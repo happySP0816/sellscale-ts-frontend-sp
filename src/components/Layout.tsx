@@ -20,6 +20,7 @@ import { SearchBar } from "./nav/SearchBar";
 import { SidePanel } from "./nav/SidePanel";
 import { openContextModal } from "@mantine/modals";
 import { UserContext } from "../contexts/user";
+import ProfileTab from "./common/ProfileTab";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
@@ -36,12 +37,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <AppShell
-      padding="md"
+      className={'h-full'}
       fixed={false}
       // Nav bar for mobile view
       navbar={
         <Navbar
-          width={{ base: 280 }}
+          width={{ base: 200 }}
           p="xs"
           sx={{
             top: !hasSideNavOverlay ? 0 : undefined,
@@ -85,37 +86,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </MediaQuery>
             <Logo colorScheme={colorScheme} />
 
-            <Group>
               {/* Show top nav buttons if desktop or larger */}
               {!mdScreenOrLess && (
-                <>
-                  <Button variant="subtle" color="gray" size="xs">
+                <Group spacing="xs">
+                  <Button variant="subtle" color="gray" size="sm">
                     Home
                   </Button>
 
-                  <Button variant="subtle" color="gray" size="xs">
+                  <Button variant="subtle" color="gray" size="sm">
                     Inbox
                   </Button>
 
-                  <Button variant="subtle" color="gray" size="xs">
+                  <Button variant="subtle" color="gray" size="sm">
                     Prospects
                   </Button>
 
-                  <Button variant="subtle" color="gray" size="xs">
+                  <Button variant="subtle" color="gray" size="sm">
                     CTAs
                   </Button>
 
-                  <Button variant="subtle" color="gray" size="xs">
+                  <Button variant="subtle" color="gray" size="sm">
                     Campaigns
                   </Button>
-                </>
+                </Group>
               )}
+
+            <Group>
 
               {/* Show search bar if larger than tablet */}
               {!smScreenOrLess && <SearchBar />}
-            </Group>
 
-            <Group>
+              {!smScreenOrLess && <ProfileTab name="Benedict Cumberbatch" email="benny20@cubumberbatch.gmail.com" />}
+
               {/* Dark mode / light mode switch */}
               <ActionIcon
                 variant="default"
@@ -135,6 +137,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       }
       styles={(theme) => ({
         main: {
+          padding: 0,
           height: "calc(100vh - 60px)",
         },
         body: {

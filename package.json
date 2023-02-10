@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.10.5",
+    "@headlessui/react": "^1.7.10",
+    "@heroicons/react": "^2.0.15",
     "@mantine/core": "^5.10.0",
     "@mantine/form": "^5.10.0",
     "@mantine/hooks": "^5.10.0",

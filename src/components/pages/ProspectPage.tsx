@@ -22,7 +22,7 @@ export default function AboutPage() {
                 <IconInfoSquareRounded />
               </ThemeIcon>
             </Text>
-            <Title order={2} pl={10} >{`Welcome`}</Title>
+            <Title order={2} pl={10} >{`Prospects`}</Title>
           </Flex>
           <Text>
             {`Landing page for SellScale Sight.`}

@@ -1,5 +1,12 @@
 import React, { useContext } from "react";
-import { IconInfoCircle, IconHistory, IconTrendingUp } from "@tabler/icons";
+import {
+  IconInbox,
+  IconHistory,
+  IconHome2,
+  IconAffiliate,
+  IconSpeakerphone,
+  IconAssembly,
+} from "@tabler/icons";
 import {
   ThemeIcon,
   UnstyledButton,
@@ -36,7 +43,7 @@ function PanelLink({ icon, color, label, onClick, isActive }: PanelLinkProps) {
       my={4}
       sx={(theme) => ({
         display: "block",
-        width: "259px",
+        width: "180px",
         padding: theme.spacing.xs,
         borderRadius: theme.radius.sm,
         color:
@@ -50,21 +57,14 @@ function PanelLink({ icon, color, label, onClick, isActive }: PanelLinkProps) {
       onClick={onClick}
     >
       <Group>
-        <ThemeIcon color={color} variant="light">
+        <ThemeIcon color={color} variant="light" radius="xl">
           {icon}
         </ThemeIcon>
-
         <Text size="sm">{label}</Text>
       </Group>
     </UnstyledButton>
   );
 }
-
-// TODO: Replace history
-const HISTORY = [
-  { name: "Entry", value: "1" },
-  { name: "Entry", value: "2" },
-];
 
 export function SidePanel() {
   const queryClient = useQueryClient();
@@ -74,8 +74,8 @@ export function SidePanel() {
   return (
     <div>
       <PanelLink
-        icon={<IconInfoCircle size={16} />}
-        color={"violet"}
+        icon={<IconHome2 size={16} />}
+        color={"gray"}
         label={`Home`}
         isActive={location.pathname === "/" || location.pathname === ""}
         onClick={() => {
@@ -84,8 +84,8 @@ export function SidePanel() {
       />
 
       <PanelLink
-        icon={<IconInfoCircle size={16} />}
-        color={"violet"}
+        icon={<IconInbox size={16} />}
+        color={"gray"}
         label={`Inbox`}
         isActive={location.pathname?.toLowerCase() === "/inbox"}
         onClick={() => {
@@ -94,14 +94,45 @@ export function SidePanel() {
       />
 
       <PanelLink
-        icon={<IconInfoCircle size={16} />}
-        color={"violet"}
+        icon={<IconAffiliate size={16} />}
+        color={"gray"}
         label={`Prospects`}
         isActive={location.pathname?.toLowerCase() === "/prospects"}
         onClick={() => {
           navigate(`/prospects`);
         }}
       />
+
+      <PanelLink
+        icon={<IconSpeakerphone size={16} />}
+        color={"gray"}
+        label={`CTAs`}
+        isActive={location.pathname?.toLowerCase() === "/call-to-actions"}
+        onClick={() => {
+          navigate(`/call-to-actions`);
+        }}
+      />
+
+      <PanelLink
+        icon={<IconAssembly size={16} />}
+        color={"gray"}
+        label={`Campaigns`}
+        isActive={location.pathname?.toLowerCase() === "/campaigns"}
+        onClick={() => {
+          navigate(`/campaigns`);
+        }}
+      />
+    </div>
+  );
+}
+
+/*
+
+const HISTORY = [
+  { name: "Entry", value: "1" },
+  { name: "Entry", value: "2" },
+];
+
 
       <Accordion variant="filled" my={4}>
         <Accordion.Item
@@ -141,11 +172,7 @@ export function SidePanel() {
                 <UnstyledButton
                   key={`recent-history-${h.value}`}
                   onClick={() => {
-                    /* We remove the query from StockPage before navigating to fix a caching bug
-                     * between react-query and react-router.
-                     */
-                    queryClient.removeQueries({ queryKey: ["get-stock-info"] });
-                    navigate(`/ticker/${h.value}`);
+                    navigate(`/`);
                   }}
                   sx={(theme) => ({
                     display: "block",
@@ -203,6 +230,4 @@ export function SidePanel() {
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>
-    </div>
-  );
-}
+*/

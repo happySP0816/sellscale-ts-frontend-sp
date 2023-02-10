@@ -19,7 +19,7 @@ export function Logo({ colorScheme }: { colorScheme: ColorScheme }) {
     >
       <Image
         height={120}
-        width={200}
+        width={150}
         fit="contain"
         src={LogoImg}
         alt="SellScale Sight"

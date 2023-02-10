@@ -162,6 +162,8 @@ export default function App() {
             '#181818',// darkest
           ],
           */
+          'scale-green': ['#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00'],
+          'scale-pink': ['#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6'],
         } }} withGlobalStyles withNormalizeCSS>
           <SpotlightProvider
             actions={(query: string) => {

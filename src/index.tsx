@@ -9,6 +9,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import ErrorPage from './components/pages/ErrorPage';
 import AboutPage from './components/pages/AboutPage';
 import ProspectPage from './components/pages/ProspectPage';
+import MissingPage from './components/pages/MissingPage';
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
         path: 'prospects',
         element: <ProspectPage />,
       },
+      {
+        path: '*',
+        element: <MissingPage />,
+      }
     ],
   },
 ]);

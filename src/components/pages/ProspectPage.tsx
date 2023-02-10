@@ -1,33 +1,37 @@
-import { List, ThemeIcon, Text, Container, Stack, Flex, Title, useMantineTheme } from "@mantine/core";
+import { List, ThemeIcon, Text, Container, Stack, Flex, Title, useMantineTheme, Drawer, Group, Button } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { IconInfoSquareRounded } from "@tabler/icons";
+import { useContext, useState } from "react";
 import { SCREEN_SIZES } from "../../constants/data";
+import { PersonaDrawerContext } from "../../contexts/personaDrawer";
+import { UserContext } from "../../contexts/user";
 import PageFrame from "../common/PageFrame";
+import PersonaCard from "../common/persona/PersonaCard";
 
+const PERSONAS = [{ name: "Persona 1" }, { name: "Persona 2" }, { name: "Persona 3" }]
 
 export default function AboutPage() {
 
   const theme = useMantineTheme();
+  const personaDrawerContext = useContext(PersonaDrawerContext);
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
 
+  const [openedUploadDrawer, setOpenedUploadDrawer] = useState(false);
+  const [openedLinkedInCTAsDrawer, setOpenedLinkedInCTAsDrawer] = useState(false);
+
   return (
-    <Container sx={{ width: `clamp(260px, ${smScreenOrLess ? '80vw' : 'calc(100vw - 280px)'}, 1000px)`, }} p={0}>
+    <Container>
       <PageFrame>
-        <Stack p={10}>
-          <Flex
-            wrap="nowrap"
-          >
-            <Text>
-              <ThemeIcon color="blue" variant="filled" size="xl" radius="xl">
-                <IconInfoSquareRounded />
-              </ThemeIcon>
-            </Text>
-            <Title order={2} pl={10} >{`Prospects`}</Title>
-          </Flex>
-          <Text>
-            {`Landing page for SellScale Sight.`}
-          </Text>
-        </Stack>
+      <PersonaCard
+
+        name={'Test'}
+        active={true}
+      />
+        {PERSONAS.map((persona) => (
+          <PersonaCard
+            key={persona.name}
+            name={persona.name}
+          />
+        ))}
       </PageFrame>
     </Container>
   );

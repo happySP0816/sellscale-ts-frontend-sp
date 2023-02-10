@@ -148,21 +148,7 @@ export default function App() {
     <UserContext.Provider value={{ user, setUser: (u: User) => { setUser(u) } }}>
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
         <MantineProvider theme={{ colorScheme, colors: {
-          /*
-          dark: [
-            '#d5d7e0',// lightest
-            '#acaebf',
-            '#1f1f1f',
-            '#464646',
-            '#393939',
-            '#2e2e2e',
-            '#232323',
-            '#1d1d1d',
-            '#1a1a1a',
-            '#181818',// darkest
-          ],
-          */
-          'scale-green': ['#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00', '#75FF00'],
+          'scale-green': ['#75FF00', '#75FA00', '#75FA00', '#60CD00', '#60CD00', '#60CD00', '#52AF00', '#52AF00', '#52AF00', '#52AF00'],
           'scale-pink': ['#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6'],
         } }} withGlobalStyles withNormalizeCSS>
           <SpotlightProvider

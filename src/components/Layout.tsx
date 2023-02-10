@@ -21,9 +21,11 @@ import { SidePanel } from "./nav/SidePanel";
 import { openContextModal } from "@mantine/modals";
 import { UserContext } from "../contexts/user";
 import ProfileTab from "./common/ProfileTab";
+import { useNavigate } from "react-router-dom";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
+  const navigate = useNavigate();
   const userContext = useContext(UserContext);
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
@@ -89,23 +91,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {/* Show top nav buttons if desktop or larger */}
               {!mdScreenOrLess && (
                 <Group spacing="xs">
-                  <Button variant="subtle" color="gray" size="sm">
+                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/`)}>
                     Home
                   </Button>
 
-                  <Button variant="subtle" color="gray" size="sm">
+                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/inbox`)}>
                     Inbox
                   </Button>
 
-                  <Button variant="subtle" color="gray" size="sm">
+                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/prospects`)}>
                     Prospects
                   </Button>
 
-                  <Button variant="subtle" color="gray" size="sm">
+                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/call-to-actions`)}>
                     CTAs
                   </Button>
 
-                  <Button variant="subtle" color="gray" size="sm">
+                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/campaigns`)}>
                     Campaigns
                   </Button>
                 </Group>
@@ -143,7 +145,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         body: {
           backgroundColor:
             theme.colorScheme === "dark"
-              ? theme.colors.dark[9]
+              ? theme.colors.dark[8]
               : theme.colors.gray[0],
           backgroundSize: "cover",
           overflowY: "auto",

@@ -10,7 +10,7 @@ export default function ProfileTab({ name, email }: { name: string, email: strin
           <Avatar
             src={null}
             alt={`${name}'s Profile Picture`}
-            color="scale-green"
+            color="teal"
             radius="xl"
           />
           <div className='inline-flex flex-col'>

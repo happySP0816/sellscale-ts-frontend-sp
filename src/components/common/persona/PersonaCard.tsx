@@ -1,20 +1,11 @@
 import {
-  Badge,
   Button,
-  Card,
-  Image,
-  Container,
-  Text,
   Avatar,
   Title,
   Stack,
   Group,
   MantineTheme,
-  Drawer,
-  Center,
 } from "@mantine/core";
-import { hideNotification, showNotification, updateNotification } from "@mantine/notifications";
-import { IconCheck, IconX } from "@tabler/icons";
 import { useRecoilState } from "recoil";
 import { temp_delay } from "../../../utils/general";
 import displayNotification from "../../../utils/notificationFlow";

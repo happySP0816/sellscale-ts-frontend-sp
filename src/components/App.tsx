@@ -18,18 +18,6 @@ import updateTokens from '../utils/updateTokens';
 import { useDebouncedState } from '@mantine/hooks';
 import { NotificationsProvider } from '@mantine/notifications';
 
-export type Stock = {
-  id?: number,
-  readonly ticker: string,
-  readonly name: string,
-  readonly trend?: string,
-  readonly sector?: string,
-  readonly summary?: string,
-  readonly price?: number,
-  readonly dayChange?: number,
-  readonly dayPercent?: number,
-};
-
 export default function App() {
 
   // Site light or dark mode
@@ -101,48 +89,7 @@ export default function App() {
 
     }
   });
-
-  // Ticker Querying //
-  const [query, setQuery] = useDebouncedState('', 400);
-  // For queryResult, null = loading and false = failed to find.
-  const [queryResult, setQueryResult] = useState<Stock | null | false>(null);
-
-  useEffect(() => {
-
-    if (query === '') {
-      setQueryResult(false);
-      return;
-    }
-
-    setQueryResult(null);
-    async function makeQuery() {
-      // Make request to backend to get stock info (see: api/yahoo/query.py)
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/query?ticker=${query}`, {
-        method: 'GET',
-      });
-      const res = await response.json();
-
-      switch (res.message) {
-        case 'STOCK_NOT_FOUND':
-          setQueryResult(false);
-          return;
-        case '':
-          setQueryResult({
-            ticker: res.data.ticker,
-            name: (res.data.name === res.data.ticker) ? res.data.sector : res.data.name,
-            trend: res.data.trend,
-            sector: res.data.sector,
-            summary: res.data.summary,
-          });
-          return;
-        default:
-          console.error(res);
-          return;
-      }
-    }
-    makeQuery();
-  }, [query]);
-
+  
   return (
 
     <UserContext.Provider value={{ user, setUser: (u: User) => { setUser(u) } }}>
@@ -153,35 +100,14 @@ export default function App() {
         } }} withGlobalStyles withNormalizeCSS>
           <SpotlightProvider
             actions={(query: string) => {
-              /* Whenever input changes, this function is called and query is set via setQuery
-               * setQuery is a debouncer, after the set debounce time the above useEffect callback is executed.
-               * That callback fetches the stock data and updates queryResult accordingly.
-               */
-              setQuery(query.trim());
-              if (queryResult && queryResult.ticker.toLowerCase().trim() === query.toLowerCase().trim()) {
-                return [{
-                  title: queryResult.ticker,
-                  description: queryResult.name,
-                  group: 'search',
-                  onTrigger: () => {
-                    /* We remove the query from StockPage before navigating to fix a caching bug
-                     * between react-query and react-router.
-                     */
-                    queryClient.removeQueries({ queryKey: ['get-stock-info'] });
-                    navigate(`/ticker/${queryResult.ticker}`);
-                  },
-                  icon: queryResult.trend === 'down' ? <IconTrendingDown size={18} /> : <IconTrendingUp size={18} />,
-                }, ...mainActions];
-              } else {
-                return mainActions;
-              }
+              return mainActions;
             }}
             searchIcon={<IconSearch size={18} />}
             searchPlaceholder={'Search'}
             searchInputProps={{ autoComplete: 'off' }}
             shortcut={['mod + K']}
             highlightQuery
-            nothingFoundMessage={queryResult === false && query !== '' ? `Nothing found` : `Loading...`}
+            nothingFoundMessage={true ? `Nothing found` : `Loading...`}
           >
             <ModalsProvider modals={{
               

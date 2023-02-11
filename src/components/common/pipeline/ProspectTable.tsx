@@ -160,8 +160,9 @@ export default function ProspectTable() {
                 <Flex>
                   <Image
                     src={
-                      "https://ui-avatars.com/api/?background=random&name=" +
-                      x.full_name.replaceAll(" ", "+")
+                      `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
+                        x.full_name
+                      )}`
                     }
                     radius="lg"
                     height={30}

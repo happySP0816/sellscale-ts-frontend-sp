@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { TextInput } from "@mantine/core";
 import { IconSearch } from "@tabler/icons";
 import { MultiSelect } from "@mantine/core";
+import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
+
+import { useRecoilState } from "recoil";
+import { prospectDrawerOpenState } from "../../atoms/personaAtoms";
 
 const COMPANIES: any = [
   {
@@ -91,6 +95,7 @@ const PAGE_SIZES = [8, 8, 8];
 
 export default function ProspectTable() {
   const [pageSize, setPageSize] = useState(PAGE_SIZES[1]);
+  const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
 
   useEffect(() => {
     setPage(1);
@@ -144,6 +149,9 @@ export default function ProspectTable() {
         records={records}
         verticalSpacing="sm"
         highlightOnHover
+        onRowClick={(prospect, row_index) => {
+          setOpened(true);
+        }}
         columns={[
           {
             accessor: "full_name",
@@ -185,6 +193,8 @@ export default function ProspectTable() {
         recordsPerPageOptions={PAGE_SIZES}
         onRecordsPerPageChange={setPageSize}
       />
+
+      <ProspectDetailsDrawer />
     </Box>
   );
 }

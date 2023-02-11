@@ -49,23 +49,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           width={{ base: 200 }}
           p="xs"
           sx={{
-            top: !hasSideNavOverlay ? 0 : undefined,
-            display: hasSideNav ? "block" : "none",
-            position: hasSideNavOverlay ? "absolute" : "relative",
-
-            backdropFilter: "blur(8px)",
-            // Add alpha channel to hex color (browser support: https://caniuse.com/css-rrggbbaa)
-            backgroundColor:
-              (theme.colorScheme === "dark"
-                ? theme.colors.dark[8]
-                : theme.colors.gray[0]) + "75",
+            backgroundColor: theme.colors.dark[8],
           }}
         >
-          {smScreenOrLess && (
-            <Navbar.Section>
-              <SearchBar isSmall={true} />
-            </Navbar.Section>
-          )}
           <Navbar.Section>
             <SidePanel />
           </Navbar.Section>

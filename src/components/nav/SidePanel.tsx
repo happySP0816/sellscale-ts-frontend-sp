@@ -46,8 +46,7 @@ function PanelLink({ icon, color, label, onClick, isActive }: PanelLinkProps) {
         width: "180px",
         padding: theme.spacing.xs,
         borderRadius: theme.radius.sm,
-        color:
-          theme.colorScheme === "dark" ? theme.colors.dark[0] : theme.black,
+        color: theme.colors.dark[0],
 
         "&:hover": {
           backgroundColor: getHoverColor(theme),
@@ -60,7 +59,6 @@ function PanelLink({ icon, color, label, onClick, isActive }: PanelLinkProps) {
         <ThemeIcon color={color} variant="light" radius="xl">
           {icon}
         </ThemeIcon>
-        <Text size="sm">{label}</Text>
       </Group>
     </UnstyledButton>
   );

@@ -9,6 +9,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
 import AboutPage from "./components/pages/AboutPage";
 import ProspectPage from "./components/pages/ProspectPage";
+import PipelinePage from "./components/pages/PipelinePage";
 import MissingPage from "./components/pages/MissingPage";
 import { RecoilRoot } from "recoil";
 
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: "home",
         element: <AboutPage />,
+      },
+      {
+        path: "pipeline",
+        element: <PipelinePage />,
       },
       {
         path: "personas",

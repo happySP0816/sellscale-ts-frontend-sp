@@ -37,9 +37,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     (smScreenOrLess && opened) || (!smScreenOrLess && mdScreenOrLess);
   const hasSideNavOverlay = hasSideNav && smScreenOrLess;
 
+  const activeTab = window.location.pathname.replaceAll("/", "");
+  console.log(activeTab);
   return (
     <AppShell
-      className={'h-full'}
+      className={"h-full"}
       fixed={false}
       // Nav bar for mobile view
       navbar={
@@ -87,38 +89,66 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               />
             </MediaQuery>
             <Logo colorScheme={colorScheme} />
+            {/* Show top nav buttons if desktop or larger */}
 
-              {/* Show top nav buttons if desktop or larger */}
-              {!mdScreenOrLess && (
-                <Group spacing="xs">
-                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/`)}>
-                    Home
-                  </Button>
+            {!mdScreenOrLess && (
+              <Group spacing="xs">
+                <Button
+                  variant="subtle"
+                  color={activeTab === "home" ? "teal" : "gray"}
+                  size="sm"
+                  onClick={() => navigate(`/home`)}
+                >
+                  Inbox
+                </Button>
 
-                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/inbox`)}>
-                    Inbox
-                  </Button>
+                <Button
+                  variant="subtle"
+                  color={activeTab === "pipeline" ? "teal" : "gray"}
+                  size="sm"
+                  onClick={() => navigate(`/pipeline`)}
+                >
+                  Pipeline
+                </Button>
 
-                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/prospects`)}>
-                    Prospects
-                  </Button>
+                <Button
+                  variant="subtle"
+                  color={activeTab === "personas" ? "teal" : "gray"}
+                  size="sm"
+                  onClick={() => navigate(`/personas`)}
+                >
+                  Personas
+                </Button>
 
-                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/call-to-actions`)}>
-                    CTAs
-                  </Button>
+                <Button
+                  variant="subtle"
+                  color={activeTab === "call-to-actions" ? "teal" : "gray"}
+                  size="sm"
+                  onClick={() => navigate(`/call-to-actions`)}
+                >
+                  CTAs
+                </Button>
 
-                  <Button variant="subtle" color="gray" size="sm" onClick={() => navigate(`/campaigns`)}>
-                    Campaigns
-                  </Button>
-                </Group>
-              )}
-
+                <Button
+                  variant="subtle"
+                  color={activeTab === "campaigns" ? "teal" : "gray"}
+                  size="sm"
+                  onClick={() => navigate(`/campaigns`)}
+                >
+                  Campaigns
+                </Button>
+              </Group>
+            )}
             <Group>
-
               {/* Show search bar if larger than tablet */}
               {!smScreenOrLess && <SearchBar />}
 
-              {!smScreenOrLess && <ProfileTab name="Benedict Cumberbatch" email="benny20@cubumberbatch.gmail.com" />}
+              {!smScreenOrLess && (
+                <ProfileTab
+                  name="Benedict Cumberbatch"
+                  email="benny20@cubumberbatch.gmail.com"
+                />
+              )}
 
               {/* Dark mode / light mode switch */}
               <ActionIcon

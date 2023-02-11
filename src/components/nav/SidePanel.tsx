@@ -71,41 +71,43 @@ export function SidePanel() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const activeTab = location.pathname?.split("/")[1];
+
   return (
     <div>
       <PanelLink
         icon={<IconHome2 size={16} />}
-        color={"gray"}
+        color={activeTab === "home" ? "teal" : "gray"}
         label={`Home`}
-        isActive={location.pathname === "/" || location.pathname === ""}
+        isActive={location.pathname === "/home" || location.pathname === ""}
         onClick={() => {
-          navigate(`/`);
+          navigate(`/home`);
         }}
       />
 
       <PanelLink
         icon={<IconInbox size={16} />}
-        color={"gray"}
-        label={`Inbox`}
-        isActive={location.pathname?.toLowerCase() === "/inbox"}
+        color={activeTab === "pipeline" ? "teal" : "gray"}
+        label={`Pipeline`}
+        isActive={location.pathname?.toLowerCase() === "/pipeline"}
         onClick={() => {
-          navigate(`/inbox`);
+          navigate(`/pipeline`);
         }}
       />
 
       <PanelLink
         icon={<IconAffiliate size={16} />}
-        color={"gray"}
-        label={`Prospects`}
-        isActive={location.pathname?.toLowerCase() === "/prospects"}
+        color={activeTab === "personas" ? "teal" : "gray"}
+        label={`Personas`}
+        isActive={location.pathname?.toLowerCase() === "/personas"}
         onClick={() => {
-          navigate(`/prospects`);
+          navigate(`/personas`);
         }}
       />
 
       <PanelLink
         icon={<IconSpeakerphone size={16} />}
-        color={"gray"}
+        color={activeTab === "call-to-actions" ? "teal" : "gray"}
         label={`CTAs`}
         isActive={location.pathname?.toLowerCase() === "/call-to-actions"}
         onClick={() => {
@@ -115,7 +117,7 @@ export function SidePanel() {
 
       <PanelLink
         icon={<IconAssembly size={16} />}
-        color={"gray"}
+        color={activeTab === "campaigns" ? "teal" : "gray"}
         label={`Campaigns`}
         isActive={location.pathname?.toLowerCase() === "/campaigns"}
         onClick={() => {

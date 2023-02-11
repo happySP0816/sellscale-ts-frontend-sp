@@ -13,14 +13,24 @@ import {
   Drawer,
   Center,
 } from "@mantine/core";
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { hideNotification, showNotification, updateNotification } from "@mantine/notifications";
+import { IconCheck, IconX } from "@tabler/icons";
+import { useRecoilState } from "recoil";
+import { temp_delay } from "../../../utils/general";
+import displayNotification from "../../../utils/notificationFlow";
+import { uploadDrawerOpenState, linkedInCTAsDrawerOpenState, activePersonaState } from "../../atoms/personaAtoms";
 
 type PersonaCardProps = {
+  value: string,
   name: string,
   active?: boolean,
 };
 
 export default function PersonaCard(props: PersonaCardProps) {
+
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
+  const [linkedInCTAsDrawerOpened, setLinkedInCTAsDrawerOpened] = useRecoilState(linkedInCTAsDrawerOpenState);
+  const [activePersona, setActivePersona] = useRecoilState(activePersonaState);
 
   const activeBackgroundSX = (theme: MantineTheme) => ({
     border: `1px solid ${
@@ -35,9 +45,34 @@ export default function PersonaCard(props: PersonaCardProps) {
         : theme.colors.gray[1],
   });
 
-  // TODO, change this to a context
-  const [openedUploadDrawer, setOpenedUploadDrawer] = useState(false);
-  const [openedLinkedInCTAsDrawer, setOpenedLinkedInCTAsDrawer] = useState(false);
+  const makeActivePersona = () => {
+    displayNotification(
+      'make-active-persona',
+      async () => {
+        await temp_delay(1000);
+        let result = (Math.random() < 0.75);
+        if(result){
+          setActivePersona(props.value);
+        }
+        return result;
+      },
+      {
+        title: `Activating Persona`,
+        message: `Updating persona to ${props.name}...`,
+        color: 'teal',
+      },
+      {
+        title: `${props.name} is now active 🎉`,
+        message: `Some extra description here`,
+        color: 'teal',
+      },
+      {
+        title: `Error while activating persona!`,
+        message: `Test 25% chance of failure!`,
+        color: 'red',
+      },
+    );
+  }
 
   return (
     <Group
@@ -50,9 +85,14 @@ export default function PersonaCard(props: PersonaCardProps) {
         }
       }}>
       <Stack align="center">
-        <Avatar size={80} radius={80} src="avatar.png" alt="it's me" />
+        <Avatar
+          size={80}
+          radius={80}
+          src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(props.name)}`}
+          alt={`${props.name}'s Profile Picture`}
+        />
         {!props.active && (
-          <Button variant="light" color="teal" size="xs" compact>
+          <Button compact variant="light" color="teal" size="xs" onClick={() => makeActivePersona()}>
             Make Active
           </Button>
         )}
@@ -62,46 +102,14 @@ export default function PersonaCard(props: PersonaCardProps) {
           {props.name}
         </Title>
         <Group grow>
-          <Button variant="outline" color="teal" m="sm" onClick={() => setOpenedUploadDrawer(true)}>
+          <Button variant="outline" color="teal" m="sm" onClick={() => setUploadDrawerOpened(true)}>
             Upload
           </Button>
-          <Button variant="outline" color="teal" m="sm" onClick={() => setOpenedLinkedInCTAsDrawer(true)}>
+          <Button variant="outline" color="teal" m="sm" onClick={() => setLinkedInCTAsDrawerOpened(true)}>
             LinkedIn CTAs
           </Button>
         </Group>
       </Stack>
-
-      <Drawer
-        opened={openedUploadDrawer}
-        onClose={() => setOpenedUploadDrawer(false)}
-        title={<Title order={2}>Upload Persona</Title>}
-        padding="xl"
-        size="xl"
-        position="right"
-      >
-        <Text pb='xs'><span className="font-bold">LinkedIn: </span><span>220/400 prospects available</span></Text>
-        <Text pb='xs'><span className="font-bold">Email: </span><span>220/400 prospects available</span></Text>
-
-        <Center my='xs'>
-          <Button variant="outline" color="teal">
-            Upload Now
-          </Button>
-        </Center>
-
-        <Text align="center" pb='xs' c="dimmed" fs="italic" fz="sm">CSV of Email + LinkedIn</Text>
-        
-      </Drawer>
-      <Drawer
-        opened={openedLinkedInCTAsDrawer}
-        onClose={() => setOpenedLinkedInCTAsDrawer(false)}
-        title="LinkedIn CTAs"
-        padding="xl"
-        size="xl"
-        position="right"
-      >
-        
-      </Drawer>
-
     </Group>
   );
 };

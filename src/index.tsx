@@ -10,6 +10,7 @@ import ErrorPage from './components/pages/ErrorPage';
 import AboutPage from './components/pages/AboutPage';
 import ProspectPage from './components/pages/ProspectPage';
 import MissingPage from './components/pages/MissingPage';
+import { RecoilRoot } from 'recoil';
 
 const queryClient = new QueryClient();
 
@@ -42,7 +43,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <RecoilRoot>
+        <RouterProvider router={router} />
+      </RecoilRoot>
     </QueryClientProvider>
   </React.StrictMode>
 );

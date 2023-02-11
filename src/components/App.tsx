@@ -186,7 +186,7 @@ export default function App() {
             <ModalsProvider modals={{
               
             }}>
-              <NotificationsProvider>
+              <NotificationsProvider position='top-right'>
                 <LoadingOverlay visible={infoResult.isLoading} overlayBlur={4} />
                 <Layout>
                   {/* Outlet is where react-router will render child routes */}

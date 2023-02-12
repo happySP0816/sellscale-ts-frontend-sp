@@ -8,12 +8,12 @@ export default function PageFrame({ children }: { children: React.ReactNode }) {
 
   return (
     <Container
-      sx={{
+      sx={(theme) => ({
         width: `clamp(260px, ${
           smScreenOrLess ? "80vw" : "calc(100vw - 280px)"
         }, 1000px)`,
-      }}
-      p={0}
+        padding: theme.spacing.xl * 1.5,
+      })}
     >
       {children}
     </Container>

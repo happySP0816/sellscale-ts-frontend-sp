@@ -66,18 +66,11 @@ export default function PipelinePage() {
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
 
   return (
-    <Container
-      sx={{
-        width: `clamp(260px, ${
-          smScreenOrLess ? "80vw" : "calc(100vw - 280px)"
-        }, 1000px)`,
-      }}
-      p={0}
-    >
+    <PageFrame>
       <PipelineSelector data={PIPELINE_SELECTOR_DATA}></PipelineSelector>
-      <Container m="md">
+      <Container pt={30} px={0}>
         <ProspectTable />
       </Container>
-    </Container>
+    </PageFrame>
   );
 }

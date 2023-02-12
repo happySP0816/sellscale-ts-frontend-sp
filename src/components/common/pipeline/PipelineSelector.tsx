@@ -16,9 +16,8 @@ import {
 } from "@tabler/icons";
 
 const useStyles = createStyles((theme) => ({
-  root: {
-    padding: theme.spacing.xl * 1.5,
-  },
+
+  root: {},
 
   value: {
     fontSize: 24,

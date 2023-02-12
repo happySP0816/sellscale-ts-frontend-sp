@@ -10,6 +10,7 @@ import {
   Drawer,
   Group,
   Button,
+  Paper,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useContext, useState } from "react";
@@ -40,8 +41,8 @@ export default function AboutPage() {
 
   return (
     <>
-      <Container>
-        <PageFrame>
+      <PageFrame>
+        <Paper withBorder p="md" radius="md">
           {PERSONAS.filter((persona) => persona.value === activePersona).map(
             (persona) => (
               // Should always be only 1 active card
@@ -62,9 +63,8 @@ export default function AboutPage() {
               />
             )
           )}
-        </PageFrame>
-      </Container>
-
+        </Paper>
+      </PageFrame>
       <LinkedInCTAsDrawer />
       <PersonaUploadDrawer />
     </>

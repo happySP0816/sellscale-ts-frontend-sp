@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@assets/*": ["src/assets/*"],
+      "@atoms/*": ["src/components/atoms/*"],
+      "@common/*": ["src/components/common/*"],
+      "@drawers/*": ["src/components/drawers/*"],
+      "@nav/*": ["src/components/nav/*"],
+      "@pages/*": ["src/components/pages/*"],
+      "@constants/*": ["src/constants/*"],
+      "@contexts/*": ["src/contexts/*"],
+      "@utils/*": ["src/utils/*"]
+    }
+  }
+}

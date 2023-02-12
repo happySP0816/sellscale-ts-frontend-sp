@@ -105,7 +105,7 @@ export default function PersonaCard(props: PersonaCardProps) {
         )}
       </Stack>
       <Stack spacing="xs">
-        <Title order={2} ml="sm" mt="md">
+        <Title order={3} ml="sm" mt="md">
           {props.name}
         </Title>
         <Text ml="sm">872 contacts with 68% used. 48 active connections.</Text>

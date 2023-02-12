@@ -5,6 +5,9 @@ import {
   SimpleGrid,
   Text,
   Button,
+  Flex,
+  Stack,
+  Space,
 } from "@mantine/core";
 import {
   IconUserPlus,
@@ -16,9 +19,7 @@ import {
 } from "@tabler/icons";
 
 const useStyles = createStyles((theme) => ({
-  root: {
-    padding: theme.spacing.xl * 1.5,
-  },
+  root: {},
 
   value: {
     fontSize: 24,
@@ -69,20 +70,28 @@ export default function PipelineSelector({ data }: StatsGridProps) {
     const Icon = stat.icon;
 
     return (
-      <Paper withBorder p="md" radius="md" key={stat.title}>
+      <Paper
+        withBorder
+        p="md"
+        radius="md"
+        key={stat.title}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
         <Group position="apart">
           <Text size="xs" color="dimmed" className={classes.title}>
             {stat.title}
           </Text>
         </Group>
-
         <Group align="flex-end" spacing="xs" mt={25}>
           <Text className={classes.value}>{stat.value}</Text>
+          <Text size="xs" color="dimmed">
+            {stat.description}
+          </Text>
         </Group>
-
-        <Text size="xs" color="dimmed" mt={7}>
-          {stat.description}
-        </Text>
         <Button variant="outline" color={stat.color} mt="md" size="xs">
           View Contacts
         </Button>

@@ -1,176 +1,109 @@
-import { useContext, useState } from "react";
-import { IconSun, IconMoonStars } from "@tabler/icons";
+import { useState } from "react";
+import { IconSearch } from "@tabler/icons";
 import {
   AppShell,
   Navbar,
   Header,
-  Group,
-  ActionIcon,
-  useMantineColorScheme,
-  MediaQuery,
   Burger,
   useMantineTheme,
-  Button,
-  Title,
+  Container,
 } from "@mantine/core";
-import { Logo } from "./nav/Logo";
 import { useMediaQuery } from "@mantine/hooks";
-import { SCREEN_SIZES } from "../constants/data";
-import { SearchBar } from "./nav/SearchBar";
-import { SidePanel } from "./nav/SidePanel";
-import { openContextModal } from "@mantine/modals";
-import { UserContext } from "../contexts/user";
-import ProfileTab from "./common/ProfileTab";
-import { useNavigate } from "react-router-dom";
+import { NAV_BAR_WIDTH, SCREEN_SIZES } from "@constants/data";
+import SidePanel from "@nav/SidePanel";
+import ProfileIcon from "@nav/ProfileIcon";
+import { LogoFull } from "@nav/Logo";
+import { animated, useSpring } from "@react-spring/web";
+import { openSpotlight } from "@mantine/spotlight";
+
+const AnimatedNavbar = animated(Navbar);
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
-  const navigate = useNavigate();
-  const userContext = useContext(UserContext);
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
-  const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
-  const mdScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.MD})`);
+  const smScreenOrLess = useMediaQuery(
+    `(max-width: ${SCREEN_SIZES.SM})`,
+    false,
+    { getInitialValueInEffect: true }
+  );
 
-  const [opened, setOpened] = useState(false);
-  const hasSideNav =
-    (smScreenOrLess && opened) || (!smScreenOrLess && mdScreenOrLess);
-  const hasSideNavOverlay = hasSideNav && smScreenOrLess;
+  const isMobileView = smScreenOrLess;
+
+  const [navOpened, setNavOpened] = useState(false);
+  const navStyles = useSpring({
+    x: isMobileView && !navOpened ? -NAV_BAR_WIDTH * 2 : 0,
+  });
 
   const activeTab = window.location.pathname.replaceAll("/", "");
-  console.log(activeTab);
+  console.log(activeTab, navOpened);
   return (
     <AppShell
       className={"h-full"}
-      fixed={false}
-      // Nav bar for mobile view
+      fixed={true}
       navbar={
-        <Navbar
-          width={{ base: 200 }}
-          p="xs"
-          sx={{
-            top: !hasSideNavOverlay ? 0 : undefined,
-            display: hasSideNav ? "block" : "none",
-            position: hasSideNavOverlay ? "absolute" : "relative",
-
-            backdropFilter: "blur(8px)",
-            // Add alpha channel to hex color (browser support: https://caniuse.com/css-rrggbbaa)
-            backgroundColor:
-              (theme.colorScheme === "dark"
-                ? theme.colors.dark[8]
-                : theme.colors.gray[0]) + "75",
+        <AnimatedNavbar
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            backgroundColor: theme.colors.dark[7],
+            transform: navStyles.x.to((x) => `translate3d(${x}%,0,0)`),
           }}
+          width={{ base: NAV_BAR_WIDTH }}
         >
-          {smScreenOrLess && (
-            <Navbar.Section>
-              <SearchBar isSmall={true} />
-            </Navbar.Section>
-          )}
           <Navbar.Section>
-            <SidePanel />
+            <SidePanel isMobile={isMobileView} />
           </Navbar.Section>
-        </Navbar>
+          <Navbar.Section>
+            <ProfileIcon
+              name="Benedict Cumberbatch"
+              email="benny10@cumberbtached.gmail.cvom"
+            />
+          </Navbar.Section>
+        </AnimatedNavbar>
       }
-      // Site header (& nav bar for desktop view)
       header={
-        <Header height={60}>
-          <Group
-            sx={{ height: "100%", flexWrap: "nowrap" }}
-            px={20}
-            position="apart"
-          >
-            {/* Show burger menu if tablet or smaller */}
-            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-              <Burger
-                opened={opened}
-                onClick={() => setOpened((o) => !o)}
-                size="sm"
-                color={theme.colors.gray[6]}
-              />
-            </MediaQuery>
-            <Logo colorScheme={colorScheme} />
-            {/* Show top nav buttons if desktop or larger */}
-
-            {!mdScreenOrLess && (
-              <Group spacing="xs">
-                <Button
-                  variant="subtle"
-                  color={activeTab === "home" ? "teal" : "gray"}
+        isMobileView ? (
+          <Header height={NAV_BAR_WIDTH}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "nowrap",
+              }}
+            >
+              <Container p={12} m={0}>
+                <Burger
+                  opened={navOpened}
+                  onClick={() => setNavOpened((o) => !o)}
                   size="sm"
-                  onClick={() => navigate(`/home`)}
-                >
-                  Inbox
-                </Button>
-
-                <Button
-                  variant="subtle"
-                  color={activeTab === "pipeline" ? "teal" : "gray"}
-                  size="sm"
-                  onClick={() => navigate(`/pipeline`)}
-                >
-                  Pipeline
-                </Button>
-
-                <Button
-                  variant="subtle"
-                  color={activeTab === "personas" ? "teal" : "gray"}
-                  size="sm"
-                  onClick={() => navigate(`/personas`)}
-                >
-                  Personas
-                </Button>
-
-                <Button
-                  variant="subtle"
-                  color={activeTab === "call-to-actions" ? "teal" : "gray"}
-                  size="sm"
-                  onClick={() => navigate(`/call-to-actions`)}
-                >
-                  CTAs
-                </Button>
-
-                <Button
-                  variant="subtle"
-                  color={activeTab === "campaigns" ? "teal" : "gray"}
-                  size="sm"
-                  onClick={() => navigate(`/campaigns`)}
-                >
-                  Campaigns
-                </Button>
-              </Group>
-            )}
-            <Group>
-              {/* Show search bar if larger than tablet */}
-              {!smScreenOrLess && <SearchBar />}
-
-              {!smScreenOrLess && (
-                <ProfileTab
-                  name="Benedict Cumberbatch"
-                  email="benny20@cubumberbatch.gmail.com"
+                  color={theme.colors.gray[5]}
                 />
-              )}
+              </Container>
 
-              {/* Dark mode / light mode switch */}
-              <ActionIcon
-                variant="default"
-                onClick={() => toggleColorScheme()}
-                size={30}
-                sx={{ borderRadius: "50px" }}
+              <Container>
+                <LogoFull />
+              </Container>
+
+              <Container
+                p={12}
+                m={0}
+                className="cursor-pointer"
+                onClick={() => openSpotlight()}
               >
-                {colorScheme === "dark" ? (
-                  <IconSun size={16} />
-                ) : (
-                  <IconMoonStars size={16} />
-                )}
-              </ActionIcon>
-            </Group>
-          </Group>
-        </Header>
+                <IconSearch size={22} />
+              </Container>
+            </div>
+          </Header>
+        ) : (
+          <></>
+        )
       }
       styles={(theme) => ({
         main: {
           padding: 0,
-          height: "calc(100vh - 60px)",
+          marginTop: isMobileView ? NAV_BAR_WIDTH : 0,
+          marginLeft: isMobileView ? 0 : NAV_BAR_WIDTH,
         },
         body: {
           backgroundColor:

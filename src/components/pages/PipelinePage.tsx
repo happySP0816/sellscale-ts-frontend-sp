@@ -1,25 +1,7 @@
-import {
-  List,
-  ThemeIcon,
-  Text,
-  Container,
-  Stack,
-  Flex,
-  Title,
-  useMantineTheme,
-} from "@mantine/core";
-import {
-  IconUserPlus,
-  IconDiscount2,
-  IconReceipt2,
-  IconCoin,
-  IconArrowUpRight,
-  IconArrowDownRight,
-} from "@tabler/icons";
+import { Container, useMantineTheme } from "@mantine/core";
+import { IconUserPlus } from "@tabler/icons";
 import { useMediaQuery } from "@mantine/hooks";
-import { IconInfoSquareRounded } from "@tabler/icons";
 import { SCREEN_SIZES } from "../../constants/data";
-import PageFrame from "../common/PageFrame";
 import PipelineSelector, { icons } from "../common/pipeline/PipelineSelector";
 import ProspectTable from "../common/pipeline/ProspectTable";
 

@@ -9,6 +9,7 @@ type NavTabProps = {
   description: string;
   onClick: () => void;
   indicatorColor?: DefaultMantineColor;
+  dontChangeTab?: boolean;
 }
 
 export default function NavTab(props: NavTabProps) {
@@ -19,7 +20,9 @@ export default function NavTab(props: NavTabProps) {
 
   return (
     <Tooltip label={props.description} position="right" className="cursor-pointer" onClick={() => {
-      setNavTab(props.name);
+      if(!props.dontChangeTab){
+        setNavTab(props.name);
+      }
       props.onClick();
     }} withArrow>
       <div ref={ref} style={{

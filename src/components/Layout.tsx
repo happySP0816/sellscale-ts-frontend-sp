@@ -1,64 +1,97 @@
-import { useContext, useState } from "react";
-import { IconSun, IconMoonStars } from "@tabler/icons";
+import { useState } from "react";
+import { IconSearch } from "@tabler/icons";
 import {
   AppShell,
   Navbar,
   Header,
-  Group,
-  ActionIcon,
-  useMantineColorScheme,
-  MediaQuery,
   Burger,
   useMantineTheme,
-  Button,
-  Title,
-  Center,
+  Container,
 } from "@mantine/core";
-import { Logo } from "./nav/Logo";
 import { useMediaQuery } from "@mantine/hooks";
-import { NAV_BAR_WIDTH, SCREEN_SIZES } from "../constants/data";
-import { SearchBar } from "./nav/SearchBar";
-import { SidePanel } from "./nav/SidePanel";
-import { openContextModal } from "@mantine/modals";
-import { UserContext } from "../contexts/user";
-import { useNavigate } from "react-router-dom";
+import { NAV_BAR_WIDTH, SCREEN_SIZES } from "@constants/data";
+import { SidePanel } from "@nav/SidePanel";
+import { LogoFull } from "@nav/Logo";
+import { animated, useSpring } from "@react-spring/web";
+import { openSpotlight } from "@mantine/spotlight";
+
+const AnimatedNavbar = animated(Navbar)
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
-  const navigate = useNavigate();
-  const userContext = useContext(UserContext);
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
-  const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
-  const mdScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.MD})`);
+  const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`, false, { getInitialValueInEffect: true });
 
-  const [opened, setOpened] = useState(false);
+  const isMobileView = smScreenOrLess;
+
+  const [navOpened, setNavOpened] = useState(false);
+  const navStyles = useSpring({
+    x: isMobileView && !navOpened ? -NAV_BAR_WIDTH*2 : 0,
+  });
 
   const activeTab = window.location.pathname.replaceAll("/", "");
-  console.log(activeTab);
+  console.log(activeTab, navOpened);
   return (
     <AppShell
       className={"h-full"}
       fixed={true}
       navbar={
-        <Navbar
-          width={{ base: NAV_BAR_WIDTH }}
-          sx={{
+        <AnimatedNavbar
+          style={{
             backgroundColor: theme.colors.dark[7],
+            transform: navStyles.x.to(x => `translate3d(${x}%,0,0)`)
           }}
+          width={{ base: NAV_BAR_WIDTH }}
         >
-          <Navbar.Section style={{ flex: 1 }}>
-            <Center>
-              <Logo />
-            </Center>
-            <SidePanel />
+          <Navbar.Section
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <SidePanel isMobile={isMobileView} />
           </Navbar.Section>
-        </Navbar>
+        </AnimatedNavbar>
+      }
+      header={
+        isMobileView ? (
+          <Header height={NAV_BAR_WIDTH}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "nowrap",
+              }}
+            >
+              <Container p={12} m={0}>
+                <Burger
+                  opened={navOpened}
+                  onClick={() => setNavOpened((o) => !o)}
+                  size="sm"
+                  color={theme.colors.gray[5]}
+                />
+              </Container>
+
+              <Container>
+                <LogoFull />
+              </Container>
+
+              <Container p={12} m={0} className="cursor-pointer" onClick={() => openSpotlight()}>
+                <IconSearch size={22} />
+              </Container>
+            </div>
+          </Header>
+        ) : (
+          <></>
+        )
       }
       styles={(theme) => ({
         main: {
           padding: 0,
-          marginLeft: NAV_BAR_WIDTH,
+          marginTop: isMobileView ? NAV_BAR_WIDTH : 0,
+          marginLeft: isMobileView ? 0 : NAV_BAR_WIDTH,
         },
         body: {
           backgroundColor:

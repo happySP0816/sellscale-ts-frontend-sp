@@ -12,6 +12,7 @@
     "@mantine/modals": "^5.10.0",
     "@mantine/notifications": "^5.10.0",
     "@mantine/spotlight": "^5.10.0",
+    "@react-spring/web": "^9.6.1",
     "@tabler/icons": "^1.119.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -33,10 +34,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts --max_old_space_size=4096 build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "craco start",
+    "build": "craco --max_old_space_size=4096 build",
+    "test": "craco test",
+    "eject": "craco eject"
   },
   "eslintConfig": {
     "extends": [
@@ -57,8 +58,11 @@
     ]
   },
   "devDependencies": {
+    "@craco/craco": "^7.0.0",
     "@faker-js/faker": "^7.6.0",
     "@types/lodash": "^4.14.191",
+    "@types/react-transition-group": "^4.4.5",
+    "craco-alias": "^3.0.1",
     "tailwindcss": "^3.2.6"
   }
 }

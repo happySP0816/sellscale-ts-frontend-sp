@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import {
   IconInbox,
   IconHistory,
-  IconHome2,
+  IconSearch,
   IconAffiliate,
   IconSpeakerphone,
   IconAssembly,
@@ -16,13 +16,17 @@ import {
   Accordion,
   Flex,
   MantineTheme,
+  Center,
 } from "@mantine/core";
 import { UserContext } from "../../contexts/user";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "react-query";
 import NavTab from "./NavTab";
+import { LogoIcon } from "@nav/Logo";
 import { LOGO_HEIGHT } from "../../constants/data";
 import ProfileIcon from "./ProfileIcon";
+import { useOs } from "@mantine/hooks";
+import { openSpotlight } from "@mantine/spotlight";
 
 type PanelLinkProps = {
   icon: React.ReactNode;
@@ -68,29 +72,41 @@ function PanelLink({ icon, color, label, onClick, isActive }: PanelLinkProps) {
   );
 }
 
-export function SidePanel() {
+export function SidePanel(props: { isMobile?: boolean }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
+  const os = useOs();
 
   const activeTab = location.pathname?.split("/")[1];
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: `calc(100% - ${LOGO_HEIGHT}px)`,
-      }}
-    >
+    <>
       <div>
+        {!props.isMobile && (
+          <Center h={50}>
+            <LogoIcon />
+          </Center>
+        )}
+
         <NavTab
           icon={<IconHome size={22} />}
           name="home"
           description="Home"
           onClick={() => navigate(`/home`)}
         />
+
+        {!props.isMobile && (
+          <NavTab
+            icon={<IconSearch size={22} />}
+            name="search"
+            description={`Search | ${
+              os === "undetermined" || os === "macos" ? "⌘" : "Ctrl"
+            } + K`}
+            onClick={() => openSpotlight()}
+            dontChangeTab={true}
+          />
+        )}
 
         <NavTab
           icon={<IconInbox size={22} />}
@@ -121,8 +137,11 @@ export function SidePanel() {
         />
       </div>
       <div>
-        <ProfileIcon name="Benedict Cumberbatch" email="benny10@cumberbtached.gmail.cvom" />
+        <ProfileIcon
+          name="Benedict Cumberbatch"
+          email="benny10@cumberbtached.gmail.cvom"
+        />
       </div>
-    </div>
+    </>
   );
 }

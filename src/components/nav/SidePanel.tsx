@@ -74,7 +74,7 @@ function PanelLink({ icon, color, label, onClick, isActive }: PanelLinkProps) {
   );
 }
 
-export function SidePanel(props: { isMobile?: boolean }) {
+export default function SidePanel(props: { isMobile?: boolean }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
@@ -141,12 +141,6 @@ export function SidePanel(props: { isMobile?: boolean }) {
           name="campaigns"
           description="Campaigns"
           onClick={() => navigate(`/campaigns`)}
-        />
-      </div>
-      <div>
-        <ProfileIcon
-          name="Benedict Cumberbatch"
-          email="benny10@cumberbtached.gmail.cvom"
         />
       </div>
     </>

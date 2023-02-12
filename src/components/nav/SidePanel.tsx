@@ -6,6 +6,7 @@ import {
   IconAffiliate,
   IconSpeakerphone,
   IconAssembly,
+  IconHome,
 } from "@tabler/icons";
 import {
   ThemeIcon,
@@ -19,6 +20,9 @@ import {
 import { UserContext } from "../../contexts/user";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "react-query";
+import NavTab from "./NavTab";
+import { LOGO_HEIGHT } from "../../constants/data";
+import ProfileIcon from "./ProfileIcon";
 
 type PanelLinkProps = {
   icon: React.ReactNode;
@@ -72,162 +76,53 @@ export function SidePanel() {
   const activeTab = location.pathname?.split("/")[1];
 
   return (
-    <div>
-      <PanelLink
-        icon={<IconHome2 size={16} />}
-        color={activeTab === "home" ? "teal" : "gray"}
-        label={`Home`}
-        isActive={location.pathname === "/home" || location.pathname === ""}
-        onClick={() => {
-          navigate(`/home`);
-        }}
-      />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        height: `calc(100% - ${LOGO_HEIGHT}px)`,
+      }}
+    >
+      <div>
+        <NavTab
+          icon={<IconHome size={22} />}
+          name="home"
+          description="Home"
+          onClick={() => navigate(`/home`)}
+        />
 
-      <PanelLink
-        icon={<IconInbox size={16} />}
-        color={activeTab === "pipeline" ? "teal" : "gray"}
-        label={`Pipeline`}
-        isActive={location.pathname?.toLowerCase() === "/pipeline"}
-        onClick={() => {
-          navigate(`/pipeline`);
-        }}
-      />
+        <NavTab
+          icon={<IconInbox size={22} />}
+          name="pipeline"
+          description="Pipeline"
+          onClick={() => navigate(`/pipeline`)}
+        />
 
-      <PanelLink
-        icon={<IconAffiliate size={16} />}
-        color={activeTab === "personas" ? "teal" : "gray"}
-        label={`Personas`}
-        isActive={location.pathname?.toLowerCase() === "/personas"}
-        onClick={() => {
-          navigate(`/personas`);
-        }}
-      />
+        <NavTab
+          icon={<IconAffiliate size={22} />}
+          name="personas"
+          description="Personas"
+          onClick={() => navigate(`/personas`)}
+        />
 
-      <PanelLink
-        icon={<IconSpeakerphone size={16} />}
-        color={activeTab === "call-to-actions" ? "teal" : "gray"}
-        label={`CTAs`}
-        isActive={location.pathname?.toLowerCase() === "/call-to-actions"}
-        onClick={() => {
-          navigate(`/call-to-actions`);
-        }}
-      />
+        <NavTab
+          icon={<IconSpeakerphone size={22} />}
+          name="call-to-actions"
+          description="Call-to-Actions"
+          onClick={() => navigate(`/call-to-actions`)}
+        />
 
-      <PanelLink
-        icon={<IconAssembly size={16} />}
-        color={activeTab === "campaigns" ? "teal" : "gray"}
-        label={`Campaigns`}
-        isActive={location.pathname?.toLowerCase() === "/campaigns"}
-        onClick={() => {
-          navigate(`/campaigns`);
-        }}
-      />
+        <NavTab
+          icon={<IconAssembly size={22} />}
+          name="campaigns"
+          description="Campaigns"
+          onClick={() => navigate(`/campaigns`)}
+        />
+      </div>
+      <div>
+        <ProfileIcon name="Benedict Cumberbatch" email="benny10@cumberbtached.gmail.cvom" />
+      </div>
     </div>
   );
 }
-
-/*
-
-const HISTORY = [
-  { name: "Entry", value: "1" },
-  { name: "Entry", value: "2" },
-];
-
-
-      <Accordion variant="filled" my={4}>
-        <Accordion.Item
-          value="recently-viewed"
-          sx={(theme) => ({
-            "&[data-active]": {
-              backgroundColor: getHoverColor(theme),
-            },
-          })}
-        >
-          <Accordion.Control
-            icon={
-              <ThemeIcon color={"grape"} variant="light">
-                <IconHistory size={16} />
-              </ThemeIcon>
-            }
-            p={10}
-            sx={(theme) => ({
-              borderRadius: theme.radius.sm,
-
-              "&:hover": {
-                backgroundColor: getHoverColor(theme),
-              },
-            })}
-          >
-            <Text size="sm" ml={4}>{`Two`}</Text>
-          </Accordion.Control>
-          <Accordion.Panel
-            sx={{
-              overflow: "hidden",
-              whiteSpace: "nowrap",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {HISTORY.map((h) => {
-              return (
-                <UnstyledButton
-                  key={`recent-history-${h.value}`}
-                  onClick={() => {
-                    navigate(`/`);
-                  }}
-                  sx={(theme) => ({
-                    display: "block",
-                    width: "100%",
-                    padding: theme.spacing.xs,
-                    borderRadius: theme.radius.sm,
-                    color:
-                      theme.colorScheme === "dark"
-                        ? theme.colors.dark[0]
-                        : theme.black,
-
-                    "&:hover": {
-                      backgroundColor: getHoverColor(theme),
-                    },
-                  })}
-                >
-                  <Flex
-                    gap="md"
-                    justify="space-between"
-                    wrap="nowrap"
-                    align="center"
-                  >
-                    <Text
-                      size="sm"
-                      fw={700}
-                      sx={{
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {h.value}
-                    </Text>
-                    <Text
-                      size="sm"
-                      sx={{
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {h.name}
-                    </Text>
-                  </Flex>
-                </UnstyledButton>
-              );
-            })}
-            {HISTORY.length === 0 && (
-              <Text
-                ta="center"
-                fs="italic"
-                fz="sm"
-                c="dimmed"
-                pt={10}
-              >{`No records`}</Text>
-            )}
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
-*/

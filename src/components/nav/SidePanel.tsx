@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   IconInbox,
   IconHistory,
@@ -27,6 +27,8 @@ import { LOGO_HEIGHT } from "../../constants/data";
 import ProfileIcon from "./ProfileIcon";
 import { useOs } from "@mantine/hooks";
 import { openSpotlight } from "@mantine/spotlight";
+import { useRecoilState } from "recoil";
+import { navTabState } from "@atoms/navAtoms";
 
 type PanelLinkProps = {
   icon: React.ReactNode;
@@ -78,7 +80,12 @@ export function SidePanel(props: { isMobile?: boolean }) {
   const location = useLocation();
   const os = useOs();
 
+  const [navTab, setNavTab] = useRecoilState(navTabState);
   const activeTab = location.pathname?.split("/")[1];
+
+  useEffect(() => {
+    setNavTab(activeTab);
+  }, [activeTab, setNavTab]);
 
   return (
     <>
@@ -88,13 +95,6 @@ export function SidePanel(props: { isMobile?: boolean }) {
             <LogoIcon />
           </Center>
         )}
-
-        <NavTab
-          icon={<IconHome size={22} />}
-          name="home"
-          description="Home"
-          onClick={() => navigate(`/home`)}
-        />
 
         {!props.isMobile && (
           <NavTab
@@ -107,6 +107,13 @@ export function SidePanel(props: { isMobile?: boolean }) {
             dontChangeTab={true}
           />
         )}
+
+        <NavTab
+          icon={<IconHome size={22} />}
+          name="home"
+          description="Home"
+          onClick={() => navigate(`/home`)}
+        />
 
         <NavTab
           icon={<IconInbox size={22} />}

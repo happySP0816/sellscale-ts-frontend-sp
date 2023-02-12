@@ -4,6 +4,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { SCREEN_SIZES } from "../../constants/data";
 import PipelineSelector, { icons } from "../common/pipeline/PipelineSelector";
 import ProspectTable from "../common/pipeline/ProspectTable";
+import PageFrame from "@common/PageFrame";
 
 const PIPELINE_SELECTOR_DATA = [
   {

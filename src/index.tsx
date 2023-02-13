@@ -12,6 +12,7 @@ import ProspectPage from "./components/pages/ProspectPage";
 import PipelinePage from "./components/pages/PipelinePage";
 import MissingPage from "./components/pages/MissingPage";
 import { RecoilRoot } from "recoil";
+import CampaignPage from "@pages/CampaignPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "personas",
         element: <ProspectPage />,
+      },
+      {
+        path: "campaigns",
+        element: <CampaignPage />,
       },
       {
         path: "*",

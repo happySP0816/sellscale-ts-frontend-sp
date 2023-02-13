@@ -1,18 +1,15 @@
-import { Box, Flex, Grid, Image, Text, Chip, Group, Badge, Avatar } from "@mantine/core";
+import { Box, Flex, Image, Text, Chip, Group, Badge, Avatar, useMantineTheme } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { forwardRef, useEffect, useRef, useState } from "react";
-import { TextInput } from "@mantine/core";
-import { IconSearch } from "@tabler/icons";
 import { MultiSelect } from "@mantine/core";
-import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
-import { IconCalendar } from "@tabler/icons";
+import CampaignDetailsDrawer from "@drawers/CampaignDetailsDrawer";
+import { IconCalendar, IconUsers } from "@tabler/icons";
 
 import { useRecoilState } from "recoil";
-import { prospectDrawerOpenState } from "../../atoms/personaAtoms";
-import { campaignDrawerOpenState } from "@atoms/campaignAtoms";
+import { activeCampaignState, campaignDrawerOpenState } from "@atoms/campaignAtoms";
 import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { useQuery } from "react-query";
-import { temp_delay } from "@utils/general";
+import { temp_delay, valueToColor } from "@utils/general";
 import { chunk } from "lodash";
 import { faker } from "@faker-js/faker";
 import { Campaign } from "src/main";
@@ -66,7 +63,7 @@ const SelectRepresent = forwardRef<HTMLDivElement, ItemProps>(
   )
 );
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 function defaultFilterDate() {
   const today = new Date();
@@ -77,7 +74,9 @@ function defaultFilterDate() {
 
 export default function ProspectTable() {
 
+  const theme = useMantineTheme();
   const [opened, setOpened] = useRecoilState(campaignDrawerOpenState);
+  const [activeCampaign, setActiveCampaign] = useRecoilState(activeCampaignState);
 
   const [represent, setRepresent] = useState('');
   const [filterDate, setFilterDate] = useState<DateRangePickerValue>(defaultFilterDate);
@@ -111,11 +110,12 @@ export default function ProspectTable() {
 
   return (
     <Box>
-      <div style={{ display: 'flex',  }}>
+      <div style={{ display: 'flex' }}>
         <MultiSelect
             data={FAKER_REPRESENTATIVES}
             label="Representatives"
             placeholder="Pick representatives"
+            icon={<IconUsers size={16} />}
             itemComponent={SelectRepresent}
             searchable
             searchValue={represent}
@@ -129,6 +129,8 @@ export default function ProspectTable() {
               (item.label?.toLowerCase().includes(value.toLowerCase().trim()) ||
                 item.description.toLowerCase().includes(value.toLowerCase().trim()))
             }
+            style={{ maxWidth: '50%', flexBasis: '50%', }}
+            p={'xs'}
           />
           <DateRangePicker
             label="Filter by Date"
@@ -136,11 +138,16 @@ export default function ProspectTable() {
             icon={<IconCalendar size={16} />}
             value={filterDate}
             onChange={setFilterDate}
+            inputFormat="MMM D, YYYY"
+            amountOfMonths={2}
+            style={{ maxWidth: '50%', flexBasis: '50%', }}
+            p={'xs'}
           />
       </div>
 
 
       <DataTable
+          height={'min(670px, 100vh - 200px)'}
           verticalAlignment="top"
           loaderColor="teal"
           noRecordsText={"No campaigns found"}
@@ -152,7 +159,7 @@ export default function ProspectTable() {
               sortable: true,
               render: ({ status }) => {
                 return (
-                  <Badge>{status.replaceAll("_", " ").toLowerCase()}</Badge>
+                  <Badge color={valueToColor(theme, status)}>{status.replaceAll("_", " ")}</Badge>
                 );
               },
             },
@@ -162,7 +169,7 @@ export default function ProspectTable() {
               sortable: true,
               render: ({ type }) => {
                 return (
-                  <Badge>{type.replaceAll("_", " ").toLowerCase()}</Badge>
+                  <Badge color={valueToColor(theme, type)}>{type.replaceAll("_", " ")}</Badge>
                 );
               },
             },
@@ -172,7 +179,13 @@ export default function ProspectTable() {
               sortable: true,
               render: ({ startDate }) => {
                 return (
-                  <Text>{startDate.toTimeString()}</Text>
+                  <Text>
+                    {startDate.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </Text>
                 );
               },
             },
@@ -182,7 +195,13 @@ export default function ProspectTable() {
               sortable: true,
               render: ({ endDate }) => {
                 return (
-                  <Text>{endDate.toTimeString()}</Text>
+                  <Text>
+                    {endDate.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </Text>
                 );
               },
             },
@@ -190,6 +209,7 @@ export default function ProspectTable() {
               accessor: "name",
               title: "Name",
               sortable: true,
+              ellipsis: true,
             },
             {
               accessor: "prospectIds",
@@ -232,58 +252,9 @@ export default function ProspectTable() {
           paginationColor="teal"
           sortStatus={sortStatus}
           onSortStatusChange={handleSortStatusChange}
-          onRowClick={({ id }) => setOpened(true)}
+          onRowClick={(data) => { setActiveCampaign(data satisfies Campaign); setOpened(true); }}
         />
-
-      <DataTable
-        withBorder
-        records={data}
-        verticalSpacing="sm"
-        highlightOnHover
-        onRowClick={(prospect, row_index) => {
-          setOpened(true);
-        }}
-        columns={[
-          {
-            accessor: "full_name",
-            render: (x: any) => {
-              return (
-                <Flex>
-                  <Image
-                    src={
-                      `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                        x.full_name
-                      )}`
-                    }
-                    radius="lg"
-                    height={30}
-                    width={30}
-                  ></Image>
-                  <Text ml="md">{x.full_name}</Text>
-                </Flex>
-              );
-            },
-          },
-          { accessor: "company" },
-          { accessor: "title" },
-          { accessor: "industry" },
-          {
-            accessor: "status",
-            render: (x: any) => {
-              return (
-                <Chip defaultChecked color="teal">
-                  {x.status.replaceAll("_", " ").toLowerCase()}
-                </Chip>
-              );
-            },
-          },
-        ]}
-        totalRecords={totalRecords.current}
-        recordsPerPage={PAGE_SIZE}
-        page={page}
-        onPageChange={(p) => setPage(p)}
-      />
-      <ProspectDetailsDrawer />
+      <CampaignDetailsDrawer />
     </Box>
   );
 }

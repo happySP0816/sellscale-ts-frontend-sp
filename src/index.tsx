@@ -5,7 +5,7 @@ import App from "./components/App";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import reportWebVitals from "./reportWebVitals";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, json, RouterProvider } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
 import AboutPage from "./components/pages/AboutPage";
 import ProspectPage from "./components/pages/ProspectPage";
@@ -14,6 +14,8 @@ import MissingPage from "./components/pages/MissingPage";
 import { RecoilRoot } from "recoil";
 import CampaignPage from "@pages/CampaignPage";
 import AuthPage from "@pages/AuthPage";
+import RestrictedRoute from "./auth/RestrictedRoute";
+import LoginPage from "@pages/LoginPage";
 
 const queryClient = new QueryClient();
 
@@ -26,27 +28,31 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <AboutPage />,
+        element: <RestrictedRoute page={<AboutPage />} />,
+      },
+      {
+        path: "home",
+        element: <RestrictedRoute page={<AboutPage />} />,
+      },
+      {
+        path: "pipeline",
+        element: <RestrictedRoute page={<PipelinePage />} />,
+      },
+      {
+        path: "personas",
+        element: <RestrictedRoute page={<ProspectPage />} />,
+      },
+      {
+        path: "campaigns",
+        element: <RestrictedRoute page={<CampaignPage />} />,
       },
       {
         path: "authenticate",
         element: <AuthPage />,
       },
       {
-        path: "home",
-        element: <AboutPage />,
-      },
-      {
-        path: "pipeline",
-        element: <PipelinePage />,
-      },
-      {
-        path: "personas",
-        element: <ProspectPage />,
-      },
-      {
-        path: "campaigns",
-        element: <CampaignPage />,
+        path: "login",
+        element: <LoginPage />,
       },
       {
         path: "*",

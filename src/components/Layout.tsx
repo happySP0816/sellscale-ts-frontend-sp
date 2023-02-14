@@ -15,11 +15,16 @@ import ProfileIcon from "@nav/ProfileIcon";
 import { LogoFull } from "@nav/Logo";
 import { animated, useSpring } from "@react-spring/web";
 import { openSpotlight } from "@mantine/spotlight";
+import { userEmailState, userNameState } from "@atoms/userAtoms";
+import { useRecoilValue } from "recoil";
 
 const AnimatedNavbar = animated(Navbar);
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
+
+  const userName = useRecoilValue(userNameState);
+  const userEmail = useRecoilValue(userEmailState);
 
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.SM})`,
@@ -35,7 +40,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   });
 
   const activeTab = window.location.pathname.replaceAll("/", "");
-  console.log(activeTab, navOpened);
+
   return (
     <AppShell
       className={"h-full"}
@@ -55,8 +60,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Navbar.Section>
           <Navbar.Section>
             <ProfileIcon
-              name="Benedict Cumberbatch"
-              email="benny10@cumberbtached.gmail.cvom"
+              name={`${userName.first} ${userName.last}`}
+              email={userEmail}
             />
           </Navbar.Section>
         </AnimatedNavbar>

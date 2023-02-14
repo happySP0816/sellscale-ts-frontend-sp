@@ -17,6 +17,7 @@ import { animated, useSpring } from "@react-spring/web";
 import { openSpotlight } from "@mantine/spotlight";
 import { userEmailState, userNameState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
+import { isLoggedIn } from "@auth/core";
 
 const AnimatedNavbar = animated(Navbar);
 
@@ -59,10 +60,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <SidePanel isMobile={isMobileView} />
           </Navbar.Section>
           <Navbar.Section>
-            <ProfileIcon
-              name={`${userName.first} ${userName.last}`}
-              email={userEmail}
-            />
+            {isLoggedIn() && (
+              <ProfileIcon
+                name={`${userName.first} ${userName.last}`}
+                email={userEmail}
+              />
+            )}
           </Navbar.Section>
         </AnimatedNavbar>
       }

@@ -20,6 +20,7 @@ import { NotificationsProvider } from '@mantine/notifications';
 
 export default function App() {
 
+  /* For if we want to support light mode & dark mode:
   // Site light or dark mode
   const isSystemDarkMode = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   const savedSiteTheme = localStorage.getItem('site-theme');
@@ -33,6 +34,7 @@ export default function App() {
     setColorScheme(nextColorScheme);
     localStorage.setItem('site-theme', nextColorScheme);
   };
+  */
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -93,8 +95,8 @@ export default function App() {
   return (
 
     <UserContext.Provider value={{ user, setUser: (u: User) => { setUser(u) } }}>
-      <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-        <MantineProvider theme={{ colorScheme, colors: {
+      <ColorSchemeProvider colorScheme={'dark'} toggleColorScheme={() => {}}>
+        <MantineProvider theme={{ colorScheme: 'dark', colors: {
           'scale-green': ['#75FF00', '#75FA00', '#75FA00', '#60CD00', '#60CD00', '#60CD00', '#52AF00', '#52AF00', '#52AF00', '#52AF00'],
           'scale-pink': ['#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6', '#EA5CF6'],
         } }} withGlobalStyles withNormalizeCSS>

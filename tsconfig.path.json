@@ -10,7 +10,8 @@
       "@pages/*": ["src/components/pages/*"],
       "@constants/*": ["src/constants/*"],
       "@contexts/*": ["src/contexts/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@auth/*": ["src/auth/*"]
     }
   }
 }

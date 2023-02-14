@@ -1,59 +1,75 @@
 import {
-  LoadingOverlay, Modal, Title, useMantineTheme, Text, Group, Button, TextInput, Center,
+  LoadingOverlay,
+  Modal,
+  Text,
+  Divider,
+  Button,
+  TextInput,
+  Center,
+  Container,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconAt } from "@tabler/icons";
 import { useEffect, useState } from "react";
-import { login } from "src/auth/core";
+import { login } from "@auth/core";
+import { useRecoilState } from "recoil";
+import { userEmailState } from "@atoms/userAtoms";
+import { LogoFull } from "@nav/Logo";
 
 async function sendLogin(email: string) {
+  const response = await fetch(
+    `${process.env.REACT_APP_API_URI}/client/send_magic_link_login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_sdr_email: email,
+      }),
+    }
+  );
 
-  const response = await fetch(`${process.env.REACT_APP_API_URI}/client/send_magic_link_login`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      'client_sdr_email': email,
-    })
-  });
-  return await response.json().catch((error) => {
-    console.error(error);
+  let result = await response.text().catch((err) => {
+    console.error("Failed to read response as plain text", err);
     showNotification({
-      id: 'auth-error',
-      title: 'Error',
-      message: `Error: ${error}`,
-      color: 'red',
+      id: "auth-error",
+      title: "Error",
+      message: `Error: ${err}`,
+      color: "red",
       autoClose: false,
     });
+    return null;
   });
 
+  return { status: response.status, message: result };
 }
 
-const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+const emailRegex =
+  /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
 export default function LoginPage() {
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const theme = useMantineTheme();
+  const [userEmail, setUserEmail] = useRecoilState(userEmailState);
+
+  const [checkEmail, setCheckEmail] = useState(false);
 
   const form = useForm({
     initialValues: {
-      email: '',
+      email: "",
     },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
     setError(null);
     handleLogin(values);
-  }
+  };
 
   const handleLogin = async (values: typeof form.values) => {
-
-    if(!values.email.match(emailRegex)){
-      setError('Not a valid email address!');
+    if (!values.email.match(emailRegex)) {
+      setError("Not a valid email address!");
       return;
     }
 
@@ -64,48 +80,59 @@ export default function LoginPage() {
 
     setLoading(false);
 
-    // TODO: Pass in res data to login function
-    //login();
-
+    if (res?.status === 200) {
+      login(values.email, setUserEmail);
+      setCheckEmail(true);
+    } else if (res?.status === 404) {
+      setError(res.message);
+    } else {
+      setError("Error logging in");
+    }
   };
 
-  return (
-    <Modal
-      opened={true}
-      withCloseButton={false}
-      onClose={() => {}}
-      size="lg"
-    >
-      <Title order={2}>Login to SellScale Sight</Title>
+    return (
+      <Modal opened={true} withCloseButton={false} onClose={() => {}} size="sm">
+        <LogoFull size={35} />
+        <Text c="dimmed" fs="italic" ta="center" size="sm">
+          View your prospects, outbound analytics, and personas all in one place.
+        </Text>
+        <Divider my="sm" label="Login" labelPosition="center" />
 
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <LoadingOverlay visible={loading} />
+        <Container>
+          {!checkEmail && (
+            <form onSubmit={form.onSubmit(handleSubmit)}>
+              <LoadingOverlay visible={loading} />
 
-        <TextInput
-          mt="md"
-          required
-          placeholder={`Email`}
-          label={`Email`}
-          icon={<IconAt size={16} stroke={1.5} />}
-          {...form.getInputProps('email')}
-        />
+              <TextInput
+                mt="md"
+                required
+                placeholder={`Client Email`}
+                icon={<IconAt size={16} stroke={1.5} />}
+                {...form.getInputProps("email")}
+              />
 
+              {error && (
+                <Text color="red" size="sm" mt="sm">
+                  {error}
+                </Text>
+              )}
 
-        {error && (
-          <Text color="red" size="sm" mt="sm">
-            {error}
-          </Text>
-        )}
-
-        {(
-          <Center m={'sm'}>
-            <Button variant="outline" radius="md" type="submit">
-              Login
-            </Button>
-          </Center>
-        )}
-      </form>
-      
-  </Modal>
-  );
+              {
+                <Center m={"sm"}>
+                  <Button variant="outline" radius="md" type="submit">
+                    Login
+                  </Button>
+                </Center>
+              }
+            </form>
+          )}
+          {checkEmail && (
+          <>
+            <Text ta="center">A login link has been sent to your email.</Text>
+            <Text ta="center" fs="italic" c="dimmed">You may close this tab now.</Text>
+          </>
+          )}
+        </Container>
+      </Modal>
+    );
 }

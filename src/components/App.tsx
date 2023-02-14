@@ -9,14 +9,14 @@ import {
 
 import Layout from './Layout';
 import { SpotlightAction, SpotlightProvider } from '@mantine/spotlight';
-import { IconSearch, IconTrendingDown, IconTrendingUp } from '@tabler/icons';
-import { User, UserContext } from '../contexts/user';
+import { IconSearch } from '@tabler/icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { ModalsProvider } from '@mantine/modals';
 import { useQuery, useQueryClient } from 'react-query';
-import updateTokens from '../utils/updateTokens';
-import { useDebouncedState } from '@mantine/hooks';
 import { NotificationsProvider } from '@mantine/notifications';
+import { isLoggedIn } from '@auth/core';
+import { useRecoilState } from 'recoil';
+import { userEmailState, userNameState, userTokenState } from '@atoms/userAtoms';
 
 export default function App() {
 
@@ -38,63 +38,43 @@ export default function App() {
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [user, setUser] = useState({
-    localId: '',
-  });
 
+  const [userEmail, setUserEmail] = useRecoilState(userEmailState);
+  const [userName, setUserName] = useRecoilState(userNameState);
+  const [userToken, setUserToken] = useRecoilState(userTokenState);
 
   const mainActions: SpotlightAction[] = [];
 
-  // When page is loading, fetch user info from accessToken
+  // When page is loading, sync user info with local storage info
   const infoResult = useQuery({
-    queryKey: ['get-info'],
+    queryKey: ['sync-user-info'],
     queryFn: async () => {
-      if (user.localId) { return ''; }
+      if (userToken) { return ''; }
 
-      const getInfo = async () => {
-        const accessToken = localStorage.getItem('accessToken');
-        if (!accessToken) { return; }
+      const syncLogin = async () => {
 
-        console.log('Retrieving profile info...');
+        if(isLoggedIn()){
 
-        // Make request to backend to get info (see: api/auth/info.py)
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/info`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-          },
-        });
-        const res = await response.json();
+          setUserEmail(localStorage.getItem('user-email')+'');
+          setUserName(localStorage.getItem('user-name')+'');
+          setUserToken(localStorage.getItem('user-token')+'');
 
-        switch (res.message) {
-          case 'INVALID_ID_TOKEN':
-            console.log('Invalid access token.')
-            let success = await updateTokens();
-            if (success) {
-              console.log('Updated access token, attempting info retrieval again...')
-              await getInfo();
-            }
-            return;
-          case '':
-            console.log('Successfully found info.')
-            setUser({
-              localId: res.data.localId,
-            });
-            return;
-          default:
-            return;
+        } else {
+
+          // Not logged in, should redirect to login page
+          console.log('Not logged in');
+
         }
+
       }
 
-      await getInfo();
+      await syncLogin();
       return '';
 
     }
   });
   
   return (
-
-    <UserContext.Provider value={{ user, setUser: (u: User) => { setUser(u) } }}>
       <ColorSchemeProvider colorScheme={'dark'} toggleColorScheme={() => {}}>
         <MantineProvider theme={{ colorScheme: 'dark', colors: {
           'scale-green': ['#75FF00', '#75FA00', '#75FA00', '#60CD00', '#60CD00', '#60CD00', '#52AF00', '#52AF00', '#52AF00', '#52AF00'],
@@ -125,7 +105,6 @@ export default function App() {
           </SpotlightProvider>
         </MantineProvider>
       </ColorSchemeProvider>
-    </UserContext.Provider>
 
   );
 }

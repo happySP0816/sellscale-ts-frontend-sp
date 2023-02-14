@@ -4,6 +4,14 @@ export function temp_delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export function splitName(name: string) {
+  let parts = name.split(' ');
+  return {
+    first: parts[0],
+    last: parts[parts.length - 1],
+  };
+}
+
 /**
  * Given a string, returns a number between 0 and range that is consistent for the same string.
  * @param str 

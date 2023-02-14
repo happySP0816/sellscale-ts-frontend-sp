@@ -18,7 +18,6 @@ import {
   MantineTheme,
   Center,
 } from "@mantine/core";
-import { UserContext } from "../../contexts/user";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "react-query";
 import NavTab from "./NavTab";

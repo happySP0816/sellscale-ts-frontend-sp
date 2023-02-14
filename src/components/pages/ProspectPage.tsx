@@ -13,14 +13,10 @@ import {
   Paper,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { useContext, useState } from "react";
 import { useRecoilState } from "recoil";
 import { SCREEN_SIZES } from "../../constants/data";
-import { UserContext } from "../../contexts/user";
 import {
   activePersonaState,
-  linkedInCTAsDrawerOpenState,
-  uploadDrawerOpenState,
 } from "../atoms/personaAtoms";
 import PageFrame from "../common/PageFrame";
 import PersonaCard from "../common/persona/PersonaCard";

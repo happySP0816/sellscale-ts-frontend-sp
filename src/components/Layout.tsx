@@ -62,7 +62,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Navbar.Section>
             {isLoggedIn() && (
               <ProfileIcon
-                name={`${userName.first} ${userName.last}`}
+                name={userName}
                 email={userEmail}
               />
             )}

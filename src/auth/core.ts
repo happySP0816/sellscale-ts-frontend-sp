@@ -1,8 +1,9 @@
 import { SetterOrUpdater } from "recoil";
 
-
 export function isLoggedIn(){
-  return false;
+  return localStorage.getItem('user-token')
+    && localStorage.getItem('user-email')
+    && localStorage.getItem('user-name');
 }
 
 export function login(email: string, setUserEmail: SetterOrUpdater<string>){
@@ -12,7 +13,17 @@ export function login(email: string, setUserEmail: SetterOrUpdater<string>){
 
 }
 
-export function authorize(){
+export function authorize(
+    token: string,
+    setUserToken: SetterOrUpdater<string>,
+    name: string,
+    setUserName: SetterOrUpdater<string>){
+
+  setUserToken(token);
+  localStorage.setItem('user-token', token);
+
+  setUserName(name);
+  localStorage.setItem('user-name', name);
 
 }
 

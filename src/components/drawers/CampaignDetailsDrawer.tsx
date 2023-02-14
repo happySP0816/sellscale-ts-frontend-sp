@@ -14,6 +14,7 @@ import {
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   percentageToColor,
+  splitName,
   temp_delay,
   valueToColor,
 } from "../../utils/general";
@@ -57,13 +58,13 @@ export default function CampaignDetailsDrawer() {
       <Group className="inline-flex flex-nowrap truncate">
         <Avatar
           src={null}
-          alt={`${userName.first}'s Profile Picture`}
+          alt={`${splitName(userName).first}'s Profile Picture`}
           color="teal"
           radius="xl"
         />
         <div className="inline-flex flex-col">
           <Text fz="xs" fw={700}>
-            {userName.first} {userName.last}
+            {userName}
           </Text>
           <Text fz="xs" c="dimmed">
             {userEmail}

@@ -1,10 +1,12 @@
-import { Center, createStyles, Group, UnstyledButton, Text, Badge, Loader } from "@mantine/core";
+import { userTokenState } from "@atoms/userAtoms";
+import { Center, createStyles, Group, UnstyledButton, Text, Badge, Loader, useMantineTheme } from "@mantine/core";
 import { useDebouncedState } from "@mantine/hooks";
 import { SpotlightAction, SpotlightActionProps, SpotlightProvider } from "@mantine/spotlight";
 import { IconAffiliate, IconHome, IconInbox, IconSearch, IconSpeakerphone, IconAssembly, IconTrendingDown } from "@tabler/icons";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
 
 const useStyles = createStyles((theme) => ({
   action: {
@@ -65,6 +67,7 @@ function CustomAction({
 export default function SpotlightWrapper({ children }: { children: React.ReactNode }) {
 
   const navigate = useNavigate();
+  const theme = useMantineTheme();
 
   const mainActions: SpotlightAction[] = [
     {
@@ -89,15 +92,6 @@ export default function SpotlightWrapper({ children }: { children: React.ReactNo
       icon: <IconAffiliate size={18} />,
     },
     {
-      title: 'Call-to-Actions',
-      description: 'TO-REMOVE',
-      group: 'Pages',
-      onTrigger: () => navigate(`/call-to-actions`),
-      icon: <IconSpeakerphone size={18} />,
-      badge: 'TO-REMOVE',
-      badgeColor: 'red',
-    },
-    {
       title: 'Campaigns',
       description: 'View and understand the performance of your weekly outbound campaigns',
       group: 'Pages',
@@ -106,7 +100,7 @@ export default function SpotlightWrapper({ children }: { children: React.ReactNo
     },
   ];
 
-
+  const userToken = useRecoilValue(userTokenState);
   const [query, setQuery] = useDebouncedState('', 400);
   // For queryResult, null = loading and false = failed to find.
   const [queryResult, setQueryResult] = useState<SpotlightAction[] | null | false>(null);
@@ -117,7 +111,7 @@ export default function SpotlightWrapper({ children }: { children: React.ReactNo
       return;
     }
     setQueryResult(null);
-    activateQueryPipeline(query, navigate).then((result) => {
+    activateQueryPipeline(query, navigate, theme, userToken).then((result) => {
       setQueryResult(result);
     });
   }, [query]);

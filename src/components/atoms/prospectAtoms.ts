@@ -5,6 +5,11 @@ const prospectDrawerOpenState = atom({
   default: false,
 });
 
+const prospectDrawerIdState = atom({
+  key: "prospect-drawer-id",
+  default: -1,
+});
+
 const prospectSelectorTypeState = atom({
   key: "prospect-selector-type",
   default: 'all',
@@ -19,4 +24,5 @@ export {
   prospectDrawerOpenState,
   prospectSelectorTypeState,
   prospectStatusesState,
+  prospectDrawerIdState,
 };

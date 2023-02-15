@@ -129,13 +129,6 @@ export default function SidePanel(props: { isMobile?: boolean }) {
         />
 
         <NavTab
-          icon={<IconSpeakerphone size={22} />}
-          name="call-to-actions"
-          description="Call-to-Actions"
-          onClick={() => navigate(`/call-to-actions`)}
-        />
-
-        <NavTab
           icon={<IconAssembly size={22} />}
           name="campaigns"
           description="Campaigns"

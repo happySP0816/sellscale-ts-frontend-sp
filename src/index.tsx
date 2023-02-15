@@ -35,8 +35,9 @@ const router = createBrowserRouter([
         element: <RestrictedRoute page={<AboutPage />} />,
       },
       {
-        path: "pipeline",
+        path: "pipeline/:prospectId?",
         element: <RestrictedRoute page={<PipelinePage />} />,
+        loader: async ({ params }) => { return { prospectId: params.prospectId }; },
       },
       {
         path: "personas",

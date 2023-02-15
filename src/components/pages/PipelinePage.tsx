@@ -6,9 +6,12 @@ import PipelineSelector, { icons } from "../common/pipeline/PipelineSelector";
 import ProspectTable from "../common/pipeline/ProspectTable";
 import PageFrame from "@common/PageFrame";
 import { useQuery } from "react-query";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
+import { useLoaderData } from "react-router-dom";
+import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import { useEffect } from "react";
 
 function getPipelineSelectorData(data: any){
   return new Map()
@@ -50,6 +53,17 @@ function getPipelineSelectorData(data: any){
 }
 
 export default function PipelinePage() {
+
+  const { prospectId } = useLoaderData() as { prospectId: string };
+  const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);
+  const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
+  useEffect(() => {
+    if(prospectId && prospectId.trim().length > 0){
+      setProspectId(+prospectId.trim())
+      setOpened(true);
+    }
+  }, [prospectId]);
+
   const theme = useMantineTheme();
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
   const userToken = useRecoilValue(userTokenState);

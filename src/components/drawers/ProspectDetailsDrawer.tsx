@@ -1,8 +1,8 @@
 import { Drawer, ScrollArea } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
-import { useRecoilState } from "recoil";
-import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import { faker } from "@faker-js/faker";
 import { useQuery } from "react-query";
 import { percentageToColor, temp_delay } from "../../utils/general";
@@ -15,6 +15,8 @@ import ProspectDetailsChangeStatus from "../common/prospectDetails/ProspectDetai
 import ProspectDetailsCompany from "../common/prospectDetails/ProspectDetailsCompany";
 import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes";
 import ProspectDetailsViewConversation from "../common/prospectDetails/ProspectDetailsViewConversation";
+import { userTokenState } from "@atoms/userAtoms";
+import { logout } from "@auth/core";
 
 const PAGE_SIZE = 20;
 
@@ -64,8 +66,31 @@ const PROSPECT_DETAILS = {
   },
 };
 
-export default function ProspectDetailsDrawer(props: {}) {
+export default function ProspectDetailsDrawer() {
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
+  const prospectId = useRecoilValue(prospectDrawerIdState);
+  const userToken = useRecoilValue(userTokenState);
+
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [`query-prospect-details`],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URI}/prospect/${prospectId}`,
+        {
+          method: "GET",
+          headers: {
+            'Authorization': `Bearer ${userToken}`,
+          },
+        }
+      );
+      if(response.status === 401){ logout() }
+      const res = await response.json();
+
+      return res;
+    },
+  });
+
+  console.log(data);
 
   return (
     <Drawer

@@ -17,6 +17,7 @@ import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
 
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
+  prospectDrawerIdState,
   prospectDrawerOpenState,
   prospectSelectorTypeState,
   prospectStatusesState,
@@ -83,6 +84,7 @@ export default function ProspectTable({
 }) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
+  const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
   const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
   const userToken = useRecoilValue(userTokenState);
   const totalRecords = useRef(0);
@@ -154,8 +156,6 @@ export default function ProspectTable({
         return [];
       }
 
-      console.log(res.total_count);
-
       totalRecords.current = res.total_count;
       return res.prospects.map((prospect: any) => {
         return {
@@ -207,6 +207,7 @@ export default function ProspectTable({
         noRecordsText={"No prospects found"}
         fetching={isFetching}
         onRowClick={(prospect, row_index) => {
+          setProspectId(prospect.id);
           setOpened(true);
         }}
         columns={[

@@ -56,7 +56,7 @@ function CustomAction({
           )}
         </div>
 
-        {action.badge && <Badge>{action.badge}</Badge>}
+        {action.badge && <Badge color={action.badgeColor}>{action.badge}</Badge>}
       </Group>
     </UnstyledButton>
   );
@@ -94,6 +94,8 @@ export default function SpotlightWrapper({ children }: { children: React.ReactNo
       group: 'Pages',
       onTrigger: () => navigate(`/call-to-actions`),
       icon: <IconSpeakerphone size={18} />,
+      badge: 'TO-REMOVE',
+      badgeColor: 'red',
     },
     {
       title: 'Campaigns',

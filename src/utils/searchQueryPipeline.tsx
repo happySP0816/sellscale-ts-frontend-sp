@@ -9,6 +9,7 @@ import { NavigateFunction } from "react-router-dom";
  */
 export async function activateQueryPipeline(query: string, navigate: NavigateFunction): Promise<SpotlightAction[] | null | false> {
 
+  // TODO: Implement this function.
   return [];
 
 }

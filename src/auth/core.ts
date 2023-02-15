@@ -29,5 +29,9 @@ export function authorize(
 
 export function logout(){
 
-}
+  localStorage.removeItem('user-token');
+  localStorage.removeItem('user-email');
+  localStorage.removeItem('user-name');
+  window.location.href = '/';
 
+}

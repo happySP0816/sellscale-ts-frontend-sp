@@ -8,6 +8,7 @@ import PageFrame from "@common/PageFrame";
 import { useQuery } from "react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
+import { logout } from "@auth/core";
 
 function getPipelineSelectorData(data: any){
   return new Map()
@@ -65,6 +66,7 @@ export default function PipelinePage() {
           },
         }
       );
+      if(response.status === 401){ logout() }
       const res = await response.json();
 
       return res;

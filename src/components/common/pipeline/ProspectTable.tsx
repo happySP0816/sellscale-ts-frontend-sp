@@ -25,6 +25,7 @@ import { useQuery } from "react-query";
 import { valueToColor } from "@utils/general";
 import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState } from "@mantine/hooks";
+import { logout } from "@auth/core";
 
 const ALL_STATUSES = [
   { value: 'ACCEPTED', label: 'Accepted' },
@@ -117,6 +118,7 @@ export default function ProspectTable({
           }),
         }
       );
+      if(response.status === 401){ logout() }
       const res = await response.json();
       if (!res) {
         return [];

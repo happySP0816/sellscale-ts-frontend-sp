@@ -1,13 +1,22 @@
-import { Container, useMantineTheme } from "@mantine/core";
-import { IconUserPlus } from "@tabler/icons";
-import { useMediaQuery } from "@mantine/hooks";
-import { SCREEN_SIZES } from "../../constants/data";
-import PipelineSelector, { icons } from "../common/pipeline/PipelineSelector";
-import ProspectTable from "../common/pipeline/ProspectTable";
+
 import PageFrame from "@common/PageFrame";
 import CampaignTable from "@common/campaigns/CampaignTable";
+import { useLoaderData } from "react-router-dom";
+import { useEffect } from "react";
+import { useRecoilState } from "recoil";
+import { campaignDrawerIdState, campaignDrawerOpenState } from "@atoms/campaignAtoms";
 
 export default function CampaignsPage() {
+
+  const { campaignId } = useLoaderData() as { campaignId: string };
+  const [_opened, setOpened] = useRecoilState(campaignDrawerOpenState);
+  const [_campaignId, setCampaignId] = useRecoilState(campaignDrawerIdState);
+  useEffect(() => {
+    if(campaignId && campaignId.trim().length > 0){
+      setCampaignId(+campaignId.trim())
+      setOpened(true);
+    }
+  }, [campaignId]);
 
   return (
     <PageFrame>

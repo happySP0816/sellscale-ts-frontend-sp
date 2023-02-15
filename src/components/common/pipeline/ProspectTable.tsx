@@ -168,6 +168,7 @@ export default function ProspectTable({
         };
       });
     },
+    refetchOnWindowFocus: false,
   });
 
   return (
@@ -189,7 +190,7 @@ export default function ProspectTable({
             data={ALL_STATUSES}
             mb="md"
             label="Filter by Status"
-            placeholder="Pick all that you like"
+            placeholder="Select statuses"
             searchable
             nothingFound="Nothing found"
             value={statuses}

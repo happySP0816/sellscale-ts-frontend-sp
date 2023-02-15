@@ -136,7 +136,7 @@ export default function SpotlightWrapper({ children }: { children: React.ReactNo
           searchPlaceholder={"Search..."}
           searchInputProps={{ autoComplete: "off" }}
           shortcut={["mod + K"]}
-          highlightQuery
+          limit={30}
           nothingFoundMessage={
             query !== '' && (queryResult === false || (queryResult && queryResult.length === 0)) ?
             (<Text c="dimmed" fs="italic">Nothing found</Text>)

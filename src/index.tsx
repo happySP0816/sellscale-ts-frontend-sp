@@ -44,8 +44,9 @@ const router = createBrowserRouter([
         element: <RestrictedRoute page={<ProspectPage />} />,
       },
       {
-        path: "campaigns",
+        path: "campaigns/:campaignId?",
         element: <RestrictedRoute page={<CampaignPage />} />,
+        loader: async ({ params }) => { return { campaignId: params.campaignId }; },
       },
       {
         path: "authenticate",

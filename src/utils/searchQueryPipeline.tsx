@@ -12,10 +12,11 @@ import { valueToColor } from "./general";
  */
 export async function activateQueryPipeline(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string): Promise<SpotlightAction[] | null | false> {
 
-  let prospects = await checkProspects(query, navigate, theme, userToken)
+  const prospects = await checkProspects(query, navigate, theme, userToken)
+  const campaigns = await checkCampaigns(query, navigate, theme, userToken)
 
   // TODO: Add more checks here.
-  return [...prospects];
+  return [...campaigns, ...prospects];
 
 }
 
@@ -59,6 +60,42 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       ),
       badge: prospect.status,
       badgeColor: valueToColor(theme, prospect.status),
+    };
+  });
+
+}
+
+
+async function checkCampaigns(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string){
+
+  const response = await fetch(
+    `${process.env.REACT_APP_API_URI}/campaigns/all_campaigns`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: query,
+      }),
+    }
+  );
+  if(response.status === 401){ logout() }
+  const res = await response.json();
+  if (!res || !res.outbound_campaigns) {
+    return [];
+  }
+
+  return res.outbound_campaigns.map((campaign: any) => {
+    return {
+      title: campaign.name,
+      description: `Dates: ${new Date(campaign.campaign_start_date).toLocaleDateString("en-US")} - ${new Date(campaign.campaign_end_date).toLocaleDateString("en-US")} | ${campaign.prospect_ids.length} prospects`,
+      keywords: '',
+      group: 'Campaigns',
+      onTrigger: () => navigate(`/campaigns/${campaign.id}`),
+      badge: campaign.status,
+      badgeColor: valueToColor(theme, campaign.status),
     };
   });
 

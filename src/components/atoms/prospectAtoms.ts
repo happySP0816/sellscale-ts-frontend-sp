@@ -10,7 +10,13 @@ const prospectSelectorTypeState = atom({
   default: 'all',
 });
 
+const prospectStatusesState = atom({
+  key: "prospect-statuses",
+  default: [] as string[],
+});
+
 export {
   prospectDrawerOpenState,
   prospectSelectorTypeState,
+  prospectStatusesState,
 };

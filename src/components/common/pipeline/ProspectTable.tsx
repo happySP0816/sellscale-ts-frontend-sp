@@ -9,7 +9,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TextInput } from "@mantine/core";
 import { IconSearch } from "@tabler/icons";
 import { MultiSelect } from "@mantine/core";
@@ -19,12 +19,13 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import {
   prospectDrawerOpenState,
   prospectSelectorTypeState,
+  prospectStatusesState,
 } from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { useQuery } from "react-query";
 import { valueToColor } from "@utils/general";
 import { StatGridInfo } from "./PipelineSelector";
-import { useDebouncedState } from "@mantine/hooks";
+import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
 
 const ALL_STATUSES = [
@@ -40,7 +41,7 @@ const ALL_STATUSES = [
   { value: 'NOT_QUALIFIED', label: 'Not Qualified' },
 ];
 
-function getInniateStatuses(selectorType: string){
+export function getDefaultStatuses(selectorType: string){
   if(selectorType === 'accepted'){
     return ['ACCEPTED'];
   } else if(selectorType === 'bumped'){
@@ -52,6 +53,26 @@ function getInniateStatuses(selectorType: string){
   }
   return [];
 }
+export function getSelectorTypeFromStatuses(statuses: string[]){
+  let statusesSet = new Set(statuses);
+  let potentialTypes = [];
+
+  // Order matters here, the first added is the most likely to be set
+  if(statusesSet.has('DEMO_SET') && statusesSet.has('DEMO_WON') && statusesSet.has('DEMO_LOSS')){
+    potentialTypes.push('demo');
+  }
+  if(statusesSet.has('ACTIVE_CONVO') && statusesSet.has('SCHEDULING')){
+    potentialTypes.push('active');
+  }
+  if(statusesSet.has('RESPONDED')){
+    potentialTypes.push('bumped');
+  }
+  if(statusesSet.has('ACCEPTED')){
+    potentialTypes.push('accepted');
+  }
+  potentialTypes.push('all');
+  return potentialTypes;
+}
 
 const PAGE_SIZE = 20;
 
@@ -62,11 +83,12 @@ export default function ProspectTable({
 }) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
-  const selectorType = useRecoilValue(prospectSelectorTypeState);
+  const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
   const userToken = useRecoilValue(userTokenState);
+  const totalRecords = useRef(0);
 
   const [search, setSearch] = useDebouncedState("", 200);
-  const [statuses, setStatuses] = useState<string[]>([]);
+  const [statuses, setStatuses] = useRecoilState(prospectStatusesState);
 
   const [page, setPage] = useState(1);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
@@ -83,6 +105,13 @@ export default function ProspectTable({
     setPage(1);
   }, [search, statuses]);
 
+  useEffect(() => {
+    let potentialTypes = getSelectorTypeFromStatuses(statuses);
+    // potentialTypes is in order of most to least difficult to match.
+    // Update the selector type to hardest to match.
+    setSelectorType(potentialTypes[0]);
+  }, [statuses]);
+
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `query-pipeline-prospects`,
@@ -92,9 +121,10 @@ export default function ProspectTable({
       // @ts-ignore
       // eslint-disable-next-line
       const [_key, { page, sortStatus, statuses, search }] = queryKey;
-      const filterStatuses = [...statuses, ...getInniateStatuses(selectorType)];
 
-      console.log(page, sortStatus, filterStatuses, search);
+      // TODO: Remove console.log
+      //console.log(page, sortStatus, statuses, search);
+      totalRecords.current = 0;
 
       const response = await fetch(
         `${process.env.REACT_APP_API_URI}/prospect/get_prospects`,
@@ -106,7 +136,7 @@ export default function ProspectTable({
           },
           body: JSON.stringify({
             query: search.length > 0 ? search : undefined,
-            status: filterStatuses.length > 0 ? filterStatuses : undefined,
+            status: statuses.length > 0 ? statuses : undefined,
             limit: PAGE_SIZE,
             offset: (page - 1) * PAGE_SIZE,
             filters: [
@@ -120,11 +150,14 @@ export default function ProspectTable({
       );
       if(response.status === 401){ logout() }
       const res = await response.json();
-      if (!res) {
+      if (!res || !res.prospects) {
         return [];
       }
 
-      return res.map((prospect: any) => {
+      console.log(res.total_count);
+
+      totalRecords.current = res.total_count;
+      return res.prospects.map((prospect: any) => {
         return {
           id: prospect.id,
           full_name: prospect.full_name,
@@ -145,6 +178,7 @@ export default function ProspectTable({
             label="Search Prospects"
             placeholder="Search by Name, Company, Title, or Industry"
             mb="md"
+            name="search prospects"
             width={"500px"}
             onChange={(e) => setSearch(e.currentTarget.value)}
             icon={<IconSearch size={14} />}
@@ -152,12 +186,13 @@ export default function ProspectTable({
         </Grid.Col>
         <Grid.Col span={4}>
           <MultiSelect
-            data={ALL_STATUSES.filter((status) => !getInniateStatuses(selectorType).includes(status.value))}
+            data={ALL_STATUSES}
             mb="md"
             label="Filter by Status"
             placeholder="Pick all that you like"
             searchable
             nothingFound="Nothing found"
+            value={statuses}
             onChange={setStatuses}
           />
         </Grid.Col>
@@ -219,7 +254,7 @@ export default function ProspectTable({
           },
         ]}
         records={data}
-        totalRecords={+(selectorData.get(selectorType)?.value || PAGE_SIZE)}
+        totalRecords={totalRecords.current}
         recordsPerPage={PAGE_SIZE}
         page={page}
         onPageChange={(p) => setPage(p)}

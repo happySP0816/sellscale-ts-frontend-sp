@@ -2,7 +2,10 @@ import { Drawer, LoadingOverlay, ScrollArea, Title } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import {
+  prospectDrawerIdState,
+  prospectDrawerOpenState,
+} from "@atoms/prospectAtoms";
 import { faker } from "@faker-js/faker";
 import { useQuery } from "react-query";
 import { percentageToColor, temp_delay } from "../../utils/general";
@@ -31,11 +34,13 @@ export default function ProspectDetailsDrawer() {
         {
           method: "GET",
           headers: {
-            'Authorization': `Bearer ${userToken}`,
+            Authorization: `Bearer ${userToken}`,
           },
         }
       );
-      if(response.status === 401){ logout() }
+      if (response.status === 401) {
+        logout();
+      }
       const res = await response.json();
 
       return res;
@@ -49,7 +54,9 @@ export default function ProspectDetailsDrawer() {
     <Drawer
       opened={opened}
       onClose={() => setOpened(false)}
-      title={<Title order={2}>{(data?.details) ? data.details.full_name : ''}</Title>}
+      title={
+        <Title order={2}>{data?.details ? data.details.full_name : ""}</Title>
+      }
       padding="xl"
       size="xl"
       position="right"
@@ -75,16 +82,18 @@ export default function ProspectDetailsDrawer() {
             currentStatus={data.details.status}
             prospectId={data.details.id}
           />
-          <ProspectDetailsCompany
-            logo={data.company.logo}
-            company_name={data.company.name}
-            location={data.company.location}
-            description={data.company.description}
-            employee_count={data.company.employee_count}
-            tagline={data.company.tagline}
-            tags={data.company.tags}
-            website_url={data.company.url}
-          />
+          {data.company.name && (
+            <ProspectDetailsCompany
+              logo={data.company.logo}
+              company_name={data.company.name}
+              location={data.company.location}
+              description={data.company.description}
+              employee_count={data.company.employee_count}
+              tagline={data.company.tagline}
+              tags={data.company.tags}
+              website_url={data.company.url}
+            />
+          )}
         </ScrollArea>
       )}
     </Drawer>

@@ -95,9 +95,19 @@ export default function ProspectDetailsCompany(
           Learn more about {props.company_name}
         </Button>
 
-        <Button variant="default" fullWidth mt="md">
-          Visit {props.company_name}'s website
-        </Button>
+        {props.website_url && (
+          <Button
+            variant="default"
+            fullWidth
+            mt="md"
+            component="a"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={props.website_url}
+          >
+            Visit {props.company_name}'s website
+          </Button>
+        )}
       </Paper>
     </Card>
   );

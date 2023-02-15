@@ -5,11 +5,6 @@ const uploadDrawerOpenState = atom({
   default: false,
 });
 
-const prospectDrawerOpenState = atom({
-  key: "prospect-drawer-open",
-  default: false,
-});
-
 const linkedInCTAsDrawerOpenState = atom({
   key: "persona-linkedin-ctas-drawer-open",
   default: false,
@@ -22,7 +17,6 @@ const activePersonaState = atom({
 
 export {
   uploadDrawerOpenState,
-  prospectDrawerOpenState,
   linkedInCTAsDrawerOpenState,
   activePersonaState,
 };

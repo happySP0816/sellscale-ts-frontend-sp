@@ -6,8 +6,8 @@ import { IconSearch } from "@tabler/icons";
 import { MultiSelect } from "@mantine/core";
 import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
 
-import { useRecoilState } from "recoil";
-import { prospectDrawerOpenState } from "../../atoms/personaAtoms";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { prospectDrawerOpenState, prospectSelectorTypeState } from "@atoms/prospectAtoms";
 
 const COMPANIES: any = [
   {
@@ -91,24 +91,14 @@ const COMPANIES: any = [
     status: "SENT_OUTREACH",
   },
 ];
-const PAGE_SIZES = [8, 8, 8];
+
+const PAGE_SIZE = 20;
 
 export default function ProspectTable() {
-  const [pageSize, setPageSize] = useState(PAGE_SIZES[1]);
-  const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
-
-  useEffect(() => {
-    setPage(1);
-  }, [pageSize]);
 
   const [page, setPage] = useState(1);
-  const [records, setRecords] = useState(COMPANIES.slice(0, pageSize));
-
-  useEffect(() => {
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize;
-    setRecords(COMPANIES.slice(from, to));
-  }, [page, pageSize]);
+  const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
+  const selectorType = useRecoilValue(prospectSelectorTypeState);
 
   return (
     <Box>
@@ -146,7 +136,7 @@ export default function ProspectTable() {
 
       <DataTable
         withBorder
-        records={records}
+        records={COMPANIES}
         verticalSpacing="sm"
         highlightOnHover
         onRowClick={(prospect, row_index) => {
@@ -188,11 +178,9 @@ export default function ProspectTable() {
           },
         ]}
         totalRecords={COMPANIES.length}
-        recordsPerPage={pageSize}
+        recordsPerPage={PAGE_SIZE}
         page={page}
         onPageChange={(p) => setPage(p)}
-        recordsPerPageOptions={PAGE_SIZES}
-        onRecordsPerPageChange={setPageSize}
       />
 
       <ProspectDetailsDrawer />

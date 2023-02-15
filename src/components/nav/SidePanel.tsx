@@ -83,7 +83,7 @@ export default function SidePanel(props: { isMobile?: boolean }) {
   const activeTab = location.pathname?.split("/")[1];
 
   useEffect(() => {
-    setNavTab(activeTab);
+    setNavTab(activeTab.trim() === "" ? "home" : activeTab);
   }, [activeTab, setNavTab]);
 
   return (

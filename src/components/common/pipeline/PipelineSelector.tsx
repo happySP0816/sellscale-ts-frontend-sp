@@ -1,3 +1,4 @@
+import { prospectSelectorTypeState } from "@atoms/prospectAtoms";
 import {
   createStyles,
   Group,
@@ -17,6 +18,7 @@ import {
   IconArrowUpRight,
   IconArrowDownRight,
 } from "@tabler/icons";
+import { useRecoilState } from "recoil";
 
 const useStyles = createStyles((theme) => ({
   root: {},
@@ -56,6 +58,7 @@ export const icons = {
 
 interface StatsGridProps {
   data: {
+    id: string;
     title: string;
     description: string;
     icon: any;
@@ -66,6 +69,9 @@ interface StatsGridProps {
 
 export default function PipelineSelector({ data }: StatsGridProps) {
   const { classes } = useStyles();
+
+  const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
+
   const stats = data.map((stat) => {
     const Icon = stat.icon;
 
@@ -92,8 +98,13 @@ export default function PipelineSelector({ data }: StatsGridProps) {
             {stat.description}
           </Text>
         </Group>
-        <Button variant="outline" color={stat.color} mt="md" size="xs">
-          View Contacts
+        <Button
+          variant={selectorType === stat.id ? 'filled' : 'outline'}
+          onClick={() => setSelectorType(stat.id)}
+          color={stat.color}
+          mt="md"
+          size="xs">
+          {selectorType === stat.id ? 'Active Filter' : 'Select Filter'}
         </Button>
       </Paper>
     );

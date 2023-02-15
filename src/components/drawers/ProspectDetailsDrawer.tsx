@@ -2,7 +2,7 @@ import { Drawer, ScrollArea } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
 import { useRecoilState } from "recoil";
-import { prospectDrawerOpenState } from "../atoms/personaAtoms";
+import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import { faker } from "@faker-js/faker";
 import { useQuery } from "react-query";
 import { percentageToColor, temp_delay } from "../../utils/general";

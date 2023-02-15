@@ -5,6 +5,12 @@ const navTabState = atom({
   default: 'home',
 });
 
+const navLoadingState = atom({
+  key: "nav-loading",
+  default: false,
+});
+
 export {
-  navTabState
+  navTabState,
+  navLoadingState,
 };

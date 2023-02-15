@@ -150,6 +150,7 @@ export default function ProspectTable() {
           height={'min(670px, 100vh - 200px)'}
           verticalAlignment="top"
           loaderColor="teal"
+          highlightOnHover
           noRecordsText={"No campaigns found"}
           fetching={isFetching}
           columns={[ 

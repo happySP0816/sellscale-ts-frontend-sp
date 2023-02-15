@@ -2,17 +2,17 @@ import { atom } from "recoil";
 
 const userNameState = atom({
   key: "user-name",
-  default: '',
+  default: localStorage.getItem("user-name") || '',
 });
 
 const userEmailState = atom({
   key: "user-email",
-  default: '',
+  default: localStorage.getItem("user-email") || '',
 });
 
 const userTokenState = atom({
   key: "user-token",
-  default: '',
+  default: localStorage.getItem("user-token") || '',
 });
 
 export {

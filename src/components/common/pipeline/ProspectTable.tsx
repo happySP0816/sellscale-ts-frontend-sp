@@ -1,5 +1,14 @@
-import { Box, Flex, Grid, Image, Text, Chip } from "@mantine/core";
-import { DataTable } from "mantine-datatable";
+import {
+  Box,
+  Flex,
+  Grid,
+  Image,
+  Text,
+  Chip,
+  Badge,
+  useMantineTheme,
+} from "@mantine/core";
+import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useState } from "react";
 import { TextInput } from "@mantine/core";
 import { IconSearch } from "@tabler/icons";
@@ -7,98 +16,124 @@ import { MultiSelect } from "@mantine/core";
 import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import { prospectDrawerOpenState, prospectSelectorTypeState } from "@atoms/prospectAtoms";
+import {
+  prospectDrawerOpenState,
+  prospectSelectorTypeState,
+} from "@atoms/prospectAtoms";
+import { userTokenState } from "@atoms/userAtoms";
+import { useQuery } from "react-query";
+import { valueToColor } from "@utils/general";
+import { StatGridInfo } from "./PipelineSelector";
+import { useDebouncedState } from "@mantine/hooks";
 
-const COMPANIES: any = [
-  {
-    id: "8797",
-    full_name: "Kevin Monahan",
-    company: "Energy Data Management Services, LLC",
-    title: "Director - Analytics and Forecasting",
-    industry: "Internet",
-    status: "SENT_OUTREACH",
-  },
-  {
-    id: "2649",
-    full_name: "Kyle Miller, M.Ed",
-    company: "Phyllis Bodel Child Care Ctr",
-    title: "Executive Director at Phyllis Bodel Child Care Ctr",
-    industry: "Education Management",
-    status: "SENT_OUTREACH",
-  },
-  {
-    id: "6977",
-    full_name: "Rob Pontarelli",
-    company: "Magellan Development Group",
-    title: "Senior VP Marketing",
-    industry: "",
-    status: "SENT_OUTREACH",
-  },
-  {
-    id: "864",
-    full_name: "Samantha Pang",
-    company: "Helpshift",
-    title: "VP Customer Success",
-    industry: "Internet",
-    status: "SENT_OUTREACH",
-  },
-  {
-    id: "5466",
-    full_name: "Utkarsh Jain",
-    company: "Sisu",
-    title: "Software Engineer at Sisu",
-    industry: "Computer Software",
-    status: "SENT_OUTREACH",
-  },
-  {
-    id: "2361",
-    full_name: "Laurie Lyons",
-    company: "Pegasus Residential",
-    title: "Vice President Client Services",
-    industry: "Real Estate",
-    status: "SENT_OUTREACH",
-  },
-  {
-    id: "2538",
-    full_name: "Kisha Dowell Donahue",
-    company: "Wood Partners",
-    title: "Vice President Of Technology at Wood Partners",
-    industry: "Real Estate",
-    status: "SENT_OUTREACH",
-  },
-  {
-    id: "2650",
-    full_name: "Nancy Moya",
-    company: "Learning Care Group",
-    title: "Education Management Professional",
-    industry: "Education Management",
-    status: "SENT_OUTREACH",
-  },
-  {
-    id: "64",
-    full_name: "Wendy Rodriguez",
-    company: "Verizon",
-    title: "Executive Compensation Manager",
-    industry: "Information Technology and Services",
-    status: "SENT_OUTREACH",
-  },
-  {
-    id: "9556",
-    full_name: "Morgan Meyer, CPA, CHFP",
-    company: "Howard County Medical Center",
-    title: "CFO at Howard County Medical Center",
-    industry: "Accounting",
-    status: "SENT_OUTREACH",
-  },
+const ALL_STATUSES = [
+  { value: 'ACCEPTED', label: 'Accepted' },
+  { value: 'SENT_OUTREACH', label: 'Sent Outreach' },
+  { value: 'RESPONDED', label: 'Responded' },
+  { value: 'ACTIVE_CONVO', label: 'Active Conversation' },
+  { value: 'SCHEDULING', label: 'Scheduling' },
+  { value: 'DEMO_SET', label: 'Demo Set' },
+  { value: 'DEMO_WON', label: 'Demo Complete' },
+  { value: 'DEMO_LOSS', label: 'Demo Missed' },
+  { value: 'NOT_INTERESTED', label: 'Not Interested' },
+  { value: 'NOT_QUALIFIED', label: 'Not Qualified' },
 ];
+
+function getInniateStatuses(selectorType: string){
+  if(selectorType === 'accepted'){
+    return ['ACCEPTED'];
+  } else if(selectorType === 'bumped'){
+    return ['RESPONDED'];
+  } else if(selectorType === 'active'){
+    return ['ACTIVE_CONVO', 'SCHEDULING'];
+  } else if(selectorType === 'demo'){
+    return ['DEMO_SET', 'DEMO_WON', 'DEMO_LOSS'];
+  }
+  return [];
+}
 
 const PAGE_SIZE = 20;
 
-export default function ProspectTable() {
-
-  const [page, setPage] = useState(1);
+export default function ProspectTable({
+  selectorData,
+}: {
+  selectorData: Map<string, StatGridInfo>;
+}) {
+  const theme = useMantineTheme();
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const selectorType = useRecoilValue(prospectSelectorTypeState);
+  const userToken = useRecoilValue(userTokenState);
+
+  const [search, setSearch] = useDebouncedState("", 200);
+  const [statuses, setStatuses] = useState<string[]>([]);
+
+  const [page, setPage] = useState(1);
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
+    columnAccessor: "full_name",
+    direction: "asc",
+  });
+
+  const handleSortStatusChange = (status: DataTableSortStatus) => {
+    setPage(1);
+    setSortStatus(status);
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statuses]);
+
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [
+      `query-pipeline-prospects`,
+      { page, sortStatus, statuses, search },
+    ],
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { page, sortStatus, statuses, search }] = queryKey;
+      const filterStatuses = [...statuses, ...getInniateStatuses(selectorType)];
+
+      console.log(page, sortStatus, filterStatuses, search);
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URI}/prospect/get_prospects`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: search.length > 0 ? search : undefined,
+            status: filterStatuses.length > 0 ? filterStatuses : undefined,
+            limit: PAGE_SIZE,
+            offset: (page - 1) * PAGE_SIZE,
+            filters: [
+              {
+                field: sortStatus.columnAccessor,
+                direction: sortStatus.direction === 'asc' ? 1 : -1,
+              },
+            ],
+          }),
+        }
+      );
+      const res = await response.json();
+      if (!res) {
+        return [];
+      }
+
+      return res.map((prospect: any) => {
+        return {
+          id: prospect.id,
+          full_name: prospect.full_name,
+          company: prospect.company,
+          title: prospect.title,
+          industry: prospect.industry,
+          status: prospect.status,
+        };
+      });
+    },
+  });
 
   return (
     <Box>
@@ -109,51 +144,45 @@ export default function ProspectTable() {
             placeholder="Search by Name, Company, Title, or Industry"
             mb="md"
             width={"500px"}
+            onChange={(e) => setSearch(e.currentTarget.value)}
             icon={<IconSearch size={14} />}
           />
         </Grid.Col>
         <Grid.Col span={4}>
           <MultiSelect
-            data={[
-              "Prospected",
-              "Sent Outreach",
-              "Accepted",
-              "Bumped",
-              "Active Conversation",
-              "Scheduling",
-              "Demo Set",
-              "Demo Complete",
-              "Demo Missed",
-            ]}
+            data={ALL_STATUSES.filter((status) => !getInniateStatuses(selectorType).includes(status.value))}
             mb="md"
             label="Filter by Status"
             placeholder="Pick all that you like"
             searchable
             nothingFound="Nothing found"
+            onChange={setStatuses}
           />
         </Grid.Col>
       </Grid>
 
       <DataTable
         withBorder
-        records={COMPANIES}
-        verticalSpacing="sm"
+        height={'min(670px, 100vh - 200px)'}
+        verticalAlignment="top"
+        loaderColor="teal"
         highlightOnHover
+        noRecordsText={"No prospects found"}
+        fetching={isFetching}
         onRowClick={(prospect, row_index) => {
           setOpened(true);
         }}
         columns={[
           {
             accessor: "full_name",
+            sortable: true,
             render: (x: any) => {
               return (
                 <Flex>
                   <Image
-                    src={
-                      `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                        x.full_name
-                      )}`
-                    }
+                    src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
+                      x.full_name
+                    )}`}
                     radius="lg"
                     height={30}
                     width={30}
@@ -163,24 +192,38 @@ export default function ProspectTable() {
               );
             },
           },
-          { accessor: "company" },
-          { accessor: "title" },
-          { accessor: "industry" },
+          {
+            accessor: "company",
+            sortable: true,
+          },
+          {
+            accessor: "title",
+            sortable: true,
+          },
+          {
+            accessor: "industry",
+            sortable: true,
+          },
           {
             accessor: "status",
-            render: (x: any) => {
+            sortable: true,
+            render: ({ status }) => {
               return (
-                <Chip defaultChecked color="teal">
-                  {x.status.replaceAll("_", " ").toLowerCase()}
-                </Chip>
+                <Badge color={valueToColor(theme, status)}>
+                  {status.replaceAll("_", " ")}
+                </Badge>
               );
             },
           },
         ]}
-        totalRecords={COMPANIES.length}
+        records={data}
+        totalRecords={+(selectorData.get(selectorType)?.value || PAGE_SIZE)}
         recordsPerPage={PAGE_SIZE}
         page={page}
         onPageChange={(p) => setPage(p)}
+        paginationColor="teal"
+        sortStatus={sortStatus}
+        onSortStatusChange={handleSortStatusChange}
       />
 
       <ProspectDetailsDrawer />

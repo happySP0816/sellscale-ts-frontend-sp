@@ -18,6 +18,7 @@ import {
   IconArrowUpRight,
   IconArrowDownRight,
 } from "@tabler/icons";
+import { useQueryClient } from "react-query";
 import { useRecoilState } from "recoil";
 
 const useStyles = createStyles((theme) => ({
@@ -56,23 +57,24 @@ export const icons = {
   demo_set_only: IconCoin,
 };
 
-interface StatsGridProps {
-  data: {
-    id: string;
-    title: string;
-    description: string;
-    icon: any;
-    value: string;
-    color: string;
-  }[];
+export type StatGridInfo = {
+  title: string;
+  description: string;
+  icon: any;
+  value: string;
+  color: string;
 }
 
-export default function PipelineSelector({ data }: StatsGridProps) {
+export default function PipelineSelector({ data }: { data: Map<string, StatGridInfo> }) {
   const { classes } = useStyles();
+  const queryClient = useQueryClient()
 
   const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
 
-  const stats = data.map((stat) => {
+  const stats = [...data.keys()].map((id) => {
+    let stat = data.get(id);
+    if(!stat) { return (<></>); }
+
     const Icon = stat.icon;
 
     return (
@@ -99,12 +101,15 @@ export default function PipelineSelector({ data }: StatsGridProps) {
           </Text>
         </Group>
         <Button
-          variant={selectorType === stat.id ? 'filled' : 'outline'}
-          onClick={() => setSelectorType(stat.id)}
+          variant={selectorType === id ? 'filled' : 'outline'}
+          onClick={() => {
+            queryClient.removeQueries({ queryKey: ['query-pipeline-prospects'] });
+            setSelectorType(id);
+          }}
           color={stat.color}
           mt="md"
           size="xs">
-          {selectorType === stat.id ? 'Active Filter' : 'Select Filter'}
+          {selectorType === id ? 'Active Filter' : 'Apply Filter'}
         </Button>
       </Paper>
     );

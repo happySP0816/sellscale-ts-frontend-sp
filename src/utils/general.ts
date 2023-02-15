@@ -65,6 +65,9 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   'cancelled': 'red',
   'linkedin': 'indigo',
   'email': 'orange',
+  'accepted': 'green',
+  'active_convo': 'yellow',
+  'responded': 'orange',
 };
 export function valueToColor(theme: MantineTheme, value: string): MantineColor {
   value = value.toLowerCase();

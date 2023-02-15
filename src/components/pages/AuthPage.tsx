@@ -71,7 +71,7 @@ export default function AuthPage() {
       return;
     }
 
-    sendAuthToken(authToken, userEmail).then((response) => {
+    sendAuthToken(authToken, userEmail+'').then((response) => {
       console.log(response);
 
       authorize('4dWDIYgxOqC1JTmXI0UKTDTXPumZ5XXi', setUserToken, 'Aaron Cassar', setUserName);

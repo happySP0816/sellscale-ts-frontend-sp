@@ -9,48 +9,44 @@ import { useQuery } from "react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 
-const PIPELINE_SELECTOR_DATA = [
-  {
-    id: "all",
+function getPipelineSelectorData(data: any){
+  return new Map()
+  .set('all', {
     title: "All Prospects",
     description: "All prospects in the pipeline",
     icon: IconUserPlus,
-    value: "1,829",
+    value: data?.pipeline_data?.sent_outreach || "-",
     color: "blue",
-  },
-  {
-    id: "accepted",
+  })
+  .set('accepted', {
     title: "Accepted",
     description: "Accepted prospects in the pipeline",
     icon: IconUserPlus,
-    value: "329",
+    value: data?.pipeline_data?.accepted || "-",
     color: "green",
-  },
-  {
-    id: "bumped",
+  })
+  .set('bumped', {
     title: "Bumped",
     description: "Bumped prospects in the pipeline",
     icon: IconUserPlus,
-    value: "184",
+    value: data?.pipeline_data?.responded || "-",
     color: "orange",
-  },
-  {
-    id: "active",
+  })
+  .set('active', {
     title: "Active Convos",
     description: "Active conversations in the pipeline",
     icon: IconUserPlus,
-    value: "92",
+    value: (data?.pipeline_data) ? (data.pipeline_data.active_convo + data.pipeline_data.scheduling) : "-",
     color: "yellow",
-  },
-  {
-    id: "demo",
+  })
+  .set('demo', {
     title: "Demo Set",
     description: "Demo set prospects in the pipeline",
     icon: IconUserPlus,
-    value: "48",
+    value: (data?.pipeline_data) ? (data.pipeline_data.demo_loss + data.pipeline_data.demo_set + data.pipeline_data.demo_won) : "-",
     color: "purple",
-  },
-];
+  });
+}
 
 export default function PipelinePage() {
   const theme = useMantineTheme();
@@ -58,29 +54,29 @@ export default function PipelinePage() {
   const userToken = useRecoilValue(userTokenState);
 
   const { data, isFetching, refetch } = useQuery({
+    queryKey: [`query-pipeline-details`],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/prospect/get_prospects?client_sdr_id=20`,
+        `${process.env.REACT_APP_API_URI}/analytics/pipeline/all_details`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
-            Authorization: `Bearer ${userToken}`,
+            'Authorization': `Bearer ${userToken}`,
           },
         }
       );
       const res = await response.json();
 
-      console.log(res);
-
-      return "";
+      return res;
     },
   });
 
+  const PIPELINE_SELECTOR_DATA = getPipelineSelectorData(data);
   return (
     <PageFrame>
-      <PipelineSelector data={PIPELINE_SELECTOR_DATA}></PipelineSelector>
+      <PipelineSelector data={PIPELINE_SELECTOR_DATA} />
       <Container pt={30} px={0}>
-        <ProspectTable />
+        <ProspectTable selectorData={PIPELINE_SELECTOR_DATA} />
       </Container>
     </PageFrame>
   );

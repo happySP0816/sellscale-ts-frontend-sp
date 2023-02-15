@@ -128,6 +128,7 @@ export default function ProspectDetailsChangeStatus(
 ) {
   const { classes, theme } = useStyles();
   const [opened, setOpened] = useState(false);
+  const [statusService, setStatusService] = useState<'' | 'EMAIL' | 'LINKEDIN'>('');
 
   const items = mockdata.map((item) => (
     <UnstyledButton key={item.title} className={classes.item}>
@@ -145,22 +146,30 @@ export default function ProspectDetailsChangeStatus(
           Status
         </Text>
         <Badge color="pink" variant="light">
-          Demo Set
+          {props.currentStatus.replaceAll("_", " ")}
         </Badge>
       </Group>
       <Flex>
         <Button
           color="pink"
-          variant="outline"
-          onClick={() => setOpened((o: boolean) => !o)}
+          fullWidth
+          variant={statusService === 'EMAIL' ? 'filled' : 'outline'}
+          onClick={() => {
+            setStatusService(opened ? '' : 'EMAIL');
+            setOpened((o: boolean) => !o);
+          }}
         >
           Change Email Status
         </Button>
         <Button
           color="blue"
-          variant="outline"
+          fullWidth
+          variant={statusService === 'LINKEDIN' ? 'filled' : 'outline'}
           ml="md"
-          onClick={() => setOpened((o: boolean) => !o)}
+          onClick={() => {
+            setStatusService(opened ? '' : 'LINKEDIN');
+            setOpened((o: boolean) => !o);
+          }}
         >
           Change Linkedin Status
         </Button>

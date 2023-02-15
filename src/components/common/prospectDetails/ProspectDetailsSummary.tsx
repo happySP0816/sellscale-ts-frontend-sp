@@ -22,8 +22,9 @@ const useStyles = createStyles((theme) => ({
 
 type ProspectDetailsSummaryProps = {
   full_name: string;
-  status: string;
-  title: string;
+  title: string | null;
+  email: string | null;
+  linkedin: string | null;
   profile_pic: string | null;
 };
 
@@ -33,30 +34,17 @@ export default function ProspectDetailsSummary(
   const { classes } = useStyles();
   return (
     <div>
-      <Group noWrap>
+      <Group noWrap align='flex-start'>
         <Avatar
           src={
             props.profile_pic
               ? props.profile_pic
-              : "https://99designs-blog.imgix.net/blog/wp-content/uploads/2018/12/Gradient_builder_2.jpg?auto=format&q=60&w=1815&h=1200&fit=crop&crop=faces"
+              : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(props.full_name)}`
           }
           size={94}
           radius="md"
         />
         <div>
-          <Text
-            size="xs"
-            sx={{ textTransform: "uppercase" }}
-            weight={700}
-            color="dimmed"
-          >
-            {props.status.replaceAll("_", " ")}
-          </Text>
-
-          <Text size="lg" weight={500} className={classes.name}>
-            {props.full_name}
-          </Text>
-
           <Group noWrap spacing={10} mt={3}>
             <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
             <Text size="xs" color="dimmed">
@@ -64,19 +52,23 @@ export default function ProspectDetailsSummary(
             </Text>
           </Group>
 
-          <Group noWrap spacing={10} mt={5}>
-            <IconMail stroke={1.5} size={16} className={classes.icon} />
-            <Text size="xs" color="dimmed">
-              email goes here
-            </Text>
-          </Group>
+          {props.email && (
+            <Group noWrap spacing={10} mt={5}>
+              <IconMail stroke={1.5} size={16} className={classes.icon} />
+              <Text size="xs" color="dimmed">
+                {props.email}
+              </Text>
+            </Group>
+          )}
 
-          <Group noWrap spacing={10} mt={5}>
-            <IconSocial stroke={1.5} size={16} className={classes.icon} />
-            <Text size="xs" color="dimmed">
-              www.linkedin.com/in/aaadesara
-            </Text>
-          </Group>
+          {props.linkedin && (
+            <Group noWrap spacing={10} mt={5}>
+              <IconSocial stroke={1.5} size={16} className={classes.icon} />
+              <Text size="xs" color="dimmed">
+                {props.linkedin}
+              </Text>
+            </Group>
+          )}
         </div>
       </Group>
     </div>

@@ -1,8 +1,11 @@
-import { Drawer, ScrollArea } from "@mantine/core";
+import { Drawer, LoadingOverlay, ScrollArea, Title } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import {
+  prospectDrawerIdState,
+  prospectDrawerOpenState,
+} from "@atoms/prospectAtoms";
 import { faker } from "@faker-js/faker";
 import { useQuery } from "react-query";
 import { percentageToColor, temp_delay } from "../../utils/general";
@@ -18,76 +21,31 @@ import ProspectDetailsViewConversation from "../common/prospectDetails/ProspectD
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 
-const PAGE_SIZE = 20;
-
-const PROSPECT_DETAILS = {
-  details: {
-    id: 4042,
-    full_name: "Ayesha Tariq Mahmood",
-    title: "Head of People Operations & Development l Product Owner - Arbisoft",
-    status: "DEMO_SET",
-    profile_pic: null,
-    ai_responses_disabled: null,
-    notes: [],
-    persona: "Zaheer - HR leaders",
-  },
-  li: {
-    li_conversation_url:
-      "https://www.linkedin.com/messaging/thread/2-OWViOTk2NmQtZjg4Yy00MzE3LWFhZmQtMDJkNDc3OTg4MmMzXzAxMw==",
-    li_conversation_thread: [],
-    li_profile: "linkedin.com/in/ayesha-tariq-mahmood",
-  },
-  email: { email: null, email_status: "" },
-  company: {
-    logo:
-      "https://media-exp1.licdn.com/dms/image/C4D0BAQGx8nN_y90A7Q/company-logo_400_400/0/1644584625800?e=1675296000&v=beta&t=cQg_ueisrQekizV9k9_YpW_xpiNKGl1wtG92aBKHBv4",
-    name: "Arbisoft",
-    location: "MCKINNEY TX, TX",
-    tags: [
-      "Rapid Application Development",
-      "Enterprise Applications",
-      "3D Applications",
-      "Mobile App Development",
-      "Automated Data Scraping",
-      "Cloud Applications",
-      "data services",
-      "SaaS",
-      "Python",
-      "web app development",
-      "software quality assurance",
-      "custom software development",
-      "Dedicated team",
-    ],
-    tagline: "Imagine . Build . Test . Repeat",
-    description:
-      "Arbisoft is one of the fastest growing software services companies in South East Asia. We have managed to rapidly build and grow a world class team of engineers ready to take on diverse and challenging technology development projects. We create software that are used and loved by millions of users, in sectors like Education, Technology, Healthcare, Services and more.\r\n\r\nThe Arbisoft formula...\r\nImagine. Build. Test. Repeat.",
-    url: "https://www.arbisoft.com",
-    employee_count: 889,
-  },
-};
-
 export default function ProspectDetailsDrawer() {
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const prospectId = useRecoilValue(prospectDrawerIdState);
   const userToken = useRecoilValue(userTokenState);
 
   const { data, isFetching, refetch } = useQuery({
-    queryKey: [`query-prospect-details`],
+    queryKey: [`query-prospect-details-${prospectId}`],
     queryFn: async () => {
       const response = await fetch(
         `${process.env.REACT_APP_API_URI}/prospect/${prospectId}`,
         {
           method: "GET",
           headers: {
-            'Authorization': `Bearer ${userToken}`,
+            Authorization: `Bearer ${userToken}`,
           },
         }
       );
-      if(response.status === 401){ logout() }
+      if (response.status === 401) {
+        logout();
+      }
       const res = await response.json();
 
       return res;
     },
+    refetchOnWindowFocus: false,
   });
 
   console.log(data);
@@ -96,39 +54,48 @@ export default function ProspectDetailsDrawer() {
     <Drawer
       opened={opened}
       onClose={() => setOpened(false)}
+      title={
+        <Title order={2}>{data?.details ? data.details.full_name : ""}</Title>
+      }
       padding="xl"
       size="xl"
       position="right"
     >
-      <ScrollArea
-        style={{ height: window.innerHeight - 100, overflowY: "hidden" }}
-      >
-        <ProspectDetailsSummary
-          full_name={PROSPECT_DETAILS.details.full_name}
-          status={PROSPECT_DETAILS.details.status}
-          title={PROSPECT_DETAILS.details.title}
-          profile_pic={PROSPECT_DETAILS.details.profile_pic}
-        />
-        <ProspectDetailsChangeStatus
-          currentStatus={PROSPECT_DETAILS.details.status}
-          prospectId={PROSPECT_DETAILS.details.id}
-        />
-        <ProspectDetailsViewConversation conversation_entry_list={[]} />
-        <ProspectDetailsNotes
-          currentStatus={PROSPECT_DETAILS.details.status}
-          prospectId={PROSPECT_DETAILS.details.id}
-        />
-        <ProspectDetailsCompany
-          logo={PROSPECT_DETAILS.company.logo}
-          company_name={PROSPECT_DETAILS.company.name}
-          location={PROSPECT_DETAILS.company.location}
-          description={PROSPECT_DETAILS.company.description}
-          employee_count={PROSPECT_DETAILS.company.employee_count}
-          tagline={PROSPECT_DETAILS.company.tagline}
-          tags={PROSPECT_DETAILS.company.tags}
-          website_url={PROSPECT_DETAILS.company.url}
-        />
-      </ScrollArea>
+      <LoadingOverlay visible={isFetching} overlayBlur={2} />
+      {data?.details && !isFetching && (
+        <ScrollArea
+          style={{ height: window.innerHeight - 100, overflowY: "hidden" }}
+        >
+          <ProspectDetailsSummary
+            full_name={data.details.full_name}
+            title={data.details.title}
+            email={data.email.email}
+            linkedin={data.li.li_profile}
+            profile_pic={data.details.profile_pic}
+          />
+          <ProspectDetailsChangeStatus
+            currentStatus={data.details.status}
+            prospectId={data.details.id}
+          />
+          <ProspectDetailsViewConversation conversation_entry_list={[]} />
+          <ProspectDetailsNotes
+            currentStatus={data.details.status}
+            prospectId={data.details.id}
+          />
+          {data.company.name && (
+            <ProspectDetailsCompany
+              logo={data.company.logo}
+              company_name={data.company.name}
+              location={data.company.location}
+              description={data.company.description}
+              employee_count={data.company.employee_count}
+              tagline={data.company.tagline}
+              tags={data.company.tags}
+              website_url={data.company.url}
+            />
+          )}
+        </ScrollArea>
+      )}
     </Drawer>
   );
 }

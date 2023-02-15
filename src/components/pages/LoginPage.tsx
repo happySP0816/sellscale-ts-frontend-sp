@@ -101,7 +101,7 @@ export default function LoginPage() {
         <Container>
           {!checkEmail && (
             <form onSubmit={form.onSubmit(handleSubmit)}>
-              <LoadingOverlay visible={loading} />
+              <LoadingOverlay visible={loading} overlayBlur={2} />
 
               <TextInput
                 mt="md"

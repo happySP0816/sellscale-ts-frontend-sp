@@ -82,7 +82,7 @@ export default function ProspectDetailsNotes(
         {mockdata.map(
           (item: any, i: number) =>
             (i == 0 || viewAllNotes) && (
-              <Timeline.Item bullet={<IconGitBranch size={12} />}>
+              <Timeline.Item key={`timeline-item-${i}`} bullet={<IconGitBranch size={12} />}>
                 <Text size="sm">{item.note}</Text>
                 <Text size="xs" color="dimmed" mt={4}>
                   {item.date}

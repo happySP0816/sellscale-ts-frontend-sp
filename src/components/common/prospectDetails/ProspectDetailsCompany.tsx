@@ -38,14 +38,14 @@ const useStyles = createStyles((theme) => ({
 }));
 
 type ProspectCompanyDetailsProps = {
-  logo: string;
-  company_name: string;
-  location: string;
-  description: string;
-  employee_count: number;
-  tags: string[];
-  website_url: string;
-  tagline: string;
+  logo: string | null;
+  company_name: string | null;
+  location: string | null;
+  description: string | null;
+  employee_count: number | null;
+  tags: string[] | null;
+  website_url: string | null;
+  tagline: string | null;
 };
 
 export default function ProspectDetailsCompany(
@@ -79,8 +79,8 @@ export default function ProspectDetailsCompany(
 
         <Collapse in={opened} mt="md">
           <Text size="sm">{props.description}</Text>
-          {props.tags.map((tag) => (
-            <Badge color="blue" variant="outline" ml="xs" size="xs">
+          {props.tags?.map((tag) => (
+            <Badge key={tag} color="blue" variant="outline" ml="xs" size="xs">
               {tag}
             </Badge>
           ))}

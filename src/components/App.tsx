@@ -1,27 +1,16 @@
-import { useEffect, useState } from "react";
-
 import {
   MantineProvider,
   ColorSchemeProvider,
-  ColorScheme,
   LoadingOverlay,
 } from "@mantine/core";
 
 import Layout from "./Layout";
-import { SpotlightAction, SpotlightProvider } from "@mantine/spotlight";
-import { IconSearch } from "@tabler/icons";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { ModalsProvider } from "@mantine/modals";
-import { useQuery, useQueryClient } from "react-query";
 import { NotificationsProvider } from "@mantine/notifications";
-import { isLoggedIn } from "@auth/core";
-import { SetterOrUpdater, useRecoilState, useRecoilValue } from "recoil";
-import {
-  userEmailState,
-  userNameState,
-  userTokenState,
-} from "@atoms/userAtoms";
+import { useRecoilValue } from "recoil";
 import { navLoadingState } from "@atoms/navAtoms";
+import SpotlightWrapper from "@nav/SpotlightWrapper";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -41,8 +30,6 @@ export default function App() {
   */
 
   const loading = useRecoilValue(navLoadingState);
-
-  const mainActions: SpotlightAction[] = [];
 
   return (
     <ColorSchemeProvider colorScheme={"dark"} toggleColorScheme={() => {}}>
@@ -79,17 +66,7 @@ export default function App() {
         withGlobalStyles
         withNormalizeCSS
       >
-        <SpotlightProvider
-          actions={(query: string) => {
-            return mainActions;
-          }}
-          searchIcon={<IconSearch size={18} />}
-          searchPlaceholder={"Search"}
-          searchInputProps={{ autoComplete: "off" }}
-          shortcut={["mod + K"]}
-          highlightQuery
-          nothingFoundMessage={true ? `Nothing found` : `Loading...`}
-        >
+        <SpotlightWrapper>
           <ModalsProvider modals={{}}>
             <NotificationsProvider position="top-right">
               <LoadingOverlay visible={loading} overlayBlur={4} />
@@ -99,7 +76,7 @@ export default function App() {
               </Layout>
             </NotificationsProvider>
           </ModalsProvider>
-        </SpotlightProvider>
+        </SpotlightWrapper>
       </MantineProvider>
     </ColorSchemeProvider>
   );

@@ -23,6 +23,15 @@ async function sendAuthToken(authToken: string, email: string) {
       'token': authToken,
     })
   });
+  if(response.status !== 200){
+    showNotification({
+      id: 'auth-not-okay',
+      title: 'Error',
+      message: `Responded with: ${response.status}, ${response.statusText}`,
+      color: 'red',
+      autoClose: false,
+    });
+  }
   return await response.json().catch((error) => {
     console.error(error);
     showNotification({
@@ -74,7 +83,7 @@ export default function AuthPage() {
     sendAuthToken(authToken, userEmail+'').then((response) => {
       console.log(response);
 
-      authorize('4dWDIYgxOqC1JTmXI0UKTDTXPumZ5XXi', setUserToken, 'Aaron Cassar', setUserName);
+      authorize(response.token, setUserToken, 'Unknown User', setUserName);
       navigate(`/`);
 
     });

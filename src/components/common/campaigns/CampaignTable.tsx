@@ -25,7 +25,7 @@ import {
 } from "@atoms/campaignAtoms";
 import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { useQuery } from "react-query";
-import { temp_delay, valueToColor } from "@utils/general";
+import { formatDate, temp_delay, valueToColor } from "@utils/general";
 import { chunk } from "lodash";
 import { faker } from "@faker-js/faker";
 import { Campaign } from "src/main";
@@ -77,13 +77,6 @@ const ALL_TYPES = [
 
 const PAGE_SIZE = 20;
 
-function defaultFilterDate() {
-  const today = new Date();
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(today.getFullYear() - 1);
-  return [today, oneYearAgo] satisfies DateRangePickerValue;
-}
-
 export default function ProspectTable() {
   const theme = useMantineTheme();
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
@@ -96,7 +89,7 @@ export default function ProspectTable() {
   const [search, setSearch] = useDebouncedState("", 200);
   const [statuses, setStatuses] = useState<string[]>([]);
   const [filterDate, setFilterDate] =
-    useState<DateRangePickerValue>(defaultFilterDate);
+    useState<DateRangePickerValue>([null, null]);
   const [type, setType] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
@@ -138,6 +131,8 @@ export default function ProspectTable() {
             status: statuses.length > 0 ? statuses : undefined,
             limit: PAGE_SIZE,
             offset: (page - 1) * PAGE_SIZE,
+            campaign_start_date: filterDate[0] ? formatDate(new Date(filterDate[0])) : undefined,
+            campaign_end_date: filterDate[1] ? formatDate(new Date(filterDate[1])) : undefined,
             filters: [
               {
                 field: sortStatus.columnAccessor,
@@ -208,7 +203,7 @@ export default function ProspectTable() {
           data={ALL_CAMPAIGN_STATUSES}
           mb="md"
           label="Filter by Status"
-          placeholder="Pick all that you like"
+          placeholder="Select statuses"
           searchable
           nothingFound="Nothing found"
           value={statuses}

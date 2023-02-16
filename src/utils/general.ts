@@ -4,12 +4,26 @@ export function temp_delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * Given a string, returns the first and last name.
+ * @param name 
+ * @returns 
+ */
 export function splitName(name: string) {
   let parts = name.split(' ');
   return {
     first: parts[0],
     last: parts[parts.length - 1],
   };
+}
+
+/**
+ * Given a date, returns a string in the format YYYY-MM-DD.
+ * @param date 
+ * @returns 
+ */
+export function formatDate(date: Date) {
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
 
 /**

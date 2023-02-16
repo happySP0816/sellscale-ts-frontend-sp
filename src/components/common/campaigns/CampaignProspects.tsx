@@ -66,10 +66,10 @@ export default function CampaignProspects({
     if (search.trim() !== "") {
       filteredProspects = filteredProspects.filter((prospect) => {
         return (
-          prospect.full_name.toLowerCase().includes(search.toLowerCase()) ||
-          prospect.company.toLowerCase().includes(search.toLowerCase()) ||
-          prospect.title.toLowerCase().includes(search.toLowerCase()) ||
-          prospect.industry.toLowerCase().includes(search.toLowerCase())
+          prospect.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+          prospect.company?.toLowerCase().includes(search.toLowerCase()) ||
+          prospect.title?.toLowerCase().includes(search.toLowerCase()) ||
+          prospect.industry?.toLowerCase().includes(search.toLowerCase())
         );
       });
     }

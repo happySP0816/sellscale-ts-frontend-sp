@@ -29,7 +29,7 @@ import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
 
-const ALL_STATUSES = [
+const ALL_PROSPECT_STATUSES = [
   { value: 'ACCEPTED', label: 'Accepted' },
   { value: 'SENT_OUTREACH', label: 'Sent Outreach' },
   { value: 'RESPONDED', label: 'Responded' },
@@ -41,6 +41,7 @@ const ALL_STATUSES = [
   { value: 'NOT_INTERESTED', label: 'Not Interested' },
   { value: 'NOT_QUALIFIED', label: 'Not Qualified' },
 ];
+export { ALL_PROSPECT_STATUSES };
 
 export function getDefaultStatuses(selectorType: string){
   if(selectorType === 'accepted'){
@@ -187,7 +188,7 @@ export default function ProspectTable({
         </Grid.Col>
         <Grid.Col span={4}>
           <MultiSelect
-            data={ALL_STATUSES}
+            data={ALL_PROSPECT_STATUSES}
             mb="md"
             label="Filter by Status"
             placeholder="Select statuses"

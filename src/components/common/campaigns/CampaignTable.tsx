@@ -59,7 +59,7 @@ const SelectRepresent = forwardRef<HTMLDivElement, ItemProps>(
 );
 */
 
-const ALL_STATUSES = [
+const ALL_CAMPAIGN_STATUSES = [
   { value: "PENDING", label: "Pending" },
   { value: "NEEDS_REVIEW", label: "Needs Review" },
   { value: "IN_PROGRESS", label: "In Progress" },
@@ -68,6 +68,7 @@ const ALL_STATUSES = [
   { value: "COMPLETE", label: "Complete" },
   { value: "CANCELLED", label: "Cancelled" },
 ];
+export { ALL_CAMPAIGN_STATUSES };
 
 const ALL_TYPES = [
   { value: "EMAIL", label: "Email" },
@@ -204,7 +205,7 @@ export default function ProspectTable() {
       </div>
       <div style={{ display: "flex", flexWrap: (smScreenOrLess) ? 'wrap' : 'nowrap' }}>
         <MultiSelect
-          data={ALL_STATUSES}
+          data={ALL_CAMPAIGN_STATUSES}
           mb="md"
           label="Filter by Status"
           placeholder="Pick all that you like"

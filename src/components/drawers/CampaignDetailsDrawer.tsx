@@ -11,6 +11,7 @@ import {
   Button,
   Center,
   LoadingOverlay,
+  Tabs,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
@@ -34,6 +35,8 @@ import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { Campaign } from "src/main";
 import { logout } from "@auth/core";
 import { useQuery } from "react-query";
+import CampaignProspects from "@common/campaigns/CampaignProspects";
+import CampaignCTAs from "@common/campaigns/CampaignCTAs";
 
 export default function CampaignDetailsDrawer() {
   const theme = useMantineTheme();
@@ -49,7 +52,7 @@ export default function CampaignDetailsDrawer() {
       }
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/campaign/${campaignId}`,
+        `${process.env.REACT_APP_API_URI}/campaigns/${campaignId}`,
         {
           method: "GET",
           headers: {
@@ -69,79 +72,45 @@ export default function CampaignDetailsDrawer() {
 
   console.log(data);
 
-  const activeCampaign: Campaign = {
-    uuid: "dwwdd",
-    id: -1,
-    name: "Campaign 1",
-    prospect_ids: [],
-    campaign_type: "EMAIL",
-    ctas: [],
-    client_archetype_id: 0,
-    client_sdr_id: 0,
-    campaign_start_date: new Date(),
-    campaign_end_date: new Date(),
-    status: "PENDING",
-  };
-
   const userName = useRecoilValue(userNameState);
   const userEmail = useRecoilValue(userEmailState);
 
-  const [campaignDate, setCampaignDate] = useState<DateRangePickerValue>([
-    activeCampaign ? activeCampaign.campaign_start_date : null,
-    activeCampaign ? activeCampaign.campaign_end_date : null,
-  ]);
-
-  if (!activeCampaign) return <></>;
   return (
     <Drawer
       opened={opened}
       onClose={() => setOpened(false)}
+      title={
+        <Title order={2}>{data?.campaign_details ? data.campaign_details.campaign_raw.name : ""}</Title>
+      }
       padding="xl"
       size="xl"
       position="right"
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
-      {data?.details && !isFetching && (
+      {data?.campaign_details && !isFetching && (
         <ScrollArea
           style={{ height: window.innerHeight - 100, overflowY: "hidden" }}
         >
-          <Badge color={valueToColor(theme, activeCampaign.campaign_type)}>
-            {activeCampaign.campaign_type.replaceAll("_", " ")}
-          </Badge>
-          <Title order={3}>{activeCampaign.name}</Title>
-          <Divider my="xs" />
-
-          <Group className="inline-flex flex-nowrap truncate">
-            <Avatar
-              src={null}
-              alt={`${splitName(userName).first}'s Profile Picture`}
-              color="teal"
-              radius="xl"
-            />
-            <div className="inline-flex flex-col">
-              <Text fz="xs" fw={700}>
-                {userName}
-              </Text>
-              <Text fz="xs" c="dimmed">
-                {userEmail}
-              </Text>
-            </div>
+          <Group pb='xs'>
+            <Badge color={valueToColor(theme, data.campaign_details.campaign_raw.status)}>
+              {data.campaign_details.campaign_raw.status.replaceAll("_", " ")}
+            </Badge>
+            <Badge color={valueToColor(theme, data.campaign_details.campaign_raw.campaign_type)}>
+              {data.campaign_details.campaign_raw.campaign_type.replaceAll("_", " ")}
+            </Badge>
           </Group>
-          <DateRangePicker
-            label="Filter by Date"
-            placeholder="Pick date range"
-            icon={<IconCalendar size={16} />}
-            value={campaignDate}
-            onChange={setCampaignDate}
-            inputFormat="MMM D, YYYY"
-            amountOfMonths={2}
-            py={"xs"}
-          />
-          <Center>
-            <Button variant="outline" color="teal" radius="xl" size="md" m="xs">
-              View Details →
-            </Button>
-          </Center>
+          <Tabs defaultValue="prospects">
+            <Tabs.List grow position="center">
+              <Tabs.Tab value="prospects">Prospects</Tabs.Tab>
+              <Tabs.Tab value="ctas">Call-to-Actions</Tabs.Tab>
+            </Tabs.List>
+            <Tabs.Panel value="prospects" pt="xs">
+              <CampaignProspects prospects={data.campaign_details.prospects} />
+            </Tabs.Panel>
+            <Tabs.Panel value="ctas" pt="xs">
+              <CampaignCTAs />
+            </Tabs.Panel>
+          </Tabs>
         </ScrollArea>
       )}
     </Drawer>

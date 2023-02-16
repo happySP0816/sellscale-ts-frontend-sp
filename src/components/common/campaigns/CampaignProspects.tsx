@@ -1,0 +1,146 @@
+import {
+  Box,
+  Flex,
+  Grid,
+  Image,
+  Text,
+  Chip,
+  Badge,
+  useMantineTheme,
+} from "@mantine/core";
+import { DataTable, DataTableSortStatus } from "mantine-datatable";
+import { useEffect, useRef, useState } from "react";
+import { TextInput } from "@mantine/core";
+import { IconSearch } from "@tabler/icons";
+import { MultiSelect } from "@mantine/core";
+import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
+
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  prospectDrawerIdState,
+  prospectDrawerOpenState,
+  prospectSelectorTypeState,
+  prospectStatusesState,
+} from "@atoms/prospectAtoms";
+import { userTokenState } from "@atoms/userAtoms";
+import { valueToColor } from "@utils/general";
+import { useDebouncedState } from "@mantine/hooks";
+import { Prospect } from "src/main";
+import { ALL_PROSPECT_STATUSES } from "@common/pipeline/ProspectTable";
+import { chunk } from "lodash";
+
+const PAGE_SIZE = 10;
+
+export default function CampaignProspects({ prospects }: { prospects: Prospect[] }) {
+  const theme = useMantineTheme();
+  const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
+  const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
+  const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
+  const userToken = useRecoilValue(userTokenState);
+
+  const [search, setSearch] = useDebouncedState("", 200);
+  const [statuses, setStatuses] = useRecoilState(prospectStatusesState);
+
+  const [page, setPage] = useState(1);
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
+    columnAccessor: "full_name",
+    direction: "asc",
+  });
+
+  const handleSortStatusChange = (status: DataTableSortStatus) => {
+    setPage(1);
+    setSortStatus(status);
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statuses]);
+
+  // Split prospects into pages => data
+  const getData = (page: number) => {
+    return chunk(prospects, PAGE_SIZE)[page - 1];
+  };
+  const data = useRef(getData(page));
+  useEffect(() => {
+    data.current = getData(page);
+  }, [page]);
+
+  return (
+    <Box>
+      <Grid grow>
+        <Grid.Col span={4}>
+          <TextInput
+            label="Search Prospects"
+            placeholder="Search by Name, Company, Title, or Industry"
+            mb="md"
+            name="search prospects"
+            width={"500px"}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            icon={<IconSearch size={14} />}
+          />
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <MultiSelect
+            data={ALL_PROSPECT_STATUSES}
+            mb="md"
+            label="Filter by Status"
+            placeholder="Select statuses"
+            searchable
+            nothingFound="Nothing found"
+            value={statuses}
+            onChange={setStatuses}
+          />
+        </Grid.Col>
+      </Grid>
+
+      <DataTable
+        withBorder
+        height={'min(670px, 100vh - 200px)'}
+        verticalAlignment="top"
+        loaderColor="teal"
+        highlightOnHover
+        noRecordsText={"No prospects found"}
+        onRowClick={(prospect, row_index) => {
+          // TODO: Made make clicking on the row do something
+        }}
+        columns={[
+          {
+            accessor: "full_name",
+            sortable: true,
+            render: (x: any) => {
+              return (
+                <Flex>
+                  <Image
+                    src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
+                      x.full_name
+                    )}`}
+                    radius="lg"
+                    height={30}
+                    width={30}
+                  ></Image>
+                  <Text ml="md">{x.full_name}</Text>
+                </Flex>
+              );
+            },
+          },
+          {
+            accessor: "company",
+            sortable: true,
+          },
+          {
+            accessor: "title",
+            sortable: true,
+          },
+        ]}
+        records={data.current}
+        totalRecords={prospects.length}
+        recordsPerPage={PAGE_SIZE}
+        page={page}
+        onPageChange={(p) => setPage(p)}
+        paginationColor="teal"
+        sortStatus={sortStatus}
+        onSortStatusChange={handleSortStatusChange}
+      />
+    </Box>
+  );
+}

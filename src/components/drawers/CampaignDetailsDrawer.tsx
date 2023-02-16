@@ -108,7 +108,7 @@ export default function CampaignDetailsDrawer() {
               <CampaignProspects prospects={data.campaign_details.prospects} />
             </Tabs.Panel>
             <Tabs.Panel value="ctas" pt="xs">
-              <CampaignCTAs />
+              <CampaignCTAs ctas={data.campaign_details.ctas} />
             </Tabs.Panel>
           </Tabs>
         </ScrollArea>

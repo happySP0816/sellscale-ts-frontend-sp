@@ -31,21 +31,23 @@ import { chunk } from "lodash";
 
 const PAGE_SIZE = 10;
 
-export default function CampaignProspects({ prospects }: { prospects: Prospect[] }) {
+export default function CampaignProspects({
+  prospects,
+}: {
+  prospects: Prospect[];
+}) {
   const theme = useMantineTheme();
-  const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
-  const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
-  const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
   const userToken = useRecoilValue(userTokenState);
 
   const [search, setSearch] = useDebouncedState("", 200);
-  const [statuses, setStatuses] = useRecoilState(prospectStatusesState);
+  const [statuses, setStatuses] = useState<string[]>([]);
 
   const [page, setPage] = useState(1);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
     columnAccessor: "full_name",
     direction: "asc",
   });
+  const totalRecords = useRef(0);
 
   const handleSortStatusChange = (status: DataTableSortStatus) => {
     setPage(1);
@@ -58,12 +60,30 @@ export default function CampaignProspects({ prospects }: { prospects: Prospect[]
 
   // Split prospects into pages => data
   const getData = (page: number) => {
-    return chunk(prospects, PAGE_SIZE)[page - 1];
+
+    // Filter prospects by search
+    let filteredProspects = prospects;
+    if (search.trim() !== "") {
+      filteredProspects = filteredProspects.filter((prospect) => {
+        return (
+          prospect.full_name.toLowerCase().includes(search.toLowerCase()) ||
+          prospect.company.toLowerCase().includes(search.toLowerCase()) ||
+          prospect.title.toLowerCase().includes(search.toLowerCase()) ||
+          prospect.industry.toLowerCase().includes(search.toLowerCase())
+        );
+      });
+    }
+
+    // Filter prospects by statuses
+    if (statuses.length > 0) {
+      filteredProspects = filteredProspects.filter((prospect) => {
+        return statuses.includes(prospect.status);
+      });
+    }
+
+    totalRecords.current = filteredProspects.length;
+    return chunk(filteredProspects, PAGE_SIZE)[page - 1];
   };
-  const data = useRef(getData(page));
-  useEffect(() => {
-    data.current = getData(page);
-  }, [page]);
 
   return (
     <Box>
@@ -95,7 +115,7 @@ export default function CampaignProspects({ prospects }: { prospects: Prospect[]
 
       <DataTable
         withBorder
-        height={'min(670px, 100vh - 200px)'}
+        height={"min(670px, 100vh - 300px)"}
         verticalAlignment="top"
         loaderColor="teal"
         highlightOnHover
@@ -132,8 +152,8 @@ export default function CampaignProspects({ prospects }: { prospects: Prospect[]
             sortable: true,
           },
         ]}
-        records={data.current}
-        totalRecords={prospects.length}
+        records={getData(page)}
+        totalRecords={totalRecords.current}
         recordsPerPage={PAGE_SIZE}
         page={page}
         onPageChange={(p) => setPage(p)}

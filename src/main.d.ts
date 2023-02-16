@@ -50,3 +50,10 @@ export interface Prospect {
   title: string;
   twitter_url: string | null;
 }
+
+export interface CTA {
+  id: number;
+  archetype_id: number;
+  active: boolean,
+  text_value: string;
+}

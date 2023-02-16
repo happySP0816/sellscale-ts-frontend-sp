@@ -79,7 +79,7 @@ export default function LinkedInCTAsDrawer(props: {}) {
           columns={[
             {
               accessor: "cta",
-              title: "Call-To-Action",
+              title: "Call-to-Action",
               sortable: true,
             },
             {
@@ -125,7 +125,7 @@ export default function LinkedInCTAsDrawer(props: {}) {
             openModal({
               title: (
                 <Group position="apart" mt="md" mb="xs">
-                  <Title order={3}>Call-To-Action</Title>
+                  <Title order={3}>Call-to-Action</Title>
                   <Badge color={active ? 'teal' : 'red'} variant="light">
                     {active ? 'Active' : 'Inactive'}
                   </Badge>

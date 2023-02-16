@@ -10,13 +10,7 @@ const linkedInCTAsDrawerOpenState = atom({
   default: false,
 });
 
-const activePersonaState = atom({
-  key: "active-persona",
-  default: "1",
-});
-
 export {
   uploadDrawerOpenState,
   linkedInCTAsDrawerOpenState,
-  activePersonaState,
 };

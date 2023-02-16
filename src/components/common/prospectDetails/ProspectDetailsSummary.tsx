@@ -37,7 +37,7 @@ export default function ProspectDetailsSummary(
       <Group noWrap align='flex-start'>
         <Avatar
           src={
-            props.profile_pic
+            false // TODO: Support LinkedIn props.profile_pic
               ? props.profile_pic
               : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(props.full_name)}`
           }

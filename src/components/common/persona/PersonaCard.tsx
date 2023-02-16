@@ -6,31 +6,31 @@ import {
   Stack,
   Group,
   MantineTheme,
+  Switch,
+  useMantineTheme,
 } from "@mantine/core";
+import { IconCheck, IconX } from "@tabler/icons";
 import { useRecoilState } from "recoil";
 import { temp_delay } from "../../../utils/general";
 import displayNotification from "../../../utils/notificationFlow";
 import {
   uploadDrawerOpenState,
   linkedInCTAsDrawerOpenState,
-  activePersonaState,
 } from "../../atoms/personaAtoms";
 
 type PersonaCardProps = {
   value: string;
   name: string;
-  active?: boolean;
+  active: boolean;
 };
 
 export default function PersonaCard(props: PersonaCardProps) {
+  const theme = useMantineTheme();
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
     uploadDrawerOpenState
   );
-  const [
-    linkedInCTAsDrawerOpened,
-    setLinkedInCTAsDrawerOpened,
-  ] = useRecoilState(linkedInCTAsDrawerOpenState);
-  const [activePersona, setActivePersona] = useRecoilState(activePersonaState);
+  const [linkedInCTAsDrawerOpened, setLinkedInCTAsDrawerOpened] =
+    useRecoilState(linkedInCTAsDrawerOpenState);
 
   const activeBackgroundSX = (theme: MantineTheme) => ({
     border: `1px solid ${
@@ -50,7 +50,7 @@ export default function PersonaCard(props: PersonaCardProps) {
         await temp_delay(1000);
         let result = Math.random() < 0.75;
         if (result) {
-          setActivePersona(props.value);
+          //setActivePersona(props.value);
         }
         return result;
       },
@@ -92,17 +92,31 @@ export default function PersonaCard(props: PersonaCardProps) {
           )}`}
           alt={`${props.name}'s Profile Picture`}
         />
-        {!props.active && (
-          <Button
-            compact
-            variant="light"
-            color="teal"
-            size="xs"
-            onClick={() => makeActivePersona()}
-          >
-            Make Active
-          </Button>
-        )}
+        <Switch
+          checked={props.active}
+          onChange={(event) => {
+            /* setChecked(event.currentTarget.checked) */
+          }}
+          color="teal"
+          size="md"
+          onLabel="ON"
+          offLabel="OFF"
+          thumbIcon={
+            props.active ? (
+              <IconCheck
+                size={12}
+                color={theme.colors.teal[theme.fn.primaryShade()]}
+                stroke={3}
+              />
+            ) : (
+              <IconX
+                size={12}
+                color={theme.colors.red[theme.fn.primaryShade()]}
+                stroke={3}
+              />
+            )
+          }
+        />
       </Stack>
       <Stack spacing="xs">
         <Title order={3} ml="sm" mt="md">

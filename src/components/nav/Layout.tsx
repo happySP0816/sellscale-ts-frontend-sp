@@ -18,6 +18,7 @@ import { openSpotlight } from "@mantine/spotlight";
 import { userEmailState, userNameState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
 import { isLoggedIn } from "@auth/core";
+import LogoutBtn from "@nav/LogoutBtn";
 
 const AnimatedNavbar = animated(Navbar);
 
@@ -61,10 +62,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Navbar.Section>
           <Navbar.Section>
             {isLoggedIn() && (
-              <ProfileIcon
-                name={userName}
-                email={userEmail}
-              />
+              <>
+                <ProfileIcon
+                  name={userName}
+                  email={userEmail}
+                />
+                <LogoutBtn />
+              </>
             )}
           </Navbar.Section>
         </AnimatedNavbar>

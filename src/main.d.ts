@@ -54,6 +54,21 @@ export interface Prospect {
 export interface CTA {
   id: number;
   archetype_id: number;
-  active: boolean,
+  active: boolean;
   text_value: string;
+}
+
+export interface Archetype {
+  active: boolean;
+  archetype: string;
+  client_id: number;
+  client_sdr_id: number;
+  disable_ai_after_prospect_engaged: boolean;
+  filters: null; // TODO: 
+  id: number;
+  performance: {
+    status_map: Record<string, number>;
+    total_prospects: number;
+  };
+  transformer_blocklist: null; // TODO: 
 }

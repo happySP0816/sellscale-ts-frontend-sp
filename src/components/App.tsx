@@ -4,7 +4,7 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 
-import Layout from "./Layout";
+import Layout from "./nav/Layout";
 import { Outlet } from "react-router-dom";
 import { ModalsProvider } from "@mantine/modals";
 import { NotificationsProvider } from "@mantine/notifications";

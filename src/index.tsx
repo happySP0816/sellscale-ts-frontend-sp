@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { createBrowserRouter, json, RouterProvider } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
 import AboutPage from "./components/pages/AboutPage";
-import ProspectPage from "./components/pages/ProspectPage";
+import PersonaPage from "./components/pages/PersonaPage";
 import PipelinePage from "./components/pages/PipelinePage";
 import MissingPage from "./components/pages/MissingPage";
 import { RecoilRoot } from "recoil";
@@ -41,7 +41,7 @@ const router = createBrowserRouter([
       },
       {
         path: "personas",
-        element: <RestrictedRoute page={<ProspectPage />} />,
+        element: <RestrictedRoute page={<PersonaPage />} />,
       },
       {
         path: "campaigns/:campaignId?",

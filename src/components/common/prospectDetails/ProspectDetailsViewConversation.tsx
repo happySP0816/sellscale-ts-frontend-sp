@@ -1,4 +1,4 @@
-import { LinkedInConversationEntry } from "@common/persona/LinkedInConversationEntry";
+import { LinkedInConversationEntry } from "@common/persona/LinkedinConversationEntry";
 import { Button, Flex, Card, Text, Group, ScrollArea } from "@mantine/core";
 import { IconExternalLink } from "@tabler/icons";
 import { slice } from "lodash";

@@ -20,7 +20,7 @@ import { useOs } from "@mantine/hooks";
 import { openSpotlight } from "@mantine/spotlight";
 import { useRecoilState } from "recoil";
 import { navTabState } from "@atoms/navAtoms";
-import { LogoIcon } from "@nav/Logo";
+import { LogoFull, LogoIcon } from "@nav/Logo";
 
 type PanelLinkProps = {
   icon: React.ReactNode;
@@ -84,7 +84,7 @@ export default function SidePanel(props: { isMobile?: boolean }) {
       <div>
         {!props.isMobile && (
           <Center h={50}>
-            <LogoIcon />
+            <LogoFull size={23} />
           </Center>
         )}
 

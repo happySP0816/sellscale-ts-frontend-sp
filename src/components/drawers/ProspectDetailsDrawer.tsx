@@ -21,7 +21,9 @@ export default function ProspectDetailsDrawer() {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospect-details-${prospectId}`],
     queryFn: async () => {
-      if(prospectId === -1) { return null; }
+      if (prospectId === -1) {
+        return null;
+      }
 
       const response = await fetch(
         `${process.env.REACT_APP_API_URI}/prospect/${prospectId}`,
@@ -49,7 +51,9 @@ export default function ProspectDetailsDrawer() {
       opened={opened}
       onClose={() => setOpened(false)}
       title={
-        <Title order={2}>{data?.prospect_info ? data.prospect_info.details.full_name : ""}</Title>
+        <Title order={2}>
+          {data?.prospect_info ? data.prospect_info.details.full_name : ""}
+        </Title>
       }
       padding="xl"
       size="xl"
@@ -71,7 +75,14 @@ export default function ProspectDetailsDrawer() {
             currentStatus={data.prospect_info.details.status}
             prospectId={data.prospect_info.details.id}
           />
-          <ProspectDetailsViewConversation conversation_entry_list={[]} />
+          {data.prospect_info.li?.li_conversation_thread?.length > 0 && (
+            <ProspectDetailsViewConversation
+              conversation_entry_list={
+                data.prospect_info.li.li_conversation_thread
+              }
+              conversation_url={data.prospect_info.li.li_conversation_url}
+            />
+          )}
           <ProspectDetailsNotes
             currentStatus={data.prospect_info.details.status}
             prospectId={data.prospect_info.details.id}

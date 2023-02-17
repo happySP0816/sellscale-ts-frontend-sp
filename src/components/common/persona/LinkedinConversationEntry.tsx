@@ -5,6 +5,7 @@ import {
   Group,
   TypographyStylesProvider,
   Paper,
+  Badge,
 } from "@mantine/core";
 
 const useStyles = createStyles((theme) => ({
@@ -30,18 +31,20 @@ interface CommentHtmlProps {
   body: string;
   name: string;
   image: string;
+  isLatest: boolean;
 }
 
-export function LinkedinConversationEntry({
+export function LinkedInConversationEntry({
   postedAt,
   body,
   name,
   image,
+  isLatest,
 }: CommentHtmlProps) {
   const { classes } = useStyles();
   return (
     <Paper withBorder radius="md" className={classes.comment}>
-      <Group>
+      <Group sx={{ position: 'relative' }}>
         <Avatar src={image} alt={name} radius="xl" />
         <div>
           <Text size="sm">{name}</Text>
@@ -49,7 +52,9 @@ export function LinkedinConversationEntry({
             {postedAt}
           </Text>
         </div>
+        {isLatest && (<Badge sx={{ position: 'absolute', top: 0, right: 0 }}>Latest Message</Badge>)}
       </Group>
+
       <TypographyStylesProvider className={classes.body}>
         <div
           className={classes.content}

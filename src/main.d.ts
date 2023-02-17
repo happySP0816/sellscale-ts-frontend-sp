@@ -72,3 +72,17 @@ export interface Archetype {
   };
   transformer_blocklist: null; // TODO: 
 }
+
+export interface LinkedInMessage {
+  author: string;
+  connection_degree: string;
+  conversation_url: string;
+  date: string;
+  first_name: string;
+  last_name: string;
+  headline: string;
+  img_url: string;
+  li_url: string;
+  message: string;
+  profile_url: string;
+}

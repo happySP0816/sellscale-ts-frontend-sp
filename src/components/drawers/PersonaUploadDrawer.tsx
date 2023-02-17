@@ -3,10 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import { temp_delay } from "../../utils/general";
 import displayNotification from "../../utils/notificationFlow";
-import { uploadDrawerOpenState } from "../atoms/personaAtoms";
+import { currentPersonaIdState, uploadDrawerOpenState } from "../atoms/personaAtoms";
 
 export default function PersonaUploadDrawer(props: {}) {
   const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
+  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
+  
   const isUploading = useRef(false);
   const resetRef = useRef<() => void>(null);
 
@@ -47,7 +49,10 @@ export default function PersonaUploadDrawer(props: {}) {
   return (
     <Drawer
       opened={opened}
-      onClose={() => setOpened(false)}
+      onClose={() => {
+        setCurrentPersonaId(-1);
+        setOpened(false);
+      }}
       title={<Title order={2}>Upload Persona</Title>}
       padding="xl"
       size="xl"

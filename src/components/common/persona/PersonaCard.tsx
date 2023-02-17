@@ -19,6 +19,7 @@ import displayNotification from "../../../utils/notificationFlow";
 import {
   uploadDrawerOpenState,
   linkedInCTAsDrawerOpenState,
+  currentPersonaIdState,
 } from "../../atoms/personaAtoms";
 
 export default function PersonaCard(props: { archetype: Archetype }) {
@@ -28,6 +29,8 @@ export default function PersonaCard(props: { archetype: Archetype }) {
   );
   const [linkedInCTAsDrawerOpened, setLinkedInCTAsDrawerOpened] =
     useRecoilState(linkedInCTAsDrawerOpenState);
+  const [currentPersonaId, setCurrentPersonaId] =
+    useRecoilState(currentPersonaIdState);
 
   const activeBackgroundSX = (theme: MantineTheme) => ({
     border: `1px solid ${
@@ -150,7 +153,10 @@ export default function PersonaCard(props: { archetype: Archetype }) {
           size="xs"
           variant="outline"
           color="teal"
-          onClick={() => setUploadDrawerOpened(true)}
+          onClick={() => {
+            setCurrentPersonaId(props.archetype.id);
+            setUploadDrawerOpened(true);
+          }}
         >
           Upload
         </Button>
@@ -158,7 +164,10 @@ export default function PersonaCard(props: { archetype: Archetype }) {
           size="xs"
           variant="outline"
           color="teal"
-          onClick={() => setLinkedInCTAsDrawerOpened(true)}
+          onClick={() => {
+            setCurrentPersonaId(props.archetype.id);
+            setLinkedInCTAsDrawerOpened(true);
+          }}
         >
           LinkedIn CTAs
         </Button>

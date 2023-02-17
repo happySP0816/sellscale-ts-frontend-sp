@@ -12,6 +12,7 @@ const useStyles = createStyles((theme) => ({
   comment: {
     padding: `${theme.spacing.lg}px ${theme.spacing.xl}px`,
   },
+  
 
   body: {
     paddingLeft: 54,

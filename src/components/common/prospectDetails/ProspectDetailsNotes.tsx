@@ -103,12 +103,11 @@ export default function ProspectDetailsNotes(
         </Timeline>
       )}
 
-      <Flex>
+      <Flex gap="xs">
         <Button
           disabled={viewAllNotes || props.notes.length <= 1}
           color="blue"
           variant="outline"
-          mt="md"
           onClick={() => setViewAllNotes((o: boolean) => !o)}
         >
           View all notes
@@ -116,8 +115,6 @@ export default function ProspectDetailsNotes(
         <Button
           color="blue"
           variant="outline"
-          mt="md"
-          ml="md"
           onClick={() => setOpened(true)}
         >
           Create New Note

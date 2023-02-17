@@ -3,12 +3,15 @@ import {
   Card,
   Badge,
   Text,
+  Box,
   SimpleGrid,
   UnstyledButton,
   Collapse,
   Button,
   Group,
   Flex,
+  SegmentedControl,
+  Center,
 } from "@mantine/core";
 import { useState } from "react";
 import {
@@ -22,6 +25,7 @@ import {
   IconConfetti,
   IconFaceIdError,
   IconTrash,
+  IconBrandLinkedin,
 } from "@tabler/icons";
 
 const mockdata = [
@@ -128,7 +132,9 @@ export default function ProspectDetailsChangeStatus(
 ) {
   const { classes, theme } = useStyles();
   const [opened, setOpened] = useState(false);
-  const [statusService, setStatusService] = useState<'' | 'EMAIL' | 'LINKEDIN'>('');
+  const [statusService, setStatusService] = useState<'EMAIL' | 'LINKEDIN'>('LINKEDIN');
+
+  const statusSelectEnabled = false;
 
   const items = mockdata.map((item) => (
     <UnstyledButton key={item.title} className={classes.item}>
@@ -149,35 +155,40 @@ export default function ProspectDetailsChangeStatus(
           {props.currentStatus.replaceAll("_", " ")}
         </Badge>
       </Group>
-      <Flex>
-        <Button
-          color="pink"
-          fullWidth
-          variant={statusService === 'EMAIL' ? 'filled' : 'outline'}
-          onClick={() => {
-            setStatusService(opened ? '' : 'EMAIL');
-            setOpened((o: boolean) => !o);
-          }}
-        >
-          Change Email Status
-        </Button>
+      <Flex gap="xs">
         <Button
           color="blue"
-          fullWidth
-          variant={statusService === 'LINKEDIN' ? 'filled' : 'outline'}
-          ml="md"
+          variant={opened ? 'filled' : 'outline'}
           onClick={() => {
-            setStatusService(opened ? '' : 'LINKEDIN');
             setOpened((o: boolean) => !o);
           }}
         >
-          Change Linkedin Status
+          Update Status
         </Button>
+        <SegmentedControl
+          color='blue'
+          defaultValue={statusService}
+          onChange={(value) => {setStatusService(value as 'EMAIL' | 'LINKEDIN')}}
+          data={[
+            { value: 'LINKEDIN', label: (
+              <Center>
+                <IconBrandLinkedin size={16} />
+                <Box ml={10}>LinkedIn</Box>
+              </Center>
+            ) },
+            { value: 'EMAIL', label: (
+              <Center>
+                <IconMail size={16} />
+                <Box ml={10}>Email</Box>
+              </Center>
+            ) },
+          ]}
+        />
       </Flex>
       <Collapse in={opened} mt="md">
         <Card withBorder radius="md" className={classes.card}>
           <Group position="apart">
-            <Text className={classes.title}>Change status to:</Text>
+            <Text className={classes.title}>{`Change ${statusService === 'LINKEDIN' ? 'LinkedIn' : 'Email' } status to:`}</Text>
           </Group>
           <SimpleGrid cols={3} mt="md">
             {items}

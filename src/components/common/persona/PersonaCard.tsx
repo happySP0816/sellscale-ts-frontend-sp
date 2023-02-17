@@ -11,6 +11,7 @@ import {
 } from "@mantine/core";
 import { IconCheck, IconX } from "@tabler/icons";
 import { useRecoilState } from "recoil";
+import { Archetype } from "src/main";
 import { temp_delay } from "../../../utils/general";
 import displayNotification from "../../../utils/notificationFlow";
 import {
@@ -18,13 +19,7 @@ import {
   linkedInCTAsDrawerOpenState,
 } from "../../atoms/personaAtoms";
 
-type PersonaCardProps = {
-  value: string;
-  name: string;
-  active: boolean;
-};
-
-export default function PersonaCard(props: PersonaCardProps) {
+export default function PersonaCard(props: { archetype: Archetype }) {
   const theme = useMantineTheme();
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
     uploadDrawerOpenState
@@ -56,11 +51,11 @@ export default function PersonaCard(props: PersonaCardProps) {
       },
       {
         title: `Activating Persona`,
-        message: `Updating persona to ${props.name}...`,
+        message: `Updating persona to ${props.archetype.archetype}...`,
         color: "teal",
       },
       {
-        title: `${props.name} is now active 🎉`,
+        title: `${props.archetype.archetype} is now active 🎉`,
         message: `Some extra description here`,
         color: "teal",
       },
@@ -76,7 +71,7 @@ export default function PersonaCard(props: PersonaCardProps) {
     <Group
       p="xs"
       sx={(theme) => {
-        if (props.active) {
+        if (props.archetype.active) {
           return activeBackgroundSX(theme);
         } else {
           return {};
@@ -88,12 +83,12 @@ export default function PersonaCard(props: PersonaCardProps) {
           size={80}
           radius={80}
           src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-            props.name
+            props.archetype.archetype
           )}`}
-          alt={`${props.name}'s Profile Picture`}
+          alt={`${props.archetype.archetype}'s Picture`}
         />
         <Switch
-          checked={props.active}
+          checked={props.archetype.active}
           onChange={(event) => {
             /* setChecked(event.currentTarget.checked) */
           }}
@@ -101,8 +96,13 @@ export default function PersonaCard(props: PersonaCardProps) {
           size="md"
           onLabel="ON"
           offLabel="OFF"
+          sx={(theme) => ({
+            track: {
+              cursor: "pointer!important",// TODO: fix this
+            }
+          })}
           thumbIcon={
-            props.active ? (
+            props.archetype.active ? (
               <IconCheck
                 size={12}
                 color={theme.colors.teal[theme.fn.primaryShade()]}
@@ -120,9 +120,9 @@ export default function PersonaCard(props: PersonaCardProps) {
       </Stack>
       <Stack spacing="xs">
         <Title order={3} ml="sm" mt="md">
-          {props.name}
+          {props.archetype.archetype}
         </Title>
-        <Text ml="sm">872 contacts with 68% used. 48 active connections.</Text>
+        <Text ml="sm">{`${props.archetype.performance.total_prospects} contacts with X% used.`}</Text>
         <Group>
           <Button
             variant="outline"

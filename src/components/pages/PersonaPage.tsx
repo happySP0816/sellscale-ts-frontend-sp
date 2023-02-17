@@ -11,7 +11,7 @@ import {
   useMantineTheme,
   Drawer,
   Group,
-  Button,
+  Divider,
   Paper,
   LoadingOverlay,
 } from "@mantine/core";
@@ -52,7 +52,11 @@ export default function PersonaPage() {
         return [];
       }
 
-      return res.archetypes as Archetype[];
+      let result = res.archetypes as Archetype[];
+      // Sort by number of prospects
+      return result.sort((a, b) => {
+        return b.performance.total_prospects - a.performance.total_prospects;
+      });
     },
     refetchOnWindowFocus: false,
   });
@@ -64,13 +68,20 @@ export default function PersonaPage() {
       <PageFrame>
         <Paper withBorder p="md" radius="md">
           <LoadingOverlay visible={isFetching} overlayBlur={2} />
-          {data?.map(
+          {data?.filter((p) => p.active).map(
             (persona) => (
               <PersonaCard
                 key={persona.id}
-                value={persona.archetype}
-                name={persona.archetype}
-                active={persona.active}
+                archetype={persona}
+              />
+            )
+          )}
+          <Divider my="sm" />
+          {data?.filter((p) => !p.active).map(
+            (persona) => (
+              <PersonaCard
+                key={persona.id}
+                archetype={persona}
               />
             )
           )}

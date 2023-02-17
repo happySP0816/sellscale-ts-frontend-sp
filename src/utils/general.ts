@@ -81,7 +81,7 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   'email': 'orange',
   'accepted': 'green',
   'active_convo': 'yellow',
-  'responded': 'orange',
+  'bumped': 'orange',
 };
 export function valueToColor(theme: MantineTheme, value: string): MantineColor {
   value = value.toLowerCase();

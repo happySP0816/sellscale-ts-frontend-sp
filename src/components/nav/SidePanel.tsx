@@ -1,33 +1,26 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
-  IconInbox,
-  IconHistory,
   IconSearch,
-  IconAffiliate,
-  IconSpeakerphone,
-  IconAssembly,
+  IconFilter,
+  IconUsers,
   IconHome,
+  IconSend,
 } from "@tabler/icons";
 import {
   ThemeIcon,
   UnstyledButton,
   Group,
-  Text,
-  Accordion,
-  Flex,
   MantineTheme,
   Center,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "react-query";
 import NavTab from "./NavTab";
-import { LogoIcon } from "@nav/Logo";
-import { LOGO_HEIGHT } from "../../constants/data";
-import ProfileIcon from "./ProfileIcon";
 import { useOs } from "@mantine/hooks";
 import { openSpotlight } from "@mantine/spotlight";
 import { useRecoilState } from "recoil";
 import { navTabState } from "@atoms/navAtoms";
+import { LogoIcon } from "@nav/Logo";
 
 type PanelLinkProps = {
   icon: React.ReactNode;
@@ -115,21 +108,21 @@ export default function SidePanel(props: { isMobile?: boolean }) {
         />
 
         <NavTab
-          icon={<IconInbox size={22} />}
+          icon={<IconFilter size={22} />}
           name="pipeline"
           description="Pipeline"
           onClick={() => navigate(`/pipeline`)}
         />
 
         <NavTab
-          icon={<IconAffiliate size={22} />}
+          icon={<IconUsers size={22} />}
           name="personas"
           description="Personas"
           onClick={() => navigate(`/personas`)}
         />
 
         <NavTab
-          icon={<IconAssembly size={22} />}
+          icon={<IconSend size={22} />}
           name="campaigns"
           description="Campaigns"
           onClick={() => navigate(`/campaigns`)}

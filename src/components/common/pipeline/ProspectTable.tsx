@@ -32,7 +32,7 @@ import { logout } from "@auth/core";
 const ALL_PROSPECT_STATUSES = [
   { value: 'ACCEPTED', label: 'Accepted' },
   { value: 'SENT_OUTREACH', label: 'Sent Outreach' },
-  { value: 'RESPONDED', label: 'Responded' },
+  { value: 'RESPONDED', label: 'Bumped' },
   { value: 'ACTIVE_CONVO', label: 'Active Conversation' },
   { value: 'SCHEDULING', label: 'Scheduling' },
   { value: 'DEMO_SET', label: 'Demo Set' },
@@ -74,6 +74,21 @@ export function getSelectorTypeFromStatuses(statuses: string[]){
   }
   potentialTypes.push('all');
   return potentialTypes;
+}
+export function convertStatusToLabel(status: string){
+  if(status.toUpperCase() === 'RESPONDED'){
+    return 'Bumped';
+  }
+  if(status === 'DEMO_SET'){
+    return 'Demo Scheduled';
+  }
+  if(status === 'DEMO_WON'){
+    return 'Demo Complete';
+  }
+  if(status === 'DEMO_LOSS'){
+    return 'Demo Missed';
+  }
+  return status.replaceAll("_", " ");
 }
 
 const PAGE_SIZE = 20;
@@ -245,8 +260,8 @@ export default function ProspectTable({
             sortable: true,
             render: ({ status }) => {
               return (
-                <Badge color={valueToColor(theme, status)}>
-                  {status.replaceAll("_", " ")}
+                <Badge color={valueToColor(theme, convertStatusToLabel(status))}>
+                  {convertStatusToLabel(status)}
                 </Badge>
               );
             },

@@ -87,15 +87,14 @@ export default function ProspectTable() {
   const totalRecords = useRef(0);
 
   const [search, setSearch] = useDebouncedState("", 200);
-  const [statuses, setStatuses] = useState<string[]>([]);
   const [filterDate, setFilterDate] =
     useState<DateRangePickerValue>([null, null]);
   const [type, setType] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-    columnAccessor: "id",
-    direction: "asc",
+    columnAccessor: "campaign_start_date",
+    direction: "desc",
   });
 
   const handleSortStatusChange = (status: DataTableSortStatus) => {
@@ -106,15 +105,15 @@ export default function ProspectTable() {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `query-campaigns-data`,
-      { page, sortStatus, search, statuses, filterDate, type },
+      { page, sortStatus, search, filterDate, type },
     ],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { page, sortStatus, search, statuses, filterDate, type }] =
+      const [_key, { page, sortStatus, search, filterDate, type }] =
         queryKey;
 
-      console.log(page, sortStatus, search, statuses, filterDate, type);
+      console.log(page, sortStatus, search, filterDate, type);
       totalRecords.current = 0;
 
       const response = await fetch(
@@ -128,7 +127,7 @@ export default function ProspectTable() {
           body: JSON.stringify({
             query: search.length > 0 ? search : undefined,
             campaign_type: type ? [type] : undefined,
-            status: statuses.length > 0 ? statuses : undefined,
+            status: ['COMPLETE'],
             limit: PAGE_SIZE,
             offset: (page - 1) * PAGE_SIZE,
             campaign_start_date: filterDate[0] ? formatDate(new Date(filterDate[0])) : undefined,
@@ -178,12 +177,11 @@ export default function ProspectTable() {
         <TextInput
           label="Search Campaigns"
           placeholder="Search by Campaign Name"
-          mb="md"
           name="search campaigns"
           width={"500px"}
           onChange={(e) => setSearch(e.currentTarget.value)}
           icon={<IconSearch size={14} />}
-          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "50%", flexBasis: "50%" }}
+          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "33%", flexBasis: "33%" }}
           px={"xs"}
         />
         <DateRangePicker
@@ -194,21 +192,7 @@ export default function ProspectTable() {
           onChange={setFilterDate}
           inputFormat="MMM D, YYYY"
           amountOfMonths={2}
-          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "50%", flexBasis: "50%" }}
-          px={"xs"}
-        />
-      </div>
-      <div style={{ display: "flex", flexWrap: (smScreenOrLess) ? 'wrap' : 'nowrap' }}>
-        <MultiSelect
-          data={ALL_CAMPAIGN_STATUSES}
-          mb="md"
-          label="Filter by Status"
-          placeholder="Select statuses"
-          searchable
-          nothingFound="Nothing found"
-          value={statuses}
-          onChange={setStatuses}
-          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "50%", flexBasis: "50%" }}
+          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "33%", flexBasis: "33%" }}
           px={"xs"}
         />
         <Select
@@ -219,7 +203,7 @@ export default function ProspectTable() {
           onChange={setType}
           searchable
           clearable
-          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "50%", flexBasis: "50%" }}
+          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "33%", flexBasis: "33%" }}
           px={"xs"}
         />
       </div>
@@ -251,52 +235,16 @@ export default function ProspectTable() {
         */}
 
       <DataTable
+        withBorder
         height={"min(670px, 100vh - 200px)"}
         verticalAlignment="top"
+        mt="md"
         loaderColor="teal"
         highlightOnHover
         noRecordsText={"No campaigns found"}
         fetching={isFetching}
+        rowSx={{ height: 50 }}
         columns={[
-          {
-            accessor: "status",
-            title: "Status",
-            sortable: true,
-            render: ({ status }) => {
-              return (
-                <Badge color={valueToColor(theme, status)}>
-                  {status.replaceAll("_", " ")}
-                </Badge>
-              );
-            },
-          },
-          {
-            accessor: "campaign_type",
-            title: "Type",
-            sortable: true,
-            render: ({ campaign_type }) => {
-              return (
-                <Badge color={valueToColor(theme, campaign_type)}>
-                  {campaign_type.replaceAll("_", " ")}
-                </Badge>
-              );
-            },
-          },
-          {
-            accessor: "name",
-            title: "Name",
-            sortable: true,
-            ellipsis: true,
-            width: '20vw',
-          },
-          {
-            accessor: "prospect_ids",
-            title: "# Prospects",
-            sortable: true,
-            render: ({ prospect_ids }) => {
-              return <Text>{prospect_ids.length}</Text>;
-            },
-          },
           {
             accessor: "campaign_start_date",
             title: "Start",
@@ -327,6 +275,33 @@ export default function ProspectTable() {
                   })}
                 </Text>
               );
+            },
+          },
+          {
+            accessor: "campaign_type",
+            title: "Type",
+            sortable: true,
+            render: ({ campaign_type }) => {
+              return (
+                <Badge color={valueToColor(theme, campaign_type)}>
+                  {campaign_type.replaceAll("_", " ")}
+                </Badge>
+              );
+            },
+          },
+          {
+            accessor: "name",
+            title: "Name",
+            sortable: true,
+            ellipsis: true,
+            width: '20vw',
+          },
+          {
+            accessor: "prospect_ids",
+            title: "# Prospects",
+            sortable: true,
+            render: ({ prospect_ids }) => {
+              return <Text>{prospect_ids.length}</Text>;
             },
           },
         ]}

@@ -26,7 +26,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { valueToColor } from "@utils/general";
 import { useDebouncedState } from "@mantine/hooks";
 import { Prospect } from "src/main";
-import { ALL_PROSPECT_STATUSES } from "@common/pipeline/ProspectTable";
+import { ALL_PROSPECT_STATUSES, convertStatusToLabel } from "@common/pipeline/ProspectTable";
 import { chunk } from "lodash";
 
 const PAGE_SIZE = 10;
@@ -147,8 +147,15 @@ export default function CampaignProspects({
             sortable: true,
           },
           {
-            accessor: "title",
+            accessor: "status",
             sortable: true,
+            render: ({ status }) => {
+              return (
+                <Badge color={valueToColor(theme, convertStatusToLabel(status))}>
+                  {convertStatusToLabel(status)}
+                </Badge>
+              );
+            },
           },
         ]}
         records={getData(page)}

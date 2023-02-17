@@ -99,7 +99,7 @@ export default function CampaignDetailsDrawer() {
               {data.campaign_details.campaign_raw.campaign_type.replaceAll("_", " ")}
             </Badge>
           </Group>
-          <Tabs defaultValue="prospects">
+          <Tabs defaultValue="prospects" px='xs'>
             <Tabs.List grow position="center">
               <Tabs.Tab value="prospects">Prospects</Tabs.Tab>
               <Tabs.Tab value="ctas">Call-to-Actions</Tabs.Tab>

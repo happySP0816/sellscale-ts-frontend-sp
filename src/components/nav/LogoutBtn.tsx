@@ -9,7 +9,7 @@ export default function LogoutBtn() {
       label="Logout"
       position="right"
       className="cursor-pointer"
-      onClick={() => logout()}
+      onClick={() => logout(true)}
       withArrow
     >
       <div

@@ -49,8 +49,8 @@ export default function AuthPage() {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const userEmail = useRecoilValue(userEmailState);
   const [userName, setUserName] = useRecoilState(userNameState);
+  const [userEmail, setUserEmail] = useRecoilState(userEmailState);
   const [userToken, setUserToken] = useRecoilState(userTokenState);
 
   useEffect(() => {
@@ -81,9 +81,8 @@ export default function AuthPage() {
     }
 
     sendAuthToken(authToken, userEmail+'').then((response) => {
-      console.log(response);
 
-      authorize(response.token, setUserToken, 'Unknown User', setUserName);
+      authorize(response.token, setUserToken, setUserName, setUserEmail);
       navigate(`/`);
 
     });

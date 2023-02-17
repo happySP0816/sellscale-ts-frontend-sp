@@ -134,8 +134,6 @@ export default function ProspectDetailsChangeStatus(
   const [opened, setOpened] = useState(false);
   const [statusService, setStatusService] = useState<'EMAIL' | 'LINKEDIN'>('LINKEDIN');
 
-  const statusSelectEnabled = false;
-
   const items = mockdata.map((item) => (
     <UnstyledButton key={item.title} className={classes.item}>
       <item.icon color={theme.colors[item.color][6]} size={32} />

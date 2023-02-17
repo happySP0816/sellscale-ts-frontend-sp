@@ -60,11 +60,11 @@ export default function PersonaUploadDrawer(props: {}) {
     >
       <Text pb="xs">
         <span className="font-bold">LinkedIn: </span>
-        <span>220/400 prospects available</span>
+        <span>X/Y prospects available</span>
       </Text>
       <Text pb="xs">
         <span className="font-bold">Email: </span>
-        <span>220/400 prospects available</span>
+        <span>X/Y prospects available</span>
       </Text>
 
       <Group position="center">

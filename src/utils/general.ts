@@ -1,4 +1,5 @@
 import { MantineColor, MantineTheme } from "@mantine/core";
+import { startCase } from "lodash";
 
 export function temp_delay(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -101,4 +102,21 @@ export function valueToColor(theme: MantineTheme, value: string): MantineColor {
   }
 
   return "gray";
+}
+
+export function formatToLabel(value: string){
+  value = value.toLowerCase();
+  if(value === 'responded'){
+    return 'Bumped';
+  }
+  if(value === 'demo_set'){
+    return 'Demo Scheduled';
+  }
+  if(value === 'demo_won'){
+    return 'Demo Complete';
+  }
+  if(value === 'demo_loss'){
+    return 'Demo Missed';
+  }
+  return startCase(value.replaceAll("_", " "));
 }

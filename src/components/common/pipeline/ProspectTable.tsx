@@ -24,7 +24,7 @@ import {
 } from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { useQuery } from "react-query";
-import { valueToColor } from "@utils/general";
+import { formatToLabel, valueToColor } from "@utils/general";
 import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
@@ -74,21 +74,6 @@ export function getSelectorTypeFromStatuses(statuses: string[]){
   }
   potentialTypes.push('all');
   return potentialTypes;
-}
-export function convertStatusToLabel(status: string){
-  if(status.toUpperCase() === 'RESPONDED'){
-    return 'Bumped';
-  }
-  if(status === 'DEMO_SET'){
-    return 'Demo Scheduled';
-  }
-  if(status === 'DEMO_WON'){
-    return 'Demo Complete';
-  }
-  if(status === 'DEMO_LOSS'){
-    return 'Demo Missed';
-  }
-  return status.replaceAll("_", " ");
 }
 
 const PAGE_SIZE = 20;
@@ -260,8 +245,8 @@ export default function ProspectTable({
             sortable: true,
             render: ({ status }) => {
               return (
-                <Badge color={valueToColor(theme, convertStatusToLabel(status))}>
-                  {convertStatusToLabel(status)}
+                <Badge color={valueToColor(theme, formatToLabel(status))}>
+                  {formatToLabel(status)}
                 </Badge>
               );
             },

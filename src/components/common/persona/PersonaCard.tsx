@@ -5,14 +5,16 @@ import {
   Text,
   Stack,
   Group,
+  Progress,
   MantineTheme,
   Switch,
   useMantineTheme,
+  Container,
 } from "@mantine/core";
 import { IconCheck, IconX } from "@tabler/icons";
 import { useRecoilState } from "recoil";
 import { Archetype } from "src/main";
-import { temp_delay } from "../../../utils/general";
+import { formatToLabel, temp_delay, valueToColor } from "../../../utils/general";
 import displayNotification from "../../../utils/notificationFlow";
 import {
   uploadDrawerOpenState,
@@ -67,9 +69,24 @@ export default function PersonaCard(props: { archetype: Archetype }) {
     );
   };
 
+  const getStatusPercentage = () => {
+    let m = 100 / props.archetype.performance.total_prospects;
+    let percentData = [];
+    for(let statD in props.archetype.performance.status_map){
+      percentData.push({
+        value: props.archetype.performance.status_map[statD]*m,
+        color: valueToColor(theme, formatToLabel(statD)),
+        label: formatToLabel(statD),
+        tooltip: `${formatToLabel(statD)} - ${props.archetype.performance.status_map[statD]} prospects`,
+      });
+    }
+    return percentData;
+  }
+
   return (
-    <Group
+    <Container
       p="xs"
+      style={{ display: 'flex', justifyContent: 'space-between' }}
       sx={(theme) => {
         if (props.archetype.active) {
           return activeBackgroundSX(theme);
@@ -78,10 +95,10 @@ export default function PersonaCard(props: { archetype: Archetype }) {
         }
       }}
     >
-      <Stack align="center">
+      <Stack align="center" justify="flex-end">
         <Avatar
-          size={80}
-          radius={80}
+          size={60}
+          radius={60}
           src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
             props.archetype.archetype
           )}`}
@@ -98,8 +115,8 @@ export default function PersonaCard(props: { archetype: Archetype }) {
           offLabel="OFF"
           sx={(theme) => ({
             track: {
-              cursor: "pointer!important",// TODO: fix this
-            }
+              cursor: "pointer!important", // TODO: fix this
+            },
           })}
           thumbIcon={
             props.archetype.active ? (
@@ -118,30 +135,43 @@ export default function PersonaCard(props: { archetype: Archetype }) {
           }
         />
       </Stack>
-      <Stack spacing="xs">
+      <Stack spacing="xs" mx='md' w={'100%'}>
         <Title order={3} ml="sm" mt="md">
           {props.archetype.archetype}
         </Title>
         <Text ml="sm">{`${props.archetype.performance.total_prospects} contacts with X% used.`}</Text>
-        <Group>
-          <Button
-            variant="outline"
-            color="teal"
-            m="sm"
-            onClick={() => setUploadDrawerOpened(true)}
-          >
-            Upload
-          </Button>
-          <Button
-            variant="outline"
-            color="teal"
-            m="sm"
-            onClick={() => setLinkedInCTAsDrawerOpened(true)}
-          >
-            LinkedIn CTAs
-          </Button>
-        </Group>
+        <Progress
+          size={14}
+          sections={getStatusPercentage()}
+        />
       </Stack>
-    </Group>
+      <Stack spacing="xs">
+        <Button
+          size="xs"
+          variant="outline"
+          color="teal"
+          onClick={() => setUploadDrawerOpened(true)}
+        >
+          Upload
+        </Button>
+        <Button
+          size="xs"
+          variant="outline"
+          color="teal"
+          onClick={() => setLinkedInCTAsDrawerOpened(true)}
+        >
+          LinkedIn CTAs
+        </Button>
+        <Button
+          disabled
+          size="xs"
+          variant="outline"
+          color="teal"
+          onClick={() => {}}
+        >
+          Configuration
+        </Button>
+      </Stack>
+    </Container>
   );
 }

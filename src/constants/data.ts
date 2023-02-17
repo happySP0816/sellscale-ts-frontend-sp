@@ -13,4 +13,5 @@ export const SCREEN_SIZES = {
 export const DEBOUNCE_DELAY = 200;// ms
 
 export const LOGO_HEIGHT = 50;// px
-export const NAV_BAR_WIDTH = 50;// px
+export const NAV_BAR_SIDE_WIDTH = 130;// px
+export const NAV_BAR_TOP_WIDTH = 50;// px

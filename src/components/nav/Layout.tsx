@@ -9,7 +9,7 @@ import {
   Container,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { NAV_BAR_WIDTH, SCREEN_SIZES } from "@constants/data";
+import { NAV_BAR_SIDE_WIDTH, NAV_BAR_TOP_WIDTH, SCREEN_SIZES } from "@constants/data";
 import SidePanel from "@nav/SidePanel";
 import ProfileIcon from "@nav/ProfileIcon";
 import { LogoFull } from "@nav/Logo";
@@ -38,7 +38,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const [navOpened, setNavOpened] = useState(false);
   const navStyles = useSpring({
-    x: isMobileView && !navOpened ? -NAV_BAR_WIDTH * 2 : 0,
+    x: isMobileView && !navOpened ? -NAV_BAR_SIDE_WIDTH * 2 : 0,
   });
 
   const activeTab = window.location.pathname.replaceAll("/", "");
@@ -55,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             backgroundColor: theme.colors.dark[7],
             transform: navStyles.x.to((x) => `translate3d(${x}%,0,0)`),
           }}
-          width={{ base: NAV_BAR_WIDTH }}
+          width={{ base: NAV_BAR_SIDE_WIDTH }}
         >
           <Navbar.Section>
             <SidePanel isMobile={isMobileView} />
@@ -75,7 +75,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       }
       header={
         isMobileView ? (
-          <Header height={NAV_BAR_WIDTH}>
+          <Header height={NAV_BAR_TOP_WIDTH}>
             <div
               style={{
                 display: "flex",
@@ -114,8 +114,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       styles={(theme) => ({
         main: {
           padding: 0,
-          marginTop: isMobileView ? NAV_BAR_WIDTH : 0,
-          marginLeft: isMobileView ? 0 : NAV_BAR_WIDTH,
+          marginTop: isMobileView ? NAV_BAR_SIDE_WIDTH : 0,
+          marginLeft: isMobileView ? 0 : NAV_BAR_SIDE_WIDTH,
         },
         body: {
           backgroundColor:

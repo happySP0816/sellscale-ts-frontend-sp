@@ -68,8 +68,7 @@ export default function CampaignProspects({
         return (
           prospect.full_name?.toLowerCase().includes(search.toLowerCase()) ||
           prospect.company?.toLowerCase().includes(search.toLowerCase()) ||
-          prospect.title?.toLowerCase().includes(search.toLowerCase()) ||
-          prospect.industry?.toLowerCase().includes(search.toLowerCase())
+          prospect.title?.toLowerCase().includes(search.toLowerCase())
         );
       });
     }
@@ -91,7 +90,7 @@ export default function CampaignProspects({
         <Grid.Col span={4}>
           <TextInput
             label="Search Prospects"
-            placeholder="Search by Name, Company, Title, or Industry"
+            placeholder="Search by Name, Company, or Title"
             mb="md"
             name="search prospects"
             width={"500px"}

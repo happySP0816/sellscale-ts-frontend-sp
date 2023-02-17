@@ -178,7 +178,7 @@ export default function ProspectTable({
         <Grid.Col span={4}>
           <TextInput
             label="Search Prospects"
-            placeholder="Search by Name, Company, Title, or Industry"
+            placeholder="Search by Name, Company, or Title"
             mb="md"
             name="search prospects"
             width={"500px"}
@@ -238,10 +238,6 @@ export default function ProspectTable({
           },
           {
             accessor: "title",
-            sortable: true,
-          },
-          {
-            accessor: "industry",
             sortable: true,
           },
           {

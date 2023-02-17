@@ -45,7 +45,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
     return {
       title: prospect.full_name,
       description: prospect.title,
-      keywords: prospect.industry+' '+prospect.company,
+      keywords: prospect.company,
       group: 'Prospects',
       onTrigger: () => navigate(`/pipeline/${prospect.id}`),
       icon: (

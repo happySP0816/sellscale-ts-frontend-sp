@@ -86,6 +86,7 @@ export default function ProspectDetailsDrawer() {
           <ProspectDetailsNotes
             currentStatus={data.prospect_info.details.status}
             prospectId={data.prospect_info.details.id}
+            notes={data.prospect_info.details.notes}
           />
           {data.prospect_info.company.name && (
             <ProspectDetailsCompany

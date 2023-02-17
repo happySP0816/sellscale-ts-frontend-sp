@@ -12,6 +12,7 @@ import {
 import { IconGitBranch } from "@tabler/icons";
 
 import { useState } from "react";
+import { ProspectNote } from "src/main";
 
 const mockdata = [
   {
@@ -62,6 +63,7 @@ const useStyles = createStyles((theme) => ({
 type ProspectDetailsChangeStatusProps = {
   currentStatus: string;
   prospectId: number;
+  notes: ProspectNote[];
 };
 
 export default function ProspectDetailsNotes(
@@ -78,22 +80,32 @@ export default function ProspectDetailsNotes(
           Notes
         </Text>
       </Group>
-      <Timeline active={1} bulletSize={24} lineWidth={2}>
-        {mockdata.map(
-          (item: any, i: number) =>
-            (i === 0 || viewAllNotes) && (
-              <Timeline.Item key={`timeline-item-${i}`} bullet={<IconGitBranch size={12} />}>
-                <Text size="sm">{item.note}</Text>
-                <Text size="xs" color="dimmed" mt={4}>
-                  {item.date}
-                </Text>
-              </Timeline.Item>
-            )
-        )}
-      </Timeline>
+      {props.notes.length > 0 && (
+        <Timeline active={1} bulletSize={24} lineWidth={2}>
+          {props.notes.map(
+            (note, index) =>
+              (index === 0 || viewAllNotes) && (
+                <Timeline.Item
+                  key={`timeline-item-${index}`}
+                  bullet={<IconGitBranch size={12} />}
+                >
+                  <Text size="sm">{note.note}</Text>
+                  <Text size="xs" color="dimmed" mt={4}>
+                    {new Date(note.created_at).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </Text>
+                </Timeline.Item>
+              )
+          )}
+        </Timeline>
+      )}
 
       <Flex>
         <Button
+          disabled={viewAllNotes || props.notes.length <= 1}
           color="blue"
           variant="outline"
           mt="md"

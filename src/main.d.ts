@@ -86,3 +86,10 @@ export interface LinkedInMessage {
   message: string;
   profile_url: string;
 }
+
+export interface ProspectNote {
+  created_at: string,
+  id: number,
+  note: string,
+  prospect_id: number,
+}

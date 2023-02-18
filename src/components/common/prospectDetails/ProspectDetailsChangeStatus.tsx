@@ -30,6 +30,11 @@ import {
   IconChecks,
 } from "@tabler/icons";
 import { startCase } from "lodash";
+import displayNotification from "@utils/notificationFlow";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { prospectDrawerCurrentStatusState } from "@atoms/prospectAtoms";
+import { formatToLabel } from "@utils/general";
 
 const statusOptions = [
   {
@@ -130,8 +135,34 @@ const channelIconMap = {
   EMAIL: <IconMail size={16} />,
 };
 
+async function updateChannelStatus(
+  prospectId: number,
+  userToken: string,
+  channelType: string,
+  newStatus: string
+) { // TODO, update for channelType
+  return await fetch(
+    `${process.env.REACT_APP_API_URI}/prospect`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prospect_id: prospectId,
+        new_status: newStatus,
+      }),
+    }
+  ).then((r) => {
+    return (r.status+'').startsWith('2');
+  }).catch((e) => {
+    console.error(e);
+    return false;
+  });
+}
+
 type ProspectDetailsChangeStatusProps = {
-  currentStatus: string;
   prospectId: number;
   channelOptions: {
     label: string;
@@ -144,14 +175,18 @@ export default function ProspectDetailsChangeStatus(
   props: ProspectDetailsChangeStatusProps
 ) {
   const { classes, theme } = useStyles();
-  const [statusService, setStatusService] = useState<string>(
+  const [channelType, setChannelType] = useState<string>(
     props.channelOptions[0].value
   );
+  const [currentStatus, setCurrentStatus] = useRecoilState(prospectDrawerCurrentStatusState);
+  const userToken = useRecoilValue(userTokenState);
 
   const items = [];
-  for(const statusValue in props.channelOptions.find((o) => o.value === statusService)?.status_options){
+  for (const statusValue in props.channelOptions.find(
+    (o) => o.value === channelType
+  )?.status_options) {
     let status = statusOptions.find((o) => o.status === statusValue);
-    if(!status) {
+    if (!status) {
       status = {
         title: startCase(statusValue),
         icon: IconQuestionMark,
@@ -160,7 +195,42 @@ export default function ProspectDetailsChangeStatus(
       };
     }
     items.push(
-      <UnstyledButton key={status.status} className={classes.item}>
+      <UnstyledButton
+        key={status.status}
+        className={classes.item}
+        onClick={async () => {
+          await displayNotification(
+            "make-active-persona",
+            async () => {
+              let result = await updateChannelStatus(
+                props.prospectId,
+                userToken,
+                channelType,
+                status?.status as string
+              );
+              if(result) {
+                setCurrentStatus(status?.status as string);
+              }
+              return result;
+            },
+            {
+              title: `Updating Status`,
+              message: `Working with servers...`,
+              color: "teal",
+            },
+            {
+              title: `Updated!`,
+              message: `Status is now ${status?.title}!`,
+              color: "teal",
+            },
+            {
+              title: `Error while updating!`,
+              message: `Please try again later.`,
+              color: "red",
+            }
+          );
+        }}
+      >
         <status.icon color={theme.colors[status.color][6]} size={32} />
         <Text size="xs" mt={7}>
           {status.title}
@@ -176,16 +246,16 @@ export default function ProspectDetailsChangeStatus(
           Status
         </Text>
         <Badge color="pink" variant="light">
-          {props.currentStatus.replaceAll("_", " ")}
+          {formatToLabel(currentStatus)}
         </Badge>
       </Group>
       <Flex>
         {props.channelOptions.length > 1 && (
           <SegmentedControl
             color="blue"
-            defaultValue={statusService}
+            defaultValue={channelType}
             onChange={(value) => {
-              setStatusService(value);
+              setChannelType(value);
             }}
             data={props.channelOptions.map((option) => {
               return {

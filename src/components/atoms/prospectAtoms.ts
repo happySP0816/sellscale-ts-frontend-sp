@@ -10,6 +10,11 @@ const prospectDrawerIdState = atom({
   default: -1,
 });
 
+const prospectDrawerCurrentStatusState = atom({
+  key: "prospect-drawer-current-status",
+  default: 'UNKNOWN',
+});
+
 const prospectSelectorTypeState = atom({
   key: "prospect-selector-type",
   default: 'all',
@@ -25,4 +30,5 @@ export {
   prospectSelectorTypeState,
   prospectStatusesState,
   prospectDrawerIdState,
+  prospectDrawerCurrentStatusState,
 };

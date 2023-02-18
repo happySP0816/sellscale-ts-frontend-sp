@@ -1,16 +1,23 @@
-import { Drawer, Title, Text, Button, Group, FileButton } from "@mantine/core";
+import { Drawer, Title, Text, Button, Group, FileButton, useMantineTheme } from "@mantine/core";
+import { Dropzone, DropzoneProps, MIME_TYPES } from '@mantine/dropzone';
+import { IconUpload, IconX, IconPhoto, IconFileDescription } from "@tabler/icons";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
 import { temp_delay } from "../../utils/general";
 import displayNotification from "../../utils/notificationFlow";
-import { currentPersonaIdState, uploadDrawerOpenState } from "../atoms/personaAtoms";
+import {
+  currentPersonaIdState,
+  uploadDrawerOpenState,
+} from "../atoms/personaAtoms";
 
 export default function PersonaUploadDrawer(props: {}) {
   const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
-  
+  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
+    currentPersonaIdState
+  );
+  const theme = useMantineTheme();
+
   const isUploading = useRef(false);
-  const resetRef = useRef<() => void>(null);
 
   const uploadFile = async (file: File) => {
     if (isUploading.current) {
@@ -42,7 +49,6 @@ export default function PersonaUploadDrawer(props: {}) {
       }
     );
 
-    resetRef.current?.();
     isUploading.current = false;
   };
 
@@ -58,29 +64,56 @@ export default function PersonaUploadDrawer(props: {}) {
       size="xl"
       position="right"
     >
-      <Text pb="xs">
-        <span className="font-bold">LinkedIn: </span>
-        <span>X/Y prospects available</span>
-      </Text>
-      <Text pb="xs">
-        <span className="font-bold">Email: </span>
-        <span>X/Y prospects available</span>
-      </Text>
 
       <Group position="center">
-        <FileButton resetRef={resetRef} onChange={uploadFile} accept=".csv">
-          {(props) =>
-            <Button
-              {...props}
-              variant="outline"
-              color="teal"
-            >Upload image</Button>
-          }
-        </FileButton>
+        <Dropzone
+          loading={isUploading.current}
+          onDrop={(files: any) => console.log("accepted files", files)}
+          onReject={(files: any) => console.log("rejected files", files)}
+          accept={[MIME_TYPES.csv]}
+          {...props}
+        >
+          <Group
+            position="center"
+            spacing="xl"
+            style={{ minHeight: 220, pointerEvents: "none" }}
+          >
+            <Dropzone.Accept>
+              <IconUpload
+                size={80}
+                stroke={1.5}
+                color={
+                  theme.colors[theme.primaryColor][
+                    theme.colorScheme === "dark" ? 4 : 6
+                  ]
+                }
+              />
+            </Dropzone.Accept>
+            <Dropzone.Reject>
+              <IconX
+                size={80}
+                stroke={1.5}
+                color={theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]}
+              />
+            </Dropzone.Reject>
+            <Dropzone.Idle>
+              <IconFileDescription size={80} stroke={1.5} />
+            </Dropzone.Idle>
+
+            <div>
+              <Text align="center" size="xl" inline>
+                Drag CSVs here or click to select files
+              </Text>
+              <Text align="center" size="sm" color="dimmed" inline mt={7}>
+                Attach as many files as you like, each file should not exceed 5mb
+              </Text>
+            </div>
+          </Group>
+        </Dropzone>
       </Group>
 
       <Text align="center" pb="xs" c="dimmed" fs="italic" fz="sm">
-        CSV of Email + LinkedIn
+        CSVs of Email + LinkedIn
       </Text>
     </Drawer>
   );

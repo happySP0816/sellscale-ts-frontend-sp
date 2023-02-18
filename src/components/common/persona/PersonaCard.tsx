@@ -43,6 +43,7 @@ export default function PersonaCard(props: { archetype: Archetype }) {
         : theme.colors.gray[1],
   });
 
+  /*
   const makeActivePersona = () => {
     displayNotification(
       "make-active-persona",
@@ -71,6 +72,7 @@ export default function PersonaCard(props: { archetype: Archetype }) {
       }
     );
   };
+  */
 
   const getStatusPercentage = () => {
     let m = 100 / props.archetype.performance.total_prospects;
@@ -84,6 +86,18 @@ export default function PersonaCard(props: { archetype: Archetype }) {
       });
     }
     return percentData;
+  }
+
+  const getUsedPercentage = () => {
+    if(props.archetype.performance.total_prospects === 0) return 0;
+    let m = 100 / props.archetype.performance.total_prospects;
+    let totalUsed = 0;
+    for(let statD in props.archetype.performance.status_map){
+      if(statD !== 'PROSPECTED') {
+        totalUsed += props.archetype.performance.status_map[statD];
+      }
+    }
+    return Math.round(totalUsed*m);
   }
 
   return (
@@ -142,7 +156,7 @@ export default function PersonaCard(props: { archetype: Archetype }) {
         <Title order={3} ml="sm" mt="md">
           {props.archetype.archetype}
         </Title>
-        <Text ml="sm">{`${props.archetype.performance.total_prospects} contacts with X% used.`}</Text>
+        <Text ml="sm">{`${props.archetype.performance.total_prospects} contacts with ${getUsedPercentage()}% used.`}</Text>
         <Progress
           size={14}
           sections={getStatusPercentage()}

@@ -21,14 +21,17 @@ import {
   IconChartBubble,
   IconCalendar,
   IconX,
+  IconQuestionMark,
   IconCalendarEvent,
   IconConfetti,
   IconFaceIdError,
   IconTrash,
   IconBrandLinkedin,
+  IconChecks,
 } from "@tabler/icons";
+import { startCase } from "lodash";
 
-const mockdata = [
+const statusOptions = [
   {
     title: "Accepted Invite",
     icon: IconHeartHandshake,
@@ -122,26 +125,49 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
+const channelIconMap = {
+  LINKEDIN: <IconBrandLinkedin size={16} />,
+  EMAIL: <IconMail size={16} />,
+};
+
 type ProspectDetailsChangeStatusProps = {
   currentStatus: string;
   prospectId: number;
+  channelOptions: {
+    label: string;
+    status_options: Record<string, string>;
+    value: string;
+  }[];
 };
 
 export default function ProspectDetailsChangeStatus(
   props: ProspectDetailsChangeStatusProps
 ) {
   const { classes, theme } = useStyles();
-  const [opened, setOpened] = useState(false);
-  const [statusService, setStatusService] = useState<'EMAIL' | 'LINKEDIN'>('LINKEDIN');
+  const [statusService, setStatusService] = useState<string>(
+    props.channelOptions[0].value
+  );
 
-  const items = mockdata.map((item) => (
-    <UnstyledButton key={item.title} className={classes.item}>
-      <item.icon color={theme.colors[item.color][6]} size={32} />
-      <Text size="xs" mt={7}>
-        {item.title}
-      </Text>
-    </UnstyledButton>
-  ));
+  const items = [];
+  for(const statusValue in props.channelOptions.find((o) => o.value === statusService)?.status_options){
+    let status = statusOptions.find((o) => o.status === statusValue);
+    if(!status) {
+      status = {
+        title: startCase(statusValue),
+        icon: IconQuestionMark,
+        color: "blue",
+        status: statusValue,
+      };
+    }
+    items.push(
+      <UnstyledButton key={status.status} className={classes.item}>
+        <status.icon color={theme.colors[status.color][6]} size={32} />
+        <Text size="xs" mt={7}>
+          {status.title}
+        </Text>
+      </UnstyledButton>
+    );
+  }
 
   return (
     <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
@@ -153,46 +179,31 @@ export default function ProspectDetailsChangeStatus(
           {props.currentStatus.replaceAll("_", " ")}
         </Badge>
       </Group>
-      <Flex gap="xs">
-        <Button
-          color="blue"
-          variant={opened ? 'filled' : 'outline'}
-          onClick={() => {
-            setOpened((o: boolean) => !o);
-          }}
-        >
-          Update Status
-        </Button>
-        <SegmentedControl
-          color='blue'
-          defaultValue={statusService}
-          onChange={(value) => {setStatusService(value as 'EMAIL' | 'LINKEDIN')}}
-          data={[
-            { value: 'LINKEDIN', label: (
-              <Center>
-                <IconBrandLinkedin size={16} />
-                <Box ml={10}>LinkedIn</Box>
-              </Center>
-            ) },
-            { value: 'EMAIL', label: (
-              <Center>
-                <IconMail size={16} />
-                <Box ml={10}>Email</Box>
-              </Center>
-            ) },
-          ]}
-        />
+      <Flex>
+        {props.channelOptions.length > 1 && (
+          <SegmentedControl
+            color="blue"
+            defaultValue={statusService}
+            onChange={(value) => {
+              setStatusService(value);
+            }}
+            data={props.channelOptions.map((option) => {
+              return {
+                value: option.value,
+                label: (
+                  <Center>
+                    {channelIconMap[option.value as "LINKEDIN" | "EMAIL"]}
+                    <Box ml={10}>{option.label}</Box>
+                  </Center>
+                ),
+              };
+            })}
+          />
+        )}
       </Flex>
-      <Collapse in={opened} mt="md">
-        <Card withBorder radius="md" className={classes.card}>
-          <Group position="apart">
-            <Text className={classes.title}>{`Change ${statusService === 'LINKEDIN' ? 'LinkedIn' : 'Email' } status to:`}</Text>
-          </Group>
-          <SimpleGrid cols={3} mt="md">
-            {items}
-          </SimpleGrid>
-        </Card>
-      </Collapse>
+      <SimpleGrid cols={3} mt="md">
+        {items}
+      </SimpleGrid>
     </Card>
   );
 }

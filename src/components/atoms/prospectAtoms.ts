@@ -1,4 +1,5 @@
 import { atom } from "recoil";
+import { ProspectNote } from "src/main";
 
 const prospectDrawerOpenState = atom({
   key: "prospect-drawer-open",
@@ -13,6 +14,11 @@ const prospectDrawerIdState = atom({
 const prospectDrawerCurrentStatusState = atom({
   key: "prospect-drawer-current-status",
   default: 'UNKNOWN',
+});
+
+const prospectDrawerNotesState = atom({
+  key: "prospect-drawer-notes",
+  default: [] as ProspectNote[],
 });
 
 const prospectSelectorTypeState = atom({
@@ -31,4 +37,5 @@ export {
   prospectStatusesState,
   prospectDrawerIdState,
   prospectDrawerCurrentStatusState,
+  prospectDrawerNotesState,
 };

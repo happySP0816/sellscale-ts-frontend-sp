@@ -4,6 +4,7 @@ import {
   prospectDrawerIdState,
   prospectDrawerOpenState,
   prospectDrawerCurrentStatusState,
+  prospectDrawerNotesState,
 } from "@atoms/prospectAtoms";
 import { useQuery } from "react-query";
 import ProspectDetailsSummary from "../common/prospectDetails/ProspectDetailsSummary";
@@ -45,6 +46,7 @@ async function getChannelStatusOptions(prospectId: number, userToken: string, ch
 export default function ProspectDetailsDrawer() {
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [currentStatus, setCurrentStatus] = useRecoilState(prospectDrawerCurrentStatusState);
+  const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
   const prospectId = useRecoilValue(prospectDrawerIdState);
   const userToken = useRecoilValue(userTokenState);
 
@@ -78,6 +80,7 @@ export default function ProspectDetailsDrawer() {
       console.log(channelOptions);
 
       setCurrentStatus(res.prospect_info.details.status);
+      setNotes(res.prospect_info.details.notes);
 
       return { main: res, channelOptions };
     },
@@ -128,7 +131,6 @@ export default function ProspectDetailsDrawer() {
           <ProspectDetailsNotes
             currentStatus={data.main.prospect_info.details.status}
             prospectId={data.main.prospect_info.details.id}
-            notes={data.main.prospect_info.details.notes}
           />
           {data.main.prospect_info.company.name && (
             <ProspectDetailsCompany

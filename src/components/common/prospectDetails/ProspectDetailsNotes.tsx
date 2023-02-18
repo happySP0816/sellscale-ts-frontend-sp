@@ -1,3 +1,5 @@
+import { prospectDrawerNotesState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import { userTokenState } from "@atoms/userAtoms";
 import {
   createStyles,
   Card,
@@ -10,24 +12,12 @@ import {
   Textarea,
 } from "@mantine/core";
 import { IconGitBranch } from "@tabler/icons";
+import displayNotification from "@utils/notificationFlow";
 
 import { useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { ProspectNote } from "src/main";
 
-const mockdata = [
-  {
-    note: "Accepted my invite. We scheduled a call for next week.",
-    date: "March 23rd, 2022 (latest note)",
-  },
-  {
-    note: "We met! Was a good meeting. Meeting his team next week.",
-    date: "March 30th, 2022",
-  },
-  {
-    note: "Met with his team. They're interested in a demo.",
-    date: "April 1st, 2022",
-  },
-];
 const useStyles = createStyles((theme) => ({
   card: {
     backgroundColor:
@@ -60,10 +50,35 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
+async function addProspectNote(
+  prospectId: number,
+  userToken: string,
+  newNote: string
+) {
+  return await fetch(
+    `${process.env.REACT_APP_API_URI}/prospect/add_note`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prospect_id: prospectId,
+        note: newNote,
+      }),
+    }
+  ).then(async (r) => {
+    return await r.json();
+  }).catch((e) => {
+    console.error(e);
+    return false;
+  });
+}
+
 type ProspectDetailsChangeStatusProps = {
   currentStatus: string;
   prospectId: number;
-  notes: ProspectNote[];
 };
 
 export default function ProspectDetailsNotes(
@@ -71,7 +86,10 @@ export default function ProspectDetailsNotes(
 ) {
   const { classes, theme } = useStyles();
   const [opened, setOpened] = useState(false);
+  const [newNote, setNewNote] = useState('');
   const [viewAllNotes, setViewAllNotes] = useState(false);
+  const userToken = useRecoilValue(userTokenState);
+  const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
 
   return (
     <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
@@ -80,9 +98,9 @@ export default function ProspectDetailsNotes(
           Notes
         </Text>
       </Group>
-      {props.notes.length > 0 && (
-        <Timeline active={1} bulletSize={24} lineWidth={2}>
-          {props.notes.map(
+      {notes.length > 0 && (
+        <Timeline active={1} bulletSize={24} lineWidth={2} m='xs'>
+          {notes.map(
             (note, index) =>
               (index === 0 || viewAllNotes) && (
                 <Timeline.Item
@@ -105,7 +123,7 @@ export default function ProspectDetailsNotes(
 
       <Flex gap="xs">
         <Button
-          disabled={viewAllNotes || props.notes.length <= 1}
+          disabled={viewAllNotes || notes.length <= 1}
           color="blue"
           variant="outline"
           onClick={() => setViewAllNotes((o: boolean) => !o)}
@@ -129,13 +147,45 @@ export default function ProspectDetailsNotes(
           placeholder="Add a note here..."
           label="New Note"
           withAsterisk
+          onBlur={(e) => setNewNote(e.target.value)}
         />
         <Button
           color="blue"
           variant="outline"
           mt="md"
-          onClick={() => {
-            setOpened(false);
+          onClick={async () => {
+            await displayNotification(
+              "add-prospect-note",
+              async () => {
+                let result = await addProspectNote(
+                  props.prospectId,
+                  userToken,
+                  newNote
+                );
+                if(result) {
+                  setNotes((prev) => [...prev,
+                    {id: result.prospect_note_id, note: newNote, prospect_id: props.prospectId, created_at: new Date().toISOString()}
+                  ]);
+                  setOpened(false);
+                }
+                return result;
+              },
+              {
+                title: `Adding Note`,
+                message: `Working with servers...`,
+                color: "teal",
+              },
+              {
+                title: `Added!`,
+                message: `You new note has been added.`,
+                color: "teal",
+              },
+              {
+                title: `Error while adding note!`,
+                message: `Please try again later.`,
+                color: "red",
+              }
+            );
           }}
         >
           Save Note

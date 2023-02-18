@@ -140,7 +140,7 @@ async function updateChannelStatus(
   userToken: string,
   channelType: string,
   newStatus: string
-) { // TODO, update for channelType
+) {
   return await fetch(
     `${process.env.REACT_APP_API_URI}/prospect`,
     {
@@ -152,6 +152,7 @@ async function updateChannelStatus(
       body: JSON.stringify({
         prospect_id: prospectId,
         new_status: newStatus,
+        channel_type: channelType,
       }),
     }
   ).then((r) => {
@@ -200,7 +201,7 @@ export default function ProspectDetailsChangeStatus(
         className={classes.item}
         onClick={async () => {
           await displayNotification(
-            "make-active-persona",
+            "change-prospect-status",
             async () => {
               let result = await updateChannelStatus(
                 props.prospectId,

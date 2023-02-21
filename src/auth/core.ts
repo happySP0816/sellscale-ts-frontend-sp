@@ -13,20 +13,18 @@ export function login(email: string, setUserEmail: SetterOrUpdater<string>){
 
 }
 
-export function authorize(token: string, setUserToken: SetterOrUpdater<string>, setUserName: SetterOrUpdater<string>, setUserEmail: SetterOrUpdater<string>){
+export async function authorize(token: string, setUserToken: SetterOrUpdater<string>, setUserName: SetterOrUpdater<string>, setUserEmail: SetterOrUpdater<string>){
 
   setUserToken(token);
   localStorage.setItem('user-token', token);
 
-  getUserInfo(token).then((info) => {
-    if(!info){ logout(); }
+  const info = await getUserInfo(token);
+  if(!info){ logout(); }
 
-    setUserName(info.sdr_name);
-    localStorage.setItem('user-name', info.sdr_name);
-    setUserEmail(info.sdr_email);
-    localStorage.setItem('user-email', info.sdr_email);
-
-  });
+  setUserName(info.sdr_name);
+  localStorage.setItem('user-name', info.sdr_name);
+  setUserEmail(info.sdr_email);
+  localStorage.setItem('user-email', info.sdr_email);
 
 }
 

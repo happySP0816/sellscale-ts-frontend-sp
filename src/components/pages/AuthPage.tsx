@@ -4,7 +4,7 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import PageFrame from "../common/PageFrame";
@@ -53,13 +53,11 @@ export default function AuthPage() {
   const [userEmail, setUserEmail] = useRecoilState(userEmailState);
   const [userToken, setUserToken] = useRecoilState(userTokenState);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
 
     const tokenType = searchParams.get('stytch_token_type');
     const authToken = searchParams.get('token');
     const email = searchParams.get('email') || userEmail;
-
-    console.log(email, authToken, tokenType);
 
     if (!authToken){
       showNotification({

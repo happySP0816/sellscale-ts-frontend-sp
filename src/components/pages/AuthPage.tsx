@@ -54,20 +54,13 @@ export default function AuthPage() {
   const [userToken, setUserToken] = useRecoilState(userTokenState);
 
   useEffect(() => {
+
     const tokenType = searchParams.get('stytch_token_type');
     const authToken = searchParams.get('token');
+    const email = searchParams.get('email') || userEmail;
 
-    if (tokenType !== 'magic_links'){
-      showNotification({
-        id: 'auth-invalid-token-type',
-        title: 'Invalid token type',
-        message: `Token type "${tokenType}" was not expected!`,
-        color: 'red',
-        autoClose: false,
-      });
-      console.error('Invalid token type', tokenType);
-      return;
-    }
+    console.log(email, authToken, tokenType);
+
     if (!authToken){
       showNotification({
         id: 'auth-invalid-token',
@@ -80,14 +73,28 @@ export default function AuthPage() {
       return;
     }
 
-    sendAuthToken(authToken, userEmail+'').then((response) => {
+    if(tokenType === 'magic_links'){
+      sendAuthToken(authToken, email).then(async (response) => {
+        await authorize(response.token, setUserToken, setUserName, setUserEmail);
+        navigate(`/`);
+      });
+    } else if(tokenType === 'direct'){
+      (async () => {
+        await authorize(authToken, setUserToken, setUserName, setUserEmail);
+        navigate(`/`);
+      })();
+    } else {
+      showNotification({
+        id: 'auth-invalid-token-type',
+        title: 'Invalid token type',
+        message: `Token type "${tokenType}" was not expected!`,
+        color: 'red',
+        autoClose: false,
+      });
+      console.error('Invalid token type', tokenType);
+    }
 
-      authorize(response.token, setUserToken, setUserName, setUserEmail);
-      navigate(`/`);
-
-    });
-
-  }, [searchParams, userEmail]);
+  }, []);
 
   return (
     <PageFrame>

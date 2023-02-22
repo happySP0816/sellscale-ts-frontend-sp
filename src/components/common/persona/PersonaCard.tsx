@@ -74,6 +74,7 @@ export default function PersonaCard(props: { archetype: Archetype }) {
   };
   */
 
+  /*
   const getStatusPercentage = () => {
     let m = 100 / props.archetype.performance.total_prospects;
     let percentData = [];
@@ -85,6 +86,34 @@ export default function PersonaCard(props: { archetype: Archetype }) {
         tooltip: `${formatToLabel(statD)} - ${props.archetype.performance.status_map[statD]} prospects`,
       });
     }
+    return percentData;
+  }
+  */
+
+  const WARNING_PERCENTAGE = 75;
+  const getStatusUsedPercentage = () => {
+    let usedVal = 0;
+    let unusedVal = 0;
+
+    for(let statD in props.archetype.performance.status_map){
+      if(statD === 'PROSPECTED') {
+        unusedVal += props.archetype.performance.status_map[statD];
+      } else {
+        usedVal += props.archetype.performance.status_map[statD];
+      }
+    }
+
+    let m = 100 / props.archetype.performance.total_prospects;
+    let percentData = [];
+    if(usedVal*m > 0) {
+      percentData.push({
+        value: usedVal*m,
+        color: usedVal*m > WARNING_PERCENTAGE ? 'red' : (usedVal*m > 50 ? 'yellow' : 'green'),
+        label: 'Used',
+        tooltip: `Used - ${unusedVal} prospects`,
+      });
+    }
+
     return percentData;
   }
 
@@ -159,8 +188,11 @@ export default function PersonaCard(props: { archetype: Archetype }) {
         <Text ml="sm">{`${props.archetype.performance.total_prospects} contacts with ${getUsedPercentage()}% used.`}</Text>
         <Progress
           size={14}
-          sections={getStatusPercentage()}
+          sections={getStatusUsedPercentage()}
         />
+        {getStatusUsedPercentage().filter((s) => s.value > WARNING_PERCENTAGE).length > 0 && (
+          <Text c="dimmed" fs="italic" fz="sm">You should upload more contacts soon!</Text>
+        )}
       </Stack>
       <Stack spacing="xs">
         <Button

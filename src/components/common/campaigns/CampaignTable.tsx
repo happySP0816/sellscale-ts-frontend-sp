@@ -150,6 +150,9 @@ export default function ProspectTable() {
       }
 
       totalRecords.current = res.total_count;
+
+      console.log(res.outbound_campaigns);
+
       return res.outbound_campaigns.map((campaign: any) => {
         return {
           uuid: campaign.uuid,

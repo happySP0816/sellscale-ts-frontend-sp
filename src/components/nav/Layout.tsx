@@ -11,7 +11,7 @@ import {
 import { useMediaQuery } from "@mantine/hooks";
 import { NAV_BAR_SIDE_WIDTH, NAV_BAR_TOP_WIDTH, SCREEN_SIZES } from "@constants/data";
 import SidePanel from "@nav/SidePanel";
-import ProfileIcon from "@nav/ProfileIcon";
+import ProfileIcon, { ProfileCard } from "@nav/ProfileIcon";
 import { LogoFull } from "@nav/Logo";
 import { animated, useSpring } from "@react-spring/web";
 import { openSpotlight } from "@mantine/spotlight";
@@ -41,8 +41,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     x: isMobileView && !navOpened ? -NAV_BAR_SIDE_WIDTH * 2 : 0,
   });
 
-  const activeTab = window.location.pathname.replaceAll("/", "");
-
   return (
     <AppShell
       className={"h-full"}
@@ -63,7 +61,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Navbar.Section>
             {isLoggedIn() && (
               <>
-                <ProfileIcon
+                <ProfileCard
                   name={userName}
                   email={userEmail}
                 />

@@ -20,12 +20,12 @@ export default function NavTab(props: NavTabProps) {
   const { hovered, ref } = useHover();
 
   return (
-    <Tooltip disabled={true} label={props.description} position="right" className="cursor-pointer" onClick={() => {
+    <Tooltip label={props.description} withArrow position="right" className="cursor-pointer" onClick={() => {
       if(!props.dontChangeTab){
         setNavTab(props.name);
       }
       props.onClick();
-    }} withArrow>
+    }}>
       <div ref={ref} style={{
         display: 'flex',
       }}>
@@ -45,13 +45,13 @@ export default function NavTab(props: NavTabProps) {
           // Add alpha channel to hex color (browser support: https://caniuse.com/css-rrggbbaa)
           backgroundColor: hovered || navTab === props.name ? theme.colors.teal[7]+'15' : "transparent",
         }}>
-          <Container p={5} m={0}>
+          <Container p={5} m={0} sx={{ lineHeight: '0px' }}>
             <Indicator disabled={!props.indicatorColor} dot size={11} color={props.indicatorColor} withBorder>
               {props.icon}
             </Indicator>
           </Container>
           <Container p={5} m={0}>
-            <Text>{startCase(props.name)}</Text>
+            <Text fz="sm">{startCase(props.name)}</Text>
           </Container>
         </div>
       </div>

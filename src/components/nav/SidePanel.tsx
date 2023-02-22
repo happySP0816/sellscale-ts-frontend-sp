@@ -103,28 +103,28 @@ export default function SidePanel(props: { isMobile?: boolean }) {
         <NavTab
           icon={<IconHome size={22} />}
           name="home"
-          description="Home"
+          description="Go to home page"
           onClick={() => navigate(`/home`)}
         />
 
         <NavTab
           icon={<IconFilter size={22} />}
           name="pipeline"
-          description="Pipeline"
+          description="View the state of your outbound funnel by stage"
           onClick={() => navigate(`/pipeline`)}
         />
 
         <NavTab
           icon={<IconUsers size={22} />}
           name="personas"
-          description="Personas"
+          description="Create target ICPs and upload new prospect lists"
           onClick={() => navigate(`/personas`)}
         />
 
         <NavTab
           icon={<IconSend size={22} />}
           name="campaigns"
-          description="Campaigns"
+          description="View and understand the performance of your weekly outbound campaigns"
           onClick={() => navigate(`/campaigns`)}
         />
       </div>

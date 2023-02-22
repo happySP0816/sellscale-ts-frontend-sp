@@ -34,7 +34,7 @@ import displayNotification from "@utils/notificationFlow";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { prospectDrawerCurrentStatusState } from "@atoms/prospectAtoms";
-import { formatToLabel } from "@utils/general";
+import { formatToLabel, splitName } from "@utils/general";
 
 const statusOptions = [
   {
@@ -165,6 +165,7 @@ async function updateChannelStatus(
 
 type ProspectDetailsChangeStatusProps = {
   prospectId: number;
+  prospectName: string;
   channelOptions: {
     label: string;
     status_options: Record<string, string>;
@@ -242,7 +243,7 @@ export default function ProspectDetailsChangeStatus(
 
   return (
     <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
-      <Group position="apart" mb="xs">
+      <Group position="apart">
         <Text weight={700} size="lg">
           Status
         </Text>
@@ -250,6 +251,7 @@ export default function ProspectDetailsChangeStatus(
           {formatToLabel(currentStatus)}
         </Badge>
       </Group>
+      <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${splitName(props.prospectName).first}'s status.`}</Text>
       <Flex>
         {props.channelOptions.length > 1 && (
           <SegmentedControl

@@ -1,5 +1,5 @@
 import { prospectDrawerNotesState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
-import { userTokenState } from "@atoms/userAtoms";
+import { userNameState, userTokenState } from "@atoms/userAtoms";
 import {
   createStyles,
   Card,
@@ -12,6 +12,7 @@ import {
   Textarea,
 } from "@mantine/core";
 import { IconGitBranch } from "@tabler/icons";
+import { splitName } from "@utils/general";
 import displayNotification from "@utils/notificationFlow";
 
 import { useState } from "react";
@@ -93,11 +94,12 @@ export default function ProspectDetailsNotes(
 
   return (
     <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
-      <Group position="apart" mb="xs">
+      <Group position="apart">
         <Text weight={700} size="lg">
           Notes
         </Text>
       </Group>
+      <Text mb="xs" fz="sm" c="dimmed">Write down details about this prospect (meeting dates, considerations, etc).</Text>
       {notes.length > 0 && (
         <Timeline active={1} bulletSize={24} lineWidth={2} m='xs'>
           {notes.map(

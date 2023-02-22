@@ -82,6 +82,7 @@ export default function LinkedInCTAsDrawer(props: {}) {
         return {
           ...cta,
           percentage: cta.performance?.total_count ? Math.round((totalResponded / cta.performance.total_count) * 100) : 0,
+          total_count: cta.performance?.total_count,
         };
       });
       if(!pageData) { return []; }
@@ -119,11 +120,16 @@ export default function LinkedInCTAsDrawer(props: {}) {
             },
             {
               accessor: "percentage",
-              title: "%",
+              title: "Acceptance Rate",
               ellipsis: true,
               sortable: true,
               width: 80,
               render: ({ percentage }) => `${percentage}%`,
+            },
+            {
+              accessor: "total_count",
+              title: "Contacts",
+              sortable: true,
             },
             {
               accessor: "active",
@@ -156,6 +162,7 @@ export default function LinkedInCTAsDrawer(props: {}) {
           paginationColor="teal"
           sortStatus={sortStatus}
           onSortStatusChange={handleSortStatusChange}
+          /*
           onRowClick={({ id, text_value, percentage, active }) =>
             openModal({
               title: (
@@ -184,7 +191,7 @@ export default function LinkedInCTAsDrawer(props: {}) {
                 }
               }),
             })
-          }
+          }*/
           rowContextMenu={{
             items: ({ id }) => [
               {

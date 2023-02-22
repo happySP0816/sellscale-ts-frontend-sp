@@ -14,6 +14,7 @@ import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes
 import ProspectDetailsViewConversation from "../common/prospectDetails/ProspectDetailsViewConversation";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
+import { useRef } from "react";
 
 async function getChannelOptions(prospectId: number, userToken: string){
   const response = await fetch(
@@ -117,6 +118,7 @@ export default function ProspectDetailsDrawer() {
           {data.channelOptions.length > 0 && (
             <ProspectDetailsChangeStatus
               prospectId={data.main.prospect_info.details.id}
+              prospectName={data.main.prospect_info.details.full_name}
               channelOptions={data.channelOptions}
             />
           )}

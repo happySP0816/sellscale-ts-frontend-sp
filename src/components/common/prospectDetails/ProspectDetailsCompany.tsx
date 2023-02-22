@@ -55,11 +55,12 @@ export default function ProspectDetailsCompany(
 
   return (
     <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
-      <Group position="apart" mb="xs">
+      <Group position="apart">
         <Text weight={700} size="lg">
           Company
         </Text>
       </Group>
+      <Text mb="xs" fz="sm" c="dimmed">Details about this account.</Text>
       <Paper
         radius="md"
         withBorder
@@ -92,7 +93,7 @@ export default function ProspectDetailsCompany(
           mt="md"
           onClick={(o) => setOpened(!opened)}
         >
-          Learn more about {props.company_name}
+          {props.company_name && props.company_name.length > 30 ? `Learn more about company` : `Learn more about ${props.company_name}`}
         </Button>
 
         {props.website_url && (
@@ -105,7 +106,7 @@ export default function ProspectDetailsCompany(
             rel="noopener noreferrer"
             href={props.website_url}
           >
-            Visit {props.company_name}'s website
+            {props.company_name && props.company_name.length > 30 ? `Visit company website` : `Visit ${props.company_name}'s website`}
           </Button>
         )}
       </Paper>

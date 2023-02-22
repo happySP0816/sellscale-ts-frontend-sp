@@ -54,7 +54,6 @@ async function uploadCSV(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        client_id: -1, // USE UserToken instead
         archetype_id: archetype_id,
         csv_payload: convertCSVtoJSON(contents),
       }),

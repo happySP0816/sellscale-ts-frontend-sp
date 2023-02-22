@@ -1,23 +1,79 @@
-import { Drawer, Title, Text, Button, Group, FileButton, useMantineTheme } from "@mantine/core";
-import { Dropzone, DropzoneProps, MIME_TYPES } from '@mantine/dropzone';
-import { IconUpload, IconX, IconPhoto, IconFileDescription } from "@tabler/icons";
+import { userTokenState } from "@atoms/userAtoms";
+import { getUserInfo } from "@auth/core";
+import {
+  Drawer,
+  Title,
+  Text,
+  Button,
+  Group,
+  FileButton,
+  useMantineTheme,
+  Center,
+  SimpleGrid,
+  Container,
+} from "@mantine/core";
+import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
+import {
+  IconUpload,
+  IconX,
+  IconPhoto,
+  IconFileDescription,
+} from "@tabler/icons";
 import { useEffect, useRef, useState } from "react";
-import { useRecoilState } from "recoil";
-import { temp_delay } from "../../utils/general";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { convertCSVtoJSON, temp_delay } from "../../utils/general";
 import displayNotification from "../../utils/notificationFlow";
 import {
   currentPersonaIdState,
   uploadDrawerOpenState,
 } from "../atoms/personaAtoms";
 
+async function uploadCSV(
+  archetype_id: number,
+  userToken: string,
+  payload: File
+) {
+
+  console.log(payload);
+
+  const read = new FileReader();
+  read.readAsBinaryString(payload);
+
+  const contents = await new Promise((res, rej) => {
+    read.onloadend = function(){
+      res(read.result as string);
+    }
+  }) as string;
+
+  const response = await fetch(
+    `${process.env.REACT_APP_API_URI}/prospect/add_prospect_from_csv_payload`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_id: -1, // USE UserToken instead
+        archetype_id: archetype_id,
+        csv_payload: convertCSVtoJSON(contents),
+      }),
+    }
+  );
+  return response;
+}
+
 export default function PersonaUploadDrawer(props: {}) {
   const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
     currentPersonaIdState
   );
+  const userToken = useRecoilValue(userTokenState);
+
   const theme = useMantineTheme();
 
   const isUploading = useRef(false);
+  const resetRef = useRef<() => void>(null);
 
   const uploadFile = async (file: File) => {
     if (isUploading.current) {
@@ -28,27 +84,27 @@ export default function PersonaUploadDrawer(props: {}) {
     await displayNotification(
       "make-active-persona",
       async () => {
-        console.log(file);
-        await temp_delay(1000);
-        return Math.random() < 0.75;
+        const response = await uploadCSV(currentPersonaId, userToken, file)
+        return response?.status === 200;
       },
       {
-        title: `Uploading Persona`,
+        title: `Uploading Contacts to Persona`,
         message: `Working with servers...`,
         color: "teal",
       },
       {
         title: `Uploaded!`,
-        message: `Very cool 👍`,
+        message: `Added contacts to persona.`,
         color: "teal",
       },
       {
         title: `Error while uploading!`,
-        message: `Test 25% chance of failure!`,
+        message: `Please try again later.`,
         color: "red",
       }
     );
 
+    resetRef.current?.();
     isUploading.current = false;
   };
 
@@ -59,62 +115,25 @@ export default function PersonaUploadDrawer(props: {}) {
         setCurrentPersonaId(-1);
         setOpened(false);
       }}
-      title={<Title order={2}>Upload Persona</Title>}
+      title={<Title order={2}>Upload to Persona</Title>}
       padding="xl"
       size="xl"
       position="right"
     >
-
-      <Group position="center">
-        <Dropzone
-          loading={isUploading.current}
-          onDrop={(files: any) => console.log("accepted files", files)}
-          onReject={(files: any) => console.log("rejected files", files)}
-          accept={[MIME_TYPES.csv]}
-          {...props}
-        >
-          <Group
-            position="center"
-            spacing="xl"
-            style={{ minHeight: 220, pointerEvents: "none" }}
-          >
-            <Dropzone.Accept>
-              <IconUpload
-                size={80}
-                stroke={1.5}
-                color={
-                  theme.colors[theme.primaryColor][
-                    theme.colorScheme === "dark" ? 4 : 6
-                  ]
-                }
-              />
-            </Dropzone.Accept>
-            <Dropzone.Reject>
-              <IconX
-                size={80}
-                stroke={1.5}
-                color={theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]}
-              />
-            </Dropzone.Reject>
-            <Dropzone.Idle>
-              <IconFileDescription size={80} stroke={1.5} />
-            </Dropzone.Idle>
-
-            <div>
-              <Text align="center" size="xl" inline>
-                Drag CSVs here or click to select files
-              </Text>
-              <Text align="center" size="sm" color="dimmed" inline mt={7}>
-                Attach as many files as you like, each file should not exceed 5mb
-              </Text>
-            </div>
-          </Group>
-        </Dropzone>
-      </Group>
-
-      <Text align="center" pb="xs" c="dimmed" fs="italic" fz="sm">
-        CSVs of Email + LinkedIn
-      </Text>
+      <Container m="sm">
+        <Text c="dimmed" fs="italic" align="center">
+          Upload a CSV of Email + LinkedIn contacts.
+        </Text>
+      </Container>
+      <Center>
+        <FileButton resetRef={resetRef} onChange={uploadFile} accept=".csv">
+          {(props) => (
+            <Button {...props} variant="outline" color="teal">
+              Upload File
+            </Button>
+          )}
+        </FileButton>
+      </Center>
     </Drawer>
   );
 }

@@ -50,7 +50,7 @@ export function logout(noCheck = false){
 }
 
 
-async function getUserInfo(userToken: string | null) {
+export async function getUserInfo(userToken: string | null) {
   if(userToken === null){ return null; }
 
   const response = await fetch(
@@ -69,6 +69,8 @@ async function getUserInfo(userToken: string | null) {
   if (!res || !res.sdr_info) {
     return null;
   }
+
+  console.log(res);
 
   return res.sdr_info;
 

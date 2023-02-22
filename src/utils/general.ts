@@ -2,16 +2,16 @@ import { MantineColor, MantineTheme } from "@mantine/core";
 import { startCase } from "lodash";
 
 export function temp_delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
  * Given a string, returns the first and last name.
- * @param name 
- * @returns 
+ * @param name
+ * @returns
  */
 export function splitName(name: string) {
-  let parts = name.split(' ');
+  let parts = name.split(" ");
   return {
     first: parts[0],
     last: parts[parts.length - 1],
@@ -20,8 +20,8 @@ export function splitName(name: string) {
 
 /**
  * Given a date, returns a string in the format YYYY-MM-DD.
- * @param date 
- * @returns 
+ * @param date
+ * @returns
  */
 export function formatDate(date: Date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -29,8 +29,8 @@ export function formatDate(date: Date) {
 
 /**
  * Given a string, returns a number between 0 and range that is consistent for the same string.
- * @param str 
- * @param range 
+ * @param str
+ * @param range
  * @returns - Consistent number between 0 and range
  */
 export function hashString(str: string, range: number): number {
@@ -43,7 +43,7 @@ export function hashString(str: string, range: number): number {
 
 /**
  * Given a number between 0 and 100, returns a color between red and green.
- * @param input 
+ * @param input
  * @returns - Color between red and green
  */
 export function percentageToColor(input: number): string {
@@ -66,28 +66,33 @@ export function percentageToColor(input: number): string {
     b = midColor.b + ((endColor.b - midColor.b) * (input - 50)) / 50;
   }
 
-  return "#" + ((1 << 24) + (Math.round(r) << 16) + (Math.round(g) << 8) + Math.round(b)).toString(16).slice(1);
+  return (
+    "#" +
+    ((1 << 24) + (Math.round(r) << 16) + (Math.round(g) << 8) + Math.round(b))
+      .toString(16)
+      .slice(1)
+  );
 }
 
 /**
  * Returns a fitting color for a given value.
- * @param theme 
- * @param value 
+ * @param theme
+ * @param value
  * @returns - color name in mantine theme colors
  */
 const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
-  'complete': 'blue',
-  'cancelled': 'red',
-  'linkedin': 'indigo',
-  'email': 'orange',
-  'accepted': 'green',
-  'active_convo': 'yellow',
-  'bumped': 'orange',
+  complete: "blue",
+  cancelled: "red",
+  linkedin: "indigo",
+  email: "orange",
+  accepted: "green",
+  active_convo: "yellow",
+  bumped: "orange",
 };
 export function valueToColor(theme: MantineTheme, value: string): MantineColor {
   value = value.toLowerCase();
 
-  if(PRESET_COLOR_MAPS[value]) {
+  if (PRESET_COLOR_MAPS[value]) {
     return PRESET_COLOR_MAPS[value];
   }
 
@@ -104,19 +109,48 @@ export function valueToColor(theme: MantineTheme, value: string): MantineColor {
   return "gray";
 }
 
-export function formatToLabel(value: string){
+export function formatToLabel(value: string) {
   value = value.toLowerCase();
-  if(value === 'responded'){
-    return 'Bumped';
+  if (value === "responded") {
+    return "Bumped";
   }
-  if(value === 'demo_set'){
-    return 'Demo Scheduled';
+  if (value === "demo_set") {
+    return "Demo Scheduled";
   }
-  if(value === 'demo_won'){
-    return 'Demo Complete';
+  if (value === "demo_won") {
+    return "Demo Complete";
   }
-  if(value === 'demo_loss'){
-    return 'Demo Missed';
+  if (value === "demo_loss") {
+    return "Demo Missed";
   }
   return startCase(value.replaceAll("_", " "));
+}
+
+/**
+ * Converts a CSV string to a JSON object.
+ * @param csv
+ * @returns - JSON object
+ */
+export function convertCSVtoJSON(csv: string) {
+  let lines = csv.replace(/\r/g, '').split("\n");
+
+  let result = [];
+
+  // NOTE: If your columns contain commas in their values, you'll need
+  // to deal with those before doing the next step
+  let headers = lines[0].split(",");
+
+  for (let i = 1; i < lines.length; i++) {
+    let obj = {};
+    let currentline = lines[i].split(",");
+
+    for (let j = 0; j < headers.length; j++) {
+      // @ts-ignore
+      obj[headers[j]] = currentline[j];
+    }
+
+    result.push(obj);
+  }
+
+  return result;
 }

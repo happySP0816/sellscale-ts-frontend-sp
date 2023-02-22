@@ -142,7 +142,7 @@ async function updateChannelStatus(
   newStatus: string
 ) {
   return await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect`,
+    `${process.env.REACT_APP_API_URI}/prospect/`,
     {
       method: "PATCH",
       headers: {

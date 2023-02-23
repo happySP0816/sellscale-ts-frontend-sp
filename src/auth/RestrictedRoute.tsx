@@ -11,7 +11,7 @@ export default function RestrictedRoute(props: { page: React.ReactNode }) {
       if(!isLoggedIn()) {
         navigate('/login');
       }
-    }, 100);
+    });
   }, []);
 
   if(isLoggedIn()){

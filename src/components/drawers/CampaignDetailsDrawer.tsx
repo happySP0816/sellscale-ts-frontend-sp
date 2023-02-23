@@ -70,11 +70,6 @@ export default function CampaignDetailsDrawer() {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data);
-
-  const userName = useRecoilValue(userNameState);
-  const userEmail = useRecoilValue(userEmailState);
-
   return (
     <Drawer
       opened={opened}

@@ -125,8 +125,6 @@ export default function ProspectTable({
       // eslint-disable-next-line
       const [_key, { page, sortStatus, statuses, search }] = queryKey;
 
-      // TODO: Remove console.log
-      //console.log(page, sortStatus, statuses, search);
       totalRecords.current = 0;
 
       const response = await fetch(

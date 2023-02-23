@@ -124,7 +124,6 @@ export default function SpotlightWrapper({ children }: { children: React.ReactNo
              * That callback fetches the result data and updates queryResult accordingly.
              */
             setQuery(query.trim());
-            console.log(queryResult);
             if (queryResult) {
               return [...queryResult, ...mainActions];
             } else {

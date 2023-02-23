@@ -64,7 +64,6 @@ export default function LinkedInCTAsDrawer(props: {}) {
         logout();
       }
       const res = await response.json();
-      console.log(res);
       if (!res || !res.ctas) {
         return [];
       }

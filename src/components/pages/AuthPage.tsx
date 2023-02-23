@@ -11,8 +11,6 @@ import PageFrame from "../common/PageFrame";
 
 async function sendAuthToken(authToken: string, email: string) {
 
-  console.log(authToken, email);
-
   const response = await fetch(`${process.env.REACT_APP_API_URI}/client/approve_auth_token`, {
     method: 'POST',
     headers: {

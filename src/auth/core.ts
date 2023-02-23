@@ -70,7 +70,6 @@ export async function getUserInfo(userToken: string | null) {
     return null;
   }
 
-  console.log(res);
 
   return res.sdr_info;
 

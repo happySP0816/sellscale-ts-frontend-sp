@@ -61,8 +61,6 @@ export default function PersonaPage() {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data);
-
   return (
     <>
       <PageFrame>

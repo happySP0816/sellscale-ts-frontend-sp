@@ -78,8 +78,6 @@ export default function ProspectDetailsDrawer() {
         channelOption.status_options = channelStatusOptions;
       }
 
-      console.log(channelOptions);
-
       setCurrentStatus(res.prospect_info.details.status);
       setNotes(res.prospect_info.details.notes);
 
@@ -87,8 +85,6 @@ export default function ProspectDetailsDrawer() {
     },
     refetchOnWindowFocus: false,
   });
-
-  console.log(data);
 
   return (
     <Drawer

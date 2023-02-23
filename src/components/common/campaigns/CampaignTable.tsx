@@ -113,7 +113,6 @@ export default function ProspectTable() {
       const [_key, { page, sortStatus, search, filterDate, type }] =
         queryKey;
 
-      console.log(page, sortStatus, search, filterDate, type);
       totalRecords.current = 0;
 
       const response = await fetch(
@@ -151,8 +150,6 @@ export default function ProspectTable() {
 
       totalRecords.current = res.total_count;
 
-      console.log(res.outbound_campaigns);
-
       return res.outbound_campaigns.map((campaign: any) => {
         return {
           uuid: campaign.uuid,
@@ -171,8 +168,6 @@ export default function ProspectTable() {
     },
     refetchOnWindowFocus: false,
   });
-
-  console.log(data);
 
   return (
     <Box>

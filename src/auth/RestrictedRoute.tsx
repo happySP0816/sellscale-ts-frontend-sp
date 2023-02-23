@@ -7,9 +7,11 @@ export default function RestrictedRoute(props: { page: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if(!isLoggedIn()){
-      navigate('/login');
-    };
+    setTimeout(() => {
+      if(!isLoggedIn()) {
+        navigate('/login');
+      }
+    });
   }, []);
 
   if(isLoggedIn()){

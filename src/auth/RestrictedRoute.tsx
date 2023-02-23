@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isLoggedIn } from './core';
 
@@ -6,7 +6,7 @@ export default function RestrictedRoute(props: { page: React.ReactNode }) {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setTimeout(() => {
       if(!isLoggedIn()) {
         navigate('/login');

@@ -157,7 +157,7 @@ export default function ProspectTable() {
         return {
           uuid: campaign.uuid,
           id: campaign.id,
-          name: campaign.name,
+          name: campaign.canonical_name || campaign.name,
           prospect_ids: campaign.prospect_ids,
           campaign_type: campaign.campaign_type,
           ctas: campaign.ctas,

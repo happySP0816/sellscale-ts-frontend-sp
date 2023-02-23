@@ -12,18 +12,38 @@ import {
   Container,
 } from "@mantine/core";
 import { IconCheck, IconX } from "@tabler/icons";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype } from "src/main";
-import { formatToLabel, temp_delay, valueToColor } from "../../../utils/general";
-import displayNotification from "../../../utils/notificationFlow";
 import {
   uploadDrawerOpenState,
   linkedInCTAsDrawerOpenState,
   currentPersonaIdState,
-} from "../../atoms/personaAtoms";
+} from "@atoms/personaAtoms";
+import { userTokenState } from "@atoms/userAtoms";
+import { useQueryClient } from "react-query";
 
-export default function PersonaCard(props: { archetype: Archetype }) {
+async function togglePersona(archetype_id: number, userToken: string) {
+
+  const response = await fetch(
+    `${process.env.REACT_APP_API_URI}/client/archetype/toggle_active`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_archetype_id: archetype_id,
+      }),
+    }
+  );
+  return response;
+}
+
+export default function PersonaCard(props: { archetype: Archetype, refetch: () => void }) {
   const theme = useMantineTheme();
+  const userToken = useRecoilValue(userTokenState);
+  const queryClient = useQueryClient();
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
     uploadDrawerOpenState
   );
@@ -132,6 +152,7 @@ export default function PersonaCard(props: { archetype: Archetype }) {
   return (
     <Container
       p="xs"
+      m='xs'
       style={{ display: 'flex', justifyContent: 'space-between' }}
       sx={(theme) => {
         if (props.archetype.active) {
@@ -152,18 +173,22 @@ export default function PersonaCard(props: { archetype: Archetype }) {
         />
         <Switch
           checked={props.archetype.active}
-          onChange={(event) => {
-            /* setChecked(event.currentTarget.checked) */
+          onChange={async (event) => {
+            const res = await togglePersona(props.archetype.id, userToken);
+            if(res.status === 200) {
+              queryClient.removeQueries({ queryKey: ['query-personas-data'] });
+              props.refetch();
+            }
           }}
           color="teal"
           size="md"
           onLabel="ON"
           offLabel="OFF"
-          sx={(theme) => ({
+          styles={{
             track: {
-              cursor: "pointer!important", // TODO: fix this
+              cursor: "pointer",
             },
-          })}
+          }}
           thumbIcon={
             props.archetype.active ? (
               <IconCheck

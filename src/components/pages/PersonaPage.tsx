@@ -73,6 +73,7 @@ export default function PersonaPage() {
               <PersonaCard
                 key={persona.id}
                 archetype={persona}
+                refetch={refetch}
               />
             )
           )}
@@ -82,6 +83,7 @@ export default function PersonaPage() {
               <PersonaCard
                 key={persona.id}
                 archetype={persona}
+                refetch={refetch}
               />
             )
           )}

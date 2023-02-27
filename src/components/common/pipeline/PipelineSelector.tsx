@@ -111,7 +111,7 @@ export default function PipelineSelector({ data }: { data: Map<string, StatGridI
           color={stat.color}
           mt="md"
           size="xs">
-          {selectorType === id ? 'Active Category' : 'Set Category'}
+          View
         </Button>
       </Paper>
     );

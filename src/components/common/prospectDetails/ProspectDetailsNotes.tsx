@@ -55,7 +55,7 @@ async function addProspectNote(
   prospectId: number,
   userToken: string,
   newNote: string
-) {
+): Promise<{ status: string, title: string, message: string, extra?: any }> {
   return await fetch(
     `${process.env.REACT_APP_API_URI}/prospect/add_note`,
     {
@@ -70,10 +70,15 @@ async function addProspectNote(
       }),
     }
   ).then(async (r) => {
-    return await r.json();
+    const res = await r.json();
+    if(r.status === 200){
+      return { status: 'success', title: `Success`, message: `Added note.`, extra: res.prospect_note_id };
+    } else {
+      return { status: 'error', title: `Error (${r.status})`, message: res.message };
+    }
   }).catch((e) => {
     console.error(e);
-    return false;
+    return { status: 'error', title: `Error while adding note`, message: e.message };
   });
 }
 
@@ -164,9 +169,9 @@ export default function ProspectDetailsNotes(
                   userToken,
                   newNote
                 );
-                if(result) {
+                if(result.status === 'success' && result.extra) {
                   setNotes((prev) => [...prev,
-                    {id: result.prospect_note_id, note: newNote, prospect_id: props.prospectId, created_at: new Date().toISOString()}
+                    {id: result.extra as number, note: newNote, prospect_id: props.prospectId, created_at: new Date().toISOString()}
                   ]);
                   setOpened(false);
                 }

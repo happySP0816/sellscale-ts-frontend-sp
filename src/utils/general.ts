@@ -126,31 +126,3 @@ export function formatToLabel(value: string) {
   return startCase(value.replaceAll("_", " "));
 }
 
-/**
- * Converts a CSV string to a JSON object.
- * @param csv
- * @returns - JSON object
- */
-export function convertCSVtoJSON(csv: string) {
-  let lines = csv.replace(/\r/g, '').split("\n");
-
-  let result = [];
-
-  // NOTE: If your columns contain commas in their values, you'll need
-  // to deal with those before doing the next step
-  let headers = lines[0].split(",");
-
-  for (let i = 1; i < lines.length; i++) {
-    let obj = {};
-    let currentline = lines[i].split(",");
-
-    for (let j = 0; j < headers.length; j++) {
-      // @ts-ignore
-      obj[headers[j]] = currentline[j];
-    }
-
-    result.push(obj);
-  }
-
-  return result;
-}

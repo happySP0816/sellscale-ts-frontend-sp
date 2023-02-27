@@ -7,7 +7,12 @@ type NotificationDetails = {
   color: string;
 };
 
-export default async function displayNotification(id: string, fn: () => Promise<boolean>, loading: NotificationDetails, success: NotificationDetails, error: NotificationDetails) {
+export default async function displayNotification(
+  id: string,
+  fn: () => Promise<{ status: string, title: string, message: string }>,
+  loading: NotificationDetails,
+  success: NotificationDetails,
+  error: NotificationDetails) {
 
   hideNotification(id);
   showNotification({
@@ -20,11 +25,11 @@ export default async function displayNotification(id: string, fn: () => Promise<
     disallowClose: true,
   });
 
-  const showError = (message: string) => {
+  const showError = (title: string ,message: string) => {
     updateNotification({
       id: id,
-      autoClose: 5000,
-      title: error.title,
+      autoClose: false,
+      title,
       message,
       color: error.color,
       icon: <IconX />,
@@ -33,7 +38,7 @@ export default async function displayNotification(id: string, fn: () => Promise<
 
   let result = await fn();
 
-  if (result) {
+  if (result.status === 'success') {
     updateNotification({
       id: id,
       autoClose: 5000,
@@ -42,8 +47,12 @@ export default async function displayNotification(id: string, fn: () => Promise<
       color: success.color,
       icon: <IconCheck />,
     });
+  } else if (result.status === 'error') {
+    console.warn(`Error: ${result.title}, ${result.message}`);
+    showError(result.title, result.message);
   } else {
-    showError(error.message);
+    console.error(`Unknown Status (${result.status}): ${result.title}, ${result.message}`);
+    showError(error.title, error.message);
   }
 
 }

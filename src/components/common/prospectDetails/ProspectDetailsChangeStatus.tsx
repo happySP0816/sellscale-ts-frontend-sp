@@ -155,11 +155,15 @@ async function updateChannelStatus(
         channel_type: channelType,
       }),
     }
-  ).then((r) => {
-    return (r.status+'').startsWith('2');
+  ).then(async (r) => {
+    if((r.status+'').startsWith('2')){
+      return { status: 'success', title: `Success`, message: `Status updated.` };
+    } else {
+      return { status: 'error', title: `Error (${r.status})`, message: await r.text() };
+    }
   }).catch((e) => {
     console.error(e);
-    return false;
+    return { status: 'error', title: `Error while updating`, message: e.message };
   });
 }
 
@@ -210,7 +214,7 @@ export default function ProspectDetailsChangeStatus(
                 channelType,
                 status?.status as string
               );
-              if(result) {
+              if(result.status === 'success') {
                 setCurrentStatus(status?.status as string);
               }
               return result;

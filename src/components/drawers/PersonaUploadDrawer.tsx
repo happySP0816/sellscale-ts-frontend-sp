@@ -12,7 +12,6 @@ import {
   SimpleGrid,
   Container,
 } from "@mantine/core";
-import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
 import {
   IconUpload,
   IconX,
@@ -21,31 +20,29 @@ import {
 } from "@tabler/icons";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { convertCSVtoJSON, temp_delay } from "../../utils/general";
 import displayNotification from "../../utils/notificationFlow";
 import {
   currentPersonaIdState,
   uploadDrawerOpenState,
 } from "../atoms/personaAtoms";
+import Papa from "papaparse";
 
-async function uploadCSV(
-  archetype_id: number,
-  userToken: string,
-  payload: File
-) {
-
-  console.log(payload);
+async function uploadCSV(archetype_id: number, userToken: string, payload: File): Promise<{ status: string, title: string, message: string, extra?: any }> {
 
   const read = new FileReader();
   read.readAsBinaryString(payload);
 
-  const contents = await new Promise((res, rej) => {
+  const csvStr = await new Promise((res, rej) => {
     read.onloadend = function(){
       res(read.result as string);
     }
   }) as string;
+  const csvData = Papa.parse(csvStr, { header: true });
+  if(csvData.errors.length > 0){
+    return { status: 'error', title: `${csvData.errors[0].type} Error [${csvData.errors[0].row}]`, message: csvData.errors[0].message };
+  }
 
-  const response = await fetch(
+  return await fetch(
     `${process.env.REACT_APP_API_URI}/prospect/add_prospect_from_csv_payload`,
     {
       method: "POST",
@@ -55,11 +52,20 @@ async function uploadCSV(
       },
       body: JSON.stringify({
         archetype_id: archetype_id,
-        csv_payload: convertCSVtoJSON(contents),
+        csv_payload: csvData.data,
       }),
     }
-  );
-  return response;
+  ).then(async (r) => {
+    if(r.status === 200){
+      return { status: 'success', title: `Success`, message: `Contacts added to persona.` };
+    } else {
+      return { status: 'error', title: `Error (${r.status})`, message: await r.text() };
+    }
+  }).catch((err) => {
+    console.log(err);
+    return { status: 'error', title: `Error while uploading`, message: err.message };
+  });
+
 }
 
 export default function PersonaUploadDrawer(props: {}) {
@@ -83,8 +89,7 @@ export default function PersonaUploadDrawer(props: {}) {
     await displayNotification(
       "make-active-persona",
       async () => {
-        const response = await uploadCSV(currentPersonaId, userToken, file)
-        return response?.status === 200;
+        return await uploadCSV(currentPersonaId, userToken, file);
       },
       {
         title: `Uploading Contacts to Persona`,

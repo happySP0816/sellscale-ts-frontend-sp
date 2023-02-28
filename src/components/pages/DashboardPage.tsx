@@ -21,6 +21,7 @@ import {
   IconAnalyze,
   IconBellRinging,
   IconCalendarEvent,
+  IconChartBar,
   IconInfoSquareRounded,
   IconMessageCircle,
   IconPhoto,
@@ -53,9 +54,9 @@ export default function DashboardPage() {
               description={"Check back on your recently viewed prospects"}
             />
             <NotificationCard
-              icon={<IconCalendarEvent size={45} />}
-              name={"Scheduled Events"}
-              description={"Update to your scheduled demos"}
+              icon={<IconChartBar size={45} />}
+              name={"Demo Sets"}
+              description={"View your leads"}
             />
           </Flex>
         </div>

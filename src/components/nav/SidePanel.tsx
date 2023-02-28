@@ -102,9 +102,9 @@ export default function SidePanel(props: { isMobile?: boolean }) {
 
         <NavTab
           icon={<IconHome size={22} />}
-          name="home"
-          description="Go to home page"
-          onClick={() => navigate(`/home`)}
+          name="dashboard"
+          description="Go to dashboard"
+          onClick={() => navigate(`/dashboard`)}
         />
 
         <NavTab

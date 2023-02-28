@@ -7,7 +7,7 @@ import reportWebVitals from "./reportWebVitals";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { createBrowserRouter, json, RouterProvider } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
-import AboutPage from "./components/pages/AboutPage";
+import DashboardPage from "./components/pages/DashboardPage";
 import PersonaPage from "./components/pages/PersonaPage";
 import PipelinePage from "./components/pages/PipelinePage";
 import MissingPage from "./components/pages/MissingPage";
@@ -28,11 +28,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <RestrictedRoute page={<AboutPage />} />,
+        element: <RestrictedRoute page={<DashboardPage />} />,
       },
       {
-        path: "home",
-        element: <RestrictedRoute page={<AboutPage />} />,
+        path: "dashboard",
+        element: <RestrictedRoute page={<DashboardPage />} />,
       },
       {
         path: "pipeline/:prospectId?",

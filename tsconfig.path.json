@@ -8,6 +8,7 @@
       "@drawers/*": ["src/components/drawers/*"],
       "@nav/*": ["src/components/nav/*"],
       "@pages/*": ["src/components/pages/*"],
+      "@modals/*": ["src/components/modals/*"],
       "@constants/*": ["src/constants/*"],
       "@contexts/*": ["src/contexts/*"],
       "@utils/*": ["src/utils/*"],

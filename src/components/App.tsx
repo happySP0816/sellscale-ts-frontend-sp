@@ -11,6 +11,7 @@ import { NotificationsProvider } from "@mantine/notifications";
 import { useRecoilValue } from "recoil";
 import { navLoadingState } from "@atoms/navAtoms";
 import SpotlightWrapper from "@nav/SpotlightWrapper";
+import UploadProspectsModal from "@modals/UploadProspectsModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -67,7 +68,14 @@ export default function App() {
         withNormalizeCSS
       >
         <SpotlightWrapper>
-          <ModalsProvider modals={{}}>
+          <ModalsProvider
+            modals={{
+              uploadProspects: UploadProspectsModal,
+            }}
+            modalProps={{
+              closeOnClickOutside: false,
+            }}
+          >
             <NotificationsProvider position="top-right">
               <LoadingOverlay visible={loading} overlayBlur={4} />
               <Layout>

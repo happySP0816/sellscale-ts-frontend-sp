@@ -71,8 +71,8 @@ export default function SpotlightWrapper({ children }: { children: React.ReactNo
 
   const mainActions: SpotlightAction[] = [
     {
-      title: 'Home',
-      description: 'Go to home page',
+      title: 'Dashboard',
+      description: 'Go to dashboard',
       group: 'Pages',
       onTrigger: () => navigate(`/home`),
       icon: <IconHome size={18} />,

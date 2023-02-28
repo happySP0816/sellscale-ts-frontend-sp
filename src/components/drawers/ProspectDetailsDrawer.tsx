@@ -78,7 +78,7 @@ export default function ProspectDetailsDrawer() {
         channelOption.status_options = channelStatusOptions;
       }
 
-      setCurrentStatus(res.prospect_info.details.status);
+      setCurrentStatus(res.prospect_info.details.overall_status);
       setNotes(res.prospect_info.details.notes);
 
       return { main: res, channelOptions };
@@ -127,7 +127,7 @@ export default function ProspectDetailsDrawer() {
             />
           )}
           <ProspectDetailsNotes
-            currentStatus={data.main.prospect_info.details.status}
+            currentStatus={data.main.prospect_info.details.overall_status}
             prospectId={data.main.prospect_info.details.id}
           />
           {data.main.prospect_info.company.name && (

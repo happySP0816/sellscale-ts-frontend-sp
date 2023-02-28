@@ -90,7 +90,7 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   bumped: "orange",
 };
 export function valueToColor(theme: MantineTheme, value: string): MantineColor {
-  value = value.toLowerCase();
+  value = value?.toLowerCase();
 
   if (PRESET_COLOR_MAPS[value]) {
     return PRESET_COLOR_MAPS[value];
@@ -110,7 +110,7 @@ export function valueToColor(theme: MantineTheme, value: string): MantineColor {
 }
 
 export function formatToLabel(value: string) {
-  value = value.toLowerCase();
+  value = value?.toLowerCase();
   if (value === "responded") {
     return "Bumped";
   }

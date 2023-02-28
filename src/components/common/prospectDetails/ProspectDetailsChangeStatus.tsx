@@ -142,7 +142,7 @@ async function updateChannelStatus(
   newStatus: string
 ) {
   return await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/`,
+    `${process.env.REACT_APP_API_URI}/prospect/${prospectId}`,
     {
       method: "PATCH",
       headers: {
@@ -150,7 +150,6 @@ async function updateChannelStatus(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prospect_id: prospectId,
         new_status: newStatus,
         channel_type: channelType,
       }),

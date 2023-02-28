@@ -74,6 +74,7 @@ export default function App() {
             }}
             modalProps={{
               closeOnClickOutside: false,
+              size: "lg",
             }}
           >
             <NotificationsProvider position="top-right">

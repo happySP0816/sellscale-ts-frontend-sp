@@ -55,7 +55,7 @@ export default function ProspectDetailsSummary(
           {props.email && (
             <Group noWrap spacing={10} mt={5}>
               <IconMail stroke={1.5} size={16} className={classes.icon} />
-              <Text size="xs" color="dimmed">
+              <Text size="xs" color="dimmed" component="a" href={`mailto:${props.email}`}>
                 {props.email}
               </Text>
             </Group>
@@ -64,7 +64,7 @@ export default function ProspectDetailsSummary(
           {props.linkedin && (
             <Group noWrap spacing={10} mt={5}>
               <IconSocial stroke={1.5} size={16} className={classes.icon} />
-              <Text size="xs" color="dimmed">
+              <Text size="xs" color="dimmed" component="a" target="_blank" rel="noopener noreferrer" href={`https://${props.linkedin}`}>
                 {props.linkedin}
               </Text>
             </Group>

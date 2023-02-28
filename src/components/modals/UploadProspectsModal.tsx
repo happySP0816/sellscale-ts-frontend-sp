@@ -17,9 +17,10 @@ import {
   Flex,
   Textarea,
   FocusTrap,
+  LoadingOverlay,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
 import {
@@ -33,11 +34,12 @@ import {
   IconPlus,
 } from "@tabler/icons";
 import { DataTable } from "mantine-datatable";
-
-const ddd = [
-  { value: "react", label: "React" },
-  { value: "ng", label: "Angular" },
-];
+import FileDropAndPreview from "./upload-prospects/FileDropAndPreview";
+import { useQuery } from "react-query";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { logout } from "@auth/core";
+import { Archetype } from "src/main";
 
 export default function UploadProspectsModal({
   context,
@@ -45,44 +47,87 @@ export default function UploadProspectsModal({
   innerProps,
 }: ContextModalProps) {
   const theme = useMantineTheme();
-  const [personas, setPersonas] = useState(ddd);
-  const defaultPersonas = useRef(ddd);
+  const [personas, setPersonas] = useState<{ value: string, label: string }[]>([]);
+  const defaultPersonas = useRef<{ value: string, label: string }[]>([]);
 
-  const [createdPersona, setCreatedPersona] = useState('');
+  const [createdPersona, setCreatedPersona] = useState("");
   const [openedCTAs, setOpenedCTAs] = useState(false);
   const [newCTAText, setNewCTAText] = useState("");
   const addCTAInputRef = useRef<HTMLTextAreaElement | null>(null);
   const [ctas, setCTAs] = useState([
     {
+      id: 0,
       cta: `I would love to chat sometime!`,
-      controls: { id: 0 },
     },
     {
+      id: 1,
       cta: `Would you be interested in chatting?`,
-      controls: { id: 1 },
     },
   ]);
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
       const cta = {
+        id: ctas.length > 0 ? ctas[ctas.length - 1].id + 1 : 0,
         cta: newCTAText,
-        controls: {
-          id: ctas.length > 0 ? ctas[ctas.length - 1].controls.id + 1 : 0,
-        },
       };
       setCTAs((current) => [...current, cta]);
       setNewCTAText("");
     }
   };
   const deleteCTA = (id: number) => {
-    setCTAs((current) => current.filter((cta) => cta.controls.id !== id));
+    setCTAs((current) => current.filter((cta) => cta.id !== id));
   };
   const editCTA = (id: number) => {
-    setNewCTAText(ctas.filter((cta) => cta.controls.id === id)[0].cta);
+    setNewCTAText(ctas.filter((cta) => cta.id === id)[0].cta);
     deleteCTA(id);
     addCTAInputRef.current?.focus();
   };
+
+  const userToken = useRecoilValue(userTokenState);
+  // Fetch personas
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [
+      `query-personas-data`
+    ],
+    queryFn: async () => {
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URI}/client/archetype/get_archetypes`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (response.status === 401) {
+        logout();
+      }
+      const res = await response.json();
+      if (!res || !res.archetypes) {
+        return [];
+      }
+
+      // Sort alphabetically by archetype (name)
+      return (res.archetypes as Archetype[]).sort((a, b) => {
+        return a.archetype.localeCompare(b.archetype);
+      });
+    },
+    refetchOnWindowFocus: false,
+  });
+  // After fetch, set default personas and set personas if they haven't been set yet
+  if(data){
+    defaultPersonas.current = data.map((persona) => ({
+      value: persona.id+'',
+      label: persona.archetype,
+    }));
+  }
+  useEffect(() => {
+    if(personas.length === 0 && defaultPersonas.current.length > 0){
+      setPersonas(defaultPersonas.current);
+    }
+  }, [defaultPersonas.current]);
 
   return (
     <Paper
@@ -92,6 +137,7 @@ export default function UploadProspectsModal({
         backgroundColor: theme.colors.dark[7],
       }}
     >
+      <LoadingOverlay visible={isFetching} overlayBlur={2} />
       <Stack spacing="xl">
         <Select
           label="Choose a Persona"
@@ -101,7 +147,12 @@ export default function UploadProspectsModal({
           searchable
           creatable
           clearable
-          getCreateLabel={(query) => <><span style={{ fontWeight: 700 }}>New Persona: </span>{query}</>}
+          getCreateLabel={(query) => (
+            <>
+              <span style={{ fontWeight: 700 }}>New Persona: </span>
+              {query}
+            </>
+          )}
           onCreate={(query) => {
             const item = { value: query, label: query };
             setPersonas((current) => [...current, item]);
@@ -110,9 +161,12 @@ export default function UploadProspectsModal({
           }}
           onChange={(value) => {
             // If created persona exists and is one of the existing personas, clear it
-            if(createdPersona.length > 0 && personas.filter((personas) => personas.value === value).length > 0) {
+            if (
+              createdPersona.length > 0 &&
+              personas.filter((personas) => personas.value === value).length > 0
+            ) {
               setPersonas(defaultPersonas.current);
-              setCreatedPersona('');
+              setCreatedPersona("");
             }
           }}
         />
@@ -128,7 +182,7 @@ export default function UploadProspectsModal({
               }}
               onClick={() => setOpenedCTAs((prev) => !prev)}
             >
-              <Text>Call-to-Actions (CTAs)</Text>
+              <Text fw={500} size='sm'>Call-to-Actions (CTAs)</Text>
               {openedCTAs ? (
                 <IconChevronUp size={20} />
               ) : (
@@ -151,21 +205,21 @@ export default function UploadProspectsModal({
                       title: "",
                     },
                     {
-                      accessor: "controls",
+                      accessor: "id",
                       title: "",
-                      render: ({ controls }) => (
+                      render: ({ id }) => (
                         <Group position="right" spacing={0}>
                           <ActionIcon
                             color="blue"
                             variant="transparent"
-                            onClick={() => editCTA(controls.id)}
+                            onClick={() => editCTA(id)}
                           >
                             <IconPencil size={18} />
                           </ActionIcon>
                           <ActionIcon
                             color="red"
                             variant="transparent"
-                            onClick={() => deleteCTA(controls.id)}
+                            onClick={() => deleteCTA(id)}
                           >
                             <IconTrashX size={18} />
                           </ActionIcon>
@@ -205,50 +259,9 @@ export default function UploadProspectsModal({
             <Divider mt={0} />
           </Container>
         )}
-
-        <Dropzone
-          loading={false}
-          onDrop={(files: any) => console.log("accepted files", files)}
-          onReject={(files: any) => console.log("rejected files", files)}
-          accept={[MIME_TYPES.csv]}
-        >
-          <Group
-            position="center"
-            spacing="xl"
-            style={{ minHeight: 220, pointerEvents: "none" }}
-          >
-            <Dropzone.Accept>
-              <IconUpload
-                size={80}
-                stroke={1.5}
-                color={
-                  theme.colors[theme.primaryColor][
-                    theme.colorScheme === "dark" ? 4 : 6
-                  ]
-                }
-              />
-            </Dropzone.Accept>
-            <Dropzone.Reject>
-              <IconX
-                size={80}
-                stroke={1.5}
-                color={theme.colors.red[theme.colorScheme === "dark" ? 4 : 6]}
-              />
-            </Dropzone.Reject>
-            <Dropzone.Idle>
-              <IconFileDescription size={80} stroke={1.5} />
-            </Dropzone.Idle>
-
-            <div>
-              <Text align="center" size="xl" inline>
-                Drag CSV here or click to select file
-              </Text>
-              <Text align="center" size="sm" color="dimmed" inline mt={7}>
-                Attach file should not exceed 2mb
-              </Text>
-            </div>
-          </Group>
-        </Dropzone>
+        
+        <FileDropAndPreview />
+        
       </Stack>
     </Paper>
   );

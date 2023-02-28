@@ -1,7 +1,7 @@
 import XLSX from "xlsx";
 
 
-export async function convertSheetToJSON(payload: File): Promise<any[] | DOMException> {
+export async function convertFileToJSON(payload: File): Promise<any[] | DOMException> {
 
   const reader = new FileReader();
   reader.readAsBinaryString(payload);
@@ -31,7 +31,7 @@ export async function convertSheetToJSON(payload: File): Promise<any[] | DOMExce
 
 export async function uploadSheet(archetype_id: number, userToken: string, payload: File): Promise<{ status: string, title: string, message: string, extra?: any }> {
 
-  const json = await convertSheetToJSON(payload);
+  const json = await convertFileToJSON(payload);
   if(json instanceof DOMException){
     return { status: 'error', title: `Error while parsing file`, message: json+'' };
   }

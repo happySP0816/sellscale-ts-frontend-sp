@@ -13,16 +13,12 @@
 
 # Table of Contents
 
-1. [SellScale API Overview](#sellscale-api-overview)
+1. [SellScale App Overview](#sellscale-app-overview)
 2. [Development](#development)
    1. [Overview](#overview)
    2. [Installation & Local Set Up](#installation--local-set-up)
-   3. [Running Locally](#running-locally)
    4. [Making Changes](#making-changes)
-   5. [Handling DB Migrations](#handling-db-migrations)
 3. [Other](#other)
-   1. [API Documentation](#api-documentation)
-   2. [Helpful Bash Profiles](#bash-profiles)
 
 # SellScale App Overview
 

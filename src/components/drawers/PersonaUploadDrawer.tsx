@@ -18,7 +18,8 @@ import {
   IconPhoto,
   IconFileDescription,
 } from "@tabler/icons";
-import { uploadSheet } from "@utils/fileProcessing";
+import { convertFileToJSON } from "@utils/fileProcessing";
+import uploadProspects from "@utils/requests/uploadProspects";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import displayNotification from "../../utils/notificationFlow";
@@ -46,18 +47,23 @@ export default function PersonaUploadDrawer(props: {}) {
     isUploading.current = true;
 
     await displayNotification(
-      "make-active-persona",
+      "uploading-prospects",
       async () => {
-        return await uploadSheet(currentPersonaId, userToken, file);
+        const json = await convertFileToJSON(file);
+        if(json instanceof DOMException) {
+          return { status: 'error', title: `Error while uploading`, message: json.message };
+        } else {
+          return await uploadProspects(currentPersonaId, userToken, json);
+        }
       },
       {
-        title: `Uploading Contacts to Persona`,
+        title: `Uploading Prospects to Persona`,
         message: `Working with servers...`,
         color: "teal",
       },
       {
         title: `Uploaded!`,
-        message: `Added contacts to persona.`,
+        message: `Added prospects to persona.`,
         color: "teal",
       },
       {

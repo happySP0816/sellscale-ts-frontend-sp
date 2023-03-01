@@ -1,3 +1,11 @@
+
+export interface MsgResponse {
+  status: 'success' | 'error';
+  title: string;
+  message: string;
+  extra?: any;
+}
+
 export interface Campaign {
   uuid: string;
   id: number;

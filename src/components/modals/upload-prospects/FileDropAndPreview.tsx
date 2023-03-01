@@ -38,6 +38,8 @@ import {
   IconPlus,
 } from "@tabler/icons";
 import { convertFileToJSON } from "@utils/fileProcessing";
+import createPersona from "@utils/requests/createPersona";
+import uploadProspects from "@utils/requests/uploadProspects";
 import _ from "lodash";
 import { DataTable } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -125,100 +127,6 @@ function convertColumn(columnName: string) {
     .replace(/[\_\ \-\~\.\+]+/g, "_");
 }
 
-async function makePersona(userToken: string, name: string, ctas: string[]) {
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/archetype`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        archetype: name,
-        disable_ai_after_prospect_engaged: true,
-      }),
-    }
-  );
-  if (response.status === 401) {
-    logout();
-    return false;
-  }
-  if (response.status !== 200) {
-    showNotification({
-      id: "persona-create-not-okay",
-      title: "Error",
-      message: `Responded with: ${response.status}, ${response.statusText}`,
-      color: "red",
-      autoClose: false,
-    });
-    return false;
-  }
-  const res = await response.json().catch((error) => {
-    console.error(error);
-    showNotification({
-      id: "persona-create-error",
-      title: "Error",
-      message: `Error: ${error}`,
-      color: "red",
-      autoClose: false,
-    });
-  });
-  if (!res) {
-    return false;
-  }
-
-  const personaId = res.client_archetype_id;
-  for (const cta of ctas) {
-    const success = await makeCTA(userToken, personaId, cta);
-    if(!success) return false;
-  }
-
-  return true;
-}
-
-async function makeCTA(userToken: string, personaId: string, cta: string) {
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/message_generation/create_cta`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        archetype_id: personaId,
-        text_value: cta,
-      }),
-    }
-  );
-  if (response.status === 401) {
-    logout();
-    return false;
-  }
-  if (response.status !== 200) {
-    showNotification({
-      id: "cta-create-not-okay",
-      title: "Error",
-      message: `Responded with: ${response.status}, ${response.statusText}`,
-      color: "red",
-      autoClose: false,
-    });
-    return false;
-  }
-  const res = await response.json().catch((error) => {
-    console.error(error);
-    showNotification({
-      id: "cta-create-error",
-      title: "Error",
-      message: `Error: ${error}`,
-      color: "red",
-      autoClose: false,
-    });
-  });
-  return res != null;
-}
-
 type FileDropAndPreviewProps = {
   personaId: string | null;
   createPersona?: {
@@ -228,10 +136,7 @@ type FileDropAndPreviewProps = {
 };
 
 // personaId is null if creating a new persona
-export default function FileDropAndPreview({
-  personaId,
-  createPersona,
-}: FileDropAndPreviewProps) {
+export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
 
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -260,10 +165,10 @@ export default function FileDropAndPreview({
     );
     // TODO: could check that the email and URLs are valid?
 
-    const hasPersona = createPersona
-      ? createPersona.name.length > 0
-      : personaId !== null && personaId.length > 0;
-    const hasCTA = createPersona ? createPersona.ctas.length > 0 : true;
+    const hasPersona = props.createPersona
+      ? props.createPersona.name.length > 0
+      : props.personaId !== null && props.personaId.length > 0;
+    const hasCTA = props.createPersona ? props.createPersona.ctas.length > 0 : true;
 
     let failureReasons = [];
     if (!hasPersona) {
@@ -289,19 +194,42 @@ export default function FileDropAndPreview({
     }
     setPreUploading(true);
 
-    console.log(createPersona);
-
-    if(createPersona){
-      const success = await makePersona(userToken, createPersona.name, createPersona.ctas);
-      if(!success) {
+    let archetype_id = props.personaId;
+    if(props.createPersona){
+      const result = await createPersona(userToken, props.createPersona.name, props.createPersona.ctas);
+      if(result.status === 'error') {
         console.error("Failed to create persona & CTAs");
         return;
       }
+      archetype_id = result.extra;
     }
 
-    console.log('Uploading prospects');
-    // start uploading prospects
-    // send notifcation in corner
+    const result = await uploadProspects(+(archetype_id as string), userToken, (fileJSON as any[]).map((row) => {
+      const mappedRow = {};
+      // Only include columns that are mapped to a prospect db column
+      Object.keys(row)
+      .filter((key) => PROSPECT_DB_COLUMNS.includes(columnMappings.get(key.trim()) as string))
+      .forEach((key) => {
+        // Use the mapped prospect db column intead of the original column name
+        // @ts-ignore
+        mappedRow[columnMappings.get(key.trim())] = row[key];
+      });
+      return mappedRow;
+    }));
+    if (result.status === "error") {
+      console.error("Failed to start prospects upload");
+      return;
+    }
+
+    showNotification({
+      id: 'uploading-prospects',
+      loading: true,
+      title: 'Uploading prospects...',
+      message: 'Check the persona for progress',
+      color: 'teal',
+      autoClose: false,
+      disallowClose: true,
+    });
 
     closeAllModals();
     setPreUploading(false);

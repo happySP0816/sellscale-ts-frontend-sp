@@ -32,6 +32,7 @@ import {
   IconChevronUp,
   IconPencil,
   IconPlus,
+  IconUsers,
 } from "@tabler/icons";
 import { DataTable } from "mantine-datatable";
 import FileDropAndPreview from "./upload-prospects/FileDropAndPreview";
@@ -49,8 +50,9 @@ export default function UploadProspectsModal({
   const theme = useMantineTheme();
   const [personas, setPersonas] = useState<{ value: string, label: string }[]>([]);
   const defaultPersonas = useRef<{ value: string, label: string }[]>([]);
-
   const [createdPersona, setCreatedPersona] = useState("");
+  const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
+
   const [openedCTAs, setOpenedCTAs] = useState(false);
   const [newCTAText, setNewCTAText] = useState("");
   const addCTAInputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -144,6 +146,7 @@ export default function UploadProspectsModal({
           data={personas}
           placeholder="Select or create a persona for the prospects"
           nothingFound="Nothing found"
+          icon={<IconUsers size={14} />}
           searchable
           creatable
           clearable
@@ -154,6 +157,7 @@ export default function UploadProspectsModal({
             </>
           )}
           onCreate={(query) => {
+            // value = ID if selected, name if created
             const item = { value: query, label: query };
             setPersonas((current) => [...current, item]);
             setCreatedPersona(query);
@@ -168,6 +172,7 @@ export default function UploadProspectsModal({
               setPersonas(defaultPersonas.current);
               setCreatedPersona("");
             }
+            setSelectedPersona(value);
           }}
         />
 
@@ -260,7 +265,13 @@ export default function UploadProspectsModal({
           </Container>
         )}
         
-        <FileDropAndPreview />
+        <FileDropAndPreview
+          personaId={createdPersona.length > 0 ? null : selectedPersona}
+          createPersona={createdPersona.length > 0 ? {
+            name: createdPersona,
+            ctas: ctas.map((cta) => cta.cta),
+          } : undefined}
+        />
         
       </Stack>
     </Paper>

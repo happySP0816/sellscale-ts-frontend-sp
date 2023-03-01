@@ -65,7 +65,7 @@ export default function DashboardPage() {
             Quick Actions
           </Title>
           <Paper withBorder m="xs" p="md" radius="md" w={"100%"}>
-            <Stack>
+            <Stack spacing='xs'>
               <Button
                 variant="outline"
                 color="teal"
@@ -80,7 +80,7 @@ export default function DashboardPage() {
               >
                 Upload Prospects
               </Button>
-              <Progress value={50} />
+              {/* <Progress value={50} /> */}
               <Divider my="xs" />
               <Button
                 variant="outline"
@@ -89,7 +89,7 @@ export default function DashboardPage() {
                 onClick={() => {}}
                 disabled
               >
-                Another Action
+                Future Action
               </Button>
               <Divider my="xs" />
               <Button
@@ -99,7 +99,7 @@ export default function DashboardPage() {
                 onClick={() => {}}
                 disabled
               >
-                Another Action
+                Future Action
               </Button>
             </Stack>
           </Paper>

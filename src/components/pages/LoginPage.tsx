@@ -16,6 +16,7 @@ import { login } from "@auth/core";
 import { useRecoilState } from "recoil";
 import { userEmailState } from "@atoms/userAtoms";
 import { LogoFull } from "@nav/Logo";
+import { EMAIL_REGEX } from "@constants/data";
 
 async function sendLogin(email: string) {
   const response = await fetch(
@@ -46,9 +47,6 @@ async function sendLogin(email: string) {
   return { status: response.status, message: result };
 }
 
-const emailRegex =
-  /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +66,7 @@ export default function LoginPage() {
   };
 
   const handleLogin = async (values: typeof form.values) => {
-    if (!values.email.match(emailRegex)) {
+    if (!values.email.match(EMAIL_REGEX)) {
       setError("Not a valid email address!");
       return;
     }

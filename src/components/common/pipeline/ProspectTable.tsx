@@ -7,6 +7,8 @@ import {
   Chip,
   Badge,
   useMantineTheme,
+  Select,
+  LoadingOverlay,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +19,7 @@ import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
 
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
+  prospectChannelState,
   prospectDrawerIdState,
   prospectDrawerOpenState,
   prospectSelectorTypeState,
@@ -28,30 +31,33 @@ import { formatToLabel, valueToColor } from "@utils/general";
 import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
+import getChannels from "@utils/requests/getChannels";
 
 const ALL_PROSPECT_STATUSES = [
   { value: 'ACCEPTED', label: 'Accepted' },
-  { value: 'SENT_OUTREACH', label: 'Sent Outreach' },
-  { value: 'RESPONDED', label: 'Bumped' },
   { value: 'ACTIVE_CONVO', label: 'Active Conversation' },
-  { value: 'SCHEDULING', label: 'Scheduling' },
-  { value: 'DEMO_SET', label: 'Demo Set' },
-  { value: 'DEMO_WON', label: 'Demo Complete' },
-  { value: 'DEMO_LOSS', label: 'Demo Missed' },
-  { value: 'NOT_INTERESTED', label: 'Not Interested' },
-  { value: 'NOT_QUALIFIED', label: 'Not Qualified' },
+  { value: 'BUMPED', label: 'Bumped' },
+  { value: 'DEMO', label: 'Demo Set' },
+  { value: 'PROSPECTED', label: 'Prospected' },
+  { value: 'REMOVED', label: 'Removed' },
+  { value: 'SENT_OUTREACH', label: 'Sent Outreach' },
 ];
-export { ALL_PROSPECT_STATUSES };
+const ALL_PROSPECT_CHANNELS = [
+  { value: 'LINKEDIN', label: 'LinkedIn' },
+  { value: 'EMAIL', label: 'Email' },
+  //TODO: { value: 'NONE', label: 'None' },
+];
+export { ALL_PROSPECT_STATUSES, ALL_PROSPECT_CHANNELS };
 
 export function getDefaultStatuses(selectorType: string){
   if(selectorType === 'accepted'){
     return ['ACCEPTED'];
   } else if(selectorType === 'bumped'){
-    return ['RESPONDED'];
+    return ['BUMPED'];
   } else if(selectorType === 'active'){
-    return ['ACTIVE_CONVO', 'SCHEDULING'];
+    return ['ACTIVE_CONVO'];
   } else if(selectorType === 'demo'){
-    return ['DEMO_SET', 'DEMO_WON', 'DEMO_LOSS'];
+    return ['DEMO'];
   }
   return [];
 }
@@ -60,13 +66,13 @@ export function getSelectorTypeFromStatuses(statuses: string[]){
   let potentialTypes = [];
 
   // Order matters here, the first added is the most likely to be set
-  if(statusesSet.has('DEMO_SET') && statusesSet.has('DEMO_WON') && statusesSet.has('DEMO_LOSS')){
+  if(statusesSet.has('DEMO')){
     potentialTypes.push('demo');
   }
-  if(statusesSet.has('ACTIVE_CONVO') && statusesSet.has('SCHEDULING')){
+  if(statusesSet.has('ACTIVE_CONVO')){
     potentialTypes.push('active');
   }
-  if(statusesSet.has('RESPONDED')){
+  if(statusesSet.has('BUMPED')){
     potentialTypes.push('bumped');
   }
   if(statusesSet.has('ACCEPTED')){
@@ -92,6 +98,7 @@ export default function ProspectTable({
 
   const [search, setSearch] = useDebouncedState("", 200);
   const [statuses, setStatuses] = useRecoilState(prospectStatusesState);
+  const [channel, setChannel] = useRecoilState(prospectChannelState);
 
   const [page, setPage] = useState(1);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
@@ -106,7 +113,7 @@ export default function ProspectTable({
 
   useEffect(() => {
     setPage(1);
-  }, [search, statuses]);
+  }, [search, statuses, channel]);
 
   useEffect(() => {
     let potentialTypes = getSelectorTypeFromStatuses(statuses);
@@ -118,12 +125,12 @@ export default function ProspectTable({
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `query-pipeline-prospects`,
-      { page, sortStatus, statuses, search },
+      { page, sortStatus, statuses, search, channel },
     ],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { page, sortStatus, statuses, search }] = queryKey;
+      const [_key, { page, sortStatus, statuses, search, channel }] = queryKey;
 
       totalRecords.current = 0;
 
@@ -137,6 +144,7 @@ export default function ProspectTable({
           },
           body: JSON.stringify({
             query: search.length > 0 ? search : undefined,
+            channel: channel.length > 0 ? channel : 'SELLSCALE',
             status: statuses.length > 0 ? statuses : undefined,
             limit: PAGE_SIZE,
             offset: (page - 1) * PAGE_SIZE,
@@ -176,12 +184,23 @@ export default function ProspectTable({
     refetchOnWindowFocus: false,
   });
 
+
+  const { data: data_channels } = useQuery({
+    queryKey: [
+      `query-get-channels-prospects`,
+    ],
+    queryFn: async () => {
+      return await getChannels(userToken);
+    },
+    refetchOnWindowFocus: false,
+  });
+
   console.log(data);
 
   return (
     <Box>
       <Grid grow>
-        <Grid.Col span={4}>
+        <Grid.Col span={5}>
           <TextInput
             label="Search Prospects"
             placeholder="Search by Name, Company, or Title"
@@ -190,18 +209,50 @@ export default function ProspectTable({
             width={"500px"}
             onChange={(e) => setSearch(e.currentTarget.value)}
             icon={<IconSearch size={14} />}
+            className='truncate'
           />
         </Grid.Col>
         <Grid.Col span={4}>
           <MultiSelect
-            data={ALL_PROSPECT_STATUSES}
+            data={
+              // If channels are not loaded or failed to fetch, don't show anything
+              (!data_channels || data_channels.status !== 'success') ? [] : 
+              // Otherwise, show overall statuses
+                data_channels.extra['SELLSCALE'].statuses_available.map((status: string) => {
+              return {
+                label: data_channels.extra['SELLSCALE'][status].name,
+                value: status,
+              };
+            })}
             mb="md"
-            label="Filter by Status"
+            label="Filter by Overall Status"
             placeholder="Select statuses"
             searchable
             nothingFound="Nothing found"
             value={statuses}
             onChange={setStatuses}
+            className='truncate'
+          />
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <Select
+            data={
+              // If channels are not loaded or failed to fetch, don't show anything
+              (!data_channels || data_channels.status !== 'success') ? [] : 
+              // Otherwise, show channels (other than SELLSCALE)
+                Object.keys(data_channels.extra).filter(x => x !== 'SELLSCALE').map((channel) => {
+              return {
+                label: formatToLabel(channel),
+                value: channel,
+              };
+            })}
+            mb="md"
+            clearable
+            label="Filter by Channel"
+            placeholder="Select channel"
+            value={channel}
+            onChange={(value) => value ? setChannel(value) : setChannel('')}
+            className='truncate'
           />
         </Grid.Col>
       </Grid>
@@ -249,7 +300,6 @@ export default function ProspectTable({
           {
             accessor: "status",
             title: 'Overall Status',
-            sortable: true,
             render: ({ status }) => {
               return (
                 <Badge color={valueToColor(theme, formatToLabel(status))}>
@@ -260,7 +310,6 @@ export default function ProspectTable({
           },
           {
             accessor: "channels",
-            sortable: true,
             render: ({ channels }) => {
               return channels.map((c: string, index: number) => (
                 <Badge key={index} color={valueToColor(theme, formatToLabel(c))}>

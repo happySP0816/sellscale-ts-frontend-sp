@@ -159,8 +159,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
   const checkCanUpload = () => {
     const hasScrapeTarget = Array.from(columnMappings.values()).some(
       (value) => {
-        // Bug with Mantine? This should be returning the select value, but it's returning the label
-        return value === "email" || value === "linkedin_url";
+        return value === "linkedin_url"; //TODO: || value === "email";
       }
     );
     // TODO: could check that the email and URLs are valid?
@@ -181,7 +180,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     }
     if (!hasScrapeTarget) {
       failureReasons.push(
-        "Please map at least one column to a profile target (such as an email or LinkedIn URL)."
+        "Please map at least one column to a profile target (such as a LinkedIn URL)." // TODO: or email
       );
     }
 

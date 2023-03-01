@@ -19,35 +19,35 @@ function getPipelineSelectorData(data: any){
     title: "All Prospects",
     description: "All prospects in the pipeline",
     icon: IconUserPlus,
-    value: data?.pipeline_data?.sent_outreach || "-",
+    value: data?.pipeline_data?.SELLSCALE.SENT_OUTREACH || "-",
     color: "blue",
   })
   .set('accepted', {
     title: "Accepted",
     description: "Accepted prospects in the pipeline",
     icon: IconUserPlus,
-    value: data?.pipeline_data?.accepted || "-",
+    value: data?.pipeline_data?.SELLSCALE.ACCEPTED || "-",
     color: "green",
   })
   .set('bumped', {
     title: "Bumped",
     description: "Bumped prospects in the pipeline",
     icon: IconUserPlus,
-    value: data?.pipeline_data?.responded || "-",
+    value: data?.pipeline_data?.SELLSCALE.BUMPED || "-",
     color: "orange",
   })
   .set('active', {
     title: "Active Convos",
     description: "Active conversations in the pipeline",
     icon: IconUserPlus,
-    value: (data?.pipeline_data) ? (data.pipeline_data.active_convo + data.pipeline_data.scheduling) : "-",
+    value: data?.pipeline_data?.SELLSCALE.ACTIVE_CONVO || "-",
     color: "yellow",
   })
   .set('demo', {
     title: "Demo Set",
     description: "Demo set prospects in the pipeline",
     icon: IconUserPlus,
-    value: (data?.pipeline_data) ? (data.pipeline_data.demo_loss + data.pipeline_data.demo_set + data.pipeline_data.demo_won) : "-",
+    value: data?.pipeline_data?.SELLSCALE.DEMO || "-",
     color: "purple",
   });
 }
@@ -86,6 +86,8 @@ export default function PipelinePage() {
       return res;
     },
   });
+
+  console.log(data)
 
   const PIPELINE_SELECTOR_DATA = getPipelineSelectorData(data);
   return (

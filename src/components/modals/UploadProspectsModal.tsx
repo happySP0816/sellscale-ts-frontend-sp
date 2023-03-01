@@ -90,7 +90,7 @@ export default function UploadProspectsModal({
   // Fetch personas
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
-      `query-personas-data`
+      `query-personas-active-data`
     ],
     queryFn: async () => {
 
@@ -114,7 +114,7 @@ export default function UploadProspectsModal({
       // Sort alphabetically by archetype (name)
       return (res.archetypes as Archetype[]).sort((a, b) => {
         return a.archetype.localeCompare(b.archetype);
-      });
+      }).filter((persona) => persona.active === true);
     },
     refetchOnWindowFocus: false,
   });
@@ -141,40 +141,43 @@ export default function UploadProspectsModal({
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       <Stack spacing="xl">
-        <Select
-          label="Choose a Persona"
-          data={personas}
-          placeholder="Select or create a persona for the prospects"
-          nothingFound="Nothing found"
-          icon={<IconUsers size={14} />}
-          searchable
-          creatable
-          clearable
-          getCreateLabel={(query) => (
-            <>
-              <span style={{ fontWeight: 700 }}>New Persona: </span>
-              {query}
-            </>
-          )}
-          onCreate={(query) => {
-            // value = ID if selected, name if created
-            const item = { value: query, label: query };
-            setPersonas((current) => [...current, item]);
-            setCreatedPersona(query);
-            return item;
-          }}
-          onChange={(value) => {
-            // If created persona exists and is one of the existing personas, clear it
-            if (
-              createdPersona.length > 0 &&
-              personas.filter((personas) => personas.value === value).length > 0
-            ) {
-              setPersonas(defaultPersonas.current);
-              setCreatedPersona("");
-            }
-            setSelectedPersona(value);
-          }}
-        />
+        {!isFetching && (
+          <Select
+            label="Set Persona"
+            defaultValue={defaultPersonas.current.length === 1 ? defaultPersonas.current[0].value : undefined}
+            data={personas}
+            placeholder="Select or create a persona for the prospects"
+            nothingFound="Nothing found"
+            icon={<IconUsers size={14} />}
+            searchable
+            creatable
+            clearable
+            getCreateLabel={(query) => (
+              <>
+                <span style={{ fontWeight: 700 }}>New Persona: </span>
+                {query}
+              </>
+            )}
+            onCreate={(query) => {
+              // value = ID if selected, name if created
+              const item = { value: query, label: query };
+              setPersonas((current) => [...current, item]);
+              setCreatedPersona(query);
+              return item;
+            }}
+            onChange={(value) => {
+              // If created persona exists and is one of the existing personas, clear it
+              if (
+                createdPersona.length > 0 &&
+                personas.filter((personas) => personas.value === value).length > 0
+              ) {
+                setPersonas(defaultPersonas.current);
+                setCreatedPersona("");
+              }
+              setSelectedPersona(value);
+            }}
+          />
+        )}
 
         {createdPersona.length > 0 && (
           <Container mx={2} my={0} p={0}>

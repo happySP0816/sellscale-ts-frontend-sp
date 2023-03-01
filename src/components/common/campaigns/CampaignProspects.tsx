@@ -7,6 +7,7 @@ import {
   Chip,
   Badge,
   useMantineTheme,
+  LoadingOverlay,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -26,8 +27,9 @@ import { userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, valueToColor } from "@utils/general";
 import { useDebouncedState } from "@mantine/hooks";
 import { Prospect } from "src/main";
-import { ALL_PROSPECT_STATUSES } from "@common/pipeline/ProspectTable";
 import { chunk } from "lodash";
+import { useQuery } from "react-query";
+import getChannels from "@utils/requests/getChannels";
 
 const PAGE_SIZE = 10;
 
@@ -57,6 +59,16 @@ export default function CampaignProspects({
   useEffect(() => {
     setPage(1);
   }, [search, statuses]);
+
+  const { data: data_channels } = useQuery({
+    queryKey: [
+      `query-get-channels-campaign-prospects`,
+    ],
+    queryFn: async () => {
+      return await getChannels(userToken);
+    },
+    refetchOnWindowFocus: false,
+  });
 
   // Split prospects into pages => data
   const getData = (page: number) => {
@@ -100,7 +112,16 @@ export default function CampaignProspects({
         </Grid.Col>
         <Grid.Col span={4}>
           <MultiSelect
-            data={ALL_PROSPECT_STATUSES}
+            data={
+              // If channels are not loaded or failed to fetch, don't show anything
+              (!data_channels || data_channels.status !== 'success') ? [] : 
+              // Otherwise, show overall statuses
+                data_channels.extra['SELLSCALE'].statuses_available.map((status: string) => {
+              return {
+                label: data_channels.extra['SELLSCALE'][status].name,
+                value: status,
+              };
+            })}
             mb="md"
             label="Filter by Status"
             placeholder="Select statuses"

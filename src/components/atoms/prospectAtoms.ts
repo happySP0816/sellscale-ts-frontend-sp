@@ -31,10 +31,16 @@ const prospectStatusesState = atom({
   default: [] as string[],
 });
 
+const prospectChannelState = atom({
+  key: "prospect-channel",
+  default: '',
+});
+
 export {
   prospectDrawerOpenState,
   prospectSelectorTypeState,
   prospectStatusesState,
+  prospectChannelState,
   prospectDrawerIdState,
   prospectDrawerCurrentStatusState,
   prospectDrawerNotesState,

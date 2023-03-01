@@ -88,9 +88,10 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   accepted: "green",
   active_convo: "yellow",
   bumped: "orange",
+  demo: "blue",
 };
 export function valueToColor(theme: MantineTheme, value: string): MantineColor {
-  value = value?.toLowerCase();
+  value = value?.toLowerCase().trim().replace(" ", "_");
 
   if (PRESET_COLOR_MAPS[value]) {
     return PRESET_COLOR_MAPS[value];

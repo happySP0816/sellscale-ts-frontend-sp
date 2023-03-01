@@ -156,6 +156,8 @@ export default function ProspectTable({
       }
 
       totalRecords.current = res.total_count;
+
+      console.log(res.prospects);
       return res.prospects.map((prospect: any) => {
         return {
           id: prospect.id,
@@ -163,12 +165,18 @@ export default function ProspectTable({
           company: prospect.company,
           title: prospect.title,
           industry: prospect.industry,
-          status: prospect.status,
+          status: prospect.overall_status || prospect.status,
+          channels: [
+            prospect.approved_outreach_message_id ? 'LINKEDIN' : undefined,
+            prospect.approved_prospect_email_id ? 'EMAIL' : undefined
+          ].filter((x) => x),
         };
       });
     },
     refetchOnWindowFocus: false,
   });
+
+  console.log(data);
 
   return (
     <Box>
@@ -240,6 +248,7 @@ export default function ProspectTable({
           },
           {
             accessor: "status",
+            title: 'Overall Status',
             sortable: true,
             render: ({ status }) => {
               return (
@@ -247,6 +256,17 @@ export default function ProspectTable({
                   {formatToLabel(status)}
                 </Badge>
               );
+            },
+          },
+          {
+            accessor: "channels",
+            sortable: true,
+            render: ({ channels }) => {
+              return channels.map((c: string, index: number) => (
+                <Badge key={index} color={valueToColor(theme, formatToLabel(c))}>
+                  {formatToLabel(c)}
+                </Badge>
+              ));
             },
           },
         ]}

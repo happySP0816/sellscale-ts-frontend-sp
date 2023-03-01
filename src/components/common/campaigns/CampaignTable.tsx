@@ -77,7 +77,7 @@ const ALL_TYPES = [
 
 const PAGE_SIZE = 20;
 
-export default function ProspectTable() {
+export default function CampaignTable() {
   const theme = useMantineTheme();
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
 

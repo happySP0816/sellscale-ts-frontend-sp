@@ -11,7 +11,7 @@ export interface Campaign {
   id: number;
   name: string;
   prospect_ids: number[];
-  campaign_type: "EMAIL" | "LINKEDIN";
+  campaign_type: Channel;
   ctas: number[];
   client_archetype_id: number;
   client_sdr_id: number;
@@ -105,3 +105,5 @@ export interface ProspectNote {
   note: string,
   prospect_id: number,
 }
+
+export type Channel = 'EMAIL' | 'LINKEDIN' | 'SELLSCALE';

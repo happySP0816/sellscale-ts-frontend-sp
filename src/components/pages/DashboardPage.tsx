@@ -81,26 +81,26 @@ export default function DashboardPage() {
                 Upload Prospects
               </Button>
               {/* <Progress value={50} /> */}
-              <Divider my="xs" />
-              <Button
-                variant="outline"
-                color="teal"
-                fullWidth
-                onClick={() => {}}
-                disabled
-              >
-                Future Action
-              </Button>
-              <Divider my="xs" />
-              <Button
-                variant="outline"
-                color="teal"
-                fullWidth
-                onClick={() => {}}
-                disabled
-              >
-                Future Action
-              </Button>
+              {/* 
+                <Button
+                  variant="outline"
+                  color="teal"
+                  fullWidth
+                  onClick={() => {}}
+                  disabled
+                >
+                  Future Action
+                </Button>
+                <Button
+                  variant="outline"
+                  color="teal"
+                  fullWidth
+                  onClick={() => {}}
+                  disabled
+                >
+                  Future Action
+                </Button>
+              */}
             </Stack>
           </Paper>
         </div>

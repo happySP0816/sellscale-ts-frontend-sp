@@ -68,7 +68,7 @@ export type StatGridInfo = {
 
 export default function PipelineSelector({ data }: { data: Map<string, StatGridInfo> }) {
   const { classes } = useStyles();
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
   const [statuses, setStatuses] = useRecoilState(prospectStatusesState);

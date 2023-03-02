@@ -1,5 +1,6 @@
 import { MantineColor, MantineTheme } from "@mantine/core";
 import { startCase } from "lodash";
+import { Channel } from "src/main";
 
 export function temp_delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -111,7 +112,8 @@ export function valueToColor(theme: MantineTheme, value: string): MantineColor {
 }
 
 export function formatToLabel(value: string) {
-  value = value?.toLowerCase();
+  if(!value) { return ''; }
+  value = value.toLowerCase();
   if (value === "responded") {
     return "Bumped";
   }
@@ -124,6 +126,74 @@ export function formatToLabel(value: string) {
   if (value === "demo_loss") {
     return "Demo Missed";
   }
+  if (value === "linkedin") {
+    return "LinkedIn";
+  }
   return startCase(value.replaceAll("_", " "));
 }
 
+/* NOT USED:
+export function convertStatus(status: string, toChannel: Channel): string[] {
+  if(toChannel === 'LINKEDIN'){
+    if(status === 'ACCEPTED') return [status];
+    if(status === 'ACTIVE_CONVO') return [status];
+    if(status === 'BUMPED') return ['RESPONDED'];
+    if(status === 'DEMO') return ['DEMO_SET', 'DEMO_WON', 'DEMO_LOSS'];
+    if(status === 'PROSPECTED') return [status];
+    if(status === 'REMOVED') return ['NOT_QUALIFIED'];
+    if(status === 'SENT_OUTREACH') return [status];
+    if(status === 'DEMO_LOSS') return [status];
+    if(status === 'DEMO_SET') return [status];
+    if(status === 'DEMO_WON') return [status];
+    if(status === 'NOT_QUALIFIED') return [status];
+    if(status === 'RESPONDED') return [status];
+    if(status === 'DEMO_LOST') return ['DEMO_LOSS'];
+    if(status === 'EMAIL_OPENED') return ['ACCEPTED'];
+    if(status === 'NOT_INTERESTED') return [status];
+    if(status === 'NOT_SENT') return ['NOT_QUALIFIED'];
+    if(status === 'SCHEDULING') return [status];
+    if(status === 'UNKNOWN') return ['NOT_QUALIFIED'];
+  }
+  if(toChannel === 'EMAIL'){
+    if(status === 'ACCEPTED') return [status];
+    if(status === 'ACTIVE_CONVO') return [status];
+    if(status === 'BUMPED') return ['EMAIL_OPENED'];
+    if(status === 'DEMO') return ['DEMO_SET', 'DEMO_WON', 'DEMO_LOST'];
+    if(status === 'PROSPECTED') return ['SENT_OUTREACH'];
+    if(status === 'REMOVED') return ['UNKNOWN'];
+    if(status === 'SENT_OUTREACH') return [status];
+    if(status === 'DEMO_LOSS') return ['DEMO_LOST'];
+    if(status === 'DEMO_SET') return [status];
+    if(status === 'DEMO_WON') return [status];
+    if(status === 'NOT_QUALIFIED') return ['UNKNOWN'];
+    if(status === 'RESPONDED') return ['ACTIVE_CONVO'];
+    if(status === 'DEMO_LOST') return [status];
+    if(status === 'EMAIL_OPENED') return [status];
+    if(status === 'NOT_INTERESTED') return [status];
+    if(status === 'NOT_SENT') return [status];
+    if(status === 'SCHEDULING') return [status];
+    if(status === 'UNKNOWN') return [status];
+  }
+  if(toChannel === 'SELLSCALE'){
+    if(status === 'ACCEPTED') return [status];
+    if(status === 'ACTIVE_CONVO') return [status];
+    if(status === 'BUMPED') return [status];
+    if(status === 'DEMO') return [status];
+    if(status === 'PROSPECTED') return [status];
+    if(status === 'REMOVED') return [status];
+    if(status === 'SENT_OUTREACH') return [status];
+    if(status === 'DEMO_LOSS') return ['DEMO'];
+    if(status === 'DEMO_SET') return ['DEMO'];
+    if(status === 'DEMO_WON') return ['DEMO'];
+    if(status === 'NOT_QUALIFIED') return ['REMOVED'];
+    if(status === 'RESPONDED') return ['BUMPED'];
+    if(status === 'DEMO_LOST') return ['DEMO'];
+    if(status === 'EMAIL_OPENED') return ['ACCEPTED'];
+    if(status === 'NOT_INTERESTED') return ['REMOVED'];
+    if(status === 'NOT_SENT') return ['REMOVED'];
+    if(status === 'SCHEDULING') return ['ACTIVE_CONVO'];
+    if(status === 'UNKNOWN') return ['REMOVED'];
+  }
+  return [];
+}
+*/

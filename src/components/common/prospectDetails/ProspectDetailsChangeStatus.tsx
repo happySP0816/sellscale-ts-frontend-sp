@@ -38,8 +38,9 @@ import { startCase } from "lodash";
 import displayNotification from "@utils/notificationFlow";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { prospectDrawerCurrentStatusState } from "@atoms/prospectAtoms";
 import { formatToLabel, splitName, valueToColor } from "@utils/general";
+import { useQueryClient } from "react-query";
+import { Channel } from "src/main";
 
 const linkedinStatusOptions = [
   {
@@ -205,10 +206,13 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const channelIconMap = {
-  LINKEDIN: <IconBrandLinkedin size={16} />,
-  EMAIL: <IconMail size={16} />,
-};
+export function channelToIcon(channel: Channel, size: number){
+  switch (channel) {
+    case 'LINKEDIN': return <IconBrandLinkedin size={16} />;
+    case 'EMAIL': return <IconMail size={16} />;
+    default: return <IconQuestionMark size={size} />;
+  }
+}
 
 async function updateChannelStatus(
   prospectId: number,
@@ -244,31 +248,29 @@ async function updateChannelStatus(
 type ProspectDetailsChangeStatusProps = {
   prospectId: number;
   prospectName: string;
-  channelOptions: {
-    label: string;
-    status_options: Record<string, string>;
-    value: string;
-  }[];
+  channelData: {
+    data: any;
+    value: Channel;
+    currentStatus: string;
+  };
 };
 
 export default function ProspectDetailsChangeStatus(
   props: ProspectDetailsChangeStatusProps
 ) {
+
+  console.log(props.channelData)
+
   const { classes, theme } = useStyles();
-  const [channelType, setChannelType] = useState<string>(
-    props.channelOptions[0].value
-  );
-  const [currentStatus, setCurrentStatus] = useRecoilState(prospectDrawerCurrentStatusState);
   const userToken = useRecoilValue(userTokenState);
+  const queryClient = useQueryClient();
 
   const items = [];
-  for (const statusValue in props.channelOptions.find(
-    (o) => o.value === channelType
-  )?.status_options) {
+  for (const statusValue of props.channelData.data.statuses_available) {
     let status: any = null;
-    if (channelType === "EMAIL") {
+    if (props.channelData.value === "EMAIL") {
       status = emailStatusOptions.find((o) => o.status === statusValue);
-    } else if (channelType === "LINKEDIN") {
+    } else if (props.channelData.value === "LINKEDIN") {
       status = linkedinStatusOptions.find((o) => o.status === statusValue);
     }
     if (!status) {
@@ -290,11 +292,12 @@ export default function ProspectDetailsChangeStatus(
               let result = await updateChannelStatus(
                 props.prospectId,
                 userToken,
-                channelType,
+                props.channelData.value,
                 status?.status as string
               );
               if(result.status === 'success') {
-                setCurrentStatus(status?.status as string);
+                // This will make the query rerun and update the UI
+                queryClient.invalidateQueries({ queryKey: [`query-prospect-details-${props.prospectId}`] });
               }
               return result;
             },
@@ -305,7 +308,7 @@ export default function ProspectDetailsChangeStatus(
             },
             {
               title: `Updated!`,
-              message: `Status is now ${status?.title}!`,
+              message: `Status is now "${status?.title}"!`,
               color: "teal",
             },
             {
@@ -328,35 +331,13 @@ export default function ProspectDetailsChangeStatus(
     <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
       <Group position="apart">
         <Text weight={700} size="lg">
-          Status
+          {`${formatToLabel(props.channelData.value)} Status`}
         </Text>
-        <Badge color={valueToColor(theme, formatToLabel(currentStatus))} variant="light">
-          {formatToLabel(currentStatus)}
+        <Badge color={valueToColor(theme, formatToLabel(props.channelData.currentStatus))} variant="light">
+          {formatToLabel(props.channelData.currentStatus)}
         </Badge>
       </Group>
-      <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${splitName(props.prospectName).first}'s status.`}</Text>
-      <Flex>
-        {props.channelOptions.length > 1 && (
-          <SegmentedControl
-            color="blue"
-            defaultValue={channelType}
-            onChange={(value) => {
-              setChannelType(value);
-            }}
-            data={props.channelOptions.map((option) => {
-              return {
-                value: option.value,
-                label: (
-                  <Center>
-                    {channelIconMap[option.value as "LINKEDIN" | "EMAIL"]}
-                    <Box ml={10}>{option.label}</Box>
-                  </Center>
-                ),
-              };
-            })}
-          />
-        )}
-      </Flex>
+      <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${splitName(props.prospectName).first}'s ${formatToLabel(props.channelData.value)} status.`}</Text>
       <SimpleGrid cols={3} mt="md">
         {items}
       </SimpleGrid>

@@ -49,10 +49,10 @@ export default function UploadProspectsModal({
 }: ContextModalProps) {
   const theme = useMantineTheme();
   const [personas, setPersonas] = useState<
-    { value: string; label: string; group: string }[]
+    { value: string; label: string; group: string | undefined }[]
   >([]);
   const defaultPersonas = useRef<
-    { value: string; label: string; group: string }[]
+    { value: string; label: string; group: string | undefined }[]
   >([]);
   const [createdPersona, setCreatedPersona] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
@@ -121,7 +121,7 @@ export default function UploadProspectsModal({
         } else {
           return a.archetype.localeCompare(b.archetype);
         }
-      });
+      }).filter((persona) => persona.active);
     },
     refetchOnWindowFocus: false,
   });
@@ -130,7 +130,7 @@ export default function UploadProspectsModal({
     defaultPersonas.current = data.map((persona) => ({
       value: persona.id + "",
       label: persona.archetype,
-      group: persona.active ? "Active" : "Inactive",
+      group: undefined, //persona.active ? "Active" : "Inactive",
     }));
   }
   useEffect(() => {
@@ -161,11 +161,11 @@ export default function UploadProspectsModal({
                 : undefined
             }
             data={personas}
-            placeholder="Select or create a persona for the prospects"
+            placeholder="Select a persona for the prospects"// or create
             nothingFound="Nothing found"
             icon={<IconUsers size={14} />}
             searchable
-            creatable
+            //creatable
             clearable
             getCreateLabel={(query) => (
               <>

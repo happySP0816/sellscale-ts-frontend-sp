@@ -32,6 +32,7 @@ import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
 import getChannels from "@utils/requests/getChannels";
+import { Channel } from "src/main";
 
 const ALL_PROSPECT_STATUSES = [
   { value: 'ACCEPTED', label: 'Accepted' },
@@ -61,6 +62,7 @@ export function getDefaultStatuses(selectorType: string){
   }
   return [];
 }
+
 export function getSelectorTypeFromStatuses(statuses: string[]){
   let statusesSet = new Set(statuses);
   let potentialTypes = [];
@@ -175,8 +177,8 @@ export default function ProspectTable({
           industry: prospect.industry,
           status: prospect.overall_status || prospect.status,
           channels: [
-            prospect.approved_outreach_message_id ? 'LINKEDIN' : undefined,
-            prospect.approved_prospect_email_id ? 'EMAIL' : undefined
+            prospect.linkedin_status ? 'LINKEDIN' : undefined,
+            prospect.email_status ? 'EMAIL' : undefined
           ].filter((x) => x),
         };
       });
@@ -195,7 +197,7 @@ export default function ProspectTable({
     refetchOnWindowFocus: false,
   });
 
-  console.log(data);
+  console.log(data, data_channels);
 
   return (
     <Box>
@@ -209,28 +211,6 @@ export default function ProspectTable({
             width={"500px"}
             onChange={(e) => setSearch(e.currentTarget.value)}
             icon={<IconSearch size={14} />}
-            className='truncate'
-          />
-        </Grid.Col>
-        <Grid.Col span={4}>
-          <MultiSelect
-            data={
-              // If channels are not loaded or failed to fetch, don't show anything
-              (!data_channels || data_channels.status !== 'success') ? [] : 
-              // Otherwise, show overall statuses
-                data_channels.extra['SELLSCALE'].statuses_available.map((status: string) => {
-              return {
-                label: data_channels.extra['SELLSCALE'][status].name,
-                value: status,
-              };
-            })}
-            mb="md"
-            label="Filter by Overall Status"
-            placeholder="Select statuses"
-            searchable
-            nothingFound="Nothing found"
-            value={statuses}
-            onChange={setStatuses}
             className='truncate'
           />
         </Grid.Col>
@@ -251,7 +231,29 @@ export default function ProspectTable({
             label="Filter by Channel"
             placeholder="Select channel"
             value={channel}
-            onChange={(value) => value ? setChannel(value) : setChannel('')}
+            onChange={(value) => value ? setChannel(value as Channel) : setChannel('SELLSCALE')}
+            className='truncate'
+          />
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <MultiSelect
+            data={
+              // If channels are not loaded or failed to fetch, don't show anything
+              (!data_channels || data_channels.status !== 'success') ? [] : 
+              // Otherwise, show {channel} statuses
+                data_channels.extra[channel].statuses_available.map((status: string) => {
+              return {
+                label: data_channels.extra[channel][status].name,
+                value: status,
+              };
+            })}
+            mb="md"
+            label={`Filter by ${formatToLabel(channel.replace('SELLSCALE', 'Overall'))} Status`}
+            placeholder="Select statuses"
+            searchable
+            nothingFound="Nothing found"
+            value={statuses}
+            onChange={setStatuses}
             className='truncate'
           />
         </Grid.Col>
@@ -298,6 +300,16 @@ export default function ProspectTable({
             sortable: true,
           },
           {
+            accessor: "channels",
+            render: ({ channels }) => {
+              return channels.map((c: string, index: number) => (
+                <Badge key={index} color={valueToColor(theme, formatToLabel(c))}>
+                  {formatToLabel(c)}
+                </Badge>
+              ));
+            },
+          },
+          {
             accessor: "status",
             title: 'Overall Status',
             render: ({ status }) => {
@@ -306,16 +318,6 @@ export default function ProspectTable({
                   {formatToLabel(status)}
                 </Badge>
               );
-            },
-          },
-          {
-            accessor: "channels",
-            render: ({ channels }) => {
-              return channels.map((c: string, index: number) => (
-                <Badge key={index} color={valueToColor(theme, formatToLabel(c))}>
-                  {formatToLabel(c)}
-                </Badge>
-              ));
             },
           },
         ]}
@@ -329,7 +331,9 @@ export default function ProspectTable({
         onSortStatusChange={handleSortStatusChange}
       />
 
-      <ProspectDetailsDrawer />
+      {opened && (
+        <ProspectDetailsDrawer />
+      )}
     </Box>
   );
 }

@@ -45,3 +45,33 @@ export default async function getChannels(userToken: string): Promise<MsgRespons
   return { status: 'success', title: `Success`, message: `Gathered available outbound channels`, extra: res.available_outbound_channels };
 
 }
+
+// TODO: Make it return MsgResponse
+export async function getChannelOptions(prospectId: number, userToken: string) {
+  const response = await fetch(
+    `${process.env.REACT_APP_API_URI}/prospect/get_valid_channel_types?prospect_id=${prospectId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  const res = await response.json();
+  return res.choices;
+}
+
+// TODO: Make it return MsgResponse
+export async function getChannelStatusOptions(prospectId: number, userToken: string, channelType: string) {
+  const response = await fetch(
+    `${process.env.REACT_APP_API_URI}/prospect/get_valid_next_prospect_statuses?prospect_id=${prospectId}&channel_type=${channelType}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  const res = await response.json();
+  return res;
+}

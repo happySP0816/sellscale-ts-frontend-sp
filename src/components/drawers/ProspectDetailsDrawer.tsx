@@ -1,54 +1,55 @@
-import { Drawer, LoadingOverlay, ScrollArea, Title, Badge, Flex, useMantineTheme } from "@mantine/core";
+import {
+  Drawer,
+  LoadingOverlay,
+  ScrollArea,
+  Title,
+  Badge,
+  Flex,
+  useMantineTheme,
+  Tabs,
+  Divider,
+} from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   prospectDrawerIdState,
   prospectDrawerOpenState,
-  prospectDrawerCurrentStatusState,
   prospectDrawerNotesState,
+  prospectChannelState,
 } from "@atoms/prospectAtoms";
 import { useQuery } from "react-query";
 import ProspectDetailsSummary from "../common/prospectDetails/ProspectDetailsSummary";
-import ProspectDetailsChangeStatus from "../common/prospectDetails/ProspectDetailsChangeStatus";
+import ProspectDetailsChangeStatus, {
+  channelToIcon,
+} from "../common/prospectDetails/ProspectDetailsChangeStatus";
 import ProspectDetailsCompany from "../common/prospectDetails/ProspectDetailsCompany";
 import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes";
 import ProspectDetailsViewConversation from "../common/prospectDetails/ProspectDetailsViewConversation";
 import { userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, valueToColor } from "@utils/general";
 import { logout } from "@auth/core";
-import { useRef } from "react";
-
-async function getChannelOptions(prospectId: number, userToken: string) {
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/get_valid_channel_types?prospect_id=${prospectId}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-      },
-    }
-  );
-  const res = await response.json();
-  return res.choices;
-}
-
-async function getChannelStatusOptions(prospectId: number, userToken: string, channelType: string) {
-  const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/get_valid_next_prospect_statuses?prospect_id=${prospectId}&channel_type=${channelType}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-      },
-    }
-  );
-  const res = await response.json();
-  return res;
-}
+import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
+import { useEffect, useRef, useState } from "react";
+import { Channel } from "src/main";
 
 export default function ProspectDetailsDrawer() {
   const theme = useMantineTheme();
-  const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
-  const [currentStatus, setCurrentStatus] = useRecoilState(prospectDrawerCurrentStatusState);
+  const tableFilterChannel = useRecoilValue(prospectChannelState);
+  const [channelType, setChannelType] = useState<Channel | null>(
+    tableFilterChannel.length > 0 ? tableFilterChannel : null
+  );
+
+  // This component is only rendered if drawerOpened=true - which isn't helpful for the first render
+  // So we use actuallyOpened to control when the drawer opens and delay it by 100ms (for the animation to play)
+  const [drawerOpened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
+  const [actuallyOpened, setActuallyOpened] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      setActuallyOpened(drawerOpened);
+    }, 100);
+  }, [])
+
+  console.log(channelType, tableFilterChannel);
+
   const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
   const prospectId = useRecoilValue(prospectDrawerIdState);
   const userToken = useRecoilValue(userTokenState);
@@ -73,51 +74,58 @@ export default function ProspectDetailsDrawer() {
         logout();
       }
       const res = await response.json();
+      const res_channels = await getChannels(userToken);
+      const res_valid_channels = await getChannelOptions(prospectId, userToken);
 
-      const channelOptions = await getChannelOptions(prospectId, userToken);
-      for (let channelOption of channelOptions) {
-        const channelStatusOptions = await getChannelStatusOptions(prospectId, userToken, channelOption.value);
-        channelOption.status_options = channelStatusOptions;
-      }
-
-      setCurrentStatus(res.prospect_info.details.overall_status);
       setNotes(res.prospect_info.details.notes);
 
-      return { main: res, channelOptions };
+      return {
+        main: res,
+        channels: res_channels.status === "success" ? res_channels.extra : {},
+        channelTypes: res_valid_channels,
+      };
     },
     refetchOnWindowFocus: false,
   });
 
+  console.log(data?.main.prospect_info);
+
+  console.log(data?.channelTypes);
+
   return (
     <Drawer
-      opened={opened}
-      onClose={() => setOpened(false)}
+      opened={actuallyOpened}
+      onClose={() => setDrawerOpened(false)}
       title={
-        <Flex align="center" gap="md">
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
           <Title order={2}>
-            {data?.main.prospect_info ? data.main.prospect_info.details.full_name : ""}
+            {data?.main.prospect_info
+              ? data.main.prospect_info.details.full_name
+              : ""}
           </Title>
-          <>
-            {data?.channelOptions.map((option: any) => {
-              return (
-                <Badge color={valueToColor(theme, formatToLabel(option.value))} variant="light">
-                  {option.value}
-                </Badge>
-              )
-            })}
-          </>
-          
-        </Flex>
+          {data && (
+            <Badge
+              color={valueToColor(
+                theme,
+                formatToLabel(data.main.prospect_info.details.overall_status)
+              )}
+              variant="light"
+            >
+              {`${formatToLabel(
+                data.main.prospect_info.details.overall_status
+              )}`}
+            </Badge>
+          )}
+        </div>
       }
       padding="xl"
       size="xl"
       position="right"
+      styles={{ title: { width: "100%" } }}
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       {data?.main.prospect_info && !isFetching && (
-        <ScrollArea
-          style={{ height: window.innerHeight - 100, overflowY: "hidden" }}
-        >
+        <>
           <ProspectDetailsSummary
             full_name={data.main.prospect_info.details.full_name}
             title={data.main.prospect_info.details.title}
@@ -125,38 +133,94 @@ export default function ProspectDetailsDrawer() {
             linkedin={data.main.prospect_info.li.li_profile}
             profile_pic={data.main.prospect_info.details.profile_pic}
           />
-          {data.channelOptions.length > 0 && (
-            <ProspectDetailsChangeStatus
+          <ScrollArea
+            style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
+          >
+            {data?.channelTypes.length > 0 && (
+              <>
+                <Tabs
+                  value={
+                    (channelType === null || channelType === 'SELLSCALE')
+                      ? data.channelTypes[0].value
+                      : channelType
+                  }
+                  onTabChange={(value) => { setChannelType(value as Channel | null); }}
+                >
+                  <Tabs.List position="center">
+                    {data.channelTypes.map(
+                      (channel: { label: string; value: Channel }) => (
+                        <Tabs.Tab
+                          key={channel.value}
+                          value={channel.value}
+                          icon={channelToIcon(channel.value, 14)}
+                        >
+                          {`${formatToLabel(channel.label)} Outbound`}
+                        </Tabs.Tab>
+                      )
+                    )}
+                  </Tabs.List>
+
+                  {data?.channelTypes.map(
+                    (channel: { label: string; value: Channel }) => (
+                      <Tabs.Panel
+                        key={channel.value}
+                        value={channel.value}
+                        px="md"
+                      >
+                        <ProspectDetailsChangeStatus
+                          prospectId={data.main.prospect_info.details.id}
+                          prospectName={
+                            data.main.prospect_info.details.full_name
+                          }
+                          channelData={{
+                            data: data.channels[channel.value],
+                            value: channel.value,
+                            currentStatus:
+                              channel.value === "LINKEDIN"
+                                ? data.main.prospect_info.details
+                                    .linkedin_status
+                                : data.main.prospect_info.details.email_status,
+                          }}
+                        />
+
+                        {channel.value === "LINKEDIN" &&
+                          data.main.prospect_info.li?.li_conversation_thread
+                            ?.length > 0 && (
+                            <ProspectDetailsViewConversation
+                              conversation_entry_list={
+                                data.main.prospect_info.li
+                                  .li_conversation_thread
+                              }
+                              conversation_url={
+                                data.main.prospect_info.li.li_conversation_url
+                              }
+                            />
+                          )}
+                      </Tabs.Panel>
+                    )
+                  )}
+                </Tabs>
+                <Divider my="sm" size="sm" />
+              </>
+            )}
+            <ProspectDetailsNotes
+              currentStatus={data.main.prospect_info.details.overall_status}
               prospectId={data.main.prospect_info.details.id}
-              prospectName={data.main.prospect_info.details.full_name}
-              channelOptions={data.channelOptions}
             />
-          )}
-          {data.main.prospect_info.li?.li_conversation_thread?.length > 0 && (
-            <ProspectDetailsViewConversation
-              conversation_entry_list={
-                data.main.prospect_info.li.li_conversation_thread
-              }
-              conversation_url={data.main.prospect_info.li.li_conversation_url}
-            />
-          )}
-          <ProspectDetailsNotes
-            currentStatus={data.main.prospect_info.details.overall_status}
-            prospectId={data.main.prospect_info.details.id}
-          />
-          {data.main.prospect_info.company.name && (
-            <ProspectDetailsCompany
-              logo={data.main.prospect_info.company.logo}
-              company_name={data.main.prospect_info.company.name}
-              location={data.main.prospect_info.company.location}
-              description={data.main.prospect_info.company.description}
-              employee_count={data.main.prospect_info.company.employee_count}
-              tagline={data.main.prospect_info.company.tagline}
-              tags={data.main.prospect_info.company.tags}
-              website_url={data.main.prospect_info.company.url}
-            />
-          )}
-        </ScrollArea>
+            {data.main.prospect_info.company.name && (
+              <ProspectDetailsCompany
+                logo={data.main.prospect_info.company.logo}
+                company_name={data.main.prospect_info.company.name}
+                location={data.main.prospect_info.company.location}
+                description={data.main.prospect_info.company.description}
+                employee_count={data.main.prospect_info.company.employee_count}
+                tagline={data.main.prospect_info.company.tagline}
+                tags={data.main.prospect_info.company.tags}
+                website_url={data.main.prospect_info.company.url}
+              />
+            )}
+          </ScrollArea>
+        </>
       )}
     </Drawer>
   );

@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { ProspectNote } from "src/main";
+import { Channel, ProspectNote } from "src/main";
 
 const prospectDrawerOpenState = atom({
   key: "prospect-drawer-open",
@@ -9,11 +9,6 @@ const prospectDrawerOpenState = atom({
 const prospectDrawerIdState = atom({
   key: "prospect-drawer-id",
   default: -1,
-});
-
-const prospectDrawerCurrentStatusState = atom({
-  key: "prospect-drawer-current-status",
-  default: 'UNKNOWN',
 });
 
 const prospectDrawerNotesState = atom({
@@ -33,7 +28,7 @@ const prospectStatusesState = atom({
 
 const prospectChannelState = atom({
   key: "prospect-channel",
-  default: '',
+  default: 'SELLSCALE' as Channel,
 });
 
 export {
@@ -42,6 +37,5 @@ export {
   prospectStatusesState,
   prospectChannelState,
   prospectDrawerIdState,
-  prospectDrawerCurrentStatusState,
   prospectDrawerNotesState,
 };

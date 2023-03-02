@@ -217,6 +217,14 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     }));
     if (result.status === "error") {
       console.error("Failed to start prospects upload");
+      showNotification({
+        id: 'uploading-prospects-failed',
+        title: 'Error while uploading prospects',
+        message: result.message,
+        color: 'red',
+        autoClose: false,
+      });
+      setPreUploading(false);
       return;
     }
 
@@ -226,7 +234,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
       title: 'Uploading prospects...',
       message: 'Check the persona for progress',
       color: 'teal',
-      autoClose: false,
+      autoClose: 15000,
       disallowClose: true,
     });
 

@@ -48,8 +48,12 @@ export default function UploadProspectsModal({
   innerProps,
 }: ContextModalProps) {
   const theme = useMantineTheme();
-  const [personas, setPersonas] = useState<{ value: string, label: string }[]>([]);
-  const defaultPersonas = useRef<{ value: string, label: string }[]>([]);
+  const [personas, setPersonas] = useState<
+    { value: string; label: string; group: string }[]
+  >([]);
+  const defaultPersonas = useRef<
+    { value: string; label: string; group: string }[]
+  >([]);
   const [createdPersona, setCreatedPersona] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
 
@@ -89,11 +93,8 @@ export default function UploadProspectsModal({
   const userToken = useRecoilValue(userTokenState);
   // Fetch personas
   const { data, isFetching, refetch } = useQuery({
-    queryKey: [
-      `query-personas-active-data`
-    ],
+    queryKey: [`query-personas-active-data`],
     queryFn: async () => {
-
       const response = await fetch(
         `${process.env.REACT_APP_API_URI}/client/archetype/get_archetypes`,
         {
@@ -113,20 +114,27 @@ export default function UploadProspectsModal({
 
       // Sort alphabetically by archetype (name)
       return (res.archetypes as Archetype[]).sort((a, b) => {
-        return a.archetype.localeCompare(b.archetype);
-      }).filter((persona) => persona.active === true);
+        if (a.active && !b.active) {
+          return -1;
+        } else if (!a.active && b.active) {
+          return 1;
+        } else {
+          return a.archetype.localeCompare(b.archetype);
+        }
+      });
     },
     refetchOnWindowFocus: false,
   });
   // After fetch, set default personas and set personas if they haven't been set yet
-  if(data){
+  if (data) {
     defaultPersonas.current = data.map((persona) => ({
-      value: persona.id+'',
+      value: persona.id + "",
       label: persona.archetype,
+      group: persona.active ? "Active" : "Inactive",
     }));
   }
   useEffect(() => {
-    if(personas.length === 0 && defaultPersonas.current.length > 0){
+    if (personas.length === 0 && defaultPersonas.current.length > 0) {
       setPersonas(defaultPersonas.current);
     }
   }, [defaultPersonas.current]);
@@ -144,7 +152,14 @@ export default function UploadProspectsModal({
         {!isFetching && (
           <Select
             label="Set Persona"
-            defaultValue={defaultPersonas.current.length === 1 ? defaultPersonas.current[0].value : undefined}
+            defaultValue={
+              defaultPersonas.current.length === 1 ||
+              (defaultPersonas.current.length > 1 &&
+                defaultPersonas.current[0].group === "Active" &&
+                defaultPersonas.current[1].group === "Inactive")
+                ? defaultPersonas.current[0].value
+                : undefined
+            }
             data={personas}
             placeholder="Select or create a persona for the prospects"
             nothingFound="Nothing found"
@@ -160,7 +175,7 @@ export default function UploadProspectsModal({
             )}
             onCreate={(query) => {
               // value = ID if selected, name if created
-              const item = { value: query, label: query };
+              const item = { value: query, label: query, group: "Active" };
               setPersonas((current) => [...current, item]);
               setCreatedPersona(query);
               return item;
@@ -169,7 +184,8 @@ export default function UploadProspectsModal({
               // If created persona exists and is one of the existing personas, clear it
               if (
                 createdPersona.length > 0 &&
-                personas.filter((personas) => personas.value === value).length > 0
+                personas.filter((personas) => personas.value === value).length >
+                  0
               ) {
                 setPersonas(defaultPersonas.current);
                 setCreatedPersona("");
@@ -190,7 +206,9 @@ export default function UploadProspectsModal({
               }}
               onClick={() => setOpenedCTAs((prev) => !prev)}
             >
-              <Text fw={500} size='sm'>Call-to-Actions (CTAs)</Text>
+              <Text fw={500} size="sm">
+                Call-to-Actions (CTAs)
+              </Text>
               {openedCTAs ? (
                 <IconChevronUp size={20} />
               ) : (
@@ -267,15 +285,18 @@ export default function UploadProspectsModal({
             <Divider mt={0} />
           </Container>
         )}
-        
+
         <FileDropAndPreview
           personaId={createdPersona.length > 0 ? null : selectedPersona}
-          createPersona={createdPersona.length > 0 ? {
-            name: createdPersona,
-            ctas: ctas.map((cta) => cta.cta),
-          } : undefined}
+          createPersona={
+            createdPersona.length > 0
+              ? {
+                  name: createdPersona,
+                  ctas: ctas.map((cta) => cta.cta),
+                }
+              : undefined
+          }
         />
-        
       </Stack>
     </Paper>
   );

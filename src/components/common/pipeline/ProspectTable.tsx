@@ -148,7 +148,7 @@ export default function ProspectTable({
             status: statuses.length > 0 ? statuses : undefined,
             limit: PAGE_SIZE,
             offset: (page - 1) * PAGE_SIZE,
-            filters: [
+            ordering: [
               {
                 field: sortStatus.columnAccessor,
                 direction: sortStatus.direction === 'asc' ? 1 : -1,

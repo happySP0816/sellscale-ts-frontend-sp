@@ -1,4 +1,4 @@
-import { Drawer, LoadingOverlay, ScrollArea, Title } from "@mantine/core";
+import { Drawer, LoadingOverlay, ScrollArea, Title, Badge, Flex, useMantineTheme } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   prospectDrawerIdState,
@@ -13,10 +13,11 @@ import ProspectDetailsCompany from "../common/prospectDetails/ProspectDetailsCom
 import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes";
 import ProspectDetailsViewConversation from "../common/prospectDetails/ProspectDetailsViewConversation";
 import { userTokenState } from "@atoms/userAtoms";
+import { formatToLabel, valueToColor } from "@utils/general";
 import { logout } from "@auth/core";
 import { useRef } from "react";
 
-async function getChannelOptions(prospectId: number, userToken: string){
+async function getChannelOptions(prospectId: number, userToken: string) {
   const response = await fetch(
     `${process.env.REACT_APP_API_URI}/prospect/get_valid_channel_types?prospect_id=${prospectId}`,
     {
@@ -30,7 +31,7 @@ async function getChannelOptions(prospectId: number, userToken: string){
   return res.choices;
 }
 
-async function getChannelStatusOptions(prospectId: number, userToken: string, channelType: string){
+async function getChannelStatusOptions(prospectId: number, userToken: string, channelType: string) {
   const response = await fetch(
     `${process.env.REACT_APP_API_URI}/prospect/get_valid_next_prospect_statuses?prospect_id=${prospectId}&channel_type=${channelType}`,
     {
@@ -45,6 +46,7 @@ async function getChannelStatusOptions(prospectId: number, userToken: string, ch
 }
 
 export default function ProspectDetailsDrawer() {
+  const theme = useMantineTheme();
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [currentStatus, setCurrentStatus] = useRecoilState(prospectDrawerCurrentStatusState);
   const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
@@ -73,7 +75,7 @@ export default function ProspectDetailsDrawer() {
       const res = await response.json();
 
       const channelOptions = await getChannelOptions(prospectId, userToken);
-      for(let channelOption of channelOptions){
+      for (let channelOption of channelOptions) {
         const channelStatusOptions = await getChannelStatusOptions(prospectId, userToken, channelOption.value);
         channelOption.status_options = channelStatusOptions;
       }
@@ -91,9 +93,21 @@ export default function ProspectDetailsDrawer() {
       opened={opened}
       onClose={() => setOpened(false)}
       title={
-        <Title order={2}>
-          {data?.main.prospect_info ? data.main.prospect_info.details.full_name : ""}
-        </Title>
+        <Flex align="center" gap="md">
+          <Title order={2}>
+            {data?.main.prospect_info ? data.main.prospect_info.details.full_name : ""}
+          </Title>
+          <>
+            {data?.channelOptions.map((option: any) => {
+              return (
+                <Badge color={valueToColor(theme, formatToLabel(option.value))} variant="light">
+                  {option.value}
+                </Badge>
+              )
+            })}
+          </>
+          
+        </Flex>
       }
       padding="xl"
       size="xl"

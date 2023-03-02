@@ -16,7 +16,12 @@ import {
 import { useState } from "react";
 import {
   IconHeartHandshake,
+  IconMailboxOff,
+  IconSend,
+  IconClick,
   IconMail,
+  IconMailForward,
+  IconMailOpened,
   IconNotification,
   IconChartBubble,
   IconCalendar,
@@ -34,9 +39,9 @@ import displayNotification from "@utils/notificationFlow";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { prospectDrawerCurrentStatusState } from "@atoms/prospectAtoms";
-import { formatToLabel, splitName } from "@utils/general";
+import { formatToLabel, splitName, valueToColor } from "@utils/general";
 
-const statusOptions = [
+const linkedinStatusOptions = [
   {
     title: "Accepted Invite",
     icon: IconHeartHandshake,
@@ -86,7 +91,7 @@ const statusOptions = [
     status: "NOT_INTERESTED",
   },
   {
-    title: "Demo Loss",
+    title: "Demo Lost",
     icon: IconFaceIdError,
     color: "red",
     status: "DEMO_LOSS",
@@ -98,6 +103,76 @@ const statusOptions = [
     status: "NOT_QUALIFIED",
   },
 ];
+
+const emailStatusOptions = [
+  {
+    title: "Not Sent",
+    icon: IconMailboxOff,
+    color: "gray",
+    status: "NOT_SENT",
+  },
+  {
+    title: "Sent Email",
+    icon: IconSend,
+    color: "orange",
+    status: "SENT_OUTREACH",
+  },
+  {
+    title: "Email Opened",
+    icon: IconMailOpened,
+    color: "yellow",
+    status: "EMAIL_OPENED",
+  },
+  {
+    title: "Email Clicked",
+    icon: IconClick,
+    color: "blue",
+    status: "ACCEPTED",
+  },
+  {
+    title: "Email Replied",
+    icon: IconMailForward,
+    color: "orange",
+    status: "ACTIVE_CONVO",
+  },
+  {
+    title: "Sent Email",
+    icon: IconSend,
+    color: "orange",
+    status: "SENT_OUTREACH",
+  },
+  {
+    title: "Scheduling",
+    icon: IconCalendar,
+    color: "pink",
+    status: "SCHEDULING",
+  },
+  {
+    title: "Demo Set",
+    icon: IconCalendarEvent,
+    color: "pink",
+    status: "DEMO_SET",
+  },
+  {
+    title: "Demo Complete",
+    icon: IconConfetti,
+    color: "green",
+    status: "DEMO_WON",
+  },
+  {
+    title: "Demo Lost",
+    icon: IconFaceIdError,
+    color: "red",
+    status: "DEMO_LOST",
+  },
+  {
+    title: "Not Interested",
+    icon: IconX,
+    color: "red",
+    status: "NOT_INTERESTED",
+  },
+];
+
 const useStyles = createStyles((theme) => ({
   card: {
     backgroundColor:
@@ -190,7 +265,12 @@ export default function ProspectDetailsChangeStatus(
   for (const statusValue in props.channelOptions.find(
     (o) => o.value === channelType
   )?.status_options) {
-    let status = statusOptions.find((o) => o.status === statusValue);
+    let status: any = null;
+    if (channelType === "EMAIL") {
+      status = emailStatusOptions.find((o) => o.status === statusValue);
+    } else if (channelType === "LINKEDIN") {
+      status = linkedinStatusOptions.find((o) => o.status === statusValue);
+    }
     if (!status) {
       status = {
         title: startCase(statusValue),
@@ -250,7 +330,7 @@ export default function ProspectDetailsChangeStatus(
         <Text weight={700} size="lg">
           Status
         </Text>
-        <Badge color="pink" variant="light">
+        <Badge color={valueToColor(theme, formatToLabel(currentStatus))} variant="light">
           {formatToLabel(currentStatus)}
         </Badge>
       </Group>

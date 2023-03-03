@@ -22,7 +22,7 @@ export default async function uploadProspects(archetype_id: number, userToken: s
       return { status: 'error', title: `Error (${r.status})`, message: (await r.text()) };
     }
   }).catch((err) => {
-    console.log(err);
+    console.warn(err);
     return { status: 'error', title: `Error while uploading`, message: err.message };
   }) as MsgResponse;
 

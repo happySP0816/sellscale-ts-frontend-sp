@@ -89,8 +89,6 @@ export default function PipelinePage() {
     },
   });
 
-  console.log(data)
-
   const PIPELINE_SELECTOR_DATA = getPipelineSelectorData(data);
   return (
     <PageFrame>

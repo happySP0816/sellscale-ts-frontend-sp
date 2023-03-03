@@ -279,7 +279,6 @@ type ProspectDetailsChangeStatusProps = {
 export default function ProspectDetailsChangeStatus(
   props: ProspectDetailsChangeStatusProps
 ) {
-  console.log(props.channelData);
 
   const { classes, theme } = useStyles();
   const userToken = useRecoilValue(userTokenState);

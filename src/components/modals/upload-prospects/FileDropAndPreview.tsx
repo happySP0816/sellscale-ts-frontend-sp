@@ -273,11 +273,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     onCancel: () => {
       closeAllModals();
     },
-    onConfirm: () => {
-      if (checkCanUpload().length === 0) {
-        startUpload();
-      }
-    },
+    onConfirm: () => startUpload(),
   });
 
   return (
@@ -386,7 +382,11 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
                 <Button
                   variant="outline"
                   color={checkCanUpload().length > 0 ? "red" : "teal"}
-                  onClick={openModal}
+                  onClick={() => {
+                    if (checkCanUpload().length === 0) {
+                      openModal();
+                    }
+                  }}
                 >
                   Start Upload!
                 </Button>

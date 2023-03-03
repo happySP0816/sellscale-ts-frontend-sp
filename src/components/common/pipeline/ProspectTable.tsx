@@ -9,11 +9,12 @@ import {
   useMantineTheme,
   Select,
   LoadingOverlay,
+  ActionIcon,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
 import { TextInput } from "@mantine/core";
-import { IconSearch } from "@tabler/icons";
+import { IconRefresh, IconSearch } from "@tabler/icons";
 import { MultiSelect } from "@mantine/core";
 import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
 
@@ -219,7 +220,7 @@ export default function ProspectTable({
     refetchOnWindowFocus: false,
   });
 
-  const { data: data_channels } = useQuery({
+  const { data: data_channels, refetch: refetch_channels } = useQuery({
     queryKey: [`query-get-channels-prospects`],
     queryFn: async () => {
       return await getChannels(userToken);
@@ -365,9 +366,21 @@ export default function ProspectTable({
           },
           {
             accessor: "status",
-            title: `${formatToLabel(
-              channel.replace("SELLSCALE", "Overall")
-            )} Status`,
+            title: (
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <Text>
+                  {`${formatToLabel(
+                    channel.replace("SELLSCALE", "Overall")
+                  )} Status`}
+                </Text>
+                <ActionIcon size="sm" onClick={() => {
+                  refetch();
+                  refetch_channels();
+                }}>
+                  <IconRefresh size="0.875rem" />
+                </ActionIcon>
+              </div>
+            ),
             render: ({ status }) => {
               return (
                 <Badge color={valueToColor(theme, formatToLabel(status))}>

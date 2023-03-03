@@ -174,6 +174,8 @@ const emailStatusOptions = [
   },
 ];
 
+const dontShowStatuses = ['UNKNOWN', 'PROSPECTED'];
+
 const useStyles = createStyles((theme) => ({
   card: {
     backgroundColor:
@@ -266,7 +268,8 @@ export default function ProspectDetailsChangeStatus(
   const queryClient = useQueryClient();
 
   const items = [];
-  for (const statusValue of props.channelData.data.statuses_available) {
+  for (const statusValue of props.channelData.data.statuses_available
+        .filter((s: string) => !dontShowStatuses.includes(s))) {
     let status: any = null;
     if (props.channelData.value === "EMAIL") {
       status = emailStatusOptions.find((o) => o.status === statusValue);
@@ -296,8 +299,9 @@ export default function ProspectDetailsChangeStatus(
                 status?.status as string
               );
               if(result.status === 'success') {
-                // This will make the query rerun and update the UI
+                // This will make the queries rerun and update the UI
                 queryClient.invalidateQueries({ queryKey: [`query-prospect-details-${props.prospectId}`] });
+                queryClient.invalidateQueries({ queryKey: ['query-pipeline-prospects'] });
               }
               return result;
             },

@@ -26,13 +26,16 @@ import {
   IconMessageCircle,
   IconPhoto,
 } from "@tabler/icons";
+import { setPageTitle } from "@utils/documentChange";
 import { SCREEN_SIZES } from "../../constants/data";
 import PageFrame from "../common/PageFrame";
 
 export default function DashboardPage() {
+  setPageTitle("Dashboard");
+  
   return (
     <PageFrame>
-      <Flex>
+      <Flex wrap="wrap">
         <div style={{ flex: "2 0 0" }}>
           <Title order={3} pl={20} pb={5}>
             Daily Updates

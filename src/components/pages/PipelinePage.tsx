@@ -12,6 +12,7 @@ import { logout } from "@auth/core";
 import { useLoaderData } from "react-router-dom";
 import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import { useEffect } from "react";
+import { setPageTitle } from "@utils/documentChange";
 
 function getPipelineSelectorData(data: any){
   return new Map()
@@ -53,6 +54,7 @@ function getPipelineSelectorData(data: any){
 }
 
 export default function PipelinePage() {
+  setPageTitle(`Pipeline`);
 
   const { prospectId } = useLoaderData() as { prospectId: string };
   const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);

@@ -17,6 +17,7 @@ import { useRecoilState } from "recoil";
 import { userEmailState } from "@atoms/userAtoms";
 import { LogoFull } from "@nav/Logo";
 import { EMAIL_REGEX } from "@constants/data";
+import { setPageTitle } from "@utils/documentChange";
 
 async function sendLogin(email: string) {
   const response = await fetch(
@@ -48,6 +49,8 @@ async function sendLogin(email: string) {
 }
 
 export default function LoginPage() {
+  setPageTitle(`Login`);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useRecoilState(userEmailState);

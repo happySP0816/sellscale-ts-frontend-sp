@@ -24,14 +24,14 @@ export default createStyles((theme) => ({
   },
 
   shortcut: {
-    fontSize: 11,
+    fontSize: 8,
     lineHeight: 1,
-    padding: '4px 7px',
+    padding: '6px 4px',
     borderRadius: theme.radius.sm,
     color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
     border: `1px solid ${
       theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[2]
     }`,
-    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[0],
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
   },
 }));

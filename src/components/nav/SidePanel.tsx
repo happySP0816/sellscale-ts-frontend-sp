@@ -12,6 +12,7 @@ import {
   Group,
   MantineTheme,
   Center,
+  Text,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "react-query";
@@ -21,6 +22,7 @@ import { openSpotlight } from "@mantine/spotlight";
 import { useRecoilState } from "recoil";
 import { navTabState } from "@atoms/navAtoms";
 import { LogoFull, LogoIcon } from "@nav/Logo";
+import useStyles from './SearchBars.styles';
 
 type PanelLinkProps = {
   icon: React.ReactNode;
@@ -71,6 +73,7 @@ export default function SidePanel(props: { isMobile?: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
   const os = useOs();
+  const { classes } = useStyles();
 
   const [navTab, setNavTab] = useRecoilState(navTabState);
   const activeTab = location.pathname?.split("/")[1];
@@ -97,6 +100,11 @@ export default function SidePanel(props: { isMobile?: boolean }) {
             } + K`}
             onClick={() => openSpotlight()}
             dontChangeTab={true}
+            sideContent={
+              <Text weight={700} className={classes.shortcut} mx={4} truncate>
+                {os === 'undetermined' || os === 'macos' ? '⌘' : 'Ctrl'} + K
+              </Text>
+            }
           />
         )}
 

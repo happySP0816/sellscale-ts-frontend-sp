@@ -112,7 +112,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       styles={(theme) => ({
         main: {
           padding: 0,
-          marginTop: isMobileView ? NAV_BAR_SIDE_WIDTH : 0,
+          marginTop: isMobileView ? NAV_BAR_TOP_WIDTH : 0,
           marginLeft: isMobileView ? 0 : NAV_BAR_SIDE_WIDTH,
         },
         body: {

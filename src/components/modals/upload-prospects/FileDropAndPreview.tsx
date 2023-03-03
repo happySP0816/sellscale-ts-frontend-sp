@@ -315,7 +315,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
               autoClose: 5000,
             });
           }}
-          accept={[MIME_TYPES.csv, MIME_TYPES.xls, MIME_TYPES.xlsx]}
+          accept={[MIME_TYPES.csv, MIME_TYPES.xls, MIME_TYPES.xlsx, 'text/tsv', 'text/tab-separated-values']}
         >
           <Group
             position="center"

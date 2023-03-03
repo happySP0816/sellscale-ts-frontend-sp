@@ -16,6 +16,7 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
+import { setPageTitle } from "@utils/documentChange";
 import { useQuery } from "react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype } from "src/main";
@@ -26,6 +27,7 @@ import LinkedInCTAsDrawer from "../drawers/LinkedInCTAsDrawer";
 import PersonaUploadDrawer from "../drawers/PersonaUploadDrawer";
 
 export default function PersonaPage() {
+  setPageTitle(`Personas`);
 
   const userToken = useRecoilValue(userTokenState);
 

@@ -1,5 +1,5 @@
 import { DefaultMantineColor, Indicator, Tooltip, useMantineTheme, Text, Container } from "@mantine/core";
-import { useHover } from "@mantine/hooks";
+import { useHover, useOs } from "@mantine/hooks";
 import { startCase } from "lodash";
 import { useRecoilState } from "recoil";
 import { navTabState } from "../atoms/navAtoms";
@@ -11,6 +11,7 @@ type NavTabProps = {
   onClick: () => void;
   indicatorColor?: DefaultMantineColor;
   dontChangeTab?: boolean;
+  sideContent?: React.ReactNode;
 }
 
 export default function NavTab(props: NavTabProps) {
@@ -20,7 +21,7 @@ export default function NavTab(props: NavTabProps) {
   const { hovered, ref } = useHover();
 
   return (
-    <Tooltip label={props.description} withArrow position="right" className="cursor-pointer" onClick={() => {
+    <Tooltip label={props.description} withArrow openDelay={1000} position="right" className="cursor-pointer" onClick={() => {
       if(!props.dontChangeTab){
         setNavTab(props.name);
       }
@@ -50,8 +51,13 @@ export default function NavTab(props: NavTabProps) {
               {props.icon}
             </Indicator>
           </Container>
-          <Container p={5} m={0}>
-            <Text fz="sm">{startCase(props.name)}</Text>
+          <Container pl={3} pr={0} m={0}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Text fz="sm">{startCase(props.name)}</Text>
+              {props.sideContent && (
+                props.sideContent
+              )}
+            </div>
           </Container>
         </div>
       </div>

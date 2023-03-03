@@ -1,6 +1,9 @@
+import { setPageTitle } from "@utils/documentChange";
 import { useRouteError } from "react-router-dom";
 
 export default function MissingPage() {
+  setPageTitle(`Error 404`);
+
   return (
     <>
       {/*

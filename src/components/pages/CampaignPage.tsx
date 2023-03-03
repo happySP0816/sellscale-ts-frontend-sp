@@ -5,8 +5,10 @@ import { useLoaderData } from "react-router-dom";
 import { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { campaignDrawerIdState, campaignDrawerOpenState } from "@atoms/campaignAtoms";
+import { setPageTitle } from "@utils/documentChange";
 
 export default function CampaignsPage() {
+  setPageTitle("Campaigns");
 
   const { campaignId } = useLoaderData() as { campaignId: string };
   const [_opened, setOpened] = useRecoilState(campaignDrawerOpenState);

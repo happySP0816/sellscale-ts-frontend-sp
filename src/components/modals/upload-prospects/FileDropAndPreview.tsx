@@ -189,9 +189,6 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
   };
 
   const startUpload = async () => {
-    if (checkCanUpload().length > 0) {
-      return;
-    }
     setPreUploading(true);
 
     let archetype_id = props.personaId;
@@ -276,7 +273,11 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     onCancel: () => {
       closeAllModals();
     },
-    onConfirm: () => startUpload(),
+    onConfirm: () => {
+      if (checkCanUpload().length === 0) {
+        startUpload();
+      }
+    },
   });
 
   return (

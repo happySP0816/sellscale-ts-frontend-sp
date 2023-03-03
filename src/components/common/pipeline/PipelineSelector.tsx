@@ -1,4 +1,4 @@
-import { prospectSelectorTypeState, prospectStatusesState } from "@atoms/prospectAtoms";
+import { prospectSelectorTypeState } from "@atoms/prospectAtoms";
 import {
   createStyles,
   Group,
@@ -20,7 +20,6 @@ import {
 } from "@tabler/icons";
 import { useQueryClient } from "react-query";
 import { useRecoilState } from "recoil";
-import { getDefaultStatuses } from "./ProspectTable";
 
 const useStyles = createStyles((theme) => ({
   root: {},
@@ -71,13 +70,10 @@ export default function PipelineSelector({ data }: { data: Map<string, StatGridI
   const queryClient = useQueryClient();
 
   const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
-  const [statuses, setStatuses] = useRecoilState(prospectStatusesState);
 
   const stats = [...data.keys()].map((id) => {
     let stat = data.get(id);
     if(!stat) { return (<></>); }
-
-    const Icon = stat.icon;
 
     return (
       <Paper
@@ -106,7 +102,7 @@ export default function PipelineSelector({ data }: { data: Map<string, StatGridI
           variant={selectorType === id ? 'filled' : 'outline'}
           onClick={() => {
             queryClient.removeQueries({ queryKey: ['query-pipeline-prospects'] });
-            setStatuses(getDefaultStatuses(id));
+            setSelectorType(id);
           }}
           color={stat.color}
           mt="md"

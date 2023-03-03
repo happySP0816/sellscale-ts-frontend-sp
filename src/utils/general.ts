@@ -113,7 +113,7 @@ export function valueToColor(theme: MantineTheme, value: string): MantineColor {
 
 export function formatToLabel(value: string) {
   if(!value) { return ''; }
-  value = value.toLowerCase();
+  value = value.toLowerCase().replaceAll(" ", "_");
   if (value === "responded") {
     return "Bumped";
   }
@@ -123,7 +123,7 @@ export function formatToLabel(value: string) {
   if (value === "demo_won") {
     return "Demo Complete";
   }
-  if (value === "demo_loss") {
+  if (value === "demo_loss" || value === "demo_lost") {
     return "Demo Missed";
   }
   if (value === "linkedin") {

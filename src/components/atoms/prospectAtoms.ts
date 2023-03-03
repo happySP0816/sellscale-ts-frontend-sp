@@ -21,11 +21,6 @@ const prospectSelectorTypeState = atom({
   default: 'all',
 });
 
-const prospectStatusesState = atom({
-  key: "prospect-statuses",
-  default: [] as string[],
-});
-
 const prospectChannelState = atom({
   key: "prospect-channel",
   default: 'SELLSCALE' as Channel,
@@ -34,7 +29,6 @@ const prospectChannelState = atom({
 export {
   prospectDrawerOpenState,
   prospectSelectorTypeState,
-  prospectStatusesState,
   prospectChannelState,
   prospectDrawerIdState,
   prospectDrawerNotesState,

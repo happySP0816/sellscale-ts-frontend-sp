@@ -17,12 +17,6 @@ import { MultiSelect } from "@mantine/core";
 import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
 
 import { useRecoilState, useRecoilValue } from "recoil";
-import {
-  prospectDrawerIdState,
-  prospectDrawerOpenState,
-  prospectSelectorTypeState,
-  prospectStatusesState,
-} from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, valueToColor } from "@utils/general";
 import { useDebouncedState } from "@mantine/hooks";

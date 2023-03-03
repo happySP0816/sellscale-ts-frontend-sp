@@ -40,7 +40,9 @@ export default function ProspectDetailsDrawer() {
 
   // This component is only rendered if drawerOpened=true - which isn't helpful for the first render
   // So we use actuallyOpened to control when the drawer opens and delay it by 100ms (for the animation to play)
-  const [drawerOpened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
+  const [drawerOpened, setDrawerOpened] = useRecoilState(
+    prospectDrawerOpenState
+  );
   const [actuallyOpened, setActuallyOpened] = useState(false);
   useEffect(() => {
     setTimeout(() => {
@@ -134,11 +136,13 @@ export default function ProspectDetailsDrawer() {
               <>
                 <Tabs
                   value={
-                    (channelType === null || channelType === 'SELLSCALE')
+                    channelType === null || channelType === "SELLSCALE"
                       ? data.channelTypes[0].value
                       : channelType
                   }
-                  onTabChange={(value) => { setChannelType(value as Channel | null); }}
+                  onTabChange={(value) => {
+                    setChannelType(value as Channel | null);
+                  }}
                 >
                   <Tabs.List position="center">
                     {data.channelTypes.map(
@@ -188,6 +192,7 @@ export default function ProspectDetailsDrawer() {
                               conversation_url={
                                 data.main.prospect_info.li.li_conversation_url
                               }
+                              prospect_id={data?.main.prospect_info.details.id}
                             />
                           )}
                       </Tabs.Panel>

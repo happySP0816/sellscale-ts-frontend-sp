@@ -30,6 +30,7 @@ import { logout } from "@auth/core";
 import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";
 import { Channel } from "src/main";
+import FlexSeparate from "@common/library/FlexSeparate";
 
 export default function ProspectDetailsDrawer() {
   const theme = useMantineTheme();
@@ -93,7 +94,7 @@ export default function ProspectDetailsDrawer() {
       opened={actuallyOpened}
       onClose={() => setDrawerOpened(false)}
       title={
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <FlexSeparate>
           <Title order={2}>
             {data?.main.prospect_info
               ? data.main.prospect_info.details.full_name
@@ -112,7 +113,7 @@ export default function ProspectDetailsDrawer() {
               )}`}
             </Badge>
           )}
-        </div>
+        </FlexSeparate>
       }
       padding="xl"
       size="xl"

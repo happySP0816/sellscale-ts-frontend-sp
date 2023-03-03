@@ -12,6 +12,7 @@ import {
   SimpleGrid,
   Container,
 } from "@mantine/core";
+import FileDropAndPreview from "@modals/upload-prospects/FileDropAndPreview";
 import {
   IconUpload,
   IconX,
@@ -22,12 +23,44 @@ import { convertFileToJSON } from "@utils/fileProcessing";
 import uploadProspects from "@utils/requests/uploadProspects";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
+import { Archetype } from "src/main";
 import displayNotification from "../../utils/notificationFlow";
 import {
   currentPersonaIdState,
   uploadDrawerOpenState,
 } from "../atoms/personaAtoms";
 
+export default function PersonaUploadDrawer(props: { personas: Archetype[] | undefined }) {
+  const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
+  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
+    currentPersonaIdState
+  );
+
+  const persona = props.personas?.find((persona) => persona.id === currentPersonaId);
+  if(!persona) {
+    return (<>Failed to find persona with ID: "{currentPersonaId}"</>)
+  }
+
+  const closeDrawer = () => {
+    setCurrentPersonaId(-1);
+    setOpened(false);
+  }
+
+  return (
+    <Drawer
+      opened={opened}
+      onClose={closeDrawer}
+      title={<Title order={3}>Upload to {persona.archetype}</Title>}
+      padding="xl"
+      size="xl"
+      position="right"
+    >
+      <FileDropAndPreview personaId={persona.id+''} onUploadSuccess={closeDrawer} />
+    </Drawer>
+  );
+}
+
+/*
 export default function PersonaUploadDrawer(props: {}) {
   const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
@@ -106,3 +139,4 @@ export default function PersonaUploadDrawer(props: {}) {
     </Drawer>
   );
 }
+*/

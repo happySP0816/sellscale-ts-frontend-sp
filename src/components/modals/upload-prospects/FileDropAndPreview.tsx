@@ -1,5 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
+import FlexSeparate from "@common/library/FlexSeparate";
 import {
   Anchor,
   Button,
@@ -117,6 +118,9 @@ function determineColumns(
             <Text className="truncate">{key.trim()}</Text>
           </Stack>
         ),
+        render: (value: any) => {
+          return <Text sx={{ wordBreak: 'break-word' }}>{value[key]}</Text>;
+        }
       };
     });
 }
@@ -134,6 +138,8 @@ type FileDropAndPreviewProps = {
     name: string;
     ctas: string[];
   };
+  onUploadSuccess?: () => void;
+  onUploadFailure?: () => void;
 };
 
 // personaId is null if creating a new persona
@@ -223,6 +229,9 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
         autoClose: false,
       });
       setPreUploading(false);
+      if(props.onUploadFailure){
+        props.onUploadFailure();
+      }
       return;
     }
 
@@ -238,7 +247,10 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
 
     closeAllModals();
     setPreUploading(false);
-    
+
+    if(props.onUploadSuccess){
+      props.onUploadSuccess();
+    }
   };
 
   const openModal = () => openConfirmModal({
@@ -357,9 +369,17 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
       )}
       {fileJSON && (
         <Stack spacing={0} mah={500}>
-          <Text fw={500} size="sm" pl={2}>
-            Please map your file's columns to our system
-          </Text>
+          <FlexSeparate>
+            <Text fw={500} size="sm" pl={2}>
+              Please map your file's columns to our system
+            </Text>
+            <ActionIcon color="red" size="sm" onClick={() => {
+              setFileJSON(null);
+              setColumnMappings(new Map());
+            }}>
+              <IconTrashX size="0.875rem" />
+            </ActionIcon>
+          </FlexSeparate>
           <DataTable
             mih={300}
             highlightOnHover

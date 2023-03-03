@@ -1,3 +1,4 @@
+import FlexSeparate from "@common/library/FlexSeparate";
 import { DefaultMantineColor, Indicator, Tooltip, useMantineTheme, Text, Container } from "@mantine/core";
 import { useHover, useOs } from "@mantine/hooks";
 import { startCase } from "lodash";
@@ -52,12 +53,12 @@ export default function NavTab(props: NavTabProps) {
             </Indicator>
           </Container>
           <Container pl={3} pr={0} m={0}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <FlexSeparate>
               <Text fz="sm">{startCase(props.name)}</Text>
               {props.sideContent && (
                 props.sideContent
               )}
-            </div>
+            </FlexSeparate>
           </Container>
         </div>
       </div>

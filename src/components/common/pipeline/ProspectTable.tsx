@@ -34,6 +34,7 @@ import { logout } from "@auth/core";
 import getChannels from "@utils/requests/getChannels";
 import { Channel } from "src/main";
 import _ from "lodash";
+import FlexSeparate from "@common/library/FlexSeparate";
 
 /**
  * Gets the default statuses for a given selector type (based on channel)
@@ -366,7 +367,7 @@ export default function ProspectTable({
           {
             accessor: "status",
             title: (
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <FlexSeparate>
                 <Text>
                   {`${formatToLabel(
                     channel.replace("SELLSCALE", "Overall")
@@ -378,7 +379,7 @@ export default function ProspectTable({
                 }}>
                   <IconRefresh size="0.875rem" />
                 </ActionIcon>
-              </div>
+              </FlexSeparate>
             ),
             render: ({ status }) => {
               return (

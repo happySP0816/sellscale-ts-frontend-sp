@@ -23,11 +23,11 @@ import { showNotification } from "@mantine/notifications";
 import { closeAllModals, openModal } from "@mantine/modals";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
-import { CTA } from "src/main";
+import { Archetype, CTA } from "src/main";
 
 const PAGE_SIZE = 20;
 
-export default function LinkedInCTAsDrawer(props: {}) {
+export default function LinkedInCTAsDrawer(props: { personas: Archetype[] | undefined }) {
   const [opened, setOpened] = useRecoilState(linkedInCTAsDrawerOpenState);
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
   const userToken = useRecoilValue(userTokenState);

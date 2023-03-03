@@ -89,8 +89,8 @@ export default function PersonaPage() {
           )}
         </Paper>
       </PageFrame>
-      <LinkedInCTAsDrawer />
-      <PersonaUploadDrawer />
+      <LinkedInCTAsDrawer personas={data} />
+      <PersonaUploadDrawer personas={data} />
     </>
   );
 }

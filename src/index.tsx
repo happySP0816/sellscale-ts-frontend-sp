@@ -96,8 +96,9 @@ root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <RecoilRoot>
-        
+        <Sentry.ErrorBoundary fallback={<div>An error has occurred</div>} showDialog>
           <RouterProvider router={router} />
+        </Sentry.ErrorBoundary>
       </RecoilRoot>
     </QueryClientProvider>
   </React.StrictMode>

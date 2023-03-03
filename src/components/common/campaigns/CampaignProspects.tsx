@@ -82,7 +82,7 @@ export default function CampaignProspects({
     // Filter prospects by statuses
     if (statuses.length > 0) {
       filteredProspects = filteredProspects.filter((prospect) => {
-        return statuses.includes(prospect.status);
+        return statuses.includes(prospect.overall_status);
       });
     }
 
@@ -117,7 +117,7 @@ export default function CampaignProspects({
               };
             })}
             mb="md"
-            label="Filter by Status"
+            label="Filter by Overall Status"
             placeholder="Select statuses"
             searchable
             nothingFound="Nothing found"
@@ -162,12 +162,13 @@ export default function CampaignProspects({
             sortable: true,
           },
           {
-            accessor: "status",
+            accessor: "overall_status",
+            title: "Overall Status",
             sortable: true,
-            render: ({ status }) => {
+            render: ({ overall_status }) => {
               return (
-                <Badge color={valueToColor(theme, formatToLabel(status))}>
-                  {formatToLabel(status)}
+                <Badge color={valueToColor(theme, formatToLabel(overall_status))}>
+                  {formatToLabel(overall_status)}
                 </Badge>
               );
             },

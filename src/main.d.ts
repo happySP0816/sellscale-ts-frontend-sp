@@ -53,10 +53,12 @@ export interface Prospect {
   li_last_message_timestamp: Date;
   linkedin_bio: string | null;
   linkedin_url: string;
-  status: string; // TODO: Fill out enum
   times_bumped: null;
   title: string;
   twitter_url: string | null;
+  overall_status: string;
+  linkedin_status: string;
+  email_status: string;
 }
 
 export interface CTA {

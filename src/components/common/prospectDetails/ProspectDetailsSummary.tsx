@@ -33,44 +33,56 @@ export default function ProspectDetailsSummary(
 ) {
   const { classes } = useStyles();
   return (
-    <div>
-      <Group noWrap align='flex-start'>
-        <Avatar
-          src={
-            false // TODO: Support LinkedIn props.profile_pic
-              ? props.profile_pic
-              : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(props.full_name)}`
-          }
-          size={94}
-          radius="md"
-        />
-        <div>
-          <Group noWrap spacing={10} mt={3}>
-            <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
-            <Text size="xs" color="dimmed">
-              {props.title}
+    <Group noWrap align="flex-start" pb='xs'>
+      <Avatar
+        src={
+          false // TODO: Support LinkedIn props.profile_pic
+            ? props.profile_pic
+            : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
+                props.full_name
+              )}`
+        }
+        size={94}
+        radius="md"
+      />
+      <div>
+        <Group noWrap spacing={10} mt={3}>
+          <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
+          <Text size="xs" color="dimmed">
+            {props.title}
+          </Text>
+        </Group>
+
+        {props.email && (
+          <Group noWrap spacing={10} mt={5}>
+            <IconMail stroke={1.5} size={16} className={classes.icon} />
+            <Text
+              size="xs"
+              color="dimmed"
+              component="a"
+              href={`mailto:${props.email}`}
+            >
+              {props.email}
             </Text>
           </Group>
+        )}
 
-          {props.email && (
-            <Group noWrap spacing={10} mt={5}>
-              <IconMail stroke={1.5} size={16} className={classes.icon} />
-              <Text size="xs" color="dimmed" component="a" href={`mailto:${props.email}`}>
-                {props.email}
-              </Text>
-            </Group>
-          )}
-
-          {props.linkedin && (
-            <Group noWrap spacing={10} mt={5}>
-              <IconSocial stroke={1.5} size={16} className={classes.icon} />
-              <Text size="xs" color="dimmed" component="a" target="_blank" rel="noopener noreferrer" href={`https://${props.linkedin}`}>
-                {props.linkedin}
-              </Text>
-            </Group>
-          )}
-        </div>
-      </Group>
-    </div>
+        {props.linkedin && (
+          <Group noWrap spacing={10} mt={5}>
+            <IconSocial stroke={1.5} size={16} className={classes.icon} />
+            <Text
+              size="xs"
+              color="dimmed"
+              component="a"
+              target="_blank"
+              rel="noopener noreferrer"
+              href={`https://${props.linkedin}`}
+            >
+              {props.linkedin}
+            </Text>
+          </Group>
+        )}
+      </div>
+    </Group>
   );
 }

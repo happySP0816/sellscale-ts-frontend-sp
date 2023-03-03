@@ -58,8 +58,8 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
           width={30}
         ></Image>
       ),
-      badge: prospect.status,
-      badgeColor: valueToColor(theme, prospect.status),
+      badge: prospect.overall_status,
+      badgeColor: valueToColor(theme, prospect.overall_status),
     };
   });
 

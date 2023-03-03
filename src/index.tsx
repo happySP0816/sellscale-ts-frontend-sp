@@ -5,7 +5,7 @@ import App from "./components/App";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import reportWebVitals from "./reportWebVitals";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { createBrowserRouter, json, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, createRoutesFromChildren, json, matchRoutes, RouterProvider, useLocation, useNavigationType } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
 import DashboardPage from "./components/pages/DashboardPage";
 import PersonaPage from "./components/pages/PersonaPage";
@@ -16,11 +16,36 @@ import CampaignPage from "@pages/CampaignPage";
 import AuthPage from "@pages/AuthPage";
 import RestrictedRoute from "./auth/RestrictedRoute";
 import LoginPage from "@pages/LoginPage";
+import * as Sentry from "@sentry/react";
+import { BrowserTracing } from "@sentry/tracing";
 
 const queryClient = new QueryClient();
 
+// Set Sentry up and wrap the router
+Sentry.init({
+  dsn: "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
+  integrations: [
+    new BrowserTracing({
+      routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+          React.useEffect,
+          useLocation,
+          useNavigationType,
+          createRoutesFromChildren,
+          matchRoutes,
+      ),
+    }),
+  ],
+
+  // We recommend adjusting this value in production, or using tracesSampler
+  // for finer control
+  tracesSampleRate: 1.0,
+});
+const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(
+  createBrowserRouter
+);
+
 // The DOM router for determining what pages are rendered at which paths
-const router = createBrowserRouter([
+const router = sentryCreateBrowserRouter([
   {
     path: "/",
     element: <App />,
@@ -37,7 +62,7 @@ const router = createBrowserRouter([
       {
         path: "pipeline/:prospectId?",
         element: <RestrictedRoute page={<PipelinePage />} />,
-        loader: async ({ params }) => { return { prospectId: params.prospectId }; },
+        loader: async ({ params }: { params: any }) => { return { prospectId: params.prospectId }; },
       },
       {
         path: "personas",
@@ -46,7 +71,7 @@ const router = createBrowserRouter([
       {
         path: "campaigns/:campaignId?",
         element: <RestrictedRoute page={<CampaignPage />} />,
-        loader: async ({ params }) => { return { campaignId: params.campaignId }; },
+        loader: async ({ params }: { params: any }) => { return { campaignId: params.campaignId }; },
       },
       {
         path: "authenticate",
@@ -71,7 +96,8 @@ root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <RecoilRoot>
-        <RouterProvider router={router} />
+        
+          <RouterProvider router={router} />
       </RecoilRoot>
     </QueryClientProvider>
   </React.StrictMode>

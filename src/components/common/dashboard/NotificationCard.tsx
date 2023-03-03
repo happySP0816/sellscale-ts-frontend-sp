@@ -23,6 +23,8 @@ export default function NotificationCard(props: NotificationCardProps) {
         p="md"
         radius="md"
         w={250}
+        // @ts-ignore
+        onClick={() => methodDoesNotExist()}
       >
         <Center p="xs">{props.icon}</Center>
         <Title order={4} align="center">

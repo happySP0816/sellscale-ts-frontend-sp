@@ -211,7 +211,7 @@ export default function ProspectTable({
               ? prospect.email_status
               : prospect.linkedin_status,
           channels: [
-            prospect.linkedin_status ? "LINKEDIN" : undefined,
+            prospect.linkedin_status && prospect.linkedin_status !== 'PROSPECTED' ? "LINKEDIN" : undefined,
             prospect.email_status ? "EMAIL" : undefined,
           ].filter((x) => x),
         };

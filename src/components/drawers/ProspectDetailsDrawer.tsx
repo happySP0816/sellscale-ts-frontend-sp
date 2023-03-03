@@ -46,9 +46,7 @@ export default function ProspectDetailsDrawer() {
     setTimeout(() => {
       setActuallyOpened(drawerOpened);
     }, 100);
-  }, [])
-
-  console.log(channelType, tableFilterChannel);
+  }, []);
 
   const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
   const prospectId = useRecoilValue(prospectDrawerIdState);
@@ -87,10 +85,6 @@ export default function ProspectDetailsDrawer() {
     },
     refetchOnWindowFocus: false,
   });
-
-  console.log(data?.main.prospect_info);
-
-  console.log(data?.channelTypes);
 
   return (
     <Drawer

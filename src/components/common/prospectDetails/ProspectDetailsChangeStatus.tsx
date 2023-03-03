@@ -39,8 +39,9 @@ import displayNotification from "@utils/notificationFlow";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, splitName, valueToColor } from "@utils/general";
-import { useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import { Channel } from "src/main";
+import { getChannelStatusOptions } from "@utils/requests/getChannels";
 
 const linkedinStatusOptions = [
   {
@@ -268,8 +269,21 @@ export default function ProspectDetailsChangeStatus(
   const queryClient = useQueryClient();
 
   const items = [];
-  for (const statusValue of props.channelData.data.statuses_available
-        .filter((s: string) => !dontShowStatuses.includes(s))) {
+
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [`prospect-next-status-options-${props.channelData.value}`],
+    queryFn: async () => {
+      const res = await getChannelStatusOptions(props.prospectId, userToken, props.channelData.value);
+      if(res.status === 'success'){
+        return Object.keys(res.extra.valid_next_statuses).map((k) => res.extra.valid_next_statuses[k].enum_val);
+      } else {
+        return [];
+      }
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  for (const statusValue of (data ? data : []).filter((s: string) => !dontShowStatuses.includes(s))) {
     let status: any = null;
     if (props.channelData.value === "EMAIL") {
       status = emailStatusOptions.find((o) => o.status === statusValue);
@@ -302,6 +316,7 @@ export default function ProspectDetailsChangeStatus(
                 // This will make the queries rerun and update the UI
                 queryClient.invalidateQueries({ queryKey: [`query-prospect-details-${props.prospectId}`] });
                 queryClient.invalidateQueries({ queryKey: ['query-pipeline-prospects'] });
+                refetch();
               }
               return result;
             },

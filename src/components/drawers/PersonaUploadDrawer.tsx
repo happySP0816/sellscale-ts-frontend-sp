@@ -1,30 +1,10 @@
-import { userTokenState } from "@atoms/userAtoms";
-import { getUserInfo } from "@auth/core";
 import {
   Drawer,
   Title,
-  Text,
-  Button,
-  Group,
-  FileButton,
-  useMantineTheme,
-  Center,
-  SimpleGrid,
-  Container,
 } from "@mantine/core";
 import FileDropAndPreview from "@modals/upload-prospects/FileDropAndPreview";
-import {
-  IconUpload,
-  IconX,
-  IconPhoto,
-  IconFileDescription,
-} from "@tabler/icons";
-import { convertFileToJSON } from "@utils/fileProcessing";
-import uploadProspects from "@utils/requests/uploadProspects";
-import { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import { Archetype } from "src/main";
-import displayNotification from "../../utils/notificationFlow";
 import {
   currentPersonaIdState,
   uploadDrawerOpenState,

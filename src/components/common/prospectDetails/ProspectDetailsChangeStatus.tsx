@@ -176,7 +176,7 @@ const emailStatusOptions = [
   },
 ];
 
-const dontShowStatuses = ['UNKNOWN', 'PROSPECTED'];
+const dontShowStatuses = ["UNKNOWN", "PROSPECTED"];
 
 const useStyles = createStyles((theme) => ({
   card: {
@@ -210,11 +210,14 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function channelToIcon(channel: Channel, size: number){
+export function channelToIcon(channel: Channel, size: number) {
   switch (channel) {
-    case 'LINKEDIN': return <IconBrandLinkedin size={16} />;
-    case 'EMAIL': return <IconMail size={16} />;
-    default: return <IconQuestionMark size={size} />;
+    case "LINKEDIN":
+      return <IconBrandLinkedin size={16} />;
+    case "EMAIL":
+      return <IconMail size={16} />;
+    default:
+      return <IconQuestionMark size={size} />;
   }
 }
 
@@ -237,16 +240,30 @@ async function updateChannelStatus(
         channel_type: channelType,
       }),
     }
-  ).then(async (r) => {
-    if((r.status+'').startsWith('2')){
-      return { status: 'success', title: `Success`, message: `Status updated.` };
-    } else {
-      return { status: 'error', title: `Error (${r.status})`, message: await r.text() };
-    }
-  }).catch((e) => {
-    console.error(e);
-    return { status: 'error', title: `Error while updating`, message: e.message };
-  });
+  )
+    .then(async (r) => {
+      if ((r.status + "").startsWith("2")) {
+        return {
+          status: "success",
+          title: `Success`,
+          message: `Status updated.`,
+        };
+      } else {
+        return {
+          status: "error",
+          title: `Error (${r.status})`,
+          message: await r.text(),
+        };
+      }
+    })
+    .catch((e) => {
+      console.error(e);
+      return {
+        status: "error",
+        title: `Error while updating`,
+        message: e.message,
+      };
+    });
 }
 
 type ProspectDetailsChangeStatusProps = {
@@ -262,8 +279,7 @@ type ProspectDetailsChangeStatusProps = {
 export default function ProspectDetailsChangeStatus(
   props: ProspectDetailsChangeStatusProps
 ) {
-
-  console.log(props.channelData)
+  console.log(props.channelData);
 
   const { classes, theme } = useStyles();
   const userToken = useRecoilValue(userTokenState);
@@ -274,9 +290,15 @@ export default function ProspectDetailsChangeStatus(
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`prospect-next-status-options-${props.prospectId}-${props.channelData.value}`],
     queryFn: async () => {
-      const res = await getChannelStatusOptions(props.prospectId, userToken, props.channelData.value);
-      if(res.status === 'success'){
-        return Object.keys(res.extra.valid_next_statuses).map((k) => res.extra.valid_next_statuses[k].enum_val);
+      const res = await getChannelStatusOptions(
+        props.prospectId,
+        userToken,
+        props.channelData.value
+      );
+      if (res.status === "success") {
+        return Object.keys(res.extra.valid_next_statuses).map(
+          (k) => res.extra.valid_next_statuses[k].enum_val
+        );
       } else {
         return [];
       }
@@ -284,7 +306,9 @@ export default function ProspectDetailsChangeStatus(
     refetchOnWindowFocus: false,
   });
 
-  for (const statusValue of (data ? data : []).filter((s: string) => !dontShowStatuses.includes(s))) {
+  for (const statusValue of (data ? data : []).filter(
+    (s: string) => !dontShowStatuses.includes(s)
+  )) {
     let status: any = null;
     if (props.channelData.value === "EMAIL") {
       status = emailStatusOptions.find((o) => o.status === statusValue);
@@ -313,10 +337,14 @@ export default function ProspectDetailsChangeStatus(
                 props.channelData.value,
                 status?.status as string
               );
-              if(result.status === 'success') {
+              if (result.status === "success") {
                 // This will make the queries rerun and update the UI
-                queryClient.invalidateQueries({ queryKey: [`query-prospect-details-${props.prospectId}`] });
-                queryClient.invalidateQueries({ queryKey: ['query-pipeline-prospects'] });
+                queryClient.invalidateQueries({
+                  queryKey: [`query-prospect-details-${props.prospectId}`],
+                });
+                queryClient.invalidateQueries({
+                  queryKey: ["query-pipeline-prospects"],
+                });
                 refetch();
               }
               return result;
@@ -353,7 +381,13 @@ export default function ProspectDetailsChangeStatus(
         <Text weight={700} size="lg">
           {`${formatToLabel(props.channelData.value)} Status`}
         </Text>
-        <Badge color={valueToColor(theme, formatToLabel(props.channelData.currentStatus))} variant="light">
+        <Badge
+          color={valueToColor(
+            theme,
+            formatToLabel(props.channelData.currentStatus)
+          )}
+          variant="light"
+        >
           {formatToLabel(props.channelData.currentStatus)}
         </Badge>
       </Group>

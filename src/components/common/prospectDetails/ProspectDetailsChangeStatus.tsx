@@ -12,6 +12,7 @@ import {
   Flex,
   SegmentedControl,
   Center,
+  LoadingOverlay,
 } from "@mantine/core";
 import { useState } from "react";
 import {
@@ -271,7 +272,7 @@ export default function ProspectDetailsChangeStatus(
   const items = [];
 
   const { data, isFetching, refetch } = useQuery({
-    queryKey: [`prospect-next-status-options-${props.channelData.value}`],
+    queryKey: [`prospect-next-status-options-${props.prospectId}-${props.channelData.value}`],
     queryFn: async () => {
       const res = await getChannelStatusOptions(props.prospectId, userToken, props.channelData.value);
       if(res.status === 'success'){
@@ -357,6 +358,7 @@ export default function ProspectDetailsChangeStatus(
         </Badge>
       </Group>
       <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${splitName(props.prospectName).first}'s ${formatToLabel(props.channelData.value)} status.`}</Text>
+      <LoadingOverlay visible={isFetching} overlayBlur={2} />
       <SimpleGrid cols={3} mt="md">
         {items}
       </SimpleGrid>

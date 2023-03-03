@@ -136,6 +136,7 @@ export default function UploadProspectsModal({
   useEffect(() => {
     if (personas.length === 0 && defaultPersonas.current.length > 0) {
       setPersonas(defaultPersonas.current);
+      setSelectedPersona(defaultPersonas.current[0].value);
     }
   }, [defaultPersonas.current]);
 

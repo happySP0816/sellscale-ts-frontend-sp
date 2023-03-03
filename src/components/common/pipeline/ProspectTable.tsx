@@ -196,7 +196,6 @@ export default function ProspectTable({
 
       totalRecords.current = res.total_count;
 
-      console.log(res.prospects);
       return res.prospects.map((prospect: any) => {
         return {
           id: prospect.id,

@@ -22,10 +22,11 @@ import {
   HoverCard,
   List,
   LoadingOverlay,
+  Title,
 } from "@mantine/core";
 import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
 import { useForceUpdate } from "@mantine/hooks";
-import { closeAllModals } from "@mantine/modals";
+import { closeAllModals, openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import {
   IconUpload,
@@ -243,6 +244,41 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     
   };
 
+  const openModal = () => openConfirmModal({
+    title: (<Title order={3}>Confirm Upload</Title>),
+    children: (
+      <>
+        <Text>
+          We’re ready to process your file! Here’s the summary:
+        </Text>
+        <List withPadding>
+          {Array.from(columnMappings.values()).filter(
+            (value) => {
+              return value === "linkedin_url" || value === "email";
+            }
+          ).map((value) => convertColumn(value)).map((value) => (
+            <List.Item key={value}>{
+              value === 'linkedin_url' ? (<>You’re uploading <b>LinkedIn</b> prospects</>) : 
+              value === 'email' ? (<>You’re uploading <b>email</b> prospects</>) : ''
+            }</List.Item>
+          ))}
+        </List>
+        <Text pt='xs'>
+          <>You’re about to upload <b>{fileJSON?.length}</b> prospects.</>
+        </Text>
+        <Text fs="italic" pt='xs'>
+          Looks good?
+        </Text>
+      </>
+    ),
+    confirmProps: { color: 'teal', variant: 'outline' },
+    labels: { confirm: `Yes, let's do it! 🚀`, cancel: 'Nevermind' },
+    onCancel: () => {
+      closeAllModals();
+    },
+    onConfirm: () => startUpload(),
+  });
+
   return (
     <>
       <LoadingOverlay visible={preUploading} overlayBlur={2} />
@@ -349,7 +385,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
                 <Button
                   variant="outline"
                   color={checkCanUpload().length > 0 ? "red" : "teal"}
-                  onClick={startUpload}
+                  onClick={openModal}
                 >
                   Start Upload!
                 </Button>

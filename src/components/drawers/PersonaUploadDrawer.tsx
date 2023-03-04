@@ -18,7 +18,7 @@ export default function PersonaUploadDrawer(props: { personas: Archetype[] | und
 
   const persona = props.personas?.find((persona) => persona.id === currentPersonaId);
   if(!persona) {
-    return (<>Failed to find persona with ID: "{currentPersonaId}"</>)
+    return (<></>)
   }
 
   const closeDrawer = () => {

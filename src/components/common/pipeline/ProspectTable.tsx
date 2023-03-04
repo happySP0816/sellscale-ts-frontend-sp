@@ -63,6 +63,7 @@ function getDefaultStatuses(
 
   const defaultStatuses = [];
   for (const status of Object.keys(data_channels.extra[channel])) {
+    if(!status) { continue; }
     const overallStatus =
       data_channels.extra[channel][status].sellscale_enum_val;
     if (overallStatus === overallStatusFromSelectorType) {

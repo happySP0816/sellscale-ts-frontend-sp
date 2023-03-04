@@ -197,7 +197,7 @@ export default function ProspectDetailsViewConversation(
         value={messageDraft}
       />
       <Flex>
-        {/* <Button
+        <Button
           variant="outline"
           mt="sm"
           color="violet"
@@ -212,7 +212,7 @@ export default function ProspectDetailsViewConversation(
           }}
         >
           Generate AI Follow Up
-        </Button> */}
+        </Button>
         <Button
           variant="outline"
           mt="sm"

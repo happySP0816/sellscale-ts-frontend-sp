@@ -55,9 +55,7 @@ export default function CampaignProspects({
   }, [search, statuses]);
 
   const { data: data_channels } = useQuery({
-    queryKey: [
-      `query-get-channels-campaign-prospects`,
-    ],
+    queryKey: [`query-get-channels-campaign-prospects`],
     queryFn: async () => {
       return await getChannels(userToken);
     },
@@ -66,7 +64,6 @@ export default function CampaignProspects({
 
   // Split prospects into pages => data
   const getData = (page: number) => {
-
     // Filter prospects by search
     let filteredProspects = prospects;
     if (search.trim() !== "") {
@@ -108,14 +105,18 @@ export default function CampaignProspects({
           <MultiSelect
             data={
               // If channels are not loaded or failed to fetch, don't show anything
-              (!data_channels || data_channels.status !== 'success') ? [] : 
-              // Otherwise, show overall statuses
-                data_channels.extra['SELLSCALE'].statuses_available.map((status: string) => {
-              return {
-                label: data_channels.extra['SELLSCALE'][status].name,
-                value: status,
-              };
-            })}
+              !data_channels || data_channels.status !== "success"
+                ? []
+                : // Otherwise, show overall statuses
+                  data_channels.extra["SELLSCALE"].statuses_available.map(
+                    (status: string) => {
+                      return {
+                        label: data_channels.extra["SELLSCALE"][status].name,
+                        value: status,
+                      };
+                    }
+                  )
+            }
             mb="md"
             label="Filter by Overall Status"
             placeholder="Select statuses"
@@ -167,7 +168,9 @@ export default function CampaignProspects({
             sortable: true,
             render: ({ overall_status }) => {
               return (
-                <Badge color={valueToColor(theme, formatToLabel(overall_status))}>
+                <Badge
+                  color={valueToColor(theme, formatToLabel(overall_status))}
+                >
                   {formatToLabel(overall_status)}
                 </Badge>
               );

@@ -38,9 +38,9 @@ import FlexSeparate from "@common/library/FlexSeparate";
 
 /**
  * Gets the default statuses for a given selector type (based on channel)
- * @param selectorType 
- * @param data_channels 
- * @param channel 
+ * @param selectorType
+ * @param data_channels
+ * @param channel
  * @returns - An array of default statuses
  */
 function getDefaultStatuses(
@@ -63,7 +63,9 @@ function getDefaultStatuses(
 
   const defaultStatuses = [];
   for (const status of Object.keys(data_channels.extra[channel])) {
-    if(!status) { continue; }
+    if (!status) {
+      continue;
+    }
     const overallStatus =
       data_channels.extra[channel][status].sellscale_enum_val;
     if (overallStatus === overallStatusFromSelectorType) {
@@ -76,9 +78,9 @@ function getDefaultStatuses(
 
 /**
  * Get a selector type from an array of statuses
- * @param statuses 
- * @param data_channels 
- * @param channel 
+ * @param statuses
+ * @param data_channels
+ * @param channel
  * @returns - A selector type
  */
 function getSelectorTypeFromStatuses(
@@ -86,32 +88,50 @@ function getSelectorTypeFromStatuses(
   data_channels: any,
   channel: Channel
 ) {
-  if (!statuses) { return 'all'; }
+  if (!statuses) {
+    return "all";
+  }
 
-  const acceptedDefaults = getDefaultStatuses("accepted", data_channels, channel).sort();
-  const bumpedDefaults = getDefaultStatuses("bumped", data_channels, channel).sort();
-  const activeDefaults = getDefaultStatuses("active", data_channels, channel).sort();
-  const demoDefaults = getDefaultStatuses("demo", data_channels, channel).sort();
+  const acceptedDefaults = getDefaultStatuses(
+    "accepted",
+    data_channels,
+    channel
+  ).sort();
+  const bumpedDefaults = getDefaultStatuses(
+    "bumped",
+    data_channels,
+    channel
+  ).sort();
+  const activeDefaults = getDefaultStatuses(
+    "active",
+    data_channels,
+    channel
+  ).sort();
+  const demoDefaults = getDefaultStatuses(
+    "demo",
+    data_channels,
+    channel
+  ).sort();
   const allDefaults = getDefaultStatuses("all", data_channels, channel).sort();
 
   const uniqueStatuses = Array.from(new Set(statuses)).sort();
 
-  if(_.isEqual(acceptedDefaults, uniqueStatuses)){
+  if (_.isEqual(acceptedDefaults, uniqueStatuses)) {
     return "accepted";
   }
-  if(_.isEqual(bumpedDefaults, uniqueStatuses)){
+  if (_.isEqual(bumpedDefaults, uniqueStatuses)) {
     return "bumped";
   }
-  if(_.isEqual(activeDefaults, uniqueStatuses)){
+  if (_.isEqual(activeDefaults, uniqueStatuses)) {
     return "active";
   }
-  if(_.isEqual(demoDefaults, uniqueStatuses)){
+  if (_.isEqual(demoDefaults, uniqueStatuses)) {
     return "demo";
   }
-  if(_.isEqual(allDefaults, uniqueStatuses)){
+  if (_.isEqual(allDefaults, uniqueStatuses)) {
     return "all";
   }
-  return '';
+  return "";
 }
 
 const PAGE_SIZE = 20;
@@ -150,7 +170,9 @@ export default function ProspectTable({
   }, [search, statuses, channel]);
 
   useEffect(() => {
-    setSelectorType(getSelectorTypeFromStatuses(statuses, data_channels, channel));
+    setSelectorType(
+      getSelectorTypeFromStatuses(statuses, data_channels, channel)
+    );
   }, [statuses]);
 
   const { data, isFetching, refetch } = useQuery({
@@ -212,9 +234,16 @@ export default function ProspectTable({
               ? prospect.email_status
               : prospect.linkedin_status,
           channels: [
-            prospect.linkedin_status && prospect.linkedin_status !== 'PROSPECTED' ? "LINKEDIN" : undefined,
+            prospect.linkedin_status &&
+            prospect.linkedin_status !== "PROSPECTED"
+              ? "LINKEDIN"
+              : undefined,
             prospect.email_status ? "EMAIL" : undefined,
           ].filter((x) => x),
+          review_details: {
+            last_reviewed: prospect.last_reviewed,
+            times_bumped: prospect.times_bumped,
+          },
         };
       });
     },
@@ -233,7 +262,7 @@ export default function ProspectTable({
     if (data_channels && selectorType) {
       setStatuses(getDefaultStatuses(selectorType, data_channels, channel));
     }
-  },[selectorType, channel]);
+  }, [selectorType, channel]);
 
   return (
     <Box>
@@ -305,7 +334,7 @@ export default function ProspectTable({
             value={statuses ? statuses : []}
             onChange={(value) => {
               setStatuses(value);
-              setSelectorType('');
+              setSelectorType("");
             }}
             className="truncate"
           />
@@ -374,10 +403,13 @@ export default function ProspectTable({
                     channel.replace("SELLSCALE", "Overall")
                   )} Status`}
                 </Text>
-                <ActionIcon size="sm" onClick={() => {
-                  refetch();
-                  refetch_channels();
-                }}>
+                <ActionIcon
+                  size="sm"
+                  onClick={() => {
+                    refetch();
+                    refetch_channels();
+                  }}
+                >
                   <IconRefresh size="0.875rem" />
                 </ActionIcon>
               </FlexSeparate>
@@ -387,6 +419,29 @@ export default function ProspectTable({
                 <Badge color={valueToColor(theme, formatToLabel(status))}>
                   {formatToLabel(status)}
                 </Badge>
+              );
+            },
+          },
+          {
+            accessor: "review_details",
+            title: "Last Reviewed",
+            sortable: false,
+            hidden: selectorType !== "bumped",
+            render: ({ review_details }) => {
+              let last_reviewed = review_details.last_reviewed;
+              let times_bumped = review_details.times_bumped;
+              if (!last_reviewed) {
+                return null;
+              }
+              return (
+                <>
+                  <Badge>{last_reviewed?.substring(0, 16)}</Badge>
+                  {times_bumped > 0 && (
+                    <Badge color="red">{`Bumped ${times_bumped} time${
+                      times_bumped > 1 ? "s" : ""
+                    }`}</Badge>
+                  )}
+                </>
               );
             },
           },

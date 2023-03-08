@@ -95,7 +95,7 @@ export default function ProspectDetailsDrawer() {
       onClose={() => setDrawerOpened(false)}
       title={
         <FlexSeparate>
-          <Title order={2}>
+          <Title order={3}>
             {data?.main.prospect_info
               ? data.main.prospect_info.details.full_name
               : ""}

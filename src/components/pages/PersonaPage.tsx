@@ -1,5 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
+import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
 import {
   List,
   ThemeIcon,
@@ -17,6 +18,7 @@ import {
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { setPageTitle } from "@utils/documentChange";
+import getPersonas, { getAllUploads } from "@utils/requests/getPersonas";
 import { useQuery } from "react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype } from "src/main";
@@ -37,24 +39,14 @@ export default function PersonaPage() {
     ],
     queryFn: async () => {
 
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/client/archetype/get_archetypes`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-      if (response.status === 401) {
-        logout();
-      }
-      const res = await response.json();
-      if (!res || !res.archetypes) {
-        return [];
+      const response = await getPersonas(userToken);
+      const result = response.status === 'success' ? response.extra as Archetype[] : [];
+
+      for(let persona of result) {
+        const uploadsResponse = await getAllUploads(userToken, persona.id);
+        persona.uploads = uploadsResponse.status === 'success' ? uploadsResponse.extra : [];
       }
 
-      let result = res.archetypes as Archetype[];
       // Sort by number of prospects
       return result.sort((a, b) => {
         return b.performance.total_prospects - a.performance.total_prospects;
@@ -91,6 +83,7 @@ export default function PersonaPage() {
       </PageFrame>
       <LinkedInCTAsDrawer personas={data} />
       <PersonaUploadDrawer personas={data} />
+      <UploadDetailsDrawer />
     </>
   );
 }

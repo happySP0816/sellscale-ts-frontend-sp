@@ -45,6 +45,7 @@ import uploadProspects from "@utils/requests/uploadProspects";
 import _ from "lodash";
 import { DataTable } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "react-query";
 import { useRecoilValue } from "recoil";
 
 const MAX_FILE_SIZE_MB = 2;
@@ -146,6 +147,7 @@ type FileDropAndPreviewProps = {
 export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
 
   const theme = useMantineTheme();
+  const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
   const [fileJSON, setFileJSON] = useState<any[] | null>(null);
   const [columnMappings, setColumnMappings] = useState<Map<string, string>>(
@@ -223,7 +225,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
       console.error("Failed to start prospects upload");
       showNotification({
         id: 'uploading-prospects-failed',
-        title: 'Error while uploading prospects',
+        title: result.title,
         message: result.message,
         color: 'red',
         autoClose: false,
@@ -241,12 +243,13 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
       title: 'Uploading prospects...',
       message: 'Check the persona for progress',
       color: 'teal',
-      autoClose: 15000,
-      disallowClose: true,
+      autoClose: 10000,
     });
 
     closeAllModals();
     setPreUploading(false);
+    // Invalidates the query for the personas data so that the new persona will be fetched
+    queryClient.invalidateQueries({ queryKey: ['query-personas-data'] });
 
     if(props.onUploadSuccess){
       props.onUploadSuccess();

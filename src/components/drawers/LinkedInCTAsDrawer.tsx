@@ -100,7 +100,7 @@ export default function LinkedInCTAsDrawer(props: { personas: Archetype[] | unde
         setCurrentPersonaId(-1);
         setOpened(false);
       }}
-      title={<Title order={2}>LinkedIn CTAs</Title>}
+      title={<Title order={3}>LinkedIn CTAs</Title>}
       padding="xl"
       size="xl"
       position="right"
@@ -142,6 +142,7 @@ export default function LinkedInCTAsDrawer(props: { personas: Archetype[] | unde
                       const entry = data.filter((d) => d.id === id)[0];
                       entry.active = !entry.active;
                       refetch();
+                      throw new Error("Not CTA enable/disabling implemented yet");
                     }
                   }}
                   styles={(theme) => ({

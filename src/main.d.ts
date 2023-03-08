@@ -85,6 +85,7 @@ export interface Archetype {
     total_prospects: number;
   };
   transformer_blocklist: null; // TODO: 
+  uploads?: any[];
 }
 
 export interface LinkedInMessage {

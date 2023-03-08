@@ -21,6 +21,8 @@ import {
 } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { useQueryClient } from "react-query";
+import FlexSeparate from "@common/library/FlexSeparate";
+import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from "@atoms/uploadAtoms";
 
 async function togglePersona(archetype_id: number, userToken: string) {
 
@@ -51,6 +53,10 @@ export default function PersonaCard(props: { archetype: Archetype, refetch: () =
     useRecoilState(linkedInCTAsDrawerOpenState);
   const [currentPersonaId, setCurrentPersonaId] =
     useRecoilState(currentPersonaIdState);
+
+  const isUploading = props.archetype.uploads && props.archetype.uploads.length > 0 && props.archetype.uploads[0].stats.in_progress > 0;
+  const [prospectUploadDrawerOpened, setProspectUploadDrawerOpened] = useRecoilState(prospectUploadDrawerOpenState);
+  const [prospectUploadDrawerId, setProspectUploadDrawerId] = useRecoilState(prospectUploadDrawerIdState);
 
   const activeBackgroundSX = (theme: MantineTheme) => ({
     border: `1px solid ${
@@ -210,12 +216,23 @@ export default function PersonaCard(props: { archetype: Archetype, refetch: () =
         <Title order={3} ml="sm" mt="md">
           {props.archetype.archetype}
         </Title>
-        <Text ml="sm">{`${props.archetype.performance.total_prospects} contacts with ${getUsedPercentage()}% used.`}</Text>
+        <FlexSeparate>
+          <Text ml="sm">{`${props.archetype.performance.total_prospects} contacts with ${getUsedPercentage()}% used.`}</Text>
+          {props.archetype.uploads && props.archetype.uploads.length > 0 && (
+            <Button variant="subtle" color="dark" size="xs" onClick={() => {
+              setProspectUploadDrawerId(props.archetype.uploads && props.archetype.uploads[0].id)
+              setProspectUploadDrawerOpened(true);
+            }}>
+              {isUploading ? 'Upload in Progress...' : 'Latest Upload'}
+            </Button>
+          )}
+        </FlexSeparate>
         <Progress
           size={14}
           sections={getStatusUsedPercentage()}
+          animate={isUploading}
         />
-        {getStatusUsedPercentage().filter((s) => s.value > WARNING_PERCENTAGE).length > 0 && (
+        {!isUploading && getStatusUsedPercentage().filter((s) => s.value > WARNING_PERCENTAGE).length > 0 && (
           <Text c="dimmed" fs="italic" fz="sm">You should upload more contacts soon!</Text>
         )}
       </Stack>
@@ -229,7 +246,7 @@ export default function PersonaCard(props: { archetype: Archetype, refetch: () =
             setUploadDrawerOpened(true);
           }}
         >
-          Upload
+          Upload Prospects
         </Button>
         <Button
           size="xs"

@@ -75,7 +75,7 @@ export default function CampaignDetailsDrawer() {
       opened={opened}
       onClose={() => setOpened(false)}
       title={
-        <Title order={2}>{data?.campaign_details ? data.campaign_details.campaign_raw.name : ""}</Title>
+        <Title order={3}>{data?.campaign_details ? data.campaign_details.campaign_raw.name : ""}</Title>
       }
       padding="xl"
       size="xl"

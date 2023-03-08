@@ -5,6 +5,7 @@ import {
   IconBriefcase,
   IconMail,
   IconSocial,
+  IconBuildingStore
 } from "@tabler/icons";
 
 const useStyles = createStyles((theme) => ({
@@ -21,25 +22,29 @@ const useStyles = createStyles((theme) => ({
 }));
 
 type ProspectDetailsSummaryProps = {
-  full_name: string;
+  fullName: string;
   title: string | null;
   email: string | null;
   linkedin: string | null;
-  profile_pic: string | null;
+  profilePic: string | null;
+  companyName: string | null;
+  companyURL?: string;
 };
 
 export default function ProspectDetailsSummary(
   props: ProspectDetailsSummaryProps
 ) {
   const { classes } = useStyles();
+  const companyURL = props.companyName && !props.companyURL ? `https://www.google.com/search?q=${encodeURIComponent(props.companyName)}` : props.companyURL;
+
   return (
     <Group noWrap align="flex-start" pb='xs'>
       <Avatar
         src={
           false // TODO: Support LinkedIn props.profile_pic
-            ? props.profile_pic
+            ? props.profilePic
             : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                props.full_name
+                props.fullName
               )}`
         }
         size={94}
@@ -79,6 +84,22 @@ export default function ProspectDetailsSummary(
               href={`https://${props.linkedin}`}
             >
               {props.linkedin}
+            </Text>
+          </Group>
+        )}
+
+        {props.companyName && (
+          <Group noWrap spacing={10} mt={5}>
+            <IconBuildingStore stroke={1.5} size={16} className={classes.icon} />
+            <Text
+              size="xs"
+              color="dimmed"
+              component="a"
+              target="_blank"
+              rel="noopener noreferrer"
+              href={companyURL}
+            >
+              {props.companyName}
             </Text>
           </Group>
         )}

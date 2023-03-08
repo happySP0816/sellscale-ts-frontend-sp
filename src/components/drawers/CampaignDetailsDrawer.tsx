@@ -94,16 +94,16 @@ export default function CampaignDetailsDrawer() {
               {data.campaign_details.campaign_raw.campaign_type.replaceAll("_", " ")}
             </Badge>
           </Group>
-          <Tabs defaultValue="prospects" px='xs'>
+          <Tabs defaultValue="ctas" px='xs'>
             <Tabs.List grow position="center">
-              <Tabs.Tab value="prospects">Prospects</Tabs.Tab>
               <Tabs.Tab value="ctas">Call-to-Actions</Tabs.Tab>
+              <Tabs.Tab value="prospects">Prospects</Tabs.Tab>
             </Tabs.List>
-            <Tabs.Panel value="prospects" pt="xs">
-              <CampaignProspects prospects={data.campaign_details.prospects} />
-            </Tabs.Panel>
             <Tabs.Panel value="ctas" pt="xs">
               <CampaignCTAs ctas={data.campaign_details.ctas} />
+            </Tabs.Panel>
+            <Tabs.Panel value="prospects" pt="xs">
+              <CampaignProspects prospects={data.campaign_details.prospects} />
             </Tabs.Panel>
           </Tabs>
         </ScrollArea>

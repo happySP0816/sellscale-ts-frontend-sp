@@ -124,11 +124,13 @@ export default function ProspectDetailsDrawer() {
       {data?.main.prospect_info && !isFetching && (
         <>
           <ProspectDetailsSummary
-            full_name={data.main.prospect_info.details.full_name}
+            fullName={data.main.prospect_info.details.full_name}
             title={data.main.prospect_info.details.title}
             email={data.main.prospect_info.email.email}
             linkedin={data.main.prospect_info.li.li_profile}
-            profile_pic={data.main.prospect_info.details.profile_pic}
+            profilePic={data.main.prospect_info.details.profile_pic}
+            companyName={data.main.prospect_info.company.name}
+            companyURL={data.main.prospect_info.company.url}
           />
           <ScrollArea
             style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
@@ -207,18 +209,19 @@ export default function ProspectDetailsDrawer() {
               currentStatus={data.main.prospect_info.details.overall_status}
               prospectId={data.main.prospect_info.details.id}
             />
-            {data.main.prospect_info.company.name && (
-              <ProspectDetailsCompany
-                logo={data.main.prospect_info.company.logo}
-                company_name={data.main.prospect_info.company.name}
-                location={data.main.prospect_info.company.location}
-                description={data.main.prospect_info.company.description}
-                employee_count={data.main.prospect_info.company.employee_count}
-                tagline={data.main.prospect_info.company.tagline}
-                tags={data.main.prospect_info.company.tags}
-                website_url={data.main.prospect_info.company.url}
-              />
-            )}
+            { // data.main.prospect_info.company.name && (
+              // <ProspectDetailsCompany
+              //   logo={data.main.prospect_info.company.logo}
+              //   company_name={data.main.prospect_info.company.name}
+              //   location={data.main.prospect_info.company.location}
+              //   description={data.main.prospect_info.company.description}
+              //   employee_count={data.main.prospect_info.company.employee_count}
+              //   tagline={data.main.prospect_info.company.tagline}
+              //   tags={data.main.prospect_info.company.tags}
+              //   website_url={data.main.prospect_info.company.url}
+              // />
+            // )
+            }
           </ScrollArea>
         </>
       )}

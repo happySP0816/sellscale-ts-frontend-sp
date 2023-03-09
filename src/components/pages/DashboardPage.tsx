@@ -67,11 +67,13 @@ export default function DashboardPage() {
           <Title order={3} pl={20} pb={5}>
             Quick Actions
           </Title>
-          <Paper withBorder m="xs" p="md" radius="md" w={"100%"}>
+          <Container m="xs" p={0} w={"100%"}>
             <Stack spacing='xs'>
               <Button
-                variant="outline"
+                variant="light"
                 color="teal"
+                radius="md"
+                size="md"
                 fullWidth
                 onClick={() => {
                   openContextModal({
@@ -105,7 +107,7 @@ export default function DashboardPage() {
                 </Button>
               */}
             </Stack>
-          </Paper>
+          </Container>
         </div>
       </Flex>
     </PageFrame>

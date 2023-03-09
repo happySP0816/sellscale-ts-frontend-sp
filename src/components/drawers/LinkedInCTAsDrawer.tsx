@@ -127,7 +127,7 @@ export default function LinkedInCTAsDrawer(props: { personas: Archetype[] | unde
             },
             {
               accessor: "total_count",
-              title: "Contacts",
+              title: "Prospects",
               sortable: true,
             },
             {

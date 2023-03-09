@@ -145,7 +145,7 @@ export default function UploadDetailsDrawer() {
   const refreshDrawer = () => {
     refetch_personas();
     refetch();
-  }
+  };
   useEffect(() => {
     refreshDrawer();
   }, [opened]);
@@ -201,157 +201,147 @@ export default function UploadDetailsDrawer() {
         overlayBlur={2}
       />
       <div style={{ position: "absolute", top: 0, right: 0 }}>
-        <ActionIcon
-          onClick={refreshDrawer}
-        >
+        <ActionIcon onClick={refreshDrawer}>
           <IconRefresh size="1.125rem" />
         </ActionIcon>
       </div>
-      {data && uploadData && !isFetching && !isFetching_personas && (
-        <>
-          <Group noWrap grow>
-            <Group>
-              <Avatar size={84} radius="md">
-                <IconUsers size="3rem" />
-              </Avatar>
-              <div>
-                <Title order={6}>Total</Title>
-                <Title order={1}>{uploadData.stats.total}</Title>
-                <Text fs="italic" fz="xs" opacity={0.5}>
-                  Potential Prospects
-                </Text>
-              </div>
-            </Group>
-            <Group>
-              <Avatar size={84} radius="md">
-                <IconClockRecord size="3rem" />
-              </Avatar>
-              <div>
-                <Title order={6} color="orange.2">
-                  Queued
-                </Title>
-                <Title order={1} color="orange.2">
-                  {uploadData.stats.queued +
-                    uploadData.stats.not_started +
-                    uploadData.stats.in_progress}
-                </Title>
-                <Text fs="italic" fz="xs" opacity={0.5} color="orange.2">
-                  Scheduled to upload
-                </Text>
-              </div>
-            </Group>
-          </Group>
-          <Group noWrap grow pt="lg" pl="md">
-            <div>
-              <Title order={6} color="green.4">
-                Success
-              </Title>
-              <Title order={2} color="green.4">
-                {uploadData.stats.success}
-              </Title>
-              <Text fs="italic" fz="xs" opacity={0.5} color="green.4">
-                Prospects created
-              </Text>
-            </div>
-            <div>
-              <Title order={6} color="red.4">
-                Disqualified
-              </Title>
-              <Title order={2} color="red.4">
-                {uploadData.stats.disqualified}
-              </Title>
-              <Text fs="italic" fz="xs" opacity={0.5} color="red.4">
-                Not Eligible
-              </Text>
-            </div>
-            <div>
-              <Title order={6} color="red.4">
-                Failed
-              </Title>
-              <Title order={2} color="red.4">
-                {uploadData.stats.failed}
-              </Title>
-              <Text fs="italic" fz="xs" opacity={0.5} color="red.4">
-                Error Occurred
-              </Text>
-            </div>
-          </Group>
-          <Text pt="md" fw={650}>
-            File Rows
+      <Group noWrap grow>
+        <Group>
+          <Avatar size={84} radius="md">
+            <IconUsers size="3rem" />
+          </Avatar>
+          <div>
+            <Title order={6}>Total</Title>
+            <Title order={1}>{uploadData?.stats.total}</Title>
+            <Text fs="italic" fz="xs" opacity={0.5}>
+              Potential Prospects
+            </Text>
+          </div>
+        </Group>
+        <Group>
+          <Avatar size={84} radius="md">
+            <IconClockRecord size="3rem" />
+          </Avatar>
+          <div>
+            <Title order={6} color="orange.2">
+              Queued
+            </Title>
+            <Title order={1} color="orange.2">
+              {uploadData?.stats.queued +
+                uploadData?.stats.not_started +
+                uploadData?.stats.in_progress}
+            </Title>
+            <Text fs="italic" fz="xs" opacity={0.5} color="orange.2">
+              Scheduled to upload
+            </Text>
+          </div>
+        </Group>
+      </Group>
+      <Group noWrap grow pt="lg" pl="md">
+        <div>
+          <Title order={6} color="green.4">
+            Success
+          </Title>
+          <Title order={2} color="green.4">
+            {uploadData?.stats.success}
+          </Title>
+          <Text fs="italic" fz="xs" opacity={0.5} color="green.4">
+            Prospects created
           </Text>
-          <DataTable
-            withBorder
-            height={"min(670px, 100vh - 300px)"}
-            verticalAlignment="top"
-            loaderColor="teal"
-            highlightOnHover
-            noRecordsText={"No rows found"}
-            rowExpansion={{
-              content: ({ record }) => (
-                <Stack p="xs" spacing={6}>
-                  {Object.keys(record.csv_row_data).map((key, i) => (
-                    <Flex key={i} wrap="nowrap">
-                      <div style={{ width: 105 }}>
-                        <Text fw={700} truncate>
-                          {formatToLabel(key)}
-                        </Text>
-                      </div>
-                      <div>
-                        <Text sx={{ wordBreak: "break-word" }}>
-                          {record.csv_row_data[key]}
-                        </Text>
-                      </div>
-                    </Flex>
-                  ))}
-                </Stack>
-              ),
-            }}
-            columns={[
-              {
-                accessor: "csv_row_hash",
-                title: "Row ID",
-                width: 100,
-                sortable: true,
-                render: ({ csv_row_hash }) => (
-                  <Text truncate>{csv_row_hash}</Text>
-                ),
-              },
-              {
-                accessor: "upload_attempts",
-                title: "Attempts",
-                sortable: true,
-              },
-              {
-                accessor: "status",
-                sortable: true,
-                render: ({ status }) => (
-                  <Badge
-                    color={valueToColor(theme, formatToLabel(status))}
-                    variant="light"
-                  >
-                    {formatToLabel(status)}
-                  </Badge>
-                ),
-              },
-              {
-                accessor: "error_type",
-                sortable: true,
-                render: ({ error_type }) => (
-                  <Text>{_.capitalize(error_type)}</Text>
-                ),
-              },
-            ]}
-            records={data}
-            totalRecords={totalRecords.current}
-            recordsPerPage={PAGE_SIZE}
-            page={page}
-            onPageChange={(p) => setPage(p)}
-            paginationColor="teal"
-            sortStatus={sortStatus}
-            onSortStatusChange={handleSortStatusChange}
-          />
-        </>
-      )}
+        </div>
+        <div>
+          <Title order={6} color="red.4">
+            Disqualified
+          </Title>
+          <Title order={2} color="red.4">
+            {uploadData?.stats.disqualified}
+          </Title>
+          <Text fs="italic" fz="xs" opacity={0.5} color="red.4">
+            Not Eligible
+          </Text>
+        </div>
+        <div>
+          <Title order={6} color="red.4">
+            Failed
+          </Title>
+          <Title order={2} color="red.4">
+            {uploadData?.stats.failed}
+          </Title>
+          <Text fs="italic" fz="xs" opacity={0.5} color="red.4">
+            Error Occurred
+          </Text>
+        </div>
+      </Group>
+      <Text pt="md" fw={650}>
+        File Rows
+      </Text>
+      <DataTable
+        withBorder
+        height={"min(670px, 100vh - 300px)"}
+        verticalAlignment="top"
+        loaderColor="teal"
+        highlightOnHover
+        noRecordsText={"No rows found"}
+        rowExpansion={{
+          content: ({ record }) => (
+            <Stack p="xs" spacing={6}>
+              {Object.keys(record.csv_row_data).map((key, i) => (
+                <Flex key={i} wrap="nowrap">
+                  <div style={{ width: 105 }}>
+                    <Text fw={700} truncate>
+                      {formatToLabel(key)}
+                    </Text>
+                  </div>
+                  <div>
+                    <Text sx={{ wordBreak: "break-word" }}>
+                      {record.csv_row_data[key]}
+                    </Text>
+                  </div>
+                </Flex>
+              ))}
+            </Stack>
+          ),
+        }}
+        columns={[
+          {
+            accessor: "csv_row_hash",
+            title: "Row ID",
+            width: 100,
+            sortable: true,
+            render: ({ csv_row_hash }) => <Text truncate>{csv_row_hash}</Text>,
+          },
+          {
+            accessor: "upload_attempts",
+            title: "Attempts",
+            sortable: true,
+          },
+          {
+            accessor: "status",
+            sortable: true,
+            render: ({ status }) => (
+              <Badge
+                color={valueToColor(theme, formatToLabel(status))}
+                variant="light"
+              >
+                {formatToLabel(status)}
+              </Badge>
+            ),
+          },
+          {
+            accessor: "error_type",
+            sortable: true,
+            render: ({ error_type }) => <Text>{_.capitalize(error_type)}</Text>,
+          },
+        ]}
+        records={data ?? []}
+        totalRecords={totalRecords.current}
+        recordsPerPage={PAGE_SIZE}
+        page={page}
+        onPageChange={(p) => setPage(p)}
+        paginationColor="teal"
+        sortStatus={sortStatus}
+        onSortStatusChange={handleSortStatusChange}
+      />
     </Drawer>
   );
 }

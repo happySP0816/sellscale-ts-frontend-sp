@@ -18,7 +18,7 @@ export default async function uploadProspects(archetype_id: number, userToken: s
     }
   ).then(async (r) => {
     if(r.status === 200){
-      return { status: 'success', title: `Success`, message: `Contacts added to persona.` };
+      return { status: 'success', title: `Success`, message: `Prospects added to persona.` };
     } else {
       let text = await r.text();
       if(r.status === 400 && text.startsWith('Duplicate CSVs are not allowed')){

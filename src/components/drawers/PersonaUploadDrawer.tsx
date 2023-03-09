@@ -104,7 +104,7 @@ export default function PersonaUploadDrawer(props: {}) {
     >
       <Container m="sm">
         <Text c="dimmed" fs="italic" align="center">
-          Upload a CSV of Email + LinkedIn contacts.
+          Upload a CSV of Email + LinkedIn prospects.
         </Text>
       </Container>
       <Center>

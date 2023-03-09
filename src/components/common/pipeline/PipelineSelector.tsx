@@ -120,6 +120,7 @@ export default function PipelineSelector({ data }: { data: Map<string, StatGridI
           { maxWidth: "md", cols: 2 },
           { maxWidth: "xs", cols: 1 },
         ]}
+        spacing="lg"
       >
         {stats}
       </SimpleGrid>

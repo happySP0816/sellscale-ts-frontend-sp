@@ -10,6 +10,7 @@ import {
   Switch,
   useMantineTheme,
   Container,
+  Paper,
 } from "@mantine/core";
 import { IconCheck, IconX } from "@tabler/icons";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -156,19 +157,11 @@ export default function PersonaCard(props: { archetype: Archetype, refetch: () =
   }
 
   return (
-    <Container
-      p="xs"
-      m='xs'
-      style={{ display: 'flex', justifyContent: 'space-between' }}
-      sx={(theme) => {
-        if (props.archetype.active) {
-          return activeBackgroundSX(theme);
-        } else {
-          return {};
-        }
-      }}
-    >
-      <Stack align="center" justify="flex-end">
+    <Paper withBorder p="xs" m='sm' radius="md" sx={(theme) => ({
+      backgroundColor: props.archetype.active ? theme.colors.dark[6] : undefined,
+    })}>
+      <FlexSeparate>
+      <Stack align="center" justify="space-between">
         <Avatar
           size={60}
           radius={60}
@@ -182,7 +175,6 @@ export default function PersonaCard(props: { archetype: Archetype, refetch: () =
           onChange={async (event) => {
             const res = await togglePersona(props.archetype.id, userToken);
             if(res.status === 200) {
-              queryClient.removeQueries({ queryKey: ['query-personas-data'] });
               props.refetch();
             }
           }}
@@ -212,29 +204,33 @@ export default function PersonaCard(props: { archetype: Archetype, refetch: () =
           }
         />
       </Stack>
-      <Stack spacing="xs" mx='md' w={'100%'}>
-        <Title order={3} ml="sm" mt="md">
-          {props.archetype.archetype}
-        </Title>
-        <FlexSeparate>
-          <Text ml="sm">{`${props.archetype.performance.total_prospects} contacts with ${getUsedPercentage()}% used.`}</Text>
-          {props.archetype.uploads && props.archetype.uploads.length > 0 && (
-            <Button variant="subtle" color="dark" size="xs" onClick={() => {
-              setProspectUploadDrawerId(props.archetype.uploads && props.archetype.uploads[0].id)
-              setProspectUploadDrawerOpened(true);
-            }}>
-              {isUploading ? 'Upload in Progress...' : 'Latest Upload'}
-            </Button>
+      <Stack spacing="xs" mx='md' w={'100%'} justify="space-between">
+        <div>
+          <Title order={3} ml="sm">
+            {props.archetype.archetype}
+          </Title>
+          <FlexSeparate>
+            <Text ml="sm" mt={5}>{`${props.archetype.performance.total_prospects} prospects with ${getUsedPercentage()}% used.`}</Text>
+            {props.archetype.uploads && props.archetype.uploads.length > 0 && (
+              <Button variant="subtle" color="dark" size="xs" onClick={() => {
+                setProspectUploadDrawerId(props.archetype.uploads && props.archetype.uploads[0].id)
+                setProspectUploadDrawerOpened(true);
+              }}>
+                {isUploading ? 'Upload in Progress...' : 'Latest Upload'}
+              </Button>
+            )}
+          </FlexSeparate>
+        </div>
+        <div>
+          {!isUploading && getStatusUsedPercentage().filter((s) => s.value > WARNING_PERCENTAGE).length > 0 && (
+            <Text c="dimmed" fs="italic" fz="sm">You should upload more prospects soon!</Text>
           )}
-        </FlexSeparate>
-        <Progress
-          size={14}
-          sections={getStatusUsedPercentage()}
-          animate={isUploading}
-        />
-        {!isUploading && getStatusUsedPercentage().filter((s) => s.value > WARNING_PERCENTAGE).length > 0 && (
-          <Text c="dimmed" fs="italic" fz="sm">You should upload more contacts soon!</Text>
-        )}
+          <Progress
+            size={14}
+            sections={getStatusUsedPercentage()}
+            animate={isUploading}
+          />
+        </div>
       </Stack>
       <Stack spacing="xs">
         <Button
@@ -269,6 +265,7 @@ export default function PersonaCard(props: { archetype: Archetype, refetch: () =
           Configuration
         </Button>
       </Stack>
-    </Container>
+      </FlexSeparate>
+    </Paper>
   );
 }

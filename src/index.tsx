@@ -22,24 +22,26 @@ import { BrowserTracing } from "@sentry/tracing";
 const queryClient = new QueryClient();
 
 // Set Sentry up and wrap the router
-Sentry.init({
-  dsn: "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
-  integrations: [
-    new BrowserTracing({
-      routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-          React.useEffect,
-          useLocation,
-          useNavigationType,
-          createRoutesFromChildren,
-          matchRoutes,
-      ),
-    }),
-  ],
+if (process.env.NODE_ENV === 'production') {
+  Sentry.init({
+    dsn: "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
+    integrations: [
+      new BrowserTracing({
+        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+            React.useEffect,
+            useLocation,
+            useNavigationType,
+            createRoutesFromChildren,
+            matchRoutes,
+        ),
+      }),
+    ],
 
-  // We recommend adjusting this value in production, or using tracesSampler
-  // for finer control
-  tracesSampleRate: 1.0,
-});
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 1.0,
+  });
+}
 const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(
   createBrowserRouter
 );

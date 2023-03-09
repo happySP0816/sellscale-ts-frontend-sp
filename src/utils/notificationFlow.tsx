@@ -41,7 +41,7 @@ export default async function displayNotification(
   if (result.status === 'success') {
     updateNotification({
       id: id,
-      autoClose: 5000,
+      autoClose: 3000,
       title: success.title,
       message: success.message,
       color: success.color,

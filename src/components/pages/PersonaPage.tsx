@@ -58,7 +58,6 @@ export default function PersonaPage() {
   return (
     <>
       <PageFrame>
-        <Paper withBorder p="md" radius="md">
           <LoadingOverlay visible={isFetching} overlayBlur={2} />
           {data?.filter((p) => p.active).map(
             (persona) => (
@@ -69,7 +68,6 @@ export default function PersonaPage() {
               />
             )
           )}
-          <Divider my="sm" />
           {data?.filter((p) => !p.active).map(
             (persona) => (
               <PersonaCard
@@ -79,7 +77,6 @@ export default function PersonaPage() {
               />
             )
           )}
-        </Paper>
       </PageFrame>
       <LinkedInCTAsDrawer personas={data} />
       <PersonaUploadDrawer personas={data} />

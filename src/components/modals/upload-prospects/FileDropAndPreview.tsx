@@ -47,20 +47,21 @@ import { DataTable } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "react-query";
 import { useRecoilValue } from "recoil";
+import { QueryCache } from 'react-query';
 
 const MAX_FILE_SIZE_MB = 2;
 const PREVIEW_FIRST_N_ROWS = 5;
 const PROSPECT_DB_COLUMNS = [
+  "linkedin_url",
+  "email",
   "company",
   "company_url",
-  "email",
   "first_name",
   "full_name",
   "industry",
   "last_name",
   "last_position",
   "linkedin_bio",
-  "linkedin_url",
   "title",
   "twitter_url",
 ];
@@ -97,7 +98,7 @@ function determineColumns(
             <Select
               value={columnMappings.get(key.trim())}
               data={[
-                { label: "-", value: "none" },
+                { label: "-", value: "none", group: 'Skipped' },
                 ...PROSPECT_DB_COLUMNS.map((column) => {
                   return {
                     label: _.startCase(column.replace("_", " ")).replace(
@@ -105,6 +106,7 @@ function determineColumns(
                       "URL"
                     ),
                     value: column,
+                    group: (column === "linkedin_url" || column === "email") ? 'Required Fields' : 'Additional Fields',
                   };
                 }),
               ]}
@@ -154,6 +156,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     new Map()
   );
   const [preUploading, setPreUploading] = useState(false);
+  const queryCache = new QueryCache();
 
   useEffect(() => {
     if (fileJSON) {
@@ -250,6 +253,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     setPreUploading(false);
     // Invalidates the query for the personas data so that the new persona will be fetched
     queryClient.invalidateQueries({ queryKey: ['query-personas-data'] });
+    queryCache.clear();
 
     if(props.onUploadSuccess){
       props.onUploadSuccess();

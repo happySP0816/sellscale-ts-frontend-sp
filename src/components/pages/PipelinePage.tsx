@@ -93,7 +93,7 @@ export default function PipelinePage() {
   return (
     <PageFrame>
       <PipelineSelector data={PIPELINE_SELECTOR_DATA} />
-      <Container pt={30} px={0}>
+      <Container pt={15} px={0}>
         <ProspectTable selectorData={PIPELINE_SELECTOR_DATA} />
       </Container>
     </PageFrame>

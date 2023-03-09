@@ -52,44 +52,44 @@ export default function AuthPage() {
   const [userToken, setUserToken] = useRecoilState(userTokenState);
 
   useLayoutEffect(() => {
+    setTimeout(() => {
+      const tokenType = searchParams.get('stytch_token_type');
+      const authToken = searchParams.get('token');
+      const email = searchParams.get('email') || userEmail;
 
-    const tokenType = searchParams.get('stytch_token_type');
-    const authToken = searchParams.get('token');
-    const email = searchParams.get('email') || userEmail;
+      if (!authToken){
+        showNotification({
+          id: 'auth-invalid-token',
+          title: 'Invalid token',
+          message: `Token "${authToken}" is invalid!`,
+          color: 'red',
+          autoClose: false,
+        });
+        console.error('Invalid token', tokenType);
+        return;
+      }
 
-    if (!authToken){
-      showNotification({
-        id: 'auth-invalid-token',
-        title: 'Invalid token',
-        message: `Token "${authToken}" is invalid!`,
-        color: 'red',
-        autoClose: false,
-      });
-      console.error('Invalid token', tokenType);
-      return;
-    }
-
-    if(tokenType === 'magic_links'){
-      sendAuthToken(authToken, email).then(async (response) => {
-        await authorize(response.token, setUserToken, setUserName, setUserEmail);
-        navigate(`/`);
-      });
-    } else if(tokenType === 'direct'){
-      (async () => {
-        await authorize(authToken, setUserToken, setUserName, setUserEmail);
-        navigate(`/`);
-      })();
-    } else {
-      showNotification({
-        id: 'auth-invalid-token-type',
-        title: 'Invalid token type',
-        message: `Token type "${tokenType}" was not expected!`,
-        color: 'red',
-        autoClose: false,
-      });
-      console.error('Invalid token type', tokenType);
-    }
-
+      if(tokenType === 'magic_links'){
+        sendAuthToken(authToken, email).then(async (response) => {
+          await authorize(response.token, setUserToken, setUserName, setUserEmail);
+          navigate(`/`);
+        });
+      } else if(tokenType === 'direct'){
+        (async () => {
+          await authorize(authToken, setUserToken, setUserName, setUserEmail);
+          navigate(`/`);
+        })();
+      } else {
+        showNotification({
+          id: 'auth-invalid-token-type',
+          title: 'Invalid token type',
+          message: `Token type "${tokenType}" was not expected!`,
+          color: 'red',
+          autoClose: false,
+        });
+        console.error('Invalid token type', tokenType);
+      }
+    });
   }, []);
 
   return (

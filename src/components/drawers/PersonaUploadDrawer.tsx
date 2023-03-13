@@ -30,7 +30,7 @@ export default function PersonaUploadDrawer(props: { personas: Archetype[] | und
     <Drawer
       opened={opened}
       onClose={closeDrawer}
-      title={<Title order={3}>Upload to {persona.archetype}</Title>}
+      title={<Title order={3}>Upload - {persona.archetype}</Title>}
       padding="xl"
       size="xl"
       position="right"

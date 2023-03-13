@@ -1,5 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
+import PersonaDetailsDrawer from "@drawers/PersonaDetailsDrawer";
 import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
 import {
   List,
@@ -25,7 +26,6 @@ import { Archetype } from "src/main";
 import { SCREEN_SIZES } from "../../constants/data";
 import PageFrame from "../common/PageFrame";
 import PersonaCard from "../common/persona/PersonaCard";
-import LinkedInCTAsDrawer from "../drawers/LinkedInCTAsDrawer";
 import PersonaUploadDrawer from "../drawers/PersonaUploadDrawer";
 
 export default function PersonaPage() {
@@ -65,6 +65,7 @@ export default function PersonaPage() {
                 key={persona.id}
                 archetype={persona}
                 refetch={refetch}
+                isOpen={data.filter((p) => p.active).length === 1 ? true : undefined}
               />
             )
           )}
@@ -78,7 +79,7 @@ export default function PersonaPage() {
             )
           )}
       </PageFrame>
-      <LinkedInCTAsDrawer personas={data} />
+      <PersonaDetailsDrawer personas={data} />
       <PersonaUploadDrawer personas={data} />
       <UploadDetailsDrawer />
     </>

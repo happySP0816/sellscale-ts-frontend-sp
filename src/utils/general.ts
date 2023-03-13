@@ -119,9 +119,11 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   disqualified: 'red',
   errror: 'red',
   upload_failed: 'orange',
+  years_of_experience_at_current_job: 'red',
+  current_job_specialties: 'pink',
 };
 export function valueToColor(theme: MantineTheme, value: string): MantineColor {
-  value = value?.toLowerCase().trim().replace(" ", "_");
+  value = value?.toLowerCase().trim().replaceAll(" ", "_");
 
   if (PRESET_COLOR_MAPS[value]) {
     return PRESET_COLOR_MAPS[value];

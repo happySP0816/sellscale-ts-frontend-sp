@@ -5,8 +5,8 @@ const uploadDrawerOpenState = atom({
   default: false,
 });
 
-const linkedInCTAsDrawerOpenState = atom({
-  key: "persona-linkedin-ctas-drawer-open",
+const detailsDrawerOpenState = atom({
+  key: "persona-details-drawer-open",
   default: false,
 });
 
@@ -17,6 +17,6 @@ const currentPersonaIdState = atom({
 
 export {
   uploadDrawerOpenState,
-  linkedInCTAsDrawerOpenState,
+  detailsDrawerOpenState,
   currentPersonaIdState,
 };

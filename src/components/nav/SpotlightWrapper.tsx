@@ -74,7 +74,7 @@ export default function SpotlightWrapper({ children }: { children: React.ReactNo
       title: 'Dashboard',
       description: 'Go to dashboard',
       group: 'Pages',
-      onTrigger: () => navigate(`/home`),
+      onTrigger: () => navigate(`/dashboard`),
       icon: <IconHome size={18} />,
     },
     {

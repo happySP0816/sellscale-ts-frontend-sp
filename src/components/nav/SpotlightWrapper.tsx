@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { useDebouncedState } from "@mantine/hooks";
 import { SpotlightAction, SpotlightActionProps, SpotlightProvider } from "@mantine/spotlight";
-import { IconUsers, IconHome, IconSend, IconSearch, IconFilter, IconAnalyze, IconSettings } from "@tabler/icons";
+import { IconUsers, IconHome, IconSend, IconSearch, IconFilter, IconAnalyze } from "@tabler/icons";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -109,6 +109,13 @@ export default function SpotlightWrapper({
       icon: <IconAnalyze size={18} />,
     },
     {
+      title: 'Analytics',
+      description: 'View your outbound analytics',
+      group: 'Pages',
+      onTrigger: () => navigate(`/analytics`),
+      icon: <IconAnalyze size={18} />,
+    },
+    {
       title: "Personas",
       description: "Create target ICPs and upload new prospect lists",
       group: "Pages",
@@ -122,13 +129,6 @@ export default function SpotlightWrapper({
       group: "Pages",
       onTrigger: () => navigate(`/campaigns`),
       icon: <IconSend size={18} />,
-    },
-    {
-      title: "Settings",
-      description: "Configure SellScale automations and settings",
-      group: "Pages",
-      onTrigger: () => navigate(`/settings`),
-      icon: <IconSettings size={18} />,
     },
   ];
 

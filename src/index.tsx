@@ -84,6 +84,10 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<AnalyticsPage />} />,
       },
       {
+        path: "analytics",
+        element: <RestrictedRoute page={<AnalyticsPage />} />,
+      },
+      {
         path: "personas",
         element: <RestrictedRoute page={<PersonaPage />} />,
       },

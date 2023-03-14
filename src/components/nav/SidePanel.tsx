@@ -5,6 +5,7 @@ import {
   IconUsers,
   IconHome,
   IconSend,
+  IconAnalyze,
   IconSettings,
 } from "@tabler/icons";
 import {
@@ -121,6 +122,13 @@ export default function SidePanel(props: { isMobile?: boolean }) {
           name="pipeline"
           description="View the state of your outbound funnel by stage"
           onClick={() => navigate(`/pipeline`)}
+        />
+
+        <NavTab
+          icon={<IconAnalyze size={22} />}
+          name="analytics"
+          description="View your outbound analytics"
+          onClick={() => navigate(`/analytics`)}
         />
 
         <NavTab

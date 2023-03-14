@@ -27,6 +27,7 @@ import SettingsPage from "@pages/SettingsPage";
 import LoginPage from "@pages/LoginPage";
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
+import AnalyticsPage from "@pages/AnalyticsPage";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,10 @@ const router = sentryCreateBrowserRouter([
         loader: async ({ params }: { params: any }) => {
           return { prospectId: params.prospectId };
         },
+      },
+      {
+        path: "analytics",
+        element: <RestrictedRoute page={<AnalyticsPage />} />,
       },
       {
         path: "personas",

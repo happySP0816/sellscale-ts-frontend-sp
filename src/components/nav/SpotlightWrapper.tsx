@@ -1,8 +1,30 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { Center, createStyles, Group, UnstyledButton, Text, Badge, Loader, useMantineTheme } from "@mantine/core";
+import {
+  Center,
+  createStyles,
+  Group,
+  UnstyledButton,
+  Text,
+  Badge,
+  Loader,
+  useMantineTheme,
+} from "@mantine/core";
 import { useDebouncedState } from "@mantine/hooks";
-import { SpotlightAction, SpotlightActionProps, SpotlightProvider } from "@mantine/spotlight";
-import { IconAffiliate, IconHome, IconInbox, IconSearch, IconSpeakerphone, IconAssembly, IconTrendingDown } from "@tabler/icons";
+import {
+  SpotlightAction,
+  SpotlightActionProps,
+  SpotlightProvider,
+} from "@mantine/spotlight";
+import {
+  IconAffiliate,
+  IconHome,
+  IconInbox,
+  IconSearch,
+  IconSpeakerphone,
+  IconAssembly,
+  IconTrendingDown,
+  IconSettings,
+} from "@tabler/icons";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,15 +32,18 @@ import { useRecoilValue } from "recoil";
 
 const useStyles = createStyles((theme) => ({
   action: {
-    position: 'relative',
-    display: 'block',
-    width: '100%',
-    padding: '10px 12px',
+    position: "relative",
+    display: "block",
+    width: "100%",
+    padding: "10px 12px",
     borderRadius: theme.radius.sm,
   },
 
   actionHovered: {
-    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[1],
+    backgroundColor:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[4]
+        : theme.colors.gray[1],
   },
 }));
 
@@ -31,7 +56,11 @@ function CustomAction({
   ...others
 }: SpotlightActionProps) {
   // @ts-ignore
-  const { classes, cx } = useStyles(null, { styles, classNames, name: 'Spotlight' });
+  const { classes, cx } = useStyles(null, {
+    styles,
+    classNames,
+    name: "Spotlight",
+  });
 
   return (
     <UnstyledButton
@@ -42,11 +71,7 @@ function CustomAction({
       {...others}
     >
       <Group noWrap>
-        {action.icon && (
-          <Center>
-            {action.icon}
-          </Center>
-        )}
+        {action.icon && <Center>{action.icon}</Center>}
 
         <div style={{ flex: 1 }}>
           <Text>{action.title}</Text>
@@ -58,55 +83,70 @@ function CustomAction({
           )}
         </div>
 
-        {action.badge && <Badge color={action.badgeColor}>{action.badge}</Badge>}
+        {action.badge && (
+          <Badge color={action.badgeColor}>{action.badge}</Badge>
+        )}
       </Group>
     </UnstyledButton>
   );
 }
 
-export default function SpotlightWrapper({ children }: { children: React.ReactNode }) {
-
+export default function SpotlightWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const navigate = useNavigate();
   const theme = useMantineTheme();
 
   const mainActions: SpotlightAction[] = [
     {
-      title: 'Dashboard',
-      description: 'Go to dashboard',
-      group: 'Pages',
+      title: "Dashboard",
+      description: "Go to dashboard",
+      group: "Pages",
       onTrigger: () => navigate(`/dashboard`),
       icon: <IconHome size={18} />,
     },
     {
-      title: 'Pipeline',
-      description: 'View the state of your outbound funnel by stage',
-      group: 'Pages',
+      title: "Pipeline",
+      description: "View the state of your outbound funnel by stage",
+      group: "Pages",
       onTrigger: () => navigate(`/pipeline`),
       icon: <IconInbox size={18} />,
     },
     {
-      title: 'Personas',
-      description: 'Create target ICPs and upload new prospect lists',
-      group: 'Pages',
+      title: "Personas",
+      description: "Create target ICPs and upload new prospect lists",
+      group: "Pages",
       onTrigger: () => navigate(`/personas`),
       icon: <IconAffiliate size={18} />,
     },
     {
-      title: 'Campaigns',
-      description: 'View and understand the performance of your weekly outbound campaigns',
-      group: 'Pages',
+      title: "Campaigns",
+      description:
+        "View and understand the performance of your weekly outbound campaigns",
+      group: "Pages",
       onTrigger: () => navigate(`/campaigns`),
       icon: <IconAssembly size={18} />,
+    },
+    {
+      title: "Settings",
+      description: "Configure SellScale automations and settings",
+      group: "Pages",
+      onTrigger: () => navigate(`/settings`),
+      icon: <IconSettings size={18} />,
     },
   ];
 
   const userToken = useRecoilValue(userTokenState);
-  const [query, setQuery] = useDebouncedState('', 400);
+  const [query, setQuery] = useDebouncedState("", 400);
   // For queryResult, null = loading and false = failed to find.
-  const [queryResult, setQueryResult] = useState<SpotlightAction[] | null | false>(null);
+  const [queryResult, setQueryResult] = useState<
+    SpotlightAction[] | null | false
+  >(null);
 
   useEffect(() => {
-    if (query === '') {
+    if (query === "") {
       setQueryResult(false);
       return;
     }
@@ -118,33 +158,36 @@ export default function SpotlightWrapper({ children }: { children: React.ReactNo
 
   return (
     <SpotlightProvider
-          actions={(query: string) => {
-            /* Whenever input changes, this function is called and query is set via setQuery
-             * setQuery is a debouncer, after the set debounce time the above useEffect callback is executed.
-             * That callback fetches the result data and updates queryResult accordingly.
-             */
-            setQuery(query.trim());
-            if (queryResult) {
-              return [...queryResult, ...mainActions];
-            } else {
-              return mainActions;
-            }
-          }}
-          actionComponent={CustomAction}
-          searchIcon={<IconSearch size={18} />}
-          searchPlaceholder={"Search..."}
-          searchInputProps={{ autoComplete: "off" }}
-          shortcut={["mod + K"]}
-          limit={30}
-          nothingFoundMessage={
-            query !== '' && (queryResult === false || (queryResult && queryResult.length === 0)) ?
-            (<Text c="dimmed" fs="italic">Nothing found</Text>)
-            :
-            (<Loader color="teal" variant="dots" />)
-          }
-        >
+      actions={(query: string) => {
+        /* Whenever input changes, this function is called and query is set via setQuery
+         * setQuery is a debouncer, after the set debounce time the above useEffect callback is executed.
+         * That callback fetches the result data and updates queryResult accordingly.
+         */
+        setQuery(query.trim());
+        if (queryResult) {
+          return [...queryResult, ...mainActions];
+        } else {
+          return mainActions;
+        }
+      }}
+      actionComponent={CustomAction}
+      searchIcon={<IconSearch size={18} />}
+      searchPlaceholder={"Search..."}
+      searchInputProps={{ autoComplete: "off" }}
+      shortcut={["mod + K"]}
+      limit={30}
+      nothingFoundMessage={
+        query !== "" &&
+        (queryResult === false || (queryResult && queryResult.length === 0)) ? (
+          <Text c="dimmed" fs="italic">
+            Nothing found
+          </Text>
+        ) : (
+          <Loader color="teal" variant="dots" />
+        )
+      }
+    >
       {children}
     </SpotlightProvider>
   );
-
 }

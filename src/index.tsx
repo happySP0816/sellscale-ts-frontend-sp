@@ -5,7 +5,15 @@ import App from "./components/App";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import reportWebVitals from "./reportWebVitals";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { createBrowserRouter, createRoutesFromChildren, json, matchRoutes, RouterProvider, useLocation, useNavigationType } from "react-router-dom";
+import {
+  createBrowserRouter,
+  createRoutesFromChildren,
+  json,
+  matchRoutes,
+  RouterProvider,
+  useLocation,
+  useNavigationType,
+} from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
 import DashboardPage from "./components/pages/DashboardPage";
 import PersonaPage from "./components/pages/PersonaPage";
@@ -15,6 +23,7 @@ import { RecoilRoot } from "recoil";
 import CampaignPage from "@pages/CampaignPage";
 import AuthPage from "@pages/AuthPage";
 import RestrictedRoute from "./auth/RestrictedRoute";
+import SettingsPage from "@pages/SettingsPage";
 import LoginPage from "@pages/LoginPage";
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
@@ -22,17 +31,18 @@ import { BrowserTracing } from "@sentry/tracing";
 const queryClient = new QueryClient();
 
 // Set Sentry up and wrap the router
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   Sentry.init({
-    dsn: "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
+    dsn:
+      "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
     integrations: [
       new BrowserTracing({
         routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-            React.useEffect,
-            useLocation,
-            useNavigationType,
-            createRoutesFromChildren,
-            matchRoutes,
+          React.useEffect,
+          useLocation,
+          useNavigationType,
+          createRoutesFromChildren,
+          matchRoutes
         ),
       }),
     ],
@@ -64,7 +74,9 @@ const router = sentryCreateBrowserRouter([
       {
         path: "pipeline/:prospectId?",
         element: <RestrictedRoute page={<PipelinePage />} />,
-        loader: async ({ params }: { params: any }) => { return { prospectId: params.prospectId }; },
+        loader: async ({ params }: { params: any }) => {
+          return { prospectId: params.prospectId };
+        },
       },
       {
         path: "personas",
@@ -73,7 +85,13 @@ const router = sentryCreateBrowserRouter([
       {
         path: "campaigns/:campaignId?",
         element: <RestrictedRoute page={<CampaignPage />} />,
-        loader: async ({ params }: { params: any }) => { return { campaignId: params.campaignId }; },
+        loader: async ({ params }: { params: any }) => {
+          return { campaignId: params.campaignId };
+        },
+      },
+      {
+        path: "settings",
+        element: <RestrictedRoute page={<SettingsPage />} />,
       },
       {
         path: "authenticate",
@@ -98,7 +116,10 @@ root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <RecoilRoot>
-        <Sentry.ErrorBoundary fallback={<div>An error has occurred</div>} showDialog>
+        <Sentry.ErrorBoundary
+          fallback={<div>An error has occurred</div>}
+          showDialog
+        >
           <RouterProvider router={router} />
         </Sentry.ErrorBoundary>
       </RecoilRoot>

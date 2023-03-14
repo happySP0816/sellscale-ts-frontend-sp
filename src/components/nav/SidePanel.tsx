@@ -5,6 +5,7 @@ import {
   IconUsers,
   IconHome,
   IconSend,
+  IconSettings,
 } from "@tabler/icons";
 import {
   ThemeIcon,
@@ -22,7 +23,7 @@ import { openSpotlight } from "@mantine/spotlight";
 import { useRecoilState } from "recoil";
 import { navTabState } from "@atoms/navAtoms";
 import { LogoFull, LogoIcon } from "@nav/Logo";
-import useStyles from './SearchBars.styles';
+import useStyles from "./SearchBars.styles";
 
 type PanelLinkProps = {
   icon: React.ReactNode;
@@ -102,7 +103,7 @@ export default function SidePanel(props: { isMobile?: boolean }) {
             dontChangeTab={true}
             sideContent={
               <Text weight={700} className={classes.shortcut} mx={4} truncate>
-                {os === 'undetermined' || os === 'macos' ? '⌘' : 'Ctrl'} + K
+                {os === "undetermined" || os === "macos" ? "⌘" : "Ctrl"} + K
               </Text>
             }
           />
@@ -134,6 +135,13 @@ export default function SidePanel(props: { isMobile?: boolean }) {
           name="campaigns"
           description="View and understand the performance of your weekly outbound campaigns"
           onClick={() => navigate(`/campaigns`)}
+        />
+
+        <NavTab
+          icon={<IconSettings size={22} />}
+          name="settings"
+          description="Configure your SellScale settings"
+          onClick={() => navigate(`/settings`)}
         />
       </div>
     </>

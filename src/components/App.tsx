@@ -12,6 +12,8 @@ import { useRecoilValue } from "recoil";
 import { navLoadingState } from "@atoms/navAtoms";
 import SpotlightWrapper from "@nav/SpotlightWrapper";
 import UploadProspectsModal from "@modals/UploadProspectsModal";
+import SendLinkedInCredentialsModal from "@modals/SendLinkedInCredentialsModal";
+import InstructionsLinkedInCookieModal from "@modals/InstructionsLinkedInCookieModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -71,6 +73,8 @@ export default function App() {
           <ModalsProvider
             modals={{
               uploadProspects: UploadProspectsModal,
+              sendLinkedInCredentials: SendLinkedInCredentialsModal,
+              sendLinkedInCookie: InstructionsLinkedInCookieModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

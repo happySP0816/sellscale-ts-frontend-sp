@@ -1,11 +1,12 @@
 import PageFrame from "@common/PageFrame";
-import { Text } from "@mantine/core";
+import { Paper, SimpleGrid, Text } from "@mantine/core";
 import { useVesselLink } from "@vesselapi/react-vessel-link";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { Button, Card, Title, Notification } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { IconCheck } from "@tabler/icons";
+import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -93,12 +94,17 @@ function VesselIntegrations() {
   };
 
   return (
-    <Card maw={800}>
+    <Paper
+      withBorder
+      m="xs"
+      p="md"
+      radius="md"
+    >
       <Title order={3}>
-        Connect SellScale to your Sales Engagement tool of choice.
+        Connect to your Sales Engagement Tool
       </Title>
-      <Text mb="lg">
-        By connecting SellScale to a sales engagement tool (like Outreach or
+      <Text fz="sm" pt='xs' pb="lg">
+        By connecting to a sales engagement tool (like Outreach or
         Salesloft), we can automatically personalize contacts, enroll in
         sequences, and collect analytics.
       </Text>
@@ -144,7 +150,7 @@ function VesselIntegrations() {
           </Button>
         </>
       )}
-    </Card>
+    </Paper>
   );
 }
 
@@ -155,7 +161,11 @@ export default function SettingsPage() {
         Settings
       </Title>
 
-      <VesselIntegrations />
+      <SimpleGrid cols={2} spacing={0}>
+        <VesselIntegrations />
+        <LinkedInConnectedCard connected={false} />
+      </SimpleGrid>
+
     </PageFrame>
   );
 }

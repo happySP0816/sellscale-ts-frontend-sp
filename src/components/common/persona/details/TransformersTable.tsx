@@ -75,6 +75,7 @@ export default function TransformersTable() {
       height={280}
       verticalAlignment="top"
       loaderColor="teal"
+      fetching={isFetching}
       noRecordsText={"No transformers found"}
       columns={[
         {

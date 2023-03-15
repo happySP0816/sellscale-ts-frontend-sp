@@ -25,9 +25,8 @@ import {
 } from "@atoms/campaignAtoms";
 import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { useQuery } from "react-query";
-import { formatDate, temp_delay, valueToColor } from "@utils/general";
+import { formatDate, formatToLabel, temp_delay, valueToColor } from "@utils/general";
 import { chunk } from "lodash";
-import { faker } from "@faker-js/faker";
 import { Campaign } from "src/main";
 import { logout } from "@auth/core";
 import { userTokenState } from "@atoms/userAtoms";
@@ -105,6 +104,8 @@ export default function EmailAnalyticsTable() {
         return {
           ...data,
           id: i,
+          demos_list: data.demos === '()' ? [] : data.demos.trim().split(', ').map((name) => name.trim().substring(1, name.trim().length - 1)),
+          replies_list: data.replies === '()' ? [] : data.replies.trim().split(', ').map((name) => name.trim().substring(1, name.trim().length - 1)),
         };
       });
       if (!pageData) {
@@ -116,6 +117,8 @@ export default function EmailAnalyticsTable() {
     },
     refetchOnWindowFocus: false,
   });
+
+  console.log(data)
 
   return (
     <Box>
@@ -178,14 +181,42 @@ export default function EmailAnalyticsTable() {
             sortable: true,
           },
           {
-            accessor: "demos",
+            accessor: "demos_list",
             sortable: true,
             width: 240,
+            render: ({ demos_list }) => (
+              <>
+                {demos_list.map((demo, i) => (
+                  <Badge
+                    key={i}
+                    color={valueToColor(theme, formatToLabel(demo))}
+                    variant="light"
+                    maw={200}
+                  >
+                    {formatToLabel(demo)}
+                  </Badge>
+                ))}
+              </>
+            ),
           },
           {
-            accessor: "replies",
+            accessor: "replies_list",
             sortable: true,
             width: 240,
+            render: ({ replies_list }) => (
+              <>
+                {replies_list.map((reply, i) => (
+                  <Badge
+                    key={i}
+                    color={valueToColor(theme, formatToLabel(reply))}
+                    variant="light"
+                    maw={200}
+                  >
+                    {formatToLabel(reply)}
+                  </Badge>
+                ))}
+              </>
+            ),
           },
           {
             accessor: "open_percent",

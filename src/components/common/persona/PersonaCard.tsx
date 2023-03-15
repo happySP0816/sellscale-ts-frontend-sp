@@ -15,6 +15,7 @@ import {
   Collapse,
   Flex,
   Tabs,
+  Center,
 } from "@mantine/core";
 import {
   IconCheck,
@@ -111,6 +112,10 @@ export default function PersonaCard(props: {
         ? theme.colors.dark[6]
         : theme.colors.gray[1],
   });
+
+  const displayTransformers = Object.keys(props.archetype.performance.status_map).some((key) => {
+    return key !== "PROSPECTED";
+  }) ?? Object.keys(props.archetype.performance.status_map).length > 0;
 
   /*
   const makeActivePersona = () => {
@@ -348,7 +353,13 @@ export default function PersonaCard(props: {
             <PersonaDetailsCTAs />
           </Tabs.Panel>
           <Tabs.Panel value="transformers" pt="xs" h={600}>
-            <PersonaDetailsTransformers />
+            {displayTransformers ? (
+              <PersonaDetailsTransformers />
+            ) : (
+              <Center w={'100%'} h={'75%'}>
+                <Text c="dimmed" fs="italic">No messages have been sent for this persona yet.</Text>
+              </Center>
+            )}
           </Tabs.Panel>
           <Tabs.Panel value="patterns" pt="xs" h={600}>
             <PersonaDetailsPatterns />

@@ -124,6 +124,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                   component="a"
                   target="_blank"
                   rel="noopener noreferrer"
+                  disabled
                   href={
                     usingFirefox
                       ? "https://addons.mozilla.org/en-US/firefox/extensions/"

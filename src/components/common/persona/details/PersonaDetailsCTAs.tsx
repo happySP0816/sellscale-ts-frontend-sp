@@ -10,6 +10,7 @@ import {
   Stack,
   Group,
   Box,
+  Flex,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
@@ -105,6 +106,9 @@ export default function PersonaDetailsCTAs() {
 
   return (
     <Box>
+      <Flex direction="row-reverse" gap="sm" pb='xs'>
+        <Text fs="italic" c="dimmed">Note: Call to Actions are for LinkedIn only</Text>
+      </Flex>
       <DataTable
         height={"min(670px, 100vh - 200px)"}
         verticalAlignment="top"

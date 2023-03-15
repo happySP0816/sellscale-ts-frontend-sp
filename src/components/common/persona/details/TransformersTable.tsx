@@ -10,10 +10,11 @@ import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
 import { useQuery } from "react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
+import { Channel } from "src/main";
 
 const PAGE_SIZE = 20;
 
-export default function TransformersTable() {
+export default function TransformersTable(props: { channel: Channel }) {
   const theme = useMantineTheme();
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
     currentPersonaIdState
@@ -35,15 +36,15 @@ export default function TransformersTable() {
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
-      `query-transformers-data-${currentPersonaId}`,
-      { page, sortStatus },
+      `query-transformers-data-${currentPersonaId}-${props.channel}`,
+      { page, sortStatus, channel: props.channel },
     ],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { page, sortStatus }] = queryKey;
+      const [_key, { page, sortStatus, channel }] = queryKey;
 
-      const response = await getTransformers(userToken, currentPersonaId);
+      const response = await getTransformers(userToken, currentPersonaId, channel === 'EMAIL');
       const result =
         response.status === "success" ? (response.extra as any[]) : [];
 
@@ -72,7 +73,7 @@ export default function TransformersTable() {
 
   return (
     <DataTable
-      height={280}
+      height={240}
       verticalAlignment="top"
       loaderColor="teal"
       fetching={isFetching}

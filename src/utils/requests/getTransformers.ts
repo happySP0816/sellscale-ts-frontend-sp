@@ -6,10 +6,10 @@ import getResponseJSON, { isMsgResponse } from "./utils";
  * @param userToken 
  * @returns - MsgResponse
  */
-export default async function getTransformers(userToken: string, archetype_id: number): Promise<MsgResponse> {
+export default async function getTransformers(userToken: string, archetype_id: number, isEmail: boolean): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/archetype/${archetype_id}/transformers`,
+    `${process.env.REACT_APP_API_URI}/client/archetype/${archetype_id}/transformers?email=${isEmail}`,
     {
       method: "GET",
       headers: {

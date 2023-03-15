@@ -16,6 +16,7 @@ import _ from "lodash";
 import { Bar } from "react-chartjs-2";
 import { useQuery } from "react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
+import { Channel } from "src/main";
 
 ChartJS.register(
   CategoryScale,
@@ -26,7 +27,7 @@ ChartJS.register(
   Legend
 );
 
-export default function TransformersChart() {
+export default function TransformersChart(props: { channel: Channel }) {
 
   const theme = useMantineTheme();
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
@@ -34,10 +35,15 @@ export default function TransformersChart() {
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
-      `query-transformers-chart-data-${currentPersonaId}`,
+      `query-transformers-chart-data-${currentPersonaId}-${props.channel}`,
+      { channel: props.channel },
     ],
-    queryFn: async () => {
-      const response = await getTransformers(userToken, currentPersonaId);
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { channel }] = queryKey;
+
+      const response = await getTransformers(userToken, currentPersonaId, channel === 'EMAIL');
       const result = response.status === "success" ? (response.extra as any[]) : [];
       return result.map((data, i) => {
         return {

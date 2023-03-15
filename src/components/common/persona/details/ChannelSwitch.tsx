@@ -1,18 +1,27 @@
-import TransformersChart from "@common/charts/TransformersChart";
-import { Box, Center, Container, Flex, SegmentedControl, Title } from "@mantine/core";
+import { Box, Center, Flex, SegmentedControl, Title } from "@mantine/core";
 import { IconBrandLinkedin, IconMail } from "@tabler/icons";
-import { useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { Channel } from "src/main";
-import ChannelSwitch from "./ChannelSwitch";
-import TransformersTable from "./TransformersTable";
 
-export default function PersonaDetailsTransformers() {
+export default forwardRef(function ChannelSwitch(
+  props: { defaultValue: Channel },
+  ref
+) {
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        getChannel: () => channel,
+        setChannel: setChannel,
+      };
+    },
+    []
+  );
 
-  const [channel, setChannel] = useState<Channel>('LINKEDIN');
+  const [channel, setChannel] = useState(props.defaultValue);
 
   return (
-    <Box>
-      <Flex direction="row-reverse" gap="sm">
+    <Flex direction="row-reverse" gap="sm">
       <SegmentedControl
         size="sm"
         value={channel}
@@ -42,11 +51,5 @@ export default function PersonaDetailsTransformers() {
         Channel
       </Title>
     </Flex>
-
-      <Center p={0} h={310}>
-        <TransformersChart channel={channel} />
-      </Center>
-      <TransformersTable channel={channel} />
-    </Box>
   );
-}
+});

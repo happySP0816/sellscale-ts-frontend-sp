@@ -6,6 +6,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { Button, Card, Title, Notification } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { IconCheck } from "@tabler/icons";
+import PageTitle from "@nav/PageTitle";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
 
 function VesselIntegrations() {
@@ -157,9 +158,7 @@ function VesselIntegrations() {
 export default function SettingsPage() {
   return (
     <PageFrame>
-      <Title order={1} mb="md">
-        Settings
-      </Title>
+      <PageTitle title='Settings' />
 
       <SimpleGrid cols={2} spacing={0}>
         <VesselIntegrations />

@@ -1,6 +1,7 @@
 import EmailAnalyticsTable from "@common/analytics/EmailAnalyticsTable";
 import PageFrame from "@common/PageFrame";
 import { Tabs } from "@mantine/core";
+import PageTitle from "@nav/PageTitle";
 import { setPageTitle } from "@utils/documentChange";
 
 export default function AnalyticsPage() {
@@ -8,6 +9,7 @@ export default function AnalyticsPage() {
 
   return (
     <PageFrame>
+      <PageTitle title='Analytics' mb={false} />
       <Tabs defaultValue="email" px="xs">
         <Tabs.List grow position="center">
           <Tabs.Tab value="email">Email</Tabs.Tab>

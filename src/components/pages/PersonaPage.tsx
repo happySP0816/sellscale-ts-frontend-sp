@@ -1,5 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
+import FlexSeparate from "@common/library/FlexSeparate";
 import PersonaDetailsDrawer from "@drawers/PersonaDetailsDrawer";
 import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
 import {
@@ -16,8 +17,12 @@ import {
   Divider,
   Paper,
   LoadingOverlay,
+  Button,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
+import { openContextModal } from "@mantine/modals";
+import PageTitle from "@nav/PageTitle";
+import { IconUserPlus } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import getPersonas, { getAllUploads } from "@utils/requests/getPersonas";
 import { useQuery } from "react-query";
@@ -59,6 +64,20 @@ export default function PersonaPage() {
     <>
       <PageFrame>
           <LoadingOverlay visible={isFetching} overlayBlur={2} />
+          <FlexSeparate alignItems="flex-end">
+            <PageTitle title='Personas' mb={false} />
+            <Button mx='sm' rightIcon={<IconUserPlus size='1rem' />} variant="outline" radius="lg" color="teal" size="xs"
+              onClick={() => {
+                openContextModal({
+                  modal: 'uploadProspects',
+                  title: (<Title order={3}>Create Persona</Title>),
+                  innerProps: { mode: 'CREATE-ONLY' },
+                });
+              }}
+            >
+              Create New Persona
+            </Button>
+          </FlexSeparate>
           {data?.filter((p) => p.active).map(
             (persona) => (
               <PersonaCard

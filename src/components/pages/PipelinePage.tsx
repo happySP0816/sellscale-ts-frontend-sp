@@ -13,6 +13,7 @@ import { useLoaderData } from "react-router-dom";
 import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import { useEffect } from "react";
 import { setPageTitle } from "@utils/documentChange";
+import PageTitle from "@nav/PageTitle";
 
 function getPipelineSelectorData(data: any){
   return new Map()
@@ -92,6 +93,7 @@ export default function PipelinePage() {
   const PIPELINE_SELECTOR_DATA = getPipelineSelectorData(data);
   return (
     <PageFrame>
+      <PageTitle title='Pipeline' />
       <PipelineSelector data={PIPELINE_SELECTOR_DATA} />
       <Container pt={15} px={0}>
         <ProspectTable selectorData={PIPELINE_SELECTOR_DATA} />

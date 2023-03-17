@@ -20,7 +20,7 @@ import { useQuery } from "react-query";
 import { chunk, sortBy } from "lodash";
 import { IconPencil, IconTrashX } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
-import { closeAllModals, openModal } from "@mantine/modals";
+import { closeAllModals, openContextModal, openModal } from "@mantine/modals";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import { Archetype, CTA } from "src/main";
@@ -28,6 +28,9 @@ import {
   currentPersonaIdState,
   detailsDrawerOpenState,
 } from "@atoms/personaAtoms";
+import displayNotification from "@utils/notificationFlow";
+import createCTA from "@utils/requests/createCTA";
+import toggleCTA from "@utils/requests/toggleCTA";
 
 const PAGE_SIZE = 20;
 
@@ -107,6 +110,17 @@ export default function PersonaDetailsCTAs() {
   return (
     <Box>
       <Flex direction="row-reverse" gap="sm" pb='xs'>
+        <Button color="gray" size="xs"
+          onClick={() => {
+            openContextModal({
+              modal: 'createNewCTA',
+              title: (<Title order={3}>Create CTA</Title>),
+              innerProps: { personaId: currentPersonaId },
+            });
+          }}
+        >
+          Create New CTA
+        </Button>
         <Text fs="italic" c="dimmed">Note: Call to Actions are for LinkedIn only</Text>
       </Flex>
       <DataTable
@@ -141,12 +155,14 @@ export default function PersonaDetailsCTAs() {
               <Switch
                 color="teal"
                 checked={active}
-                onClick={(e) => {
+                onClick={async (e) => {
                   if (data) {
-                    const entry = data.filter((d) => d.id === id)[0];
-                    entry.active = !entry.active;
-                    refetch();
-                    throw new Error("Not CTA enable/disabling implemented yet");
+                    const result = await toggleCTA(userToken, id);
+                    if(result.status === 'success') {
+                      const entry = data.filter((d) => d.id === id)[0];
+                      entry.active = !entry.active;
+                      refetch();
+                    }
                   }
                 }}
                 styles={(theme) => ({

@@ -14,6 +14,7 @@ import SpotlightWrapper from "@nav/SpotlightWrapper";
 import UploadProspectsModal from "@modals/UploadProspectsModal";
 import SendLinkedInCredentialsModal from "@modals/SendLinkedInCredentialsModal";
 import InstructionsLinkedInCookieModal from "@modals/InstructionsLinkedInCookieModal";
+import CreateNewCTAModal from "@modals/CreateNewCTAModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -75,6 +76,7 @@ export default function App() {
               uploadProspects: UploadProspectsModal,
               sendLinkedInCredentials: SendLinkedInCredentialsModal,
               sendLinkedInCookie: InstructionsLinkedInCookieModal,
+              createNewCTA: CreateNewCTAModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

@@ -79,7 +79,7 @@ export default function DashboardPage() {
                   openContextModal({
                     modal: 'uploadProspects',
                     title: (<Title order={3}>Upload Prospects</Title>),
-                    innerProps: {},
+                    innerProps: { mode: 'ADD-ONLY' },
                   });
                 }}
               >

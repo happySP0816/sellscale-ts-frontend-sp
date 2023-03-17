@@ -46,7 +46,7 @@ export default function UploadProspectsModal({
   context,
   id,
   innerProps,
-}: ContextModalProps) {
+}: ContextModalProps<{ mode: 'ADD-ONLY' | 'ADD-CREATE' | 'CREATE-ONLY' }>) {
   const theme = useMantineTheme();
   const [personas, setPersonas] = useState<
     { value: string; label: string; group: string | undefined }[]
@@ -63,11 +63,11 @@ export default function UploadProspectsModal({
   const [ctas, setCTAs] = useState([
     {
       id: 0,
-      cta: `I would love to chat sometime!`,
+      cta: `Default CTA 0`,
     },
     {
       id: 1,
-      cta: `Would you be interested in chatting?`,
+      cta: `Default CTA 1`,
     },
   ]);
 
@@ -126,7 +126,7 @@ export default function UploadProspectsModal({
     refetchOnWindowFocus: false,
   });
   // After fetch, set default personas and set personas if they haven't been set yet
-  if (data) {
+  if (data && (innerProps.mode === "ADD-ONLY" || innerProps.mode === "ADD-CREATE")) {
     defaultPersonas.current = data.map((persona) => ({
       value: persona.id + "",
       label: persona.archetype,
@@ -152,7 +152,7 @@ export default function UploadProspectsModal({
       <Stack spacing="xl">
         {!isFetching && (
           <Select
-            label="Set Persona"
+            label={innerProps.mode === "CREATE-ONLY" ? "Name" : "Set Persona"}
             defaultValue={
               defaultPersonas.current.length === 1 ||
               (defaultPersonas.current.length > 1 &&
@@ -162,11 +162,15 @@ export default function UploadProspectsModal({
                 : undefined
             }
             data={personas}
-            placeholder="Select a persona for the prospects"// or create
-            nothingFound="Nothing found"
+            placeholder={
+              innerProps.mode === "ADD-ONLY" ? "Select a persona for the prospects" : (
+                innerProps.mode === "CREATE-ONLY" ? "Create a persona for the prospects" : "Select or create a persona for the prospects"
+              )
+            }
+            nothingFound={innerProps.mode === "CREATE-ONLY" ? "Input a persona name" : "Nothing found"}
             icon={<IconUsers size={14} />}
             searchable
-            //creatable
+            creatable={innerProps.mode === 'ADD-CREATE' || innerProps.mode === 'CREATE-ONLY'}
             clearable
             getCreateLabel={(query) => (
               <>
@@ -176,7 +180,7 @@ export default function UploadProspectsModal({
             )}
             onCreate={(query) => {
               // value = ID if selected, name if created
-              const item = { value: query, label: query, group: "Active" };
+              const item = { value: query, label: query, group: undefined }; // group: "Active"
               setPersonas((current) => [...current, item]);
               setCreatedPersona(query);
               return item;
@@ -196,7 +200,7 @@ export default function UploadProspectsModal({
           />
         )}
 
-        {createdPersona.length > 0 && (
+        {createdPersona.length > 0 && false && ( // TODO: Re-enable?
           <Container mx={2} my={0} p={0}>
             <Text
               sx={{

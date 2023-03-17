@@ -344,6 +344,9 @@ export default function ProspectDetailsChangeStatus(
                 queryClient.invalidateQueries({
                   queryKey: ["query-pipeline-prospects"],
                 });
+                queryClient.invalidateQueries({
+                  queryKey: ["query-pipeline-details"],
+                });
                 refetch();
               }
               return result;

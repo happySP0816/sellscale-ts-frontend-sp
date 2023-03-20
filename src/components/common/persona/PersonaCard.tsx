@@ -69,7 +69,6 @@ async function togglePersona(archetype_id: number, userToken: string) {
 export default function PersonaCard(props: {
   archetype: Archetype;
   refetch: () => void;
-  isOpen?: boolean;
 }) {
   const theme = useMantineTheme();
   const mdScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.MD})`);
@@ -84,7 +83,14 @@ export default function PersonaCard(props: {
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
     currentPersonaIdState
   );
-  const [opened, { toggle }] = useDisclosure(props.isOpen === true);
+  const [opened, { open, close }] = useDisclosure(props.archetype.id === currentPersonaId);
+  useEffect(() => {
+    if(props.archetype.id === currentPersonaId){
+      open();
+    } else {
+      close();
+    }
+  }, [currentPersonaId]);
 
   const isUploading =
     props.archetype.uploads &&
@@ -95,12 +101,6 @@ export default function PersonaCard(props: {
   const [prospectUploadDrawerId, setProspectUploadDrawerId] = useRecoilState(
     prospectUploadDrawerIdState
   );
-
-  useEffect(() => {
-    if(props.isOpen === true){
-      setCurrentPersonaId(props.archetype.id);
-    }
-  }, []);
 
   const activeBackgroundSX = (theme: MantineTheme) => ({
     border: `1px solid ${
@@ -269,8 +269,11 @@ export default function PersonaCard(props: {
             spacing={8}
             sx={{ cursor: "pointer" }}
             onClick={() => {
-              setCurrentPersonaId(props.archetype.id);
-              toggle();
+              if(props.archetype.id === currentPersonaId){
+                setCurrentPersonaId(-1);
+              } else {
+                setCurrentPersonaId(props.archetype.id);
+              }
             }}
           >
             <Title order={2} fz={24} fw={400} truncate maw="35vw">

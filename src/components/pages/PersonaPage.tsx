@@ -1,3 +1,4 @@
+import { currentPersonaIdState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import FlexSeparate from "@common/library/FlexSeparate";
@@ -25,6 +26,7 @@ import PageTitle from "@nav/PageTitle";
 import { IconUserPlus } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import getPersonas, { getAllUploads } from "@utils/requests/getPersonas";
+import { useEffect } from "react";
 import { useQuery } from "react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype } from "src/main";
@@ -38,6 +40,8 @@ export default function PersonaPage() {
 
   const userToken = useRecoilValue(userTokenState);
 
+  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
+
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `query-personas-data`
@@ -50,6 +54,11 @@ export default function PersonaPage() {
       for(let persona of result) {
         const uploadsResponse = await getAllUploads(userToken, persona.id);
         persona.uploads = uploadsResponse.status === 'success' ? uploadsResponse.extra : [];
+      }
+
+      const activePersonas = result.filter((p) => p.active);
+      if(activePersonas.length === 1){
+        setCurrentPersonaId(activePersonas[0].id);
       }
 
       // Sort by number of prospects
@@ -84,7 +93,6 @@ export default function PersonaPage() {
                 key={persona.id}
                 archetype={persona}
                 refetch={refetch}
-                isOpen={data.filter((p) => p.active).length === 1 ? true : undefined}
               />
             )
           )}

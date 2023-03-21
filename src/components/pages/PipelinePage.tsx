@@ -3,9 +3,9 @@ import { IconUserPlus } from "@tabler/icons";
 import { useMediaQuery } from "@mantine/hooks";
 import { SCREEN_SIZES } from "../../constants/data";
 import PipelineSelector, { icons } from "../common/pipeline/PipelineSelector";
-import ProspectTable from "../common/pipeline/ProspectTable";
+import ProspectTable_old from "../common/pipeline/ProspectTable_old";
 import PageFrame from "@common/PageFrame";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
@@ -96,7 +96,7 @@ export default function PipelinePage() {
       <PageTitle title='Pipeline' />
       <PipelineSelector data={PIPELINE_SELECTOR_DATA} />
       <Container pt={15} px={0}>
-        <ProspectTable selectorData={PIPELINE_SELECTOR_DATA} />
+        <ProspectTable_old selectorData={PIPELINE_SELECTOR_DATA} />
       </Container>
     </PageFrame>
   );

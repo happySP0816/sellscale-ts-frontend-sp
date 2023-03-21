@@ -40,7 +40,7 @@ import displayNotification from "@utils/notificationFlow";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, splitName, valueToColor } from "@utils/general";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Channel } from "src/main";
 import { getChannelStatusOptions } from "@utils/requests/getChannels";
 

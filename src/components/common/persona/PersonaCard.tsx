@@ -36,7 +36,7 @@ import {
   detailsDrawerOpenState,
 } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import FlexSeparate from "@common/library/FlexSeparate";
 import {
   prospectUploadDrawerIdState,

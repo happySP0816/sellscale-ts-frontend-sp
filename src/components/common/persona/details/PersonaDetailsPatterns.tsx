@@ -19,7 +19,7 @@ import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { faker } from "@faker-js/faker";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { chunk, sortBy } from "lodash";
 import { IconBrandLinkedin, IconMail, IconTrashX } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";

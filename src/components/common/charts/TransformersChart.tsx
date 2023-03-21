@@ -14,7 +14,7 @@ import {
 } from "chart.js";
 import _ from "lodash";
 import { Bar } from "react-chartjs-2";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Channel } from "src/main";
 

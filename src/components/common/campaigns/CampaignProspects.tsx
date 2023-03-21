@@ -22,7 +22,7 @@ import { formatToLabel, valueToColor } from "@utils/general";
 import { useDebouncedState } from "@mantine/hooks";
 import { Prospect } from "src/main";
 import { chunk } from "lodash";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import getChannels from "@utils/requests/getChannels";
 
 const PAGE_SIZE = 10;

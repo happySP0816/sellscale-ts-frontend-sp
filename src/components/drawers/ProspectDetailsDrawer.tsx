@@ -16,7 +16,7 @@ import {
   prospectDrawerNotesState,
   prospectChannelState,
 } from "@atoms/prospectAtoms";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import ProspectDetailsSummary from "../common/prospectDetails/ProspectDetailsSummary";
 import ProspectDetailsChangeStatus, {
   channelToIcon,

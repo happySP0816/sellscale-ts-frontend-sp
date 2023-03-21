@@ -45,7 +45,7 @@ import { useEffect, useRef, useState } from "react";
 import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { Archetype, Campaign } from "src/main";
 import { logout } from "@auth/core";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import CampaignProspects from "@common/campaigns/CampaignProspects";
 import CampaignCTAs from "@common/campaigns/CampaignCTAs";
 import { prospectUploadDrawerOpenState } from "@atoms/uploadAtoms";

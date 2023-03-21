@@ -17,7 +17,7 @@ import {
   Text,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import NavTab from "./NavTab";
 import { useOs } from "@mantine/hooks";
 import { openSpotlight } from "@mantine/spotlight";

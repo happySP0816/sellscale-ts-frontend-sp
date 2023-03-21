@@ -5,7 +5,7 @@ export {}
 import { Group, Container, Divider, useMantineTheme, Box, Stack, Text } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 type ScaleTableProps = {
   id: string;

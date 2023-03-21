@@ -8,7 +8,7 @@ import getTransformers from "@utils/requests/getTransformers";
 import _ from "lodash";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Channel } from "src/main";
 

@@ -24,7 +24,7 @@ import {
   campaignDrawerOpenState,
 } from "@atoms/campaignAtoms";
 import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { formatDate, temp_delay, valueToColor } from "@utils/general";
 import { chunk } from "lodash";
 import { faker } from "@faker-js/faker";

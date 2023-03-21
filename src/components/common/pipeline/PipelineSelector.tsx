@@ -18,7 +18,7 @@ import {
   IconArrowUpRight,
   IconArrowDownRight,
 } from "@tabler/icons";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilState } from "recoil";
 
 const useStyles = createStyles((theme) => ({

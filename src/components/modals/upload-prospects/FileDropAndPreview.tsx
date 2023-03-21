@@ -45,9 +45,9 @@ import uploadProspects from "@utils/requests/uploadProspects";
 import _ from "lodash";
 import { DataTable } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
-import { useQueryClient } from "react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
-import { QueryCache } from 'react-query';
+import { QueryCache } from "@tanstack/react-query";
 
 const MAX_FILE_SIZE_MB = 2;
 const PREVIEW_FIRST_N_ROWS = 5;

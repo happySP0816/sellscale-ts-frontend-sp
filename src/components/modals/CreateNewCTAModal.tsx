@@ -40,7 +40,7 @@ import {
 } from "@tabler/icons";
 import { DataTable } from "mantine-datatable";
 import FileDropAndPreview from "./upload-prospects/FileDropAndPreview";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";

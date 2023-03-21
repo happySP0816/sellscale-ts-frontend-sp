@@ -25,6 +25,7 @@ export async function authorize(token: string, setUserToken: SetterOrUpdater<str
   localStorage.setItem('user-name', info.sdr_name);
   setUserEmail(info.sdr_email);
   localStorage.setItem('user-email', info.sdr_email);
+  document.cookie = `token=${token}; SameSite=None; Secure`;
 
 }
 
@@ -34,6 +35,7 @@ export function logout(noCheck = false){
     localStorage.removeItem('user-token');
     localStorage.removeItem('user-email');
     localStorage.removeItem('user-name');
+    document.cookie = `token=; SameSite=None; Secure`;
     window.location.href = '/';
   }
 

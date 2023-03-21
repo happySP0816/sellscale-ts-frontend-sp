@@ -15,18 +15,17 @@ import ProfileIcon, { ProfileCard } from "@nav/ProfileIcon";
 import { LogoFull } from "@nav/Logo";
 import { animated, useSpring } from "@react-spring/web";
 import { openSpotlight } from "@mantine/spotlight";
-import { userEmailState, userNameState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
 import { isLoggedIn } from "@auth/core";
 import LogoutBtn from "@nav/LogoutBtn";
+import { userDataState } from "@atoms/userAtoms";
 
 const AnimatedNavbar = animated(Navbar);
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
 
-  const userName = useRecoilValue(userNameState);
-  const userEmail = useRecoilValue(userEmailState);
+  const userData = useRecoilValue(userDataState);
 
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.SM})`,
@@ -62,8 +61,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {isLoggedIn() && (
               <>
                 <ProfileCard
-                  name={userName}
-                  email={userEmail}
+                  name={userData?.sdr_name || ''}
+                  email={userData?.sdr_email || ''}
                 />
                 <LogoutBtn />
               </>

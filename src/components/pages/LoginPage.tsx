@@ -14,7 +14,7 @@ import { IconAt } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { login } from "@auth/core";
 import { useRecoilState } from "recoil";
-import { userEmailState } from "@atoms/userAtoms";
+import { userDataState } from "@atoms/userAtoms";
 import { LogoFull } from "@nav/Logo";
 import { EMAIL_REGEX } from "@constants/data";
 import { setPageTitle } from "@utils/documentChange";
@@ -53,7 +53,7 @@ export default function LoginPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useRecoilState(userEmailState);
+  const [userData, setUserData] = useRecoilState(userDataState);
 
   const [checkEmail, setCheckEmail] = useState(false);
 
@@ -82,7 +82,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (res?.status === 200) {
-      login(values.email, setUserEmail);
+      login(values.email, setUserData);
       setCheckEmail(true);
     } else if (res?.status === 404) {
       setError(res.message);

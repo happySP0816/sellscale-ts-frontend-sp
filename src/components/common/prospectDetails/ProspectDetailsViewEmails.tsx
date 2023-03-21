@@ -45,8 +45,6 @@ export default function ProspectDetailsViewEmails(props: {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data);
-
   return (
     <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
       <LoadingOverlay visible={isFetching} overlayBlur={2} />

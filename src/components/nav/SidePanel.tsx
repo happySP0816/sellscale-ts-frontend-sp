@@ -21,10 +21,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import NavTab from "./NavTab";
 import { useOs } from "@mantine/hooks";
 import { openSpotlight } from "@mantine/spotlight";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { navTabState } from "@atoms/navAtoms";
 import { LogoFull, LogoIcon } from "@nav/Logo";
 import useStyles from "./SearchBars.styles";
+import { userDataState } from "@atoms/userAtoms";
 
 type PanelLinkProps = {
   icon: React.ReactNode;
@@ -77,6 +78,8 @@ export default function SidePanel(props: { isMobile?: boolean }) {
   const os = useOs();
   const { classes } = useStyles();
 
+  const userData = useRecoilValue(userDataState);
+
   const [navTab, setNavTab] = useRecoilState(navTabState);
   const activeTab = location.pathname?.split("/")[1];
 
@@ -124,12 +127,16 @@ export default function SidePanel(props: { isMobile?: boolean }) {
           onClick={() => navigate(`/pipeline`)}
         />
 
-        <NavTab
-          icon={<IconAnalyze size={22} />}
-          name="analytics"
-          description="View your outbound analytics"
-          onClick={() => navigate(`/analytics`)}
-        />
+        {userData && (userData.weekly_li_outbound_target > 0 || userData.weekly_email_outbound_target > 0) ? (
+          <NavTab
+            icon={<IconAnalyze size={22} />}
+            name="analytics"
+            description="View your outbound analytics"
+            onClick={() => navigate(`/analytics`)}
+          />
+        ) : (
+          ""
+        )}
 
         <NavTab
           icon={<IconUsers size={22} />}

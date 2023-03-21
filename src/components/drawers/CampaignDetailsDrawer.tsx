@@ -25,8 +25,6 @@ import {
   campaignDrawerOpenState,
 } from "@atoms/campaignAtoms";
 import {
-  userEmailState,
-  userNameState,
   userTokenState,
 } from "@atoms/userAtoms";
 import { IconCalendar } from "@tabler/icons";

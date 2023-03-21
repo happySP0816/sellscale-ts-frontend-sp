@@ -72,8 +72,6 @@ export default function PersonaDetailsPatterns() {
     enabled: currentPersonaId !== -1,
   });
 
-  console.log(data);
-
   return (
     <>
       <Flex direction="row-reverse" gap="sm" pb='xs'>

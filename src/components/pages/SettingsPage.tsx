@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { IconCheck } from "@tabler/icons";
 import PageTitle from "@nav/PageTitle";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
+import { useQuery } from "react-query";
+import { getUserInfo } from "@auth/core";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -156,13 +158,23 @@ function VesselIntegrations() {
 }
 
 export default function SettingsPage() {
+
+  const userToken = useRecoilValue(userTokenState);
+
+  const { data } = useQuery({
+    queryKey: [`query-get-linkedin-connected`],
+    queryFn: async () => {
+      return await getUserInfo(userToken);
+    },
+  });
+
   return (
     <PageFrame>
       <PageTitle title='Settings' />
 
       <SimpleGrid cols={2} spacing={0}>
         <VesselIntegrations />
-        <LinkedInConnectedCard connected={false} />
+        <LinkedInConnectedCard connected={data ? data.li_connected : false} />
       </SimpleGrid>
 
     </PageFrame>

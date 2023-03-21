@@ -38,7 +38,7 @@ const PAGE_SIZE = 10;
 
 type EmailAnalytics = {
   campaign_end_date: string,
-  campaign_id: number,
+  archetype: string,
   campaign_start_date: string,
   demo_percent: number,
   demos: string,
@@ -118,8 +118,6 @@ export default function EmailAnalyticsTable() {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data)
-
   return (
     <Box>
       <DataTable
@@ -142,7 +140,8 @@ export default function EmailAnalyticsTable() {
             sortable: true,
           },
           {
-            accessor: "campaign_id",
+            accessor: "archetype",
+            title: 'Persona',
             sortable: true,
           },
           {

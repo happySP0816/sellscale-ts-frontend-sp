@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   Center,
   createStyles,
@@ -85,8 +85,9 @@ export default function SpotlightWrapper({
 }) {
   const navigate = useNavigate();
   const theme = useMantineTheme();
+  const userData = useRecoilValue(userDataState);
 
-  const mainActions: SpotlightAction[] = [
+  let mainActions: SpotlightAction[] = [
     {
       title: "Dashboard",
       description: "Go to dashboard",
@@ -100,13 +101,6 @@ export default function SpotlightWrapper({
       group: "Pages",
       onTrigger: () => navigate(`/pipeline`),
       icon: <IconFilter size={18} />,
-    },
-    {
-      title: 'Analytics',
-      description: 'View your outbound analytics',
-      group: 'Pages',
-      onTrigger: () => navigate(`/analytics`),
-      icon: <IconAnalyze size={18} />,
     },
     {
       title: 'Analytics',
@@ -131,6 +125,9 @@ export default function SpotlightWrapper({
       icon: <IconSend size={18} />,
     },
   ];
+  if(userData && !userData.weekly_li_outbound_target && !userData.weekly_email_outbound_target){
+    mainActions = mainActions.filter(action => action.title !== 'Analytics');
+  }
 
   const userToken = useRecoilValue(userTokenState);
   const [query, setQuery] = useDebouncedState("", 400);

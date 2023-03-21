@@ -11,6 +11,7 @@ import {
   Button,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
 import {
   IconCloudDownload,
   IconCookie,
@@ -39,6 +40,16 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                 color="blue"
                 radius="xl"
                 variant="transparent"
+                onClick={() => {
+                  // TODO: - implement disconnect
+                  showNotification({
+                    id: 'linkedin-disconnect-not-implemented',
+                    title: 'Please Contact an Administrator',
+                    message: 'Automatic disconnect is not yet implemented! Please contact an administrator to disconnect your LinkedIn account.',
+                    color: 'red',
+                    autoClose: false,
+                  });
+                }}
               >
                 <IconX size={15} />
               </ActionIcon>

@@ -1,22 +1,16 @@
 import { atom } from "recoil";
 
-const userNameState = atom({
-  key: "user-name",
-  default: localStorage.getItem("user-name") || '',
-});
-
-const userEmailState = atom({
-  key: "user-email",
-  default: localStorage.getItem("user-email") || '',
-});
-
 const userTokenState = atom({
   key: "user-token",
   default: localStorage.getItem("user-token") || '',
 });
 
+const userDataState = atom({
+  key: "user-data",
+  default: JSON.parse(localStorage.getItem("user-data") ?? '{}') || {},
+});
+
 export {
-  userNameState,
-  userEmailState,
   userTokenState,
+  userDataState,
 };

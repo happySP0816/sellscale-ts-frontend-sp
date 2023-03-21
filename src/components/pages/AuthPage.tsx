@@ -1,4 +1,4 @@
-import { userEmailState, userNameState, userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { authorize } from "@auth/core";
 import {
   LoadingOverlay,
@@ -47,15 +47,14 @@ export default function AuthPage() {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [userName, setUserName] = useRecoilState(userNameState);
-  const [userEmail, setUserEmail] = useRecoilState(userEmailState);
+  const [userData, setUserData] = useRecoilState(userDataState);
   const [userToken, setUserToken] = useRecoilState(userTokenState);
 
   useLayoutEffect(() => {
     setTimeout(() => {
       const tokenType = searchParams.get('stytch_token_type');
       const authToken = searchParams.get('token');
-      const email = searchParams.get('email') || userEmail;
+      const email = searchParams.get('email') || userData.sdr_email;
 
       if (!authToken){
         showNotification({
@@ -71,12 +70,12 @@ export default function AuthPage() {
 
       if(tokenType === 'magic_links'){
         sendAuthToken(authToken, email).then(async (response) => {
-          await authorize(response.token, setUserToken, setUserName, setUserEmail);
+          await authorize(response.token, setUserToken, setUserData);
           navigate(`/`);
         });
       } else if(tokenType === 'direct'){
         (async () => {
-          await authorize(authToken, setUserToken, setUserName, setUserEmail);
+          await authorize(authToken, setUserToken, setUserData);
           navigate(`/`);
         })();
       } else {

@@ -2,18 +2,17 @@ import { SetterOrUpdater } from "recoil";
 
 export function isLoggedIn(){
   return localStorage.getItem('user-token')
-    && localStorage.getItem('user-email')
-    && localStorage.getItem('user-name');
+    && localStorage.getItem('user-data');
 }
 
-export function login(email: string, setUserEmail: SetterOrUpdater<string>){
+export function login(email: string, setUserData: SetterOrUpdater<any>){
 
-  setUserEmail(email);
-  localStorage.setItem('user-email', email);
+  setUserData({ sdr_email: email });
+  localStorage.setItem('user-data', JSON.stringify({ sdr_email: email }));
 
 }
 
-export async function authorize(token: string, setUserToken: SetterOrUpdater<string>, setUserName: SetterOrUpdater<string>, setUserEmail: SetterOrUpdater<string>){
+export async function authorize(token: string, setUserToken: SetterOrUpdater<string>, setUserData: SetterOrUpdater<any>){
 
   setUserToken(token);
   localStorage.setItem('user-token', token);
@@ -21,11 +20,16 @@ export async function authorize(token: string, setUserToken: SetterOrUpdater<str
   const info = await getUserInfo(token);
   if(!info){ logout(); }
 
+<<<<<<< HEAD
   setUserName(info.sdr_name);
   localStorage.setItem('user-name', info.sdr_name);
   setUserEmail(info.sdr_email);
   localStorage.setItem('user-email', info.sdr_email);
   document.cookie = `token=${token}; SameSite=None; Secure`;
+=======
+  setUserData(info);
+  localStorage.setItem('user-data', JSON.stringify(info));
+>>>>>>> a9413e5 (Made schlep changes)
 
 }
 
@@ -33,9 +37,13 @@ export function logout(noCheck = false){
 
   const logoutProcess = () => {
     localStorage.removeItem('user-token');
+<<<<<<< HEAD
     localStorage.removeItem('user-email');
     localStorage.removeItem('user-name');
     document.cookie = `token=; SameSite=None; Secure`;
+=======
+    localStorage.removeItem('user-data');
+>>>>>>> a9413e5 (Made schlep changes)
     window.location.href = '/';
   }
 
@@ -72,7 +80,5 @@ export async function getUserInfo(userToken: string | null) {
     return null;
   }
 
-
   return res.sdr_info;
-
 }

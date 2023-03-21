@@ -1,5 +1,5 @@
 import { prospectDrawerNotesState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
-import { userNameState, userTokenState } from "@atoms/userAtoms";
+import { userTokenState } from "@atoms/userAtoms";
 import {
   createStyles,
   Card,

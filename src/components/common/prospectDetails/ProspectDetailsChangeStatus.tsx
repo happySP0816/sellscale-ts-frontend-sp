@@ -378,7 +378,7 @@ export default function ProspectDetailsChangeStatus(
   }
 
   return (
-    <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
+    <Card shadow="sm" p="lg" radius="md" withBorder>
       <Group position="apart">
         <Text weight={700} size="lg">
           {`${formatToLabel(props.channelData.value)} Status`}

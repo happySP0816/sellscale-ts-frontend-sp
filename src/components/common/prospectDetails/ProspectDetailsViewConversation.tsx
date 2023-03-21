@@ -115,7 +115,7 @@ export default function ProspectDetailsViewConversation(
           {`Last Updated: ${new Date(messages[0].date).toLocaleDateString(
             "en-US",
             {
-              month: "long",
+              month: "short",
               day: "numeric",
               year: "numeric",
             }
@@ -131,7 +131,7 @@ export default function ProspectDetailsViewConversation(
             <LinkedInConversationEntry
               key={`message-${index}`}
               postedAt={new Date(message.date).toLocaleDateString("en-US", {
-                month: "long",
+                month: "short",
                 day: "numeric",
                 year: "numeric",
               })}

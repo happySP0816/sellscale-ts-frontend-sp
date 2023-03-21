@@ -31,6 +31,7 @@ import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";
 import { Channel } from "src/main";
 import FlexSeparate from "@common/library/FlexSeparate";
+import ProspectDetailsViewEmails from "@common/prospectDetails/ProspectDetailsViewEmails";
 
 export default function ProspectDetailsDrawer() {
   const theme = useMantineTheme();
@@ -166,7 +167,8 @@ export default function ProspectDetailsDrawer() {
                       <Tabs.Panel
                         key={channel.value}
                         value={channel.value}
-                        px="md"
+                        p="sm"
+                        sx={{ borderLeft: '1px solid #373A40', borderRight: '1px solid #373A40' }}
                       >
                         <ProspectDetailsChangeStatus
                           prospectId={data.main.prospect_info.details.id}
@@ -198,18 +200,23 @@ export default function ProspectDetailsDrawer() {
                               prospect_id={data?.main.prospect_info.details.id}
                             />
                           )}
+
+                        {channel.value === "EMAIL" && (
+                          <ProspectDetailsViewEmails prospectId={data.main.prospect_info.details.id} />
+                        )}
                       </Tabs.Panel>
                     )
                   )}
                 </Tabs>
-                <Divider my="sm" size="sm" />
+                <Divider mb="sm" size="sm" />
               </>
             )}
             <ProspectDetailsNotes
               currentStatus={data.main.prospect_info.details.overall_status}
               prospectId={data.main.prospect_info.details.id}
             />
-            { // data.main.prospect_info.company.name && (
+            {
+              // data.main.prospect_info.company.name && (
               // <ProspectDetailsCompany
               //   logo={data.main.prospect_info.company.logo}
               //   company_name={data.main.prospect_info.company.name}
@@ -220,7 +227,7 @@ export default function ProspectDetailsDrawer() {
               //   tags={data.main.prospect_info.company.tags}
               //   website_url={data.main.prospect_info.company.url}
               // />
-            // )
+              // )
             }
           </ScrollArea>
         </>

@@ -2,7 +2,7 @@ import { logout } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src/main";
 
-export default async function getResponseJSON(key: string, response: Response): Promise<MsgResponse | any> {
+export default async function getResponseJSON(key: string, response: Response): Promise<MsgResponse | Record<string, any>> {
 
   if (response.status === 401) {
     logout();

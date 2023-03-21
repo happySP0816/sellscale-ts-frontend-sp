@@ -117,7 +117,7 @@ export default function ProspectDetailsNotes(
                   <Text size="sm">{note.note}</Text>
                   <Text size="xs" color="dimmed" mt={4}>
                     {new Date(note.created_at).toLocaleDateString("en-US", {
-                      month: "long",
+                      month: "short",
                       day: "numeric",
                       year: "numeric",
                     })}

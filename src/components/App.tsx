@@ -15,6 +15,7 @@ import UploadProspectsModal from "@modals/UploadProspectsModal";
 import SendLinkedInCredentialsModal from "@modals/SendLinkedInCredentialsModal";
 import InstructionsLinkedInCookieModal from "@modals/InstructionsLinkedInCookieModal";
 import CreateNewCTAModal from "@modals/CreateNewCTAModal";
+import ViewEmailModal from "@modals/ViewEmailModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -77,6 +78,7 @@ export default function App() {
               sendLinkedInCredentials: SendLinkedInCredentialsModal,
               sendLinkedInCookie: InstructionsLinkedInCookieModal,
               createNewCTA: CreateNewCTAModal,
+              viewEmail: ViewEmailModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

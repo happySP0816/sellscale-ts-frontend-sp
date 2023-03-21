@@ -109,4 +109,12 @@ export interface ProspectNote {
   prospect_id: number,
 }
 
+export interface ProspectEmail extends Record<string, unknown> {
+  first_name: string,
+  company: string,
+  email: string,
+  body: string,
+  date: Date
+}
+
 export type Channel = 'EMAIL' | 'LINKEDIN' | 'SELLSCALE';

@@ -7,8 +7,8 @@ import { Button, Card, Title, Notification } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { IconCheck } from "@tabler/icons";
 import PageTitle from "@nav/PageTitle";
+import { useQuery } from "@tanstack/react-query";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
-import { useQuery } from "react-query";
 import { getUserInfo } from "@auth/core";
 
 function VesselIntegrations() {

@@ -20,16 +20,9 @@ export async function authorize(token: string, setUserToken: SetterOrUpdater<str
   const info = await getUserInfo(token);
   if(!info){ logout(); }
 
-<<<<<<< HEAD
-  setUserName(info.sdr_name);
-  localStorage.setItem('user-name', info.sdr_name);
-  setUserEmail(info.sdr_email);
-  localStorage.setItem('user-email', info.sdr_email);
-  document.cookie = `token=${token}; SameSite=None; Secure`;
-=======
   setUserData(info);
   localStorage.setItem('user-data', JSON.stringify(info));
->>>>>>> a9413e5 (Made schlep changes)
+  document.cookie = `token=${token}; SameSite=None; Secure`;
 
 }
 
@@ -37,13 +30,8 @@ export function logout(noCheck = false){
 
   const logoutProcess = () => {
     localStorage.removeItem('user-token');
-<<<<<<< HEAD
-    localStorage.removeItem('user-email');
-    localStorage.removeItem('user-name');
-    document.cookie = `token=; SameSite=None; Secure`;
-=======
     localStorage.removeItem('user-data');
->>>>>>> a9413e5 (Made schlep changes)
+    document.cookie = `token=; SameSite=None; Secure`;
     window.location.href = '/';
   }
 

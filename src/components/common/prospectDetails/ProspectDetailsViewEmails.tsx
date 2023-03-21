@@ -23,7 +23,7 @@ import displayNotification from "@utils/notificationFlow";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
 import { LinkedInMessage, ProspectEmail } from "src/main";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import getEmails from "@utils/requests/getEmails";
 import _ from "lodash";
 import { openContextModal } from "@mantine/modals";

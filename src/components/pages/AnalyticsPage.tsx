@@ -1,11 +1,7 @@
 import EmailAnalyticsTable from "@common/analytics/EmailAnalyticsTable";
 import PageFrame from "@common/PageFrame";
-<<<<<<< HEAD
-import { Tabs } from "@mantine/core";
 import PageTitle from "@nav/PageTitle";
-=======
 import { Center, Tabs, Title } from "@mantine/core";
->>>>>>> a9413e5 (Made schlep changes)
 import { setPageTitle } from "@utils/documentChange";
 
 export default function AnalyticsPage() {

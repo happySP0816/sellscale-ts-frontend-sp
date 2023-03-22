@@ -244,6 +244,9 @@ export default function ProspectTable_old({
             last_reviewed: prospect.last_reviewed,
             times_bumped: prospect.times_bumped,
           },
+          scheduling:
+            prospect.linkedin_status === "SCHEDULING" ||
+            prospect.email_status === "SCHEDULING",
         };
       });
     },
@@ -441,6 +444,22 @@ export default function ProspectTable_old({
                       times_bumped > 1 ? "s" : ""
                     }`}</Badge>
                   )}
+                </>
+              );
+            },
+          },
+          {
+            accessor: "review_details",
+            title: "Scheduling",
+            sortable: false,
+            hidden: selectorType !== "active",
+            render: ({ scheduling }) => {
+              if (!scheduling) {
+                return null;
+              }
+              return (
+                <>
+                  <Badge>Scheduling</Badge>
                 </>
               );
             },

@@ -7,10 +7,10 @@ import getResponseJSON, { isMsgResponse } from "./utils";
  * @param prospect_id
  * @returns - MsgResponse
  */
-export default async function getEmails(userToken: string, prospect_id: number): Promise<MsgResponse> {
+export default async function getEmails(userToken: string, prospectId: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/${prospect_id}/all_emails`,
+    `${process.env.REACT_APP_API_URI}/prospect/${prospectId}/all_emails`,
     {
       method: "GET",
       headers: {
@@ -21,6 +21,44 @@ export default async function getEmails(userToken: string, prospect_id: number):
   const result = await getResponseJSON("all-emails-get", response);
   if(isMsgResponse(result)) { return result; }
 
-  return { status: 'success', title: `Success`, message: `Gathered all emails`, extra: result.data };
+  console.log("result.data", result.data)
+
+  const emails = await Promise.all(result.data.map(async (d: any) => {
+    const statsResult = await getEmailDetails(userToken, prospectId, d.id);
+    return {
+      ...d,
+      details: statsResult.status === 'success' ? statsResult.extra : null,
+    };
+  }));
+
+  console.log("emails", emails)
+
+  return { status: 'success', title: `Success`, message: `Gathered all emails`, extra: emails };
+
+}
+
+
+/**
+ * Get details for a specific email
+ * @param userToken 
+ * @param prospectId 
+ * @param emailId 
+ * @returns - MsgResponse
+ */
+export async function getEmailDetails(userToken: string, prospectId: number, emailId: number): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${process.env.REACT_APP_API_URI}/prospect/${prospectId}/email/${emailId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  const result = await getResponseJSON("email-details-get", response);
+  if(isMsgResponse(result)) { return result; }
+
+  return { status: 'success', title: `Success`, message: `Gathered email details`, extra: result.data };
 
 }

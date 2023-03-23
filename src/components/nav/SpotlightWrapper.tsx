@@ -12,6 +12,7 @@ import {
 import { useDebouncedState } from "@mantine/hooks";
 import { SpotlightAction, SpotlightActionProps, SpotlightProvider } from "@mantine/spotlight";
 import { IconUsers, IconHome, IconSend, IconSearch, IconFilter, IconAnalyze } from "@tabler/icons";
+import { navigateToPage } from "@utils/documentChange";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -92,28 +93,28 @@ export default function SpotlightWrapper({
       title: "Dashboard",
       description: "Go to dashboard",
       group: "Pages",
-      onTrigger: () => navigate(`/dashboard`),
+      onTrigger: () => navigateToPage(navigate, `/dashboard`),
       icon: <IconHome size={18} />,
     },
     {
       title: "Pipeline",
       description: "View the state of your outbound funnel by stage",
       group: "Pages",
-      onTrigger: () => navigate(`/pipeline`),
+      onTrigger: () => navigateToPage(navigate, `/pipeline`),
       icon: <IconFilter size={18} />,
     },
     {
       title: 'Analytics',
       description: 'View your outbound analytics',
       group: 'Pages',
-      onTrigger: () => navigate(`/analytics`),
+      onTrigger: () => navigateToPage(navigate, `/analytics`),
       icon: <IconAnalyze size={18} />,
     },
     {
       title: "Personas",
       description: "Create target ICPs and upload new prospect lists",
       group: "Pages",
-      onTrigger: () => navigate(`/personas`),
+      onTrigger: () => navigateToPage(navigate, `/personas`),
       icon: <IconUsers size={18} />,
     },
     {
@@ -121,7 +122,7 @@ export default function SpotlightWrapper({
       description:
         "View and understand the performance of your weekly outbound campaigns",
       group: "Pages",
-      onTrigger: () => navigate(`/campaigns`),
+      onTrigger: () => navigateToPage(navigate, `/campaigns`),
       icon: <IconSend size={18} />,
     },
   ];

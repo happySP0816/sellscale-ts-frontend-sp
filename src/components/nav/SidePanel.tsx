@@ -26,6 +26,7 @@ import { navTabState } from "@atoms/navAtoms";
 import { LogoFull, LogoIcon } from "@nav/Logo";
 import useStyles from "./SearchBars.styles";
 import { userDataState } from "@atoms/userAtoms";
+import { navigateToPage } from "@utils/documentChange";
 
 type PanelLinkProps = {
   icon: React.ReactNode;
@@ -117,14 +118,14 @@ export default function SidePanel(props: { isMobile?: boolean }) {
           icon={<IconHome size={22} />}
           name="dashboard"
           description="Go to dashboard"
-          onClick={() => navigate(`/dashboard`)}
+          onClick={() => navigateToPage(navigate, `/dashboard`)}
         />
 
         <NavTab
           icon={<IconFilter size={22} />}
           name="pipeline"
           description="View the state of your outbound funnel by stage"
-          onClick={() => navigate(`/pipeline`)}
+          onClick={() => navigateToPage(navigate, `/pipeline`)}
         />
 
         {userData && (userData.weekly_li_outbound_target > 0 || userData.weekly_email_outbound_target > 0) ? (
@@ -132,7 +133,7 @@ export default function SidePanel(props: { isMobile?: boolean }) {
             icon={<IconAnalyze size={22} />}
             name="analytics"
             description="View your outbound analytics"
-            onClick={() => navigate(`/analytics`)}
+            onClick={() => navigateToPage(navigate, `/analytics`)}
           />
         ) : (
           ""
@@ -142,21 +143,21 @@ export default function SidePanel(props: { isMobile?: boolean }) {
           icon={<IconUsers size={22} />}
           name="personas"
           description="Create target ICPs and upload new prospect lists"
-          onClick={() => navigate(`/personas`)}
+          onClick={() => navigateToPage(navigate, `/personas`)}
         />
 
         <NavTab
           icon={<IconSend size={22} />}
           name="campaigns"
           description="View and understand the performance of your weekly outbound campaigns"
-          onClick={() => navigate(`/campaigns`)}
+          onClick={() => navigateToPage(navigate, `/campaigns`)}
         />
 
         <NavTab
           icon={<IconSettings size={22} />}
           name="settings"
           description="Configure your SellScale settings"
-          onClick={() => navigate(`/settings`)}
+          onClick={() => navigateToPage(navigate, `/settings`)}
         />
       </div>
     </>

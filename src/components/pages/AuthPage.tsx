@@ -4,6 +4,7 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
+import { navigateToPage } from "@utils/documentChange";
 import { useEffect, useLayoutEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -71,12 +72,12 @@ export default function AuthPage() {
       if(tokenType === 'magic_links'){
         sendAuthToken(authToken, email).then(async (response) => {
           await authorize(response.token, setUserToken, setUserData);
-          navigate(`/`);
+          navigateToPage(navigate, `/`);
         });
       } else if(tokenType === 'direct'){
         (async () => {
           await authorize(authToken, setUserToken, setUserData);
-          navigate(`/`);
+          navigateToPage(navigate, `/`);
         })();
       } else {
         showNotification({

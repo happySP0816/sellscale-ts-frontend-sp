@@ -16,6 +16,8 @@ import SendLinkedInCredentialsModal from "@modals/SendLinkedInCredentialsModal";
 import InstructionsLinkedInCookieModal from "@modals/InstructionsLinkedInCookieModal";
 import CreateNewCTAModal from "@modals/CreateNewCTAModal";
 import ViewEmailModal from "@modals/ViewEmailModal";
+import { useEffect } from "react";
+import { userDataState } from "@atoms/userAtoms";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -33,6 +35,22 @@ export default function App() {
     localStorage.setItem('site-theme', nextColorScheme);
   };
   */
+
+  const userData = useRecoilValue(userDataState);
+
+  // Setup Intercom widget
+  useEffect(() => {
+    if(!userData) { return; }
+    console.log(userData);
+    // @ts-ignore
+    window.Intercom("boot", {
+      api_base: "https://api-iam.intercom.io",
+      app_id: "sq3vzhd8",
+      name: userData.sdr_name,
+      email: userData.sdr_email,
+      created_at: 0,
+    });
+  }, [userData]);
 
   const loading = useRecoilValue(navLoadingState);
 

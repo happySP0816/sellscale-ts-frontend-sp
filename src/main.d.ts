@@ -110,9 +110,8 @@ export interface ProspectNote {
 }
 
 export interface ProspectEmail extends Record<string, unknown> {
-  first_name: string,
-  company: string,
   email: string,
+  subject: string,
   body: string,
   date: Date
 }

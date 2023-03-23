@@ -2,6 +2,7 @@ import { logout } from "@auth/core";
 import { MantineTheme, Image } from "@mantine/core";
 import { SpotlightAction } from "@mantine/spotlight";
 import { NavigateFunction } from "react-router-dom";
+import { navigateToPage } from "./documentChange";
 import { valueToColor } from "./general";
 
 /**
@@ -47,7 +48,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       description: prospect.title,
       keywords: prospect.company,
       group: 'Prospects',
-      onTrigger: () => navigate(`/pipeline/${prospect.id}`),
+      onTrigger: () => navigateToPage(navigate, `/pipeline/${prospect.id}`),
       icon: (
         <Image
           src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
@@ -93,7 +94,7 @@ async function checkCampaigns(query: string, navigate: NavigateFunction, theme: 
       description: `Dates: ${new Date(campaign.campaign_start_date).toLocaleDateString("en-US")} - ${new Date(campaign.campaign_end_date).toLocaleDateString("en-US")} | ${campaign.prospect_ids.length} prospects`,
       keywords: '',
       group: 'Campaigns',
-      onTrigger: () => navigate(`/campaigns/${campaign.id}`),
+      onTrigger: () => navigateToPage(navigate, `/campaigns/${campaign.id}`),
       badge: campaign.status,
       badgeColor: valueToColor(theme, campaign.status),
     };

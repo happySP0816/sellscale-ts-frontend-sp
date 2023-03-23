@@ -37,10 +37,19 @@ export default function ProspectDetailsViewEmails(props: {
     queryKey: [`query-prospect-emails-${props.prospectId}`],
     queryFn: async () => {
       const response = await getEmails(userToken, props.prospectId);
-      const result =
-        response.status === "success" ? (response.extra as ProspectEmail[]) : [];
 
-      return result;
+      // Filter out all emails that we couldn't get details on
+      const result = response.status === "success" ? response.extra.filter((data: any) => data.details) : [];
+
+      // Map the output to our desired format
+      return result.map((data: any) => {
+        return {
+          email: data.details.additional.recipient_email_address,
+          subject: data.details.subject,
+          body: data.details.bodyText,
+          date: data.details.createdTime,
+        };
+      }) as ProspectEmail[];
     },
     refetchOnWindowFocus: false,
   });
@@ -57,8 +66,9 @@ export default function ProspectDetailsViewEmails(props: {
         View recent emails sent by SellScale below.
       </Text>
       <ScrollArea>
-        {data?.map((email) => (
+        {data?.map((email, index) => (
           <ViewEmailButton
+            key={index}
             prospectId={props.prospectId}
             data={email}
           />
@@ -69,7 +79,7 @@ export default function ProspectDetailsViewEmails(props: {
 }
 
 function ViewEmailButton(props: {
-  prospectId: number;
+  prospectId: number,
   data: ProspectEmail,
 }) {
   return (
@@ -82,7 +92,7 @@ function ViewEmailButton(props: {
           modal: 'viewEmail',
           title: (
             <Group>
-              <Title order={4}>{props.data.first_name} {props.data.company}</Title>
+              <Title order={4}>{props.data.subject}</Title>
               <Text fz="sm" fs="italic" c="dimmed">{props.data.email}</Text>
             </Group>
           ),
@@ -96,7 +106,7 @@ function ViewEmailButton(props: {
         label: { flexDirection: 'column', alignItems: 'flex-start' }
       }}
     >
-      <Text>{_.truncate(props.data.body.split('\n')[0], {length: 40, separator: ' '})}</Text>
+      <Text>{_.truncate(props.data.subject, {length: 40, separator: ' '})}</Text>
       <Text fz="sm">
         {new Date(props.data.date).toLocaleDateString("en-US", {
           month: "short",

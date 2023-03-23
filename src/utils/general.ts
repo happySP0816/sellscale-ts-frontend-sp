@@ -123,7 +123,8 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   current_job_specialties: 'pink',
 };
 export function valueToColor(theme: MantineTheme, value: string): MantineColor {
-  value = value?.toLowerCase().trim().replaceAll(" ", "_");
+  if(!value) { return "gray"; }
+  value = value.toLowerCase().trim().replaceAll(" ", "_");
 
   if (PRESET_COLOR_MAPS[value]) {
     return PRESET_COLOR_MAPS[value];

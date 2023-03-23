@@ -223,7 +223,8 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
         mappedRow[columnMappings.get(key.trim())] = row[key];
       });
       return mappedRow;
-    }));
+      // Remove prospects that don't have a linkedin_url column
+    }).filter((row: any) => row.linkedin_url));
     if (result.status === "error") {
       console.error("Failed to start prospects upload");
       showNotification({

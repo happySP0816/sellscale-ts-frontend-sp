@@ -45,8 +45,10 @@ export default function App() {
     $crisp.push(["set", "user:email", [userData.sdr_email]]);
     // @ts-ignore
     $crisp.push(["set", "user:nickname", [userData.sdr_name]]);
-    // @ts-ignore
-    $crisp.push(["set", "user:company", [userData.client.company]]);
+    if(userData.client){
+      // @ts-ignore
+      $crisp.push(["set", "user:company", [userData.client.company]]);
+    }
   }, [userData]);
 
   const loading = useRecoilValue(navLoadingState);

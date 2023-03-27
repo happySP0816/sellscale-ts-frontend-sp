@@ -38,18 +38,15 @@ export default function App() {
 
   const userData = useRecoilValue(userDataState);
 
-  // Setup Intercom widget
+  // Fill in Crisp widget w/ info
   useEffect(() => {
     if(!userData) { return; }
-    console.log(userData);
     // @ts-ignore
-    window.Intercom("boot", {
-      api_base: "https://api-iam.intercom.io",
-      app_id: "sq3vzhd8",
-      name: userData.sdr_name,
-      email: userData.sdr_email,
-      created_at: 0,
-    });
+    $crisp.push(["set", "user:email", [userData.sdr_email]]);
+    // @ts-ignore
+    $crisp.push(["set", "user:nickname", [userData.sdr_name]]);
+    // @ts-ignore
+    $crisp.push(["set", "user:company", [userData.client.company]]);
   }, [userData]);
 
   const loading = useRecoilValue(navLoadingState);

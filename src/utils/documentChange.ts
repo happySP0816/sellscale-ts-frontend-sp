@@ -10,6 +10,4 @@ export function setPageTitle(title: string) {
 
 export function navigateToPage(navigate: NavigateFunction, to: string) {
   navigate(to);
-  // @ts-ignore
-  window.Intercom("update");
 }

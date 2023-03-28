@@ -6,7 +6,7 @@ import {
   Paper,
   useMantineTheme,
   Avatar,
-  Stack,
+  Title,
   Select,
   Collapse,
   Divider,
@@ -20,7 +20,7 @@ import {
   LoadingOverlay,
   PasswordInput,
 } from "@mantine/core";
-import { ContextModalProps } from "@mantine/modals";
+import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
@@ -63,39 +63,40 @@ export default function CreateNewCTAModel({
 
   const form = useForm({
     initialValues: {
-      cta: '',
+      cta: "",
     },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
-
     setLoading(true);
-    
+
     const result = await createCTA(userToken, innerProps.personaId, values.cta);
 
     setLoading(false);
 
-    if(result.status === 'success'){
+    if (result.status === "success") {
       showNotification({
-        id: 'new-cta-created',
-        title: 'CTA successfully created',
-        message: 'Please allow some time for it to propagate through our systems.',
-        color: 'blue',
+        id: "new-cta-created",
+        title: "CTA successfully created",
+        message:
+          "Please allow some time for it to propagate through our systems.",
+        color: "blue",
         autoClose: 3000,
       });
-      queryClient.invalidateQueries({ queryKey: [`query-cta-data-${innerProps.personaId}`] });
+      queryClient.invalidateQueries({
+        queryKey: [`query-cta-data-${innerProps.personaId}`],
+      });
     } else {
       showNotification({
-        id: 'new-cta-created-error',
-        title: 'Error while creating a new CTA',
-        message: 'Please contact an administrator.',
-        color: 'red',
+        id: "new-cta-created-error",
+        title: "Error while creating a new CTA",
+        message: "Please contact an administrator.",
+        color: "red",
         autoClose: false,
       });
     }
-    
-    context.closeModal(id);
 
+    context.closeModal(id);
   };
 
   return (
@@ -113,9 +114,9 @@ export default function CreateNewCTAModel({
           mt="md"
           required
           placeholder={`I'd love to connect and learn more about you...`}
-          label='Call-to-Action'
+          label="Call-to-Action"
           withAsterisk
-          {...form.getInputProps('cta')}
+          {...form.getInputProps("cta")}
         />
 
         {error && (
@@ -124,23 +125,32 @@ export default function CreateNewCTAModel({
           </Text>
         )}
 
-        {(
+        {
           <Group position="apart" mt="xl">
-            <Anchor
-              component="button"
-              type="button"
-              color="dimmed"
-              size="sm"
-            >
+            <Anchor component="button" type="button" color="dimmed" size="sm">
               {/* Need help? */}
             </Anchor>
+
+            <Button
+              variant="outline"
+              radius="md"
+              size="xs"
+              onClick={() => {
+                openContextModal({
+                  modal: "ctaGenerator",
+                  title: <Title order={3}>CTA Generator</Title>,
+                  innerProps: { personaId: innerProps.personaId, personaName: '' },
+                });
+              }}
+            >
+              Brainstorm CTAs with AI
+            </Button>
 
             <Button variant="light" radius="md" type="submit">
               Create
             </Button>
-
           </Group>
-        )}
+        }
       </form>
     </Paper>
   );

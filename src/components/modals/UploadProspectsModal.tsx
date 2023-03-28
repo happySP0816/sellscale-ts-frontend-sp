@@ -60,16 +60,7 @@ export default function UploadProspectsModal({
   const [openedCTAs, setOpenedCTAs] = useState(false);
   const [newCTAText, setNewCTAText] = useState("");
   const addCTAInputRef = useRef<HTMLTextAreaElement | null>(null);
-  const [ctas, setCTAs] = useState([
-    {
-      id: 0,
-      cta: `Default CTA 0`,
-    },
-    {
-      id: 1,
-      cta: `Default CTA 1`,
-    },
-  ]);
+  const [ctas, setCTAs] = useState<{id: number, cta: string}[]>([]);
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {

@@ -185,11 +185,13 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     if (!hasPersona) {
       failureReasons.push("Please select a persona to upload to.");
     }
+    /*
     if (!hasCTA) {
       failureReasons.push(
         "Please create at least one CTA for your new persona."
       );
     }
+    */
     if (!hasScrapeTarget) {
       failureReasons.push(
         "Please map at least one column to a profile target (such as a LinkedIn URL)." // TODO: or email

@@ -19,6 +19,7 @@ import ViewEmailModal from "@modals/ViewEmailModal";
 import { useEffect } from "react";
 import { userDataState } from "@atoms/userAtoms";
 import SequenceWriterModal from "@modals/SequenceWriterModal";
+import CTAGeneratorModal from "@modals/CTAGeneratorModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -98,6 +99,7 @@ export default function App() {
               createNewCTA: CreateNewCTAModal,
               viewEmail: ViewEmailModal,
               sequenceWriter: SequenceWriterModal,
+              ctaGenerator: CTAGeneratorModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

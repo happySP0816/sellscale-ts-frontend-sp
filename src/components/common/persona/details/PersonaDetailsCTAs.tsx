@@ -92,6 +92,7 @@ export default function PersonaDetailsCTAs() {
             percentage: cta.performance?.total_count
               ? Math.round((totalResponded / cta.performance.total_count) * 100)
               : 0,
+            total_responded: totalResponded,
             total_count: cta.performance?.total_count,
           };
         }
@@ -147,6 +148,7 @@ export default function PersonaDetailsCTAs() {
             accessor: "total_count",
             title: "Prospects",
             sortable: true,
+            render: ({ total_count, total_responded }) => `${total_responded} / ${total_count}`,
           },
           {
             accessor: "active",

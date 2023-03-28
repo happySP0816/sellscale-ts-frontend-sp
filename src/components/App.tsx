@@ -18,6 +18,7 @@ import CreateNewCTAModal from "@modals/CreateNewCTAModal";
 import ViewEmailModal from "@modals/ViewEmailModal";
 import { useEffect } from "react";
 import { userDataState } from "@atoms/userAtoms";
+import SequenceWriterModal from "@modals/SequenceWriterModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -96,6 +97,7 @@ export default function App() {
               sendLinkedInCookie: InstructionsLinkedInCookieModal,
               createNewCTA: CreateNewCTAModal,
               viewEmail: ViewEmailModal,
+              sequenceWriter: SequenceWriterModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

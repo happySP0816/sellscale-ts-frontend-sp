@@ -85,27 +85,22 @@ export default function DashboardPage() {
               >
                 Upload Prospects
               </Button>
-              {/* <Progress value={50} /> */}
-              {/* 
-                <Button
-                  variant="outline"
-                  color="teal"
-                  fullWidth
-                  onClick={() => {}}
-                  disabled
-                >
-                  Future Action
-                </Button>
-                <Button
-                  variant="outline"
-                  color="teal"
-                  fullWidth
-                  onClick={() => {}}
-                  disabled
-                >
-                  Future Action
-                </Button>
-              */}
+              <Button
+                variant="light"
+                color="teal"
+                radius="md"
+                size="md"
+                fullWidth
+                onClick={() => {
+                  openContextModal({
+                    modal: 'sequenceWriter',
+                    title: (<Title order={3}>Sequence Writer</Title>),
+                    innerProps: {},
+                  });
+                }}
+              >
+                Sequence Writer
+              </Button>
             </Stack>
           </Container>
         </div>

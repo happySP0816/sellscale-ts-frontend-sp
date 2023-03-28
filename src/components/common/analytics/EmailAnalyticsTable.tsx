@@ -175,8 +175,18 @@ export default function EmailAnalyticsTable() {
             },
           },
           {
-            accessor: "num_prospects",
-            title: "# Prospects",
+            accessor: "open_percent",
+            title: "Open %",
+            sortable: true,
+          },
+          {
+            accessor: "reply_percent",
+            title: "Reply %",
+            sortable: true,
+          },
+          {
+            accessor: "demo_percent",
+            title: "Demo %",
             sortable: true,
           },
           {
@@ -199,6 +209,11 @@ export default function EmailAnalyticsTable() {
             ),
           },
           {
+            accessor: "num_prospects",
+            title: "# Prospects",
+            sortable: true,
+          },
+          {
             accessor: "replies_list",
             sortable: true,
             width: 240,
@@ -216,21 +231,6 @@ export default function EmailAnalyticsTable() {
                 ))}
               </>
             ),
-          },
-          {
-            accessor: "open_percent",
-            title: "Open %",
-            sortable: true,
-          },
-          {
-            accessor: "reply_percent",
-            title: "Reply %",
-            sortable: true,
-          },
-          {
-            accessor: "demo_percent",
-            title: "Demo %",
-            sortable: true,
           },
         ]}
         records={data}

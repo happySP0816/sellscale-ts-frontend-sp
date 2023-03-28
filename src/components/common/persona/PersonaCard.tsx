@@ -342,16 +342,10 @@ export default function PersonaCard(props: {
       <Collapse in={opened}>
         <Tabs defaultValue="transformers" color="teal">
           <Tabs.List>
-            {/* <Tabs.Tab value="overview">Overview</Tabs.Tab> */}
             <Tabs.Tab value="transformers">Transformers</Tabs.Tab>
             <Tabs.Tab value="patterns">Patterns</Tabs.Tab>
             <Tabs.Tab value="ctas">CTAs</Tabs.Tab>
           </Tabs.List>
-          {/* 
-          <Tabs.Panel value="overview" pt="xs" h={600}>
-            TODO
-          </Tabs.Panel>
-          */}
           <Tabs.Panel value="ctas" pt="xs" h={600}>
             <PersonaDetailsCTAs />
           </Tabs.Panel>
@@ -371,115 +365,4 @@ export default function PersonaCard(props: {
       </Collapse>
     </Paper>
   );
-
-  /*
-  return (
-    <Paper
-      withBorder
-      p="xs"
-      m="sm"
-      radius="md"
-      sx={(theme) => ({
-        backgroundColor: props.archetype.active
-          ? theme.colors.dark[6]
-          : undefined,
-      })}
-    >
-      <FlexSeparate>
-        <Stack align="center" justify="space-between">
-          <Avatar
-            size={60}
-            radius={60}
-            src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-              props.archetype.archetype
-            )}`}
-            alt={`${props.archetype.archetype}'s Picture`}
-          />
-          <Switch
-            checked={props.archetype.active}
-            onChange={async (event) => {
-              const res = await togglePersona(props.archetype.id, userToken);
-              if (res.status === 200) {
-                props.refetch();
-              }
-            }}
-            color="teal"
-            size="md"
-            onLabel="ON"
-            offLabel="OFF"
-            styles={{
-              track: {
-                cursor: "pointer",
-              },
-            }}
-            thumbIcon={
-              props.archetype.active ? (
-                <IconCheck
-                  size={12}
-                  color={theme.colors.teal[theme.fn.primaryShade()]}
-                  stroke={3}
-                />
-              ) : (
-                <IconX
-                  size={12}
-                  color={theme.colors.red[theme.fn.primaryShade()]}
-                  stroke={3}
-                />
-              )
-            }
-          />
-        </Stack>
-        <Stack spacing="xs" mx="md" w={"100%"} justify="space-between">
-          <div>
-            <Title order={3} ml="sm">
-              {props.archetype.archetype}
-            </Title>
-            <FlexSeparate>
-              <Text ml="sm" mt={5}>{`${
-                props.archetype.performance.total_prospects
-              } prospects with ${getUsedPercentage()}% used.`}</Text>
-              {props.archetype.uploads &&
-                props.archetype.uploads.length > 0 && (
-                  <Button
-                    variant="subtle"
-                    color="dark"
-                    size="xs"
-                    onClick={() => {
-                      setProspectUploadDrawerId(
-                        props.archetype.uploads && props.archetype.uploads[0].id
-                      );
-                      setProspectUploadDrawerOpened(true);
-                    }}
-                  >
-                    {isUploading ? "Upload in Progress..." : "Latest Upload"}
-                  </Button>
-                )}
-            </FlexSeparate>
-          </div>
-          <div>
-            <Progress
-              size={14}
-              sections={getStatusUsedPercentage()}
-              animate={isUploading}
-            />
-          </div>
-        </Stack>
-        <Stack spacing="xs">
-          <Button
-            size="xs"
-            variant="light"
-            color="teal"
-            leftIcon={<IconFileUpload size={14} />}
-            onClick={() => {
-              setCurrentPersonaId(props.archetype.id);
-              setUploadDrawerOpened(true);
-            }}
-          >
-            Upload
-          </Button>
-        </Stack>
-      </FlexSeparate>
-    </Paper>
-  );
-  */
 }

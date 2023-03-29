@@ -140,6 +140,8 @@ type FileDropAndPreviewProps = {
   createPersona?: {
     name: string;
     ctas: string[];
+    description: string;
+    fitReason: string;
   };
   onUploadSuccess?: () => void;
   onUploadFailure?: () => void;
@@ -206,7 +208,10 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
 
     let archetype_id = props.personaId;
     if(props.createPersona){
-      const result = await createPersona(userToken, props.createPersona.name, props.createPersona.ctas);
+      const result = await createPersona(userToken, props.createPersona.name, props.createPersona.ctas, {
+        description: props.createPersona.description,
+        fitReason: props.createPersona.fitReason,
+      });
       if(result.status === 'error') {
         console.error("Failed to create persona & CTAs");
         return;

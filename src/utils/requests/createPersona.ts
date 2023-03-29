@@ -3,7 +3,10 @@ import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src/main";
 import createCTA from "./createCTA";
 
-export default async function createPersona(userToken: string, name: string, ctas: string[]): Promise<MsgResponse> {
+export default async function createPersona(userToken: string, name: string, ctas: string[], extras: {
+  description: string;
+  fitReason: string;
+}): Promise<MsgResponse> {
   const response = await fetch(
     `${process.env.REACT_APP_API_URI}/client/archetype`,
     {
@@ -15,6 +18,8 @@ export default async function createPersona(userToken: string, name: string, cta
       body: JSON.stringify({
         archetype: name,
         disable_ai_after_prospect_engaged: true,
+        description: extras.description,
+        fit_reason: extras.fitReason,
       }),
     }
   );

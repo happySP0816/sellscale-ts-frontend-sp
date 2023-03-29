@@ -62,6 +62,9 @@ export default function UploadProspectsModal({
   const addCTAInputRef = useRef<HTMLTextAreaElement | null>(null);
   const [ctas, setCTAs] = useState<{id: number, cta: string}[]>([]);
 
+  const [description, setDescription] = useState('');
+  const [fitReason, setFitReason] = useState('');
+
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
       const cta = {
@@ -191,6 +194,23 @@ export default function UploadProspectsModal({
           />
         )}
 
+        {innerProps.mode === "CREATE-ONLY" && (
+          <Stack spacing={10}>
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="This persona are C-Level Execs who..."
+              label="In 1-2 sentances, describe this persona"
+            />
+            <Textarea
+              value={fitReason}
+              onChange={(e) => setFitReason(e.target.value)}
+              placeholder="To help their outbound team increase..."
+              label="Why would this persona buy your product?"
+            />
+          </Stack>
+        )}
+
         {createdPersona.length > 0 && false && ( // TODO: Re-enable?
           <Container mx={2} my={0} p={0}>
             <Text
@@ -289,6 +309,8 @@ export default function UploadProspectsModal({
               ? {
                   name: createdPersona,
                   ctas: ctas.map((cta) => cta.cta),
+                  description: description,
+                  fitReason: fitReason,
                 }
               : undefined
           }

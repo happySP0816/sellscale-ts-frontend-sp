@@ -243,7 +243,7 @@ export default function ProspectDetailsViewConversation(
         </Button>
       </FlexSeparate>
 
-      {emptyConvo ? (
+      {!emptyConvo ? (
         <div>
           <ScrollArea
             style={{ height: msgCount > 2 ? 500 : "inherit", maxHeight: 300 }}
@@ -345,7 +345,7 @@ export default function ProspectDetailsViewConversation(
         <Button
           variant="light"
           radius="xl"
-          size="lg"
+          size="md"
           color="blue"
           fullWidth
           rightIcon={<IconSend size={14} />}

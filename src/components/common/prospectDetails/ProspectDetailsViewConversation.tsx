@@ -56,6 +56,7 @@ export default function ProspectDetailsViewConversation(
   );
 
   const emptyConvo = props.conversation_entry_list.length === 0;
+  console.log(emptyConvo);
 
   const [loadingSend, setLoadingSend] = useState(false);
   const messages = useRef(

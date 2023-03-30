@@ -1,3 +1,4 @@
+import { userTokenState } from "@atoms/userAtoms";
 import FlexSeparate from "@common/library/FlexSeparate";
 import {
   ActionIcon,
@@ -19,10 +20,15 @@ import {
   IconPassword,
   IconX,
 } from "@tabler/icons";
+import { clearAuthTokens } from "@utils/requests/clearAuthTokens";
+import { useRecoilValue } from "recoil";
+import { useQueryClient } from "@tanstack/react-query";
 import LinkedInAuthOption from "./LinkedInAuthOption";
 
 export default function LinkedInConnectedCard(props: { connected: boolean }) {
   const usingFirefox = navigator.userAgent.search("Firefox") >= 0;
+  const userToken = useRecoilValue(userTokenState);
+  const queryClient = useQueryClient();
 
   return (
     <Paper withBorder m="xs" p="md" radius="md">
@@ -40,14 +46,27 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                 color="blue"
                 radius="xl"
                 variant="transparent"
-                onClick={() => {
-                  // TODO: - implement disconnect
-                  showNotification({
-                    id: 'linkedin-disconnect-not-implemented',
-                    title: 'Please Contact an Administrator',
-                    message: 'Automatic disconnect is not yet implemented! Please contact an administrator to disconnect your LinkedIn account.',
-                    color: 'red',
-                    autoClose: false,
+                onClick={async () => {
+                  const result = await clearAuthTokens(userToken);
+                  if(result.status === 'success'){
+                    showNotification({
+                      id: 'linkedin-disconnect-success',
+                      title: 'Success',
+                      message: 'You have successfully disconnected your LinkedIn account.',
+                      color: 'blue',
+                      autoClose: 5000,
+                    });
+                  } else {
+                    showNotification({
+                      id: 'linkedin-disconnect-failure',
+                      title: 'Failure',
+                      message: 'There was an error disconnecting your LinkedIn account. Please contact an admin.',
+                      color: 'red',
+                      autoClose: false,
+                    })
+                  }
+                  queryClient.invalidateQueries({
+                    queryKey: ["query-get-linkedin-connected"],
                   });
                 }}
               >
@@ -128,18 +147,17 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
 
             <LinkedInAuthOption
               num={3}
-              time="coming soon"
+              time="~3 seconds"
               text={`Install ${usingFirefox ? "Firefox" : "Chrome"} Extension`}
               button={
                 <Button
                   component="a"
                   target="_blank"
                   rel="noopener noreferrer"
-                  disabled
                   href={
                     usingFirefox
-                      ? "https://addons.mozilla.org/en-US/firefox/extensions/"
-                      : "https://chrome.google.com/webstore/category/extensions"
+                      ? "https://addons.mozilla.org/en-US/firefox/addon/sellscale-browser-extension/"
+                      : "https://chrome.google.com/webstore/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa/"
                   }
                   variant="light"
                   size="xs"

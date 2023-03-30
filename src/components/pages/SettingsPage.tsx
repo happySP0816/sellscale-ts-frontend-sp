@@ -172,7 +172,7 @@ export default function SettingsPage() {
 
       <SimpleGrid cols={2} spacing={0}>
         <VesselIntegrations />
-        <LinkedInConnectedCard connected={data ? data.li_connected : false} />
+        <LinkedInConnectedCard connected={data ? data.li_voyager_connected : false} />
       </SimpleGrid>
 
     </PageFrame>

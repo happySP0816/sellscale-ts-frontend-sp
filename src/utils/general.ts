@@ -93,6 +93,16 @@ export function convertDateToShortFormat(date: Date) {
 
 
 /**
+ * Converts a date to a local time string in the format MMM D, h:mm a
+ * @param date 
+ * @returns - Date in the format MMM D, h:mm a
+ */
+export function convertDateToLocalTime(date: Date) {
+  return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
+}
+
+
+/**
  * Returns a fitting color for a given value.
  * @param theme
  * @param value

@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { LinkedInConversationEntry } from "@common/persona/LinkedInConversationEntry";
 import {
   Button,
@@ -8,14 +8,23 @@ import {
   Group,
   ScrollArea,
   Textarea,
+  Container,
+  LoadingOverlay,
 } from "@mantine/core";
-import { IconExternalLink, IconMail, IconRobot } from "@tabler/icons";
-import { slice } from "lodash";
+import { IconExternalLink, IconSend, IconRobot } from "@tabler/icons";
 import displayNotification from "@utils/notificationFlow";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { LinkedInMessage } from "src/main";
+import { useQuery } from "@tanstack/react-query";
+import FlexSeparate from "@common/library/FlexSeparate";
+import { convertDateToLocalTime, convertDateToShortFormat } from "@utils/general";
+import { sendLinkedInMessage } from "@utils/requests/sendMessage";
+import { showNotification } from "@mantine/notifications";
+import { getConversation } from "@utils/requests/getConversation";
+import _ from "lodash";
+import { getHotkeyHandler, useDebouncedState, useHotkeys, useTimeout } from "@mantine/hooks";
 
 type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
@@ -28,9 +37,40 @@ const LOAD_CHUNK_SIZE = 5;
 export default function ProspectDetailsViewConversation(
   props: ProspectDetailsViewConversationPropsType
 ) {
-  const [msgCount, setMsgCount] = useState(1);
+  const [msgCount, setMsgCount] = useState(LOAD_CHUNK_SIZE);
   const userToken = useRecoilValue(userTokenState);
   const [messageDraft, setMessageDraft] = useState("");
+  const userData = useRecoilValue(userDataState);
+
+  const [scrollPosition, onScrollPositionChange] = useDebouncedState({ x: 0, y: 50 }, 200);
+
+  const [loadingSend, setLoadingSend] = useState(false);
+  const messages = useRef(props.conversation_entry_list.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+
+  const msgsViewport = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    msgsViewport.current?.scrollTo({ top: msgsViewport.current.scrollHeight, behavior: 'smooth' });
+  }
+
+  useQuery({
+    queryKey: [`query-get-li-convo-${props.prospect_id}`],
+    queryFn: async () => {
+      const result = await getConversation(userToken, props.prospect_id);
+      const latestMessages = result.status === "success" ? result.extra as LinkedInMessage[] : undefined;
+      if (latestMessages) {
+        if(latestMessages.length > messages.current.length){
+          console.log("scrolling to bottom soon")
+          setTimeout(() => {
+            console.log("scrolling to bottom now")
+            scrollToBottom()
+          }, 500);
+        }
+        messages.current = latestMessages.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      }
+      return latestMessages;
+    },
+    enabled: userData.li_voyager_connected,
+  });
 
   const sendFollowUp = async () => {
     await displayNotification(
@@ -76,9 +116,36 @@ export default function ProspectDetailsViewConversation(
       }
     );
   };
+  const sendMessage = async () => {
+    setLoadingSend(true);
+    const result = await sendLinkedInMessage(
+      userToken,
+      props.prospect_id,
+      messageDraft
+    );
+    if (result.status === "success") {
+      let yourMessage = _.cloneDeep(messages.current.find((msg) => msg.connection_degree === "You"));
+      if(yourMessage) {
+        yourMessage.message = messageDraft;
+        yourMessage.date = new Date().toUTCString();
+        messages.current.push(yourMessage);
+      }
+      setMessageDraft("");
+    } else {
+      showNotification({
+        id: "send-linkedin-message-error",
+        title: "Error",
+        message: "Failed to send message. Please try again later.",
+        color: "red",
+        autoClose: false,
+      });
+    }
+    setLoadingSend(false);
+    setTimeout(() => scrollToBottom());
+  };
 
   const generateAIFollowup = () => {
-    setMessageDraft("loading ...");
+    setMessageDraft("Loading...");
     fetch(
       `${process.env.REACT_APP_API_URI}/li_conversation/prospect/generate_response`,
       {
@@ -98,43 +165,58 @@ export default function ProspectDetailsViewConversation(
       .then((resp) => setMessageDraft(resp["message"]));
   };
 
-  // Sorted by date
-  const messages = props.conversation_entry_list.sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
+  useEffect(() => {
+    scrollToBottom();
+  }, []);
+
+  useEffect(() => {
+    if(scrollPosition.y < 40 && msgCount < messages.current.length){
+      setMsgCount((prev) => prev + LOAD_CHUNK_SIZE);
+      msgsViewport.current?.scrollTo({ top: scrollPosition.y + 500 });
+    }
+  }, [scrollPosition]);
 
   return (
     <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
-      <Group position="apart">
-        <Text weight={700} size="lg">
-          Linkedin Conversation
-        </Text>
-      </Group>
-      <Group position="apart" mb="xs">
-        <Text weight={200} size="xs">
-          {`Last Updated: ${new Date(messages[0].date).toLocaleDateString(
-            "en-US",
-            {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            }
-          )}`}
-        </Text>
-      </Group>
+      <FlexSeparate>
+        <div>
+          <Group position="apart">
+            <Text weight={700} size="lg">
+              Linkedin Conversation
+            </Text>
+          </Group>
+          <Group position="apart" mb="xs">
+            <Text weight={200} size="xs">
+              {`Last Updated: ${convertDateToLocalTime(
+                new Date(messages.current[0].date)
+              )}`}
+            </Text>
+          </Group>
+        </div>
+        <Button
+          variant="subtle"
+          radius="xl"
+          size="xs"
+          component="a"
+          target="_blank"
+          rel="noopener noreferrer"
+          href={props.conversation_url}
+          rightIcon={<IconExternalLink size={14} />}
+        >
+          Open LinkedIn
+        </Button>
+      </FlexSeparate>
 
       <ScrollArea
         style={{ height: msgCount > 2 ? 500 : "inherit", maxHeight: 300 }}
+        viewportRef={msgsViewport}
+        onScrollPositionChange={onScrollPositionChange}
       >
-        {slice(props.conversation_entry_list, 0, msgCount).map(
+        {_.slice(messages.current, messages.current.length-msgCount > 0 ? messages.current.length-msgCount : 0, messages.current.length).map(
           (message, index) => (
             <LinkedInConversationEntry
               key={`message-${index}`}
-              postedAt={new Date(message.date).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+              postedAt={convertDateToLocalTime(new Date(message.date))}
               body={message.message}
               name={message.author}
               image={
@@ -144,89 +226,75 @@ export default function ProspectDetailsViewConversation(
                       `${message.first_name} ${message.last_name}`
                     )}`
               }
-              isLatest={index === 0}
             />
           )
         )}
       </ScrollArea>
-      <Flex>
-        <Button
-          disabled={msgCount >= props.conversation_entry_list.length}
-          variant="outline"
-          color="gray"
-          mt="sm"
-          onClick={() => setMsgCount((prev) => prev + LOAD_CHUNK_SIZE)}
-        >
-          Load more
-        </Button>
-        {msgCount > 1 && (
-          <Button
-            variant="outline"
-            color="gray"
-            mt="sm"
-            ml="sm"
-            onClick={() => setMsgCount((prev) => 1)}
-          >
-            Less
-          </Button>
-        )}
-        <Button
-          variant="outline"
-          mt="sm"
-          ml="sm"
-          color="teal"
-          component="a"
-          target="_blank"
-          rel="noopener noreferrer"
-          href={props.conversation_url}
-          rightIcon={<IconExternalLink size={14} />}
-        >
-          Open Conversation
-        </Button>
-      </Flex>
 
-      <Textarea
-        mt="sm"
-        minRows={5}
-        placeholder="Write a follow up message here..."
-        label="Follow Up Message"
-        withAsterisk
-        onChange={(e) => {
-          setMessageDraft(e.target?.value);
-        }}
-        value={messageDraft}
-      />
-      <Flex>
-        <Button
-          variant="outline"
+      <div>
+        <LoadingOverlay visible={loadingSend} overlayBlur={2} />
+        <Textarea
           mt="sm"
-          color="violet"
-          component="a"
-          mr="sm"
-          target="_blank"
-          fullWidth
-          rel="noopener noreferrer"
-          rightIcon={<IconRobot size={14} />}
-          onClick={() => {
-            generateAIFollowup();
+          minRows={2}
+          maxRows={6}
+          autosize
+          placeholder="Write a message..."
+          onChange={(e) => {
+            setMessageDraft(e.target?.value);
           }}
-        >
-          Generate AI Follow Up
-        </Button>
-        <Button
-          variant="outline"
-          mt="sm"
-          color="blue"
-          component="a"
-          target="_blank"
-          fullWidth
-          rel="noopener noreferrer"
-          rightIcon={<IconMail size={14} />}
-          onClick={sendFollowUp}
-        >
-          Schedule
-        </Button>
-      </Flex>
+          value={messageDraft}
+          onKeyDown={getHotkeyHandler([
+            ['mod+Enter', () => {
+              if (userData.li_voyager_connected) {
+                sendMessage();
+              } else {
+                sendFollowUp();
+              }
+            }],
+          ])}
+        />
+        <Flex>
+          <Button
+            variant="light"
+            mt="sm"
+            radius="xl"
+            size="xs"
+            color="violet"
+            component="a"
+            mr="sm"
+            target="_blank"
+            fullWidth
+            rel="noopener noreferrer"
+            rightIcon={<IconRobot size={14} />}
+            onClick={() => {
+              generateAIFollowup();
+            }}
+          >
+            Generate AI Follow Up
+          </Button>
+          <Button
+            variant="light"
+            mt="sm"
+            radius="xl"
+            size="xs"
+            color="blue"
+            component="a"
+            target="_blank"
+            fullWidth
+            rel="noopener noreferrer"
+            rightIcon={<IconSend size={14} />}
+            onClick={() => {
+              if (userData.li_voyager_connected) {
+                sendMessage();
+              } else {
+                sendFollowUp();
+              }
+            }}
+          >
+            {userData.li_voyager_connected ? "Send" : "Schedule"}
+          </Button>
+        </Flex>
+      </div>
     </Card>
   );
 }

@@ -100,6 +100,7 @@ export interface LinkedInMessage {
   li_url: string;
   message: string;
   profile_url: string;
+  urn_id: string;
 }
 
 export interface ProspectNote {

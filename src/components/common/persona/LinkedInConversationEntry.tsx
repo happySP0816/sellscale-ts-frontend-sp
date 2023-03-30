@@ -16,7 +16,7 @@ const useStyles = createStyles((theme) => ({
 
   body: {
     paddingLeft: 54,
-    paddingTop: theme.spacing.sm,
+    paddingTop: 5,
     fontSize: theme.fontSizes.sm,
   },
 
@@ -32,7 +32,7 @@ interface CommentHtmlProps {
   body: string;
   name: string;
   image: string;
-  isLatest: boolean;
+  isLatest?: boolean;
 }
 
 export function LinkedInConversationEntry({

@@ -81,12 +81,10 @@ function VesselIntegrations() {
       requestOptions
     )
       .then((res) => {
-        var data = res.json();
+        let data = res.json();
         return data;
       })
       .then((j) => {
-        console.log("here");
-        console.log(j);
         if ("connected" in j && j["connected"]) {
           setConnected(true);
         } else {

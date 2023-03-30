@@ -90,6 +90,8 @@ export default function ProspectDetailsDrawer() {
     refetchOnWindowFocus: false,
   });
 
+  console.log(data?.main.prospect_info);
+
   return (
     <Drawer
       opened={actuallyOpened}

@@ -189,8 +189,7 @@ export default function ProspectDetailsDrawer() {
                         />
 
                         {channel.value === "LINKEDIN" &&
-                          data.main.prospect_info.li?.li_conversation_thread
-                            ?.length > 0 && (
+                          data.main.prospect_info.li?.li_conversation_thread && (
                             <ProspectDetailsViewConversation
                               conversation_entry_list={
                                 data.main.prospect_info.li

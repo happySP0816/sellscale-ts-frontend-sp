@@ -89,7 +89,7 @@ export default function AuthPage() {
         });
         console.error('Invalid token type', tokenType);
       }
-    });
+    }, 1000);
   }, []);
 
   return (

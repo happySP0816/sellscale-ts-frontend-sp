@@ -51,6 +51,8 @@ export function logout(noCheck = false){
 export async function getUserInfo(userToken: string | null) {
   if(userToken === null){ return null; }
 
+  console.log(userToken);
+
   const response = await fetch(
     `${process.env.REACT_APP_API_URI}/client/sdr`,
     {

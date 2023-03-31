@@ -25,6 +25,7 @@
     "@vesselapi/react-vessel-link": "^1.1.6",
     "chart.js": "^4.2.1",
     "dayjs": "^1.11.7",
+    "env-cmd": "^10.1.0",
     "lodash": "^4.17.21",
     "mantine-datatable": "^1.8.2",
     "mantine-react-table": "^0.9.5",
@@ -42,10 +43,16 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco --max_old_space_size=4096 build",
+    "start": "env-cmd -f .env.local craco start",
+    "build": "env-cmd -f .env.local craco --max_old_space_size=4096 build",
     "test": "jest",
-    "eject": "craco eject"
+    "eject": "craco eject",
+    "start:local": "env-cmd -f .env.local craco start",
+    "build:local": "env-cmd -f .env.local craco --max_old_space_size=4096 build",
+    "start:stage": "env-cmd -f .env.stage craco start",
+    "build:stage": "env-cmd -f .env.stage craco --max_old_space_size=4096 build",
+    "start:prod": "env-cmd -f .env.prod craco start",
+    "build:prod": "env-cmd -f .env.prod rcraco --max_old_space_size=4096 build"
   },
   "jest": {
     "transform": {

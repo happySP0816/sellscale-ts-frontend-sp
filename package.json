@@ -52,7 +52,7 @@
     "start:stage": "env-cmd -f .env.stage craco start",
     "build:stage": "env-cmd -f .env.stage craco --max_old_space_size=4096 build",
     "start:prod": "env-cmd -f .env.prod craco start",
-    "build:prod": "env-cmd -f .env.prod rcraco --max_old_space_size=4096 build"
+    "build:prod": "env-cmd -f .env.prod craco --max_old_space_size=4096 build"
   },
   "jest": {
     "transform": {

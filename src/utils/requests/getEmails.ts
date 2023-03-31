@@ -21,8 +21,6 @@ export default async function getEmails(userToken: string, prospectId: number): 
   const result = await getResponseJSON("all-emails-get", response);
   if(isMsgResponse(result)) { return result; }
 
-  console.log("result.data", result.data)
-
   const emails = await Promise.all(result.data.map(async (d: any) => {
     const statsResult = await getEmailDetails(userToken, prospectId, d.id);
     return {
@@ -30,8 +28,6 @@ export default async function getEmails(userToken: string, prospectId: number): 
       details: statsResult.status === 'success' ? statsResult.extra : null,
     };
   }));
-
-  console.log("emails", emails)
 
   return { status: 'success', title: `Success`, message: `Gathered all emails`, extra: emails };
 

@@ -173,3 +173,16 @@ export function formatToLabel(value: string) {
   }
   return startCase(value.replaceAll("_", " ")).replace("Url", "URL");
 }
+
+/**
+ * Returns the URL for our browser extension
+ * @param isFirefox - Whether the browser is firefox
+ * @returns - URL for our browser extension
+ */
+export function getBrowserExtensionURL(isFirefox: boolean){
+  if(isFirefox){
+    return "https://addons.mozilla.org/en-US/firefox/addon/sellscale-browser-extension/";
+  } else {
+    return "https://chrome.google.com/webstore/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa/";
+  }
+}

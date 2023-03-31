@@ -33,6 +33,7 @@ import {
   useHotkeys,
   useTimeout,
 } from "@mantine/hooks";
+import InstallExtensionCard from "@common/library/InstallExtensionCard";
 
 type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
@@ -56,7 +57,6 @@ export default function ProspectDetailsViewConversation(
   );
 
   const emptyConvo = props.conversation_entry_list.length === 0;
-  console.log(emptyConvo);
 
   const [loadingSend, setLoadingSend] = useState(false);
   const messages = useRef(
@@ -81,9 +81,7 @@ export default function ProspectDetailsViewConversation(
         : undefined;
     if (latestMessages) {
       if (latestMessages.length > messages.current.length) {
-        console.log("scrolling to bottom soon");
         setTimeout(() => {
-          console.log("scrolling to bottom now");
           scrollToBottom();
         }, 500);
       }
@@ -92,7 +90,7 @@ export default function ProspectDetailsViewConversation(
       );
     }
     return latestMessages;
-  }
+  };
 
   useQuery({
     queryKey: [`query-get-li-convo-${props.prospect_id}`],
@@ -208,155 +206,162 @@ export default function ProspectDetailsViewConversation(
     }
   }, [scrollPosition]);
 
-  if(!userData.li_voyager_connected && emptyConvo) {
-    return (<></>);
+  if (!userData.li_voyager_connected && emptyConvo) {
+    return <></>;
   }
 
   return (
-    <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
-      <FlexSeparate>
-        <div>
-          <Group position="apart">
-            <Text weight={700} size="lg">
-              Linkedin Conversation
-            </Text>
-          </Group>
-          <Group position="apart" mb="xs">
-            <Text weight={200} size="xs">
-              {`Last Updated: ${convertDateToLocalTime(
-                emptyConvo ? new Date() : new Date(messages.current[0].date)
-              )}`}
-            </Text>
-          </Group>
-        </div>
-        <Button
-          variant="subtle"
-          radius="xl"
-          size="xs"
-          component="a"
-          target="_blank"
-          disabled={emptyConvo}
-          rel="noopener noreferrer"
-          href={props.conversation_url}
-          rightIcon={<IconExternalLink size={14} />}
-        >
-          Open LinkedIn
-        </Button>
-      </FlexSeparate>
-
-      {!emptyConvo ? (
-        <div>
-          <ScrollArea
-            style={{ height: msgCount > 2 ? 500 : "inherit", maxHeight: 300 }}
-            viewportRef={msgsViewport}
-            onScrollPositionChange={onScrollPositionChange}
-          >
-            {_.slice(
-              messages.current,
-              messages.current.length - msgCount > 0
-                ? messages.current.length - msgCount
-                : 0,
-              messages.current.length
-            ).map((message, index) => (
-              <LinkedInConversationEntry
-                key={`message-${index}`}
-                postedAt={convertDateToLocalTime(new Date(message.date))}
-                body={message.message}
-                name={message.author}
-                image={
-                  false // TODO: Support LinkedIn props.profile_pic
-                    ? message.profile_url
-                    : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                        `${message.first_name} ${message.last_name}`
-                      )}`
-                }
-              />
-            ))}
-          </ScrollArea>
-
+    <>
+      <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
+        <FlexSeparate>
           <div>
-            <LoadingOverlay visible={loadingSend} overlayBlur={2} />
-            <Textarea
-              mt="sm"
-              minRows={2}
-              maxRows={6}
-              autosize
-              placeholder="Write a message..."
-              onChange={(e) => {
-                setMessageDraft(e.target?.value);
-              }}
-              value={messageDraft}
-              onKeyDown={getHotkeyHandler([
-                [
-                  "mod+Enter",
-                  () => {
+            <Group position="apart">
+              <Text weight={700} size="lg">
+                Linkedin Conversation
+              </Text>
+            </Group>
+            <Group position="apart" mb="xs">
+              <Text weight={200} size="xs">
+                {`Last Updated: ${convertDateToLocalTime(
+                  emptyConvo ? new Date() : new Date(messages.current[0].date)
+                )}`}
+              </Text>
+            </Group>
+          </div>
+          <Button
+            variant="subtle"
+            radius="xl"
+            size="xs"
+            component="a"
+            target="_blank"
+            disabled={emptyConvo}
+            rel="noopener noreferrer"
+            href={props.conversation_url}
+            rightIcon={<IconExternalLink size={14} />}
+          >
+            Open LinkedIn
+          </Button>
+        </FlexSeparate>
+
+        {!emptyConvo ? (
+          <div>
+            <ScrollArea
+              style={{ height: msgCount > 2 ? 500 : "inherit", maxHeight: 300 }}
+              viewportRef={msgsViewport}
+              onScrollPositionChange={onScrollPositionChange}
+            >
+              {_.slice(
+                messages.current,
+                messages.current.length - msgCount > 0
+                  ? messages.current.length - msgCount
+                  : 0,
+                messages.current.length
+              ).map((message, index) => (
+                <LinkedInConversationEntry
+                  key={`message-${index}`}
+                  postedAt={convertDateToLocalTime(new Date(message.date))}
+                  body={message.message}
+                  name={message.author}
+                  image={
+                    false // TODO: Support LinkedIn props.profile_pic
+                      ? message.profile_url
+                      : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
+                          `${message.first_name} ${message.last_name}`
+                        )}`
+                  }
+                />
+              ))}
+            </ScrollArea>
+
+            <div>
+              <LoadingOverlay visible={loadingSend} overlayBlur={2} />
+              <Textarea
+                mt="sm"
+                minRows={2}
+                maxRows={6}
+                autosize
+                placeholder="Write a message..."
+                onChange={(e) => {
+                  setMessageDraft(e.target?.value);
+                }}
+                value={messageDraft}
+                onKeyDown={getHotkeyHandler([
+                  [
+                    "mod+Enter",
+                    () => {
+                      if (userData.li_voyager_connected) {
+                        sendMessage();
+                      } else {
+                        sendFollowUp();
+                      }
+                    },
+                  ],
+                ])}
+              />
+              <Flex>
+                <Button
+                  variant="light"
+                  mt="sm"
+                  radius="xl"
+                  size="xs"
+                  color="violet"
+                  component="a"
+                  mr="sm"
+                  target="_blank"
+                  fullWidth
+                  rel="noopener noreferrer"
+                  rightIcon={<IconRobot size={14} />}
+                  onClick={() => {
+                    generateAIFollowup();
+                  }}
+                >
+                  Generate AI Follow Up
+                </Button>
+                <Button
+                  variant="light"
+                  mt="sm"
+                  radius="xl"
+                  size="xs"
+                  color="blue"
+                  component="a"
+                  target="_blank"
+                  fullWidth
+                  rel="noopener noreferrer"
+                  rightIcon={<IconSend size={14} />}
+                  onClick={() => {
                     if (userData.li_voyager_connected) {
                       sendMessage();
                     } else {
                       sendFollowUp();
                     }
-                  },
-                ],
-              ])}
-            />
-            <Flex>
-              <Button
-                variant="light"
-                mt="sm"
-                radius="xl"
-                size="xs"
-                color="violet"
-                component="a"
-                mr="sm"
-                target="_blank"
-                fullWidth
-                rel="noopener noreferrer"
-                rightIcon={<IconRobot size={14} />}
-                onClick={() => {
-                  generateAIFollowup();
-                }}
-              >
-                Generate AI Follow Up
-              </Button>
-              <Button
-                variant="light"
-                mt="sm"
-                radius="xl"
-                size="xs"
-                color="blue"
-                component="a"
-                target="_blank"
-                fullWidth
-                rel="noopener noreferrer"
-                rightIcon={<IconSend size={14} />}
-                onClick={() => {
-                  if (userData.li_voyager_connected) {
-                    sendMessage();
-                  } else {
-                    sendFollowUp();
-                  }
-                }}
-              >
-                {userData.li_voyager_connected ? "Send" : "Schedule"}
-              </Button>
-            </Flex>
+                  }}
+                >
+                  {userData.li_voyager_connected ? "Send" : "Schedule"}
+                </Button>
+              </Flex>
+            </div>
           </div>
+        ) : (
+          <Button
+            variant="light"
+            radius="xl"
+            size="md"
+            color="blue"
+            fullWidth
+            rightIcon={<IconSend size={14} />}
+            onClick={async () => {
+              await fetchAndPopulateConvo();
+            }}
+          >
+            Sync Conversation
+          </Button>
+        )}
+      </Card>
+      {!userData.li_voyager_connected && (
+        <div style={{ paddingTop: 10 }}>
+          <InstallExtensionCard />
         </div>
-      ) : (
-        <Button
-          variant="light"
-          radius="xl"
-          size="md"
-          color="blue"
-          fullWidth
-          rightIcon={<IconSend size={14} />}
-          onClick={async () => {
-            await fetchAndPopulateConvo();
-          }}
-        >
-          Sync Conversation
-        </Button>
       )}
-    </Card>
+    </>
   );
 }

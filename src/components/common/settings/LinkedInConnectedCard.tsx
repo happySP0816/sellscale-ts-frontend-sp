@@ -10,6 +10,7 @@ import {
   Title,
   Stack,
   Button,
+  Center,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -24,6 +25,7 @@ import { clearAuthTokens } from "@utils/requests/clearAuthTokens";
 import { useRecoilValue } from "recoil";
 import { useQueryClient } from "@tanstack/react-query";
 import LinkedInAuthOption from "./LinkedInAuthOption";
+import { getBrowserExtensionURL } from "@utils/general";
 
 export default function LinkedInConnectedCard(props: { connected: boolean }) {
   const usingFirefox = navigator.userAgent.search("Firefox") >= 0;
@@ -48,22 +50,24 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                 variant="transparent"
                 onClick={async () => {
                   const result = await clearAuthTokens(userToken);
-                  if(result.status === 'success'){
+                  if (result.status === "success") {
                     showNotification({
-                      id: 'linkedin-disconnect-success',
-                      title: 'Success',
-                      message: 'You have successfully disconnected your LinkedIn account.',
-                      color: 'blue',
+                      id: "linkedin-disconnect-success",
+                      title: "Success",
+                      message:
+                        "You have successfully disconnected your LinkedIn account.",
+                      color: "blue",
                       autoClose: 5000,
                     });
                   } else {
                     showNotification({
-                      id: 'linkedin-disconnect-failure',
-                      title: 'Failure',
-                      message: 'There was an error disconnecting your LinkedIn account. Please contact an admin.',
-                      color: 'red',
+                      id: "linkedin-disconnect-failure",
+                      title: "Failure",
+                      message:
+                        "There was an error disconnecting your LinkedIn account. Please contact an admin.",
+                      color: "red",
                       autoClose: false,
-                    })
+                    });
                   }
                   queryClient.invalidateQueries({
                     queryKey: ["query-get-linkedin-connected"],
@@ -96,9 +100,9 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
       ) : (
         <>
           <Text fz="sm" pt="xs">
-            Connect to LinkedIn to let our systems automatically send outreach
-            and start conversations for you!
+          With our browser extension you can sync and automate your LinkedIn account directly with SellScale!
           </Text>
+          {/* 
           <Stack pt="lg">
 
             <LinkedInAuthOption
@@ -168,6 +172,22 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
               }
             />
           </Stack>
+          */}
+          <Center>
+            <Button
+              component="a"
+              target="_blank"
+              rel="noopener noreferrer"
+              href={getBrowserExtensionURL(usingFirefox)}
+              my={20}
+              variant="outline"
+              size="md"
+              color="green"
+              rightIcon={<IconCloudDownload size="1rem" />}
+            >
+              Install {usingFirefox ? 'Firefox' : 'Chrome'} Extension
+            </Button>
+          </Center>
         </>
       )}
     </Paper>

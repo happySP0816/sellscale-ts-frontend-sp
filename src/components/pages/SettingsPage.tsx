@@ -37,7 +37,6 @@ function VesselIntegrations() {
       )
         .then((response) => response.text())
         .then((result) => {
-          console.log(result);
           getSalesEngagementConnection();
         })
         .catch((error) => console.log("error", error));
@@ -55,7 +54,6 @@ function VesselIntegrations() {
         return res.json();
       })
       .then((j) => {
-        console.log(j.linkToken);
         return j.linkToken;
       });
   };

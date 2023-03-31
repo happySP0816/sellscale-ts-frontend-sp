@@ -1,4 +1,6 @@
+import { userDataState } from "@atoms/userAtoms";
 import NotificationCard from "@common/dashboard/NotificationCard";
+import InstallExtensionCard from "@common/library/InstallExtensionCard";
 import {
   List,
   ThemeIcon,
@@ -27,11 +29,14 @@ import {
   IconPhoto,
 } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
+import { useRecoilValue } from "recoil";
 import { SCREEN_SIZES } from "../../constants/data";
 import PageFrame from "../common/PageFrame";
 
 export default function DashboardPage() {
   setPageTitle("Dashboard");
+
+  const userData = useRecoilValue(userDataState);
   
   return (
     <PageFrame>
@@ -69,6 +74,9 @@ export default function DashboardPage() {
           </Title>
           <Container m="xs" p={0} w={"100%"}>
             <Stack spacing='xs'>
+              {!userData.li_voyager_connected && (
+                <InstallExtensionCard />
+              )}
               <Button
                 variant="light"
                 color="teal"

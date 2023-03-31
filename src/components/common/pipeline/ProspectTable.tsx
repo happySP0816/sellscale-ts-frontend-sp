@@ -89,7 +89,6 @@ export default function ProspectTable({
         sorting,
       ],
       queryFn: async ({ pageParam = 0 }) => {
-        console.log(pageParam);
 
         const response = await fetch(
           `${process.env.REACT_APP_API_URI}/prospect/get_prospects`,
@@ -119,8 +118,6 @@ export default function ProspectTable({
 
         // TODO: Fix this
         const channel = "SELLSCALE";
-
-        console.log(res.total_count);
 
         return {
           data: res.prospects.map((prospect: any) => {

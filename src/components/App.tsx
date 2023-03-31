@@ -40,8 +40,6 @@ export default function App() {
 
   const userData = useRecoilValue(userDataState);
 
-  console.log('testing');
-
   // Fill in Crisp widget w/ info
   useEffect(() => {
     if(!userData) { return; }

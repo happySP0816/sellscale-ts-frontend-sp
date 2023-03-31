@@ -43,11 +43,15 @@ export default function App() {
   // Fill in Crisp widget w/ info
   useEffect(() => {
     if(!userData) { return; }
-    // @ts-ignore
-    $crisp.push(["set", "user:email", [userData.sdr_email]]);
-    // @ts-ignore
-    $crisp.push(["set", "user:nickname", [userData.sdr_name]]);
-    if(userData.client){
+    if(userData.sdr_email) {
+      // @ts-ignore
+      $crisp.push(["set", "user:email", [userData.sdr_email]]);
+    }
+    if(userData.sdr_name){
+      // @ts-ignore
+      $crisp.push(["set", "user:nickname", [userData.sdr_name]]);
+    }
+    if(userData.client?.company){
       // @ts-ignore
       $crisp.push(["set", "user:company", [userData.client.company]]);
     }

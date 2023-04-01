@@ -47,7 +47,8 @@ import { SCREEN_SIZES } from "@constants/data";
 import PersonaDetailsCTAs from "./details/PersonaDetailsCTAs";
 import PersonaDetailsTransformers from "./details/PersonaDetailsTransformers";
 import PersonaDetailsPatterns from "./details/PersonaDetailsPatterns";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import PullProspectEmailsCard from "@common/credits/PullProspectEmailsCard";
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(
@@ -83,9 +84,11 @@ export default function PersonaCard(props: {
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
     currentPersonaIdState
   );
-  const [opened, { open, close }] = useDisclosure(props.archetype.id === currentPersonaId);
+  const [opened, { open, close }] = useDisclosure(
+    props.archetype.id === currentPersonaId
+  );
   useEffect(() => {
-    if(props.archetype.id === currentPersonaId){
+    if (props.archetype.id === currentPersonaId) {
       open();
     } else {
       close();
@@ -96,8 +99,10 @@ export default function PersonaCard(props: {
     props.archetype.uploads &&
     props.archetype.uploads.length > 0 &&
     props.archetype.uploads[0].stats.in_progress > 0;
-  const [prospectUploadDrawerOpened, setProspectUploadDrawerOpened] =
-    useRecoilState(prospectUploadDrawerOpenState);
+  const [
+    prospectUploadDrawerOpened,
+    setProspectUploadDrawerOpened,
+  ] = useRecoilState(prospectUploadDrawerOpenState);
   const [prospectUploadDrawerId, setProspectUploadDrawerId] = useRecoilState(
     prospectUploadDrawerIdState
   );
@@ -113,9 +118,10 @@ export default function PersonaCard(props: {
         : theme.colors.gray[1],
   });
 
-  const displayTransformers = Object.keys(props.archetype.performance.status_map).some((key) => {
-    return key !== "PROSPECTED";
-  }) ?? Object.keys(props.archetype.performance.status_map).length > 0;
+  const displayTransformers =
+    Object.keys(props.archetype.performance.status_map).some((key) => {
+      return key !== "PROSPECTED";
+    }) ?? Object.keys(props.archetype.performance.status_map).length > 0;
 
   /*
   const makeActivePersona = () => {
@@ -197,6 +203,7 @@ export default function PersonaCard(props: {
             : "teal.9",
         label: label,
         tooltip: label,
+        unusedProspectsVal: unusedVal,
       });
     }
 
@@ -269,7 +276,7 @@ export default function PersonaCard(props: {
             spacing={8}
             sx={{ cursor: "pointer" }}
             onClick={() => {
-              if(props.archetype.id === currentPersonaId){
+              if (props.archetype.id === currentPersonaId) {
                 setCurrentPersonaId(-1);
               } else {
                 setCurrentPersonaId(props.archetype.id);
@@ -345,6 +352,7 @@ export default function PersonaCard(props: {
             <Tabs.Tab value="transformers">Transformers</Tabs.Tab>
             <Tabs.Tab value="patterns">Patterns</Tabs.Tab>
             <Tabs.Tab value="ctas">CTAs</Tabs.Tab>
+            <Tabs.Tab value="tools">Tools</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="ctas" pt="xs" h={600}>
             <PersonaDetailsCTAs />
@@ -353,13 +361,18 @@ export default function PersonaCard(props: {
             {displayTransformers ? (
               <PersonaDetailsTransformers />
             ) : (
-              <Center w={'100%'} h={'75%'}>
-                <Text c="dimmed" fs="italic">No messages have been sent for this persona yet.</Text>
+              <Center w={"100%"} h={"75%"}>
+                <Text c="dimmed" fs="italic">
+                  No messages have been sent for this persona yet.
+                </Text>
               </Center>
             )}
           </Tabs.Panel>
           <Tabs.Panel value="patterns" pt="xs" h={600}>
             <PersonaDetailsPatterns />
+          </Tabs.Panel>
+          <Tabs.Panel value="tools" pt="xs" h={600}>
+            <PullProspectEmailsCard archetype_id={props.archetype.id} />
           </Tabs.Panel>
         </Tabs>
       </Collapse>

@@ -1,3 +1,4 @@
+import CreditsCard from "@common/credits/CreditsCard";
 import { Avatar, Text, Flex, Center, Popover, Container } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 
@@ -45,31 +46,39 @@ export default function ProfileIcon({
 
 export function ProfileCard({ name, email }: { name: string; email: string }) {
   return (
-    <Flex
-      gap={0}
-      justify="center"
-      align="center"
-      direction="row"
-      wrap="nowrap"
-    >
-      <Center mx={5}>
-        <Avatar
-          size="sm"
-          radius="xl"
-          src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-            name
-          )}`}
-          alt={`${name}'s Profile Picture`}
-        />
-      </Center>
-      <Container className="truncate p-0">
-        <Text size="xs" fw={700} className="truncate">
-          {name}
-        </Text>
-        <Text size="xs" c="dimmed" className="truncate">
-          {email}
-        </Text>
-      </Container>
-    </Flex>
+    <Popover width={300} position="top" withArrow shadow="md">
+      <Popover.Target>
+        <Flex
+          gap={0}
+          justify="left"
+          align="center"
+          direction="row"
+          wrap="nowrap"
+          style={{ cursor: "pointer" }}
+        >
+          <Center mx={5}>
+            <Avatar
+              size="sm"
+              radius="xl"
+              src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
+                name
+              )}`}
+              alt={`${name}'s Profile Picture`}
+            />
+          </Center>
+          <Container className="truncate p-0">
+            <Text size="xs" fw={700} className="truncate">
+              {name}
+            </Text>
+            <Text size="xs" c="dimmed" className="truncate">
+              {email}
+            </Text>
+          </Container>
+        </Flex>
+      </Popover.Target>
+      <Popover.Dropdown ml="md">
+        <CreditsCard />
+      </Popover.Dropdown>
+    </Popover>
   );
 }

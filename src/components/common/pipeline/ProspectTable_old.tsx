@@ -350,7 +350,7 @@ export default function ProspectTable_old({
         verticalAlignment="top"
         loaderColor="teal"
         highlightOnHover
-        noRecordsText={"No prospects found"}
+        noRecordsText={"No prospects yet! Check back soon..."}
         fetching={isFetching}
         onRowClick={(prospect, row_index) => {
           setProspectId(prospect.id);

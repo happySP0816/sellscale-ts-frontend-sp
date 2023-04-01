@@ -239,7 +239,7 @@ export default function CampaignTable() {
         mt="md"
         loaderColor="teal"
         highlightOnHover
-        noRecordsText={"No campaigns found"}
+        noRecordsText={"No campaigns generated yet! Check back soon..."}
         fetching={isFetching}
         rowSx={{ height: 50 }}
         columns={[

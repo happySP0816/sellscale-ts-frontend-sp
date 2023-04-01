@@ -134,7 +134,7 @@ export default function CampaignProspects({
         verticalAlignment="top"
         loaderColor="teal"
         highlightOnHover
-        noRecordsText={"No prospects found"}
+        noRecordsText={"No prospects yet! Check back soon..."}
         onRowClick={(prospect, row_index) => {
           // TODO: Made make clicking on the row do something
         }}

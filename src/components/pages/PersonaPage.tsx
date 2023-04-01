@@ -57,10 +57,10 @@ export default function PersonaPage() {
           uploadsResponse.status === "success" ? uploadsResponse.extra : [];
       }
 
-      const activePersonas = result.filter((p) => p.active);
-      if (activePersonas.length === 1) {
-        setCurrentPersonaId(activePersonas[0].id);
-      }
+      // const activePersonas = result.filter((p) => p.active);
+      // if (activePersonas.length === 1) {
+      //   setCurrentPersonaId(activePersonas[0].id);
+      // }
 
       // Sort by number of prospects
       return result.sort((a, b) => {
@@ -130,7 +130,7 @@ export default function PersonaPage() {
                 styles={{
                   placeholder: {
                     backgroundColor: "transparent",
-                  }
+                  },
                 }}
               >
                 <IconCornerRightUp size="10rem" stroke={1} />

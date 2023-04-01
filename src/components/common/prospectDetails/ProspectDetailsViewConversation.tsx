@@ -206,6 +206,7 @@ export default function ProspectDetailsViewConversation(
     }
   }, [scrollPosition]);
 
+  console.log(!userData.li_voyager_connected && emptyConvo)
   if (!userData.li_voyager_connected && emptyConvo) {
     return (
       <div style={{ paddingTop: 10 }}>

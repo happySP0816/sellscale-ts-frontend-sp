@@ -207,7 +207,11 @@ export default function ProspectDetailsViewConversation(
   }, [scrollPosition]);
 
   if (!userData.li_voyager_connected && emptyConvo) {
-    return <></>;
+    return (
+      <div style={{ paddingTop: 10 }}>
+        <InstallExtensionCard />
+      </div>
+    );
   }
 
   return (

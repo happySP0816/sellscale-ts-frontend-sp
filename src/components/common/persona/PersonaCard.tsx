@@ -75,6 +75,8 @@ export default function PersonaCard(props: {
   const mdScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.MD})`);
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
+  const [unusedProspects, setUnusedProspects] = useState(0);
+
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
     uploadDrawerOpenState
   );
@@ -87,13 +89,30 @@ export default function PersonaCard(props: {
   const [opened, { open, close }] = useDisclosure(
     props.archetype.id === currentPersonaId
   );
+
+  const fetchNumUnusedProspects = async () => {
+    const res = await fetch(
+      `${process.env.REACT_APP_API_URI}/client/unused_li_and_email_prospects_count?client_archetype_id=` +
+        props.archetype.id,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+    const data = await res.json();
+    setUnusedProspects(data.unused_linkedin_prospects);
+  };
+
   useEffect(() => {
     if (props.archetype.id === currentPersonaId) {
       open();
     } else {
       close();
     }
-  }, [currentPersonaId]);
+    fetchNumUnusedProspects();
+  }, [currentPersonaId, fetchNumUnusedProspects]);
 
   const isUploading =
     props.archetype.uploads &&
@@ -173,11 +192,11 @@ export default function PersonaCard(props: {
   const WARNING_PERCENTAGE = 25;
   const getStatusUsedPercentage = () => {
     let usedVal = 0;
-    let unusedVal = 0;
+    let unusedVal = unusedProspects;
 
     for (let statD in props.archetype.performance.status_map) {
       if (statD === "PROSPECTED") {
-        unusedVal += props.archetype.performance.status_map[statD];
+        // unusedVal += props.archetype.performance.status_map[statD];
       } else {
         usedVal += props.archetype.performance.status_map[statD];
       }
@@ -203,10 +222,8 @@ export default function PersonaCard(props: {
             : "teal.9",
         label: label,
         tooltip: label,
-        unusedProspectsVal: unusedVal,
       });
     }
-
     return percentData;
   };
 

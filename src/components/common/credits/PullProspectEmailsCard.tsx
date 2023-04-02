@@ -12,6 +12,7 @@ export default function PullProspectEmailsCard(props: PropsType) {
   const [numEmailFetchingCredits, setNumEmailFetchingCredits] = useState(0);
   const [unusedEmailProspects, setUnusedEmailProspects] = useState(0);
   const [fetchButtonDisabled, setFetchButtonDisabled] = useState(false);
+  const [fetchedStats, setFetchedStats] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
   const fetchCredits = async () => {
@@ -66,7 +67,10 @@ export default function PullProspectEmailsCard(props: PropsType) {
   };
 
   useEffect(() => {
-    refreshStats();
+    if (!fetchedStats) {
+      refreshStats();
+    }
+    setFetchedStats(true);
   }, [refreshStats]);
 
   return (

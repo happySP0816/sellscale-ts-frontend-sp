@@ -20,7 +20,6 @@ import PersonaPage from "./components/pages/PersonaPage";
 import PipelinePage from "./components/pages/old/PipelinePage";
 import MissingPage from "./components/pages/MissingPage";
 import { RecoilRoot } from "recoil";
-import CampaignPage from "@pages/old/CampaignPage";
 import AuthPage from "@pages/AuthPage";
 import RestrictedRoute from "./auth/RestrictedRoute";
 import SettingsPage from "@pages/SettingsPage";

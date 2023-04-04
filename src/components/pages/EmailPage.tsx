@@ -31,7 +31,7 @@ export default function EmailPage() {
           <PersonaDetailsTransformers channel="EMAIL" />
         </Tabs.Panel>
         <Tabs.Panel value="campaign-history" pt="xs">
-          <CampaignTable />
+          <CampaignTable type="EMAIL" />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

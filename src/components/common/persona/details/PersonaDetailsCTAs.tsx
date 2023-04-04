@@ -11,6 +11,7 @@ import {
   Group,
   Box,
   Flex,
+  Select,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
@@ -18,7 +19,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { faker } from "@faker-js/faker";
 import { useQuery } from "@tanstack/react-query";
 import { chunk, sortBy } from "lodash";
-import { IconPencil, IconTrashX } from "@tabler/icons";
+import { IconPencil, IconTrashX, IconUser } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import { closeAllModals, openContextModal, openModal } from "@mantine/modals";
 import { userTokenState } from "@atoms/userAtoms";
@@ -34,7 +35,7 @@ import toggleCTA from "@utils/requests/toggleCTA";
 
 const PAGE_SIZE = 20;
 
-export default function PersonaDetailsCTAs() {
+export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
     currentPersonaIdState
   );
@@ -110,12 +111,35 @@ export default function PersonaDetailsCTAs() {
 
   return (
     <Box>
-      <Flex direction="row-reverse" gap="sm" pb='xs'>
-        <Button color="gray" size="xs"
+      <Flex direction="row-reverse" gap="sm" pb="xs">
+        {props.personas && (
+          <Select
+            pr="sm"
+            pb="xs"
+            placeholder="Select a persona"
+            color="teal"
+            // @ts-ignore
+            data={
+              props.personas
+                ? props.personas.map((persona: Archetype) => ({
+                    value: persona.id + "",
+                    label: persona.archetype,
+                  }))
+                : []
+            }
+            icon={<IconUser size="1rem" />}
+            value={currentPersonaId + ""}
+            onChange={(value) => setCurrentPersonaId(value ? +value : -1)}
+          />
+        )}
+        <Button
+          color="gray"
+          size="sm"
+          variant="light"
           onClick={() => {
             openContextModal({
-              modal: 'createNewCTA',
-              title: (<Title order={3}>Create CTA</Title>),
+              modal: "createNewCTA",
+              title: <Title order={3}>Create CTA</Title>,
               innerProps: { personaId: currentPersonaId },
             });
           }}
@@ -147,7 +171,8 @@ export default function PersonaDetailsCTAs() {
             accessor: "total_count",
             title: "Prospects",
             sortable: true,
-            render: ({ total_count, total_responded }) => `${total_responded} / ${total_count}`,
+            render: ({ total_count, total_responded }) =>
+              `${total_responded} / ${total_count}`,
           },
           {
             accessor: "active",
@@ -159,7 +184,7 @@ export default function PersonaDetailsCTAs() {
                 onClick={async (e) => {
                   if (data) {
                     const result = await toggleCTA(userToken, id);
-                    if(result.status === 'success') {
+                    if (result.status === "success") {
                       const entry = data.filter((d) => d.id === id)[0];
                       entry.active = !entry.active;
                       refetch();

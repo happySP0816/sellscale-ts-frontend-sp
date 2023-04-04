@@ -12,13 +12,18 @@ import {
   Stack,
   Textarea,
   LoadingOverlay,
+  Select,
+  SelectItem,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
+import { useQuery } from "@tanstack/react-query";
 import { generateDraft, generateValueProps, sendToOutreach } from "@utils/requests/generateSequence";
+import getPersonas from "@utils/requests/getPersonas";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
+import { Archetype } from "src/main";
 
 export default function SequenceWriterModal({
   context,
@@ -29,7 +34,7 @@ export default function SequenceWriterModal({
   const userToken = useRecoilValue(userTokenState);
   const [active, setActive] = useState(0);
   const [valueProps, setValueProps] = useState<string[]>([]);
-  const [steps, setSteps] = useState<string[]>([]);
+  const [steps, setSteps] = useState<{email: string, subject_line: string}[]>([]);
   const [loading, setLoading] = useState(false);
 
   const surveyForm = useForm({
@@ -37,8 +42,27 @@ export default function SequenceWriterModal({
       company: "",
       sellingTo: "",
       sellingWhat: "",
-      numSteps: 4,
+      numValueProps: 1,
+      archetypeID: -1
     },
+  });
+
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [`query-personas-data`],
+    queryFn: async () => {
+      const response = await getPersonas(userToken);
+      const result =
+        response.status === "success" ? (response.extra as Archetype[]) : [];
+
+      const mapped_result = result.map((res) => {
+        return {
+          value: res.id + "",
+          label: res.archetype,
+        }
+      })
+      return mapped_result satisfies SelectItem[]
+    },
+    refetchOnWindowFocus: false,
   });
 
   const handleSurveySubmit = async (values: typeof surveyForm.values) => {
@@ -48,7 +72,7 @@ export default function SequenceWriterModal({
       values.company,
       values.sellingTo,
       values.sellingWhat,
-      values.numSteps
+      values.numValueProps
     );
     setLoading(false);
     if (result.status === "success") {
@@ -69,7 +93,8 @@ export default function SequenceWriterModal({
     setLoading(true);
     const result = await generateDraft(
       userToken,
-      valueProps
+      valueProps,
+      +surveyForm.values.archetypeID
     );
     setLoading(false);
     if (result.status === "success") {
@@ -90,7 +115,11 @@ export default function SequenceWriterModal({
     setLoading(true);
     const result = await sendToOutreach(
       userToken,
-      steps
+      steps.map((step) => {
+        return(
+          "Subject: " + step.subject_line + "\n" + "Email: " + step.email
+        )
+      })
     );
     setLoading(false);
     if (result.status === "success") {
@@ -121,7 +150,7 @@ export default function SequenceWriterModal({
         backgroundColor: theme.colors.dark[7],
       }}
     >
-      <LoadingOverlay visible={loading} overlayBlur={2} />
+      <LoadingOverlay visible={loading || isFetching} overlayBlur={2} />
       <Stepper
         active={active}
         onStepClick={setActive}
@@ -149,17 +178,24 @@ export default function SequenceWriterModal({
                 {...surveyForm.getInputProps("sellingWhat")}
               />
 
+              <Select
+                required
+                label="Which persona are you targeting?"
+                {...surveyForm.getInputProps("archetypeID")}
+                data={(data)??[]}
+              />
+
               <NumberInput
                 required
-                label="# Steps in Sequence"
-                max={7}
+                label="# Value Props"
+                max={3}
                 min={1}
-                {...surveyForm.getInputProps("numSteps")}
+                {...surveyForm.getInputProps("numValueProps")}
               />
 
               <Center>
                 <Button radius="md" type="submit">
-                  Generate {surveyForm.values.numSteps} Value Props
+                  Generate {surveyForm.values.numValueProps} Value Props
                 </Button>
               </Center>
             </Stack>
@@ -178,6 +214,7 @@ export default function SequenceWriterModal({
                   setValueProps(newValueProps);
                 }}
                 required
+                autosize
               />
             ))}
 
@@ -191,18 +228,31 @@ export default function SequenceWriterModal({
         <Stepper.Step label="Generate Sequences">
         <Stack>
             {steps.map((step, index) => (
-              <Textarea
+              <div
                 key={index}
-                label={`Step ${index + 1}`}
-                value={step}
-                onChange={(e) => {
-                  const newSteps = [...steps];
-                  newSteps[index] = e.currentTarget.value;
-                  setSteps(newSteps);
-                }}
-                required
-                autosize
-              />
+              >
+                <Text>Email {index + 1} </Text>
+                <Textarea
+                  value={step.subject_line}
+                  onChange={(e) => {
+                    const newSteps = [...steps];
+                    newSteps[index].subject_line = e.currentTarget.value;
+                    setSteps(newSteps);
+                  }}
+                  required
+                  autosize
+                />
+                <Textarea
+                  value={step.email}
+                  onChange={(e) => {
+                    const newSteps = [...steps];
+                    newSteps[index].email = e.currentTarget.value;
+                    setSteps(newSteps);
+                  }}
+                  required
+                  autosize
+                />
+              </div>
             ))}
 
             <Center>

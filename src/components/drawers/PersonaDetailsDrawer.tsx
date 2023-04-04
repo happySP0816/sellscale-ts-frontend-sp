@@ -72,7 +72,7 @@ export default function PersonaDetailsDrawer(props: { personas: Archetype[] | un
               <PersonaDetailsCTAs />
             </Tabs.Panel>
             <Tabs.Panel value="transformers" pt="xs">
-              <PersonaDetailsTransformers />
+              <PersonaDetailsTransformers channel="LINKEDIN" />
             </Tabs.Panel>
           </Tabs>
     </Drawer>

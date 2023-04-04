@@ -44,11 +44,9 @@ import {
 } from "@atoms/uploadAtoms";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { SCREEN_SIZES } from "@constants/data";
-import PersonaDetailsCTAs from "./details/PersonaDetailsCTAs";
-import PersonaDetailsTransformers from "./details/PersonaDetailsTransformers";
-import PersonaDetailsPatterns from "./details/PersonaDetailsPatterns";
 import { useEffect, useState } from "react";
 import PullProspectEmailsCard from "@common/credits/PullProspectEmailsCard";
+import ComingSoonCard from "@common/library/ComingSoonCard";
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(
@@ -137,12 +135,11 @@ export default function PersonaCard(props: {
         : theme.colors.gray[1],
   });
 
-  const displayTransformers =
-    Object.keys(props.archetype.performance.status_map).some((key) => {
-      return key !== "PROSPECTED";
-    }) ?? Object.keys(props.archetype.performance.status_map).length > 0;
-
   /*
+    const displayTransformers = Object.keys(props.archetype.performance.status_map).some((key) => {
+    return key !== "PROSPECTED";
+  }) ?? Object.keys(props.archetype.performance.status_map).length > 0;
+
   const makeActivePersona = () => {
     displayNotification(
       "make-active-persona",
@@ -364,29 +361,18 @@ export default function PersonaCard(props: {
         opacity={0.8}
       />
       <Collapse in={opened}>
-        <Tabs defaultValue="transformers" color="teal">
+        <Tabs defaultValue="all-contacts" px="xs" color="teal">
           <Tabs.List>
             <Tabs.Tab value="transformers">Transformers</Tabs.Tab>
             <Tabs.Tab value="patterns">Patterns</Tabs.Tab>
             <Tabs.Tab value="ctas">CTAs</Tabs.Tab>
             <Tabs.Tab value="tools">Tools</Tabs.Tab>
           </Tabs.List>
-          <Tabs.Panel value="ctas" pt="xs" h={600}>
-            <PersonaDetailsCTAs />
+          <Tabs.Panel value="all-contacts" pt="xs">
+            <ComingSoonCard h={400} />
           </Tabs.Panel>
-          <Tabs.Panel value="transformers" pt="xs" h={600}>
-            {displayTransformers ? (
-              <PersonaDetailsTransformers />
-            ) : (
-              <Center w={"100%"} h={"75%"}>
-                <Text c="dimmed" fs="italic">
-                  No messages have been sent for this persona yet.
-                </Text>
-              </Center>
-            )}
-          </Tabs.Panel>
-          <Tabs.Panel value="patterns" pt="xs" h={600}>
-            <PersonaDetailsPatterns />
+          <Tabs.Panel value="pulse" pt="xs">
+            <ComingSoonCard h={400} />
           </Tabs.Panel>
           <Tabs.Panel value="tools" pt="xs" h={600}>
             <PullProspectEmailsCard archetype_id={props.archetype.id} />

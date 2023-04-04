@@ -1,7 +1,4 @@
-import {
-  Drawer,
-  Title,
-} from "@mantine/core";
+import { Drawer, Tabs, Title } from "@mantine/core";
 import FileDropAndPreview from "@modals/upload-prospects/FileDropAndPreview";
 import { useRecoilState } from "recoil";
 import { Archetype } from "src/main";
@@ -9,22 +6,27 @@ import {
   currentPersonaIdState,
   uploadDrawerOpenState,
 } from "../atoms/personaAtoms";
+import ComingSoonCard from "@common/library/ComingSoonCard";
 
-export default function PersonaUploadDrawer(props: { personas: Archetype[] | undefined }) {
+export default function PersonaUploadDrawer(props: {
+  personas: Archetype[] | undefined;
+}) {
   const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
     currentPersonaIdState
   );
 
-  const persona = props.personas?.find((persona) => persona.id === currentPersonaId);
-  if(!persona) {
-    return (<></>)
+  const persona = props.personas?.find(
+    (persona) => persona.id === currentPersonaId
+  );
+  if (!persona) {
+    return <></>;
   }
 
   const closeDrawer = () => {
     setCurrentPersonaId(-1);
     setOpened(false);
-  }
+  };
 
   return (
     <Drawer
@@ -35,7 +37,21 @@ export default function PersonaUploadDrawer(props: { personas: Archetype[] | und
       size="xl"
       position="right"
     >
-      <FileDropAndPreview personaId={persona.id+''} onUploadSuccess={closeDrawer} />
+      <Tabs defaultValue="from-file" px="xs" color="teal">
+        <Tabs.List>
+          <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
+          <Tabs.Tab value="from-crm">Import from CRM</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="from-file" pt="xs">
+          <FileDropAndPreview
+            personaId={persona.id + ""}
+            onUploadSuccess={closeDrawer}
+          />
+        </Tabs.Panel>
+        <Tabs.Panel value="from-crm" pt="xs">
+          <ComingSoonCard h={200} />
+        </Tabs.Panel>
+      </Tabs>
     </Drawer>
   );
 }

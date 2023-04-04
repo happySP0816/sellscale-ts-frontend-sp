@@ -173,7 +173,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
-      `query-pipeline-prospects`,
+      `query-pipeline-prospects-${props.personaSpecific ?? "all"}}`,
       { page, sortStatus, statuses, search, channel },
     ],
     queryFn: async ({ queryKey }) => {
@@ -195,6 +195,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             query: search.length > 0 ? search : undefined,
             channel: channel.length > 0 ? channel : "SELLSCALE",
             status: statuses?.length > 0 ? statuses : undefined,
+            persona_id: props.personaSpecific,
             limit: PAGE_SIZE,
             offset: (page - 1) * PAGE_SIZE,
             ordering: [

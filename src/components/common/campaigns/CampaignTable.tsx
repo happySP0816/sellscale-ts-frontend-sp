@@ -28,7 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 import { formatDate, temp_delay, valueToColor } from "@utils/general";
 import { chunk } from "lodash";
 import { faker } from "@faker-js/faker";
-import { Campaign } from "src/main";
+import { Campaign, Channel } from "src/main";
 import { logout } from "@auth/core";
 import { userTokenState } from "@atoms/userAtoms";
 import { useDebouncedState, useMediaQuery } from "@mantine/hooks";
@@ -77,7 +77,7 @@ const ALL_TYPES = [
 
 const PAGE_SIZE = 20;
 
-export default function CampaignTable() {
+export default function CampaignTable(props: { type: Channel }) {
   const theme = useMantineTheme();
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
 
@@ -89,7 +89,8 @@ export default function CampaignTable() {
   const [search, setSearch] = useDebouncedState("", 200);
   const [filterDate, setFilterDate] =
     useState<DateRangePickerValue>([null, null]);
-  const [type, setType] = useState<string | null>(null);
+  //const [type, setType] = useState<string | null>(null);
+  const type = props.type;
 
   const [page, setPage] = useState(1);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
@@ -179,7 +180,7 @@ export default function CampaignTable() {
           width={"500px"}
           onChange={(e) => setSearch(e.currentTarget.value)}
           icon={<IconSearch size={14} />}
-          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "33%", flexBasis: "33%" }}
+          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "60%", flexBasis: "60%" }}
           px={"xs"}
         />
         <DateRangePicker
@@ -190,9 +191,10 @@ export default function CampaignTable() {
           onChange={setFilterDate}
           inputFormat="MMM D, YYYY"
           amountOfMonths={2}
-          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "33%", flexBasis: "33%" }}
+          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "40%", flexBasis: "40%" }}
           px={"xs"}
         />
+        {/*
         <Select
           label="Filter by Type"
           placeholder="Select a type"
@@ -204,6 +206,7 @@ export default function CampaignTable() {
           style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "33%", flexBasis: "33%" }}
           px={"xs"}
         />
+        */}
       </div>
 
       {/* For if we want to add something like this in the future:
@@ -275,6 +278,7 @@ export default function CampaignTable() {
               );
             },
           },
+          /*
           {
             accessor: "campaign_type",
             title: "Type",
@@ -287,6 +291,7 @@ export default function CampaignTable() {
               );
             },
           },
+          */
           {
             accessor: "name",
             title: "Name",

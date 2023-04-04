@@ -1,5 +1,6 @@
 import { userDataState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
+import EmailAnalyticsTable from "@common/analytics/EmailAnalyticsTable";
 import CampaignTable from "@common/campaigns/CampaignTable";
 import AllContactsSection from "@common/home/AllContactsSection";
 import RecActionsSection from "@common/home/RecActionsSection";
@@ -23,6 +24,7 @@ export default function EmailPage() {
           <Tabs.Tab value="sequences">Sequences</Tabs.Tab>
           <Tabs.Tab value="personalizations">Personalizations</Tabs.Tab>
           <Tabs.Tab value="campaign-history">Campaign History</Tabs.Tab>
+          <Tabs.Tab value="email-details">Sequence Analysis</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="sequences" pt="xs">
           <SequenceSection />
@@ -32,6 +34,9 @@ export default function EmailPage() {
         </Tabs.Panel>
         <Tabs.Panel value="campaign-history" pt="xs">
           <CampaignTable type="EMAIL" />
+        </Tabs.Panel>
+        <Tabs.Panel value="email-details" pt="xs">
+          <EmailAnalyticsTable />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

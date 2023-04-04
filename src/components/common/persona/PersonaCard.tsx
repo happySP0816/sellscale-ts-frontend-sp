@@ -47,6 +47,8 @@ import { SCREEN_SIZES } from "@constants/data";
 import { useEffect, useState } from "react";
 import PullProspectEmailsCard from "@common/credits/PullProspectEmailsCard";
 import ComingSoonCard from "@common/library/ComingSoonCard";
+import ProspectTable_old from "@common/pipeline/ProspectTable_old";
+import { prospectSelectorTypeState } from "@atoms/prospectAtoms";
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(
@@ -87,6 +89,9 @@ export default function PersonaCard(props: {
   const [opened, { open, close }] = useDisclosure(
     props.archetype.id === currentPersonaId
   );
+  const [selectorType, setSelectorType] = useRecoilState(
+    prospectSelectorTypeState
+  );
 
   const fetchNumUnusedProspects = async () => {
     const res = await fetch(
@@ -111,6 +116,11 @@ export default function PersonaCard(props: {
     }
     fetchNumUnusedProspects();
   }, [currentPersonaId, fetchNumUnusedProspects]);
+
+  // Temp Fix: Make sure the prospect table selector is set to all when the persona is opened - to prevent ProspectTable bug
+  useEffect(() => {
+    setSelectorType('all');
+  }, [opened])
 
   const isUploading =
     props.archetype.uploads &&
@@ -363,13 +373,12 @@ export default function PersonaCard(props: {
       <Collapse in={opened}>
         <Tabs defaultValue="all-contacts" px="xs" color="teal">
           <Tabs.List>
-            <Tabs.Tab value="transformers">Transformers</Tabs.Tab>
-            <Tabs.Tab value="patterns">Patterns</Tabs.Tab>
-            <Tabs.Tab value="ctas">CTAs</Tabs.Tab>
+            <Tabs.Tab value="all-contacts">All Contacts</Tabs.Tab>
+            <Tabs.Tab value="pulse">Pulse</Tabs.Tab>
             <Tabs.Tab value="tools">Tools</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="all-contacts" pt="xs">
-            <ComingSoonCard h={400} />
+            <ProspectTable_old personaSpecific={props.archetype.id} />
           </Tabs.Panel>
           <Tabs.Panel value="pulse" pt="xs">
             <ComingSoonCard h={400} />

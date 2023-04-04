@@ -16,6 +16,7 @@ import { Archetype } from "src/main";
 import { useEffect, useState } from "react";
 import { currentPersonaIdState } from "@atoms/personaAtoms";
 
+/* 
 export default function AnalyticsPage() {
   setPageTitle("Analytics");
 
@@ -90,3 +91,4 @@ export default function AnalyticsPage() {
     </PageFrame>
   );
 }
+ */

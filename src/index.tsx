@@ -15,19 +15,19 @@ import {
   useNavigationType,
 } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
-import DashboardPage from "./components/pages/DashboardPage";
+import HomePage from "./components/pages/HomePage";
 import PersonaPage from "./components/pages/PersonaPage";
-import PipelinePage from "./components/pages/PipelinePage";
+import PipelinePage from "./components/pages/old/PipelinePage";
 import MissingPage from "./components/pages/MissingPage";
 import { RecoilRoot } from "recoil";
-import CampaignPage from "@pages/CampaignPage";
 import AuthPage from "@pages/AuthPage";
 import RestrictedRoute from "./auth/RestrictedRoute";
 import SettingsPage from "@pages/SettingsPage";
 import LoginPage from "@pages/LoginPage";
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
-import AnalyticsPage from "@pages/AnalyticsPage";
+import LinkedInPage from "@pages/LinkedInPage";
+import EmailPage from "@pages/EmailPage";
 
 const queryClient = new QueryClient();
 
@@ -66,12 +66,13 @@ const router = sentryCreateBrowserRouter([
     children: [
       {
         path: "",
-        element: <RestrictedRoute page={<DashboardPage />} />,
+        element: <RestrictedRoute page={<HomePage />} />,
       },
       {
-        path: "dashboard",
-        element: <RestrictedRoute page={<DashboardPage />} />,
+        path: "home",
+        element: <RestrictedRoute page={<HomePage />} />,
       },
+      /*
       {
         path: "pipeline/:prospectId?",
         element: <RestrictedRoute page={<PipelinePage />} />,
@@ -79,18 +80,20 @@ const router = sentryCreateBrowserRouter([
           return { prospectId: params.prospectId };
         },
       },
+      */
       {
-        path: "analytics",
-        element: <RestrictedRoute page={<AnalyticsPage />} />,
+        path: "linkedin",
+        element: <RestrictedRoute page={<LinkedInPage />} />,
       },
       {
-        path: "analytics",
-        element: <RestrictedRoute page={<AnalyticsPage />} />,
+        path: "email",
+        element: <RestrictedRoute page={<EmailPage />} />,
       },
       {
         path: "personas",
         element: <RestrictedRoute page={<PersonaPage />} />,
       },
+      /*
       {
         path: "campaigns/:campaignId?",
         element: <RestrictedRoute page={<CampaignPage />} />,
@@ -98,6 +101,7 @@ const router = sentryCreateBrowserRouter([
           return { campaignId: params.campaignId };
         },
       },
+      */
       {
         path: "settings",
         element: <RestrictedRoute page={<SettingsPage />} />,

@@ -30,11 +30,12 @@ import {
 } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { useRecoilValue } from "recoil";
-import { SCREEN_SIZES } from "../../constants/data";
-import PageFrame from "../common/PageFrame";
+import { SCREEN_SIZES } from "../../../constants/data";
+import PageFrame from "../../common/PageFrame";
 
+/* 
 export default function DashboardPage() {
-  setPageTitle("Dashboard");
+  setPageTitle("Home");
 
   const userData = useRecoilValue(userDataState);
   
@@ -116,3 +117,4 @@ export default function DashboardPage() {
     </PageFrame>
   );
 }
+ */

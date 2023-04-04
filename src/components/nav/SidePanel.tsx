@@ -7,6 +7,8 @@ import {
   IconSend,
   IconAnalyze,
   IconSettings,
+  IconBrandLinkedin,
+  IconMail,
 } from "@tabler/icons";
 import {
   ThemeIcon,
@@ -85,7 +87,7 @@ export default function SidePanel(props: { isMobile?: boolean }) {
   const activeTab = location.pathname?.split("/")[1];
 
   useEffect(() => {
-    setNavTab(activeTab.trim() === "" ? "dashboard" : activeTab);
+    setNavTab(activeTab.trim() === "" ? "home" : activeTab);
   }, [activeTab, setNavTab]);
 
   return (
@@ -116,28 +118,24 @@ export default function SidePanel(props: { isMobile?: boolean }) {
 
         <NavTab
           icon={<IconHome size={22} />}
-          name="dashboard"
-          description="Go to dashboard"
-          onClick={() => navigateToPage(navigate, `/dashboard`)}
+          name="home"
+          description="Go to home"
+          onClick={() => navigateToPage(navigate, `/home`)}
         />
 
         <NavTab
-          icon={<IconFilter size={22} />}
-          name="pipeline"
-          description="View the state of your outbound funnel by stage"
-          onClick={() => navigateToPage(navigate, `/pipeline`)}
+          icon={<IconBrandLinkedin size={22} />}
+          name="linkedin"
+          description="View your LinkedIn outbound"
+          onClick={() => navigateToPage(navigate, `/linkedin`)}
         />
 
-        {userData && (userData.weekly_li_outbound_target > 0 || userData.weekly_email_outbound_target > 0) ? (
-          <NavTab
-            icon={<IconAnalyze size={22} />}
-            name="analytics"
-            description="View your outbound analytics"
-            onClick={() => navigateToPage(navigate, `/analytics`)}
-          />
-        ) : (
-          ""
-        )}
+        <NavTab
+          icon={<IconMail size={22} />}
+          name="email"
+          description="View your email outbound"
+          onClick={() => navigateToPage(navigate, `/email`)}
+        />
 
         <NavTab
           icon={<IconUsers size={22} />}
@@ -146,19 +144,6 @@ export default function SidePanel(props: { isMobile?: boolean }) {
           onClick={() => navigateToPage(navigate, `/personas`)}
         />
 
-        <NavTab
-          icon={<IconSend size={22} />}
-          name="campaigns"
-          description="View and understand the performance of your weekly outbound campaigns"
-          onClick={() => navigateToPage(navigate, `/campaigns`)}
-        />
-
-        <NavTab
-          icon={<IconSettings size={22} />}
-          name="settings"
-          description="Configure your SellScale settings"
-          onClick={() => navigateToPage(navigate, `/settings`)}
-        />
       </div>
     </>
   );

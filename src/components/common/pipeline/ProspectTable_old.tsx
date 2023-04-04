@@ -136,11 +136,7 @@ function getSelectorTypeFromStatuses(
 
 const PAGE_SIZE = 20;
 
-export default function ProspectTable_old({
-  selectorData,
-}: {
-  selectorData: Map<string, StatGridInfo>;
-}) {
+export default function ProspectTable_old(props: { personaSpecific?: number }) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
@@ -272,10 +268,10 @@ export default function ProspectTable_old({
       <Grid grow>
         <Grid.Col span={5}>
           <TextInput
-            label="Search Prospects"
+            label="Search Contacts"
             placeholder="Search by Name, Company, or Title"
             mb="md"
-            name="search prospects"
+            name="search contacts"
             width={"500px"}
             onChange={(e) => setSearch(e.currentTarget.value)}
             icon={<IconSearch size={14} />}

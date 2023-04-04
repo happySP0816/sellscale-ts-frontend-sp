@@ -16,6 +16,10 @@ code {
     monospace;
 }
 
+.crisp-client .cc-tlyw {
+  z-index: 0!important;
+}
+
 /* CSS Animation Frames */
 @keyframes pull-in-from-left {
   from {

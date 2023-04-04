@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IconSearch } from "@tabler/icons";
+import { IconSearch, IconSettings } from "@tabler/icons";
 import {
   AppShell,
   Navbar,
@@ -19,11 +19,15 @@ import { useRecoilValue } from "recoil";
 import { isLoggedIn } from "@auth/core";
 import LogoutBtn from "@nav/LogoutBtn";
 import { userDataState } from "@atoms/userAtoms";
+import NavTab from "./NavTab";
+import { navigateToPage } from "@utils/documentChange";
+import { useNavigate } from "react-router-dom";
 
 const AnimatedNavbar = animated(Navbar);
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
+  const navigate = useNavigate();
 
   const userData = useRecoilValue(userDataState);
 
@@ -63,6 +67,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <ProfileCard
                   name={userData?.sdr_name || ''}
                   email={userData?.sdr_email || ''}
+                />
+                <NavTab
+                  icon={<IconSettings size={22} />}
+                  name="settings"
+                  description="Configure your SellScale settings"
+                  onClick={() => navigateToPage(navigate, `/settings`)}
                 />
                 <LogoutBtn />
               </>

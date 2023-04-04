@@ -4,6 +4,7 @@ import { useHover, useOs } from "@mantine/hooks";
 import { startCase } from "lodash";
 import { useRecoilState } from "recoil";
 import { navTabState } from "../atoms/navAtoms";
+import { formatToLabel } from "@utils/general";
 
 type NavTabProps = {
   icon: React.ReactNode;
@@ -54,7 +55,7 @@ export default function NavTab(props: NavTabProps) {
           </Container>
           <Container pl={3} pr={0} m={0}>
             <FlexSeparate>
-              <Text fz="sm">{startCase(props.name)}</Text>
+              <Text fz="sm">{formatToLabel(props.name)}</Text>
               {props.sideContent && (
                 props.sideContent
               )}

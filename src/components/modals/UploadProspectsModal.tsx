@@ -18,6 +18,7 @@ import {
   Textarea,
   FocusTrap,
   LoadingOverlay,
+  Tabs,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -41,6 +42,7 @@ import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import { Archetype } from "src/main";
+import ComingSoonCard from "@common/library/ComingSoonCard";
 
 export default function UploadProspectsModal({
   context,
@@ -302,19 +304,30 @@ export default function UploadProspectsModal({
           </Container>
         )}
 
-        <FileDropAndPreview
-          personaId={createdPersona.length > 0 ? null : selectedPersona}
-          createPersona={
-            createdPersona.length > 0
-              ? {
-                  name: createdPersona,
-                  ctas: ctas.map((cta) => cta.cta),
-                  description: description,
-                  fitReason: fitReason,
-                }
-              : undefined
-          }
-        />
+        <Tabs defaultValue="from-file" px="xs" color="teal">
+          <Tabs.List>
+            <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
+            <Tabs.Tab value="from-crm">Import from CRM</Tabs.Tab>
+          </Tabs.List>
+          <Tabs.Panel value="from-file" pt="xs">
+            <FileDropAndPreview
+              personaId={createdPersona.length > 0 ? null : selectedPersona}
+              createPersona={
+                createdPersona.length > 0
+                  ? {
+                      name: createdPersona,
+                      ctas: ctas.map((cta) => cta.cta),
+                      description: description,
+                      fitReason: fitReason,
+                    }
+                  : undefined
+              }
+            />
+          </Tabs.Panel>
+          <Tabs.Panel value="from-crm" pt="xs">
+            <ComingSoonCard h={200} />
+          </Tabs.Panel>
+        </Tabs>
       </Stack>
     </Paper>
   );

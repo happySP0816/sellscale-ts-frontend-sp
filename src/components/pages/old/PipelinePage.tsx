@@ -1,9 +1,9 @@
 import { Container, useMantineTheme } from "@mantine/core";
 import { IconUserPlus } from "@tabler/icons";
 import { useMediaQuery } from "@mantine/hooks";
-import { SCREEN_SIZES } from "../../constants/data";
-import PipelineSelector, { icons } from "../common/pipeline/PipelineSelector";
-import ProspectTable_old from "../common/pipeline/ProspectTable_old";
+import { SCREEN_SIZES } from "../../../constants/data";
+import PipelineSelector, { icons } from "../../common/pipeline/PipelineSelector";
+import ProspectTable_old from "../../common/pipeline/ProspectTable_old";
 import PageFrame from "@common/PageFrame";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -96,7 +96,7 @@ export default function PipelinePage() {
       <PageTitle title='Pipeline' />
       <PipelineSelector data={PIPELINE_SELECTOR_DATA} />
       <Container pt={15} px={0}>
-        <ProspectTable_old selectorData={PIPELINE_SELECTOR_DATA} />
+        <ProspectTable_old />
       </Container>
     </PageFrame>
   );

@@ -8,16 +8,6 @@ export default async function getResponseJSON(key: string, response: Response): 
     logout();
     return { status: 'error', title: `Not Authorized`, message: 'Please login again.' };
   }
-  if (response.status !== 200) {
-    showNotification({
-      id: key+"-not-okay",
-      title: "Error",
-      message: `Responded with: ${response.status}, ${response.statusText}`,
-      color: "red",
-      autoClose: false,
-    });
-    return { status: 'error', title: `Error`, message: `Responded with: ${response.status}, ${response.statusText}` };
-  }
   const res = await response.json().catch((error) => {
     console.error(error);
     showNotification({
@@ -30,6 +20,26 @@ export default async function getResponseJSON(key: string, response: Response): 
   });
   if (!res) {
     return { status: 'error', title: `Error`, message: `See logs for details` };
+  }
+  if (response.status === 403 && res.message.toLowerCase() === "invalid linkedin cookies") {
+    showNotification({
+      id: key+"-invalid-li-cookies",
+      title: "LinkedIn Disconnected",
+      message: `Looks like your LinkedIn account has been disconnected. Please reconnect your LinkedIn account.`,
+      color: "red",
+      autoClose: false,
+    });
+    return { status: 'error', title: `LinkedIn Disconnected`, message: `Looks like your LinkedIn account has been disconnected. Please reconnect your LinkedIn account.` };
+  }
+  if (response.status !== 200) {
+    showNotification({
+      id: key+"-not-okay",
+      title: "Error",
+      message: `Responded with: ${response.status}, ${response.statusText}`,
+      color: "red",
+      autoClose: false,
+    });
+    return { status: 'error', title: `Error`, message: `Responded with: ${response.status}, ${response.statusText}` };
   }
 
   return res;

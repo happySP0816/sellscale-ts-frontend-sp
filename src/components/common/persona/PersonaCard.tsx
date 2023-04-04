@@ -119,8 +119,8 @@ export default function PersonaCard(props: {
 
   // Temp Fix: Make sure the prospect table selector is set to all when the persona is opened - to prevent ProspectTable bug
   useEffect(() => {
-    setSelectorType('all');
-  }, [opened])
+    setSelectorType("all");
+  }, [opened]);
 
   const isUploading =
     props.archetype.uploads &&
@@ -201,11 +201,11 @@ export default function PersonaCard(props: {
     let usedVal = 0;
     let unusedVal = unusedProspects;
 
-    for (let statD in props.archetype.performance.status_map) {
+    for (let statD in props.archetype.performance?.status_map) {
       if (statD === "PROSPECTED") {
         // unusedVal += props.archetype.performance.status_map[statD];
       } else {
-        usedVal += props.archetype.performance.status_map[statD];
+        usedVal += props.archetype.performance?.status_map[statD];
       }
     }
 

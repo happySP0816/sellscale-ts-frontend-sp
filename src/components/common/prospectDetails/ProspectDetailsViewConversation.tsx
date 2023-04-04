@@ -95,7 +95,7 @@ export default function ProspectDetailsViewConversation(
   useQuery({
     queryKey: [`query-get-li-convo-${props.prospect_id}`],
     queryFn: async () => {
-      return await fetchAndPopulateConvo();
+      return (await fetchAndPopulateConvo()) ?? [];
     },
     enabled: userData.li_voyager_connected,
   });
@@ -228,7 +228,7 @@ export default function ProspectDetailsViewConversation(
             <Group position="apart" mb="xs">
               <Text weight={200} size="xs">
                 {`Last Updated: ${convertDateToLocalTime(
-                  emptyConvo ? new Date() : new Date(messages.current[0].date)
+                  emptyConvo || !messages.current[0] ? new Date() : new Date(messages.current[0].date)
                 )}`}
               </Text>
             </Group>

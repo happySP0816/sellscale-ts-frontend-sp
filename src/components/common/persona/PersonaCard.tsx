@@ -44,19 +44,11 @@ import {
 } from "@atoms/uploadAtoms";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { SCREEN_SIZES } from "@constants/data";
-<<<<<<< HEAD
 import { useEffect, useState } from "react";
 import PullProspectEmailsCard from "@common/credits/PullProspectEmailsCard";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import ProspectTable_old from "@common/pipeline/ProspectTable_old";
 import { prospectSelectorTypeState } from "@atoms/prospectAtoms";
-=======
-import PersonaDetailsCTAs from "./details/PersonaDetailsCTAs";
-import PersonaDetailsTransformers from "./details/PersonaDetailsTransformers";
-import PersonaDetailsPatterns from "./details/PersonaDetailsPatterns";
-import { useEffect } from "react";
-import ComingSoonCard from "@common/library/ComingSoonCard";
->>>>>>> 3ca1f7a464f8a794dc953ea74e18d06d9b736570
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(

@@ -1,9 +1,6 @@
 import { userDataState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
-<<<<<<< HEAD
 import EmailAnalyticsTable from "@common/analytics/EmailAnalyticsTable";
-=======
->>>>>>> 3ca1f7a464f8a794dc953ea74e18d06d9b736570
 import CampaignTable from "@common/campaigns/CampaignTable";
 import AllContactsSection from "@common/home/AllContactsSection";
 import RecActionsSection from "@common/home/RecActionsSection";

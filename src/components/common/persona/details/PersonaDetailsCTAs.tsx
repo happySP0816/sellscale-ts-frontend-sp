@@ -122,7 +122,6 @@ export default function PersonaDetailsCTAs() {
         >
           Create New CTA
         </Button>
-        <Text fs="italic" c="dimmed">Note: Call to Actions are for LinkedIn only</Text>
       </Flex>
       <DataTable
         height={"min(670px, 100vh - 200px)"}

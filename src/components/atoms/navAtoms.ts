@@ -2,7 +2,7 @@ import { atom } from "recoil";
 
 const navTabState = atom({
   key: "nav-tab",
-  default: 'dashboard',
+  default: 'home',
 });
 
 const navLoadingState = atom({

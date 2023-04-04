@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { useDebouncedState } from "@mantine/hooks";
 import { SpotlightAction, SpotlightActionProps, SpotlightProvider } from "@mantine/spotlight";
-import { IconUsers, IconHome, IconSend, IconSearch, IconFilter, IconAnalyze } from "@tabler/icons";
+import { IconUsers, IconHome, IconSend, IconSearch, IconFilter, IconAnalyze, IconBrandLinkedin, IconMail } from "@tabler/icons";
 import { navigateToPage } from "@utils/documentChange";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
 import { useEffect, useState } from "react";
@@ -90,25 +90,25 @@ export default function SpotlightWrapper({
 
   let mainActions: SpotlightAction[] = [
     {
-      title: "Dashboard",
-      description: "Go to dashboard",
+      title: "Home",
+      description: "Go to home",
       group: "Pages",
-      onTrigger: () => navigateToPage(navigate, `/dashboard`),
+      onTrigger: () => navigateToPage(navigate, `/home`),
       icon: <IconHome size={18} />,
     },
     {
-      title: "Pipeline",
-      description: "View the state of your outbound funnel by stage",
+      title: "LinkedIn",
+      description: "View your LinkedIn outbound",
       group: "Pages",
-      onTrigger: () => navigateToPage(navigate, `/pipeline`),
-      icon: <IconFilter size={18} />,
+      onTrigger: () => navigateToPage(navigate, `/linkedin`),
+      icon: <IconBrandLinkedin size={18} />,
     },
     {
-      title: 'Analytics',
-      description: 'View your outbound analytics',
+      title: 'Email',
+      description: 'View your email outbound',
       group: 'Pages',
-      onTrigger: () => navigateToPage(navigate, `/analytics`),
-      icon: <IconAnalyze size={18} />,
+      onTrigger: () => navigateToPage(navigate, `/email`),
+      icon: <IconMail size={18} />,
     },
     {
       title: "Personas",
@@ -116,14 +116,6 @@ export default function SpotlightWrapper({
       group: "Pages",
       onTrigger: () => navigateToPage(navigate, `/personas`),
       icon: <IconUsers size={18} />,
-    },
-    {
-      title: "Campaigns",
-      description:
-        "View and understand the performance of your weekly outbound campaigns",
-      group: "Pages",
-      onTrigger: () => navigateToPage(navigate, `/campaigns`),
-      icon: <IconSend size={18} />,
     },
   ];
   if(userData && !userData.weekly_li_outbound_target && !userData.weekly_email_outbound_target){

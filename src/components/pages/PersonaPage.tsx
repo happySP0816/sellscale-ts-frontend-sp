@@ -94,49 +94,53 @@ export default function PersonaPage() {
             Create New Persona
           </Button>
         </FlexSeparate>
-        {data?.length && data?.length > 0 ? (
-          <div>
-            {data
-              ?.filter((p) => p.active)
-              .map((persona) => (
-                <PersonaCard
-                  key={persona.id}
-                  archetype={persona}
-                  refetch={refetch}
-                />
-              ))}
-            {data
-              ?.filter((p) => !p.active)
-              .map((persona) => (
-                <PersonaCard
-                  key={persona.id}
-                  archetype={persona}
-                  refetch={refetch}
-                />
-              ))}
-          </div>
-        ) : (
-          <Paper withBorder m="xl" p="md" radius="md">
-            <FlexSeparate>
-              <Group>
-                <Title order={3}>Create Your First Persona</Title>
-                <Text fs="italic">
-                  A persona is a way to structure your contacts into various
-                  ‘ICPs’ (ideal customer profiles).
-                </Text>
-              </Group>
-              <Avatar
-                size={70}
-                styles={{
-                  placeholder: {
-                    backgroundColor: "transparent",
-                  }
-                }}
-              >
-                <IconCornerRightUp size="10rem" stroke={1} />
-              </Avatar>
-            </FlexSeparate>
-          </Paper>
+        {data && (
+          <>
+            {data?.length && data?.length > 0 ? (
+              <div>
+                {data
+                  ?.filter((p) => p.active)
+                  .map((persona) => (
+                    <PersonaCard
+                      key={persona.id}
+                      archetype={persona}
+                      refetch={refetch}
+                    />
+                  ))}
+                {data
+                  ?.filter((p) => !p.active)
+                  .map((persona) => (
+                    <PersonaCard
+                      key={persona.id}
+                      archetype={persona}
+                      refetch={refetch}
+                    />
+                  ))}
+              </div>
+            ) : (
+              <Paper withBorder m="xl" p="md" radius="md">
+                <FlexSeparate>
+                  <Group>
+                    <Title order={3}>Create Your First Persona</Title>
+                    <Text fs="italic">
+                      A persona is a way to structure your contacts into various
+                      ‘ICPs’ (ideal customer profiles).
+                    </Text>
+                  </Group>
+                  <Avatar
+                    size={70}
+                    styles={{
+                      placeholder: {
+                        backgroundColor: "transparent",
+                      },
+                    }}
+                  >
+                    <IconCornerRightUp size="10rem" stroke={1} />
+                  </Avatar>
+                </FlexSeparate>
+              </Paper>
+            )}
+          </>
         )}
       </PageFrame>
       <PersonaDetailsDrawer personas={data} />

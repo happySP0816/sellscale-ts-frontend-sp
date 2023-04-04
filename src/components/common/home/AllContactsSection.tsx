@@ -92,7 +92,11 @@ export default function AllContactsSection() {
     <div>
       <PipelineSelector data={PIPELINE_SELECTOR_DATA} />
       <Container pt={15} px={0}>
+<<<<<<< HEAD
         <ProspectTable_old />
+=======
+        <ProspectTable_old selectorData={PIPELINE_SELECTOR_DATA} />
+>>>>>>> 3ca1f7a464f8a794dc953ea74e18d06d9b736570
       </Container>
     </div>
   );

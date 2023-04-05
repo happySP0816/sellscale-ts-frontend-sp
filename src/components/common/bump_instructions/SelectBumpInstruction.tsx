@@ -64,7 +64,7 @@ export default function SelectBumpInstruction(props: PropsType) {
   }, []);
 
   // Todo: Aakash - fix this!
-  return null;
+  // return null;
 
   return (
     <>
@@ -83,6 +83,10 @@ export default function SelectBumpInstruction(props: PropsType) {
         onCreate={(value) => {
           createBumpFramework(value);
           return value;
+        }}
+        onChange={(value: any) => {
+          console.log(value);
+          props.onBumpFrameworkSelected(value);
         }}
         getCreateLabel={(query) => (
           <>

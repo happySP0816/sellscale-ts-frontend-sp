@@ -34,11 +34,13 @@ import {
   useTimeout,
 } from "@mantine/hooks";
 import InstallExtensionCard from "@common/library/InstallExtensionCard";
+import SelectBumpInstruction from "@common/bump_instructions/SelectBumpInstruction";
 
 type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
   conversation_url: string;
   prospect_id: number;
+  overall_status: string;
 };
 
 const LOAD_CHUNK_SIZE = 5;
@@ -50,6 +52,7 @@ export default function ProspectDetailsViewConversation(
   const userToken = useRecoilValue(userTokenState);
   const [messageDraft, setMessageDraft] = useState("");
   const userData = useRecoilValue(userDataState);
+  const [selectedBumpFrameworkId, setBumpFrameworkId] = useState(0);
 
   const [scrollPosition, onScrollPositionChange] = useDebouncedState(
     { x: 0, y: 50 },
@@ -206,7 +209,7 @@ export default function ProspectDetailsViewConversation(
     }
   }, [scrollPosition]);
 
-  console.log(!userData.li_voyager_connected && emptyConvo)
+  console.log(!userData.li_voyager_connected && emptyConvo);
   if (!userData.li_voyager_connected && emptyConvo) {
     return (
       <div style={{ paddingTop: 10 }}>
@@ -228,7 +231,9 @@ export default function ProspectDetailsViewConversation(
             <Group position="apart" mb="xs">
               <Text weight={200} size="xs">
                 {`Last Updated: ${convertDateToLocalTime(
-                  emptyConvo || !messages.current[0] ? new Date() : new Date(messages.current[0].date)
+                  emptyConvo || !messages.current[0]
+                    ? new Date()
+                    : new Date(messages.current[0].date)
                 )}`}
               </Text>
             </Group>
@@ -344,6 +349,13 @@ export default function ProspectDetailsViewConversation(
                   {userData.li_voyager_connected ? "Send" : "Schedule"}
                 </Button>
               </Flex>
+              <SelectBumpInstruction
+                client_sdr_id={userData.id}
+                overall_status={props.overall_status}
+                onBumpFrameworkSelected={(framework_id) => {
+                  setBumpFrameworkId(framework_id);
+                }}
+              />
             </div>
           </div>
         ) : (

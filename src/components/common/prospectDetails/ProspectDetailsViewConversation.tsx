@@ -231,9 +231,7 @@ export default function ProspectDetailsViewConversation(
             <Group position="apart" mb="xs">
               <Text weight={200} size="xs">
                 {`Last Updated: ${convertDateToLocalTime(
-                  emptyConvo || !messages.current[0]
-                    ? new Date()
-                    : new Date(messages.current[0].date)
+                  emptyConvo || !messages.current[0] ? new Date() : new Date(messages.current[0].date)
                 )}`}
               </Text>
             </Group>

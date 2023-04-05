@@ -13,6 +13,9 @@ import {
   Center,
   createStyles,
   Avatar,
+  Container,
+  LoadingOverlay,
+  Loader,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -29,7 +32,7 @@ import {
 } from "@tabler/icons";
 import { clearAuthTokens } from "@utils/requests/clearAuthTokens";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LinkedInAuthOption from "./LinkedInAuthOption";
 import { getBrowserExtensionURL } from "@utils/general";
 import { useEffect, useState } from "react";
@@ -57,6 +60,14 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
   const [liProfile, setLiProfile] = useState<null | any>(null);
 
   const { classes } = useStyles();
+
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [`li-profile-self`],
+    queryFn: async () => {
+      const result = await getLiProfile(userToken);
+      return result.status === "success" ? result.extra : null;
+    },
+  });
 
   return (
     <Paper withBorder m="xs" p="md" radius="md">
@@ -222,41 +233,29 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
         </div>
         {props.connected && (
           <div>
-            <Button
-              variant="light"
-              loading={loadingConnection}
-              size="xs"
-              leftIcon={<IconRefreshDot size="1rem" />}
-              onClick={async () => {
-                setLoadingConnection(true);
-                const result = await getLiProfile(userToken);
-                if (result.status === "success") {
-                  setLoadingConnection(false);
-                  console.log(result);
-                  setLiProfile(result.extra);
-                }
-              }}
-            >
-              Check Connection
-            </Button>
-            {liProfile && (
+            {!data && (
+              <Center w="100%" h={100}>
+                <Stack align="center">
+                  <Loader variant="dots" size="xl" />
+                  <Text c="dimmed" fz="sm" fs="italic">Fetching LinkedIn details...</Text>
+                </Stack>
+              </Center>
+            )}
+            {data && (
               <Group noWrap spacing={10} align="flex-start" pt="xs">
                 <Avatar
                   src={
-                    liProfile.miniProfile.picture[
-                      "com.linkedin.common.VectorImage"
-                    ].rootUrl +
-                    liProfile.miniProfile.picture[
-                      "com.linkedin.common.VectorImage"
-                    ].artifacts[2].fileIdentifyingUrlPathSegment
+                    data.miniProfile.picture["com.linkedin.common.VectorImage"]
+                      .rootUrl +
+                    data.miniProfile.picture["com.linkedin.common.VectorImage"]
+                      .artifacts[2].fileIdentifyingUrlPathSegment
                   }
                   size={94}
                   radius="md"
                 />
                 <div>
                   <Title order={3}>
-                    {liProfile.miniProfile.firstName}{" "}
-                    {liProfile.miniProfile.lastName}
+                    {data.miniProfile.firstName} {data.miniProfile.lastName}
                   </Title>
 
                   <Group noWrap spacing={10} mt={3}>
@@ -266,7 +265,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                       className={classes.icon}
                     />
                     <Text size="xs" color="dimmed">
-                      {liProfile.miniProfile.occupation}
+                      {data.miniProfile.occupation}
                     </Text>
                   </Group>
 
@@ -282,9 +281,9 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                       component="a"
                       target="_blank"
                       rel="noopener noreferrer"
-                      href={`https://www.linkedin.com/in/${liProfile.miniProfile.publicIdentifier}`}
+                      href={`https://www.linkedin.com/in/${data.miniProfile.publicIdentifier}`}
                     >
-                      linkedin.com/in/{liProfile.miniProfile.publicIdentifier}
+                      linkedin.com/in/{data.miniProfile.publicIdentifier}
                     </Text>
                   </Group>
                 </div>

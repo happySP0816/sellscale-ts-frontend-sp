@@ -14,10 +14,10 @@ import { valueToColor } from "./general";
 export async function activateQueryPipeline(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string): Promise<SpotlightAction[] | null | false> {
 
   const prospects = await checkProspects(query, navigate, theme, userToken)
-  const campaigns = await checkCampaigns(query, navigate, theme, userToken)
+  //const campaigns = await checkCampaigns(query, navigate, theme, userToken)
 
   // TODO: Add more checks here.
-  return [...campaigns, ...prospects];
+  return [/*...campaigns,*/ ...prospects];
 
 }
 
@@ -48,7 +48,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       description: prospect.title,
       keywords: prospect.company,
       group: 'Prospects',
-      onTrigger: () => navigateToPage(navigate, `/pipeline/${prospect.id}`),
+      onTrigger: () => navigateToPage(navigate, `/home/${prospect.id}`),
       icon: (
         <Image
           src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
@@ -66,7 +66,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
 
 }
 
-
+/*
 async function checkCampaigns(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string){
 
   const response = await fetch(
@@ -101,3 +101,4 @@ async function checkCampaigns(query: string, navigate: NavigateFunction, theme: 
   });
 
 }
+*/

@@ -1,3 +1,4 @@
+import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import { userDataState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
 import AllContactsSection from "@common/home/AllContactsSection";
@@ -5,12 +6,22 @@ import RecActionsSection from "@common/home/RecActionsSection";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import { Tabs } from "@mantine/core";
 import { setPageTitle } from "@utils/documentChange";
-import { useRecoilValue } from "recoil";
+import { useEffect } from "react";
+import { useLoaderData } from "react-router-dom";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function HomePage() {
   setPageTitle("Home");
 
-  const userData = useRecoilValue(userDataState);
+  const { prospectId } = useLoaderData() as { prospectId: string };
+  const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);
+  const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
+  useEffect(() => {
+    if(prospectId && prospectId.trim().length > 0){
+      setProspectId(+prospectId.trim())
+      setOpened(true);
+    }
+  }, [prospectId]);
 
   return (
     <PageFrame>

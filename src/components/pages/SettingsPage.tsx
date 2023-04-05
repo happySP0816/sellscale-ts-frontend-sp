@@ -1,8 +1,8 @@
 import PageFrame from "@common/PageFrame";
 import { Paper, SimpleGrid, Text } from "@mantine/core";
 import { useVesselLink } from "@vesselapi/react-vessel-link";
-import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { Button, Card, Title, Notification } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { IconCheck } from "@tabler/icons";
@@ -156,11 +156,15 @@ function VesselIntegrations() {
 export default function SettingsPage() {
 
   const userToken = useRecoilValue(userTokenState);
+  const [userData, setUserData] = useRecoilState(userDataState);
 
   const { data } = useQuery({
     queryKey: [`query-get-linkedin-connected`],
     queryFn: async () => {
-      return await getUserInfo(userToken);
+      const info = await getUserInfo(userToken);
+      setUserData(info);
+      localStorage.setItem('user-data', JSON.stringify(info));
+      return info;
     },
   });
 

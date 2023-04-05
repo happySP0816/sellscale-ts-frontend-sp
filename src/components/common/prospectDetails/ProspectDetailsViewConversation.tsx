@@ -87,7 +87,7 @@ export default function ProspectDetailsViewConversation(
   };
 
   const fetchAndPopulateConvo = async () => {
-    if(messages.current.length === 0){
+    if (messages.current.length === 0) {
       setLoading(true);
     }
     const result = await getConversation(userToken, props.prospect_id);
@@ -115,7 +115,7 @@ export default function ProspectDetailsViewConversation(
       return (await fetchAndPopulateConvo()) ?? [];
     },
     enabled: userData.li_voyager_connected,
-    refetchInterval: 30*1000,// every 30 seconds, refetch
+    refetchInterval: 30 * 1000, // every 30 seconds, refetch
   });
 
   const sendFollowUp = async () => {
@@ -166,11 +166,7 @@ export default function ProspectDetailsViewConversation(
     setLoading(true);
     const msg = messageDraft;
     setMessageDraft("");
-    const result = await sendLinkedInMessage(
-      userToken,
-      props.prospect_id,
-      msg
-    );
+    const result = await sendLinkedInMessage(userToken, props.prospect_id, msg);
     if (result.status === "success") {
       let yourMessage = _.cloneDeep(
         messages.current.find((msg) => msg.connection_degree === "You")
@@ -268,7 +264,6 @@ export default function ProspectDetailsViewConversation(
             Open LinkedIn
           </Button>
         </FlexSeparate>
-
         <div style={{ position: "relative" }}>
           <LoadingOverlay visible={loading} overlayBlur={2} />
           {!emptyConvo || loading ? (
@@ -300,99 +295,22 @@ export default function ProspectDetailsViewConversation(
               ))}
             </ScrollArea>
           ) : (
-              <Center mah={300} h={300}>
-                <Text size="sm" fs="italic" c="dimmed">
-                  No messages found.
-                </Text>
-              </Center>
+            <Center mah={300} h={300}>
+              <Text size="sm" fs="italic" c="dimmed">
+                No messages found.
+              </Text>
+            </Center>
           )}
         </div>
-
-            <div>
-              <LoadingOverlay visible={loadingSend} overlayBlur={2} />
-              <Textarea
-                mt="sm"
-                minRows={2}
-                maxRows={6}
-                autosize
-                placeholder="Write a message..."
-                onChange={(e) => {
-                  setMessageDraft(e.target?.value);
-                }}
-                value={messageDraft}
-                onKeyDown={getHotkeyHandler([
-                  [
-                    "mod+Enter",
-                    () => {
-                      if (userData.li_voyager_connected) {
-                        sendMessage();
-                      } else {
-                        sendFollowUp();
-                      }
-                    },
-                  ],
-                ])}
-              />
-              <Flex>
-                <Button
-                  variant="light"
-                  mt="sm"
-                  radius="xl"
-                  size="xs"
-                  color="violet"
-                  component="a"
-                  mr="sm"
-                  target="_blank"
-                  fullWidth
-                  rel="noopener noreferrer"
-                  rightIcon={<IconRobot size={14} />}
-                  onClick={() => {
-                    generateAIFollowup();
-                  }}
-                >
-                  Generate AI Follow Up
-                </Button>
-                <Button
-                  variant="light"
-                  mt="sm"
-                  radius="xl"
-                  size="xs"
-                  color="blue"
-                  component="a"
-                  target="_blank"
-                  fullWidth
-                  rel="noopener noreferrer"
-                  rightIcon={<IconSend size={14} />}
-                  onClick={() => {
-                    if (userData.li_voyager_connected) {
-                      sendMessage();
-                    } else {
-                      sendFollowUp();
-                    }
-                  }}
-                >
-                  {userData.li_voyager_connected ? "Send" : "Schedule"}
-                </Button>
-              </Flex>
-              <SelectBumpInstruction
-                client_sdr_id={userData.id}
-                overall_status={props.overall_status}
-                onBumpFrameworkSelected={(framework_id) => {
-                  setBumpFrameworkId(framework_id);
-                }}
-              />
-            </div>
-          </div>
-        ) : (
-          <Button
-            variant="light"
-            radius="xl"
-            size="md"
-            color="blue"
-            fullWidth
-            rightIcon={<IconReload size={18} />}
-            onClick={async () => {
-              await fetchAndPopulateConvo();
+        <div>
+          <Textarea
+            mt="sm"
+            minRows={2}
+            maxRows={6}
+            autosize
+            placeholder="Write a message..."
+            onChange={(e) => {
+              setMessageDraft(e.target?.value);
             }}
             value={messageDraft}
             onKeyDown={getHotkeyHandler([

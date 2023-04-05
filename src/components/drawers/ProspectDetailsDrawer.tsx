@@ -170,7 +170,10 @@ export default function ProspectDetailsDrawer() {
                         key={channel.value}
                         value={channel.value}
                         p="sm"
-                        sx={{ borderLeft: '1px solid #373A40', borderRight: '1px solid #373A40' }}
+                        sx={{
+                          borderLeft: "1px solid #373A40",
+                          borderRight: "1px solid #373A40",
+                        }}
                       >
                         <ProspectDetailsChangeStatus
                           prospectId={data.main.prospect_info.details.id}
@@ -189,7 +192,8 @@ export default function ProspectDetailsDrawer() {
                         />
 
                         {channel.value === "LINKEDIN" &&
-                          data.main.prospect_info.li?.li_conversation_thread && (
+                          data.main.prospect_info.li
+                            ?.li_conversation_thread && (
                             <ProspectDetailsViewConversation
                               conversation_entry_list={
                                 data.main.prospect_info.li
@@ -199,11 +203,16 @@ export default function ProspectDetailsDrawer() {
                                 data.main.prospect_info.li.li_conversation_url
                               }
                               prospect_id={data?.main.prospect_info.details.id}
+                              overall_status={
+                                data.main.prospect_info.details.overall_status
+                              }
                             />
                           )}
 
                         {channel.value === "EMAIL" && (
-                          <ProspectDetailsViewEmails prospectId={data.main.prospect_info.details.id} />
+                          <ProspectDetailsViewEmails
+                            prospectId={data.main.prospect_info.details.id}
+                          />
                         )}
                       </Tabs.Panel>
                     )

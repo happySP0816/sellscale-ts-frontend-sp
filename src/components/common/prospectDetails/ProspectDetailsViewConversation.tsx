@@ -11,7 +11,7 @@ import {
   Container,
   LoadingOverlay,
 } from "@mantine/core";
-import { IconExternalLink, IconSend, IconRobot } from "@tabler/icons";
+import { IconExternalLink, IconSend, IconRobot, IconReload } from "@tabler/icons";
 import displayNotification from "@utils/notificationFlow";
 
 import { useEffect, useRef, useState } from "react";
@@ -59,14 +59,14 @@ export default function ProspectDetailsViewConversation(
     200
   );
 
-  const emptyConvo = props.conversation_entry_list.length === 0;
-
   const [loadingSend, setLoadingSend] = useState(false);
   const messages = useRef(
     props.conversation_entry_list.sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     )
   );
+
+  const emptyConvo = messages.current.length === 0;
 
   const msgsViewport = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
@@ -367,7 +367,7 @@ export default function ProspectDetailsViewConversation(
             size="md"
             color="blue"
             fullWidth
-            rightIcon={<IconSend size={14} />}
+            rightIcon={<IconReload size={18} />}
             onClick={async () => {
               await fetchAndPopulateConvo();
             }}

@@ -158,7 +158,7 @@ export default function SettingsPage() {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
 
-  const { data } = useQuery({
+  useQuery({
     queryKey: [`query-get-linkedin-connected`],
     queryFn: async () => {
       const info = await getUserInfo(userToken);
@@ -174,7 +174,7 @@ export default function SettingsPage() {
 
       <SimpleGrid cols={2} spacing={0}>
         <VesselIntegrations />
-        <LinkedInConnectedCard connected={data ? data.li_voyager_connected : false} />
+        <LinkedInConnectedCard connected={userData ? userData.li_voyager_connected : false} />
       </SimpleGrid>
 
     </PageFrame>

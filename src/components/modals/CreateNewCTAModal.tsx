@@ -110,14 +110,21 @@ export default function CreateNewCTAModel({
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <LoadingOverlay visible={loading} />
 
+        <Flex direction='column'>
+      
         <Textarea
           mt="md"
           required
           placeholder={`I'd love to connect and learn more about you...`}
           label="Call-to-Action"
           withAsterisk
+          autosize
           {...form.getInputProps("cta")}
         />
+        <Text size="xs" color={form.getInputProps("cta").value.length <= 120 ? "grey" : "red"}>
+          {form.getInputProps("cta").value.length}/{120}
+        </Text>
+        </Flex>
 
         {error && (
           <Text color="red" size="sm" mt="sm">
@@ -146,7 +153,7 @@ export default function CreateNewCTAModel({
               Brainstorm CTAs with AI
             </Button>
 
-            <Button variant="light" radius="md" type="submit">
+            <Button variant="light" radius="md" type="submit" disabled={form.getInputProps("cta").value.length > 120}>
               Create
             </Button>
           </Group>

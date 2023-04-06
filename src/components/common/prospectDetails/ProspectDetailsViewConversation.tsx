@@ -286,13 +286,7 @@ export default function ProspectDetailsViewConversation(
                   postedAt={convertDateToLocalTime(new Date(message.date))}
                   body={message.message}
                   name={message.author}
-                  image={
-                    false // TODO: Support LinkedIn props.profile_pic
-                      ? message.profile_url
-                      : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                          `${message.first_name} ${message.last_name}`
-                        )}`
-                  }
+                  image={message.img_url}
                 />
               ))}
             </ScrollArea>

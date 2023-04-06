@@ -6,7 +6,9 @@ import {
   TypographyStylesProvider,
   Paper,
   Badge,
+  useMantineTheme,
 } from "@mantine/core";
+import { nameToInitials, valueToColor } from "@utils/general";
 
 const useStyles = createStyles((theme) => ({
   comment: {
@@ -43,10 +45,11 @@ export function LinkedInConversationEntry({
   isLatest,
 }: CommentHtmlProps) {
   const { classes } = useStyles();
+  const theme = useMantineTheme();
   return (
     <Paper withBorder radius="md" className={classes.comment}>
       <Group sx={{ position: 'relative' }}>
-        <Avatar src={image} alt={name} radius="xl" />
+        <Avatar src={image} radius="xl" alt={name} color={valueToColor(theme, name)}>{nameToInitials(name)}</Avatar>
         <div>
           <Text size="sm">{name}</Text>
           <Text size="xs" color="dimmed">

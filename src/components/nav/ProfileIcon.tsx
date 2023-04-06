@@ -1,6 +1,15 @@
 import CreditsCard from "@common/credits/CreditsCard";
-import { Avatar, Text, Flex, Center, Popover, Container } from "@mantine/core";
+import {
+  Avatar,
+  Text,
+  Flex,
+  Center,
+  Popover,
+  Container,
+  useMantineTheme,
+} from "@mantine/core";
 import { useHover } from "@mantine/hooks";
+import { nameToInitials, valueToColor } from "@utils/general";
 
 export default function ProfileIcon({
   name,
@@ -10,6 +19,7 @@ export default function ProfileIcon({
   email: string;
 }) {
   const { hovered, ref } = useHover();
+  const theme = useMantineTheme();
 
   return (
     <Popover
@@ -22,12 +32,13 @@ export default function ProfileIcon({
       <Popover.Target>
         <Center ref={ref} py="md" className="cursor-pointer">
           <Avatar
-            radius="xl"
-            src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-              name
-            )}`}
+            src={null}
             alt={`${name}'s Profile Picture`}
-          />
+            color={valueToColor(theme, name)}
+            radius="xl"
+          >
+            {nameToInitials(name)}
+          </Avatar>
         </Center>
       </Popover.Target>
       <Popover.Dropdown sx={{ pointerEvents: "none" }}>
@@ -45,6 +56,7 @@ export default function ProfileIcon({
 }
 
 export function ProfileCard({ name, email }: { name: string; email: string }) {
+  const theme = useMantineTheme();
   return (
     <Popover width={300} position="top" withArrow shadow="md">
       <Popover.Target>
@@ -58,13 +70,14 @@ export function ProfileCard({ name, email }: { name: string; email: string }) {
         >
           <Center mx={5}>
             <Avatar
-              size="sm"
-              radius="xl"
-              src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                name
-              )}`}
+              src={null}
               alt={`${name}'s Profile Picture`}
-            />
+              color={valueToColor(theme, name)}
+              radius="xl"
+              size="sm"
+            >
+              {nameToInitials(name)}
+            </Avatar>
           </Center>
           <Container className="truncate p-0">
             <Text size="xs" fw={700} className="truncate">

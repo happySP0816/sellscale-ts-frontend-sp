@@ -27,7 +27,7 @@ import {
   prospectSelectorTypeState,
 } from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
-import { formatToLabel, valueToColor } from "@utils/general";
+import { formatToLabel, nameToInitials, valueToColor } from "@utils/general";
 import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
@@ -57,6 +57,7 @@ export default function ProspectTable({
 }: {
   selectorData: Map<string, StatGridInfo>;
 }) {
+  const theme = useMantineTheme();
   const tableContainerRef = useRef<HTMLDivElement>(null); //we can get access to the underlying TableContainer element and react to its scroll events
   const rowVirtualizerInstanceRef =
     useRef<MRT_Virtualizer<HTMLDivElement, HTMLTableRowElement>>(null); //we can get access to the underlying Virtualizer instance and call its scrollToIndex method
@@ -212,12 +213,12 @@ export default function ProspectTable({
             }}
           >
             <Avatar
-              src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                renderedCellValue as string
-              )}`}
+              src={null}
+              alt={renderedCellValue+''}
+              color={valueToColor(theme, renderedCellValue+'')}
               size={30}
               radius={30}
-            />
+            >{nameToInitials(renderedCellValue+'')}</Avatar>
             <span>{renderedCellValue}</span>
           </Box>
         ),

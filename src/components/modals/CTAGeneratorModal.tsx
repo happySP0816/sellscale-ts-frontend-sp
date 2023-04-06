@@ -135,19 +135,35 @@ export default function CTAGeneratorModal({
                     <Badge w={150} mt={10} color={valueToColor(theme, cta.tag)}>
                       {cta.tag.replace('[', '')}-based
                     </Badge>
-                    <Textarea
-                      w={300}
-                      placeholder="Your CTA"
-                      value={cta.cta}
-                      onChange={(e) => {
-                        const newGeneratedCTAs = [...generatedCTAs];
-                        newGeneratedCTAs[index] = { enabled: cta.enabled, tag: cta.tag, cta: e.currentTarget.value };
-                        setGeneratedCTAs(newGeneratedCTAs);
-                      }}
-                      required
-                      variant="unstyled"
-                    />
+                    <Flex direction='column'>
+                      <Textarea
+                        w={300}
+                        placeholder="Your CTA"
+                        value={cta.cta}
+                        onChange={(e) => {
+                          const newGeneratedCTAs = [...generatedCTAs];
+                          newGeneratedCTAs[index] = { enabled: cta.enabled, tag: cta.tag, cta: e.currentTarget.value };
+                          setGeneratedCTAs(newGeneratedCTAs);
+                        }}
+                        required
+                        variant="unstyled"
+                        autosize
+                      />
+                      <Text size="xs" color={cta.cta.length <= 120 ? "grey" : "red"}>
+                        {cta.cta.length}/{120}
+                      </Text>
+                    </Flex>
                     <Button disabled={!cta.enabled} mt={10} onClick={async () => {
+                      if (cta.cta.length > 120) {
+                        showNotification({
+                          id: "create-cta-error",
+                          title: "Error",
+                          message: "CTA must be less than 120 characters",
+                          color: "red",
+                          autoClose: false,
+                        });
+                        return;
+                      }
                       const response = await createCTA(userToken, innerProps.personaId, cta.cta);
                       if (response.status === "success") {
                         showNotification({

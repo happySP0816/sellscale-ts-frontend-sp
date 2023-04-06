@@ -10,6 +10,7 @@ import {
   Select,
   LoadingOverlay,
   ActionIcon,
+  Tooltip
   Avatar,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
@@ -226,6 +227,8 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           title: prospect.title,
           industry: prospect.industry,
           img_url: prospect.img_url,
+          icp_fit_score: prospect.icp_fit_score,
+          icp_fit_reason: prospect.icp_fit_reason,
           status:
             channel === "SELLSCALE"
               ? prospect.overall_status
@@ -421,6 +424,41 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
                   {formatToLabel(status)}
                 </Badge>
               );
+            },
+          },
+          {
+            accessor: "icp_fit_score",
+            title: "ICP Fit",
+            sortable: true,
+            render: ({ icp_fit_score, icp_fit_reason }) => {
+              let icpFitScoreMap = new Map<string, string>([
+                ['-1', "ERROR"],
+                ['0', "VERY LOW"],
+                ['1', "LOW"],
+                ['2', "MEDIUM"],
+                ['3', "HIGH"],
+                ['4', "VERY HIGH"],
+              ]);
+              const mappedFitScore: string = icpFitScoreMap.get(icp_fit_score + "") || "N/A"
+              let tooltipWidth = 500
+              if (mappedFitScore === "N/A") {
+                tooltipWidth = 50
+              }
+
+              return (
+                <Tooltip 
+                  label={icp_fit_reason || "N/A"}
+                  position="left"
+                  width={tooltipWidth}
+                  multiline
+                >
+                  <Badge
+                    color={valueToColor(theme, mappedFitScore)}
+                  >
+                    {mappedFitScore}
+                  </Badge>
+                </Tooltip>
+              )
             },
           },
           {

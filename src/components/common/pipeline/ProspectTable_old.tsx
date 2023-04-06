@@ -10,8 +10,8 @@ import {
   Select,
   LoadingOverlay,
   ActionIcon,
-  Tooltip
-  Avatar,
+  Tooltip,
+  Avatar
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";

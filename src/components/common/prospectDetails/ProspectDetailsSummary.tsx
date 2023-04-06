@@ -47,7 +47,7 @@ export default function ProspectDetailsSummary(
   return (
     <Group noWrap align="flex-start" pb="xs">
       <Avatar
-        src={null}
+        src={props.profilePic}
         alt={props.fullName}
         color={valueToColor(theme, props.fullName)}
         radius="md"

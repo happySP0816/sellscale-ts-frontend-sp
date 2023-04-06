@@ -147,7 +147,7 @@ export default function CampaignProspects({
               return (
                 <Flex>
                   <Avatar
-                    src={null}
+                    src={x.img_url}
                     alt={x.full_name}
                     color={valueToColor(theme, x.full_name)}
                     radius="lg"

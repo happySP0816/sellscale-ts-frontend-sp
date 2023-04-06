@@ -33,7 +33,7 @@ import {
   IconFaceIdError,
   IconTrash,
   IconBrandLinkedin,
-  IconChecks,
+  IconMessageDots,
 } from "@tabler/icons";
 import { startCase } from "lodash";
 import displayNotification from "@utils/notificationFlow";
@@ -104,6 +104,12 @@ const linkedinStatusOptions = [
     icon: IconTrash,
     color: "red",
     status: "NOT_QUALIFIED",
+  },
+  {
+    title: "Queued for Outreach",
+    icon: IconMessageDots,
+    color: "cyan",
+    status: "QUEUED_FOR_OUTREACH",
   },
 ];
 

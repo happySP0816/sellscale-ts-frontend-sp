@@ -65,6 +65,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {isLoggedIn() && (
               <>
                 <ProfileCard
+                  imgUrl={userData?.img_url || ''}
                   name={userData?.sdr_name || ''}
                   email={userData?.sdr_email || ''}
                 />

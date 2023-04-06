@@ -170,9 +170,7 @@ export default function ProspectDetailsViewConversation(
     setMessageDraft("");
     const result = await sendLinkedInMessage(userToken, props.prospect_id, msg);
     if (result.status === "success") {
-      let yourMessage = _.cloneDeep(
-        messages.current.find((msg) => msg.connection_degree === "You")
-      );
+      let yourMessage = _.cloneDeep(messages.current).reverse().find((msg) => msg.connection_degree === "You");
       if (yourMessage) {
         yourMessage.message = msg;
         yourMessage.date = new Date().toUTCString();

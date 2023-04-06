@@ -90,7 +90,7 @@ export default function ProspectDetailsDrawer() {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data?.main.prospect_info);
+  console.log(data?.main);
 
   return (
     <Drawer

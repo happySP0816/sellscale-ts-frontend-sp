@@ -225,6 +225,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           company: prospect.company,
           title: prospect.title,
           industry: prospect.industry,
+          img_url: prospect.img_url,
           status:
             channel === "SELLSCALE"
               ? prospect.overall_status
@@ -362,7 +363,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               return (
                 <Flex>
                   <Avatar
-                    src={null}
+                    src={x.img_url}
                     alt={x.full_name}
                     color={valueToColor(theme, x.full_name)}
                     radius="lg"

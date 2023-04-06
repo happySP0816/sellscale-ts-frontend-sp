@@ -51,7 +51,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       onTrigger: () => navigateToPage(navigate, `/home/${prospect.id}`),
       icon: (
         <Avatar
-          src={null}
+          src={prospect.img_url}
           alt={prospect.full_name}
           color={valueToColor(theme, prospect.full_name)}
           radius="lg"

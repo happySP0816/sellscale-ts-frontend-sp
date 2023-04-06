@@ -14,9 +14,11 @@ import { nameToInitials, valueToColor } from "@utils/general";
 export default function ProfileIcon({
   name,
   email,
+  imgUrl,
 }: {
   name: string;
   email: string;
+  imgUrl: string;
 }) {
   const { hovered, ref } = useHover();
   const theme = useMantineTheme();
@@ -32,7 +34,7 @@ export default function ProfileIcon({
       <Popover.Target>
         <Center ref={ref} py="md" className="cursor-pointer">
           <Avatar
-            src={null}
+            src={imgUrl}
             alt={`${name}'s Profile Picture`}
             color={valueToColor(theme, name)}
             radius="xl"
@@ -55,7 +57,7 @@ export default function ProfileIcon({
   );
 }
 
-export function ProfileCard({ name, email }: { name: string; email: string }) {
+export function ProfileCard({ name, email, imgUrl }: { name: string; email: string; imgUrl: string }) {
   const theme = useMantineTheme();
   return (
     <Popover width={300} position="top" withArrow shadow="md">
@@ -70,7 +72,7 @@ export function ProfileCard({ name, email }: { name: string; email: string }) {
         >
           <Center mx={5}>
             <Avatar
-              src={null}
+              src={imgUrl}
               alt={`${name}'s Profile Picture`}
               color={valueToColor(theme, name)}
               radius="xl"

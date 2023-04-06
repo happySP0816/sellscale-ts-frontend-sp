@@ -296,8 +296,9 @@ export default function ProspectDetailsViewConversation(
             </ScrollArea>
           ) : (
             <Center mah={300} h={300}>
-              <Text size="sm" fs="italic" c="dimmed">
-                No messages found.
+              <Text>
+                <Text size="md" fs="italic" c="dimmed" ta="center" pb={5}>No conversation <u>yet</u>.</Text>
+                <Text size="sm" fs="italic" c="dimmed" ta="center">Once they accept your connection request, you will see your conversation here!</Text>
               </Text>
             </Center>
           )}

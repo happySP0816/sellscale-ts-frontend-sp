@@ -1,10 +1,11 @@
 import ComingSoonCard from "@common/library/ComingSoonCard";
+import EmailOutboundProgram from "@common/persona/EmailOutboundProgram";
 
 export default function SequenceSection() {
 
   return (
     <>
-      <ComingSoonCard h={600} />
+      <EmailOutboundProgram />
     </>
   )
 

@@ -1,12 +1,13 @@
-import { createStyles, Avatar, Text, Group } from "@mantine/core";
+import { createStyles, Avatar, Text, Group, useMantineTheme } from "@mantine/core";
 import {
   IconPhoneCall,
   IconAt,
   IconBriefcase,
   IconMail,
   IconSocial,
-  IconBuildingStore
+  IconBuildingStore,
 } from "@tabler/icons";
+import { nameToInitials, valueToColor } from "@utils/general";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -34,22 +35,26 @@ type ProspectDetailsSummaryProps = {
 export default function ProspectDetailsSummary(
   props: ProspectDetailsSummaryProps
 ) {
+  const theme = useMantineTheme();
   const { classes } = useStyles();
-  const companyURL = props.companyName && !props.companyURL ? `https://www.google.com/search?q=${encodeURIComponent(props.companyName)}` : props.companyURL;
+  const companyURL =
+    props.companyName && !props.companyURL
+      ? `https://www.google.com/search?q=${encodeURIComponent(
+          props.companyName
+        )}`
+      : props.companyURL;
 
   return (
-    <Group noWrap align="flex-start" pb='xs'>
+    <Group noWrap align="flex-start" pb="xs">
       <Avatar
-        src={
-          false // TODO: Support LinkedIn props.profile_pic
-            ? props.profilePic
-            : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                props.fullName
-              )}`
-        }
-        size={94}
+        src={null}
+        alt={props.fullName}
+        color={valueToColor(theme, props.fullName)}
         radius="md"
-      />
+        size={94}
+      >
+        {nameToInitials(props.fullName)}
+      </Avatar>
       <div>
         <Group noWrap spacing={10} mt={3}>
           <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
@@ -90,7 +95,11 @@ export default function ProspectDetailsSummary(
 
         {props.companyName && (
           <Group noWrap spacing={10} mt={5}>
-            <IconBuildingStore stroke={1.5} size={16} className={classes.icon} />
+            <IconBuildingStore
+              stroke={1.5}
+              size={16}
+              className={classes.icon}
+            />
             <Text
               size="xs"
               color="dimmed"

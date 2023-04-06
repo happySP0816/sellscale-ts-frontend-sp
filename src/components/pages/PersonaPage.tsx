@@ -64,7 +64,9 @@ export default function PersonaPage() {
 
       // Sort by number of prospects
       return result.sort((a, b) => {
-        return b.performance.total_prospects - a.performance.total_prospects;
+        const b_total_prospects = b.performance ? b.performance.total_prospects : 0;
+        const a_total_prospects = a.performance ? a.performance.total_prospects : 0;
+        return b_total_prospects - a_total_prospects;
       });
     },
     refetchOnWindowFocus: false,

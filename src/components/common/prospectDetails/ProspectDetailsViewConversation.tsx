@@ -10,8 +10,15 @@ import {
   Textarea,
   Container,
   LoadingOverlay,
+  Center,
+  Loader,
 } from "@mantine/core";
-import { IconExternalLink, IconSend, IconRobot, IconReload } from "@tabler/icons";
+import {
+  IconExternalLink,
+  IconSend,
+  IconRobot,
+  IconReload,
+} from "@tabler/icons";
 import displayNotification from "@utils/notificationFlow";
 
 import { useEffect, useRef, useState } from "react";
@@ -59,11 +66,16 @@ export default function ProspectDetailsViewConversation(
     200
   );
 
-  const [loadingSend, setLoadingSend] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [msgLoading, setMsgLoading] = useState(false);
+
+  // Use cached convo if voyager isn't connected, else fetch latest
   const messages = useRef(
-    props.conversation_entry_list.sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    )
+    userData.li_voyager_connected
+      ? []
+      : props.conversation_entry_list.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        )
   );
 
   const emptyConvo = messages.current.length === 0;
@@ -77,6 +89,9 @@ export default function ProspectDetailsViewConversation(
   };
 
   const fetchAndPopulateConvo = async () => {
+    if (messages.current.length === 0) {
+      setLoading(true);
+    }
     const result = await getConversation(userToken, props.prospect_id);
     const latestMessages =
       result.status === "success"
@@ -92,16 +107,17 @@ export default function ProspectDetailsViewConversation(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
     }
+    setLoading(false);
     return latestMessages;
   };
 
   useQuery({
     queryKey: [`query-get-li-convo-${props.prospect_id}`],
     queryFn: async () => {
-      // todo(Aaron): fix this. It's causing conversations to disappear after 3 seconds.
-      // return (await fetchAndPopulateConvo()) ?? [];
+      return (await fetchAndPopulateConvo()) ?? [];
     },
     enabled: userData.li_voyager_connected,
+    refetchInterval: 30 * 1000, // every 30 seconds, refetch
   });
 
   const sendFollowUp = async () => {
@@ -149,22 +165,19 @@ export default function ProspectDetailsViewConversation(
     );
   };
   const sendMessage = async () => {
-    setLoadingSend(true);
-    const result = await sendLinkedInMessage(
-      userToken,
-      props.prospect_id,
-      messageDraft
-    );
+    setMsgLoading(true);
+    const msg = messageDraft;
+    setMessageDraft("");
+    const result = await sendLinkedInMessage(userToken, props.prospect_id, msg);
     if (result.status === "success") {
       let yourMessage = _.cloneDeep(
         messages.current.find((msg) => msg.connection_degree === "You")
       );
       if (yourMessage) {
-        yourMessage.message = messageDraft;
+        yourMessage.message = msg;
         yourMessage.date = new Date().toUTCString();
         messages.current.push(yourMessage);
       }
-      setMessageDraft("");
     } else {
       showNotification({
         id: "send-linkedin-message-error",
@@ -174,7 +187,7 @@ export default function ProspectDetailsViewConversation(
         autoClose: false,
       });
     }
-    setLoadingSend(false);
+    setMsgLoading(false);
     setTimeout(() => scrollToBottom());
   };
 
@@ -211,7 +224,6 @@ export default function ProspectDetailsViewConversation(
     }
   }, [scrollPosition]);
 
-  console.log(!userData.li_voyager_connected && emptyConvo);
   if (!userData.li_voyager_connected && emptyConvo) {
     return (
       <div style={{ paddingTop: 10 }}>
@@ -254,9 +266,9 @@ export default function ProspectDetailsViewConversation(
             Open LinkedIn
           </Button>
         </FlexSeparate>
-
-        {!emptyConvo ? (
-          <div>
+        <div style={{ position: "relative" }}>
+          <LoadingOverlay visible={loading} overlayBlur={2} />
+          {!emptyConvo || loading ? (
             <ScrollArea
               style={{ height: msgCount > 2 ? 500 : "inherit", maxHeight: 300 }}
               viewportRef={msgsViewport}
@@ -274,107 +286,95 @@ export default function ProspectDetailsViewConversation(
                   postedAt={convertDateToLocalTime(new Date(message.date))}
                   body={message.message}
                   name={message.author}
-                  image={
-                    false // TODO: Support LinkedIn props.profile_pic
-                      ? message.profile_url
-                      : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                          `${message.first_name} ${message.last_name}`
-                        )}`
-                  }
+                  image={message.img_url}
                 />
               ))}
             </ScrollArea>
-
-            <div>
-              <LoadingOverlay visible={loadingSend} overlayBlur={2} />
-              <Textarea
-                mt="sm"
-                minRows={2}
-                maxRows={6}
-                autosize
-                placeholder="Write a message..."
-                onChange={(e) => {
-                  setMessageDraft(e.target?.value);
-                }}
-                value={messageDraft}
-                onKeyDown={getHotkeyHandler([
-                  [
-                    "mod+Enter",
-                    () => {
-                      if (userData.li_voyager_connected) {
-                        sendMessage();
-                      } else {
-                        sendFollowUp();
-                      }
-                    },
-                  ],
-                ])}
-              />
-              <Flex>
-                <Button
-                  variant="light"
-                  mt="sm"
-                  radius="xl"
-                  size="xs"
-                  color="violet"
-                  component="a"
-                  mr="sm"
-                  target="_blank"
-                  fullWidth
-                  rel="noopener noreferrer"
-                  rightIcon={<IconRobot size={14} />}
-                  onClick={() => {
-                    generateAIFollowup();
-                  }}
-                >
-                  Generate AI Follow Up
-                </Button>
-                <Button
-                  variant="light"
-                  mt="sm"
-                  radius="xl"
-                  size="xs"
-                  color="blue"
-                  component="a"
-                  target="_blank"
-                  fullWidth
-                  rel="noopener noreferrer"
-                  rightIcon={<IconSend size={14} />}
-                  onClick={() => {
+          ) : (
+            <Center mah={300} h={300}>
+              <Text>
+                <Text size="md" fs="italic" c="dimmed" ta="center" pb={5}>No conversation <u>yet</u>.</Text>
+                <Text size="sm" fs="italic" c="dimmed" ta="center">Once they accept your connection request, you will see your conversation here!</Text>
+              </Text>
+            </Center>
+          )}
+        </div>
+        <div>
+          <div style={{ position: "relative" }}>
+            <LoadingOverlay visible={msgLoading} overlayBlur={2} />
+            <Textarea
+              mt="sm"
+              minRows={2}
+              maxRows={6}
+              autosize
+              placeholder="Write a message..."
+              onChange={(e) => {
+                setMessageDraft(e.target?.value);
+              }}
+              value={messageDraft}
+              onKeyDown={getHotkeyHandler([
+                [
+                  "mod+Enter",
+                  () => {
                     if (userData.li_voyager_connected) {
                       sendMessage();
                     } else {
                       sendFollowUp();
                     }
-                  }}
-                >
-                  {userData.li_voyager_connected ? "Send" : "Schedule"}
-                </Button>
-              </Flex>
-              <SelectBumpInstruction
-                client_sdr_id={userData.id}
-                overall_status={props.overall_status}
-                onBumpFrameworkSelected={(framework_id) => {
-                  setBumpFrameworkId(framework_id);
-                }}
-              />
-            </div>
+                  },
+                ],
+              ])}
+            />
           </div>
-        ) : (
-          <Button
-            variant="light"
-            radius="xl"
-            size="md"
-            color="blue"
-            fullWidth
-            rightIcon={<IconReload size={18} />}
-            onClick={async () => {
-              await fetchAndPopulateConvo();
+          <Flex>
+            <Button
+              variant="light"
+              mt="sm"
+              radius="xl"
+              size="xs"
+              color="violet"
+              component="a"
+              mr="sm"
+              target="_blank"
+              fullWidth
+              rel="noopener noreferrer"
+              rightIcon={<IconRobot size={14} />}
+              onClick={() => {
+                generateAIFollowup();
+              }}
+            >
+              Generate AI Follow Up
+            </Button>
+            <Button
+              variant="light"
+              mt="sm"
+              radius="xl"
+              size="xs"
+              color="blue"
+              component="a"
+              target="_blank"
+              fullWidth
+              rel="noopener noreferrer"
+              rightIcon={<IconSend size={14} />}
+              onClick={() => {
+                if (userData.li_voyager_connected) {
+                  sendMessage();
+                } else {
+                  sendFollowUp();
+                }
+              }}
+            >
+              {userData.li_voyager_connected ? "Send" : "Schedule"}
+            </Button>
+          </Flex>
+          <SelectBumpInstruction
+            client_sdr_id={userData.id}
+            overall_status={props.overall_status}
+            onBumpFrameworkSelected={(framework_id) => {
+              setBumpFrameworkId(framework_id);
             }}
-          >
-            Sync Conversation
-          </Button>
-        )}
+          />
+        </div>
       </Card>
       {!userData.li_voyager_connected && (
         <div style={{ paddingTop: 10 }}>

@@ -1,9 +1,9 @@
 import { logout } from "@auth/core";
-import { MantineTheme, Image } from "@mantine/core";
+import { MantineTheme, Image, Avatar } from "@mantine/core";
 import { SpotlightAction } from "@mantine/spotlight";
 import { NavigateFunction } from "react-router-dom";
 import { navigateToPage } from "./documentChange";
-import { valueToColor } from "./general";
+import { nameToInitials, valueToColor } from "./general";
 
 /**
  * 
@@ -14,10 +14,10 @@ import { valueToColor } from "./general";
 export async function activateQueryPipeline(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string): Promise<SpotlightAction[] | null | false> {
 
   const prospects = await checkProspects(query, navigate, theme, userToken)
-  const campaigns = await checkCampaigns(query, navigate, theme, userToken)
+  //const campaigns = await checkCampaigns(query, navigate, theme, userToken)
 
   // TODO: Add more checks here.
-  return [...campaigns, ...prospects];
+  return [/*...campaigns,*/ ...prospects];
 
 }
 
@@ -48,16 +48,15 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       description: prospect.title,
       keywords: prospect.company,
       group: 'Prospects',
-      onTrigger: () => navigateToPage(navigate, `/pipeline/${prospect.id}`),
+      onTrigger: () => navigateToPage(navigate, `/home/${prospect.id}`),
       icon: (
-        <Image
-          src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-            prospect.full_name
-          )}`}
+        <Avatar
+          src={null}
+          alt={prospect.full_name}
+          color={valueToColor(theme, prospect.full_name)}
           radius="lg"
-          height={30}
-          width={30}
-        ></Image>
+          size={30}
+        >{nameToInitials(prospect.full_name)}</Avatar>
       ),
       badge: prospect.overall_status,
       badgeColor: valueToColor(theme, prospect.overall_status),
@@ -66,7 +65,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
 
 }
 
-
+/*
 async function checkCampaigns(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string){
 
   const response = await fetch(
@@ -101,3 +100,4 @@ async function checkCampaigns(query: string, navigate: NavigateFunction, theme: 
   });
 
 }
+*/

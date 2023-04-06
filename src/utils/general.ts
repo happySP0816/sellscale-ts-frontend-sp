@@ -175,6 +175,20 @@ export function formatToLabel(value: string) {
 }
 
 /**
+ * Returns the initials for a given name
+ * @param name 
+ * @returns - Initials for a given name
+ */
+export function nameToInitials(name: string){
+  const names = name.split(" ");
+  if(names.length === 1){
+    return names[0][0];
+  } else {
+    return names[0][0] + names[names.length - 1][0];
+  }
+}
+
+/**
  * Returns the URL for our browser extension
  * @param isFirefox - Whether the browser is firefox
  * @returns - URL for our browser extension

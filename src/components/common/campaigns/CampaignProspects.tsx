@@ -8,6 +8,7 @@ import {
   Badge,
   useMantineTheme,
   LoadingOverlay,
+  Avatar,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -18,7 +19,7 @@ import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
 
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { formatToLabel, valueToColor } from "@utils/general";
+import { formatToLabel, nameToInitials, valueToColor } from "@utils/general";
 import { useDebouncedState } from "@mantine/hooks";
 import { Prospect } from "src/main";
 import { chunk } from "lodash";
@@ -145,14 +146,13 @@ export default function CampaignProspects({
             render: (x: any) => {
               return (
                 <Flex>
-                  <Image
-                    src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                      x.full_name
-                    )}`}
+                  <Avatar
+                    src={null}
+                    alt={x.full_name}
+                    color={valueToColor(theme, x.full_name)}
                     radius="lg"
-                    height={30}
-                    width={30}
-                  ></Image>
+                    size={30}
+                  >{nameToInitials(x.full_name)}</Avatar>
                   <Text ml="md">{x.full_name}</Text>
                 </Flex>
               );

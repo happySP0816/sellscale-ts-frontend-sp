@@ -85,6 +85,7 @@ export interface Archetype {
     total_prospects: number;
   };
   transformer_blocklist: null; // TODO: 
+  vessel_sequence_id: number;
   uploads?: any[];
 }
 

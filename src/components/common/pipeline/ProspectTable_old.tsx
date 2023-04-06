@@ -11,6 +11,7 @@ import {
   LoadingOverlay,
   ActionIcon,
   Tooltip
+  Avatar,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -28,7 +29,7 @@ import {
 } from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { useQuery } from "@tanstack/react-query";
-import { formatToLabel, valueToColor } from "@utils/general";
+import { formatToLabel, nameToInitials, valueToColor } from "@utils/general";
 import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
@@ -363,14 +364,13 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             render: (x: any) => {
               return (
                 <Flex>
-                  <Image
-                    src={`https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(
-                      x.full_name
-                    )}`}
+                  <Avatar
+                    src={null}
+                    alt={x.full_name}
+                    color={valueToColor(theme, x.full_name)}
                     radius="lg"
-                    height={30}
-                    width={30}
-                  ></Image>
+                    size={30}
+                  >{nameToInitials(x.full_name)}</Avatar>
                   <Text ml="md">{x.full_name}</Text>
                 </Flex>
               );

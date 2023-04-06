@@ -200,7 +200,6 @@ export default function UploadProspectsModal({
           <Stack spacing={10}>
             <Textarea
               value={description}
-              maxLength={200}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="This persona are C-Level Execs who..."
               label="In 1-2 sentances, describe this persona"

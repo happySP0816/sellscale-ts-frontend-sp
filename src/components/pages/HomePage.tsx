@@ -11,7 +11,7 @@ import { useLoaderData } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function HomePage() {
-  setPageTitle("Home");
+  setPageTitle("");
 
   const { prospectId } = useLoaderData() as { prospectId: string };
   const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);

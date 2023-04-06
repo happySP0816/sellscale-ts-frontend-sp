@@ -11,6 +11,7 @@ import {
   Container,
   LoadingOverlay,
   Center,
+  Loader,
 } from "@mantine/core";
 import {
   IconExternalLink,
@@ -66,6 +67,7 @@ export default function ProspectDetailsViewConversation(
   );
 
   const [loading, setLoading] = useState(false);
+  const [msgLoading, setMsgLoading] = useState(false);
 
   // Use cached convo if voyager isn't connected, else fetch latest
   const messages = useRef(
@@ -163,7 +165,7 @@ export default function ProspectDetailsViewConversation(
     );
   };
   const sendMessage = async () => {
-    setLoading(true);
+    setMsgLoading(true);
     const msg = messageDraft;
     setMessageDraft("");
     const result = await sendLinkedInMessage(userToken, props.prospect_id, msg);
@@ -185,7 +187,7 @@ export default function ProspectDetailsViewConversation(
         autoClose: false,
       });
     }
-    setLoading(false);
+    setMsgLoading(false);
     setTimeout(() => scrollToBottom());
   };
 
@@ -304,29 +306,32 @@ export default function ProspectDetailsViewConversation(
           )}
         </div>
         <div>
-          <Textarea
-            mt="sm"
-            minRows={2}
-            maxRows={6}
-            autosize
-            placeholder="Write a message..."
-            onChange={(e) => {
-              setMessageDraft(e.target?.value);
-            }}
-            value={messageDraft}
-            onKeyDown={getHotkeyHandler([
-              [
-                "mod+Enter",
-                () => {
-                  if (userData.li_voyager_connected) {
-                    sendMessage();
-                  } else {
-                    sendFollowUp();
-                  }
-                },
-              ],
-            ])}
-          />
+          <div style={{ position: "relative" }}>
+            <LoadingOverlay visible={msgLoading} overlayBlur={2} />
+            <Textarea
+              mt="sm"
+              minRows={2}
+              maxRows={6}
+              autosize
+              placeholder="Write a message..."
+              onChange={(e) => {
+                setMessageDraft(e.target?.value);
+              }}
+              value={messageDraft}
+              onKeyDown={getHotkeyHandler([
+                [
+                  "mod+Enter",
+                  () => {
+                    if (userData.li_voyager_connected) {
+                      sendMessage();
+                    } else {
+                      sendFollowUp();
+                    }
+                  },
+                ],
+              ])}
+            />
+          </div>
           <Flex>
             <Button
               variant="light"

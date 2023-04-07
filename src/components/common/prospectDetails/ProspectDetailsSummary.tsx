@@ -44,8 +44,6 @@ export default function ProspectDetailsSummary(
         )}`
       : props.companyURL;
 
-  console.log(props.profilePic)
-
   return (
     <Group noWrap align="flex-start" pb="xs">
       <Avatar

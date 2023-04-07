@@ -57,6 +57,8 @@ export default function AuthPage() {
       const authToken = searchParams.get('token');
       const email = searchParams.get('email') || userData.sdr_email;
 
+      const redirect = searchParams.get('redirect') ? `/${searchParams.get('redirect')}` : '/';
+
       if (!authToken){
         showNotification({
           id: 'auth-invalid-token',
@@ -72,12 +74,12 @@ export default function AuthPage() {
       if(tokenType === 'magic_links'){
         sendAuthToken(authToken, email).then(async (response) => {
           await authorize(response.token, setUserToken, setUserData);
-          navigateToPage(navigate, `/`);
+          navigateToPage(navigate, redirect);
         });
       } else if(tokenType === 'direct'){
         (async () => {
           await authorize(authToken, setUserToken, setUserData);
-          navigateToPage(navigate, `/`);
+          navigateToPage(navigate, redirect);
         })();
       } else {
         showNotification({
@@ -89,7 +91,7 @@ export default function AuthPage() {
         });
         console.error('Invalid token type', tokenType);
       }
-    }, 1000);
+    });
   }, []);
 
   return (

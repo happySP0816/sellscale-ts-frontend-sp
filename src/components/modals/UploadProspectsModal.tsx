@@ -202,7 +202,7 @@ export default function UploadProspectsModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="This persona are C-Level Execs who..."
-              label="In 1-2 sentances, describe this persona"
+              label="In 1-2 sentences, describe this persona"
             />
             <Textarea
               value={fitReason}

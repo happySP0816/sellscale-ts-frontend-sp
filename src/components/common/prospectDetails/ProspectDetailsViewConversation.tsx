@@ -12,12 +12,15 @@ import {
   LoadingOverlay,
   Center,
   Loader,
+  Alert,
+  Anchor,
 } from "@mantine/core";
 import {
   IconExternalLink,
   IconSend,
   IconRobot,
   IconReload,
+  IconAlertCircle,
 } from "@tabler/icons";
 import displayNotification from "@utils/notificationFlow";
 
@@ -59,6 +62,7 @@ export default function ProspectDetailsViewConversation(
   const [messageDraft, setMessageDraft] = useState("");
   const userData = useRecoilValue(userDataState);
   const [selectedBumpFrameworkId, setBumpFrameworkId] = useState(0);
+  const [convoOutOfSync, setConvoOutOfSync] = useState(false);
 
   const [scrollPosition, onScrollPositionChange] = useDebouncedState(
     { x: 0, y: 50 },
@@ -92,11 +96,20 @@ export default function ProspectDetailsViewConversation(
       setLoading(true);
     }
     const result = await getConversation(userToken, props.prospect_id);
+
+    // Fixes bug with li saying there's no convo but we have one cached
+    if (result.message === 'NO_CONVO' && props.conversation_entry_list.length > 0){
+      setConvoOutOfSync(true);
+      result.extra = props.conversation_entry_list;
+    }
+
+    // Get and sort messages
     const latestMessages =
       result.status === "success"
         ? (result.extra as LinkedInMessage[])
         : undefined;
     if (latestMessages) {
+      // If we have a new message, scroll to bottom
       if (latestMessages.length > messages.current.length) {
         setTimeout(() => {
           scrollToBottom();
@@ -264,6 +277,11 @@ export default function ProspectDetailsViewConversation(
           </Button>
         </FlexSeparate>
         <div style={{ position: "relative" }}>
+          {convoOutOfSync && (
+            <Alert icon={<IconAlertCircle size="1rem" />} title="Out of Sync!" color="orange" sx={{ borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
+              <Text fz='xs' c="orange.1">We've detected this conversation might be desynced with LinkedIn! Please <Anchor c="orange.4" href={props.conversation_url} target="_blank" rel="noopener noreferrer">check LinkedIn</Anchor> first before sending a message.</Text>
+            </Alert>
+          )}
           <LoadingOverlay visible={loading} overlayBlur={2} />
           {!emptyConvo || loading ? (
             <ScrollArea

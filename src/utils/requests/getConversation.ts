@@ -28,7 +28,7 @@ export async function getConversation(
   return {
     status: "success",
     title: `Success`,
-    message: `Sent message`,
+    message: result.data_status,
     extra: result.data,
   };
 }

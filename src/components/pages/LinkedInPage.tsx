@@ -10,7 +10,7 @@ import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import PersonaDetailsTransformers from "@common/persona/details/PersonaDetailsTransformers";
 import { Select, Tabs } from "@mantine/core";
 import PageTitle from "@nav/PageTitle";
-import { IconUser } from "@tabler/icons";
+import { IconAffiliate, IconHistory, IconSignature, IconSpeakerphone, IconTopologyStar, IconUser } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import getPersonas from "@utils/requests/getPersonas";
 import { useQuery } from "@tanstack/react-query";
@@ -50,9 +50,9 @@ export default function LinkedInPage() {
     <PageFrame>
       <Tabs defaultValue="ctas" px="xs" color="teal">
         <Tabs.List>
-          <Tabs.Tab value="ctas">CTAs</Tabs.Tab>
-          <Tabs.Tab value="personalizations">Personalizations</Tabs.Tab>
-          <Tabs.Tab value="campaign-history">Campaign History</Tabs.Tab>
+          <Tabs.Tab value="ctas" icon={<IconSpeakerphone size="1.1rem" />}>CTAs</Tabs.Tab>
+          <Tabs.Tab value="personalizations" icon={<IconAffiliate size="1.1rem" />}>Personalizations</Tabs.Tab>
+          <Tabs.Tab value="campaign-history" icon={<IconHistory size="1.1rem" />}>Campaign History</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="ctas" pt="xs">
           <PersonaDetailsCTAs personas={data} />

@@ -18,6 +18,8 @@ import {
   Center,
 } from "@mantine/core";
 import {
+  IconActivityHeartbeat,
+  IconAddressBook,
   IconCheck,
   IconChevronDown,
   IconChevronUp,
@@ -25,6 +27,7 @@ import {
   IconHistory,
   IconPower,
   IconPresentationAnalytics,
+  IconTool,
   IconUpload,
   IconX,
 } from "@tabler/icons";
@@ -373,9 +376,9 @@ export default function PersonaCard(props: {
       <Collapse in={opened}>
         <Tabs defaultValue="all-contacts" px="xs" color="teal">
           <Tabs.List>
-            <Tabs.Tab value="all-contacts">All Contacts</Tabs.Tab>
-            <Tabs.Tab value="pulse">Pulse</Tabs.Tab>
-            <Tabs.Tab value="tools">Tools</Tabs.Tab>
+            <Tabs.Tab value="all-contacts" icon={<IconAddressBook size="1.1rem" />}>All Contacts</Tabs.Tab>
+            <Tabs.Tab value="pulse" icon={<IconActivityHeartbeat size="1.1rem" />}>Pulse</Tabs.Tab>
+            <Tabs.Tab value="tools" icon={<IconTool size="1.1rem" />}>Tools</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="all-contacts" pt="xs">
             <ProspectTable_old personaSpecific={props.archetype.id} />

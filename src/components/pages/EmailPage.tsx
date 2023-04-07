@@ -9,6 +9,7 @@ import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import PersonaDetailsTransformers from "@common/persona/details/PersonaDetailsTransformers";
 import SequenceSection from "@common/sequence/SequenceSection";
 import { Tabs } from "@mantine/core";
+import { IconAffiliate, IconHistory, IconListDetails, IconReport } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { useRecoilValue } from "recoil";
 
@@ -21,10 +22,10 @@ export default function EmailPage() {
     <PageFrame>
       <Tabs defaultValue="sequences" px="xs" color="teal">
         <Tabs.List>
-          <Tabs.Tab value="sequences">Sequences</Tabs.Tab>
-          <Tabs.Tab value="personalizations">Personalizations</Tabs.Tab>
-          <Tabs.Tab value="campaign-history">Campaign History</Tabs.Tab>
-          <Tabs.Tab value="email-details">Sequence Analysis</Tabs.Tab>
+          <Tabs.Tab value="sequences" icon={<IconListDetails size="1.1rem" />}>Sequences</Tabs.Tab>
+          <Tabs.Tab value="personalizations" icon={<IconAffiliate size="1.1rem" />}>Personalizations</Tabs.Tab>
+          <Tabs.Tab value="campaign-history" icon={<IconHistory size="1.1rem" />}>Campaign History</Tabs.Tab>
+          <Tabs.Tab value="email-details" icon={<IconReport size="1.1rem" />}>Sequence Analysis</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="sequences" pt="xs">
           <SequenceSection />

@@ -28,7 +28,6 @@ import { useQuery } from "@tanstack/react-query";
 import FlexSeparate from "@common/library/FlexSeparate";
 import {
   convertDateToLocalTime,
-  convertDateToShortFormat,
 } from "@utils/general";
 import { sendLinkedInMessage } from "@utils/requests/sendMessage";
 import { showNotification } from "@mantine/notifications";

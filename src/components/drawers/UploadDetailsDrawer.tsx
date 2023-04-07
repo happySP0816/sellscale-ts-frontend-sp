@@ -21,9 +21,6 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import {
   convertDateToShortFormat,
   formatToLabel,
-  percentageToColor,
-  splitName,
-  temp_delay,
   valueToColor,
 } from "@utils/general";
 import {

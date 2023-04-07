@@ -2,7 +2,7 @@ import { MantineColor, MantineTheme } from "@mantine/core";
 import { startCase } from "lodash";
 import { Channel } from "src/main";
 
-export function temp_delay(ms: number) {
+export function testDelay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 

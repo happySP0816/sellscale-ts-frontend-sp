@@ -17,7 +17,6 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import {
   percentageToColor,
   splitName,
-  temp_delay,
   valueToColor,
 } from "../../utils/general";
 import {

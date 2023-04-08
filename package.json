@@ -4,16 +4,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "env-cmd -f .env.local vite",
-    "build": "env-cmd -f .env.local tsc && vite build",
+    "start": "vite",
+    "build": "tsc && vite build",
     "test": "jest",
     "preview": "vite preview",
-    "start:local": "env-cmd -f .env.local vite",
-    "build:local": "env-cmd -f .env.local tsc && vite build",
-    "start:stage": "env-cmd -f .env.stage vite",
-    "build:stage": "env-cmd -f .env.stage tsc && vite build",
-    "start:prod": "env-cmd -f .env.prod vite",
-    "build:prod": "env-cmd -f .env.prod tsc && vite build"
+    "start:local": "vite",
+    "build:local": "tsc && vite build",
+    "start:stage": "vite",
+    "build:stage": "tsc && vite build",
+    "start:prod": "vite",
+    "build:prod": "tsc && vite build"
   },
   "jest": {
     "transform": {

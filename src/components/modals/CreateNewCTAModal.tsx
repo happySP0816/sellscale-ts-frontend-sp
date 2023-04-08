@@ -19,6 +19,7 @@ import {
   FocusTrap,
   LoadingOverlay,
   PasswordInput,
+  Card,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -110,20 +111,24 @@ export default function CreateNewCTAModel({
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <LoadingOverlay visible={loading} />
 
-        <Flex direction='column'>
-      
-        <Textarea
-          mt="md"
-          required
-          placeholder={`I'd love to connect and learn more about you...`}
-          label="Call-to-Action"
-          withAsterisk
-          autosize
-          {...form.getInputProps("cta")}
-        />
-        <Text size="xs" color={form.getInputProps("cta").value.length <= 120 ? "grey" : "red"}>
-          {form.getInputProps("cta").value.length}/{120}
-        </Text>
+        <Flex direction="column">
+          <Textarea
+            mt="md"
+            required
+            placeholder={`I'd love to connect and learn more about you...`}
+            label="Call-to-Action"
+            withAsterisk
+            autosize
+            {...form.getInputProps("cta")}
+          />
+          <Text
+            size="xs"
+            color={
+              form.getInputProps("cta").value.length <= 120 ? "grey" : "red"
+            }
+          >
+            {form.getInputProps("cta").value.length}/{120}
+          </Text>
         </Flex>
 
         {error && (
@@ -133,29 +138,50 @@ export default function CreateNewCTAModel({
         )}
 
         {
-          <Group position="apart" mt="xl">
+          <Group>
             <Anchor component="button" type="button" color="dimmed" size="sm">
               {/* Need help? */}
             </Anchor>
-
             <Button
-              variant="outline"
+              variant="light"
               radius="md"
-              size="xs"
-              onClick={() => {
-                openContextModal({
-                  modal: "ctaGenerator",
-                  title: <Title order={3}>CTA Generator</Title>,
-                  innerProps: { personaId: innerProps.personaId, personaName: '' },
-                });
-              }}
+              type="submit"
+              ml="auto"
+              mr="auto"
+              size="md"
+              disabled={form.getInputProps("cta").value.length > 120}
             >
-              Brainstorm CTAs with AI
+              Create new CTA
             </Button>
 
-            <Button variant="light" radius="md" type="submit" disabled={form.getInputProps("cta").value.length > 120}>
-              Create
-            </Button>
+            <br />
+            <Container w="100%">
+              <Card w="50%" mt="md">
+                <Text weight={"bold"}>AI-Powered CTA Generator</Text>
+                <Text size="sm">
+                  Press the button below to generate 6 CTAs based on your
+                  persona in seconds.
+                </Text>
+                <Button
+                  variant="outline"
+                  radius="md"
+                  size="xs"
+                  mt="md"
+                  onClick={() => {
+                    openContextModal({
+                      modal: "ctaGenerator",
+                      title: <Title order={3}>CTA Generator</Title>,
+                      innerProps: {
+                        personaId: innerProps.personaId,
+                        personaName: "",
+                      },
+                    });
+                  }}
+                >
+                  Brainstorm CTAs with AI
+                </Button>
+              </Card>
+            </Container>
           </Group>
         }
       </form>

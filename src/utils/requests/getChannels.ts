@@ -1,12 +1,13 @@
 
 import { logout } from "@auth/core";
+import { API_URL } from "@constants/data";
 import { showNotification } from "@mantine/notifications";
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 
 export default async function getChannels(userToken: string): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/sdr/get_available_outbound_channels`,
+    `${API_URL}/client/sdr/get_available_outbound_channels`,
     {
       method: "GET",
       headers: {
@@ -49,7 +50,7 @@ export default async function getChannels(userToken: string): Promise<MsgRespons
 // TODO: Make it return MsgResponse
 export async function getChannelOptions(prospectId: number, userToken: string) {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/get_valid_channel_types?prospect_id=${prospectId}`,
+    `${API_URL}/prospect/get_valid_channel_types?prospect_id=${prospectId}`,
     {
       method: "GET",
       headers: {
@@ -63,7 +64,7 @@ export async function getChannelOptions(prospectId: number, userToken: string) {
 
 export async function getChannelStatusOptions(prospectId: number, userToken: string, channelType: string) {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/${prospectId}/get_valid_next_statuses?channel_type=${channelType}`,
+    `${API_URL}/prospect/${prospectId}/get_valid_next_statuses?channel_type=${channelType}`,
     {
       method: "GET",
       headers: {

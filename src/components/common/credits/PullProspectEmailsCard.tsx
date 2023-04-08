@@ -1,4 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
 import { Title, Text, Card, Flex, Container, Button } from "@mantine/core";
 import { IconMail } from "@tabler/icons";
 import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ export default function PullProspectEmailsCard(props: PropsType) {
 
   const fetchCredits = async () => {
     const res = await fetch(
-      `${process.env.REACT_APP_API_URI}/prospect/get_credits`,
+      `${API_URL}/prospect/get_credits`,
       {
         method: "GET",
         headers: {
@@ -31,7 +32,7 @@ export default function PullProspectEmailsCard(props: PropsType) {
 
   const fetchNumUunusedProspects = async () => {
     const res = await fetch(
-      `${process.env.REACT_APP_API_URI}/client/unused_li_and_email_prospects_count?client_archetype_id=` +
+      `${API_URL}/client/unused_li_and_email_prospects_count?client_archetype_id=` +
         props.archetype_id,
       {
         method: "GET",
@@ -47,7 +48,7 @@ export default function PullProspectEmailsCard(props: PropsType) {
   const fetchAdditionalProspectEmails = async () => {
     setFetchButtonDisabled(true);
     const res = await fetch(
-      `${process.env.REACT_APP_API_URI}/prospect/pull_emails`,
+      `${API_URL}/prospect/pull_emails`,
       {
         method: "POST",
         headers: {

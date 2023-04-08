@@ -16,12 +16,12 @@ import { login } from "@auth/core";
 import { useRecoilState } from "recoil";
 import { userDataState } from "@atoms/userAtoms";
 import { LogoFull } from "@nav/Logo";
-import { EMAIL_REGEX } from "@constants/data";
+import { API_URL, EMAIL_REGEX } from "@constants/data";
 import { setPageTitle } from "@utils/documentChange";
 
 async function sendLogin(email: string) {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/send_magic_link_login`,
+    `${API_URL}/client/send_magic_link_login`,
     {
       method: "POST",
       headers: {

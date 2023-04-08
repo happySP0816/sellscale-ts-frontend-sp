@@ -15,7 +15,7 @@ import { setPageTitle } from "@utils/documentChange";
 import getPersonas from "@utils/requests/getPersonas";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Archetype } from "src/main";
+import { Archetype } from "src";
 
 export default function LinkedInPage() {
   setPageTitle("LinkedIn");

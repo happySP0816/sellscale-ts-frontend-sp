@@ -27,11 +27,10 @@ import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate, formatToLabel, valueToColor } from "@utils/general";
 import { chunk } from "lodash";
-import { Campaign } from "src/main";
 import { logout } from "@auth/core";
 import { userTokenState } from "@atoms/userAtoms";
 import { useDebouncedState, useMediaQuery } from "@mantine/hooks";
-import { SCREEN_SIZES } from "@constants/data";
+import { API_URL, SCREEN_SIZES } from "@constants/data";
 import _ from "lodash";
 
 const PAGE_SIZE = 10;
@@ -82,7 +81,7 @@ export default function EmailAnalyticsTable() {
       totalRecords.current = 0;
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/campaigns/email_analytics`,
+        `${API_URL}/campaigns/email_analytics`,
         {
           method: "GET",
           headers: {

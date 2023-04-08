@@ -26,13 +26,14 @@ import { showNotification } from "@mantine/notifications";
 import { closeAllModals, openModal } from "@mantine/modals";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
-import { Archetype, Channel, CTA } from "src/main";
+import { Archetype, Channel, CTA } from "src";
 import {
   currentPersonaIdState,
   detailsDrawerOpenState,
 } from "@atoms/personaAtoms";
 import PatternCard from "./PatternCard";
 import ChannelSwitch from "./ChannelSwitch";
+import { API_URL } from "@constants/data";
 
 const PAGE_SIZE = 20;
 
@@ -54,7 +55,7 @@ export default function PersonaDetailsPatterns() {
       const [_key, { channel }] = queryKey;
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/message_generation/stack_ranked_configuration_priority?generated_message_type=${channel}&archetype_id=${currentPersonaId}`,
+        `${API_URL}/message_generation/stack_ranked_configuration_priority?generated_message_type=${channel}&archetype_id=${currentPersonaId}`,
         {
           method: "GET",
           headers: {

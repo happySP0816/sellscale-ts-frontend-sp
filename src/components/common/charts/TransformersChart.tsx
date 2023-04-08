@@ -16,7 +16,7 @@ import _ from "lodash";
 import { Bar } from "react-chartjs-2";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Channel } from "src/main";
+import { Channel } from "src";
 import { IconChartHistogram } from "@tabler/icons";
 
 ChartJS.register(

@@ -1,5 +1,6 @@
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 /**
  * Generate CTA ideas
@@ -12,7 +13,7 @@ import getResponseJSON, { isMsgResponse } from "./utils";
 export async function generateCTAs(userToken: string, company: string, persona: string, proposition: string): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/message_generation/generate_ai_made_ctas`,
+    `${API_URL}/message_generation/generate_ai_made_ctas`,
     {
       method: "POST",
       headers: {

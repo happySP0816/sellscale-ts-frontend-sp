@@ -1,3 +1,4 @@
+import { API_URL } from "@constants/data";
 import { SetterOrUpdater } from "recoil";
 
 export function isLoggedIn(){
@@ -52,7 +53,7 @@ export async function getUserInfo(userToken: string | null) {
   if(userToken === null){ return null; }
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/sdr`,
+    `${API_URL}/client/sdr`,
     {
       method: "GET",
       headers: {

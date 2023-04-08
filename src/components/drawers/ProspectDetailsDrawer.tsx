@@ -29,9 +29,10 @@ import { formatToLabel, valueToColor } from "@utils/general";
 import { logout } from "@auth/core";
 import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";
-import { Channel } from "src/main";
+import { Channel } from "src";
 import FlexSeparate from "@common/library/FlexSeparate";
 import ProspectDetailsViewEmails from "@common/prospectDetails/ProspectDetailsViewEmails";
+import { API_URL } from "@constants/data";
 
 export default function ProspectDetailsDrawer() {
   const theme = useMantineTheme();
@@ -64,7 +65,7 @@ export default function ProspectDetailsDrawer() {
       }
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/prospect/${prospectId}`,
+        `${API_URL}/prospect/${prospectId}`,
         {
           method: "GET",
           headers: {

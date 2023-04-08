@@ -2,7 +2,7 @@ import { Badge, Box } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
 
-import { CTA } from "src/main";
+import { CTA } from "src";
 import { chunk, sortBy } from "lodash";
 
 const PAGE_SIZE = 10;
@@ -43,6 +43,7 @@ export default function CampaignCTAs({ ctas }: { ctas: CTA[] }) {
       return [];
     }
 
+    // @ts-ignore
     pageData = sortBy(pageData, sortStatus.columnAccessor);
     return sortStatus.direction === "desc" ? pageData.reverse() : pageData;
   };

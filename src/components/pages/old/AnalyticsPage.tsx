@@ -12,7 +12,7 @@ import getPersonas from "@utils/requests/getPersonas";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { useQuery } from "@tanstack/react-query";
-import { Archetype } from "src/main";
+import { Archetype } from "src";
 import { useEffect, useState } from "react";
 import { currentPersonaIdState } from "@atoms/personaAtoms";
 

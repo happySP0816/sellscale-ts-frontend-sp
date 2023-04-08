@@ -1,5 +1,6 @@
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 /**
  * Generates value props for sequence
@@ -13,7 +14,7 @@ import getResponseJSON, { isMsgResponse } from "./utils";
 export async function generateValueProps(userToken: string, company: string, sellingTo: string, sellingWhat: string, num: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/ml/generate_sequence_value_props`,
+    `${API_URL}/ml/generate_sequence_value_props`,
     {
       method: "POST",
       headers: {
@@ -39,7 +40,7 @@ export async function generateValueProps(userToken: string, company: string, sel
 export async function generateDraft(userToken: string, valueProps: string[], archetypeID: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/ml/generate_sequence_draft`,
+    `${API_URL}/ml/generate_sequence_draft`,
     {
       method: "POST",
       headers: {
@@ -63,7 +64,7 @@ export async function generateDraft(userToken: string, valueProps: string[], arc
 export async function sendToOutreach(userToken: string, steps: string[]): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/integration/outreach/send-sequence`,
+    `${API_URL}/integration/outreach/send-sequence`,
     {
       method: "POST",
       headers: {

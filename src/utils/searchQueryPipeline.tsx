@@ -4,6 +4,7 @@ import { SpotlightAction } from "@mantine/spotlight";
 import { NavigateFunction } from "react-router-dom";
 import { navigateToPage } from "./documentChange";
 import { nameToInitials, valueToColor } from "./general";
+import { API_URL } from "@constants/data";
 
 /**
  * 
@@ -24,7 +25,7 @@ export async function activateQueryPipeline(query: string, navigate: NavigateFun
 async function checkProspects(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string){
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/get_prospects`,
+    `${API_URL}/prospect/get_prospects`,
     {
       method: "POST",
       headers: {
@@ -69,7 +70,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
 async function checkCampaigns(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string){
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/campaigns/all_campaigns`,
+    `${API_URL}/campaigns/all_campaigns`,
     {
       method: "POST",
       headers: {

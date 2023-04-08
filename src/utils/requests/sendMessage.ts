@@ -1,5 +1,6 @@
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 /**
  * Send LinkedIn message to prospect
@@ -11,7 +12,7 @@ import getResponseJSON, { isMsgResponse } from "./utils";
 export async function sendLinkedInMessage(userToken: string, prospectId: number, message: string): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/voyager/send_message`,
+    `${API_URL}/voyager/send_message`,
     {
       method: "POST",
       headers: {

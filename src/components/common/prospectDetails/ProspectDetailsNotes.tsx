@@ -1,5 +1,6 @@
 import { prospectDrawerNotesState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
 import {
   createStyles,
   Card,
@@ -17,7 +18,7 @@ import displayNotification from "@utils/notificationFlow";
 
 import { useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { ProspectNote } from "src/main";
+import { ProspectNote } from "src";
 
 const useStyles = createStyles((theme) => ({
   card: {
@@ -57,7 +58,7 @@ async function addProspectNote(
   newNote: string
 ): Promise<{ status: string, title: string, message: string, extra?: any }> {
   return await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/add_note`,
+    `${API_URL}/prospect/add_note`,
     {
       method: "POST",
       headers: {

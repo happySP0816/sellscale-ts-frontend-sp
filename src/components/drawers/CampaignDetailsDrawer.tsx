@@ -29,11 +29,12 @@ import {
 import { IconCalendar } from "@tabler/icons";
 import { useState } from "react";
 import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
-import { Campaign } from "src/main";
+import { Campaign } from "src";
 import { logout } from "@auth/core";
 import { useQuery } from "@tanstack/react-query";
 import CampaignProspects from "@common/campaigns/CampaignProspects";
 import CampaignCTAs from "@common/campaigns/CampaignCTAs";
+import { API_URL } from "@constants/data";
 
 export default function CampaignDetailsDrawer() {
   const theme = useMantineTheme();
@@ -49,7 +50,7 @@ export default function CampaignDetailsDrawer() {
       }
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/campaigns/${campaignId}`,
+        `${API_URL}/campaigns/${campaignId}`,
         {
           method: "GET",
           headers: {

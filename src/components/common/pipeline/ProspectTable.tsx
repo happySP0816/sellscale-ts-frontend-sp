@@ -32,7 +32,7 @@ import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
 import getChannels from "@utils/requests/getChannels";
-import { Channel } from "src/main";
+import { Channel } from "src";
 import _ from "lodash";
 import FlexSeparate from "@common/library/FlexSeparate";
 import React, { useMemo } from "react";
@@ -45,6 +45,7 @@ import {
 } from "mantine-react-table";
 import { Tooltip } from "@mantine/core";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { API_URL } from "@constants/data";
 
 const fetchSize = 20;
 
@@ -92,7 +93,7 @@ export default function ProspectTable({
       queryFn: async ({ pageParam = 0 }) => {
 
         const response = await fetch(
-          `${process.env.REACT_APP_API_URI}/prospect/get_prospects`,
+          `${API_URL}/prospect/get_prospects`,
           {
             method: "POST",
             headers: {

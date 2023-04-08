@@ -1,7 +1,8 @@
 import { logout } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 /**
  * Get all personas for a user
@@ -11,7 +12,7 @@ import getResponseJSON, { isMsgResponse } from "./utils";
 export default async function getPersonas(userToken: string): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/archetype/get_archetypes`,
+    `${API_URL}/client/archetype/get_archetypes`,
     {
       method: "GET",
       headers: {
@@ -35,7 +36,7 @@ export default async function getPersonas(userToken: string): Promise<MsgRespons
 export async function getAllUploads(userToken: string, personaId: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/archetype/${personaId}/all_uploads`,
+    `${API_URL}/client/archetype/${personaId}/all_uploads`,
     {
       method: "GET",
       headers: {
@@ -67,7 +68,7 @@ export async function getAllUploads(userToken: string, personaId: number): Promi
 export async function getUploadStats(userToken: string, uploadId: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/prospect_upload/${uploadId}/stats`,
+    `${API_URL}/client/prospect_upload/${uploadId}/stats`,
     {
       method: "GET",
       headers: {
@@ -92,7 +93,7 @@ export async function getUploadStats(userToken: string, uploadId: number): Promi
 export async function getUploadDetails(userToken: string, uploadId: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/prospect_upload/${uploadId}/details`,
+    `${API_URL}/client/prospect_upload/${uploadId}/details`,
     {
       method: "GET",
       headers: {

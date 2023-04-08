@@ -41,8 +41,9 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, splitName, valueToColor } from "@utils/general";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Channel } from "src/main";
+import { Channel } from "src";
 import { getChannelStatusOptions } from "@utils/requests/getChannels";
+import { API_URL } from "@constants/data";
 
 const linkedinStatusOptions = [
   {
@@ -234,7 +235,7 @@ async function updateChannelStatus(
   newStatus: string
 ) {
   return await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/${prospectId}`,
+    `${API_URL}/prospect/${prospectId}`,
     {
       method: "PATCH",
       headers: {

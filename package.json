@@ -1,7 +1,26 @@
 {
   "name": "sellscale-app",
-  "version": "1.0.0",
   "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "env-cmd -f .env.local vite",
+    "build": "env-cmd -f .env.local tsc && vite build",
+    "test": "jest",
+    "preview": "vite preview",
+    "start:local": "env-cmd -f .env.local vite",
+    "build:local": "env-cmd -f .env.local tsc && vite build",
+    "start:stage": "env-cmd -f .env.stage vite",
+    "build:stage": "env-cmd -f .env.stage tsc && vite build",
+    "start:prod": "env-cmd -f .env.prod vite",
+    "build:prod": "env-cmd -f .env.prod tsc && vite build"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.(ts|tsx|js|jsx)$": "ts-jest"
+    },
+    "testEnvironment": "jsdom"
+  },
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@headlessui/react": "^1.7.10",
@@ -41,56 +60,20 @@
     "web-vitals": "^2.1.4",
     "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
   },
-  "scripts": {
-    "start": "env-cmd -f .env.local craco start",
-    "build": "env-cmd -f .env.local craco --max_old_space_size=4096 build",
-    "test": "jest",
-    "eject": "craco eject",
-    "start:local": "env-cmd -f .env.local craco start",
-    "build:local": "env-cmd -f .env.local craco --max_old_space_size=4096 build",
-    "start:stage": "env-cmd -f .env.stage craco start",
-    "build:stage": "env-cmd -f .env.stage craco --max_old_space_size=4096 build",
-    "start:prod": "env-cmd -f .env.prod craco start",
-    "build:prod": "env-cmd -f .env.prod craco --max_old_space_size=4096 build"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.(ts|tsx|js|jsx)$": "ts-jest"
-    },
-    "testEnvironment": "jsdom"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "devDependencies": {
-    "@babel/preset-typescript": "^7.21.0",
-    "@craco/craco": "^7.0.0",
     "@faker-js/faker": "^7.6.0",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.4.3",
     "@types/babel__generator": "^7.6.4",
     "@types/jest": "^29.4.1",
     "@types/lodash": "^4.14.191",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
     "@types/react-transition-group": "^4.4.5",
-    "craco-alias": "^3.0.1",
-    "eslint-config-react-app": "^7.0.1",
+    "@vitejs/plugin-react": "^3.1.0",
+    "autoprefixer": "^10.4.14",
     "jest": "^27.5.1",
-    "tailwindcss": "^3.2.6"
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.3.1",
+    "typescript": "^4.9.3",
+    "vite": "^4.2.0"
   }
 }

@@ -1,5 +1,6 @@
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 /**
  * Get all email responses for a prospect
@@ -10,7 +11,7 @@ import getResponseJSON, { isMsgResponse } from "./utils";
 export default async function getEmails(userToken: string, prospectId: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/${prospectId}/all_emails`,
+    `${API_URL}/prospect/${prospectId}/all_emails`,
     {
       method: "GET",
       headers: {
@@ -44,7 +45,7 @@ export default async function getEmails(userToken: string, prospectId: number): 
 export async function getEmailDetails(userToken: string, prospectId: number, emailId: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/${prospectId}/email/${emailId}`,
+    `${API_URL}/prospect/${prospectId}/email/${emailId}`,
     {
       method: "GET",
       headers: {

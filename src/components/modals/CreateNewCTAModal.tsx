@@ -44,7 +44,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
-import { Archetype } from "src/main";
+import { Archetype } from "src";
 import { EMAIL_REGEX } from "@constants/data";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";

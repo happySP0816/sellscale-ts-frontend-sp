@@ -23,7 +23,7 @@ import { generateDraft, generateValueProps, sendToOutreach } from "@utils/reques
 import getPersonas from "@utils/requests/getPersonas";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Archetype } from "src/main";
+import { Archetype } from "src";
 
 export default function SequenceWriterModal({
   context,

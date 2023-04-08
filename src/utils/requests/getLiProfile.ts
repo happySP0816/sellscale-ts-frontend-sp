@@ -1,11 +1,12 @@
 import { logout } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 export default async function getLiProfile(userToken: string): Promise<MsgResponse> {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/voyager/profile/self`,
+    `${API_URL}/voyager/profile/self`,
     {
       method: "GET",
       headers: {

@@ -1,5 +1,6 @@
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 /**
  * Get all transformers for an archetype
@@ -9,7 +10,7 @@ import getResponseJSON, { isMsgResponse } from "./utils";
 export default async function getTransformers(userToken: string, archetype_id: number, isEmail: boolean): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/archetype/${archetype_id}/transformers?email=${isEmail}`,
+    `${API_URL}/client/archetype/${archetype_id}/transformers?email=${isEmail}`,
     {
       method: "GET",
       headers: {

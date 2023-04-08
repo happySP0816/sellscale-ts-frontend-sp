@@ -32,7 +32,7 @@ import {
   IconX,
 } from "@tabler/icons";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Archetype } from "src/main";
+import { Archetype } from "src";
 import {
   uploadDrawerOpenState,
   currentPersonaIdState,
@@ -46,7 +46,7 @@ import {
   prospectUploadDrawerOpenState,
 } from "@atoms/uploadAtoms";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import { SCREEN_SIZES } from "@constants/data";
+import { API_URL, SCREEN_SIZES } from "@constants/data";
 import { useEffect, useState } from "react";
 import PullProspectEmailsCard from "@common/credits/PullProspectEmailsCard";
 import ComingSoonCard from "@common/library/ComingSoonCard";
@@ -55,7 +55,7 @@ import { prospectSelectorTypeState } from "@atoms/prospectAtoms";
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/archetype/toggle_active`,
+    `${API_URL}/client/archetype/toggle_active`,
     {
       method: "PATCH",
       headers: {
@@ -98,7 +98,7 @@ export default function PersonaCard(props: {
 
   const fetchNumUnusedProspects = async () => {
     const res = await fetch(
-      `${process.env.REACT_APP_API_URI}/client/unused_li_and_email_prospects_count?client_archetype_id=` +
+      `${API_URL}/client/unused_li_and_email_prospects_count?client_archetype_id=` +
         props.archetype.id,
       {
         method: "GET",

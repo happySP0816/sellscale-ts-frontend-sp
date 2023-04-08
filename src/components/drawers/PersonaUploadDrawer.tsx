@@ -1,7 +1,7 @@
 import { Drawer, Tabs, Title } from "@mantine/core";
 import FileDropAndPreview from "@modals/upload-prospects/FileDropAndPreview";
 import { useRecoilState } from "recoil";
-import { Archetype } from "src/main";
+import { Archetype } from "src";
 import {
   currentPersonaIdState,
   uploadDrawerOpenState,

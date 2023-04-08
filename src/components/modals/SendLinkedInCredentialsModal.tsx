@@ -43,8 +43,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
-import { Archetype } from "src/main";
-import { EMAIL_REGEX } from "@constants/data";
+import { Archetype } from "src";
+import { API_URL, EMAIL_REGEX } from "@constants/data";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 
@@ -69,7 +69,7 @@ export default function SendLinkedInCredentialsModal({
 
     setLoading(true);
 
-    const response = await fetch(`${process.env.REACT_APP_API_URI}/integration/linkedin/send-credentials`, {
+    const response = await fetch(`${API_URL}/integration/linkedin/send-credentials`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${userToken}`,

@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import getPersonas from "@utils/requests/getPersonas";
 import { getSequences, saveSequenceToPersona } from "@utils/requests/getSequences";
 import { useRecoilValue } from "recoil";
-import { Archetype } from "src/main";
+import { Archetype } from "src";
 
 export default function EmailOutboundProgram() {
   

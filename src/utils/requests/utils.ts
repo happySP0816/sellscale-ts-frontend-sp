@@ -1,6 +1,6 @@
 import { logout } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 
 export default async function getResponseJSON(key: string, response: Response): Promise<MsgResponse | Record<string, any>> {
 

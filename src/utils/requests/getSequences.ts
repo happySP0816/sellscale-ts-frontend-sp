@@ -1,5 +1,6 @@
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 /**
  * Get all sequences for a user
@@ -9,7 +10,7 @@ import getResponseJSON, { isMsgResponse } from "./utils";
 export async function getSequences(userToken: string): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/integration/sequences-auth`,
+    `${API_URL}/integration/sequences-auth`,
     {
       method: "GET",
       headers: {
@@ -33,7 +34,7 @@ export async function getSequences(userToken: string): Promise<MsgResponse> {
 export async function saveSequenceToPersona(userToken: string, personaId: string, sequenceId: string): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/integration/set-persona-sequence`,
+    `${API_URL}/integration/set-persona-sequence`,
     {
       method: "POST",
       headers: {

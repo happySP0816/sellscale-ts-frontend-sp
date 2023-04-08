@@ -9,10 +9,11 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import PageFrame from "../common/PageFrame";
+import { API_URL } from "@constants/data";
 
 async function sendAuthToken(authToken: string, email: string) {
 
-  const response = await fetch(`${process.env.REACT_APP_API_URI}/client/approve_auth_token`, {
+  const response = await fetch(`${API_URL}/client/approve_auth_token`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'

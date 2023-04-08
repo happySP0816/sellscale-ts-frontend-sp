@@ -24,7 +24,7 @@ import { showNotification } from "@mantine/notifications";
 import { closeAllModals, openContextModal, openModal } from "@mantine/modals";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
-import { Archetype, CTA } from "src/main";
+import { Archetype, CTA } from "src";
 import {
   currentPersonaIdState,
   detailsDrawerOpenState,
@@ -32,6 +32,7 @@ import {
 import displayNotification from "@utils/notificationFlow";
 import createCTA from "@utils/requests/createCTA";
 import toggleCTA from "@utils/requests/toggleCTA";
+import { API_URL } from "@constants/data";
 
 const PAGE_SIZE = 20;
 
@@ -61,7 +62,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
       const [_key, { page, sortStatus }] = queryKey;
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/client/archetype/${currentPersonaId}/get_ctas`,
+        `${API_URL}/client/archetype/${currentPersonaId}/get_ctas`,
         {
           method: "GET",
           headers: {

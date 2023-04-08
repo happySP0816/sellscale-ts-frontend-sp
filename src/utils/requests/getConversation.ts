@@ -1,5 +1,6 @@
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 /**
  * Get a conversation with a prospect
@@ -12,7 +13,7 @@ export async function getConversation(
   prospectId: number
 ): Promise<MsgResponse> {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/voyager/conversation?prospect_id=${prospectId}`,
+    `${API_URL}/voyager/conversation?prospect_id=${prospectId}`,
     {
       method: "GET",
       headers: {

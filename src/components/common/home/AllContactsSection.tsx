@@ -1,7 +1,7 @@
 import { Container, useMantineTheme } from "@mantine/core";
 import { IconUserPlus } from "@tabler/icons";
 import { useMediaQuery } from "@mantine/hooks";
-import { SCREEN_SIZES } from "../../../constants/data";
+import { API_URL, SCREEN_SIZES } from "@constants/data";
 import PipelineSelector, { icons } from "../pipeline/PipelineSelector";
 import ProspectTable_old from "../pipeline/ProspectTable_old";
 import PageFrame from "@common/PageFrame";
@@ -72,7 +72,7 @@ export default function AllContactsSection() {
     queryKey: [`query-pipeline-details`],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/analytics/pipeline/all_details`,
+        `${API_URL}/analytics/pipeline/all_details`,
         {
           method: "GET",
           headers: {

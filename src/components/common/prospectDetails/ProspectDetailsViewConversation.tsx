@@ -26,7 +26,7 @@ import displayNotification from "@utils/notificationFlow";
 
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { LinkedInMessage } from "src/main";
+import { LinkedInMessage } from "src";
 import { useQuery } from "@tanstack/react-query";
 import FlexSeparate from "@common/library/FlexSeparate";
 import {
@@ -44,6 +44,7 @@ import {
 } from "@mantine/hooks";
 import InstallExtensionCard from "@common/library/InstallExtensionCard";
 import SelectBumpInstruction from "@common/bump_instructions/SelectBumpInstruction";
+import { API_URL } from "@constants/data";
 
 type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
@@ -137,7 +138,7 @@ export default function ProspectDetailsViewConversation(
       "asend-woz-message",
       async () => {
         let result: any = await fetch(
-          `${process.env.REACT_APP_API_URI}/li_conversation/prospect/send_woz_message`,
+          `${API_URL}/li_conversation/prospect/send_woz_message`,
           {
             method: "POST",
             headers: {
@@ -204,7 +205,7 @@ export default function ProspectDetailsViewConversation(
   const generateAIFollowup = () => {
     setMessageDraft("Loading...");
     fetch(
-      `${process.env.REACT_APP_API_URI}/li_conversation/prospect/generate_response`,
+      `${API_URL}/li_conversation/prospect/generate_response`,
       {
         method: "POST",
         headers: {

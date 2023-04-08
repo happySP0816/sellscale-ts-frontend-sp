@@ -1,14 +1,15 @@
 import { logout } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import createCTA from "./createCTA";
+import { API_URL } from "@constants/data";
 
 export default async function createPersona(userToken: string, name: string, ctas: string[], extras: {
   description: string;
   fitReason: string;
 }): Promise<MsgResponse> {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/client/archetype`,
+    `${API_URL}/client/archetype`,
     {
       method: "POST",
       headers: {

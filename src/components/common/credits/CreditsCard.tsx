@@ -1,4 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
 import { Title, Text, Card, Divider } from "@mantine/core";
 import { Progress } from "@mantine/core";
 import { useEffect, useState } from "react";
@@ -13,7 +14,7 @@ export default function CreditsCard() {
   useEffect(() => {
     const fetchCredits = async () => {
       const res = await fetch(
-        `${process.env.REACT_APP_API_URI}/prospect/get_credits`,
+        `${API_URL}/prospect/get_credits`,
         {
           method: "GET",
           headers: {

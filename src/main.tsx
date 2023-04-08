@@ -32,7 +32,7 @@ import EmailPage from "@pages/EmailPage";
 const queryClient = new QueryClient();
 
 // Set Sentry up and wrap the router
-if (process.env.NODE_ENV === "production") {
+if (import.meta.env.PROD) {
   Sentry.init({
     dsn:
       "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",

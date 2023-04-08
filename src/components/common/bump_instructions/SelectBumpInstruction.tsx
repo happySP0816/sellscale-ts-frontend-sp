@@ -3,6 +3,7 @@ import CreateBumpInstructionModal from "./CreateBumpInstructionModal";
 import { Container, Select } from "@mantine/core";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
 
 type PropsType = {
   client_sdr_id: number;
@@ -18,7 +19,7 @@ export default function SelectBumpInstruction(props: PropsType) {
   const getBumpFrameworks = () => {
     setLoadingBumpFrameworks(true);
     fetch(
-      `${process.env.REACT_APP_API_URI}/bump_framework/?client_sdr_id=` +
+      `${API_URL}/bump_framework/?client_sdr_id=` +
         props.client_sdr_id +
         `&overall_status=` +
         props.overall_status,
@@ -42,7 +43,7 @@ export default function SelectBumpInstruction(props: PropsType) {
   };
 
   const createBumpFramework = (description: string) => {
-    fetch(`${process.env.REACT_APP_API_URI}/bump_framework/create`, {
+    fetch(`${API_URL}/bump_framework/create`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,

@@ -28,11 +28,11 @@ import { useQuery } from "@tanstack/react-query";
 import { formatDate, valueToColor } from "@utils/general";
 import { chunk } from "lodash";
 import { faker } from "@faker-js/faker";
-import { Campaign, Channel } from "src/main";
 import { logout } from "@auth/core";
 import { userTokenState } from "@atoms/userAtoms";
 import { useDebouncedState, useMediaQuery } from "@mantine/hooks";
-import { SCREEN_SIZES } from "@constants/data";
+import { API_URL, SCREEN_SIZES } from "@constants/data";
+import { Campaign, Channel } from "src";
 
 /* For if we want to add something like this in the future:
 interface ItemProps extends React.ComponentPropsWithoutRef<"div"> {
@@ -117,7 +117,7 @@ export default function CampaignTable(props: { type: Channel }) {
       totalRecords.current = 0;
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/campaigns/all_campaigns`,
+        `${API_URL}/campaigns/all_campaigns`,
         {
           method: "POST",
           headers: {

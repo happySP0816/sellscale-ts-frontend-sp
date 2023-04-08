@@ -1,10 +1,11 @@
 import { logout } from "@auth/core";
+import { API_URL } from "@constants/data";
 import { showNotification } from "@mantine/notifications";
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 
 export default async function toggleCTA(userToken: string, cta_id: number): Promise<MsgResponse> {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/message_generation/toggle_cta_active`,
+    `${API_URL}/message_generation/toggle_cta_active`,
     {
       method: "POST",
       headers: {

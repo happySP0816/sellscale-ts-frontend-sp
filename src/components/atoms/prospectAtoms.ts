@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { Channel, ProspectNote } from "src/main";
+import { Channel, ProspectNote } from "src";
 
 const prospectDrawerOpenState = atom({
   key: "prospect-drawer-open",

@@ -1,7 +1,7 @@
 import { Box, Center, Flex, SegmentedControl, Title } from "@mantine/core";
 import { IconBrandLinkedin, IconMail } from "@tabler/icons";
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { Channel } from "src/main";
+import { Channel } from "src";
 
 export default forwardRef(function ChannelSwitch(
   props: { defaultValue: Channel },

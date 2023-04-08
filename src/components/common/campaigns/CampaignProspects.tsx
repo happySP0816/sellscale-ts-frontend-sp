@@ -21,7 +21,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, nameToInitials, valueToColor } from "@utils/general";
 import { useDebouncedState } from "@mantine/hooks";
-import { Prospect } from "src/main";
+import { Prospect } from "src";
 import { chunk } from "lodash";
 import { useQuery } from "@tanstack/react-query";
 import getChannels from "@utils/requests/getChannels";

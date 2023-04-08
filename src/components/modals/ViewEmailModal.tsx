@@ -6,7 +6,7 @@ import {
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import ReactMarkdown from "react-markdown";
-import { ProspectEmail } from "src/main";
+import { ProspectEmail } from "src";
 
 export default function ViewEmailModal({
   context,

@@ -1,10 +1,11 @@
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 import getResponseJSON, { isMsgResponse } from "./utils";
+import { API_URL } from "@constants/data";
 
 export default async function uploadProspects(archetype_id: number, userToken: string, json: any[]): Promise<MsgResponse> {
 
   return await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/add_prospect_from_csv_payload`,
+    `${API_URL}/prospect/add_prospect_from_csv_payload`,
     {
       method: "POST",
       headers: {
@@ -44,7 +45,7 @@ export default async function uploadProspects(archetype_id: number, userToken: s
 export async function retriggerUploadJob(userToken: string, archetype_id: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/prospect/retrigger_upload_job`,
+    `${API_URL}/prospect/retrigger_upload_job`,
     {
       method: "POST",
       headers: {

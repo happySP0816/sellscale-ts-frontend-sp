@@ -1,10 +1,11 @@
 import { logout } from "@auth/core";
+import { API_URL } from "@constants/data";
 import { showNotification } from "@mantine/notifications";
-import { MsgResponse } from "src/main";
+import { MsgResponse } from "src";
 
 export default async function createCTA(userToken: string, personaId: string, cta: string): Promise<MsgResponse> {
   const response = await fetch(
-    `${process.env.REACT_APP_API_URI}/message_generation/create_cta`,
+    `${API_URL}/message_generation/create_cta`,
     {
       method: "POST",
       headers: {

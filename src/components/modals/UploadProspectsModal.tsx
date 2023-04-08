@@ -41,8 +41,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
-import { Archetype } from "src/main";
+import { Archetype } from "src";
 import ComingSoonCard from "@common/library/ComingSoonCard";
+import { API_URL } from "@constants/data";
 
 export default function UploadProspectsModal({
   context,
@@ -92,7 +93,7 @@ export default function UploadProspectsModal({
     queryKey: [`query-personas-active-data`],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URI}/client/archetype/get_archetypes`,
+        `${API_URL}/client/archetype/get_archetypes`,
         {
           method: "GET",
           headers: {

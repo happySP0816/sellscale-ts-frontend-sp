@@ -65,7 +65,7 @@ function getDefaultStatuses(
   })();
 
   const defaultStatuses = [];
-  for (const status of Object.keys(data_channels.extra[channel])) {
+  for (const status of Object.keys(data_channels.extra[channel] || {})) {
     if (!status) {
       continue;
     }

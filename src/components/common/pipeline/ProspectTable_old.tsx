@@ -11,7 +11,7 @@ import {
   LoadingOverlay,
   ActionIcon,
   Tooltip,
-  Avatar
+  Avatar,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -186,30 +186,27 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
 
       totalRecords.current = 0;
 
-      const response = await fetch(
-        `${API_URL}/prospect/get_prospects`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            query: search.length > 0 ? search : undefined,
-            channel: channel.length > 0 ? channel : "SELLSCALE",
-            status: statuses?.length > 0 ? statuses : undefined,
-            persona_id: props.personaSpecific,
-            limit: PAGE_SIZE,
-            offset: (page - 1) * PAGE_SIZE,
-            ordering: [
-              {
-                field: sortStatus.columnAccessor,
-                direction: sortStatus.direction === "asc" ? 1 : -1,
-              },
-            ],
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/prospect/get_prospects`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: search.length > 0 ? search : undefined,
+          channel: channel.length > 0 ? channel : "SELLSCALE",
+          status: statuses?.length > 0 ? statuses : undefined,
+          persona_id: props.personaSpecific,
+          limit: PAGE_SIZE,
+          offset: (page - 1) * PAGE_SIZE,
+          ordering: [
+            {
+              field: sortStatus.columnAccessor,
+              direction: sortStatus.direction === "asc" ? 1 : -1,
+            },
+          ],
+        }),
+      });
       if (response.status === 401) {
         logout();
       }
@@ -319,7 +316,10 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show {channel} statuses
-                  data_channels.extra[channel].statuses_available
+                  (data_channels.extra[channel]
+                    ? data_channels.extra[channel].statuses_available
+                    : []
+                  )
                     .map((status: string) => {
                       return {
                         label: formatToLabel(
@@ -372,7 +372,9 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
                     color={valueToColor(theme, x.full_name)}
                     radius="lg"
                     size={30}
-                  >{nameToInitials(x.full_name)}</Avatar>
+                  >
+                    {nameToInitials(x.full_name)}
+                  </Avatar>
                   <Text ml="md">{x.full_name}</Text>
                 </Flex>
               );
@@ -433,33 +435,32 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             sortable: true,
             render: ({ icp_fit_score, icp_fit_reason }) => {
               let icpFitScoreMap = new Map<string, string>([
-                ['-1', "ERROR"],
-                ['0', "VERY LOW"],
-                ['1', "LOW"],
-                ['2', "MEDIUM"],
-                ['3', "HIGH"],
-                ['4', "VERY HIGH"],
+                ["-1", "ERROR"],
+                ["0", "VERY LOW"],
+                ["1", "LOW"],
+                ["2", "MEDIUM"],
+                ["3", "HIGH"],
+                ["4", "VERY HIGH"],
               ]);
-              const mappedFitScore: string = icpFitScoreMap.get(icp_fit_score + "") || "N/A"
-              let tooltipWidth = 500
+              const mappedFitScore: string =
+                icpFitScoreMap.get(icp_fit_score + "") || "N/A";
+              let tooltipWidth = 500;
               if (mappedFitScore === "N/A") {
-                tooltipWidth = 50
+                tooltipWidth = 50;
               }
 
               return (
-                <Tooltip 
+                <Tooltip
                   label={icp_fit_reason || "N/A"}
                   position="left"
                   width={tooltipWidth}
                   multiline
                 >
-                  <Badge
-                    color={valueToColor(theme, mappedFitScore)}
-                  >
+                  <Badge color={valueToColor(theme, mappedFitScore)}>
                     {mappedFitScore}
                   </Badge>
                 </Tooltip>
-              )
+              );
             },
           },
           {

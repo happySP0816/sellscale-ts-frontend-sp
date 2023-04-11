@@ -61,10 +61,10 @@ export async function generateDraft(userToken: string, valueProps: string[], arc
 }
 
 
-export async function sendToOutreach(userToken: string, steps: string[]): Promise<MsgResponse> {
+export async function sendToOutreach(userToken: string, title: string, archetype_id: number, steps: { subject: string, body: string }[]): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/integration/outreach/send-sequence`,
+    `${API_URL}/email_generation/add_sequence`,
     {
       method: "POST",
       headers: {
@@ -72,7 +72,9 @@ export async function sendToOutreach(userToken: string, steps: string[]): Promis
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        "steps": steps,
+        "title": title,
+        "archetype_id": archetype_id,
+        "data": steps,
       }),
     }
   );

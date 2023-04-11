@@ -201,14 +201,16 @@ export default function PersonaCard(props: {
 
   const WARNING_PERCENTAGE = 25;
   const getStatusUsedPercentage = () => {
+    if(!props.archetype.performance) { return []; }
+
     let usedVal = 0;
     let unusedVal = unusedProspects;
 
-    for (let statD in props.archetype.performance?.status_map) {
+    for (let statD in props.archetype.performance.status_map) {
       if (statD === "PROSPECTED") {
         // unusedVal += props.archetype.performance.status_map[statD];
       } else {
-        usedVal += props.archetype.performance?.status_map[statD];
+        usedVal += props.archetype.performance.status_map[statD];
       }
     }
 

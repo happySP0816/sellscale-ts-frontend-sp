@@ -39,10 +39,11 @@ export default function SequenceWriterModal({
 
   const surveyForm = useForm({
     initialValues: {
+      title: "",
       company: "",
       sellingTo: "",
       sellingWhat: "",
-      numValueProps: 1,
+      numValueProps: 3,
       archetypeID: -1
     },
   });
@@ -115,18 +116,21 @@ export default function SequenceWriterModal({
     setLoading(true);
     const result = await sendToOutreach(
       userToken,
+      surveyForm.values.title,
+      +surveyForm.values.archetypeID,
       steps.map((step) => {
-        return(
-          "Subject: " + step.subject_line + "\n" + "Email: " + step.email
-        )
+        return {
+          subject: step.subject_line,
+          body: step.email,
+        }
       })
     );
     setLoading(false);
     if (result.status === "success") {
       showNotification({
         id: "sequence-writer-send-steps-success",
-        title: "Sent to Outreach",
-        message: "Your sequence has been scheduled to Outreach. Please allow up to 24 hours for it to propagate.",
+        title: "Sent to Sales Engagement Tool",
+        message: "Your sequence has been queued to your sales engagement tool. Please allow up to 24 hours for it to propagate.",
         color: "green",
         autoClose: 5000,
       });
@@ -135,7 +139,7 @@ export default function SequenceWriterModal({
       showNotification({
         id: "sequence-writer-send-steps-error",
         title: "Error",
-        message: "Failed to send to outreach",
+        message: "Failed to send to sales engagement tools",
         color: "red",
         autoClose: false,
       });
@@ -160,6 +164,12 @@ export default function SequenceWriterModal({
         <Stepper.Step label="Quick Survey">
           <form onSubmit={surveyForm.onSubmit(handleSurveySubmit)}>
             <Stack>
+              <TextInput
+                required
+                label="Sequence Title"
+                {...surveyForm.getInputProps("title")}
+              />
+
               <TextInput
                 required
                 label="Company Name"
@@ -187,8 +197,8 @@ export default function SequenceWriterModal({
 
               <NumberInput
                 required
-                label="# Value Props"
-                max={3}
+                label="# Value Props (max 5)"
+                max={5}
                 min={1}
                 {...surveyForm.getInputProps("numValueProps")}
               />
@@ -257,7 +267,7 @@ export default function SequenceWriterModal({
 
             <Center>
               <Button color="teal" radius="md" onClick={handleDraftSubmit}>
-                Copy Sequence into Outreach Tool
+                Create & Copy Sequence into Sales Engagement Tool
               </Button>
             </Center>
           </Stack>

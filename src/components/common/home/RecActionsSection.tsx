@@ -54,7 +54,7 @@ export default function RecActionsSection() {
                       });
                     }}
                   >
-                    Create a draft sequence with AI
+                    Create Sequence with AI
                   </Button>
                 </Stack>
               </Container>

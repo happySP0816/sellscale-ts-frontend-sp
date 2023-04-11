@@ -27,6 +27,15 @@ export interface Campaign {
     | "CANCELLED";
 }
 
+export interface Sequence {
+  id: number,
+  title: string,
+  client_sdr_id: number,
+  archetype_id: number,
+  data: { subject: string, body: string }[],
+  status: string,
+}
+
 export interface Prospect {
   approved_outreach_message_id: number | null;
   approved_prospect_email_id: number | null;

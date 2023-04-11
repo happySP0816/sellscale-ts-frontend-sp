@@ -197,8 +197,8 @@ export default function SequenceWriterModal({
 
               <NumberInput
                 required
-                label="# Value Props (max 5)"
-                max={5}
+                label="# Value Props (max 3)"
+                max={3}
                 min={1}
                 {...surveyForm.getInputProps("numValueProps")}
               />

@@ -20,6 +20,7 @@ import { useEffect } from "react";
 import { userDataState } from "@atoms/userAtoms";
 import SequenceWriterModal from "@modals/SequenceWriterModal";
 import CTAGeneratorModal from "@modals/CTAGeneratorModal";
+import ManagePulsePrompt from "@modals/ManagePulsePromptModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -104,6 +105,7 @@ export default function App() {
               viewEmail: ViewEmailModal,
               sequenceWriter: SequenceWriterModal,
               ctaGenerator: CTAGeneratorModal,
+              managePulsePrompt: ManagePulsePrompt,
             }}
             modalProps={{
               closeOnClickOutside: false,

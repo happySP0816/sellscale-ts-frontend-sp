@@ -201,6 +201,17 @@ export default function CTAGeneratorModal({
                             });
                             return;
                           }
+
+                          // Disable the CTA
+                          const newGeneratedCTAs = [...generatedCTAs];
+                          newGeneratedCTAs[index] = {
+                            enabled: false,
+                            tag: cta.tag,
+                            cta: cta.cta,
+                          };
+                          setGeneratedCTAs(newGeneratedCTAs);
+
+                          // Create the CTA
                           const response = await createCTA(
                             userToken,
                             innerProps.personaId,
@@ -214,15 +225,6 @@ export default function CTAGeneratorModal({
                               color: "green",
                               autoClose: 5000,
                             });
-
-                            // Disable the CTA
-                            const newGeneratedCTAs = [...generatedCTAs];
-                            newGeneratedCTAs[index] = {
-                              enabled: false,
-                              tag: cta.tag,
-                              cta: cta.cta,
-                            };
-                            setGeneratedCTAs(newGeneratedCTAs);
                           } else {
                             showNotification({
                               id: "create-cta-error",

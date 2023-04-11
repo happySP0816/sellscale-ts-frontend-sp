@@ -34,7 +34,7 @@ export default function SequenceWriterModal({
   const userToken = useRecoilValue(userTokenState);
   const [active, setActive] = useState(0);
   const [valueProps, setValueProps] = useState<string[]>([]);
-  const [steps, setSteps] = useState<{email: string, subject_line: string}[]>([]);
+  const [steps, setSteps] = useState<{ email: string, subject_line: string }[]>([]);
   const [loading, setLoading] = useState(false);
 
   const surveyForm = useForm({
@@ -163,18 +163,15 @@ export default function SequenceWriterModal({
       >
         <Stepper.Step label="Quick Survey">
           <form onSubmit={surveyForm.onSubmit(handleSurveySubmit)}>
-            <Stack>
+            <Text size='sm' mt='sm'>
+              Please fill out the following survey to generate value proposition ideas.
+            </Text>
+            <Stack mt='sm'>
               <Select
                 required
                 label="Select which persona you are targeting"
                 {...surveyForm.getInputProps("archetypeID")}
-                data={(data)??[]}
-              />
-
-              <TextInput
-                required
-                label="Sequence Title"
-                {...surveyForm.getInputProps("title")}
+                data={(data) ?? []}
               />
 
               <TextInput
@@ -218,11 +215,14 @@ export default function SequenceWriterModal({
           </form>
         </Stepper.Step>
         <Stepper.Step label="Value Props">
-          <Stack>
+          <Text size='sm' mt='sm'>
+            These are your generated value propositions! Please review them before moving on to the sequence generation step.
+          </Text>
+          <Stack mt='sm'>
             {valueProps.map((valueProp, index) => (
               <Textarea
                 key={index}
-                label={`Value #${index + 1}`}
+                label={`Value Prop #${index + 1}`}
                 value={valueProp}
                 onChange={(e) => {
                   const newValueProps = [...valueProps];
@@ -242,7 +242,10 @@ export default function SequenceWriterModal({
           </Stack>
         </Stepper.Step>
         <Stepper.Step label="Generate Sequences">
-        <Stack>
+          <Text size='sm' mt='sm'>
+            These are your generated sequence steps! Please edit them before approving for SellScale review.
+          </Text>
+          <Stack mt='sm'>
             {steps.map((step, index) => (
               <div
                 key={index}
@@ -259,7 +262,7 @@ export default function SequenceWriterModal({
                   required
                   autosize
                 />
-                <Text size='xs' mt='xs'>Body</Text> 
+                <Text size='xs' mt='xs'>Body</Text>
                 <Textarea
                   value={step.email}
                   onChange={(e) => {
@@ -270,7 +273,7 @@ export default function SequenceWriterModal({
                   required
                   autosize
                 />
-                <Divider mt="md"/>
+                <Divider mt="md" />
               </div>
             ))}
 

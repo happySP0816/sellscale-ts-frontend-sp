@@ -110,7 +110,35 @@ export default function CreateNewCTAModel({
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <LoadingOverlay visible={loading} />
+        <Text size='sm' mt='md'>
+          Call-to-Actions for LinkedIn are included at the end of a SellScale personalization and are the best way to start a conversation. You can manually add a CTA, or use our AI-powered CTA generator to brainstorm.
+        </Text>
 
+        <Card mt="md">
+          <Text weight={"bold"}>AI-Powered CTA Generator</Text>
+          <Text size="sm">
+            Press the button below to generate 6 CTAs based on your
+            persona in seconds.
+          </Text>
+          <Button
+            variant="outline"
+            radius="md"
+            size="xs"
+            mt="md"
+            onClick={() => {
+              openContextModal({
+                modal: "ctaGenerator",
+                title: <Title order={3}>CTA Generator</Title>,
+                innerProps: {
+                  personaId: innerProps.personaId,
+                  personaName: "",
+                },
+              });
+            }}
+          >
+            Brainstorm CTAs with AI
+          </Button>
+        </Card>
         <Flex direction="column">
           <Textarea
             mt="md"
@@ -153,35 +181,6 @@ export default function CreateNewCTAModel({
             >
               Create new CTA
             </Button>
-
-            <br />
-            <Container w="100%">
-              <Card w="50%" mt="md">
-                <Text weight={"bold"}>AI-Powered CTA Generator</Text>
-                <Text size="sm">
-                  Press the button below to generate 6 CTAs based on your
-                  persona in seconds.
-                </Text>
-                <Button
-                  variant="outline"
-                  radius="md"
-                  size="xs"
-                  mt="md"
-                  onClick={() => {
-                    openContextModal({
-                      modal: "ctaGenerator",
-                      title: <Title order={3}>CTA Generator</Title>,
-                      innerProps: {
-                        personaId: innerProps.personaId,
-                        personaName: "",
-                      },
-                    });
-                  }}
-                >
-                  Brainstorm CTAs with AI
-                </Button>
-              </Card>
-            </Container>
           </Group>
         }
       </form>

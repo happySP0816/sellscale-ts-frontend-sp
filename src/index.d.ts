@@ -87,6 +87,7 @@ export interface Archetype {
   transformer_blocklist: null; // TODO: 
   vessel_sequence_id: number;
   uploads?: any[];
+  icp_matching_prompt: string;
 }
 
 export interface LinkedInMessage {

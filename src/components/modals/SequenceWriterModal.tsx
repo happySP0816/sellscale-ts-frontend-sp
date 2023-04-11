@@ -43,7 +43,7 @@ export default function SequenceWriterModal({
       company: "",
       sellingTo: "",
       sellingWhat: "",
-      numValueProps: 3,
+      numSteps: 3,
       archetypeID: -1
     },
   });
@@ -73,7 +73,7 @@ export default function SequenceWriterModal({
       values.company,
       values.sellingTo,
       values.sellingWhat,
-      values.numValueProps
+      values.numSteps
     );
     setLoading(false);
     if (result.status === "success") {
@@ -164,6 +164,19 @@ export default function SequenceWriterModal({
         <Stepper.Step label="Quick Survey">
           <form onSubmit={surveyForm.onSubmit(handleSurveySubmit)}>
             <Stack>
+              <Select
+                required
+                label="Select which persona you are targeting"
+                {...surveyForm.getInputProps("archetypeID")}
+                data={(data)??[]}
+              />
+
+              <TextInput
+                required
+                label="Sequence Title"
+                {...surveyForm.getInputProps("title")}
+              />
+
               <TextInput
                 required
                 label="Sequence Title"
@@ -188,24 +201,17 @@ export default function SequenceWriterModal({
                 {...surveyForm.getInputProps("sellingWhat")}
               />
 
-              <Select
-                required
-                label="Which persona are you targeting?"
-                {...surveyForm.getInputProps("archetypeID")}
-                data={(data)??[]}
-              />
-
               <NumberInput
                 required
-                label="# Value Props (max 3)"
+                label="# Steps (max 3)"
                 max={3}
                 min={1}
-                {...surveyForm.getInputProps("numValueProps")}
+                {...surveyForm.getInputProps("numSteps")}
               />
 
               <Center>
                 <Button radius="md" type="submit">
-                  Generate {surveyForm.values.numValueProps} Value Props
+                  Generate {surveyForm.values.numSteps} Steps
                 </Button>
               </Center>
             </Stack>
@@ -241,7 +247,8 @@ export default function SequenceWriterModal({
               <div
                 key={index}
               >
-                <Text>Email {index + 1} </Text>
+                <Text size='md' weight='bold'>Email Step #{index + 1} </Text>
+                <Text size='xs' mt='xs'>Subject</Text>
                 <Textarea
                   value={step.subject_line}
                   onChange={(e) => {
@@ -252,6 +259,7 @@ export default function SequenceWriterModal({
                   required
                   autosize
                 />
+                <Text size='xs' mt='xs'>Body</Text> 
                 <Textarea
                   value={step.email}
                   onChange={(e) => {
@@ -262,6 +270,7 @@ export default function SequenceWriterModal({
                   required
                   autosize
                 />
+                <Divider mt="md"/>
               </div>
             ))}
 

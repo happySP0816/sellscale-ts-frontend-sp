@@ -197,7 +197,7 @@ export default function CTAGeneratorModal({
                               title: "Error",
                               message: "CTA must be less than 120 characters",
                               color: "red",
-                              autoClose: false,
+                              autoClose: 2000,
                             });
                             return;
                           }

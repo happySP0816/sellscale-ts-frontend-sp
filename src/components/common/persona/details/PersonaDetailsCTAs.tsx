@@ -103,7 +103,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
         return [];
       }
 
-      pageData = sortBy(pageData, sortStatus.columnAccessor);
+      pageData = sortBy(pageData, ['active', sortStatus.columnAccessor]);
       return sortStatus.direction === "desc" ? pageData.reverse() : pageData;
     },
     refetchOnWindowFocus: false,

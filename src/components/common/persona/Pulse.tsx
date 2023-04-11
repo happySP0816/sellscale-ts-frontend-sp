@@ -15,8 +15,8 @@ export default function Pulse(props: {
       <Textarea
         defaultValue={currentICPPrompt}
         placeholder="No prompt? Send SellScale a prompt request through here."
-        label="Ideal Customer Profile Prompt (Pulse Prompt)"
-        description="This is a description of your Ideal Customer Profile which SellScale AI uses to qualify prospects in this persona."
+        label="Ideal Customer Profile Description"
+        description="Description of your Ideal Customer Profile (ICP) that SellScale AI will use to filter prospects."
         autosize
         disabled
       />

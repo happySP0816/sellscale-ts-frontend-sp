@@ -49,7 +49,7 @@ export default function ManagePulsePrompt({
         title: "No Changes Detected",
         message: "You have not made any changes to your Pulse Prompt. Please make changes to your Pulse Prompt before requesting to save changes.",
         color: "red",
-        autoClose: 3000,
+        autoClose: 5000,
       })
 
       setLoading(false)
@@ -60,7 +60,7 @@ export default function ManagePulsePrompt({
         title: "No Prompt Detected",
         message: "You have not entered a Pulse Prompt. Please enter a Pulse Prompt before requesting to save changes.",
         color: "red",
-        autoClose: 3000,
+        autoClose: 5000,
       })
     }
 
@@ -75,7 +75,7 @@ export default function ManagePulsePrompt({
           title: "Sent Pulse Prompt Edit Request",
           message: "Your request to edit your Pulse Prompt has been sent to SellScale. SellScale AI will apply your changes in the best way possible!",
           color: "blue",
-          autoClose: 3000,
+          autoClose: 5000,
         })
       } else if (innerProps.mode === "CREATE") {
         showNotification({
@@ -83,7 +83,7 @@ export default function ManagePulsePrompt({
           title: "Sent Pulse Prompt Creation Request",
           message: "Your request to create a Pulse Prompt has been sent to SellScale. SellScale AI will create a prompt in the best way possible!",
           color: "blue",
-          autoClose: 3000,
+          autoClose: 5000,
         })
       }
     }
@@ -131,6 +131,7 @@ export default function ManagePulsePrompt({
                     mb='xs'
                     placeholder="Senior Level, Junior Level, etc."
                     label="ICP Seniority"
+                    description="Please write the qualitative seniority level of your prospect."
                     withAsterisk
                     required
                     {...form.getInputProps("seniority")}
@@ -139,6 +140,7 @@ export default function ManagePulsePrompt({
                     mb='xs'
                     placeholder="Software Engineering, Fullstack, etc."
                     label="Relevant Work"
+                    description="Please rank what type of work or roles your ICP has done."
                     withAsterisk
                     required
                     {...form.getInputProps("relevantWork")}
@@ -147,6 +149,7 @@ export default function ManagePulsePrompt({
                     mb='xs'
                     placeholder="Tier 1: Senior level SWE&#13;&#10;Tier2: Junior level SWE"
                     label="Tiers"
+                    description="Please rank the preference of your ICP based on their descriptions."
                     minRows={2}
                     withAsterisk
                     autosize
@@ -155,7 +158,8 @@ export default function ManagePulsePrompt({
                   />
                   <Textarea
                     mb='xs'
-                    placeholder="If the biography mentions React, this is a positive ideal candidate&#13;&#10;&#13;&#10;Interested in startups"
+                    placeholder="If the biography mentions Python, this is a positive ideal candidate&#13;&#10;&#13;&#10;Interested in startups"
+                    description="Please mention any other notes that may be useful to grab from a LinkedIn Bio."
                     label="Other"
                     minRows={4}
                     withAsterisk

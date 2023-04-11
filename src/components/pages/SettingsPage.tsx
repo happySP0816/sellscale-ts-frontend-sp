@@ -10,6 +10,7 @@ import PageTitle from "@nav/PageTitle";
 import { useQuery } from "@tanstack/react-query";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
 import { getUserInfo } from "@auth/core";
+import NylasConnectedCard from "@common/settings/NylasConnectedCard";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -175,6 +176,7 @@ export default function SettingsPage() {
       <SimpleGrid cols={2} spacing={0}>
         <VesselIntegrations />
         <LinkedInConnectedCard connected={userData ? userData.li_voyager_connected : false} />
+        <NylasConnectedCard connected={userData ? userData.nylas_connected : false} />
       </SimpleGrid>
 
     </PageFrame>

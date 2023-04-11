@@ -202,15 +202,6 @@ export default function CTAGeneratorModal({
                             return;
                           }
 
-                          // Disable the CTA
-                          const newGeneratedCTAs = [...generatedCTAs];
-                          newGeneratedCTAs[index] = {
-                            enabled: false,
-                            tag: cta.tag,
-                            cta: cta.cta,
-                          };
-                          setGeneratedCTAs(newGeneratedCTAs);
-
                           // Create the CTA
                           const response = await createCTA(
                             userToken,
@@ -218,6 +209,16 @@ export default function CTAGeneratorModal({
                             cta.cta
                           );
                           if (response.status === "success") {
+
+                            // Disable the CTA
+                            const newGeneratedCTAs = [...generatedCTAs];
+                            newGeneratedCTAs[index] = {
+                              enabled: false,
+                              tag: cta.tag,
+                              cta: cta.cta,
+                            };
+                            setGeneratedCTAs(newGeneratedCTAs);
+
                             showNotification({
                               id: "create-cta-success",
                               title: "Success",

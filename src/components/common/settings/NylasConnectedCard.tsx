@@ -26,6 +26,7 @@ import {
   IconCookie,
   IconKey,
   IconPassword,
+  IconPlugConnected,
   IconRefreshDot,
   IconSocial,
   IconX,
@@ -37,6 +38,7 @@ import LinkedInAuthOption from "./LinkedInAuthOption";
 import { getBrowserExtensionURL } from "@utils/general";
 import { useEffect, useState } from "react";
 import getLiProfile from "@utils/requests/getLiProfile";
+import getNylasClientID from "@utils/requests/getNylasClientID";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -51,20 +53,19 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function LinkedInConnectedCard(props: { connected: boolean }) {
-  const usingFirefox = navigator.userAgent.search("Firefox") >= 0;
+const REDIRECT_URI = `${window.location.origin}/settings`;
+
+export default function NylasConnectedCard(props: { connected: boolean }) {
+  
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
 
-  const [loadingConnection, setLoadingConnection] = useState(false);
-  const [liProfile, setLiProfile] = useState<null | any>(null);
-
   const { classes } = useStyles();
 
-  const { data, isFetching, refetch } = useQuery({
-    queryKey: [`li-profile-self`],
+  const { data: nylasClientId } = useQuery({
+    queryKey: [`nylas-profile-self`],
     queryFn: async () => {
-      const result = await getLiProfile(userToken);
+      const result = await getNylasClientID(userToken);
       return result.status === "success" ? result.extra : null;
     },
   });
@@ -74,7 +75,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
       <Stack>
         <div>
           <Group>
-            <Title order={3}>LinkedIn Account</Title>
+            <Title order={3}>Email Integration</Title>
             {props.connected ? (
               <Badge
                 size="xl"
@@ -133,105 +134,33 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
           </Group>
           {props.connected ? (
             <Text fz="sm" pt="xs">
-              By being connected to LinkedIn, SellScale is able to send
-              connections, read, and respond to your contact's conversations.
+              By connecting your email, SellScale is able to manage, read, and respond to your contact's conversations.
             </Text>
           ) : (
             <>
               <Text fz="sm" pt="xs">
-                With our browser extension you can sync and automate your
-                LinkedIn account directly with SellScale!
+                By connecting your email, SellScale is able to manage, read, and respond to your contact's conversations.
               </Text>
-              {/* 
-          <Stack pt="lg">
-
-            <LinkedInAuthOption
-              num={1}
-              time="~30 seconds"
-              text="Enter LinkedIn credentials"
-              button={
-                <Button
-                  variant="light"
-                  size="xs"
-                  rightIcon={<IconKey size="1rem" />}
-                  onClick={() => {
-                    openContextModal({
-                      modal: 'sendLinkedInCredentials',
-                      title: (<Title order={3}>LinkedIn Credentials</Title>),
-                      innerProps: {},
-                    });
-                  }}
-                >
-                  Enter credentials
-                </Button>
-              }
-            />
-
-            <LinkedInAuthOption
-              num={2}
-              time="~3 minutes"
-              text="Manually paste in Cookie"
-              button={
-                <Button
-                  variant="light"
-                  size="xs"
-                  rightIcon={<IconCookie size="1rem" />}
-                  onClick={() => {
-                    openContextModal({
-                      modal: 'sendLinkedInCookie',
-                      title: (<Title order={3}>Find Your LinkedIn Cookie</Title>),
-                      innerProps: {},
-                    });
-                  }}
-                >
-                  View instructions
-                </Button>
-              }
-            />
-
-            <LinkedInAuthOption
-              num={3}
-              time="~3 seconds"
-              text={`Install ${usingFirefox ? "Firefox" : "Chrome"} Extension`}
-              button={
-                <Button
-                  component="a"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={
-                    usingFirefox
-                      ? "https://addons.mozilla.org/en-US/firefox/addon/sellscale-browser-extension/"
-                      : "https://chrome.google.com/webstore/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa/"
-                  }
-                  variant="light"
-                  size="xs"
-                  rightIcon={<IconCloudDownload size="1rem" />}
-                >
-                  Install Extension
-                </Button>
-              }
-            />
-          </Stack>
-          */}
               <Center>
                 <Button
                   component="a"
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={getBrowserExtensionURL(usingFirefox)}
+                  href={nylasClientId ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code` : ''}
                   my={20}
                   variant="outline"
                   size="md"
-                  color="green"
-                  rightIcon={<IconCloudDownload size="1rem" />}
+                  color="pink"
+                  rightIcon={<IconPlugConnected size="1rem" />}
                 >
-                  Install {usingFirefox ? "Firefox" : "Chrome"} Extension
+                  Connect Email
                 </Button>
               </Center>
             </>
           )}
         </div>
-        {props.connected && (
+
+        {/* {props.connected && (
           <div>
             {!data && (
               <Center w="100%" h={100}>
@@ -290,7 +219,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
               </Group>
             )}
           </div>
-        )}
+        )} */}
       </Stack>
     </Paper>
   );

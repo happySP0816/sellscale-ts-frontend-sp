@@ -5,16 +5,15 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "build": "npm run generate-meta-tag && tsc && vite build",
+    "build": "tsc && vite build",
     "test": "jest",
     "preview": "vite preview",
     "start:local": "vite",
-    "build:local": "npm run generate-meta-tag && tsc && vite build",
+    "build:local": "tsc && vite build",
     "start:stage": "vite",
-    "build:stage": "npm run generate-meta-tag && tsc && vite build",
+    "build:stage": "tsc && vite build",
     "start:prod": "vite",
-    "build:prod": "npm run generate-meta-tag && tsc && vite build",
-    "generate-meta-tag": "node ./node_modules/react-cache-buster/dist/generate-meta-tag.js"
+    "build:prod": "tsc && vite build"
   },
   "jest": {
     "transform": {
@@ -51,7 +50,6 @@
     "mantine-datatable": "^1.8.2",
     "mantine-react-table": "^0.9.5",
     "react": "^18.2.0",
-    "react-cache-buster": "^0.1.8",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.7.1",

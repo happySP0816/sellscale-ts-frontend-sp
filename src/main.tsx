@@ -28,9 +28,8 @@ import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 import LinkedInPage from "@pages/LinkedInPage";
 import EmailPage from "@pages/EmailPage";
-import CacheBuster from 'react-cache-buster';
-import { version } from '../package.json';
-import { LoadingOverlay } from "@mantine/core";
+
+console.log('Here is the version: 1.0.0');
 
 const queryClient = new QueryClient();
 
@@ -133,15 +132,7 @@ root.render(
           fallback={<div>An error has occurred</div>}
           showDialog
         >
-          <CacheBuster
-            currentVersion={`${version}-${new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' })}`}
-            isEnabled={import.meta.env.PROD}
-            isVerboseMode={false}
-            loadingComponent={<LoadingOverlay visible={true} overlayBlur={4} />}
-            metaFileDirectory={'.'}
-          >
-            <RouterProvider router={router} />
-          </CacheBuster>
+          <RouterProvider router={router} />
         </Sentry.ErrorBoundary>
       </RecoilRoot>
     </QueryClientProvider>

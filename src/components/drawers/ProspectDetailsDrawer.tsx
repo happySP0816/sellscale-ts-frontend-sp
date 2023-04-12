@@ -33,6 +33,7 @@ import { Channel } from "src";
 import FlexSeparate from "@common/library/FlexSeparate";
 import ProspectDetailsViewEmails from "@common/prospectDetails/ProspectDetailsViewEmails";
 import { API_URL } from "@constants/data";
+import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove";
 
 export default function ProspectDetailsDrawer() {
   const theme = useMantineTheme();
@@ -64,15 +65,12 @@ export default function ProspectDetailsDrawer() {
         return null;
       }
 
-      const response = await fetch(
-        `${API_URL}/prospect/${prospectId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/prospect/${prospectId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
       if (response.status === 401) {
         logout();
       }
@@ -225,6 +223,10 @@ export default function ProspectDetailsDrawer() {
             <ProspectDetailsNotes
               currentStatus={data.main.prospect_info.details.overall_status}
               prospectId={data.main.prospect_info.details.id}
+            />
+            <ProspectDetailsRemove
+              prospectId={data.main.prospect_info.details.id}
+              prospectStatus={data.main.prospect_info.details.overall_status}
             />
             {
               // data.main.prospect_info.company.name && (

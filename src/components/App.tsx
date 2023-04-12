@@ -21,6 +21,7 @@ import { userDataState } from "@atoms/userAtoms";
 import SequenceWriterModal from "@modals/SequenceWriterModal";
 import CTAGeneratorModal from "@modals/CTAGeneratorModal";
 import ManagePulsePrompt from "@modals/ManagePulsePromptModal";
+import ViewEmailThreadModal from "@modals/ViewEmailThreadModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -106,6 +107,7 @@ export default function App() {
               sequenceWriter: SequenceWriterModal,
               ctaGenerator: CTAGeneratorModal,
               managePulsePrompt: ManagePulsePrompt,
+              viewEmailThread: ViewEmailThreadModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

@@ -250,7 +250,7 @@ export default function ProspectDetailsViewConversation(
           <div>
             <Group position="apart">
               <Text weight={700} size="lg">
-                Linkedin Conversation
+                LinkedIn Conversation
               </Text>
             </Group>
             <Group position="apart" mb="xs">

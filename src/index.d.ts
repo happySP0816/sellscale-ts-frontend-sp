@@ -1,4 +1,4 @@
-
+declare module 'react-render-html';
 export interface MsgResponse {
   status: 'success' | 'error';
   title: string;
@@ -125,7 +125,8 @@ export interface ProspectEmail extends Record<string, unknown> {
   email: string,
   subject: string,
   body: string,
-  date: Date
+  date: number,
+  from: string,
 }
 
 export type Channel = 'EMAIL' | 'LINKEDIN' | 'SELLSCALE';

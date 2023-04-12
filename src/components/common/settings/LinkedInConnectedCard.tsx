@@ -74,7 +74,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
       <Stack>
         <div>
           <Group>
-            <Title order={3}>LinkedIn Account</Title>
+            <Title order={3}>LinkedIn Integration</Title>
             {props.connected ? (
               <Badge
                 size="xl"

@@ -328,7 +328,7 @@ export default function ProspectTable({
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show {channel} statuses
-                  data_channels.extra[channel].statuses_available
+                  data_channels?.extra[channel]?.statuses_available
                     .map((status: string) => {
                       return {
                         label: formatToLabel(

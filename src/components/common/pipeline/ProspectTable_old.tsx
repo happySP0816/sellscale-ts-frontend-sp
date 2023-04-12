@@ -318,7 +318,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show {channel} statuses
-                  (data_channels.extra[channel]
+                  (data_channels.extra[channel] && data_channels.extra[channel].statuses_available
                     ? data_channels.extra[channel].statuses_available
                     : []
                   )

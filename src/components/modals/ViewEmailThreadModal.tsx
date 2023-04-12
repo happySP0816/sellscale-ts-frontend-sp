@@ -54,7 +54,7 @@ export default function ViewEmailThreadModal({
       }}
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
-      <ScrollArea>
+      <ScrollArea mih={200}>
         {data?.map((email: any, index: number) => (
           <Paper
             withBorder

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "build": "tsc && vite build",
+    "build": "npm run generate-meta-tag && tsc && vite build",
     "test": "jest",
     "preview": "vite preview",
     "start:local": "vite",

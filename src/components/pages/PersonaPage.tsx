@@ -29,7 +29,7 @@ import { setPageTitle } from "@utils/documentChange";
 import getPersonas, { getAllUploads } from "@utils/requests/getPersonas";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Archetype } from "src";
+import { Archetype } from "src/main";
 import { SCREEN_SIZES } from "../../constants/data";
 import PageFrame from "../common/PageFrame";
 import PersonaCard from "../common/persona/PersonaCard";

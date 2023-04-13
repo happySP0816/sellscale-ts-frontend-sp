@@ -109,7 +109,7 @@ export default function CampaignProspects({
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show overall statuses
-                  data_channels?.extra["SELLSCALE"]?.statuses_available.map(
+                  data_channels?.extra["SELLSCALE"]?.statuses_available?.map(
                     (status: string) => {
                       return {
                         label: data_channels.extra["SELLSCALE"][status].name,

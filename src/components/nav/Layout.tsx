@@ -137,7 +137,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         },
       })}
     >
-      <Text c="dimmed" fz="sm" sx={{ position: 'absolute', top: 2, right: 5 }}>v. {version}</Text>
+      <Text c="dimmed" fs="italic" fz="xs" sx={{ position: 'absolute', top: 2, right: 5 }}>v. {version}</Text>
       <main>{children}</main>
     </AppShell>
   );

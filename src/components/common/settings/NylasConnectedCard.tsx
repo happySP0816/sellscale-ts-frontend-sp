@@ -63,13 +63,15 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
 
   const { classes } = useStyles();
 
-  const { data: nylasClientId } = useQuery({
+  const { data: nylasClientId, isFetching } = useQuery({
     queryKey: [`nylas-profile-self`],
     queryFn: async () => {
       const result = await getNylasClientID(userToken);
       return result.status === "success" ? result.extra : null;
     },
   });
+
+  console.log(isFetching)
 
   return (
     <Paper withBorder m="xs" p="md" radius="md">
@@ -153,6 +155,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                   size="md"
                   color="pink"
                   rightIcon={<IconPlugConnected size="1rem" />}
+                  loading={isFetching}
                 >
                   Connect Email
                 </Button>

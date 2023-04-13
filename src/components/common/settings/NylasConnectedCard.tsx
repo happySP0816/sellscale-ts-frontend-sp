@@ -39,6 +39,7 @@ import { getBrowserExtensionURL } from "@utils/general";
 import { useEffect, useState } from "react";
 import getLiProfile from "@utils/requests/getLiProfile";
 import getNylasClientID from "@utils/requests/getNylasClientID";
+import { clearNylasTokens } from "@utils/requests/clearNylasTokens";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -89,28 +90,28 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                     radius="xl"
                     variant="transparent"
                     onClick={async () => {
-                      const result = await clearAuthTokens(userToken);
+                      const result = await clearNylasTokens(userToken);
                       if (result.status === "success") {
                         showNotification({
-                          id: "linkedin-disconnect-success",
+                          id: "nylas-disconnect-success",
                           title: "Success",
                           message:
-                            "You have successfully disconnected your LinkedIn account.",
+                            "You have successfully disconnected your email.",
                           color: "blue",
                           autoClose: 5000,
                         });
                       } else {
                         showNotification({
-                          id: "linkedin-disconnect-failure",
+                          id: "nylas-disconnect-failure",
                           title: "Failure",
                           message:
-                            "There was an error disconnecting your LinkedIn account. Please contact an admin.",
+                            "There was an error disconnecting your email. Please contact an admin.",
                           color: "red",
                           autoClose: false,
                         });
                       }
                       queryClient.invalidateQueries({
-                        queryKey: ["query-get-linkedin-connected"],
+                        queryKey: ["query-get-accounts-connected"],
                       });
                     }}
                   >

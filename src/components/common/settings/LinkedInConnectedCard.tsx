@@ -109,7 +109,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                         });
                       }
                       queryClient.invalidateQueries({
-                        queryKey: ["query-get-linkedin-connected"],
+                        queryKey: ["query-get-accounts-connected"],
                       });
                     }}
                   >

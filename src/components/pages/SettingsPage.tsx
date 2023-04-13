@@ -11,6 +11,9 @@ import { useQuery } from "@tanstack/react-query";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
 import { getUserInfo } from "@auth/core";
 import NylasConnectedCard from "@common/settings/NylasConnectedCard";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { navigateToPage } from "@utils/documentChange";
+import exchangeNylasClientID from "@utils/requests/exchangeNylasAuthCode";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -158,9 +161,24 @@ export default function SettingsPage() {
 
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
+  
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    setTimeout(() => {
+      const nylasCode = searchParams.get('code');
+      if(nylasCode){
+        (async () => {
+          await exchangeNylasClientID(userToken, nylasCode);
+          navigateToPage(navigate, '/settings');
+        })();
+      }
+    });
+  }, []);
 
   useQuery({
-    queryKey: [`query-get-linkedin-connected`],
+    queryKey: [`query-get-accounts-connected`],
     queryFn: async () => {
       const info = await getUserInfo(userToken);
       setUserData(info);

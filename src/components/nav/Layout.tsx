@@ -7,6 +7,7 @@ import {
   Burger,
   useMantineTheme,
   Container,
+  Text,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { NAV_BAR_SIDE_WIDTH, NAV_BAR_TOP_WIDTH, SCREEN_SIZES } from "@constants/data";
@@ -22,6 +23,7 @@ import { userDataState } from "@atoms/userAtoms";
 import NavTab from "./NavTab";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
+import { version } from '../../../package.json';
 
 const AnimatedNavbar = animated(Navbar);
 
@@ -135,6 +137,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         },
       })}
     >
+      <Text c="dimmed" fz="sm" sx={{ position: 'absolute', top: 2, right: 5 }}>v. {version}</Text>
       <main>{children}</main>
     </AppShell>
   );

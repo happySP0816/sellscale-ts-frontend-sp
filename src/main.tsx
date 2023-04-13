@@ -29,8 +29,6 @@ import { BrowserTracing } from "@sentry/tracing";
 import LinkedInPage from "@pages/LinkedInPage";
 import EmailPage from "@pages/EmailPage";
 
-console.log('Here is the version: 1.1.2');
-
 const queryClient = new QueryClient();
 
 // Set Sentry up and wrap the router
@@ -58,6 +56,12 @@ if (import.meta.env.PROD) {
 const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(
   createBrowserRouter
 );
+
+// Clear the cache on startup
+const keys = await caches.keys();
+for (const key of keys) {
+  caches.delete(key);
+}
 
 // The DOM router for determining what pages are rendered at which paths
 const router = sentryCreateBrowserRouter([

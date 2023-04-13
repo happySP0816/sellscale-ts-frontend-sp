@@ -57,11 +57,13 @@ const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(
   createBrowserRouter
 );
 
-// Clear the cache on startup
-const keys = await caches.keys();
-for (const key of keys) {
-  caches.delete(key);
-}
+(async () => {
+  // Clear the cache on startup
+  const keys = await caches.keys();
+  for (const key of keys) {
+    caches.delete(key);
+  }
+})();
 
 // The DOM router for determining what pages are rendered at which paths
 const router = sentryCreateBrowserRouter([

@@ -56,11 +56,20 @@ const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(
   createBrowserRouter
 );
 
+// Fixes cache issues on refresh
 (async () => {
   // Clear the cache on startup
   const keys = await caches.keys();
   for (const key of keys) {
     caches.delete(key);
+  }
+
+  // Unregister our service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(async (registration) => {
+      const result = await registration.unregister();
+      console.log('Unregistered service worker: ', result);
+    });
   }
 })();
 

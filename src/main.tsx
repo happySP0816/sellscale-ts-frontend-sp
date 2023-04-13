@@ -29,7 +29,7 @@ import { BrowserTracing } from "@sentry/tracing";
 import LinkedInPage from "@pages/LinkedInPage";
 import EmailPage from "@pages/EmailPage";
 
-console.log('Here is the version: 1.1.0');
+console.log('Here is the version: 1.1.1');
 
 const queryClient = new QueryClient();
 

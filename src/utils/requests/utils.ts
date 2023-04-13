@@ -13,7 +13,7 @@ export default async function getResponseJSON(key: string, response: Response): 
     showNotification({
       id: key+"-error",
       title: "Error",
-      message: `Error: ${error}`,
+      message: `Error: ${error.length > 20 ? 'Issue occurred, please check logs' : error}`,
       color: "red",
       autoClose: false,
     });

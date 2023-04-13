@@ -125,9 +125,6 @@ export default function ProspectDetailsDrawer() {
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       {data?.main.prospect_info && !isFetching && (
         <>
-          <ProspectDetailsViewEmails
-                            prospectId={data.main.prospect_info.details.id}
-                          />
           <ProspectDetailsSummary
             fullName={data.main.prospect_info.details.full_name}
             title={data.main.prospect_info.details.title}

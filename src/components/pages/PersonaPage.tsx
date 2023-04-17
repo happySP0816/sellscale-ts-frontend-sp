@@ -21,7 +21,7 @@ import {
   Button,
   Avatar,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import { useForceUpdate, useMediaQuery } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import PageTitle from "@nav/PageTitle";
 import { IconCornerRightUp, IconUserPlus } from "@tabler/icons";
@@ -34,10 +34,12 @@ import { SCREEN_SIZES } from "../../constants/data";
 import PageFrame from "../common/PageFrame";
 import PersonaCard from "../common/persona/PersonaCard";
 import PersonaUploadDrawer from "../drawers/PersonaUploadDrawer";
+import { useEffect } from "react";
 
 export default function PersonaPage() {
   setPageTitle(`Personas`);
 
+  const forceUpdate = useForceUpdate();
   const userToken = useRecoilValue(userTokenState);
 
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
@@ -50,12 +52,6 @@ export default function PersonaPage() {
       const response = await getPersonas(userToken);
       const result =
         response.status === "success" ? (response.extra as Archetype[]) : [];
-
-      for (let persona of result) {
-        const uploadsResponse = await getAllUploads(userToken, persona.id);
-        persona.uploads =
-          uploadsResponse.status === "success" ? uploadsResponse.extra : [];
-      }
 
       // const activePersonas = result.filter((p) => p.active);
       // if (activePersonas.length === 1) {
@@ -71,6 +67,19 @@ export default function PersonaPage() {
     },
     refetchOnWindowFocus: false,
   });
+
+
+  useEffect(() => {
+    if (!data) return;
+    (async () => {
+      for (let persona of data) {
+        const uploadsResponse = await getAllUploads(userToken, persona.id);
+        persona.uploads =
+          uploadsResponse.status === "success" ? uploadsResponse.extra : [];
+      }
+      forceUpdate();
+    })();
+  }, [data])
 
   return (
     <>

@@ -172,6 +172,7 @@ export default function SettingsPage() {
         (async () => {
           await exchangeNylasClientID(userToken, nylasCode);
           navigateToPage(navigate, '/settings');
+          window.location.reload();
         })();
       }
     });

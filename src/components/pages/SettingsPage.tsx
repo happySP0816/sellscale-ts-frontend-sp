@@ -97,19 +97,12 @@ function VesselIntegrations() {
   };
 
   return (
-    <Paper
-      withBorder
-      m="xs"
-      p="md"
-      radius="md"
-    >
-      <Title order={3}>
-        Connect to your Sales Engagement Tool
-      </Title>
-      <Text fz="sm" pt='xs' pb="lg">
-        By connecting to a sales engagement tool (like Outreach or
-        Salesloft), we can automatically personalize contacts, enroll in
-        sequences, and collect analytics.
+    <Paper withBorder m="xs" p="md" radius="md">
+      <Title order={3}>Connect to your Sales Engagement Tool</Title>
+      <Text fz="sm" pt="xs" pb="lg">
+        By connecting to a sales engagement tool (like Outreach or Salesloft),
+        we can automatically personalize contacts, enroll in sequences, and
+        collect analytics.
       </Text>
       {isConnected ? (
         <Notification
@@ -129,6 +122,7 @@ function VesselIntegrations() {
         <>
           <Button
             color={"green"}
+            m="sm"
             mr="md"
             onClick={async () =>
               open({
@@ -140,7 +134,21 @@ function VesselIntegrations() {
             Connect to Salesloft
           </Button>
           <Button
+            color={"orange"}
+            m="sm"
+            mr="md"
+            onClick={async () =>
+              open({
+                integrationId: "apollo",
+                linkToken: await getLinkToken(),
+              })
+            }
+          >
+            Connect to Apollo
+          </Button>
+          <Button
             color={"blue"}
+            m="sm"
             mr="md"
             onClick={async () =>
               open({
@@ -158,20 +166,19 @@ function VesselIntegrations() {
 }
 
 export default function SettingsPage() {
-
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
-  
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
     setTimeout(() => {
-      const nylasCode = searchParams.get('code');
-      if(nylasCode){
+      const nylasCode = searchParams.get("code");
+      if (nylasCode) {
         (async () => {
           await exchangeNylasClientID(userToken, nylasCode);
-          navigateToPage(navigate, '/settings');
+          navigateToPage(navigate, "/settings");
           window.location.reload();
         })();
       }
@@ -183,21 +190,24 @@ export default function SettingsPage() {
     queryFn: async () => {
       const info = await getUserInfo(userToken);
       setUserData(info);
-      localStorage.setItem('user-data', JSON.stringify(info));
+      localStorage.setItem("user-data", JSON.stringify(info));
       return info;
     },
   });
 
   return (
     <PageFrame>
-      <PageTitle title='Settings' />
+      <PageTitle title="Settings" />
 
       <SimpleGrid cols={2} spacing={0}>
         <VesselIntegrations />
-        <LinkedInConnectedCard connected={userData ? userData.li_voyager_connected : false} />
-        <NylasConnectedCard connected={userData ? userData.nylas_connected : false} />
+        <LinkedInConnectedCard
+          connected={userData ? userData.li_voyager_connected : false}
+        />
+        <NylasConnectedCard
+          connected={userData ? userData.nylas_connected : false}
+        />
       </SimpleGrid>
-
     </PageFrame>
   );
 }

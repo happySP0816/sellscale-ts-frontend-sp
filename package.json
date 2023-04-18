@@ -10,9 +10,9 @@
     "preview": "vite preview",
     "start:local": "vite",
     "build:local": "tsc && vite build",
-    "start:stage": "vite",
+    "start:stage": "vite --mode staging",
     "build:stage": "tsc && vite build",
-    "start:prod": "vite",
+    "start:prod": "vite --mode production",
     "build:prod": "tsc && vite build"
   },
   "jest": {

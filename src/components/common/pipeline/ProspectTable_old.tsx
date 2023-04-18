@@ -267,8 +267,6 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
     }
   }, [selectorType, channel]);
 
-  console.log(data_channels);
-
   return (
     <Box>
       <Grid grow>

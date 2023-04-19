@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   Text,
   Paper,
@@ -14,14 +14,20 @@ import {
   LoadingOverlay,
   Select,
   SelectItem,
+  ActionIcon,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
+import { IconReload } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
-import { generateDraft, generateValueProps, sendToOutreach } from "@utils/requests/generateSequence";
+import {
+  generateDraft,
+  generateValueProps,
+  sendToOutreach,
+} from "@utils/requests/generateSequence";
 import getPersonas from "@utils/requests/getPersonas";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { Archetype } from "src";
 
@@ -32,19 +38,27 @@ export default function SequenceWriterModal({
 }: ContextModalProps) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
   const [active, setActive] = useState(0);
   const [valueProps, setValueProps] = useState<string[]>([]);
-  const [steps, setSteps] = useState<{ email: string, subject_line: string }[]>([]);
+  const [steps, setSteps] = useState<{ email: string; subject_line: string }[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
+  const [loadingValueProp, setLoadingValueProp] = useState({ active: false, index: -1 });
 
   const surveyForm = useForm({
     initialValues: {
       title: "",
-      company: "",
+      company: userData?.client?.company ?? "",
       sellingTo: "",
       sellingWhat: "",
       numSteps: 3,
-      archetypeID: -1
+      archetypeID: -1,
+    },
+
+    validate: {
+      archetypeID: (value) => (value === -1 ? "Please select a persona" : null),
     },
   });
 
@@ -59,9 +73,9 @@ export default function SequenceWriterModal({
         return {
           value: res.id + "",
           label: res.archetype,
-        }
-      })
-      return mapped_result satisfies SelectItem[]
+        };
+      });
+      return mapped_result satisfies SelectItem[];
     },
     refetchOnWindowFocus: false,
   });
@@ -77,17 +91,44 @@ export default function SequenceWriterModal({
     );
     setLoading(false);
     if (result.status === "success") {
-      setValueProps(result.extra.filter((valueProp: string) => valueProp.trim() !== ""));
+      setValueProps(
+        result.extra.filter((valueProp: string) => valueProp.trim() !== "")
+      );
       setActive((current) => current + 1);
     } else {
       showNotification({
         id: "sequence-writer-generate-props-error",
-        title: "Error",
-        message: "Failed to generate value props",
+        title: "Generation Failed",
+        message: "Failed to generate CTA ideas. Please try again!",
         color: "red",
         autoClose: false,
       });
     }
+  };
+
+  const regenerateValueProp = async (index: number) => {
+    setLoadingValueProp({ active: true, index });
+    const result = await generateValueProps(
+      userToken,
+      surveyForm.values.company,
+      surveyForm.values.sellingTo,
+      surveyForm.values.sellingWhat,
+      1
+    );
+    if (result.status === "success") {
+      const newValueProps = [...valueProps];
+      newValueProps[index] = result.extra[0].replace('Value Prop: ', '');
+      setValueProps(newValueProps);
+    } else {
+      showNotification({
+        id: "sequence-writer-generate-props-error",
+        title: "Error",
+        message: "Failed to regenerate value prop",
+        color: "red",
+        autoClose: 5000,
+      });
+    }
+    setLoadingValueProp({ active: false, index });
   };
 
   const handleValuePropsSubmit = async () => {
@@ -122,7 +163,7 @@ export default function SequenceWriterModal({
         return {
           subject: step.subject_line,
           body: step.email,
-        }
+        };
       })
     );
     setLoading(false);
@@ -130,7 +171,8 @@ export default function SequenceWriterModal({
       showNotification({
         id: "sequence-writer-send-steps-success",
         title: "Sent to Sales Engagement Tool",
-        message: "Your sequence has been queued to your sales engagement tool. Please allow up to 24 hours for it to propagate.",
+        message:
+          "Your sequence has been queued to your sales engagement tool. Please allow up to 24 hours for it to propagate.",
         color: "green",
         autoClose: 5000,
       });
@@ -163,39 +205,64 @@ export default function SequenceWriterModal({
       >
         <Stepper.Step label="Quick Survey">
           <form onSubmit={surveyForm.onSubmit(handleSurveySubmit)}>
-            <Text size='sm' mt='sm'>
-              Please fill out the following survey to generate value proposition ideas.
+            <Text size="sm" mt="sm">
+              Please fill out the following survey to generate value proposition
+              ideas.
             </Text>
-            <Stack mt='sm'>
+            <Stack mt="sm">
               <Select
                 required
                 label="Select which persona you are targeting"
+                placeholder="ex. VP of Sales, Head of HR"
                 {...surveyForm.getInputProps("archetypeID")}
-                data={(data) ?? []}
+                data={data ?? []}
+                onBlur={() => {
+                  if (!surveyForm.values.title) {
+                    const currentDate = new Date();
+                    const formattedDate = `${
+                      currentDate.getMonth() + 1
+                    }/${currentDate.getDate()}/${currentDate.getFullYear()}`;
+
+                    const defaultTitle = `${userData.sdr_name} - ${
+                      data?.find(
+                        (d) => d.value === surveyForm.values.archetypeID + ""
+                      )?.label
+                    } - ${formattedDate}`;
+                    surveyForm.setFieldValue("title", defaultTitle);
+                  }
+                }}
               />
 
               <TextInput
                 required
                 label="Sequence Title"
+                placeholder="ex. Joe Smith - VP Sales - 03/11/2021"
                 {...surveyForm.getInputProps("title")}
+                disabled={surveyForm.values.archetypeID === -1}
               />
 
               <TextInput
                 required
                 label="Company Name"
+                placeholder="ex. Acme Corp"
                 {...surveyForm.getInputProps("company")}
+                disabled={surveyForm.values.archetypeID === -1}
               />
 
               <TextInput
                 required
                 label="Who are you selling to?"
+                placeholder="ex. VP of Sales"
                 {...surveyForm.getInputProps("sellingTo")}
+                disabled={surveyForm.values.archetypeID === -1}
               />
 
               <TextInput
                 required
                 label="What are you selling?"
+                placeholder="ex. Sales Engagement Tool"
                 {...surveyForm.getInputProps("sellingWhat")}
+                disabled={surveyForm.values.archetypeID === -1}
               />
 
               <NumberInput
@@ -204,6 +271,7 @@ export default function SequenceWriterModal({
                 max={3}
                 min={1}
                 {...surveyForm.getInputProps("numSteps")}
+                disabled={surveyForm.values.archetypeID === -1}
               />
 
               <Center>
@@ -215,23 +283,36 @@ export default function SequenceWriterModal({
           </form>
         </Stepper.Step>
         <Stepper.Step label="Value Props">
-          <Text size='sm' mt='sm'>
-            These are your generated value propositions! Please review them before moving on to the sequence generation step.
+          <Text size="sm" mt="sm">
+            These are your generated value propositions! Please review them
+            before moving on to the sequence generation step.
           </Text>
-          <Stack mt='sm'>
+          <Stack mt="sm">
             {valueProps.map((valueProp, index) => (
-              <Textarea
-                key={index}
-                label={`Value Prop #${index + 1}`}
-                value={valueProp}
-                onChange={(e) => {
-                  const newValueProps = [...valueProps];
-                  newValueProps[index] = e.currentTarget.value;
-                  setValueProps(newValueProps);
-                }}
-                required
-                autosize
-              />
+              <div style={{ position: 'relative' }}>
+                <Textarea
+                  key={index}
+                  label={`Value Prop #${index + 1}`}
+                  value={valueProp}
+                  onChange={(e) => {
+                    const newValueProps = [...valueProps];
+                    newValueProps[index] = e.currentTarget.value;
+                    setValueProps(newValueProps);
+                  }}
+                  required
+                  autosize
+                />
+                <ActionIcon
+                  sx={{ position: 'absolute', top: 0, right: 0 }}
+                  loading={loadingValueProp.active && loadingValueProp.index === index}
+                  size="sm"
+                  onClick={() => {
+                    regenerateValueProp(index);
+                  }}
+                >
+                  <IconReload size="0.875rem" />
+                </ActionIcon>
+              </div>
             ))}
 
             <Center>
@@ -242,16 +323,20 @@ export default function SequenceWriterModal({
           </Stack>
         </Stepper.Step>
         <Stepper.Step label="Generate Sequences">
-          <Text size='sm' mt='sm'>
-            These are your generated sequence steps! Please edit them before approving for SellScale review.
+          <Text size="sm" mt="sm">
+            These are your generated sequence steps! Please edit them before
+            approving for SellScale review. NOTE: Scroll to the bottom to upload
+            into your sales engagement tool
           </Text>
-          <Stack mt='sm'>
+          <Stack mt="sm">
             {steps.map((step, index) => (
-              <div
-                key={index}
-              >
-                <Text size='md' weight='bold'>Email Step #{index + 1} </Text>
-                <Text size='xs' mt='xs'>Subject</Text>
+              <div key={index}>
+                <Text size="md" weight="bold">
+                  Email Step #{index + 1}{" "}
+                </Text>
+                <Text size="xs" mt="xs">
+                  Subject
+                </Text>
                 <Textarea
                   value={step.subject_line}
                   onChange={(e) => {
@@ -262,7 +347,9 @@ export default function SequenceWriterModal({
                   required
                   autosize
                 />
-                <Text size='xs' mt='xs'>Body</Text>
+                <Text size="xs" mt="xs">
+                  Body
+                </Text>
                 <Textarea
                   value={step.email}
                   onChange={(e) => {

@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
 import FlexSeparate from "@common/library/FlexSeparate";
 import {
@@ -21,6 +21,7 @@ import {
   Flex,
   ScrollArea,
   Container,
+  createStyles,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
@@ -42,13 +43,37 @@ interface CTAGeneratorProps extends Record<string, unknown> {
   personaName: string;
 }
 
+const useStyles = createStyles((theme) => ({
+  root: {
+    position: "relative",
+  },
+
+  input: {
+    height: 54,
+    paddingTop: 18,
+  },
+
+  label: {
+    position: "absolute",
+    pointerEvents: "none",
+    fontSize: theme.fontSizes.xs,
+    paddingLeft: theme.spacing.sm,
+    paddingTop: `calc(${theme.spacing.sm} / 2)`,
+    zIndex: 1,
+  },
+}));
+
 export default function CTAGeneratorModal({
   context,
   id,
   innerProps,
 }: ContextModalProps<CTAGeneratorProps>) {
   const theme = useMantineTheme();
+  const { classes } = useStyles();
+
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
+
   const [generatedCTAs, setGeneratedCTAs] = useState<
     { cta: string; tag: string; enabled: boolean }[]
   >([]);
@@ -56,7 +81,7 @@ export default function CTAGeneratorModal({
 
   const surveyForm = useForm({
     initialValues: {
-      company: "",
+      company: userData?.client?.company ?? "",
       persona: innerProps.personaName,
       proposition: "",
     },
@@ -78,11 +103,12 @@ export default function CTAGeneratorModal({
     } else {
       showNotification({
         id: "generate-cta-ideas-error",
-        title: "Error",
-        message: "Failed to generate CTA ideas",
+        title: "Generation Failed",
+        message: "Failed to generate CTA ideas. Please try again!",
         color: "red",
-        autoClose: false,
+        autoClose: 5000,
       });
+
     }
   };
 
@@ -101,33 +127,33 @@ export default function CTAGeneratorModal({
       <LoadingOverlay visible={loading} overlayBlur={2} />
       <form onSubmit={surveyForm.onSubmit(handleSubmit)}>
         <Stack spacing="xl">
-          <Group spacing="xs" position="center">
-            <Input
-              icon={<IconWriting />}
-              variant="unstyled"
+          <Container m={0}>
+            <TextInput
+              label="Company"
               placeholder="Company"
-              w={120}
-              required
+              classNames={classes}
               {...surveyForm.getInputProps("company")}
-            />
-            <Text>helps</Text>
-            <Input
-              variant="unstyled"
-              placeholder="Target persona"
-              w={120}
               required
+            />
+
+            <TextInput
+              mt="md"
+              label="Which persona?"
+              placeholder="ex. VP of Sales, Head of HR"
+              classNames={classes}
               {...surveyForm.getInputProps("persona")}
-            />
-            <Text>with</Text>
-            <Input
-              variant="unstyled"
-              placeholder="Value proposition"
-              w={210}
               required
-              {...surveyForm.getInputProps("proposition")}
             />
-            <Text>.</Text>
-          </Group>
+
+            <TextInput
+              mt="md"
+              label="Value Proposition"
+              placeholder="What benefits or economic value do you provide to them?"
+              classNames={classes}
+              {...surveyForm.getInputProps("proposition")}
+              required
+            />
+          </Container>
           <Center>
             <Button radius="md" type="submit">
               Generate CTA Ideas
@@ -140,12 +166,12 @@ export default function CTAGeneratorModal({
             </>
           )}
           {generatedCTAs.length > 0 && (
-            <>
+            <div>
               <ScrollArea h={400}>
                 <Stack>
                   {generatedCTAs.map((cta, index) => (
-                    <FlexSeparate key={index}>
-                      <Container>
+                    <Flex key={index}>
+                      <Container m={0} p={0}>
                         <Badge
                           w={150}
                           mt={10}
@@ -157,15 +183,14 @@ export default function CTAGeneratorModal({
                           ctaText={cta.cta}
                         ></CTAGeneratorExample>
                       </Container>
-                      <Flex direction="column">
+                      <Flex direction="column" mx={8}>
                         <Textarea
                           w={300}
                           placeholder="Your CTA"
                           value={cta.cta}
+                          px={8}
                           sx={{
                             border: "solid 1px #333",
-                            padding: 8,
-                            marginRight: 8,
                           }}
                           onChange={(e) => {
                             const newGeneratedCTAs = [...generatedCTAs];
@@ -183,6 +208,7 @@ export default function CTAGeneratorModal({
                         <Text
                           size="xs"
                           color={cta.cta.length <= 120 ? "grey" : "red"}
+                          ta="right"
                         >
                           {cta.cta.length}/{120}
                         </Text>
@@ -190,6 +216,7 @@ export default function CTAGeneratorModal({
                       <Button
                         disabled={!cta.enabled}
                         mt={10}
+                        radius='md'
                         onClick={async () => {
                           if (cta.cta.length > 120) {
                             showNotification({
@@ -209,7 +236,6 @@ export default function CTAGeneratorModal({
                             cta.cta
                           );
                           if (response.status === "success") {
-
                             // Disable the CTA
                             const newGeneratedCTAs = [...generatedCTAs];
                             newGeneratedCTAs[index] = {
@@ -240,11 +266,11 @@ export default function CTAGeneratorModal({
                       >
                         Use CTA
                       </Button>
-                    </FlexSeparate>
+                    </Flex>
                   ))}
                 </Stack>
               </ScrollArea>
-            </>
+            </div>
           )}
         </Stack>
       </form>

@@ -71,8 +71,6 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
     },
   });
 
-  console.log(isFetching)
-
   return (
     <Paper withBorder m="xs" p="md" radius="md">
       <Stack>

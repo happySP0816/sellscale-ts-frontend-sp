@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { LinkedInConversationEntry } from "@common/persona/LinkedInConversationEntry";
 import {
   Button,
@@ -29,12 +29,14 @@ import _ from "lodash";
 import { openContextModal } from "@mantine/modals";
 import { convertDateToLocalTime } from "@utils/general";
 import EmailThreadEntry from "@common/persona/emails/EmailThreadEntry";
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from "isomorphic-dompurify";
+import ConnectEmailCard from "@common/library/ConnectEmailCard";
 
 export default function ProspectDetailsViewEmails(props: {
   prospectId: number;
 }) {
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospect-email-threads-${props.prospectId}`],
@@ -45,36 +47,41 @@ export default function ProspectDetailsViewEmails(props: {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data);
-
   return (
-    <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
-      <LoadingOverlay visible={isFetching} overlayBlur={2} />
-      <Group position="apart">
-        <Text weight={700} size="lg">
-          Email Conversation
-        </Text>
-      </Group>
-      <Group position="apart" mb="xs">
-        <Text weight={200} size="xs">
-          {`Last Updated: ${convertDateToLocalTime(new Date())}`}
-        </Text>
-      </Group>
-      <ScrollArea>
-        {data?.map((emailThread: any, index: number) => (
-          <EmailThreadEntry
-            key={index}
-            postedAt={convertDateToLocalTime(
-              new Date(emailThread.last_message_timestamp * 1000)
-            )}
-            body={DOMPurify.sanitize(emailThread.snippet)}
-            name={emailThread.subject}
-            threadId={emailThread.id}
-            prospectId={props.prospectId}
-          />
-        ))}
-      </ScrollArea>
-    </Card>
+    <>
+      <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
+        <LoadingOverlay visible={isFetching} overlayBlur={2} />
+        <Group position="apart">
+          <Text weight={700} size="lg">
+            Email Conversation
+          </Text>
+        </Group>
+        <Group position="apart" mb="xs">
+          <Text weight={200} size="xs">
+            {`Last Updated: ${convertDateToLocalTime(new Date())}`}
+          </Text>
+        </Group>
+        <ScrollArea>
+          {data?.map((emailThread: any, index: number) => (
+            <EmailThreadEntry
+              key={index}
+              postedAt={convertDateToLocalTime(
+                new Date(emailThread.last_message_timestamp * 1000)
+              )}
+              body={DOMPurify.sanitize(emailThread.snippet)}
+              name={emailThread.subject}
+              threadId={emailThread.id}
+              prospectId={props.prospectId}
+            />
+          ))}
+        </ScrollArea>
+      </Card>
+      {!userData.nylas_connected && (
+        <div style={{ paddingTop: 10 }}>
+          <ConnectEmailCard />
+        </div>
+      )}
+    </>
   );
 }
 

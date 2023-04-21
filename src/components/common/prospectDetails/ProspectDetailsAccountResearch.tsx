@@ -48,9 +48,15 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
           Account Research
         </Text>
       </Group>
-      <Text mb="xs" fz="sm" c="dimmed">
-        Here is information collected about this prospect.
-      </Text>
+      {accountResearchArray.length > 0 ? (
+        <Text mb="xs" fz="sm" c="dimmed">
+          Here is information collected about this prospect.
+        </Text>
+      ) : (
+        <Text mb="xs" fz="sm" c="dimmed">
+          No account research points found.
+        </Text>
+      )}
       {/* <Button size="xs" variant="light" compact mb="md">
         Regenerate Account Research
       </Button> */}
@@ -75,8 +81,7 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
           </tbody>
         </Table>
       )}
-
-      <GeneratedByAI />
+      {accountResearchArray.length > 0 && <GeneratedByAI />}
     </Card>
   );
 }

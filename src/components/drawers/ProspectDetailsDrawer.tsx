@@ -138,89 +138,94 @@ export default function ProspectDetailsDrawer() {
           <ScrollArea
             style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
           >
-            {data?.channelTypes.length > 0 && (
-              <>
-                <Tabs
-                  value={
-                    channelType === null || channelType === "SELLSCALE"
-                      ? data.channelTypes[0].value
-                      : channelType
-                  }
-                  onTabChange={(value) => {
-                    setChannelType(value as Channel | null);
-                  }}
-                >
-                  <Tabs.List position="center">
-                    {data.channelTypes.map(
+            {data?.channelTypes.length > 0 &&
+              data.main.prospect_info.details.overall_status !==
+                "PROSPECTED" && (
+                <>
+                  <Tabs
+                    value={
+                      channelType === null || channelType === "SELLSCALE"
+                        ? data.channelTypes[0].value
+                        : channelType
+                    }
+                    onTabChange={(value) => {
+                      setChannelType(value as Channel | null);
+                    }}
+                  >
+                    <Tabs.List position="center">
+                      {data.channelTypes.map(
+                        (channel: { label: string; value: Channel }) => (
+                          <Tabs.Tab
+                            key={channel.value}
+                            value={channel.value}
+                            icon={channelToIcon(channel.value, 14)}
+                          >
+                            {`${formatToLabel(channel.label)} Outbound`}
+                          </Tabs.Tab>
+                        )
+                      )}
+                    </Tabs.List>
+
+                    {data?.channelTypes.map(
                       (channel: { label: string; value: Channel }) => (
-                        <Tabs.Tab
+                        <Tabs.Panel
                           key={channel.value}
                           value={channel.value}
-                          icon={channelToIcon(channel.value, 14)}
-                        >
-                          {`${formatToLabel(channel.label)} Outbound`}
-                        </Tabs.Tab>
-                      )
-                    )}
-                  </Tabs.List>
-
-                  {data?.channelTypes.map(
-                    (channel: { label: string; value: Channel }) => (
-                      <Tabs.Panel
-                        key={channel.value}
-                        value={channel.value}
-                        p="sm"
-                        sx={{
-                          borderLeft: "1px solid #373A40",
-                          borderRight: "1px solid #373A40",
-                        }}
-                      >
-                        <ProspectDetailsChangeStatus
-                          prospectId={data.main.prospect_info.details.id}
-                          prospectName={
-                            data.main.prospect_info.details.full_name
-                          }
-                          channelData={{
-                            data: data.channels[channel.value],
-                            value: channel.value,
-                            currentStatus:
-                              channel.value === "LINKEDIN"
-                                ? data.main.prospect_info.details
-                                    .linkedin_status
-                                : data.main.prospect_info.details.email_status,
+                          p="sm"
+                          sx={{
+                            borderLeft: "1px solid #373A40",
+                            borderRight: "1px solid #373A40",
                           }}
-                        />
+                        >
+                          <ProspectDetailsChangeStatus
+                            prospectId={data.main.prospect_info.details.id}
+                            prospectName={
+                              data.main.prospect_info.details.full_name
+                            }
+                            channelData={{
+                              data: data.channels[channel.value],
+                              value: channel.value,
+                              currentStatus:
+                                channel.value === "LINKEDIN"
+                                  ? data.main.prospect_info.details
+                                      .linkedin_status
+                                  : data.main.prospect_info.details
+                                      .email_status,
+                            }}
+                          />
 
-                        {channel.value === "LINKEDIN" &&
-                          data.main.prospect_info.li
-                            ?.li_conversation_thread && (
-                            <ProspectDetailsViewConversation
-                              conversation_entry_list={
-                                data.main.prospect_info.li
-                                  .li_conversation_thread
-                              }
-                              conversation_url={
-                                data.main.prospect_info.li.li_conversation_url
-                              }
-                              prospect_id={data?.main.prospect_info.details.id}
-                              overall_status={
-                                data.main.prospect_info.details.overall_status
-                              }
+                          {channel.value === "LINKEDIN" &&
+                            data.main.prospect_info.li
+                              ?.li_conversation_thread && (
+                              <ProspectDetailsViewConversation
+                                conversation_entry_list={
+                                  data.main.prospect_info.li
+                                    .li_conversation_thread
+                                }
+                                conversation_url={
+                                  data.main.prospect_info.li.li_conversation_url
+                                }
+                                prospect_id={
+                                  data?.main.prospect_info.details.id
+                                }
+                                overall_status={
+                                  data.main.prospect_info.details.overall_status
+                                }
+                              />
+                            )}
+
+                          {channel.value === "EMAIL" && (
+                            <ProspectDetailsViewEmails
+                              prospectId={data.main.prospect_info.details.id}
                             />
                           )}
-
-                        {channel.value === "EMAIL" && (
-                          <ProspectDetailsViewEmails
-                            prospectId={data.main.prospect_info.details.id}
-                          />
-                        )}
-                      </Tabs.Panel>
-                    )
-                  )}
-                </Tabs>
-                <Divider mb="sm" size="sm" />
-              </>
-            )}
+                        </Tabs.Panel>
+                      )
+                    )}
+                  </Tabs>
+                  <Divider mb="sm" size="sm" />
+                </>
+              )}
             <ProspectDetailsAccountResearch
               prospectId={data.main.prospect_info.details.id}
             />

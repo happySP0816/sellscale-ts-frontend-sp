@@ -1,6 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
-import { Title, Text, Card, Flex, Container, Button } from "@mantine/core";
+import { Title, Text, Card, Code, Container, Button } from "@mantine/core";
 import { IconMail } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -17,15 +17,12 @@ export default function PullProspectEmailsCard(props: PropsType) {
   const userToken = useRecoilValue(userTokenState);
 
   const fetchCredits = async () => {
-    const res = await fetch(
-      `${API_URL}/prospect/get_credits`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      }
-    );
+    const res = await fetch(`${API_URL}/prospect/get_credits`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
     const data = await res.json();
     setNumEmailFetchingCredits(data.email_fetching_credits);
   };
@@ -47,15 +44,12 @@ export default function PullProspectEmailsCard(props: PropsType) {
 
   const fetchAdditionalProspectEmails = async () => {
     setFetchButtonDisabled(true);
-    const res = await fetch(
-      `${API_URL}/prospect/pull_emails`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      }
-    );
+    const res = await fetch(`${API_URL}/prospect/pull_emails`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
 
     setTimeout(() => {
       setFetchButtonDisabled(false);
@@ -75,43 +69,44 @@ export default function PullProspectEmailsCard(props: PropsType) {
   }, [refreshStats]);
 
   return (
-    <Card pl="sm" pr="sm">
-      <Flex>
-        <Container>
-          <Title order={3}>
-            {unusedEmailProspects} Unused Prospects with Emails
-          </Title>
-          <Text>
-            Fetch more emails for this persona by pressing `Fetch Emails`. If an
-            email is found, it will use 1 Email Extraction Credit. If email was
-            already found or no email was found, it will not use a credit.
-          </Text>
-        </Container>
-        <Container>
-          <Button
-            size="lg"
-            color="pink"
-            leftIcon={<IconMail />}
-            mb="sm"
-            onClick={fetchAdditionalProspectEmails}
-            disabled={fetchButtonDisabled}
-          >
-            Fetch Emails
-          </Button>
-          <Text size="sm">
-            By pressing this button, you may use your Email Extraction Credits
-          </Text>
-          <Button
-            size="xs"
-            variant="outline"
-            color="gray"
-            mt="sm"
-            onClick={refreshStats}
-          >
-            Refresh
-          </Button>
-        </Container>
-      </Flex>
+    <Card pl="sm" pr="sm" mt="md" mr="md">
+      <Container>
+        <Title order={3}>
+          {unusedEmailProspects} Unused Prospects with Emails
+        </Title>
+        <Text size="sm">
+          Fetch more emails for this persona by pressing{" "}
+          <Code color="pink">Fetch Emails</Code>. If an email is found, it will
+          use 1 Email Extraction Credit. If email was already found or no email
+          was found, it will not use a credit.
+        </Text>
+      </Container>
+      <Container>
+        <Text mt="md" size="sm">
+          By pressing this button, you may use your Email Extraction Credits
+        </Text>
+        <Button
+          size="lg"
+          color="pink"
+          mt="md"
+          leftIcon={<IconMail />}
+          mb="sm"
+          onClick={fetchAdditionalProspectEmails}
+          disabled={fetchButtonDisabled}
+        >
+          Fetch Emails
+        </Button>
+      </Container>
+
+      <Button
+        size="xs"
+        variant="subtle"
+        color="gray"
+        mt="sm"
+        onClick={refreshStats}
+      >
+        Refresh Stats
+      </Button>
     </Card>
   );
 }

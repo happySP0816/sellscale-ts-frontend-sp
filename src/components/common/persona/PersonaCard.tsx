@@ -49,10 +49,10 @@ import {
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { API_URL, SCREEN_SIZES } from "@constants/data";
 import { useEffect, useState } from "react";
-import PullProspectEmailsCard from "@common/credits/PullProspectEmailsCard";
 import ProspectTable_old from "@common/pipeline/ProspectTable_old";
 import { prospectSelectorTypeState } from "@atoms/prospectAtoms";
 import Pulse from "./Pulse";
+import PersonaTools from "./PersonaTools";
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(`${API_URL}/client/archetype/toggle_active`, {
@@ -417,8 +417,8 @@ export default function PersonaCard(props: {
           <Tabs.Panel value="pulse" pt="xs">
             <Pulse archetype={props.archetype} />
           </Tabs.Panel>
-          <Tabs.Panel value="tools" pt="xs" h={600}>
-            <PullProspectEmailsCard archetype_id={props.archetype.id} />
+          <Tabs.Panel value="tools" pt="xs">
+            <PersonaTools archetype_id={props.archetype.id} />
           </Tabs.Panel>
         </Tabs>
       </Collapse>

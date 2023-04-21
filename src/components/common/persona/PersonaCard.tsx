@@ -16,6 +16,7 @@ import {
   Flex,
   Tabs,
   Center,
+  Loader,
 } from "@mantine/core";
 import {
   IconActivityHeartbeat,
@@ -54,19 +55,16 @@ import { prospectSelectorTypeState } from "@atoms/prospectAtoms";
 import Pulse from "./Pulse";
 
 async function togglePersona(archetype_id: number, userToken: string) {
-  const response = await fetch(
-    `${API_URL}/client/archetype/toggle_active`,
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_archetype_id: archetype_id,
-      }),
-    }
-  );
+  const response = await fetch(`${API_URL}/client/archetype/toggle_active`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      client_archetype_id: archetype_id,
+    }),
+  });
   return response;
 }
 
@@ -95,20 +93,32 @@ export default function PersonaCard(props: {
   const [selectorType, setSelectorType] = useRecoilState(
     prospectSelectorTypeState
   );
+  const [
+    numUnusedProspectsIsLoading,
+    setNumUnusedProspectsIsLoading,
+  ] = useState(false);
+  const [fetchedNumUnusedProspects, setFetchedNumUnusedProspects] = useState(
+    false
+  );
 
   const fetchNumUnusedProspects = async () => {
-    const res = await fetch(
-      `${API_URL}/client/unused_li_and_email_prospects_count?client_archetype_id=` +
-        props.archetype.id,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      }
-    );
-    const data = await res.json();
-    setUnusedProspects(data.unused_linkedin_prospects);
+    if (!fetchedNumUnusedProspects) {
+      setNumUnusedProspectsIsLoading(true);
+      const res = await fetch(
+        `${API_URL}/client/unused_li_and_email_prospects_count?client_archetype_id=` +
+          props.archetype.id,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      const data = await res.json();
+      setUnusedProspects(data.unused_linkedin_prospects);
+      setNumUnusedProspectsIsLoading(false);
+      setFetchedNumUnusedProspects(true);
+    }
   };
 
   useEffect(() => {
@@ -201,7 +211,9 @@ export default function PersonaCard(props: {
 
   const WARNING_PERCENTAGE = 25;
   const getStatusUsedPercentage = () => {
-    if(!props.archetype.performance) { return []; }
+    if (!props.archetype.performance) {
+      return [];
+    }
 
     let usedVal = 0;
     let unusedVal = unusedProspects;
@@ -368,25 +380,42 @@ export default function PersonaCard(props: {
           )}
         </Flex>
       </FlexSeparate>
-      <Progress
-        mt={10}
-        size={17}
-        sections={getStatusUsedPercentage()}
-        animate={isUploading}
-        opacity={0.8}
-      />
+      {numUnusedProspectsIsLoading ? (
+        <Loader variant="dots" color="green" />
+      ) : (
+        <Progress
+          mt={10}
+          size={17}
+          sections={getStatusUsedPercentage()}
+          animate={isUploading}
+          opacity={0.8}
+        />
+      )}
+
       <Collapse in={opened}>
         <Tabs defaultValue="all-contacts" px="xs" color="teal">
           <Tabs.List>
-            <Tabs.Tab value="all-contacts" icon={<IconAddressBook size="1.1rem" />}>All Contacts</Tabs.Tab>
-            <Tabs.Tab value="pulse" icon={<IconActivityHeartbeat size="1.1rem" />}>Pulse</Tabs.Tab>
-            <Tabs.Tab value="tools" icon={<IconTool size="1.1rem" />}>Tools</Tabs.Tab>
+            <Tabs.Tab
+              value="all-contacts"
+              icon={<IconAddressBook size="1.1rem" />}
+            >
+              All Contacts
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="pulse"
+              icon={<IconActivityHeartbeat size="1.1rem" />}
+            >
+              Pulse
+            </Tabs.Tab>
+            <Tabs.Tab value="tools" icon={<IconTool size="1.1rem" />}>
+              Tools
+            </Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="all-contacts" pt="xs">
             <ProspectTable_old personaSpecific={props.archetype.id} />
           </Tabs.Panel>
           <Tabs.Panel value="pulse" pt="xs">
-            <Pulse archetype={props.archetype}/>
+            <Pulse archetype={props.archetype} />
           </Tabs.Panel>
           <Tabs.Panel value="tools" pt="xs" h={600}>
             <PullProspectEmailsCard archetype_id={props.archetype.id} />

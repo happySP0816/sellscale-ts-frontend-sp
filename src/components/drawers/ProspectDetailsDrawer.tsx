@@ -34,6 +34,7 @@ import FlexSeparate from "@common/library/FlexSeparate";
 import ProspectDetailsViewEmails from "@common/prospectDetails/ProspectDetailsViewEmails";
 import { API_URL } from "@constants/data";
 import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove";
+import ProspectDetailsAccountResearch from "@common/prospectDetails/ProspectDetailsAccountResearch";
 
 export default function ProspectDetailsDrawer() {
   const theme = useMantineTheme();
@@ -220,6 +221,9 @@ export default function ProspectDetailsDrawer() {
                 <Divider mb="sm" size="sm" />
               </>
             )}
+            <ProspectDetailsAccountResearch
+              prospectId={data.main.prospect_info.details.id}
+            />
             <ProspectDetailsNotes
               currentStatus={data.main.prospect_info.details.overall_status}
               prospectId={data.main.prospect_info.details.id}

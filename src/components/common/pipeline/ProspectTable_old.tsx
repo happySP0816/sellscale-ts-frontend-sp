@@ -12,6 +12,7 @@ import {
   ActionIcon,
   Tooltip,
   Avatar,
+  Button,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -19,6 +20,7 @@ import { TextInput } from "@mantine/core";
 import { IconRefresh, IconSearch } from "@tabler/icons";
 import { MultiSelect } from "@mantine/core";
 import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
+import ICPFitPill from "./ICPFitAndReason";
 
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
@@ -434,32 +436,13 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             title: "ICP Fit",
             sortable: true,
             render: ({ icp_fit_score, icp_fit_reason }) => {
-              let icpFitScoreMap = new Map<string, string>([
-                ["-1", "ERROR"],
-                ["0", "VERY LOW"],
-                ["1", "LOW"],
-                ["2", "MEDIUM"],
-                ["3", "HIGH"],
-                ["4", "VERY HIGH"],
-              ]);
-              const mappedFitScore: string =
-                icpFitScoreMap.get(icp_fit_score + "") || "N/A";
-              let tooltipWidth = 500;
-              if (mappedFitScore === "N/A") {
-                tooltipWidth = 50;
-              }
-
               return (
-                <Tooltip
-                  label={icp_fit_reason || "N/A"}
-                  position="left"
-                  width={tooltipWidth}
-                  multiline
-                >
-                  <Badge color={valueToColor(theme, mappedFitScore)}>
-                    {mappedFitScore}
-                  </Badge>
-                </Tooltip>
+                <>
+                  <ICPFitPill
+                    icp_fit_score={icp_fit_score}
+                    icp_fit_reason={icp_fit_reason}
+                  />
+                </>
               );
             },
           },

@@ -11,7 +11,7 @@ type PropsType = {
 
 export default function ProspectDetailsAccountResearch(props: PropsType) {
   const userToken = useRecoilValue(userTokenState);
-  const [accountResearchArray, setAccountResearchArray] = useState([]);
+  const [accountResearchArray, setAccountResearchArray]: any = useState([]);
   const [fetched, setFetched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -64,7 +64,7 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
             </tr>
           </thead>
           <tbody>
-            {accountResearchArray.map((item, index) => {
+            {accountResearchArray.map((item: any, index: any) => {
               return (
                 <tr key={item.title}>
                   <td>{item.title}</td>

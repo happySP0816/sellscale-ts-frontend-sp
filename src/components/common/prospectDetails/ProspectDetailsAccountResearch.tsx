@@ -65,7 +65,7 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
         <Table striped highlightOnHover withBorder withColumnBorders>
           <thead>
             <tr>
-              <th>Title</th>
+              <th>Source</th>
               <th>Reason</th>
             </tr>
           </thead>

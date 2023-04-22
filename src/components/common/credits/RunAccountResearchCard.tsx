@@ -9,15 +9,18 @@ import {
   Loader,
   TextInput,
   Divider,
+  Box,
   Textarea,
   Button,
   Grid,
   Code,
   Tooltip,
+  LoadingOverlay,
 } from "@mantine/core";
 import { useRecoilValue } from "recoil";
 import { useEffect, useState } from "react";
 import displayNotification from "@utils/notificationFlow";
+import { IconRobot } from "@tabler/icons";
 
 type PropsType = {
   archetype_id: number;
@@ -128,6 +131,55 @@ export default function RunAccountResearchCard(props: PropsType) {
     return res;
   };
 
+  const [loadingPersonaFitReason, setLoadingPersonaFitReason] = useState(false);
+
+  const fetchPersonaFitReason = async (): Promise<{
+    status: string;
+    title: string;
+    message: string;
+    extra?: any;
+  }> => {
+    setLoadingPersonaFitReason(true);
+    const res = await fetch(
+      `${API_URL}/client/archetype/${props.archetype_id}/predict_persona_fit_reason`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+      .then(async (r) => {
+        if (r.status === 200) {
+          return {
+            status: "success",
+            title: `Success`,
+            message: `Generated persona fit reason.`,
+            extra: await r.json(),
+          };
+        } else {
+          return {
+            status: "error",
+            title: `Error (${r.status})`,
+            message: "Error while running fit generation. Contact engineer.",
+            extra: {},
+          };
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+        return {
+          status: "error",
+          title: `Error while running fit generation. Contact engineer.`,
+          message: e.message,
+          extra: {},
+        };
+      });
+    setLoadingPersonaFitReason(false);
+    setPersonaValueProp(res.extra.reason);
+    return res;
+  };
   // const fetchAdditionalProspectEmails = async () => {
   //   setFetchButtonDisabled(true);
   //   const res = await fetch(
@@ -170,24 +222,65 @@ export default function RunAccountResearchCard(props: PropsType) {
                 disabled
               />
               <Textarea
+                mt="sm"
                 placeholder="ex. The best sugar donuts in the world!"
                 label="Tagline"
                 defaultValue={accountResearchInputs.company_tagline}
                 withAsterisk
                 disabled
               />
-              <Textarea
-                placeholder="ex. They love sugar!"
-                label="Why would this persona buy this product?"
-                minRows={3}
-                maxRows={6}
-                onChange={(e) => {
-                  setPersonaValueProp(e.currentTarget.value);
+              <Box maw={400} pos="relative" mt="sm">
+                <LoadingOverlay
+                  visible={loadingPersonaFitReason}
+                  overlayBlur={2}
+                />
+                <Textarea
+                  placeholder="ex. They love sugar!"
+                  label="Why would this persona buy this product?"
+                  minRows={3}
+                  maxRows={6}
+                  onChange={(e) => {
+                    setPersonaValueProp(e.currentTarget.value);
+                  }}
+                  disabled={buttonsHidden}
+                  value={personaValueProp}
+                  withAsterisk
+                />
+              </Box>
+
+              <Button
+                mt="md"
+                size="xs"
+                variant="white"
+                color="grape"
+                loading={loadingPersonaFitReason}
+                loaderPosition="right"
+                leftIcon={<IconRobot />}
+                onClick={async () => {
+                  await displayNotification(
+                    "fetch-persona-fit-reason",
+                    fetchPersonaFitReason,
+                    {
+                      title: `Running persona fit reason generation...`,
+                      message: `Working with servers...`,
+                      color: "teal",
+                    },
+                    {
+                      title: `Persona fit generated!`,
+                      message: `SellScale AI predicted why this persona would buy this product.`,
+                      color: "teal",
+                    },
+                    {
+                      title: `Error while running persona fit reason generation`,
+                      message: `Please try again later.`,
+                      color: "red",
+                    }
+                  );
                 }}
-                disabled={buttonsHidden}
-                defaultValue={accountResearchInputs.persona_value_prop}
-                withAsterisk
-              />
+              >
+                Predict persona fit reason
+              </Button>
+
               {buttonsHidden && (
                 <Card withBorder mt="md">
                   <Grid>

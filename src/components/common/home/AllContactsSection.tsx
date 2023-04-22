@@ -10,7 +10,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import { useLoaderData } from "react-router-dom";
-import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import { prospectDrawerIdState, prospectDrawerOpenState, prospectShowPurgatoryState } from "@atoms/prospectAtoms";
 import { useEffect } from "react";
 
 function getPipelineSelectorData(data: any){
@@ -67,12 +67,17 @@ export default function AllContactsSection() {
   */
 
   const userToken = useRecoilValue(userTokenState);
+  const showPurgatory = useRecoilValue(prospectShowPurgatoryState);
 
   const { data, isFetching, refetch } = useQuery({
-    queryKey: [`query-pipeline-details`],
-    queryFn: async () => {
+    queryKey: [`query-pipeline-details`, { showPurgatory }],
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { showPurgatory }] = queryKey;
+
       const response = await fetch(
-        `${API_URL}/analytics/pipeline/all_details`,
+        `${API_URL}/analytics/pipeline/all_details?include_purgatory=${showPurgatory}`,
         {
           method: "GET",
           headers: {

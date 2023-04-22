@@ -112,6 +112,7 @@ export default function PipelineSelector({ data }: { data: Map<string, StatGridI
       </Paper>
     );
   });
+  
   return (
     <div className={classes.root}>
       <SimpleGrid

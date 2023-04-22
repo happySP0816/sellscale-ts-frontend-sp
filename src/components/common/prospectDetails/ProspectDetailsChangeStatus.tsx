@@ -13,6 +13,7 @@ import {
   SegmentedControl,
   Center,
   LoadingOverlay,
+  Select,
 } from "@mantine/core";
 import { useState } from "react";
 import {
@@ -183,7 +184,7 @@ const emailStatusOptions = [
   },
 ];
 
-const dontShowStatuses = ["UNKNOWN", "PROSPECTED"];
+const dontShowStatuses = ["UNKNOWN", "PROSPECTED", "ACTIVE_CONVO_OBJECTION", "ACTIVE_CONVO_QUAL_NEEDED", "ACTIVE_CONVO_QUESTION", "ACTIVE_CONVO_SCHEDULING"];
 
 const useStyles = createStyles((theme) => ({
   card: {
@@ -313,7 +314,7 @@ export default function ProspectDetailsChangeStatus(
   });
 
   for (const statusValue of (data ? data : []).filter(
-    (s: string) => !dontShowStatuses.includes(s)
+    (s: string) => !dontShowStatuses.includes(s) && !(props.channelData.currentStatus.startsWith('ACTIVE_CONVO') && s === 'ACTIVE_CONVO')
   )) {
     let status: any = null;
     if (props.channelData.value === "EMAIL") {
@@ -334,46 +335,7 @@ export default function ProspectDetailsChangeStatus(
         key={status.status}
         className={classes.item}
         onClick={async () => {
-          await displayNotification(
-            "change-prospect-status",
-            async () => {
-              let result = await updateChannelStatus(
-                props.prospectId,
-                userToken,
-                props.channelData.value,
-                status?.status as string
-              );
-              if (result.status === "success") {
-                // This will make the queries rerun and update the UI
-                queryClient.invalidateQueries({
-                  queryKey: [`query-prospect-details-${props.prospectId}`],
-                });
-                queryClient.invalidateQueries({
-                  queryKey: ["query-pipeline-prospects"],
-                });
-                queryClient.invalidateQueries({
-                  queryKey: ["query-pipeline-details"],
-                });
-                refetch();
-              }
-              return result;
-            },
-            {
-              title: `Updating Status`,
-              message: `Working with servers...`,
-              color: "teal",
-            },
-            {
-              title: `Updated!`,
-              message: `Status is now "${status?.title}"!`,
-              color: "teal",
-            },
-            {
-              title: `Error while updating!`,
-              message: `Please try again later.`,
-              color: "red",
-            }
-          );
+          await changeStatus(status);
         }}
       >
         <status.icon color={theme.colors[status.color][6]} size={32} />
@@ -383,6 +345,54 @@ export default function ProspectDetailsChangeStatus(
       </UnstyledButton>
     );
   }
+
+  const changeStatus = async (status: { title: string, status: string }) => {
+    await displayNotification(
+      "change-prospect-status",
+      async () => {
+        let result = await updateChannelStatus(
+          props.prospectId,
+          userToken,
+          props.channelData.value,
+          status?.status as string
+        );
+        if (result.status === "success") {
+          // This will make the queries rerun and update the UI
+          queryClient.invalidateQueries({
+            queryKey: [`query-prospect-details-${props.prospectId}`],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["query-pipeline-prospects-all"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["query-pipeline-details"],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["query-get-channels-prospects"],
+          });
+          refetch();
+        }
+        return result;
+      },
+      {
+        title: `Updating Status`,
+        message: `Working with servers...`,
+        color: "teal",
+      },
+      {
+        title: `Updated!`,
+        message: `Status is now "${status?.title}"!`,
+        color: "teal",
+      },
+      {
+        title: `Error while updating!`,
+        message: `Please try again later.`,
+        color: "red",
+      }
+    );
+  };
+
+  console.log(props.channelData.currentStatus)
 
   return (
     <Card shadow="sm" p="lg" radius="md" withBorder>
@@ -405,6 +415,34 @@ export default function ProspectDetailsChangeStatus(
       <SimpleGrid cols={3} mt="md">
         {items}
       </SimpleGrid>
+      {props.channelData.currentStatus.startsWith('ACTIVE_CONVO') && (
+        <Select
+          mt={15}
+          label="Conversation Substatus"
+          placeholder="The state of the active conversation"
+          clearable
+          data={[
+            { value: 'ACTIVE_CONVO_QUESTION', label: 'Question' },
+            { value: 'ACTIVE_CONVO_QUAL_NEEDED', label: 'Qualifications Needed' },
+            { value: 'ACTIVE_CONVO_OBJECTION', label: 'Objection' },
+            { value: 'ACTIVE_CONVO_SCHEDULING', label: 'Scheduling' },
+          ]}
+          defaultValue={props.channelData.currentStatus}
+          onChange={async (value) => {
+            if(!value) {
+              await changeStatus({
+                title: 'Active Conversation',
+                status: 'ACTIVE_CONVO'
+              });
+            } else {
+              await changeStatus({
+                title: formatToLabel(value),
+                status: value
+              });
+            }
+          }}
+        />
+      )}
     </Card>
   );
 }

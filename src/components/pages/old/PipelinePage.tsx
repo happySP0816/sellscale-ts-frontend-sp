@@ -10,7 +10,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import { useLoaderData } from "react-router-dom";
-import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import { prospectDrawerIdState, prospectDrawerOpenState, prospectShowPurgatoryState } from "@atoms/prospectAtoms";
 import { useEffect } from "react";
 import { setPageTitle } from "@utils/documentChange";
 import PageTitle from "@nav/PageTitle";
@@ -70,12 +70,13 @@ export default function PipelinePage() {
   const theme = useMantineTheme();
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
   const userToken = useRecoilValue(userTokenState);
+  const showPurgatory = useRecoilValue(prospectShowPurgatoryState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-pipeline-details`],
     queryFn: async () => {
       const response = await fetch(
-        `${API_URL}/analytics/pipeline/all_details`,
+        `${API_URL}/analytics/pipeline/all_details?include_purgatory=${showPurgatory}`,
         {
           method: "GET",
           headers: {

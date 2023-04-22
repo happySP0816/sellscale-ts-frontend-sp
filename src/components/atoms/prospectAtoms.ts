@@ -26,10 +26,16 @@ const prospectChannelState = atom({
   default: 'SELLSCALE' as Channel,
 });
 
+const prospectShowPurgatoryState = atom({
+  key: "prospect-show-purgatory",
+  default: false,
+});
+
 export {
   prospectDrawerOpenState,
   prospectSelectorTypeState,
   prospectChannelState,
   prospectDrawerIdState,
   prospectDrawerNotesState,
+  prospectShowPurgatoryState,
 };

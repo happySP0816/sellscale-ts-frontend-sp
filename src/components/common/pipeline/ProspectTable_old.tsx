@@ -13,6 +13,8 @@ import {
   Tooltip,
   Avatar,
   Button,
+  Switch,
+  Group,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -28,9 +30,10 @@ import {
   prospectDrawerIdState,
   prospectDrawerOpenState,
   prospectSelectorTypeState,
+  prospectShowPurgatoryState,
 } from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatToLabel, nameToInitials, valueToColor } from "@utils/general";
 import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
@@ -154,6 +157,8 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
   const [search, setSearch] = useDebouncedState("", 200);
   const [statuses, setStatuses] = useState<string[] | null>(null);
   const [channel, setChannel] = useRecoilState(prospectChannelState);
+  const [showPurgatory, setShowPurgatory] = useRecoilState(prospectShowPurgatoryState);
+  const queryClient = useQueryClient();
 
   const [page, setPage] = useState(1);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
@@ -178,13 +183,13 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
-      `query-pipeline-prospects-${props.personaSpecific ?? "all"}}`,
-      { page, sortStatus, statuses, search, channel },
+      `query-pipeline-prospects-${props.personaSpecific ?? "all"}`,
+      { page, sortStatus, statuses, search, channel, showPurgatory },
     ],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { page, sortStatus, statuses, search, channel }] = queryKey;
+      const [_key, { page, sortStatus, statuses, search, channel, showPurgatory }] = queryKey;
 
       totalRecords.current = 0;
 
@@ -217,9 +222,17 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
         return [];
       }
 
+      // Purgatory filtering
+      const prospects = showPurgatory ? res.prospects : res.prospects.filter((prospect: any) => {
+        if (!prospect.hidden_until) {
+            return true;
+        }
+        return new Date(`${prospect.hidden_until} UTC`) < new Date();
+      });
+
       totalRecords.current = res.total_count;
 
-      return res.prospects.map((prospect: any) => {
+      return prospects.map((prospect: any) => {
         return {
           id: prospect.id,
           full_name: prospect.full_name,
@@ -229,6 +242,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           img_url: prospect.img_url,
           icp_fit_score: prospect.icp_fit_score,
           icp_fit_reason: prospect.icp_fit_reason,
+          hidden_until: prospect.hidden_until,
           status:
             channel === "SELLSCALE"
               ? prospect.overall_status
@@ -272,7 +286,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
   return (
     <Box>
       <Grid grow>
-        <Grid.Col span={5}>
+        <Grid.Col span={4}>
           <TextInput
             label="Search Contacts"
             placeholder="Search by Name, Company, or Title"
@@ -347,6 +361,21 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             className="truncate"
           />
         </Grid.Col>
+        <Grid.Col span={1}>
+          <Switch.Group
+            label="Processing"
+            onChange={(value) => {
+              setShowPurgatory(!showPurgatory);
+            }}
+          >
+            <Group>
+              <Switch
+                value="purgatory"
+                onLabel="Hide" offLabel="Show"
+              />
+            </Group>
+          </Switch.Group>
+        </Grid.Col>
       </Grid>
 
       <DataTable
@@ -406,11 +435,30 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           {
             accessor: "status",
             title: (
+              <Text>
+                {`${formatToLabel(
+                  channel.replace("SELLSCALE", "Overall")
+                )} Status`}
+              </Text>
+            ),
+            render: ({ status, review_details }) => {
+              return (
+                <Badge color={valueToColor(theme, formatToLabel(status))}>
+                  {status === 'BUMPED' || status === 'RESPONDED' ? (
+                    <>{formatToLabel(status)} #{review_details.times_bumped ?? 1}</>
+                  ) : (
+                    <>{formatToLabel(status)}</>
+                  )}
+                </Badge>
+              );
+            },
+          },
+          {
+            accessor: "icp_fit_score",
+            title: (
               <FlexSeparate>
                 <Text>
-                  {`${formatToLabel(
-                    channel.replace("SELLSCALE", "Overall")
-                  )} Status`}
+                  ICP Fit
                 </Text>
                 <ActionIcon
                   size="sm"
@@ -423,17 +471,6 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
                 </ActionIcon>
               </FlexSeparate>
             ),
-            render: ({ status }) => {
-              return (
-                <Badge color={valueToColor(theme, formatToLabel(status))}>
-                  {formatToLabel(status)}
-                </Badge>
-              );
-            },
-          },
-          {
-            accessor: "icp_fit_score",
-            title: "ICP Fit",
             sortable: true,
             render: ({ icp_fit_score, icp_fit_reason }) => {
               return (

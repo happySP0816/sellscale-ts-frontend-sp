@@ -25,9 +25,9 @@ import {
 import displayNotification from "@utils/notificationFlow";
 
 import { useEffect, useRef, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { LinkedInMessage } from "src";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FlexSeparate from "@common/library/FlexSeparate";
 import {
   convertDateToLocalTime,

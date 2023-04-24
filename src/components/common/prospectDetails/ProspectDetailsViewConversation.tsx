@@ -45,6 +45,7 @@ import {
 import InstallExtensionCard from "@common/library/InstallExtensionCard";
 import SelectBumpInstruction from "@common/bump_instructions/SelectBumpInstruction";
 import { API_URL } from "@constants/data";
+import { prospectDrawerStatusesState } from "@atoms/prospectAtoms";
 
 type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
@@ -58,6 +59,8 @@ const LOAD_CHUNK_SIZE = 5;
 export default function ProspectDetailsViewConversation(
   props: ProspectDetailsViewConversationPropsType
 ) {
+  const queryClient = useQueryClient();
+  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(prospectDrawerStatusesState);
   const [msgCount, setMsgCount] = useState(LOAD_CHUNK_SIZE);
   const userToken = useRecoilValue(userTokenState);
   const [messageDraft, setMessageDraft] = useState("");
@@ -107,7 +110,7 @@ export default function ProspectDetailsViewConversation(
     // Get and sort messages
     const latestMessages =
       result.status === "success"
-        ? (result.extra as LinkedInMessage[])
+        ? (result.extra.convo as LinkedInMessage[])
         : undefined;
     if (latestMessages) {
       // If we have a new message, scroll to bottom
@@ -119,6 +122,22 @@ export default function ProspectDetailsViewConversation(
       messages.current = latestMessages.sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
+
+      // If status changed, update UI
+      if (result.extra.prospect.overall_status !== prospectDrawerStatuses.overall){
+        setProspectDrawerStatuses((prev) => ({
+          overall: result.extra.prospect.overall_status,
+          linkedin: result.extra.prospect.linkedin_status,
+          email: result.extra.prospect.email_status,
+        }));
+        queryClient.invalidateQueries({
+          queryKey: [`query-pipeline-prospects-all`],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [`query-get-channels-prospects`],
+        });
+      }
+
     }
     setLoading(false);
     return latestMessages;
@@ -200,6 +219,9 @@ export default function ProspectDetailsViewConversation(
     }
     setMsgLoading(false);
     setTimeout(() => scrollToBottom());
+
+    // Update convo and UI
+    await fetchAndPopulateConvo();
   };
 
   const generateAIFollowup = () => {

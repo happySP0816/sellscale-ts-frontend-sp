@@ -16,6 +16,11 @@ const prospectDrawerNotesState = atom({
   default: [] as ProspectNote[],
 });
 
+const prospectDrawerStatusesState = atom({
+  key: "prospect-drawer-statuses",
+  default: { overall: '', linkedin: '', email: '' },
+});
+
 const prospectSelectorTypeState = atom({
   key: "prospect-selector-type",
   default: 'all',
@@ -37,5 +42,6 @@ export {
   prospectChannelState,
   prospectDrawerIdState,
   prospectDrawerNotesState,
+  prospectDrawerStatusesState,
   prospectShowPurgatoryState,
 };

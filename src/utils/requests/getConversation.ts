@@ -30,6 +30,9 @@ export async function getConversation(
     status: "success",
     title: `Success`,
     message: result.data_status,
-    extra: result.data,
+    extra: {
+      convo: result.data,
+      prospect: result.prospect,
+    },
   };
 }

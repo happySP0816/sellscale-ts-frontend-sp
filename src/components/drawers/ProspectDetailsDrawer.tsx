@@ -15,6 +15,7 @@ import {
   prospectDrawerOpenState,
   prospectDrawerNotesState,
   prospectChannelState,
+  prospectDrawerStatusesState,
 } from "@atoms/prospectAtoms";
 import { useQuery } from "@tanstack/react-query";
 import ProspectDetailsSummary from "../common/prospectDetails/ProspectDetailsSummary";
@@ -58,6 +59,7 @@ export default function ProspectDetailsDrawer() {
   const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
   const prospectId = useRecoilValue(prospectDrawerIdState);
   const userToken = useRecoilValue(userTokenState);
+  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(prospectDrawerStatusesState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospect-details-${prospectId}`],
@@ -90,7 +92,14 @@ export default function ProspectDetailsDrawer() {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data?.main);
+  useEffect(() => {
+    if (!data) { return; }
+    setProspectDrawerStatuses({
+      overall: data.main.prospect_info.details.overall_status,
+      linkedin: data.main.prospect_info.details.linkedin_status,
+      email: data.main.prospect_info.details.email_status,
+    });
+  }, [data]);
 
   return (
     <Drawer
@@ -107,12 +116,12 @@ export default function ProspectDetailsDrawer() {
             <Badge
               color={valueToColor(
                 theme,
-                formatToLabel(data.main.prospect_info.details.overall_status)
+                formatToLabel(prospectDrawerStatuses.overall)
               )}
               variant="light"
             >
               {`${formatToLabel(
-                data.main.prospect_info.details.overall_status
+                prospectDrawerStatuses.overall
               )}`}
             </Badge>
           )}
@@ -139,7 +148,7 @@ export default function ProspectDetailsDrawer() {
             style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
           >
             {data?.channelTypes.length > 0 &&
-              data.main.prospect_info.details.overall_status !==
+              prospectDrawerStatuses.overall !==
                 "PROSPECTED" && (
                 <>
                   <Tabs
@@ -187,10 +196,8 @@ export default function ProspectDetailsDrawer() {
                               value: channel.value,
                               currentStatus:
                                 channel.value === "LINKEDIN"
-                                  ? data.main.prospect_info.details
-                                      .linkedin_status
-                                  : data.main.prospect_info.details
-                                      .email_status,
+                                  ? prospectDrawerStatuses.linkedin
+                                  : prospectDrawerStatuses.email,
                             }}
                           />
 
@@ -209,7 +216,7 @@ export default function ProspectDetailsDrawer() {
                                   data?.main.prospect_info.details.id
                                 }
                                 overall_status={
-                                  data.main.prospect_info.details.overall_status
+                                  prospectDrawerStatuses.overall
                                 }
                               />
                             )}
@@ -230,12 +237,12 @@ export default function ProspectDetailsDrawer() {
               prospectId={data.main.prospect_info.details.id}
             />
             <ProspectDetailsNotes
-              currentStatus={data.main.prospect_info.details.overall_status}
+              currentStatus={prospectDrawerStatuses.overall}
               prospectId={data.main.prospect_info.details.id}
             />
             <ProspectDetailsRemove
               prospectId={data.main.prospect_info.details.id}
-              prospectStatus={data.main.prospect_info.details.overall_status}
+              prospectStatus={prospectDrawerStatuses.overall}
             />
             {
               // data.main.prospect_info.company.name && (

@@ -1,0 +1,201 @@
+import React from "react";
+import {
+  Button,
+  Popover,
+  Textarea,
+  Text,
+  Title,
+  SegmentedControl,
+  Divider,
+  Card,
+  Grid,
+} from "@mantine/core";
+import { IconRobot, IconX } from "@tabler/icons";
+import { API_URL } from "@constants/data";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+
+type PropsType = {
+  placeholder?: string;
+  label?: string;
+  description?: string;
+  minRows?: number;
+  maxRows?: number;
+  onChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  disabled?: boolean;
+  value?: string;
+  withAsterisk?: boolean;
+  loadingAIGenerate?: boolean;
+  onAIGenerateClicked?: () => void;
+};
+
+export default function TextAreaWithAI(props: PropsType) {
+  const [AIPopoverToggled, setAIPopoverToggled] = React.useState(false);
+  const [aiEditorMode, setAIEditorMode] = React.useState<"write" | "edit">(
+    "write"
+  );
+
+  const [editingLoading, setEditingLoading] = React.useState(false);
+  const [editInstruction, setEditInstruction] = React.useState("");
+  const userToken = useRecoilValue(userTokenState);
+
+  const editTextViaAPI = () => {
+    setEditingLoading(true);
+    fetch(`${API_URL}/ml/edit_text`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        initial_text: props.value,
+        prompt: editInstruction,
+      }),
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((j) => {
+        const updatedValue: any = {
+          currentTarget: {
+            value: j.data,
+          },
+        };
+        props.onChange && props.onChange(updatedValue);
+        setAIPopoverToggled(false);
+      })
+      .finally(() => {
+        setEditingLoading(false);
+      });
+  };
+
+  return (
+    <>
+      {/* AI Writing Popup */}
+      <Popover
+        width={300}
+        trapFocus
+        position="left"
+        withArrow
+        shadow="md"
+        opened={AIPopoverToggled}
+      >
+        <Popover.Target>
+          <Button
+            color="teal"
+            radius="xl"
+            size="xs"
+            compact
+            onClick={() => setAIPopoverToggled(!AIPopoverToggled)}
+            sx={{ position: "absolute", top: 0, right: 0, zIndex: 100 }}
+          >
+            ✍🏼 AI Write
+          </Button>
+        </Popover.Target>
+        <Popover.Dropdown>
+          <Grid>
+            <Grid.Col span={10}>
+              <Title order={4}>✍🏼 Writing Assistant</Title>
+              <Text size="sm">Draft text or edit using AI.</Text>
+            </Grid.Col>
+            <Grid.Col span={2}>
+              <Button
+                compact
+                size="xs"
+                variant="subtle"
+                color="gray"
+                rightIcon={<IconX />}
+                onClick={() => setAIPopoverToggled(false)}
+              />
+            </Grid.Col>
+          </Grid>
+          <SegmentedControl
+            w={"100%"}
+            mt={"md"}
+            data={[
+              { label: "Write", value: "write" },
+              { label: "Edit", value: "edit" },
+            ]}
+            value={aiEditorMode}
+            onChange={(value) => {
+              setAIEditorMode(value as "write" | "edit");
+            }}
+          />
+          {aiEditorMode === "write" && (
+            <Card withBorder mt="md">
+              <Text size="sm">
+                Auto generate a first draft using AI. SellScale will use
+                existing context to generate.
+              </Text>
+              <Button
+                mt="md"
+                size="xs"
+                color="teal"
+                w="100%"
+                loading={props.loadingAIGenerate}
+                loaderPosition="right"
+                leftIcon={<IconRobot />}
+                onClick={() => {
+                  setAIPopoverToggled(false);
+                  return (
+                    props.onAIGenerateClicked && props.onAIGenerateClicked()
+                  );
+                }}
+              >
+                Generate with AI
+              </Button>
+            </Card>
+          )}
+          {aiEditorMode === "edit" && (
+            <Card withBorder mt="md">
+              <Text size="sm">
+                Edit your text using AI. Tell SellScale what you want to change.
+              </Text>
+              <Textarea
+                mt="md"
+                label="Editing Instruction"
+                onChange={(event) => {
+                  setEditInstruction(event.currentTarget.value);
+                }}
+                placeholder="Describe how you want to edit this text."
+              />
+              <Button
+                mt="md"
+                size="xs"
+                color="grape"
+                w="100%"
+                loading={editingLoading}
+                loaderPosition="right"
+                leftIcon={<IconRobot />}
+                disabled={!editInstruction}
+                onClick={() => {
+                  const value: any = {
+                    currentTarget: {
+                      value: "This is edited text",
+                    },
+                  };
+                  editTextViaAPI();
+                }}
+              >
+                Edit with AI
+              </Button>
+            </Card>
+          )}
+        </Popover.Dropdown>
+      </Popover>
+
+      {/* Main Text Area */}
+      <Textarea
+        placeholder={props.placeholder}
+        label={props.label}
+        description={props.description}
+        minRows={props.minRows}
+        maxRows={props.maxRows}
+        onChange={props.onChange}
+        disabled={props.disabled}
+        value={props.value}
+        withAsterisk={props.withAsterisk}
+      />
+    </>
+  );
+}

@@ -1,4 +1,4 @@
-import GeneratedByAI from "@atoms/GeneratedByAI";
+import GeneratedByAI from "@common/library/GeneratedByAI";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import { Card, Text, Group, Table, Button, Loader } from "@mantine/core";

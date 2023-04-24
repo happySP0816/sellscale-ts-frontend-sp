@@ -21,6 +21,7 @@ import { useRecoilValue } from "recoil";
 import { useEffect, useState } from "react";
 import displayNotification from "@utils/notificationFlow";
 import { IconRobot } from "@tabler/icons";
+import TextAreaWithAI from "@common/library/TextAreaWithAI";
 
 type PropsType = {
   archetype_id: number;
@@ -180,22 +181,6 @@ export default function RunAccountResearchCard(props: PropsType) {
     setPersonaValueProp(res.extra.reason);
     return res;
   };
-  // const fetchAdditionalProspectEmails = async () => {
-  //   setFetchButtonDisabled(true);
-  //   const res = await fetch(
-  //     `${API_URL}/prospect/pull_emails`,
-  //     {
-  //       method: "POST",
-  //       headers: {
-  //         Authorization: `Bearer ${userToken}`,
-  //       },
-  //     }
-  //   );
-
-  //   setTimeout(() => {
-  //     setFetchButtonDisabled(false);
-  //   }, 10000);
-  // };
 
   return (
     <Card pl="sm" pr="sm" mt="md">
@@ -234,9 +219,10 @@ export default function RunAccountResearchCard(props: PropsType) {
                   visible={loadingPersonaFitReason}
                   overlayBlur={2}
                 />
-                <Textarea
+                <TextAreaWithAI
                   placeholder="ex. They love sugar!"
                   label="Why would this persona buy this product?"
+                  description="Describe why this persona would buy this product."
                   minRows={3}
                   maxRows={6}
                   onChange={(e) => {
@@ -245,41 +231,30 @@ export default function RunAccountResearchCard(props: PropsType) {
                   disabled={buttonsHidden}
                   value={personaValueProp}
                   withAsterisk
+                  loadingAIGenerate={loadingPersonaFitReason}
+                  onAIGenerateClicked={async () => {
+                    await displayNotification(
+                      "fetch-persona-fit-reason",
+                      fetchPersonaFitReason,
+                      {
+                        title: `Running persona fit reason generation...`,
+                        message: `Working with servers...`,
+                        color: "teal",
+                      },
+                      {
+                        title: `Persona fit generated!`,
+                        message: `SellScale AI predicted why this persona would buy this product.`,
+                        color: "teal",
+                      },
+                      {
+                        title: `Error while running persona fit reason generation`,
+                        message: `Please try again later.`,
+                        color: "red",
+                      }
+                    );
+                  }}
                 />
               </Box>
-
-              <Button
-                mt="md"
-                size="xs"
-                variant="white"
-                color="grape"
-                loading={loadingPersonaFitReason}
-                loaderPosition="right"
-                leftIcon={<IconRobot />}
-                onClick={async () => {
-                  await displayNotification(
-                    "fetch-persona-fit-reason",
-                    fetchPersonaFitReason,
-                    {
-                      title: `Running persona fit reason generation...`,
-                      message: `Working with servers...`,
-                      color: "teal",
-                    },
-                    {
-                      title: `Persona fit generated!`,
-                      message: `SellScale AI predicted why this persona would buy this product.`,
-                      color: "teal",
-                    },
-                    {
-                      title: `Error while running persona fit reason generation`,
-                      message: `Please try again later.`,
-                      color: "red",
-                    }
-                  );
-                }}
-              >
-                Predict persona fit reason
-              </Button>
 
               {buttonsHidden && (
                 <Card withBorder mt="md">

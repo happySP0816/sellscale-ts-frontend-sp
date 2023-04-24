@@ -374,7 +374,7 @@ export default function ProspectDetailsViewConversation(
               component="a"
               mr="sm"
               target="_blank"
-              fullWidth
+              w="70%"
               rel="noopener noreferrer"
               rightIcon={<IconRobot size={14} />}
               onClick={() => {
@@ -391,7 +391,7 @@ export default function ProspectDetailsViewConversation(
               color="blue"
               component="a"
               target="_blank"
-              fullWidth
+              w='30%'
               rel="noopener noreferrer"
               rightIcon={<IconSend size={14} />}
               onClick={() => {

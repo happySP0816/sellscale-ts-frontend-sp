@@ -22,6 +22,7 @@ import SequenceWriterModal from "@modals/SequenceWriterModal";
 import CTAGeneratorModal from "@modals/CTAGeneratorModal";
 import ManagePulsePrompt from "@modals/ManagePulsePromptModal";
 import ViewEmailThreadModal from "@modals/ViewEmailThreadModal";
+import ManageBumpFramework from "@modals/ManageBumpFrameworkModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -108,6 +109,7 @@ export default function App() {
               ctaGenerator: CTAGeneratorModal,
               managePulsePrompt: ManagePulsePrompt,
               viewEmailThread: ViewEmailThreadModal,
+              manageBumpFramework: ManageBumpFramework,
             }}
             modalProps={{
               closeOnClickOutside: false,

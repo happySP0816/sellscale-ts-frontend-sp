@@ -1,9 +1,22 @@
 import { useEffect, useState } from "react";
 import CreateBumpInstructionModal from "./CreateBumpInstructionModal";
-import { Container, Select } from "@mantine/core";
+import { Button, Card, Container, Select, Text, Title } from "@mantine/core";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
+
+import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
+import { openContextModal } from "@mantine/modals";
+
+
+type BumpFramework = {
+  id: number;
+  title: string;
+  description: string;
+  overall_status: string;
+  active: boolean;
+  default: boolean;
+};
 
 type PropsType = {
   client_sdr_id: number;
@@ -12,93 +25,72 @@ type PropsType = {
 };
 
 export default function SelectBumpInstruction(props: PropsType) {
-  const [bumpFrameworks, setBumpFrameworks] = useState([]);
+  const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
+  const [selectedBumpFramework, setSelectedBumpFramework] = useState<BumpFramework>();
+
   const userToken = useRecoilValue(userTokenState);
   const [loadingBumpFrameworks, setLoadingBumpFrameworks] = useState(false);
 
-  const getBumpFrameworks = () => {
+  const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
-    fetch(
-      `${API_URL}/bump_framework/?client_sdr_id=` +
-        props.client_sdr_id +
-        `&overall_status=` +
-        props.overall_status,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      }
-    )
-      .then((res) => {
-        setLoadingBumpFrameworks(false);
-        return res.json();
-      })
-      .then((j) => {
-        setBumpFrameworks(j);
-      })
-      .catch((e) => {
-        setLoadingBumpFrameworks(false);
-      });
-  };
+    const result = await getBumpFrameworks(userToken, props.overall_status);
 
-  const createBumpFramework = (description: string) => {
-    fetch(`${API_URL}/bump_framework/create`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_sdr_id: props.client_sdr_id,
-        overall_status: props.overall_status,
-        description: description,
-      }),
-    }).then((res) => {
-      getBumpFrameworks();
-      return res.json();
-    });
+    setBumpFrameworks(result.extra);
+    for (const bumpFramework of result.extra as BumpFramework[]) {
+      if (bumpFramework.default) {
+        setSelectedBumpFramework(bumpFramework);
+        props.onBumpFrameworkSelected(bumpFramework.id);
+        break
+      }
+    }
+
+    setLoadingBumpFrameworks(false)
   };
 
   useEffect(() => {
-    getBumpFrameworks();
+    triggerGetBumpFrameworks();
   }, []);
 
-  // Todo: Aakash - fix this!
-  // return null;
-
   return (
-    <>
+    <Card withBorder mt='sm'>
+      <Text fw='bold'>
+        Bump Framework
+      </Text>
+      <Text fz='xs'>
+        Bump Frameworks are used to train the AI on how to respond to specific messages. The default bump framework is used, but you can manage all bump frameworks.
+      </Text>
       <Select
-        data={bumpFrameworks.map((x: any) => {
-          return { value: x.id, label: x.description };
-        })}
-        placeholder={
-          loadingBumpFrameworks
-            ? "loading..."
-            : "ex. Keep it short! Mention the superbowl!"
+        mt='md'
+        value={
+          selectedBumpFramework
+            ? selectedBumpFramework.id + ""
+            : '-1'
         }
-        label="Instruct your AI for the next bump generation"
-        description="Tell the AI on how you'd like it to response. Choose an existing bump framework or create a new one."
-        mt={"sm"}
-        onCreate={(value) => {
-          createBumpFramework(value);
-          return value;
-        }}
+        data={bumpFrameworks.map((x: any) => {
+          return { value: x.id + '', label: x.title };
+        })}
+        placeholder={"Select Manage Bump Frameworks"}
         onChange={(value: any) => {
-          console.log(value);
+          setSelectedBumpFramework(bumpFrameworks.find((x) => x.id == value));
           props.onBumpFrameworkSelected(value);
         }}
-        getCreateLabel={(query) => (
-          <>
-            <span style={{ fontWeight: 700 }}>Create new instruction: </span>
-            {query}
-          </>
-        )}
-        disabled={loadingBumpFrameworks}
         searchable
         creatable
+        withinPortal
+        dropdownPosition="bottom"
       />
-    </>
+      <Button
+        mt='md'
+        onClick={() => {
+          openContextModal({
+            modal: "manageBumpFramework",
+            title: <Title order={3}>Manage Bump Frameworks</Title>,
+            innerProps: {selectedBumpFramework: selectedBumpFramework, overallStatus: props.overall_status, backTriggerGetFrameworks: triggerGetBumpFrameworks},
+          });
+        }}
+      >
+        Manage
+      </Button>
+    </Card >
   );
 }

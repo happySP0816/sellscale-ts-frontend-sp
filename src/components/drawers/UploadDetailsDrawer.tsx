@@ -105,6 +105,7 @@ export default function UploadDetailsDrawer() {
       );
       return sortStatus.direction === "desc" ? pageData.reverse() : pageData;
     },
+    refetchOnWindowFocus: false,
   });
 
   // Fetch personas (for stats)
@@ -127,6 +128,7 @@ export default function UploadDetailsDrawer() {
 
       return result;
     },
+    refetchOnWindowFocus: false,
   });
 
   const persona = data_personas?.find((persona) => {

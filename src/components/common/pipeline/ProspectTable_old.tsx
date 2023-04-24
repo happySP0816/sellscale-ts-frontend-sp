@@ -15,6 +15,7 @@ import {
   Button,
   Switch,
   Group,
+  SegmentedControl,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -160,6 +161,8 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
   const [showPurgatory, setShowPurgatory] = useRecoilState(prospectShowPurgatoryState);
   const queryClient = useQueryClient();
 
+  const [bumpedCount, setBumpedCount] = useState('all');
+
   const [page, setPage] = useState(1);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
     columnAccessor: "full_name",
@@ -184,12 +187,12 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `query-pipeline-prospects-${props.personaSpecific ?? "all"}`,
-      { page, sortStatus, statuses, search, channel, showPurgatory },
+      { page, sortStatus, statuses, search, channel, showPurgatory, bumpedCount },
     ],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { page, sortStatus, statuses, search, channel, showPurgatory }] = queryKey;
+      const [_key, { page, sortStatus, statuses, search, channel, showPurgatory, bumpedCount }] = queryKey;
 
       totalRecords.current = 0;
 
@@ -223,11 +226,20 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
       }
 
       // Purgatory filtering
-      const prospects = showPurgatory ? res.prospects : res.prospects.filter((prospect: any) => {
+      let prospects = showPurgatory ? res.prospects : res.prospects.filter((prospect: any) => {
         if (!prospect.hidden_until) {
             return true;
         }
         return new Date(`${prospect.hidden_until} UTC`) < new Date();
+      });
+
+      // Bumped Count Filtering
+      prospects = prospects.filter((prospect: any) => {
+        if(statuses?.includes('BUMPED') && bumpedCount !== 'all' && prospect.times_bumped !== +bumpedCount) {
+          return false;
+        } else {
+          return true;
+        }
       });
 
       totalRecords.current = res.total_count;
@@ -377,6 +389,23 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           </Switch.Group>
         </Grid.Col>
       </Grid>
+
+      {statuses?.includes('BUMPED') && (
+        <SegmentedControl
+          value={bumpedCount}
+          onChange={setBumpedCount}
+          radius={12}
+          color="orange"
+          size="xs"
+          pb={10}
+          data={[
+            { label: 'All', value: 'all' },
+            { label: 'Bumped #1', value: '1' },
+            { label: 'Bumped #2', value: '2' },
+            { label: 'Bumped #3+', value: '3' },
+          ]}
+        />
+      )}
 
       <DataTable
         withBorder

@@ -1,4 +1,4 @@
-import GeneratedByAI from "@atoms/GeneratedByAI";
+import GeneratedByAI from "@common/library/GeneratedByAI";
 import {
   Badge,
   useMantineTheme,

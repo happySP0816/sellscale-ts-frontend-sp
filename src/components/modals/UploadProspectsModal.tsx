@@ -44,12 +44,14 @@ import { logout } from "@auth/core";
 import { Archetype } from "src";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import { API_URL } from "@constants/data";
+import TextAreaWithAI from "@common/library/TextAreaWithAI";
+import displayNotification from "@utils/notificationFlow";
 
 export default function UploadProspectsModal({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ mode: 'ADD-ONLY' | 'ADD-CREATE' | 'CREATE-ONLY' }>) {
+}: ContextModalProps<{ mode: "ADD-ONLY" | "ADD-CREATE" | "CREATE-ONLY" }>) {
   const theme = useMantineTheme();
   const [personas, setPersonas] = useState<
     { value: string; label: string; group: string | undefined }[]
@@ -63,10 +65,11 @@ export default function UploadProspectsModal({
   const [openedCTAs, setOpenedCTAs] = useState(false);
   const [newCTAText, setNewCTAText] = useState("");
   const addCTAInputRef = useRef<HTMLTextAreaElement | null>(null);
-  const [ctas, setCTAs] = useState<{id: number, cta: string}[]>([]);
+  const [ctas, setCTAs] = useState<{ id: number; cta: string }[]>([]);
 
-  const [description, setDescription] = useState('');
-  const [fitReason, setFitReason] = useState('');
+  const [description, setDescription] = useState("");
+  const [fitReason, setFitReason] = useState("");
+  const [icpMatchingPrompt, setICPMatchingPrompt] = useState("");
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
@@ -85,6 +88,170 @@ export default function UploadProspectsModal({
     setNewCTAText(ctas.filter((cta) => cta.id === id)[0].cta);
     deleteCTA(id);
     addCTAInputRef.current?.focus();
+  };
+
+  const [
+    loadingPersonaDescriptionGeneration,
+    setLoadingPersonaDescriptionGeneration,
+  ] = useState(false);
+  const generatePersonaDescription = async (): Promise<{
+    status: string;
+    title: string;
+    message: string;
+    extra?: any;
+  }> => {
+    setLoadingPersonaDescriptionGeneration(true);
+    const res = await fetch(
+      `${API_URL}/client/archetype/generate_persona_description`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          persona_name: selectedPersona,
+        }),
+      }
+    )
+      .then(async (r) => {
+        if (r.status === 200) {
+          return {
+            status: "success",
+            title: "Success",
+            message: "Persona description generated successfully",
+            extra: await r.json(),
+          };
+        } else {
+          return {
+            status: "error",
+            title: `Error (${r.status})`,
+            message: "Failed to generate persona description",
+            extra: {},
+          };
+        }
+      })
+      .catch((e) => {
+        return {
+          status: "error",
+          title: "Error",
+          message: e.message,
+          extra: {},
+        };
+      });
+    setLoadingPersonaDescriptionGeneration(false);
+    setDescription(res.extra.description);
+    return res;
+  };
+
+  const [
+    loadingPersonaBuyReasonGeneration,
+    setLoadingPersonaBuyReasonGeneration,
+  ] = useState(false);
+  const generatePersonaBuyReason = async (): Promise<{
+    status: string;
+    title: string;
+    message: string;
+    extra?: any;
+  }> => {
+    setLoadingPersonaBuyReasonGeneration(true);
+    const res = await fetch(
+      `${API_URL}/client/archetype/generate_persona_buy_reason`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          persona_name: selectedPersona,
+        }),
+      }
+    )
+      .then(async (r) => {
+        if (r.status === 200) {
+          return {
+            status: "success",
+            title: "Success",
+            message: "Persona buying reason generated successfully",
+            extra: await r.json(),
+          };
+        } else {
+          return {
+            status: "error",
+            title: `Error (${r.status})`,
+            message: "Failed to generate persona buying reason",
+            extra: {},
+          };
+        }
+      })
+      .catch((e) => {
+        return {
+          status: "error",
+          title: "Error",
+          message: e.message,
+          extra: {},
+        };
+      });
+    setLoadingPersonaBuyReasonGeneration(false);
+    setFitReason(res.extra.description);
+    return res;
+  };
+
+  const [
+    loadingICPMatchingPromptGeneration,
+    setLoadingICPMatchingPromptGeneration,
+  ] = useState(false);
+  const generateICPMatchingPrompt = async (): Promise<{
+    status: string;
+    title: string;
+    message: string;
+    extra?: any;
+  }> => {
+    setLoadingICPMatchingPromptGeneration(true);
+    const res = await fetch(
+      `${API_URL}/client/archetype/generate_persona_icp_matching_prompt`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          persona_name: selectedPersona,
+          persona_description: description,
+          persona_buy_reason: fitReason,
+        }),
+      }
+    )
+      .then(async (r) => {
+        if (r.status === 200) {
+          return {
+            status: "success",
+            title: "Success",
+            message: "ICP matching prompt generated successfully",
+            extra: await r.json(),
+          };
+        } else {
+          return {
+            status: "error",
+            title: `Error (${r.status})`,
+            message: "Failed to generate ICP matching prompt",
+            extra: {},
+          };
+        }
+      })
+      .catch((e) => {
+        return {
+          status: "error",
+          title: "Error",
+          message: e.message,
+          extra: {},
+        };
+      });
+    setLoadingICPMatchingPromptGeneration(false);
+    setICPMatchingPrompt(res.extra.description);
+    return res;
   };
 
   const userToken = useRecoilValue(userTokenState);
@@ -110,20 +277,25 @@ export default function UploadProspectsModal({
       }
 
       // Sort alphabetically by archetype (name)
-      return (res.archetypes as Archetype[]).sort((a, b) => {
-        if (a.active && !b.active) {
-          return -1;
-        } else if (!a.active && b.active) {
-          return 1;
-        } else {
-          return a.archetype.localeCompare(b.archetype);
-        }
-      }).filter((persona) => persona.active);
+      return (res.archetypes as Archetype[])
+        .sort((a, b) => {
+          if (a.active && !b.active) {
+            return -1;
+          } else if (!a.active && b.active) {
+            return 1;
+          } else {
+            return a.archetype.localeCompare(b.archetype);
+          }
+        })
+        .filter((persona) => persona.active);
     },
     refetchOnWindowFocus: false,
   });
   // After fetch, set default personas and set personas if they haven't been set yet
-  if (data && (innerProps.mode === "ADD-ONLY" || innerProps.mode === "ADD-CREATE")) {
+  if (
+    data &&
+    (innerProps.mode === "ADD-ONLY" || innerProps.mode === "ADD-CREATE")
+  ) {
     defaultPersonas.current = data.map((persona) => ({
       value: persona.id + "",
       label: persona.archetype,
@@ -160,14 +332,23 @@ export default function UploadProspectsModal({
             }
             data={personas}
             placeholder={
-              innerProps.mode === "ADD-ONLY" ? "Select a persona for the prospects" : (
-                innerProps.mode === "CREATE-ONLY" ? "Create a persona for the prospects" : "Select or create a persona for the prospects"
-              )
+              innerProps.mode === "ADD-ONLY"
+                ? "Select a persona for the prospects"
+                : innerProps.mode === "CREATE-ONLY"
+                ? "Create a persona for the prospects"
+                : "Select or create a persona for the prospects"
             }
-            nothingFound={innerProps.mode === "CREATE-ONLY" ? "Input a persona name" : "Nothing found"}
+            nothingFound={
+              innerProps.mode === "CREATE-ONLY"
+                ? "Input a persona name"
+                : "Nothing found"
+            }
             icon={<IconUsers size={14} />}
             searchable
-            creatable={innerProps.mode === 'ADD-CREATE' || innerProps.mode === 'CREATE-ONLY'}
+            creatable={
+              innerProps.mode === "ADD-CREATE" ||
+              innerProps.mode === "CREATE-ONLY"
+            }
             clearable
             getCreateLabel={(query) => (
               <>
@@ -199,111 +380,191 @@ export default function UploadProspectsModal({
 
         {innerProps.mode === "CREATE-ONLY" && (
           <Stack spacing={10}>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="This persona are C-Level Execs who..."
-              label="In 1-2 sentences, describe this persona"
-            />
-            <Textarea
+            <>
+              <TextAreaWithAI
+                withAsterisk
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="This persona are C-Level Execs who..."
+                label="In 1-2 sentences, describe this persona"
+                loadingAIGenerate={loadingPersonaDescriptionGeneration}
+                onAIGenerateClicked={async () => {
+                  await displayNotification(
+                    "generate-persona-description",
+                    generatePersonaDescription,
+                    {
+                      title: "Generating persona description...",
+                      message: "This may take a few seconds.",
+                      color: "teal",
+                    },
+                    {
+                      title: "Persona description generated!",
+                      message: "Your persona description has been generated.",
+                      color: "teal",
+                    },
+                    {
+                      title: "Failed to generate persona description",
+                      message: "Please try again or contact SellScale team.",
+                      color: "red",
+                    }
+                  );
+                }}
+              />
+            </>
+            <TextAreaWithAI
+              withAsterisk
               value={fitReason}
               onChange={(e) => setFitReason(e.target.value)}
               placeholder="To help their outbound team increase..."
               label="Why would this persona buy your product?"
+              loadingAIGenerate={loadingPersonaBuyReasonGeneration}
+              onAIGenerateClicked={async () => {
+                await displayNotification(
+                  "generate-persona-buy-reason",
+                  generatePersonaBuyReason,
+                  {
+                    title: "Generating persona fit reason...",
+                    message: "This may take a few seconds.",
+                    color: "teal",
+                  },
+                  {
+                    title: "Persona fit reason generated!",
+                    message: "Your persona fit reason has been generated.",
+                    color: "teal",
+                  },
+                  {
+                    title: "Failed to generate persona fit reason",
+                    message: "Please try again or contact SellScale team.",
+                    color: "red",
+                  }
+                );
+              }}
+            />
+            <TextAreaWithAI
+              withAsterisk
+              value={icpMatchingPrompt}
+              onChange={(e) => setICPMatchingPrompt(e.target.value)}
+              description="Describe the roles, seniority, location, tiers, and other notes to rank prospects in this persona."
+              minRows={4}
+              placeholder="Role(s): VP of Sales, Director of Revenue&#10;Seniority: Senior&#10;Locations: California and Nevada&#10;Other Notes:&#10;-Should lead BI team&#10;Tiers:&#10;- Tier 1: XYZ&#10;- Tier 2: ABC&#10;- Tier 3: DEF..."
+              label="Describe how you want to rank the prospects in this persona."
+              loadingAIGenerate={loadingICPMatchingPromptGeneration}
+              onAIGenerateClicked={async () => {
+                await displayNotification(
+                  "generate-icp-matching-prompt",
+                  generateICPMatchingPrompt,
+                  {
+                    title: "Generating ICP matching prompt...",
+                    message: "This may take a few seconds.",
+                    color: "teal",
+                  },
+                  {
+                    title: "ICP matching prompt generated!",
+                    message: "Your persona fit reason has been generated.",
+                    color: "teal",
+                  },
+                  {
+                    title: "Failed to generate ICP matching prompt",
+                    message: "Please try again or contact SellScale team.",
+                    color: "red",
+                  }
+                );
+              }}
             />
           </Stack>
         )}
 
-        {createdPersona.length > 0 && false && ( // TODO: Re-enable?
-          <Container mx={2} my={0} p={0}>
-            <Text
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                cursor: "pointer",
-              }}
-              onClick={() => setOpenedCTAs((prev) => !prev)}
-            >
-              <Text fw={500} size="sm">
-                Call-to-Actions (CTAs)
+        {createdPersona.length > 0 &&
+          false && ( // TODO: Re-enable?
+            <Container mx={2} my={0} p={0}>
+              <Text
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                }}
+                onClick={() => setOpenedCTAs((prev) => !prev)}
+              >
+                <Text fw={500} size="sm">
+                  Call-to-Actions (CTAs)
+                </Text>
+                {openedCTAs ? (
+                  <IconChevronUp size={20} />
+                ) : (
+                  <IconChevronDown size={20} />
+                )}
               </Text>
-              {openedCTAs ? (
-                <IconChevronUp size={20} />
-              ) : (
-                <IconChevronDown size={20} />
-              )}
-            </Text>
-            <Divider mb={0} />
-            <Collapse in={openedCTAs}>
-              <Text c="dimmed" fz="xs">
-                If a LinkedIn message is generated using this persona, one of
-                your CTAs will be randomly selected and added to the end of the
-                message.
-              </Text>
-              {ctas.length > 0 && (
-                <DataTable
-                  highlightOnHover
-                  columns={[
-                    {
-                      accessor: "cta",
-                      title: "",
-                    },
-                    {
-                      accessor: "id",
-                      title: "",
-                      render: ({ id }) => (
-                        <Group position="right" spacing={0}>
-                          <ActionIcon
-                            color="blue"
-                            variant="transparent"
-                            onClick={() => editCTA(id)}
-                          >
-                            <IconPencil size={18} />
-                          </ActionIcon>
-                          <ActionIcon
-                            color="red"
-                            variant="transparent"
-                            onClick={() => deleteCTA(id)}
-                          >
-                            <IconTrashX size={18} />
-                          </ActionIcon>
-                        </Group>
-                      ),
-                    },
-                  ]}
-                  records={ctas}
-                />
-              )}
-              <Divider my={0} />
-              <Flex justify="center" align="center">
-                <div style={{ flex: "5 0 0" }}>
-                  <Textarea
-                    pl={8}
-                    variant="unstyled"
-                    placeholder="Write a new CTA"
-                    autosize
-                    minRows={1}
-                    ref={addCTAInputRef}
-                    onChange={(e) => setNewCTAText(e.currentTarget.value)}
-                    value={newCTAText}
+              <Divider mb={0} />
+              <Collapse in={openedCTAs}>
+                <Text c="dimmed" fz="xs">
+                  If a LinkedIn message is generated using this persona, one of
+                  your CTAs will be randomly selected and added to the end of
+                  the message.
+                </Text>
+                {ctas.length > 0 && (
+                  <DataTable
+                    highlightOnHover
+                    columns={[
+                      {
+                        accessor: "cta",
+                        title: "",
+                      },
+                      {
+                        accessor: "id",
+                        title: "",
+                        render: ({ id }) => (
+                          <Group position="right" spacing={0}>
+                            <ActionIcon
+                              color="blue"
+                              variant="transparent"
+                              onClick={() => editCTA(id)}
+                            >
+                              <IconPencil size={18} />
+                            </ActionIcon>
+                            <ActionIcon
+                              color="red"
+                              variant="transparent"
+                              onClick={() => deleteCTA(id)}
+                            >
+                              <IconTrashX size={18} />
+                            </ActionIcon>
+                          </Group>
+                        ),
+                      },
+                    ]}
+                    records={ctas}
                   />
-                </div>
-                <Center style={{ flex: "1 0 0" }}>
-                  <ActionIcon
-                    sx={{ flex: "1 0 0" }}
-                    color="green"
-                    variant="transparent"
-                    onClick={addNewCTA}
-                  >
-                    <IconPlus size={18} />
-                  </ActionIcon>
-                </Center>
-              </Flex>
-            </Collapse>
-            <Divider mt={0} />
-          </Container>
-        )}
+                )}
+                <Divider my={0} />
+                <Flex justify="center" align="center">
+                  <div style={{ flex: "5 0 0" }}>
+                    <Textarea
+                      pl={8}
+                      variant="unstyled"
+                      placeholder="Write a new CTA"
+                      autosize
+                      minRows={1}
+                      ref={addCTAInputRef}
+                      onChange={(e) => setNewCTAText(e.currentTarget.value)}
+                      value={newCTAText}
+                    />
+                  </div>
+                  <Center style={{ flex: "1 0 0" }}>
+                    <ActionIcon
+                      sx={{ flex: "1 0 0" }}
+                      color="green"
+                      variant="transparent"
+                      onClick={addNewCTA}
+                    >
+                      <IconPlus size={18} />
+                    </ActionIcon>
+                  </Center>
+                </Flex>
+              </Collapse>
+              <Divider mt={0} />
+            </Container>
+          )}
 
         <Tabs defaultValue="from-file" px="xs" color="teal">
           <Tabs.List>
@@ -320,6 +581,7 @@ export default function UploadProspectsModal({
                       ctas: ctas.map((cta) => cta.cta),
                       description: description,
                       fitReason: fitReason,
+                      icpMatchingPrompt: icpMatchingPrompt,
                     }
                   : undefined
               }

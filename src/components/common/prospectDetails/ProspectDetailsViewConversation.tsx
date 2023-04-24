@@ -46,6 +46,7 @@ import InstallExtensionCard from "@common/library/InstallExtensionCard";
 import SelectBumpInstruction from "@common/bump_instructions/SelectBumpInstruction";
 import { API_URL } from "@constants/data";
 import { prospectDrawerStatusesState } from "@atoms/prospectAtoms";
+import { postBumpGenerateResponse } from "@utils/requests/postBumpGenerateResponse";
 
 type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
@@ -81,8 +82,8 @@ export default function ProspectDetailsViewConversation(
     userData.li_voyager_connected
       ? []
       : props.conversation_entry_list.sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-        )
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      )
   );
 
   const emptyConvo = messages.current.length === 0;
@@ -102,7 +103,7 @@ export default function ProspectDetailsViewConversation(
     const result = await getConversation(userToken, props.prospect_id);
 
     // Fixes bug with li saying there's no convo but we have one cached
-    if (result.message === 'NO_CONVO' && props.conversation_entry_list.length > 0){
+    if (result.message === 'NO_CONVO' && props.conversation_entry_list.length > 0) {
       setConvoOutOfSync(true);
       result.extra = props.conversation_entry_list;
     }
@@ -124,7 +125,7 @@ export default function ProspectDetailsViewConversation(
       );
 
       // If status changed, update UI
-      if (result.extra.prospect.overall_status !== prospectDrawerStatuses.overall){
+      if (result.extra.prospect.overall_status !== prospectDrawerStatuses.overall) {
         setProspectDrawerStatuses((prev) => ({
           overall: result.extra.prospect.overall_status,
           linkedin: result.extra.prospect.linkedin_status,
@@ -224,26 +225,29 @@ export default function ProspectDetailsViewConversation(
     await fetchAndPopulateConvo();
   };
 
-  const generateAIFollowup = () => {
+  const generateAIFollowup = async () => {
     setMessageDraft("Loading...");
-    fetch(
-      `${API_URL}/li_conversation/prospect/generate_response`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prospect_id: props.prospect_id,
-          bump_framework_id: selectedBumpFrameworkId,
-        }),
-      }
-    )
-      .then((e) => {
-        return e.json();
-      })
-      .then((resp) => setMessageDraft(resp["message"]));
+    const result = await postBumpGenerateResponse(userToken, props.prospect_id, selectedBumpFrameworkId);
+
+    if (result.status === "success") {
+      showNotification({
+        id: "generate-ai-followup-success",
+        title: "Success",
+        message: "Message generated.",
+        color: "green",
+        autoClose: true,
+      });
+      setMessageDraft(result.extra.message);
+    } else {
+      showNotification({
+        id: "generate-ai-followup-error",
+        title: "Error",
+        message: "Failed to generate message. Please try again later.",
+        color: "red",
+        autoClose: false,
+      });
+      setMessageDraft("Error generating message.");
+    }
   };
 
   useEffect(() => {
@@ -405,13 +409,17 @@ export default function ProspectDetailsViewConversation(
               {userData.li_voyager_connected ? "Send" : "Schedule"}
             </Button>
           </Flex>
-          <SelectBumpInstruction
-            client_sdr_id={userData.id}
-            overall_status={props.overall_status}
-            onBumpFrameworkSelected={(framework_id) => {
-              setBumpFrameworkId(framework_id);
-            }}
-          />
+          {
+            props.overall_status &&
+            <SelectBumpInstruction
+              client_sdr_id={userData.id}
+              overall_status={props.overall_status}
+              onBumpFrameworkSelected={(framework_id) => {
+                setBumpFrameworkId(framework_id);
+              }}
+            />
+          }
+
         </div>
       </Card>
       {!userData.li_voyager_connected && (

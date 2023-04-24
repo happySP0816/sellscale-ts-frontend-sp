@@ -98,7 +98,7 @@ function determineColumns(
             <Select
               value={columnMappings.get(key.trim())}
               data={[
-                { label: "-", value: "none", group: 'Skipped' },
+                { label: "-", value: "none", group: "Skipped" },
                 ...PROSPECT_DB_COLUMNS.map((column) => {
                   return {
                     label: _.startCase(column.replace("_", " ")).replace(
@@ -106,7 +106,10 @@ function determineColumns(
                       "URL"
                     ),
                     value: column,
-                    group: (column === "linkedin_url" || column === "email") ? 'Required Fields' : 'Additional Fields',
+                    group:
+                      column === "linkedin_url" || column === "email"
+                        ? "Required Fields"
+                        : "Additional Fields",
                   };
                 }),
               ]}
@@ -122,8 +125,8 @@ function determineColumns(
           </Stack>
         ),
         render: (value: any) => {
-          return <Text sx={{ wordBreak: 'break-word' }}>{value[key]}</Text>;
-        }
+          return <Text sx={{ wordBreak: "break-word" }}>{value[key]}</Text>;
+        },
       };
     });
 }
@@ -142,6 +145,7 @@ type FileDropAndPreviewProps = {
     ctas: string[];
     description: string;
     fitReason: string;
+    icpMatchingPrompt: string;
   };
   onUploadSuccess?: () => void;
   onUploadFailure?: () => void;
@@ -149,7 +153,6 @@ type FileDropAndPreviewProps = {
 
 // personaId is null if creating a new persona
 export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
-
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
@@ -181,7 +184,9 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     const hasPersona = props.createPersona
       ? props.createPersona.name.length > 0
       : props.personaId !== null && props.personaId.length > 0;
-    const hasCTA = props.createPersona ? props.createPersona.ctas.length > 0 : true;
+    const hasCTA = props.createPersona
+      ? props.createPersona.ctas.length > 0
+      : true;
 
     let failureReasons = [];
     if (!hasPersona) {
@@ -207,101 +212,128 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     setPreUploading(true);
 
     let archetype_id = props.personaId;
-    if(props.createPersona){
-      const result = await createPersona(userToken, props.createPersona.name, props.createPersona.ctas, {
-        description: props.createPersona.description,
-        fitReason: props.createPersona.fitReason,
-      });
-      if(result.status === 'error') {
+    if (props.createPersona) {
+      const result = await createPersona(
+        userToken,
+        props.createPersona.name,
+        props.createPersona.ctas,
+        {
+          description: props.createPersona.description,
+          fitReason: props.createPersona.fitReason,
+          icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
+        }
+      );
+      if (result.status === "error") {
         console.error("Failed to create persona & CTAs");
         return;
       }
       archetype_id = result.extra;
     }
 
-    const result = await uploadProspects(+(archetype_id as string), userToken, (fileJSON as any[]).map((row) => {
-      const mappedRow = {};
-      // Only include columns that are mapped to a prospect db column
-      Object.keys(row)
-      .filter((key) => PROSPECT_DB_COLUMNS.includes(columnMappings.get(key.trim()) as string))
-      .forEach((key) => {
-        // Use the mapped prospect db column intead of the original column name
-        // @ts-ignore
-        mappedRow[columnMappings.get(key.trim())] = row[key];
-      });
-      return mappedRow;
-      // Remove prospects that don't have a linkedin_url column
-    }).filter((row: any) => row.linkedin_url));
+    const result = await uploadProspects(
+      +(archetype_id as string),
+      userToken,
+      (fileJSON as any[])
+        .map((row) => {
+          const mappedRow = {};
+          // Only include columns that are mapped to a prospect db column
+          Object.keys(row)
+            .filter((key) =>
+              PROSPECT_DB_COLUMNS.includes(
+                columnMappings.get(key.trim()) as string
+              )
+            )
+            .forEach((key) => {
+              // Use the mapped prospect db column intead of the original column name
+              // @ts-ignore
+              mappedRow[columnMappings.get(key.trim())] = row[key];
+            });
+          return mappedRow;
+          // Remove prospects that don't have a linkedin_url column
+        })
+        .filter((row: any) => row.linkedin_url)
+    );
     if (result.status === "error") {
       console.error("Failed to start prospects upload");
       showNotification({
-        id: 'uploading-prospects-failed',
+        id: "uploading-prospects-failed",
         title: result.title,
         message: result.message,
-        color: 'red',
+        color: "red",
         autoClose: false,
       });
       setPreUploading(false);
-      if(props.onUploadFailure){
+      if (props.onUploadFailure) {
         props.onUploadFailure();
       }
       return;
     }
 
     showNotification({
-      id: 'uploading-prospects',
+      id: "uploading-prospects",
       loading: true,
-      title: 'Uploading prospects...',
-      message: 'Check the persona for progress',
-      color: 'teal',
+      title: "Uploading prospects...",
+      message: "Check the persona for progress",
+      color: "teal",
       autoClose: 10000,
     });
 
     closeAllModals();
     setPreUploading(false);
     // Invalidates the query for the personas data so that the new persona will be fetched
-    queryClient.invalidateQueries({ queryKey: ['query-personas-data'] });
+    queryClient.invalidateQueries({ queryKey: ["query-personas-data"] });
     queryCache.clear();
 
-    if(props.onUploadSuccess){
+    if (props.onUploadSuccess) {
       props.onUploadSuccess();
     }
   };
 
-  const openModal = () => openConfirmModal({
-    title: (<Title order={3}>Confirm Upload</Title>),
-    children: (
-      <>
-        <Text>
-          We’re ready to process your file! Here’s the summary:
-        </Text>
-        <List withPadding>
-          {Array.from(columnMappings.values()).filter(
-            (value) => {
-              return value === "linkedin_url" || value === "email";
-            }
-          ).map((value) => convertColumn(value)).map((value) => (
-            <List.Item key={value}>{
-              value === 'linkedin_url' ? (<>You’re uploading <b>LinkedIn</b> prospects</>) : 
-              value === 'email' ? (<>You’re uploading <b>email</b> prospects</>) : ''
-            }</List.Item>
-          ))}
-        </List>
-        <Text pt='xs'>
-          <>You’re about to upload <b>{fileJSON?.length}</b> prospects.</>
-        </Text>
-        <Text fs="italic" pt='xs'>
-          Looks good?
-        </Text>
-      </>
-    ),
-    confirmProps: { color: 'teal', variant: 'outline' },
-    labels: { confirm: `Yes, let's do it! 🚀`, cancel: 'Nevermind' },
-    onCancel: () => {
-      closeAllModals();
-    },
-    onConfirm: () => startUpload(),
-  });
+  const openModal = () =>
+    openConfirmModal({
+      title: <Title order={3}>Confirm Upload</Title>,
+      children: (
+        <>
+          <Text>We’re ready to process your file! Here’s the summary:</Text>
+          <List withPadding>
+            {Array.from(columnMappings.values())
+              .filter((value) => {
+                return value === "linkedin_url" || value === "email";
+              })
+              .map((value) => convertColumn(value))
+              .map((value) => (
+                <List.Item key={value}>
+                  {value === "linkedin_url" ? (
+                    <>
+                      You’re uploading <b>LinkedIn</b> prospects
+                    </>
+                  ) : value === "email" ? (
+                    <>
+                      You’re uploading <b>email</b> prospects
+                    </>
+                  ) : (
+                    ""
+                  )}
+                </List.Item>
+              ))}
+          </List>
+          <Text pt="xs">
+            <>
+              You’re about to upload <b>{fileJSON?.length}</b> prospects.
+            </>
+          </Text>
+          <Text fs="italic" pt="xs">
+            Looks good?
+          </Text>
+        </>
+      ),
+      confirmProps: { color: "teal", variant: "outline" },
+      labels: { confirm: `Yes, let's do it! 🚀`, cancel: "Nevermind" },
+      onCancel: () => {
+        closeAllModals();
+      },
+      onConfirm: () => startUpload(),
+    });
 
   return (
     <>
@@ -342,7 +374,13 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
               autoClose: 5000,
             });
           }}
-          accept={[MIME_TYPES.csv, MIME_TYPES.xls, MIME_TYPES.xlsx, 'text/tsv', 'text/tab-separated-values']}
+          accept={[
+            MIME_TYPES.csv,
+            MIME_TYPES.xls,
+            MIME_TYPES.xlsx,
+            "text/tsv",
+            "text/tab-separated-values",
+          ]}
         >
           <Group
             position="center"
@@ -388,10 +426,14 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
             <Text fw={500} size="sm" pl={2}>
               Please map your file's columns to our system
             </Text>
-            <ActionIcon color="red" size="sm" onClick={() => {
-              setFileJSON(null);
-              setColumnMappings(new Map());
-            }}>
+            <ActionIcon
+              color="red"
+              size="sm"
+              onClick={() => {
+                setFileJSON(null);
+                setColumnMappings(new Map());
+              }}
+            >
               <IconTrashX size="0.875rem" />
             </ActionIcon>
           </FlexSeparate>

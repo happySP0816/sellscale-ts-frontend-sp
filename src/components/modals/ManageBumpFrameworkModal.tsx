@@ -16,6 +16,7 @@ import {
   Textarea,
   Badge,
   Switch,
+  ScrollArea,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import {
@@ -33,6 +34,7 @@ import { useEffect } from "react";
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
 import { createBumpFramework } from "@utils/requests/createBumpFramework";
+import { postBumpDeactivate } from "@utils/requests/postBumpDeactivate";
 
 type BumpFramework = {
   id: number;
@@ -59,7 +61,17 @@ export default function ManageBumpFramework({
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
     const result = await getBumpFrameworks(userToken, innerProps.overallStatus);
-    setBumpFrameworks(result.extra);
+
+    let bumpFrameworkArray = [] as BumpFramework[];
+    for (const bumpFramework of result.extra as BumpFramework[]) {
+      if (bumpFramework.default) {
+        bumpFrameworkArray.unshift(bumpFramework)
+      } else {
+        bumpFrameworkArray.push(bumpFramework)
+      }
+    }
+
+    setBumpFrameworks(bumpFrameworkArray);
     setLoadingBumpFrameworks(false);
   };
 
@@ -147,6 +159,42 @@ export default function ManageBumpFramework({
     setLoadingBumpFrameworks(false);
   }
 
+  const triggerPostBumpDeactivate = async () => {
+    setLoadingBumpFrameworks(true);
+
+    if (selectedBumpFramework == null) {
+      return;
+    }
+
+    const result = await postBumpDeactivate(
+      userToken,
+      selectedBumpFramework?.id,
+    );
+    if (result.status === "success") {
+      showNotification({
+        title: "Success",
+        message: "Bump Framework deactivated successfully",
+        color: theme.colors.green[7],
+        icon: <IconCheck radius="sm" color={theme.colors.green[7]} />,
+      });
+      triggerGetBumpFrameworks();
+      setSelectedBumpFramework(null);
+      innerProps.backTriggerGetFrameworks();
+      form.values.title = "";
+      form.values.description = "";
+      form.values.default = false;
+    } else {
+      showNotification({
+        title: "Error",
+        message: result.message,
+        color: theme.colors.red[7],
+        icon: <IconX radius="sm" color={theme.colors.red[7]} />,
+      });
+    }
+
+    setLoadingBumpFrameworks(false);
+  }
+
   const form = useForm({
     initialValues: {
       title: "",
@@ -175,50 +223,77 @@ export default function ManageBumpFramework({
         backgroundColor: theme.colors.dark[7],
       }}
     >
+      <LoadingOverlay visible={loadingBumpFrameworks}/>
       <Flex dir="row">
         <Flex w="50%">
-          <Stack w="95%">
+          <Stack w="95%" h="500px" >
             <Button
+              h='60px'
               onClick={() => {
                 form.values.title = "";
                 form.values.description = "";
                 form.values.default = false;
                 setSelectedBumpFramework(null);
               }}
-            >Create New Framework</Button>
-            {
-              bumpFrameworks?.map((framework) => {
-                return (
-                  <Card
-                    onClick={() => {
-                      form.values.title = framework.title;
-                      form.values.description = framework.description;
-                      form.values.default = framework.default;
-                      setSelectedBumpFramework(framework)
-                    }}
-                    withBorder
-                    styles={{
-                      cardSection: {
-                        cursor: "pointer",
-                        border: "1px solid red"
-                      }
-                    }}
-                  >
-                    <Text fw='bold' fz='lg'>
-                      {framework.title}
-                    </Text>
-                    <Text fz='sm'>
-                      {framework.description}
-                    </Text>
-                  </Card>
-                )
-              })
-            }
+            >
+              Create New Framework
+            </Button>
+            <ScrollArea offsetScrollbars>
+              {
+                bumpFrameworks?.map((framework) => {
+                  return (
+                    <Card
+                      mb='sm'
+                      onClick={() => {
+                        form.values.title = framework.title;
+                        form.values.description = framework.description;
+                        form.values.default = framework.default;
+                        setSelectedBumpFramework(framework)
+                      }}
+                      withBorder
+                      styles={{
+                        cardSection: {
+                          cursor: "pointer",
+                          border: "1px solid red"
+                        }
+                      }}
+                    >
+                      <Flex
+                        justify='space-between'
+                      >
+                        {
+                          framework.default ? (
+                            <>
+                              <Text fw='bold' fz='lg' w="70%">
+                                {framework.title}
+                              </Text>
+                              <Badge
+                                color='green'
+                                size='xs'
+                              >
+                                Default
+                              </Badge>
+                            </>
+                          ) : (
+                            <Text fw='bold' fz='lg'>
+                              {framework.title}
+                            </Text>
+                          )
+                        }
+                      </Flex>
+                      <Text mt='xs' fz='sm'>
+                        {framework.description}
+                      </Text>
+                    </Card>
+                  )
+                })
+              }
+            </ScrollArea>
           </Stack>
         </Flex>
         <Flex w="50%">
 
-          <Card w="100%" withBorder>
+          <Card w="100%" h="400px" withBorder>
             <form onSubmit={() => console.log('submit')}>
               {
                 selectedBumpFramework == null ? (
@@ -265,34 +340,50 @@ export default function ManageBumpFramework({
                 />
               }
 
-              <Flex justify={'flex-end'}>
+              <Flex>
                 {
                   selectedBumpFramework == null ?
 
-
-                    <Button
-                      mt='md'
-                      disabled={form.values.title.trim() == "" || form.values.description.trim() == ""}
-                      onClick={() => {
-                        triggerCreateBumpFramework();
-                      }}
-                    >
-                      Create
-                    </Button>
+                    <Flex w='100%' justify='flex-end'>
+                      <Button
+                        mt='md'
+                        disabled={form.values.title.trim() == "" || form.values.description.trim() == ""}
+                        onClick={() => {
+                          triggerCreateBumpFramework();
+                        }}
+                      >
+                        Create
+                      </Button>
+                    </Flex>
                     :
-                    <Button
-                      mt='md'
-                      hidden={
-                        selectedBumpFramework?.title == form.values.title.trim() &&
-                        selectedBumpFramework?.description == form.values.description.trim() &&
-                        selectedBumpFramework?.default == form.values.default
-                      }
-                      onClick={() => {
-                        triggerEditBumpFramework();
-                      }}
-                    >
-                      Save
-                    </Button>
+                    <Flex justify='space-between' w='100%'>
+                      <Flex>
+                        <Button
+                          mt='md'
+                          color='red'
+                          onClick={() => {
+                            triggerPostBumpDeactivate();
+                          }}
+                        >
+                          Deactivate
+                        </Button>
+                      </Flex>
+                      <Flex>
+                        <Button
+                          mt='md'
+                          hidden={
+                            selectedBumpFramework?.title == form.values.title.trim() &&
+                            selectedBumpFramework?.description == form.values.description.trim() &&
+                            selectedBumpFramework?.default == form.values.default
+                          }
+                          onClick={() => {
+                            triggerEditBumpFramework();
+                          }}
+                        >
+                          Save
+                        </Button>
+                      </Flex>
+                    </Flex>
                 }
 
               </Flex>

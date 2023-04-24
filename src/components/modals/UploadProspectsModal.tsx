@@ -69,6 +69,7 @@ export default function UploadProspectsModal({
 
   const [description, setDescription] = useState("");
   const [fitReason, setFitReason] = useState("");
+  const [icpMatchingPrompt, setICPMatchingPrompt] = useState("");
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
@@ -194,6 +195,62 @@ export default function UploadProspectsModal({
       });
     setLoadingPersonaBuyReasonGeneration(false);
     setFitReason(res.extra.description);
+    return res;
+  };
+
+  const [
+    loadingICPMatchingPromptGeneration,
+    setLoadingICPMatchingPromptGeneration,
+  ] = useState(false);
+  const generateICPMatchingPrompt = async (): Promise<{
+    status: string;
+    title: string;
+    message: string;
+    extra?: any;
+  }> => {
+    setLoadingICPMatchingPromptGeneration(true);
+    const res = await fetch(
+      `${API_URL}/client/archetype/generate_persona_icp_matching_prompt`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          persona_name: selectedPersona,
+          persona_description: description,
+          persona_buy_reason: fitReason,
+        }),
+      }
+    )
+      .then(async (r) => {
+        if (r.status === 200) {
+          return {
+            status: "success",
+            title: "Success",
+            message: "ICP matching prompt generated successfully",
+            extra: await r.json(),
+          };
+        } else {
+          return {
+            status: "error",
+            title: `Error (${r.status})`,
+            message: "Failed to generate ICP matching prompt",
+            extra: {},
+          };
+        }
+      })
+      .catch((e) => {
+        return {
+          status: "error",
+          title: "Error",
+          message: e.message,
+          extra: {},
+        };
+      });
+    setLoadingICPMatchingPromptGeneration(false);
+    setICPMatchingPrompt(res.extra.description);
     return res;
   };
 
@@ -383,6 +440,37 @@ export default function UploadProspectsModal({
                 );
               }}
             />
+            <TextAreaWithAI
+              withAsterisk
+              value={icpMatchingPrompt}
+              onChange={(e) => setICPMatchingPrompt(e.target.value)}
+              description="Describe the roles, seniority, location, tiers, and other notes to rank prospects in this persona."
+              minRows={4}
+              placeholder="Role(s): VP of Sales, Director of Revenue&#10;Seniority: Senior&#10;Locations: California and Nevada&#10;Other Notes:&#10;-Should lead BI team&#10;Tiers:&#10;- Tier 1: XYZ&#10;- Tier 2: ABC&#10;- Tier 3: DEF..."
+              label="Describe how you want to rank the prospects in this persona."
+              loadingAIGenerate={loadingICPMatchingPromptGeneration}
+              onAIGenerateClicked={async () => {
+                await displayNotification(
+                  "generate-icp-matching-prompt",
+                  generateICPMatchingPrompt,
+                  {
+                    title: "Generating ICP matching prompt...",
+                    message: "This may take a few seconds.",
+                    color: "teal",
+                  },
+                  {
+                    title: "ICP matching prompt generated!",
+                    message: "Your persona fit reason has been generated.",
+                    color: "teal",
+                  },
+                  {
+                    title: "Failed to generate ICP matching prompt",
+                    message: "Please try again or contact SellScale team.",
+                    color: "red",
+                  }
+                );
+              }}
+            />
           </Stack>
         )}
 
@@ -493,6 +581,7 @@ export default function UploadProspectsModal({
                       ctas: ctas.map((cta) => cta.cta),
                       description: description,
                       fitReason: fitReason,
+                      icpMatchingPrompt: icpMatchingPrompt,
                     }
                   : undefined
               }

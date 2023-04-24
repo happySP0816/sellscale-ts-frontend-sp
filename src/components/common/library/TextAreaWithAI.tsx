@@ -9,11 +9,13 @@ import {
   Divider,
   Card,
   Grid,
+  Box,
 } from "@mantine/core";
 import { IconRobot, IconX } from "@tabler/icons";
 import { API_URL } from "@constants/data";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
+import { useClickOutside } from "@mantine/hooks";
 
 type PropsType = {
   placeholder?: string;
@@ -30,10 +32,21 @@ type PropsType = {
 };
 
 export default function TextAreaWithAI(props: PropsType) {
+  const options = [];
+  if (props.onAIGenerateClicked) {
+    options.push({
+      label: "Write",
+      value: "write",
+    });
+  }
+  options.push({
+    label: "Edit",
+    value: "edit",
+  });
+
+  const ref = useClickOutside(() => setAIPopoverToggled(false));
   const [AIPopoverToggled, setAIPopoverToggled] = React.useState(false);
-  const [aiEditorMode, setAIEditorMode] = React.useState<"write" | "edit">(
-    "write"
-  );
+  const [aiEditorMode, setAIEditorMode] = React.useState(options[0].value);
 
   const [editingLoading, setEditingLoading] = React.useState(false);
   const [editInstruction, setEditInstruction] = React.useState("");
@@ -60,6 +73,9 @@ export default function TextAreaWithAI(props: PropsType) {
           currentTarget: {
             value: j.data,
           },
+          target: {
+            value: j.data,
+          },
         };
         props.onChange && props.onChange(updatedValue);
         setAIPopoverToggled(false);
@@ -70,7 +86,7 @@ export default function TextAreaWithAI(props: PropsType) {
   };
 
   return (
-    <>
+    <Box mt="sm" ref={ref}>
       {/* AI Writing Popup */}
       <Popover
         width={300}
@@ -87,7 +103,7 @@ export default function TextAreaWithAI(props: PropsType) {
             size="xs"
             compact
             onClick={() => setAIPopoverToggled(!AIPopoverToggled)}
-            sx={{ position: "absolute", top: 0, right: 0, zIndex: 100 }}
+            sx={{ position: "absolute", right: 0, zIndex: 100 }}
           >
             ✍🏼 AI Write
           </Button>
@@ -109,18 +125,17 @@ export default function TextAreaWithAI(props: PropsType) {
               />
             </Grid.Col>
           </Grid>
-          <SegmentedControl
-            w={"100%"}
-            mt={"md"}
-            data={[
-              { label: "Write", value: "write" },
-              { label: "Edit", value: "edit" },
-            ]}
-            value={aiEditorMode}
-            onChange={(value) => {
-              setAIEditorMode(value as "write" | "edit");
-            }}
-          />
+          {options.length > 1 && (
+            <SegmentedControl
+              w={"100%"}
+              mt={"md"}
+              data={options}
+              value={aiEditorMode}
+              onChange={(value) => {
+                setAIEditorMode(value as "write" | "edit");
+              }}
+            />
+          )}
           {aiEditorMode === "write" && (
             <Card withBorder mt="md">
               <Text size="sm">
@@ -136,10 +151,10 @@ export default function TextAreaWithAI(props: PropsType) {
                 loaderPosition="right"
                 leftIcon={<IconRobot />}
                 onClick={() => {
+                  const res =
+                    props.onAIGenerateClicked && props.onAIGenerateClicked();
                   setAIPopoverToggled(false);
-                  return (
-                    props.onAIGenerateClicked && props.onAIGenerateClicked()
-                  );
+                  return res;
                 }}
               >
                 Generate with AI
@@ -169,11 +184,6 @@ export default function TextAreaWithAI(props: PropsType) {
                 leftIcon={<IconRobot />}
                 disabled={!editInstruction}
                 onClick={() => {
-                  const value: any = {
-                    currentTarget: {
-                      value: "This is edited text",
-                    },
-                  };
                   editTextViaAPI();
                 }}
               >
@@ -196,6 +206,6 @@ export default function TextAreaWithAI(props: PropsType) {
         value={props.value}
         withAsterisk={props.withAsterisk}
       />
-    </>
+    </Box>
   );
 }

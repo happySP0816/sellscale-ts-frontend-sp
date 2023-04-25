@@ -17,10 +17,13 @@ import {
   Tabs,
   Center,
   Loader,
+  Box,
 } from "@mantine/core";
 import {
   IconActivityHeartbeat,
   IconAddressBook,
+  IconAnalyze,
+  IconArrowsSplit,
   IconCheck,
   IconChevronDown,
   IconChevronUp,
@@ -71,6 +74,7 @@ async function togglePersona(archetype_id: number, userToken: string) {
 export default function PersonaCard(props: {
   archetype: Archetype;
   refetch: () => void;
+  unassignedPersona: boolean;
 }) {
   const theme = useMantineTheme();
   const mdScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.MD})`);
@@ -279,39 +283,41 @@ export default function PersonaCard(props: {
     <Paper withBorder p="xs" my={20} radius="md">
       <FlexSeparate>
         <Group noWrap={true}>
-          <Switch
-            checked={props.archetype.active}
-            onChange={async (event) => {
-              const res = await togglePersona(props.archetype.id, userToken);
-              if (res.status === 200) {
-                props.refetch();
+          {!props.unassignedPersona && (
+            <Switch
+              checked={props.archetype.active}
+              onChange={async (event) => {
+                const res = await togglePersona(props.archetype.id, userToken);
+                if (res.status === 200) {
+                  props.refetch();
+                }
+              }}
+              color="teal"
+              size="sm"
+              onLabel="ON"
+              offLabel="OFF"
+              styles={{
+                track: {
+                  cursor: "pointer",
+                },
+              }}
+              thumbIcon={
+                props.archetype.active ? (
+                  <IconCheck
+                    size={12}
+                    color={theme.colors.teal[theme.fn.primaryShade()]}
+                    stroke={3}
+                  />
+                ) : (
+                  <IconX
+                    size={12}
+                    color={theme.colors.red[theme.fn.primaryShade()]}
+                    stroke={3}
+                  />
+                )
               }
-            }}
-            color="teal"
-            size="sm"
-            onLabel="ON"
-            offLabel="OFF"
-            styles={{
-              track: {
-                cursor: "pointer",
-              },
-            }}
-            thumbIcon={
-              props.archetype.active ? (
-                <IconCheck
-                  size={12}
-                  color={theme.colors.teal[theme.fn.primaryShade()]}
-                  stroke={3}
-                />
-              ) : (
-                <IconX
-                  size={12}
-                  color={theme.colors.red[theme.fn.primaryShade()]}
-                  stroke={3}
-                />
-              )
-            }
-          />
+            />
+          )}
           <Group
             noWrap={true}
             spacing={8}
@@ -324,9 +330,16 @@ export default function PersonaCard(props: {
               }
             }}
           >
-            <Title order={2} fz={24} fw={400} truncate maw="35vw">
-              {props.archetype.archetype}
-            </Title>
+            <Box>
+              <Title order={2} fz={24} fw={400} truncate maw="35vw">
+                {props.archetype.archetype}
+              </Title>
+              {props.unassignedPersona && (
+                <Title order={6} fw={200} truncate maw="35vw">
+                  Upload new prospects here to auto-distribute
+                </Title>
+              )}
+            </Box>
             {opened ? (
               <IconChevronDown size="2rem" stroke={2} />
             ) : (
@@ -401,15 +414,29 @@ export default function PersonaCard(props: {
             >
               All Contacts
             </Tabs.Tab>
-            <Tabs.Tab
-              value="pulse"
-              icon={<IconActivityHeartbeat size="1.1rem" />}
-            >
-              Pulse
-            </Tabs.Tab>
-            <Tabs.Tab value="tools" icon={<IconTool size="1.1rem" />}>
-              Tools
-            </Tabs.Tab>
+            {!props.unassignedPersona && (
+              <Tabs.Tab
+                value="pulse"
+                icon={<IconActivityHeartbeat size="1.1rem" />}
+              >
+                Pulse
+              </Tabs.Tab>
+            )}
+            {!props.unassignedPersona && (
+              <Tabs.Tab value="tools" icon={<IconTool size="1.1rem" />}>
+                Tools
+              </Tabs.Tab>
+            )}
+            {props.unassignedPersona && (
+              <Tabs.Tab value="analyze" icon={<IconAnalyze size="1.1rem" />}>
+                Analyze
+              </Tabs.Tab>
+            )}
+            {props.unassignedPersona && (
+              <Tabs.Tab value="split" icon={<IconArrowsSplit size="1.1rem" />}>
+                Split
+              </Tabs.Tab>
+            )}
           </Tabs.List>
           <Tabs.Panel value="all-contacts" pt="xs">
             <ProspectTable_old personaSpecific={props.archetype.id} />

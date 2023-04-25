@@ -215,6 +215,8 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               direction: sortStatus.direction === "asc" ? 1 : -1,
             },
           ],
+          bumped: (statuses?.includes('BUMPED') || statuses?.includes('RESPONDED')) ? bumpedCount : 'all',
+          show_purgatory: showPurgatory,
         }),
       });
       if (response.status === 401) {
@@ -225,29 +227,9 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
         return [];
       }
 
-      // Purgatory filtering
-      let prospects = showPurgatory ? res.prospects : res.prospects.filter((prospect: any) => {
-        if (!prospect.hidden_until) {
-            return true;
-        }
-        return new Date(`${prospect.hidden_until} UTC`) < new Date();
-      });
-
-      // Bumped Count Filtering
-      prospects = prospects.filter((prospect: any) => {
-        if(!prospect.times_bumped) {
-          prospect.times_bumped = 1;
-        }
-        if((statuses?.includes('BUMPED') || statuses?.includes('RESPONDED')) && bumpedCount !== 'all' && prospect.times_bumped !== +bumpedCount) {
-          return false;
-        } else {
-          return true;
-        }
-      });
-
       totalRecords.current = res.total_count;
 
-      return prospects.map((prospect: any) => {
+      return res.prospects.map((prospect: any) => {
         return {
           id: prospect.id,
           full_name: prospect.full_name,
@@ -484,7 +466,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               return (
                 <Badge color={valueToColor(theme, formatToLabel(status))}>
                   {status === 'BUMPED' || status === 'RESPONDED' ? (
-                    <>{formatToLabel(status)} #{review_details.times_bumped ?? 1}</>
+                    <>{formatToLabel(status)} #{(review_details.times_bumped && review_details.times_bumped >= 1) ? review_details.times_bumped : '?'}</>
                   ) : (
                     <>{formatToLabel(status)}</>
                   )}

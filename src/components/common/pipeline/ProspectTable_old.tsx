@@ -235,6 +235,9 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
 
       // Bumped Count Filtering
       prospects = prospects.filter((prospect: any) => {
+        if(!prospect.times_bumped) {
+          prospect.times_bumped = 1;
+        }
         if(statuses?.includes('BUMPED') && bumpedCount !== 'all' && prospect.times_bumped !== +bumpedCount) {
           return false;
         } else {
@@ -390,7 +393,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
         </Grid.Col>
       </Grid>
 
-      {statuses?.includes('BUMPED') && (
+      {(statuses?.includes('BUMPED') || statuses?.includes('RESPONDED')) && (
         <SegmentedControl
           value={bumpedCount}
           onChange={setBumpedCount}

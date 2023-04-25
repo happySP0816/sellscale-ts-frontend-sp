@@ -60,26 +60,31 @@ export default function PersonaPage() {
 
       // Sort by number of prospects
       return result.sort((a, b) => {
-        const b_total_prospects = b.performance ? b.performance.total_prospects : 0;
-        const a_total_prospects = a.performance ? a.performance.total_prospects : 0;
+        const b_total_prospects = b.performance
+          ? b.performance.total_prospects
+          : 0;
+        const a_total_prospects = a.performance
+          ? a.performance.total_prospects
+          : 0;
         return b_total_prospects - a_total_prospects;
       });
     },
     refetchOnWindowFocus: false,
   });
 
-
   useEffect(() => {
     if (!data) return;
     (async () => {
       for (let persona of data) {
-        const uploadsResponse = await getAllUploads(userToken, persona.id);
-        persona.uploads =
-          uploadsResponse.status === "success" ? uploadsResponse.extra : [];
+        if (persona.active) {
+          const uploadsResponse = await getAllUploads(userToken, persona.id);
+          persona.uploads =
+            uploadsResponse.status === "success" ? uploadsResponse.extra : [];
+        }
       }
       forceUpdate();
     })();
-  }, [data])
+  }, [data]);
 
   return (
     <>
@@ -109,17 +114,38 @@ export default function PersonaPage() {
           <>
             {data?.length && data?.length > 0 ? (
               <div>
+                {/* Unassigned Persona First */}
                 {data
-                  ?.filter((p) => p.active)
-                  .map((persona) => (
-                    <PersonaCard
-                      key={persona.id}
-                      archetype={persona}
-                      refetch={refetch}
-                    />
-                  ))}
+                  ?.filter((p) => p.active && p.is_unassigned_contact_archetype)
+                  .map((persona) => {
+                    return (
+                      <PersonaCard
+                        key={persona.id}
+                        archetype={persona}
+                        refetch={refetch}
+                        unassignedPersona
+                      />
+                    );
+                  })}
+                {/* Active Normal Personas */}
                 {data
-                  ?.filter((p) => !p.active)
+                  ?.filter(
+                    (p) => p.active && !p.is_unassigned_contact_archetype
+                  )
+                  .map((persona) => {
+                    return (
+                      <PersonaCard
+                        key={persona.id}
+                        archetype={persona}
+                        refetch={refetch}
+                      />
+                    );
+                  })}
+                {/* Inactive Normal Personas */}
+                {data
+                  ?.filter(
+                    (p) => !p.active && !p.is_unassigned_contact_archetype
+                  )
                   .map((persona) => (
                     <PersonaCard
                       key={persona.id}

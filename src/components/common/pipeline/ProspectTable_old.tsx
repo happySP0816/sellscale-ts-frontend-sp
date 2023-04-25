@@ -238,7 +238,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
         if(!prospect.times_bumped) {
           prospect.times_bumped = 1;
         }
-        if(statuses?.includes('BUMPED') && bumpedCount !== 'all' && prospect.times_bumped !== +bumpedCount) {
+        if((statuses?.includes('BUMPED') || statuses?.includes('RESPONDED')) && bumpedCount !== 'all' && prospect.times_bumped !== +bumpedCount) {
           return false;
         } else {
           return true;
@@ -352,10 +352,17 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
                     : []
                   )
                     .map((status: string) => {
+                      
+                      let label = formatToLabel(
+                        data_channels.extra[channel][status].enum_val
+                      );
+                      // Patch for Active Convo to show Unassigned
+                      if (label === 'Active Convo' && channel === 'LINKEDIN') {
+                        label = 'Active Convo Unassigned';
+                      }
+
                       return {
-                        label: formatToLabel(
-                          data_channels.extra[channel][status].enum_val
-                        ),
+                        label: label,
                         value: status,
                       };
                     })

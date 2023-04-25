@@ -184,7 +184,7 @@ const emailStatusOptions = [
   },
 ];
 
-const dontShowStatuses = ["UNKNOWN", "PROSPECTED", "ACTIVE_CONVO_OBJECTION", "ACTIVE_CONVO_QUAL_NEEDED", "ACTIVE_CONVO_QUESTION", "ACTIVE_CONVO_SCHEDULING"];
+const dontShowStatuses = ["UNKNOWN", "PROSPECTED", "ACTIVE_CONVO_OBJECTION", "ACTIVE_CONVO_NEXT_STEPS", "ACTIVE_CONVO_QUAL_NEEDED", "ACTIVE_CONVO_QUESTION", "ACTIVE_CONVO_SCHEDULING"];
 
 const useStyles = createStyles((theme) => ({
   card: {
@@ -426,6 +426,7 @@ export default function ProspectDetailsChangeStatus(
             { value: 'ACTIVE_CONVO_QUAL_NEEDED', label: 'Qualifications Needed' },
             { value: 'ACTIVE_CONVO_OBJECTION', label: 'Objection' },
             { value: 'ACTIVE_CONVO_SCHEDULING', label: 'Scheduling' },
+            { value: 'ACTIVE_CONVO_NEXT_STEPS', label: 'Next Steps' },
           ]}
           defaultValue={props.channelData.currentStatus}
           onChange={async (value) => {

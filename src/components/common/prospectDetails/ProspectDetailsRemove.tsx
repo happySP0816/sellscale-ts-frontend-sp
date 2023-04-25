@@ -10,50 +10,50 @@ type ProspectDetailsRemoveProps = {
   prospectStatus: string;
 };
 
+export async function removeProspectFromContactList(
+  prospectId: number,
+  userToken: string
+): Promise<{ status: string; title: string; message: string; extra?: any }> {
+  return await fetch(
+    `${API_URL}/prospect/remove_from_contact_list?prospect_id=` + prospectId,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+    }
+  )
+    .then(async (r) => {
+      if (r.status === 200) {
+        return {
+          status: "success",
+          title: `Success`,
+          message: `Removed prospect from contact list.`,
+        };
+      } else {
+        return {
+          status: "error",
+          title: `Error (${r.status})`,
+          message: "Error while removing prospect from contact list.",
+        };
+      }
+    })
+    .catch((e) => {
+      console.error(e);
+      return {
+        status: "error",
+        title: `Error while removing prospect from contact list.`,
+        message: e.message,
+      };
+    });
+}
+
 export default function ProspectDetailsRemove(
   props: ProspectDetailsRemoveProps
 ) {
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
-
-  async function removeProspectFromContactList(
-    prospectId: number,
-    userToken: string
-  ): Promise<{ status: string; title: string; message: string; extra?: any }> {
-    return await fetch(
-      `${API_URL}/prospect/remove_from_contact_list?prospect_id=` + prospectId,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    )
-      .then(async (r) => {
-        if (r.status === 200) {
-          return {
-            status: "success",
-            title: `Success`,
-            message: `Removed prospect from contact list.`,
-          };
-        } else {
-          return {
-            status: "error",
-            title: `Error (${r.status})`,
-            message: "Error while removing prospect from contact list.",
-          };
-        }
-      })
-      .catch((e) => {
-        console.error(e);
-        return {
-          status: "error",
-          title: `Error while removing prospect from contact list.`,
-          message: e.message,
-        };
-      });
-  }
 
   if (props.prospectStatus === "REMOVED") {
     return null;

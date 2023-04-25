@@ -8,6 +8,7 @@ import {
   useMantineTheme,
   Tabs,
   Divider,
+  ActionIcon,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
@@ -36,6 +37,8 @@ import ProspectDetailsViewEmails from "@common/prospectDetails/ProspectDetailsVi
 import { API_URL } from "@constants/data";
 import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove";
 import ProspectDetailsAccountResearch from "@common/prospectDetails/ProspectDetailsAccountResearch";
+import { IconDots } from "@tabler/icons";
+import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
 
 export default function ProspectDetailsDrawer() {
   const theme = useMantineTheme();
@@ -112,25 +115,32 @@ export default function ProspectDetailsDrawer() {
               ? data.main.prospect_info.details.full_name
               : ""}
           </Title>
-          {data && (
-            <Badge
-              color={valueToColor(
-                theme,
-                formatToLabel(prospectDrawerStatuses.overall)
-              )}
-              variant="light"
-            >
-              {`${formatToLabel(
-                prospectDrawerStatuses.overall
-              )}`}
-            </Badge>
-          )}
+          <div style={{ display: 'flex' }}>
+            {data && (
+              <>
+              <Badge
+                color={valueToColor(
+                  theme,
+                  formatToLabel(prospectDrawerStatuses.overall)
+                )}
+                variant="light"
+                mr={20}
+                mt={5}
+              >
+                {`${formatToLabel(
+                  prospectDrawerStatuses.overall
+                )}`}
+              </Badge>
+              <ProspectDetailsOptionsMenu prospectId={data.main.prospect_info.details.id} />
+              </>
+            )}
+          </div>
         </FlexSeparate>
       }
       padding="xl"
       size="xl"
       position="right"
-      styles={{ title: { width: "100%" } }}
+      styles={{ title: { width: "100%", marginRight: 0 } }}
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       {data?.main.prospect_info && !isFetching && (
@@ -240,11 +250,12 @@ export default function ProspectDetailsDrawer() {
               currentStatus={prospectDrawerStatuses.overall}
               prospectId={data.main.prospect_info.details.id}
             />
-            <ProspectDetailsRemove
-              prospectId={data.main.prospect_info.details.id}
-              prospectStatus={prospectDrawerStatuses.overall}
-            />
             {
+              // <ProspectDetailsRemove
+              //   prospectId={data.main.prospect_info.details.id}
+              //   prospectStatus={prospectDrawerStatuses.overall}
+              // />
+              //
               // data.main.prospect_info.company.name && (
               // <ProspectDetailsCompany
               //   logo={data.main.prospect_info.company.logo}

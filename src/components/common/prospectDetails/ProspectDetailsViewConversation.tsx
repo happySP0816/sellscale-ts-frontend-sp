@@ -29,9 +29,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { LinkedInMessage } from "src";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import FlexSeparate from "@common/library/FlexSeparate";
-import {
-  convertDateToLocalTime,
-} from "@utils/general";
+import { convertDateToLocalTime } from "@utils/general";
 import { sendLinkedInMessage } from "@utils/requests/sendMessage";
 import { showNotification } from "@mantine/notifications";
 import { getConversation } from "@utils/requests/getConversation";
@@ -61,12 +59,15 @@ export default function ProspectDetailsViewConversation(
   props: ProspectDetailsViewConversationPropsType
 ) {
   const queryClient = useQueryClient();
-  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(prospectDrawerStatusesState);
+  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(
+    prospectDrawerStatusesState
+  );
   const [msgCount, setMsgCount] = useState(LOAD_CHUNK_SIZE);
   const userToken = useRecoilValue(userTokenState);
   const [messageDraft, setMessageDraft] = useState("");
   const userData = useRecoilValue(userDataState);
   const [selectedBumpFrameworkId, setBumpFrameworkId] = useState(0);
+  const [accountResearch, setAccountResearch] = useState("");
   const [convoOutOfSync, setConvoOutOfSync] = useState(false);
 
   const [scrollPosition, onScrollPositionChange] = useDebouncedState(
@@ -82,8 +83,8 @@ export default function ProspectDetailsViewConversation(
     userData.li_voyager_connected
       ? []
       : props.conversation_entry_list.sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      )
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        )
   );
 
   const emptyConvo = messages.current.length === 0;
@@ -103,7 +104,10 @@ export default function ProspectDetailsViewConversation(
     const result = await getConversation(userToken, props.prospect_id);
 
     // Fixes bug with li saying there's no convo but we have one cached
-    if (result.message === 'NO_CONVO' && props.conversation_entry_list.length > 0) {
+    if (
+      result.message === "NO_CONVO" &&
+      props.conversation_entry_list.length > 0
+    ) {
       setConvoOutOfSync(true);
       result.extra = props.conversation_entry_list;
     }
@@ -125,7 +129,9 @@ export default function ProspectDetailsViewConversation(
       );
 
       // If status changed, update UI
-      if (result.extra.prospect.overall_status !== prospectDrawerStatuses.overall) {
+      if (
+        result.extra.prospect.overall_status !== prospectDrawerStatuses.overall
+      ) {
         setProspectDrawerStatuses((prev) => ({
           overall: result.extra.prospect.overall_status,
           linkedin: result.extra.prospect.linkedin_status,
@@ -138,7 +144,6 @@ export default function ProspectDetailsViewConversation(
           queryKey: [`query-get-channels-prospects`],
         });
       }
-
     }
     setLoading(false);
     return latestMessages;
@@ -203,7 +208,9 @@ export default function ProspectDetailsViewConversation(
     setMessageDraft("");
     const result = await sendLinkedInMessage(userToken, props.prospect_id, msg);
     if (result.status === "success") {
-      let yourMessage = _.cloneDeep(messages.current).reverse().find((msg) => msg.connection_degree === "You");
+      let yourMessage = _.cloneDeep(messages.current)
+        .reverse()
+        .find((msg) => msg.connection_degree === "You");
       if (yourMessage) {
         yourMessage.message = msg;
         yourMessage.date = new Date().toUTCString();
@@ -227,7 +234,12 @@ export default function ProspectDetailsViewConversation(
 
   const generateAIFollowup = async () => {
     setMessageDraft("Loading...");
-    const result = await postBumpGenerateResponse(userToken, props.prospect_id, selectedBumpFrameworkId);
+    const result = await postBumpGenerateResponse(
+      userToken,
+      props.prospect_id,
+      selectedBumpFrameworkId,
+      accountResearch
+    );
 
     if (result.status === "success") {
       showNotification({
@@ -246,7 +258,7 @@ export default function ProspectDetailsViewConversation(
         color: "red",
         autoClose: false,
       });
-      setMessageDraft("Error generating message.");
+      setMessageDraft("");
     }
   };
 
@@ -305,8 +317,25 @@ export default function ProspectDetailsViewConversation(
         </FlexSeparate>
         <div style={{ position: "relative" }}>
           {convoOutOfSync && (
-            <Alert icon={<IconAlertCircle size="1rem" />} title="Out of Sync!" color="orange" sx={{ borderTopLeftRadius: 15, borderTopRightRadius: 15 }}>
-              <Text fz='xs' c="orange.1">We've detected this conversation might be desynced with LinkedIn! Please <Anchor c="orange.4" href={props.conversation_url} target="_blank" rel="noopener noreferrer">check LinkedIn</Anchor> first before sending a message.</Text>
+            <Alert
+              icon={<IconAlertCircle size="1rem" />}
+              title="Out of Sync!"
+              color="orange"
+              sx={{ borderTopLeftRadius: 15, borderTopRightRadius: 15 }}
+            >
+              <Text fz="xs" c="orange.1">
+                We've detected this conversation might be desynced with
+                LinkedIn! Please{" "}
+                <Anchor
+                  c="orange.4"
+                  href={props.conversation_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  check LinkedIn
+                </Anchor>{" "}
+                first before sending a message.
+              </Text>
             </Alert>
           )}
           <LoadingOverlay visible={loading} overlayBlur={2} />
@@ -335,8 +364,13 @@ export default function ProspectDetailsViewConversation(
           ) : (
             <Center mah={300} h={300}>
               <Text>
-                <Text size="md" fs="italic" c="dimmed" ta="center" pb={5}>No conversation <u>yet</u>.</Text>
-                <Text size="sm" fs="italic" c="dimmed" ta="center">Once they accept your connection request, you will see your conversation here!</Text>
+                <Text size="md" fs="italic" c="dimmed" ta="center" pb={5}>
+                  No conversation <u>yet</u>.
+                </Text>
+                <Text size="sm" fs="italic" c="dimmed" ta="center">
+                  Once they accept your connection request, you will see your
+                  conversation here!
+                </Text>
               </Text>
             </Center>
           )}
@@ -395,7 +429,7 @@ export default function ProspectDetailsViewConversation(
               color="blue"
               component="a"
               target="_blank"
-              w='30%'
+              w="30%"
               rel="noopener noreferrer"
               rightIcon={<IconSend size={14} />}
               onClick={() => {
@@ -409,17 +443,18 @@ export default function ProspectDetailsViewConversation(
               {userData.li_voyager_connected ? "Send" : "Schedule"}
             </Button>
           </Flex>
-          {
-            props.overall_status &&
+          {props.overall_status && (
             <SelectBumpInstruction
               client_sdr_id={userData.id}
               overall_status={props.overall_status}
               onBumpFrameworkSelected={(framework_id) => {
                 setBumpFrameworkId(framework_id);
               }}
+              onAccountResearchChanged={(research) => {
+                setAccountResearch(research);
+              }}
             />
-          }
-
+          )}
         </div>
       </Card>
       {!userData.li_voyager_connected && (

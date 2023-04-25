@@ -4,13 +4,17 @@ import { API_URL } from "@constants/data";
 
 /**
  * Generates a response given a Bump Framework ID
- * @param userToken 
+ * @param userToken
  * @param prospectID
  * @param bumpFrameworkID
  * @returns - MsgResponse
  */
-export async function postBumpGenerateResponse(userToken: string, prospectID: number, bumpFrameworkID: number): Promise<MsgResponse> {
-
+export async function postBumpGenerateResponse(
+  userToken: string,
+  prospectID: number,
+  bumpFrameworkID: number,
+  accountResearch: string | null
+): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/li_conversation/prospect/generate_response`,
     {
@@ -22,12 +26,19 @@ export async function postBumpGenerateResponse(userToken: string, prospectID: nu
       body: JSON.stringify({
         prospect_id: prospectID,
         bump_framework_id: bumpFrameworkID,
+        account_research_copy: accountResearch,
       }),
     }
   );
   const result = await getResponseJSON("generate_li_bump_response", response);
-  if (isMsgResponse(result)) { return result; }
+  if (isMsgResponse(result)) {
+    return result;
+  }
 
-  return { status: 'success', title: `Success`, message: `Generated LI Bump Response`, extra: result };
-
+  return {
+    status: "success",
+    title: `Success`,
+    message: `Generated LI Bump Response`,
+    extra: result,
+  };
 }

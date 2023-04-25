@@ -138,6 +138,7 @@ export default function PersonaPage() {
                         key={persona.id}
                         archetype={persona}
                         refetch={refetch}
+                        unassignedPersona={false}
                       />
                     );
                   })}
@@ -151,6 +152,7 @@ export default function PersonaPage() {
                       key={persona.id}
                       archetype={persona}
                       refetch={refetch}
+                      unassignedPersona={false}
                     />
                   ))}
               </div>

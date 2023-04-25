@@ -1,6 +1,6 @@
-declare module 'react-render-html';
+declare module "react-render-html";
 export interface MsgResponse {
-  status: 'success' | 'error';
+  status: "success" | "error";
   title: string;
   message: string;
   extra?: any;
@@ -28,12 +28,12 @@ export interface Campaign {
 }
 
 export interface Sequence {
-  id: number,
-  title: string,
-  client_sdr_id: number,
-  archetype_id: number,
-  data: { subject: string, body: string }[],
-  status: string,
+  id: number;
+  title: string;
+  client_sdr_id: number;
+  archetype_id: number;
+  data: { subject: string; body: string }[];
+  status: string;
 }
 
 export interface Prospect {
@@ -87,16 +87,17 @@ export interface Archetype {
   client_id: number;
   client_sdr_id: number;
   disable_ai_after_prospect_engaged: boolean;
-  filters: null; // TODO: 
+  filters: null; // TODO:
   id: number;
   performance: {
     status_map: Record<string, number>;
     total_prospects: number;
   };
-  transformer_blocklist: null; // TODO: 
+  transformer_blocklist: null; // TODO:
   vessel_sequence_id: number;
   uploads?: any[];
   icp_matching_prompt: string;
+  is_unassigned_contact_archetype: boolean;
 }
 
 export interface LinkedInMessage {
@@ -115,18 +116,18 @@ export interface LinkedInMessage {
 }
 
 export interface ProspectNote {
-  created_at: string,
-  id: number,
-  note: string,
-  prospect_id: number,
+  created_at: string;
+  id: number;
+  note: string;
+  prospect_id: number;
 }
 
 export interface ProspectEmail extends Record<string, unknown> {
-  email: string,
-  subject: string,
-  body: string,
-  date: number,
-  from: string,
+  email: string;
+  subject: string;
+  body: string;
+  date: number;
+  from: string;
 }
 
-export type Channel = 'EMAIL' | 'LINKEDIN' | 'SELLSCALE';
+export type Channel = "EMAIL" | "LINKEDIN" | "SELLSCALE";

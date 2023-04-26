@@ -428,12 +428,11 @@ export default function PersonaCard(props: {
                 Tools
               </Tabs.Tab>
             )}
-            {props.unassignedPersona &&
-              false && ( // todo(Aakash) - remove false
-                <Tabs.Tab value="analyze" icon={<IconAnalyze size="1.1rem" />}>
-                  Analyze
-                </Tabs.Tab>
-              )}
+            {props.unassignedPersona && (
+              <Tabs.Tab value="analyze" icon={<IconAnalyze size="1.1rem" />}>
+                Analyze
+              </Tabs.Tab>
+            )}
             {props.unassignedPersona &&
               false && ( // todo(Aakash) - remove false
                 <Tabs.Tab

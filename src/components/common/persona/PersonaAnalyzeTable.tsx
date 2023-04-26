@@ -1,4 +1,5 @@
-import { Group, Avatar, Text, Accordion } from "@mantine/core";
+import { Group, Avatar, Text, Accordion, Badge } from "@mantine/core";
+import { Icon123 } from "@tabler/icons";
 
 const charactersList = [
   {
@@ -38,34 +39,49 @@ const charactersList = [
   },
 ];
 
-interface AccordionLabelProps {
-  label: string;
-  image: string;
-  description: string;
-}
+type AccordionLabelProps = {
+  name: any;
+  tagline: any;
+};
 
-function AccordionLabel({ label, image, description }: AccordionLabelProps) {
+function AccordionLabel({ name, tagline }: AccordionLabelProps) {
   return (
     <Group noWrap>
-      <Avatar src={image} radius="xl" size="lg" />
+      <Avatar src={<Icon123 />} radius="xl" size="lg" />
       <div>
-        <Text>{label}</Text>
+        <Text size="xs" color="teal">
+          Sample Persona:{" "}
+        </Text>
+        <Text weight="700">{name}</Text>
         <Text size="sm" color="dimmed" weight={400}>
-          {description}
+          {tagline}
         </Text>
       </div>
     </Group>
   );
 }
 
-export default function PersonaAnalyzeTable() {
-  const items = charactersList.map((item) => (
-    <Accordion.Item value={item.id} key={item.label}>
+type PropsType = {
+  data: any;
+};
+
+export default function PersonaAnalyzeTable(props: PropsType) {
+  const items = props.data.map((item: any) => (
+    <Accordion.Item value={item.name} key={item.name}>
       <Accordion.Control>
         <AccordionLabel {...item} />
       </Accordion.Control>
       <Accordion.Panel>
-        <Text size="sm">{item.content}</Text>
+        <Text size="sm">{item.description}</Text>
+
+        <Text size="sm" mt="md">
+          Some example titles include:{" "}
+        </Text>
+        {item?.example_titles?.map((title: any) => (
+          <Badge key={title} variant="light" color="teal" size="xs">
+            {title}
+          </Badge>
+        ))}
       </Accordion.Panel>
     </Accordion.Item>
   ));

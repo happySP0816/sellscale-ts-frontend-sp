@@ -4,6 +4,9 @@ import { API_URL } from "@constants/data";
 import { Card, Text, Group, Table, Button, Loader } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
+import { IconReload } from "@tabler/icons";
+import displayNotification from "@utils/notificationFlow";
+import { generateResearchPoints } from "@utils/requests/generateResearchPoints";
 
 type PropsType = {
   prospectId: number;
@@ -53,9 +56,44 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
           Here is information collected about this prospect.
         </Text>
       ) : (
-        <Text mb="xs" fz="sm" c="dimmed">
-          No account research points found.
-        </Text>
+        <div>
+          <Text mb="xs" fz="sm" c="dimmed">
+            No account research points found.
+          </Text>
+          <Button
+            variant="light"
+            rightIcon={<IconReload size='0.975rem' />}
+            onClick={async () => {
+              await displayNotification(
+                "regenerate-research-points",
+                async () => {
+                  let result = await generateResearchPoints(
+                    userToken,
+                    props.prospectId
+                  );
+                  return result;
+                },
+                {
+                  title: `Reattempting Research...`,
+                  message: `Working with servers...`,
+                  color: "teal",
+                },
+                {
+                  title: `Scheduled!`,
+                  message: `We're reattempting our research on this prospect. Check back later!`,
+                  color: "teal",
+                },
+                {
+                  title: `Error while reattempting research.`,
+                  message: `Please try again later.`,
+                  color: "red",
+                }
+              );
+            }}
+          >
+            Reattempt Research
+          </Button>
+        </div>
       )}
       {/* <Button size="xs" variant="light" compact mb="md">
         Regenerate Account Research

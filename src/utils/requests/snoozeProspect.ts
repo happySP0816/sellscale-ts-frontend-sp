@@ -6,7 +6,7 @@ import { API_URL } from "@constants/data";
  * Snoozed a prospect for a given number of days
  * @param userToken 
  * @param prospectId 
- * @param message 
+ * @param days 
  * @returns - MsgResponse
  */
 export async function snoozeProspect(userToken: string, prospectId: number, days: number): Promise<MsgResponse> {

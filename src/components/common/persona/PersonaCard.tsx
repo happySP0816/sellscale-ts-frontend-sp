@@ -56,6 +56,7 @@ import ProspectTable_old from "@common/pipeline/ProspectTable_old";
 import { prospectSelectorTypeState } from "@atoms/prospectAtoms";
 import Pulse from "./Pulse";
 import PersonaTools from "./PersonaTools";
+import PersonaAnalyze from "./PersonaAnalyze";
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(`${API_URL}/client/archetype/toggle_active`, {
@@ -427,16 +428,21 @@ export default function PersonaCard(props: {
                 Tools
               </Tabs.Tab>
             )}
-            {props.unassignedPersona && (
-              <Tabs.Tab value="analyze" icon={<IconAnalyze size="1.1rem" />}>
-                Analyze
-              </Tabs.Tab>
-            )}
-            {props.unassignedPersona && (
-              <Tabs.Tab value="split" icon={<IconArrowsSplit size="1.1rem" />}>
-                Split
-              </Tabs.Tab>
-            )}
+            {props.unassignedPersona &&
+              false && ( // todo(Aakash) - remove false
+                <Tabs.Tab value="analyze" icon={<IconAnalyze size="1.1rem" />}>
+                  Analyze
+                </Tabs.Tab>
+              )}
+            {props.unassignedPersona &&
+              false && ( // todo(Aakash) - remove false
+                <Tabs.Tab
+                  value="split"
+                  icon={<IconArrowsSplit size="1.1rem" />}
+                >
+                  Split
+                </Tabs.Tab>
+              )}
           </Tabs.List>
           <Tabs.Panel value="all-contacts" pt="xs">
             <ProspectTable_old personaSpecific={props.archetype.id} />
@@ -445,6 +451,12 @@ export default function PersonaCard(props: {
             <Pulse archetype={props.archetype} />
           </Tabs.Panel>
           <Tabs.Panel value="tools" pt="xs">
+            <PersonaTools archetype_id={props.archetype.id} />
+          </Tabs.Panel>
+          <Tabs.Panel value="analyze" pt="xs">
+            <PersonaAnalyze archetype_id={props.archetype.id} />
+          </Tabs.Panel>
+          <Tabs.Panel value="split" pt="xs">
             <PersonaTools archetype_id={props.archetype.id} />
           </Tabs.Panel>
         </Tabs>

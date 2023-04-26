@@ -9,6 +9,7 @@ import {
   Flex,
   Stack,
   Space,
+  Loader,
 } from "@mantine/core";
 import {
   IconUserPlus,
@@ -63,17 +64,27 @@ export type StatGridInfo = {
   icon: any;
   value: string;
   color: string;
-}
+};
 
-export default function PipelineSelector({ data }: { data: Map<string, StatGridInfo> }) {
+export default function PipelineSelector({
+  data,
+  loadingData,
+}: {
+  data: Map<string, StatGridInfo>;
+  loadingData?: boolean;
+}) {
   const { classes } = useStyles();
   const queryClient = useQueryClient();
 
-  const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
+  const [selectorType, setSelectorType] = useRecoilState(
+    prospectSelectorTypeState
+  );
 
   const stats = [...data.keys()].map((id) => {
     let stat = data.get(id);
-    if(!stat) { return (<></>); }
+    if (!stat) {
+      return <></>;
+    }
 
     return (
       <Paper
@@ -93,26 +104,35 @@ export default function PipelineSelector({ data }: { data: Map<string, StatGridI
           </Text>
         </Group>
         <Group align="flex-end" spacing="xs" mt={25}>
-          <Text className={classes.value}>{stat.value}</Text>
+          {loadingData ? (
+            <Loader variant="dots" w="100%" color={stat.color} />
+          ) : (
+            <Text className={classes.value} w="100%">
+              {stat.value}
+            </Text>
+          )}
           <Text size="xs" color="dimmed">
             {stat.description}
           </Text>
         </Group>
         <Button
-          variant={selectorType === id ? 'filled' : 'outline'}
+          variant={selectorType === id ? "filled" : "outline"}
           onClick={() => {
-            queryClient.removeQueries({ queryKey: ['query-pipeline-prospects'] });
+            queryClient.removeQueries({
+              queryKey: ["query-pipeline-prospects"],
+            });
             setSelectorType(id);
           }}
           color={stat.color}
           mt="md"
-          size="xs">
+          size="xs"
+        >
           View
         </Button>
       </Paper>
     );
   });
-  
+
   return (
     <div className={classes.root}>
       <SimpleGrid

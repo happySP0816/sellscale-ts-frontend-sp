@@ -10,50 +10,53 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import { useLoaderData } from "react-router-dom";
-import { prospectDrawerIdState, prospectDrawerOpenState, prospectShowPurgatoryState } from "@atoms/prospectAtoms";
-import { useEffect } from "react";
+import {
+  prospectDrawerIdState,
+  prospectDrawerOpenState,
+  prospectShowPurgatoryState,
+} from "@atoms/prospectAtoms";
+import { useEffect, useState } from "react";
 
-function getPipelineSelectorData(data: any){
+function getPipelineSelectorData(data: any) {
   return new Map()
-  .set('all', {
-    title: "All Prospects",
-    description: "All prospects in the pipeline",
-    icon: IconUserPlus,
-    value: data?.pipeline_data?.SELLSCALE.SENT_OUTREACH || "-",
-    color: "blue",
-  })
-  .set('accepted', {
-    title: "Accepted",
-    description: "Accepted prospects in the pipeline",
-    icon: IconUserPlus,
-    value: data?.pipeline_data?.SELLSCALE.ACCEPTED || "-",
-    color: "green",
-  })
-  .set('bumped', {
-    title: "Bumped",
-    description: "Bumped prospects in the pipeline",
-    icon: IconUserPlus,
-    value: data?.pipeline_data?.SELLSCALE.BUMPED || "-",
-    color: "orange",
-  })
-  .set('active', {
-    title: "Active Convos",
-    description: "Active conversations in the pipeline",
-    icon: IconUserPlus,
-    value: data?.pipeline_data?.SELLSCALE.ACTIVE_CONVO || "-",
-    color: "yellow",
-  })
-  .set('demo', {
-    title: "Demo Set",
-    description: "Demo set prospects in the pipeline",
-    icon: IconUserPlus,
-    value: data?.pipeline_data?.SELLSCALE.DEMO || "-",
-    color: "purple",
-  });
+    .set("all", {
+      title: "All Prospects",
+      description: "All prospects in the pipeline",
+      icon: IconUserPlus,
+      value: data?.pipeline_data?.SELLSCALE.SENT_OUTREACH || "-",
+      color: "blue",
+    })
+    .set("accepted", {
+      title: "Accepted",
+      description: "Accepted prospects in the pipeline",
+      icon: IconUserPlus,
+      value: data?.pipeline_data?.SELLSCALE.ACCEPTED || "-",
+      color: "green",
+    })
+    .set("bumped", {
+      title: "Bumped",
+      description: "Bumped prospects in the pipeline",
+      icon: IconUserPlus,
+      value: data?.pipeline_data?.SELLSCALE.BUMPED || "-",
+      color: "orange",
+    })
+    .set("active", {
+      title: "Active Convos",
+      description: "Active conversations in the pipeline",
+      icon: IconUserPlus,
+      value: data?.pipeline_data?.SELLSCALE.ACTIVE_CONVO || "-",
+      color: "yellow",
+    })
+    .set("demo", {
+      title: "Demo Set",
+      description: "Demo set prospects in the pipeline",
+      icon: IconUserPlus,
+      value: data?.pipeline_data?.SELLSCALE.DEMO || "-",
+      color: "grape",
+    });
 }
 
 export default function AllContactsSection() {
-
   //const { prospectId } = useLoaderData() as { prospectId: string };
   const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
@@ -68,6 +71,7 @@ export default function AllContactsSection() {
 
   const userToken = useRecoilValue(userTokenState);
   const showPurgatory = useRecoilValue(prospectShowPurgatoryState);
+  const [loadingData, setLoadingData] = useState(false);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-pipeline-details`, { showPurgatory }],
@@ -76,17 +80,22 @@ export default function AllContactsSection() {
       // eslint-disable-next-line
       const [_key, { showPurgatory }] = queryKey;
 
+      setLoadingData(true);
       const response = await fetch(
         `${API_URL}/analytics/pipeline/all_details?include_purgatory=${showPurgatory}`,
         {
           method: "GET",
           headers: {
-            'Authorization': `Bearer ${userToken}`,
+            Authorization: `Bearer ${userToken}`,
           },
         }
       );
-      if(response.status === 401){ logout() }
+      if (response.status === 401) {
+        logout();
+      }
       const res = await response.json();
+
+      setLoadingData(false);
 
       return res;
     },
@@ -95,7 +104,10 @@ export default function AllContactsSection() {
   const PIPELINE_SELECTOR_DATA = getPipelineSelectorData(data);
   return (
     <div>
-      <PipelineSelector data={PIPELINE_SELECTOR_DATA} />
+      <PipelineSelector
+        data={PIPELINE_SELECTOR_DATA}
+        loadingData={loadingData}
+      />
       <Container pt={15} px={0}>
         <ProspectTable_old />
       </Container>

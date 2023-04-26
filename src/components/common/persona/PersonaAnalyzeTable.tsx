@@ -47,7 +47,7 @@ type AccordionLabelProps = {
 function AccordionLabel({ name, tagline }: AccordionLabelProps) {
   return (
     <Group noWrap>
-      <Avatar src={<Icon123 />} radius="xl" size="lg" />
+      <Avatar radius="xl" size="lg" />
       <div>
         <Text size="xs" color="teal">
           Sample Persona:{" "}

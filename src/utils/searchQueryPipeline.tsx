@@ -34,6 +34,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       },
       body: JSON.stringify({
         query: query,
+        show_purgatory: true,
       }),
     }
   );

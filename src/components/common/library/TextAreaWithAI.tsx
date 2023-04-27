@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactElement } from "react";
 import {
   Button,
   Popover,
@@ -10,12 +10,14 @@ import {
   Card,
   Grid,
   Box,
+  TextInput,
 } from "@mantine/core";
-import { IconRobot, IconX } from "@tabler/icons";
+import { IconPencil, IconRobot, IconX } from "@tabler/icons";
 import { API_URL } from "@constants/data";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { useClickOutside } from "@mantine/hooks";
+import RichTextArea from "./RichTextArea";
 
 type PropsType = {
   placeholder?: string;
@@ -27,6 +29,7 @@ type PropsType = {
   disabled?: boolean;
   value?: string;
   withAsterisk?: boolean;
+  inputType?: "text-area" | "text-input" | "rich-text-area",
   loadingAIGenerate?: boolean;
   onAIGenerateClicked?: () => void;
 };
@@ -86,7 +89,7 @@ export default function TextAreaWithAI(props: PropsType) {
   };
 
   return (
-    <Box mt="sm" ref={ref}>
+    <Box mt="sm" sx={{ position: 'relative' }} ref={ref}>
       {/* AI Writing Popup */}
       <Popover
         width={300}
@@ -99,14 +102,20 @@ export default function TextAreaWithAI(props: PropsType) {
         <Popover.Target>
           <Button
             color="teal"
+            variant="light"
             radius="xl"
             size="xs"
             compact
             onClick={() => setAIPopoverToggled(!AIPopoverToggled)}
-            sx={{ position: "absolute", right: 0, zIndex: 100 }}
-            disabled={props.disabled}
+            sx={{ position: "absolute", top: 7, right: 7, zIndex: 100 }}
+            leftIcon={<IconPencil size='0.8rem' />}
+            styles={{
+              leftIcon: {
+                marginRight: 3,
+              }
+            }}
           >
-            {!props.disabled && '✍🏼'} AI Write
+            AI Write
           </Button>
         </Popover.Target>
         <Popover.Dropdown>
@@ -195,19 +204,40 @@ export default function TextAreaWithAI(props: PropsType) {
         </Popover.Dropdown>
       </Popover>
 
-      {/* Main Text Area */}
-      <Textarea
-        placeholder={props.placeholder}
-        label={props.label}
-        description={props.description}
-        minRows={props.minRows}
-        maxRows={props.maxRows}
-        onChange={props.onChange}
-        disabled={props.disabled}
-        value={props.value}
-        withAsterisk={props.withAsterisk}
-        autosize
-      />
+      {/* Main Text */}
+      {props.inputType === "rich-text-area" ? (
+        <RichTextArea
+          onChange={(value) => {
+            props.onChange && props.onChange({ currentTarget: { value } } as React.ChangeEvent<HTMLTextAreaElement>);
+          }}
+          value={props.value}
+          personalizationBtn
+        />
+      ) : (props.inputType === "text-input" ? (
+        <TextInput
+          placeholder={props.placeholder}
+          label={props.label}
+          description={props.description}
+          onChange={(e) => {
+            props.onChange && props.onChange(e as unknown as React.ChangeEvent<HTMLTextAreaElement>);
+          }}
+          disabled={props.disabled}
+          value={props.value}
+          withAsterisk={props.withAsterisk}
+        />
+      ) : (
+        <Textarea
+          placeholder={props.placeholder}
+          label={props.label}
+          description={props.description}
+          minRows={props.minRows}
+          maxRows={props.maxRows}
+          onChange={props.onChange}
+          disabled={props.disabled}
+          value={props.value}
+          withAsterisk={props.withAsterisk}
+        />
+      ))}
     </Box>
   );
 }

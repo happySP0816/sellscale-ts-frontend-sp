@@ -19,6 +19,7 @@ const useStyles = createStyles((theme) => ({
     padding: `${theme.spacing.lg}px ${theme.spacing.xl}px`,
     marginTop: `5px`,
     marginBottom: `5px`,
+    width: 380,
   },
 
   body: {

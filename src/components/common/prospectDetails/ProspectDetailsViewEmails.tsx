@@ -10,11 +10,15 @@ import {
   ScrollArea,
   Textarea,
   LoadingOverlay,
+  ActionIcon,
 } from "@mantine/core";
 import {
   IconChevronRight,
   IconExternalLink,
   IconMail,
+  IconPencil,
+  IconPlus,
+  IconRefresh,
   IconRobot,
 } from "@tabler/icons";
 import { slice } from "lodash";
@@ -26,14 +30,17 @@ import { LinkedInMessage, ProspectEmail } from "src";
 import { useQuery } from "@tanstack/react-query";
 import { getEmailThreads } from "@utils/requests/getEmails";
 import _ from "lodash";
-import { openContextModal } from "@mantine/modals";
+import { openContextModal, closeAllModals } from "@mantine/modals";
 import { convertDateToLocalTime } from "@utils/general";
 import EmailThreadEntry from "@common/persona/emails/EmailThreadEntry";
 import DOMPurify from "isomorphic-dompurify";
 import ConnectEmailCard from "@common/library/ConnectEmailCard";
+import FlexSeparate from "@common/library/FlexSeparate";
+import { generateEmail } from "@utils/requests/generateEmail";
 
 export default function ProspectDetailsViewEmails(props: {
   prospectId: number;
+  email: string;
 }) {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
@@ -45,22 +52,95 @@ export default function ProspectDetailsViewEmails(props: {
       return response.status === "success" ? response.extra : [];
     },
     refetchOnWindowFocus: false,
+    refetchInterval: 20 * 1000, // every 20 seconds, refetch
   });
+
+  const openComposeEmailModal = (subject: string, body: string) => {
+    openContextModal({
+      modal: "composeEmail",
+      title: (
+        <Group position="apart">
+          <div>
+            <Title order={4}>Email Compose</Title>
+          </div>
+          <div>
+            <Button
+              size="xs"
+              radius="xl"
+              variant="light"
+              onClick={async () => {
+                const response = await generateEmail(userToken, props.prospectId);
+                if (response.status === "success") {
+                  closeAllModals();
+                  setTimeout(() => {
+                    openComposeEmailModal(response.extra.subject, response.extra.body.replace(/\n/gm, '<br>'));
+                  }, 1);
+                }
+              }}
+            >
+              AI Generate Email
+            </Button>
+          </div>
+        </Group>
+      ),
+      styles: (theme) => ({
+        title: {
+          width: "100%",
+        },
+        header: {
+          margin: 0,
+        },
+      }),
+      innerProps: {
+        email: props.email,
+        subject: subject,
+        body: body,
+        from: userData.sdr_email,
+        prospectId: props.prospectId,
+      },
+    });
+  }
 
   return (
     <>
       <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
-        <LoadingOverlay visible={isFetching} overlayBlur={2} />
-        <Group position="apart">
-          <Text weight={700} size="lg">
-            Email Conversation
-          </Text>
-        </Group>
-        <Group position="apart" mb="xs">
-          <Text weight={200} size="xs">
-            {`Last Updated: ${convertDateToLocalTime(new Date())}`}
-          </Text>
-        </Group>
+        <LoadingOverlay visible={isFetching && data} overlayBlur={2} />
+        <FlexSeparate>
+          <div>
+            <Group position="apart">
+              <Text weight={700} size="lg">
+                Email Conversation
+              </Text>
+            </Group>
+            <Group position="apart" mb="xs">
+              <Text weight={200} size="xs">
+                {`Last Updated: ${convertDateToLocalTime(new Date())}`}
+              </Text>
+            </Group>
+          </div>
+          <Flex
+            direction="column"
+            align="flex-end"
+            gap={0}
+            m={0}
+            p={0}
+          >
+            <Button
+              size="xs"
+              leftIcon={<IconPencil size="1rem" />}
+              onClick={() => {
+                openComposeEmailModal("", "");
+              }}
+            >
+              Compose
+            </Button>
+            {/*
+              <ActionIcon size="sm" pr={5} onClick={() => refetch()}>
+                <IconRefresh size="0.875rem"/>
+              </ActionIcon>
+            */}
+          </Flex>
+        </FlexSeparate>
         <ScrollArea>
           {data?.map((emailThread: any, index: number) => (
             <EmailThreadEntry

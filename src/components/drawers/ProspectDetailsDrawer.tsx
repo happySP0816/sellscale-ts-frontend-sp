@@ -234,6 +234,7 @@ export default function ProspectDetailsDrawer() {
                           {channel.value === "EMAIL" && (
                             <ProspectDetailsViewEmails
                               prospectId={data.main.prospect_info.details.id}
+                              email={data.main.prospect_info.email.email}
                             />
                           )}
                         </Tabs.Panel>

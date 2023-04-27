@@ -23,6 +23,7 @@ import CTAGeneratorModal from "@modals/CTAGeneratorModal";
 import ManagePulsePrompt from "@modals/ManagePulsePromptModal";
 import ViewEmailThreadModal from "@modals/ViewEmailThreadModal";
 import ManageBumpFramework from "@modals/ManageBumpFrameworkModal";
+import ComposeEmailModal from "@modals/ComposeEmailModal";
 
 export default function App() {
   /* For if we want to support light mode & dark mode:
@@ -105,6 +106,7 @@ export default function App() {
               sendLinkedInCookie: InstructionsLinkedInCookieModal,
               createNewCTA: CreateNewCTAModal,
               viewEmail: ViewEmailModal,
+              composeEmail: ComposeEmailModal,
               sequenceWriter: SequenceWriterModal,
               ctaGenerator: CTAGeneratorModal,
               managePulsePrompt: ManagePulsePrompt,

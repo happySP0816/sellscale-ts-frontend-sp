@@ -80,7 +80,7 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
                 },
                 {
                   title: `Scheduled!`,
-                  message: `We're reattempting our research on this prospect. Check back later!`,
+                  message: `We're reattempting our research on this prospect. Check back later (reopen this drawer later)!`,
                   color: "teal",
                 },
                 {

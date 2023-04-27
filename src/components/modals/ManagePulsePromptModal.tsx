@@ -4,7 +4,7 @@ import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconPencil } from "@tabler/icons";
-import postICPClassificationPromptChangeRequest from "@utils/requests/postICPClassificationPromptChangeRequest";
+import postICPClassificationPromptChange from "@utils/requests/postICPClassificationPromptChange";
 import { useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { Archetype } from "src";
@@ -15,7 +15,7 @@ export default function ManagePulsePrompt({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ mode: 'EDIT' | 'CREATE', archetype: Archetype }>) {
+}: ContextModalProps<{ mode: 'EDIT' | 'CREATE', archetype: Archetype, backfillICPPrompt: Function }>) {
   const theme = useMantineTheme();
   const [currentICPPrompt, setCurrentICPPrompt] = useState(innerProps.archetype.icp_matching_prompt)
   const [loading, setLoading] = useState(false);
@@ -64,7 +64,7 @@ export default function ManagePulsePrompt({
       })
     }
 
-    const result = await postICPClassificationPromptChangeRequest(userToken, innerProps.archetype.id, prompt);
+    const result = await postICPClassificationPromptChange(userToken, innerProps.archetype.id, prompt);
 
     setLoading(false)
 
@@ -72,20 +72,28 @@ export default function ManagePulsePrompt({
       if (innerProps.mode === "EDIT") {
         showNotification({
           id: "edit-pulse-prompt",
-          title: "Sent Pulse Prompt Edit Request",
-          message: "Your request to edit your Pulse Prompt has been sent to SellScale. SellScale AI will apply your changes in the best way possible!",
-          color: "blue",
-          autoClose: 5000,
+          title: "Pulse Prompt Edited",
+          message: "Pulse Prompt has been edited successfully.",
+          color: "teal",
+          autoClose: 3000,
         })
       } else if (innerProps.mode === "CREATE") {
         showNotification({
           id: "create-pulse-prompt",
-          title: "Sent Pulse Prompt Creation Request",
-          message: "Your request to create a Pulse Prompt has been sent to SellScale. SellScale AI will create a prompt in the best way possible!",
-          color: "blue",
-          autoClose: 5000,
+          title: "Pulse Prompt Created",
+          message: "Pulse Prompt has been created successfully.",
+          color: "teal",
+          autoClose: 3000,
         })
       }
+
+      innerProps.backfillICPPrompt(prompt)
+    } else {
+      showNotification({
+        id: "pulse-prompt-request-fail",
+        title: "Pulse Prompt Request Failed",
+        message: "Pulse Prompt could not be modified. Please try again or contact support.",
+      })
     }
 
     context.closeModal(id)

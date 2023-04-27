@@ -1,14 +1,33 @@
-import { Paper, Title, Text, Textarea, Button } from "@mantine/core";
+import { Paper, Title, Text, Textarea, Button, LoadingOverlay } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { IconPencil } from "@tabler/icons";
-import { useState } from "react";
-import { Archetype } from "src"
+import { useEffect, useState } from "react";
+
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { Archetype } from "src";
+
+import getICPClassificationPrompt from "@utils/requests/getICPClassificationPrompt";
 
 export default function Pulse(props: {
   archetype: Archetype;
 }) {
-  const [currentICPPrompt, setCurrentICPPrompt] = useState(props.archetype.icp_matching_prompt)
+  const userToken = useRecoilValue(userTokenState)
+  const [currentICPPrompt, setCurrentICPPrompt] = useState('')
+  
+  const triggerGetICPClassificationPrompt = async () => {
+    const result = await getICPClassificationPrompt(userToken, props.archetype.id)
 
+    if (result.status === 'success') {
+      setCurrentICPPrompt(result.extra)
+    } else {
+      setCurrentICPPrompt('')
+    }
+  }
+
+  useEffect(() => {
+    triggerGetICPClassificationPrompt()
+  }, [])
 
   return (
     <Paper withBorder p="xs" my={20} radius="md">
@@ -31,13 +50,13 @@ export default function Pulse(props: {
             openContextModal({
               modal: "managePulsePrompt",
               title: <Title order={3}>Edit Pulse Prompt</Title>,
-              innerProps: { mode: "EDIT", archetype: props.archetype },
+              innerProps: { mode: "EDIT", archetype: props.archetype, backfillICPPrompt: setCurrentICPPrompt },
             })
             :
             openContextModal({
               modal: "managePulsePrompt",
               title: <Title order={3}>Create Pulse Prompt</Title>,
-              innerProps: { mode: "CREATE", archetype: props.archetype },
+              innerProps: { mode: "CREATE", archetype: props.archetype, backfillICPPrompt: setCurrentICPPrompt },
             })
         }}
       >

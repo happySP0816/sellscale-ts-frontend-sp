@@ -213,7 +213,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           showPurgatory,
           bumpedCount,
         },
-      ] = queryKey;
+      ]: any = queryKey;
 
       totalRecords.current = 0;
 

@@ -3,7 +3,6 @@ import {
   MultiSelect,
   Box,
   CloseButton,
-  SelectItemProps,
   Text,
   Badge,
   Grid,
@@ -22,7 +21,7 @@ const countriesData = [
   { label: "Russia", value: "RU" },
 ];
 
-function Value({ value, label, onRemove, classNames, ...others }: any) {
+function Value({ value, active, label, onRemove, classNames, ...others }: any) {
   return (
     <div {...others}>
       <Box
@@ -37,6 +36,12 @@ function Value({ value, label, onRemove, classNames, ...others }: any) {
           borderRadius: theme.radius.sm,
         })}
       >
+        <Badge
+          color={active ? "green" : "red"}
+          size="xs"
+          mr="xs"
+          variant="filled"
+        ></Badge>
         <Box sx={{ lineHeight: 1 }}>{label}</Box>
         <CloseButton
           onMouseDown={onRemove}
@@ -50,7 +55,7 @@ function Value({ value, label, onRemove, classNames, ...others }: any) {
   );
 }
 
-const Item = forwardRef<HTMLDivElement, SelectItemProps>(
+const Item = forwardRef(
   (
     {
       name,
@@ -62,18 +67,16 @@ const Item = forwardRef<HTMLDivElement, SelectItemProps>(
       percent_unused_email_prospects,
       value,
       ...others
-    },
+    }: any,
     ref
   ) => {
     return (
       <div ref={ref} {...others}>
         <Grid align="center">
-          <Grid.Col span={1}>
-            <Badge color={active ? "green" : "red"} size="xs">
+          <Grid.Col span={7}>
+            <Badge color={active ? "green" : "red"} size="xs" mb="xs">
               {active ? "Active" : "Inactive"}
             </Badge>
-          </Grid.Col>
-          <Grid.Col span={6}>
             <div>{name}</div>
           </Grid.Col>
           <Grid.Col span={5}>
@@ -81,11 +84,11 @@ const Item = forwardRef<HTMLDivElement, SelectItemProps>(
               <b>{num_prospects}</b> prospects total
             </Text>
             <Text size="xs">
-              <b>{num_unused_li_prospects}</b> available Linkedin prospects (
+              <b>{num_unused_li_prospects}</b> available for Linkedin (
               {Math.round(percent_unused_li_prospects * 100)}%)
             </Text>
             <Text size="xs">
-              <b>{num_unused_email_prospects}</b> available Email prospects (
+              <b>{num_unused_email_prospects}</b> available for Email (
               {Math.round(percent_unused_email_prospects * 100)}%)
             </Text>
           </Grid.Col>
@@ -95,7 +98,11 @@ const Item = forwardRef<HTMLDivElement, SelectItemProps>(
   }
 );
 
-export default function PersonaSplitSelect() {
+export default function PersonaSplitSelect({
+  disabled,
+}: {
+  disabled: boolean;
+}) {
   const [userToken] = useRecoilState(userTokenState);
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-archetype-details`, {}],
@@ -125,6 +132,7 @@ export default function PersonaSplitSelect() {
 
   return (
     <MultiSelect
+      zIndex={1000}
       data={personaOptions}
       limit={20}
       valueComponent={Value}
@@ -132,9 +140,11 @@ export default function PersonaSplitSelect() {
       searchable
       defaultValue={["US", "FI"]}
       required={true}
-      placeholder="none selected ..."
+      placeholder="select personas..."
       label="Select persona to split into"
       description="SellScale will use AI to split your prospects into these personas"
+      onChange={(ids) => console.log(ids)}
+      disabled={disabled}
     />
   );
 }

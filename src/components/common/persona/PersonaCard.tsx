@@ -435,7 +435,7 @@ export default function PersonaCard(props: {
               </Tabs.Tab>
             )}
             {props.unassignedPersona &&
-              false && ( // todo(Aakash) - remove false
+              true && ( // todo(Aakash) - remove false
                 <Tabs.Tab
                   value="split"
                   icon={<IconArrowsSplit size="1.1rem" />}

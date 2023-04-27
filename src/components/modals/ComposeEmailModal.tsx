@@ -41,6 +41,8 @@ export default function ComposeEmailModal({
   const [subject, setSubject] = useState(innerProps.subject);
   const [body, setBody] = useState(innerProps.body);
 
+  const [sending, setSending] = useState(false);
+
   return (
     <Paper
       p={0}
@@ -74,7 +76,9 @@ export default function ComposeEmailModal({
         <Button
           radius="xl"
           leftIcon={<IconSend size='0.9rem' />}
+          loading={sending}
           onClick={async () => {
+            setSending(true);
             const result = await sendEmail(userToken, innerProps.prospectId, subject, body);
             console.log(result);
             context.closeModal(id);

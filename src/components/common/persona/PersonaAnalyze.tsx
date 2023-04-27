@@ -41,7 +41,6 @@ export default function PersonaAnalyze(props: PropsType) {
     )
       .then((res) => res.json())
       .then((j) => {
-        console.log(j);
         setShowAnalysis(true);
         setPersonaBuckets(j.data);
       })

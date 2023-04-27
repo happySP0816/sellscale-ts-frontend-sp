@@ -22,6 +22,7 @@ import {
   ScrollArea,
   Container,
   createStyles,
+  Autocomplete,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
@@ -37,10 +38,12 @@ import {
 } from "@utils/requests/generateSequence";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
+import { Archetype } from "src";
 
 interface CTAGeneratorProps extends Record<string, unknown> {
   personaId: string;
   personaName: string;
+  personas?: Archetype[];
 }
 
 const useStyles = createStyles((theme) => ({
@@ -135,11 +138,12 @@ export default function CTAGeneratorModal({
               {...surveyForm.getInputProps("company")}
               required
             />
-
-            <TextInput
+            
+            <Autocomplete
               mt="md"
               label="Which persona?"
               placeholder="ex. VP of Sales, Head of HR"
+              data={innerProps.personas ? innerProps.personas.map((p) => p.archetype) : []}
               classNames={classes}
               {...surveyForm.getInputProps("persona")}
               required

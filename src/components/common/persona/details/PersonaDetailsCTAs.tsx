@@ -141,7 +141,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
             openContextModal({
               modal: "createNewCTA",
               title: <Title order={3}>Create CTA</Title>,
-              innerProps: { personaId: currentPersonaId },
+              innerProps: { personaId: currentPersonaId, personas: props.personas },
             });
           }}
         >

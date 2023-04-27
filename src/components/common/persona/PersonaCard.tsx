@@ -57,6 +57,7 @@ import { prospectSelectorTypeState } from "@atoms/prospectAtoms";
 import Pulse from "./Pulse";
 import PersonaTools from "./PersonaTools";
 import PersonaAnalyze from "./PersonaAnalyze";
+import PersonaSplit from "./PersonaSplit";
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(`${API_URL}/client/archetype/toggle_active`, {
@@ -456,7 +457,7 @@ export default function PersonaCard(props: {
             <PersonaAnalyze archetype_id={props.archetype.id} />
           </Tabs.Panel>
           <Tabs.Panel value="split" pt="xs">
-            <PersonaTools archetype_id={props.archetype.id} />
+            <PersonaSplit archetype_id={props.archetype.id} />
           </Tabs.Panel>
         </Tabs>
       </Collapse>

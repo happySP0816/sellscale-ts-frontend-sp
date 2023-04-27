@@ -104,8 +104,9 @@ export default function TextAreaWithAI(props: PropsType) {
             compact
             onClick={() => setAIPopoverToggled(!AIPopoverToggled)}
             sx={{ position: "absolute", right: 0, zIndex: 100 }}
+            disabled={props.disabled}
           >
-            ✍🏼 AI Write
+            {!props.disabled && '✍🏼'} AI Write
           </Button>
         </Popover.Target>
         <Popover.Dropdown>
@@ -205,6 +206,7 @@ export default function TextAreaWithAI(props: PropsType) {
         disabled={props.disabled}
         value={props.value}
         withAsterisk={props.withAsterisk}
+        autosize
       />
     </Box>
   );

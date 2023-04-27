@@ -116,7 +116,7 @@ export default function PersonaPage() {
               <div>
                 {/* Unassigned Persona First */}
                 {data
-                  ?.filter((p) => p.active && p.is_unassigned_contact_archetype)
+                  ?.filter((p) => p.is_unassigned_contact_archetype)
                   .map((persona) => {
                     return (
                       <PersonaCard

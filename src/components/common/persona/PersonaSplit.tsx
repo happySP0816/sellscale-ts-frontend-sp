@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useRecoilState } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
+import PersonaRecentSplitRequests from "./PersonaRecentSplitRequests";
 type PropsType = {
   archetype_id: number;
 };
@@ -53,8 +54,8 @@ export default function PersonaSplit(props: PropsType) {
   };
 
   return (
-    <Box w="60%">
-      <Container>
+    <Flex>
+      <Container w="60%">
         <Title order={4}>Split Prospects into Personas</Title>
         <Text size="sm" mb="lg">
           Select the personas you want to split your prospects into and then
@@ -90,6 +91,9 @@ export default function PersonaSplit(props: PropsType) {
           </Card>
         )}
       </Container>
-    </Box>
+      <Container w="40%">
+        <PersonaRecentSplitRequests archetype_id={props.archetype_id} />
+      </Container>
+    </Flex>
   );
 }

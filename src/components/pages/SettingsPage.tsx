@@ -22,7 +22,7 @@ function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
   const [isConnected, setConnected] = useState(false);
   const [mailboxes, setMailboxes] = useState([]);
-  const [connectedMailbox, setConnectedMailbox] = useState('');
+  const [connectedMailbox, setConnectedMailbox] = useState("");
   const [hasMailbox, setHasMailbox] = useState(false);
 
   const { open } = useVesselLink({
@@ -76,19 +76,19 @@ function VesselIntegrations() {
         method: "GET",
         headers: {
           Authorization: "Bearer " + userToken,
-        }
+        },
       }
     )
       .then((res) => {
         return res.json();
       })
       .then((j) => {
-        console.log(j.mailboxes)
+        console.log(j.mailboxes);
         setMailboxes(j.mailboxes);
-        return
+        return;
       });
 
-    return
+    return;
   };
 
   const getCurrentMailbox = () => {
@@ -98,7 +98,7 @@ function VesselIntegrations() {
         method: "GET",
         headers: {
           Authorization: "Bearer " + userToken,
-        }
+        },
       }
     )
       .then((res) => {
@@ -107,9 +107,9 @@ function VesselIntegrations() {
       .then((j) => {
         setConnectedMailbox(j.mailbox.id);
         setHasMailbox(true);
-        return
+        return;
       });
-  }
+  };
 
   useEffect(() => {
     getSalesEngagementConnection();
@@ -171,42 +171,43 @@ function VesselIntegrations() {
           </Notification>
 
           <Card mt="md">
-            {
-              hasMailbox ?
-                <Notification
-                  closeButtonProps={{ opacity: 0 }}
-                  icon={<IconCheck size="1.1rem" />}
-                  title="Outbound email address selected"
-                  bg={"gray"}
-                  color="green"
-                  mb="sm"
-                /> :
-                <Notification
-                  closeButtonProps={{ opacity: 0 }}
-                  icon={<IconX size="1.1rem" />}
-                  title="Outbound email address not selected"
-                  bg={"gray"}
-                  color="red"
-                  mb="sm"
-                />
-            }
-            <Text fz="lg" color="white">Select outbounding email</Text>
-            <Text mt="xs" fz="sm" color="white" >
-              To ensure that we send emails from the correct email address, please
-              select the email address you use in your sales engagement tool.
+            {hasMailbox ? (
+              <Notification
+                closeButtonProps={{ opacity: 0 }}
+                icon={<IconCheck size="1.1rem" />}
+                title="Outbound email address selected"
+                bg={"gray"}
+                color="green"
+                mb="sm"
+              />
+            ) : (
+              <Notification
+                closeButtonProps={{ opacity: 0 }}
+                icon={<IconX size="1.1rem" />}
+                title="Outbound email address not selected"
+                bg={"gray"}
+                color="red"
+                mb="sm"
+              />
+            )}
+            <Text fz="lg" color="white">
+              Select outbounding email
             </Text>
-            <Select mt='sm'
+            <Text mt="xs" fz="sm" color="white">
+              To ensure that we send emails from the correct email address,
+              please select the email address you use in your sales engagement
+              tool.
+            </Text>
+            <Select
+              mt="sm"
               label="Email Address"
               placeholder="Select email address"
-              data={mailboxes.map(
-                (mailbox: any) => {
-                  return { value: mailbox?.id, label: mailbox.email }
-                }
-              )}
+              data={mailboxes.map((mailbox: any) => {
+                return { value: mailbox?.id, label: mailbox.email };
+              })}
               disabled={hasMailbox}
               value={connectedMailbox}
               onChange={(value: any) => {
-                console.log(value)
                 setConnectedMailbox(value);
               }}
               searchable
@@ -214,65 +215,75 @@ function VesselIntegrations() {
               dropdownPosition="bottom"
               withinPortal
             />
-            {
-              hasMailbox ?
-                <Flex justify='flex-end' hidden={false}>
-                  <Button
-                    mt="md"
-                    color="red"
-                    onClick={async () => {
-                      const result = await disconnectVesselMailbox(userToken);
-                      if (result.status === "success") {
-                        showNotification({
-                          id: "mailbox-disconnect-success",
-                          title: "Mailbox disconnected",
-                          message: "Your outbounding mailbox has been disconnected, please connect another to use Email outbound.",
-                          color: "blue",
-                          autoClose: 5000,
-                        })
-                      } else {
-                        showNotification({
-                          id: "mailbox-disconnect-failure",
-                          title: "Failed to disconnect",
-                          message: "Your outbounding mailbox could not be disconnected, please try again or contact SellScale for support.",
-                          color: "red",
-                          autoClose: 5000,
-                        })
-                      }
-                      setHasMailbox(false);
-                      setConnectedMailbox('');
-                    }}
-                  >
-                    Disconnect
-                  </Button>
-                </Flex>
-                :
-                <Flex justify='flex-end' hidden={connectedMailbox === ""}>
-                  <Button mt="md" color="green" onClick={async () => {
-                    const result = await connectVesselMailbox(userToken, parseInt(connectedMailbox));
+            {hasMailbox ? (
+              <Flex justify="flex-end" hidden={false}>
+                <Button
+                  mt="md"
+                  color="red"
+                  onClick={async () => {
+                    const result = await disconnectVesselMailbox(userToken);
+                    if (result.status === "success") {
+                      showNotification({
+                        id: "mailbox-disconnect-success",
+                        title: "Mailbox disconnected",
+                        message:
+                          "Your outbounding mailbox has been disconnected, please connect another to use Email outbound.",
+                        color: "blue",
+                        autoClose: 5000,
+                      });
+                    } else {
+                      showNotification({
+                        id: "mailbox-disconnect-failure",
+                        title: "Failed to disconnect",
+                        message:
+                          "Your outbounding mailbox could not be disconnected, please try again or contact SellScale for support.",
+                        color: "red",
+                        autoClose: 5000,
+                      });
+                    }
+                    setHasMailbox(false);
+                    setConnectedMailbox("");
+                  }}
+                >
+                  Disconnect
+                </Button>
+              </Flex>
+            ) : (
+              <Flex justify="flex-end" hidden={connectedMailbox === ""}>
+                <Button
+                  mt="md"
+                  color="green"
+                  onClick={async () => {
+                    const result = await connectVesselMailbox(
+                      userToken,
+                      parseInt(connectedMailbox)
+                    );
                     if (result.status === "success") {
                       showNotification({
                         id: "mailbox-connect-success",
                         title: "Mailbox connected",
-                        message: "Your outbounding mailbox has been connected, you can now use Email outbound.",
+                        message:
+                          "Your outbounding mailbox has been connected, you can now use Email outbound.",
                         color: "blue",
                         autoClose: 5000,
-                      })
+                      });
                     } else {
                       showNotification({
                         id: "mailbox-connect-failure",
                         title: "Failed to connect",
-                        message: "Your outbounding mailbox could not be connected, please try again or contact SellScale for support.",
+                        message:
+                          "Your outbounding mailbox could not be connected, please try again or contact SellScale for support.",
                         color: "red",
                         autoClose: 5000,
-                      })
+                      });
                     }
                     setHasMailbox(true);
-                  }}>
-                    Save
-                  </Button>
-                </Flex>
-            }
+                  }}
+                >
+                  Save
+                </Button>
+              </Flex>
+            )}
           </Card>
         </>
       ) : (

@@ -158,10 +158,12 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
   const [search, setSearch] = useDebouncedState("", 200);
   const [statuses, setStatuses] = useState<string[] | null>(null);
   const [channel, setChannel] = useRecoilState(prospectChannelState);
-  const [showPurgatory, setShowPurgatory] = useRecoilState(prospectShowPurgatoryState);
+  const [showPurgatory, setShowPurgatory] = useRecoilState(
+    prospectShowPurgatoryState
+  );
   const queryClient = useQueryClient();
 
-  const [bumpedCount, setBumpedCount] = useState('all');
+  const [bumpedCount, setBumpedCount] = useState("all");
 
   const [page, setPage] = useState(1);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
@@ -187,12 +189,31 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `query-pipeline-prospects-${props.personaSpecific ?? "all"}`,
-      { page, sortStatus, statuses, search, channel, showPurgatory, bumpedCount },
+      {
+        page,
+        sortStatus,
+        statuses,
+        search,
+        channel,
+        showPurgatory,
+        bumpedCount,
+      },
     ],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { page, sortStatus, statuses, search, channel, showPurgatory, bumpedCount }] = queryKey;
+      const [
+        _key,
+        {
+          page,
+          sortStatus,
+          statuses,
+          search,
+          channel,
+          showPurgatory,
+          bumpedCount,
+        },
+      ] = queryKey;
 
       totalRecords.current = 0;
 
@@ -215,7 +236,10 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               direction: sortStatus.direction === "asc" ? 1 : -1,
             },
           ],
-          bumped: (statuses?.includes('BUMPED') || statuses?.includes('RESPONDED')) ? bumpedCount : 'all',
+          bumped:
+            statuses?.includes("BUMPED") || statuses?.includes("RESPONDED")
+              ? bumpedCount
+              : "all",
           show_purgatory: showPurgatory,
         }),
       });
@@ -334,13 +358,12 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
                     : []
                   )
                     .map((status: string) => {
-                      
                       let label = formatToLabel(
                         data_channels.extra[channel][status].enum_val
                       );
                       // Patch for Active Convo to show Unassigned
-                      if (label === 'Active Convo' && channel === 'LINKEDIN') {
-                        label = 'Active Convo Unassigned';
+                      if (label === "Active Convo" && channel === "LINKEDIN") {
+                        label = "Active Convo Unassigned";
                       }
 
                       return {
@@ -373,16 +396,13 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             }}
           >
             <Group>
-              <Switch
-                value="purgatory"
-                onLabel="Hide" offLabel="Show"
-              />
+              <Switch value="purgatory" onLabel="Hide" offLabel="Show" />
             </Group>
           </Switch.Group>
         </Grid.Col>
       </Grid>
 
-      {(statuses?.includes('BUMPED') || statuses?.includes('RESPONDED')) && (
+      {(statuses?.includes("BUMPED") || statuses?.includes("RESPONDED")) && (
         <SegmentedControl
           value={bumpedCount}
           onChange={setBumpedCount}
@@ -391,10 +411,10 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           size="xs"
           pb={10}
           data={[
-            { label: 'All', value: 'all' },
-            { label: 'Bumped #1', value: '1' },
-            { label: 'Bumped #2', value: '2' },
-            { label: 'Bumped #3+', value: '3' },
+            { label: "All", value: "all" },
+            { label: "Bumped #1", value: "1" },
+            { label: "Bumped #2", value: "2" },
+            { label: "Bumped #3+", value: "3" },
           ]}
         />
       )}
@@ -465,8 +485,14 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             render: ({ status, review_details }) => {
               return (
                 <Badge color={valueToColor(theme, formatToLabel(status))}>
-                  {status === 'BUMPED' || status === 'RESPONDED' ? (
-                    <>{formatToLabel(status)} #{(review_details.times_bumped && review_details.times_bumped >= 1) ? review_details.times_bumped : '?'}</>
+                  {status === "BUMPED" || status === "RESPONDED" ? (
+                    <>
+                      {formatToLabel(status)} #
+                      {review_details.times_bumped &&
+                      review_details.times_bumped >= 1
+                        ? review_details.times_bumped
+                        : "?"}
+                    </>
                   ) : (
                     <>{formatToLabel(status)}</>
                   )}
@@ -478,9 +504,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             accessor: "icp_fit_score",
             title: (
               <FlexSeparate>
-                <Text>
-                  ICP Fit
-                </Text>
+                <Text>ICP Fit</Text>
                 <ActionIcon
                   size="sm"
                   onClick={() => {
@@ -511,18 +535,12 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             hidden: selectorType !== "bumped",
             render: ({ review_details }) => {
               let last_reviewed = review_details.last_reviewed;
-              let times_bumped = review_details.times_bumped;
               if (!last_reviewed) {
                 return null;
               }
               return (
                 <>
                   <Badge>{last_reviewed?.substring(0, 16)}</Badge>
-                  {times_bumped > 0 && (
-                    <Badge color="red">{`Bumped ${times_bumped} time${
-                      times_bumped > 1 ? "s" : ""
-                    }`}</Badge>
-                  )}
                 </>
               );
             },

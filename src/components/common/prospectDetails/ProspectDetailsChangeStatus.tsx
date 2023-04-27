@@ -184,7 +184,15 @@ const emailStatusOptions = [
   },
 ];
 
-const dontShowStatuses = ["UNKNOWN", "PROSPECTED", "ACTIVE_CONVO_OBJECTION", "ACTIVE_CONVO_NEXT_STEPS", "ACTIVE_CONVO_QUAL_NEEDED", "ACTIVE_CONVO_QUESTION", "ACTIVE_CONVO_SCHEDULING"];
+const dontShowStatuses = [
+  "UNKNOWN",
+  "PROSPECTED",
+  "ACTIVE_CONVO_OBJECTION",
+  "ACTIVE_CONVO_NEXT_STEPS",
+  "ACTIVE_CONVO_QUAL_NEEDED",
+  "ACTIVE_CONVO_QUESTION",
+  "ACTIVE_CONVO_SCHEDULING",
+];
 
 const useStyles = createStyles((theme) => ({
   card: {
@@ -235,20 +243,17 @@ async function updateChannelStatus(
   channelType: string,
   newStatus: string
 ) {
-  return await fetch(
-    `${API_URL}/prospect/${prospectId}`,
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        new_status: newStatus,
-        channel_type: channelType,
-      }),
-    }
-  )
+  return await fetch(`${API_URL}/prospect/${prospectId}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      new_status: newStatus,
+      channel_type: channelType,
+    }),
+  })
     .then(async (r) => {
       if ((r.status + "").startsWith("2")) {
         return {
@@ -287,7 +292,6 @@ type ProspectDetailsChangeStatusProps = {
 export default function ProspectDetailsChangeStatus(
   props: ProspectDetailsChangeStatusProps
 ) {
-
   const { classes, theme } = useStyles();
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
@@ -295,7 +299,9 @@ export default function ProspectDetailsChangeStatus(
   const items = [];
 
   const { data, isFetching, refetch } = useQuery({
-    queryKey: [`prospect-next-status-options-${props.prospectId}-${props.channelData.value}`],
+    queryKey: [
+      `prospect-next-status-options-${props.prospectId}-${props.channelData.value}`,
+    ],
     queryFn: async () => {
       const res = await getChannelStatusOptions(
         props.prospectId,
@@ -314,7 +320,12 @@ export default function ProspectDetailsChangeStatus(
   });
 
   for (const statusValue of (data ? data : []).filter(
-    (s: string) => !dontShowStatuses.includes(s) && !(props.channelData.currentStatus.startsWith('ACTIVE_CONVO') && s === 'ACTIVE_CONVO')
+    (s: string) =>
+      !dontShowStatuses.includes(s) &&
+      !(
+        props.channelData.currentStatus.startsWith("ACTIVE_CONVO") &&
+        s === "ACTIVE_CONVO"
+      )
   )) {
     let status: any = null;
     if (props.channelData.value === "EMAIL") {
@@ -346,7 +357,7 @@ export default function ProspectDetailsChangeStatus(
     );
   }
 
-  const changeStatus = async (status: { title: string, status: string }) => {
+  const changeStatus = async (status: { title: string; status: string }) => {
     await displayNotification(
       "change-prospect-status",
       async () => {
@@ -392,8 +403,6 @@ export default function ProspectDetailsChangeStatus(
     );
   };
 
-  console.log(props.channelData.currentStatus)
-
   return (
     <Card shadow="sm" p="lg" radius="md" withBorder>
       <Group position="apart">
@@ -410,35 +419,40 @@ export default function ProspectDetailsChangeStatus(
           {formatToLabel(props.channelData.currentStatus)}
         </Badge>
       </Group>
-      <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${splitName(props.prospectName).first}'s ${formatToLabel(props.channelData.value)} status.`}</Text>
+      <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${
+        splitName(props.prospectName).first
+      }'s ${formatToLabel(props.channelData.value)} status.`}</Text>
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       <SimpleGrid cols={3} mt="md">
         {items}
       </SimpleGrid>
-      {props.channelData.currentStatus.startsWith('ACTIVE_CONVO') && (
+      {props.channelData.currentStatus.startsWith("ACTIVE_CONVO") && (
         <Select
           mt={15}
           label="Conversation Substatus"
           placeholder="The state of the active conversation"
           clearable
           data={[
-            { value: 'ACTIVE_CONVO_QUESTION', label: 'Question' },
-            { value: 'ACTIVE_CONVO_QUAL_NEEDED', label: 'Qualifications Needed' },
-            { value: 'ACTIVE_CONVO_OBJECTION', label: 'Objection' },
-            { value: 'ACTIVE_CONVO_SCHEDULING', label: 'Scheduling' },
-            { value: 'ACTIVE_CONVO_NEXT_STEPS', label: 'Next Steps' },
+            { value: "ACTIVE_CONVO_QUESTION", label: "Question" },
+            {
+              value: "ACTIVE_CONVO_QUAL_NEEDED",
+              label: "Qualifications Needed",
+            },
+            { value: "ACTIVE_CONVO_OBJECTION", label: "Objection" },
+            { value: "ACTIVE_CONVO_SCHEDULING", label: "Scheduling" },
+            { value: "ACTIVE_CONVO_NEXT_STEPS", label: "Next Steps" },
           ]}
           defaultValue={props.channelData.currentStatus}
           onChange={async (value) => {
-            if(!value) {
+            if (!value) {
               await changeStatus({
-                title: 'Active Conversation',
-                status: 'ACTIVE_CONVO'
+                title: "Active Conversation",
+                status: "ACTIVE_CONVO",
               });
             } else {
               await changeStatus({
                 title: formatToLabel(value),
-                status: value
+                status: value,
               });
             }
           }}

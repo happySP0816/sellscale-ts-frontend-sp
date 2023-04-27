@@ -100,15 +100,15 @@ const Item = forwardRef(
 
 export default function PersonaSplitSelect({
   disabled,
+  onChange,
 }: {
   disabled: boolean;
+  onChange: (ids: number[]) => void;
 }) {
   const [userToken] = useRecoilState(userTokenState);
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-archetype-details`, {}],
     queryFn: async ({ queryKey }) => {
-      console.log("GOT HERE");
-
       const response = await fetch(`${API_URL}/client/archetype/get_details`, {
         method: "GET",
         headers: {
@@ -128,7 +128,6 @@ export default function PersonaSplitSelect({
     personaOptions[i]["label"] = personaOptions[i].name;
     personaOptions[i]["value"] = personaOptions[i].id;
   }
-  console.log(personaOptions);
 
   return (
     <MultiSelect
@@ -143,7 +142,7 @@ export default function PersonaSplitSelect({
       placeholder="select personas..."
       label="Select persona to split into"
       description="SellScale will use AI to split your prospects into these personas"
-      onChange={(ids) => console.log(ids)}
+      onChange={(ids) => onChange(ids.map((x) => parseInt(x)))}
       disabled={disabled}
     />
   );

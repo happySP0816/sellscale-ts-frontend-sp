@@ -60,8 +60,9 @@ export default function ProspectTable({
 }) {
   const theme = useMantineTheme();
   const tableContainerRef = useRef<HTMLDivElement>(null); //we can get access to the underlying TableContainer element and react to its scroll events
-  const rowVirtualizerInstanceRef =
-    useRef<MRT_Virtualizer<HTMLDivElement, HTMLTableRowElement>>(null); //we can get access to the underlying Virtualizer instance and call its scrollToIndex method
+  const rowVirtualizerInstanceRef = useRef<
+    MRT_Virtualizer<HTMLDivElement, HTMLTableRowElement>
+  >(null); //we can get access to the underlying Virtualizer instance and call its scrollToIndex method
 
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
     []
@@ -82,84 +83,85 @@ export default function ProspectTable({
   const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
   // ??
 
-  const { data, fetchNextPage, isError, isFetching, isLoading } =
-    useInfiniteQuery({
-      queryKey: [
-        `query-infinite-pipeline-prospects`,
-        columnFilters,
-        globalFilter,
-        sorting,
-      ],
-      queryFn: async ({ pageParam = 0 }) => {
+  const {
+    data,
+    fetchNextPage,
+    isError,
+    isFetching,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: [
+      `query-infinite-pipeline-prospects`,
+      columnFilters,
+      globalFilter,
+      sorting,
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await fetch(`${API_URL}/prospect/get_prospects`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: "", //search.length > 0 ? search : undefined,
+          channel: "SELLSCALE", //channel.length > 0 ? channel : "SELLSCALE",
+          status: undefined, //statuses?.length > 0 ? statuses : undefined,
+          limit: fetchSize,
+          offset: pageParam * fetchSize,
+          ordering: [],
+        }),
+      });
+      if (response.status === 401) {
+        logout();
+      }
+      const res = await response.json();
+      if (!res || !res.prospects) {
+        return [] as any;
+      }
 
-        const response = await fetch(
-          `${API_URL}/prospect/get_prospects`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${userToken}`,
-              "Content-Type": "application/json",
+      // TODO: Fix this
+      const channel = "SELLSCALE";
+
+      return {
+        data: res.prospects.map((prospect: any) => {
+          return {
+            id: prospect.id,
+            full_name: prospect.full_name,
+            company: prospect.company,
+            title: prospect.title,
+            industry: prospect.industry,
+            status:
+              channel === "SELLSCALE"
+                ? prospect.overall_status
+                : channel === "EMAIL"
+                ? prospect.email_status
+                : prospect.linkedin_status,
+            channels: [
+              prospect.linkedin_status &&
+              prospect.linkedin_status !== "PROSPECTED"
+                ? "LINKEDIN"
+                : undefined,
+              prospect.email_status ? "EMAIL" : undefined,
+            ].filter((x) => x),
+            review_details: {
+              last_reviewed: prospect.last_reviewed,
+              times_bumped: prospect.times_bumped,
             },
-            body: JSON.stringify({
-              query: "", //search.length > 0 ? search : undefined,
-              channel: "SELLSCALE", //channel.length > 0 ? channel : "SELLSCALE",
-              status: undefined, //statuses?.length > 0 ? statuses : undefined,
-              limit: fetchSize,
-              offset: pageParam * fetchSize,
-              ordering: [],
-            }),
-          }
-        );
-        if (response.status === 401) {
-          logout();
-        }
-        const res = await response.json();
-        if (!res || !res.prospects) {
-          return [] as any;
-        }
-
-        // TODO: Fix this
-        const channel = "SELLSCALE";
-
-        return {
-          data: res.prospects.map((prospect: any) => {
-            return {
-              id: prospect.id,
-              full_name: prospect.full_name,
-              company: prospect.company,
-              title: prospect.title,
-              industry: prospect.industry,
-              status:
-                channel === "SELLSCALE"
-                  ? prospect.overall_status
-                  : channel === "EMAIL"
-                  ? prospect.email_status
-                  : prospect.linkedin_status,
-              channels: [
-                prospect.linkedin_status &&
-                prospect.linkedin_status !== "PROSPECTED"
-                  ? "LINKEDIN"
-                  : undefined,
-                prospect.email_status ? "EMAIL" : undefined,
-              ].filter((x) => x),
-              review_details: {
-                last_reviewed: prospect.last_reviewed,
-                times_bumped: prospect.times_bumped,
-              },
-              meta: {
-                totalRowCount: res.total_count,
-              },
-            };
-          }),
-          meta: {
-            totalRowCount: res.total_count,
-          },
-        };
-      },
-      getNextPageParam: (_lastGroup, groups) => groups.length,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    });
+            meta: {
+              totalRowCount: res.total_count,
+            },
+          };
+        }),
+        meta: {
+          totalRowCount: res.total_count,
+        },
+      };
+    },
+    getNextPageParam: (_lastGroup, groups) => groups.length,
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+  });
 
   const flatData = useMemo(
     () => data?.pages.flatMap((page: any) => page.data) ?? [],
@@ -208,18 +210,20 @@ export default function ProspectTable({
         Cell: ({ renderedCellValue, row }) => (
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
             }}
           >
             <Avatar
               src={null}
-              alt={renderedCellValue+''}
-              color={valueToColor(theme, renderedCellValue+'')}
+              alt={renderedCellValue + ""}
+              color={valueToColor(theme, renderedCellValue + "")}
               size={30}
               radius={30}
-            >{nameToInitials(renderedCellValue+'')}</Avatar>
+            >
+              {nameToInitials(renderedCellValue + "")}
+            </Avatar>
             <span>{renderedCellValue}</span>
           </Box>
         ),
@@ -251,18 +255,12 @@ export default function ProspectTable({
             times_bumped: number;
           }>();
           let last_reviewed = review_details.last_reviewed;
-          let times_bumped = review_details.times_bumped;
           if (!last_reviewed) {
             return null;
           }
           return (
             <>
               <Badge>{last_reviewed?.substring(0, 16)}</Badge>
-              {times_bumped > 0 && (
-                <Badge color="red">{`Bumped ${times_bumped} time${
-                  times_bumped > 1 ? "s" : ""
-                }`}</Badge>
-              )}
             </>
           );
         },
@@ -400,9 +398,9 @@ export default function ProspectTable({
         rowVirtualizerInstanceRef={rowVirtualizerInstanceRef} //get access to the virtualizer instance
         rowVirtualizerProps={{ overscan: 10 }}
         mantineProgressProps={({ isTopToolbar }) => ({
-          color: 'teal',
+          color: "teal",
           sx: {
-            display: isTopToolbar ? 'none' : 'block', //hide top progress bar
+            display: isTopToolbar ? "none" : "block", //hide top progress bar
           },
         })}
       />

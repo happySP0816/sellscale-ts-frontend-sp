@@ -1,11 +1,11 @@
 import PageFrame from "@common/PageFrame";
-import { Flex, Paper, Select, SimpleGrid, Text } from "@mantine/core";
+import { Flex, Paper, Select, SimpleGrid, Tabs, Text } from "@mantine/core";
 import { useVesselLink } from "@vesselapi/react-vessel-link";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { Button, Card, Title, Notification } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { IconCheck, IconX } from "@tabler/icons";
+import { IconBrandLinkedin, IconCalendar, IconCheck, IconInbox, IconMail, IconMailbox, IconX } from "@tabler/icons";
 import PageTitle from "@nav/PageTitle";
 import { useQuery } from "@tanstack/react-query";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
@@ -17,6 +17,7 @@ import exchangeNylasClientID from "@utils/requests/exchangeNylasAuthCode";
 import { disconnectVesselMailbox } from "@utils/requests/disconnectVesselMailbox";
 import { connectVesselMailbox } from "@utils/requests/connectVesselMailbox";
 import { showNotification } from "@mantine/notifications";
+import CalendarAndScheduling from "@common/settings/CalendarAndScheduling";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -366,16 +367,34 @@ export default function SettingsPage() {
   return (
     <PageFrame>
       <PageTitle title="Settings" />
+      <Tabs orientation="vertical" defaultValue="linkedinConnection">
+        <Tabs.List>
+          <Tabs.Tab value='linkedinConnection' icon={<IconBrandLinkedin size='0.8rem'/>}>LinkedIn Connection</Tabs.Tab>
+          <Tabs.Tab value='emailConnection' icon={<IconInbox size='0.8rem'/>}>Email Connection</Tabs.Tab>
+          <Tabs.Tab value='salesEngagementConnection' icon={<IconMailbox size='0.8rem'/>}>Sales Engagement Tool</Tabs.Tab>
+          <Tabs.Tab value='calendarAndScheduling' icon={<IconCalendar size='0.8rem'/>}>Calendar and Scheduling</Tabs.Tab>
+        </Tabs.List>
 
-      <SimpleGrid cols={2} spacing={0}>
-        <VesselIntegrations />
-        <LinkedInConnectedCard
-          connected={userData ? userData.li_voyager_connected : false}
-        />
-        <NylasConnectedCard
-          connected={userData ? userData.nylas_connected : false}
-        />
-      </SimpleGrid>
+        <Tabs.Panel value="linkedinConnection" pl="xs">
+          <LinkedInConnectedCard
+            connected={userData ? userData.li_voyager_connected : false}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="emailConnection" pl="xs">
+          <NylasConnectedCard
+            connected={userData ? userData.nylas_connected : false}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="salesEngagementConnection" pl="xs">
+          <VesselIntegrations />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="calendarAndScheduling" pl="xs">
+          <CalendarAndScheduling />
+        </Tabs.Panel>
+      </Tabs>
     </PageFrame>
   );
 }

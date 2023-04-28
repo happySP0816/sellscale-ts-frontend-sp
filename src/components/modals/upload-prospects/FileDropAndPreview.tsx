@@ -176,7 +176,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
   const checkCanUpload = () => {
     const hasScrapeTarget = Array.from(columnMappings.values()).some(
       (value) => {
-        return value === "linkedin_url"; //TODO: || value === "email";
+        return value === "linkedin_url" || value === "email";
       }
     );
     // TODO: could check that the email and URLs are valid?
@@ -201,7 +201,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     */
     if (!hasScrapeTarget) {
       failureReasons.push(
-        "Please map at least one column to a profile target (such as a LinkedIn URL)." // TODO: or email
+        "Please map at least one column to a profile target (such as a LinkedIn URL or email)."
       );
     }
 
@@ -230,28 +230,32 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
       archetype_id = result.extra;
     }
 
+    const uploadJSON = (fileJSON as any[])
+    .map((row) => {
+      const mappedRow = {};
+      // Only include columns that are mapped to a prospect db column
+      Object.keys(row)
+        .filter((key) =>
+          PROSPECT_DB_COLUMNS.includes(
+            columnMappings.get(key.trim()) as string
+          )
+        )
+        .forEach((key) => {
+          // Use the mapped prospect db column intead of the original column name
+          // @ts-ignore
+          mappedRow[columnMappings.get(key.trim())] = row[key];
+        });
+      return mappedRow;
+      // Remove prospects that don't have a linkedin_url or email column
+    })
+    .filter((row: any) => row.linkedin_url || row.email);
+
     const result = await uploadProspects(
       +(archetype_id as string),
       userToken,
-      (fileJSON as any[])
-        .map((row) => {
-          const mappedRow = {};
-          // Only include columns that are mapped to a prospect db column
-          Object.keys(row)
-            .filter((key) =>
-              PROSPECT_DB_COLUMNS.includes(
-                columnMappings.get(key.trim()) as string
-              )
-            )
-            .forEach((key) => {
-              // Use the mapped prospect db column intead of the original column name
-              // @ts-ignore
-              mappedRow[columnMappings.get(key.trim())] = row[key];
-            });
-          return mappedRow;
-          // Remove prospects that don't have a linkedin_url column
-        })
-        .filter((row: any) => row.linkedin_url)
+      // If any row contains an email column, then we're using email
+      !![...Object.keys(uploadJSON[0])].find((key) => key.toLowerCase() === 'email'),
+      uploadJSON
     );
     if (result.status === "error") {
       console.error("Failed to start prospects upload");

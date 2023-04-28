@@ -20,6 +20,7 @@ export default function ICPFitPill(props: PropsType) {
   const { hovered, ref } = useHover();
 
   let icpFitScoreMap = new Map<string, string>([
+    ["-3", "QUEUED"],
     ["-2", "CALCULATING"],
     ["-1", "ERROR"],
     ["0", "VERY LOW"],

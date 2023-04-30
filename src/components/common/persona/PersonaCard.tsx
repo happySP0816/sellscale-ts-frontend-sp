@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Button,
   Avatar,
@@ -31,6 +32,7 @@ import {
   IconHistory,
   IconPower,
   IconPresentationAnalytics,
+  IconRefresh,
   IconTool,
   IconUpload,
   IconX,
@@ -393,6 +395,16 @@ export default function PersonaCard(props: {
               Upload Prospects
             </Button>
           )}
+          <Button
+            variant="subtle"
+            color="grape"
+            radius="md"
+            onClick={() => {
+              window.location.reload(); // TODO: remove this
+            }}
+          >
+            <IconRefresh size={14} />
+          </Button>
         </Flex>
       </FlexSeparate>
       {numUnusedProspectsIsLoading ? (

@@ -484,19 +484,35 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             ),
             render: ({ status, review_details }) => {
               return (
-                <Badge color={valueToColor(theme, formatToLabel(status))}>
-                  {status === "BUMPED" || status === "RESPONDED" ? (
-                    <>
-                      {formatToLabel(status)} #
-                      {review_details.times_bumped &&
-                      review_details.times_bumped >= 1
-                        ? review_details.times_bumped
-                        : "?"}
-                    </>
-                  ) : (
-                    <>{formatToLabel(status)}</>
+                <>
+                  <Badge color={valueToColor(theme, formatToLabel(status))}>
+                    {status === "BUMPED" || status === "RESPONDED" ? (
+                      <>
+                        {formatToLabel(status)} #
+                        {review_details.times_bumped &&
+                        review_details.times_bumped >= 1
+                          ? review_details.times_bumped
+                          : "?"}
+                      </>
+                    ) : (
+                      <>
+                        {formatToLabel(
+                          status.includes("ACTIVE_CONVO")
+                            ? "ACTIVE_CONVO"
+                            : status
+                        )}
+                      </>
+                    )}
+                  </Badge>
+                  {status.includes("ACTIVE_CONVO_") && (
+                    <Badge>
+                      {(status.includes("ACTIVE_CONVO_")
+                        ? status.replace("ACTIVE_CONVO_", "")
+                        : ""
+                      ).replaceAll("_", " ")}
+                    </Badge>
                   )}
-                </Badge>
+                </>
               );
             },
           },
@@ -541,22 +557,6 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               return (
                 <>
                   <Badge>{last_reviewed?.substring(0, 16)}</Badge>
-                </>
-              );
-            },
-          },
-          {
-            accessor: "review_details",
-            title: "Scheduling",
-            sortable: false,
-            hidden: selectorType !== "active",
-            render: ({ scheduling }) => {
-              if (!scheduling) {
-                return null;
-              }
-              return (
-                <>
-                  <Badge>Scheduling</Badge>
                 </>
               );
             },

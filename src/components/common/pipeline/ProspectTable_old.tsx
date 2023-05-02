@@ -346,7 +346,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             className="truncate"
           />
         </Grid.Col>
-        <Grid.Col span={4}>
+        <Grid.Col span={3}>
           <MultiSelect
             data={
               // If channels are not loaded or failed to fetch, don't show anything
@@ -388,9 +388,13 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             className="truncate"
           />
         </Grid.Col>
-        <Grid.Col span={1}>
+        <Grid.Col span={2}>
           <Switch.Group
-            label="Processing"
+            label={
+              showPurgatory
+                ? "Show prospects that need contacting"
+                : "Only show prospects contacted in last 2 days"
+            }
             onChange={(value) => {
               setShowPurgatory(!showPurgatory);
             }}

@@ -49,6 +49,9 @@ export default function PullProspectEmailsCard(props: PropsType) {
       headers: {
         Authorization: `Bearer ${userToken}`,
       },
+      body: JSON.stringify({
+        archetype_id: props.archetype_id,
+      }),
     });
 
     setTimeout(() => {

@@ -1,4 +1,4 @@
-import { createStyles, Avatar, Text, Group, useMantineTheme } from "@mantine/core";
+import { createStyles, Avatar, Text, Group, useMantineTheme, Badge } from "@mantine/core";
 import {
   IconPhoneCall,
   IconAt,
@@ -30,6 +30,7 @@ type ProspectDetailsSummaryProps = {
   profilePic: string | null;
   companyName: string | null;
   companyURL?: string;
+  persona?: string;
 };
 
 export default function ProspectDetailsSummary(
@@ -40,8 +41,8 @@ export default function ProspectDetailsSummary(
   const companyURL =
     props.companyName && !props.companyURL
       ? `https://www.google.com/search?q=${encodeURIComponent(
-          props.companyName
-        )}`
+        props.companyName
+      )}`
       : props.companyURL;
 
   return (
@@ -56,6 +57,15 @@ export default function ProspectDetailsSummary(
         {nameToInitials(props.fullName)}
       </Avatar>
       <div>
+        <Badge
+          p='xs'
+          variant='outline'
+          radius='sm'
+          size='xs'
+          color={valueToColor(theme, props.persona || "Persona Unassigned")}
+        >
+          {props.persona || "Persona Unassigned"}
+        </Badge>
         <Group noWrap spacing={10} mt={3}>
           <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
           <Text size="xs" color="dimmed">

@@ -13,6 +13,7 @@ import { valueToColor } from "@utils/general";
 type PropsType = {
   icp_fit_score: number;
   icp_fit_reason: string;
+  archetype: string;
 };
 
 export default function ICPFitPill(props: PropsType) {
@@ -45,6 +46,19 @@ export default function ICPFitPill(props: PropsType) {
           </Text>
           <Divider mb="md" mt="md" />
           <Text size="sm" weight="700">
+            Archetype:
+          </Text>
+          <Badge
+            p='xs'
+            variant='outline'
+            radius='sm'
+            size='xs'
+            color={valueToColor(theme, props.archetype || "Persona Unassigned")}
+          >
+            {props.archetype || "Persona Unassigned"}
+          </Badge>
+
+          <Text size="sm" weight="700" mt='md'>
             ICP Fit Score:
           </Text>
           <Badge color={valueToColor(theme, mappedFitScore)} ref={ref}>

@@ -9,6 +9,8 @@ import {
   Tabs,
   Divider,
   ActionIcon,
+  Card,
+  Box,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
@@ -118,20 +120,20 @@ export default function ProspectDetailsDrawer() {
           <div style={{ display: 'flex' }}>
             {data && (
               <>
-              <Badge
-                color={valueToColor(
-                  theme,
-                  formatToLabel(prospectDrawerStatuses.overall)
-                )}
-                variant="light"
-                mr={20}
-                mt={5}
-              >
-                {`${formatToLabel(
-                  prospectDrawerStatuses.overall
-                )}`}
-              </Badge>
-              <ProspectDetailsOptionsMenu prospectId={data.main.prospect_info.details.id} />
+                <Badge
+                  color={valueToColor(
+                    theme,
+                    formatToLabel(prospectDrawerStatuses.overall)
+                  )}
+                  variant="light"
+                  mr={20}
+                  mt={5}
+                >
+                  {`${formatToLabel(
+                    prospectDrawerStatuses.overall
+                  )}`}
+                </Badge>
+                <ProspectDetailsOptionsMenu prospectId={data.main.prospect_info.details.id} />
               </>
             )}
           </div>
@@ -153,13 +155,14 @@ export default function ProspectDetailsDrawer() {
             profilePic={data.main.prospect_info.details.profile_pic}
             companyName={data.main.prospect_info.company.name}
             companyURL={data.main.prospect_info.company.url}
+            persona={data.main.prospect_info.details.persona}
           />
           <ScrollArea
             style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
           >
             {data?.channelTypes.length > 0 &&
               prospectDrawerStatuses.overall !==
-                "PROSPECTED" && (
+              "PROSPECTED" && (
                 <>
                   <Tabs
                     value={

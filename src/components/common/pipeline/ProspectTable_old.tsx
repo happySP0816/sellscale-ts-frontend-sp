@@ -257,6 +257,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
         return {
           id: prospect.id,
           full_name: prospect.full_name,
+          archetype: prospect.archetype_name,
           company: prospect.company,
           title: prospect.title,
           industry: prospect.industry,
@@ -537,12 +538,13 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               </FlexSeparate>
             ),
             sortable: true,
-            render: ({ icp_fit_score, icp_fit_reason }) => {
+            render: ({ icp_fit_score, icp_fit_reason, archetype }) => {
               return (
                 <>
                   <ICPFitPill
                     icp_fit_score={icp_fit_score}
                     icp_fit_reason={icp_fit_reason}
+                    archetype={archetype}
                   />
                 </>
               );

@@ -99,7 +99,7 @@ export default function DashboardSection() {
     .filter((p) => p.linkedin_status === "ACTIVE_CONVO_QUESTION")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
   const prospectsDemo = prospects
-    .filter((p) => p.overall_status === "DEMO")
+    .filter((p) => p.linkedin_status === "DEMO_SET")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
 
   const totalProspectTasks =

@@ -46,6 +46,7 @@ import ComingSoonCard from "@common/library/ComingSoonCard";
 import { API_URL } from "@constants/data";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import displayNotification from "@utils/notificationFlow";
+import CreatePersona from "@common/persona/CreatePersona";
 
 export default function UploadProspectsModal({
   context,
@@ -570,6 +571,7 @@ export default function UploadProspectsModal({
           <Tabs.List>
             <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
             <Tabs.Tab value="from-crm">Import from CRM</Tabs.Tab>
+            <Tabs.Tab value="from-empty">Create Empty Persona</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="from-file" pt="xs">
             <FileDropAndPreview
@@ -589,6 +591,17 @@ export default function UploadProspectsModal({
           </Tabs.Panel>
           <Tabs.Panel value="from-crm" pt="xs">
             <ComingSoonCard h={200} />
+          </Tabs.Panel>
+          <Tabs.Panel value="from-empty" pt="xs">
+            <CreatePersona
+              createPersona={{
+                name: createdPersona,
+                ctas: ctas.map((cta) => cta.cta),
+                description: description,
+                fitReason: fitReason,
+                icpMatchingPrompt: icpMatchingPrompt,
+              }}
+            />
           </Tabs.Panel>
         </Tabs>
       </Stack>

@@ -99,6 +99,7 @@ export default function AllContactsSection() {
 
       return res;
     },
+    refetchOnWindowFocus: false,
   });
 
   const PIPELINE_SELECTOR_DATA = getPipelineSelectorData(data);

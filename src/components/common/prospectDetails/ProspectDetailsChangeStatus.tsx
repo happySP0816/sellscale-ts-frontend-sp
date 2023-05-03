@@ -237,7 +237,7 @@ export function channelToIcon(channel: Channel, size: number) {
   }
 }
 
-async function updateChannelStatus(
+export async function updateChannelStatus(
   prospectId: number,
   userToken: string,
   channelType: string,

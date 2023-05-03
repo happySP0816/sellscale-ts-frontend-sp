@@ -7,7 +7,7 @@ type NotificationCardProps = {
   description: string;
 };
 
-export default function NotificationCard(props: NotificationCardProps) {
+export default function old_NotificationCard(props: NotificationCardProps) {
   const { hovered, ref } = useHover();
 
   return (

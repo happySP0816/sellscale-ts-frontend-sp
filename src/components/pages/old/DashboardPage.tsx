@@ -1,5 +1,5 @@
 import { userDataState } from "@atoms/userAtoms";
-import NotificationCard from "@common/dashboard/NotificationCard";
+import NotificationCard from "@common/dashboard/old_NotificationCard";
 import InstallExtensionCard from "@common/library/InstallExtensionCard";
 import {
   List,

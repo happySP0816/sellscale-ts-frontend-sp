@@ -2,7 +2,7 @@ import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectA
 import { userDataState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
 import AllContactsSection from "@common/home/AllContactsSection";
-import RecActionsSection from "@common/home/RecActionsSection";
+import DashboardSection from "@common/home/DashboardSection";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import { Tabs } from "@mantine/core";
 import { IconActivity, IconAddressBook, IconCheckbox } from "@tabler/icons";
@@ -26,17 +26,17 @@ export default function HomePage() {
 
   return (
     <PageFrame>
-      <Tabs defaultValue="all-contacts" px="xs" color="teal">
+      <Tabs defaultValue="dashboard" px="xs" color="teal">
         <Tabs.List>
+          <Tabs.Tab value="dashboard" icon={<IconCheckbox size="1.1rem" />}>Dashboard</Tabs.Tab>
           <Tabs.Tab value="all-contacts" icon={<IconAddressBook size="1.1rem" />}>All Contacts</Tabs.Tab>
-          <Tabs.Tab value="rec-actions" icon={<IconCheckbox size="1.1rem" />}>Recommended Actions</Tabs.Tab>
           <Tabs.Tab value="recent-activity" icon={<IconActivity size="1.1rem" />}>Recent Activity</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="all-contacts" pt="xs">
           <AllContactsSection />
         </Tabs.Panel>
-        <Tabs.Panel value="rec-actions" pt="xs">
-          <RecActionsSection />
+        <Tabs.Panel value="dashboard" pt="xs">
+          <DashboardSection />
         </Tabs.Panel>
         <Tabs.Panel value="recent-activity" pt="xs">
           <RecentActivitySection />

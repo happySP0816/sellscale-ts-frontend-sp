@@ -3,7 +3,7 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
 import CampaignTable from "@common/campaigns/CampaignTable";
 import AllContactsSection from "@common/home/AllContactsSection";
-import RecActionsSection from "@common/home/RecActionsSection";
+import RecActionsSection from "@common/home/DashboardSection";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import FlexSeparate from "@common/library/FlexSeparate";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";

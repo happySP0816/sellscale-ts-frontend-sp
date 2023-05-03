@@ -68,6 +68,9 @@ export interface Prospect {
   overall_status: string;
   linkedin_status: string;
   email_status: string;
+  img_url: string;
+  img_expire: string;
+  recent_messages: any;
 }
 
 export interface CTA {

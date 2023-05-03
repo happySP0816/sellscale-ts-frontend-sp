@@ -3,7 +3,7 @@ import PageFrame from "@common/PageFrame";
 import EmailAnalyticsTable from "@common/analytics/EmailAnalyticsTable";
 import CampaignTable from "@common/campaigns/CampaignTable";
 import AllContactsSection from "@common/home/AllContactsSection";
-import RecActionsSection from "@common/home/RecActionsSection";
+import RecActionsSection from "@common/home/DashboardSection";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import PersonaDetailsTransformers from "@common/persona/details/PersonaDetailsTransformers";

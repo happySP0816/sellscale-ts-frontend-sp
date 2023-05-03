@@ -3,17 +3,16 @@ import getResponseJSON, { isMsgResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
- * Send LinkedIn message to prospect
+ * Add a note to a prospect
  * @param userToken 
  * @param prospectId 
- * @param message 
- * @param purgatory
+ * @param note 
  * @returns - MsgResponse
  */
-export async function sendLinkedInMessage(userToken: string, prospectId: number, message: string, purgatory?: boolean): Promise<MsgResponse> {
+export async function addProspectNote(userToken: string, prospectId: number, note: string): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/voyager/send_message`,
+    `${API_URL}/prospect/add_note`,
     {
       method: "POST",
       headers: {
@@ -22,14 +21,13 @@ export async function sendLinkedInMessage(userToken: string, prospectId: number,
       },
       body: JSON.stringify({
         "prospect_id": prospectId,
-        "message": message,
-        "purgatory": purgatory ?? false,
+        "note": note,
       }),
     }
   );
-  const result = await getResponseJSON("send-linkedin-message", response);
+  const result = await getResponseJSON("add-prospect-note", response);
   if(isMsgResponse(result)) { return result; }
 
-  return { status: 'success', title: `Success`, message: `Sent message` };
+  return { status: 'success', title: `Success`, message: `Added note` };
 
 }

@@ -107,7 +107,7 @@ export default function TextAreaWithAI(props: PropsType) {
             size="xs"
             compact
             onClick={() => setAIPopoverToggled(!AIPopoverToggled)}
-            sx={{ position: "absolute", top: 7, right: 7, zIndex: 100 }}
+            sx={{ position: "absolute", top: props.label ? 0 : 7, right: 7, zIndex: 100 }}
             leftIcon={<IconPencil size='0.8rem' />}
             styles={{
               leftIcon: {

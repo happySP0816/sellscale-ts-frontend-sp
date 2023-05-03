@@ -50,6 +50,40 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
         <Text weight={700} size="lg">
           Account Research
         </Text>
+        <Button
+          variant="light"
+          size="xs"
+          rightIcon={<IconReload size="0.975rem" />}
+          onClick={async () => {
+            await displayNotification(
+              "regenerate-research-points",
+              async () => {
+                let result = await generateResearchPoints(
+                  userToken,
+                  props.prospectId
+                );
+                return result;
+              },
+              {
+                title: `Reattempting Research...`,
+                message: `Working with servers...`,
+                color: "teal",
+              },
+              {
+                title: `Scheduled!`,
+                message: `We're reattempting our research on this prospect. Check back later (reopen this drawer later)!`,
+                color: "teal",
+              },
+              {
+                title: `Error while reattempting research.`,
+                message: `Please try again later.`,
+                color: "red",
+              }
+            );
+          }}
+        >
+          Reattempt Research
+        </Button>
       </Group>
       {accountResearchArray.length > 0 ? (
         <Text mb="xs" fz="sm" c="dimmed">
@@ -60,39 +94,6 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
           <Text mb="xs" fz="sm" c="dimmed">
             No account research points found.
           </Text>
-          <Button
-            variant="light"
-            rightIcon={<IconReload size='0.975rem' />}
-            onClick={async () => {
-              await displayNotification(
-                "regenerate-research-points",
-                async () => {
-                  let result = await generateResearchPoints(
-                    userToken,
-                    props.prospectId
-                  );
-                  return result;
-                },
-                {
-                  title: `Reattempting Research...`,
-                  message: `Working with servers...`,
-                  color: "teal",
-                },
-                {
-                  title: `Scheduled!`,
-                  message: `We're reattempting our research on this prospect. Check back later (reopen this drawer later)!`,
-                  color: "teal",
-                },
-                {
-                  title: `Error while reattempting research.`,
-                  message: `Please try again later.`,
-                  color: "red",
-                }
-              );
-            }}
-          >
-            Reattempt Research
-          </Button>
         </div>
       )}
       {/* <Button size="xs" variant="light" compact mb="md">

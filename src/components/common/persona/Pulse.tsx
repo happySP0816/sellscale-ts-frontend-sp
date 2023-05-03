@@ -59,11 +59,20 @@ export default function Pulse(props: {
           <Text>
             {label}
           </Text>
-          <Badge
-            color={valueToColor(theme, icpFitScoreMap.get(icpFit.toString()) || 'NONE')}
-          >
-            {icpFitScoreMap.get(icpFit.toString())}
-          </Badge>
+          {
+            icpFit &&
+            <Badge
+              color={valueToColor(theme, icpFitScoreMap.get(icpFit.toString()) || 'NONE')}
+            >
+              {icpFitScoreMap.get(icpFit.toString())}
+            </Badge>
+          }
+          {/* <Badge
+              color={valueToColor(theme, icpFitScoreMap.get(icpFit.toString()) || 'NONE')}
+            >
+              {icpFitScoreMap.get(icpFit.toString())}
+            </Badge> */}
+
         </Flex>
         <Text fz='xs'>
           {title} @ {company}
@@ -130,8 +139,8 @@ export default function Pulse(props: {
         Are you sure you want to run the pulse prompt on all prospects? This may take a while and will cost you credits.
       </Text>
     ),
-    labels: {confirm: 'Confirm', cancel: "Cancel"},
-    onCancel: () => {},
+    labels: { confirm: 'Confirm', cancel: "Cancel" },
+    onCancel: () => { },
     onConfirm: () => triggerPostRunICPClassification(),
   })
 
@@ -317,7 +326,7 @@ export default function Pulse(props: {
                       Estimated Time:
                     </Text>
                     <Text ml='xs'>
-                      {(prospects.length * .3/60).toPrecision(1)} minutes
+                      {(prospects.length * .3 / 60).toPrecision(1)} minutes
                     </Text>
                   </Flex>
                   <Flex>

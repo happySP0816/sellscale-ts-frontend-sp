@@ -60,19 +60,19 @@ export default function Pulse(props: {
             {label}
           </Text>
           {
-            icpFit &&
-            <Badge
-              color={valueToColor(theme, icpFitScoreMap.get(icpFit.toString()) || 'NONE')}
-            >
-              {icpFitScoreMap.get(icpFit.toString())}
-            </Badge>
+            icpFit ?
+              <Badge
+                color={valueToColor(theme, icpFitScoreMap.get(icpFit.toString()) || 'NONE')}
+              >
+                {icpFitScoreMap.get(icpFit.toString())}
+              </Badge>
+              :
+              <Badge
+                color={valueToColor(theme, 'NONE')}
+              >
+                NONE
+              </Badge>
           }
-          {/* <Badge
-              color={valueToColor(theme, icpFitScoreMap.get(icpFit.toString()) || 'NONE')}
-            >
-              {icpFitScoreMap.get(icpFit.toString())}
-            </Badge> */}
-
         </Flex>
         <Text fz='xs'>
           {title} @ {company}
@@ -266,11 +266,25 @@ export default function Pulse(props: {
                         <Text fz='sm' fw='bold' mr='xs'>
                           Fit:
                         </Text>
-                        <Badge
+                        {
+                          selectedProspect.icp_fit_score ?
+                            <Badge
+                              color={valueToColor(theme, icpFitScoreMap.get(selectedProspect.icp_fit_score.toString()) || 'NONE')}
+                            >
+                              {icpFitScoreMap.get(selectedProspect.icp_fit_score.toString())}
+                            </Badge>
+                            :
+                            <Badge
+                              color={valueToColor(theme, 'NONE')}
+                            >
+                              None
+                            </Badge>
+                        }
+                        {/* <Badge
                           color={valueToColor(theme, icpFitScoreMap.get(selectedProspect.icp_fit_score.toString()) || 'NONE')}
                         >
                           {icpFitScoreMap.get(selectedProspect.icp_fit_score.toString())}
-                        </Badge>
+                        </Badge> */}
                       </Flex>
 
                       <Flex mt='md'>
@@ -278,7 +292,7 @@ export default function Pulse(props: {
                           Reason:
                         </Text>
                         <Text fz='sm'>
-                          {selectedProspect.icp_fit_reason}
+                          {selectedProspect.icp_fit_reason || "None"}
                         </Text>
 
                       </Flex>

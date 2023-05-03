@@ -65,7 +65,7 @@ export default function DashboardSection() {
         body: JSON.stringify({
           channel: "SELLSCALE",
           limit: 10000, // TODO: Maybe use pagination method instead
-          status: ['DEMO', 'ACTIVE_CONVO']
+          status: ["DEMO", "ACTIVE_CONVO"],
         }),
       });
       if (response.status === 401) {
@@ -102,7 +102,13 @@ export default function DashboardSection() {
     .filter((p) => p.overall_status === "DEMO")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
 
-  const totalProspectTasks = prospectsNextSteps.length + prospectsObjection.length + prospectsScheduled.length + prospectsQualNeeded.length + prospectsQuestion.length + prospectsDemo.length;
+  const totalProspectTasks =
+    prospectsNextSteps.length +
+    prospectsObjection.length +
+    prospectsScheduled.length +
+    prospectsQualNeeded.length +
+    prospectsQuestion.length +
+    prospectsDemo.length;
 
   return (
     <>
@@ -114,12 +120,20 @@ export default function DashboardSection() {
                 Welcome back, {userData && splitName(userData.sdr_name).first}!
               </Text>
               <Text ta="center" fz="md">
-                <Text c="dimmed" span>
-                  You have
-                </Text>{" "}
-                <Text c="gray.5" span>
-                  {totalProspectTasks} new tasks
-                </Text>
+                {isFetching ? (
+                  <Text c="dimmed" fz='sm' fs='italic' span>
+                  Fetching tasks...
+                  </Text>
+                ) : (
+                  <>
+                    <Text c="dimmed" span>
+                      You have
+                    </Text>{" "}
+                    <Text c="gray.5" span>
+                      {totalProspectTasks} new tasks
+                    </Text>
+                  </>
+                )}
               </Text>
             </div>
             <ScrollArea

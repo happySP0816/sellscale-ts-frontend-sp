@@ -64,7 +64,8 @@ export default function DashboardSection() {
         },
         body: JSON.stringify({
           channel: "SELLSCALE",
-          //status: statuses?.length > 0 ? statuses : undefined,
+          limit: 10000, // TODO: Maybe use pagination method instead
+          status: ['DEMO', 'ACTIVE_CONVO']
         }),
       });
       if (response.status === 401) {

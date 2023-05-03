@@ -70,7 +70,7 @@ export default function DashCardContents(props: { prospect: Prospect, includeNot
             {props.prospect.full_name}
           </Text>
           <Text fz="sm">
-            {latest_msg ? `“${latest_msg.message}”` : 'Issue occured: No recent message from them'}
+            {latest_msg ? `${latest_msg.message.trim()}` : 'Issue occured: No recent message from them'}
           </Text>
           <Group position="right" mt={5}>
             <Button

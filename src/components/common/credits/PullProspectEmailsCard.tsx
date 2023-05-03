@@ -48,6 +48,7 @@ export default function PullProspectEmailsCard(props: PropsType) {
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         archetype_id: props.archetype_id,

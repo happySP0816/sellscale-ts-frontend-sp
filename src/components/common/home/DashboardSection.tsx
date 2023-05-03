@@ -101,6 +101,8 @@ export default function DashboardSection() {
     .filter((p) => p.overall_status === "DEMO")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
 
+  const totalProspectTasks = prospectsNextSteps.length + prospectsObjection.length + prospectsScheduled.length + prospectsQualNeeded.length + prospectsQuestion.length + prospectsDemo.length;
+
   return (
     <>
       <Flex justify="center" pb={10}>
@@ -115,7 +117,7 @@ export default function DashboardSection() {
                   You have
                 </Text>{" "}
                 <Text c="gray.5" span>
-                  4 new tasks
+                  {totalProspectTasks} new tasks
                 </Text>
               </Text>
             </div>

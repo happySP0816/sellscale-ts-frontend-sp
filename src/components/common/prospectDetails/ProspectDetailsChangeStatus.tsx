@@ -323,7 +323,7 @@ export default function ProspectDetailsChangeStatus(
     (s: string) =>
       !dontShowStatuses.includes(s) &&
       !(
-        props.channelData.currentStatus.startsWith("ACTIVE_CONVO") &&
+        props.channelData.currentStatus?.startsWith("ACTIVE_CONVO") &&
         s === "ACTIVE_CONVO"
       )
   )) {
@@ -426,7 +426,7 @@ export default function ProspectDetailsChangeStatus(
       <SimpleGrid cols={3} mt="md">
         {items}
       </SimpleGrid>
-      {props.channelData.currentStatus.startsWith("ACTIVE_CONVO") && (
+      {props.channelData.currentStatus?.startsWith("ACTIVE_CONVO") && (
         <Select
           mt={15}
           label="Conversation Substatus"

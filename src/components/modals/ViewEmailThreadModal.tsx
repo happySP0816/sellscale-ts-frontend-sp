@@ -69,18 +69,18 @@ export default function ViewEmailThreadModal({
             <Flex>
               <Avatar
                 src={null}
-                alt={email.from[0].name}
-                color={valueToColor(theme, email.from[0].name)}
+                alt={email.message_from[0]?.name}
+                color={valueToColor(theme, email.message_from[0]?.name || 'default-color')}
                 radius={45}
                 size={45}
                 mt={5}
                 mr={10}
               >
-                {nameToInitials(email.from[0].name)}
+                {nameToInitials(email.message_from[0]?.name)}
               </Avatar>
               <div>
                 <Text>
-                  <b>{email.from[0].name}</b> replied
+                  <b>{email.message_from[0]?.name}</b> replied
                 </Text>
                 <Badge
                   color="gray"
@@ -88,7 +88,7 @@ export default function ViewEmailThreadModal({
                   size="sm"
                   styles={{ root: { textTransform: "initial" } }}
                 >
-                  To: {email.to[0].email}
+                  To: {email.message_to[0]?.email}
                 </Badge>
                 {/* TODO: Include Cc-ed */}
                 <div
@@ -102,7 +102,7 @@ export default function ViewEmailThreadModal({
                   fz="sm"
                   c="dimmed"
                 >
-                  {convertDateToLocalTime(new Date(email.date * 1000))}
+                  {convertDateToLocalTime(new Date(email.date_received))}
                 </Text>
               </div>
             </Flex>

@@ -35,9 +35,9 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function EmailThreadEntry(props: {
-  name: string;
+  subject: string;
   postedAt: string;
-  body: string;
+  snippet: string;
   threadId: string;
   prospectId: number;
 }) {
@@ -58,12 +58,12 @@ export default function EmailThreadEntry(props: {
       onClick={() => {
         openContextModal({
           modal: "viewEmailThread",
-          title: <Title order={3}>{props.name}</Title>,
+          title: <Title order={3}>{props.subject}</Title>,
           innerProps: { prospectId: props.prospectId, threadId: props.threadId },
         });
       }}
     >
-      <Title order={5}>{props.name}</Title>
+      <Title order={5}>{props.subject}</Title>
       <Text
         size="xs"
         color="dimmed"
@@ -75,7 +75,7 @@ export default function EmailThreadEntry(props: {
       <TypographyStylesProvider className={classes.body}>
         <div
           className={classes.content}
-          dangerouslySetInnerHTML={{ __html: _.truncate(props.body, {
+          dangerouslySetInnerHTML={{ __html: _.truncate(props.snippet, {
             'length': 100,
             'separator': ' '
           }) }}

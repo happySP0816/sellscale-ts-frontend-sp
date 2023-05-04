@@ -28,7 +28,7 @@ import ProspectDetailsChangeStatus, {
 import ProspectDetailsCompany from "../common/prospectDetails/ProspectDetailsCompany";
 import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes";
 import ProspectDetailsViewConversation from "../common/prospectDetails/ProspectDetailsViewConversation";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, valueToColor } from "@utils/general";
 import { logout } from "@auth/core";
 import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
@@ -43,6 +43,7 @@ import { IconDots } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
 
 export default function ProspectDetailsDrawer() {
+  const userData = useRecoilValue(userDataState);
   const theme = useMantineTheme();
   const tableFilterChannel = useRecoilValue(prospectChannelState);
   const [channelType, setChannelType] = useState<Channel | null>(
@@ -234,7 +235,7 @@ export default function ProspectDetailsDrawer() {
                               />
                             )}
 
-                          {channel.value === "EMAIL" && (
+                          {(channel.value === "EMAIL" && userData.nylas_connected === true) && (
                             <ProspectDetailsViewEmails
                               prospectId={data.main.prospect_info.details.id}
                               email={data.main.prospect_info.email.email}

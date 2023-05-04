@@ -1,0 +1,65 @@
+import React from "react";
+import createPersona from "@utils/requests/createPersona";
+import { Button, Card, Text, Title } from "@mantine/core";
+import { useRecoilState } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+
+type PropsType = {
+  createPersona: {
+    name: string;
+    ctas: string[];
+    description: string;
+    fitReason: string;
+    icpMatchingPrompt: string;
+  };
+};
+
+export default function CreatePersona(props: PropsType) {
+  const [creatingPersona, setCreatingPersona] = React.useState(false);
+  const [userToken] = useRecoilState(userTokenState);
+
+  const createPersonaHandler = async () => {
+    setCreatingPersona(true);
+    const result = await createPersona(
+      userToken,
+      props.createPersona.name,
+      props.createPersona.ctas,
+      {
+        description: props.createPersona.description,
+        fitReason: props.createPersona.fitReason,
+        icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
+      }
+    );
+    if (result.status === "error") {
+      console.error("Failed to create persona & CTAs");
+      return;
+    }
+    setCreatingPersona(false);
+    window.location.reload();
+  };
+
+  return (
+    <Card>
+      <Title order={5}>Create Empty Persona</Title>
+      <Text size="sm">
+        Create a persona without any prospects added. You can add prospects
+        later.
+      </Text>
+      <Button
+        disabled={
+          !props.createPersona?.name ||
+          !props.createPersona?.ctas ||
+          !props.createPersona?.description ||
+          !props.createPersona?.fitReason ||
+          !props.createPersona.icpMatchingPrompt
+        }
+        onClick={() => createPersonaHandler()}
+        loading={creatingPersona}
+        mt="md"
+      >
+        Create Persona
+      </Button>
+    </Card>
+  );
+}
+//

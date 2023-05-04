@@ -7,6 +7,7 @@ import {
   uploadDrawerOpenState,
 } from "../atoms/personaAtoms";
 import ComingSoonCard from "@common/library/ComingSoonCard";
+import CreatePersona from "@common/persona/CreatePersona";
 
 export default function PersonaUploadDrawer(props: {
   personas: Archetype[] | undefined;

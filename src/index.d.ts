@@ -71,6 +71,7 @@ export interface Prospect {
   img_url: string;
   img_expire: string;
   recent_messages: any;
+  demo_date: any;
 }
 
 export interface CTA {

@@ -52,10 +52,13 @@ export default function DashboardSection() {
     | null
   >(null);
 
-  const [demosDrawerOpened, setDemosDrawerOpened] =
-    useRecoilState(demosDrawerOpenState);
-  const [demoFeedbackDrawerOpened, setDemoFeedbackDrawerOpened] =
-    useRecoilState(demoFeedbackSeeAllDrawerOpenState);
+  const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
+    demosDrawerOpenState
+  );
+  const [
+    demoFeedbackDrawerOpened,
+    setDemoFeedbackDrawerOpened,
+  ] = useRecoilState(demoFeedbackSeeAllDrawerOpenState);
 
   const { data, isFetching } = useQuery({
     queryKey: [`query-dash-get-prospects`],
@@ -132,7 +135,8 @@ export default function DashboardSection() {
                   <>
                     {totalProspectTasks === 0 ? (
                       <Text c="dimmed" span>
-                        You’re good to go for the day - no action needed.<br/>
+                        You’re good to go for the day - no action needed.
+                        <br />
                         <i>Check back in tomorrow!</i>
                       </Text>
                     ) : (
@@ -297,10 +301,12 @@ export default function DashboardSection() {
                         </div>
                         <div style={{ flexGrow: 1, marginLeft: 10 }}>
                           <Text fw={700} fz="sm">
-                            Demo with {prospectsDemo[0].full_name}
+                            Demo with {prospectsDemo[0].full_name}!
                           </Text>
                           <Text fz="sm" c="dimmed">
-                            {convertDateToLocalTime(new Date())}
+                            {prospectsDemo[0].demo_date
+                              ? "Demo set for " + prospectsDemo[0].demo_date
+                              : "No demo date set."}
                           </Text>
                         </div>
                         <div>

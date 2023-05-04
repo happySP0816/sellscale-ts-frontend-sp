@@ -28,6 +28,7 @@ import { sendLinkedInMessage } from "@utils/requests/sendMessage";
 import { addProspectNote } from "@utils/requests/addProspectNote";
 import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChangeStatus";
 import { useQueryClient } from "@tanstack/react-query";
+import { convertDateToLocalTime } from "@utils/general";
 
 export default function DashCardContents(props: { prospect: Prospect, includeNote?: boolean, includeQualified?: boolean, includeSchedule?: boolean }) {
   const userToken = useRecoilValue(userTokenState);
@@ -51,7 +52,7 @@ export default function DashCardContents(props: { prospect: Prospect, includeNot
 
   return (
     <>
-      <Flex justify="space-between">
+      <Flex justify="space-between" sx={{ position: 'relative' }}>
         <div>
           <Indicator
             dot
@@ -95,6 +96,7 @@ export default function DashCardContents(props: { prospect: Prospect, includeNot
               See details
             </Button>
             <Button
+              hidden
               color="green"
               radius="xl"
               size="xs"
@@ -113,6 +115,9 @@ export default function DashCardContents(props: { prospect: Prospect, includeNot
             </Button>
           </Group>
         </div>
+        <Text fz={10} fs="italic" c='dimmed' sx={{ position: 'absolute', top: 0, right: 0 }}>
+          {convertDateToLocalTime(new Date(latest_msg?.date))}
+        </Text>
       </Flex>
       <Collapse in={opened}>
           <Stack>

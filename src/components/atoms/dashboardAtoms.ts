@@ -20,9 +20,15 @@ const dashCardSeeAllDrawerOpenState = atom({
   default: false,
 });
 
+const demoFeedbackSeeAllDrawerOpenState = atom({
+  key: "demo-feedback-see-all-drawer-open",
+  default: false,
+});
+
 export {
   schedulingDrawerOpenState,
   questionsDrawerOpenState,
   demosDrawerOpenState,
   dashCardSeeAllDrawerOpenState,
+  demoFeedbackSeeAllDrawerOpenState,
 };

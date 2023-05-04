@@ -18,6 +18,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import NotificationCard from "./dashboard/NotificationCard";
 import {
   dashCardSeeAllDrawerOpenState,
+  demoFeedbackSeeAllDrawerOpenState,
   demosDrawerOpenState,
   questionsDrawerOpenState,
   schedulingDrawerOpenState,
@@ -33,6 +34,7 @@ import DemoFeedbackDrawer from "@drawers/DemoFeedbackDrawer";
 import DashCardContents from "./dashboard/DashCardContents";
 import DashCardSeeAllDrawer from "@drawers/DashCardSeeAllDrawer";
 import { useQuery } from "@tanstack/react-query";
+import DemoFeedbackSeeAllDrawer from "@drawers/DemoFeedbackSeeAllDrawer";
 
 export default function DashboardSection() {
   const userToken = useRecoilValue(userTokenState);
@@ -52,6 +54,8 @@ export default function DashboardSection() {
 
   const [demosDrawerOpened, setDemosDrawerOpened] =
     useRecoilState(demosDrawerOpenState);
+  const [demoFeedbackDrawerOpened, setDemoFeedbackDrawerOpened] =
+    useRecoilState(demoFeedbackSeeAllDrawerOpenState);
 
   const { data, isFetching } = useQuery({
     queryKey: [`query-dash-get-prospects`],
@@ -121,17 +125,26 @@ export default function DashboardSection() {
               </Text>
               <Text ta="center" fz="md">
                 {isFetching ? (
-                  <Text c="dimmed" fz='sm' fs='italic' span>
-                  Fetching tasks...
+                  <Text c="dimmed" fz="sm" fs="italic" span>
+                    Fetching tasks...
                   </Text>
                 ) : (
                   <>
-                    <Text c="dimmed" span>
-                      You have
-                    </Text>{" "}
-                    <Text c="gray.5" span>
-                      {totalProspectTasks} new tasks
-                    </Text>
+                    {totalProspectTasks === 0 ? (
+                      <Text c="dimmed" span>
+                        You’re good to go for the day - no action needed.<br/>
+                        <i>Check back in tomorrow!</i>
+                      </Text>
+                    ) : (
+                      <>
+                        <Text c="dimmed" span>
+                          You have
+                        </Text>{" "}
+                        <Text c="gray.5" span>
+                          {totalProspectTasks} new tasks
+                        </Text>
+                      </>
+                    )}
                   </>
                 )}
               </Text>
@@ -140,87 +153,71 @@ export default function DashboardSection() {
               style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
             >
               {isFetching ? (
-                <LoadingOverlay visible={true} />
+                <LoadingOverlay zIndex={0} visible={true} />
               ) : (
                 <Stack spacing={40}>
-                  <NotificationCard
-                    title="Continue the convo"
-                    amount={prospectsNextSteps.length}
-                    onClickSeeAll={() => {
-                      seeAllType.current = "CONTINUE_CONVO";
-                      setSeeAllDrawerOpened(true);
-                    }}
-                    noneMsg="No conversations to continue"
-                  >
-                    {prospectsNextSteps.length > 0 && (
-                      <DashCardContents
-                        prospect={prospectsNextSteps[0]}
-                        includeNote
-                      />
-                    )}
-                  </NotificationCard>
-
-                  <NotificationCard
-                    title="Handle Objection"
-                    amount={prospectsObjection.length}
-                    onClickSeeAll={() => {
-                      seeAllType.current = "HANDLE_OBJECTION";
-                      setSeeAllDrawerOpened(true);
-                    }}
-                    noneMsg="No objections to handle"
-                  >
-                    {prospectsObjection.length > 0 && (
-                      <DashCardContents prospect={prospectsObjection[0]} />
-                    )}
-                  </NotificationCard>
-
-                  <NotificationCard
-                    title="Complex Question"
-                    amount={prospectsQuestion.length}
-                    onClickSeeAll={() => {
-                      seeAllType.current = "COMPLEX_QUESTION";
-                      setSeeAllDrawerOpened(true);
-                    }}
-                    noneMsg="No complex questions"
-                  >
-                    {prospectsQuestion.length > 0 && (
-                      <DashCardContents prospect={prospectsQuestion[0]} />
-                    )}
-                  </NotificationCard>
-
-                  <NotificationCard
-                    title="Qualifications Needed"
-                    amount={prospectsQualNeeded.length}
-                    onClickSeeAll={() => {
-                      seeAllType.current = "QUAL_NEEDED";
-                      setSeeAllDrawerOpened(true);
-                    }}
-                    noneMsg="No qualifications to check"
-                  >
-                    {prospectsQualNeeded.length > 0 && (
-                      <DashCardContents
-                        prospect={prospectsQualNeeded[0]}
-                        includeQualified
-                      />
-                    )}
-                  </NotificationCard>
-
-                  <NotificationCard
-                    title="Scheduling"
-                    amount={prospectsScheduled.length}
-                    onClickSeeAll={() => {
-                      seeAllType.current = "SCHEDULING";
-                      setSeeAllDrawerOpened(true);
-                    }}
-                    noneMsg="Nothing new to schedule"
-                  >
-                    {prospectsScheduled.length > 0 && (
+                  {prospectsScheduled.length > 0 && (
+                    <NotificationCard
+                      title="Scheduling"
+                      amount={prospectsScheduled.length}
+                      onClickSeeAll={() => {
+                        seeAllType.current = "SCHEDULING";
+                        setSeeAllDrawerOpened(true);
+                      }}
+                      noneMsg="Nothing new to schedule"
+                    >
                       <DashCardContents
                         prospect={prospectsScheduled[0]}
                         includeSchedule
                       />
-                    )}
-                  </NotificationCard>
+                    </NotificationCard>
+                  )}
+
+                  {prospectsQuestion.length > 0 && (
+                    <NotificationCard
+                      title="Complex Question"
+                      amount={prospectsQuestion.length}
+                      onClickSeeAll={() => {
+                        seeAllType.current = "COMPLEX_QUESTION";
+                        setSeeAllDrawerOpened(true);
+                      }}
+                      noneMsg="No complex questions"
+                    >
+                      <DashCardContents prospect={prospectsQuestion[0]} />
+                    </NotificationCard>
+                  )}
+
+                  {prospectsObjection.length > 0 && (
+                    <NotificationCard
+                      title="Handle Objection"
+                      amount={prospectsObjection.length}
+                      onClickSeeAll={() => {
+                        seeAllType.current = "HANDLE_OBJECTION";
+                        setSeeAllDrawerOpened(true);
+                      }}
+                      noneMsg="No objections to handle"
+                    >
+                      <DashCardContents prospect={prospectsObjection[0]} />
+                    </NotificationCard>
+                  )}
+
+                  {prospectsNextSteps.length > 0 && (
+                    <NotificationCard
+                      title="Continue the convo"
+                      amount={prospectsNextSteps.length}
+                      onClickSeeAll={() => {
+                        seeAllType.current = "CONTINUE_CONVO";
+                        setSeeAllDrawerOpened(true);
+                      }}
+                      noneMsg="No conversations to continue"
+                    >
+                      <DashCardContents
+                        prospect={prospectsNextSteps[0]}
+                        includeNote
+                      />
+                    </NotificationCard>
+                  )}
+
                   {/*
                 <NotificationCard
                   title="Complex Question"
@@ -272,14 +269,14 @@ export default function DashboardSection() {
                   )}
                 </NotificationCard>
                 */}
-                  <NotificationCard
-                    title="Demo Feedback"
-                    amount={prospectsDemo.length}
-                    assistantMsg="You scheduled a demo - how did it go?"
-                    onClickSeeAll={() => setDemosDrawerOpened(true)}
-                    noneMsg="No demos scheduled"
-                  >
-                    {prospectsDemo.length > 0 && (
+                  {prospectsDemo.length > 0 && (
+                    <NotificationCard
+                      title="Demo Feedback"
+                      amount={prospectsDemo.length}
+                      assistantMsg="You scheduled a demo - how did it go?"
+                      onClickSeeAll={() => setDemoFeedbackDrawerOpened(true)}
+                      noneMsg="No demos scheduled"
+                    >
                       <Flex justify="space-between">
                         <div>
                           <Indicator
@@ -318,8 +315,25 @@ export default function DashboardSection() {
                           </Button>
                         </div>
                       </Flex>
-                    )}
-                  </NotificationCard>
+                    </NotificationCard>
+                  )}
+
+                  {prospectsQualNeeded.length > 0 && (
+                    <NotificationCard
+                      title="Qualifications Needed"
+                      amount={prospectsQualNeeded.length}
+                      onClickSeeAll={() => {
+                        seeAllType.current = "QUAL_NEEDED";
+                        setSeeAllDrawerOpened(true);
+                      }}
+                      noneMsg="No qualifications to check"
+                    >
+                      <DashCardContents
+                        prospect={prospectsQualNeeded[0]}
+                        includeQualified
+                      />
+                    </NotificationCard>
+                  )}
                 </Stack>
               )}
             </ScrollArea>
@@ -364,7 +378,14 @@ export default function DashboardSection() {
         </>
       )}
       {!isFetching && demosDrawerOpened && (
-        <DemoFeedbackDrawer prospects={prospectsDemo} />
+        <>
+          <DemoFeedbackDrawer prospects={prospectsDemo} />
+        </>
+      )}
+      {!isFetching && demoFeedbackDrawerOpened && (
+        <>
+          <DemoFeedbackSeeAllDrawer prospects={prospectsDemo} />
+        </>
       )}
     </>
   );

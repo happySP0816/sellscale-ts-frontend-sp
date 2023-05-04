@@ -1,11 +1,12 @@
-import { Card, Paper, TextInput, Text, Title, ActionIcon, Flex, Button, LoadingOverlay, Notification } from "@mantine/core";
+import { Card, Paper, TextInput, Text, Title, ActionIcon, Flex, Button, LoadingOverlay, Notification, Select } from "@mantine/core";
 import { IconCheck, IconEdit, IconX } from "@tabler/icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { patchSchedulingLink } from "@utils/requests/patchSchedulingLink";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
+import { API_URL } from "@constants/data";
 
 
 const urlRegex: RegExp = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-z0-9\-]+(?:\.[a-z]{2,})+(?:\/[\w\-\.\?\=\&]*)*$/i;
@@ -18,7 +19,30 @@ export default function CalendarAndScheduling() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
+  const [timeZone, setTimeZone] = useState<string>(userData.timezone);
+
   const [schedulingLink, setSchedulingLink] = useState<string>(userData.scheduling_link || '');
+
+  useEffect(() => {
+    if(timeZone && timeZone !== userData.timezone) {
+      (async () => {
+        const response = await fetch(
+          `${API_URL}/client/sdr/timezone`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              timezone: timeZone
+            }),
+          }
+        );
+        setUserData({ ...userData, timezone: timeZone });
+      })();
+    }
+  }, [timeZone]);
 
   function handleUrlChange(event: React.ChangeEvent<HTMLInputElement>): void {
     const value = event.target.value;
@@ -151,6 +175,22 @@ export default function CalendarAndScheduling() {
             </Button>
           </Flex>
         }
+      </Card>
+      <Card mt='md'>
+        <Text fz='lg' fw='bold'>Time Zone</Text>
+        <Text mt='sm' fz='sm'>This time zone should be set to the time zone for the majority of your prospects.</Text>
+        <Select
+            mt="md"
+            withinPortal
+            /* @ts-ignore */
+            data={Intl.supportedValuesOf("timeZone")}
+            placeholder={Intl.DateTimeFormat().resolvedOptions().timeZone}
+            searchable
+            clearable
+            nothingFound="Time zone not found"
+            value={timeZone}
+            onChange={(value) => setTimeZone(value as string)}
+          />
       </Card>
     </Paper>
   )

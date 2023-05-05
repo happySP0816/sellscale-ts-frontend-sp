@@ -28,8 +28,6 @@ import { useEffect, useRef, useState } from "react";
 import { Prospect } from "src";
 import { logout } from "@auth/core";
 import { API_URL } from "@constants/data";
-import SchedulingCardContents from "./dashboard/SchedulingCardContents";
-import ComplexQuestionsDrawer from "@drawers/ComplexQuestionsDrawer";
 import DemoFeedbackDrawer from "@drawers/DemoFeedbackDrawer";
 import DashCardContents from "./dashboard/DashCardContents";
 import DashCardSeeAllDrawer from "@drawers/DashCardSeeAllDrawer";
@@ -67,9 +65,9 @@ export default function DashboardSection() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          channel: "SELLSCALE",
           limit: 10000, // TODO: Maybe use pagination method instead
           status: ["DEMO", "ACTIVE_CONVO"],
+          show_purgatory: 'ALL',
         }),
       });
       if (response.status === 401) {
@@ -151,6 +149,7 @@ export default function DashboardSection() {
             </div>
             <ScrollArea
               style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
+              pr={15}
             >
               {isFetching ? (
                 <LoadingOverlay zIndex={0} visible={true} />

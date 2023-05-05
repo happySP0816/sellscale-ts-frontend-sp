@@ -40,6 +40,13 @@ export default function CalendarAndScheduling() {
           }
         );
         setUserData({ ...userData, timezone: timeZone });
+        showNotification({
+          id: "change-sdr-timezone",
+          title: "Time Zone Updated",
+          message: `Your time zone has been updated.`,
+          color: "green",
+          autoClose: 2000,
+        });
       })();
     }
   }, [timeZone]);

@@ -63,6 +63,16 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
 
   const userToken = useRecoilValue(userTokenState);
 
+  const prospectsVisible = [];
+  const prospectsHidden = [];
+  for(let prospect of props.prospects){
+    if(new Date(prospect.hidden_until) > new Date()){
+      prospectsHidden.push(prospect);
+    } else {
+      prospectsVisible.push(prospect);
+    }
+  }
+
   return (
     <Drawer
       opened={actuallyOpened}
@@ -94,8 +104,21 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
         <ScrollArea
           style={{ height: window.innerHeight - 100, overflowY: "hidden" }}
         >
-          {props.prospects.map((prospect, i) => (
+          {prospectsVisible.map((prospect, i) => (
             <Paper key={i} withBorder p="xs" radius="md" mt={14}>
+              <DashCardContents
+                prospect={prospect}
+                includeNote={props.includeNote}
+                includeQualified={props.includeQualified}
+                includeSchedule={props.includeSchedule}
+              />
+            </Paper>
+          ))}
+          {prospectsHidden.length > 0 && (
+            <Divider my="xs" label="Waiting for Response" labelPosition="center" />
+          )}
+          {prospectsHidden.map((prospect, i) => (
+            <Paper key={i} withBorder p="xs" radius="md" mt={14} sx={{ filter: 'saturate(30%)' }}>
               <DashCardContents
                 prospect={prospect}
                 includeNote={props.includeNote}

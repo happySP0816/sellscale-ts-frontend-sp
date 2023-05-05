@@ -33,7 +33,7 @@ export default function NotificationCard(props: {
             </Avatar>
           )}
         </Group>
-        {props.amount > 1 && (
+        {props.amount >= 1 && ( // props.amount > 1
           <Text fw={300} c="green.3" fz={12} sx={{ cursor: "pointer" }} onClick={props.onClickSeeAll}>
             See all
           </Text>

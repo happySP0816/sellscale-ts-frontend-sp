@@ -21,7 +21,7 @@ import {
   Container,
 } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { Prospect } from "src";
 import { showNotification } from "@mantine/notifications";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
@@ -31,6 +31,7 @@ import { addProspectNote } from "@utils/requests/addProspectNote";
 import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChangeStatus";
 import { useQueryClient } from "@tanstack/react-query";
 import { convertDateToLocalTime } from "@utils/general";
+import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 
 export default function DashCardContents(props: {
   prospect: Prospect;
@@ -69,6 +70,10 @@ export default function DashCardContents(props: {
   const [qualified, setQualified] = useState<boolean>(true);
   const [schedule, setSchedule] = useState<string>("");
 
+  // Prospect Drawer
+  const [_opened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
+  const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
+
   const getMessage = (
     full_name: string,
     img_url: string,
@@ -106,6 +111,10 @@ export default function DashCardContents(props: {
     </Flex>
   );
 
+  if(!latest_msg){
+    return <></>;
+  }
+
   return (
     <>
       {opened ? (
@@ -133,6 +142,20 @@ export default function DashCardContents(props: {
       )}
       <div>
         <Group position="right" mt={5}>
+          <Button
+            color="green"
+            radius="xl"
+            size="sm"
+            compact
+            variant={opened ? "filled" : "light"}
+            onClick={() => {
+              setProspectId(props.prospect.id);
+              setDrawerOpened(true);
+            }}
+          >
+            Open
+          </Button>
+          {/*
           <Button
             color="green"
             radius="xl"
@@ -172,6 +195,7 @@ export default function DashCardContents(props: {
           >
             Flag
           </Button>
+          */}
         </Group>
       </div>
       <Collapse in={opened}>

@@ -73,6 +73,7 @@ export interface Prospect {
   recent_messages: any;
   hidden_until: string;
   hidden_reason: string;
+  demo_date: any;
 }
 
 export interface CTA {

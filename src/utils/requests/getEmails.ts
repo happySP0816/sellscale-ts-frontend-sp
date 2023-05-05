@@ -3,10 +3,10 @@ import getResponseJSON, { isMsgResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 
-export async function getEmailThreads(userToken: string, prospectId: number, limit: number): Promise<MsgResponse> {
+export async function getEmailThreads(userToken: string, prospectId: number, limit: number, offset: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/prospect/${prospectId}/email/threads?limit=${limit}`,
+    `${API_URL}/prospect/${prospectId}/email/threads?limit=${limit}&offset=${offset}`,
     {
       method: "GET",
       headers: {

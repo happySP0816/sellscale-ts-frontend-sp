@@ -48,7 +48,7 @@ export default function ProspectDetailsViewEmails(props: {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospect-email-threads-${props.prospectId}`],
     queryFn: async () => {
-      const response = await getEmailThreads(userToken, props.prospectId, 5);
+      const response = await getEmailThreads(userToken, props.prospectId, 5, 0);
       return response.status === "success" ? response.extra : [];
     },
     refetchOnWindowFocus: false,
@@ -134,11 +134,11 @@ export default function ProspectDetailsViewEmails(props: {
             >
               Compose
             </Button>
-            {/*
+            
               <ActionIcon size="sm" pr={5} onClick={() => refetch()}>
                 <IconRefresh size="0.875rem"/>
               </ActionIcon>
-            */}
+           
           </Flex>
         </FlexSeparate>
         <ScrollArea>
@@ -146,11 +146,11 @@ export default function ProspectDetailsViewEmails(props: {
             <EmailThreadEntry
               key={index}
               postedAt={convertDateToLocalTime(
-                new Date(emailThread.last_message_timestamp * 1000)
+                new Date(emailThread.last_message_timestamp)
               )}
-              body={DOMPurify.sanitize(emailThread.snippet)}
-              name={emailThread.subject}
-              threadId={emailThread.id}
+              snippet={DOMPurify.sanitize(emailThread.snippet)}
+              subject={emailThread.subject}
+              threadId={emailThread.nylas_thread_id}
               prospectId={props.prospectId}
             />
           ))}

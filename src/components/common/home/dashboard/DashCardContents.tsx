@@ -48,14 +48,14 @@ export default function DashCardContents(props: {
   const [response, setResponse] = useState<string>("");
   const [purgatory, setPurgatory] = useState<boolean>(true);
 
-  const li_convo =
+  var li_convo =
     props.prospect.recent_messages.li_convo?.filter(
-      (msg: any) => msg.thread_urn_id !== null
+      (msg: any) => msg.connection_degree !== "You"
     ) ?? [];
-  const latest_msgs = li_convo.sort(
+  var latest_msgs = li_convo.sort(
     (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
-  const latest_msg = latest_msgs[0];
+  var latest_msg = latest_msgs[0];
 
   // Msgs scroll view
   const viewport = useRef<HTMLDivElement>(null);
@@ -98,7 +98,7 @@ export default function DashCardContents(props: {
         <Text fw={700} fz="sm">
           {full_name}
         </Text>
-        <Text fz="sm">{message.trim()}</Text>
+        <Text fz="sm">{message?.trim()}</Text>
       </div>
       <Text
         fz={10}
@@ -121,22 +121,17 @@ export default function DashCardContents(props: {
         <ScrollArea h={200} viewportRef={viewport}>
           {latest_msgs.reverse().map((msg: any, i: number) => (
             <Container px={0} py={10} key={i}>
-              {getMessage(
-                msg.author,
-                msg.img_url,
-                msg.message,
-                msg.date
-              )}
+              {getMessage(msg.author, msg.img_url, msg.message, msg.date)}
             </Container>
           ))}
         </ScrollArea>
       ) : (
         <>
           {getMessage(
-            latest_msg.author,
-            latest_msg.img_url,
-            latest_msg.message,
-            latest_msg.date
+            latest_msg?.author,
+            latest_msg?.img_url,
+            latest_msg?.message,
+            latest_msg?.date
           )}
         </>
       )}

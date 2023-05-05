@@ -265,6 +265,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           icp_fit_score: prospect.icp_fit_score,
           icp_fit_reason: prospect.icp_fit_reason,
           hidden_until: prospect.hidden_until,
+          demo_date: prospect.demo_date,
           status:
             channel === "SELLSCALE"
               ? prospect.overall_status

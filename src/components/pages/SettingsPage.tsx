@@ -5,7 +5,15 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { Button, Card, Title, Notification } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { IconBrandLinkedin, IconCalendar, IconCheck, IconInbox, IconMail, IconMailbox, IconX } from "@tabler/icons";
+import {
+  IconBrandLinkedin,
+  IconCalendar,
+  IconCheck,
+  IconInbox,
+  IconMail,
+  IconMailbox,
+  IconX,
+} from "@tabler/icons";
 import PageTitle from "@nav/PageTitle";
 import { useQuery } from "@tanstack/react-query";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
@@ -18,6 +26,8 @@ import { disconnectVesselMailbox } from "@utils/requests/disconnectVesselMailbox
 import { connectVesselMailbox } from "@utils/requests/connectVesselMailbox";
 import { showNotification } from "@mantine/notifications";
 import CalendarAndScheduling from "@common/settings/CalendarAndScheduling";
+import { IconTrashFilled } from "@tabler/icons-react";
+import DoNotContactList from "@common/settings/DoNotContactList";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -369,10 +379,33 @@ export default function SettingsPage() {
       <PageTitle title="Settings" />
       <Tabs orientation="vertical" defaultValue="linkedinConnection">
         <Tabs.List>
-          <Tabs.Tab value='linkedinConnection' icon={<IconBrandLinkedin size='0.8rem'/>}>LinkedIn Connection</Tabs.Tab>
-          <Tabs.Tab value='emailConnection' icon={<IconInbox size='0.8rem'/>}>Email Connection</Tabs.Tab>
-          <Tabs.Tab value='salesEngagementConnection' icon={<IconMailbox size='0.8rem'/>}>Sales Engagement Tool</Tabs.Tab>
-          <Tabs.Tab value='calendarAndScheduling' icon={<IconCalendar size='0.8rem'/>}>Calendar and Scheduling</Tabs.Tab>
+          <Tabs.Tab
+            value="linkedinConnection"
+            icon={<IconBrandLinkedin size="0.8rem" />}
+          >
+            LinkedIn Connection
+          </Tabs.Tab>
+          <Tabs.Tab value="emailConnection" icon={<IconInbox size="0.8rem" />}>
+            Email Connection
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="salesEngagementConnection"
+            icon={<IconMailbox size="0.8rem" />}
+          >
+            Sales Engagement Tool
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="calendarAndScheduling"
+            icon={<IconCalendar size="0.8rem" />}
+          >
+            Calendar and Scheduling
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="doNotContact"
+            icon={<IconTrashFilled size="0.8rem" />}
+          >
+            Do Not Contact Filters
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="linkedinConnection" pl="xs">
@@ -393,6 +426,10 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="calendarAndScheduling" pl="xs">
           <CalendarAndScheduling />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="doNotContact" pl="xs">
+          <DoNotContactList />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

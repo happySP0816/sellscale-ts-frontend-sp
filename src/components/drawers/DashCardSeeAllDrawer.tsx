@@ -118,7 +118,7 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
             <Divider my="xs" label="Waiting for Response" labelPosition="center" />
           )}
           {prospectsHidden.map((prospect, i) => (
-            <Paper key={i} withBorder p="xs" radius="md" mt={14} sx={{ filter: 'saturate(30%)' }}>
+            <Paper key={i} withBorder p="xs" radius="md" mt={14} sx={{ filter: 'opacity(30%)' }}>
               <DashCardContents
                 prospect={prospect}
                 includeNote={props.includeNote}

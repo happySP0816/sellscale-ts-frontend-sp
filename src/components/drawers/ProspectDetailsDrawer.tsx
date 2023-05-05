@@ -92,6 +92,7 @@ export default function ProspectDetailsDrawer() {
       setNotes(res.prospect_info.details.notes);
 
       console.log(res);
+      console.log(res_valid_channels);
 
       return {
         main: res,

@@ -45,6 +45,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Channel } from "src";
 import { getChannelStatusOptions } from "@utils/requests/getChannels";
 import { API_URL } from "@constants/data";
+import ProspectDemoDateSelector from "./ProspectDemoDateSelector";
 
 const linkedinStatusOptions = [
   {
@@ -282,6 +283,7 @@ export async function updateChannelStatus(
 type ProspectDetailsChangeStatusProps = {
   prospectId: number;
   prospectName: string;
+  prospectDemoDate: any;
   channelData: {
     data: any;
     value: Channel;
@@ -426,6 +428,10 @@ export default function ProspectDetailsChangeStatus(
       <SimpleGrid cols={3} mt="md">
         {items}
       </SimpleGrid>
+
+      {props.channelData.currentStatus.includes("DEMO") && (
+        <ProspectDemoDateSelector prospectId={props.prospectId} />
+      )}
       {props.channelData.currentStatus?.startsWith("ACTIVE_CONVO") && (
         <Select
           mt={15}

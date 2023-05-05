@@ -36,7 +36,11 @@ import ProspectDetailsCompany from "../common/prospectDetails/ProspectDetailsCom
 import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes";
 import ProspectDetailsViewConversation from "../common/prospectDetails/ProspectDetailsViewConversation";
 import { userTokenState } from "@atoms/userAtoms";
-import { convertDateToLocalTime, formatToLabel, valueToColor } from "@utils/general";
+import {
+  convertDateToLocalTime,
+  formatToLabel,
+  valueToColor,
+} from "@utils/general";
 import { logout } from "@auth/core";
 import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";
@@ -56,15 +60,14 @@ import {
 import SchedulingCardContents from "@common/home/dashboard/SchedulingCardContents";
 import Assistant from "@assets/images/assistant.svg";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
+import ProspectDemoDateSelector from "@common/prospectDetails/ProspectDemoDateSelector";
 
 export default function DemoFeedbackDrawer(props: { prospects: Prospect[] }) {
   const theme = useMantineTheme();
 
   // This component is only rendered if drawerOpened=true - which isn't helpful for the first render
   // So we use actuallyOpened to control when the drawer opens and delay it by 100ms (for the animation to play)
-  const [drawerOpened, setDrawerOpened] = useRecoilState(
-    demosDrawerOpenState
-  );
+  const [drawerOpened, setDrawerOpened] = useRecoilState(demosDrawerOpenState);
   const [actuallyOpened, setActuallyOpened] = useState(false);
   useEffect(() => {
     setTimeout(() => {
@@ -98,7 +101,7 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[] }) {
         <Paper withBorder p="xs" radius="md">
           <Flex justify="space-between">
             <div>
-                <Avatar size="md" radius="xl" src={activeProspect.img_url} />
+              <Avatar size="md" radius="xl" src={activeProspect.img_url} />
             </div>
             <div style={{ flexGrow: 1, marginLeft: 10 }}>
               <Text fw={700} fz="sm">
@@ -112,11 +115,10 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[] }) {
         </Paper>
       </div>
 
+      <ProspectDemoDateSelector prospectId={activeProspect.id} />
+
       <Stack style={{ marginTop: 20 }}>
-        <Radio.Group
-          name="demoSuccess"
-          label="How was the demo?"
-        >
+        <Radio.Group name="demoSuccess" label="How was the demo?">
           <Radio color="green" value="won" label="Demo Won" />
           <Radio color="green" value="loss" label="Demo Loss" />
         </Radio.Group>
@@ -129,13 +131,9 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[] }) {
           <Radio color="green" value="no" label="No" />
         </Radio.Group>
 
-        <TextInput
-          label="What do you want changed next time to qualify?"
-        />
+        <TextInput label="What do you want changed next time to qualify?" />
 
-        <TextInput
-          label="What makes them the right fit?"
-        />
+        <TextInput label="What makes them the right fit?" />
       </Stack>
 
       <div

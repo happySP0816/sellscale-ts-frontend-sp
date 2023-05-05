@@ -65,7 +65,9 @@ export default function ProspectDetailsDrawer() {
   const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
   const prospectId = useRecoilValue(prospectDrawerIdState);
   const userToken = useRecoilValue(userTokenState);
-  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(prospectDrawerStatusesState);
+  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(
+    prospectDrawerStatusesState
+  );
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospect-details-${prospectId}`],
@@ -89,6 +91,8 @@ export default function ProspectDetailsDrawer() {
 
       setNotes(res.prospect_info.details.notes);
 
+      console.log(res);
+
       return {
         main: res,
         channels: res_channels.status === "success" ? res_channels.extra : {},
@@ -99,7 +103,9 @@ export default function ProspectDetailsDrawer() {
   });
 
   useEffect(() => {
-    if (!data) { return; }
+    if (!data) {
+      return;
+    }
     setProspectDrawerStatuses({
       overall: data.main.prospect_info.details.overall_status,
       linkedin: data.main.prospect_info.details.linkedin_status,
@@ -118,7 +124,7 @@ export default function ProspectDetailsDrawer() {
               ? data.main.prospect_info.details.full_name
               : ""}
           </Title>
-          <div style={{ display: 'flex' }}>
+          <div style={{ display: "flex" }}>
             {data && (
               <>
                 <Badge
@@ -130,11 +136,11 @@ export default function ProspectDetailsDrawer() {
                   mr={20}
                   mt={5}
                 >
-                  {`${formatToLabel(
-                    prospectDrawerStatuses.overall
-                  )}`}
+                  {`${formatToLabel(prospectDrawerStatuses.overall)}`}
                 </Badge>
-                <ProspectDetailsOptionsMenu prospectId={data.main.prospect_info.details.id} />
+                <ProspectDetailsOptionsMenu
+                  prospectId={data.main.prospect_info.details.id}
+                />
               </>
             )}
           </div>
@@ -162,8 +168,7 @@ export default function ProspectDetailsDrawer() {
             style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
           >
             {data?.channelTypes.length > 0 &&
-              prospectDrawerStatuses.overall !==
-              "PROSPECTED" && (
+              prospectDrawerStatuses.overall !== "PROSPECTED" && (
                 <>
                   <Tabs
                     value={
@@ -205,6 +210,9 @@ export default function ProspectDetailsDrawer() {
                             prospectName={
                               data.main.prospect_info.details.full_name
                             }
+                            prospectDemoDate={
+                              data.main.prospect_info.details.demo_date
+                            }
                             channelData={{
                               data: data.channels[channel.value],
                               value: channel.value,
@@ -229,9 +237,7 @@ export default function ProspectDetailsDrawer() {
                                 prospect_id={
                                   data?.main.prospect_info.details.id
                                 }
-                                overall_status={
-                                  prospectDrawerStatuses.overall
-                                }
+                                overall_status={prospectDrawerStatuses.overall}
                               />
                             )}
 

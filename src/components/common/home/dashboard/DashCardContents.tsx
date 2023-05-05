@@ -48,14 +48,10 @@ export default function DashCardContents(props: {
   const [response, setResponse] = useState<string>("");
   const [purgatory, setPurgatory] = useState<boolean>(true);
 
-  var li_convo =
-    props.prospect.recent_messages.li_convo?.filter(
-      (msg: any) => msg.connection_degree !== "You"
-    ) ?? [];
-  var latest_msgs = li_convo.sort(
+  let latest_msgs = props.prospect.recent_messages.li_convo?.sort(
     (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-  var latest_msg = latest_msgs[0];
+  ) ?? [];
+  let latest_msg = latest_msgs[0];
 
   // Msgs scroll view
   const viewport = useRef<HTMLDivElement>(null);

@@ -68,7 +68,7 @@ export default function DashboardSection() {
           channel: "SELLSCALE",
           limit: 10000, // TODO: Maybe use pagination method instead
           status: ["DEMO", "ACTIVE_CONVO"],
-          show_purgatory: 'ALL',
+          show_purgatory: "ALL",
         }),
       });
       if (response.status === 401) {
@@ -86,22 +86,45 @@ export default function DashboardSection() {
 
   console.log(prospects);
 
-  const prospectsNextSteps = prospects
+  const getProspectsWithActiveMsg = (li_status: string) => {
+    return prospects
+      .filter((p) => {
+        const latest_msgs =
+          p.recent_messages.li_convo?.sort(
+            (a: any, b: any) =>
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+          ) ?? [];
+        const last_msg_from_prospect =
+          latest_msgs.length > 0 && latest_msgs[0].connection_degree !== "You";
+        return (
+          p.linkedin_status === li_status && last_msg_from_prospect
+        );
+      })
+      .sort((a, b) => a.full_name.localeCompare(b.full_name));
+  }
+
+  const prospectsNextSteps = getProspectsWithActiveMsg("ACTIVE_CONVO_NEXT_STEPS");
+  const prospectsObjection = getProspectsWithActiveMsg("ACTIVE_CONVO_OBJECTION");
+  const prospectsScheduled = getProspectsWithActiveMsg("ACTIVE_CONVO_SCHEDULING");
+  const prospectsQualNeeded = getProspectsWithActiveMsg("ACTIVE_CONVO_QUAL_NEEDED");
+  const prospectsQuestion = getProspectsWithActiveMsg("ACTIVE_CONVO_QUESTION");
+
+  const all_prospectsNextSteps = prospects
     .filter((p) => p.linkedin_status === "ACTIVE_CONVO_NEXT_STEPS")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
-  const prospectsObjection = prospects
+  const all_prospectsObjection = prospects
     .filter((p) => p.linkedin_status === "ACTIVE_CONVO_OBJECTION")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
-  const prospectsScheduled = prospects
+  const all_prospectsScheduled = prospects
     .filter((p) => p.linkedin_status === "ACTIVE_CONVO_SCHEDULING")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
-  const prospectsQualNeeded = prospects
+  const all_prospectsQualNeeded = prospects
     .filter((p) => p.linkedin_status === "ACTIVE_CONVO_QUAL_NEEDED")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
-  const prospectsQuestion = prospects
+  const all_prospectsQuestion = prospects
     .filter((p) => p.linkedin_status === "ACTIVE_CONVO_QUESTION")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
-  const prospectsDemo = prospects
+  const all_prospectsDemo = prospects
     .filter((p) => p.linkedin_status === "DEMO_SET")
     .sort((a, b) => a.full_name.localeCompare(b.full_name));
 
@@ -111,7 +134,7 @@ export default function DashboardSection() {
     prospectsScheduled.length +
     prospectsQualNeeded.length +
     prospectsQuestion.length +
-    prospectsDemo.length;
+    all_prospectsDemo.length;
 
   return (
     <>
@@ -131,7 +154,8 @@ export default function DashboardSection() {
                   <>
                     {totalProspectTasks === 0 ? (
                       <Text c="dimmed" span>
-                        You’re good to go for the day - no action needed.<br/>
+                        You’re good to go for the day - no action needed.
+                        <br />
                         <i>Check back in tomorrow!</i>
                       </Text>
                     ) : (
@@ -156,10 +180,11 @@ export default function DashboardSection() {
                 <LoadingOverlay zIndex={0} visible={true} />
               ) : (
                 <Stack spacing={40}>
-                  {prospectsScheduled.length > 0 && (
+                  {true && (
                     <NotificationCard
                       title="Scheduling"
                       amount={prospectsScheduled.length}
+                      totalAmount={all_prospectsScheduled.length}
                       onClickSeeAll={() => {
                         seeAllType.current = "SCHEDULING";
                         setSeeAllDrawerOpened(true);
@@ -173,10 +198,11 @@ export default function DashboardSection() {
                     </NotificationCard>
                   )}
 
-                  {prospectsQuestion.length > 0 && (
+                  {true && (
                     <NotificationCard
                       title="Complex Question"
                       amount={prospectsQuestion.length}
+                      totalAmount={all_prospectsQuestion.length}
                       onClickSeeAll={() => {
                         seeAllType.current = "COMPLEX_QUESTION";
                         setSeeAllDrawerOpened(true);
@@ -187,10 +213,11 @@ export default function DashboardSection() {
                     </NotificationCard>
                   )}
 
-                  {prospectsObjection.length > 0 && (
+                  {true && (
                     <NotificationCard
                       title="Handle Objection"
                       amount={prospectsObjection.length}
+                      totalAmount={all_prospectsObjection.length}
                       onClickSeeAll={() => {
                         seeAllType.current = "HANDLE_OBJECTION";
                         setSeeAllDrawerOpened(true);
@@ -201,10 +228,11 @@ export default function DashboardSection() {
                     </NotificationCard>
                   )}
 
-                  {prospectsNextSteps.length > 0 && (
+                  {true && (
                     <NotificationCard
                       title="Continue the convo"
                       amount={prospectsNextSteps.length}
+                      totalAmount={all_prospectsNextSteps.length}
                       onClickSeeAll={() => {
                         seeAllType.current = "CONTINUE_CONVO";
                         setSeeAllDrawerOpened(true);
@@ -269,10 +297,11 @@ export default function DashboardSection() {
                   )}
                 </NotificationCard>
                 */}
-                  {prospectsDemo.length > 0 && (
+                  {all_prospectsDemo.length > 0 && (
                     <NotificationCard
                       title="Demo Feedback"
-                      amount={prospectsDemo.length}
+                      amount={all_prospectsDemo.length}
+                      totalAmount={all_prospectsDemo.length}
                       assistantMsg="You scheduled a demo - how did it go?"
                       onClickSeeAll={() => setDemoFeedbackDrawerOpened(true)}
                       noneMsg="No demos scheduled"
@@ -291,13 +320,13 @@ export default function DashboardSection() {
                             <Avatar
                               size="md"
                               radius="xl"
-                              src={prospectsDemo[0].img_url}
+                              src={all_prospectsDemo[0].img_url}
                             />
                           </Indicator>
                         </div>
                         <div style={{ flexGrow: 1, marginLeft: 10 }}>
                           <Text fw={700} fz="sm">
-                            Demo with {prospectsDemo[0].full_name}
+                            Demo with {all_prospectsDemo[0].full_name}
                           </Text>
                           <Text fz="sm" c="dimmed">
                             {convertDateToLocalTime(new Date())}
@@ -318,10 +347,11 @@ export default function DashboardSection() {
                     </NotificationCard>
                   )}
 
-                  {prospectsQualNeeded.length > 0 && (
+                  {true && (
                     <NotificationCard
                       title="Qualifications Needed"
                       amount={prospectsQualNeeded.length}
+                      totalAmount={all_prospectsQualNeeded.length}
                       onClickSeeAll={() => {
                         seeAllType.current = "QUAL_NEEDED";
                         setSeeAllDrawerOpened(true);
@@ -344,33 +374,33 @@ export default function DashboardSection() {
         <>
           {seeAllType.current === "CONTINUE_CONVO" && (
             <DashCardSeeAllDrawer
-              prospects={prospectsNextSteps}
+              prospects={all_prospectsNextSteps}
               title={"Continue the Conversation"}
               includeNote
             />
           )}
           {seeAllType.current === "HANDLE_OBJECTION" && (
             <DashCardSeeAllDrawer
-              prospects={prospectsObjection}
+              prospects={all_prospectsObjection}
               title={"Handle Objection"}
             />
           )}
           {seeAllType.current === "COMPLEX_QUESTION" && (
             <DashCardSeeAllDrawer
-              prospects={prospectsQuestion}
+              prospects={all_prospectsQuestion}
               title={"Complex Question"}
             />
           )}
           {seeAllType.current === "QUAL_NEEDED" && (
             <DashCardSeeAllDrawer
-              prospects={prospectsQualNeeded}
+              prospects={all_prospectsQualNeeded}
               title={"Qualifications Needed"}
               includeQualified
             />
           )}
           {seeAllType.current === "SCHEDULING" && (
             <DashCardSeeAllDrawer
-              prospects={prospectsScheduled}
+              prospects={all_prospectsScheduled}
               title={"Scheduling"}
               includeSchedule
             />
@@ -379,12 +409,12 @@ export default function DashboardSection() {
       )}
       {!isFetching && demosDrawerOpened && (
         <>
-          <DemoFeedbackDrawer prospects={prospectsDemo} />
+          <DemoFeedbackDrawer prospects={all_prospectsDemo} />
         </>
       )}
       {!isFetching && demoFeedbackDrawerOpened && (
         <>
-          <DemoFeedbackSeeAllDrawer prospects={prospectsDemo} />
+          <DemoFeedbackSeeAllDrawer prospects={all_prospectsDemo} />
         </>
       )}
     </>

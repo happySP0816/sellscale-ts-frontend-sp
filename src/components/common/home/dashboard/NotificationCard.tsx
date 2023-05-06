@@ -5,6 +5,7 @@ import _ from "lodash";
 export default function NotificationCard(props: {
   title: string;
   amount: number;
+  totalAmount: number;
   noneMsg: string;
   onClickSeeAll: () => void;
   assistantMsg?: string;
@@ -33,7 +34,7 @@ export default function NotificationCard(props: {
             </Avatar>
           )}
         </Group>
-        {props.amount >= 1 && ( // props.amount > 1
+        {props.totalAmount >= 1 && ( // props.amount > 1
           <Text fw={300} c="green.3" fz={12} sx={{ cursor: "pointer" }} onClick={props.onClickSeeAll}>
             See all
           </Text>

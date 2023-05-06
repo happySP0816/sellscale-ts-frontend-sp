@@ -66,7 +66,6 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
   const prospectsVisible = [];
   const prospectsHidden = [];
   for(let prospect of props.prospects){
-    console.log(prospect);
 
     let latest_msgs = prospect.recent_messages.li_convo?.sort(
       (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -86,7 +85,7 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
       title={
         <Group spacing={10}>
           <Title order={3}>{props.title}</Title>
-          {props.prospects.length > 1 && (
+          {prospectsVisible.length > 1 && (
             <Avatar
               color="violet"
               radius="xl"
@@ -97,7 +96,7 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
                 },
               }}
             >
-              {`${props.prospects.length}`}
+              {`${prospectsVisible.length}`}
             </Avatar>
           )}
         </Group>    

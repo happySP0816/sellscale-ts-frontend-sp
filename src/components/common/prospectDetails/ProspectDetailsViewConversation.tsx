@@ -144,6 +144,10 @@ export default function ProspectDetailsViewConversation(
           queryKey: [`query-get-channels-prospects`],
         });
       }
+
+      queryClient.invalidateQueries({
+        queryKey: [`query-dash-get-prospects`],
+      });
     }
     setLoading(false);
     return latestMessages;

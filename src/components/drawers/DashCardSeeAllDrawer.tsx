@@ -66,10 +66,16 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
   const prospectsVisible = [];
   const prospectsHidden = [];
   for(let prospect of props.prospects){
-    if(new Date(prospect.hidden_until) > new Date()){
-      prospectsHidden.push(prospect);
-    } else {
+    console.log(prospect);
+
+    let latest_msgs = prospect.recent_messages.li_convo?.sort(
+      (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    ) ?? [];
+
+    if(latest_msgs.length > 0 && latest_msgs[0].connection_degree !== 'You'){
       prospectsVisible.push(prospect);
+    } else {
+      prospectsHidden.push(prospect);
     }
   }
 

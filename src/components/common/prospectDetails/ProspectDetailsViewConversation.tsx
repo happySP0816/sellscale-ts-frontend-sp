@@ -237,7 +237,7 @@ export default function ProspectDetailsViewConversation(
   };
 
   const generateAIFollowup = async () => {
-    setMessageDraft("Loading...");
+    setMsgLoading(true);
     const result = await postBumpGenerateResponse(
       userToken,
       props.prospect_id,
@@ -264,6 +264,7 @@ export default function ProspectDetailsViewConversation(
       });
       setMessageDraft("");
     }
+    setMsgLoading(false);
   };
 
   useEffect(() => {

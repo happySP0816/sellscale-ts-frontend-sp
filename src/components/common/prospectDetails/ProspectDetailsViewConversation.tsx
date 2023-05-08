@@ -448,7 +448,7 @@ export default function ProspectDetailsViewConversation(
               {userData.li_voyager_connected ? "Send" : "Schedule"}
             </Button>
           </Flex>
-          {props.overall_status && (
+          {props.overall_status && loading && (
             <SelectBumpInstruction
               client_sdr_id={userData.id}
               overall_status={props.overall_status}

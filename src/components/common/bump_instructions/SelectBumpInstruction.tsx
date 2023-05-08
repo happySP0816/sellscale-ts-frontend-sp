@@ -11,7 +11,7 @@ import {
   Textarea,
   Title,
 } from "@mantine/core";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 
@@ -37,6 +37,11 @@ type PropsType = {
 
 export default function SelectBumpInstruction(props: PropsType) {
   const userToken = useRecoilValue(userTokenState);
+  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(
+    prospectDrawerStatusesState
+  );
+
+  console.log("prospectDrawerStatuses", prospectDrawerStatuses)
 
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
   const [
@@ -47,11 +52,12 @@ export default function SelectBumpInstruction(props: PropsType) {
 
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
-    const result = await getBumpFrameworks(userToken, props.overall_status);
+    const result = await getBumpFrameworks(userToken, prospectDrawerStatuses.overall);
 
     setBumpFrameworks(result.extra);
     for (const bumpFramework of result.extra as BumpFramework[]) {
       if (bumpFramework.default) {
+        console.log("getting bump frameworks", prospectDrawerStatuses.overall, bumpFramework)
         setSelectedBumpFramework(bumpFramework);
         props.onBumpFrameworkSelected(bumpFramework.id);
         break;
@@ -63,7 +69,7 @@ export default function SelectBumpInstruction(props: PropsType) {
 
   useEffect(() => {
     triggerGetBumpFrameworks();
-  }, []);
+  }, [prospectDrawerStatuses]);
 
   return (
     <Card withBorder mt="sm">

@@ -26,6 +26,7 @@ type BumpFramework = {
   overall_status: string;
   active: boolean;
   default: boolean;
+  bump_length: string;
 };
 
 type PropsType = {

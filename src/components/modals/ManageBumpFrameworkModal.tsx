@@ -223,6 +223,12 @@ export default function ManageBumpFramework({
   useEffect(() => {
     triggerGetBumpFrameworks();
     setSelectedBumpFramework(innerProps.selectedBumpFramework);
+
+    let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === innerProps.selectedBumpFramework.bump_length)?.value
+    if (length == null) {
+      length = 50;
+    }
+    setBumpLengthValue(length)
     if (innerProps.selectedBumpFramework == null) {
       return;
     }

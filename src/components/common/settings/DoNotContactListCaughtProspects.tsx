@@ -137,6 +137,14 @@ export default function DoNotContactListCaughtProspects() {
             >
               {opened ? "Hide" : "View"} Prospects
             </Button>
+            <Button
+              color="gray"
+              ml="lg"
+              leftIcon={<IconRefresh />}
+              onClick={fetchCaughtProspects}
+            >
+              Refresh
+            </Button>
           </Flex>
           <Collapse in={opened}>
             <Card withBorder mt="lg">

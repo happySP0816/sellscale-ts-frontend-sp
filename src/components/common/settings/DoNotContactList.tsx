@@ -1,72 +1,114 @@
 import {
   Card,
   Paper,
-  TextInput,
   Text,
   Title,
-  ActionIcon,
-  Flex,
   Button,
-  LoadingOverlay,
-  Notification,
-  Select,
   MultiSelect,
   Box,
-  Container,
+  Divider,
 } from "@mantine/core";
-import { IconCheck, IconEdit, IconX } from "@tabler/icons";
 import { useEffect, useState } from "react";
 
-import { patchSchedulingLink } from "@utils/requests/patchSchedulingLink";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
 import { API_URL } from "@constants/data";
+import DoNotContactListCaughtProspects from "./DoNotContactListCaughtProspects";
 
 const urlRegex: RegExp = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-z0-9\-]+(?:\.[a-z]{2,})+(?:\/[\w\-\.\?\=\&]*)*$/i;
 
 export default function DoNotContactList() {
-  const [keywords, setKeywords] = useState([
-    { value: "staffing", label: "staffing" },
-    { value: "recruit", label: "recruit" },
+  const [userToken] = useRecoilState(userTokenState);
+  const [fetchedData, setFetchedData] = useState(false);
+  const [keywords, setKeywords]: any = useState([
+    // { value: "staffing", label: "staffing" },
   ]);
-  const [companyNames, setCompanyNames] = useState([
-    { value: "Medicus", label: "medicus" },
-    { value: "Staff Care", label: "staff care" },
-    { value: "Curative", label: "curative" },
+  const [companyNames, setCompanyNames]: any = useState([
+    // { value: "Medicus", label: "medicus" },
   ]);
+  const [selectedCompanies, setSelectedCompanies] = useState([]);
+  const [selectedKeywords, setSelectedKeywords] = useState([]);
+  const [needsSave, setNeedsSave] = useState(false);
 
-  const defaultSelectedKeywords = keywords.map((x) => x.value);
-  const defaultSelectedCompanyNames = companyNames.map((x) => x.value);
+  const getKeywords = async () => {
+    const res = await fetch(`${API_URL}/client/do_not_contact_filters`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    const resp = await res.json();
+    setCompanyNames(
+      resp.data.do_not_contact_company_names.map((x: any) => ({
+        value: x,
+        label: x,
+      }))
+    );
+    setSelectedCompanies(
+      resp.data.do_not_contact_company_names.map((x: any) => x)
+    );
+
+    setKeywords(
+      resp.data.do_not_contact_keywords_in_company_names.map((x: any) => ({
+        value: x,
+        label: x,
+      }))
+    );
+    setSelectedKeywords(
+      resp.data.do_not_contact_keywords_in_company_names.map((x: any) => x)
+    );
+  };
+
+  useEffect(() => {
+    if (!fetchedData) {
+      getKeywords();
+      setFetchedData(true);
+    }
+  }, [fetchedData]);
+
+  const saveFilters = async () => {
+    const resp = await fetch(`${API_URL}/client/do_not_contact_filters`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        do_not_contact_company_names: selectedCompanies,
+        do_not_contact_keywords_in_company_names: selectedKeywords,
+      }),
+    });
+    if (resp.status === 200) {
+      showNotification({
+        title: "Success",
+        message: "Successfully saved filters",
+        color: "green",
+      });
+    } else {
+      showNotification({
+        title: "Error",
+        message: "Error saving filters",
+        color: "red",
+      });
+    }
+    setNeedsSave(false);
+  };
 
   return (
     <Paper withBorder m="xs" p="md" radius="md">
-      <Flex>
-        <Box>
-          <Title order={3}>Do Not Contact Filters</Title>{" "}
-          <Text size="sm">
-            You can specify what conditions need to be met to automatically
-            remove prospects from SellScale AI outreach.
-          </Text>
-          <Text size="sm" mt="md">
-            Any prospect that meets these criteria will automatically be marked
-            as 'removed' from the SellScale pipeline if uploaded in the future.
-          </Text>
-        </Box>
-        <Card withBorder m="lg" mr="0" mt="0">
-          <Container>
-            <Title order={5}>🚨 Warning: 46 prospects caught</Title>
-            <Text size="sm">
-              46 prospects are currently still in the SellScale pipeline that
-              meet these criteria. Press the button below to remove them from
-              the pipeline.
-            </Text>
-            <Button mt="md" color="red">
-              Remove 46 Prospects
-            </Button>
-          </Container>
-        </Card>
-      </Flex>
+      <Box>
+        <Title order={3}>Do Not Contact Filters</Title>{" "}
+        <Text size="sm">
+          You can specify what conditions need to be met to automatically remove
+          prospects from SellScale AI outreach.
+        </Text>
+        <Text size="sm" mt="md">
+          Any prospect that meets these criteria will automatically be marked as
+          'removed' from the SellScale pipeline if uploaded in the future.
+        </Text>
+      </Box>
 
       <Card mt="md">
         <Title order={5}>Filter by Keywords</Title>
@@ -81,11 +123,15 @@ export default function DoNotContactList() {
           placeholder="Select or create keywords"
           searchable
           creatable
-          defaultValue={defaultSelectedKeywords}
+          value={selectedKeywords}
+          onChange={(value: any) => {
+            setSelectedKeywords(value);
+            setNeedsSave(true);
+          }}
           getCreateLabel={(query) => `+ Add a filter for ${query}`}
-          onCreate={(query) => {
-            const item = { value: query, label: query };
-            setKeywords((current) => [...current, item]);
+          onCreate={(query: any) => {
+            const item: any = { value: query, label: query };
+            setKeywords((current: any) => [...current, item]);
             return item;
           }}
         />
@@ -103,23 +149,33 @@ export default function DoNotContactList() {
           placeholder="Select or create companies"
           searchable
           creatable
-          defaultValue={defaultSelectedCompanyNames}
+          value={selectedCompanies}
+          onChange={(value: any) => {
+            setSelectedCompanies(value);
+            setNeedsSave(true);
+          }}
           getCreateLabel={(query) => `+ Add a filter for ${query}`}
-          onCreate={(query) => {
-            const item = { value: query, label: query };
-            setKeywords((current) => [...current, item]);
+          onCreate={(query: any) => {
+            const item: any = { value: query, label: query };
+            setCompanyNames((current: any) => [...current, item]);
             return item;
           }}
         />
       </Card>
       <Button
         mt="lg"
-        onClick={() => {
-          alert("Coming soon!");
+        size="md"
+        onClick={async () => {
+          await saveFilters();
         }}
+        disabled={!needsSave}
       >
-        Save Criteria
+        Save Filter Criteria
       </Button>
+
+      <Divider mt="lg" mb="lg" />
+
+      <DoNotContactListCaughtProspects />
     </Paper>
   );
 }

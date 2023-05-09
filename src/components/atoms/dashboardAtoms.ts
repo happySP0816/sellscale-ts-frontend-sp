@@ -15,6 +15,11 @@ const demosDrawerOpenState = atom({
   default: false,
 });
 
+const demosDrawerProspectIdState = atom({
+  key: "dash-demos-drawer-prospect-id",
+  default: -1,
+});
+
 const dashCardSeeAllDrawerOpenState = atom({
   key: "dash-see-all-drawer-open",
   default: false,
@@ -29,6 +34,7 @@ export {
   schedulingDrawerOpenState,
   questionsDrawerOpenState,
   demosDrawerOpenState,
+  demosDrawerProspectIdState,
   dashCardSeeAllDrawerOpenState,
   demoFeedbackSeeAllDrawerOpenState,
 };

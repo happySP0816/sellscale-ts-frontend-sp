@@ -1,4 +1,4 @@
-import { Avatar, Center, Flex, Group, Paper, Text } from "@mantine/core";
+import { Anchor, Avatar, Center, Flex, Group, Paper, Text } from "@mantine/core";
 import Assistant from "@assets/images/assistant.svg";
 import _ from "lodash";
 
@@ -89,7 +89,16 @@ export default function NotificationCard(props: {
       ) : (
         <Paper px="xs" radius="md" mt={14}>
           <Center style={{ height: 50 }}>
-            <Text fz="sm">{props.noneMsg}</Text>
+            {props.totalAmount >= 1 ? (
+              <Text fz="sm" fs="italic">
+                  Waiting to hear back from
+                  <Anchor fs="italic" pl={4} component="button" type="button" onClick={props.onClickSeeAll}>
+                    {props.totalAmount} contact{props.totalAmount > 1 ? "s" : ""}
+                  </Anchor>...
+              </Text>
+            ) : (
+              <Text fz="sm">{props.noneMsg}</Text>
+            )}
           </Center>
         </Paper>
       )}

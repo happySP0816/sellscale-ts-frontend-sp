@@ -20,6 +20,7 @@ import {
   dashCardSeeAllDrawerOpenState,
   demoFeedbackSeeAllDrawerOpenState,
   demosDrawerOpenState,
+  demosDrawerProspectIdState,
   questionsDrawerOpenState,
   schedulingDrawerOpenState,
 } from "@atoms/dashboardAtoms";
@@ -52,10 +53,11 @@ export default function DashboardSection() {
 
   const [demosDrawerOpened, setDemosDrawerOpened] =
     useRecoilState(demosDrawerOpenState);
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(demosDrawerProspectIdState);
   const [demoFeedbackDrawerOpened, setDemoFeedbackDrawerOpened] =
     useRecoilState(demoFeedbackSeeAllDrawerOpenState);
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-dash-get-prospects`],
     queryFn: async () => {
       const response = await fetch(`${API_URL}/prospect/get_prospects`, {
@@ -135,6 +137,8 @@ export default function DashboardSection() {
     prospectsQualNeeded.length +
     prospectsQuestion.length +
     all_prospectsDemo.length;
+
+  console.log(all_prospectsDemo);
 
   return (
     <>
@@ -329,7 +333,7 @@ export default function DashboardSection() {
                             Demo with {all_prospectsDemo[0].full_name}
                           </Text>
                           <Text fz="sm" c="dimmed">
-                            {convertDateToLocalTime(new Date())}
+                            {convertDateToLocalTime(new Date(all_prospectsDemo[0].demo_date))}
                           </Text>
                         </div>
                         <div>
@@ -338,7 +342,10 @@ export default function DashboardSection() {
                             radius="xl"
                             size="xs"
                             ml={8}
-                            onClick={() => setDemosDrawerOpened(true)}
+                            onClick={() => {
+                              setDrawerProspectId(all_prospectsDemo[0].id);
+                              setDemosDrawerOpened(true);
+                            }}
                           >
                             Give Feedback
                           </Button>
@@ -409,7 +416,7 @@ export default function DashboardSection() {
       )}
       {!isFetching && demosDrawerOpened && (
         <>
-          <DemoFeedbackDrawer prospects={all_prospectsDemo} />
+          <DemoFeedbackDrawer prospects={all_prospectsDemo} refetch={refetch} />
         </>
       )}
       {!isFetching && demoFeedbackDrawerOpened && (

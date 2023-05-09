@@ -52,6 +52,7 @@ import {
   dashCardSeeAllDrawerOpenState,
   demoFeedbackSeeAllDrawerOpenState,
   demosDrawerOpenState,
+  demosDrawerProspectIdState,
   schedulingDrawerOpenState,
 } from "@atoms/dashboardAtoms";
 import SchedulingCardContents from "@common/home/dashboard/SchedulingCardContents";
@@ -76,6 +77,7 @@ export default function DemoFeedbackSeeAllDrawer(props: {
 
   const [demosDrawerOpened, setDemosDrawerOpened] =
     useRecoilState(demosDrawerOpenState);
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(demosDrawerProspectIdState);
   const userToken = useRecoilValue(userTokenState);
 
   return (
@@ -139,7 +141,10 @@ export default function DemoFeedbackSeeAllDrawer(props: {
                     radius="xl"
                     size="xs"
                     ml={8}
-                    onClick={() => setDemosDrawerOpened(true)}
+                    onClick={() => {
+                      setDrawerProspectId(prospect.id);
+                      setDemosDrawerOpened(true);
+                    }}
                   >
                     Give Feedback
                   </Button>

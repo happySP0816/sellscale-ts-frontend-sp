@@ -98,6 +98,7 @@ export function convertDateToShortFormat(date: Date) {
  * @returns - Date in the format MMM D, h:mm a
  */
 export function convertDateToLocalTime(date: Date) {
+  if(date.getTime() === 0) { return "Unknown Time"; }
   return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
 }
 

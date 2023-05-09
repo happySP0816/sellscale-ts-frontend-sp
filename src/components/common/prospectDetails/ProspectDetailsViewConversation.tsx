@@ -237,7 +237,7 @@ export default function ProspectDetailsViewConversation(
   };
 
   const generateAIFollowup = async () => {
-    setMessageDraft("Loading...");
+    setMsgLoading(true);
     const result = await postBumpGenerateResponse(
       userToken,
       props.prospect_id,
@@ -264,6 +264,7 @@ export default function ProspectDetailsViewConversation(
       });
       setMessageDraft("");
     }
+    setMsgLoading(false);
   };
 
   useEffect(() => {
@@ -447,7 +448,7 @@ export default function ProspectDetailsViewConversation(
               {userData.li_voyager_connected ? "Send" : "Schedule"}
             </Button>
           </Flex>
-          {props.overall_status && (
+          {props.overall_status && !loading && (
             <SelectBumpInstruction
               client_sdr_id={userData.id}
               overall_status={props.overall_status}

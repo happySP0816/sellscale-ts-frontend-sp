@@ -11,7 +11,7 @@ import {
   Textarea,
   Title,
 } from "@mantine/core";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 
@@ -26,6 +26,7 @@ type BumpFramework = {
   overall_status: string;
   active: boolean;
   default: boolean;
+  bump_length: string;
 };
 
 type PropsType = {
@@ -37,6 +38,9 @@ type PropsType = {
 
 export default function SelectBumpInstruction(props: PropsType) {
   const userToken = useRecoilValue(userTokenState);
+  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(
+    prospectDrawerStatusesState
+  );
 
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
   const [
@@ -47,7 +51,7 @@ export default function SelectBumpInstruction(props: PropsType) {
 
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
-    const result = await getBumpFrameworks(userToken, props.overall_status);
+    const result = await getBumpFrameworks(userToken, prospectDrawerStatuses.overall);
 
     setBumpFrameworks(result.extra);
     for (const bumpFramework of result.extra as BumpFramework[]) {
@@ -63,7 +67,7 @@ export default function SelectBumpInstruction(props: PropsType) {
 
   useEffect(() => {
     triggerGetBumpFrameworks();
-  }, []);
+  }, [prospectDrawerStatuses]);
 
   return (
     <Card withBorder mt="sm">

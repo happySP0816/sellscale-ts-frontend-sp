@@ -17,6 +17,8 @@ import {
   Badge,
   Switch,
   ScrollArea,
+  Slider,
+  Tooltip,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import {
@@ -43,7 +45,15 @@ type BumpFramework = {
   overall_status: string;
   active: boolean;
   default: boolean;
+  bump_length: string;
 };
+
+const bumpFrameworkLengthMarks = [
+  { value: 0, label: 'Short', api_label: "SHORT" },
+  { value: 50, label: 'Medium', api_label: "MEDIUM" },
+  { value: 100, label: 'Long', api_label: "LONG" },
+];
+
 
 export default function ManageBumpFramework({
   context,
@@ -57,6 +67,8 @@ export default function ManageBumpFramework({
 
   const [loadingBumpFrameworks, setLoadingBumpFrameworks] = useState(false);
   const userToken = useRecoilValue(userTokenState);
+
+  const [bumpLengthValue, setBumpLengthValue] = useState(50);
 
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
@@ -81,12 +93,14 @@ export default function ManageBumpFramework({
     if (selectedBumpFramework == null) {
       return;
     }
+
     const result = await patchBumpFramework(
       userToken,
       selectedBumpFramework?.id,
       selectedBumpFramework?.overall_status,
       form.values.title,
       form.values.description,
+      bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
       form.values.default
     );
 
@@ -105,7 +119,8 @@ export default function ManageBumpFramework({
         description: form.values.description,
         overall_status: selectedBumpFramework.overall_status,
         active: selectedBumpFramework.active,
-        default: form.values.default
+        default: form.values.default,
+        bump_length: bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
       })
     } else {
       showNotification({
@@ -127,6 +142,7 @@ export default function ManageBumpFramework({
       innerProps.overallStatus,
       form.values.title,
       form.values.description,
+      bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
       form.values.default
     );
 
@@ -145,7 +161,8 @@ export default function ManageBumpFramework({
         description: form.values.description,
         overall_status: innerProps.overallStatus,
         active: true,
-        default: form.values.default
+        default: form.values.default,
+        bump_length: bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
       })
     } else {
       showNotification({
@@ -199,13 +216,19 @@ export default function ManageBumpFramework({
     initialValues: {
       title: "",
       description: "",
-      default: false,
+      default: false
     },
   });
 
   useEffect(() => {
     triggerGetBumpFrameworks();
     setSelectedBumpFramework(innerProps.selectedBumpFramework);
+
+    let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === innerProps.selectedBumpFramework.bump_length)?.value
+    if (length == null) {
+      length = 50;
+    }
+    setBumpLengthValue(length)
     if (innerProps.selectedBumpFramework == null) {
       return;
     }
@@ -223,7 +246,7 @@ export default function ManageBumpFramework({
         backgroundColor: theme.colors.dark[7],
       }}
     >
-      <LoadingOverlay visible={loadingBumpFrameworks}/>
+      <LoadingOverlay visible={loadingBumpFrameworks} />
       <Flex dir="row">
         <Flex w="50%">
           <Stack w="95%" h="500px" >
@@ -233,6 +256,7 @@ export default function ManageBumpFramework({
                 form.values.title = "";
                 form.values.description = "";
                 form.values.default = false;
+                setBumpLengthValue(50);
                 setSelectedBumpFramework(null);
               }}
             >
@@ -245,9 +269,14 @@ export default function ManageBumpFramework({
                     <Card
                       mb='sm'
                       onClick={() => {
+                        let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === framework.bump_length)?.value
+                        if (length == null) {
+                          length = 50;
+                        }
                         form.values.title = framework.title;
                         form.values.description = framework.description;
                         form.values.default = framework.default;
+                        setBumpLengthValue(length)
                         setSelectedBumpFramework(framework)
                       }}
                       withBorder
@@ -293,7 +322,7 @@ export default function ManageBumpFramework({
         </Flex>
         <Flex w="50%">
 
-          <Card w="100%" h="400px" withBorder>
+          <Card w="100%" mih="400px" withBorder>
             <form onSubmit={() => console.log('submit')}>
               {
                 selectedBumpFramework == null ? (
@@ -327,10 +356,32 @@ export default function ManageBumpFramework({
                 {...form.getInputProps("description")}
                 autosize
               />
+              <Text fz='sm' mt='md'>
+                Bump Length
+              </Text>
+              <Tooltip 
+                multiline
+                width={220}
+                withArrow
+                label="Control how long you want the generated bump to be."
+              >
+                <Slider
+                  label={null}
+                  step={50}
+                  marks={bumpFrameworkLengthMarks}
+                  mt='xs'
+                  mb='xl'
+                  p='md'
+                  value={bumpLengthValue}
+                  onChange={(value) => {
+                    setBumpLengthValue(value);
+                  }}
+                />
+              </Tooltip>
               {
                 selectedBumpFramework == null &&
                 <Switch
-                  mt='md'
+                  pt='md'
                   label="Make default?"
                   labelPosition="right"
                   checked={form.values.default}
@@ -374,7 +425,8 @@ export default function ManageBumpFramework({
                           hidden={
                             selectedBumpFramework?.title == form.values.title.trim() &&
                             selectedBumpFramework?.description == form.values.description.trim() &&
-                            selectedBumpFramework?.default == form.values.default
+                            selectedBumpFramework?.default == form.values.default &&
+                            selectedBumpFramework?.bump_length == bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label
                           }
                           onClick={() => {
                             triggerEditBumpFramework();

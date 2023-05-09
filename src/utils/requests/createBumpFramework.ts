@@ -8,10 +8,11 @@ import { API_URL } from "@constants/data";
  * @param overallStatus
  * @param title
  * @param description
+ * @param length
  * @param setDefault
  * @returns - MsgResponse
  */
-export async function createBumpFramework(userToken: string, overallStatus: string, title: string, description: string, setDefault: boolean): Promise<MsgResponse> {
+export async function createBumpFramework(userToken: string, overallStatus: string, title: string, description: string, length: string, setDefault: boolean): Promise<MsgResponse> {
 
   const response = await fetch(
     `${API_URL}/bump_framework/bump`,
@@ -26,6 +27,7 @@ export async function createBumpFramework(userToken: string, overallStatus: stri
         title: title,
         description: description,
         default: setDefault,
+        length: length,
       })
     }
   );

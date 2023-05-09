@@ -17,30 +17,37 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
   const [accountResearchArray, setAccountResearchArray]: any = useState([]);
   const [fetched, setFetched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAccountResearchLoading, setIsAccountResearchLoading] = useState(
+    false
+  );
+
+  const fetchAccountResearch = () => {
+    const res = fetch(
+      `${API_URL}/research/account_research_points?prospect_id=` +
+        props.prospectId,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        setAccountResearchArray(res);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+      });
+  };
 
   useEffect(() => {
     if (!fetched) {
       setIsLoading(true);
       setFetched(true);
-      const res = fetch(
-        `${API_URL}/research/account_research_points?prospect_id=` +
-          props.prospectId,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      )
-        .then((res) => res.json())
-        .then((res) => {
-          setAccountResearchArray(res);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          console.log(err);
-          setIsLoading(false);
-        });
+      fetchAccountResearch();
     }
   }, [fetched]);
 
@@ -55,6 +62,7 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
           size="xs"
           rightIcon={<IconReload size="0.975rem" />}
           onClick={async () => {
+            setIsAccountResearchLoading(true);
             await displayNotification(
               "regenerate-research-points",
               async () => {
@@ -65,21 +73,23 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
                 return result;
               },
               {
-                title: `Reattempting Research...`,
+                title: `Generating Account Research...`,
                 message: `Working with servers...`,
                 color: "teal",
               },
               {
-                title: `Scheduled!`,
-                message: `We're reattempting our research on this prospect. Check back later (reopen this drawer later)!`,
+                title: `Account Research has been generated.`,
+                message: `You can now view the research points.`,
                 color: "teal",
               },
               {
-                title: `Error while reattempting research.`,
+                title: `Account Research could not be generated.`,
                 message: `Please try again later.`,
                 color: "red",
               }
             );
+            fetchAccountResearch();
+            setIsAccountResearchLoading(false);
           }}
         >
           Reattempt Research
@@ -120,6 +130,7 @@ export default function ProspectDetailsAccountResearch(props: PropsType) {
           </tbody>
         </Table>
       )}
+      {isAccountResearchLoading && <Loader variant="dots" />}
       {accountResearchArray.length > 0 && <GeneratedByAI />}
     </Card>
   );

@@ -140,6 +140,7 @@ export default function DoNotContactListCaughtProspects() {
             <Button
               color="gray"
               ml="lg"
+              mt="md"
               leftIcon={<IconRefresh />}
               onClick={fetchCaughtProspects}
             >

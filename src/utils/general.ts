@@ -137,6 +137,13 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   upload_failed: 'orange',
   years_of_experience_at_current_job: 'red',
   current_job_specialties: 'pink',
+
+  terrible: 'red',
+  poor: 'orange',
+  fair: 'yellow',
+  good: 'lime',
+  great: 'green',
+  excellent: 'teal',
 };
 export function valueToColor(theme: MantineTheme, value: string): MantineColor {
   if(!value) { return "gray"; }

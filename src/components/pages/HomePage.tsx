@@ -4,11 +4,12 @@ import {
 } from "@atoms/prospectAtoms";
 import { userDataState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
+import DemoFeedbackChart from "@common/charts/DemoFeedbackChart";
 import AllContactsSection from "@common/home/AllContactsSection";
 import DashboardSection from "@common/home/DashboardSection";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import { Tabs } from "@mantine/core";
-import { IconActivity, IconAddressBook, IconCheckbox } from "@tabler/icons";
+import { IconActivity, IconAddressBook, IconCheckbox, IconClipboardData } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { useEffect } from "react";
 import { useLoaderData } from "react-router-dom";
@@ -46,6 +47,12 @@ export default function HomePage() {
           >
             Recent Activity
           </Tabs.Tab>
+          <Tabs.Tab
+            value="demo-feedback"
+            icon={<IconClipboardData size="1.1rem" />}
+          >
+            Demo Feedback Repository
+          </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="all-contacts" pt="xs">
           <AllContactsSection />
@@ -55,6 +62,9 @@ export default function HomePage() {
         </Tabs.Panel>
         <Tabs.Panel value="recent-activity" pt="xs">
           <RecentActivitySection />
+        </Tabs.Panel>
+        <Tabs.Panel value="demo-feedback" pt="xs">
+          <DemoFeedbackChart />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

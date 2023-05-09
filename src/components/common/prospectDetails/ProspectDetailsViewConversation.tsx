@@ -67,6 +67,7 @@ export default function ProspectDetailsViewConversation(
   const [messageDraft, setMessageDraft] = useState("");
   const userData = useRecoilValue(userDataState);
   const [selectedBumpFrameworkId, setBumpFrameworkId] = useState(0);
+  const [selectedBumpFrameworkLengthAPI, setBumpFrameworkLengthAPI] = useState("MEDIUM")
   const [accountResearch, setAccountResearch] = useState("");
   const [convoOutOfSync, setConvoOutOfSync] = useState(false);
 
@@ -245,7 +246,8 @@ export default function ProspectDetailsViewConversation(
       userToken,
       props.prospect_id,
       selectedBumpFrameworkId,
-      accountResearch
+      accountResearch,
+      selectedBumpFrameworkLengthAPI
     );
 
     if (result.status === "success") {
@@ -456,8 +458,9 @@ export default function ProspectDetailsViewConversation(
             <SelectBumpInstruction
               client_sdr_id={userData.id}
               overall_status={props.overall_status}
-              onBumpFrameworkSelected={(framework_id) => {
+              onBumpFrameworkSelected={(framework_id, bump_length) => {
                 setBumpFrameworkId(framework_id);
+                setBumpFrameworkLengthAPI(bump_length);
               }}
               onAccountResearchChanged={(research) => {
                 setAccountResearch(research);

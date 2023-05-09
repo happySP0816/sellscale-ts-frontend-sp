@@ -7,9 +7,11 @@ import {
   Grid,
   LoadingOverlay,
   Select,
+  Slider,
   Text,
   Textarea,
   Title,
+  Tooltip,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -32,15 +34,23 @@ type BumpFramework = {
 type PropsType = {
   client_sdr_id: number;
   overall_status: string;
-  onBumpFrameworkSelected: (bumpFrameworkId: number) => void;
+  onBumpFrameworkSelected: (bumpFrameworkId: number, bumpFrameworkLengthAPI: string) => void;
   onAccountResearchChanged: (accountResearch: string) => void;
 };
+
+const bumpFrameworkLengthMarks = [
+  { value: 0, label: 'Short', api_label: "SHORT" },
+  { value: 50, label: 'Medium', api_label: "MEDIUM" },
+  { value: 100, label: 'Long', api_label: "LONG" },
+];
 
 export default function SelectBumpInstruction(props: PropsType) {
   const userToken = useRecoilValue(userTokenState);
   const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(
     prospectDrawerStatusesState
   );
+
+  const [bumpLengthValue, setBumpLengthValue] = useState(50);
 
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
   const [
@@ -56,8 +66,14 @@ export default function SelectBumpInstruction(props: PropsType) {
     setBumpFrameworks(result.extra);
     for (const bumpFramework of result.extra as BumpFramework[]) {
       if (bumpFramework.default) {
+        let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === bumpFramework.bump_length)?.value
+        if (length == null) {
+          length = 50;
+        }
+
         setSelectedBumpFramework(bumpFramework);
-        props.onBumpFrameworkSelected(bumpFramework.id);
+        setBumpLengthValue(length);
+        props.onBumpFrameworkSelected(bumpFramework.id, bumpFramework.bump_length);
         break;
       }
     }
@@ -88,10 +104,15 @@ export default function SelectBumpInstruction(props: PropsType) {
             })}
             placeholder={"Select Bump Frameworks"}
             onChange={(value: any) => {
-              setSelectedBumpFramework(
-                bumpFrameworks.find((x) => x.id == value)
-              );
-              props.onBumpFrameworkSelected(value);
+              let bumpFramework = bumpFrameworks.find((x) => x.id == value)
+              let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === bumpFramework?.bump_length)?.value
+              if (length == null) {
+                length = 50;
+              }
+
+              setSelectedBumpFramework(bumpFramework);
+              setBumpLengthValue(length);
+              props.onBumpFrameworkSelected(value, bumpFramework?.bump_length || "MEDIUM");
             }}
             searchable
             creatable
@@ -118,6 +139,30 @@ export default function SelectBumpInstruction(props: PropsType) {
           </Button>
         </Grid.Col>
       </Grid>
+      <Tooltip
+        multiline
+        width={220}
+        withArrow
+        label="Control how long you want the generated bump to be."
+      >
+        <Slider
+          label={null}
+          step={50}
+          marks={bumpFrameworkLengthMarks}
+          mt='xs'
+          mb='xl'
+          p='md'
+          value={bumpLengthValue}
+          onChange={(value) => {
+            setBumpLengthValue(value);
+            let bumpLength = bumpFrameworkLengthMarks.find((marks) => marks.value === value)?.api_label
+            if (bumpLength == null) {
+              bumpLength = "MEDIUM";
+            }
+            props.onBumpFrameworkSelected(selectedBumpFramework?.id || -1, bumpLength);
+          }}
+        />
+      </Tooltip>
       <Textarea
         mt="md"
         onChange={(event) => {

@@ -1,4 +1,7 @@
-import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import {
+  prospectDrawerIdState,
+  prospectDrawerOpenState,
+} from "@atoms/prospectAtoms";
 import { userDataState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
 import AllContactsSection from "@common/home/AllContactsSection";
@@ -18,8 +21,8 @@ export default function HomePage() {
   const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
   useEffect(() => {
-    if(prospectId && prospectId.trim().length > 0){
-      setProspectId(+prospectId.trim())
+    if (prospectId && prospectId.trim().length > 0) {
+      setProspectId(+prospectId.trim());
       setOpened(true);
     }
   }, [prospectId]);
@@ -28,9 +31,21 @@ export default function HomePage() {
     <PageFrame>
       <Tabs defaultValue="dashboard" px="xs" color="teal">
         <Tabs.List>
-          <Tabs.Tab value="dashboard" icon={<IconCheckbox size="1.1rem" />}>Dashboard</Tabs.Tab>
-          <Tabs.Tab value="all-contacts" icon={<IconAddressBook size="1.1rem" />}>All Contacts</Tabs.Tab>
-          <Tabs.Tab value="recent-activity" icon={<IconActivity size="1.1rem" />}>Recent Activity</Tabs.Tab>
+          <Tabs.Tab value="dashboard" icon={<IconCheckbox size="1.1rem" />}>
+            Dashboard
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="all-contacts"
+            icon={<IconAddressBook size="1.1rem" />}
+          >
+            Pipeline
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="recent-activity"
+            icon={<IconActivity size="1.1rem" />}
+          >
+            Recent Activity
+          </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="all-contacts" pt="xs">
           <AllContactsSection />

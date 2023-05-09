@@ -140,8 +140,8 @@ export default function DoNotContactListCaughtProspects() {
           </Flex>
           <Collapse in={opened}>
             <Card withBorder mt="lg">
-              <Table>
-                <thead highlightOnHover withBorder withColumnBorders>
+              <Table striped highlightOnHover withBorder withColumnBorders>
+                <thead>
                   <tr>
                     <th>Prospect Name</th>
                     <th>Company</th>

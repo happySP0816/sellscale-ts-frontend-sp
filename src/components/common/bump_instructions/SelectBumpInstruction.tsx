@@ -41,8 +41,6 @@ export default function SelectBumpInstruction(props: PropsType) {
     prospectDrawerStatusesState
   );
 
-  console.log("prospectDrawerStatuses", prospectDrawerStatuses)
-
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
   const [
     selectedBumpFramework,
@@ -57,7 +55,6 @@ export default function SelectBumpInstruction(props: PropsType) {
     setBumpFrameworks(result.extra);
     for (const bumpFramework of result.extra as BumpFramework[]) {
       if (bumpFramework.default) {
-        console.log("getting bump frameworks", prospectDrawerStatuses.overall, bumpFramework)
         setSelectedBumpFramework(bumpFramework);
         props.onBumpFrameworkSelected(bumpFramework.id);
         break;

@@ -84,8 +84,6 @@ export default function DashboardSection() {
   });
   const prospects = data ?? [];
 
-  console.log(prospects);
-
   const getProspectsWithActiveMsg = (li_status: string) => {
     return prospects
       .filter((p) => {

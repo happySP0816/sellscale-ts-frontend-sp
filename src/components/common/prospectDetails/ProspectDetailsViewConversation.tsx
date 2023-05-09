@@ -77,6 +77,7 @@ export default function ProspectDetailsViewConversation(
 
   const [loading, setLoading] = useState(false);
   const [msgLoading, setMsgLoading] = useState(false);
+  const [generateMsgLoading, setGenerateMsgLoading] = useState(false);
 
   // Use cached convo if voyager isn't connected, else fetch latest
   const messages = useRef(
@@ -239,7 +240,7 @@ export default function ProspectDetailsViewConversation(
   };
 
   const generateAIFollowup = async () => {
-    setMsgLoading(true);
+    setGenerateMsgLoading(true);
     const result = await postBumpGenerateResponse(
       userToken,
       props.prospect_id,
@@ -266,7 +267,7 @@ export default function ProspectDetailsViewConversation(
       });
       setMessageDraft("");
     }
-    setMsgLoading(false);
+    setGenerateMsgLoading(false);
   };
 
   useEffect(() => {
@@ -384,7 +385,7 @@ export default function ProspectDetailsViewConversation(
         </div>
         <div>
           <div style={{ position: "relative" }}>
-            <LoadingOverlay visible={msgLoading} overlayBlur={2} />
+            <LoadingOverlay visible={msgLoading || generateMsgLoading} overlayBlur={2} />
             <Textarea
               mt="sm"
               minRows={2}
@@ -421,6 +422,7 @@ export default function ProspectDetailsViewConversation(
               target="_blank"
               w="70%"
               rel="noopener noreferrer"
+              loading={generateMsgLoading}
               rightIcon={<IconRobot size={14} />}
               onClick={() => {
                 generateAIFollowup();

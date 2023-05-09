@@ -21,10 +21,10 @@ const urlRegex: RegExp = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-z0-9\-]+(?:\.[a-
 export default function DoNotContactList() {
   const [userToken] = useRecoilState(userTokenState);
   const [fetchedData, setFetchedData] = useState(false);
-  const [keywords, setKeywords] = useState([
+  const [keywords, setKeywords]: any = useState([
     // { value: "staffing", label: "staffing" },
   ]);
-  const [companyNames, setCompanyNames] = useState([
+  const [companyNames, setCompanyNames]: any = useState([
     // { value: "Medicus", label: "medicus" },
   ]);
   const [selectedCompanies, setSelectedCompanies] = useState([]);
@@ -129,9 +129,9 @@ export default function DoNotContactList() {
             setNeedsSave(true);
           }}
           getCreateLabel={(query) => `+ Add a filter for ${query}`}
-          onCreate={(query) => {
-            const item = { value: query, label: query };
-            setKeywords((current) => [...current, item]);
+          onCreate={(query: any) => {
+            const item: any = { value: query, label: query };
+            setKeywords((current: any) => [...current, item]);
             return item;
           }}
         />
@@ -155,9 +155,9 @@ export default function DoNotContactList() {
             setNeedsSave(true);
           }}
           getCreateLabel={(query) => `+ Add a filter for ${query}`}
-          onCreate={(query) => {
-            const item = { value: query, label: query };
-            setCompanyNames((current) => [...current, item]);
+          onCreate={(query: any) => {
+            const item: any = { value: query, label: query };
+            setCompanyNames((current: any) => [...current, item]);
             return item;
           }}
         />

@@ -145,9 +145,11 @@ export default function ProspectDetailsViewConversation(
         });
       }
 
-      queryClient.invalidateQueries({
-        queryKey: [`query-dash-get-prospects`],
-      });
+      if(result.extra.prospect.linkedin_status !== prospectDrawerStatuses.linkedin) {
+        queryClient.invalidateQueries({
+          queryKey: [`query-dash-get-prospects`],
+        });
+      }
     }
     setLoading(false);
     return latestMessages;

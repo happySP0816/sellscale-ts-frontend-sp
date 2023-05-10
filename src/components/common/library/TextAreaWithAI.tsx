@@ -11,6 +11,7 @@ import {
   Grid,
   Box,
   TextInput,
+  LoadingOverlay,
 } from "@mantine/core";
 import { IconPencil, IconRobot, IconX } from "@tabler/icons";
 import { API_URL } from "@constants/data";
@@ -29,7 +30,7 @@ type PropsType = {
   disabled?: boolean;
   value?: string;
   withAsterisk?: boolean;
-  inputType?: "text-area" | "text-input" | "rich-text-area",
+  inputType?: "text-area" | "text-input" | "rich-text-area";
   loadingAIGenerate?: boolean;
   onAIGenerateClicked?: () => void;
 };
@@ -89,7 +90,8 @@ export default function TextAreaWithAI(props: PropsType) {
   };
 
   return (
-    <Box mt="sm" sx={{ position: 'relative' }} ref={ref}>
+    <Box mt="sm" sx={{ position: "relative" }} ref={ref}>
+      <LoadingOverlay visible={props.loadingAIGenerate || false} />
       {/* AI Writing Popup */}
       <Popover
         width={300}
@@ -107,12 +109,17 @@ export default function TextAreaWithAI(props: PropsType) {
             size="xs"
             compact
             onClick={() => setAIPopoverToggled(!AIPopoverToggled)}
-            sx={{ position: "absolute", top: props.label ? 0 : 7, right: 7, zIndex: 100 }}
-            leftIcon={<IconPencil size='0.8rem' />}
+            sx={{
+              position: "absolute",
+              top: props.label ? 0 : 7,
+              right: 7,
+              zIndex: 100,
+            }}
+            leftIcon={<IconPencil size="0.8rem" />}
             styles={{
               leftIcon: {
                 marginRight: 3,
-              }
+              },
             }}
           >
             AI Write
@@ -208,18 +215,24 @@ export default function TextAreaWithAI(props: PropsType) {
       {props.inputType === "rich-text-area" ? (
         <RichTextArea
           onChange={(value) => {
-            props.onChange && props.onChange({ currentTarget: { value } } as React.ChangeEvent<HTMLTextAreaElement>);
+            props.onChange &&
+              props.onChange({
+                currentTarget: { value },
+              } as React.ChangeEvent<HTMLTextAreaElement>);
           }}
           value={props.value}
           personalizationBtn
         />
-      ) : (props.inputType === "text-input" ? (
+      ) : props.inputType === "text-input" ? (
         <TextInput
           placeholder={props.placeholder}
           label={props.label}
           description={props.description}
           onChange={(e) => {
-            props.onChange && props.onChange(e as unknown as React.ChangeEvent<HTMLTextAreaElement>);
+            props.onChange &&
+              props.onChange(
+                (e as unknown) as React.ChangeEvent<HTMLTextAreaElement>
+              );
           }}
           disabled={props.disabled}
           value={props.value}
@@ -237,7 +250,7 @@ export default function TextAreaWithAI(props: PropsType) {
           value={props.value}
           withAsterisk={props.withAsterisk}
         />
-      ))}
+      )}
     </Box>
   );
 }

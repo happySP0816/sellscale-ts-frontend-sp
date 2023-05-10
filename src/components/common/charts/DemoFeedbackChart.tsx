@@ -1,7 +1,7 @@
 import { currentPersonaIdState } from '@atoms/personaAtoms';
 import { userTokenState } from '@atoms/userAtoms';
-import { Center, Paper, useMantineTheme, Text, Avatar, Flex } from '@mantine/core';
-import { convertDateToLocalTime, valueToColor } from '@utils/general';
+import { Center, Paper, useMantineTheme, Text, Avatar, Flex, Badge } from '@mantine/core';
+import { convertDateToLocalTime, formatToLabel, valueToColor } from '@utils/general';
 import getTransformers from '@utils/requests/getTransformers';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import _ from 'lodash';
@@ -9,12 +9,58 @@ import { Bar } from 'react-chartjs-2';
 import { useQuery } from '@tanstack/react-query';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { Channel } from 'src';
-import { IconChartHistogram } from '@tabler/icons';
+import {
+  IconChartHistogram,
+  IconMoodEmpty,
+  IconMoodCry,
+  IconMoodSad,
+  IconMoodSmile,
+  IconMoodHappy,
+  IconMoodCrazyHappy,
+  IconMoodWrrr,
+} from '@tabler/icons-react';
 import getDemoFeedback from '@utils/requests/getDemoFeedback';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { useState } from 'react';
+import { prospectDrawerIdState, prospectDrawerOpenState } from '@atoms/prospectAtoms';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const ratingToLabel = (rating: string) => {
+  if(rating === '0/5'){
+    return 'Terrible';
+  } else if(rating === '1/5'){
+    return 'Poor';
+  } else if(rating === '2/5'){
+    return 'Fair';
+  } else if(rating === '3/5'){
+    return 'Good';
+  } else if(rating === '4/5'){
+    return 'Great';
+  } else if(rating === '5/5'){
+    return 'Excellent';
+  } else {
+    return '';
+  }
+}
+const ratingToIcon = (rating: string) => {
+  const size = '1.3rem';
+  if(rating === '1/5'){
+    return <IconMoodCry size={size} />;
+  } else if(rating === '2/5'){
+    return <IconMoodSad size={size} />;
+  } else if(rating === '3/5'){
+    return <IconMoodSmile size={size} />;
+  } else if(rating === '4/5'){
+    return <IconMoodHappy size={size} />;
+  } else if(rating === '5/5'){
+    return <IconMoodCrazyHappy size={size} />;
+  } else if(rating === '0/5'){
+    return <IconMoodWrrr size={size} />;
+  } else {
+    return <IconMoodEmpty size={size} />;
+  }
+}
 
 export default function DemoFeedbackChart() {
   const theme = useMantineTheme();
@@ -30,6 +76,10 @@ export default function DemoFeedbackChart() {
   const handleSortStatusChange = (status: DataTableSortStatus) => {
     setSortStatus(status);
   };
+
+  // Prospect Drawer
+  const [_opened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
+  const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-demo-feedback`, { sortStatus }],
@@ -61,23 +111,6 @@ export default function DemoFeedbackChart() {
     .set('Excellent', 0);
   
   // Count & Map rating to table rating labels
-  const ratingToLabel = (rating: string) => {
-    if(rating === '0/5'){
-      return 'Terrible';
-    } else if(rating === '1/5'){
-      return 'Poor';
-    } else if(rating === '2/5'){
-      return 'Fair';
-    } else if(rating === '3/5'){
-      return 'Good';
-    } else if(rating === '4/5'){
-      return 'Great';
-    } else if(rating === '5/5'){
-      return 'Excellent';
-    } else {
-      return '';
-    }
-  }
   for (const d of data || []) {
     let ratingLabel = ratingToLabel(d.rating);
     chartData.set(ratingLabel, chartData.get(ratingLabel) + 1);
@@ -190,8 +223,24 @@ export default function DemoFeedbackChart() {
             title: 'Contact',
             sortable: true,
             width: 300,
-            render: ({ prospect_img_url, prospect_name, demo_date }) => (
-              <Paper withBorder p='xs' radius='md'>
+            render: ({ prospect_id, prospect_img_url, prospect_name, demo_date }) => (
+              <Paper
+                p='xs'
+                withBorder
+                radius="md"
+                sx={{
+                  position: "relative",
+                  cursor: "pointer",
+                  backgroundColor: theme.colors.dark[8],
+                  "&:hover": {
+                    filter: "brightness(135%)",
+                  },
+                }}
+                onClick={() => {
+                  setProspectId(prospect_id);
+                  setDrawerOpened(true);
+                }}
+              >
                 <Flex justify='space-between'>
                   <div>
                     <Avatar size='md' radius='xl' src={prospect_img_url} />
@@ -212,9 +261,18 @@ export default function DemoFeedbackChart() {
             accessor: 'status',
             title: 'Status',
             sortable: true,
+            width: 100,
             render: ({ status }) => (
               <Text>
-                {status === 'OCCURRED' ? 'Complete' : status}
+                <Badge
+                  color={valueToColor(
+                    theme,
+                    formatToLabel(status === 'OCCURRED' ? 'Complete' : status)
+                  )}
+                  variant="light"
+                >
+                  {formatToLabel(status === 'OCCURRED' ? 'Complete' : status)}
+                </Badge>
               </Text>
             ),
           },
@@ -222,16 +280,21 @@ export default function DemoFeedbackChart() {
             accessor: 'rating',
             title: 'Rating',
             sortable: true,
-            render: ({ rating }) => (
+            width: 100,
+            render: ({ rating, status }) => (
               <Text>
-                {ratingToLabel(rating)}
+                {(
+                  <Flex gap={5}>
+                    <Text color={theme.colors[valueToColor(theme, ratingToLabel(rating))][7]}>{ratingToIcon(rating)}</Text>
+                    <Text>{ratingToLabel(rating)}</Text>
+                  </Flex>
+                )}
               </Text>
             ),
           },
           {
             accessor: 'feedback',
             title: 'Notes',
-            width: 300,
           },
         ]}
         records={tableData}

@@ -6,6 +6,7 @@ import {
   IconMoodSmile,
   IconMoodHappy,
   IconMoodCrazyHappy,
+  IconMoodWrrr,
 } from '@tabler/icons-react';
 
 export function DemoRating(props: any) {
@@ -13,6 +14,8 @@ export function DemoRating(props: any) {
   const getEmptyIcon = (value: number) => {
     const defaultProps = { size: '1.5rem', color: 'gray', stroke: 1.5 };
     switch (value) {
+      case 0:
+        return <IconMoodWrrr {...defaultProps} />;
       case 1:
         return <IconMoodCry {...defaultProps} />;
       case 2:
@@ -33,16 +36,18 @@ export function DemoRating(props: any) {
     const theme = useMantineTheme();
 
     switch (value) {
+      case 0:
+        return <IconMoodWrrr {...defaultProps} color={theme.colors.red[7]} />;
       case 1:
-        return <IconMoodCry {...defaultProps} color={theme.colors.red[7]} />;
+        return <IconMoodCry {...defaultProps} color={theme.colors.orange[7]} />;
       case 2:
-        return <IconMoodSad {...defaultProps} color={theme.colors.orange[7]} />;
+        return <IconMoodSad {...defaultProps} color={theme.colors.yellow[7]} />;
       case 3:
-        return <IconMoodSmile {...defaultProps} color={theme.colors.yellow[7]} />;
+        return <IconMoodSmile {...defaultProps} color={theme.colors.lime[7]} />;
       case 4:
-        return <IconMoodHappy {...defaultProps} color={theme.colors.lime[7]} />;
+        return <IconMoodHappy {...defaultProps} color={theme.colors.green[7]} />;
       case 5:
-        return <IconMoodCrazyHappy {...defaultProps} color={theme.colors.green[7]} />;
+        return <IconMoodCrazyHappy {...defaultProps} color={theme.colors.teal[7]} />;
       default:
         return <IconMoodEmpty {...defaultProps} />;
     }

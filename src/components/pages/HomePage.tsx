@@ -11,7 +11,7 @@ import RecentActivitySection from "@common/home/RecentActivitySection";
 import { Tabs } from "@mantine/core";
 import { IconActivity, IconAddressBook, IconCheckbox, IconClipboardData } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 
@@ -28,9 +28,11 @@ export default function HomePage() {
     }
   }, [prospectId]);
 
+  const [activeTab, setActiveTab] = useState<string | null>('dashboard');
+
   return (
     <PageFrame>
-      <Tabs defaultValue="dashboard" px="xs" color="teal">
+      <Tabs value={activeTab} onTabChange={setActiveTab} px="xs" color="teal">
         <Tabs.List>
           <Tabs.Tab value="dashboard" icon={<IconCheckbox size="1.1rem" />}>
             Dashboard
@@ -64,7 +66,9 @@ export default function HomePage() {
           <RecentActivitySection />
         </Tabs.Panel>
         <Tabs.Panel value="demo-feedback" pt="xs">
-          <DemoFeedbackChart />
+          {activeTab === "demo-feedback" && (
+            <DemoFeedbackChart />
+          )}
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

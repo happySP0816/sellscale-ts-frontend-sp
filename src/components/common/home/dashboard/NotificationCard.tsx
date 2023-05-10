@@ -92,7 +92,7 @@ export default function NotificationCard(props: {
             {props.totalAmount >= 1 ? (
               <Text fz="sm" fs="italic">
                   Waiting to hear back from
-                  <Anchor fs="italic" pl={4} component="button" type="button" onClick={props.onClickSeeAll}>
+                  <Anchor fs="italic" pl={4} component="button" type="button" color="green.4" onClick={props.onClickSeeAll}>
                     {props.totalAmount} contact{props.totalAmount > 1 ? "s" : ""}
                   </Anchor>...
               </Text>

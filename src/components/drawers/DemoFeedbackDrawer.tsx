@@ -45,7 +45,7 @@ import FlexSeparate from '@common/library/FlexSeparate';
 import ProspectDetailsViewEmails from '@common/prospectDetails/ProspectDetailsViewEmails';
 import { API_URL } from '@constants/data';
 import ProspectDetailsRemove from '@common/prospectDetails/ProspectDetailsRemove';
-import ProspectDetailsAccountResearch from '@common/prospectDetails/ProspectDetailsAccountResearch';
+import ProspectDetailsResearch from '@common/prospectDetails/ProspectDetailsResearch';
 import { IconDots } from '@tabler/icons';
 import ProspectDetailsOptionsMenu from '@common/prospectDetails/ProspectDetailsOptionsMenu';
 import {

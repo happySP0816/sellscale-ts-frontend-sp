@@ -26,10 +26,10 @@ import { openContextModal } from "@mantine/modals";
 import PageTitle from "@nav/PageTitle";
 import { IconCornerRightUp, IconUserPlus } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
-import getPersonas, { getAllUploads } from "@utils/requests/getPersonas";
+import getPersonas, { getAllUploads, getPersonasOverview } from "@utils/requests/getPersonas";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Archetype } from "src";
+import { Archetype, PersonaOverview } from "src";
 import { SCREEN_SIZES } from "../../constants/data";
 import PageFrame from "../common/PageFrame";
 import PersonaCard from "../common/persona/PersonaCard";
@@ -49,25 +49,11 @@ export default function PersonaPage() {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-personas-data`],
     queryFn: async () => {
-      const response = await getPersonas(userToken);
+      const response = await getPersonasOverview(userToken);
       const result =
-        response.status === "success" ? (response.extra as Archetype[]) : [];
+        response.status === "success" ? (response.extra as PersonaOverview[]) : [];
 
-      // const activePersonas = result.filter((p) => p.active);
-      // if (activePersonas.length === 1) {
-      //   setCurrentPersonaId(activePersonas[0].id);
-      // }
-
-      // Sort by number of prospects
-      return result.sort((a, b) => {
-        const b_total_prospects = b.performance
-          ? b.performance.total_prospects
-          : 0;
-        const a_total_prospects = a.performance
-          ? a.performance.total_prospects
-          : 0;
-        return b_total_prospects - a_total_prospects;
-      });
+      return result;
     },
     refetchOnWindowFocus: false,
   });
@@ -121,7 +107,7 @@ export default function PersonaPage() {
                     return (
                       <PersonaCard
                         key={persona.id}
-                        archetype={persona}
+                        personaOverview={persona}
                         refetch={refetch}
                         unassignedPersona
                       />
@@ -136,7 +122,7 @@ export default function PersonaPage() {
                     return (
                       <PersonaCard
                         key={persona.id}
-                        archetype={persona}
+                        personaOverview={persona}
                         refetch={refetch}
                         unassignedPersona={false}
                       />
@@ -150,7 +136,7 @@ export default function PersonaPage() {
                   .map((persona) => (
                     <PersonaCard
                       key={persona.id}
-                      archetype={persona}
+                      personaOverview={persona}
                       refetch={refetch}
                       unassignedPersona={false}
                     />
@@ -182,8 +168,8 @@ export default function PersonaPage() {
           </>
         )}
       </PageFrame>
-      <PersonaDetailsDrawer personas={data} />
-      <PersonaUploadDrawer personas={data} />
+      <PersonaDetailsDrawer personaOverviews={data} />
+      <PersonaUploadDrawer personaOverviews={data} />
       <UploadDetailsDrawer />
     </>
   );

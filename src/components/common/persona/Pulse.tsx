@@ -5,7 +5,7 @@ import { forwardRef, useEffect, useState } from "react";
 
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { Archetype } from "src";
+import { Archetype, PersonaOverview } from "src";
 
 import getICPClassificationPrompt from "@utils/requests/getICPClassificationPrompt";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
@@ -43,7 +43,7 @@ let icpFitScoreMap = new Map<string, string>([
 ]);
 
 export default function Pulse(props: {
-  archetype: Archetype;
+  personaOverview: PersonaOverview;
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState)
@@ -82,7 +82,7 @@ export default function Pulse(props: {
   );
 
   const triggerGetICPClassificationPrompt = async () => {
-    const result = await getICPClassificationPrompt(userToken, props.archetype.id)
+    const result = await getICPClassificationPrompt(userToken, props.personaOverview.id)
 
     if (result.status === 'success') {
       setCurrentICPPrompt(result.extra)
@@ -92,7 +92,7 @@ export default function Pulse(props: {
   }
 
   const triggerGetArchetypeProspects = async () => {
-    const result = await getArchetypeProspects(userToken, props.archetype.id)
+    const result = await getArchetypeProspects(userToken, props.personaOverview.id)
 
     if (result.status === 'success') {
       setProspects(result.extra)
@@ -107,7 +107,7 @@ export default function Pulse(props: {
     setTestingPrompt(true)
     console.log('triggering')
 
-    const result = await getICPOneProspect(userToken, props.archetype.id, selectedProspect.id)
+    const result = await getICPOneProspect(userToken, props.personaOverview.id, selectedProspect.id)
     console.log(result)
 
     if (result.status === 'success') {
@@ -145,7 +145,7 @@ export default function Pulse(props: {
   })
 
   const triggerPostRunICPClassification = async () => {
-    const result = await postRunICPClassification(userToken, props.archetype.id)
+    const result = await postRunICPClassification(userToken, props.personaOverview.id)
 
     if (result.status === 'success') {
       showNotification({
@@ -193,13 +193,13 @@ export default function Pulse(props: {
                 openContextModal({
                   modal: "managePulsePrompt",
                   title: <Title order={3}>Edit Pulse Prompt</Title>,
-                  innerProps: { mode: "EDIT", archetype: props.archetype, backfillICPPrompt: setCurrentICPPrompt },
+                  innerProps: { mode: "EDIT", personaOverview: props.personaOverview, backfillICPPrompt: setCurrentICPPrompt },
                 })
                 :
                 openContextModal({
                   modal: "managePulsePrompt",
                   title: <Title order={3}>Create Pulse Prompt</Title>,
-                  innerProps: { mode: "CREATE", archetype: props.archetype, backfillICPPrompt: setCurrentICPPrompt },
+                  innerProps: { mode: "CREATE", personaOverview: props.personaOverview, backfillICPPrompt: setCurrentICPPrompt },
                 })
             }}
           >

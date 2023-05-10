@@ -1,7 +1,7 @@
 import { Drawer, Tabs, Title } from "@mantine/core";
 import FileDropAndPreview from "@modals/upload-prospects/FileDropAndPreview";
 import { useRecoilState } from "recoil";
-import { Archetype } from "src";
+import { Archetype, PersonaOverview } from "src";
 import {
   currentPersonaIdState,
   uploadDrawerOpenState,
@@ -10,14 +10,14 @@ import ComingSoonCard from "@common/library/ComingSoonCard";
 import CreatePersona from "@common/persona/CreatePersona";
 
 export default function PersonaUploadDrawer(props: {
-  personas: Archetype[] | undefined;
+  personaOverviews: PersonaOverview[] | undefined;
 }) {
   const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
     currentPersonaIdState
   );
 
-  const persona = props.personas?.find(
+  const persona = props.personaOverviews?.find(
     (persona) => persona.id === currentPersonaId
   );
   if (!persona) {
@@ -33,7 +33,7 @@ export default function PersonaUploadDrawer(props: {
     <Drawer
       opened={opened}
       onClose={closeDrawer}
-      title={<Title order={3}>Upload - {persona.archetype}</Title>}
+      title={<Title order={3}>Upload - {persona.name}</Title>}
       padding="xl"
       size="xl"
       position="right"

@@ -7,7 +7,7 @@ import { IconPencil } from "@tabler/icons";
 import postICPClassificationPromptChange from "@utils/requests/postICPClassificationPromptChange";
 import { useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Archetype } from "src";
+import { Archetype, PersonaOverview } from "src";
 
 const defaultHeader = 'I am a sales researcher. This is the Ideal Customer Profile for my target customer:\n\n'
 
@@ -15,9 +15,9 @@ export default function ManagePulsePrompt({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ mode: 'EDIT' | 'CREATE', archetype: Archetype, backfillICPPrompt: Function }>) {
+}: ContextModalProps<{ mode: 'EDIT' | 'CREATE', personaOverview: PersonaOverview, backfillICPPrompt: Function }>) {
   const theme = useMantineTheme();
-  const [currentICPPrompt, setCurrentICPPrompt] = useState(innerProps.archetype.icp_matching_prompt)
+  const [currentICPPrompt, setCurrentICPPrompt] = useState(innerProps.personaOverview.icp_matching_prompt)
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
@@ -43,7 +43,7 @@ export default function ManagePulsePrompt({
   async function handleSaveChanges(prompt: string) {
     setLoading(true)
 
-    if (innerProps.mode === "EDIT" && currentICPPrompt === innerProps.archetype.icp_matching_prompt) {
+    if (innerProps.mode === "EDIT" && currentICPPrompt === innerProps.personaOverview.icp_matching_prompt) {
       showNotification({
         id: "edit-pulse-prompt-fail-no-changes",
         title: "No Changes Detected",
@@ -64,7 +64,7 @@ export default function ManagePulsePrompt({
       })
     }
 
-    const result = await postICPClassificationPromptChange(userToken, innerProps.archetype.id, prompt);
+    const result = await postICPClassificationPromptChange(userToken, innerProps.personaOverview.id, prompt);
 
     setLoading(false)
 

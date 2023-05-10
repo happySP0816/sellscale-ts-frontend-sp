@@ -106,6 +106,18 @@ export interface Archetype {
   is_unassigned_contact_archetype: boolean;
 }
 
+export interface PersonaOverview {
+  active: boolean
+  id: number,
+  name: string,
+  num_prospects: number,
+  num_unused_email_prospects: number,
+  num_unused_li_prospects: number,
+  icp_matching_prompt: string,
+  is_unassigned_contact_archetype: boolean,
+  uploads?: any[],
+}
+
 export interface LinkedInMessage {
   author: string;
   connection_degree: string;

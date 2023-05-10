@@ -29,7 +29,7 @@ import {
 import { IconCalendar } from "@tabler/icons";
 import { useRef, useState } from "react";
 import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
-import { Archetype, Campaign } from "src";
+import { Archetype, Campaign, PersonaOverview } from "src";
 import { logout } from "@auth/core";
 import { useQuery } from "@tanstack/react-query";
 import CampaignProspects from "@common/campaigns/CampaignProspects";
@@ -40,13 +40,13 @@ import PersonaDetailsTransformers from "@common/persona/details/PersonaDetailsTr
 import { DataTableSortStatus } from "mantine-datatable";
 import _ from "lodash";
 
-export default function PersonaDetailsDrawer(props: { personas: Archetype[] | undefined }) {
+export default function PersonaDetailsDrawer(props: { personaOverviews: PersonaOverview[] | undefined }) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useRecoilState(detailsDrawerOpenState);
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
   const userToken = useRecoilValue(userTokenState);
 
-  const persona = props.personas?.find((persona) => persona.id === currentPersonaId);
+  const persona = props.personaOverviews?.find((persona) => persona.id === currentPersonaId);
   if(!persona) {
     return (<></>)
   }
@@ -56,7 +56,7 @@ export default function PersonaDetailsDrawer(props: { personas: Archetype[] | un
       opened={opened}
       onClose={() => setOpened(false)}
       title={
-        <Title order={3}>Details - {persona.archetype}</Title>
+        <Title order={3}>Details - {persona.name}</Title>
       }
       padding="xl"
       size="xl"

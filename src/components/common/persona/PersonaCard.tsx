@@ -39,7 +39,7 @@ import {
   IconX,
 } from "@tabler/icons";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Archetype } from "src";
+import { Archetype, PersonaOverview } from "src";
 import {
   uploadDrawerOpenState,
   currentPersonaIdState,
@@ -78,7 +78,7 @@ async function togglePersona(archetype_id: number, userToken: string) {
 }
 
 export default function PersonaCard(props: {
-  archetype: Archetype;
+  personaOverview: PersonaOverview;
   refetch: () => void;
   unassignedPersona: boolean;
 }) {
@@ -86,7 +86,6 @@ export default function PersonaCard(props: {
   const mdScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.MD})`);
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
-  const [unusedProspects, setUnusedProspects] = useState(0);
 
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
     uploadDrawerOpenState
@@ -98,11 +97,14 @@ export default function PersonaCard(props: {
     currentPersonaIdState
   );
   const [opened, { open, close }] = useDisclosure(
-    props.archetype.id === currentPersonaId
+    props.personaOverview.id === currentPersonaId
   );
   const [selectorType, setSelectorType] = useRecoilState(
     prospectSelectorTypeState
   );
+
+  /*
+  const [unusedProspects, setUnusedProspects] = useState(0);
   const [
     numUnusedProspectsIsLoading,
     setNumUnusedProspectsIsLoading,
@@ -116,7 +118,7 @@ export default function PersonaCard(props: {
       setNumUnusedProspectsIsLoading(true);
       const res = await fetch(
         `${API_URL}/client/unused_li_and_email_prospects_count?client_archetype_id=` +
-          props.archetype.id,
+          props.personaOverview.id,
         {
           method: "GET",
           headers: {
@@ -130,15 +132,15 @@ export default function PersonaCard(props: {
       setFetchedNumUnusedProspects(true);
     }
   };
+  */
 
   useEffect(() => {
-    if (props.archetype.id === currentPersonaId) {
+    if (props.personaOverview.id === currentPersonaId) {
       open();
     } else {
       close();
     }
-    fetchNumUnusedProspects();
-  }, [currentPersonaId, fetchNumUnusedProspects]);
+  }, [currentPersonaId]);
 
   // Temp Fix: Make sure the prospect table selector is set to all when the persona is opened - to prevent ProspectTable bug
   useEffect(() => {
@@ -146,9 +148,9 @@ export default function PersonaCard(props: {
   }, [opened]);
 
   const isUploading =
-    props.archetype.uploads &&
-    props.archetype.uploads.length > 0 &&
-    props.archetype.uploads[0].stats.in_progress > 0;
+    props.personaOverview.uploads &&
+    props.personaOverview.uploads.length > 0 &&
+    props.personaOverview.uploads[0].stats.in_progress > 0;
   const [
     prospectUploadDrawerOpened,
     setProspectUploadDrawerOpened,
@@ -168,80 +170,21 @@ export default function PersonaCard(props: {
         : theme.colors.gray[1],
   });
 
-  /*
-    const displayTransformers = Object.keys(props.archetype.performance.status_map).some((key) => {
-    return key !== "PROSPECTED";
-  }) ?? Object.keys(props.archetype.performance.status_map).length > 0;
-
-  const makeActivePersona = () => {
-    displayNotification(
-      "make-active-persona",
-      async () => {
-        await temp_delay(1000);
-        let result = Math.random() < 0.75;
-        if (result) {
-          //setActivePersona(props.value);
-        }
-        return result;
-      },
-      {
-        title: `Activating Persona`,
-        message: `Updating persona to ${props.archetype.archetype}...`,
-        color: "teal",
-      },
-      {
-        title: `${props.archetype.archetype} is now active 🎉`,
-        message: `Some extra description here`,
-        color: "teal",
-      },
-      {
-        title: `Error while activating persona!`,
-        message: `Test 25% chance of failure!`,
-        color: "red",
-      }
-    );
-  };
-  */
-
-  /*
-  const getStatusPercentage = () => {
-    let m = 100 / props.archetype.performance.total_prospects;
-    let percentData = [];
-    for(let statD in props.archetype.performance.status_map){
-      percentData.push({
-        value: props.archetype.performance.status_map[statD]*m,
-        color: valueToColor(theme, formatToLabel(statD)),
-        label: formatToLabel(statD),
-        tooltip: `${formatToLabel(statD)} - ${props.archetype.performance.status_map[statD]} prospects`,
-      });
-    }
-    return percentData;
-  }
-  */
-
   const WARNING_PERCENTAGE = 25;
   const getStatusUsedPercentage = () => {
-    if (!props.archetype.performance) {
-      return [];
-    }
 
-    let usedVal = 0;
-    let unusedVal = unusedProspects;
+    let usedEmail = props.personaOverview.num_prospects - props.personaOverview.num_unused_email_prospects;
+    let usedLi = props.personaOverview.num_prospects - props.personaOverview.num_unused_li_prospects;
 
-    for (let statD in props.archetype.performance.status_map) {
-      if (statD === "PROSPECTED") {
-        // unusedVal += props.archetype.performance.status_map[statD];
-      } else {
-        usedVal += props.archetype.performance.status_map[statD];
-      }
-    }
+    let unusedVal = props.personaOverview.num_prospects - (usedEmail + usedLi);
+    let usedVal = props.personaOverview.num_prospects - unusedVal;
 
-    let m = 100 / props.archetype.performance.total_prospects;
+    let m = 100 / props.personaOverview.num_prospects;
     let percentData = [];
     const label = `Unprocessed, ${Math.round(
       unusedVal * m
     )}% - ${unusedVal} / ${
-      props.archetype.performance.total_prospects
+      props.personaOverview.num_prospects
     } prospects`;
     if (unusedVal * m > 0) {
       percentData.push({
@@ -261,27 +204,15 @@ export default function PersonaCard(props: {
     return percentData;
   };
 
-  const getUsedPercentage = () => {
-    if (props.archetype.performance.total_prospects === 0) return 0;
-    let m = 100 / props.archetype.performance.total_prospects;
-    let totalUsed = 0;
-    for (let statD in props.archetype.performance.status_map) {
-      if (statD !== "PROSPECTED") {
-        totalUsed += props.archetype.performance.status_map[statD];
-      }
-    }
-    return Math.round(totalUsed * m);
-  };
-
   const openUploadHistory = () => {
     setProspectUploadDrawerId(
-      props.archetype.uploads && props.archetype.uploads[0].id
+      props.personaOverview.uploads && props.personaOverview.uploads[0].id
     );
     setProspectUploadDrawerOpened(true);
   };
 
   const openUploadProspects = () => {
-    setCurrentPersonaId(props.archetype.id);
+    setCurrentPersonaId(props.personaOverview.id);
     setUploadDrawerOpened(true);
   };
 
@@ -291,9 +222,9 @@ export default function PersonaCard(props: {
         <Group noWrap={true}>
           {!props.unassignedPersona && (
             <Switch
-              checked={props.archetype.active}
+              checked={props.personaOverview.active}
               onChange={async (event) => {
-                const res = await togglePersona(props.archetype.id, userToken);
+                const res = await togglePersona(props.personaOverview.id, userToken);
                 if (res.status === 200) {
                   props.refetch();
                 }
@@ -308,7 +239,7 @@ export default function PersonaCard(props: {
                 },
               }}
               thumbIcon={
-                props.archetype.active ? (
+                props.personaOverview.active ? (
                   <IconCheck
                     size={12}
                     color={theme.colors.teal[theme.fn.primaryShade()]}
@@ -329,16 +260,17 @@ export default function PersonaCard(props: {
             spacing={8}
             sx={{ cursor: "pointer" }}
             onClick={() => {
-              if (props.archetype.id === currentPersonaId) {
+              console.log(props.personaOverview.id, currentPersonaId);
+              if (props.personaOverview.id === currentPersonaId) {
                 setCurrentPersonaId(-1);
               } else {
-                setCurrentPersonaId(props.archetype.id);
+                setCurrentPersonaId(props.personaOverview.id);
               }
             }}
           >
             <Box>
               <Title order={2} fz={24} fw={400} truncate maw="35vw">
-                {props.archetype.archetype}
+                {props.personaOverview.name}
               </Title>
               {props.unassignedPersona && (
                 <Title order={6} fw={200} truncate maw="35vw">
@@ -354,7 +286,7 @@ export default function PersonaCard(props: {
           </Group>
         </Group>
         <Flex align="flex-end">
-          {props.archetype.uploads && props.archetype.uploads.length > 0 && (
+          {props.personaOverview.uploads && props.personaOverview.uploads.length > 0 && (
             <>
               {mdScreenOrLess ? (
                 <ActionIcon
@@ -409,7 +341,7 @@ export default function PersonaCard(props: {
           </Button>
         </Flex>
       </FlexSeparate>
-      {numUnusedProspectsIsLoading ? (
+      {false ? (
         <Loader variant="dots" color="green" />
       ) : (
         <Progress
@@ -464,19 +396,19 @@ export default function PersonaCard(props: {
               )}
           </Tabs.List>
           <Tabs.Panel value="all-contacts" pt="xs">
-            <ProspectTable_old personaSpecific={props.archetype.id} />
+            <ProspectTable_old personaSpecific={props.personaOverview.id} />
           </Tabs.Panel>
           <Tabs.Panel value="pulse" pt="xs">
-            <Pulse archetype={props.archetype} />
+            <Pulse personaOverview={props.personaOverview} />
           </Tabs.Panel>
           <Tabs.Panel value="tools" pt="xs">
-            <PersonaTools archetype_id={props.archetype.id} />
+            <PersonaTools archetype_id={props.personaOverview.id} />
           </Tabs.Panel>
           <Tabs.Panel value="analyze" pt="xs">
-            <PersonaAnalyze archetype_id={props.archetype.id} />
+            <PersonaAnalyze archetype_id={props.personaOverview.id} />
           </Tabs.Panel>
           <Tabs.Panel value="split" pt="xs">
-            <PersonaSplit archetype_id={props.archetype.id} />
+            <PersonaSplit archetype_id={props.personaOverview.id} />
           </Tabs.Panel>
           <Tabs.Panel value="brain" pt="xs">
             <PersonaBrain archetype_id={props.archetype.id} />

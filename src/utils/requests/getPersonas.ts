@@ -27,6 +27,31 @@ export default async function getPersonas(userToken: string): Promise<MsgRespons
 
 }
 
+
+/**
+ * Get all personas for a user
+ * @param userToken 
+ * @returns - MsgResponse
+ */
+export async function getPersonasOverview(userToken: string): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${API_URL}/client/archetype/get_archetypes/overview`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  const result = await getResponseJSON("personas-get-overview", response);
+  if(isMsgResponse(result)) { return result; }
+
+  return { status: 'success', title: `Success`, message: `Gathered personas overview`, extra: result.data };
+
+}
+
+
 /**
  * Get all uploads for a persona
  * @param userToken 

@@ -25,6 +25,7 @@ import {
   IconAddressBook,
   IconAnalyze,
   IconArrowsSplit,
+  IconBrain,
   IconCheck,
   IconChevronDown,
   IconChevronUp,
@@ -60,6 +61,7 @@ import Pulse from "./Pulse";
 import PersonaTools from "./PersonaTools";
 import PersonaAnalyze from "./PersonaAnalyze";
 import PersonaSplit from "./PersonaSplit";
+import PersonaBrain from "./PersonaBrain";
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(`${API_URL}/client/archetype/toggle_active`, {
@@ -441,6 +443,11 @@ export default function PersonaCard(props: {
                 Tools
               </Tabs.Tab>
             )}
+            {!props.unassignedPersona && (
+              <Tabs.Tab value="brain" icon={<IconBrain size="1.1rem" />}>
+                Brain
+              </Tabs.Tab>
+            )}
             {props.unassignedPersona && (
               <Tabs.Tab value="analyze" icon={<IconAnalyze size="1.1rem" />}>
                 Analyze
@@ -470,6 +477,9 @@ export default function PersonaCard(props: {
           </Tabs.Panel>
           <Tabs.Panel value="split" pt="xs">
             <PersonaSplit archetype_id={props.archetype.id} />
+          </Tabs.Panel>
+          <Tabs.Panel value="brain" pt="xs">
+            <PersonaBrain archetype_id={props.archetype.id} />
           </Tabs.Panel>
         </Tabs>
       </Collapse>

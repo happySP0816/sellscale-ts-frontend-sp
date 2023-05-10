@@ -9,7 +9,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import PersonaSplitSelect from "./PersonaSplitSelect";
+import PersonaSelect from "./PersonaSplitSelect";
 import { useState } from "react";
 import { useRecoilState } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -62,9 +62,12 @@ export default function PersonaSplit(props: PropsType) {
           click the button <Code>Split into Personas</Code> to automatically
           split your prospects into the selected personas.
         </Text>
-        <PersonaSplitSelect
+        <PersonaSelect
           disabled={disablePersonaSplitButton}
           onChange={setDestinationPersonaIDs}
+          selectMultiple={true}
+          label="Select Personas to Split Prospects Into"
+          description="The prospects will be split into the selected personas using the splitting AI"
         />
         <Button
           color="grape"

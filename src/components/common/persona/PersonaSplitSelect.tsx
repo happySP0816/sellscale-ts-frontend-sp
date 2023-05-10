@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import {
   MultiSelect,
   Box,
@@ -98,14 +98,23 @@ const Item = forwardRef(
   }
 );
 
-export default function PersonaSplitSelect({
-  disabled,
-  onChange,
-}: {
+type PropsType = {
   disabled: boolean;
   onChange: (ids: number[]) => void;
-}) {
+  selectMultiple?: boolean;
+  label: string;
+  description: string;
+};
+
+export default function PersonaSelect({
+  disabled,
+  onChange,
+  selectMultiple,
+  label,
+  description,
+}: PropsType) {
   const [userToken] = useRecoilState(userTokenState);
+  const [selectedValues, setSelectedValues] = useState([]); // [1, 2, 3
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-archetype-details`, {}],
     queryFn: async ({ queryKey }) => {
@@ -137,12 +146,19 @@ export default function PersonaSplitSelect({
       valueComponent={Value}
       itemComponent={Item}
       searchable
-      defaultValue={["US", "FI"]}
       required={true}
+      value={selectedValues}
       placeholder="select personas..."
-      label="Select persona to split into"
-      description="SellScale will use AI to split your prospects into these personas"
-      onChange={(ids) => onChange(ids.map((x) => parseInt(x)))}
+      label={label}
+      description={description}
+      onChange={(ids) => {
+        var val: any = ids.map((x) => parseInt(x));
+        if (!selectMultiple) {
+          val = [val[0]];
+        }
+        onChange(val);
+        setSelectedValues(val);
+      }}
       disabled={disabled}
     />
   );

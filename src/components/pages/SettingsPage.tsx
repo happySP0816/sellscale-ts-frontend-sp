@@ -26,8 +26,9 @@ import { disconnectVesselMailbox } from "@utils/requests/disconnectVesselMailbox
 import { connectVesselMailbox } from "@utils/requests/connectVesselMailbox";
 import { showNotification } from "@mantine/notifications";
 import CalendarAndScheduling from "@common/settings/CalendarAndScheduling";
-import { IconTrashFilled } from "@tabler/icons-react";
+import { IconBrain, IconTrashFilled } from "@tabler/icons-react";
 import DoNotContactList from "@common/settings/DoNotContactList";
+import SellScaleBrain from "@common/settings/SellScaleBrain";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -377,8 +378,11 @@ export default function SettingsPage() {
   return (
     <PageFrame>
       <PageTitle title="Settings" />
-      <Tabs orientation="vertical" defaultValue="linkedinConnection">
+      <Tabs orientation="vertical" defaultValue="sellScaleBrain">
         <Tabs.List>
+          <Tabs.Tab value="sellScaleBrain" icon={<IconBrain size="0.8rem" />}>
+            SellScale Brain
+          </Tabs.Tab>
           <Tabs.Tab
             value="linkedinConnection"
             icon={<IconBrandLinkedin size="0.8rem" />}
@@ -430,6 +434,10 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="doNotContact" pl="xs">
           <DoNotContactList />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="sellScaleBrain" pl="xs">
+          <SellScaleBrain />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

@@ -172,9 +172,12 @@ export default function PersonaCard(props: {
 
   const WARNING_PERCENTAGE = 25;
   const getStatusUsedPercentage = () => {
-
-    let usedEmail = props.personaOverview.num_prospects - props.personaOverview.num_unused_email_prospects;
-    let usedLi = props.personaOverview.num_prospects - props.personaOverview.num_unused_li_prospects;
+    let usedEmail =
+      props.personaOverview.num_prospects -
+      props.personaOverview.num_unused_email_prospects;
+    let usedLi =
+      props.personaOverview.num_prospects -
+      props.personaOverview.num_unused_li_prospects;
 
     let unusedVal = props.personaOverview.num_prospects - (usedEmail + usedLi);
     let usedVal = props.personaOverview.num_prospects - unusedVal;
@@ -183,9 +186,7 @@ export default function PersonaCard(props: {
     let percentData = [];
     const label = `Unprocessed, ${Math.round(
       unusedVal * m
-    )}% - ${unusedVal} / ${
-      props.personaOverview.num_prospects
-    } prospects`;
+    )}% - ${unusedVal} / ${props.personaOverview.num_prospects} prospects`;
     if (unusedVal * m > 0) {
       percentData.push({
         value: unusedVal * m,
@@ -224,7 +225,10 @@ export default function PersonaCard(props: {
             <Switch
               checked={props.personaOverview.active}
               onChange={async (event) => {
-                const res = await togglePersona(props.personaOverview.id, userToken);
+                const res = await togglePersona(
+                  props.personaOverview.id,
+                  userToken
+                );
                 if (res.status === 200) {
                   props.refetch();
                 }
@@ -286,29 +290,30 @@ export default function PersonaCard(props: {
           </Group>
         </Group>
         <Flex align="flex-end">
-          {props.personaOverview.uploads && props.personaOverview.uploads.length > 0 && (
-            <>
-              {mdScreenOrLess ? (
-                <ActionIcon
-                  radius="xl"
-                  variant="light"
-                  mx="sm"
-                  onClick={openUploadHistory}
-                >
-                  <IconHistory size={14} />
-                </ActionIcon>
-              ) : (
-                <Button
-                  variant="subtle"
-                  color="dark"
-                  size="xs"
-                  onClick={openUploadHistory}
-                >
-                  {isUploading ? "Upload in Progress..." : "Latest Upload"}
-                </Button>
-              )}
-            </>
-          )}
+          {props.personaOverview.uploads &&
+            props.personaOverview.uploads.length > 0 && (
+              <>
+                {mdScreenOrLess ? (
+                  <ActionIcon
+                    radius="xl"
+                    variant="light"
+                    mx="sm"
+                    onClick={openUploadHistory}
+                  >
+                    <IconHistory size={14} />
+                  </ActionIcon>
+                ) : (
+                  <Button
+                    variant="subtle"
+                    color="dark"
+                    size="xs"
+                    onClick={openUploadHistory}
+                  >
+                    {isUploading ? "Upload in Progress..." : "Latest Upload"}
+                  </Button>
+                )}
+              </>
+            )}
           {mdScreenOrLess ? (
             <ActionIcon
               color="teal"
@@ -411,7 +416,7 @@ export default function PersonaCard(props: {
             <PersonaSplit archetype_id={props.personaOverview.id} />
           </Tabs.Panel>
           <Tabs.Panel value="brain" pt="xs">
-            <PersonaBrain archetype_id={props.archetype.id} />
+            <PersonaBrain archetype_id={props.personaOverview.id} />
           </Tabs.Panel>
         </Tabs>
       </Collapse>

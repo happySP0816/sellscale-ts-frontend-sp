@@ -224,7 +224,7 @@ export default function ManageBumpFramework({
     triggerGetBumpFrameworks();
     setSelectedBumpFramework(innerProps.selectedBumpFramework);
 
-    let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === innerProps.selectedBumpFramework.bump_length)?.value
+    let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === innerProps.selectedBumpFramework?.bump_length)?.value
     if (length == null) {
       length = 50;
     }

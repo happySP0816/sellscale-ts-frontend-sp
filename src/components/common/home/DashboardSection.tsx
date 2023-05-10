@@ -108,6 +108,10 @@ export default function DashboardSection() {
   const prospectsScheduled = getProspectsWithActiveMsg("ACTIVE_CONVO_SCHEDULING");
   const prospectsQualNeeded = getProspectsWithActiveMsg("ACTIVE_CONVO_QUAL_NEEDED");
   const prospectsQuestion = getProspectsWithActiveMsg("ACTIVE_CONVO_QUESTION");
+  const prospectsDemo = prospects.filter((p) => {
+    const demo_scheduled = p.hidden_reason === 'DEMO_SCHEDULED' && new Date(p.hidden_until) > new Date(); 
+    return p.linkedin_status === 'DEMO_SET' && !demo_scheduled;
+  }).sort((a, b) => a.full_name.localeCompare(b.full_name));
 
   const all_prospectsNextSteps = prospects
     .filter((p) => p.linkedin_status === "ACTIVE_CONVO_NEXT_STEPS")
@@ -134,7 +138,7 @@ export default function DashboardSection() {
     prospectsScheduled.length +
     prospectsQualNeeded.length +
     prospectsQuestion.length +
-    all_prospectsDemo.length;
+    prospectsDemo.length;
 
   console.log(all_prospectsDemo);
 
@@ -302,7 +306,7 @@ export default function DashboardSection() {
                   {all_prospectsDemo.length > 0 && (
                     <NotificationCard
                       title="Demo Feedback"
-                      amount={all_prospectsDemo.length}
+                      amount={prospectsDemo.length}
                       totalAmount={all_prospectsDemo.length}
                       assistantMsg="You scheduled a demo - how did it go?"
                       onClickSeeAll={() => setDemoFeedbackDrawerOpened(true)}
@@ -322,16 +326,16 @@ export default function DashboardSection() {
                             <Avatar
                               size="md"
                               radius="xl"
-                              src={all_prospectsDemo[0].img_url}
+                              src={prospectsDemo[0].img_url}
                             />
                           </Indicator>
                         </div>
                         <div style={{ flexGrow: 1, marginLeft: 10 }}>
                           <Text fw={700} fz="sm">
-                            Demo with {all_prospectsDemo[0].full_name}
+                            Demo with {prospectsDemo[0].full_name}
                           </Text>
                           <Text fz="sm" c="dimmed">
-                            {convertDateToLocalTime(new Date(all_prospectsDemo[0].demo_date))}
+                            {convertDateToLocalTime(new Date(prospectsDemo[0].demo_date))}
                           </Text>
                         </div>
                         <div>
@@ -341,7 +345,7 @@ export default function DashboardSection() {
                             size="xs"
                             ml={8}
                             onClick={() => {
-                              setDrawerProspectId(all_prospectsDemo[0].id);
+                              setDrawerProspectId(prospectsDemo[0].id);
                               setDemosDrawerOpened(true);
                             }}
                           >

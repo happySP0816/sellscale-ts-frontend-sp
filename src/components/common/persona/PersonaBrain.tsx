@@ -302,7 +302,7 @@ export default function PersonaBrain(props: PropsType) {
             disabled={!needsSave}
             onClick={savePersonaDetails}
           >
-            Save Persona Brain
+            Save Persona Information
           </Button>
           <Button
             color="red"

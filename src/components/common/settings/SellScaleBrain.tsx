@@ -22,6 +22,8 @@ import {
 } from "@tabler/icons";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import SellScaleBrainPersonasTab from "./SellScaleBrain/SellScaleBrainPersonasTab";
+import SellScaleBrainUserTab from "./SellScaleBrain/SellScaleBrainUserTab";
+import SellScaleBrainCompanyTab from "./SellScaleBrain/SellScaleBrainCompanyTab";
 
 export default function SellScaleBrain() {
   const [userToken] = useRecoilState(userTokenState);
@@ -59,11 +61,11 @@ export default function SellScaleBrain() {
           </Tabs.List>
 
           <Tabs.Panel value="company_info" pt="xs">
-            <ComingSoonCard />
+            <SellScaleBrainCompanyTab />
           </Tabs.Panel>
 
           <Tabs.Panel value="user_info" pt="xs">
-            <ComingSoonCard />
+            <SellScaleBrainUserTab />
           </Tabs.Panel>
 
           <Tabs.Panel value="persona_info" pt="xs">

@@ -11,6 +11,7 @@ import {
   ActionIcon,
   Card,
   Box,
+  Button,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
@@ -35,11 +36,11 @@ import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";
 import { Channel } from "src";
 import FlexSeparate from "@common/library/FlexSeparate";
-import ProspectDetailsViewEmails from "@common/prospectDetails/ProspectDetailsViewEmails";
+import ProspectDetailsViewEmails, { openComposeEmailModal } from "@common/prospectDetails/ProspectDetailsViewEmails";
 import { API_URL } from "@constants/data";
 import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove";
 import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsResearch";
-import { IconDots } from "@tabler/icons";
+import { IconDots, IconPencil } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
 
 export default function ProspectDetailsDrawer() {
@@ -155,16 +156,38 @@ export default function ProspectDetailsDrawer() {
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       {data?.main.prospect_info && !isFetching && (
         <>
-          <ProspectDetailsSummary
-            fullName={data.main.prospect_info.details.full_name}
-            title={data.main.prospect_info.details.title}
-            email={data.main.prospect_info.email.email}
-            linkedin={data.main.prospect_info.li.li_profile}
-            profilePic={data.main.prospect_info.details.profile_pic}
-            companyName={data.main.prospect_info.company.name}
-            companyURL={data.main.prospect_info.company.url}
-            persona={data.main.prospect_info.details.persona}
-          />
+          <div style={{ position: 'relative' }}>
+            <ProspectDetailsSummary
+              fullName={data.main.prospect_info.details.full_name}
+              title={data.main.prospect_info.details.title}
+              email={data.main.prospect_info.email.email}
+              linkedin={data.main.prospect_info.li.li_profile}
+              profilePic={data.main.prospect_info.details.profile_pic}
+              companyName={data.main.prospect_info.company.name}
+              companyURL={data.main.prospect_info.company.url}
+              persona={data.main.prospect_info.details.persona}
+            />
+            <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
+              {data.main.prospect_info.email.email && (
+                <Button
+                  size="xs"
+                  variant="light"
+                  leftIcon={<IconPencil size="1rem" />}
+                  onClick={() => {
+                    openComposeEmailModal(
+                      userToken,
+                      prospectId,
+                      data.main.prospect_info.email.email,
+                      userData.sdr_email,
+                      "", "");
+                  }}
+                >
+                  Compose Email
+                </Button>
+              )}
+            </div>
+          </div>
+
           <ScrollArea
             style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
           >

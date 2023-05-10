@@ -38,6 +38,57 @@ import ConnectEmailCard from "@common/library/ConnectEmailCard";
 import FlexSeparate from "@common/library/FlexSeparate";
 import { generateEmail } from "@utils/requests/generateEmail";
 
+export const openComposeEmailModal = (userToken: string, prospectId: number, email: string, sdr_email: string, subject: string, body: string) => {
+  openContextModal({
+    modal: "composeEmail",
+    title: (
+      <Group position="apart">
+        <div>
+          <Title order={4}>Email Compose</Title>
+        </div>
+        <div>
+          <Button
+            size="xs"
+            radius="xl"
+            variant="light"
+            onClick={async () => {
+              const response = await generateEmail(userToken, prospectId);
+              if (response.status === "success") {
+                closeAllModals();
+                setTimeout(() => {
+                  openComposeEmailModal(
+                    userToken,
+                    prospectId,
+                    email,
+                    sdr_email,
+                    response.extra.subject, response.extra.body.replace(/\n/gm, '<br>'));
+                }, 1);
+              }
+            }}
+          >
+            AI Generate Email
+          </Button>
+        </div>
+      </Group>
+    ),
+    styles: (theme) => ({
+      title: {
+        width: "100%",
+      },
+      header: {
+        margin: 0,
+      },
+    }),
+    innerProps: {
+      email: email,
+      subject: subject,
+      body: body,
+      from: sdr_email,
+      prospectId: prospectId,
+    },
+  });
+}
+
 export default function ProspectDetailsViewEmails(props: {
   prospectId: number;
   email: string;
@@ -54,52 +105,6 @@ export default function ProspectDetailsViewEmails(props: {
     refetchOnWindowFocus: false,
     refetchInterval: 20 * 1000, // every 20 seconds, refetch
   });
-
-  const openComposeEmailModal = (subject: string, body: string) => {
-    openContextModal({
-      modal: "composeEmail",
-      title: (
-        <Group position="apart">
-          <div>
-            <Title order={4}>Email Compose</Title>
-          </div>
-          <div>
-            <Button
-              size="xs"
-              radius="xl"
-              variant="light"
-              onClick={async () => {
-                const response = await generateEmail(userToken, props.prospectId);
-                if (response.status === "success") {
-                  closeAllModals();
-                  setTimeout(() => {
-                    openComposeEmailModal(response.extra.subject, response.extra.body.replace(/\n/gm, '<br>'));
-                  }, 1);
-                }
-              }}
-            >
-              AI Generate Email
-            </Button>
-          </div>
-        </Group>
-      ),
-      styles: (theme) => ({
-        title: {
-          width: "100%",
-        },
-        header: {
-          margin: 0,
-        },
-      }),
-      innerProps: {
-        email: props.email,
-        subject: subject,
-        body: body,
-        from: userData.sdr_email,
-        prospectId: props.prospectId,
-      },
-    });
-  }
 
   return (
     <>
@@ -129,7 +134,12 @@ export default function ProspectDetailsViewEmails(props: {
               size="xs"
               leftIcon={<IconPencil size="1rem" />}
               onClick={() => {
-                openComposeEmailModal("", "");
+                openComposeEmailModal(
+                  userToken,
+                  props.prospectId,
+                  props.email,
+                  userData.sdr_email,
+                  "", "");
               }}
             >
               Compose

@@ -32,6 +32,7 @@ import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChan
 import { useQueryClient } from "@tanstack/react-query";
 import { convertDateToLocalTime } from "@utils/general";
 import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import { dashCardSeeAllDrawerOpenState } from "@atoms/dashboardAtoms";
 
 export default function DashCardContents(props: {
   prospect: Prospect;
@@ -65,6 +66,10 @@ export default function DashCardContents(props: {
   const [note, setNote] = useState<string>("");
   const [qualified, setQualified] = useState<boolean>(true);
   const [schedule, setSchedule] = useState<string>("");
+
+  const [seeAll_drawerOpened, seeAll_setDrawerOpened] = useRecoilState(
+    dashCardSeeAllDrawerOpenState
+  );
 
   // Prospect Drawer
   const [_opened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
@@ -140,6 +145,10 @@ export default function DashCardContents(props: {
             compact
             variant={opened ? "filled" : "light"}
             onClick={() => {
+              setTimeout(() => {
+                // Use timeout to keep something open while the new drawer opens
+                seeAll_setDrawerOpened(false);
+              }, 1000);
               setProspectId(props.prospect.id);
               setDrawerOpened(true);
             }}

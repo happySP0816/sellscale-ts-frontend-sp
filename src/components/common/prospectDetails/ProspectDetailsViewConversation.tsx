@@ -67,7 +67,9 @@ export default function ProspectDetailsViewConversation(
   const [messageDraft, setMessageDraft] = useState("");
   const userData = useRecoilValue(userDataState);
   const [selectedBumpFrameworkId, setBumpFrameworkId] = useState(0);
-  const [selectedBumpFrameworkLengthAPI, setBumpFrameworkLengthAPI] = useState("MEDIUM")
+  const [selectedBumpFrameworkLengthAPI, setBumpFrameworkLengthAPI] = useState(
+    "MEDIUM"
+  );
   const [accountResearch, setAccountResearch] = useState("");
   const [convoOutOfSync, setConvoOutOfSync] = useState(false);
 
@@ -147,7 +149,10 @@ export default function ProspectDetailsViewConversation(
         });
       }
 
-      if(result.extra.prospect.linkedin_status !== prospectDrawerStatuses.linkedin) {
+      if (
+        result.extra.prospect.linkedin_status !==
+        prospectDrawerStatuses.linkedin
+      ) {
         queryClient.invalidateQueries({
           queryKey: [`query-dash-get-prospects`],
         });
@@ -238,6 +243,10 @@ export default function ProspectDetailsViewConversation(
 
     // Update convo and UI
     await fetchAndPopulateConvo();
+
+    queryClient.invalidateQueries({
+      queryKey: [`query-dash-get-prospects`],
+    });
   };
 
   const generateAIFollowup = async () => {
@@ -387,7 +396,10 @@ export default function ProspectDetailsViewConversation(
         </div>
         <div>
           <div style={{ position: "relative" }}>
-            <LoadingOverlay visible={msgLoading || generateMsgLoading} overlayBlur={2} />
+            <LoadingOverlay
+              visible={msgLoading || generateMsgLoading}
+              overlayBlur={2}
+            />
             <Textarea
               mt="sm"
               minRows={2}

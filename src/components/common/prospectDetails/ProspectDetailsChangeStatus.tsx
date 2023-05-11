@@ -118,6 +118,12 @@ const linkedinStatusOptions = [
 
 const emailStatusOptions = [
   {
+    title: "Bounced",
+    icon: IconMailboxOff,
+    color: "gray",
+    status: "BOUNCED",
+  },
+  {
     title: "Not Sent",
     icon: IconMailboxOff,
     color: "gray",

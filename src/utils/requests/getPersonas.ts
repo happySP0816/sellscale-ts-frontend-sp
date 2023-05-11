@@ -20,7 +20,7 @@ export default async function getPersonas(userToken: string): Promise<MsgRespons
       },
     }
   );
-  return processResponse(response, 'archetypes');
+  return await processResponse(response, 'archetypes');
 
 }
 
@@ -41,7 +41,7 @@ export async function getPersonasOverview(userToken: string): Promise<MsgRespons
       },
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 
 }
 
@@ -94,7 +94,7 @@ export async function getUploadStats(userToken: string, uploadId: number): Promi
       },
     }
   );
-  return processResponse(response, 'stats');
+  return await processResponse(response, 'stats');
 
 }
 
@@ -116,6 +116,6 @@ export async function getUploadDetails(userToken: string, uploadId: number): Pro
       },
     }
   );
-  return processResponse(response, 'uploads');
+  return await processResponse(response, 'uploads');
 
 }

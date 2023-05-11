@@ -19,6 +19,6 @@ export async function getResearchPointsHeuristic(userToken: string, prospectID: 
       }
     }
   );
-  return processResponse(response, 'research_points');
+  return await processResponse(response, 'research_points');
 
 }

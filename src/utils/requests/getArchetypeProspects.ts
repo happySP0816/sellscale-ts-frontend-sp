@@ -20,6 +20,6 @@ export async function getArchetypeProspects(userToken: string, archetypeID: numb
       }
     }
   );
-  return processResponse(response, 'prospects');
+  return await processResponse(response, 'prospects');
 
 }

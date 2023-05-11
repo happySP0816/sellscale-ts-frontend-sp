@@ -23,5 +23,5 @@ export async function getLIMessagesQueuedForOutreach(
       }
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 }

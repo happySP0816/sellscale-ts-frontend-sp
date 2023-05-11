@@ -25,6 +25,6 @@ export async function addProspectNote(userToken: string, prospectId: number, not
       }),
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 
 }

@@ -19,6 +19,6 @@ export async function getProspectByID(userToken: string, prospectID: number): Pr
       }
     }
   );
-  return processResponse(response, 'prospect_info');
+  return await processResponse(response, 'prospect_info');
 
 }

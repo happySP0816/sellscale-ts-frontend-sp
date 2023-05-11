@@ -25,5 +25,5 @@ export default async function postICPClassificationPromptChange(userToken: strin
       }),
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 }

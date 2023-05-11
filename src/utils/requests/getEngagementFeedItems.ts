@@ -13,5 +13,5 @@ export default async function getEngagementFeedItems(userToken: string, limit: n
       },
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 }

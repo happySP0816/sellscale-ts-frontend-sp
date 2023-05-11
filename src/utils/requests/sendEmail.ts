@@ -16,6 +16,6 @@ export async function sendEmail(userToken: string, prospectId: number, subject: 
       body: JSON.stringify({ subject, body }),
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 
 }

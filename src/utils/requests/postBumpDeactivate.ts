@@ -23,6 +23,6 @@ export async function postBumpDeactivate(userToken: string, bumpFrameworkID: num
       })
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 
 }

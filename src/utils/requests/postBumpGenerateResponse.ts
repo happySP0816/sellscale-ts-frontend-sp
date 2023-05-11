@@ -32,5 +32,5 @@ export async function postBumpGenerateResponse(
       }),
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 }

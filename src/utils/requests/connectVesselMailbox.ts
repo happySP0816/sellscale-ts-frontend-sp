@@ -22,6 +22,6 @@ export async function connectVesselMailbox(userToken: string, vesselMailboxID: n
       })
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 
 }

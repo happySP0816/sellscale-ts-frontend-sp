@@ -25,5 +25,5 @@ export async function patchSchedulingLink(
       }),
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 }

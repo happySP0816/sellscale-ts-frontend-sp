@@ -29,7 +29,7 @@ export async function generateValueProps(userToken: string, company: string, sel
       }),
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 
 }
 
@@ -50,7 +50,7 @@ export async function generateDraft(userToken: string, valueProps: string[], arc
       }),
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 
 }
 
@@ -72,6 +72,6 @@ export async function sendToOutreach(userToken: string, title: string, archetype
       }),
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 
 }

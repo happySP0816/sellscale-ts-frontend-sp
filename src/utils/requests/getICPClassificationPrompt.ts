@@ -18,5 +18,5 @@ export default async function getICPClassificationPrompt(userToken: string, arch
       }
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 }

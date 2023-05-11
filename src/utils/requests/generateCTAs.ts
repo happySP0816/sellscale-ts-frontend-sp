@@ -27,6 +27,6 @@ export async function generateCTAs(userToken: string, company: string, persona: 
       }),
     }
   );
-  return processResponse(response, 'ctas');
+  return await processResponse(response, 'ctas');
 
 }

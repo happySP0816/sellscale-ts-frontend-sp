@@ -19,6 +19,6 @@ export async function getBumpFrameworks(userToken: string, overallStatus: string
       }
     }
   );
-  return processResponse(response, 'bump_frameworks');
+  return await processResponse(response, 'bump_frameworks');
 
 }

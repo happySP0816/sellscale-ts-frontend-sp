@@ -19,5 +19,5 @@ export default async function getNylasClientID(
       },
     }
   );
-  return processResponse(response, 'nylas_client_id');
+  return await processResponse(response, 'nylas_client_id');
 }

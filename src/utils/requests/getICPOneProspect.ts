@@ -20,5 +20,5 @@ export async function getICPOneProspect(userToken: string, archetypeID: number, 
       }
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 }

@@ -31,6 +31,6 @@ export async function createBumpFramework(userToken: string, overallStatus: stri
       })
     }
   );
-  return processResponse(response, 'bump_framework_id');
+  return await processResponse(response, 'bump_framework_id');
 
 }

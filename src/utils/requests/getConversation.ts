@@ -21,5 +21,5 @@ export async function getConversation(
       },
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 }

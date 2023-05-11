@@ -28,5 +28,5 @@ export async function sendLinkedInMessage(
       purgatory: purgatory ?? true,
     }),
   });
-  return processResponse(response);
+  return await processResponse(response);
 }

@@ -24,5 +24,5 @@ export default async function exchangeNylasClientID(
       }),
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 }

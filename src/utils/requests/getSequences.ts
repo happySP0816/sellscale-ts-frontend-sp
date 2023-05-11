@@ -14,7 +14,7 @@ export async function getSequences(userToken: string): Promise<MsgResponse> {
       Authorization: `Bearer ${userToken}`,
     },
   });
-  return processResponse(response, 'sequence_options');
+  return await processResponse(response, 'sequence_options');
 }
 
 /**
@@ -38,5 +38,5 @@ export async function saveSequenceToPersona(
       sequence_id: sequenceId,
     }),
   });
-  return processResponse(response);
+  return await processResponse(response);
 }

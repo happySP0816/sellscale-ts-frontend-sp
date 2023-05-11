@@ -14,5 +14,5 @@ export default async function getDemoFeedback(userToken: string): Promise<MsgRes
       },
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 }

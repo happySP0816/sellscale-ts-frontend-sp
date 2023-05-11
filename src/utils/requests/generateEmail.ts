@@ -14,7 +14,7 @@ export async function generateEmail(
     },
     body: JSON.stringify({ prompt: prompt }),
   });
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 }
 
 
@@ -30,5 +30,5 @@ export async function getEmailGenerationPrompt(
     },
     body: JSON.stringify({ prospect_id: prospectId }),
   });
-  return processResponse(response);
+  return await processResponse(response);
 }

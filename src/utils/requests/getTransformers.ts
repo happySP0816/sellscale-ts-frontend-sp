@@ -18,6 +18,6 @@ export default async function getTransformers(userToken: string, archetype_id: n
       },
     }
   );
-  return processResponse(response, 'stats');
+  return await processResponse(response, 'stats');
 
 }

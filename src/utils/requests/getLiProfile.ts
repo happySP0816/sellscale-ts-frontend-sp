@@ -14,5 +14,5 @@ export default async function getLiProfile(userToken: string): Promise<MsgRespon
       },
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 }

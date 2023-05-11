@@ -18,6 +18,6 @@ export async function clearAuthTokens(userToken: string): Promise<MsgResponse> {
       },
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 
 }

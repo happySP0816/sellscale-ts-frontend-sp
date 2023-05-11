@@ -14,7 +14,7 @@ export async function getEmailThreads(userToken: string, prospectId: number, lim
       },
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 }
 
 
@@ -29,7 +29,7 @@ export async function getEmailMessages(userToken: string, prospectId: number, th
       },
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 }
 
 
@@ -51,5 +51,5 @@ async function getEmailDetails(userToken: string, prospectId: number, emailId: n
       },
     }
   );
-  return processResponse(response, 'data');
+  return await processResponse(response, 'data');
 }

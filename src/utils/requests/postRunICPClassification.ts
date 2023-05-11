@@ -23,5 +23,5 @@ export default async function postRunICPClassification(userToken: string, archet
       }),
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 }

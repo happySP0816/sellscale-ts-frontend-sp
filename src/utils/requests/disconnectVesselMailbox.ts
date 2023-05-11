@@ -18,6 +18,6 @@ export async function disconnectVesselMailbox(userToken: string): Promise<MsgRes
       },
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 
 }

@@ -20,6 +20,6 @@ export async function snoozeProspect(userToken: string, prospectId: number, days
       },
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 
 }

@@ -58,6 +58,6 @@ export async function retriggerUploadJob(userToken: string, archetype_id: number
       }),
     }
   );
-  return processResponse(response);
+  return await processResponse(response);
 
 }

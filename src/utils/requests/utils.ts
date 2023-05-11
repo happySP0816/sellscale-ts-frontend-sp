@@ -89,6 +89,10 @@ async function getResponseJSON(key: string, response: Response): Promise<MsgResp
 
   }
 
+  if (!res) {
+    return { status: 'error', title: `Error`, message: errMsg };
+  }
+
   return res;
 }
 

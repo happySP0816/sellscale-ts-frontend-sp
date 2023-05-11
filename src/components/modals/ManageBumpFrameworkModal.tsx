@@ -75,7 +75,7 @@ export default function ManageBumpFramework({
     const result = await getBumpFrameworks(userToken, innerProps.overallStatus);
 
     let bumpFrameworkArray = [] as BumpFramework[];
-    for (const bumpFramework of result.extra as BumpFramework[]) {
+    for (const bumpFramework of result.data as BumpFramework[]) {
       if (bumpFramework.default) {
         bumpFrameworkArray.unshift(bumpFramework)
       } else {
@@ -156,7 +156,7 @@ export default function ManageBumpFramework({
       innerProps.backTriggerGetFrameworks();
       triggerGetBumpFrameworks()
       setSelectedBumpFramework({
-        id: result.extra.bump_framework_id,
+        id: result.data.bump_framework_id,
         title: form.values.title,
         description: form.values.description,
         overall_status: innerProps.overallStatus,

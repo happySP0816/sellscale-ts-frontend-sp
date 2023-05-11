@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -32,23 +32,5 @@ export async function postBumpGenerateResponse(
       }),
     }
   );
-  const result = await getResponseJSON("generate_li_bump_response", response);
-  if (result === undefined) {
-    return {
-      status: "error",
-      title: `Error`,
-      message: `An error occurred, our engineers have been notified. Please try again later.`,
-    };
-  }
-
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return {
-    status: "success",
-    title: `Success`,
-    message: `Generated LI Bump Response`,
-    extra: result,
-  };
+  return processResponse(response);
 }

@@ -74,6 +74,6 @@ export default async function createPersona(
     status: "success",
     title: `Success`,
     message: `Persona and CTAs have been created`,
-    extra: personaId,
+    data: personaId,
   };
 }

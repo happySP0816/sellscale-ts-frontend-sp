@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -25,9 +25,6 @@ export async function addProspectNote(userToken: string, prospectId: number, not
       }),
     }
   );
-  const result = await getResponseJSON("add-prospect-note", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Added note` };
+  return processResponse(response);
 
 }

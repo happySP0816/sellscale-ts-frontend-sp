@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -23,18 +23,5 @@ export async function getLIMessagesQueuedForOutreach(
       }
     }
   );
-  const result = await getResponseJSON("get_li_messages_queued_for_outreach", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return {
-    status: "success",
-    title: `Success`,
-    message: `Retrieved LI messages queued for outreach`,
-    extra: {
-      "messages": result.messages,
-      "total_count": result.total_count,
-    },
-  };
+  return processResponse(response);
 }

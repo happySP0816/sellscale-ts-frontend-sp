@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -19,9 +19,6 @@ export async function getProspectByID(userToken: string, prospectID: number): Pr
       }
     }
   );
-  const result = await getResponseJSON("get-prospect-by-id", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Prospect retrieved`, extra: result.prospect_info.details };
+  return processResponse(response, 'prospect_info');
 
 }

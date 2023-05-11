@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -33,9 +33,6 @@ export async function patchBumpFramework(userToken: string, bumpFrameworkID: num
       })
     }
   );
-  const result = await getResponseJSON("patch_bump_framework", response);
-  if (isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Bump framework modified.` };
+  return processResponse(response);
 
 }

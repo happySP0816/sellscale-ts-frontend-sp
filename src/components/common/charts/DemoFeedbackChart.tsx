@@ -89,7 +89,7 @@ export default function DemoFeedbackChart() {
       const [_key, { sortStatus }] = queryKey;
 
       const response = await getDemoFeedback(userToken);
-      let results = response.status === 'success' ? (response.extra as any[]) : [];
+      let results = response.status === 'success' ? (response.data as any[]) : [];
 
       // Sort data
       results = _.sortBy(results, sortStatus.columnAccessor);

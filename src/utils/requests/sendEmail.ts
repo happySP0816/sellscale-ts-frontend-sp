@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 
@@ -16,9 +16,6 @@ export async function sendEmail(userToken: string, prospectId: number, subject: 
       body: JSON.stringify({ subject, body }),
     }
   );
-  const result = await getResponseJSON("email-send", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Sent email`, extra: result.data };
+  return processResponse(response, 'data');
 
 }

@@ -101,7 +101,7 @@ export default function CTAGeneratorModal({
     setLoading(false);
     if (result.status === "success") {
       setGeneratedCTAs(
-        result.extra.map((cta: any) => ({ ...cta, enabled: true }))
+        result.data.map((cta: any) => ({ ...cta, enabled: true }))
       );
     } else {
       showNotification({

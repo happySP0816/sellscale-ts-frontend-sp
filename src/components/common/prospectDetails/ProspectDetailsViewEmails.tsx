@@ -84,7 +84,7 @@ export default function ProspectDetailsViewEmails(props: {
     queryKey: [`query-prospect-email-threads-${props.prospectId}`],
     queryFn: async () => {
       const response = await getEmailThreads(userToken, props.prospectId, 5, 0);
-      return response.status === "success" ? response.extra : [];
+      return response.status === "success" ? response.data : [];
     },
     refetchOnWindowFocus: false,
     refetchInterval: 20 * 1000, // every 20 seconds, refetch

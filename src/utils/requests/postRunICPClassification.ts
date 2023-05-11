@@ -1,7 +1,7 @@
 import { API_URL } from "@constants/data";
 import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 
 /**
  * Runs the ICP Classification model for a given archetype
@@ -23,8 +23,5 @@ export default async function postRunICPClassification(userToken: string, archet
       }),
     }
   );
-  const result = await getResponseJSON("run-icp-classify", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `ICP classify triggered successfully.` };
+  return processResponse(response);
 }

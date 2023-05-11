@@ -113,13 +113,13 @@ export default function ProspectDetailsViewConversation(
       props.conversation_entry_list.length > 0
     ) {
       setConvoOutOfSync(true);
-      result.extra = props.conversation_entry_list;
+      result.data.data = props.conversation_entry_list;
     }
 
     // Get and sort messages
     const latestMessages =
       result.status === "success"
-        ? (result.extra.convo as LinkedInMessage[])
+        ? (result.data.data as LinkedInMessage[])
         : undefined;
     if (latestMessages) {
       // If we have a new message, scroll to bottom
@@ -134,12 +134,12 @@ export default function ProspectDetailsViewConversation(
 
       // If status changed, update UI
       if (
-        result.extra.prospect.overall_status !== prospectDrawerStatuses.overall
+        result.data.prospect.overall_status !== prospectDrawerStatuses.overall
       ) {
         setProspectDrawerStatuses((prev) => ({
-          overall: result.extra.prospect.overall_status,
-          linkedin: result.extra.prospect.linkedin_status,
-          email: result.extra.prospect.email_status,
+          overall: result.data.prospect.overall_status,
+          linkedin: result.data.prospect.linkedin_status,
+          email: result.data.prospect.email_status,
         }));
         queryClient.invalidateQueries({
           queryKey: [`query-pipeline-prospects-all`],
@@ -150,7 +150,7 @@ export default function ProspectDetailsViewConversation(
       }
 
       if (
-        result.extra.prospect.linkedin_status !==
+        result.data.prospect.linkedin_status !==
         prospectDrawerStatuses.linkedin
       ) {
         queryClient.invalidateQueries({
@@ -267,7 +267,7 @@ export default function ProspectDetailsViewConversation(
         color: "green",
         autoClose: true,
       });
-      setMessageDraft(result.extra.message);
+      setMessageDraft(result.data.message);
     } else {
       showNotification({
         id: "generate-ai-followup-error",

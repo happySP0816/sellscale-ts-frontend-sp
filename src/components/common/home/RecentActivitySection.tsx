@@ -43,8 +43,8 @@ export default function RecentActivitySection() {
     setIsFetching(true);
     (async () => {
       const response = await getEngagementFeedItems(userToken, ENGAGEMENT_FEED_PAGE_LIMIT, (page - 1) * ENGAGEMENT_FEED_PAGE_LIMIT)
-      const engagement_feed_items = response.status === 'success' ? response.extra.engagement_feed_items : [];
-      totalItems.current = response.status === 'success' ? response.extra.total_count : -1;
+      const engagement_feed_items = response.status === 'success' ? response.data.engagement_feed_items : [];
+      totalItems.current = response.status === 'success' ? response.data.total_count : -1;
       allEngagementFeedItems.current = allEngagementFeedItems.current.concat(engagement_feed_items);
       setIsFetching(false);
     })();

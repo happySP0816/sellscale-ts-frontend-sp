@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -27,9 +27,6 @@ export async function generateCTAs(userToken: string, company: string, persona: 
       }),
     }
   );
-  const result = await getResponseJSON("generate-cta-ideas", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Generated CTA ideas`, extra: result.ctas };
+  return processResponse(response, 'ctas');
 
 }

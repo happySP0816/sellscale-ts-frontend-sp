@@ -3,7 +3,7 @@ export interface MsgResponse {
   status: "success" | "error";
   title: string;
   message: string;
-  extra?: any;
+  data?: any;
 }
 
 export interface Campaign {

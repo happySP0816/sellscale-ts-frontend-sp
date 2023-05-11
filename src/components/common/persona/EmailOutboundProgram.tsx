@@ -16,7 +16,7 @@ export default function EmailOutboundProgram() {
     queryKey: [`query-get-all-sequences`],
     queryFn: async () => {
       const result = await getSequences(userToken);
-      return result.status === 'success' ? result.extra : [];
+      return result.status === 'success' ? result.data : [];
     },
   });
 
@@ -25,7 +25,7 @@ export default function EmailOutboundProgram() {
     queryFn: async () => {
       const response = await getPersonas(userToken);
       const result =
-        response.status === "success" ? (response.extra as Archetype[]) : [];
+        response.status === "success" ? (response.data as Archetype[]) : [];
 
       const personas = result.sort((a, b) => {
         if (a.active === b.active) {

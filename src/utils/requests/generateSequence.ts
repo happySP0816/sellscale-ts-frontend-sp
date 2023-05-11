@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -29,10 +29,7 @@ export async function generateValueProps(userToken: string, company: string, sel
       }),
     }
   );
-  const result = await getResponseJSON("generate-sequence-value-props", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Generated sequence value props`, extra: result.data };
+  return processResponse(response, 'data');
 
 }
 
@@ -53,10 +50,7 @@ export async function generateDraft(userToken: string, valueProps: string[], arc
       }),
     }
   );
-  const result = await getResponseJSON("generate-sequence-draft", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Generated sequence draft`, extra: result.data };
+  return processResponse(response, 'data');
 
 }
 
@@ -78,9 +72,6 @@ export async function sendToOutreach(userToken: string, title: string, archetype
       }),
     }
   );
-  const result = await getResponseJSON("send-sequence-steps", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Sent sequence steps` };
+  return processResponse(response);
 
 }

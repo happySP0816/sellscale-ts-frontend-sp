@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJson, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -19,15 +19,5 @@ export default async function getNylasClientID(
       },
     }
   );
-  const result = await getResponseJson("nylas-client-id-get", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return {
-    status: "success",
-    title: `Success`,
-    message: `Gathered Nylas Client ID`,
-    extra: result.nylas_client_id,
-  };
+  return processResponse(response, 'nylas_client_id');
 }

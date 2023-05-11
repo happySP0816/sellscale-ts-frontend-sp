@@ -227,7 +227,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
         console.error("Failed to create persona & CTAs");
         return;
       }
-      archetype_id = result.extra;
+      archetype_id = result.data;
     }
 
     const uploadJSON = (fileJSON as any[])

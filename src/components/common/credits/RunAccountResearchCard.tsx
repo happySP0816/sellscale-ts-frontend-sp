@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import displayNotification from "@utils/notificationFlow";
 import { IconRobot } from "@tabler/icons";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
+import { MsgResponse } from "src";
 
 type PropsType = {
   archetype_id: number;
@@ -84,12 +85,7 @@ export default function RunAccountResearchCard(props: PropsType) {
     fetch_account_research_inputs();
   };
 
-  const runAccountResearch = async (): Promise<{
-    status: string;
-    title: string;
-    message: string;
-    extra?: any;
-  }> => {
+  const runAccountResearch = async (): Promise<MsgResponse> => {
     setShowAccountResearchLoader(true);
     setButtonsHidden(true);
     const res = await fetch(
@@ -129,17 +125,12 @@ export default function RunAccountResearchCard(props: PropsType) {
           message: e.message,
         };
       });
-    return res;
+    return res as MsgResponse;
   };
 
   const [loadingPersonaFitReason, setLoadingPersonaFitReason] = useState(false);
 
-  const fetchPersonaFitReason = async (): Promise<{
-    status: string;
-    title: string;
-    message: string;
-    extra?: any;
-  }> => {
+  const fetchPersonaFitReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaFitReason(true);
     const res = await fetch(
       `${API_URL}/client/archetype/${props.archetype_id}/predict_persona_fit_reason`,
@@ -157,14 +148,14 @@ export default function RunAccountResearchCard(props: PropsType) {
             status: "success",
             title: `Success`,
             message: `Generated persona fit reason.`,
-            extra: await r.json(),
+            data: await r.json(),
           };
         } else {
           return {
             status: "error",
             title: `Error (${r.status})`,
             message: "Error while running fit generation. Contact engineer.",
-            extra: {},
+            data: {},
           };
         }
       })
@@ -174,12 +165,12 @@ export default function RunAccountResearchCard(props: PropsType) {
           status: "error",
           title: `Error while running fit generation. Contact engineer.`,
           message: e.message,
-          extra: {},
+          data: {},
         };
       });
     setLoadingPersonaFitReason(false);
-    setPersonaValueProp(res.extra.reason);
-    return res;
+    setPersonaValueProp(res.data.reason);
+    return res as MsgResponse;
   };
 
   return (

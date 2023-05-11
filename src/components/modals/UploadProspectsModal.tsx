@@ -41,7 +41,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
-import { Archetype } from "src";
+import { Archetype, MsgResponse } from "src";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import { API_URL } from "@constants/data";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
@@ -95,12 +95,7 @@ export default function UploadProspectsModal({
     loadingPersonaDescriptionGeneration,
     setLoadingPersonaDescriptionGeneration,
   ] = useState(false);
-  const generatePersonaDescription = async (): Promise<{
-    status: string;
-    title: string;
-    message: string;
-    extra?: any;
-  }> => {
+  const generatePersonaDescription = async (): Promise<MsgResponse> => {
     setLoadingPersonaDescriptionGeneration(true);
     const res = await fetch(
       `${API_URL}/client/archetype/generate_persona_description`,
@@ -121,14 +116,14 @@ export default function UploadProspectsModal({
             status: "success",
             title: "Success",
             message: "Persona description generated successfully",
-            extra: await r.json(),
+            data: await r.json(),
           };
         } else {
           return {
             status: "error",
             title: `Error (${r.status})`,
             message: "Failed to generate persona description",
-            extra: {},
+            data: {},
           };
         }
       })
@@ -137,24 +132,19 @@ export default function UploadProspectsModal({
           status: "error",
           title: "Error",
           message: e.message,
-          extra: {},
+          data: {},
         };
       });
     setLoadingPersonaDescriptionGeneration(false);
-    setDescription(res.extra.description);
-    return res;
+    setDescription(res.data.description);
+    return res as MsgResponse;
   };
 
   const [
     loadingPersonaBuyReasonGeneration,
     setLoadingPersonaBuyReasonGeneration,
   ] = useState(false);
-  const generatePersonaBuyReason = async (): Promise<{
-    status: string;
-    title: string;
-    message: string;
-    extra?: any;
-  }> => {
+  const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaBuyReasonGeneration(true);
     const res = await fetch(
       `${API_URL}/client/archetype/generate_persona_buy_reason`,
@@ -175,14 +165,14 @@ export default function UploadProspectsModal({
             status: "success",
             title: "Success",
             message: "Persona buying reason generated successfully",
-            extra: await r.json(),
+            data: await r.json(),
           };
         } else {
           return {
             status: "error",
             title: `Error (${r.status})`,
             message: "Failed to generate persona buying reason",
-            extra: {},
+            data: {},
           };
         }
       })
@@ -191,24 +181,19 @@ export default function UploadProspectsModal({
           status: "error",
           title: "Error",
           message: e.message,
-          extra: {},
+          data: {},
         };
       });
     setLoadingPersonaBuyReasonGeneration(false);
-    setFitReason(res.extra.description);
-    return res;
+    setFitReason(res.data.description);
+    return res as MsgResponse;
   };
 
   const [
     loadingICPMatchingPromptGeneration,
     setLoadingICPMatchingPromptGeneration,
   ] = useState(false);
-  const generateICPMatchingPrompt = async (): Promise<{
-    status: string;
-    title: string;
-    message: string;
-    extra?: any;
-  }> => {
+  const generateICPMatchingPrompt = async (): Promise<MsgResponse> => {
     setLoadingICPMatchingPromptGeneration(true);
     const res = await fetch(
       `${API_URL}/client/archetype/generate_persona_icp_matching_prompt`,
@@ -231,14 +216,14 @@ export default function UploadProspectsModal({
             status: "success",
             title: "Success",
             message: "ICP matching prompt generated successfully",
-            extra: await r.json(),
+            data: await r.json(),
           };
         } else {
           return {
             status: "error",
             title: `Error (${r.status})`,
             message: "Failed to generate ICP matching prompt",
-            extra: {},
+            data: {},
           };
         }
       })
@@ -247,12 +232,12 @@ export default function UploadProspectsModal({
           status: "error",
           title: "Error",
           message: e.message,
-          extra: {},
+          data: {},
         };
       });
     setLoadingICPMatchingPromptGeneration(false);
-    setICPMatchingPrompt(res.extra.description);
-    return res;
+    setICPMatchingPrompt(res.data.description);
+    return res as MsgResponse;
   };
 
   const userToken = useRecoilValue(userTokenState);

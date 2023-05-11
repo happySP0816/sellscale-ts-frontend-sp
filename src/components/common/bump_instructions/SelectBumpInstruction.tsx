@@ -63,8 +63,8 @@ export default function SelectBumpInstruction(props: PropsType) {
     setLoadingBumpFrameworks(true);
     const result = await getBumpFrameworks(userToken, prospectDrawerStatuses.overall);
 
-    setBumpFrameworks(result.extra);
-    for (const bumpFramework of result.extra as BumpFramework[]) {
+    setBumpFrameworks(result.data);
+    for (const bumpFramework of result.data as BumpFramework[]) {
       if (bumpFramework.default) {
         let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === bumpFramework.bump_length)?.value
         if (length == null) {

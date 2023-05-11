@@ -1,6 +1,6 @@
 import { API_URL } from "@constants/data";
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 
 export default async function getEngagementFeedItems(userToken: string, limit: number, offset: number): Promise<MsgResponse> {
   const response = await fetch(
@@ -13,16 +13,5 @@ export default async function getEngagementFeedItems(userToken: string, limit: n
       },
     }
   );
-  const result = await getResponseJSON("engagement-feed-get", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return {
-    status: 'success',
-    title: `Success`,
-    message: `Received engagement feed items`,
-    extra: {
-      engagement_feed_items: result.engagement_feed_items,
-      total_count: result.total_count,
-    }
-  };
+  return processResponse(response);
 }

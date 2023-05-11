@@ -299,7 +299,7 @@ export default function ProspectTable({
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show channels (other than SELLSCALE)
-                  Object.keys(data_channels.extra)
+                  Object.keys(data_channels.data)
                     .filter((x) => x !== "SELLSCALE")
                     .map((channel) => {
                       return {
@@ -326,11 +326,11 @@ export default function ProspectTable({
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show {channel} statuses
-                  data_channels?.extra[channel]?.statuses_available
+                  data_channels?.data[channel]?.statuses_available
                     .map((status: string) => {
                       return {
                         label: formatToLabel(
-                          data_channels.extra[channel][status].enum_val
+                          data_channels.data[channel][status].enum_val
                         ),
                         value: status,
                       };

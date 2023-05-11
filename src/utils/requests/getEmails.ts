@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 
@@ -14,11 +14,7 @@ export async function getEmailThreads(userToken: string, prospectId: number, lim
       },
     }
   );
-  const result = await getResponseJSON("email-threads-get", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Gathered email threads`, extra: result.data };
-
+  return processResponse(response, 'data');
 }
 
 
@@ -33,11 +29,7 @@ export async function getEmailMessages(userToken: string, prospectId: number, th
       },
     }
   );
-  const result = await getResponseJSON("email-messages-get", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Gathered email messages`, extra: result.data };
-
+  return processResponse(response, 'data');
 }
 
 
@@ -59,9 +51,5 @@ async function getEmailDetails(userToken: string, prospectId: number, emailId: n
       },
     }
   );
-  const result = await getResponseJSON("email-details-get", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Gathered email details`, extra: result.data };
-
+  return processResponse(response, 'data');
 }

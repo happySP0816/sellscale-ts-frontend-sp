@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -21,18 +21,5 @@ export async function getConversation(
       },
     }
   );
-  const result = await getResponseJSON("get-linkedin-convo", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return {
-    status: "success",
-    title: `Success`,
-    message: result.data_status,
-    extra: {
-      convo: result.data,
-      prospect: result.prospect,
-    },
-  };
+  return processResponse(response);
 }

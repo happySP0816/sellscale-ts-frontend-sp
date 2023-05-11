@@ -51,7 +51,7 @@ export default function PersonaPage() {
     queryFn: async () => {
       const response = await getPersonasOverview(userToken);
       const result =
-        response.status === "success" ? (response.extra as PersonaOverview[]) : [];
+        response.status === "success" ? (response.data as PersonaOverview[]) : [];
 
       return result;
     },
@@ -65,7 +65,7 @@ export default function PersonaPage() {
         if (persona.active) {
           const uploadsResponse = await getAllUploads(userToken, persona.id);
           persona.uploads =
-            uploadsResponse.status === "success" ? uploadsResponse.extra : [];
+            uploadsResponse.status === "success" ? uploadsResponse.data : [];
         }
       }
       forceUpdate();

@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { isMsgResponse, processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -20,9 +20,6 @@ export async function snoozeProspect(userToken: string, prospectId: number, days
       },
     }
   );
-  const result = await getResponseJSON("send-to-purgatory", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Snoozed for ${days}` };
+  return processResponse(response);
 
 }

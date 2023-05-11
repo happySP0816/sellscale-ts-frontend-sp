@@ -40,7 +40,7 @@ export default function ViewEmailThreadModal({
         innerProps.prospectId,
         innerProps.threadId
       );
-      return response.status === "success" ? response.extra : [];
+      return response.status === "success" ? response.data : [];
     },
     refetchOnWindowFocus: false,
   });

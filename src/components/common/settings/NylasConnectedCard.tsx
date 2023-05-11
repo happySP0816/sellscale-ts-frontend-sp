@@ -67,7 +67,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
     queryKey: [`nylas-profile-self`],
     queryFn: async () => {
       const result = await getNylasClientID(userToken);
-      return result.status === "success" ? result.extra : null;
+      return result.status === "success" ? result.data : null;
     },
   });
 

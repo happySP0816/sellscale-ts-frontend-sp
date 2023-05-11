@@ -51,7 +51,7 @@ export default function ProspectDetailsResearch(props: PropsType) {
       userToken,
       props.prospectId,
     );
-    setHeuristicResearchArray(result.extra)
+    setHeuristicResearchArray(result.data)
     setIsLoading(false)
   }
 

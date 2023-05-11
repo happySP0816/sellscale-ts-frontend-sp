@@ -4,6 +4,7 @@ import { Card, Group, Text, Button, Flex } from "@mantine/core";
 import { useQueryClient } from "@tanstack/react-query";
 import displayNotification from "@utils/notificationFlow";
 import { useRecoilValue } from "recoil";
+import { MsgResponse } from "src";
 
 type ProspectDetailsRemoveProps = {
   prospectId: number;
@@ -13,7 +14,7 @@ type ProspectDetailsRemoveProps = {
 export async function removeProspectFromContactList(
   prospectId: number,
   userToken: string
-): Promise<{ status: string; title: string; message: string; extra?: any }> {
+): Promise<MsgResponse> {
   return await fetch(
     `${API_URL}/prospect/remove_from_contact_list?prospect_id=` + prospectId,
     {
@@ -30,13 +31,13 @@ export async function removeProspectFromContactList(
           status: "success",
           title: `Success`,
           message: `Removed prospect from contact list.`,
-        };
+        } satisfies MsgResponse;
       } else {
         return {
           status: "error",
           title: `Error (${r.status})`,
           message: "Error while removing prospect from contact list.",
-        };
+        } satisfies MsgResponse;
       }
     })
     .catch((e) => {
@@ -44,8 +45,8 @@ export async function removeProspectFromContactList(
       return {
         status: "error",
         title: `Error while removing prospect from contact list.`,
-        message: e.message,
-      };
+        message: e.message as string,
+      } satisfies MsgResponse;
     });
 }
 

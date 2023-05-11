@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -23,9 +23,6 @@ export async function postBumpDeactivate(userToken: string, bumpFrameworkID: num
       })
     }
   );
-  const result = await getResponseJSON("post_bump_deactivate", response);
-  if (isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Bump framework deactivated.` };
+  return processResponse(response);
 
 }

@@ -28,7 +28,7 @@ export default function AnalyticsPage() {
     queryFn: async () => {
       const response = await getPersonas(userToken);
       const result =
-        response.status === "success" ? (response.extra as Archetype[]) : [];
+        response.status === "success" ? (response.data as Archetype[]) : [];
 
       const personas = result.sort((a, b) => {
         if (a.active === b.active) {

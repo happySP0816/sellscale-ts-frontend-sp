@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -19,9 +19,6 @@ export async function getResearchPointsHeuristic(userToken: string, prospectID: 
       }
     }
   );
-  const result = await getResponseJSON("get-prospect-research-points-by-id", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Research points retrieved`, extra: result.research_points };
+  return processResponse(response, 'research_points');
 
 }

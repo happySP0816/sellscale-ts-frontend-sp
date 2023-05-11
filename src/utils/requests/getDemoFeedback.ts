@@ -1,7 +1,7 @@
 import { logout } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 export default async function getDemoFeedback(userToken: string): Promise<MsgResponse> {
@@ -14,8 +14,5 @@ export default async function getDemoFeedback(userToken: string): Promise<MsgRes
       },
     }
   );
-  const result = await getResponseJSON("get-demo-feedback", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Fetched Demo Feedback`, extra: result.data };
+  return processResponse(response, 'data');
 }

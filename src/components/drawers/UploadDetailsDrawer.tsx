@@ -87,7 +87,7 @@ export default function UploadDetailsDrawer() {
       }
 
       const response = await getUploadDetails(userToken, uploadId);
-      const results = response.status === "success" ? response.extra : null;
+      const results = response.status === "success" ? response.data : null;
 
       // Split results into pages
       totalRecords.current = results.length;
@@ -118,12 +118,12 @@ export default function UploadDetailsDrawer() {
     queryFn: async () => {
       const response = await getPersonas(userToken);
       const result =
-        response.status === "success" ? (response.extra as Archetype[]) : [];
+        response.status === "success" ? (response.data as Archetype[]) : [];
 
       for (let persona of result) {
         const uploadsResponse = await getAllUploads(userToken, persona.id);
         persona.uploads =
-          uploadsResponse.status === "success" ? uploadsResponse.extra : [];
+          uploadsResponse.status === "success" ? uploadsResponse.data : [];
       }
 
       return result;

@@ -43,7 +43,7 @@ export default async function getChannels(userToken: string): Promise<MsgRespons
     return { status: 'error', title: `Error`, message: `See logs for details` };
   }
 
-  return { status: 'success', title: `Success`, message: `Gathered available outbound channels`, extra: res.available_outbound_channels };
+  return { status: 'success', title: `Success`, message: `Gathered available outbound channels`, data: res.available_outbound_channels };
 
 }
 
@@ -100,5 +100,5 @@ export async function getChannelStatusOptions(prospectId: number, userToken: str
     return { status: 'error', title: `Error`, message: `See logs for details` };
   }
 
-  return { status: 'success', title: `Success`, message: `Gathered next statuses for prospect`, extra: res };
+  return { status: 'success', title: `Success`, message: `Gathered next statuses for prospect`, data: res };
 }

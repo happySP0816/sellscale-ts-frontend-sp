@@ -319,8 +319,8 @@ export default function ProspectDetailsChangeStatus(
         props.channelData.value
       );
       if (res.status === "success") {
-        return Object.keys(res.extra.valid_next_statuses).map(
-          (k) => res.extra.valid_next_statuses[k].enum_val
+        return Object.keys(res.data.valid_next_statuses).map(
+          (k) => res.data.valid_next_statuses[k].enum_val
         );
       } else {
         return [];

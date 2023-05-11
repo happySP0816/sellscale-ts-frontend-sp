@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -19,9 +19,6 @@ export async function getBumpFrameworks(userToken: string, overallStatus: string
       }
     }
   );
-  const result = await getResponseJSON("get-bump-frameworks", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Bump frameworks retrieved`, extra: result.bump_frameworks };
+  return processResponse(response, 'bump_frameworks');
 
 }

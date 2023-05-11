@@ -97,7 +97,7 @@ export default function ProspectDetailsDrawer() {
 
       return {
         main: res,
-        channels: res_channels.status === "success" ? res_channels.extra : {},
+        channels: res_channels.status === "success" ? res_channels.data : {},
         channelTypes: res_valid_channels,
       };
     },

@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -18,9 +18,6 @@ export default async function getTransformers(userToken: string, archetype_id: n
       },
     }
   );
-  const result = await getResponseJSON("transformers-get", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Gathered transformers`, extra: result.stats };
+  return processResponse(response, 'stats');
 
 }

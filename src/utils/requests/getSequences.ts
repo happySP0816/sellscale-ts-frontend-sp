@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -14,17 +14,7 @@ export async function getSequences(userToken: string): Promise<MsgResponse> {
       Authorization: `Bearer ${userToken}`,
     },
   });
-  const result = await getResponseJSON("get-all-sequences", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return {
-    status: "success",
-    title: `Success`,
-    message: `Gathered all sequences`,
-    extra: result.sequence_options,
-  };
+  return processResponse(response, 'sequence_options');
 }
 
 /**
@@ -48,10 +38,5 @@ export async function saveSequenceToPersona(
       sequence_id: sequenceId,
     }),
   });
-  const result = await getResponseJSON("save-sequence-to-persona", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return { status: "success", title: `Success`, message: `Set sequence` };
+  return processResponse(response);
 }

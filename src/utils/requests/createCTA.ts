@@ -45,6 +45,6 @@ export default async function createCTA(userToken: string, personaId: string, ct
   if (res == null) {
     return { status: 'error', title: `Error`, message: `See logs for details` };
   } else {
-    return { status: 'success', title: `Success`, message: `CTA have been created`, extra: res.cta_id };
+    return { status: 'success', title: `Success`, message: `CTA have been created`, data: res.cta_id };
   }
 }

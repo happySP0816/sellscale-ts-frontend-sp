@@ -85,7 +85,7 @@ export default function Pulse(props: {
     const result = await getICPClassificationPrompt(userToken, props.personaOverview.id)
 
     if (result.status === 'success') {
-      setCurrentICPPrompt(result.extra)
+      setCurrentICPPrompt(result.data)
     } else {
       setCurrentICPPrompt('')
     }
@@ -95,7 +95,7 @@ export default function Pulse(props: {
     const result = await getArchetypeProspects(userToken, props.personaOverview.id)
 
     if (result.status === 'success') {
-      setProspects(result.extra)
+      setProspects(result.data)
     }
   }
 
@@ -118,8 +118,8 @@ export default function Pulse(props: {
         autoClose: 3000,
       })
       triggerGetArchetypeProspects()
-      selectedProspect.icp_fit_reason = result.extra.reason
-      selectedProspect.icp_fit_score = result.extra.fit
+      selectedProspect.icp_fit_reason = result.data.reason
+      selectedProspect.icp_fit_score = result.data.fit
     } else {
       showNotification({
         title: 'Error',

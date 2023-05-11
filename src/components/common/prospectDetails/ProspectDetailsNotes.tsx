@@ -18,7 +18,7 @@ import displayNotification from "@utils/notificationFlow";
 
 import { useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { ProspectNote } from "src";
+import { MsgResponse, ProspectNote } from "src";
 
 const useStyles = createStyles((theme) => ({
   card: {
@@ -56,7 +56,7 @@ async function addProspectNote(
   prospectId: number,
   userToken: string,
   newNote: string
-): Promise<{ status: string, title: string, message: string, extra?: any }> {
+): Promise<MsgResponse> {
   return await fetch(
     `${API_URL}/prospect/add_note`,
     {
@@ -73,13 +73,13 @@ async function addProspectNote(
   ).then(async (r) => {
     const res = await r.json();
     if(r.status === 200){
-      return { status: 'success', title: `Success`, message: `Added note.`, extra: res.prospect_note_id };
+      return { status: 'success', title: `Success`, message: `Added note.`, data: res.prospect_note_id } satisfies MsgResponse;
     } else {
-      return { status: 'error', title: `Error (${r.status})`, message: res.message };
+      return { status: 'error', title: `Error (${r.status})`, message: res.message } satisfies MsgResponse;
     }
   }).catch((e) => {
     console.error(e);
-    return { status: 'error', title: `Error while adding note`, message: e.message };
+    return { status: 'error', title: `Error while adding note`, message: e.message } satisfies MsgResponse;
   });
 }
 
@@ -170,9 +170,9 @@ export default function ProspectDetailsNotes(
                   userToken,
                   newNote
                 );
-                if(result.status === 'success' && result.extra) {
+                if(result.status === 'success' && result.data) {
                   setNotes((prev) => [...prev,
-                    {id: result.extra as number, note: newNote, prospect_id: props.prospectId, created_at: new Date().toISOString()}
+                    {id: result.data as number, note: newNote, prospect_id: props.prospectId, created_at: new Date().toISOString()}
                   ]);
                   setOpened(false);
                 }

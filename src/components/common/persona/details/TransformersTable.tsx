@@ -46,7 +46,7 @@ export default function TransformersTable(props: { channel: Channel }) {
 
       const response = await getTransformers(userToken, currentPersonaId, channel === 'EMAIL');
       const result =
-        response.status === "success" ? (response.extra as any[]) : [];
+        response.status === "success" ? (response.data as any[]) : [];
 
       totalRecords.current = result.length;
       let pageData = _.chunk(result, PAGE_SIZE)[page - 1]?.map((data, i) => {

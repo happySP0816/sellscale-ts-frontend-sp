@@ -1,7 +1,7 @@
 import { logout } from "@auth/core";
 import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -20,10 +20,7 @@ export default async function getPersonas(userToken: string): Promise<MsgRespons
       },
     }
   );
-  const result = await getResponseJSON("personas-get", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Gathered personas`, extra: result.archetypes };
+  return processResponse(response, 'archetypes');
 
 }
 
@@ -44,10 +41,7 @@ export async function getPersonasOverview(userToken: string): Promise<MsgRespons
       },
     }
   );
-  const result = await getResponseJSON("personas-get-overview", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Gathered personas overview`, extra: result.data };
+  return processResponse(response, 'data');
 
 }
 
@@ -69,18 +63,17 @@ export async function getAllUploads(userToken: string, personaId: number): Promi
       },
     }
   );
-  const result = await getResponseJSON("uploads-all-get", response);
-  if(isMsgResponse(result)) { return result; }
+  const msgResponse = await processResponse(response, 'uploads');
 
-  const uploads = await Promise.all(result.uploads.map(async (upload: any) => {
+  const uploads = await Promise.all(msgResponse.data.map(async (upload: any) => {
     const statsResult = await getUploadStats(userToken, upload.id);
     return {
       ...upload,
-      stats: statsResult.status === 'success' ? statsResult.extra : {},
+      stats: statsResult.status === 'success' ? statsResult.data : {},
     };
   }));
 
-  return { status: 'success', title: `Success`, message: `Gathered all uploads`, extra: uploads };
+  return { status: 'success', title: `Success`, message: `Gathered all uploads`, data: uploads };
 
 }
 
@@ -101,10 +94,7 @@ export async function getUploadStats(userToken: string, uploadId: number): Promi
       },
     }
   );
-  const result = await getResponseJSON("uploads-stats-get", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Gathered upload stats`, extra: result.stats };
+  return processResponse(response, 'stats');
 
 }
 
@@ -126,9 +116,6 @@ export async function getUploadDetails(userToken: string, uploadId: number): Pro
       },
     }
   );
-  const result = await getResponseJSON("uploads-details-get", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Gathered upload details`, extra: result.uploads };
+  return processResponse(response, 'uploads');
 
 }

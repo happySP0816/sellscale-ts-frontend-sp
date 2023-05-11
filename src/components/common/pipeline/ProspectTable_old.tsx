@@ -71,12 +71,12 @@ function getDefaultStatuses(
   })();
 
   const defaultStatuses = [];
-  for (const status of Object.keys(data_channels.extra[channel] || {})) {
+  for (const status of Object.keys(data_channels.data[channel] || {})) {
     if (!status) {
       continue;
     }
     const overallStatus =
-      data_channels.extra[channel][status].sellscale_enum_val;
+      data_channels.data[channel][status].sellscale_enum_val;
     if (overallStatus === overallStatusFromSelectorType) {
       defaultStatuses.push(status);
     }
@@ -328,7 +328,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show channels (other than SELLSCALE)
-                  Object.keys(data_channels.extra)
+                  Object.keys(data_channels.data)
                     .filter((x) => x !== "SELLSCALE")
                     .map((channel) => {
                       return {
@@ -355,13 +355,13 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show {channel} statuses
-                  (data_channels.extra[channel]
-                    ? data_channels.extra[channel].statuses_available
+                  (data_channels.data[channel]
+                    ? data_channels.data[channel].statuses_available
                     : []
                   )
                     .map((status: string) => {
                       let label = formatToLabel(
-                        data_channels.extra[channel][status].enum_val
+                        data_channels.data[channel][status].enum_val
                       );
                       // Patch for Active Convo to show Unassigned
                       if (label === "Active Convo" && channel === "LINKEDIN") {

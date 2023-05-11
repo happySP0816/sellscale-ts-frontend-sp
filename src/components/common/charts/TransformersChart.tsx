@@ -51,7 +51,7 @@ export default function TransformersChart(props: { channel: Channel }) {
         channel === "EMAIL"
       );
       const result =
-        response.status === "success" ? (response.extra as any[]) : [];
+        response.status === "success" ? (response.data as any[]) : [];
       return result.map((data, i) => {
         return {
           ...data,

@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -28,10 +28,5 @@ export async function sendLinkedInMessage(
       purgatory: purgatory ?? true,
     }),
   });
-  const result = await getResponseJSON("send-linkedin-message", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return { status: "success", title: `Success`, message: `Sent message` };
+  return processResponse(response);
 }

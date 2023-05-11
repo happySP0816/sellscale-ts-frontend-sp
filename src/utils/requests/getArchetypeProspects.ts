@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -20,9 +20,6 @@ export async function getArchetypeProspects(userToken: string, archetypeID: numb
       }
     }
   );
-  const result = await getResponseJSON("get-archetype-prospects", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `prospects-for-archetype-${archetypeID}-retrieved`, extra: result.prospects };
+  return processResponse(response, 'prospects');
 
 }

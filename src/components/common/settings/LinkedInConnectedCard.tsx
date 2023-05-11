@@ -65,7 +65,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
     queryKey: [`li-profile-self`],
     queryFn: async () => {
       const result = await getLiProfile(userToken);
-      return result.status === "success" ? result.extra : null;
+      return result.status === "success" ? result.data : null;
     },
   });
 

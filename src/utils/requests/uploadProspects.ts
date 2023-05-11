@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { isMsgResponse, processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 export default async function uploadProspects(archetype_id: number, userToken: string, usingEmail: boolean, json: any[]): Promise<MsgResponse> {
@@ -58,9 +58,6 @@ export async function retriggerUploadJob(userToken: string, archetype_id: number
       }),
     }
   );
-  const result = await getResponseJSON("uploads-retrigger-last", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Retriggered last upload` };
+  return processResponse(response);
 
 }

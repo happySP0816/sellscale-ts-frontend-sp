@@ -14,6 +14,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import displayNotification from "@utils/notificationFlow";
+import { MsgResponse } from "src";
 type PropsType = {
   archetype_id: number;
 };
@@ -98,12 +99,7 @@ export default function PersonaBrain(props: PropsType) {
     }
   }, [fetchedPersona]);
 
-  const generatePersonaDescription = async (): Promise<{
-    status: string;
-    title: string;
-    message: string;
-    extra?: any;
-  }> => {
+  const generatePersonaDescription = async (): Promise<MsgResponse> => {
     setLoadingPersonaDescription(true);
     const res = await fetch(
       `${API_URL}/client/archetype/generate_persona_description`,
@@ -124,14 +120,14 @@ export default function PersonaBrain(props: PropsType) {
             status: "success",
             title: "Success",
             message: "Persona description generated successfully",
-            extra: await r.json(),
+            data: await r.json(),
           };
         } else {
           return {
             status: "error",
             title: `Error (${r.status})`,
             message: "Failed to generate persona description",
-            extra: {},
+            data: {},
           };
         }
       })
@@ -140,21 +136,16 @@ export default function PersonaBrain(props: PropsType) {
           status: "error",
           title: "Error",
           message: e.message,
-          extra: {},
+          data: {},
         };
       });
-    setPersonaDescription(res.extra.description);
+    setPersonaDescription(res.data.description);
     setLoadingPersonaDescription(false);
     setNeedsSave(true);
-    return res;
+    return res as MsgResponse;
   };
 
-  const generatePersonaBuyReason = async (): Promise<{
-    status: string;
-    title: string;
-    message: string;
-    extra?: any;
-  }> => {
+  const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaFitReason(true);
     const res = await fetch(
       `${API_URL}/client/archetype/generate_persona_buy_reason`,
@@ -175,14 +166,14 @@ export default function PersonaBrain(props: PropsType) {
             status: "success",
             title: "Success",
             message: "Persona buying reason generated successfully",
-            extra: await r.json(),
+            data: await r.json(),
           };
         } else {
           return {
             status: "error",
             title: `Error (${r.status})`,
             message: "Failed to generate persona buying reason",
-            extra: {},
+            data: {},
           };
         }
       })
@@ -191,13 +182,13 @@ export default function PersonaBrain(props: PropsType) {
           status: "error",
           title: "Error",
           message: e.message,
-          extra: {},
+          data: {},
         };
       });
-    setPersonaFitReason(res.extra.description);
+    setPersonaFitReason(res.data.description);
     setLoadingPersonaFitReason(false);
     setNeedsSave(true);
-    return res;
+    return res as MsgResponse;
   };
 
   return (

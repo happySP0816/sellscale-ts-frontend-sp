@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -20,9 +20,5 @@ export async function getICPOneProspect(userToken: string, archetypeID: number, 
       }
     }
   );
-  const result = await getResponseJSON("get-icp-classification-one-prospect", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `ICP classification retrieved`, extra: {'fit': result.fit, 'reason': result.reason} };
-
+  return processResponse(response);
 }

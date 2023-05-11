@@ -73,7 +73,7 @@ export default function ComposeEmailModal({
     setFetchingEmailGenerationPrompt(false);
     console.log(response);
     if (response.status === "success") {
-      setEmailGenerationPrompt(response.extra.prompt);
+      setEmailGenerationPrompt(response.data.prompt);
     }
   };
 
@@ -131,8 +131,8 @@ export default function ComposeEmailModal({
             );
             setGeneratingEmail(false);
             if (response.status === "success") {
-              setSubject(response.extra.subject);
-              setBody(response.extra.body.replace(/\n/gm, "<br>"));
+              setSubject(response.data.subject);
+              setBody(response.data.body.replace(/\n/gm, "<br>"));
             }
           }}
         >

@@ -67,7 +67,7 @@ export default function SequenceWriterModal({
     queryFn: async () => {
       const response = await getPersonas(userToken);
       const result =
-        response.status === "success" ? (response.extra as Archetype[]) : [];
+        response.status === "success" ? (response.data as Archetype[]) : [];
 
       const mapped_result = result.map((res) => {
         return {
@@ -92,7 +92,7 @@ export default function SequenceWriterModal({
     setLoading(false);
     if (result.status === "success") {
       setValueProps(
-        result.extra.filter((valueProp: string) => valueProp.trim() !== "")
+        result.data.filter((valueProp: string) => valueProp.trim() !== "")
       );
       setActive((current) => current + 1);
     } else {
@@ -117,7 +117,7 @@ export default function SequenceWriterModal({
     );
     if (result.status === "success") {
       const newValueProps = [...valueProps];
-      newValueProps[index] = result.extra[0].replace('Value Prop: ', '');
+      newValueProps[index] = result.data[0].replace('Value Prop: ', '');
       setValueProps(newValueProps);
     } else {
       showNotification({
@@ -140,7 +140,7 @@ export default function SequenceWriterModal({
     );
     setLoading(false);
     if (result.status === "success") {
-      setSteps(result.extra);
+      setSteps(result.data);
       setActive((current) => current + 1);
     } else {
       showNotification({

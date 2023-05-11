@@ -34,8 +34,8 @@ export default function LinkedinQueuedMessages() {
     setIsFetching(true);
 
     const response = await getLIMessagesQueuedForOutreach(userToken, LI_MESSAGE_PAGE_LIMIT, (page - 1) * LI_MESSAGE_PAGE_LIMIT);
-    const messages = response.status === 'success' ? response.extra.messages : [];
-    totalItems.current = response.status === 'success' ? response.extra.total_count : -1;
+    const messages = response.status === 'success' ? response.data.messages : [];
+    totalItems.current = response.status === 'success' ? response.data.total_count : -1;
     allMessages.current = allMessages.current.concat(messages);
 
     setIsFetching(false);

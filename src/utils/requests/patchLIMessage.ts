@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -28,14 +28,5 @@ export async function patchLIMessage(
       }),
     }
   );
-  const result = await getResponseJSON("patch_li_message", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return {
-    status: "success",
-    title: `Success`,
-    message: `Successfully updated message`
-  };
+  return processResponse(response);
 }

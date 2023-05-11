@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 export async function generateEmail(
@@ -14,18 +14,9 @@ export async function generateEmail(
     },
     body: JSON.stringify({ prompt: prompt }),
   });
-  const result = await getResponseJSON("email-generate", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return {
-    status: "success",
-    title: `Success`,
-    message: `Generated email`,
-    extra: result.data,
-  };
+  return processResponse(response, 'data');
 }
+
 
 export async function getEmailGenerationPrompt(
   userToken: string,
@@ -39,16 +30,5 @@ export async function getEmailGenerationPrompt(
     },
     body: JSON.stringify({ prospect_id: prospectId }),
   });
-
-  const result = await getResponseJSON("email-generate-prompt", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return {
-    status: "success",
-    title: `Success`,
-    message: `Generated email prompt`,
-    extra: result,
-  };
+  return processResponse(response);
 }

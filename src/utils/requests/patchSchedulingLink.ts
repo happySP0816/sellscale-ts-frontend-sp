@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -25,14 +25,5 @@ export async function patchSchedulingLink(
       }),
     }
   );
-  const result = await getResponseJSON("patch_scheduling_link", response);
-  if (isMsgResponse(result)) {
-    return result;
-  }
-
-  return {
-    status: "success",
-    title: `Success`,
-    message: `Successfully updated scheduling link.`
-  };
+  return processResponse(response);
 }

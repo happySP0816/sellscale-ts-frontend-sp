@@ -1,6 +1,6 @@
 import { API_URL } from "@constants/data";
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 
 /**
  * Gets the ICP classification prompt for the given archetype.
@@ -18,8 +18,5 @@ export default async function getICPClassificationPrompt(userToken: string, arch
       }
     }
   );
-  const result = await getResponseJSON("get_icp_prompt", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Pulse prompt successfully retrieved.`, extra: result.data};
+  return processResponse(response, 'data');
 }

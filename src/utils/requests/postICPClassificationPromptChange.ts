@@ -1,7 +1,7 @@
 import { API_URL } from "@constants/data";
 import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 
 /**
  * Modifies the ICP Prompt for a given archetype
@@ -25,8 +25,5 @@ export default async function postICPClassificationPromptChange(userToken: strin
       }),
     }
   );
-  const result = await getResponseJSON("icp_prompt_change", response);
-  if(isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Pulse prompt changed successfully` };
+  return processResponse(response);
 }

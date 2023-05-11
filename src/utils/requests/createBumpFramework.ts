@@ -1,5 +1,5 @@
 import { MsgResponse } from "src";
-import getResponseJSON, { isMsgResponse } from "./utils";
+import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
@@ -31,9 +31,6 @@ export async function createBumpFramework(userToken: string, overallStatus: stri
       })
     }
   );
-  const result = await getResponseJSON("create_bump_framework", response);
-  if (isMsgResponse(result)) { return result; }
-
-  return { status: 'success', title: `Success`, message: `Bump framework created.`, extra: result.bump_framework_id};
+  return processResponse(response, 'bump_framework_id');
 
 }

@@ -431,9 +431,10 @@ export default function ProspectDetailsChangeStatus(
         {items}
       </SimpleGrid>
 
-      {props.channelData.currentStatus.includes("DEMO") && (
-        <ProspectDemoDateSelector prospectId={props.prospectId} />
-      )}
+      {props.channelData.currentStatus &&
+        props.channelData.currentStatus.includes("DEMO") && (
+          <ProspectDemoDateSelector prospectId={props.prospectId} />
+        )}
       {props.channelData.currentStatus?.startsWith("ACTIVE_CONVO") && (
         <Select
           mt={15}

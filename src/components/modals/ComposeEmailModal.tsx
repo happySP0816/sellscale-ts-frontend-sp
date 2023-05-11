@@ -15,12 +15,17 @@ import {
   Button,
   Textarea,
   LoadingOverlay,
+  Collapse,
+  Card,
 } from "@mantine/core";
 import { ContextModalProps, closeAllModals } from "@mantine/modals";
 import { IconSend } from "@tabler/icons";
-import { generateEmail } from "@utils/requests/generateEmail";
+import {
+  generateEmail,
+  getEmailGenerationPrompt,
+} from "@utils/requests/generateEmail";
 import { sendEmail } from "@utils/requests/sendEmail";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useRecoilValue } from "recoil";
 
@@ -48,6 +53,37 @@ export default function ComposeEmailModal({
   const [sending, setSending] = useState(false);
   const [generatingEmail, setGeneratingEmail] = useState(false);
 
+  const [
+    fetchedEmailGenerationPrompt,
+    setFetchedEmailGenerationPrompt,
+  ] = useState(false);
+  const [
+    fetchingEmailGenerationPrompt,
+    setFetchingEmailGenerationPrompt,
+  ] = useState(false);
+  const [emailGenerationPrompt, setEmailGenerationPrompt] = useState("");
+  const [collapseOpened, setCollapseOpened] = useState(false);
+
+  const fetchEmailGenerationPrompt = async () => {
+    setFetchingEmailGenerationPrompt(true);
+    const response = await getEmailGenerationPrompt(
+      userToken,
+      innerProps.prospectId
+    );
+    setFetchingEmailGenerationPrompt(false);
+    console.log(response);
+    if (response.status === "success") {
+      setEmailGenerationPrompt(response.extra.prompt);
+    }
+  };
+
+  useEffect(() => {
+    if (!fetchedEmailGenerationPrompt) {
+      fetchEmailGenerationPrompt();
+      setFetchedEmailGenerationPrompt(true);
+    }
+  }, [fetchedEmailGenerationPrompt]);
+
   return (
     <Paper
       p={0}
@@ -62,6 +98,7 @@ export default function ComposeEmailModal({
         <Text>To: {innerProps.email}</Text>
         <Text>From: {innerProps.from}</Text>
       </Group>
+
       <div style={{ paddingTop: 10 }}>
         <TextAreaWithAI
           placeholder="Subject"
@@ -85,17 +122,18 @@ export default function ComposeEmailModal({
           variant="light"
           mr="lg"
           color="grape"
+          disabled={!emailGenerationPrompt}
           onClick={async () => {
             setGeneratingEmail(true);
             const response = await generateEmail(
               userToken,
-              innerProps.prospectId
+              emailGenerationPrompt
             );
+            setGeneratingEmail(false);
             if (response.status === "success") {
               setSubject(response.extra.subject);
               setBody(response.extra.body.replace(/\n/gm, "<br>"));
             }
-            setGeneratingEmail(false);
           }}
         >
           Generate Email with AI
@@ -119,6 +157,40 @@ export default function ComposeEmailModal({
           Send Email
         </Button>
       </Center>
+
+      <Card mt="md">
+        <Button
+          size="xs"
+          radius="xl"
+          variant="outline"
+          mr="lg"
+          color="gray"
+          onClick={() => setCollapseOpened(!collapseOpened)}
+        >
+          {!collapseOpened ? "View" : "Hide"} Email Generation Prompt
+        </Button>
+        <Button
+          size="xs"
+          radius="xl"
+          variant="outline"
+          mr="lg"
+          color="gray"
+          onClick={() => fetchEmailGenerationPrompt()}
+        >
+          Regenerate Email Generation Prompt
+        </Button>
+        <Collapse in={collapseOpened} mt="sm">
+          <LoadingOverlay visible={fetchingEmailGenerationPrompt} />
+          <Textarea
+            mt="sm"
+            label="Email Generation Prompt"
+            description=" This is the prompt that is being used to generate the email. Feel free to edit it to your liking and then click the 'Generate Email with AI' button to generate a new email."
+            value={emailGenerationPrompt}
+            minRows={10}
+            onChange={(e: any) => setEmailGenerationPrompt(e.target.value)}
+          />
+        </Collapse>
+      </Card>
     </Paper>
   );
 }

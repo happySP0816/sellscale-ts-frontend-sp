@@ -125,15 +125,19 @@ export default function ComposeEmailModal({
           disabled={!emailGenerationPrompt}
           onClick={async () => {
             setGeneratingEmail(true);
-            const response = await generateEmail(
-              userToken,
-              emailGenerationPrompt
-            );
-            setGeneratingEmail(false);
-            if (response.status === "success") {
-              setSubject(response.data.subject);
-              setBody(response.data.body.replace(/\n/gm, "<br>"));
-            }
+            generateEmail(userToken, emailGenerationPrompt)
+              .then((response) => {
+                if (response.status === "success") {
+                  setSubject(response.data.subject);
+                  setBody(response.data.body.replace(/\n/gm, "<br>"));
+                }
+              })
+              .catch((e) => {
+                console.log(e);
+              })
+              .finally(() => {
+                setGeneratingEmail(false);
+              });
           }}
         >
           Generate Email with AI

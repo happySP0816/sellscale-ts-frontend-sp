@@ -94,7 +94,7 @@ export default function DemoFeedbackSeeAllDrawer(props: { prospects: Prospect[] 
               Demo with {prospect.full_name}
             </Text>
             <Text fz='sm' c='dimmed'>
-              {convertDateToLocalTime(new Date())}
+              {convertDateToLocalTime(new Date(prospect.demo_date))}
             </Text>
           </div>
           <div>

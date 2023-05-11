@@ -38,36 +38,20 @@ import ConnectEmailCard from "@common/library/ConnectEmailCard";
 import FlexSeparate from "@common/library/FlexSeparate";
 import { generateEmail } from "@utils/requests/generateEmail";
 
-export const openComposeEmailModal = (userToken: string, prospectId: number, email: string, sdr_email: string, subject: string, body: string) => {
+export const openComposeEmailModal = (
+  userToken: string,
+  prospectId: number,
+  email: string,
+  sdr_email: string,
+  subject: string,
+  body: string
+) => {
   openContextModal({
     modal: "composeEmail",
     title: (
       <Group position="apart">
         <div>
           <Title order={4}>Email Compose</Title>
-        </div>
-        <div>
-          <Button
-            size="xs"
-            radius="xl"
-            variant="light"
-            onClick={async () => {
-              const response = await generateEmail(userToken, prospectId);
-              if (response.status === "success") {
-                closeAllModals();
-                setTimeout(() => {
-                  openComposeEmailModal(
-                    userToken,
-                    prospectId,
-                    email,
-                    sdr_email,
-                    response.extra.subject, response.extra.body.replace(/\n/gm, '<br>'));
-                }, 1);
-              }
-            }}
-          >
-            AI Generate Email
-          </Button>
         </div>
       </Group>
     ),
@@ -87,7 +71,7 @@ export const openComposeEmailModal = (userToken: string, prospectId: number, ema
       prospectId: prospectId,
     },
   });
-}
+};
 
 export default function ProspectDetailsViewEmails(props: {
   prospectId: number;
@@ -123,13 +107,7 @@ export default function ProspectDetailsViewEmails(props: {
               </Text>
             </Group>
           </div>
-          <Flex
-            direction="column"
-            align="flex-end"
-            gap={0}
-            m={0}
-            p={0}
-          >
+          <Flex direction="column" align="flex-end" gap={0} m={0} p={0}>
             <Button
               size="xs"
               leftIcon={<IconPencil size="1rem" />}
@@ -139,16 +117,17 @@ export default function ProspectDetailsViewEmails(props: {
                   props.prospectId,
                   props.email,
                   userData.sdr_email,
-                  "", "");
+                  "",
+                  ""
+                );
               }}
             >
               Compose
             </Button>
-            
-              <ActionIcon size="sm" pr={5} onClick={() => refetch()}>
-                <IconRefresh size="0.875rem"/>
-              </ActionIcon>
-           
+
+            <ActionIcon size="sm" pr={5} onClick={() => refetch()}>
+              <IconRefresh size="0.875rem" />
+            </ActionIcon>
           </Flex>
         </FlexSeparate>
         <ScrollArea>

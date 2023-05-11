@@ -33,6 +33,14 @@ export async function postBumpGenerateResponse(
     }
   );
   const result = await getResponseJSON("generate_li_bump_response", response);
+  if (result === undefined) {
+    return {
+      status: "error",
+      title: `Error`,
+      message: `An error occurred, our engineers have been notified. Please try again later.`,
+    };
+  }
+
   if (isMsgResponse(result)) {
     return result;
   }

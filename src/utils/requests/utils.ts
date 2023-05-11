@@ -43,7 +43,7 @@ export default async function getResponseJSON(key: string, response: Response): 
 
     const userToken = localStorage.getItem("user-token");
     if(userToken){
-      await fetch(
+      fetch(
         `${API_URL}/client/submit-error`,
         {
           method: "POST",
@@ -65,5 +65,9 @@ export default async function getResponseJSON(key: string, response: Response): 
 }
 
 export function isMsgResponse(value: MsgResponse | any): value is MsgResponse {
+  if (value === undefined) {
+    return false;
+  }
+  
   return (value as MsgResponse).status !== undefined;
 }

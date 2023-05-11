@@ -12,6 +12,9 @@ import {
   Card,
   Box,
   Button,
+  Tooltip,
+  Text,
+  Center,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
@@ -36,7 +39,9 @@ import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";
 import { Channel } from "src";
 import FlexSeparate from "@common/library/FlexSeparate";
-import ProspectDetailsViewEmails, { openComposeEmailModal } from "@common/prospectDetails/ProspectDetailsViewEmails";
+import ProspectDetailsViewEmails, {
+  openComposeEmailModal,
+} from "@common/prospectDetails/ProspectDetailsViewEmails";
 import { API_URL } from "@constants/data";
 import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove";
 import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsResearch";
@@ -156,7 +161,7 @@ export default function ProspectDetailsDrawer() {
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       {data?.main.prospect_info && !isFetching && (
         <>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: "relative" }}>
             <ProspectDetailsSummary
               fullName={data.main.prospect_info.details.full_name}
               title={data.main.prospect_info.details.title}
@@ -167,25 +172,33 @@ export default function ProspectDetailsDrawer() {
               companyURL={data.main.prospect_info.company.url}
               persona={data.main.prospect_info.details.persona}
             />
-            <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
-              {data.main.prospect_info.email.email && (
+            {data.main.prospect_info.email.email && (
+              <Center>
                 <Button
                   size="xs"
                   variant="light"
                   leftIcon={<IconPencil size="1rem" />}
+                  disabled={!userData.nylas_connected}
                   onClick={() => {
                     openComposeEmailModal(
                       userToken,
                       prospectId,
                       data.main.prospect_info.email.email,
                       userData.sdr_email,
-                      "", "");
+                      "",
+                      ""
+                    );
                   }}
                 >
                   Compose Email
                 </Button>
-              )}
-            </div>
+                <Text size="xs" w="40%" ml="sm" sx={{ fontSize: "70%" }}>
+                  {userData.nylas_connected
+                    ? ""
+                    : "Email integration not connected. Connect via Settings."}
+                </Text>
+              </Center>
+            )}
           </div>
 
           <ScrollArea
@@ -265,12 +278,13 @@ export default function ProspectDetailsDrawer() {
                               />
                             )}
 
-                          {(channel.value === "EMAIL" && userData.nylas_connected === true) && (
-                            <ProspectDetailsViewEmails
-                              prospectId={data.main.prospect_info.details.id}
-                              email={data.main.prospect_info.email.email}
-                            />
-                          )}
+                          {channel.value === "EMAIL" &&
+                            userData.nylas_connected === true && (
+                              <ProspectDetailsViewEmails
+                                prospectId={data.main.prospect_info.details.id}
+                                email={data.main.prospect_info.email.email}
+                              />
+                            )}
                         </Tabs.Panel>
                       )
                     )}

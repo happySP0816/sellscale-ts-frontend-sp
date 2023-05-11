@@ -42,11 +42,20 @@ import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove
 import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsResearch";
 import { IconDots } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
-import { dashCardSeeAllDrawerOpenState, schedulingDrawerOpenState } from "@atoms/dashboardAtoms";
+import {
+  dashCardSeeAllDrawerOpenState,
+  schedulingDrawerOpenState,
+} from "@atoms/dashboardAtoms";
 import SchedulingCardContents from "@common/home/dashboard/SchedulingCardContents";
 import DashCardContents from "@common/home/dashboard/DashCardContents";
 
-export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], title: string, includeNote?: boolean, includeQualified?: boolean, includeSchedule?: boolean }) {
+export default function DashCardSeeAllDrawer(props: {
+  prospects: Prospect[];
+  title: string;
+  includeNote?: boolean;
+  includeQualified?: boolean;
+  includeSchedule?: boolean;
+}) {
   const theme = useMantineTheme();
 
   // This component is only rendered if drawerOpened=true - which isn't helpful for the first render
@@ -65,13 +74,14 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
 
   const prospectsVisible = [];
   const prospectsHidden = [];
-  for(let prospect of props.prospects){
+  for (let prospect of props.prospects) {
+    let latest_msgs =
+      prospect.recent_messages.li_convo?.sort(
+        (a: any, b: any) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+      ) ?? [];
 
-    let latest_msgs = prospect.recent_messages.li_convo?.sort(
-      (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    ) ?? [];
-
-    if(latest_msgs.length > 0 && latest_msgs[0].connection_degree !== 'You'){
+    if (latest_msgs.length > 0 && latest_msgs[0].connection_degree !== "You") {
       prospectsVisible.push(prospect);
     } else {
       prospectsHidden.push(prospect);
@@ -99,7 +109,7 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
               {`${prospectsVisible.length}`}
             </Avatar>
           )}
-        </Group>    
+        </Group>
       }
       padding="xl"
       size="xl"
@@ -109,6 +119,13 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
         <ScrollArea
           style={{ height: window.innerHeight - 100, overflowY: "hidden" }}
         >
+          {prospectsVisible.length > 0 && (
+            <Divider
+              my="xs"
+              label="Open conversation to respond"
+              labelPosition="center"
+            />
+          )}
           {prospectsVisible.map((prospect, i) => (
             <Paper key={i} withBorder p="xs" radius="md" mt={14}>
               <DashCardContents
@@ -120,10 +137,21 @@ export default function DashCardSeeAllDrawer(props: { prospects: Prospect[], tit
             </Paper>
           ))}
           {prospectsHidden.length > 0 && (
-            <Divider my="xs" label="Waiting for Response" labelPosition="center" />
+            <Divider
+              my="xs"
+              label="Waiting for response"
+              labelPosition="center"
+            />
           )}
           {prospectsHidden.map((prospect, i) => (
-            <Paper key={i} withBorder p="xs" radius="md" mt={14} sx={{ filter: 'opacity(50%)' }}>
+            <Paper
+              key={i}
+              withBorder
+              p="xs"
+              radius="md"
+              mt={14}
+              sx={{ filter: "opacity(50%)" }}
+            >
               <DashCardContents
                 prospect={prospect}
                 includeNote={props.includeNote}

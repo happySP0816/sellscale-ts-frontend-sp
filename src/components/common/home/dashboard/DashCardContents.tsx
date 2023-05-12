@@ -31,7 +31,10 @@ import { addProspectNote } from "@utils/requests/addProspectNote";
 import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChangeStatus";
 import { useQueryClient } from "@tanstack/react-query";
 import { convertDateToLocalTime } from "@utils/general";
-import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import {
+  prospectDrawerIdState,
+  prospectDrawerOpenState,
+} from "@atoms/prospectAtoms";
 import { dashCardSeeAllDrawerOpenState } from "@atoms/dashboardAtoms";
 
 export default function DashCardContents(props: {
@@ -39,6 +42,7 @@ export default function DashCardContents(props: {
   includeNote?: boolean;
   includeQualified?: boolean;
   includeSchedule?: boolean;
+  showLastEngagement?: boolean;
 }) {
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
@@ -49,10 +53,32 @@ export default function DashCardContents(props: {
   const [response, setResponse] = useState<string>("");
   const [purgatory, setPurgatory] = useState<boolean>(true);
 
-  let latest_msgs = props.prospect.recent_messages.li_convo?.sort(
-    (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  ) ?? [];
+  let latest_msgs =
+    props.prospect.recent_messages.li_convo?.sort(
+      (a: any, b: any) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+    ) ?? [];
   let latest_msg = latest_msgs[0];
+
+  const messagesFromProspect = latest_msgs.filter(
+    (x: any) => x.connection_degree !== "You"
+  );
+  const lastMessageFromProspect = messagesFromProspect[0];
+  const lastReplyDate = new Date(lastMessageFromProspect?.date);
+  const days = (date_1: Date, date_2: Date) => {
+    let difference = date_1.getTime() - date_2.getTime();
+    let TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
+    return TotalDays;
+  };
+  const daysSinceLastReply = days(new Date(), lastReplyDate);
+
+  var numFollowUps = 0;
+  for (var i = 0; i < latest_msgs.length; i++) {
+    if (latest_msgs[i].connection_degree !== "You") {
+      break;
+    }
+    numFollowUps++;
+  }
 
   // Msgs scroll view
   const viewport = useRef<HTMLDivElement>(null);
@@ -97,8 +123,9 @@ export default function DashCardContents(props: {
       </div>
       <div style={{ flexGrow: 1, marginLeft: 10 }}>
         <Text fw={700} fz="sm">
-          {full_name}
+          {full_name}{" "}
         </Text>
+
         <Text fz="sm">{message?.trim()}</Text>
       </div>
       <Text
@@ -112,7 +139,7 @@ export default function DashCardContents(props: {
     </Flex>
   );
 
-  if(!latest_msg){
+  if (!latest_msg) {
     return <></>;
   }
 
@@ -138,6 +165,12 @@ export default function DashCardContents(props: {
       )}
       <div>
         <Group position="right" mt={5}>
+          {props.showLastEngagement && (
+            <Text size="xs" color="grey">
+              {props.prospect.first_name} replied {daysSinceLastReply} days ago.{" "}
+              {numFollowUps} follow-up.
+            </Text>
+          )}
           <Button
             color="green"
             radius="xl"

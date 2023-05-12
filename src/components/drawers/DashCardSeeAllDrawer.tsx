@@ -157,6 +157,7 @@ export default function DashCardSeeAllDrawer(props: {
                 includeNote={props.includeNote}
                 includeQualified={props.includeQualified}
                 includeSchedule={props.includeSchedule}
+                showLastEngagement
               />
             </Paper>
           ))}

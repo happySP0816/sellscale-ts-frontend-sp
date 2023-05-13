@@ -37,7 +37,6 @@ import {
   IconUsers,
 } from "@tabler/icons";
 import { useEffect, useRef, useState } from "react";
-import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { Archetype, Campaign } from "src";
 import { logout } from "@auth/core";
 import { useQuery } from "@tanstack/react-query";
@@ -181,7 +180,7 @@ export default function UploadDetailsDrawer() {
         </FlexSeparate>
       }
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
       styles={{
         title: {

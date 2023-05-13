@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { DatePicker } from "@mantine/dates";
-import { API_URL } from "@constants/data";
-import { useRecoilState } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
-import displayNotification from "@utils/notificationFlow";
+import React, { useEffect, useState } from 'react';
+import { DatePicker } from '@mantine/dates';
+import { Text } from '@mantine/core';
+import { API_URL } from '@constants/data';
+import { useRecoilState } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
+import displayNotification from '@utils/notificationFlow';
 
 type PropsType = {
   prospectId: number;
@@ -17,9 +18,9 @@ export default function ProspectDemoDateSelector(props: PropsType) {
   const getProspectDemoDate = async (): Promise<Date | null> => {
     const url = `${API_URL}/prospect/${props.prospectId}/demo_date`;
     return fetch(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${userToken}`,
       },
     })
@@ -59,9 +60,9 @@ export default function ProspectDemoDateSelector(props: PropsType) {
       demo_date: value,
     };
     return fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify(data),
@@ -70,55 +71,55 @@ export default function ProspectDemoDateSelector(props: PropsType) {
         getProspectDemoDate();
         if (response.status === 200) {
           return {
-            status: "success",
-            title: "Demo date updated!",
+            status: 'success',
+            title: 'Demo date updated!',
             message: `Demo date updated to ${value}`,
           };
         }
         return {
-          status: "error",
-          title: "Error while updating demo date",
+          status: 'error',
+          title: 'Error while updating demo date',
           message: `Please try again later.`,
         };
       })
       .catch((error) => {
         return {
-          status: "error",
-          title: "Error while updating demo date",
+          status: 'error',
+          title: 'Error while updating demo date',
           message: `Please try again later.`,
         };
       });
   };
 
   return (
-    <DatePicker
-      label="When is this demo scheduled for?"
-      placeholder="Select date"
-      value={demoDate}
-      onChange={async (value) => {
-        await displayNotification(
-          "update-prospect-demo-date",
-          () => updateProspectDemoDate(value),
-          {
-            title: `Updating demo date...`,
-            message: `Working with servers...`,
-            color: "teal",
-          },
-          {
-            title: `Demo date updated!`,
-            message: `Demo date has been updated successfully.`,
-            color: "teal",
-          },
-          {
-            title: `Error while updating demo date`,
-            message: `Please try again later.`,
-            color: "red",
-          }
-        );
-      }}
-      zIndex={1000}
-      mt={"md"}
-      dropdownType="modal"
-    />
+    <div>
+      <Text>When is this demo scheduled for?</Text>
+      <DatePicker
+        placeholder='Select date'
+        value={demoDate}
+        onChange={async (value) => {
+          await displayNotification(
+            'update-prospect-demo-date',
+            () => updateProspectDemoDate(value),
+            {
+              title: `Updating demo date...`,
+              message: `Working with servers...`,
+              color: 'teal',
+            },
+            {
+              title: `Demo date updated!`,
+              message: `Demo date has been updated successfully.`,
+              color: 'teal',
+            },
+            {
+              title: `Error while updating demo date`,
+              message: `Please try again later.`,
+              color: 'red',
+            }
+          );
+        }}
+        mt={'md'}
+      />
+    </div>
   );
 }

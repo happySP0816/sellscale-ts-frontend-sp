@@ -3,7 +3,7 @@ import { DefaultMantineColor, Indicator, Tooltip, useMantineTheme, Text, Contain
 import { useHover, useOs } from "@mantine/hooks";
 import { startCase } from "lodash";
 import { useRecoilState } from "recoil";
-import { navTabState } from "../atoms/navAtoms";
+import { navTabState } from "../../atoms/navAtoms";
 import { formatToLabel } from "@utils/general";
 
 type NavTabProps = {
@@ -49,7 +49,7 @@ export default function NavTab(props: NavTabProps) {
           backgroundColor: hovered || navTab === props.name ? theme.colors.teal[7]+'15' : "transparent",
         }}>
           <Container p={5} m={0} sx={{ lineHeight: '0px' }}>
-            <Indicator disabled={!props.indicatorColor} dot size={11} color={props.indicatorColor} withBorder>
+            <Indicator disabled={!props.indicatorColor} size={11} color={props.indicatorColor} withBorder>
               {props.icon}
             </Indicator>
           </Container>
@@ -66,3 +66,41 @@ export default function NavTab(props: NavTabProps) {
     </Tooltip>
   );
 }
+
+
+/*
+
+        <AnimatedNavbar
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            backgroundColor: theme.colors.dark[7],
+            transform: navStyles.x.to((x) => `translate3d(${x}%,0,0)`),
+          }}
+          width={{ base: NAV_BAR_SIDE_WIDTH }}
+        >
+          <Navbar.Section>
+            <SidePanel isMobile={isMobileView} />
+          </Navbar.Section>
+          <Navbar.Section>
+            {isLoggedIn() && (
+              <>
+                <ProfileCard
+                  imgUrl={userData?.img_url || ''}
+                  name={userData?.sdr_name || ''}
+                  email={userData?.sdr_email || ''}
+                />
+                <NavTab
+                  icon={<IconSettings size={22} />}
+                  name="settings"
+                  description="Configure your SellScale settings"
+                  onClick={() => navigateToPage(navigate, `/settings`)}
+                />
+                <LogoutBtn />
+              </>
+            )}
+          </Navbar.Section>
+        </AnimatedNavbar>
+
+
+*/

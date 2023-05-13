@@ -49,7 +49,7 @@ export default function ProspectDetailsOptionsMenu(props: {
             >
               <Calendar
                 minDate={new Date()}
-                onChange={async (date) => {
+                onDateChange={async (date) => {
                   if(!date){ return; }
                   let timeDiff = date.getTime() - new Date().getTime();
                   let daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));

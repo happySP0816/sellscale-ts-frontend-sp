@@ -23,7 +23,6 @@ import {
   campaignDrawerIdState,
   campaignDrawerOpenState,
 } from "@atoms/campaignAtoms";
-import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate, valueToColor } from "@utils/general";
 import { chunk } from "lodash";
@@ -87,8 +86,7 @@ export default function CampaignTable(props: { type: Channel }) {
   const totalRecords = useRef(0);
 
   const [search, setSearch] = useDebouncedState("", 200);
-  const [filterDate, setFilterDate] =
-    useState<DateRangePickerValue>([null, null]);
+  //const [filterDate, setFilterDate] = useState<DateRangePickerValue>([null, null]);
   //const [type, setType] = useState<string | null>(null);
   const type = props.type;
 
@@ -106,12 +104,12 @@ export default function CampaignTable(props: { type: Channel }) {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `query-campaigns-data`,
-      { page, sortStatus, search, filterDate, type },
+      { page, sortStatus, search, type },
     ],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { page, sortStatus, search, filterDate, type }] =
+      const [_key, { page, sortStatus, search, type }] =
         queryKey;
 
       totalRecords.current = 0;
@@ -130,8 +128,8 @@ export default function CampaignTable(props: { type: Channel }) {
             status: ['COMPLETE'],
             limit: PAGE_SIZE,
             offset: (page - 1) * PAGE_SIZE,
-            campaign_start_date: filterDate[0] ? formatDate(new Date(filterDate[0])) : undefined,
-            campaign_end_date: filterDate[1] ? formatDate(new Date(filterDate[1])) : undefined,
+            //campaign_start_date: filterDate[0] ? formatDate(new Date(filterDate[0])) : undefined,
+            //campaign_end_date: filterDate[1] ? formatDate(new Date(filterDate[1])) : undefined,
             filters: [
               {
                 field: sortStatus.columnAccessor,
@@ -183,6 +181,7 @@ export default function CampaignTable(props: { type: Channel }) {
           style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "60%", flexBasis: "60%" }}
           px={"xs"}
         />
+        {/*
         <DateRangePicker
           label="Filter by Date"
           placeholder="Pick date range"
@@ -194,6 +193,7 @@ export default function CampaignTable(props: { type: Channel }) {
           style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "40%", flexBasis: "40%" }}
           px={"xs"}
         />
+        */}
         {/*
         <Select
           label="Filter by Type"

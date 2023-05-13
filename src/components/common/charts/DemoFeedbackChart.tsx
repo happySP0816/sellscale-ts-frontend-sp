@@ -228,14 +228,16 @@ export default function DemoFeedbackChart() {
                 p='xs'
                 withBorder
                 radius="md"
-                sx={{
+                sx={(theme) => ({
                   position: "relative",
                   cursor: "pointer",
-                  backgroundColor: theme.colors.dark[8],
+                  backgroundColor: theme.colorScheme === "dark"
+                      ? theme.colors.dark[8]
+                      : theme.colors.gray[0],
                   "&:hover": {
-                    filter: "brightness(135%)",
+                    filter: theme.colorScheme === "dark" ? "brightness(135%)" : "brightness(95%)",
                   },
-                }}
+                })}
                 onClick={() => {
                   setProspectId(prospect_id);
                   setDrawerOpened(true);

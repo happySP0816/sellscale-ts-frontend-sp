@@ -28,7 +28,6 @@ import {
 } from "@atoms/userAtoms";
 import { IconCalendar } from "@tabler/icons";
 import { useState } from "react";
-import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { Campaign } from "src";
 import { logout } from "@auth/core";
 import { useQuery } from "@tanstack/react-query";
@@ -76,7 +75,7 @@ export default function CampaignDetailsDrawer() {
         <Title order={3}>{data?.campaign_details ? data.campaign_details.campaign_raw.name : ""}</Title>
       }
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />

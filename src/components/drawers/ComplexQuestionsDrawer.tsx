@@ -82,7 +82,7 @@ export default function ComplexQuestionsDrawer(props: {
       onClose={() => setDrawerOpened(false)}
       title={<Title order={3}>Complex Question</Title>}
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
       sx={{ position: 'relative' }}
     >

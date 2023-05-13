@@ -85,7 +85,7 @@ export default function DemoFeedbackSeeAllDrawer(props: { prospects: Prospect[] 
       <Paper withBorder p='xs' radius='md' mt={14}>
         <Flex justify='space-between'>
           <div>
-            <Indicator dot inline size={12} offset={5} position='top-end' color='violet' withBorder>
+            <Indicator inline size={12} offset={5} position='top-end' color='violet' withBorder>
               <Avatar size='md' radius='xl' src={prospect.img_url} />
             </Indicator>
           </div>
@@ -140,7 +140,7 @@ export default function DemoFeedbackSeeAllDrawer(props: { prospects: Prospect[] 
         </Group>
       }
       padding='xl'
-      size='xl'
+      size="lg"
       position='right'
     >
       {props.prospects.length > 0 ? (

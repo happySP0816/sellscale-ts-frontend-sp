@@ -26,9 +26,10 @@ import { disconnectVesselMailbox } from "@utils/requests/disconnectVesselMailbox
 import { connectVesselMailbox } from "@utils/requests/connectVesselMailbox";
 import { showNotification } from "@mantine/notifications";
 import CalendarAndScheduling from "@common/settings/CalendarAndScheduling";
-import { IconBrain, IconTrashFilled } from "@tabler/icons-react";
+import { IconAdjustmentsFilled, IconBrain, IconTrashFilled } from "@tabler/icons-react";
 import DoNotContactList from "@common/settings/DoNotContactList";
 import SellScaleBrain from "@common/settings/SellScaleBrain";
+import SettingPreferences from "@common/settings/SettingPreferences";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -384,6 +385,12 @@ export default function SettingsPage() {
             SellScale Brain
           </Tabs.Tab>
           <Tabs.Tab
+            value="preferences"
+            icon={<IconAdjustmentsFilled size="0.8rem" />}
+          >
+            Preferences
+          </Tabs.Tab>
+          <Tabs.Tab
             value="linkedinConnection"
             icon={<IconBrandLinkedin size="0.8rem" />}
           >
@@ -438,6 +445,10 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="sellScaleBrain" pl="xs">
           <SellScaleBrain />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="preferences" pl="xs">
+          <SettingPreferences />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

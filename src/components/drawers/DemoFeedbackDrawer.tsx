@@ -163,7 +163,7 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
       }}
       title={<Title order={3}>Demo Feedback</Title>}
       padding='xl'
-      size='xl'
+      size="lg"
       position='right'
       sx={{ position: 'relative' }}
     >
@@ -205,7 +205,6 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
                   sx={{
                     fontSize: '14px',
                     fontWeight: 500,
-                    color: '#C1C2C5',
                   }}
                 >
                   How did it go?

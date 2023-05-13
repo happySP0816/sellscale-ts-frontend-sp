@@ -28,7 +28,6 @@ import {
 } from "@atoms/userAtoms";
 import { IconCalendar } from "@tabler/icons";
 import { useRef, useState } from "react";
-import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { Archetype, Campaign, PersonaOverview } from "src";
 import { logout } from "@auth/core";
 import { useQuery } from "@tanstack/react-query";
@@ -59,7 +58,7 @@ export default function PersonaDetailsDrawer(props: { personaOverviews: PersonaO
         <Title order={3}>Details - {persona.name}</Title>
       }
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
     >
           <Tabs defaultValue="ctas" px='xs'>

@@ -112,7 +112,7 @@ export default function DashCardSeeAllDrawer(props: {
         </Group>
       }
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
     >
       {props.prospects.length > 0 ? (

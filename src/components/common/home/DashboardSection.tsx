@@ -169,7 +169,7 @@ export default function DashboardSection() {
                         <Text c="dimmed" span>
                           You have
                         </Text>{" "}
-                        <Text c="gray.5" span>
+                        <Text c="gray.7" span>
                           {totalProspectTasks} new tasks
                         </Text>
                       </>
@@ -315,7 +315,6 @@ export default function DashboardSection() {
                       <Flex justify="space-between">
                         <div>
                           <Indicator
-                            dot
                             inline
                             size={12}
                             offset={5}

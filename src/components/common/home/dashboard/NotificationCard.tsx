@@ -35,7 +35,7 @@ export default function NotificationCard(props: {
           )}
         </Group>
         {props.totalAmount >= 1 && ( // props.amount > 1
-          <Text fw={300} c="green.3" fz={12} sx={{ cursor: "pointer" }} onClick={props.onClickSeeAll}>
+          <Text fw={300} c="green.7" fz={12} sx={{ cursor: "pointer" }} onClick={props.onClickSeeAll}>
             See all
           </Text>
         )}
@@ -92,7 +92,7 @@ export default function NotificationCard(props: {
             {props.totalAmount >= 1 ? (
               <Text fz="sm" fs="italic">
                   Waiting to hear back from
-                  <Anchor fs="italic" pl={4} component="button" type="button" color="green.4" onClick={props.onClickSeeAll}>
+                  <Anchor fs="italic" pl={4} component="button" type="button" color="green.7" onClick={props.onClickSeeAll}>
                     {props.totalAmount} contact{props.totalAmount > 1 ? "s" : ""}
                   </Anchor>...
               </Text>

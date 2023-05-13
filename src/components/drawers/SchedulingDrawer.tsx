@@ -86,7 +86,7 @@ export default function SchedulingDrawer(props: { prospects: Prospect[] }) {
         </Group>    
       }
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
     >
       {props.prospects.length > 0 ? (

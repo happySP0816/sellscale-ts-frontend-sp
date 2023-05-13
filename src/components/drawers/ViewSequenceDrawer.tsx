@@ -29,7 +29,7 @@ export default function ViewSequenceDrawer(props: { sequence: Sequence | null })
         <Title order={2}>{props.sequence?.title}</Title>
       }
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
     >
       <ScrollArea

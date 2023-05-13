@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { NAV_BAR_SIDE_WIDTH, NAV_BAR_TOP_WIDTH, SCREEN_SIZES } from "@constants/data";
-import SidePanel from "@nav/SidePanel";
+import SidePanel from "@nav/old/SidePanel";
 import ProfileIcon, { ProfileCard } from "@nav/ProfileIcon";
 import { LogoFull } from "@nav/Logo";
 import { animated, useSpring } from "@react-spring/web";
@@ -20,16 +20,14 @@ import { useRecoilValue } from "recoil";
 import { isLoggedIn } from "@auth/core";
 import LogoutBtn from "@nav/LogoutBtn";
 import { userDataState } from "@atoms/userAtoms";
-import NavTab from "./NavTab";
+import NavTab from "./old/NavTab";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
 import { version } from '../../../package.json';
-
-const AnimatedNavbar = animated(Navbar);
+import { NavbarNested } from "./NavbarNested";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
-  const navigate = useNavigate();
 
   const userData = useRecoilValue(userDataState);
 
@@ -42,46 +40,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isMobileView = smScreenOrLess;
 
   const [navOpened, setNavOpened] = useState(false);
-  const navStyles = useSpring({
-    x: isMobileView && !navOpened ? -NAV_BAR_SIDE_WIDTH * 2 : 0,
-  });
 
   return (
     <AppShell
       className={"h-full"}
       fixed={true}
       navbar={
-        <AnimatedNavbar
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            backgroundColor: theme.colors.dark[7],
-            transform: navStyles.x.to((x) => `translate3d(${x}%,0,0)`),
-          }}
-          width={{ base: NAV_BAR_SIDE_WIDTH }}
-        >
-          <Navbar.Section>
-            <SidePanel isMobile={isMobileView} />
-          </Navbar.Section>
-          <Navbar.Section>
-            {isLoggedIn() && (
-              <>
-                <ProfileCard
-                  imgUrl={userData?.img_url || ''}
-                  name={userData?.sdr_name || ''}
-                  email={userData?.sdr_email || ''}
-                />
-                <NavTab
-                  icon={<IconSettings size={22} />}
-                  name="settings"
-                  description="Configure your SellScale settings"
-                  onClick={() => navigateToPage(navigate, `/settings`)}
-                />
-                <LogoutBtn />
-              </>
-            )}
-          </Navbar.Section>
-        </AnimatedNavbar>
+        <NavbarNested isMobileView navOpened />
       }
       header={
         isMobileView ? (
@@ -137,7 +102,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         },
       })}
     >
-      <Text c="dimmed" fs="italic" fz="xs" sx={{ position: 'absolute', top: 2, right: 5 }}>v. {version}</Text>
       <main>{children}</main>
     </AppShell>
   );

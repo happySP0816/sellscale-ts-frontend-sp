@@ -50,7 +50,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       description: prospect.title,
       keywords: prospect.company,
       group: 'Prospects',
-      onTrigger: () => navigateToPage(navigate, `/home/${prospect.id}`),
+      onTrigger: () => navigateToPage(navigate, `/home/all-contacts/${prospect.id}`),
       icon: (
         <Avatar
           src={prospect.img_url}

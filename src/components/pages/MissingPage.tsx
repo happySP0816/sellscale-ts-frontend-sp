@@ -1,72 +1,66 @@
-import { setPageTitle } from "@utils/documentChange";
-import { useRouteError } from "react-router-dom";
+import { createStyles, Title, Image, Text, Button, Container, Group, rem } from '@mantine/core';
+import { setPageTitle } from '@utils/documentChange';
+import Guy404 from '@assets/images/404-guy.png';
+
+const useStyles = createStyles((theme) => ({
+  root: {
+    paddingTop: rem(80),
+    paddingBottom: rem(80),
+  },
+
+  label: {
+    textAlign: 'center',
+    fontWeight: 900,
+    fontSize: rem(300),
+    lineHeight: 1,
+    color: theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[2],
+    marginBottom: -250,
+
+    [theme.fn.smallerThan('sm')]: {
+      fontSize: rem(120),
+    },
+  },
+
+  title: {
+    fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+    textAlign: 'center',
+    fontWeight: 900,
+    fontSize: rem(38),
+    marginTop: -20,
+
+    [theme.fn.smallerThan('sm')]: {
+      fontSize: rem(32),
+    },
+  },
+
+  description: {
+    maxWidth: rem(500),
+    margin: 'auto',
+    marginTop: theme.spacing.xl,
+    marginBottom: `calc(${theme.spacing.xl} * 1.5)`,
+  },
+}));
 
 export default function MissingPage() {
+  const { classes } = useStyles();
   setPageTitle(`Error 404`);
 
   return (
-    <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full">
-        <body class="h-full">
-        ```
-      */}
-      <div className="flex min-h-full flex-col bg-white lg:relative">
-        <div className="flex flex-grow flex-col">
-          <main className="flex flex-grow flex-col bg-white">
-            <div className="mx-auto flex w-full max-w-7xl flex-grow flex-col px-6 lg:px-8">
-              <div className="flex-shrink-0 pt-10 sm:pt-16">
-                <a href="/" className="inline-flex">
-                  <span className="sr-only">Your Company</span>
-                  <img
-                    className="h-12 w-auto"
-                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                    alt=""
-                  />
-                </a>
-              </div>
-              <div className="my-auto flex-shrink-0 py-16 sm:py-32">
-                <p className="text-base font-semibold text-indigo-600">404</p>
-                <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Page not found</h1>
-                <p className="mt-2 text-base text-gray-500">Sorry, we couldn’t find the page you’re looking for.</p>
-                <div className="mt-6">
-                  <a href="#" className="text-base font-medium text-indigo-600 hover:text-indigo-500">
-                    Go back home
-                    <span aria-hidden="true"> &rarr;</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </main>
-          <footer className="flex-shrink-0 bg-gray-50">
-            <div className="mx-auto w-full max-w-7xl py-16 px-6 lg:px-8">
-              <nav className="flex space-x-4">
-                <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-600">
-                  Contact Support
-                </a>
-                <span className="inline-block border-l border-gray-300" aria-hidden="true" />
-                <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-600">
-                  Status
-                </a>
-                <span className="inline-block border-l border-gray-300" aria-hidden="true" />
-                <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-600">
-                  Twitter
-                </a>
-              </nav>
-            </div>
-          </footer>
-        </div>
-        <div className="hidden lg:absolute lg:inset-y-0 lg:right-0 lg:block lg:w-1/2">
-          <img
-            className="absolute inset-0 h-full w-full object-cover"
-            src="https://images.unsplash.com/photo-1470847355775-e0e3c35a9a2c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1825&q=80"
-            alt=""
-          />
-        </div>
+    <Container className={classes.root}>
+      <div className={classes.label}>404</div>
+      <div>
+        <Image maw={240} mx="auto" radius="md" src={Guy404} alt="Random image" />
       </div>
-    </>
-  )
+      <Title className={classes.title}>You found a secret place.</Title>
+      <Text color="dimmed" size="lg" align="center" className={classes.description}>
+        Unfortunately, this is only a 404 page. You may have mistyped the address, or the page has
+        been moved to another URL.
+      </Text>
+      <Group position="center">
+        <Button variant="subtle" size="md" color='green'>
+          Take me back to home page
+        </Button>
+      </Group>
+    </Container>
+  );
 }

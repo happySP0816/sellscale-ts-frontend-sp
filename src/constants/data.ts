@@ -19,7 +19,7 @@ export const SCREEN_SIZES = {
 export const DEBOUNCE_DELAY = 200; // ms
 
 export const LOGO_HEIGHT = 50; // px
-export const NAV_BAR_SIDE_WIDTH = 140; // px
+export const NAV_BAR_SIDE_WIDTH = 300; // px
 export const NAV_BAR_TOP_WIDTH = 50; // px
 
 export const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;

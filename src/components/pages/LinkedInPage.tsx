@@ -17,10 +17,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype } from "src";
 import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
+import { useLoaderData } from "react-router-dom";
 
 export default function LinkedInPage() {
   setPageTitle("LinkedIn");
 
+  const { tabId } = useLoaderData() as { tabId: string };
   const userToken = useRecoilValue(userTokenState);
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
 
@@ -49,8 +51,8 @@ export default function LinkedInPage() {
 
   return (
     <PageFrame>
-      <Tabs defaultValue="messages" px="xs" color="teal">
-        <Tabs.List>
+      <Tabs value={tabId} px="xs" color="teal">
+        <Tabs.List sx={{ display: 'none' }}>
           <Tabs.Tab value="messages" icon={<IconMailFast size="1.1rem" />}>Messages</Tabs.Tab>
           <Tabs.Tab value="ctas" icon={<IconSpeakerphone size="1.1rem" />}>CTAs</Tabs.Tab>
           <Tabs.Tab value="personalizations" icon={<IconAffiliate size="1.1rem" />}>Personalizations</Tabs.Tab>

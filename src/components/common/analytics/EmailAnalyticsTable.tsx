@@ -23,7 +23,6 @@ import {
   campaignDrawerIdState,
   campaignDrawerOpenState,
 } from "@atoms/campaignAtoms";
-import { DateRangePicker, DateRangePickerValue } from "@mantine/dates";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate, formatToLabel, valueToColor } from "@utils/general";
 import { chunk } from "lodash";

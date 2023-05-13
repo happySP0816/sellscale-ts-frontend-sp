@@ -129,6 +129,8 @@ export default function SpotlightWrapper({
     SpotlightAction[] | null | false
   >(null);
 
+  const [actions, setActions] = useState<SpotlightAction[]>(mainActions);
+
   useEffect(() => {
     if (query === "") {
       setQueryResult(false);
@@ -142,18 +144,19 @@ export default function SpotlightWrapper({
 
   return (
     <SpotlightProvider
-      actions={(query: string) => {
+      onQueryChange={(query: string) => {
         /* Whenever input changes, this function is called and query is set via setQuery
          * setQuery is a debouncer, after the set debounce time the above useEffect callback is executed.
          * That callback fetches the result data and updates queryResult accordingly.
          */
         setQuery(query.trim());
         if (queryResult) {
-          return [...queryResult, ...mainActions];
+          setActions([...queryResult, ...mainActions]);
         } else {
-          return mainActions;
+          setActions(mainActions);
         }
       }}
+      actions={actions}
       actionComponent={CustomAction}
       searchIcon={<IconSearch size={18} />}
       searchPlaceholder={"Search..."}

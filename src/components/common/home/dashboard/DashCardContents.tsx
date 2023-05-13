@@ -110,7 +110,6 @@ export default function DashCardContents(props: {
     <Flex justify="space-between" sx={{ position: "relative" }}>
       <div>
         <Indicator
-          dot
           inline
           size={12}
           offset={5}

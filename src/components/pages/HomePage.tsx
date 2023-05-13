@@ -18,7 +18,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 export default function HomePage() {
   setPageTitle("");
 
-  const { prospectId } = useLoaderData() as { prospectId: string };
+  const { tabId, prospectId } = useLoaderData() as { tabId: string, prospectId: string };
   const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
   useEffect(() => {
@@ -28,12 +28,10 @@ export default function HomePage() {
     }
   }, [prospectId]);
 
-  const [activeTab, setActiveTab] = useState<string | null>('dashboard');
-
   return (
     <PageFrame>
-      <Tabs value={activeTab} onTabChange={setActiveTab} px="xs" color="teal">
-        <Tabs.List>
+      <Tabs value={tabId} px="xs" color="teal">
+        <Tabs.List sx={{ display: 'none' }}>
           <Tabs.Tab value="dashboard" icon={<IconCheckbox size="1.1rem" />}>
             Dashboard
           </Tabs.Tab>
@@ -66,7 +64,7 @@ export default function HomePage() {
           <RecentActivitySection />
         </Tabs.Panel>
         <Tabs.Panel value="demo-feedback" pt="xs">
-          {activeTab === "demo-feedback" && (
+          {tabId === "demo-feedback" && (
             <DemoFeedbackChart />
           )}
         </Tabs.Panel>

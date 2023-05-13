@@ -43,7 +43,7 @@ export default function SchedulingCardContents(props: { prospect: Prospect }) {
     <>
     <Flex justify='space-between'>
       <div>
-        <Indicator dot inline size={12} offset={5} position="top-end" color="violet" withBorder>
+        <Indicator inline size={12} offset={5} position="top-end" color="violet" withBorder>
           <Avatar
             size="md"
             radius="xl"

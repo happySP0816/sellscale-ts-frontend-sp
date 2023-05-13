@@ -35,7 +35,7 @@ export default function PersonaUploadDrawer(props: {
       onClose={closeDrawer}
       title={<Title order={3}>Upload - {persona.name}</Title>}
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
     >
       <Tabs defaultValue="from-file" px="xs" color="teal">
@@ -116,7 +116,7 @@ export default function PersonaUploadDrawer(props: {}) {
       }}
       title={<Title order={2}>Upload to Persona</Title>}
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
     >
       <Container m="sm">

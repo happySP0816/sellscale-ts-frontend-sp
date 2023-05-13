@@ -22,7 +22,6 @@ export default async function displayNotification(
     message: loading.message,
     color: loading.color,
     autoClose: false,
-    disallowClose: true,
   });
 
   const showError = (title: string ,message: string) => {

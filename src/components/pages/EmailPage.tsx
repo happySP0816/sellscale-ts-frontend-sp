@@ -11,17 +11,19 @@ import SequenceSection from "@common/sequence/SequenceSection";
 import { Tabs } from "@mantine/core";
 import { IconAffiliate, IconHistory, IconListDetails, IconReport } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
+import { useLoaderData } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
 export default function EmailPage() {
   setPageTitle("Email");
 
   const userData = useRecoilValue(userDataState);
+  const { tabId } = useLoaderData() as { tabId: string };
 
   return (
     <PageFrame>
-      <Tabs defaultValue="sequences" px="xs" color="teal">
-        <Tabs.List>
+      <Tabs value={tabId} px="xs" color="teal">
+        <Tabs.List sx={{ display: 'none' }}>
           <Tabs.Tab value="sequences" icon={<IconListDetails size="1.1rem" />}>Sequences</Tabs.Tab>
           <Tabs.Tab value="personalizations" icon={<IconAffiliate size="1.1rem" />}>Personalizations</Tabs.Tab>
           <Tabs.Tab value="campaign-history" icon={<IconHistory size="1.1rem" />}>Campaign History</Tabs.Tab>

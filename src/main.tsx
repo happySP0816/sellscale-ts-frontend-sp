@@ -88,19 +88,25 @@ const router = sentryCreateBrowserRouter([
         },
       },
       {
-        path: "home/:prospectId?",
+        path: "home/:tabId/:prospectId?",
         element: <RestrictedRoute page={<HomePage />} />,
         loader: async ({ params }: { params: any }) => {
-          return { prospectId: params.prospectId };
+          return { tabId: params.tabId, prospectId: params.prospectId };
         },
       },
       {
-        path: "linkedin",
+        path: "linkedin/:tabId?",
         element: <RestrictedRoute page={<LinkedInPage />} />,
+        loader: async ({ params }: { params: any }) => {
+          return { tabId: params.tabId };
+        },
       },
       {
-        path: "email",
+        path: "email/:tabId?",
         element: <RestrictedRoute page={<EmailPage />} />,
+        loader: async ({ params }: { params: any }) => {
+          return { tabId: params.tabId };
+        },
       },
       {
         path: "personas",

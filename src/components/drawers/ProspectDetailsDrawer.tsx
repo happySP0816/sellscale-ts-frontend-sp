@@ -139,7 +139,7 @@ export default function ProspectDetailsDrawer() {
                     theme,
                     formatToLabel(prospectDrawerStatuses.overall)
                   )}
-                  variant="light"
+                  variant="outline"
                   mr={20}
                   mt={5}
                 >
@@ -154,9 +154,23 @@ export default function ProspectDetailsDrawer() {
         </FlexSeparate>
       }
       padding="xl"
-      size="xl"
+      size="lg"
       position="right"
-      styles={{ title: { width: "100%", marginRight: 0 } }}
+      styles={(theme) => ({
+        title: {
+          width: "100%",
+          marginRight: 0,
+          color: theme.colorScheme === "dark" ? undefined : theme.colors.gray[2],
+        },
+        header: {
+          backgroundColor: theme.colorScheme === "dark" ? undefined : theme.colors.dark[8],
+          paddingTop: 12,
+          paddingBottom: 12,
+        },
+        body: {
+          marginTop: 10,
+        }
+      })}
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       {data?.main.prospect_info && !isFetching && (
@@ -237,10 +251,10 @@ export default function ProspectDetailsDrawer() {
                           key={channel.value}
                           value={channel.value}
                           p="sm"
-                          sx={{
-                            borderLeft: "1px solid #373A40",
-                            borderRight: "1px solid #373A40",
-                          }}
+                          sx={(theme) => ({
+                            borderLeft: `1px solid ${theme.colorScheme === 'dark' ? `#373A40` : `#dee2e6`}`,
+                            borderRight: `1px solid ${theme.colorScheme === 'dark' ? `#373A40` : `#dee2e6`}`,
+                          })}
                         >
                           <ProspectDetailsChangeStatus
                             prospectId={data.main.prospect_info.details.id}

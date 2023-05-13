@@ -105,7 +105,7 @@ export default function PipelineSelector({
         </Group>
         <Group align="flex-end" spacing="xs" mt={25}>
           {loadingData ? (
-            <Loader variant="dots" w="100%" color={stat.color} />
+            <Loader variant="dots" height={10} w="100%" color={stat.color} />
           ) : (
             <Text className={classes.value} w="100%">
               {stat.value}

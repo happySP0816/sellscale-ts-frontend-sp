@@ -111,7 +111,6 @@ export default function CTAGeneratorModal({
         color: "red",
         autoClose: 5000,
       });
-
     }
   };
 
@@ -120,7 +119,6 @@ export default function CTAGeneratorModal({
       p={0}
       style={{
         position: "relative",
-        backgroundColor: theme.colors.dark[7],
       }}
     >
       <Text size="sm" mb="md">
@@ -138,12 +136,16 @@ export default function CTAGeneratorModal({
               {...surveyForm.getInputProps("company")}
               required
             />
-            
+
             <Autocomplete
               mt="md"
               label="Which persona?"
               placeholder="ex. VP of Sales, Head of HR"
-              data={innerProps.personas ? innerProps.personas.map((p) => p.archetype) : []}
+              data={
+                innerProps.personas
+                  ? innerProps.personas.map((p) => p.archetype)
+                  : []
+              }
               classNames={classes}
               {...surveyForm.getInputProps("persona")}
               required
@@ -220,7 +222,7 @@ export default function CTAGeneratorModal({
                       <Button
                         disabled={!cta.enabled}
                         mt={10}
-                        radius='md'
+                        radius="md"
                         onClick={async () => {
                           if (cta.cta.length > 120) {
                             showNotification({

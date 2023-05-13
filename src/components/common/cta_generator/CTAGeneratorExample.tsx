@@ -30,11 +30,11 @@ export default function CTAGeneratorExample(props: PropsType) {
           <Text size="sm" weight="700">
             Example message with CTA:
           </Text>
-          <Divider mt="sm" mb="sm"></Divider>
-          <Text size="sm" p="md">
+          <Divider mt="sm" mb="xs"></Divider>
+          <Text size="sm">
             Hey George! Congrats on that 3 year anni at Acme! It's clear you're
             an incredible leader after seeing what John had to say about you.{" "}
-            <span style={{ color: "yellow" }}>{props.ctaText}</span>
+            <span style={{ color: "orange" }}>{props.ctaText}</span>
           </Text>
         </Container>
       </Popover.Dropdown>

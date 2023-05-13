@@ -14,7 +14,6 @@ const useStyles = createStyles((theme) => ({
   comment: {
     padding: `${theme.spacing.lg}px ${theme.spacing.xl}px`,
   },
-  
 
   body: {
     paddingLeft: 54,
@@ -47,16 +46,27 @@ export function LinkedInConversationEntry({
   const { classes } = useStyles();
   const theme = useMantineTheme();
   return (
-    <Paper withBorder radius="md" className={classes.comment}>
-      <Group sx={{ position: 'relative' }}>
-        <Avatar src={image} radius="xl" alt={name} color={valueToColor(theme, name)}>{nameToInitials(name)}</Avatar>
+    <Paper withBorder radius="md" className={classes.comment} p="lg" mb="xs">
+      <Group sx={{ position: "relative" }}>
+        <Avatar
+          src={image}
+          radius="xl"
+          alt={name}
+          color={valueToColor(theme, name)}
+        >
+          {nameToInitials(name)}
+        </Avatar>
         <div>
           <Text size="sm">{name}</Text>
           <Text size="xs" color="dimmed">
             {postedAt}
           </Text>
         </div>
-        {isLatest && (<Badge sx={{ position: 'absolute', top: 0, right: 0 }}>Latest Message</Badge>)}
+        {isLatest && (
+          <Badge sx={{ position: "absolute", top: 0, right: 0 }}>
+            Latest Message
+          </Badge>
+        )}
       </Group>
 
       <TypographyStylesProvider className={classes.body}>

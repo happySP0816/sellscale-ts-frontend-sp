@@ -358,6 +358,9 @@ export default function ProspectDetailsChangeStatus(
         onClick={async () => {
           await changeStatus(status);
         }}
+        sx={{
+          border: "solid 1px #333",
+        }}
       >
         <status.icon color={theme.colors[status.color][6]} size={32} />
         <Text size="xs" mt={7}>

@@ -26,7 +26,11 @@ import { disconnectVesselMailbox } from "@utils/requests/disconnectVesselMailbox
 import { connectVesselMailbox } from "@utils/requests/connectVesselMailbox";
 import { showNotification } from "@mantine/notifications";
 import CalendarAndScheduling from "@common/settings/CalendarAndScheduling";
-import { IconAdjustmentsFilled, IconBrain, IconTrashFilled } from "@tabler/icons-react";
+import {
+  IconAdjustmentsFilled,
+  IconBrain,
+  IconTrashFilled,
+} from "@tabler/icons-react";
 import DoNotContactList from "@common/settings/DoNotContactList";
 import SellScaleBrain from "@common/settings/SellScaleBrain";
 import SettingPreferences from "@common/settings/SettingPreferences";
@@ -173,40 +177,37 @@ function VesselIntegrations() {
             closeButtonProps={{ opacity: 0 }}
             icon={<IconCheck size="1.1rem" />}
             title="Sales engagement tool already connected"
-            bg={"blue"}
-            color="white"
+            withBorder
           >
-            <Text color="white">
+            <Text>
               If you would like to connect a different tool, please disconnect
               your current tool first. Contact a SellScale administrator if you
               need help.
             </Text>
           </Notification>
 
-          <Card mt="md">
+          <Card mt="md" withBorder>
             {hasMailbox ? (
               <Notification
                 closeButtonProps={{ opacity: 0 }}
                 icon={<IconCheck size="1.1rem" />}
                 title="Outbound email address selected"
-                bg={"gray"}
                 color="green"
                 mb="sm"
+                withBorder
               />
             ) : (
               <Notification
                 closeButtonProps={{ opacity: 0 }}
                 icon={<IconX size="1.1rem" />}
                 title="Outbound email address not selected"
-                bg={"gray"}
                 color="red"
                 mb="sm"
+                withBorder
               />
             )}
-            <Text fz="lg" color="white">
-              Select outbounding email
-            </Text>
-            <Text mt="xs" fz="sm" color="white">
+            <Text fz="lg">Select outbounding email</Text>
+            <Text mt="xs" fz="sm">
               To ensure that we send emails from the correct email address,
               please select the email address you use in your sales engagement
               tool.

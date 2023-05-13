@@ -8,6 +8,14 @@ import {
   Container,
 } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
+import {
+  IconCrown,
+  IconHandGrab,
+  IconLoader,
+  IconMoodSmile,
+  IconThumbDown,
+  IconX,
+} from "@tabler/icons";
 import { valueToColor } from "@utils/general";
 
 type PropsType = {
@@ -30,12 +38,25 @@ export default function ICPFitPill(props: PropsType) {
     ["3", "HIGH"],
     ["4", "VERY HIGH"],
   ]);
+  let icpFitColorMap = new Map<string, any>([
+    ["-3", "grape"],
+    ["-2", "grape"],
+    ["-1", "gray"],
+    ["0", "red"],
+    ["1", "orange"],
+    ["2", "yellow"],
+    ["3", "blue"],
+    ["4", "green"],
+  ]);
   const mappedFitScore: string =
     icpFitScoreMap.get(props.icp_fit_score + "") || "N/A";
+  const mappedFitColor: any =
+    icpFitColorMap.get(props.icp_fit_score + "") || "gray";
+
   return (
     <Popover position="right" withArrow shadow="md" opened={hovered}>
       <Popover.Target>
-        <Badge color={valueToColor(theme, mappedFitScore)} ref={ref}>
+        <Badge color={mappedFitColor} ref={ref}>
           {mappedFitScore}
         </Badge>
       </Popover.Target>
@@ -49,19 +70,19 @@ export default function ICPFitPill(props: PropsType) {
             Archetype:
           </Text>
           <Badge
-            p='xs'
-            variant='outline'
-            radius='sm'
-            size='xs'
+            p="xs"
+            variant="outline"
+            radius="sm"
+            size="xs"
             color={valueToColor(theme, props.archetype || "Persona Unassigned")}
           >
             {props.archetype || "Persona Unassigned"}
           </Badge>
 
-          <Text size="sm" weight="700" mt='md'>
+          <Text size="sm" weight="700" mt="md">
             ICP Fit Score:
           </Text>
-          <Badge color={valueToColor(theme, mappedFitScore)} ref={ref}>
+          <Badge color={mappedFitColor} ref={ref}>
             {mappedFitScore}
           </Badge>
 

@@ -55,7 +55,7 @@ export default function CreateNewCTAModel({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ personaId: string, personas?: Archetype[] }>) {
+}: ContextModalProps<{ personaId: string; personas?: Archetype[] }>) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -105,20 +105,21 @@ export default function CreateNewCTAModel({
       p={0}
       style={{
         position: "relative",
-        backgroundColor: theme.colors.dark[7],
       }}
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <LoadingOverlay visible={loading} />
-        <Text size='sm' mt='md'>
-          Call-to-Actions for LinkedIn are included at the end of a SellScale personalization and are the best way to start a conversation. You can manually add a CTA, or use our AI-powered CTA generator to brainstorm.
+        <Text size="sm" mt="md">
+          Call-to-Actions for LinkedIn are included at the end of a SellScale
+          personalization and are the best way to start a conversation. You can
+          manually add a CTA, or use our AI-powered CTA generator to brainstorm.
         </Text>
 
         <Card mt="md">
           <Text weight={"bold"}>AI-Powered CTA Generator</Text>
           <Text size="sm">
-            Press the button below to generate 6 CTAs based on your
-            persona in seconds.
+            Press the button below to generate 6 CTAs based on your persona in
+            seconds.
           </Text>
           <Button
             variant="outline"

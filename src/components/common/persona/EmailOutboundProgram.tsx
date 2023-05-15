@@ -1,22 +1,33 @@
 import { userTokenState } from "@atoms/userAtoms";
 import FlexSeparate from "@common/library/FlexSeparate";
-import { Badge, Container, Group, LoadingOverlay, Paper, Select, Stack, Title } from "@mantine/core";
+import {
+  Badge,
+  Container,
+  Group,
+  LoadingOverlay,
+  Paper,
+  Select,
+  Stack,
+  Title,
+} from "@mantine/core";
 import { IconArrowNarrowRight } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import getPersonas from "@utils/requests/getPersonas";
-import { getSequences, saveSequenceToPersona } from "@utils/requests/getSequences";
+import {
+  getSequences,
+  saveSequenceToPersona,
+} from "@utils/requests/getSequences";
 import { useRecoilValue } from "recoil";
 import { Archetype } from "src";
 
 export default function EmailOutboundProgram() {
-  
   const userToken = useRecoilValue(userTokenState);
 
   const { data: sequences } = useQuery({
     queryKey: [`query-get-all-sequences`],
     queryFn: async () => {
       const result = await getSequences(userToken);
-      return result.status === 'success' ? result.data : [];
+      return result.status === "success" ? result.data : [];
     },
   });
 
@@ -29,7 +40,9 @@ export default function EmailOutboundProgram() {
 
       const personas = result.sort((a, b) => {
         if (a.active === b.active) {
-          return b.performance.total_prospects - a.performance.total_prospects;
+          return (
+            b.performance?.total_prospects - a.performance?.total_prospects
+          );
         } else {
           return a.active ? -1 : 1;
         }
@@ -41,7 +54,7 @@ export default function EmailOutboundProgram() {
   });
 
   return (
-    <Stack spacing='xl'>
+    <Stack spacing="xl">
       <Paper withBorder p="md" radius="md" w="100%">
         <Title order={3}>
           Current SLA:{" "}
@@ -58,34 +71,53 @@ export default function EmailOutboundProgram() {
       </Paper>
       <Stack>
         <LoadingOverlay visible={!personas || isFetching} overlayBlur={2} />
-        {personas && personas.map((persona, index) => (
-          <Paper key={index} withBorder p="md" radius="md" w="100%">
-            <Group position="center" spacing="sm" grow>
-              <FlexSeparate>
-                <Title order={5}>{persona.archetype}</Title>
-                <Title order={5}><IconArrowNarrowRight size="2.125rem" /></Title>
-              </FlexSeparate>
-              <Select
-                defaultValue={persona.vessel_sequence_id+''}
-                placeholder="Select a sequence"
-                searchable
-                clearable
-                nothingFound="None found"
-                data={sequences ? sequences.map((sequence: { name: string, sequence_id: string }) => ({ value: sequence.sequence_id, label: sequence.name })) : []}
-                onChange={async (value) => {
-                  const result = await saveSequenceToPersona(userToken, persona.id+'', value ?? '-1');
-                }}
-              />
-              <Badge
-                color={persona.active ? "teal" : "red"}
-                variant="light"
-                styles={{ root: { height: 35 } }}
-              >
-                {persona.active ? "Active" : "Inactive"}
-              </Badge>
-            </Group>
-          </Paper>
-        ))}
+        {personas &&
+          personas.map((persona, index) => (
+            <Paper key={index} withBorder p="md" radius="md" w="100%">
+              <Group position="center" spacing="sm" grow>
+                <FlexSeparate>
+                  <Title order={5}>{persona.archetype}</Title>
+                  <Title order={5}>
+                    <IconArrowNarrowRight size="2.125rem" />
+                  </Title>
+                </FlexSeparate>
+                <Select
+                  defaultValue={persona.vessel_sequence_id + ""}
+                  placeholder="Select a sequence"
+                  searchable
+                  clearable
+                  nothingFound="None found"
+                  data={
+                    sequences
+                      ? sequences.map(
+                          (sequence: {
+                            name: string;
+                            sequence_id: string;
+                          }) => ({
+                            value: sequence.sequence_id,
+                            label: sequence.name,
+                          })
+                        )
+                      : []
+                  }
+                  onChange={async (value) => {
+                    const result = await saveSequenceToPersona(
+                      userToken,
+                      persona.id + "",
+                      value ?? "-1"
+                    );
+                  }}
+                />
+                <Badge
+                  color={persona.active ? "teal" : "red"}
+                  variant="light"
+                  styles={{ root: { height: 35 } }}
+                >
+                  {persona.active ? "Active" : "Inactive"}
+                </Badge>
+              </Group>
+            </Paper>
+          ))}
       </Stack>
     </Stack>
   );

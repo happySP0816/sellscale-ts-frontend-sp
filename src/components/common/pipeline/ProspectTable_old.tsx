@@ -40,10 +40,11 @@ import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
 import getChannels from "@utils/requests/getChannels";
-import { Channel } from "src";
+import { Channel, PersonaOverview } from "src";
 import _ from "lodash";
 import FlexSeparate from "@common/library/FlexSeparate";
 import { API_URL } from "@constants/data";
+import { getPersonasOverview } from "@utils/requests/getPersonas";
 
 /**
  * Gets the default statuses for a given selector type (based on channel)
@@ -163,6 +164,9 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
   );
   const queryClient = useQueryClient();
 
+  const [personas, setPersonas] = useState<PersonaOverview[]>([]);
+  const [personaId, setPersonaId] = useState<number | null>(null);
+
   const [bumpedCount, setBumpedCount] = useState("all");
 
   const [page, setPage] = useState(1);
@@ -197,6 +201,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
         channel,
         showPurgatory,
         bumpedCount,
+        personaId,
       },
     ],
     queryFn: async ({ queryKey }) => {
@@ -212,6 +217,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           channel,
           showPurgatory,
           bumpedCount,
+          personaId,
         },
       ]: any = queryKey;
 
@@ -227,7 +233,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           query: search.length > 0 ? search : undefined,
           channel: channel.length > 0 ? channel : "SELLSCALE",
           status: statuses?.length > 0 ? statuses : undefined,
-          persona_id: props.personaSpecific,
+          persona_id: props.personaSpecific ?? personaId ?? undefined,
           limit: PAGE_SIZE,
           offset: (page - 1) * PAGE_SIZE,
           ordering: [
@@ -306,10 +312,19 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
     }
   }, [selectorType, channel]);
 
+  useEffect(() => {
+    (async () => {
+      const response = await getPersonasOverview(userToken);
+      const result =
+        response.status === "success" ? (response.data as PersonaOverview[]) : [];
+      setPersonas(result);
+    })();
+  }, []);
+
   return (
     <Box>
       <Grid grow>
-        <Grid.Col span={4}>
+        <Grid.Col span={3}>
           <TextInput
             label="Search Contacts"
             placeholder="Search by Name, Company, or Title"
@@ -321,7 +336,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             className="truncate"
           />
         </Grid.Col>
-        <Grid.Col span={2}>
+        <Grid.Col span={1}>
           <Select
             data={
               // If channels are not loaded or failed to fetch, don't show anything
@@ -391,18 +406,39 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           />
         </Grid.Col>
         <Grid.Col span={2}>
+          <Select
+            data={
+              personas.map((persona) => {
+                return {
+                  label: persona.name,
+                  value: persona.id+'',
+                };
+              })
+            }
+            mb="md"
+            clearable
+            label="Filter by Persona"
+            placeholder="Select persona"
+            value={personaId ? personaId + "" : null}
+            onChange={(value) =>
+              value ? setPersonaId(+value) : setPersonaId(null)
+            }
+            className="truncate"
+          />
+        </Grid.Col>
+        <Grid.Col span={2}>
           <Switch.Group
             label={
               showPurgatory
                 ? "Show prospects that need contacting"
-                : "Only show prospects contacted in last 2 days"
+                : "Recently Contacted Prospects"
             }
             onChange={(value) => {
               setShowPurgatory(!showPurgatory);
             }}
           >
             <Group>
-              <Switch value="purgatory" onLabel="Hide" offLabel="Show" />
+              <Switch value="purgatory" />
             </Group>
           </Switch.Group>
         </Grid.Col>
@@ -525,18 +561,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           {
             accessor: "icp_fit_score",
             title: (
-              <FlexSeparate>
                 <Text>ICP Fit</Text>
-                <ActionIcon
-                  size="sm"
-                  onClick={() => {
-                    refetch();
-                    refetch_channels();
-                  }}
-                >
-                  <IconRefresh size="0.875rem" />
-                </ActionIcon>
-              </FlexSeparate>
             ),
             sortable: true,
             render: ({ icp_fit_score, icp_fit_reason, archetype }) => {
@@ -564,6 +589,35 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               return (
                 <>
                   <Badge>{last_reviewed?.substring(0, 16)}</Badge>
+                </>
+              );
+            },
+          },
+          {
+            accessor: "archetype",
+            title: (
+              <FlexSeparate>
+                <Text>Persona</Text>
+                <ActionIcon
+                  size="sm"
+                  onClick={() => {
+                    refetch();
+                    refetch_channels();
+                  }}
+                >
+                  <IconRefresh size="0.875rem" />
+                </ActionIcon>
+            </FlexSeparate>
+            ),
+            render: ({ archetype }) => {
+              return (
+                <>
+                  <Badge color={valueToColor(theme, archetype)}>
+                    {_.truncate(archetype, {
+                      'length': 24,
+                      'separator': ''
+                    })}
+                  </Badge>
                 </>
               );
             },

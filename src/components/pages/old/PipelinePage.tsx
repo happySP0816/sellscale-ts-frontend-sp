@@ -104,9 +104,9 @@ export default function PipelinePage() {
     <PageFrame>
       <PageTitle title="Pipeline" />
       <PipelineSelector data={PIPELINE_SELECTOR_DATA} />
-      <Container pt={15} px={0}>
+      <div style={{ paddingTop: 15 }}>
         <ProspectTable_old />
-      </Container>
+      </div>
     </PageFrame>
   );
 }

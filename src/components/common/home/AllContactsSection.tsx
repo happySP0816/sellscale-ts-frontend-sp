@@ -109,9 +109,9 @@ export default function AllContactsSection() {
         data={PIPELINE_SELECTOR_DATA}
         loadingData={loadingData}
       />
-      <Container pt={15} px={0}>
+      <div style={{ paddingTop: 15 }}>
         <ProspectTable_old />
-      </Container>
+      </div>
     </div>
   );
 }

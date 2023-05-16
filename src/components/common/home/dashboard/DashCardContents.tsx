@@ -305,6 +305,7 @@ export default function DashCardContents(props: {
                   userToken,
                   props.prospect.id,
                   response.trim(),
+                  false,
                   purgatory
                 );
                 console.log(result);

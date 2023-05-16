@@ -7,6 +7,7 @@ import { API_URL } from "@constants/data";
  * @param userToken
  * @param prospectId
  * @param message
+ * @param aiGenerated
  * @param purgatory
  * @returns - MsgResponse
  */
@@ -14,6 +15,7 @@ export async function sendLinkedInMessage(
   userToken: string,
   prospectId: number,
   message: string,
+  aiGenerated: boolean,
   purgatory?: boolean
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/voyager/send_message`, {
@@ -25,6 +27,7 @@ export async function sendLinkedInMessage(
     body: JSON.stringify({
       prospect_id: prospectId,
       message: message,
+      ai_generated: aiGenerated,
       purgatory: purgatory ?? true,
     }),
   });

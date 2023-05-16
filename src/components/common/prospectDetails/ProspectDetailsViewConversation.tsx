@@ -82,6 +82,8 @@ export default function ProspectDetailsViewConversation(
   const [msgLoading, setMsgLoading] = useState(false);
   const [generateMsgLoading, setGenerateMsgLoading] = useState(false);
 
+  const [aiGenerated, setAiGenerated] = useState(false);
+
   // Use cached convo if voyager isn't connected, else fetch latest
   const messages = useRef(
     userData.li_voyager_connected
@@ -90,6 +92,14 @@ export default function ProspectDetailsViewConversation(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         )
   );
+
+  // If message was cleared, it's no longer ai generated
+  useEffect(() => {
+    if(messageDraft.trim().length == 0) {
+      setAiGenerated(false);
+    }
+  }, [messageDraft]);
+
 
   const emptyConvo = messages.current.length === 0;
 
@@ -219,7 +229,7 @@ export default function ProspectDetailsViewConversation(
     setMsgLoading(true);
     const msg = messageDraft;
     setMessageDraft("");
-    const result = await sendLinkedInMessage(userToken, props.prospect_id, msg);
+    const result = await sendLinkedInMessage(userToken, props.prospect_id, msg, aiGenerated);
     if (result.status === "success") {
       let yourMessage = _.cloneDeep(messages.current)
         .reverse()
@@ -268,6 +278,7 @@ export default function ProspectDetailsViewConversation(
         autoClose: true,
       });
       setMessageDraft(result.data.message);
+      setAiGenerated(true);
     } else {
       showNotification({
         id: "generate-ai-followup-error",

@@ -53,6 +53,8 @@ export default function ComposeEmailModal({
   const [sending, setSending] = useState(false);
   const [generatingEmail, setGeneratingEmail] = useState(false);
 
+  const [aiGenerated, setAiGenerated] = useState(false);
+
   const [
     fetchedEmailGenerationPrompt,
     setFetchedEmailGenerationPrompt,
@@ -76,6 +78,13 @@ export default function ComposeEmailModal({
       setEmailGenerationPrompt(response.data.prompt);
     }
   };
+
+  // If body was cleared, it's no longer ai generated
+  useEffect(() => {
+    if(body.trim().length == 0) {
+      setAiGenerated(false);
+    }
+  }, [body]);
 
   useEffect(() => {
     if (!fetchedEmailGenerationPrompt) {
@@ -130,6 +139,7 @@ export default function ComposeEmailModal({
                 if (response.status === "success") {
                   setSubject(response.data.subject);
                   setBody(response.data.body.replace(/\n/gm, "<br>"));
+                  setAiGenerated(true);
                 }
               })
               .catch((e) => {
@@ -152,9 +162,9 @@ export default function ComposeEmailModal({
               userToken,
               innerProps.prospectId,
               subject,
-              body
+              body,
+              aiGenerated
             );
-            console.log(result);
             context.closeModal(id);
           }}
         >

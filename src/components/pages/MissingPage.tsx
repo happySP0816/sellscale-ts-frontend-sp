@@ -57,7 +57,9 @@ export default function MissingPage() {
         been moved to another URL.
       </Text>
       <Group position="center">
-        <Button variant="subtle" size="md" color='green'>
+        <Button variant="subtle" size="md" color='green' onClick={() => {
+          window.location.href = '/'
+        }}>
           Take me back to home page
         </Button>
       </Group>

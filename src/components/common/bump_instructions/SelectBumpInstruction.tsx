@@ -34,14 +34,17 @@ type BumpFramework = {
 type PropsType = {
   client_sdr_id: number;
   overall_status: string;
-  onBumpFrameworkSelected: (bumpFrameworkId: number, bumpFrameworkLengthAPI: string) => void;
+  onBumpFrameworkSelected: (
+    bumpFrameworkId: number,
+    bumpFrameworkLengthAPI: string
+  ) => void;
   onAccountResearchChanged: (accountResearch: string) => void;
 };
 
 const bumpFrameworkLengthMarks = [
-  { value: 0, label: 'Short', api_label: "SHORT" },
-  { value: 50, label: 'Medium', api_label: "MEDIUM" },
-  { value: 100, label: 'Long', api_label: "LONG" },
+  { value: 0, label: "Short", api_label: "SHORT" },
+  { value: 50, label: "Medium", api_label: "MEDIUM" },
+  { value: 100, label: "Long", api_label: "LONG" },
 ];
 
 export default function SelectBumpInstruction(props: PropsType) {
@@ -61,19 +64,27 @@ export default function SelectBumpInstruction(props: PropsType) {
 
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
-    const result = await getBumpFrameworks(userToken, prospectDrawerStatuses.overall);
+    const result = await getBumpFrameworks(
+      userToken,
+      prospectDrawerStatuses.overall
+    );
 
     setBumpFrameworks(result.data);
     for (const bumpFramework of result.data as BumpFramework[]) {
       if (bumpFramework.default) {
-        let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === bumpFramework.bump_length)?.value
+        let length = bumpFrameworkLengthMarks.find(
+          (marks) => marks.api_label === bumpFramework.bump_length
+        )?.value;
         if (length == null) {
           length = 50;
         }
 
         setSelectedBumpFramework(bumpFramework);
         setBumpLengthValue(length);
-        props.onBumpFrameworkSelected(bumpFramework.id, bumpFramework.bump_length);
+        props.onBumpFrameworkSelected(
+          bumpFramework.id,
+          bumpFramework.bump_length
+        );
         break;
       }
     }
@@ -104,15 +115,20 @@ export default function SelectBumpInstruction(props: PropsType) {
             })}
             placeholder={"Select Bump Frameworks"}
             onChange={(value: any) => {
-              let bumpFramework = bumpFrameworks.find((x) => x.id == value)
-              let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === bumpFramework?.bump_length)?.value
+              let bumpFramework = bumpFrameworks.find((x) => x.id == value);
+              let length = bumpFrameworkLengthMarks.find(
+                (marks) => marks.api_label === bumpFramework?.bump_length
+              )?.value;
               if (length == null) {
                 length = 50;
               }
 
               setSelectedBumpFramework(bumpFramework);
               setBumpLengthValue(length);
-              props.onBumpFrameworkSelected(value, bumpFramework?.bump_length || "MEDIUM");
+              props.onBumpFrameworkSelected(
+                value,
+                bumpFramework?.bump_length || "MEDIUM"
+              );
             }}
             searchable
             creatable
@@ -149,17 +165,22 @@ export default function SelectBumpInstruction(props: PropsType) {
           label={null}
           step={50}
           marks={bumpFrameworkLengthMarks}
-          mt='xs'
-          mb='xl'
-          p='md'
+          mt="xs"
+          mb="xl"
+          p="md"
           value={bumpLengthValue}
           onChange={(value) => {
             setBumpLengthValue(value);
-            let bumpLength = bumpFrameworkLengthMarks.find((marks) => marks.value === value)?.api_label
+            let bumpLength = bumpFrameworkLengthMarks.find(
+              (marks) => marks.value === value
+            )?.api_label;
             if (bumpLength == null) {
               bumpLength = "MEDIUM";
             }
-            props.onBumpFrameworkSelected(selectedBumpFramework?.id || -1, bumpLength);
+            props.onBumpFrameworkSelected(
+              selectedBumpFramework?.id || -1,
+              bumpLength
+            );
           }}
         />
       </Tooltip>

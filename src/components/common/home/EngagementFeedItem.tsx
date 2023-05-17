@@ -161,6 +161,7 @@ export default function EngagementFeedItem(props: EngagementFeedItemProps) {
                 : (prospectImgURL as string)
             }
             isLatest
+            aiGenerated={false}
           />
         </div>
       ) : null}

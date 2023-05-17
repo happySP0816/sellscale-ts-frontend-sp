@@ -14,10 +14,12 @@ export default function old_NotificationCard(props: NotificationCardProps) {
     <Tooltip.Floating label="Coming soon!" color="teal">
       <Paper
         ref={ref}
-        sx={{
-          filter: hovered ? "brightness(125%)" : "brightness(100%)",
+        sx={(theme) => ({
+          "&:hover": {
+            filter: theme.colorScheme === "dark" ? "brightness(135%)" : "brightness(95%)",
+          },
           cursor: "pointer",
-        }}
+        })}
         withBorder
         m="xs"
         p="md"

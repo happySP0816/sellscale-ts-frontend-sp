@@ -19,10 +19,12 @@ export default function ViewEmailModal({
   return (
     <Paper
       p={0}
-      style={{
+      sx={(theme) => ({
         position: "relative",
-        backgroundColor: theme.colors.dark[7],
-      }}
+        backgroundColor: theme.colorScheme === "dark"
+        ? theme.colors.dark[7]
+        : theme.white,
+      })}
     >
       <ReactMarkdown>{innerProps.body}</ReactMarkdown>
       <Divider />

@@ -35,6 +35,10 @@ interface ComposeEmail extends Record<string, unknown> {
   body: string;
   from: string;
   prospectId: number;
+  reply?: {
+    threadSubject: string;
+    messageId: string;
+  }
 }
 
 export default function ComposeEmailModal({
@@ -98,7 +102,9 @@ export default function ComposeEmailModal({
       p={0}
       style={{
         position: "relative",
-        backgroundColor: theme.colors.dark[7],
+        backgroundColor: theme.colorScheme === "dark"
+        ? theme.colors.dark[7]
+        : theme.white,
         minHeight: 400,
       }}
     >
@@ -163,12 +169,13 @@ export default function ComposeEmailModal({
               innerProps.prospectId,
               subject,
               body,
-              aiGenerated
+              aiGenerated,
+              innerProps.reply?.messageId,
             );
             context.closeModal(id);
           }}
         >
-          Send Email
+          Send {innerProps.reply ? "Reply" : "Email"}
         </Button>
       </Center>
 

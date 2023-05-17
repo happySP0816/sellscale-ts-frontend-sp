@@ -44,14 +44,18 @@ export const openComposeEmailModal = (
   email: string,
   sdr_email: string,
   subject: string,
-  body: string
+  body: string,
+  reply?: {
+    threadSubject: string;
+    messageId: string;
+  }
 ) => {
   openContextModal({
     modal: "composeEmail",
     title: (
       <Group position="apart">
         <div>
-          <Title order={4}>Email Compose</Title>
+          <Title order={4}>Email Compose {reply && `- ${reply.threadSubject}`}</Title>
         </div>
       </Group>
     ),
@@ -69,6 +73,7 @@ export const openComposeEmailModal = (
       body: body,
       from: sdr_email,
       prospectId: prospectId,
+      reply: reply,
     },
   });
 };

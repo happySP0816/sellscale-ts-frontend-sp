@@ -43,18 +43,18 @@ export default function EmailThreadEntry(props: {
 }) {
   const { classes } = useStyles();
   const theme = useMantineTheme();
-  const { hovered, ref } = useHover();
   return (
     <Paper
-      ref={ref}
       withBorder
       radius="md"
       className={classes.comment}
-      sx={{
+      sx={(theme) => ({
         position: "relative",
-        filter: hovered ? "brightness(125%)" : "brightness(100%)",
+        "&:hover": {
+          filter: theme.colorScheme === "dark" ? "brightness(135%)" : "brightness(95%)",
+        },
         cursor: "pointer",
-      }}
+      })}
       onClick={() => {
         openContextModal({
           modal: "viewEmailThread",

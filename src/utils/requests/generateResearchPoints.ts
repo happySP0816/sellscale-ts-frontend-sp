@@ -8,7 +8,8 @@ import { API_URL } from "@constants/data";
  * @param prospectId 
  * @returns - MsgResponse
  */
-export async function generateResearchPoints(userToken: string, prospectId: number): Promise<MsgResponse> {
+export async function generateResearchPoints(userToken: string, prospectId: number, hardRefresh?: boolean): Promise<MsgResponse> {
+  if (hardRefresh === undefined) hardRefresh = false;
 
   const response = await fetch(
     `${API_URL}/research/account_research_points/generate`,
@@ -19,7 +20,8 @@ export async function generateResearchPoints(userToken: string, prospectId: numb
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prospect_id: prospectId
+        prospect_id: prospectId,
+        hard_refresh: hardRefresh,
       })
     }
   );

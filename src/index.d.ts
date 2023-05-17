@@ -131,6 +131,7 @@ export interface LinkedInMessage {
   message: string;
   profile_url: string;
   urn_id: string;
+  ai_generated: boolean;
 }
 
 export interface ProspectNote {

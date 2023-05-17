@@ -34,6 +34,7 @@ interface CommentHtmlProps {
   name: string;
   image: string;
   isLatest?: boolean;
+  aiGenerated: boolean;
 }
 
 export function LinkedInConversationEntry({
@@ -42,6 +43,7 @@ export function LinkedInConversationEntry({
   name,
   image,
   isLatest,
+  aiGenerated,
 }: CommentHtmlProps) {
   const { classes } = useStyles();
   const theme = useMantineTheme();
@@ -65,6 +67,11 @@ export function LinkedInConversationEntry({
         {isLatest && (
           <Badge sx={{ position: "absolute", top: 0, right: 0 }}>
             Latest Message
+          </Badge>
+        )}
+        {aiGenerated && (
+          <Badge sx={{ position: "absolute", top: 0, right: 0 }}>
+            AI
           </Badge>
         )}
       </Group>

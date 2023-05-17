@@ -116,7 +116,8 @@ export default function ProspectDetailsResearch(props: PropsType) {
                   async () => {
                     let result = await generateResearchPoints(
                       userToken,
-                      props.prospectId
+                      props.prospectId,
+                      true
                     );
                     return result;
                   },

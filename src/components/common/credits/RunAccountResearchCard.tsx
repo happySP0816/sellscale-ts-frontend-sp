@@ -253,7 +253,7 @@ export default function RunAccountResearchCard(props: PropsType) {
                     <Grid.Col span={10}>
                       <Text size="sm">
                         Account research is in progress ... check back in on the{" "}
-                        <Code>All Contacts</Code> tab in ~5 minutes.
+                        <Code>All Contacts</Code> tab in 30-50 minutes.
                       </Text>
                     </Grid.Col>
                     <Grid.Col span={2}>

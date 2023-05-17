@@ -388,6 +388,7 @@ export default function ProspectDetailsViewConversation(
                   body={message.message}
                   name={message.author}
                   image={message.img_url}
+                  aiGenerated={message.ai_generated}
                 />
               ))}
             </ScrollArea>

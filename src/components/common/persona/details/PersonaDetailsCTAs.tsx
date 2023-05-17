@@ -103,7 +103,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
         return [];
       }
 
-      pageData = sortBy(pageData, ['active', sortStatus.columnAccessor]);
+      pageData = sortBy(pageData, ["active", sortStatus.columnAccessor]);
       return sortStatus.direction === "desc" ? pageData.reverse() : pageData;
     },
     refetchOnWindowFocus: false,
@@ -117,15 +117,22 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
           <Select
             pr="sm"
             pb="xs"
+            w="50%"
             placeholder="Select a persona"
             color="teal"
             // @ts-ignore
             data={
               props.personas
-                ? props.personas.map((persona: Archetype) => ({
-                    value: persona.id + "",
-                    label: persona.archetype,
-                  }))
+                ? props.personas
+                    .filter(
+                      (persona: Archetype) =>
+                        !persona?.archetype?.includes("Unassigned")
+                    )
+                    .map((persona: Archetype) => ({
+                      value: persona.id + "",
+                      label:
+                        (persona.active ? "🟢 " : "🔴 ") + persona.archetype,
+                    }))
                 : []
             }
             icon={<IconUser size="1rem" />}
@@ -141,7 +148,10 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
             openContextModal({
               modal: "createNewCTA",
               title: <Title order={3}>Create CTA</Title>,
-              innerProps: { personaId: currentPersonaId, personas: props.personas },
+              innerProps: {
+                personaId: currentPersonaId,
+                personas: props.personas,
+              },
             });
           }}
         >

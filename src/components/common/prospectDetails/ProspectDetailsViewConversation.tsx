@@ -95,7 +95,7 @@ export default function ProspectDetailsViewConversation(
 
   // If message was cleared, it's no longer ai generated
   useEffect(() => {
-    if(messageDraft.trim().length == 0) {
+    if(messageDraft.trim().length === 0) {
       setAiGenerated(false);
     }
   }, [messageDraft]);
@@ -237,6 +237,7 @@ export default function ProspectDetailsViewConversation(
       if (yourMessage) {
         yourMessage.message = msg;
         yourMessage.date = new Date().toUTCString();
+        yourMessage.ai_generated = false;
         messages.current.push(yourMessage);
       }
     } else {

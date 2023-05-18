@@ -472,6 +472,7 @@ export default function ProspectDetailsViewConversation(props: ProspectDetailsVi
               prospect_id={props.prospect_id}
               overall_status={props.overall_status}
               account_research={accountResearch}
+              convo_history={messages.current}
               onBumpFrameworkSelected={async (bumpFramework) => {
                 if (bumpFramework) {
                   setBumpFrameworkId(bumpFramework.id);

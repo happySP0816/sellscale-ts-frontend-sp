@@ -21,13 +21,15 @@ import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
 import { openContextModal } from "@mantine/modals";
 import { prospectDrawerStatusesState } from "@atoms/prospectAtoms";
 import { autoFillAccountResearch } from "@utils/requests/autoFillAccountResearch";
-import { BumpFramework } from "src";
+import { BumpFramework, LinkedInMessage } from "src";
+import { autoSelectBumpFramework } from "@utils/requests/autoSelectBumpFramework";
 
 type PropsType = {
   client_sdr_id: number;
   prospect_id: number;
   overall_status: string;
   account_research: string;
+  convo_history: LinkedInMessage[];
   onBumpFrameworkSelected: (bumpFramework: BumpFramework | undefined) => void;
   onAccountResearchChanged: (accountResearch: string) => void;
 };
@@ -61,6 +63,7 @@ export default function SelectBumpInstruction(props: PropsType) {
     );
 
     setBumpFrameworks(result.data);
+    /* Select default framework
     for (const bumpFramework of result.data as BumpFramework[]) {
       if (bumpFramework.default) {
         let length = bumpFrameworkLengthMarks.find(
@@ -75,6 +78,31 @@ export default function SelectBumpInstruction(props: PropsType) {
         props.onBumpFrameworkSelected(bumpFramework);
         break;
       }
+    }
+    */
+
+    // Select default framework based on convo history
+    const response = await autoSelectBumpFramework(
+      userToken,
+      props.convo_history.slice(-5).map((msg) => ({
+        connection_degree: msg.connection_degree,
+        message: msg.message,
+      })),
+      result.data.map((bumpFramework: any) => bumpFramework.description),
+    )
+    if(response.status === 'success'){
+      const bumpFramework = result.data[response.data];
+
+      let length = bumpFrameworkLengthMarks.find(
+        (marks) => marks.api_label === bumpFramework.bump_length
+      )?.value;
+      if (length == null) {
+        length = 50;
+      }
+
+      setSelectedBumpFramework(bumpFramework);
+      setBumpLengthValue(length);
+      props.onBumpFrameworkSelected(bumpFramework);
     }
 
     setLoadingBumpFrameworks(false);

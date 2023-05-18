@@ -20,24 +20,15 @@ import { API_URL } from "@constants/data";
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
 import { openContextModal } from "@mantine/modals";
 import { prospectDrawerStatusesState } from "@atoms/prospectAtoms";
-
-type BumpFramework = {
-  id: number;
-  title: string;
-  description: string;
-  overall_status: string;
-  active: boolean;
-  default: boolean;
-  bump_length: string;
-};
+import { autoFillAccountResearch } from "@utils/requests/autoFillAccountResearch";
+import { BumpFramework } from "src";
 
 type PropsType = {
   client_sdr_id: number;
+  prospect_id: number;
   overall_status: string;
-  onBumpFrameworkSelected: (
-    bumpFrameworkId: number,
-    bumpFrameworkLengthAPI: string
-  ) => void;
+  account_research: string;
+  onBumpFrameworkSelected: (bumpFramework: BumpFramework | undefined) => void;
   onAccountResearchChanged: (accountResearch: string) => void;
 };
 
@@ -81,10 +72,7 @@ export default function SelectBumpInstruction(props: PropsType) {
 
         setSelectedBumpFramework(bumpFramework);
         setBumpLengthValue(length);
-        props.onBumpFrameworkSelected(
-          bumpFramework.id,
-          bumpFramework.bump_length
-        );
+        props.onBumpFrameworkSelected(bumpFramework);
         break;
       }
     }
@@ -125,10 +113,7 @@ export default function SelectBumpInstruction(props: PropsType) {
 
               setSelectedBumpFramework(bumpFramework);
               setBumpLengthValue(length);
-              props.onBumpFrameworkSelected(
-                value,
-                bumpFramework?.bump_length || "MEDIUM"
-              );
+              props.onBumpFrameworkSelected(bumpFramework);
             }}
             searchable
             creatable
@@ -177,21 +162,25 @@ export default function SelectBumpInstruction(props: PropsType) {
             if (bumpLength == null) {
               bumpLength = "MEDIUM";
             }
-            props.onBumpFrameworkSelected(
-              selectedBumpFramework?.id || -1,
-              bumpLength
-            );
+            if(selectedBumpFramework){
+              selectedBumpFramework.bump_length = bumpLength;
+            }
+            props.onBumpFrameworkSelected(selectedBumpFramework);
           }}
         />
       </Tooltip>
       <Textarea
         mt="md"
+        value={props.account_research}
         onChange={(event) => {
           props.onAccountResearchChanged(event.currentTarget.value);
         }}
         placeholder="(optional) 'Acme Corp. raised a $20m Series B'"
         label="Account Research"
         description="AI will use this information to write the bump."
+        minRows={2}
+        maxRows={4}
+        autosize
       />
     </Card>
   );

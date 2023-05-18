@@ -150,3 +150,13 @@ export interface ProspectEmail extends Record<string, unknown> {
 }
 
 export type Channel = "EMAIL" | "LINKEDIN" | "SELLSCALE";
+
+export type BumpFramework = {
+  id: number;
+  title: string;
+  description: string;
+  overall_status: string;
+  active: boolean;
+  default: boolean;
+  bump_length: string;
+};

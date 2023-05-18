@@ -33,16 +33,7 @@ import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
 import { createBumpFramework } from "@utils/requests/createBumpFramework";
 import { postBumpDeactivate } from "@utils/requests/postBumpDeactivate";
-
-type BumpFramework = {
-  id: number;
-  title: string;
-  description: string;
-  overall_status: string;
-  active: boolean;
-  default: boolean;
-  bump_length: string;
-};
+import { BumpFramework } from "src";
 
 const bumpFrameworkLengthMarks = [
   { value: 0, label: "Short", api_label: "SHORT" },

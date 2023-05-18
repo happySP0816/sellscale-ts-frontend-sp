@@ -122,7 +122,7 @@ function VesselIntegrations() {
         return res.json();
       })
       .then((j) => {
-        setConnectedMailbox(j.mailbox.id);
+        setConnectedMailbox(j?.mailbox?.id);
         setHasMailbox(true);
         return;
       });
@@ -354,18 +354,14 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    setTimeout(() => {
-      const nylasCode = searchParams.get("code");
-      if (nylasCode) {
-        (async () => {
-          await exchangeNylasClientID(userToken, nylasCode);
-          navigateToPage(navigate, "/settings");
-          window.location.reload();
-        })();
-      }
+  const nylasCode = searchParams.get("code");
+  if (nylasCode){
+    exchangeNylasClientID(userToken, nylasCode)
+    .then(() => {
+      navigateToPage(navigate, "/settings");
+      window.location.reload();
     });
-  }, []);
+  }
 
   useQuery({
     queryKey: [`query-get-accounts-connected`],

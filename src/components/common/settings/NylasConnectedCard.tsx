@@ -16,6 +16,7 @@ import {
   Container,
   LoadingOverlay,
   Loader,
+  useMantineTheme,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -25,6 +26,7 @@ import {
   IconCloudDownload,
   IconCookie,
   IconKey,
+  IconMail,
   IconPassword,
   IconPlugConnected,
   IconRefreshDot,
@@ -35,11 +37,12 @@ import { clearAuthTokens } from "@utils/requests/clearAuthTokens";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LinkedInAuthOption from "./LinkedInAuthOption";
-import { getBrowserExtensionURL } from "@utils/general";
+import { formatToLabel, getBrowserExtensionURL, nameToInitials, valueToColor } from "@utils/general";
 import { useEffect, useState } from "react";
 import getLiProfile from "@utils/requests/getLiProfile";
 import getNylasClientID from "@utils/requests/getNylasClientID";
 import { clearNylasTokens } from "@utils/requests/clearNylasTokens";
+import getNylasAccountDetails from "@utils/requests/getNylasAccountDetails";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -58,6 +61,7 @@ const REDIRECT_URI = `${window.location.origin}/settings`;
 
 export default function NylasConnectedCard(props: { connected: boolean }) {
   
+  const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
 
@@ -67,6 +71,14 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
     queryKey: [`nylas-profile-self`],
     queryFn: async () => {
       const result = await getNylasClientID(userToken);
+      return result.status === "success" ? result.data : null;
+    },
+  });
+
+  const { data } = useQuery({
+    queryKey: [`nylas-account-details`],
+    queryFn: async () => {
+      const result = await getNylasAccountDetails(userToken);
       return result.status === "success" ? result.data : null;
     },
   });
@@ -162,46 +174,42 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
           )}
         </div>
 
-        {/* {props.connected && (
+        {props.connected && (
           <div>
             {!data && (
               <Center w="100%" h={100}>
                 <Stack align="center">
                   <Loader variant="dots" size="xl" />
-                  <Text c="dimmed" fz="sm" fs="italic">Fetching LinkedIn details...</Text>
+                  <Text c="dimmed" fz="sm" fs="italic">Fetching Email details...</Text>
                 </Stack>
               </Center>
             )}
             {data && (
               <Group noWrap spacing={10} align="flex-start" pt="xs">
                 <Avatar
-                  src={
-                    data.miniProfile.picture["com.linkedin.common.VectorImage"]
-                      .rootUrl +
-                    data.miniProfile.picture["com.linkedin.common.VectorImage"]
-                      .artifacts[2].fileIdentifyingUrlPathSegment
-                  }
+                  src=""
+                  color={valueToColor(theme, `${data.name}, ${data.email_address}`)}
                   size={94}
                   radius="md"
-                />
+                >{nameToInitials(data.name)}</Avatar>
                 <div>
                   <Title order={3}>
-                    {data.miniProfile.firstName} {data.miniProfile.lastName}
+                    {data.name}
                   </Title>
 
                   <Group noWrap spacing={10} mt={3}>
-                    <IconBriefcase
+                    <IconSocial
                       stroke={1.5}
                       size={16}
                       className={classes.icon}
                     />
                     <Text size="xs" color="dimmed">
-                      {data.miniProfile.occupation}
+                      {formatToLabel(data.provider)}
                     </Text>
                   </Group>
 
                   <Group noWrap spacing={10} mt={5}>
-                    <IconSocial
+                    <IconMail
                       stroke={1.5}
                       size={16}
                       className={classes.icon}
@@ -210,18 +218,16 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                       size="xs"
                       color="dimmed"
                       component="a"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={`https://www.linkedin.com/in/${data.miniProfile.publicIdentifier}`}
+                      href={`mailto:${data.email_address}`}
                     >
-                      linkedin.com/in/{data.miniProfile.publicIdentifier}
+                      {data.email_address}
                     </Text>
                   </Group>
                 </div>
               </Group>
             )}
           </div>
-        )} */}
+        )}
       </Stack>
     </Paper>
   );

@@ -34,7 +34,7 @@ export default function ViewEmailThreadModal({
     queryKey: [`query-prospect-email-messages-${innerProps.prospectId}`],
     queryFn: async () => {
       const response = await getEmailMessages(userToken, innerProps.prospectId, innerProps.threadId);
-      return response.status === 'success' ? response.data : [];
+      return response.status === 'success' ? response.data.reverse() : [];
     },
     refetchOnWindowFocus: false,
   });
@@ -94,7 +94,7 @@ export default function ViewEmailThreadModal({
               </div>
             </Flex>
 
-            {index === data.length - 1 && (
+            {index === 0 && (
               <Button
                 sx={{ position: 'absolute', bottom: 10, right: 10 }}
                 onClick={() => {

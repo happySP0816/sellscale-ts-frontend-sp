@@ -72,7 +72,7 @@ export default function LinkedInPage() {
       <Tabs value={tabId} px="xs" color="teal">
         <Tabs.List sx={{ display: "none" }}>
           <Tabs.Tab value="messages" icon={<IconMailFast size="1.1rem" />}>
-            Messages
+            Scheduled Messages
           </Tabs.Tab>
           <Tabs.Tab value="ctas" icon={<IconSpeakerphone size="1.1rem" />}>
             CTAs

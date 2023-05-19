@@ -128,7 +128,7 @@ const siteLinks = [
     label: 'LinkedIn',
     icon: IconBrandLinkedin,
     links: [
-      { key: 'linkedin-messages', label: 'Messages', icon: IconMailFast, link: '/linkedin/messages' },
+      { key: 'linkedin-messages', label: 'Scheduled Messages', icon: IconMailFast, link: '/linkedin/messages' },
       { key: 'linkedin-ctas', label: 'CTAs', icon: IconSpeakerphone, link: '/linkedin/ctas' },
       { key: 'linkedin-personalizations', label: 'Personalizations', icon: IconAffiliate, link: '/linkedin/personalizations' },
       { key: 'linkedin-campaign-history', label: 'Campaign History', icon: IconHistory, link: '/linkedin/campaign-history' },
@@ -139,6 +139,7 @@ const siteLinks = [
     label: 'Email',
     icon: IconMail,
     links: [
+      { key: 'email-scheduled-emails', label: 'Scheduled Emails', icon: IconMailFast, link: '/email/scheduled-emails' },
       { key: 'email-sequences', label: 'Sequences', icon: IconListDetails, link: '/email/sequences' },
       { key: 'email-personalizations', label: 'Personalizations', icon: IconAffiliate, link: '/email/personalizations' },
       { key: 'email-campaign-history', label: 'Campaign History', icon: IconHistory, link: '/email/campaign-history' },

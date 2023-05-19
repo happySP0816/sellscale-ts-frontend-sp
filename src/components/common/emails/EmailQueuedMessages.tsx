@@ -7,7 +7,6 @@ import { useRecoilValue } from 'recoil';
 import EmailQueuedMessageItem from './EmailQueuedMessageItem';
 
 export default function EmailQueuedMessages() {
-  console.log('gto here');
 
   const userToken = useRecoilValue(userTokenState);
 
@@ -49,8 +48,6 @@ export default function EmailQueuedMessages() {
     },
     refetchOnWindowFocus: false,
   });
-
-  console.log(data);
 
   return (
     <div style={{ position: 'relative' }}>

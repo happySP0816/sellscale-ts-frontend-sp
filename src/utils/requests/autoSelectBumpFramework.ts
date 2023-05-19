@@ -14,6 +14,13 @@ export async function autoSelectBumpFramework(
   convo_history: { connection_degree: string, message: string }[],
   bump_frameworks: string[],
 ): Promise<MsgResponse> {
+  if (convo_history.length === 0 || bump_frameworks.length === 0) {
+    return {
+      status: "error",
+      title: 'Empty data',
+      message: 'Empty data',
+    }
+  }
 
   const response = await fetch(
     `${API_URL}/bump_framework/autoselect_framework`,

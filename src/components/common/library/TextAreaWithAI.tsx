@@ -80,6 +80,7 @@ export default function TextAreaWithAI(props: PropsType) {
           target: {
             value: j.data,
           },
+          defaultPrevented: true,// used for AI set value
         };
         props.onChange && props.onChange(updatedValue);
         setAIPopoverToggled(false);
@@ -218,6 +219,7 @@ export default function TextAreaWithAI(props: PropsType) {
             props.onChange &&
               props.onChange({
                 currentTarget: { value },
+                defaultPrevented: false,// used to see if it's AI set value
               } as React.ChangeEvent<HTMLTextAreaElement>);
           }}
           value={props.value}

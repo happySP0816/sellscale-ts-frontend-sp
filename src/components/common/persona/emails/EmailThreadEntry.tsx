@@ -12,14 +12,14 @@ import {
 import { useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import { nameToInitials, valueToColor } from "@utils/general";
+import DOMPurify from "dompurify";
 import _ from "lodash";
 
 const useStyles = createStyles((theme) => ({
   comment: {
-    padding: `${theme.spacing.lg}px ${theme.spacing.xl}px`,
     marginTop: `5px`,
     marginBottom: `5px`,
-    width: 380,
+    padding: `10px`,
   },
 
   body: {
@@ -43,6 +43,9 @@ export default function EmailThreadEntry(props: {
 }) {
   const { classes } = useStyles();
   const theme = useMantineTheme();
+
+  const snippet = props.snippet.replace('Unsubscribe', '');
+
   return (
     <Paper
       withBorder
@@ -75,10 +78,12 @@ export default function EmailThreadEntry(props: {
       <TypographyStylesProvider className={classes.body}>
         <div
           className={classes.content}
-          dangerouslySetInnerHTML={{ __html: _.truncate(props.snippet, {
-            'length': 100,
-            'separator': ' '
-          }) }}
+          dangerouslySetInnerHTML={{
+            __html: _.truncate(snippet, {
+              'length': 100,
+              'separator': ' '
+            })
+          }}
         />
       </TypographyStylesProvider>
     </Paper>

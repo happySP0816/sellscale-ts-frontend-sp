@@ -25,7 +25,7 @@ import {
   getEmailGenerationPrompt,
 } from "@utils/requests/generateEmail";
 import { sendEmail } from "@utils/requests/sendEmail";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useRecoilValue } from "recoil";
 
@@ -52,7 +52,9 @@ export default function ComposeEmailModal({
   const theme = useMantineTheme();
 
   const [subject, setSubject] = useState(innerProps.subject);
+
   const [body, setBody] = useState(innerProps.body);
+  const bodyRef = useRef('');
 
   const [sending, setSending] = useState(false);
   const [generatingEmail, setGeneratingEmail] = useState(false);
@@ -85,10 +87,10 @@ export default function ComposeEmailModal({
 
   // If body was cleared, it's no longer ai generated
   useEffect(() => {
-    if(body.trim().length == 0) {
+    if(bodyRef.current.trim().length == 0) {
       setAiGenerated(false);
     }
-  }, [body]);
+  }, [bodyRef.current]);
 
   useEffect(() => {
     if (!fetchedEmailGenerationPrompt) {
@@ -124,7 +126,10 @@ export default function ComposeEmailModal({
         <TextAreaWithAI
           value={body}
           onChange={(e) => {
-            setBody(e.currentTarget.value);
+            bodyRef.current = e.currentTarget.value;
+            if(e.defaultPrevented){
+              setBody(e.currentTarget.value);
+            }
           }}
           inputType="rich-text-area"
         />
@@ -168,7 +173,7 @@ export default function ComposeEmailModal({
               userToken,
               innerProps.prospectId,
               subject,
-              body,
+              bodyRef.current,
               aiGenerated,
               innerProps.reply?.messageId,
             );

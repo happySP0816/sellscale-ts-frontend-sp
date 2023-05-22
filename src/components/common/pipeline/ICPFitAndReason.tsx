@@ -62,22 +62,29 @@ export default function ICPFitPill(props: PropsType) {
       </Popover.Target>
       <Popover.Dropdown>
         <Container w={400}>
-          <Text size="lg" weight="800">
-            Analysis
+          <Text size="md" weight="800">
+            Prospect Analysis
           </Text>
-          <Divider mb="md" mt="md" />
-          <Text size="sm" weight="700">
-            Archetype:
-          </Text>
-          <Badge
-            p="xs"
-            variant="outline"
-            radius="sm"
-            size="xs"
-            color={valueToColor(theme, props.archetype || "Persona Unassigned")}
-          >
-            {props.archetype || "Persona Unassigned"}
-          </Badge>
+          <Divider mb="xs" mt="xs" />
+          {props.archetype && (
+            <Text size="sm" weight="700">
+              Persona:
+            </Text>
+          )}
+          {props.archetype && (
+            <Badge
+              p="xs"
+              variant="outline"
+              radius="sm"
+              size="xs"
+              color={valueToColor(
+                theme,
+                props.archetype || "Persona Unassigned"
+              )}
+            >
+              {props.archetype || "Persona Unassigned"}
+            </Badge>
+          )}
 
           <Text size="sm" weight="700" mt="md">
             ICP Fit Score:

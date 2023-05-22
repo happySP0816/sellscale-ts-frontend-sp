@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import CreateBumpInstructionModal from "./CreateBumpInstructionModal";
 import {
+  Alert,
   Button,
   Card,
+  Chip,
   Container,
+  Flex,
   Grid,
+  Loader,
   LoadingOverlay,
   Select,
   Slider,
@@ -23,6 +27,8 @@ import { prospectDrawerStatusesState } from "@atoms/prospectAtoms";
 import { autoFillAccountResearch } from "@utils/requests/autoFillAccountResearch";
 import { BumpFramework, LinkedInMessage } from "src";
 import { autoSelectBumpFramework } from "@utils/requests/autoSelectBumpFramework";
+import { IconAlertCircle, IconRobot, IconTruckLoading } from "@tabler/icons";
+import { IconSelect } from "@tabler/icons-react";
 
 type PropsType = {
   client_sdr_id: number;
@@ -88,9 +94,9 @@ export default function SelectBumpInstruction(props: PropsType) {
         connection_degree: msg.connection_degree,
         message: msg.message,
       })),
-      result.data.map((bumpFramework: any) => bumpFramework.description),
-    )
-    if(response.status === 'success'){
+      result.data.map((bumpFramework: any) => bumpFramework.description)
+    );
+    if (response.status === "success") {
       const bumpFramework = result.data[response.data];
 
       let length = bumpFrameworkLengthMarks.find(
@@ -114,7 +120,19 @@ export default function SelectBumpInstruction(props: PropsType) {
 
   return (
     <Card withBorder mt="sm">
-      <LoadingOverlay visible={loadingBumpFrameworks} />
+      {loadingBumpFrameworks && (
+        <Flex direction="row" mb="md">
+          <Alert
+            title="AI predicting, wait a moment!"
+            color="grape"
+            radius="xs"
+          >
+            SellScale AI is automatically selecting the best bump framework and
+            account research to reply based on this conversation.
+          </Alert>{" "}
+          <Loader color="grape" size="xl" ml="xs"></Loader>
+        </Flex>
+      )}
       <Text fw="bold">Bump Framework</Text>
       <Text fz="xs">
         Bump Frameworks are used to train the AI on how to respond to specific
@@ -190,7 +208,7 @@ export default function SelectBumpInstruction(props: PropsType) {
             if (bumpLength == null) {
               bumpLength = "MEDIUM";
             }
-            if(selectedBumpFramework){
+            if (selectedBumpFramework) {
               selectedBumpFramework.bump_length = bumpLength;
             }
             props.onBumpFrameworkSelected(selectedBumpFramework);

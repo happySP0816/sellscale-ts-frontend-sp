@@ -53,13 +53,15 @@ export function logout(noCheck = false){
  * @param userToken 
  * @returns 
  */
-export async function syncLocalStorage(userToken: string){
+export async function syncLocalStorage(userToken: string, setUserData: SetterOrUpdater<any>){
   if(!isLoggedIn()){ return; }
 
   const info = await getUserInfo(userToken);
   if(!info){ logout(); }
   localStorage.setItem('user-data', JSON.stringify(info));
   document.cookie = `token=${userToken}; SameSite=None; Secure`;
+  setUserData(info);
+
 }
 
 export async function getUserInfo(userToken: string | null) {

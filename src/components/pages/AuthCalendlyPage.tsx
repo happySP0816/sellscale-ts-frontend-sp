@@ -26,6 +26,7 @@ export default function AuthCalendlyPage() {
   if(code){
     codeRef.current = code;
     (async () => {
+      console.log(codeRef.current);
       const response = await updateCalendlyAccessToken(userToken, codeRef.current);
       console.log(codeRef.current);
       console.log(response);

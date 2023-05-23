@@ -23,7 +23,6 @@ import { navigateToPage, setPageTitle } from '@utils/documentChange';
 import BasicsSection from '@common/onboarding/BasicsSection';
 import ConnectionsSection from '@common/onboarding/ConnectionsSection';
 import SchedulingSection from '@common/onboarding/SchedulingSection';
-import CompleteSection from '@common/onboarding/CompleteSection';
 import { updateClientSDR } from '@utils/requests/updateClientSDR';
 import { completeClientSDROnboarding } from '@utils/requests/completeClientSDROnboarding';
 import { useNavigate } from 'react-router-dom';

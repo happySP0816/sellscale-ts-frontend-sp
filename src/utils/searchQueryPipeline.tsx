@@ -14,6 +14,8 @@ import { API_URL } from "@constants/data";
  */
 export async function activateQueryPipeline(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string): Promise<SpotlightAction[] | null | false> {
 
+  console.log('gpt here')
+
   const prospects = await checkProspects(query, navigate, theme, userToken)
   //const campaigns = await checkCampaigns(query, navigate, theme, userToken)
 

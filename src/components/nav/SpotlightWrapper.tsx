@@ -131,6 +131,13 @@ export default function SpotlightWrapper({
 
   const [actions, setActions] = useState<SpotlightAction[]>(mainActions);
 
+  // Fix bug with query result not updating the actual displayed results
+  useEffect(() => {
+    if (queryResult && queryResult.length > 0){
+      setActions([...queryResult, ...mainActions]);
+    }
+  }, [queryResult]);
+
   return (
     <SpotlightProvider
       onQueryChange={(query: string) => {

@@ -193,7 +193,7 @@ export default function SequenceWriterModal({
       p={0}
       style={{
         position: "relative",
-        backgroundColor: theme.colors.dark[7],
+        backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
       }}
     >
       <LoadingOverlay visible={loading || isFetching} overlayBlur={2} />

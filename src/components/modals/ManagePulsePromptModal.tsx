@@ -106,7 +106,7 @@ export default function ManagePulsePrompt({
         p={0}
         style={{
           position: "relative",
-          backgroundColor: theme.colors.dark[7],
+          backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
         }}
       >
         {

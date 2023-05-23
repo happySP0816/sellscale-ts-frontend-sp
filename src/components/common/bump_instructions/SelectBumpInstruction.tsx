@@ -66,7 +66,7 @@ export default function SelectBumpInstruction(props: PropsType) {
     setLoadingBumpFrameworks(true);
     const result = await getBumpFrameworks(
       userToken,
-      prospectDrawerStatuses.overall,
+      [prospectDrawerStatuses.overall],
       [props.persona_id]
     );
 

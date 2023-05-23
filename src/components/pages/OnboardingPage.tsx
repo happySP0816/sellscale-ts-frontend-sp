@@ -26,7 +26,6 @@ import SchedulingSection from '@common/onboarding/SchedulingSection';
 import { updateClientSDR } from '@utils/requests/updateClientSDR';
 import { completeClientSDROnboarding } from '@utils/requests/completeClientSDROnboarding';
 import { useNavigate } from 'react-router-dom';
-import { QueryCache } from '@tanstack/react-query'
 
 export default function OnboardingPage() {
   setPageTitle(`Onboarding`);
@@ -38,8 +37,6 @@ export default function OnboardingPage() {
 
   const [fullName, setFullName] = useState(userData.sdr_name);
   const [publicTitle, setPublicTitle] = useState(userData.sdr_title);
-  console.log(userData);
-  const queryCache = new QueryCache();
 
   const [step, setStep] = useState(0);
   const nextStep = async () => {

@@ -5,7 +5,7 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { navigateToPage } from "@utils/documentChange";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import PageFrame from "../common/PageFrame";
@@ -21,9 +21,14 @@ export default function AuthCalendlyPage() {
   const [userToken, setUserToken] = useRecoilState(userTokenState);
 
   const code = searchParams.get('code');
+  const codeRef = useRef('');
+
   if(code){
+    codeRef.current = code;
     (async () => {
-      const response = await updateCalendlyAccessToken(userToken, code);
+      const response = await updateCalendlyAccessToken(userToken, codeRef.current);
+      console.log(codeRef.current);
+      console.log(response);
       if(response.status === 'success'){
         navigateToPage(navigate, '/');
       }

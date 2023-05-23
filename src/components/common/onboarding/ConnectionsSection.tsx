@@ -47,6 +47,7 @@ export default function ConnectionsSection() {
       return result.status === 'success' ? result.data : null;
     },
     enabled: userData.li_voyager_connected,
+    cacheTime: 0,
   });
 
   const { data: nylas_data } = useQuery({
@@ -56,6 +57,7 @@ export default function ConnectionsSection() {
       return result.status === 'success' ? result.data : null;
     },
     enabled: userData.nylas_connected,
+    cacheTime: 0,
   });
 
   const { data: nylasClientId, isFetching } = useQuery({

@@ -10,6 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import PageFrame from "../common/PageFrame";
 import { API_URL } from "@constants/data";
+import { updateCalendlyAccessToken } from "@utils/requests/updateCalendlyAccessToken";
 
 
 export default function AuthCalendlyPage() {
@@ -19,17 +20,15 @@ export default function AuthCalendlyPage() {
   const [userData, setUserData] = useRecoilState(userDataState);
   const [userToken, setUserToken] = useRecoilState(userTokenState);
 
-  useEffect(() => {
-    setTimeout(() => {
-      const tokenType = searchParams.get('stytch_token_type');
-      const authToken = searchParams.get('token');
-      const email = searchParams.get('email') || userData.sdr_email;
-
-      const redirect = searchParams.get('redirect') ? `/${searchParams.get('redirect')}` : '/';
-
-      
-    });
-  }, []);
+  const code = searchParams.get('code');
+  if(code){
+    (async () => {
+      const response = await updateCalendlyAccessToken(userToken, code);
+      if(response.status === 'success'){
+        navigateToPage(navigate, '/');
+      }
+    })();
+  }
 
   return (
     <PageFrame>

@@ -131,17 +131,6 @@ export default function SpotlightWrapper({
 
   const [actions, setActions] = useState<SpotlightAction[]>(mainActions);
 
-  useEffect(() => {
-    if (query === "") {
-      setQueryResult(false);
-      return;
-    }
-    setQueryResult(null);
-    activateQueryPipeline(query, navigate, theme, userToken).then((result) => {
-      setQueryResult(result);
-    });
-  }, [query]);
-
   return (
     <SpotlightProvider
       onQueryChange={(query: string) => {
@@ -150,6 +139,15 @@ export default function SpotlightWrapper({
          * That callback fetches the result data and updates queryResult accordingly.
          */
         setQuery(query.trim());
+        if (query.trim() === "") {
+          setQueryResult(false);
+        } else {
+          setQueryResult(null);
+          activateQueryPipeline(query, navigate, theme, userToken).then((result) => {
+            setQueryResult(result);
+          });
+        }
+
         if (queryResult) {
           setActions([...queryResult, ...mainActions]);
         } else {

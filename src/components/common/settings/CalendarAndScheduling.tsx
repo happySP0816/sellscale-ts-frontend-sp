@@ -10,6 +10,7 @@ import {
   LoadingOverlay,
   Notification,
   Select,
+  Badge,
 } from '@mantine/core';
 import { IconCheck, IconEdit, IconX } from '@tabler/icons';
 import { useEffect, useState } from 'react';
@@ -197,25 +198,34 @@ export default function CalendarAndScheduling() {
           </Flex>
         )}
       </Card>
-
       <Card>
-        <Button
-          w={300}
-          mx='auto'
-          component='a'
-          target='_blank'
-          rel='noopener noreferrer'
-          href={
-            `https://auth.calendly.com/oauth/authorize?client_id=${CALENDLY_CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}`
-          }
-          my={20}
-          variant='outline'
-          size='md'
-          color='pink'
-          rightIcon={<IconCalendarShare size='1rem' />}
-        >
-          Connect to Calendly
-        </Button>
+        <Text fz='lg' fw='bold'>
+          Calendly Integration
+        </Text>
+        <Text my='sm' fz='sm'>
+          Using Calendly, SellScale AI will automatically book meetings on your calendar.
+        </Text>
+        {userData.calendly_connected ? (
+          <Badge size='xl' variant='filled' color='blue' styles={{ root: { textTransform: 'initial' } }}>
+            Calendly Connected
+          </Badge>
+        ) : (
+          <Button
+            w={300}
+            mx='auto'
+            component='a'
+            target='_blank'
+            rel='noopener noreferrer'
+            href={`https://auth.calendly.com/oauth/authorize?client_id=${CALENDLY_CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}`}
+            my={20}
+            variant='outline'
+            size='md'
+            color='blue'
+            rightIcon={<IconCalendarShare size='1rem' />}
+          >
+            Connect to Calendly
+          </Button>
+        )}
       </Card>
 
       <Card>

@@ -52,7 +52,7 @@ export default function PersonaSplit(props: PropsType) {
         </Text>
         <PersonaSelect
           disabled={disablePersonaSplitButton}
-          onChange={setDestinationPersonaIDs}
+          onChange={(archetypes) => setDestinationPersonaIDs(archetypes.map((a) => a.archetype_id))}
           selectMultiple={true}
           label='Select Personas to Split Prospects Into'
           description='The prospects will be split into the selected personas using the splitting AI'

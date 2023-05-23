@@ -28,7 +28,6 @@ import ProspectDetailsChangeStatus, {
 } from "../common/prospectDetails/ProspectDetailsChangeStatus";
 import ProspectDetailsCompany from "../common/prospectDetails/ProspectDetailsCompany";
 import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes";
-import ProspectDetailsViewConversation from "../common/prospectDetails/ProspectDetailsViewConversation";
 import { userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, valueToColor } from "@utils/general";
 import { logout } from "@auth/core";

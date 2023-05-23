@@ -7,7 +7,6 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import PersonaSplitSelect from "./PersonaSplitSelect";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";

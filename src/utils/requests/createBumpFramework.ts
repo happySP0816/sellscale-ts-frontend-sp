@@ -10,9 +10,10 @@ import { API_URL } from "@constants/data";
  * @param description
  * @param length
  * @param setDefault
+ * @param archetype_ids
  * @returns - MsgResponse
  */
-export async function createBumpFramework(userToken: string, overallStatus: string, title: string, description: string, length: string, setDefault: boolean): Promise<MsgResponse> {
+export async function createBumpFramework(userToken: string, overallStatus: string, title: string, description: string, length: string, setDefault: boolean, archetype_ids: number[]): Promise<MsgResponse> {
 
   const response = await fetch(
     `${API_URL}/bump_framework/bump`,
@@ -28,6 +29,7 @@ export async function createBumpFramework(userToken: string, overallStatus: stri
         description: description,
         default: setDefault,
         length: length,
+        archetype_ids: archetype_ids,
       })
     }
   );

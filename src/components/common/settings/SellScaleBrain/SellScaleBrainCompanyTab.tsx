@@ -23,6 +23,8 @@ export default function SellScaleBrainCompanyTab() {
   const [companyName, setCompanyName] = React.useState("");
   const [companyTagline, setCompanyTagline] = React.useState("");
   const [companyDescription, setCompanyDescription] = React.useState("");
+  const [companyMission, setCompanyMission] = React.useState("");
+  const [companyCaseStudy, setCompanyCaseStudy] = React.useState("");
   const [valuePropsKeyPoints, setValuePropsKeyPoints] = React.useState("");
   const [toneAttributes, setToneAttributes]: any = React.useState([]);
 
@@ -39,6 +41,8 @@ export default function SellScaleBrainCompanyTab() {
     setCompanyName(data.company);
     setCompanyTagline(data.tagline);
     setCompanyDescription(data.description);
+    setCompanyMission(data.mission);
+    setCompanyCaseStudy(data.case_study);
     setValuePropsKeyPoints(data.value_prop_key_points);
     setToneAttributes(data.tone_attributes);
     setFetchingCompany(false);
@@ -57,6 +61,8 @@ export default function SellScaleBrainCompanyTab() {
         company: companyName,
         tagline: companyTagline,
         description: companyDescription,
+        mission: companyMission,
+        case_study: companyCaseStudy,
         value_prop_key_points: valuePropsKeyPoints,
         tone_attributes: toneAttributes,
       }),
@@ -104,6 +110,27 @@ export default function SellScaleBrainCompanyTab() {
             value={companyDescription}
             onChange={(event) => {
               setCompanyDescription(event.currentTarget.value);
+              setNeedsSave(true);
+            }}
+            mb="sm"
+          />
+          <Textarea
+            label="Company Mission"
+            description="Your company's mission statement"
+            minRows={5}
+            value={companyMission}
+            onChange={(event) => {
+              setCompanyMission(event.currentTarget.value);
+              setNeedsSave(true);
+            }}
+            mb="sm"
+          />
+          <TextInput
+            label="Company Case Study"
+            value={companyCaseStudy}
+            placeholder="https://example.com/fh/files/misc/hsw-sqrg.pdf"
+            onChange={(event) => {
+              setCompanyCaseStudy(event.currentTarget.value);
               setNeedsSave(true);
             }}
             mb="sm"

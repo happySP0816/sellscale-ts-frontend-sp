@@ -183,6 +183,8 @@ export function NavbarNested(props: { isMobileView: boolean; navOpened: boolean 
 
   const links = siteLinks.map((item) => <LinksGroup {...item} key={item.mainKey} />);
 
+  console.log(userData);
+
   return (
     <AnimatedNavbar
       style={{
@@ -206,11 +208,7 @@ export function NavbarNested(props: { isMobileView: boolean; navOpened: boolean 
       </Navbar.Section>
 
       <Navbar.Section className={classes.footer}>
-        <ProfileCard
-          imgUrl={userData?.img_url || ''}
-          name={userData?.sdr_name || ''}
-          email={userData?.sdr_email || ''}
-        />
+        <ProfileCard />
 
         <a href="#"
         className={cx(classes.link, { [classes.linkActive]: 'settings' === navTab})}

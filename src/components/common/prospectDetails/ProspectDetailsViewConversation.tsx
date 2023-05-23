@@ -51,6 +51,7 @@ type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
   conversation_url: string;
   prospect_id: number;
+  persona_id: number;
   overall_status: string;
 };
 
@@ -529,6 +530,7 @@ export default function ProspectDetailsViewConversation(
             <SelectBumpInstruction
               client_sdr_id={userData.id}
               prospect_id={props.prospect_id}
+              persona_id={props.persona_id}
               overall_status={props.overall_status}
               account_research={accountResearch}
               convo_history={messages.current}

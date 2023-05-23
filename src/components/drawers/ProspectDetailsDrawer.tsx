@@ -74,6 +74,7 @@ export default function ProspectDetailsDrawer() {
   const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(
     prospectDrawerStatusesState
   );
+  const persona_id = useRef(-1)
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospect-details-${prospectId}`],
@@ -99,6 +100,8 @@ export default function ProspectDetailsDrawer() {
 
       console.log(res);
       console.log(res_valid_channels);
+
+      persona_id.current = res.prospect_info.details.persona_id
 
       return {
         main: res,
@@ -287,6 +290,9 @@ export default function ProspectDetailsDrawer() {
                                 }
                                 prospect_id={
                                   data?.main.prospect_info.details.id
+                                }
+                                persona_id={
+                                  persona_id.current
                                 }
                                 overall_status={prospectDrawerStatuses.overall}
                               />

@@ -86,6 +86,9 @@ export default function SchedulingCardContents(props: { prospect: Prospect }) {
           prospect_id={
             prospectDetails.prospect_info.details.id
           }
+          persona_id={
+            prospectDetails.prospect_info.details.persona_id
+          }
           overall_status={
             prospectDetails.prospect_info.details.overall_status
           }

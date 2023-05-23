@@ -6,12 +6,14 @@ import {
   Text,
   Badge,
   Grid,
+  useMantineTheme,
 } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import { API_URL } from "@constants/data";
+import { valueToColor } from "@utils/general";
 
 const countriesData = [
   { label: "United States", value: "US" },
@@ -22,6 +24,8 @@ const countriesData = [
 ];
 
 function Value({ value, active, label, onRemove, classNames, ...others }: any) {
+  const theme = useMantineTheme();
+
   return (
     <div {...others}>
       <Box
@@ -31,25 +35,30 @@ function Value({ value, active, label, onRemove, classNames, ...others }: any) {
           alignItems: "center",
           backgroundColor:
             theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
-
-          paddingLeft: theme.spacing.xs,
           borderRadius: theme.radius.sm,
         })}
       >
-        <Badge
-          color={active ? "green" : "red"}
-          size="xs"
-          mr="xs"
-          variant="filled"
-        ></Badge>
-        <Box sx={{ lineHeight: 1 }}>{label}</Box>
         <CloseButton
           onMouseDown={onRemove}
           variant="transparent"
           size={22}
           iconSize={14}
           tabIndex={-1}
+          mr='xs'
         />
+        <Badge
+          color={active ? "green" : "red"}
+          size="xs"
+          mr="xs"
+          variant="filled"
+        />
+        <Badge
+          color={valueToColor(theme, label)}
+          size='xs'
+          variant='light'
+        >
+          {label}
+        </Badge>
       </Box>
     </div>
   );
@@ -100,10 +109,11 @@ const Item = forwardRef(
 
 type PropsType = {
   disabled: boolean;
-  onChange: (ids: number[]) => void;
+  onChange: (archetypes: {archetype_id: number; archetype_name: string; }[]) => void;
   selectMultiple?: boolean;
   label: string;
   description: string;
+  defaultValues?: number[];
 };
 
 export default function PersonaSelect({
@@ -112,9 +122,11 @@ export default function PersonaSelect({
   selectMultiple,
   label,
   description,
+  defaultValues
 }: PropsType) {
   const [userToken] = useRecoilState(userTokenState);
-  const [selectedValues, setSelectedValues] = useState([]); // [1, 2, 3
+  const [selectedValues, setSelectedValues] = useState<string[]>([]); // [1, 2, 3]
+  
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-archetype-details`, {}],
     queryFn: async ({ queryKey }) => {
@@ -135,8 +147,14 @@ export default function PersonaSelect({
   const personaOptions = data?.data || [];
   for (let i = 0; i < personaOptions.length; i++) {
     personaOptions[i]["label"] = personaOptions[i].name;
-    personaOptions[i]["value"] = personaOptions[i].id;
+    personaOptions[i]["value"] = personaOptions[i].id.toString();
   }
+
+  useEffect(() => {
+    if (defaultValues) {
+      setSelectedValues(defaultValues.map((x) => (x.toString())));
+    }
+  }, [defaultValues]);
 
   return (
     <MultiSelect
@@ -152,14 +170,25 @@ export default function PersonaSelect({
       label={label}
       description={description}
       onChange={(ids) => {
-        var val: any = ids.map((x) => parseInt(x));
-        if (!selectMultiple) {
-          val = [val[0]];
+        var numVals: any = ids
+        var returnVals = []
+        for (let val of ids) {
+          returnVals.push({
+            "archetype_id": parseInt(val),
+            "archetype_name": personaOptions.find((x: any) => x.value === val)?.label
+          })
         }
-        onChange(val);
-        setSelectedValues(val);
+        if (!selectMultiple) {
+          numVals = numVals.slice(0, 1);
+          returnVals = returnVals.slice(0, 1);
+        }
+        onChange(returnVals);
+        setSelectedValues(numVals);
       }}
       disabled={disabled}
+      w='100%'
+      withinPortal
+      styles={{ wrapper: {overflow: 'visible'}, dropdown: { minWidth: 500 } }}
     />
   );
 }

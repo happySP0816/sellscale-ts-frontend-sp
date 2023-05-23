@@ -34,6 +34,7 @@ import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
 import { createBumpFramework } from "@utils/requests/createBumpFramework";
 import { postBumpDeactivate } from "@utils/requests/postBumpDeactivate";
 import { BumpFramework } from "src";
+import PersonaSelect from "@common/persona/PersonaSplitSelect";
 
 const bumpFrameworkLengthMarks = [
   { value: 0, label: "Short", api_label: "SHORT" },
@@ -48,6 +49,7 @@ export default function ManageBumpFramework({
 }: ContextModalProps<{
   selectedBumpFramework: BumpFramework;
   overallStatus: string;
+  archetypeId: number;
   backTriggerGetFrameworks: Function;
 }>) {
   const theme = useMantineTheme();
@@ -65,7 +67,7 @@ export default function ManageBumpFramework({
 
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
-    const result = await getBumpFrameworks(userToken, innerProps.overallStatus);
+    const result = await getBumpFrameworks(userToken, innerProps.overallStatus, [innerProps.archetypeId]);
 
     let bumpFrameworkArray = [] as BumpFramework[];
     for (const bumpFramework of result.data as BumpFramework[]) {
@@ -95,7 +97,8 @@ export default function ManageBumpFramework({
       form.values.description,
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
-      form.values.default
+      form.values.default,
+      form.values.archetypes?.map(archetype => archetype.archetype_id)
     );
 
     if (result.status === "success") {
@@ -117,6 +120,7 @@ export default function ManageBumpFramework({
         bump_length: bumpFrameworkLengthMarks.find(
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
+        archetypes: form.values.archetypes
       });
     } else {
       showNotification({
@@ -140,7 +144,8 @@ export default function ManageBumpFramework({
       form.values.description,
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
-      form.values.default
+      form.values.default,
+      form.values.archetypes?.map(archetype => archetype.archetype_id)
     );
 
     if (result.status === "success") {
@@ -162,6 +167,7 @@ export default function ManageBumpFramework({
         bump_length: bumpFrameworkLengthMarks.find(
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
+        archetypes: form.values.archetypes
       });
     } else {
       showNotification({
@@ -199,6 +205,7 @@ export default function ManageBumpFramework({
       form.values.title = "";
       form.values.description = "";
       form.values.default = false;
+      form.values.archetypes = [];
     } else {
       showNotification({
         title: "Error",
@@ -211,11 +218,24 @@ export default function ManageBumpFramework({
     setLoadingBumpFrameworks(false);
   };
 
+  const updateArchetypes = (archetypes: {
+    archetype_id: number;
+    archetype_name: string;
+  }[]) => {
+    form.setFieldValue('archetypes', archetypes)
+  }
+
   const form = useForm({
     initialValues: {
       title: "",
       description: "",
       default: false,
+      archetypes: [
+        {
+          archetype_id: -1,
+          archetype_name: "",
+        }
+      ],
     },
   });
 
@@ -237,6 +257,7 @@ export default function ManageBumpFramework({
     form.values.title = innerProps.selectedBumpFramework.title;
     form.values.description = innerProps.selectedBumpFramework.description;
     form.values.default = innerProps.selectedBumpFramework.default;
+    form.values.archetypes = innerProps.selectedBumpFramework.archetypes;
   }, []);
 
   return (
@@ -250,13 +271,14 @@ export default function ManageBumpFramework({
       <LoadingOverlay visible={loadingBumpFrameworks} />
       <Flex dir="row">
         <Flex w="50%">
-          <Stack w="95%" h="500px">
+          <Stack w="95%" mih="500px" mah='700px'>
             <Button
               h="60px"
               onClick={() => {
                 form.values.title = "";
                 form.values.description = "";
                 form.values.default = false;
+                form.values.archetypes = [];
                 setBumpLengthValue(50);
                 setSelectedBumpFramework(null);
               }}
@@ -278,6 +300,7 @@ export default function ManageBumpFramework({
                       form.values.title = framework.title;
                       form.values.description = framework.description;
                       form.values.default = framework.default;
+                      form.values.archetypes = framework.archetypes;
                       setBumpLengthValue(length);
                       setSelectedBumpFramework(framework);
                     }}
@@ -369,6 +392,19 @@ export default function ManageBumpFramework({
                   }}
                 />
               </Tooltip>
+              <Text fz="sm" mt="md">
+                Personas
+              </Text>
+              <Flex wrap='wrap' mt='xs' w='100%'>
+                <PersonaSelect
+                  disabled={false}
+                  onChange={(archetypes) => updateArchetypes(archetypes)}
+                  selectMultiple={true}
+                  label="Personas"
+                  description="Select the personas this framework applies to."
+                  defaultValues={form.values.archetypes.map(archetype => archetype.archetype_id)}
+                />
+              </Flex>
               {selectedBumpFramework == null && (
                 <Switch
                   pt="md"
@@ -411,26 +447,29 @@ export default function ManageBumpFramework({
                       </Button>
                     </Flex>
                     <Flex>
-                      <Button
-                        mt="md"
-                        hidden={
-                          selectedBumpFramework?.title ==
-                            form.values.title.trim() &&
+                      {
+                        (selectedBumpFramework?.title ==
+                          form.values.title.trim() &&
                           selectedBumpFramework?.description ==
-                            form.values.description.trim() &&
+                          form.values.description.trim() &&
                           selectedBumpFramework?.default ==
-                            form.values.default &&
+                          form.values.default &&
                           selectedBumpFramework?.bump_length ==
-                            bumpFrameworkLengthMarks.find(
-                              (mark) => mark.value === bumpLengthValue
-                            )?.api_label
-                        }
-                        onClick={() => {
-                          triggerEditBumpFramework();
-                        }}
-                      >
-                        Save
-                      </Button>
+                          bumpFrameworkLengthMarks.find(
+                            (mark) => mark.value === bumpLengthValue
+                          )?.api_label &&
+                          selectedBumpFramework?.archetypes == form.values.archetypes
+                        ) ? <></> : (
+                          <Button
+                            mt="md"
+                            onClick={() => {
+                              triggerEditBumpFramework();
+                            }}
+                          >
+                            Save
+                          </Button>
+                        )
+                      }
                     </Flex>
                   </Flex>
                 )}

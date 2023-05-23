@@ -12,8 +12,8 @@ export default function SellScaleBrainPersonasTab() {
         <Container>
           <PersonaSelect
             disabled={false}
-            onChange={(value) =>
-              setSelectedPersona(value.length > 0 ? value[0] : null)
+            onChange={(archetypes) =>
+              setSelectedPersona(archetypes.length > 0 ? archetypes[0].archetype_id : null)
             }
             selectMultiple={false}
             label="Select a persona"

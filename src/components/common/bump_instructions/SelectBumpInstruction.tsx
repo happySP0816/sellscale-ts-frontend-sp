@@ -33,6 +33,7 @@ import { IconSelect } from "@tabler/icons-react";
 type PropsType = {
   client_sdr_id: number;
   prospect_id: number;
+  persona_id: number;
   overall_status: string;
   account_research: string;
   convo_history: LinkedInMessage[];
@@ -65,7 +66,8 @@ export default function SelectBumpInstruction(props: PropsType) {
     setLoadingBumpFrameworks(true);
     const result = await getBumpFrameworks(
       userToken,
-      prospectDrawerStatuses.overall
+      prospectDrawerStatuses.overall,
+      [props.persona_id]
     );
 
     setBumpFrameworks(result.data);
@@ -177,6 +179,7 @@ export default function SelectBumpInstruction(props: PropsType) {
                 innerProps: {
                   selectedBumpFramework: selectedBumpFramework,
                   overallStatus: props.overall_status,
+                  archetypeId: props.persona_id,
                   backTriggerGetFrameworks: triggerGetBumpFrameworks,
                 },
               });

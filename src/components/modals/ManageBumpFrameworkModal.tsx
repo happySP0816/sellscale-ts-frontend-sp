@@ -67,7 +67,7 @@ export default function ManageBumpFramework({
 
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
-    const result = await getBumpFrameworks(userToken, innerProps.overallStatus, [innerProps.archetypeId]);
+    const result = await getBumpFrameworks(userToken, [innerProps.overallStatus], [innerProps.archetypeId]);
 
     let bumpFrameworkArray = [] as BumpFramework[];
     for (const bumpFramework of result.data as BumpFramework[]) {

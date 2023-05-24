@@ -14,6 +14,7 @@ import { setPageTitle } from "@utils/documentChange";
 import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
+import BumpFrameworksPage from "./BumpFrameworksPage";
 
 export default function HomePage() {
   setPageTitle("");
@@ -31,6 +32,7 @@ export default function HomePage() {
   return (
     <PageFrame>
       <Tabs value={tabId} px="xs" color="teal">
+        
         <Tabs.List sx={{ display: 'none' }}>
           <Tabs.Tab value="dashboard" icon={<IconCheckbox size="1.1rem" />}>
             Dashboard
@@ -53,7 +55,14 @@ export default function HomePage() {
           >
             Demo Feedback Repository
           </Tabs.Tab>
+          <Tabs.Tab
+            value="bump-frameworks"
+            icon={<IconClipboardData size="1.1rem" />}
+          >
+            Bump Frameworks
+          </Tabs.Tab>
         </Tabs.List>
+
         <Tabs.Panel value="all-contacts" pt="xs">
           <AllContactsSection />
         </Tabs.Panel>
@@ -68,6 +77,10 @@ export default function HomePage() {
             <DemoFeedbackChart />
           )}
         </Tabs.Panel>
+        <Tabs.Panel value="bump-frameworks" pt="xs">
+          <BumpFrameworksPage />
+        </Tabs.Panel>
+
       </Tabs>
     </PageFrame>
   );

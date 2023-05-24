@@ -339,7 +339,7 @@ export default function ManageBumpFramework({
           </Stack>
         </Flex>
         <Flex w="50%">
-          <Card w="100%" mih="400px" withBorder>
+          <Card w="100%" h='fit-content' withBorder>
             <form onSubmit={() => console.log("submit")}>
               {selectedBumpFramework == null ? (
                 <Text mb="sm" fz="lg" fw="bold">
@@ -392,9 +392,6 @@ export default function ManageBumpFramework({
                   }}
                 />
               </Tooltip>
-              <Text fz="sm" mt="md">
-                Personas
-              </Text>
               <Flex wrap='wrap' mt='xs' w='100%'>
                 <PersonaSelect
                   disabled={false}

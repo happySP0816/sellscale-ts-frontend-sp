@@ -35,6 +35,7 @@ export default function BumpFrameworksPage() {
   const [archetypeIDs, setArchetypeIDs] = useState<number[]>([]);
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>(null);
 
   const { data: data_channels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -131,7 +132,8 @@ export default function BumpFrameworksPage() {
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
       form.values.default,
-      form.values.archetypes?.map(archetype => archetype.archetype_id)
+      form.values.archetypes?.map(archetype => archetype.archetype_id),
+      selectedSubstatus
     );
 
     if (result.status === "success") {
@@ -162,6 +164,8 @@ export default function BumpFrameworksPage() {
         icon: <IconX radius="sm" color={theme.colors.red[7]} />,
       });
     }
+
+    setSelectedSubstatus(null);
   }
 
   const triggerEditBumpFramework = async () => {
@@ -584,6 +588,19 @@ export default function BumpFrameworksPage() {
                             mt='md'
                             withAsterisk
                           />
+                          {
+                            selectedStatus === "ACTIVE_CONVO" && (
+                              <Select
+                                label="Substatus"
+                                description="Which substatus should use this bump?"
+                                placeholder="select substatus..."
+                                data={getActiveConvoSubstatusValues()}
+                                onChange={setSelectedSubstatus}
+                                mt='md'
+                                withAsterisk
+                              />
+                            )
+                          }
                           <Switch
                             pt="md"
                             label="Make default?"
@@ -605,7 +622,8 @@ export default function BumpFrameworksPage() {
                                 form.values.title.trim() == "" ||
                                 form.values.description.trim() == "" ||
                                 form.values.archetypes.length == 0 ||
-                                selectedStatus == null
+                                selectedStatus == null ||
+                                (selectedStatus === "ACTIVE_CONVO" && selectedSubstatus == null)
                               }
                               onClick={() => {
                                 triggerCreateBumpFramework();

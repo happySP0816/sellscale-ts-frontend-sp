@@ -130,10 +130,10 @@ export default function SellScaleBrainProductsTab() {
       </Group>
       <ScrollArea>
         <Table sx={{ minWidth: 800 }} verticalSpacing='md'>
-          {rows.length > 0 && (
+          {rows?.length > 0 && (
             <tbody>{rows}</tbody>
           )}
-          {rows.length === 0 && (
+          {(!rows || rows.length === 0) && (
             <tbody>
               <tr>
                 <td>

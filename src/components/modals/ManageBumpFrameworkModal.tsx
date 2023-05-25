@@ -49,6 +49,7 @@ export default function ManageBumpFramework({
 }: ContextModalProps<{
   selectedBumpFramework: BumpFramework;
   overallStatus: string;
+  linkedinStatus: string;
   archetypeId: number;
   backTriggerGetFrameworks: Function;
 }>) {
@@ -67,7 +68,13 @@ export default function ManageBumpFramework({
 
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
-    const result = await getBumpFrameworks(userToken, [innerProps.overallStatus], [innerProps.archetypeId]);
+
+    let substatus: string[] = [];
+    if (innerProps.linkedinStatus?.includes("ACTIVE_CONVO_")) {
+      substatus.push(innerProps.linkedinStatus);
+    };
+
+    const result = await getBumpFrameworks(userToken, [innerProps.overallStatus], substatus, [innerProps.archetypeId]);
 
     let bumpFrameworkArray = [] as BumpFramework[];
     for (const bumpFramework of result.data as BumpFramework[]) {
@@ -145,7 +152,8 @@ export default function ManageBumpFramework({
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
       form.values.default,
-      form.values.archetypes?.map(archetype => archetype.archetype_id)
+      form.values.archetypes?.map(archetype => archetype.archetype_id),
+      innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : null,
     );
 
     if (result.status === "success") {

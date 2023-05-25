@@ -31,6 +31,7 @@ export default function BumpFrameworksPage() {
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
   const [selectedBumpFramework, setSelectedBumpFramework] = useState<BumpFramework | null>(null);
   const [overallStatuses, setOverallStatuses] = useState<string[]>([]);
+  const [substatuses, setSubstatuses] = useState<string[]>([]);
   const [archetypeIDs, setArchetypeIDs] = useState<number[]>([]);
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -42,8 +43,6 @@ export default function BumpFrameworksPage() {
     },
     refetchOnWindowFocus: false,
   });
-
-  
 
   const form = useForm({
     initialValues: {
@@ -61,7 +60,18 @@ export default function BumpFrameworksPage() {
 
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
-    const result = await getBumpFrameworks(userToken, overallStatuses, archetypeIDs);
+
+    // This needs reworking
+    let final_substatuses = []
+    if (substatuses != null) {
+      for (const substatus of substatuses as string[]) {
+        if (substatus.includes("ACTIVE_CONVO_")) {
+          final_substatuses.push(substatus);
+        }
+      }
+    }
+
+    const result = await getBumpFrameworks(userToken, overallStatuses, final_substatuses, archetypeIDs);
 
     if (result.status !== 'success') {
       setLoadingBumpFrameworks(false);
@@ -105,7 +115,7 @@ export default function BumpFrameworksPage() {
       form.values.default = false;
       form.values.archetypes = [];
     }
-    
+
 
     setLoadingBumpFrameworks(false);
   };
@@ -241,6 +251,25 @@ export default function BumpFrameworksPage() {
     setLoadingBumpFrameworks(false);
   };
 
+  const getActiveConvoSubstatusValues = () => {
+
+    const activeConvoStatuses = [];
+    const statuses_avilable = data_channels?.data["LINKEDIN"]?.statuses_available;
+    if (statuses_avilable != null) {
+
+      for (const item of statuses_avilable) {
+        const statusLabel = data_channels?.data["LINKEDIN"][item]?.name;
+        if (statusLabel.includes("Active Convo")) {
+          activeConvoStatuses.push({
+            label: statusLabel,
+            value: item,
+          })
+        }
+      }
+    }
+    return activeConvoStatuses;
+  }
+
   useEffect(() => {
     if (archetypeIDs.length == 0) {
       setBumpFrameworks([]);
@@ -252,7 +281,7 @@ export default function BumpFrameworksPage() {
       return;
     };
     triggerGetBumpFrameworks();
-  }, [archetypeIDs, overallStatuses])
+  }, [archetypeIDs, overallStatuses, substatuses])
 
   return (
     <>
@@ -268,50 +297,79 @@ export default function BumpFrameworksPage() {
           />
         </Flex>
         <Flex align='center' justify='space-between'>
-        <MultiSelect
-          mt='xs'
-          miw='300px'
-          w='fit-content'
-          data={
-            // If channels are not loaded or failed to fetch, don't show anything
-            !data_channels || data_channels.status !== "success"
-              ? []
-              : // Otherwise, show overall statuses
-              data_channels?.data["SELLSCALE"]?.statuses_available?.map(
-                (status: string) => {
-                  return {
-                    label: data_channels.data["SELLSCALE"][status].name,
-                    value: status,
-                  };
-                }
+          <Flex direction='row' align='center'>
+            <MultiSelect
+              mt='xs'
+              miw='300px'
+              w='fit-content'
+              data={
+                // If channels are not loaded or failed to fetch, don't show anything
+                !data_channels || data_channels.status !== "success"
+                  ? []
+                  : // Otherwise, show overall statuses
+                  data_channels?.data["SELLSCALE"]?.statuses_available?.map(
+                    (status: string) => {
+                      return {
+                        label: data_channels.data["SELLSCALE"][status].name,
+                        value: status,
+                      };
+                    }
+                  )
+              }
+              mb="md"
+              label="Filter by status"
+              placeholder="Select statuses"
+              searchable
+              nothingFound="Nothing found"
+              value={overallStatuses}
+              onChange={(e) => (
+                setOverallStatuses(e),
+                setSubstatuses([])
               )
-          }
-          mb="md"
-          label="Filter by status"
-          placeholder="Select statuses"
-          searchable
-          nothingFound="Nothing found"
-          value={overallStatuses}
-          onChange={setOverallStatuses}
-        />
-        <Button
-          variant='outline'
-          disabled={archetypeIDs.length < 1}
-          onClick={() => {
-            setSelectedBumpFramework(null);
-            form.values.title = "";
-            form.values.description = "";
-            form.values.default = false;
-            form.values.archetypes = [];
-          }}
-        >
-          Create New Framework
-        </Button>
+              }
+            />
+            {
+              overallStatuses.includes("ACTIVE_CONVO") ? (
+                <MultiSelect
+                  ml='md'
+                  mt='xs'
+                  miw='300px'
+                  w='fit-content'
+                  data={
+                    // If channels are not loaded or failed to fetch, don't show anything
+                    !data_channels || data_channels.status !== "success"
+                      ? []
+                      : getActiveConvoSubstatusValues() as any
+                  }
+                  mb="md"
+                  label="Filter by Active Convo Substatus"
+                  placeholder="Select statuses"
+                  searchable
+                  nothingFound="Nothing found"
+                  value={substatuses}
+                  onChange={setSubstatuses}
+                />
+              ) : <></>
+            }
+          </Flex>
+          <Button
+            variant='outline'
+            disabled={archetypeIDs.length < 1}
+            onClick={() => {
+              setSelectedBumpFramework(null);
+              form.values.title = "";
+              form.values.description = "";
+              form.values.default = false;
+              form.values.archetypes = [];
+            }}
+          >
+            Create New Framework
+          </Button>
         </Flex>
         <Flex mt='md'>
           <LoadingOverlay visible={loadingBumpFrameworks} />
           {
-            bumpFrameworks.length == 0 ? (
+            archetypeIDs.length == 0 ? (
               <Card
                 withBorder
                 w='100%'
@@ -321,19 +379,30 @@ export default function BumpFrameworksPage() {
                     <Flex align='center' justify={'center'}>
                       Please select a persona above.
                     </Flex>
-                  ) : <Flex align='center' justify={'center'}>
-                    No results found. Please modify your search.
-                  </Flex>
+                  ) : <></>
                 }
               </Card>
             ) : (
-              <Flex dir='row'>
+              <Flex dir='row' w="100%">
 
                 <Flex w='60%'>
-                  <ScrollArea offsetScrollbars>
+                  <ScrollArea
+                    w="100%"
+                    offsetScrollbars
+                  >
+                    {
+                      bumpFrameworks.length == 0 ? (
+                        <Card>
+                          <Flex align='center' justify={'center'}>
+                            No results found. Please modify your search or create a new framework.
+                          </Flex>
+                        </Card>
+                      ) : <></>
+                    }
                     {bumpFrameworks?.map((framework) => {
                       return (
                         <Card
+                          w="100%"
                           mb="sm"
                           onClick={() => {
                             let length = bumpFrameworkLengthMarks.find(
@@ -492,38 +561,38 @@ export default function BumpFrameworksPage() {
                       </Flex>
                       {selectedBumpFramework == null && (
                         <>
-                        <Select
-                          label="Status"
-                          description="Which status should use this bump?"
-                          placeholder="select status..."
-                          // data={overallStatuses.map((status) => {
-                          //   console.log(status)
-                          //   return {
-                          //     label: data_channels?.data["SELLSCALE"][status].name,
-                          //     value: status,
-                          //   };
-                          // })}
-                          data={data_channels?.data["SELLSCALE"]?.statuses_available?.map(
-                            (status: string) => {
-                              return {
-                                label: data_channels?.data["SELLSCALE"][status].name,
-                                value: status,
-                              };
-                            }
-                          )}
-                          onChange={setSelectedStatus}
-                          mt='md'
-                          withAsterisk
-                        />
-                        <Switch
-                          pt="md"
-                          label="Make default?"
-                          labelPosition="right"
-                          checked={form.values.default}
-                          onChange={(e) => {
-                            form.setFieldValue("default", e.currentTarget.checked);
-                          }}
-                        />
+                          <Select
+                            label="Status"
+                            description="Which status should use this bump?"
+                            placeholder="select status..."
+                            // data={overallStatuses.map((status) => {
+                            //   console.log(status)
+                            //   return {
+                            //     label: data_channels?.data["SELLSCALE"][status].name,
+                            //     value: status,
+                            //   };
+                            // })}
+                            data={data_channels?.data["SELLSCALE"]?.statuses_available?.map(
+                              (status: string) => {
+                                return {
+                                  label: data_channels?.data["SELLSCALE"][status].name,
+                                  value: status,
+                                };
+                              }
+                            )}
+                            onChange={setSelectedStatus}
+                            mt='md'
+                            withAsterisk
+                          />
+                          <Switch
+                            pt="md"
+                            label="Make default?"
+                            labelPosition="right"
+                            checked={form.values.default}
+                            onChange={(e) => {
+                              form.setFieldValue("default", e.currentTarget.checked);
+                            }}
+                          />
                         </>
                       )}
 

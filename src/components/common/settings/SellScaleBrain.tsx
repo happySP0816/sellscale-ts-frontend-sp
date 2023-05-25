@@ -18,12 +18,14 @@ import {
   IconBrandSuperhuman,
   IconBriefcase,
   IconFingerprint,
+  IconPackages,
   IconPoint,
 } from "@tabler/icons";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import SellScaleBrainPersonasTab from "./SellScaleBrain/SellScaleBrainPersonasTab";
 import SellScaleBrainUserTab from "./SellScaleBrain/SellScaleBrainUserTab";
 import SellScaleBrainCompanyTab from "./SellScaleBrain/SellScaleBrainCompanyTab";
+import SellScaleBrainProductsTab from "./SellScaleBrain/SellScaleBrainProductsTab";
 
 export default function SellScaleBrain() {
   const [userToken] = useRecoilState(userTokenState);
@@ -58,6 +60,12 @@ export default function SellScaleBrain() {
             >
               Persona Info
             </Tabs.Tab>
+            <Tabs.Tab
+              value="product_info"
+              icon={<IconPackages size="0.8rem" />}
+            >
+              Products
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="company_info" pt="xs">
@@ -70,6 +78,10 @@ export default function SellScaleBrain() {
 
           <Tabs.Panel value="persona_info" pt="xs">
             <SellScaleBrainPersonasTab />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="product_info" pt="xs">
+            <SellScaleBrainProductsTab />
           </Tabs.Panel>
         </Tabs>
       </Box>

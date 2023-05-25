@@ -20,6 +20,7 @@ import ViewEmailThreadModal from '@modals/ViewEmailThreadModal';
 import ManageBumpFramework from '@modals/ManageBumpFrameworkModal';
 import ComposeEmailModal from '@modals/ComposeEmailModal';
 import { Notifications } from '@mantine/notifications';
+import ClientProductModal from '@modals/ClientProductModal';
 
 export default function App() {
   // Site light or dark mode
@@ -89,6 +90,7 @@ export default function App() {
               managePulsePrompt: ManagePulsePrompt,
               viewEmailThread: ViewEmailThreadModal,
               manageBumpFramework: ManageBumpFramework,
+              clientProduct: ClientProductModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

@@ -12,7 +12,7 @@ import { MsgResponse } from "src";
  */
 export async function processResponse(response: Response, resultProperty=''): Promise<MsgResponse> {
 
-  // Fist stage of processing the response & we get a unqiue key from the response URL
+  // First stage of processing the response & we get a unqiue key from the response URL
   const result = await getResponseJSON(`response--${hashString(response.url, 9999999999)}`, response);
   // If the response is a MsgResponse, we know it's an error and can just return it
   if(isMsgResponse(result)) { return result; }

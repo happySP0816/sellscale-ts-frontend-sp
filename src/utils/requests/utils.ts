@@ -10,10 +10,10 @@ import { MsgResponse } from "src";
  * @param resultProperty - A specific property to return from the response JSON, default is the whole JSON
  * @returns - A MsgResponse object
  */
-export async function processResponse(response: Response, resultProperty=''): Promise<MsgResponse> {
+export async function processResponse(response: Response, resultProperty='', showNotif=true): Promise<MsgResponse> {
 
   // First stage of processing the response & we get a unqiue key from the response URL
-  const result = await getResponseJSON(`response--${hashString(response.url, 9999999999)}`, response);
+  const result = await getResponseJSON(`response--${hashString(response.url, 9999999999)}`, response, showNotif);
   // If the response is a MsgResponse, we know it's an error and can just return it
   if(isMsgResponse(result)) { return result; }
 
@@ -31,7 +31,7 @@ export async function processResponse(response: Response, resultProperty=''): Pr
  * @param response - The response object
  * @returns - Will return a MsgResponse object if the response is an error, otherwise will return the JSON object
  */
-async function getResponseJSON(key: string, response: Response): Promise<MsgResponse | Record<string, any>> {
+async function getResponseJSON(key: string, response: Response, showNotif: boolean): Promise<MsgResponse | Record<string, any>> {
 
   if (response.status === 401) {
     logout();
@@ -46,13 +46,15 @@ async function getResponseJSON(key: string, response: Response): Promise<MsgResp
     errMsg = 'Unknown error';
   }
   if (response.status === 403 && res && res.message.toLowerCase() === "invalid linkedin cookies") {
-    showNotification({
-      id: key+"-invalid-li-cookies",
-      title: "LinkedIn Disconnected",
-      message: `Looks like your LinkedIn account has been disconnected. Please reconnect your LinkedIn account.`,
-      color: "red",
-      autoClose: false,
-    });
+    if(showNotif){
+      showNotification({
+        id: key+"-invalid-li-cookies",
+        title: "LinkedIn Disconnected",
+        message: `Looks like your LinkedIn account has been disconnected. Please reconnect your LinkedIn account.`,
+        color: "red",
+        autoClose: false,
+      });
+    }
     return { status: 'error', title: `LinkedIn Disconnected`, message: `Looks like your LinkedIn account has been disconnected. Please reconnect your LinkedIn account.` };
   }
 
@@ -61,16 +63,18 @@ async function getResponseJSON(key: string, response: Response): Promise<MsgResp
   }
 
   if (errMsg) {
-    showNotification({
-      id: key+"-error",
-      title: "Error",
-      message: `An error occurred, our engineers have been notified. Please try again later.`,
-      color: "red",
-      autoClose: false,
-    });
+    if(showNotif){
+      showNotification({
+        id: key+"-error",
+        title: "Error",
+        message: `An error occurred, our engineers have been notified. Please try again later.`,
+        color: "red",
+        autoClose: false,
+      });
+    }
 
     const userToken = localStorage.getItem("user-token");
-    if(userToken){
+    if(userToken && showNotif){
       fetch(
         `${API_URL}/client/submit-error`,
         {
@@ -87,6 +91,7 @@ async function getResponseJSON(key: string, response: Response): Promise<MsgResp
       );
     }
 
+    return { status: 'error', title: `Error`, message: errMsg };
   }
 
   if (!res) {

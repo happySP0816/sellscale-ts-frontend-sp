@@ -46,6 +46,7 @@ import { API_URL } from "@constants/data";
 import { prospectDrawerStatusesState } from "@atoms/prospectAtoms";
 import { postBumpGenerateResponse } from "@utils/requests/postBumpGenerateResponse";
 import { autoFillAccountResearch } from "@utils/requests/autoFillAccountResearch";
+import { deleteAutoBumpMessage, getAutoBumpMessage } from "@utils/requests/autoBumpMessage";
 
 type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
@@ -167,6 +168,15 @@ export default function ProspectDetailsViewConversation(
           queryKey: [`query-dash-get-prospects`],
         });
       }
+
+      // Set if we have an auto bump message generated
+      const autoBumpMsgResponse = await getAutoBumpMessage(userToken, props.prospect_id);
+      if (autoBumpMsgResponse.status === "success") {
+        console.log(autoBumpMsgResponse);
+        setMessageDraft(autoBumpMsgResponse.data.message);
+        setAiGenerated(true);
+      }
+
     }
     setLoading(false);
     return latestMessages;
@@ -229,6 +239,10 @@ export default function ProspectDetailsViewConversation(
     setMsgLoading(true);
     const msg = messageDraft;
     setMessageDraft("");
+
+    // Delete the auto bump message if it exists
+    await deleteAutoBumpMessage(userToken, props.prospect_id);
+
     const result = await sendLinkedInMessage(
       userToken,
       props.prospect_id,

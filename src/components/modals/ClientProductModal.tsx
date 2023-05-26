@@ -1,57 +1,19 @@
 import {
-  Anchor,
   Button,
   Group,
-  Text,
   Paper,
-  useMantineTheme,
-  Avatar,
-  Title,
-  Select,
-  Collapse,
-  Divider,
-  Container,
-  Center,
-  ActionIcon,
   TextInput,
-  Flex,
   Textarea,
-  FocusTrap,
   LoadingOverlay,
-  PasswordInput,
-  Card,
   rem,
   createStyles,
 } from '@mantine/core';
-import { ContextModalProps, openContextModal } from '@mantine/modals';
-import { useContext, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Dropzone, DropzoneProps, MIME_TYPES } from '@mantine/dropzone';
-import {
-  IconUpload,
-  IconX,
-  IconTrashX,
-  IconFileDescription,
-  IconChevronDown,
-  IconChevronUp,
-  IconPencil,
-  IconPlus,
-  IconUsers,
-  IconLock,
-  IconUser,
-  IconMessage2,
-} from '@tabler/icons';
-import { DataTable } from 'mantine-datatable';
-import FileDropAndPreview from './upload-prospects/FileDropAndPreview';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ContextModalProps } from '@mantine/modals';
+import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
-import { logout } from '@auth/core';
-import { Archetype } from 'src';
-import { EMAIL_REGEX } from '@constants/data';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
-import createCTA from '@utils/requests/createCTA';
 import { addClientProduct, updateClientProduct } from '@utils/requests/clientProducts';
 
 const useStyles = createStyles((theme) => ({

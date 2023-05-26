@@ -580,6 +580,7 @@ export default function UploadProspectsModal({
                       description: description,
                       fitReason: fitReason,
                       icpMatchingPrompt: icpMatchingPrompt,
+                      contactObjective: contactObjective,
                     }
                   : undefined
               }

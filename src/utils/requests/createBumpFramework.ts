@@ -14,7 +14,10 @@ import { API_URL } from "@constants/data";
  * @param substatus
  * @returns - MsgResponse
  */
-export async function createBumpFramework(userToken: string, overallStatus: string, title: string, description: string, length: string, setDefault: boolean, archetype_ids: number[], substatus: string | null = null): Promise<MsgResponse> {
+export async function createBumpFramework(userToken: string, overallStatus: string, title: string, description: string, length: string, setDefault: boolean, archetype_ids: number[], substatus: string | null = ""): Promise<MsgResponse> {
+  if (substatus === null) {
+    substatus = "";
+  }
 
   const response = await fetch(
     `${API_URL}/bump_framework/bump`,

@@ -11,6 +11,7 @@ type PropsType = {
     description: string;
     fitReason: string;
     icpMatchingPrompt: string;
+    contactObjective: string;
   };
 };
 
@@ -28,6 +29,7 @@ export default function CreatePersona(props: PropsType) {
         description: props.createPersona.description,
         fitReason: props.createPersona.fitReason,
         icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
+        contactObjective: props.createPersona.contactObjective,
       }
     );
     if (result.status === "error") {
@@ -51,7 +53,8 @@ export default function CreatePersona(props: PropsType) {
           !props.createPersona?.ctas ||
           !props.createPersona?.description ||
           !props.createPersona?.fitReason ||
-          !props.createPersona.icpMatchingPrompt
+          !props.createPersona.icpMatchingPrompt ||
+          !props.createPersona.contactObjective
         }
         onClick={() => createPersonaHandler()}
         loading={creatingPersona}

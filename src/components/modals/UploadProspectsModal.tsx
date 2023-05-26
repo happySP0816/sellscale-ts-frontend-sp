@@ -72,6 +72,8 @@ export default function UploadProspectsModal({
   const [fitReason, setFitReason] = useState("");
   const [icpMatchingPrompt, setICPMatchingPrompt] = useState("");
 
+  const [contactObjective, setContactObjective] = useState("");
+
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
       const cta = {
@@ -457,6 +459,15 @@ export default function UploadProspectsModal({
                 );
               }}
             />
+            <Textarea
+              mt='md'
+              withAsterisk
+              value={contactObjective}
+              label="Contact Objective"
+              description="Describe the objective of the outreach."
+              placeholder="To get a demo scheduled with the goal of potentially integrating our product into their workflow."
+              onChange={(e) => setContactObjective(e.target.value)}
+            />
           </Stack>
         )}
 
@@ -585,6 +596,7 @@ export default function UploadProspectsModal({
                 description: description,
                 fitReason: fitReason,
                 icpMatchingPrompt: icpMatchingPrompt,
+                contactObjective: contactObjective,
               }}
             />
           </Tabs.Panel>

@@ -15,7 +15,7 @@ import { API_URL } from "@constants/data";
  * @returns - MsgResponse
  */
 export async function createBumpFramework(userToken: string, overallStatus: string, title: string, description: string, length: string, setDefault: boolean, archetype_ids: number[], substatus: string | null = ""): Promise<MsgResponse> {
-  if (substatus === null) {
+  if (!substatus) {
     substatus = "";
   }
 

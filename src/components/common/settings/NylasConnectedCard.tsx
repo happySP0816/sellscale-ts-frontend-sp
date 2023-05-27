@@ -88,7 +88,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
       <Stack>
         <div>
           <Group>
-            <Title order={3}>Email Integration</Title>
+            <Title order={3}>Email and Calendar Integration</Title>
             {props.connected ? (
               <Badge
                 size="xl"
@@ -167,7 +167,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                   rightIcon={<IconPlugConnected size="1rem" />}
                   loading={isFetching}
                 >
-                  Connect Email
+                  Connect Email & Calendar
                 </Button>
               </Center>
             </>

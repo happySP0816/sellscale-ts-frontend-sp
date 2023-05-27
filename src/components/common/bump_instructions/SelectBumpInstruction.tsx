@@ -64,9 +64,17 @@ export default function SelectBumpInstruction(props: PropsType) {
 
   const triggerGetBumpFrameworks = async () => {
     setLoadingBumpFrameworks(true);
+
+    // This needs changing in the future to be more rigid
+    let substatuses: string[] = [];
+    if (prospectDrawerStatuses.linkedin?.includes("ACTIVE_CONVO_")) {
+      substatuses = [prospectDrawerStatuses.linkedin]
+    }
+
     const result = await getBumpFrameworks(
       userToken,
       [prospectDrawerStatuses.overall],
+      substatuses,
       [props.persona_id]
     );
 
@@ -179,6 +187,7 @@ export default function SelectBumpInstruction(props: PropsType) {
                 innerProps: {
                   selectedBumpFramework: selectedBumpFramework,
                   overallStatus: props.overall_status,
+                  linkedinStatus: prospectDrawerStatuses.linkedin,
                   archetypeId: props.persona_id,
                   backTriggerGetFrameworks: triggerGetBumpFrameworks,
                 },

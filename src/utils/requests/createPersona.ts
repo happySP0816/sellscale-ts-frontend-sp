@@ -12,6 +12,7 @@ export default async function createPersona(
     description: string;
     fitReason: string;
     icpMatchingPrompt: string;
+    contactObjective: string;
   }
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/archetype`, {
@@ -26,6 +27,7 @@ export default async function createPersona(
       description: extras.description,
       fit_reason: extras.fitReason,
       icp_matching_prompt: extras.icpMatchingPrompt,
+      contact_objective: extras.contactObjective,
     }),
   });
   if (response.status === 401) {

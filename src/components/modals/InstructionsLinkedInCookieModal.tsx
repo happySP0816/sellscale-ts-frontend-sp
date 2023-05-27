@@ -5,49 +5,20 @@ import {
   Text,
   Paper,
   useMantineTheme,
-  Avatar,
-  Stack,
   Image,
-  Collapse,
-  Divider,
-  Container,
-  Center,
-  ActionIcon,
   TextInput,
-  Flex,
-  Textarea,
-  FocusTrap,
   LoadingOverlay,
-  PasswordInput,
   List,
   ThemeIcon,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
-import { useContext, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
+import { useState } from "react";
 import {
-  IconUpload,
-  IconX,
-  IconTrashX,
-  IconFileDescription,
-  IconChevronDown,
-  IconChevronUp,
-  IconPencil,
-  IconPlus,
-  IconUsers,
-  IconLock,
   IconUser,
-  IconBrandLinkedin,
 } from "@tabler/icons";
-import { DataTable } from "mantine-datatable";
-import FileDropAndPreview from "./upload-prospects/FileDropAndPreview";
-import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { logout } from "@auth/core";
-import { Archetype } from "src";
-import { API_URL, EMAIL_REGEX } from "@constants/data";
+import { API_URL } from "@constants/data";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import LinkedInCookieTut from "@assets/images/linkedin-cookie-tut.jpeg";

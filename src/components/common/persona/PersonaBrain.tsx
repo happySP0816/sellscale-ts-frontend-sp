@@ -14,6 +14,7 @@ import { API_URL } from "@constants/data";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import displayNotification from "@utils/notificationFlow";
 import { MsgResponse } from "src";
+import { showNotification } from "@mantine/notifications";
 type PropsType = {
   archetype_id: number;
 };
@@ -34,6 +35,7 @@ export default function PersonaBrain(props: PropsType) {
     personaICPMatchingInstructions,
     setPersonaICPMatchingInstructions,
   ] = useState("");
+  const [personaContactObjective, setPersonaContactObjective] = useState("");
   const [needsSave, setNeedsSave] = useState(false);
 
   const fetchPersonaDetails = async () => {
@@ -51,6 +53,7 @@ export default function PersonaBrain(props: PropsType) {
         setPersonaDescription(persona.persona_description);
         setPersonaFitReason(persona.persona_fit_reason);
         setPersonaICPMatchingInstructions(persona.icp_matching_prompt);
+        setPersonaContactObjective(persona.persona_contact_objective);
       })
       .catch((err) => {
         console.log(err);
@@ -74,6 +77,7 @@ export default function PersonaBrain(props: PropsType) {
           updated_persona_description: personaDescription,
           updated_persona_fit_reason: personaFitReason,
           updated_persona_icp_matching_prompt: personaICPMatchingInstructions,
+          updated_persona_contact_objective: personaContactObjective,
         }),
       }
     )
@@ -83,6 +87,11 @@ export default function PersonaBrain(props: PropsType) {
         setPersonaDescription(persona.persona_description);
         setPersonaFitReason(persona.persona_fit_reason);
         setPersonaICPMatchingInstructions(persona.icp_matching_prompt);
+        showNotification({
+          title: "Success",
+          message: "Persona details saved",
+          color: "blue",
+        })
       })
       .catch((err) => {
         console.log(err);
@@ -210,7 +219,7 @@ export default function PersonaBrain(props: PropsType) {
               setPersonaName(e.currentTarget.value);
               setNeedsSave(true);
             }}
-          ></TextAreaWithAI>
+          />
           <TextAreaWithAI
             label="Persona Description"
             description="Describe the persona using details like their job title, company size, industry, and more"
@@ -242,7 +251,7 @@ export default function PersonaBrain(props: PropsType) {
                 }
               );
             }}
-          ></TextAreaWithAI>
+          />
           <TextAreaWithAI
             label="Persona Fit Reason"
             description="Explain why this persona is a good fit for your product or service"
@@ -274,7 +283,7 @@ export default function PersonaBrain(props: PropsType) {
                 }
               );
             }}
-          ></TextAreaWithAI>
+          />
           <TextAreaWithAI
             label="Persona ICP Matching Instructions"
             description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc."
@@ -284,7 +293,17 @@ export default function PersonaBrain(props: PropsType) {
               setPersonaICPMatchingInstructions(e.currentTarget.value);
               setNeedsSave(true);
             }}
-          ></TextAreaWithAI>
+          />
+          <TextAreaWithAI
+            label="Persona contact objective"
+            description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral."
+            minRows={4}
+            value={personaContactObjective}
+            onChange={(e) => {
+              setPersonaContactObjective(e.currentTarget.value);
+              setNeedsSave(true);
+            }}
+          />
           <Button
             color="blue"
             variant="light"

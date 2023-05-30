@@ -14,6 +14,7 @@ import {
   IconAffiliate,
   IconHistory,
   IconMailFast,
+  IconReport,
   IconSignature,
   IconSpeakerphone,
   IconTopologyStar,
@@ -84,10 +85,10 @@ export default function LinkedInPage() {
             Personalizations
           </Tabs.Tab>
           <Tabs.Tab
-            value="campaign-history"
-            icon={<IconHistory size="1.1rem" />}
+            value="campaign-analytics"
+            icon={<IconReport size="1.1rem" />}
           >
-            Campaign History
+            Campaign Analytics
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="messages" pt="xs">
@@ -120,7 +121,7 @@ export default function LinkedInPage() {
           </FlexSeparate>
           <PersonaDetailsTransformers channel="LINKEDIN" />
         </Tabs.Panel>
-        <Tabs.Panel value="campaign-history" pt="xs">
+        <Tabs.Panel value="campaign-analytics" pt="xs">
           <CampaignTable type="LINKEDIN" />
         </Tabs.Panel>
       </Tabs>

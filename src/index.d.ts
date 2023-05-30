@@ -17,6 +17,10 @@ export interface Campaign {
   client_sdr_id: number;
   campaign_start_date: Date;
   campaign_end_date: Date;
+  analytics_sent: number;
+  analytics_open_rate: number;
+  analytics_reply_rate: number;
+  analytics_demo_count: number;
   status:
     | "PENDING"
     | "NEEDS_REVIEW"

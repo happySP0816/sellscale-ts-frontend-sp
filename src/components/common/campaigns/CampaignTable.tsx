@@ -136,6 +136,7 @@ export default function CampaignTable(props: { type: Channel }) {
                 direction: sortStatus.direction === "asc" ? 1 : -1,
               },
             ],
+            include_analytics: true,
           }),
         }
       );
@@ -143,6 +144,7 @@ export default function CampaignTable(props: { type: Channel }) {
         logout();
       }
       const res = await response.json();
+      console.log("analytics", res)
       if (!res || !res.outbound_campaigns) {
         return [];
       }
@@ -150,6 +152,18 @@ export default function CampaignTable(props: { type: Channel }) {
       totalRecords.current = res.total_count;
 
       return res.outbound_campaigns.map((campaign: any) => {
+        const total_prospects = campaign.prospect_ids.length;
+
+        let total_sent = 0;
+        let total_opened = 0;
+        let total_replied = 0;
+        let total_demo_count = 0;
+        if (campaign.analytics != null || typeof campaign.analytics != 'string') {
+          total_sent = campaign.analytics?.email_sent?.length > 0 ? campaign.analytics.email_sent.length : 0;
+          total_opened = campaign.analytics?.email_opened?.length > 0 ? campaign.analytics.email_opened.length : 0;
+          total_replied = campaign.analytics?.email_replied?.length > 0 ? campaign.analytics.email_replied.length : 0;
+          total_demo_count = campaign.analytics?.prospect_demo_set?.length > 0 ? campaign.analytics.prospect_demo_set.length : 0;
+        }
         return {
           uuid: campaign.uuid,
           id: campaign.id,
@@ -162,6 +176,13 @@ export default function CampaignTable(props: { type: Channel }) {
           campaign_start_date: campaign.campaign_start_date,
           campaign_end_date: campaign.campaign_end_date,
           status: campaign.status,
+
+          // Analytics
+          total_prospects: total_prospects,
+          analytics_sent: total_sent,
+          analytics_open_rate: total_opened / total_prospects,
+          analytics_reply_rate: total_replied / total_prospects,
+          analytics_demo_count: total_demo_count
         };
       }) as Campaign[];
     },
@@ -307,6 +328,38 @@ export default function CampaignTable(props: { type: Channel }) {
               return <Text>{prospect_ids.length}</Text>;
             },
           },
+          {
+            accessor: "# Sent",
+            title: "# Sent",
+            sortable: true,
+            render: ({ analytics_sent }) => {
+              return <Text>{analytics_sent}</Text>;
+            },
+          },
+          {
+            accessor: "open_rate",
+            title: "Open Rate %",
+            sortable: false,
+            render: ({ analytics_open_rate }) => {
+              return <Text>{(analytics_open_rate * 100).toFixed(2)} %</Text>;
+            },
+          },
+          {
+            accessor: "reply_rate",
+            title: "Reply Rate %",
+            sortable: false,
+            render: ({ analytics_reply_rate }) => {
+              return <Text>{(analytics_reply_rate * 100).toFixed(2)} %</Text>;
+            },
+          },
+          {
+            accessor: "num_demos",
+            title: "# Demos",
+            sortable: false,
+            render: ({ analytics_demo_count }) => {
+              return <Text>{analytics_demo_count}</Text>;
+            },
+          }
         ]}
         records={data}
         page={page}

@@ -133,7 +133,7 @@ const siteLinks = [
       { key: 'linkedin-messages', label: 'Scheduled Messages', icon: IconMailFast, link: '/linkedin/messages' },
       { key: 'linkedin-ctas', label: 'CTAs', icon: IconSpeakerphone, link: '/linkedin/ctas' },
       { key: 'linkedin-personalizations', label: 'Personalizations', icon: IconAffiliate, link: '/linkedin/personalizations' },
-      { key: 'linkedin-campaign-history', label: 'Campaign History', icon: IconHistory, link: '/linkedin/campaign-history' },
+      { key: 'linkedin-campaign-analytics', label: 'Campaign Analytics', icon: IconReport, link: '/linkedin/campaign-analytics' },
     ],
   },
   {
@@ -144,8 +144,8 @@ const siteLinks = [
       { key: 'email-scheduled-emails', label: 'Scheduled Emails', icon: IconMailFast, link: '/email/scheduled-emails' },
       { key: 'email-sequences', label: 'Sequences', icon: IconListDetails, link: '/email/sequences' },
       { key: 'email-personalizations', label: 'Personalizations', icon: IconAffiliate, link: '/email/personalizations' },
-      { key: 'email-campaign-history', label: 'Campaign History', icon: IconHistory, link: '/email/campaign-history' },
-      { key: 'email-email-details', label: 'Sequence Analysis', icon: IconReport, link: '/email/email-details' },
+      { key: 'email-campaign-analytics', label: 'Campaign Analytics', icon: IconReport, link: '/email/campaign-analytics' },
+      // { key: 'email-email-details', label: 'Sequence Analysis', icon: IconReport, link: '/email/email-details' },
     ],
   },
   {

@@ -28,8 +28,8 @@ export default function EmailPage() {
           <Tabs.Tab value="scheduled-emails" icon={<IconMailFast size="1.1rem" />}>Scheduled Emails</Tabs.Tab>
           <Tabs.Tab value="sequences" icon={<IconListDetails size="1.1rem" />}>Sequences</Tabs.Tab>
           <Tabs.Tab value="personalizations" icon={<IconAffiliate size="1.1rem" />}>Personalizations</Tabs.Tab>
-          <Tabs.Tab value="campaign-history" icon={<IconHistory size="1.1rem" />}>Campaign History</Tabs.Tab>
-          <Tabs.Tab value="email-details" icon={<IconReport size="1.1rem" />}>Sequence Analysis</Tabs.Tab>
+          <Tabs.Tab value="campaign-analytics" icon={<IconReport size="1.1rem" />}>Campaign Analytics</Tabs.Tab>
+          {/* <Tabs.Tab value="email-details" icon={<IconReport size="1.1rem" />}>Sequence Analysis</Tabs.Tab> */}
         </Tabs.List>
         <Tabs.Panel value="scheduled-emails" pt="xs">
           <EmailQueuedMessages />
@@ -40,12 +40,12 @@ export default function EmailPage() {
         <Tabs.Panel value="personalizations" pt="xs">
           <PersonaDetailsTransformers channel="EMAIL" />
         </Tabs.Panel>
-        <Tabs.Panel value="campaign-history" pt="xs">
+        <Tabs.Panel value="campaign-analytics" pt="xs">
           <CampaignTable type="EMAIL" />
         </Tabs.Panel>
-        <Tabs.Panel value="email-details" pt="xs">
+        {/* <Tabs.Panel value="email-details" pt="xs">
           <EmailAnalyticsTable />
-        </Tabs.Panel>
+        </Tabs.Panel> */}
       </Tabs>
     </PageFrame>
   );

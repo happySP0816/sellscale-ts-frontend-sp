@@ -178,7 +178,7 @@ export function NavbarNested(props: { isMobileView: boolean; navOpened: boolean 
   useEffect(() => {
     let newTab = activeSubTab ? `${activeTab.trim()}-${activeSubTab.trim()}` : activeTab.trim();
     newTab = (newTab === "" || newTab === "home") ? "home-dashboard" : newTab;
-    navigateToPage(navigate, `/${newTab.replace("-", "/")}`);
+    navigateToPage(navigate, `/${newTab.replace("-", "/")}`, new URLSearchParams(location.search));
     setTimeout(() => setNavTab(newTab), 100);
   }, [activeTab, activeSubTab, setNavTab]);
 

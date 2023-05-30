@@ -354,14 +354,15 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const nylasCode = searchParams.get("code");
-  if (nylasCode){
-    exchangeNylasClientID(userToken, nylasCode)
-    .then(() => {
-      navigateToPage(navigate, "/settings");
-      window.location.reload();
-    });
-  }
+  useEffect(() => {
+    const nylasCode = searchParams.get("code");
+    if (nylasCode){
+      exchangeNylasClientID(userToken, nylasCode)
+      .then((response) => {
+        navigateToPage(navigate, "/settings");
+      });
+    }
+  }, []);
 
   useQuery({
     queryKey: [`query-get-accounts-connected`],

@@ -12,6 +12,9 @@ export function setPageTitle(title: string) {
   }
 }
 
-export function navigateToPage(navigate: NavigateFunction, to: string) {
-  navigate(to);
+export function navigateToPage(navigate: NavigateFunction, to: string, queryParams?: URLSearchParams) {
+  navigate({
+    pathname: to,
+    search: queryParams ? `?${queryParams.toString()}` : undefined,
+  });
 }

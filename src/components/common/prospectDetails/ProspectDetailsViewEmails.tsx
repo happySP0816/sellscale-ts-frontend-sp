@@ -11,6 +11,7 @@ import {
   Textarea,
   LoadingOverlay,
   ActionIcon,
+  em,
 } from "@mantine/core";
 import {
   IconChevronRight,
@@ -50,12 +51,17 @@ export const openComposeEmailModal = (
     messageId: string;
   }
 ) => {
+  let emailSubject = subject;
+  if (reply?.threadSubject) {
+    emailSubject = `Re: ${reply.threadSubject}`;
+  }
+
   openContextModal({
     modal: "composeEmail",
     title: (
       <Group position="apart">
         <div>
-          <Title order={4}>Email Compose {reply && `- ${reply.threadSubject}`}</Title>
+          <Title order={4}>Email Compose {reply && `- ${emailSubject}`}</Title>
         </div>
       </Group>
     ),
@@ -69,7 +75,7 @@ export const openComposeEmailModal = (
     }),
     innerProps: {
       email: email,
-      subject: subject,
+      subject: emailSubject,
       body: body,
       from: sdr_email,
       prospectId: prospectId,

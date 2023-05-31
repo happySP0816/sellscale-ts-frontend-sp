@@ -24,6 +24,10 @@
   },
   "dependencies": {
     "@emotion/react": "^11.11.0",
+    "@fullcalendar/core": "^6.1.8",
+    "@fullcalendar/daygrid": "^6.1.8",
+    "@fullcalendar/list": "^6.1.8",
+    "@fullcalendar/react": "^6.1.8",
     "@headlessui/react": "^1.7.10",
     "@heroicons/react": "^2.0.15",
     "@mantine/core": "^6.0.10",

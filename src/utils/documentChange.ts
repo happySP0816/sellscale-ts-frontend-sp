@@ -18,3 +18,11 @@ export function navigateToPage(navigate: NavigateFunction, to: string, queryPara
     search: queryParams ? `?${queryParams.toString()}` : undefined,
   });
 }
+
+export function removeLastPathSegment() {
+  let url = window.location.href;
+  let urlParts = url.split('/');
+  urlParts.pop(); // Remove the last element
+  let newUrl = urlParts.join('/');
+  window.history.pushState({ path: newUrl }, '', newUrl);
+}

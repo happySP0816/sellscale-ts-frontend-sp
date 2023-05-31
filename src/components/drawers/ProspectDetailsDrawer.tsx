@@ -47,6 +47,8 @@ import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove
 import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsResearch";
 import { IconDots, IconPencil } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
+import { useNavigate } from "react-router-dom";
+import { removeLastPathSegment } from "@utils/documentChange";
 
 export default function ProspectDetailsDrawer() {
   const userData = useRecoilValue(userDataState);
@@ -69,12 +71,12 @@ export default function ProspectDetailsDrawer() {
   }, []);
 
   const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
-  const prospectId = useRecoilValue(prospectDrawerIdState);
+  const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
   const userToken = useRecoilValue(userTokenState);
   const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(
     prospectDrawerStatusesState
   );
-  const persona_id = useRef(-1)
+  const persona_id = useRef(-1);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospect-details-${prospectId}`],
@@ -126,7 +128,11 @@ export default function ProspectDetailsDrawer() {
   return (
     <Drawer
       opened={actuallyOpened}
-      onClose={() => setDrawerOpened(false)}
+      onClose={() => {
+        setDrawerOpened(false);
+        setProspectId(-1);
+        //removeLastPathSegment();
+      }}
       title={
         <FlexSeparate>
           <Title order={3}>

@@ -19,6 +19,8 @@ import {
   IconUsers,
   IconSpeakerphone,
   IconSettings,
+  IconAdjustments,
+  IconCalendarEvent,
 } from '@tabler/icons-react';
 import { LogoFull } from '@nav/Logo';
 import { LinksGroup } from './NavBarLinksGroup';
@@ -32,7 +34,6 @@ import { userDataState } from '@atoms/userAtoms';
 import { logout } from '@auth/core';
 import { navigateToPage } from '@utils/documentChange';
 import { useNavigate } from 'react-router-dom';
-import { IconAdjustments } from '@tabler/icons';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -123,6 +124,7 @@ const siteLinks = [
       { key: 'home-recent-activity', label: 'Recent Activity', icon: IconActivity, link: '/home/recent-activity' },
       { key: 'home-demo-feedback', label: 'Demo Feedback Repo', icon: IconClipboardData, link: '/home/demo-feedback' },
       { key: 'home-bump-frameworks', label: 'Bump Frameworks', icon: IconAdjustments, link: '/home/bump-frameworks' },
+      { key: 'home-calendar', label: 'Demo Calendar', icon: IconCalendarEvent, link: '/home/calendar' },
     ],
   },
   {
@@ -184,8 +186,6 @@ export function NavbarNested(props: { isMobileView: boolean; navOpened: boolean 
 
 
   const links = siteLinks.map((item) => <LinksGroup {...item} key={item.mainKey} />);
-
-  console.log(userData);
 
   return (
     <AnimatedNavbar

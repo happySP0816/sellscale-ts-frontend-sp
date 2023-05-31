@@ -9,12 +9,13 @@ import AllContactsSection from "@common/home/AllContactsSection";
 import DashboardSection from "@common/home/DashboardSection";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import { Tabs } from "@mantine/core";
-import { IconActivity, IconAddressBook, IconCheckbox, IconClipboardData } from "@tabler/icons";
+import { IconActivity, IconAddressBook, IconCalendarEvent, IconCheckbox, IconClipboardData } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import BumpFrameworksPage from "./BumpFrameworksPage";
+import CalendarSection from "@common/home/CalendarSection";
 
 export default function HomePage() {
   setPageTitle("");
@@ -61,6 +62,12 @@ export default function HomePage() {
           >
             Bump Frameworks
           </Tabs.Tab>
+          <Tabs.Tab
+            value="calendar"
+            icon={<IconCalendarEvent size="1.1rem" />}
+          >
+            Demo Calendar
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="all-contacts" pt="xs">
@@ -79,6 +86,11 @@ export default function HomePage() {
         </Tabs.Panel>
         <Tabs.Panel value="bump-frameworks" pt="xs">
           <BumpFrameworksPage />
+        </Tabs.Panel>
+        <Tabs.Panel value="calendar" pt="xs">
+          {tabId === "calendar" && (
+            <CalendarSection />
+          )}
         </Tabs.Panel>
 
       </Tabs>

@@ -39,8 +39,6 @@ export default function ViewEmailThreadModal({
     refetchOnWindowFocus: false,
   });
 
-  console.log(data);
-
   return (
     <Paper
       p={0}
@@ -93,29 +91,6 @@ export default function ViewEmailThreadModal({
                 </Text>
               </div>
             </Flex>
-
-            {index === 0 && (
-              <Button
-                sx={{ position: 'absolute', bottom: 10, right: 10 }}
-                onClick={() => {
-                  context.closeModal(id);
-                  openComposeEmailModal(
-                    userToken,
-                    email.prospect_id,
-                    email.prospect_email,
-                    email.sdr_email,
-                    '',
-                    '',
-                    {
-                      threadSubject: email.subject,
-                      messageId: email.nylas_message_id,
-                    }
-                  );
-                }}
-              >
-                Reply to Email
-              </Button>
-            )}
           </Paper>
         ))}
       </ScrollArea>

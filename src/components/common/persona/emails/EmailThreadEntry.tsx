@@ -8,12 +8,19 @@ import {
   Badge,
   useMantineTheme,
   Title,
+  Flex,
+  Button,
 } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
+import { openComposeEmailModal } from '@common/prospectDetails/ProspectDetailsViewEmails';
 import { nameToInitials, valueToColor } from "@utils/general";
 import DOMPurify from "dompurify";
 import _ from "lodash";
+import { userTokenState } from "@atoms/userAtoms";
+import { useRecoilValue } from "recoil";
+import { useEffect, useState } from "react";
+import { getEmailMessages } from "@utils/requests/getEmails";
 
 const useStyles = createStyles((theme) => ({
   comment: {
@@ -43,8 +50,27 @@ export default function EmailThreadEntry(props: {
 }) {
   const { classes } = useStyles();
   const theme = useMantineTheme();
+  const userToken = useRecoilValue(userTokenState);
+  const [messages, setMessages] = useState<any>([])
 
   const snippet = props.snippet.replace('Unsubscribe', '');
+
+  const triggerGetEmailMessages = async () => {
+    const response = await getEmailMessages(userToken, props.prospectId, props.threadId);
+
+    if (response.status === 'success') {
+      setMessages(response.data);
+    }
+  }
+
+  useEffect(() => {
+    triggerGetEmailMessages();
+  }, [messages])
+
+  useEffect(() => {
+    triggerGetEmailMessages();
+  }, [])
+
 
   return (
     <Paper
@@ -61,8 +87,40 @@ export default function EmailThreadEntry(props: {
       onClick={() => {
         openContextModal({
           modal: "viewEmailThread",
-          title: <Title order={3}>{props.subject}</Title>,
+          title: (
+            <Flex w='100%' pr='6px'>
+              <Flex dir="row" justify='space-between' align={'center'} w='100%'>
+                <Title order={3}>
+                  {props.subject}
+                </Title>
+                <Button
+                  hidden={messages.length === 0}
+                  onClick={() => {
+                    if (messages.length === 0) {
+                      return;
+                    }
+                    console.log('nylas messages', messages)
+                    openComposeEmailModal(
+                      userToken,
+                      messages[0]?.prospect_id,
+                      messages[0]?.prospect_email,
+                      messages[0]?.sdr_email,
+                      '',
+                      '',
+                      {
+                        threadSubject: messages[0]?.subject,
+                        messageId: messages[0]?.nylas_message_id,
+                      },
+                    );
+                  }}
+                >
+                  Reply to Thread
+                </Button>
+              </Flex>
+            </Flex>
+          ),
           innerProps: { prospectId: props.prospectId, threadId: props.threadId },
+          styles: { title: { width: "100%" } }
         });
       }}
     >

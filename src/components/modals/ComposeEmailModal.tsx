@@ -99,14 +99,12 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
       </Group>
 
       <div style={{ paddingTop: 10 }}>
-        {!innerProps.reply && (
-          <TextAreaWithAI
-            placeholder='Subject'
-            value={subject}
-            onChange={(event) => setSubject(event.currentTarget.value)}
-            inputType='text-input'
-          />
-        )}
+        <TextAreaWithAI
+          placeholder='Subject'
+          value={subject}
+          onChange={(event) => setSubject(event.currentTarget.value)}
+          inputType='text-input'
+        />
         <TextAreaWithAI
           value={body}
           onChange={(e) => {
@@ -161,6 +159,7 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
               aiGenerated,
               innerProps.reply?.messageId
             );
+            closeAllModals();
             context.closeModal(id);
           }}
         >

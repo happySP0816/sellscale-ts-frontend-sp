@@ -221,7 +221,8 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                     innerProps: {
                       mode: "EDIT",
                       personaOverview: props.personaOverview,
-                      backfillICPPrompt: setCurrentICPPrompt,
+                      backfillICPPrompt: triggerGetICPClassificationPrompt,
+                      icpPrompt: currentICPPrompt,
                     },
                   })
                 : openContextModal({
@@ -230,7 +231,8 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                     innerProps: {
                       mode: "CREATE",
                       personaOverview: props.personaOverview,
-                      backfillICPPrompt: setCurrentICPPrompt,
+                      backfillICPPrompt: triggerGetICPClassificationPrompt,
+                      icpPrompt: currentICPPrompt,
                     },
                   });
             }}

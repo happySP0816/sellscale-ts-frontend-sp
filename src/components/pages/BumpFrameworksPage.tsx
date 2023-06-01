@@ -1,6 +1,23 @@
 import { userTokenState } from "@atoms/userAtoms";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
-import { Flex, Title, Text, ScrollArea, Card, Badge, LoadingOverlay, useMantineTheme, Switch, TextInput, Textarea, Tooltip, Slider, Button, MultiSelect, Select } from "@mantine/core";
+import {
+  Flex,
+  Title,
+  Text,
+  ScrollArea,
+  Card,
+  Badge,
+  LoadingOverlay,
+  useMantineTheme,
+  Switch,
+  TextInput,
+  Textarea,
+  Tooltip,
+  Slider,
+  Button,
+  MultiSelect,
+  Select,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons";
@@ -15,13 +32,11 @@ import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { BumpFramework } from "src";
 
-
 const bumpFrameworkLengthMarks = [
   { value: 0, label: "Short", api_label: "SHORT" },
   { value: 50, label: "Medium", api_label: "MEDIUM" },
   { value: 100, label: "Long", api_label: "LONG" },
 ];
-
 
 export default function BumpFrameworksPage() {
   const userToken = useRecoilValue(userTokenState);
@@ -29,13 +44,18 @@ export default function BumpFrameworksPage() {
 
   const [loadingBumpFrameworks, setLoadingBumpFrameworks] = useState(false);
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
-  const [selectedBumpFramework, setSelectedBumpFramework] = useState<BumpFramework | null>(null);
+  const [
+    selectedBumpFramework,
+    setSelectedBumpFramework,
+  ] = useState<BumpFramework | null>(null);
   const [overallStatuses, setOverallStatuses] = useState<string[]>([]);
   const [substatuses, setSubstatuses] = useState<string[]>([]);
   const [archetypeIDs, setArchetypeIDs] = useState<number[]>([]);
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>(null);
+  const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>(
+    null
+  );
 
   const { data: data_channels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -54,7 +74,7 @@ export default function BumpFrameworksPage() {
         {
           archetype_id: -1,
           archetype_name: "",
-        }
+        },
       ],
     },
   });
@@ -63,7 +83,7 @@ export default function BumpFrameworksPage() {
     setLoadingBumpFrameworks(true);
 
     // This needs reworking
-    let final_substatuses = []
+    let final_substatuses = [];
     if (substatuses != null) {
       for (const substatus of substatuses as string[]) {
         if (substatus.includes("ACTIVE_CONVO_")) {
@@ -72,14 +92,19 @@ export default function BumpFrameworksPage() {
       }
     }
 
-    const result = await getBumpFrameworks(userToken, overallStatuses, final_substatuses, archetypeIDs);
+    const result = await getBumpFrameworks(
+      userToken,
+      overallStatuses,
+      final_substatuses,
+      archetypeIDs
+    );
 
-    if (result.status !== 'success') {
+    if (result.status !== "success") {
       setLoadingBumpFrameworks(false);
       showNotification({
-        title: 'Error',
+        title: "Error",
         message: "Could not get bump frameworks.",
-        color: 'red',
+        color: "red",
         autoClose: false,
       });
       return;
@@ -117,7 +142,6 @@ export default function BumpFrameworksPage() {
       form.values.archetypes = [];
     }
 
-
     setLoadingBumpFrameworks(false);
   };
 
@@ -132,7 +156,7 @@ export default function BumpFrameworksPage() {
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
       form.values.default,
-      form.values.archetypes?.map(archetype => archetype.archetype_id),
+      form.values.archetypes?.map((archetype) => archetype.archetype_id),
       selectedSubstatus
     );
 
@@ -154,7 +178,7 @@ export default function BumpFrameworksPage() {
         bump_length: bumpFrameworkLengthMarks.find(
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
-        archetypes: form.values.archetypes
+        archetypes: form.values.archetypes,
       });
     } else {
       showNotification({
@@ -166,7 +190,7 @@ export default function BumpFrameworksPage() {
     }
 
     setSelectedSubstatus(null);
-  }
+  };
 
   const triggerEditBumpFramework = async () => {
     setLoadingBumpFrameworks(true);
@@ -184,7 +208,7 @@ export default function BumpFrameworksPage() {
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
       form.values.default,
-      form.values.archetypes?.map(archetype => archetype.archetype_id)
+      form.values.archetypes?.map((archetype) => archetype.archetype_id)
     );
 
     if (result.status === "success") {
@@ -205,7 +229,7 @@ export default function BumpFrameworksPage() {
         bump_length: bumpFrameworkLengthMarks.find(
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
-        archetypes: form.values.archetypes
+        archetypes: form.values.archetypes,
       });
     } else {
       showNotification({
@@ -256,23 +280,22 @@ export default function BumpFrameworksPage() {
   };
 
   const getActiveConvoSubstatusValues = () => {
-
     const activeConvoStatuses = [];
-    const statuses_avilable = data_channels?.data["LINKEDIN"]?.statuses_available;
+    const statuses_avilable =
+      data_channels?.data["LINKEDIN"]?.statuses_available;
     if (statuses_avilable != null) {
-
       for (const item of statuses_avilable) {
         const statusLabel = data_channels?.data["LINKEDIN"][item]?.name;
         if (statusLabel.includes("Active Convo")) {
           activeConvoStatuses.push({
             label: statusLabel,
             value: item,
-          })
+          });
         }
       }
     }
     return activeConvoStatuses;
-  }
+  };
 
   useEffect(() => {
     if (archetypeIDs.length == 0) {
@@ -283,42 +306,44 @@ export default function BumpFrameworksPage() {
       form.values.default = false;
       form.values.archetypes = [];
       return;
-    };
+    }
     triggerGetBumpFrameworks();
-  }, [archetypeIDs, overallStatuses, substatuses])
+  }, [archetypeIDs, overallStatuses, substatuses]);
 
   return (
     <>
       <Flex direction="column">
         <Title>Bump Frameworks</Title>
-        <Flex mt='md'>
+        <Flex mt="md">
           <PersonaSelect
             disabled={false}
-            onChange={(archetype) => setArchetypeIDs(archetype.map((a) => a.archetype_id))}
+            onChange={(archetype) =>
+              setArchetypeIDs(archetype.map((a) => a.archetype_id))
+            }
             selectMultiple={true}
             label="Select Personas"
             description="Select the personas whose bump frameworks you want to view."
           />
         </Flex>
-        <Flex align='center' justify='space-between'>
-          <Flex direction='row' align='center'>
+        <Flex align="center" justify="space-between">
+          <Flex direction="row" align="center">
             <MultiSelect
-              mt='xs'
-              miw='300px'
-              w='fit-content'
+              mt="xs"
+              miw="300px"
+              w="fit-content"
               data={
                 // If channels are not loaded or failed to fetch, don't show anything
                 !data_channels || data_channels.status !== "success"
                   ? []
                   : // Otherwise, show overall statuses
-                  data_channels?.data["SELLSCALE"]?.statuses_available?.map(
-                    (status: string) => {
-                      return {
-                        label: data_channels.data["SELLSCALE"][status].name,
-                        value: status,
-                      };
-                    }
-                  )
+                    data_channels?.data["SELLSCALE"]?.statuses_available?.map(
+                      (status: string) => {
+                        return {
+                          label: data_channels.data["SELLSCALE"][status].name,
+                          value: status,
+                        };
+                      }
+                    )
               }
               mb="md"
               label="Filter by status"
@@ -326,38 +351,34 @@ export default function BumpFrameworksPage() {
               searchable
               nothingFound="Nothing found"
               value={overallStatuses}
-              onChange={(e) => (
-                setOverallStatuses(e),
-                setSubstatuses([])
-              )
-              }
+              onChange={(e) => (setOverallStatuses(e), setSubstatuses([]))}
             />
-            {
-              overallStatuses.includes("ACTIVE_CONVO") ? (
-                <MultiSelect
-                  ml='md'
-                  mt='xs'
-                  miw='300px'
-                  w='fit-content'
-                  data={
-                    // If channels are not loaded or failed to fetch, don't show anything
-                    !data_channels || data_channels.status !== "success"
-                      ? []
-                      : getActiveConvoSubstatusValues() as any
-                  }
-                  mb="md"
-                  label="Filter by Active Convo Substatus"
-                  placeholder="Select statuses"
-                  searchable
-                  nothingFound="Nothing found"
-                  value={substatuses}
-                  onChange={setSubstatuses}
-                />
-              ) : <></>
-            }
+            {overallStatuses.includes("ACTIVE_CONVO") ? (
+              <MultiSelect
+                ml="md"
+                mt="xs"
+                miw="300px"
+                w="fit-content"
+                data={
+                  // If channels are not loaded or failed to fetch, don't show anything
+                  !data_channels || data_channels.status !== "success"
+                    ? []
+                    : (getActiveConvoSubstatusValues() as any)
+                }
+                mb="md"
+                label="Filter by Active Convo Substatus"
+                placeholder="Select statuses"
+                searchable
+                nothingFound="Nothing found"
+                value={substatuses}
+                onChange={setSubstatuses}
+              />
+            ) : (
+              <></>
+            )}
           </Flex>
           <Button
-            variant='outline'
+            variant="outline"
             disabled={archetypeIDs.length < 1}
             onClick={() => {
               setSelectedBumpFramework(null);
@@ -370,317 +391,325 @@ export default function BumpFrameworksPage() {
             Create New Framework
           </Button>
         </Flex>
-        <Flex mt='md'>
+        <Flex mt="md">
           <LoadingOverlay visible={loadingBumpFrameworks} />
-          {
-            archetypeIDs.length == 0 ? (
-              <Card
-                withBorder
-                w='100%'
-              >
-                {
-                  archetypeIDs.length == 0 ? (
-                    <Flex align='center' justify={'center'}>
-                      Please select a persona above.
-                    </Flex>
-                  ) : <></>
-                }
-              </Card>
-            ) : (
-              <Flex dir='row' w="100%">
-
-                <Flex w='60%'>
-                  <ScrollArea
-                    w="100%"
-                    offsetScrollbars
-                  >
-                    {
-                      bumpFrameworks.length == 0 ? (
-                        <Card>
-                          <Flex align='center' justify={'center'}>
-                            No results found. Please modify your search or create a new framework.
-                          </Flex>
-                        </Card>
-                      ) : <></>
-                    }
-                    {bumpFrameworks?.map((framework) => {
-                      return (
-                        <Card
-                          w="100%"
-                          mb="sm"
-                          onClick={() => {
-                            let length = bumpFrameworkLengthMarks.find(
-                              (marks) => marks.api_label === framework.bump_length
-                            )?.value;
-                            if (length == null) {
-                              length = 50;
-                            }
-                            form.values.title = framework.title;
-                            form.values.description = framework.description;
-                            form.values.default = framework.default;
-                            form.values.archetypes = framework.archetypes;
-                            setBumpLengthValue(length);
-                            setSelectedBumpFramework(framework);
-                          }}
-                          withBorder
-                          sx={{
-                            cursor: "pointer",
-                            border: "1px solid red",
-                            "&:hover": {
-                              opacity: 0.5,
-                            },
-                          }}
-                          style={{
-                            backgroundColor: selectedBumpFramework?.id === framework.id ? theme.colors.blue[0] : 'white',
-                          }}
-                        >
-                          <Flex justify="space-between">
-                            {framework.default ? (
-                              <>
-                                <Flex align={'center'}>
-                                  <Text fw="bold" fz="lg">
-                                    {framework.title}
-                                  </Text>
-                                  <Badge
-                                    color={valueToColor(theme, framework.overall_status)}
-                                    size='xs'
-                                    ml='xs'
-                                    variant='filled'
-                                  >
-                                    {framework.overall_status}
-                                  </Badge>
-                                </Flex>
-                                <Flex align='center'>
-                                  <Badge color="green" size="xs">
-                                    Default
-                                  </Badge>
-                                </Flex>
-                              </>
-                            ) : (
-                              <Flex align={'center'}>
+          {archetypeIDs.length == 0 ? (
+            <Card withBorder w="100%">
+              {archetypeIDs.length == 0 ? (
+                <Flex align="center" justify={"center"}>
+                  Please select a persona above.
+                </Flex>
+              ) : (
+                <></>
+              )}
+            </Card>
+          ) : (
+            <Flex dir="row" w="100%">
+              <Flex w="60%">
+                <ScrollArea w="100%" offsetScrollbars>
+                  {bumpFrameworks.length == 0 ? (
+                    <Card>
+                      <Flex align="center" justify={"center"}>
+                        No results found. Please modify your search or create a
+                        new framework.
+                      </Flex>
+                    </Card>
+                  ) : (
+                    <></>
+                  )}
+                  {bumpFrameworks?.map((framework) => {
+                    return (
+                      <Card
+                        w="100%"
+                        mb="sm"
+                        onClick={() => {
+                          let length = bumpFrameworkLengthMarks.find(
+                            (marks) => marks.api_label === framework.bump_length
+                          )?.value;
+                          if (length == null) {
+                            length = 50;
+                          }
+                          form.values.title = framework.title;
+                          form.values.description = framework.description;
+                          form.values.default = framework.default;
+                          form.values.archetypes = framework.archetypes;
+                          setBumpLengthValue(length);
+                          setSelectedBumpFramework(framework);
+                        }}
+                        withBorder
+                        sx={{
+                          cursor: "pointer",
+                          border: "1px solid red",
+                          "&:hover": {
+                            opacity: 0.5,
+                          },
+                        }}
+                      >
+                        <Flex justify="space-between">
+                          {framework.default ? (
+                            <>
+                              <Flex align={"center"}>
                                 <Text fw="bold" fz="lg">
                                   {framework.title}
                                 </Text>
                                 <Badge
-                                  color={valueToColor(theme, framework.overall_status)}
-                                  size='xs'
-                                  ml='xs'
-                                  variant='filled'
+                                  color={valueToColor(
+                                    theme,
+                                    framework.overall_status
+                                  )}
+                                  size="xs"
+                                  ml="xs"
+                                  variant="filled"
                                 >
                                   {framework.overall_status}
                                 </Badge>
                               </Flex>
-                            )}
-                          </Flex>
-                          <Text mt="xs" fz="sm">
-                            {framework.description}
-                          </Text>
-                          <Flex wrap={'wrap'} mt='md'>
-                            {
-                              framework.archetypes.map((archetype) => {
-                                return (
-                                  <Badge
-                                    color={valueToColor(theme, archetype.archetype_name)}
-                                    size="xs"
-                                    mr="xs"
-                                    mt="xs"
-                                    key={archetype.archetype_id}
-                                    variant='dot'
-                                  >
-                                    {archetype.archetype_name}
-                                  </Badge>
-                                );
-                              })
-                            }
-                          </Flex>
-                        </Card>
-                      );
-                    })}
-                  </ScrollArea>
-                </Flex>
-
-                <Flex w="40%" >
-                  <Card w="100%" h='fit-content' withBorder>
-                    <form onSubmit={() => console.log("submit")}>
-                      {selectedBumpFramework == null ? (
-                        <Text mb="sm" fz="lg" fw="bold">
-                          Create New Framework
-                        </Text>
-                      ) : (
-                        <Flex justify={"flex-end"}>
-                          <Switch
-                            label="Default Framework?"
-                            labelPosition="left"
-                            checked={form.values.default}
-                            onChange={(e) => {
-                              form.setFieldValue("default", e.currentTarget.checked);
-                            }}
-                          />
+                              <Flex align="center">
+                                <Badge color="green" size="xs">
+                                  Default
+                                </Badge>
+                              </Flex>
+                            </>
+                          ) : (
+                            <Flex align={"center"}>
+                              <Text fw="bold" fz="lg">
+                                {framework.title}
+                              </Text>
+                              <Badge
+                                color={valueToColor(
+                                  theme,
+                                  framework.overall_status
+                                )}
+                                size="xs"
+                                ml="xs"
+                                variant="filled"
+                              >
+                                {framework.overall_status}
+                              </Badge>
+                            </Flex>
+                          )}
                         </Flex>
-                      )}
+                        <Text mt="xs" fz="sm">
+                          {framework.description}
+                        </Text>
+                        <Flex wrap={"wrap"} mt="md">
+                          {framework.archetypes.map((archetype) => {
+                            return (
+                              <Badge
+                                color={valueToColor(
+                                  theme,
+                                  archetype.archetype_name
+                                )}
+                                size="xs"
+                                mr="xs"
+                                mt="xs"
+                                key={archetype.archetype_id}
+                                variant="dot"
+                              >
+                                {archetype.archetype_name}
+                              </Badge>
+                            );
+                          })}
+                        </Flex>
+                      </Card>
+                    );
+                  })}
+                </ScrollArea>
+              </Flex>
 
-                      <TextInput
-                        label="Title"
-                        placeholder={"Mention the Super Bowl"}
-                        {...form.getInputProps("title")}
-                      />
-                      <Textarea
-                        mt="md"
-                        label="Description"
-                        placeholder={"Mention the Super Bowl which is coming up soon."}
-                        {...form.getInputProps("description")}
-                        autosize
-                      />
-                      <Text fz="sm" mt="md">
-                        Bump Length
+              <Flex w="40%">
+                <Card w="100%" h="fit-content" withBorder>
+                  <form onSubmit={() => console.log("submit")}>
+                    {selectedBumpFramework == null ? (
+                      <Text mb="sm" fz="lg" fw="bold">
+                        Create New Framework
                       </Text>
-                      <Tooltip
-                        multiline
-                        width={220}
-                        withArrow
-                        label="Control how long you want the generated bump to be."
-                      >
-                        <Slider
-                          label={null}
-                          step={50}
-                          marks={bumpFrameworkLengthMarks}
-                          mt="xs"
-                          mb="xl"
-                          p="md"
-                          value={bumpLengthValue}
-                          onChange={(value) => {
-                            setBumpLengthValue(value);
+                    ) : (
+                      <Flex justify={"flex-end"}>
+                        <Switch
+                          label="Default Framework?"
+                          labelPosition="left"
+                          checked={form.values.default}
+                          onChange={(e) => {
+                            form.setFieldValue(
+                              "default",
+                              e.currentTarget.checked
+                            );
                           }}
                         />
-                      </Tooltip>
-                      <Flex wrap='wrap' mt='xs' w='100%'>
-                        <PersonaSelect
-                          disabled={false}
-                          onChange={(archetypes) => form.setFieldValue('archetypes', archetypes)}
-                          selectMultiple={true}
-                          label="Personas"
-                          description="Select the personas this framework applies to."
-                          defaultValues={form.values.archetypes.map(archetype => archetype.archetype_id)}
-                        />
                       </Flex>
-                      {selectedBumpFramework == null && (
-                        <>
+                    )}
+
+                    <TextInput
+                      label="Title"
+                      placeholder={"Mention the Super Bowl"}
+                      {...form.getInputProps("title")}
+                    />
+                    <Textarea
+                      mt="md"
+                      label="Description"
+                      placeholder={
+                        "Mention the Super Bowl which is coming up soon."
+                      }
+                      {...form.getInputProps("description")}
+                      autosize
+                    />
+                    <Text fz="sm" mt="md">
+                      Bump Length
+                    </Text>
+                    <Tooltip
+                      multiline
+                      width={220}
+                      withArrow
+                      label="Control how long you want the generated bump to be."
+                    >
+                      <Slider
+                        label={null}
+                        step={50}
+                        marks={bumpFrameworkLengthMarks}
+                        mt="xs"
+                        mb="xl"
+                        p="md"
+                        value={bumpLengthValue}
+                        onChange={(value) => {
+                          setBumpLengthValue(value);
+                        }}
+                      />
+                    </Tooltip>
+                    <Flex wrap="wrap" mt="xs" w="100%">
+                      <PersonaSelect
+                        disabled={false}
+                        onChange={(archetypes) =>
+                          form.setFieldValue("archetypes", archetypes)
+                        }
+                        selectMultiple={true}
+                        label="Personas"
+                        description="Select the personas this framework applies to."
+                        defaultValues={form.values.archetypes.map(
+                          (archetype) => archetype.archetype_id
+                        )}
+                      />
+                    </Flex>
+                    {selectedBumpFramework == null && (
+                      <>
+                        <Select
+                          label="Status"
+                          description="Which status should use this bump?"
+                          placeholder="select status..."
+                          // data={overallStatuses.map((status) => {
+                          //   console.log(status)
+                          //   return {
+                          //     label: data_channels?.data["SELLSCALE"][status].name,
+                          //     value: status,
+                          //   };
+                          // })}
+                          data={data_channels?.data[
+                            "SELLSCALE"
+                          ]?.statuses_available?.map((status: string) => {
+                            return {
+                              label:
+                                data_channels?.data["SELLSCALE"][status].name,
+                              value: status,
+                            };
+                          })}
+                          onChange={setSelectedStatus}
+                          mt="md"
+                          withAsterisk
+                        />
+                        {selectedStatus === "ACTIVE_CONVO" && (
                           <Select
-                            label="Status"
-                            description="Which status should use this bump?"
-                            placeholder="select status..."
-                            // data={overallStatuses.map((status) => {
-                            //   console.log(status)
-                            //   return {
-                            //     label: data_channels?.data["SELLSCALE"][status].name,
-                            //     value: status,
-                            //   };
-                            // })}
-                            data={data_channels?.data["SELLSCALE"]?.statuses_available?.map(
-                              (status: string) => {
-                                return {
-                                  label: data_channels?.data["SELLSCALE"][status].name,
-                                  value: status,
-                                };
-                              }
-                            )}
-                            onChange={setSelectedStatus}
-                            mt='md'
+                            label="Substatus"
+                            description="Which substatus should use this bump?"
+                            placeholder="select substatus..."
+                            data={getActiveConvoSubstatusValues()}
+                            onChange={setSelectedSubstatus}
+                            mt="md"
                             withAsterisk
                           />
-                          {
-                            selectedStatus === "ACTIVE_CONVO" && (
-                              <Select
-                                label="Substatus"
-                                description="Which substatus should use this bump?"
-                                placeholder="select substatus..."
-                                data={getActiveConvoSubstatusValues()}
-                                onChange={setSelectedSubstatus}
-                                mt='md'
-                                withAsterisk
-                              />
-                            )
-                          }
-                          <Switch
-                            pt="md"
-                            label="Make default?"
-                            labelPosition="right"
-                            checked={form.values.default}
-                            onChange={(e) => {
-                              form.setFieldValue("default", e.currentTarget.checked);
-                            }}
-                          />
-                        </>
-                      )}
+                        )}
+                        <Switch
+                          pt="md"
+                          label="Make default?"
+                          labelPosition="right"
+                          checked={form.values.default}
+                          onChange={(e) => {
+                            form.setFieldValue(
+                              "default",
+                              e.currentTarget.checked
+                            );
+                          }}
+                        />
+                      </>
+                    )}
 
-                      <Flex>
-                        {selectedBumpFramework == null ? (
-                          <Flex w="100%" justify="flex-end">
+                    <Flex>
+                      {selectedBumpFramework == null ? (
+                        <Flex w="100%" justify="flex-end">
+                          <Button
+                            mt="md"
+                            disabled={
+                              form.values.title.trim() == "" ||
+                              form.values.description.trim() == "" ||
+                              form.values.archetypes.length == 0 ||
+                              selectedStatus == null ||
+                              (selectedStatus === "ACTIVE_CONVO" &&
+                                selectedSubstatus == null)
+                            }
+                            onClick={() => {
+                              triggerCreateBumpFramework();
+                            }}
+                          >
+                            Create
+                          </Button>
+                        </Flex>
+                      ) : (
+                        <Flex justify="space-between" w="100%">
+                          <Flex>
                             <Button
                               mt="md"
-                              disabled={
-                                form.values.title.trim() == "" ||
-                                form.values.description.trim() == "" ||
-                                form.values.archetypes.length == 0 ||
-                                selectedStatus == null ||
-                                (selectedStatus === "ACTIVE_CONVO" && selectedSubstatus == null)
-                              }
+                              color="red"
                               onClick={() => {
-                                triggerCreateBumpFramework();
+                                triggerPostBumpDeactivate();
                               }}
                             >
-                              Create
+                              Deactivate
                             </Button>
                           </Flex>
-                        ) : (
-                          <Flex justify="space-between" w="100%">
-                            <Flex>
+                          <Flex>
+                            {selectedBumpFramework?.title ==
+                              form.values.title.trim() &&
+                            selectedBumpFramework?.description ==
+                              form.values.description.trim() &&
+                            selectedBumpFramework?.default ==
+                              form.values.default &&
+                            selectedBumpFramework?.bump_length ==
+                              bumpFrameworkLengthMarks.find(
+                                (mark) => mark.value === bumpLengthValue
+                              )?.api_label &&
+                            selectedBumpFramework?.archetypes ==
+                              form.values.archetypes ? (
+                              <></>
+                            ) : (
                               <Button
                                 mt="md"
-                                color="red"
                                 onClick={() => {
-                                  triggerPostBumpDeactivate();
+                                  triggerEditBumpFramework();
                                 }}
                               >
-                                Deactivate
+                                Save
                               </Button>
-                            </Flex>
-                            <Flex>
-                              {
-                                (selectedBumpFramework?.title ==
-                                  form.values.title.trim() &&
-                                  selectedBumpFramework?.description ==
-                                  form.values.description.trim() &&
-                                  selectedBumpFramework?.default ==
-                                  form.values.default &&
-                                  selectedBumpFramework?.bump_length ==
-                                  bumpFrameworkLengthMarks.find(
-                                    (mark) => mark.value === bumpLengthValue
-                                  )?.api_label &&
-                                  selectedBumpFramework?.archetypes == form.values.archetypes
-                                ) ? <></> : (
-                                  <Button
-                                    mt="md"
-                                    onClick={() => {
-                                      triggerEditBumpFramework();
-                                    }}
-                                  >
-                                    Save
-                                  </Button>
-                                )
-                              }
-                            </Flex>
+                            )}
                           </Flex>
-                        )}
-                      </Flex>
-                    </form>
-                  </Card>
-                </Flex>
+                        </Flex>
+                      )}
+                    </Flex>
+                  </form>
+                </Card>
               </Flex>
-            )
-          }
+            </Flex>
+          )}
         </Flex>
       </Flex>
     </>
-  )
+  );
 }

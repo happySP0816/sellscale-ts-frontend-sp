@@ -1,4 +1,5 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { isLoggedIn } from "@auth/core";
 import {
   Center,
   createStyles,
@@ -10,8 +11,21 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useDebouncedState } from "@mantine/hooks";
-import { SpotlightAction, SpotlightActionProps, SpotlightProvider } from "@mantine/spotlight";
-import { IconUsers, IconHome, IconSend, IconSearch, IconFilter, IconAnalyze, IconBrandLinkedin, IconMail } from "@tabler/icons";
+import {
+  SpotlightAction,
+  SpotlightActionProps,
+  SpotlightProvider,
+} from "@mantine/spotlight";
+import {
+  IconUsers,
+  IconHome,
+  IconSend,
+  IconSearch,
+  IconFilter,
+  IconAnalyze,
+  IconBrandLinkedin,
+  IconMail,
+} from "@tabler/icons";
 import { navigateToPage } from "@utils/documentChange";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
 import { useEffect, useState } from "react";
@@ -87,6 +101,7 @@ export default function SpotlightWrapper({
   const navigate = useNavigate();
   const theme = useMantineTheme();
   const userData = useRecoilValue(userDataState);
+  const notLoggedIn = !isLoggedIn();
 
   let mainActions: SpotlightAction[] = [
     {
@@ -104,9 +119,9 @@ export default function SpotlightWrapper({
       icon: <IconBrandLinkedin size={18} />,
     },
     {
-      title: 'Email',
-      description: 'View your email outbound',
-      group: 'Pages',
+      title: "Email",
+      description: "View your email outbound",
+      group: "Pages",
       onTrigger: () => navigateToPage(navigate, `/email`),
       icon: <IconMail size={18} />,
     },
@@ -118,8 +133,12 @@ export default function SpotlightWrapper({
       icon: <IconUsers size={18} />,
     },
   ];
-  if(userData && !userData.weekly_li_outbound_target && !userData.weekly_email_outbound_target){
-    mainActions = mainActions.filter(action => action.title !== 'Analytics');
+  if (
+    userData &&
+    !userData.weekly_li_outbound_target &&
+    !userData.weekly_email_outbound_target
+  ) {
+    mainActions = mainActions.filter((action) => action.title !== "Analytics");
   }
 
   const userToken = useRecoilValue(userTokenState);
@@ -133,7 +152,7 @@ export default function SpotlightWrapper({
 
   // Fix bug with query result not updating the actual displayed results
   useEffect(() => {
-    if (queryResult && queryResult.length > 0){
+    if (queryResult && queryResult.length > 0) {
       setActions([...queryResult, ...mainActions]);
     }
   }, [queryResult]);
@@ -150,9 +169,11 @@ export default function SpotlightWrapper({
           setQueryResult(false);
         } else {
           setQueryResult(null);
-          activateQueryPipeline(query, navigate, theme, userToken).then((result) => {
-            setQueryResult(result);
-          });
+          activateQueryPipeline(query, navigate, theme, userToken).then(
+            (result) => {
+              setQueryResult(result);
+            }
+          );
         }
 
         if (queryResult) {
@@ -168,6 +189,7 @@ export default function SpotlightWrapper({
       searchInputProps={{ autoComplete: "off" }}
       shortcut={["mod + K"]}
       limit={30}
+      disabled={notLoggedIn}
       nothingFoundMessage={
         query !== "" &&
         (queryResult === false || (queryResult && queryResult.length === 0)) ? (

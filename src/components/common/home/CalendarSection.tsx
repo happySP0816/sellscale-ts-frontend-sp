@@ -32,6 +32,7 @@ export default function CalendarSection() {
       <FullCalendar
         plugins={[dayGridPlugin, listPlugin]}
         initialView='dayGridMonth'
+        timeZone='UTC'
         headerToolbar={{
           left: 'prev,next',
           center: 'title',

@@ -42,7 +42,7 @@ export default function CreatePersona(props: PropsType) {
 
   return (
     <Card>
-      <Title order={5}>Create Empty Persona</Title>
+      <Title order={5}>Upload Prospects Later</Title>
       <Text size="sm">
         Create a persona without any prospects added. You can add prospects
         later.

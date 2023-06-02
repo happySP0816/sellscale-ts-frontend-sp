@@ -316,7 +316,9 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
     (async () => {
       const response = await getPersonasOverview(userToken);
       const result =
-        response.status === "success" ? (response.data as PersonaOverview[]) : [];
+        response.status === "success"
+          ? (response.data as PersonaOverview[])
+          : [];
       setPersonas(result);
     })();
   }, []);
@@ -376,7 +378,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
                   )
                     .map((status: string) => {
                       let label = formatToLabel(
-                        data_channels.data[channel][status].enum_val
+                        data_channels.data[channel][status]?.enum_val
                       );
                       // Patch for Active Convo to show Unassigned
                       if (label === "Active Convo" && channel === "LINKEDIN") {
@@ -407,14 +409,12 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
         </Grid.Col>
         <Grid.Col span={2}>
           <Select
-            data={
-              personas.map((persona) => {
-                return {
-                  label: persona.name,
-                  value: persona.id+'',
-                };
-              })
-            }
+            data={personas.map((persona) => {
+              return {
+                label: persona.name,
+                value: persona.id + "",
+              };
+            })}
             mb="md"
             clearable
             label="Filter by Persona"
@@ -560,9 +560,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           },
           {
             accessor: "icp_fit_score",
-            title: (
-                <Text>ICP Fit</Text>
-            ),
+            title: <Text>ICP Fit</Text>,
             sortable: true,
             render: ({ icp_fit_score, icp_fit_reason, archetype }) => {
               return (
@@ -607,15 +605,15 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
                 >
                   <IconRefresh size="0.875rem" />
                 </ActionIcon>
-            </FlexSeparate>
+              </FlexSeparate>
             ),
             render: ({ archetype }) => {
               return (
                 <>
                   <Badge color={valueToColor(theme, archetype)}>
                     {_.truncate(archetype, {
-                      'length': 24,
-                      'separator': ''
+                      length: 24,
+                      separator: "",
                     })}
                   </Badge>
                 </>

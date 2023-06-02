@@ -11,7 +11,7 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 
 export default function SellScaleBrainCompanyTab() {
@@ -27,6 +27,21 @@ export default function SellScaleBrainCompanyTab() {
   const [companyCaseStudy, setCompanyCaseStudy] = React.useState("");
   const [valuePropsKeyPoints, setValuePropsKeyPoints] = React.useState("");
   const [toneAttributes, setToneAttributes]: any = React.useState([]);
+
+  const [toneOptions, setToneOptions] = useState([
+    { value: "professional", label: "Professional" },
+    { value: "fun", label: "Fun" },
+    { value: "serious", label: "Serious" },
+    { value: "quirky", label: "Quirky" },
+    { value: "friendly", label: "Friendly" },
+    { value: "helpful", label: "Helpful" },
+    { value: "authoritative", label: "Authoritative" },
+    { value: "confident", label: "Confident" },
+    { value: "casual", label: "Casual" },
+    { value: "formal", label: "Formal" },
+    { value: "informal", label: "Informal" },
+    { value: "direct", label: "Direct" },
+  ]);
 
   const fetchCompany = async () => {
     setFetchingCompany(true);
@@ -149,24 +164,13 @@ export default function SellScaleBrainCompanyTab() {
           <MultiSelect
             label="Tone Attributes"
             description="Select 3-5 tone attributes that describe your company"
-            data={[
-              { value: "professional", label: "Professional" },
-              { value: "fun", label: "Fun" },
-              { value: "serious", label: "Serious" },
-              { value: "quirky", label: "Quirky" },
-              { value: "friendly", label: "Friendly" },
-              { value: "helpful", label: "Helpful" },
-              { value: "authoritative", label: "Authoritative" },
-              { value: "confident", label: "Confident" },
-              { value: "casual", label: "Casual" },
-              { value: "formal", label: "Formal" },
-              { value: "informal", label: "Informal" },
-            ]}
+            data={toneOptions}
             value={toneAttributes}
             onChange={(value) => {
               setToneAttributes(value);
               setNeedsSave(true);
             }}
+            searchable
             mb="sm"
           />
 

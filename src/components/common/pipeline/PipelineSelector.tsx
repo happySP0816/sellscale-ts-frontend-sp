@@ -20,7 +20,7 @@ import {
   IconArrowDownRight,
 } from "@tabler/icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRecoilState } from "recoil";
+import { selector, useRecoilState } from "recoil";
 
 const useStyles = createStyles((theme) => ({
   root: {},
@@ -71,11 +71,13 @@ export default function PipelineSelector({
   loadingData,
   cardSize,
   maxCols,
+  minimal,
 }: {
   data: Map<string, StatGridInfo>;
   loadingData?: boolean;
   cardSize?: string;
   maxCols?: number;
+  minimal?: boolean;
 }) {
   const { classes } = useStyles();
   const queryClient = useQueryClient();
@@ -88,6 +90,33 @@ export default function PipelineSelector({
     let stat = data.get(id);
     if (!stat) {
       return <></>;
+    }
+
+    if (minimal) {
+      return (
+        <Button
+          color={stat.color}
+          variant={selectorType === id ? "filled" : "outline"}
+          h='fit-content'
+          py='sm'
+          onClick={() => {
+            queryClient.removeQueries({
+              queryKey: ["query-pipeline-prospects"],
+            });
+            setSelectorType(id);
+          }}
+          {...(selectorType != id ? { sx: {backgroundColor: 'white'}} : {})}
+        >
+          <Flex direction="column" align={'center'}>
+            <Text size="xs" className={classes.title}>
+              {stat.title}
+            </Text>
+            <Text>
+              {stat.value}
+            </Text>
+          </Flex>
+        </Button>
+      )
     }
 
     return (
@@ -126,7 +155,6 @@ export default function PipelineSelector({
               queryKey: ["query-pipeline-prospects"],
             });
             setSelectorType(id);
-            console.log(id)
           }}
           color={stat.color}
           mt="md"

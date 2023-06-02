@@ -302,7 +302,8 @@ export default function UploadProspectsModal({
       p={0}
       style={{
         position: "relative",
-        backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
+        backgroundColor:
+          theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
       }}
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
@@ -430,11 +431,13 @@ export default function UploadProspectsModal({
             />
             <TextAreaWithAI
               withAsterisk
-              value={icpMatchingPrompt}
+              value={
+                icpMatchingPrompt ||
+                "Role(s): \nSeniority: \nLocations: \nOther Notes:\n-\n-\n-\nTiers:\n- VERY HIGH FIT: \n- HIGH FIT: \n- MEDIUM FIT: \n- LOW FIT: \n- VERY LOW FIT:"
+              }
               onChange={(e) => setICPMatchingPrompt(e.target.value)}
               description="Describe the roles, seniority, location, tiers, and other notes to rank prospects in this persona."
               minRows={4}
-              placeholder="Role(s): VP of Sales, Director of Revenue&#10;Seniority: Senior&#10;Locations: California and Nevada&#10;Other Notes:&#10;-Should lead BI team&#10;Tiers:&#10;- Tier 1: XYZ&#10;- Tier 2: ABC&#10;- Tier 3: DEF..."
               label="Describe how you want to rank the prospects in this persona."
               loadingAIGenerate={loadingICPMatchingPromptGeneration}
               onAIGenerateClicked={async () => {
@@ -460,7 +463,7 @@ export default function UploadProspectsModal({
               }}
             />
             <Textarea
-              mt='md'
+              mt="md"
               withAsterisk
               value={contactObjective}
               label="Contact Objective"
@@ -567,7 +570,7 @@ export default function UploadProspectsModal({
           <Tabs.List>
             <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
             <Tabs.Tab value="from-crm">Import from CRM</Tabs.Tab>
-            <Tabs.Tab value="from-empty">Create Empty Persona</Tabs.Tab>
+            <Tabs.Tab value="from-empty">Upload Prospects Later</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="from-file" pt="xs">
             <FileDropAndPreview

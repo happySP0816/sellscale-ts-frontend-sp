@@ -69,9 +69,13 @@ export type StatGridInfo = {
 export default function PipelineSelector({
   data,
   loadingData,
+  cardSize,
+  maxCols,
 }: {
   data: Map<string, StatGridInfo>;
   loadingData?: boolean;
+  cardSize?: string;
+  maxCols?: number;
 }) {
   const { classes } = useStyles();
   const queryClient = useQueryClient();
@@ -89,8 +93,8 @@ export default function PipelineSelector({
     return (
       <Paper
         withBorder
-        p="md"
-        radius="md"
+        p={cardSize || 'md'}
+        radius={cardSize || 'md'}
         key={stat.title}
         sx={{
           display: "flex",
@@ -122,6 +126,7 @@ export default function PipelineSelector({
               queryKey: ["query-pipeline-prospects"],
             });
             setSelectorType(id);
+            console.log(id)
           }}
           color={stat.color}
           mt="md"
@@ -136,7 +141,7 @@ export default function PipelineSelector({
   return (
     <div className={classes.root}>
       <SimpleGrid
-        cols={5}
+        cols={maxCols || 5}
         breakpoints={[
           { maxWidth: "md", cols: 2 },
           { maxWidth: "xs", cols: 1 },

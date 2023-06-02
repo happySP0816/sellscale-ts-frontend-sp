@@ -71,7 +71,9 @@ export default function HomePage() {
         </Tabs.List>
 
         <Tabs.Panel value="all-contacts" pt="xs">
-          <AllContactsSection />
+          {tabId === "all-contacts" && (
+            <AllContactsSection />
+          )}
         </Tabs.Panel>
         <Tabs.Panel value="dashboard" pt="xs">
           <DashboardSection />

@@ -78,7 +78,7 @@ export default function SelectBumpInstruction(props: PropsType) {
       [props.persona_id]
     );
 
-    setBumpFrameworks(result.data);
+    setBumpFrameworks(result.data.bump_frameworks);
     /* Select default framework
     for (const bumpFramework of result.data as BumpFramework[]) {
       if (bumpFramework.default) {

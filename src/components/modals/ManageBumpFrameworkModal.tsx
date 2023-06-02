@@ -77,7 +77,7 @@ export default function ManageBumpFramework({
     const result = await getBumpFrameworks(userToken, [innerProps.overallStatus], substatus, [innerProps.archetypeId]);
 
     let bumpFrameworkArray = [] as BumpFramework[];
-    for (const bumpFramework of result.data as BumpFramework[]) {
+    for (const bumpFramework of result.data.bump_frameworks as BumpFramework[]) {
       if (bumpFramework.default) {
         bumpFrameworkArray.unshift(bumpFramework);
       } else {

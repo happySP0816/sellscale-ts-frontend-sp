@@ -108,7 +108,7 @@ const useStyles = createStyles((theme) => ({
     fontSize: theme.fontSizes.sm,
     color: theme.white,
     padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-    borderRadius: theme.radius.sm,
+    borderRadius: theme.radius.xl,
     fontWeight: 500,
 
     backgroundColor: theme.colors.green[9],

@@ -1,13 +1,5 @@
-import { useEffect, useState } from "react";
-import {
-  createStyles,
-  Navbar,
-  Group,
-  Code,
-  getStylesRef,
-  rem,
-  ScrollArea,
-} from "@mantine/core";
+import { useEffect, useState } from 'react';
+import { createStyles, Navbar, Group, Code, getStylesRef, rem, ScrollArea } from '@mantine/core';
 import {
   IconSwitchHorizontal,
   IconLogout,
@@ -29,31 +21,28 @@ import {
   IconSettings,
   IconAdjustments,
   IconCalendarEvent,
-} from "@tabler/icons-react";
-import { LogoFull } from "@nav/Logo";
-import { LinksGroup } from "./NavBarLinksGroup";
-import { version } from "../../../package.json";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { navTabState } from "@atoms/navAtoms";
-import { animated, useSpring } from "@react-spring/web";
-import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
-import { ProfileCard } from "@nav/ProfileIcon";
-import { userDataState } from "@atoms/userAtoms";
-import { isLoggedIn, logout } from "@auth/core";
-import { navigateToPage } from "@utils/documentChange";
-import { useNavigate } from "react-router-dom";
+  IconFileDescription,
+} from '@tabler/icons-react';
+import { LogoFull } from '@nav/Logo';
+import { LinksGroup } from './NavBarLinksGroup';
+import { version } from '../../../package.json';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { navTabState } from '@atoms/navAtoms';
+import { animated, useSpring } from '@react-spring/web';
+import { NAV_BAR_SIDE_WIDTH } from '@constants/data';
+import { ProfileCard } from '@nav/ProfileIcon';
+import { userDataState } from '@atoms/userAtoms';
+import { isLoggedIn, logout } from '@auth/core';
+import { navigateToPage } from '@utils/documentChange';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
-    backgroundColor: theme.fn.variant({ variant: "filled", color: "dark" })
-      .background,
+    backgroundColor: theme.fn.variant({ variant: 'filled', color: 'dark' }).background,
   },
 
   version: {
-    backgroundColor: theme.fn.lighten(
-      theme.fn.variant({ variant: "filled", color: "dark" }).background!,
-      0.1
-    ),
+    backgroundColor: theme.fn.lighten(theme.fn.variant({ variant: 'filled', color: 'dark' }).background!, 0.1),
     color: theme.white,
     fontWeight: 700,
   },
@@ -64,7 +53,7 @@ const useStyles = createStyles((theme) => ({
     marginLeft: theme.spacing.md,
     marginRight: theme.spacing.md,
     borderBottom: `${rem(1)} solid ${theme.fn.lighten(
-      theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+      theme.fn.variant({ variant: 'filled', color: 'dark' }).background!,
       0.1
     )}`,
   },
@@ -73,173 +62,195 @@ const useStyles = createStyles((theme) => ({
     paddingTop: theme.spacing.md,
     marginTop: theme.spacing.md,
     borderTop: `${rem(1)} solid ${theme.fn.lighten(
-      theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+      theme.fn.variant({ variant: 'filled', color: 'dark' }).background!,
       0.1
     )}`,
   },
 
   link: {
     ...theme.fn.focusStyles(),
-    display: "flex",
-    alignItems: "center",
-    textDecoration: "none",
+    display: 'flex',
+    alignItems: 'center',
+    textDecoration: 'none',
     fontSize: theme.fontSizes.sm,
     color: theme.white,
     padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
     borderRadius: theme.radius.sm,
     fontWeight: 500,
 
-    "&:hover": {
-      backgroundColor: theme.fn.lighten(
-        theme.fn.variant({ variant: "filled", color: "dark" }).background!,
-        0.1
-      ),
+    '&:hover': {
+      backgroundColor: theme.fn.lighten(theme.fn.variant({ variant: 'filled', color: 'dark' }).background!, 0.1),
     },
   },
 
   linkIcon: {
-    ref: getStylesRef("icon"),
+    ref: getStylesRef('icon'),
     color: theme.white,
     opacity: 0.75,
     marginRight: theme.spacing.sm,
   },
   linkActive: {
-    "&, &:hover": {
-      backgroundColor: theme.fn.lighten(
-        theme.fn.variant({ variant: "filled", color: "dark" }).background!,
-        0.15
-      ),
-      [`& .${getStylesRef("icon")}`]: {
+    '&, &:hover': {
+      backgroundColor: theme.fn.lighten(theme.fn.variant({ variant: 'filled', color: 'dark' }).background!, 0.15),
+      [`& .${getStylesRef('icon')}`]: {
         opacity: 0.9,
       },
       color: theme.white,
     },
   },
+
+
+  setupLink: {
+    ...theme.fn.focusStyles(),
+    display: 'flex',
+    alignItems: 'center',
+    textDecoration: 'none',
+    fontSize: theme.fontSizes.sm,
+    color: theme.white,
+    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+    borderRadius: theme.radius.sm,
+    fontWeight: 500,
+
+    backgroundColor: theme.colors.green[9],
+    '&:hover': {
+      backgroundColor: theme.colors.green[7],
+    },
+  },
+  setupLinkActive: {
+    '&, &:hover': {
+      backgroundColor: theme.colors.green[7],
+      [`& .${getStylesRef('icon')}`]: {
+        opacity: 0.9,
+      },
+      color: theme.white,
+    },
+  },
+
 }));
 
 const siteLinks = [
   {
-    mainKey: "search",
-    label: "Search",
+    mainKey: 'search',
+    label: 'Search',
     icon: IconSearch,
-    links: [{ key: "search", label: "Search", icon: IconSearch, link: "/" }],
+    links: [{ key: 'search', label: 'Search', icon: IconSearch, link: '/' }],
   },
   {
-    mainKey: "home",
-    label: "Home",
+    mainKey: 'home',
+    label: 'Home',
     icon: IconHome,
     links: [
       {
-        key: "home-dashboard",
-        label: "Dashboard",
+        key: 'home-dashboard',
+        label: 'Dashboard',
         icon: IconCheckbox,
-        link: "/home/dashboard",
+        link: '/home/dashboard',
       },
       {
-        key: "home-all-contacts",
-        label: "Pipeline",
+        key: 'home-all-contacts',
+        label: 'Pipeline',
         icon: IconAddressBook,
-        link: "/home/all-contacts",
+        link: '/home/all-contacts',
       },
       {
-        key: "home-recent-activity",
-        label: "Recent Activity",
+        key: 'home-recent-activity',
+        label: 'Recent Activity',
         icon: IconActivity,
-        link: "/home/recent-activity",
+        link: '/home/recent-activity',
       },
       {
-        key: "home-demo-feedback",
-        label: "Demo Feedback Repo",
+        key: 'home-demo-feedback',
+        label: 'Demo Feedback Repo',
         icon: IconClipboardData,
-        link: "/home/demo-feedback",
+        link: '/home/demo-feedback',
       },
       {
-        key: "home-bump-frameworks",
-        label: "Bump Frameworks",
+        key: 'home-bump-frameworks',
+        label: 'Bump Frameworks',
         icon: IconAdjustments,
-        link: "/home/bump-frameworks",
+        link: '/home/bump-frameworks',
       },
       {
-        key: "home-calendar",
-        label: "Demo Calendar",
+        key: 'home-calendar',
+        label: 'Demo Calendar',
         icon: IconCalendarEvent,
-        link: "/home/calendar",
+        link: '/home/calendar',
       },
     ],
   },
   {
-    mainKey: "linkedin",
-    label: "LinkedIn",
+    mainKey: 'linkedin',
+    label: 'LinkedIn',
     icon: IconBrandLinkedin,
     links: [
       {
-        key: "linkedin-messages",
-        label: "Scheduled Messages",
+        key: 'linkedin-messages',
+        label: 'Scheduled Messages',
         icon: IconMailFast,
-        link: "/linkedin/messages",
+        link: '/linkedin/messages',
       },
       {
-        key: "linkedin-ctas",
-        label: "CTAs",
+        key: 'linkedin-ctas',
+        label: 'CTAs',
         icon: IconSpeakerphone,
-        link: "/linkedin/ctas",
+        link: '/linkedin/ctas',
       },
       {
-        key: "linkedin-personalizations",
-        label: "Personalizations",
+        key: 'linkedin-personalizations',
+        label: 'Personalizations',
         icon: IconAffiliate,
-        link: "/linkedin/personalizations",
+        link: '/linkedin/personalizations',
       },
       {
-        key: "linkedin-campaign-analytics",
-        label: "Campaign Analytics",
+        key: 'linkedin-campaign-analytics',
+        label: 'Campaign Analytics',
         icon: IconReport,
-        link: "/linkedin/campaign-analytics",
+        link: '/linkedin/campaign-analytics',
       },
     ],
   },
   {
-    mainKey: "email",
-    label: "Email",
+    mainKey: 'email',
+    label: 'Email',
     icon: IconMail,
     links: [
       {
-        key: "email-scheduled-emails",
-        label: "Scheduled Emails",
+        key: 'email-scheduled-emails',
+        label: 'Scheduled Emails',
         icon: IconMailFast,
-        link: "/email/scheduled-emails",
+        link: '/email/scheduled-emails',
       },
       {
-        key: "email-sequences",
-        label: "Sequences",
+        key: 'email-sequences',
+        label: 'Sequences',
         icon: IconListDetails,
-        link: "/email/sequences",
+        link: '/email/sequences',
       },
       {
-        key: "email-personalizations",
-        label: "Personalizations",
+        key: 'email-personalizations',
+        label: 'Personalizations',
         icon: IconAffiliate,
-        link: "/email/personalizations",
+        link: '/email/personalizations',
       },
       {
-        key: "email-campaign-analytics",
-        label: "Campaign Analytics",
+        key: 'email-campaign-analytics',
+        label: 'Campaign Analytics',
         icon: IconReport,
-        link: "/email/campaign-analytics",
+        link: '/email/campaign-analytics',
       },
       // { key: 'email-email-details', label: 'Sequence Analysis', icon: IconReport, link: '/email/email-details' },
     ],
   },
   {
-    mainKey: "personas",
-    label: "Personas",
+    mainKey: 'personas',
+    label: 'Personas',
     icon: IconUsers,
     links: [
       {
-        key: "personas",
-        label: "Personas",
+        key: 'personas',
+        label: 'Personas',
         icon: IconUsers,
-        link: "/personas",
+        link: '/personas',
       },
     ],
   },
@@ -247,18 +258,15 @@ const siteLinks = [
 
 const AnimatedNavbar = animated(Navbar);
 
-export function NavbarNested(props: {
-  isMobileView: boolean;
-  navOpened: boolean;
-}) {
+export function NavbarNested(props: { isMobileView: boolean; navOpened: boolean }) {
   const { classes, cx } = useStyles();
   const navigate = useNavigate();
 
   const userData = useRecoilValue(userDataState);
   const [navTab, setNavTab] = useRecoilState(navTabState);
 
-  const activeTab = location.pathname?.split("/")[1];
-  const activeSubTab = location.pathname?.split("/")[2];
+  const activeTab = location.pathname?.split('/')[1];
+  const activeSubTab = location.pathname?.split('/')[2];
 
   const navStyles = useSpring({
     x: props.isMobileView && !props.navOpened ? -NAV_BAR_SIDE_WIDTH * 2 : 0,
@@ -266,37 +274,29 @@ export function NavbarNested(props: {
 
   // Update the navTab state when the URL changes
   useEffect(() => {
-    let newTab = activeSubTab
-      ? `${activeTab.trim()}-${activeSubTab.trim()}`
-      : activeTab.trim();
-    newTab = newTab === "" || newTab === "home" ? "home-dashboard" : newTab;
-    navigateToPage(
-      navigate,
-      `/${newTab.replace("-", "/")}`,
-      new URLSearchParams(location.search)
-    );
+    let newTab = activeSubTab ? `${activeTab.trim()}-${activeSubTab.trim()}` : activeTab.trim();
+    newTab = newTab === '' || newTab === 'home' ? 'home-dashboard' : newTab;
+    navigateToPage(navigate, `/${newTab.replace('-', '/')}`, new URLSearchParams(location.search));
     setTimeout(() => setNavTab(newTab), 100);
   }, [activeTab, activeSubTab, setNavTab]);
 
-  const links = siteLinks.map((item) => (
-    <LinksGroup {...item} key={item.mainKey} />
-  ));
+  const links = siteLinks.map((item) => <LinksGroup {...item} key={item.mainKey} />);
 
   const loggedIn = isLoggedIn();
 
   return (
     <AnimatedNavbar
       style={{
-        display: loggedIn ? "flex" : "none",
-        justifyContent: "space-between",
+        display: loggedIn ? 'flex' : 'none',
+        justifyContent: 'space-between',
         transform: navStyles.x.to((x) => `translate3d(${x}%,0,0)`),
       }}
       width={{ base: NAV_BAR_SIDE_WIDTH }}
-      p="md"
+      p='md'
       className={classes.navbar}
     >
       <Navbar.Section className={classes.header}>
-        <Group position="apart">
+        <Group position='apart'>
           <LogoFull size={28} />
           <Code className={classes.version}>v{version}</Code>
         </Group>
@@ -307,17 +307,35 @@ export function NavbarNested(props: {
       </Navbar.Section>
 
       <Navbar.Section className={classes.footer}>
+
+        {true && (
+          <a
+            href='#'
+            className={cx(classes.setupLink, {
+              [classes.setupLinkActive]: 'setup' === navTab,
+            })}
+            onClick={(event) => {
+              event.preventDefault();
+              navigateToPage(navigate, '/setup');
+              setTimeout(() => setNavTab('setup'), 100);
+            }}
+          >
+            <IconFileDescription className={classes.linkIcon} stroke={1.5} />
+            <span>Onboarding Setup</span>
+          </a>
+        )}
+
         <ProfileCard />
 
         <a
-          href="#"
+          href='#'
           className={cx(classes.link, {
-            [classes.linkActive]: "settings" === navTab,
+            [classes.linkActive]: 'settings' === navTab || navTab.startsWith('settings-'),
           })}
           onClick={(event) => {
             event.preventDefault();
-            navigateToPage(navigate, "/settings");
-            setTimeout(() => setNavTab("settings"), 100);
+            navigateToPage(navigate, '/settings');
+            setTimeout(() => setNavTab('settings'), 100);
           }}
         >
           <IconSettings className={classes.linkIcon} stroke={1.5} />
@@ -325,7 +343,7 @@ export function NavbarNested(props: {
         </a>
 
         <a
-          href="#"
+          href='#'
           className={classes.link}
           onClick={(event) => {
             event.preventDefault();

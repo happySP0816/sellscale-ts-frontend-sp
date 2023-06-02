@@ -27,8 +27,9 @@ import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 import LinkedInPage from "@pages/LinkedInPage";
 import EmailPage from "@pages/EmailPage";
-import OnboardingPage from "@pages/OnboardingPage";
+import OnboardingModalPage from "@pages/OnboardingModalPage";
 import AuthCalendlyPage from "@pages/AuthCalendlyPage";
+import SetupPage from "@pages/SetupPage";
 
 const queryClient = new QueryClient();
 
@@ -124,12 +125,19 @@ const router = sentryCreateBrowserRouter([
       },
       */
       {
-        path: "settings",
+        path: "settings/:tabId?",
         element: <RestrictedRoute page={<SettingsPage />} />,
+        loader: async ({ params }: { params: any }) => {
+          return { tabId: params.tabId };
+        },
       },
       {
         path: "onboarding",
-        element: <RestrictedRoute page={<OnboardingPage />} />,
+        element: <RestrictedRoute page={<OnboardingModalPage />} />,
+      },
+      {
+        path: "setup",
+        element: <RestrictedRoute page={<SetupPage />} />,
       },
       {
         path: "authenticate",

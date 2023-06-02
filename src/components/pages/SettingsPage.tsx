@@ -19,7 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
 import { getUserInfo } from "@auth/core";
 import NylasConnectedCard from "@common/settings/NylasConnectedCard";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
 import { navigateToPage } from "@utils/documentChange";
 import exchangeNylasClientID from "@utils/requests/exchangeNylasAuthCode";
 import { disconnectVesselMailbox } from "@utils/requests/disconnectVesselMailbox";
@@ -348,6 +348,9 @@ function VesselIntegrations() {
 }
 
 export default function SettingsPage() {
+
+  const { tabId } = useLoaderData() as { tabId: string };
+
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
 
@@ -378,7 +381,7 @@ export default function SettingsPage() {
   return (
     <PageFrame>
       <PageTitle title="Settings" />
-      <Tabs orientation="vertical" defaultValue="sellScaleBrain">
+      <Tabs defaultValue={tabId || "sellScaleBrain"} orientation="vertical">
         <Tabs.List>
           <Tabs.Tab value="sellScaleBrain" icon={<IconBrain size="0.8rem" />}>
             SellScale Brain

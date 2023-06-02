@@ -27,7 +27,7 @@ import { updateClientSDR } from '@utils/requests/updateClientSDR';
 import { completeClientSDROnboarding } from '@utils/requests/completeClientSDROnboarding';
 import { useNavigate } from 'react-router-dom';
 
-export default function OnboardingPage() {
+export default function OnboardingModalPage() {
   setPageTitle(`Onboarding`);
 
   const navigate = useNavigate();

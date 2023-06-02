@@ -172,9 +172,11 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
           label="Message"
           minRows={3}
           maxRows={10}
-          onChange={(e) => setMessageCompletion(e.currentTarget.value)}
+          onChange={(e) => {
+            setMessageCompletion(e.currentTarget.value);
+            setIsEditing(true);
+          }}
           value={messageCompletion}
-          disabled={!isEditing}
         />
         {!isEditing && (
           <Box pos="absolute" right="0" bottom="0">

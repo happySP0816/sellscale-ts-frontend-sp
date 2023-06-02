@@ -86,6 +86,7 @@ export default function PersonaRecentSplitRequests(props: PropsType) {
             entry.num_queued +
             entry.num_in_progress +
             entry.num_completed +
+            entry.num_no_match +
             entry.num_failed;
           return (
             <Card w="100%" withBorder mt="xs">
@@ -94,15 +95,17 @@ export default function PersonaRecentSplitRequests(props: PropsType) {
                 Attempted to split {total_prospect_count} prospects into{" "}
                 {entry.destination_client_archetype_ids?.length || 0} personas
               </Text>
-              <Divider />
-              <Badge mt="xs" color="yellow" mr="xs">
+              <Badge mt="xs" color="yellow" mr="xs" size="xs">
                 {entry.num_in_progress} queued
               </Badge>
-              <Badge mt="xs" color="red" mr="xs">
-                {entry.num_failed} failed
+              <Badge mt="xs" mr="xs" size="xs">
+                {entry.num_no_match} not matched
               </Badge>
-              <Badge mt="xs" color="green">
+              <Badge mt="xs" color="green" size="xs">
                 {entry.num_completed} completed
+              </Badge>{" "}
+              <Badge mt="xs" color="red" mr="xs" size="xs">
+                {entry.num_failed} failed
               </Badge>
             </Card>
           );

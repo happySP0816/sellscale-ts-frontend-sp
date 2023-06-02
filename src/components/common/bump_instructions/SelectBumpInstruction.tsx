@@ -68,7 +68,7 @@ export default function SelectBumpInstruction(props: PropsType) {
     // This needs changing in the future to be more rigid
     let substatuses: string[] = [];
     if (prospectDrawerStatuses.linkedin?.includes("ACTIVE_CONVO_")) {
-      substatuses = [prospectDrawerStatuses.linkedin]
+      substatuses = [prospectDrawerStatuses.linkedin];
     }
 
     const result = await getBumpFrameworks(
@@ -78,7 +78,7 @@ export default function SelectBumpInstruction(props: PropsType) {
       [props.persona_id]
     );
 
-    setBumpFrameworks(result.data);
+    setBumpFrameworks(result.data.bump_frameworks);
     /* Select default framework
     for (const bumpFramework of result.data as BumpFramework[]) {
       if (bumpFramework.default) {
@@ -104,10 +104,13 @@ export default function SelectBumpInstruction(props: PropsType) {
         connection_degree: msg.connection_degree,
         message: msg.message,
       })),
-      result.data.map((bumpFramework: any) => bumpFramework.description)
+      result.data?.bump_frameworks.map(
+        (bumpFramework: any) => bumpFramework.description
+      )
     );
+
     if (response.status === "success") {
-      const bumpFramework = result.data[response.data];
+      const bumpFramework = result.data.bump_frameworks[response.data];
 
       let length = bumpFrameworkLengthMarks.find(
         (marks) => marks.api_label === bumpFramework.bump_length

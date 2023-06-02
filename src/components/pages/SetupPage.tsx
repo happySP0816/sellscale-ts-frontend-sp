@@ -77,6 +77,7 @@ export default function SetupPage() {
         <Accordion.Item className={classes.item} value='general'>
           <Accordion.Control>
             <Title order={3}>General Onboarding</Title>
+            <Text fs="italic" c="dimmed" fz="sm">Autobiographical info</Text>
           </Accordion.Control>
           <Accordion.Panel>
             <GeneralOnboarding data={data} />
@@ -86,6 +87,7 @@ export default function SetupPage() {
         <Accordion.Item className={classes.item} value='persona'>
           <Accordion.Control>
             <Title order={3}>Persona Onboarding</Title>
+            <Text fs="italic" c="dimmed" fz="sm">Tell your AI who to target</Text>
           </Accordion.Control>
           <Accordion.Panel>
             <PersonaOnboarding data={data} />
@@ -95,6 +97,7 @@ export default function SetupPage() {
         <Accordion.Item className={classes.item} value='msg-gen'>
           <Accordion.Control>
             <Title order={3}>Message Generation Onboarding</Title>
+            <Text fs="italic" c="dimmed" fz="sm">Tell your AI how to write</Text>
           </Accordion.Control>
           <Accordion.Panel>
             <MessageGenerationOnboarding data={data} />
@@ -252,7 +255,7 @@ export function OnboardingTable({ data }: OnboardingTableProps) {
           </Badge>
         ) : (
           <Badge color='gray' fullWidth>
-            Incomplete
+            {item.link === null ? 'N/A' : 'Incomplete'}
           </Badge>
         )}
       </td>

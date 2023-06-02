@@ -40,14 +40,20 @@ export default function DoNotContactList() {
       },
     });
     const resp = await res.json();
+
+    // If the user has never set filters before, let them save empty filters
+    if (!resp.data.do_not_contact_company_names || !resp.data.do_not_contact_keywords_in_company_names) {
+      setNeedsSave(true);
+    }
+
     setCompanyNames(
-      resp.data.do_not_contact_company_names.map((x: any) => ({
+      resp.data.do_not_contact_company_names?.map((x: any) => ({
         value: x,
         label: x,
-      }))
+      })) || []
     );
     setSelectedCompanies(
-      resp.data.do_not_contact_company_names.map((x: any) => x)
+      resp.data.do_not_contact_company_names?.map((x: any) => x) || []
     );
 
     setKeywords(

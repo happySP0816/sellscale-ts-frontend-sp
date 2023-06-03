@@ -109,7 +109,7 @@ const Item = forwardRef(
 
 type PropsType = {
   disabled: boolean;
-  onChange: (archetypes: {archetype_id: number; archetype_name: string; }[]) => void;
+  onChange: (archetypes: { archetype_id: number; archetype_name: string; }[]) => void;
   selectMultiple?: boolean;
   label: string;
   description: string;
@@ -122,11 +122,11 @@ export default function PersonaSelect({
   selectMultiple,
   label,
   description,
-  defaultValues
+  defaultValues,
 }: PropsType) {
   const [userToken] = useRecoilState(userTokenState);
   const [selectedValues, setSelectedValues] = useState<string[]>([]); // [1, 2, 3]
-  
+
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-archetype-details`, {}],
     queryFn: async ({ queryKey }) => {
@@ -188,7 +188,7 @@ export default function PersonaSelect({
       disabled={disabled}
       w='100%'
       withinPortal
-      styles={{ wrapper: {overflow: 'visible'}, dropdown: { minWidth: 500 } }}
+      styles={{ wrapper: { overflow: 'visible' }, dropdown: { minWidth: 500 } }}
     />
   );
 }

@@ -34,6 +34,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
   const [selectedStatus, setSelectedStatus] = useState<string | null>('');
   const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>('');
+  const [archetypeIDs, setArchetypeIDs] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
 
   const getActiveConvoSubstatusValues = () => {
@@ -57,6 +58,17 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
   const triggerCreateBumpFramework = async () => {
     setLoading(true);
 
+    let finalArchetypeIDs: any[] = []
+    if (form.values.archetypes != null) {
+      const firstArchetype = form.values.archetypes[0];
+      if (firstArchetype.archetype_id === -1) {
+        finalArchetypeIDs = archetypeIDs;
+      } else {
+        finalArchetypeIDs = form.values.archetypes?.map((archetype) => archetype.archetype_id);
+      }
+    }
+    console.log('final', finalArchetypeIDs)
+
     const result = await createBumpFramework(
       userToken,
       selectedStatus as string,
@@ -65,7 +77,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
       form.values.default,
-      form.values.archetypes?.map((archetype) => archetype.archetype_id),
+      finalArchetypeIDs,
       selectedSubstatus
     );
 
@@ -112,6 +124,10 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
         setSelectedStatus("ACTIVE_CONVO");
         setSelectedSubstatus(props.status);
       }
+    }
+
+    if (props.archetypeIDs != null) {
+      setArchetypeIDs(props.archetypeIDs);
     }
   }, [props.status])
 

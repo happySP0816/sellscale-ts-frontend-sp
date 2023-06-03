@@ -21,6 +21,8 @@ import ManageBumpFramework from '@modals/ManageBumpFrameworkModal';
 import ComposeEmailModal from '@modals/ComposeEmailModal';
 import { Notifications } from '@mantine/notifications';
 import ClientProductModal from '@modals/ClientProductModal';
+import CopyCTAsModal from '@modals/CopyCTAsModal';
+import EditCTAModal from '@modals/EditCTAModal';
 
 export default function App() {
   // Site light or dark mode
@@ -83,6 +85,8 @@ export default function App() {
               sendLinkedInCredentials: SendLinkedInCredentialsModal,
               sendLinkedInCookie: InstructionsLinkedInCookieModal,
               createNewCTA: CreateNewCTAModal,
+              copyCTAs: CopyCTAsModal,
+              editCTA: EditCTAModal,
               viewEmail: ViewEmailModal,
               composeEmail: ComposeEmailModal,
               sequenceWriter: SequenceWriterModal,

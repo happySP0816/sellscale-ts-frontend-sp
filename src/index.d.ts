@@ -108,6 +108,7 @@ export interface Archetype {
   uploads?: any[];
   icp_matching_prompt: string;
   is_unassigned_contact_archetype: boolean;
+  ctas: CTA[];
 }
 
 export interface PersonaOverview {

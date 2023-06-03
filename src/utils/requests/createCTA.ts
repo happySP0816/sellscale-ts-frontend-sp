@@ -2,6 +2,7 @@ import { logout } from "@auth/core";
 import { API_URL } from "@constants/data";
 import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src";
+import { processResponse } from "./utils";
 
 export default async function createCTA(userToken: string, personaId: string, cta: string): Promise<MsgResponse> {
   const response = await fetch(
@@ -47,4 +48,48 @@ export default async function createCTA(userToken: string, personaId: string, ct
   } else {
     return { status: 'success', title: `Success`, message: `CTA have been created`, data: res.cta_id };
   }
+}
+
+
+export async function updateCTA(
+  userToken: string,
+  cta_id: number,
+  text_value: string,
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/message_generation/cta`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        "cta_id": cta_id,
+        "text_value": text_value,
+      }),
+    }
+  );
+  return await processResponse(response);
+}
+
+
+export async function deleteCTA(
+  userToken: string,
+  cta_id: number,
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/message_generation/cta`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        "cta_id": cta_id,
+      }),
+    }
+  );
+  return await processResponse(response);
 }

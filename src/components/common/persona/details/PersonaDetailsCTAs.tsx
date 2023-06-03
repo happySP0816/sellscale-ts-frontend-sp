@@ -30,7 +30,7 @@ import {
   detailsDrawerOpenState,
 } from "@atoms/personaAtoms";
 import displayNotification from "@utils/notificationFlow";
-import createCTA from "@utils/requests/createCTA";
+import createCTA, { deleteCTA } from "@utils/requests/createCTA";
 import toggleCTA from "@utils/requests/toggleCTA";
 import { API_URL } from "@constants/data";
 
@@ -131,7 +131,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
                     .map((persona: Archetype) => ({
                       value: persona.id + "",
                       label:
-                        (persona.active ? "🟢 " : "🔴 ") + persona.archetype,
+                        `(${persona.ctas.length} CTAs) ` + (persona.active ? "🟢 " : "🔴 ") + persona.archetype,
                     }))
                 : []
             }
@@ -157,6 +157,25 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
         >
           Create New CTA
         </Button>
+        {props.personas?.find((persona) => persona.id === currentPersonaId)?.ctas.length === 0 && (
+          <Button
+            color="gray"
+            size="sm"
+            variant="light"
+            onClick={() => {
+              openContextModal({
+                modal: "copyCTAs",
+                title: <Title order={3}>Copy CTAs</Title>,
+                innerProps: {
+                  personaId: currentPersonaId,
+                  personas: props.personas,
+                },
+              });
+            }}
+          >
+            Copy CTAs from Existing Persona
+          </Button>
+        )}
       </Flex>
       <DataTable
         height={"min(670px, 100vh - 200px)"}
@@ -219,58 +238,38 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
         paginationColor="teal"
         sortStatus={sortStatus}
         onSortStatusChange={handleSortStatusChange}
-        /*
-          onRowClick={({ id, text_value, percentage, active }) =>
-            openModal({
-              title: (
-                <Group position="apart" mt="md" mb="xs">
-                  <Title order={3}>Call-to-Action</Title>
-                  <Badge color={active ? 'teal' : 'red'} variant="light">
-                    {active ? 'Active' : 'Inactive'}
-                  </Badge>
-                </Group>
-              ),
-              children: (
-                <>
-                  <Text size="sm" py='xs'>
-                    <Text fw={700} span>Acceptance Rate: </Text>
-                    <Text c={percentageToColor(percentage)} span>{`${percentage}%`}</Text>
-                  </Text>
-                  <Text size="sm" color="dimmed">{text_value}</Text>
-                </>
-              ),
-              styles: (theme) => ({
-                title: {
-                  width: '100%',
-                },
-                header: {
-                  margin: 0,
-                }
-              }),
-            })
-          }*/
         rowContextMenu={{
-          items: ({ id }) => [
+          items: (cta) => [
             {
               key: "edit",
               icon: <IconPencil size={14} />,
               title: `Edit CTA`,
-              onClick: () =>
-                showNotification({
-                  color: "orange",
-                  message: `Should edit CTA #${id}`,
-                }),
+              disabled: !!(cta.total_count && cta.total_count > 0),
+              onClick: () => {
+                openContextModal({
+                  modal: "editCTA",
+                  title: <Title order={3}>Edit CTA</Title>,
+                  innerProps: {
+                    personaId: currentPersonaId,
+                    cta: cta,
+                  },
+                });
+              }
             },
             {
               key: "delete",
               title: `Delete CTA`,
               icon: <IconTrashX size={14} />,
               color: "red",
-              onClick: () =>
+              onClick: async () => {
+                await deleteCTA(userToken, cta.id);
                 showNotification({
-                  color: "red",
-                  message: `Should delete CTA #${id}`,
-                }),
+                  title: "Success",
+                  message: "CTA has been deleted",
+                  color: "blue",
+                });
+                refetch();
+              }
             },
           ],
         }}

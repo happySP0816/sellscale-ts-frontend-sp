@@ -9,18 +9,28 @@ import AllContactsSection from "@common/home/AllContactsSection";
 import DashboardSection from "@common/home/DashboardSection";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import { Tabs } from "@mantine/core";
-import { IconActivity, IconAddressBook, IconCalendarEvent, IconCheckbox, IconClipboardData } from "@tabler/icons";
+import {
+  IconActivity,
+  IconAddressBook,
+  IconCalendarEvent,
+  IconCheckbox,
+  IconClipboardData,
+} from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import BumpFrameworksPage from "./BumpFrameworksPage";
 import CalendarSection from "@common/home/CalendarSection";
+import DemoFeedbackPage from "@common/charts/DemoFeedbackPage";
 
 export default function HomePage() {
   setPageTitle("");
 
-  const { tabId, prospectId } = useLoaderData() as { tabId: string, prospectId: string };
+  const { tabId, prospectId } = useLoaderData() as {
+    tabId: string;
+    prospectId: string;
+  };
   const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
   useEffect(() => {
@@ -33,8 +43,7 @@ export default function HomePage() {
   return (
     <PageFrame>
       <Tabs value={tabId} px="xs" color="teal">
-        
-        <Tabs.List sx={{ display: 'none' }}>
+        <Tabs.List sx={{ display: "none" }}>
           <Tabs.Tab value="dashboard" icon={<IconCheckbox size="1.1rem" />}>
             Dashboard
           </Tabs.Tab>
@@ -62,18 +71,13 @@ export default function HomePage() {
           >
             Bump Frameworks
           </Tabs.Tab>
-          <Tabs.Tab
-            value="calendar"
-            icon={<IconCalendarEvent size="1.1rem" />}
-          >
+          <Tabs.Tab value="calendar" icon={<IconCalendarEvent size="1.1rem" />}>
             Demo Calendar
           </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="all-contacts" pt="xs">
-          {tabId === "all-contacts" && (
-            <AllContactsSection />
-          )}
+          {tabId === "all-contacts" && <AllContactsSection />}
         </Tabs.Panel>
         <Tabs.Panel value="dashboard" pt="xs">
           <DashboardSection />
@@ -82,19 +86,14 @@ export default function HomePage() {
           <RecentActivitySection />
         </Tabs.Panel>
         <Tabs.Panel value="demo-feedback" pt="xs">
-          {tabId === "demo-feedback" && (
-            <DemoFeedbackChart />
-          )}
+          {tabId === "demo-feedback" && <DemoFeedbackPage />}
         </Tabs.Panel>
         <Tabs.Panel value="bump-frameworks" pt="xs">
           <BumpFrameworksPage />
         </Tabs.Panel>
         <Tabs.Panel value="calendar" pt="xs">
-          {tabId === "calendar" && (
-            <CalendarSection />
-          )}
+          {tabId === "calendar" && <CalendarSection />}
         </Tabs.Panel>
-
       </Tabs>
     </PageFrame>
   );

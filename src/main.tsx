@@ -68,10 +68,10 @@ const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(
   }
 
   // Unregister our service worker
-  if ('serviceWorker' in navigator) {
+  if ("serviceWorker" in navigator) {
     navigator.serviceWorker.ready.then(async (registration) => {
       const result = await registration.unregister();
-      console.log('Unregistered service worker: ', result);
+      console.log("Unregistered service worker: ", result);
     });
   }
 })();
@@ -87,7 +87,7 @@ const router = sentryCreateBrowserRouter([
         path: "",
         element: <RestrictedRoute page={<HomePage />} />,
         loader: async ({ params }: { params: any }) => {
-          return { prospectId: '' };
+          return { prospectId: "" };
         },
       },
       {

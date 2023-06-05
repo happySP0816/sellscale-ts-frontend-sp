@@ -1,14 +1,34 @@
-import { currentPersonaIdState } from '@atoms/personaAtoms';
-import { userTokenState } from '@atoms/userAtoms';
-import { Center, Paper, useMantineTheme, Text, Avatar, Flex, Badge } from '@mantine/core';
-import { convertDateToLocalTime, formatToLabel, valueToColor } from '@utils/general';
-import getTransformers from '@utils/requests/getTransformers';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import _ from 'lodash';
-import { Bar } from 'react-chartjs-2';
-import { useQuery } from '@tanstack/react-query';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { Channel } from 'src';
+import { currentPersonaIdState } from "@atoms/personaAtoms";
+import { userTokenState } from "@atoms/userAtoms";
+import {
+  Center,
+  Paper,
+  useMantineTheme,
+  Text,
+  Avatar,
+  Flex,
+  Badge,
+} from "@mantine/core";
+import {
+  convertDateToLocalTime,
+  formatToLabel,
+  valueToColor,
+} from "@utils/general";
+import getTransformers from "@utils/requests/getTransformers";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import _ from "lodash";
+import { Bar } from "react-chartjs-2";
+import { useQuery } from "@tanstack/react-query";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { Channel } from "src";
 import {
   IconChartHistogram,
   IconMoodEmpty,
@@ -18,49 +38,59 @@ import {
   IconMoodHappy,
   IconMoodCrazyHappy,
   IconMoodWrrr,
-} from '@tabler/icons-react';
-import getDemoFeedback from '@utils/requests/getDemoFeedback';
-import { DataTable, DataTableSortStatus } from 'mantine-datatable';
-import { useState } from 'react';
-import { prospectDrawerIdState, prospectDrawerOpenState } from '@atoms/prospectAtoms';
+} from "@tabler/icons-react";
+import getDemoFeedback from "@utils/requests/getDemoFeedback";
+import { DataTable, DataTableSortStatus } from "mantine-datatable";
+import { useState } from "react";
+import {
+  prospectDrawerIdState,
+  prospectDrawerOpenState,
+} from "@atoms/prospectAtoms";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const ratingToLabel = (rating: string) => {
-  if(rating === '0/5'){
-    return 'Terrible';
-  } else if(rating === '1/5'){
-    return 'Poor';
-  } else if(rating === '2/5'){
-    return 'Fair';
-  } else if(rating === '3/5'){
-    return 'Good';
-  } else if(rating === '4/5'){
-    return 'Great';
-  } else if(rating === '5/5'){
-    return 'Excellent';
+  if (rating === "0/5") {
+    return "Terrible";
+  } else if (rating === "1/5") {
+    return "Poor";
+  } else if (rating === "2/5") {
+    return "Fair";
+  } else if (rating === "3/5") {
+    return "Good";
+  } else if (rating === "4/5") {
+    return "Great";
+  } else if (rating === "5/5") {
+    return "Excellent";
   } else {
-    return '';
+    return "";
   }
-}
+};
 const ratingToIcon = (rating: string) => {
-  const size = '1.3rem';
-  if(rating === '1/5'){
+  const size = "1.3rem";
+  if (rating === "1/5") {
     return <IconMoodCry size={size} />;
-  } else if(rating === '2/5'){
+  } else if (rating === "2/5") {
     return <IconMoodSad size={size} />;
-  } else if(rating === '3/5'){
+  } else if (rating === "3/5") {
     return <IconMoodSmile size={size} />;
-  } else if(rating === '4/5'){
+  } else if (rating === "4/5") {
     return <IconMoodHappy size={size} />;
-  } else if(rating === '5/5'){
+  } else if (rating === "5/5") {
     return <IconMoodCrazyHappy size={size} />;
-  } else if(rating === '0/5'){
+  } else if (rating === "0/5") {
     return <IconMoodWrrr size={size} />;
   } else {
     return <IconMoodEmpty size={size} />;
   }
-}
+};
 
 export default function DemoFeedbackChart() {
   const theme = useMantineTheme();
@@ -89,7 +119,8 @@ export default function DemoFeedbackChart() {
       const [_key, { sortStatus }] = queryKey;
 
       const response = await getDemoFeedback(userToken);
-      let results = response.status === 'success' ? (response.data as any[]) : [];
+      let results =
+        response.status === "success" ? (response.data as any[]) : [];
 
       // Sort data
       results = _.sortBy(results, sortStatus.columnAccessor);
@@ -98,18 +129,14 @@ export default function DemoFeedbackChart() {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data);
-  console.log(data?.map((d) => d.rating));
-
-
   const chartData = new Map()
-    .set('Terrible', 0)
-    .set('Poor', 0)
-    .set('Fair', 0)
-    .set('Good', 0)
-    .set('Great', 0)
-    .set('Excellent', 0);
-  
+    .set("Terrible", 0)
+    .set("Poor", 0)
+    .set("Fair", 0)
+    .set("Good", 0)
+    .set("Great", 0)
+    .set("Excellent", 0);
+
   // Count & Map rating to table rating labels
   for (const d of data || []) {
     let ratingLabel = ratingToLabel(d.rating);
@@ -118,26 +145,27 @@ export default function DemoFeedbackChart() {
 
   // Filter table data by selected bar
   let tableData = [];
-  if(selectedBar !== null){
+  if (selectedBar !== null) {
     const selectedRating = [...chartData.keys()][selectedBar];
-    tableData = data?.filter((d) => ratingToLabel(d.rating) === selectedRating) ?? [];
+    tableData =
+      data?.filter((d) => ratingToLabel(d.rating) === selectedRating) ?? [];
   } else {
     tableData = data ?? [];
   }
 
   if (!data || isFetching) {
     return (
-      <Paper withBorder p='md' radius='md' w='100%' h='100%'>
+      <Paper withBorder p="md" radius="md" w="100%" h="100%">
         <Center h={200}>
           <Avatar
             size={70}
             styles={{
               placeholder: {
-                backgroundColor: 'transparent',
+                backgroundColor: "transparent",
               },
             }}
           >
-            <IconChartHistogram color='gray' size='4rem' stroke='1' />
+            <IconChartHistogram color="gray" size="4rem" stroke="1" />
           </Avatar>
         </Center>
       </Paper>
@@ -169,7 +197,7 @@ export default function DemoFeedbackChart() {
           onClick: (event, elements) => {
             if (elements.length > 0) {
               const chartElement = elements[0];
-              if(selectedBar === chartElement.index){
+              if (selectedBar === chartElement.index) {
                 setSelectedBar(null);
               } else {
                 setSelectedBar(chartElement.index);
@@ -200,12 +228,16 @@ export default function DemoFeedbackChart() {
           labels: [...chartData.keys()],
           datasets: [
             {
-              label: ' Demos',
+              label: " Demos",
               data: [...chartData.values()],
               // Add alpha channel to hex color (browser support: https://caniuse.com/css-rrggbbaa)
-              backgroundColor: [...chartData.keys()].map((d) => theme.colors[valueToColor(theme, d)][5] + '90'),
-              borderColor: '#dcdde0',
-              borderWidth: [...chartData.keys()].map((d, index) => index === selectedBar ? 4 : 0),
+              backgroundColor: [...chartData.keys()].map(
+                (d) => theme.colors[valueToColor(theme, d)][5] + "90"
+              ),
+              borderColor: "#dcdde0",
+              borderWidth: [...chartData.keys()].map((d, index) =>
+                index === selectedBar ? 4 : 0
+              ),
             },
           ],
         }}
@@ -213,29 +245,38 @@ export default function DemoFeedbackChart() {
 
       <DataTable
         height={400}
-        verticalAlignment='top'
-        loaderColor='teal'
+        verticalAlignment="top"
+        loaderColor="teal"
         fetching={isFetching}
-        noRecordsText={'No demos found'}
+        noRecordsText={"No demos found"}
         columns={[
           {
-            accessor: 'demo_date',
-            title: 'Contact',
+            accessor: "demo_date",
+            title: "Contact",
             sortable: true,
             width: 300,
-            render: ({ prospect_id, prospect_img_url, prospect_name, demo_date }) => (
+            render: ({
+              prospect_id,
+              prospect_img_url,
+              prospect_name,
+              demo_date,
+            }) => (
               <Paper
-                p='xs'
+                p="xs"
                 withBorder
                 radius="md"
                 sx={(theme) => ({
                   position: "relative",
                   cursor: "pointer",
-                  backgroundColor: theme.colorScheme === "dark"
+                  backgroundColor:
+                    theme.colorScheme === "dark"
                       ? theme.colors.dark[8]
                       : theme.colors.gray[0],
                   "&:hover": {
-                    filter: theme.colorScheme === "dark" ? "brightness(135%)" : "brightness(95%)",
+                    filter:
+                      theme.colorScheme === "dark"
+                        ? "brightness(135%)"
+                        : "brightness(95%)",
                   },
                 })}
                 onClick={() => {
@@ -243,15 +284,15 @@ export default function DemoFeedbackChart() {
                   setDrawerOpened(true);
                 }}
               >
-                <Flex justify='space-between'>
+                <Flex justify="space-between">
                   <div>
-                    <Avatar size='md' radius='xl' src={prospect_img_url} />
+                    <Avatar size="md" radius="xl" src={prospect_img_url} />
                   </div>
                   <div style={{ flexGrow: 1, marginLeft: 10 }}>
-                    <Text fw={700} fz='sm'>
+                    <Text fw={700} fz="sm">
                       Demo with {prospect_name}
                     </Text>
-                    <Text fz='sm' c='dimmed'>
+                    <Text fz="sm" c="dimmed">
                       {convertDateToLocalTime(new Date(demo_date))}
                     </Text>
                   </div>
@@ -260,8 +301,8 @@ export default function DemoFeedbackChart() {
             ),
           },
           {
-            accessor: 'status',
-            title: 'Status',
+            accessor: "status",
+            title: "Status",
             sortable: true,
             width: 100,
             render: ({ status }) => (
@@ -269,34 +310,42 @@ export default function DemoFeedbackChart() {
                 <Badge
                   color={valueToColor(
                     theme,
-                    formatToLabel(status === 'OCCURRED' ? 'Complete' : status)
+                    formatToLabel(status === "OCCURRED" ? "Complete" : status)
                   )}
                   variant="light"
                 >
-                  {formatToLabel(status === 'OCCURRED' ? 'Complete' : status)}
+                  {formatToLabel(status === "OCCURRED" ? "Complete" : status)}
                 </Badge>
               </Text>
             ),
           },
           {
-            accessor: 'rating',
-            title: 'Rating',
+            accessor: "rating",
+            title: "Rating",
             sortable: true,
             width: 100,
             render: ({ rating, status }) => (
               <Text>
-                {(
+                {
                   <Flex gap={5}>
-                    <Text color={theme.colors[valueToColor(theme, ratingToLabel(rating))][7]}>{ratingToIcon(rating)}</Text>
+                    <Text
+                      color={
+                        theme.colors[
+                          valueToColor(theme, ratingToLabel(rating))
+                        ][7]
+                      }
+                    >
+                      {ratingToIcon(rating)}
+                    </Text>
                     <Text>{ratingToLabel(rating)}</Text>
                   </Flex>
-                )}
+                }
               </Text>
             ),
           },
           {
-            accessor: 'feedback',
-            title: 'Notes',
+            accessor: "feedback",
+            title: "Notes",
           },
         ]}
         records={tableData}

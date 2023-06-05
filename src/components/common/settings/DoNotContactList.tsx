@@ -31,6 +31,10 @@ export default function DoNotContactList() {
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [needsSave, setNeedsSave] = useState(false);
 
+  // Save as nothing tracking state
+  // - No clean, bug-free way to do this without a component restructure
+  const [saveAsNothing, setSaveAsNothing] = useState(false);
+
   const getKeywords = async () => {
     const res = await fetch(`${API_URL}/client/do_not_contact_filters`, {
       method: "GET",
@@ -44,6 +48,7 @@ export default function DoNotContactList() {
     // If the user has never set filters before, let them save empty filters
     if (!resp.data.do_not_contact_company_names || !resp.data.do_not_contact_keywords_in_company_names) {
       setNeedsSave(true);
+      setSaveAsNothing(true);
     }
 
     setCompanyNames(
@@ -100,6 +105,7 @@ export default function DoNotContactList() {
       });
     }
     setNeedsSave(false);
+    setSaveAsNothing(false);
   };
 
   return (
@@ -133,6 +139,7 @@ export default function DoNotContactList() {
           onChange={(value: any) => {
             setSelectedKeywords(value);
             setNeedsSave(true);
+            setSaveAsNothing(false);
           }}
           getCreateLabel={(query) => `+ Add a filter for ${query}`}
           onCreate={(query: any) => {
@@ -159,6 +166,7 @@ export default function DoNotContactList() {
           onChange={(value: any) => {
             setSelectedCompanies(value);
             setNeedsSave(true);
+            setSaveAsNothing(false);
           }}
           getCreateLabel={(query) => `+ Add a filter for ${query}`}
           onCreate={(query: any) => {
@@ -176,7 +184,7 @@ export default function DoNotContactList() {
         }}
         disabled={!needsSave}
       >
-        Save Filter Criteria
+        {saveAsNothing ? 'Save with no filters' : 'Save filter criteria'}
       </Button>
 
       <Divider mt="lg" mb="lg" />

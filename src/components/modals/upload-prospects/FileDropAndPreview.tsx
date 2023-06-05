@@ -255,8 +255,6 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     const result = await uploadProspects(
       +(archetype_id as string),
       userToken,
-      // If any row contains an email column, then we're using email
-      !![...Object.keys(uploadJSON[0])].find((key) => key.toLowerCase() === 'email'),
       uploadJSON
     );
     if (result.status === "error") {

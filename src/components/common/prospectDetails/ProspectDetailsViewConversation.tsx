@@ -114,9 +114,13 @@ export default function ProspectDetailsViewConversation(
   };
 
   const fetchAndPopulateConvo = async () => {
-    if (messages.current.length === 0) {
+
+    const isFirstLoad = messages.current.length === 0;
+
+    if (isFirstLoad) {
       setLoading(true);
     }
+
     const result = await getConversation(userToken, props.prospect_id);
 
     // Fixes bug with li saying there's no convo but we have one cached
@@ -169,12 +173,14 @@ export default function ProspectDetailsViewConversation(
         });
       }
 
-      // Set if we have an auto bump message generated
-      const autoBumpMsgResponse = await getAutoBumpMessage(userToken, props.prospect_id);
-      if (autoBumpMsgResponse.status === "success") {
-        console.log(autoBumpMsgResponse);
-        setMessageDraft(autoBumpMsgResponse.data.message);
-        setAiGenerated(true);
+      if (isFirstLoad) {
+        // Set if we have an auto bump message generated
+        const autoBumpMsgResponse = await getAutoBumpMessage(userToken, props.prospect_id);
+        if (autoBumpMsgResponse.status === "success") {
+          console.log(autoBumpMsgResponse);
+          setMessageDraft(autoBumpMsgResponse.data.message);
+          setAiGenerated(true);
+        }
       }
 
     }

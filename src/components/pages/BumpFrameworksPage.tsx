@@ -533,7 +533,10 @@ export default function BumpFrameworksPage() {
                 <Flex w="40%">
                   <Card w="100%" h="fit-content" withBorder>
                     <form onSubmit={() => console.log("submit")}>
-                      <Flex justify={"flex-end"}>
+                      <Flex align={'center'} justify={"space-between"}>
+                        <Title order={3}>
+                          Edit Framework
+                        </Title>
                         <Switch
                           label="Default Framework?"
                           labelPosition="left"
@@ -547,6 +550,7 @@ export default function BumpFrameworksPage() {
                         />
                       </Flex>
                       <TextInput
+                        mt='md'
                         label="Title"
                         placeholder={"Mention the Super Bowl"}
                         {...form.getInputProps("title")}

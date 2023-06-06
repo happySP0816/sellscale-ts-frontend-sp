@@ -1,5 +1,12 @@
 import { currentPersonaIdState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
+import React from "react";
+import { Tabs, Divider } from "@mantine/core";
+import { IconChartAreaFilled, IconChartArrows } from "@tabler/icons-react";
+import { IconChartArcs } from "@tabler/icons";
+import DemoFeedbackLineChart from "./DemoFeedbackLineChart";
+import { Title as MantineTitle } from "@mantine/core";
+
 import {
   Center,
   Paper,
@@ -46,6 +53,7 @@ import {
   prospectDrawerIdState,
   prospectDrawerOpenState,
 } from "@atoms/prospectAtoms";
+import DemoFeedbackBarChart from "./DemoFeedbackBarChart";
 
 ChartJS.register(
   CategoryScale,
@@ -56,7 +64,7 @@ ChartJS.register(
   Legend
 );
 
-const ratingToLabel = (rating: string) => {
+export const ratingToLabel = (rating: string) => {
   if (rating === "0/5") {
     return "Terrible";
   } else if (rating === "1/5") {
@@ -149,6 +157,9 @@ export default function DemoFeedbackChart() {
     const selectedRating = [...chartData.keys()][selectedBar];
     tableData =
       data?.filter((d) => ratingToLabel(d.rating) === selectedRating) ?? [];
+    tableData = tableData?.sort((a, b) => {
+      return a.demo_date < b.demo_date ? -1 : 1;
+    });
   } else {
     tableData = data ?? [];
   }
@@ -174,77 +185,80 @@ export default function DemoFeedbackChart() {
 
   return (
     <>
-      <Bar
-        height={100}
-        options={{
-          responsive: true,
-          plugins: {
-            title: {
-              display: true,
-              text: `Demo Satisfaction - Total Demos: ${data.length}`,
-            },
-            legend: {
-              display: false,
-            },
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  return `${context.parsed.y}${context.dataset.label}`;
-                },
-              },
-            },
-          },
-          onClick: (event, elements) => {
-            if (elements.length > 0) {
-              const chartElement = elements[0];
-              if (selectedBar === chartElement.index) {
-                setSelectedBar(null);
-              } else {
-                setSelectedBar(chartElement.index);
-              }
-            }
-          },
-          scales: {
-            y: {
-              ticks: {
-                callback: function (value, index, ticks) {
-                  return `${value}`;
-                },
-              },
-            },
-            x: {
-              ticks: {
-                font: {
-                  size: 8,
-                },
-                callback: function (value, index, ticks) {
-                  return ``;
-                },
-              },
-            },
-          },
-        }}
-        data={{
-          labels: [...chartData.keys()],
-          datasets: [
-            {
-              label: " Demos",
-              data: [...chartData.values()],
-              // Add alpha channel to hex color (browser support: https://caniuse.com/css-rrggbbaa)
-              backgroundColor: [...chartData.keys()].map(
-                (d) => theme.colors[valueToColor(theme, d)][5] + "90"
-              ),
-              borderColor: "#dcdde0",
-              borderWidth: [...chartData.keys()].map((d, index) =>
-                index === selectedBar ? 4 : 0
-              ),
-            },
-          ],
-        }}
-      />
+      <div>
+        <Tabs
+          color="green"
+          variant="pills"
+          radius="xs"
+          defaultValue="cumulative-sdr"
+        >
+          <Tabs.List>
+            <Tabs.Tab
+              value="cumulative-sdr"
+              icon={<IconChartArcs size="0.8rem" />}
+            >
+              Cumulative SDR Demos
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="demo-satisfaction"
+              icon={<IconChartAreaFilled size="0.8rem" />}
+            >
+              Demo Satisfaction
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="cumulative-company"
+              icon={<IconChartArrows size="0.8rem" />}
+            >
+              Cumulative Company Demos
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="cumulative-sdr" pt="xs">
+            <Divider mt="xs" mb="xs" />
+            <MantineTitle mb="0" order={3}>
+              Your Cumulative Demos
+            </MantineTitle>
+            <Text mb="md">
+              This chart shows the cumulative number of demos you've given
+              feedback for.
+            </Text>
+            <DemoFeedbackLineChart sdrOnly={false} />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="demo-satisfaction" pt="xs">
+            <Divider mt="xs" mb="xs" />
+            <MantineTitle mb="0" order={3}>
+              Demo Satisfaction
+            </MantineTitle>
+            <Text mb="md">
+              This chart shows the average satisfaction rating for each demo.
+            </Text>
+            <DemoFeedbackBarChart
+              data={data}
+              selectedBar={selectedBar}
+              setSelectedBar={setSelectedBar}
+              chartData={chartData}
+              theme={theme}
+              valueToColor={valueToColor}
+            />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="cumulative-company" pt="xs">
+            <Divider mt="xs" mb="xs" />
+            <MantineTitle mb="0" order={3}>
+              Cumulative Company Demos
+            </MantineTitle>
+            <Text mb="md">
+              This chart shows the cumulative number of demos all your
+              colleagues have given feedback for.
+            </Text>
+            <DemoFeedbackLineChart sdrOnly={true} />
+          </Tabs.Panel>
+        </Tabs>
+      </div>
 
       <DataTable
-        height={400}
+        height={600}
         verticalAlignment="top"
         loaderColor="teal"
         fetching={isFetching}

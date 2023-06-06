@@ -39,9 +39,17 @@ async function getResponseJSON(key: string, response: Response, showNotif: boole
   }
 
   let errMsg = '';
-  const res = await response.json().catch((error) => {
-    errMsg = error;
-  });
+  let res = null;
+  try {
+    res = await response.json();
+  } catch (e) {
+    errMsg = 'Failed to parse response as JSON';
+
+    if ((response.status+'').startsWith('2')) {
+      return { status: 'success', title: `Success`, message: 'Success', data: {} };
+    }
+  }
+
   if (!res) {
     errMsg = 'Unknown error';
   }

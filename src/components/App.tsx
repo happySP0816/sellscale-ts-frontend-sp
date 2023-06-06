@@ -29,6 +29,7 @@ import ClientProductModal from "@modals/ClientProductModal";
 import CopyCTAsModal from "@modals/CopyCTAsModal";
 import EditCTAModal from "@modals/EditCTAModal";
 import DemoFeedbackDetailsModal from "@modals/DemoFeedbackDetailsModal";
+import VoiceBuilderModal from '@modals/VoiceBuilderModal';
 
 export default function App() {
   // Site light or dark mode
@@ -114,11 +115,12 @@ export default function App() {
               viewEmailThread: ViewEmailThreadModal,
               manageBumpFramework: ManageBumpFramework,
               clientProduct: ClientProductModal,
+              voiceBuilder: VoiceBuilderModal,
               demoFeedbackDetails: DemoFeedbackDetailsModal,
             }}
             modalProps={{
               closeOnClickOutside: false,
-              size: "lg",
+              size: 'xl',
             }}
           >
             <Notifications position="top-right" />

@@ -22,7 +22,6 @@ import { useLoaderData } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import BumpFrameworksPage from "./BumpFrameworksPage";
 import CalendarSection from "@common/home/CalendarSection";
-import DemoFeedbackPage from "@common/charts/DemoFeedbackPage";
 
 export default function HomePage() {
   setPageTitle("");
@@ -86,7 +85,7 @@ export default function HomePage() {
           <RecentActivitySection />
         </Tabs.Panel>
         <Tabs.Panel value="demo-feedback" pt="xs">
-          {tabId === "demo-feedback" && <DemoFeedbackPage />}
+          {tabId === "demo-feedback" && <DemoFeedbackChart />}
         </Tabs.Panel>
         <Tabs.Panel value="bump-frameworks" pt="xs">
           <BumpFrameworksPage />

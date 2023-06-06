@@ -16,7 +16,7 @@ export default function DemoFeedbackLineChart(props: PropsType) {
   const userToken = useRecoilState(userTokenState);
   const [fetchedData, setFetchedData] = useState(false);
   const [data, setData]: any = useState([]);
-  const [dataDict, setDataDict] = useState({});
+  const [dataDict, setDataDict]: any = useState({});
 
   useEffect(() => {
     if (!fetchedData) {
@@ -63,7 +63,7 @@ export default function DemoFeedbackLineChart(props: PropsType) {
     <Box sx={{ height: "500px", backgroundColor: "white" }}>
       <ResponsiveLine
         data={data}
-        onClick={(point) => {
+        onClick={(point: any) => {
           const propsData = dataDict[point.data.y];
           openContextModal({
             modal: "demoFeedbackDetails",
@@ -108,7 +108,7 @@ export default function DemoFeedbackLineChart(props: PropsType) {
         useMesh={true}
         enablePointLabel
         pointLabelYOffset={20}
-        pointLabel={(e) => dataDict[e.y].company}
+        pointLabel={(e: any) => dataDict[e.y].company}
         // legends={[
         //   {
         //     anchor: "bottom-right",

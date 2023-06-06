@@ -1,17 +1,5 @@
-import {
-  Paper,
-  TextInput,
-  rem,
-  createStyles,
-  Text,
-  Badge,
-} from "@mantine/core";
+import { Paper, rem, createStyles, Text, Badge } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
-import { useState } from "react";
-import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
-import { useForm } from "@mantine/form";
-import { DateInput } from "@mantine/dates";
 import { ratingToLabel } from "@common/charts/DemoFeedbackChart";
 
 const useStyles = createStyles((theme) => ({
@@ -47,28 +35,6 @@ export default function DemoFeedbackDetailsModal({
   demoFeedback: string;
   refetch: () => void;
 }>) {
-  const [loading, setLoading] = useState(false);
-  const userToken = useRecoilValue(userTokenState);
-  const { classes } = useStyles();
-
-  const form = useForm({
-    initialValues: {
-      name: innerProps.editProduct?.name ?? "",
-      description: innerProps.editProduct?.description ?? "",
-      how_it_works: innerProps.editProduct?.how_it_works ?? "",
-      use_cases: innerProps.editProduct?.use_cases ?? "",
-      product_url: innerProps.editProduct?.product_url ?? "",
-    },
-  });
-
-  // inner props
-  // company: propsData.company,
-  // demoDate: propsData.demo_date,
-  // demoRating: propsData.demo_rating,
-  // fullName: propsData.full_name,
-  // prospectId: propsData.prospect_id,
-  // demoFeedback: propsData.demo_feedback,
-
   return (
     <Paper
       p={0}

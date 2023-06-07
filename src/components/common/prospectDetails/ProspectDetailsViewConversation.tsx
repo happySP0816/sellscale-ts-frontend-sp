@@ -177,7 +177,6 @@ export default function ProspectDetailsViewConversation(
         // Set if we have an auto bump message generated
         const autoBumpMsgResponse = await getAutoBumpMessage(userToken, props.prospect_id);
         if (autoBumpMsgResponse.status === "success") {
-          console.log(autoBumpMsgResponse);
           setMessageDraft(autoBumpMsgResponse.data.message);
           setAiGenerated(true);
         }
@@ -379,6 +378,10 @@ export default function ProspectDetailsViewConversation(
         console.log(err);
       });
   };
+
+  console.log(!emptyConvo)
+  console.log(loading)
+  console.log(messages.current)
 
   return (
     <>

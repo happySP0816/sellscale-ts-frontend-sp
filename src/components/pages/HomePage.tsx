@@ -79,7 +79,7 @@ export default function HomePage() {
           {tabId === "all-contacts" && <AllContactsSection />}
         </Tabs.Panel>
         <Tabs.Panel value="dashboard" pt="xs">
-          <DashboardSection />
+          {tabId === "dashboard" && <DashboardSection />}
         </Tabs.Panel>
         <Tabs.Panel value="recent-activity" pt="xs">
           <RecentActivitySection />

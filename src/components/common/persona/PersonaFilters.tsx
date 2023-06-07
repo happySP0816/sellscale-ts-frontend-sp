@@ -458,7 +458,7 @@ export default function PersonaFilters(props: PropsType) {
                       data={formOptions.headcount}
                       value={accountForm.values.headcount}
                       onChange={(value) => {
-                        leadForm.setFieldValue('headcount', value)
+                        accountForm.setFieldValue('headcount', value)
                       }}
                     />
                   </Flex>

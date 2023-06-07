@@ -21,6 +21,10 @@ export interface Campaign {
   analytics_open_rate: number;
   analytics_reply_rate: number;
   analytics_demo_count: number;
+  num_acceptances: number;
+  num_replies: number;
+  num_demos: number;
+  demos: list;
   status:
     | "PENDING"
     | "NEEDS_REVIEW"
@@ -112,15 +116,15 @@ export interface Archetype {
 }
 
 export interface PersonaOverview {
-  active: boolean
-  id: number,
-  name: string,
-  num_prospects: number,
-  num_unused_email_prospects: number,
-  num_unused_li_prospects: number,
-  icp_matching_prompt: string,
-  is_unassigned_contact_archetype: boolean,
-  uploads?: any[],
+  active: boolean;
+  id: number;
+  name: string;
+  num_prospects: number;
+  num_unused_email_prospects: number;
+  num_unused_li_prospects: number;
+  icp_matching_prompt: string;
+  is_unassigned_contact_archetype: boolean;
+  uploads?: any[];
 }
 
 export interface LinkedInMessage {
@@ -167,5 +171,5 @@ export type BumpFramework = {
   archetypes: {
     archetype_id: number;
     archetype_name: string;
-  }[]
+  }[];
 };

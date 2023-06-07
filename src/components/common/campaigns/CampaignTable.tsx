@@ -102,49 +102,42 @@ export default function CampaignTable(props: { type: Channel }) {
   };
 
   const { data, isFetching, refetch } = useQuery({
-    queryKey: [
-      `query-campaigns-data`,
-      { page, sortStatus, search, type },
-    ],
+    queryKey: [`query-campaigns-data`, { page, sortStatus, search, type }],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { page, sortStatus, search, type }] =
-        queryKey;
+      const [_key, { page, sortStatus, search, type }] = queryKey;
 
       totalRecords.current = 0;
 
-      const response = await fetch(
-        `${API_URL}/campaigns/all_campaigns`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            query: search.length > 0 ? search : undefined,
-            campaign_type: type ? [type] : undefined,
-            status: ['COMPLETE'],
-            limit: PAGE_SIZE,
-            offset: (page - 1) * PAGE_SIZE,
-            //campaign_start_date: filterDate[0] ? formatDate(new Date(filterDate[0])) : undefined,
-            //campaign_end_date: filterDate[1] ? formatDate(new Date(filterDate[1])) : undefined,
-            filters: [
-              {
-                field: sortStatus.columnAccessor,
-                direction: sortStatus.direction === "asc" ? 1 : -1,
-              },
-            ],
-            include_analytics: true,
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/campaigns/all_campaigns`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: search.length > 0 ? search : undefined,
+          campaign_type: type ? [type] : undefined,
+          status: ["COMPLETE"],
+          limit: PAGE_SIZE,
+          offset: (page - 1) * PAGE_SIZE,
+          //campaign_start_date: filterDate[0] ? formatDate(new Date(filterDate[0])) : undefined,
+          //campaign_end_date: filterDate[1] ? formatDate(new Date(filterDate[1])) : undefined,
+          filters: [
+            {
+              field: sortStatus.columnAccessor,
+              direction: sortStatus.direction === "asc" ? 1 : -1,
+            },
+          ],
+          include_analytics: true,
+        }),
+      });
       if (response.status === 401) {
         logout();
       }
       const res = await response.json();
-      console.log("analytics", res)
+      console.log("analytics", res);
       if (!res || !res.outbound_campaigns) {
         return [];
       }
@@ -158,12 +151,28 @@ export default function CampaignTable(props: { type: Channel }) {
         let total_opened = 0;
         let total_replied = 0;
         let total_demo_count = 0;
-        if (campaign.analytics != null || typeof campaign.analytics != 'string') {
-          total_sent = campaign.analytics?.email_sent?.length > 0 ? campaign.analytics.email_sent.length : 0;
-          total_opened = campaign.analytics?.email_opened?.length > 0 ? campaign.analytics.email_opened.length : 0;
-          total_replied = campaign.analytics?.email_replied?.length > 0 ? campaign.analytics.email_replied.length : 0;
-          total_demo_count = campaign.analytics?.prospect_demo_set?.length > 0 ? campaign.analytics.prospect_demo_set.length : 0;
+        if (
+          campaign.analytics != null ||
+          typeof campaign.analytics != "string"
+        ) {
+          total_sent =
+            campaign.analytics?.email_sent?.length > 0
+              ? campaign.analytics.email_sent.length
+              : 0;
+          total_opened =
+            campaign.analytics?.email_opened?.length > 0
+              ? campaign.analytics.email_opened.length
+              : 0;
+          total_replied =
+            campaign.analytics?.email_replied?.length > 0
+              ? campaign.analytics.email_replied.length
+              : 0;
+          total_demo_count =
+            campaign.analytics?.prospect_demo_set?.length > 0
+              ? campaign.analytics.prospect_demo_set.length
+              : 0;
         }
+        console.log(campaign);
         return {
           uuid: campaign.uuid,
           id: campaign.id,
@@ -177,12 +186,18 @@ export default function CampaignTable(props: { type: Channel }) {
           campaign_end_date: campaign.campaign_end_date,
           status: campaign.status,
 
-          // Analytics
+          // Linkedin Analytics
+          num_acceptances: campaign.analytics?.["# Acceptances"],
+          num_replies: campaign.analytics?.["# Replies"],
+          num_demos: campaign.analytics?.["# Demos"],
+          demos: campaign.analytics?.["Companies Demos"],
+
+          // Email Analytics
           total_prospects: total_prospects,
           analytics_sent: total_sent,
           analytics_open_rate: total_opened / total_prospects,
           analytics_reply_rate: total_replied / total_prospects,
-          analytics_demo_count: total_demo_count
+          analytics_demo_count: total_demo_count,
         };
       }) as Campaign[];
     },
@@ -191,7 +206,12 @@ export default function CampaignTable(props: { type: Channel }) {
 
   return (
     <Box>
-      <div style={{ display: "flex", flexWrap: (smScreenOrLess) ? 'wrap' : 'nowrap' }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: smScreenOrLess ? "wrap" : "nowrap",
+        }}
+      >
         <TextInput
           label="Search Campaigns"
           placeholder="Search by Campaign Name"
@@ -199,7 +219,11 @@ export default function CampaignTable(props: { type: Channel }) {
           width={"500px"}
           onChange={(e) => setSearch(e.currentTarget.value)}
           icon={<IconSearch size={14} />}
-          style={(smScreenOrLess) ? { maxWidth: "100%", flexBasis: "100%" } : { maxWidth: "60%", flexBasis: "60%" }}
+          style={
+            smScreenOrLess
+              ? { maxWidth: "100%", flexBasis: "100%" }
+              : { maxWidth: "60%", flexBasis: "60%" }
+          }
           px={"xs"}
         />
         {/*
@@ -318,7 +342,7 @@ export default function CampaignTable(props: { type: Channel }) {
             title: "Name",
             sortable: true,
             ellipsis: true,
-            width: '20vw',
+            width: "20vw",
           },
           {
             accessor: "prospect_ids",
@@ -329,8 +353,57 @@ export default function CampaignTable(props: { type: Channel }) {
             },
           },
           {
-            accessor: "# Sent",
+            accessor: "num_acceptances",
+            title: "# Acceptances",
+            hidden: type !== "LINKEDIN",
+            sortable: true,
+            render: ({ num_acceptances }) => {
+              return <Text>{num_acceptances}</Text>;
+            },
+          },
+          {
+            accessor: "num_replies",
+            title: "# Replies",
+            hidden: type !== "LINKEDIN",
+            sortable: true,
+            render: ({ num_replies }) => {
+              return <Text>{num_replies}</Text>;
+            },
+          },
+          {
+            accessor: "num_demos",
+            title: "# Demos",
+            hidden: type !== "LINKEDIN",
+            sortable: true,
+            render: ({ num_demos }) => {
+              return <Text>{num_demos}</Text>;
+            },
+          },
+          {
+            accessor: "demos",
+            title: "Demos",
+            hidden: type !== "LINKEDIN",
+            sortable: true,
+            render: ({ demos }) => {
+              return (
+                demos &&
+                demos.map((demo: any) => {
+                  return (
+                    <Badge
+                      color={valueToColor(theme, demo)}
+                      style={{ marginRight: 5 }}
+                    >
+                      {demo}
+                    </Badge>
+                  );
+                })
+              );
+            },
+          },
+          {
+            accessor: "# Emails Sent",
             title: "# Sent",
+            hidden: type !== "EMAIL",
             sortable: true,
             render: ({ analytics_sent }) => {
               return <Text>{analytics_sent}</Text>;
@@ -339,6 +412,7 @@ export default function CampaignTable(props: { type: Channel }) {
           {
             accessor: "open_rate",
             title: "Open Rate %",
+            hidden: type !== "EMAIL",
             sortable: false,
             render: ({ analytics_open_rate }) => {
               return <Text>{(analytics_open_rate * 100).toFixed(2)} %</Text>;
@@ -346,6 +420,7 @@ export default function CampaignTable(props: { type: Channel }) {
           },
           {
             accessor: "reply_rate",
+            hidden: type !== "EMAIL",
             title: "Reply Rate %",
             sortable: false,
             render: ({ analytics_reply_rate }) => {
@@ -354,12 +429,13 @@ export default function CampaignTable(props: { type: Channel }) {
           },
           {
             accessor: "num_demos",
+            hidden: type !== "EMAIL",
             title: "# Demos",
             sortable: false,
             render: ({ analytics_demo_count }) => {
               return <Text>{analytics_demo_count}</Text>;
             },
-          }
+          },
         ]}
         records={data}
         page={page}

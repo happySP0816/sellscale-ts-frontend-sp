@@ -21,6 +21,7 @@ import {
 import { ContextModalProps, closeAllModals } from '@mantine/modals';
 import { IconSend } from '@tabler/icons';
 import { generateEmail, getEmailGenerationPrompt } from '@utils/requests/generateEmail';
+import { getEmailFollowupPrompt } from '@utils/requests/getEmailFollowupPrompt';
 import { sendEmail } from '@utils/requests/sendEmail';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -32,6 +33,7 @@ interface ComposeEmail extends Record<string, unknown> {
   body: string;
   from: string;
   prospectId: number;
+  threadId: string;
   reply?: {
     threadSubject: string;
     messageId: string;
@@ -69,6 +71,20 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
     }
   };
 
+  const fetchEmailFollowupGenerationPrompt = async () => {
+    setFetchedEmailGenerationPrompt(true);
+    const response = await getEmailFollowupPrompt(
+      userToken,
+      innerProps.prospectId,
+      innerProps.threadId,
+    );
+    console.log('followup', response);
+
+    if (response.status === 'success') {
+      setEmailGenerationPrompt(response.data.data);
+    }
+  };
+
   // If body was cleared, it's no longer ai generated
   useEffect(() => {
     if (bodyRef.current.trim().length == 0) {
@@ -78,7 +94,11 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
 
   useEffect(() => {
     if (!fetchedEmailGenerationPrompt) {
-      fetchEmailGenerationPrompt();
+      if (innerProps.reply) {
+        fetchEmailFollowupGenerationPrompt();
+      } else {
+        fetchEmailGenerationPrompt();
+      }
       setFetchedEmailGenerationPrompt(true);
     }
   }, [fetchedEmailGenerationPrompt]);
@@ -176,7 +196,7 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
           color='gray'
           onClick={() => setCollapseOpened(!collapseOpened)}
         >
-          {!collapseOpened ? 'View' : 'Hide'} Email Generation Prompt
+          {!collapseOpened ? 'View' : 'Hide'} Email {!innerProps.reply ? 'Generation' : 'Followup'} Prompt
         </Button>
         <Button
           size='xs'
@@ -184,9 +204,15 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
           variant='outline'
           mr='lg'
           color='gray'
-          onClick={() => fetchEmailGenerationPrompt()}
+          onClick={() => {
+            if (innerProps.reply) {
+              fetchEmailFollowupGenerationPrompt();
+            } else {
+            fetchEmailGenerationPrompt()
+            }
+          }}
         >
-          Regenerate Email Generation Prompt
+          Regenerate Email {!innerProps.reply ? 'Generation' : 'Followup'} Prompt
         </Button>
         <Collapse in={collapseOpened} mt='sm'>
           <LoadingOverlay visible={fetchingEmailGenerationPrompt} />

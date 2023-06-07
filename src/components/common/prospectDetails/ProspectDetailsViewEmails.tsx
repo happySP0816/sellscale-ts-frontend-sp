@@ -46,6 +46,7 @@ export const openComposeEmailModal = (
   sdr_email: string,
   subject: string,
   body: string,
+  threadId?: string,
   reply?: {
     threadSubject: string;
     messageId: string;
@@ -79,6 +80,7 @@ export const openComposeEmailModal = (
       body: body,
       from: sdr_email,
       prospectId: prospectId,
+      threadId: threadId,
       reply: reply,
     },
   });
@@ -129,7 +131,7 @@ export default function ProspectDetailsViewEmails(props: {
                   props.email,
                   userData.sdr_email,
                   "",
-                  ""
+                  "",
                 );
               }}
             >

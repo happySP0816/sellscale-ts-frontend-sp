@@ -1,6 +1,7 @@
 import PullProspectEmailsCard from "@common/credits/PullProspectEmailsCard";
 import RunAccountResearchCard from "@common/credits/RunAccountResearchCard";
-import { Flex } from "@mantine/core";
+import { Flex, Stack } from "@mantine/core";
+import CustomResearchPointCard from "./CustomResearchPointCard";
 
 type PropsType = {
   archetype_id: number;
@@ -13,9 +14,10 @@ export default function PersonaTools(props: PropsType) {
       gap={{ base: "sm", sm: "lg" }}
       justify={{ sm: "center" }}
     >
-      <div>
+      <Stack spacing={0}>
         <PullProspectEmailsCard archetype_id={props.archetype_id} />
-      </div>
+        <CustomResearchPointCard />
+      </Stack>
       <div>
         <RunAccountResearchCard archetype_id={props.archetype_id} />
       </div>

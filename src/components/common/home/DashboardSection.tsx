@@ -34,6 +34,8 @@ import DashCardContents from "./dashboard/DashCardContents";
 import DashCardSeeAllDrawer from "@drawers/DashCardSeeAllDrawer";
 import { useQuery } from "@tanstack/react-query";
 import DemoFeedbackSeeAllDrawer from "@drawers/DemoFeedbackSeeAllDrawer";
+import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
+import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
 
 export default function DashboardSection() {
   const userToken = useRecoilValue(userTokenState);
@@ -51,6 +53,7 @@ export default function DashboardSection() {
     | null
   >(null);
 
+  const prospectDrawerOpened = useRecoilValue(prospectDrawerOpenState);
   const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
     demosDrawerOpenState
   );
@@ -442,6 +445,7 @@ export default function DashboardSection() {
           <DemoFeedbackSeeAllDrawer prospects={all_prospectsDemo} />
         </>
       )}
+      {prospectDrawerOpened && <ProspectDetailsDrawer />}
     </>
   );
 }

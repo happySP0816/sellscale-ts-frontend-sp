@@ -1,5 +1,4 @@
-import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { openComposeEmailModal } from '@common/prospectDetails/ProspectDetailsViewEmails';
+import { userTokenState } from '@atoms/userAtoms';
 import {
   Text,
   Paper,

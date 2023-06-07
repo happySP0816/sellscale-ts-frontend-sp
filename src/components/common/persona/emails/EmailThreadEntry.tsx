@@ -65,10 +65,6 @@ export default function EmailThreadEntry(props: {
 
   useEffect(() => {
     triggerGetEmailMessages();
-  }, [messages])
-
-  useEffect(() => {
-    triggerGetEmailMessages();
   }, [])
 
 
@@ -99,7 +95,6 @@ export default function EmailThreadEntry(props: {
                     if (messages.length === 0) {
                       return;
                     }
-                    console.log('nylas messages', messages)
                     openComposeEmailModal(
                       userToken,
                       messages[0]?.prospect_id,
@@ -107,6 +102,7 @@ export default function EmailThreadEntry(props: {
                       messages[0]?.sdr_email,
                       '',
                       '',
+                      props.threadId,
                       {
                         threadSubject: messages[0]?.subject,
                         messageId: messages[0]?.nylas_message_id,

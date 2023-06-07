@@ -47,8 +47,6 @@ import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove
 import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsResearch";
 import { IconDots, IconPencil } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
-import { useNavigate } from "react-router-dom";
-import { removeLastPathSegment } from "@utils/documentChange";
 
 export default function ProspectDetailsDrawer() {
   const userData = useRecoilValue(userDataState);
@@ -208,6 +206,7 @@ export default function ProspectDetailsDrawer() {
                       prospectId,
                       data.main.prospect_info.email.email,
                       userData.sdr_email,
+                      "",
                       "",
                       ""
                     );

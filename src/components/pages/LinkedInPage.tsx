@@ -19,6 +19,7 @@ import {
   IconSpeakerphone,
   IconTopologyStar,
   IconUser,
+  IconVocabulary,
 } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import getPersonas from "@utils/requests/getPersonas";
@@ -27,6 +28,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype } from "src";
 import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
 import { useLoaderData } from "react-router-dom";
+import VoicesSection from "@common/voice_builder/VoicesSection";
 
 export default function LinkedInPage() {
   setPageTitle("LinkedIn");
@@ -90,6 +92,12 @@ export default function LinkedInPage() {
           >
             Campaign Analytics
           </Tabs.Tab>
+          <Tabs.Tab
+            value="voices"
+            icon={<IconVocabulary size="1.1rem" />}
+          >
+            Voices
+          </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="messages" pt="xs">
           <LinkedinQueuedMessages />
@@ -123,6 +131,9 @@ export default function LinkedInPage() {
         </Tabs.Panel>
         <Tabs.Panel value="campaign-analytics" pt="xs">
           <CampaignTable type="LINKEDIN" />
+        </Tabs.Panel>
+        <Tabs.Panel value="voices" pt="xs">
+          <VoicesSection personas={data} />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

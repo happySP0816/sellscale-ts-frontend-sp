@@ -68,6 +68,23 @@ export default function CustomResearchPointCard(props: {}) {
     }
 
     const response = await uploadCustomResearchPoint(userToken, description, entries);
+    if (response.status === 'success') {
+      showNotification({
+        id: 'file-upload-success',
+        title: `Custom Data Point Added`,
+        message: `Please allow some time for it to propagate through our systems!`,
+        color: 'blue',
+        autoClose: 5000,
+      });
+    } else {
+      showNotification({
+        id: 'file-upload-error',
+        title: `Error uploading file`,
+        message: `Unknown error occurred, please try again later`,
+        color: 'red',
+        autoClose: 5000,
+      });
+    }
 
   };
 

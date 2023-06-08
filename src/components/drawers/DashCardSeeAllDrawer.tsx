@@ -73,14 +73,17 @@ export default function DashCardSeeAllDrawer(props: {
 
   const prospectsVisible = [];
   const prospectsHidden = [];
-  for (let prospect of props.prospects) {
-    let latest_msgs =
+  for (const prospect of props.prospects) {
+    const latest_msgs =
       prospect.recent_messages.li_convo?.sort(
         (a: any, b: any) =>
           new Date(b.date).getTime() - new Date(a.date).getTime()
       ) ?? [];
 
-    if (latest_msgs.length > 0 && latest_msgs[0].connection_degree !== "You") {
+    if (latest_msgs.length > 0 && 
+        (latest_msgs[0].connection_degree !== "You"
+        // Message is over 3 days old
+        || (Date.now() - new Date(latest_msgs[0].date).getTime()) > (3 * 24 * 60 * 60 * 1000))) {
       prospectsVisible.push(prospect);
     } else {
       prospectsHidden.push(prospect);

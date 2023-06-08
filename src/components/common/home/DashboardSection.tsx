@@ -103,7 +103,10 @@ export default function DashboardSection() {
               new Date(b.date).getTime() - new Date(a.date).getTime()
           ) ?? [];
         const last_msg_from_prospect =
-          latest_msgs.length > 0 && latest_msgs[0]?.connection_degree !== "You";
+            latest_msgs.length > 0 && 
+            (latest_msgs[0].connection_degree !== "You"
+            // Message is over 3 days old
+            || (Date.now() - new Date(latest_msgs[0].date).getTime()) > (3 * 24 * 60 * 60 * 1000));
         return p.linkedin_status === li_status && last_msg_from_prospect;
       })
       .sort((a, b) => a.full_name.localeCompare(b.full_name));

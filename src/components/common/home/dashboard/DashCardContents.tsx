@@ -72,8 +72,8 @@ export default function DashCardContents(props: {
   };
   const daysSinceLastReply = days(new Date(), lastReplyDate);
 
-  var numFollowUps = 0;
-  for (var i = 0; i < latest_msgs.length; i++) {
+  let numFollowUps = 0;
+  for (let i = 0; i < latest_msgs.length; i++) {
     if (latest_msgs[i].connection_degree !== "You") {
       break;
     }

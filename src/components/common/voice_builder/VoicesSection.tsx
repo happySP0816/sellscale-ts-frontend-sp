@@ -58,7 +58,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
             <tr>
               <th>Priority</th>
               <th>Name</th>
-              <th>Archetype</th>
+              <th>Persona</th>
               <th>Channel</th>
               <th>Status</th>
             </tr>

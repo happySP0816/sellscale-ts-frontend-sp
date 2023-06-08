@@ -194,14 +194,20 @@ export default function ProspectDetailsResearch(props: PropsType) {
               </thead>
               <tbody>
                 {heuristicResearchArray.map((item: any, index: any) => {
-                  console.log(item)
                   let source = item.research_point_type?.split('_').join(' ').toLowerCase().replace(/(?:^|\s)\w/g, function(match: any) {
                     return match.toUpperCase();
                   });
+                  let value = item.value;
+
+                  if (item.research_point_type === 'CUSTOM'){
+                    const customData = JSON.parse(item.value);
+                    source = customData.label;
+                    value = customData.value;
+                  }
                   return (
                     <tr key={item.research_point_type}>
                       <td>{source}</td>
-                      <td>{item.value}</td>
+                      <td>{value}</td>
                     </tr>
                   )
                 })}

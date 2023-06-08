@@ -1,3 +1,5 @@
+import { EMAIL_REGEX, URL_REGEX } from "@constants/data";
+import { ex } from "@fullcalendar/core/internal-common";
 import { MantineColor, MantineTheme } from "@mantine/core";
 import { startCase } from "lodash";
 import { Channel } from "src";
@@ -214,4 +216,17 @@ export function getBrowserExtensionURL(isFirefox: boolean){
   } else {
     return "https://chrome.google.com/webstore/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa/";
   }
+}
+
+
+export function isEmail(text: string){
+  return !!text.match(EMAIL_REGEX);
+}
+
+export function isURL(text: string){
+  return !!text.match(URL_REGEX);
+}
+
+export function isLinkedInURL(text: string){
+  return isURL(text) && text.includes("linkedin.com/in/");
 }

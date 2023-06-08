@@ -1,11 +1,17 @@
+import { userTokenState } from '@atoms/userAtoms';
 import { Card, Container, Code, Button, Title, Text, Textarea, FileInput, rem } from '@mantine/core';
 import { MIME_TYPES } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { IconUpload } from '@tabler/icons';
 import { convertFileToJSON } from '@utils/fileProcessing';
+import { isEmail, isLinkedInURL } from '@utils/general';
+import uploadCustomResearchPoint from '@utils/requests/uploadCustomResearchPoint';
 import { useState } from 'react';
+import { useRecoilValue } from 'recoil';
 
 export default function CustomResearchPointCard(props: {}) {
+
+  const userToken = useRecoilValue(userTokenState);
   const [description, setDescription] = useState('');
   const [value, setValue] = useState<File | null>();
 
@@ -26,7 +32,43 @@ export default function CustomResearchPointCard(props: {}) {
       return;
     }
 
-    console.log(result)
+    const entries = [];
+    for(const row of result) {
+
+      const email = Object.values(row).find((value) => isEmail(value as string));
+      const li_url = Object.values(row).find((value) => isLinkedInURL(value as string));
+      if (!email && !li_url) {
+        continue;
+      }
+
+      const custom_data_key = Object.keys(row).find((key) => (key.toLowerCase().trim() === 'custom_data'));
+      let custom_data_value = null;
+      if (custom_data_key) {
+        custom_data_value = row[custom_data_key];
+      } else {
+        continue;
+      }
+
+      entries.push({
+        email: email as string,
+        li_url: li_url as string,
+        value: custom_data_value as string,
+      });
+    }
+
+    if (entries.length === 0) {
+      showNotification({
+        id: 'file-upload-error',
+        title: `Error uploading file`,
+        message: `No LinkedIn URL / email or 'custom_data' column found in file`,
+        color: 'red',
+        autoClose: 5000,
+      });
+      return;
+    }
+
+    const response = await uploadCustomResearchPoint(userToken, description, entries);
+
   };
 
   return (

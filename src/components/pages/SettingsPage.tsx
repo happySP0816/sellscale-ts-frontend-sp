@@ -362,8 +362,7 @@ export default function SettingsPage() {
     if (nylasCode){
       exchangeNylasClientID(userToken, nylasCode)
       .then((response) => {
-        navigateToPage(navigate, "/settings");
-        window.location.reload();
+        window.location.href = "/settings";
       });
     }
   }, []);

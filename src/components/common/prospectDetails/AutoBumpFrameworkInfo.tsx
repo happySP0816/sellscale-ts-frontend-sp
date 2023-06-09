@@ -18,7 +18,7 @@ export default function AutoBumpFrameworkInfo(props: {
         left: -12,
       }}
     >
-      <HoverCard width={320} shadow='md' withArrow openDelay={200} closeDelay={400}>
+      <HoverCard withinPortal width={320} shadow='md' withArrow openDelay={200} closeDelay={400}>
         <HoverCard.Target>
           <ActionIcon radius='xl' color='blue' size='lg'>
             <IconInfoCircleFilled size='1.625rem' />

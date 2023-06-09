@@ -257,7 +257,6 @@ const siteLinks = [
         icon: IconWall,
         link: "/email/blocks",
       },
-      {
 /*       {
         key: "email-personalizations",
         label: "Personalizations",

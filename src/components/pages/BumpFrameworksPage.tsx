@@ -161,11 +161,9 @@ export default function BumpFrameworksPage() {
     let activeArchetypes: any[] = [];
     for (const persona of personas) {
       if (persona.active) {
-        console.log('persona', persona)
         activeArchetypes.push(persona.id);
       }
     }
-    console.log('activeArchetypes', activeArchetypes)
     setArchetypeIDs(activeArchetypes);
 
     triggerGetBumpFrameworks([], [], activeArchetypes);

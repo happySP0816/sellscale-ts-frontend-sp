@@ -31,6 +31,7 @@ import {
   IconAdjustments,
   IconCalendarEvent,
   IconFileDescription,
+  IconWall,
 } from "@tabler/icons-react";
 import { LogoFull } from "@nav/Logo";
 import { LinksGroup } from "./NavBarLinksGroup";
@@ -250,6 +251,13 @@ const siteLinks = [
       //   icon: IconListDetails,
       //   link: '/email/sequences',
       // },
+      {
+        key: "email-blocks",
+        label: "Email Blocks",
+        icon: IconWall,
+        link: "/email/blocks",
+      },
+      {
 /*       {
         key: "email-personalizations",
         label: "Personalizations",

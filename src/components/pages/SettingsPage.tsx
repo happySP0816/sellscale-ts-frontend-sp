@@ -7,6 +7,7 @@ import { Button, Card, Title, Notification } from "@mantine/core";
 import { useEffect, useState } from "react";
 import {
   IconBrandLinkedin,
+  IconBrandSlack,
   IconCalendar,
   IconCheck,
   IconInbox,
@@ -34,6 +35,7 @@ import {
 import DoNotContactList from "@common/settings/DoNotContactList";
 import SellScaleBrain from "@common/settings/SellScaleBrain";
 import SettingPreferences from "@common/settings/SettingPreferences";
+import SlackbotSection from "@common/slackbot/SlackbotSection";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -418,6 +420,12 @@ export default function SettingsPage() {
           >
             Do Not Contact Filters
           </Tabs.Tab>
+          <Tabs.Tab
+            value="slackbot"
+            icon={<IconBrandSlack size="0.8rem" />}
+          >
+            Slack Connection
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="linkedinConnection" pl="xs">
@@ -450,6 +458,10 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="preferences" pl="xs">
           <SettingPreferences />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="slackbot" pl="xs">
+          <SlackbotSection />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

@@ -512,11 +512,11 @@ export default function ProspectDetailsViewConversation(
                 ],
               ])}
             />
-            {autoBumpMessage.current && (
+            {autoBumpMessage.current && autoBumpMessage.current.bump_framework.title && (
               <AutoBumpFrameworkInfo
-                bump_title={autoBumpMessage.current.bump_framework?.title}
-                bump_description={autoBumpMessage.current.bump_framework?.description}
-                bump_length={autoBumpMessage.current.bump_framework?.length}
+                bump_title={autoBumpMessage.current.bump_framework.title}
+                bump_description={autoBumpMessage.current.bump_framework.description}
+                bump_length={autoBumpMessage.current.bump_framework.length}
                 account_research_points={autoBumpMessage.current.account_research_points ?? []}
               />
             )}

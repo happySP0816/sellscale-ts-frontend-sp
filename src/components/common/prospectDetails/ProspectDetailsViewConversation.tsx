@@ -14,6 +14,7 @@ import {
   Loader,
   Alert,
   Anchor,
+  HoverCard,
 } from "@mantine/core";
 import {
   IconExternalLink,
@@ -47,6 +48,7 @@ import { prospectDrawerStatusesState } from "@atoms/prospectAtoms";
 import { postBumpGenerateResponse } from "@utils/requests/postBumpGenerateResponse";
 import { autoFillAccountResearch } from "@utils/requests/autoFillAccountResearch";
 import { deleteAutoBumpMessage, getAutoBumpMessage } from "@utils/requests/autoBumpMessage";
+import AutoBumpFrameworkInfo from "./AutoBumpFrameworkInfo";
 
 type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
@@ -86,6 +88,8 @@ export default function ProspectDetailsViewConversation(
   const [generateMsgLoading, setGenerateMsgLoading] = useState(false);
 
   const [aiGenerated, setAiGenerated] = useState(false);
+
+  const autoBumpMessage = useRef<any>(null);
 
   // Use cached convo if voyager isn't connected, else fetch latest
   const messages = useRef(
@@ -177,6 +181,7 @@ export default function ProspectDetailsViewConversation(
         // Set if we have an auto bump message generated
         const autoBumpMsgResponse = await getAutoBumpMessage(userToken, props.prospect_id);
         if (autoBumpMsgResponse.status === "success") {
+          autoBumpMessage.current = autoBumpMsgResponse.data;
           setMessageDraft(autoBumpMsgResponse.data.message);
           setAiGenerated(true);
         }
@@ -382,6 +387,7 @@ export default function ProspectDetailsViewConversation(
   console.log(!emptyConvo)
   console.log(loading)
   console.log(messages.current)
+  console.log(autoBumpMessage.current)
 
   return (
     <>
@@ -506,6 +512,14 @@ export default function ProspectDetailsViewConversation(
                 ],
               ])}
             />
+            {autoBumpMessage.current && (
+              <AutoBumpFrameworkInfo
+                bump_title={autoBumpMessage.current.bump_framework?.title}
+                bump_description={autoBumpMessage.current.bump_framework?.description}
+                bump_length={autoBumpMessage.current.bump_framework?.length}
+                account_research_points={autoBumpMessage.current.account_research_points ?? []}
+              />
+            )}
           </div>
           <Flex>
             <Button

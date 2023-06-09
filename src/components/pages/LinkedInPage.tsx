@@ -3,7 +3,7 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
 import CampaignTable from "@common/campaigns/CampaignTable";
 import AllContactsSection from "@common/home/AllContactsSection";
-import RecActionsSection from "@common/home/DashboardSection";
+import RecActionsSection from "@pages/DashboardPage";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import FlexSeparate from "@common/library/FlexSeparate";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
@@ -12,6 +12,7 @@ import { Select, Tabs } from "@mantine/core";
 import PageTitle from "@nav/PageTitle";
 import {
   IconAffiliate,
+  IconClipboardData,
   IconHistory,
   IconMailFast,
   IconReport,
@@ -29,6 +30,7 @@ import { Archetype } from "src";
 import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
 import { useLoaderData } from "react-router-dom";
 import VoicesSection from "@common/voice_builder/VoicesSection";
+import BumpFrameworksPage from "./BumpFrameworksPage";
 
 export default function LinkedInPage() {
   setPageTitle("LinkedIn");
@@ -98,6 +100,12 @@ export default function LinkedInPage() {
           >
             Voices
           </Tabs.Tab>
+          <Tabs.Tab
+            value="bump-frameworks"
+            icon={<IconClipboardData size="1.1rem" />}
+          >
+            Bump Frameworks
+          </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="messages" pt="xs">
           <LinkedinQueuedMessages />
@@ -134,6 +142,9 @@ export default function LinkedInPage() {
         </Tabs.Panel>
         <Tabs.Panel value="voices" pt="xs">
           <VoicesSection personas={data} />
+        </Tabs.Panel>
+        <Tabs.Panel value="bump-frameworks" pt="xs">
+          <BumpFrameworksPage />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

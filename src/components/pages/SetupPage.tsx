@@ -3,7 +3,7 @@ import { userDataState, userTokenState } from '@atoms/userAtoms';
 import PageFrame from '@common/PageFrame';
 import DemoFeedbackChart from '@common/charts/DemoFeedbackChart';
 import AllContactsSection from '@common/home/AllContactsSection';
-import DashboardSection from '@common/home/DashboardSection';
+import DashboardSection from '@pages/DashboardPage';
 import RecentActivitySection from '@common/home/RecentActivitySection';
 import {
   Accordion,
@@ -199,7 +199,7 @@ function MessageGenerationOnboarding(props: { data: any }) {
         {
           title: 'Bump Frameworks for LinkedIn',
           description: 'Customize how the AI responses on LinkedIn',
-          link: '/home/bump-frameworks',
+          link: '/linkedin/bump-frameworks',
           complete: props.data.msg_gen.bump_framework_linkedin,
         },
         {

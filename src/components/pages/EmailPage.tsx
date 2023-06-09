@@ -4,7 +4,7 @@ import EmailAnalyticsTable from "@common/analytics/EmailAnalyticsTable";
 import CampaignTable from "@common/campaigns/CampaignTable";
 import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
 import AllContactsSection from "@common/home/AllContactsSection";
-import RecActionsSection from "@common/home/DashboardSection";
+import RecActionsSection from "@pages/DashboardPage";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import PersonaDetailsTransformers from "@common/persona/details/PersonaDetailsTransformers";

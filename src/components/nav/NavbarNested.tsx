@@ -153,16 +153,23 @@ const siteLinks = [
     links: [{ key: "search", label: "Search", icon: IconSearch, link: "/" }],
   },
   {
+    mainKey: "dashboard",
+    label: "Dashboard",
+    icon: IconCheckbox,
+    links: [
+      {
+        key: "dashboard",
+        label: "Dashboard",
+        icon: IconCheckbox,
+        link: "/dashboard",
+      },
+    ],
+  },
+  {
     mainKey: "home",
     label: "Home",
     icon: IconHome,
     links: [
-      {
-        key: "home-dashboard",
-        label: "Dashboard",
-        icon: IconCheckbox,
-        link: "/home/dashboard",
-      },
       {
         key: "home-all-contacts",
         label: "Pipeline",
@@ -180,12 +187,6 @@ const siteLinks = [
         label: "Demo Feedback Repo",
         icon: IconClipboardData,
         link: "/home/demo-feedback",
-      },
-      {
-        key: "home-bump-frameworks",
-        label: "Bump Frameworks",
-        icon: IconAdjustments,
-        link: "/home/bump-frameworks",
       },
       {
         key: "home-calendar",
@@ -213,10 +214,10 @@ const siteLinks = [
         link: "/linkedin/ctas",
       },
       {
-        key: "linkedin-personalizations",
-        label: "Personalizations",
-        icon: IconAffiliate,
-        link: "/linkedin/personalizations",
+        key: "linkedin-bump-frameworks",
+        label: "Bump Frameworks",
+        icon: IconAdjustments,
+        link: "/linkedin/bump-frameworks",
       },
       {
         key: "linkedin-campaign-analytics",
@@ -249,12 +250,12 @@ const siteLinks = [
       //   icon: IconListDetails,
       //   link: '/email/sequences',
       // },
-      {
+/*       {
         key: "email-personalizations",
         label: "Personalizations",
         icon: IconAffiliate,
         link: "/email/personalizations",
-      },
+      }, */
       {
         key: "email-campaign-analytics",
         label: "Campaign Analytics",
@@ -303,7 +304,7 @@ export function NavbarNested(props: {
     let newTab = activeSubTab
       ? `${activeTab.trim()}-${activeSubTab.trim()}`
       : activeTab.trim();
-    newTab = newTab === "" || newTab === "home" ? "home-dashboard" : newTab;
+    newTab = newTab === "" || newTab === "home" ? "dashboard" : newTab;
     navigateToPage(
       navigate,
       `/${newTab.replace("-", "/")}`,

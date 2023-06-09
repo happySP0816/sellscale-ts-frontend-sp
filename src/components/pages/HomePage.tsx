@@ -6,7 +6,7 @@ import { userDataState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
 import DemoFeedbackChart from "@common/charts/DemoFeedbackChart";
 import AllContactsSection from "@common/home/AllContactsSection";
-import DashboardSection from "@common/home/DashboardSection";
+import DashboardSection from "@pages/DashboardPage";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import { Tabs } from "@mantine/core";
 import {
@@ -64,12 +64,6 @@ export default function HomePage() {
           >
             Demo Feedback Repository
           </Tabs.Tab>
-          <Tabs.Tab
-            value="bump-frameworks"
-            icon={<IconClipboardData size="1.1rem" />}
-          >
-            Bump Frameworks
-          </Tabs.Tab>
           <Tabs.Tab value="calendar" icon={<IconCalendarEvent size="1.1rem" />}>
             Demo Calendar
           </Tabs.Tab>
@@ -86,9 +80,6 @@ export default function HomePage() {
         </Tabs.Panel>
         <Tabs.Panel value="demo-feedback" pt="xs">
           {tabId === "demo-feedback" && <DemoFeedbackChart />}
-        </Tabs.Panel>
-        <Tabs.Panel value="bump-frameworks" pt="xs">
-          <BumpFrameworksPage />
         </Tabs.Panel>
         <Tabs.Panel value="calendar" pt="xs">
           {tabId === "calendar" && <CalendarSection />}

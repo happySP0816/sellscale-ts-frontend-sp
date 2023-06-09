@@ -30,6 +30,7 @@ import EmailPage from "@pages/EmailPage";
 import OnboardingModalPage from "@pages/OnboardingModalPage";
 import AuthCalendlyPage from "@pages/AuthCalendlyPage";
 import SetupPage from "@pages/SetupPage";
+import DashboardSection from "@pages/DashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -85,10 +86,14 @@ const router = sentryCreateBrowserRouter([
     children: [
       {
         path: "",
-        element: <RestrictedRoute page={<HomePage />} />,
+        element: <RestrictedRoute page={<DashboardSection />} />,
         loader: async ({ params }: { params: any }) => {
           return { prospectId: "" };
         },
+      },
+      {
+        path: "dashboard",
+        element: <RestrictedRoute page={<DashboardSection />} />,
       },
       {
         path: "home/:tabId/:prospectId?",

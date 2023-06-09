@@ -15,7 +15,7 @@ import {
 import { openContextModal } from "@mantine/modals";
 import { convertDateToLocalTime, splitName } from "@utils/general";
 import { useRecoilState, useRecoilValue } from "recoil";
-import NotificationCard from "./dashboard/NotificationCard";
+import NotificationCard from "../common/home/dashboard/NotificationCard";
 import {
   dashCardSeeAllDrawerOpenState,
   demoFeedbackSeeAllDrawerOpenState,
@@ -30,12 +30,13 @@ import { Prospect } from "src";
 import { logout } from "@auth/core";
 import { API_URL } from "@constants/data";
 import DemoFeedbackDrawer from "@drawers/DemoFeedbackDrawer";
-import DashCardContents from "./dashboard/DashCardContents";
+import DashCardContents from "../common/home/dashboard/DashCardContents";
 import DashCardSeeAllDrawer from "@drawers/DashCardSeeAllDrawer";
 import { useQuery } from "@tanstack/react-query";
 import DemoFeedbackSeeAllDrawer from "@drawers/DemoFeedbackSeeAllDrawer";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
 import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import PageFrame from "@common/PageFrame";
 
 export default function DashboardSection() {
   const userToken = useRecoilValue(userTokenState);
@@ -164,7 +165,7 @@ export default function DashboardSection() {
   console.log(all_prospectsDemo);
 
   return (
-    <>
+    <PageFrame>
       <Flex justify="center" pb={10}>
         <div style={{ maxWidth: 500, width: "100%" }}>
           <Stack spacing={40}>
@@ -449,6 +450,6 @@ export default function DashboardSection() {
         </>
       )}
       {prospectDrawerOpened && <ProspectDetailsDrawer />}
-    </>
+    </PageFrame>
   );
 }

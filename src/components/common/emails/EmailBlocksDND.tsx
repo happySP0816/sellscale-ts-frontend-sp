@@ -159,7 +159,7 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
     triggerGetEmailBlocks();
   }, []);
 
-  return isDragAndDropEnabled && (
+  return (
     <>
       <LoadingOverlay visible={loading} />
       <Flex direction='column' w='100%' pl='16px'>

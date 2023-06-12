@@ -7,6 +7,8 @@ import {
   getStylesRef,
   rem,
   ScrollArea,
+  Flex,
+  Button,
 } from "@mantine/core";
 import {
   IconSwitchHorizontal,
@@ -41,10 +43,12 @@ import { navTabState } from "@atoms/navAtoms";
 import { animated, useSpring } from "@react-spring/web";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
 import { ProfileCard } from "@nav/ProfileIcon";
-import { userDataState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { isLoggedIn, logout } from "@auth/core";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getOnboardingCompletionReport } from "@utils/requests/getOnboardingCompletionReport";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -257,12 +261,12 @@ const siteLinks = [
         icon: IconWall,
         link: "/email/blocks",
       },
-/*       {
-        key: "email-personalizations",
-        label: "Personalizations",
-        icon: IconAffiliate,
-        link: "/email/personalizations",
-      }, */
+      /*       {
+              key: "email-personalizations",
+              label: "Personalizations",
+              icon: IconAffiliate,
+              link: "/email/personalizations",
+            }, */
       {
         key: "email-campaign-analytics",
         label: "Campaign Analytics",
@@ -326,6 +330,32 @@ export function NavbarNested(props: {
 
   const loggedIn = isLoggedIn();
 
+
+  // Get Onboarding completion report
+  // --------------------------------
+  const userToken = useRecoilValue(userTokenState);
+
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [`query-sdr-onboarding-completion-report`],
+    queryFn: async () => {
+      const response = await getOnboardingCompletionReport(userToken);
+      return response.status === 'success' ? response.data : null;
+    },
+  });
+
+  // Get percentage from completed steps in report
+  let stepsCount = 0;
+  let completedStepsCount = 0;
+  for (const key in data) {
+    stepsCount += Object.keys(data[key]).length;
+    completedStepsCount += Object.values(data[key]).flat().filter((item: any) => item).length;
+  }
+  stepsCount -= 4; // TEMP: Remove the 4 coming soon steps that are always false
+
+  const percentage = Math.round((completedStepsCount / stepsCount) * 100);
+  // ------------------------------
+
+
   return (
     <AnimatedNavbar
       style={{
@@ -344,14 +374,11 @@ export function NavbarNested(props: {
         </Group>
       </Navbar.Section>
 
-      <Navbar.Section grow component={ScrollArea}>
-        <div>{links}</div>
-      </Navbar.Section>
-
-      <Navbar.Section className={classes.footer}>
-        {true && (
-          <a
-            href="#"
+      {true && (
+        <Flex w='100%' mb='md'>
+          <Button
+            w='100%'
+            size='lg'
             className={cx(classes.setupLink, {
               [classes.setupLinkActive]: "setup" === navTab,
             })}
@@ -362,10 +389,16 @@ export function NavbarNested(props: {
             }}
           >
             <IconFileDescription className={classes.linkIcon} stroke={1.5} />
-            <span>Onboarding Setup</span>
-          </a>
-        )}
+            <span>Onboarding Setup - {percentage}%</span>
+          </Button>
+        </Flex>
+      )}
 
+      <Navbar.Section grow component={ScrollArea}>
+        <div>{links}</div>
+      </Navbar.Section>
+
+      <Navbar.Section className={classes.footer}>
         <ProfileCard />
 
         <a

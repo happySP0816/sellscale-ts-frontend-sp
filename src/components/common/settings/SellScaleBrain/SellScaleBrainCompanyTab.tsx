@@ -140,16 +140,6 @@ export default function SellScaleBrainCompanyTab() {
             }}
             mb="sm"
           />
-          <TextInput
-            label="Company Case Study"
-            value={companyCaseStudy}
-            placeholder="https://example.com/fh/files/misc/hsw-sqrg.pdf"
-            onChange={(event) => {
-              setCompanyCaseStudy(event.currentTarget.value);
-              setNeedsSave(true);
-            }}
-            mb="sm"
-          />
           <Textarea
             label="Value Proposition Key Points"
             description="A list of 3-5 key points that describe your value proposition"
@@ -171,6 +161,16 @@ export default function SellScaleBrainCompanyTab() {
               setNeedsSave(true);
             }}
             searchable
+            mb="sm"
+          />
+          <TextInput
+            label="(Optional) Company Case Study"
+            value={companyCaseStudy}
+            placeholder="https://example.com/fh/files/misc/hsw-sqrg.pdf"
+            onChange={(event) => {
+              setCompanyCaseStudy(event.currentTarget.value);
+              setNeedsSave(true);
+            }}
             mb="sm"
           />
 

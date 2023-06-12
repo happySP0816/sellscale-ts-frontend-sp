@@ -183,16 +183,21 @@ export default function ProspectDetailsDrawer() {
       {data?.main.prospect_info && !isFetching && (
         <>
           <div style={{ position: "relative" }}>
-            <ProspectDetailsSummary
-              fullName={data.main.prospect_info.details.full_name}
-              title={data.main.prospect_info.details.title}
-              email={data.main.prospect_info.email.email}
-              linkedin={data.main.prospect_info.li.li_profile}
-              profilePic={data.main.prospect_info.details.profile_pic}
-              companyName={data.main.prospect_info.company.name}
-              companyURL={data.main.prospect_info.company.url}
-              persona={data.main.prospect_info.details.persona}
-            />
+            <Flex w='100%' mt='md'>
+              <ProspectDetailsSummary
+                fullName={data.main.prospect_info.details.full_name}
+                prospectID={data.main.prospect_info.details.id}
+                aiEnabled={!data.main.prospect_info.details.ai_responses_disabled}
+                refetch={refetch}
+                title={data.main.prospect_info.details.title}
+                email={data.main.prospect_info.email.email}
+                linkedin={data.main.prospect_info.li.li_profile}
+                profilePic={data.main.prospect_info.details.profile_pic}
+                companyName={data.main.prospect_info.company.name}
+                companyURL={data.main.prospect_info.company.url}
+                persona={data.main.prospect_info.details.persona}
+              />
+            </Flex>
             {data.main.prospect_info.email.email && (
               <Center>
                 <Button
@@ -225,6 +230,7 @@ export default function ProspectDetailsDrawer() {
 
           <ScrollArea
             style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
+            mt='sm'
           >
             {data?.channelTypes.length > 0 &&
               prospectDrawerStatuses.overall !== "PROSPECTED" && (
@@ -289,6 +295,9 @@ export default function ProspectDetailsDrawer() {
                                 conversation_entry_list={
                                   data.main.prospect_info.li
                                     .li_conversation_thread
+                                }
+                                ai_enabled={
+                                  !data.main.prospect_info.details.ai_responses_disabled
                                 }
                                 conversation_url={
                                   data.main.prospect_info.li.li_conversation_url

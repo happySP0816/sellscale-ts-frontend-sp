@@ -15,6 +15,7 @@ import {
   Alert,
   Anchor,
   HoverCard,
+  Paper,
 } from "@mantine/core";
 import {
   IconExternalLink,
@@ -52,6 +53,7 @@ import AutoBumpFrameworkInfo from "./AutoBumpFrameworkInfo";
 
 type ProspectDetailsViewConversationPropsType = {
   conversation_entry_list: LinkedInMessage[];
+  ai_enabled: boolean;
   conversation_url: string;
   prospect_id: number;
   persona_id: number;
@@ -96,8 +98,8 @@ export default function ProspectDetailsViewConversation(
     userData.li_voyager_connected
       ? []
       : props.conversation_entry_list.sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-        )
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      )
   );
 
   // If message was cleared, it's no longer ai generated
@@ -346,7 +348,7 @@ export default function ProspectDetailsViewConversation(
   ) => {
     fetch(
       `${API_URL}/research/account_research_points?prospect_id=` +
-        props.prospect_id,
+      props.prospect_id,
       {
         method: "GET",
         headers: {
@@ -376,7 +378,7 @@ export default function ProspectDetailsViewConversation(
               research_str += `- ${res[i].reason}\n`;
             }
             setAccountResearch(research_str.trim());
-          } catch (e) {}
+          } catch (e) { }
         }
       })
       .catch((err) => {
@@ -563,6 +565,17 @@ export default function ProspectDetailsViewConversation(
               {userData.li_voyager_connected ? "Send" : "Schedule"}
             </Button>
           </Flex>
+          {!props.ai_enabled &&
+
+            <Paper withBorder w='100%' p='md' my='md' sx={{
+              backgroundColor: '#ffe4e1',
+            }}>
+              <Flex w='100%' align='center' justify='center'>
+                <Text weight='bold' color='red'>AI communication has been turned off for this prospect.</Text>
+              </Flex>
+            </Paper>
+
+          }
           {props.overall_status && !loading && (
             <SelectBumpInstruction
               client_sdr_id={userData.id}

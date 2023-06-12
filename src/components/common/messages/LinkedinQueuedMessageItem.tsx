@@ -33,6 +33,7 @@ type MessageItemProps = {
   index: number;
   icp_fit_score: number;
   icp_fit_reason: string;
+  archetype: string;
 };
 
 export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
@@ -139,10 +140,18 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
           <Flex direction="column">
             <Box>
               <ICPFitPill
-                archetype=""
+                archetype={props.archetype}
                 icp_fit_score={props.icp_fit_score}
                 icp_fit_reason={props.icp_fit_reason}
               />
+              <Badge
+                variant="outline"
+                size="sm"
+                color={valueToColor(theme, props.archetype)}
+                style={{ marginLeft: "0.5rem" }}
+              >
+                {props.archetype}
+              </Badge>
             </Box>
             <Text fw="bold" fz="xl">
               {props.full_name}

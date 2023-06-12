@@ -19,6 +19,7 @@ type MessageType = {
   completion: string;
   icp_fit_score: number;
   icp_fit_reason: string;
+  archetype: string;
 };
 
 export default function LinkedinQueuedMessages() {
@@ -96,6 +97,7 @@ export default function LinkedinQueuedMessages() {
                   index={i}
                   icp_fit_score={messageItem.icp_fit_score}
                   icp_fit_reason={messageItem.icp_fit_reason}
+                  archetype={messageItem.archetype}
                 />
               </div>
             );

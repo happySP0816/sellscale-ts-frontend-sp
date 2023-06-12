@@ -80,6 +80,9 @@ export default function SchedulingCardContents(props: { prospect: Prospect }) {
             prospectDetails.prospect_info.li
               .li_conversation_thread
           }
+          ai_enabled={
+            prospectDetails.prospect_info.details.ai_enabled
+          }
           conversation_url={
             prospectDetails.prospect_info.li.li_conversation_url
           }

@@ -1,7 +1,16 @@
 import GeneratedByAI from "@common/library/GeneratedByAI";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
-import { Card, Text, Group, Table, Button, Loader, Tabs, Flex } from "@mantine/core";
+import {
+  Card,
+  Text,
+  Group,
+  Table,
+  Button,
+  Loader,
+  Tabs,
+  Flex,
+} from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { IconReload, IconRobot, IconUser } from "@tabler/icons";
@@ -26,7 +35,7 @@ export default function ProspectDetailsResearch(props: PropsType) {
   const fetchAccountResearch = () => {
     const res = fetch(
       `${API_URL}/research/account_research_points?prospect_id=` +
-      props.prospectId,
+        props.prospectId,
       {
         method: "GET",
         headers: {
@@ -46,21 +55,21 @@ export default function ProspectDetailsResearch(props: PropsType) {
   };
 
   const triggerGetResearchPointsHeuristic = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     const result = await getResearchPointsHeuristic(
       userToken,
-      props.prospectId,
+      props.prospectId
     );
-    setHeuristicResearchArray(result.data)
-    setIsLoading(false)
-  }
+    setHeuristicResearchArray(result.data);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     if (!fetched) {
       setIsLoading(true);
       setFetched(true);
       fetchAccountResearch();
-      triggerGetResearchPointsHeuristic()
+      triggerGetResearchPointsHeuristic();
     }
   }, [fetched]);
 
@@ -69,30 +78,29 @@ export default function ProspectDetailsResearch(props: PropsType) {
       <Text weight={700} size="lg">
         Research
       </Text>
-      <Text mt='xs' fz='sm'>
-        SellScale performs research on your prospects so our AI can write the best messages possible.
+      <Text mt="xs" fz="sm">
+        SellScale performs research on your prospects so our AI can write the
+        best messages possible.
       </Text>
-      <Text my='sm' fz='sm'>
+      <Text my="sm" fz="sm">
         You can view the research points below.
       </Text>
-      <Tabs defaultValue="aiFitReasons">
+      <Tabs defaultValue="personalResearchPoints">
         <Tabs.List>
-          <Tabs.Tab
-            value="aiFitReasons"
-            icon={<IconRobot size="1.25rem" />}
-          >
-            AI Fit Reasons
-          </Tabs.Tab>
+          {" "}
           <Tabs.Tab
             value="personalResearchPoints"
             icon={<IconUser size="1.25rem" />}
           >
             Personal
           </Tabs.Tab>
+          <Tabs.Tab value="aiFitReasons" icon={<IconRobot size="1.25rem" />}>
+            AI Fit Reasons
+          </Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="aiFitReasons" pl="xs" mih={'200px'}>
-          <Flex justify={'flex-end'} align='center'>
+        <Tabs.Panel value="aiFitReasons" pl="xs" mih={"200px"}>
+          <Flex justify={"flex-end"} align="center">
             {accountResearchArray.length > 0 ? (
               <Text my="xs" fz="sm" c="dimmed">
                 This information has been synthesized by SellScale AI.
@@ -107,7 +115,7 @@ export default function ProspectDetailsResearch(props: PropsType) {
             <Button
               variant="light"
               size="xs"
-              mb='xs'
+              mb="xs"
               rightIcon={<IconReload size="0.975rem" />}
               onClick={async () => {
                 setIsAccountResearchLoading(true);
@@ -170,7 +178,7 @@ export default function ProspectDetailsResearch(props: PropsType) {
           {accountResearchArray.length > 0 && <GeneratedByAI />}
         </Tabs.Panel>
 
-        <Tabs.Panel value="personalResearchPoints" pl="xs" mih={'200px'}>
+        <Tabs.Panel value="personalResearchPoints" pl="xs" mih={"200px"}>
           {heuristicResearchArray.length > 0 ? (
             <Text my="xs" fz="sm" c="dimmed">
               This information is scraped from the web.
@@ -178,11 +186,12 @@ export default function ProspectDetailsResearch(props: PropsType) {
           ) : (
             <div>
               <Text my="xs" fz="sm" c="dimmed">
-                No personal research points found. These are usually shown after a message has been sent.
+                No personal research points found. These are usually shown after
+                a message has been sent.
               </Text>
             </div>
           )}
-              
+
           {isLoading && <Loader variant="dots" />}
           {heuristicResearchArray.length > 0 && (
             <Table striped highlightOnHover withBorder withColumnBorders>
@@ -194,12 +203,16 @@ export default function ProspectDetailsResearch(props: PropsType) {
               </thead>
               <tbody>
                 {heuristicResearchArray.map((item: any, index: any) => {
-                  let source = item.research_point_type?.split('_').join(' ').toLowerCase().replace(/(?:^|\s)\w/g, function(match: any) {
-                    return match.toUpperCase();
-                  });
+                  let source = item.research_point_type
+                    ?.split("_")
+                    .join(" ")
+                    .toLowerCase()
+                    .replace(/(?:^|\s)\w/g, function (match: any) {
+                      return match.toUpperCase();
+                    });
                   let value = item.value;
 
-                  if (item.research_point_type === 'CUSTOM'){
+                  if (item.research_point_type === "CUSTOM") {
                     const customData = JSON.parse(item.value);
                     source = customData.label;
                     value = customData.value;
@@ -209,14 +222,13 @@ export default function ProspectDetailsResearch(props: PropsType) {
                       <td>{source}</td>
                       <td>{value}</td>
                     </tr>
-                  )
+                  );
                 })}
               </tbody>
             </Table>
           )}
         </Tabs.Panel>
       </Tabs>
-
     </Card>
   );
 }

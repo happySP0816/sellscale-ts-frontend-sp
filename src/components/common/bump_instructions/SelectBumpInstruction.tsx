@@ -104,9 +104,7 @@ export default function SelectBumpInstruction(props: PropsType) {
         connection_degree: msg.connection_degree,
         message: msg.message,
       })),
-      result.data?.bump_frameworks.map(
-        (bumpFramework: any) => bumpFramework.description
-      )
+      result.data?.bump_frameworks.map((bumpFramework: any) => bumpFramework.id)
     );
 
     if (response.status === "success") {
@@ -158,7 +156,10 @@ export default function SelectBumpInstruction(props: PropsType) {
             mt="md"
             value={selectedBumpFramework ? selectedBumpFramework.id + "" : "-1"}
             data={bumpFrameworks.map((x: any) => {
-              return { value: x.id + "", label: x.title };
+              return {
+                value: x.id + "",
+                label: (x.default ? "🟢 " : "⚪️ ") + x.title,
+              };
             })}
             placeholder={"Select Bump Frameworks"}
             onChange={(value: any) => {

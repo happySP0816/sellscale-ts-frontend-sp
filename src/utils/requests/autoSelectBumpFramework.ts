@@ -3,23 +3,23 @@ import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
- * 
- * @param userToken 
- * @param convo_history 
+ *
+ * @param userToken
+ * @param convo_history
  * @param bump_frameworks
- * @returns - 
+ * @returns -
  */
 export async function autoSelectBumpFramework(
   userToken: string,
-  convo_history: { connection_degree: string, message: string }[],
-  bump_frameworks: string[],
+  convo_history: { connection_degree: string; message: string }[],
+  bump_framework_ids: number[]
 ): Promise<MsgResponse> {
-  if (convo_history.length === 0 || bump_frameworks.length === 0) {
+  if (convo_history.length === 0 || bump_framework_ids.length === 0) {
     return {
       status: "error",
-      title: 'Empty data',
-      message: 'Empty data',
-    }
+      title: "Empty data",
+      message: "Empty data",
+    };
   }
 
   const response = await fetch(
@@ -32,10 +32,9 @@ export async function autoSelectBumpFramework(
       },
       body: JSON.stringify({
         convo_history,
-        bump_frameworks,
-      })
+        bump_framework_ids,
+      }),
     }
   );
-  return await processResponse(response, 'data');
-
+  return await processResponse(response, "data");
 }

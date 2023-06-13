@@ -48,7 +48,10 @@ import { API_URL } from "@constants/data";
 import { prospectDrawerStatusesState } from "@atoms/prospectAtoms";
 import { postBumpGenerateResponse } from "@utils/requests/postBumpGenerateResponse";
 import { autoFillAccountResearch } from "@utils/requests/autoFillAccountResearch";
-import { deleteAutoBumpMessage, getAutoBumpMessage } from "@utils/requests/autoBumpMessage";
+import {
+  deleteAutoBumpMessage,
+  getAutoBumpMessage,
+} from "@utils/requests/autoBumpMessage";
 import AutoBumpFrameworkInfo from "./AutoBumpFrameworkInfo";
 
 type ProspectDetailsViewConversationPropsType = {
@@ -98,8 +101,8 @@ export default function ProspectDetailsViewConversation(
     userData.li_voyager_connected
       ? []
       : props.conversation_entry_list.sort(
-        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-      )
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        )
   );
 
   // If message was cleared, it's no longer ai generated
@@ -120,7 +123,6 @@ export default function ProspectDetailsViewConversation(
   };
 
   const fetchAndPopulateConvo = async () => {
-
     const isFirstLoad = messages.current.length === 0;
 
     if (isFirstLoad) {
@@ -181,14 +183,16 @@ export default function ProspectDetailsViewConversation(
 
       if (isFirstLoad) {
         // Set if we have an auto bump message generated
-        const autoBumpMsgResponse = await getAutoBumpMessage(userToken, props.prospect_id);
+        const autoBumpMsgResponse = await getAutoBumpMessage(
+          userToken,
+          props.prospect_id
+        );
         if (autoBumpMsgResponse.status === "success") {
           autoBumpMessage.current = autoBumpMsgResponse.data;
           setMessageDraft(autoBumpMsgResponse.data.message);
           setAiGenerated(true);
         }
       }
-
     }
     setLoading(false);
     return latestMessages;
@@ -347,8 +351,8 @@ export default function ProspectDetailsViewConversation(
     bumpFramework: BumpFramework
   ) => {
     fetch(
-      `${API_URL}/research/account_research_points?prospect_id=` +
-      props.prospect_id,
+      `${API_URL}/research/personal_research_points?prospect_id=` +
+        props.prospect_id,
       {
         method: "GET",
         headers: {
@@ -356,40 +360,28 @@ export default function ProspectDetailsViewConversation(
         },
       }
     )
-      .then((res) => res.json())
+      .then((res) => {
+        return res.json();
+      })
       .then(async (res) => {
-        const response = await autoFillAccountResearch(
-          userToken,
-          props.prospect_id,
-          messages.current.slice(-5).map((msg) => ({
-            connection_degree: msg.connection_degree,
-            message: msg.message,
-          })),
-          bumpFramework.description,
-          res.map((r: any) => r.reason)
-        );
-
-        if (response.status === "success") {
-          try {
-            // Fill account research with indexes of best research points
-            const research_indexes = response.data;
-            let research_str = "";
-            for (const i of research_indexes) {
-              research_str += `- ${res[i].reason}\n`;
-            }
-            setAccountResearch(research_str.trim());
-          } catch (e) { }
+        console.log("GOT HERE");
+        console.log(res);
+        let research_str = "";
+        for (var i = 0; i < res.length; i++) {
+          research_str += `- ${res[i].reason}\n`;
         }
+        console.log(research_str);
+        setAccountResearch(research_str.trim());
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  console.log(!emptyConvo)
-  console.log(loading)
-  console.log(messages.current)
-  console.log(autoBumpMessage.current)
+  console.log(!emptyConvo);
+  console.log(loading);
+  console.log(messages.current);
+  console.log(autoBumpMessage.current);
 
   return (
     <>
@@ -514,14 +506,19 @@ export default function ProspectDetailsViewConversation(
                 ],
               ])}
             />
-            {autoBumpMessage.current && autoBumpMessage.current.bump_framework.title && (
-              <AutoBumpFrameworkInfo
-                bump_title={autoBumpMessage.current.bump_framework.title}
-                bump_description={autoBumpMessage.current.bump_framework.description}
-                bump_length={autoBumpMessage.current.bump_framework.length}
-                account_research_points={autoBumpMessage.current.account_research_points ?? []}
-              />
-            )}
+            {autoBumpMessage.current &&
+              autoBumpMessage.current.bump_framework.title && (
+                <AutoBumpFrameworkInfo
+                  bump_title={autoBumpMessage.current.bump_framework.title}
+                  bump_description={
+                    autoBumpMessage.current.bump_framework.description
+                  }
+                  bump_length={autoBumpMessage.current.bump_framework.length}
+                  account_research_points={
+                    autoBumpMessage.current.account_research_points ?? []
+                  }
+                />
+              )}
           </div>
           <Flex>
             <Button
@@ -565,17 +562,23 @@ export default function ProspectDetailsViewConversation(
               {userData.li_voyager_connected ? "Send" : "Schedule"}
             </Button>
           </Flex>
-          {!props.ai_enabled &&
-
-            <Paper withBorder w='100%' p='md' my='md' sx={{
-              backgroundColor: '#ffe4e1',
-            }}>
-              <Flex w='100%' align='center' justify='center'>
-                <Text weight='bold' color='red'>AI communication has been turned off for this prospect.</Text>
+          {!props.ai_enabled && (
+            <Paper
+              withBorder
+              w="100%"
+              p="md"
+              my="md"
+              sx={{
+                backgroundColor: "#ffe4e1",
+              }}
+            >
+              <Flex w="100%" align="center" justify="center">
+                <Text weight="bold" color="red">
+                  AI communication has been turned off for this prospect.
+                </Text>
               </Flex>
             </Paper>
-
-          }
+          )}
           {props.overall_status && !loading && (
             <SelectBumpInstruction
               client_sdr_id={userData.id}

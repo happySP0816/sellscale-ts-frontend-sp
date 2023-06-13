@@ -11,17 +11,18 @@ import {
   Tooltip,
   useMantineTheme,
   Textarea,
-} from '@mantine/core';
-import { nameToInitials, valueToColor } from '@utils/general';
-import TextAreaWithAI from '@common/library/TextAreaWithAI';
-import { useRef, useState } from 'react';
-import { IconEdit } from '@tabler/icons';
+} from "@mantine/core";
+import { nameToInitials, valueToColor } from "@utils/general";
+import TextAreaWithAI from "@common/library/TextAreaWithAI";
+import { useRef, useState } from "react";
+import { IconEdit } from "@tabler/icons";
 
-import { patchLIMessage } from '@utils/requests/patchLIMessage';
-import { useRecoilValue } from 'recoil';
-import { userTokenState } from '@atoms/userAtoms';
-import { showNotification } from '@mantine/notifications';
-import DOMPurify from 'dompurify';
+import { patchLIMessage } from "@utils/requests/patchLIMessage";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { showNotification } from "@mantine/notifications";
+import DOMPurify from "dompurify";
+import moment from "moment";
 
 type MessageItemProps = {
   prospect_id: number;
@@ -39,47 +40,47 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
   const userToken = useRecoilValue(userTokenState);
 
   const daysDiff = Math.ceil(
-    (new Date(props.date_scheduled_to_send).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+    (new Date(props.date_scheduled_to_send).getTime() - new Date().getTime()) /
+      (1000 * 60 * 60 * 24)
   );
 
   return (
     <Card
       style={{
-        overflow: 'visible',
+        overflow: "visible",
       }}
     >
-      <Flex direction='row' mb='sm' w='100%' justify={'space-between'}>
+      <Flex direction="row" mb="sm" w="100%" justify={"space-between"}>
         <Flex>
-          <Flex mr='sm'>
+          <Flex mr="sm">
             <Avatar
               src={props.img_url}
               alt={props.full_name}
               color={valueToColor(theme, props.full_name)}
-              radius='lg'
+              radius="lg"
               size={50}
             >
               {nameToInitials(props.full_name)}
             </Avatar>
           </Flex>
-          <Flex direction='column'>
-            <Text fw='bold' fz='xl'>
+          <Flex direction="column">
+            <Text fw="bold" fz="xl">
               {props.full_name}
             </Text>
-            <Text fz='md'>
+            <Text fz="md">
               {props.title} @ {props.company}
             </Text>
           </Flex>
         </Flex>
         <Flex>
-          <Badge>
-            Sending in {daysDiff} day{daysDiff === 1 ? '' : 's'}
-          </Badge>
+          <Badge>{moment(props.date_scheduled_to_send).format("LL")}</Badge>
         </Flex>
       </Flex>
-      <Box pos='relative'>
-        <Title order={5} px={10} py={5}>{props.subject}</Title>
-        <Textarea value={props.body} autosize readOnly>
-        </Textarea>
+      <Box pos="relative">
+        <Title order={5} px={10} py={5}>
+          {props.subject}
+        </Title>
+        <Textarea value={props.body} autosize readOnly></Textarea>
       </Box>
     </Card>
   );

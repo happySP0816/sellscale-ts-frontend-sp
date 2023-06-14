@@ -19,6 +19,7 @@ import {
   Center,
   Loader,
   Box,
+  Divider,
 } from "@mantine/core";
 import {
   IconActivityHeartbeat,
@@ -36,6 +37,7 @@ import {
   IconPresentationAnalytics,
   IconRefresh,
   IconTool,
+  IconTools,
   IconUpload,
   IconX,
 } from "@tabler/icons";
@@ -364,29 +366,49 @@ export default function PersonaCard(props: {
       )}
 
       <Collapse in={opened}>
-        <Tabs defaultValue={props.unassignedPersona ? 'analyze' : 'learn'} px="xs" color="teal">
+        <Tabs
+          defaultValue={props.unassignedPersona ? "analyze" : "contacts"}
+          px="xs"
+          color="teal"
+        >
           <Tabs.List>
             {!props.unassignedPersona && (
-              <Tabs.Tab value="learn" icon={1}>
-                Learn
+              <Tabs.Tab value="contacts" icon={1}>
+                Contacts
               </Tabs.Tab>
             )}
             {!props.unassignedPersona && (
-              <Tabs.Tab
-                value="prioritize"
-                icon={2}
-              >
+              <Tabs.Tab value="teach" icon={2}>
+                Teach
+              </Tabs.Tab>
+            )}
+            {!props.unassignedPersona && (
+              <Tabs.Tab value="prioritize" icon={3}>
                 Prioritize
               </Tabs.Tab>
             )}
             {!props.unassignedPersona && (
-              <Tabs.Tab value="li-setup" icon={3}>
-                LI Setup
+              <Tabs.Tab value="li-setup" icon={4}>
+                LinkedIn Setup
               </Tabs.Tab>
             )}
             {!props.unassignedPersona && (
-              <Tabs.Tab value="email-setup" icon={4}>
+              <Tabs.Tab value="email-setup" icon={5}>
                 Email Setup
+              </Tabs.Tab>
+            )}
+            {!props.unassignedPersona && (
+              <Tabs.Tab
+                value="filters"
+                ml="auto"
+                icon={<IconFilter size={"0.8rem"} />}
+              >
+                Filters
+              </Tabs.Tab>
+            )}
+            {!props.unassignedPersona && (
+              <Tabs.Tab value="tools" icon={<IconTools size={"0.8rem"} />}>
+                Tools
               </Tabs.Tab>
             )}
 
@@ -405,6 +427,16 @@ export default function PersonaCard(props: {
                 </Tabs.Tab>
               )}
           </Tabs.List>
+          <Tabs.Panel value="contacts" pt="xs">
+            <Title order={2}>Contacts</Title>
+            <Text>
+              These are the contacts that are currently assigned to this
+              persona. To upload more contacts, click the "Upload Prospects"
+              green button in the top right.
+            </Text>
+            <Divider mt="sm" mb="sm" />
+            <ProspectTable_old personaSpecific={props.personaOverview.id} />
+          </Tabs.Panel>
           <Tabs.Panel value="pulse" pt="xs">
             <Pulse personaOverview={props.personaOverview} />
           </Tabs.Panel>
@@ -424,17 +456,47 @@ export default function PersonaCard(props: {
             <PersonaFilters archetype_id={props.personaOverview.id} />
           </Tabs.Panel>
 
-          <Tabs.Panel value="learn" pt="xs">
+          <Tabs.Panel value="teach" pt="xs">
+            <Title order={2}>Teach</Title>
+            <Text>
+              Teach the AI about this persona by sharing details like why this
+              persona would be a good fit for your product, what their ideal
+              customer profile is, and what their contact objective is.
+            </Text>
+            <Divider mt="sm" mb="sm" />
             <PersonaBrain archetype_id={props.personaOverview.id} />
           </Tabs.Panel>
           <Tabs.Panel value="prioritize" pt="xs">
+            <Title order={2}>Prioritize</Title>
+            <Text>
+              Adjust the way that the AI prioritizes prospects for this persona
+              by adjusting the description of the 'ideal persona' on the left.
+            </Text>
+            <Divider mt="sm" mb="sm" />
             <Pulse personaOverview={props.personaOverview} />
           </Tabs.Panel>
           <Tabs.Panel value="li-setup" pt="xs">
-            <PersonaLiSetup persona={props.personaOverview} personas={props.allPersonas} />
+            <Title order={2}>LinkedIn First Message Setup</Title>
+            <Text>
+              Setup the LinkedIn account that will be used to send connection
+              requests to prospects for this persona. This will configure both
+              the initial connection request.
+            </Text>
+            <Divider mt="sm" mb="sm" />
+            <PersonaLiSetup
+              persona={props.personaOverview}
+              personas={props.allPersonas}
+            />
           </Tabs.Panel>
           <Tabs.Panel value="email-setup" pt="xs">
-            <PersonaEmailSetup />
+            <Title order={2}>Email First Contact Setup</Title>
+            <Text>
+              Setup the email account that will be used to send emails to
+              prospects for this persona. This will configure both the initial
+              email.
+            </Text>
+            <Divider mt="sm" mb="sm" />
+            <PersonaEmailSetup personaId={props.personaOverview.id} />
           </Tabs.Panel>
         </Tabs>
       </Collapse>

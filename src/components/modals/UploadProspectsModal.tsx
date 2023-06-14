@@ -72,7 +72,9 @@ export default function UploadProspectsModal({
   const [fitReason, setFitReason] = useState("");
   const [icpMatchingPrompt, setICPMatchingPrompt] = useState("");
 
-  const [contactObjective, setContactObjective] = useState('Set up a discovery call in order to identify a pain point');
+  const [contactObjective, setContactObjective] = useState(
+    "Set up a discovery call in order to identify a pain point"
+  );
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
@@ -488,7 +490,6 @@ export default function UploadProspectsModal({
         <Tabs defaultValue="from-file" px="xs" color="teal">
           <Tabs.List>
             <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
-            <Tabs.Tab value="from-crm">Import from CRM</Tabs.Tab>
             <Tabs.Tab value="from-empty">Upload Prospects Later</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="from-file" pt="xs">

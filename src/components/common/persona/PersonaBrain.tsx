@@ -84,7 +84,7 @@ export default function PersonaBrain(props: PropsType) {
           title: "Success",
           message: "Persona details saved",
           color: "blue",
-        })
+        });
       })
       .catch((err) => {
         console.log(err);
@@ -158,8 +158,8 @@ export default function PersonaBrain(props: PropsType) {
             recommendations, message generations, email generations, and more.
           </Text>
           <TextAreaWithAI
-            label="Persona Name"
-            description='Give a short name to this persona. For example, "Sales Manager" or "Marketing Director"'
+            label="Descriptive Persona Name"
+            description='Give a short name to this persona. For example, "Sales Manager" or "Marketing Director". The AI will use this name when generating messages and splitting prospects.'
             minRows={1}
             value={personaName}
             onChange={(e) => {
@@ -167,17 +167,17 @@ export default function PersonaBrain(props: PropsType) {
               setNeedsSave(true);
             }}
           />
-          <TextAreaWithAI
+          {/* <TextAreaWithAI
             label="Persona Profile"
             description="Generated profile of this persona"
             minRows={4}
             value={''}
             onChange={(e) => {
             }}
-          />
+          /> */}
           <TextAreaWithAI
-            label="Why They Buy"
-            description="Explain why this persona is a good fit for your product or service"
+            label="Why do they buy your product?"
+            description="Explain why this persona is a good fit for your product or service. This will be used by the AI to generate emails and messages."
             minRows={4}
             value={personaFitReason}
             onChange={(e) => {
@@ -208,8 +208,8 @@ export default function PersonaBrain(props: PropsType) {
             }}
           />
           <TextAreaWithAI
-            label="Persona ICP Matching Instructions"
-            description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc."
+            label="Rich Persona Description"
+            description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc. Note that the AI will use this information to rank your prospects."
             minRows={4}
             value={personaICPMatchingInstructions}
             onChange={(e) => {
@@ -219,7 +219,7 @@ export default function PersonaBrain(props: PropsType) {
           />
           <TextAreaWithAI
             label="Persona contact objective"
-            description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral."
+            description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral. The AI will use this information to generate messages."
             minRows={4}
             value={personaContactObjective}
             onChange={(e) => {

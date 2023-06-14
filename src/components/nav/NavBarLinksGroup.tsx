@@ -164,7 +164,13 @@ export function LinksGroup({
       onClick={(event) => {
         event.preventDefault();
         navigateToPage(navigate, link.link);
-        setTimeout(() => setNavTab(link.key), 100);
+
+        setTimeout(() => {
+          setNavTab(link.key);
+          if (link.link.includes("persona")) {
+            window.location.reload();
+          }
+        }, 100);
       }}
     >
       <Flex>

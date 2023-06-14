@@ -94,55 +94,6 @@ export default function UploadProspectsModal({
   };
 
   const [
-    loadingPersonaDescriptionGeneration,
-    setLoadingPersonaDescriptionGeneration,
-  ] = useState(false);
-  const generatePersonaDescription = async (): Promise<MsgResponse> => {
-    setLoadingPersonaDescriptionGeneration(true);
-    const res = await fetch(
-      `${API_URL}/client/archetype/generate_persona_description`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          persona_name: selectedPersona,
-        }),
-      }
-    )
-      .then(async (r) => {
-        if (r.status === 200) {
-          return {
-            status: "success",
-            title: "Success",
-            message: "Persona description generated successfully",
-            data: await r.json(),
-          };
-        } else {
-          return {
-            status: "error",
-            title: `Error (${r.status})`,
-            message: "Failed to generate persona description",
-            data: {},
-          };
-        }
-      })
-      .catch((e) => {
-        return {
-          status: "error",
-          title: "Error",
-          message: e.message,
-          data: {},
-        };
-      });
-    setLoadingPersonaDescriptionGeneration(false);
-    setDescription(res.data.description);
-    return res as MsgResponse;
-  };
-
-  const [
     loadingPersonaBuyReasonGeneration,
     setLoadingPersonaBuyReasonGeneration,
   ] = useState(false);
@@ -207,7 +158,6 @@ export default function UploadProspectsModal({
         },
         body: JSON.stringify({
           persona_name: selectedPersona,
-          persona_description: description,
           persona_buy_reason: fitReason,
         }),
       }
@@ -369,37 +319,6 @@ export default function UploadProspectsModal({
 
         {innerProps.mode === "CREATE-ONLY" && (
           <Stack spacing={10}>
-            <>
-              <TextAreaWithAI
-                withAsterisk
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="This persona are C-Level Execs who..."
-                label="In 1-2 sentences, describe this persona"
-                loadingAIGenerate={loadingPersonaDescriptionGeneration}
-                onAIGenerateClicked={async () => {
-                  await displayNotification(
-                    "generate-persona-description",
-                    generatePersonaDescription,
-                    {
-                      title: "Generating persona description...",
-                      message: "This may take a few seconds.",
-                      color: "teal",
-                    },
-                    {
-                      title: "Persona description generated!",
-                      message: "Your persona description has been generated.",
-                      color: "teal",
-                    },
-                    {
-                      title: "Failed to generate persona description",
-                      message: "Please try again or contact SellScale team.",
-                      color: "red",
-                    }
-                  );
-                }}
-              />
-            </>
             <TextAreaWithAI
               withAsterisk
               value={fitReason}

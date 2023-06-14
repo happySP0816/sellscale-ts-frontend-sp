@@ -25,10 +25,6 @@ export default function PersonaBrain(props: PropsType) {
   const [loadingPersona, setLoadingPersona] = useState(false);
 
   const [personaName, setPersonaName] = useState("");
-  const [loadingPersonaDescription, setLoadingPersonaDescription] = useState(
-    false
-  );
-  const [personaDescription, setPersonaDescription] = useState("");
   const [loadingPersonaFitReason, setLoadingPersonaFitReason] = useState(false);
   const [personaFitReason, setPersonaFitReason] = useState("");
   const [
@@ -50,7 +46,6 @@ export default function PersonaBrain(props: PropsType) {
       .then((res) => res.json())
       .then((persona) => {
         setPersonaName(persona.archetype);
-        setPersonaDescription(persona.persona_description);
         setPersonaFitReason(persona.persona_fit_reason);
         setPersonaICPMatchingInstructions(persona.icp_matching_prompt);
         setPersonaContactObjective(persona.persona_contact_objective);
@@ -74,7 +69,6 @@ export default function PersonaBrain(props: PropsType) {
         },
         body: JSON.stringify({
           updated_persona_name: personaName,
-          updated_persona_description: personaDescription,
           updated_persona_fit_reason: personaFitReason,
           updated_persona_icp_matching_prompt: personaICPMatchingInstructions,
           updated_persona_contact_objective: personaContactObjective,
@@ -84,7 +78,6 @@ export default function PersonaBrain(props: PropsType) {
       .then((res) => res.json())
       .then((persona) => {
         setPersonaName(persona.archetype);
-        setPersonaDescription(persona.persona_description);
         setPersonaFitReason(persona.persona_fit_reason);
         setPersonaICPMatchingInstructions(persona.icp_matching_prompt);
         showNotification({
@@ -106,52 +99,6 @@ export default function PersonaBrain(props: PropsType) {
       setFetchedPersona(true);
     }
   }, [fetchedPersona]);
-
-  const generatePersonaDescription = async (): Promise<MsgResponse> => {
-    setLoadingPersonaDescription(true);
-    const res = await fetch(
-      `${API_URL}/client/archetype/generate_persona_description`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          persona_name: personaName,
-        }),
-      }
-    )
-      .then(async (r) => {
-        if (r.status === 200) {
-          return {
-            status: "success",
-            title: "Success",
-            message: "Persona description generated successfully",
-            data: await r.json(),
-          };
-        } else {
-          return {
-            status: "error",
-            title: `Error (${r.status})`,
-            message: "Failed to generate persona description",
-            data: {},
-          };
-        }
-      })
-      .catch((e) => {
-        return {
-          status: "error",
-          title: "Error",
-          message: e.message,
-          data: {},
-        };
-      });
-    setPersonaDescription(res.data.description);
-    setLoadingPersonaDescription(false);
-    setNeedsSave(true);
-    return res as MsgResponse;
-  };
 
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaFitReason(true);
@@ -224,10 +171,8 @@ export default function PersonaBrain(props: PropsType) {
             label="Persona Profile"
             description="Generated profile of this persona"
             minRows={4}
-            value={personaDescription}
+            value={''}
             onChange={(e) => {
-              setPersonaDescription(e.currentTarget.value);
-              setNeedsSave(true);
             }}
           />
           <TextAreaWithAI

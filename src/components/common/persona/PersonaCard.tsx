@@ -64,7 +64,6 @@ import PersonaAnalyze from "./PersonaAnalyze";
 import PersonaSplit from "./PersonaSplit";
 import PersonaBrain from "./PersonaBrain";
 import PersonaFilters from "./PersonaFilters";
-import PersonaLearn from "./PersonaLearn";
 import PersonaLiSetup from "./PersonaLiSetup";
 import PersonaEmailSetup from "./PersonaEmailSetup";
 

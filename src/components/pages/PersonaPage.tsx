@@ -26,7 +26,10 @@ import { openContextModal } from "@mantine/modals";
 import PageTitle from "@nav/PageTitle";
 import { IconCornerRightUp, IconUserPlus } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
-import getPersonas, { getAllUploads, getPersonasOverview } from "@utils/requests/getPersonas";
+import getPersonas, {
+  getAllUploads,
+  getPersonasOverview,
+} from "@utils/requests/getPersonas";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype, PersonaOverview } from "src";
@@ -35,6 +38,7 @@ import PageFrame from "../common/PageFrame";
 import PersonaCard from "../common/persona/PersonaCard";
 import PersonaUploadDrawer from "../drawers/PersonaUploadDrawer";
 import { useEffect } from "react";
+import { useLoaderData } from "react-router-dom";
 
 export default function PersonaPage() {
   setPageTitle(`Personas`);
@@ -46,12 +50,21 @@ export default function PersonaPage() {
     currentPersonaIdState
   );
 
+  const loaderData: any = useLoaderData();
+  const personaId = loaderData?.personaId;
+
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-personas-data`],
     queryFn: async () => {
       const response = await getPersonasOverview(userToken);
       const result =
-        response.status === "success" ? (response.data as PersonaOverview[]) : [];
+        response.status === "success"
+          ? (response.data as PersonaOverview[])
+          : [];
+      if (personaId) {
+        setCurrentPersonaId(parseInt(personaId));
+        return result.filter((p) => p.id === parseInt(personaId));
+      }
 
       return result;
     },

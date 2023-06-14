@@ -120,6 +120,13 @@ const router = sentryCreateBrowserRouter([
         path: "personas",
         element: <RestrictedRoute page={<PersonaPage />} />,
       },
+      {
+        path: "personas/:personaId?",
+        element: <RestrictedRoute page={<PersonaPage />} />,
+        loader: async ({ params }: { params: any }) => {
+          return { personaId: params.personaId };
+        },
+      },
       /*
       {
         path: "campaigns/:campaignId?",
@@ -169,16 +176,16 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   // <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RecoilRoot>
-        <Sentry.ErrorBoundary
-          fallback={<div>An error has occurred</div>}
-          showDialog
-        >
-          <RouterProvider router={router} />
-        </Sentry.ErrorBoundary>
-      </RecoilRoot>
-    </QueryClientProvider>
+  <QueryClientProvider client={queryClient}>
+    <RecoilRoot>
+      <Sentry.ErrorBoundary
+        fallback={<div>An error has occurred</div>}
+        showDialog
+      >
+        <RouterProvider router={router} />
+      </Sentry.ErrorBoundary>
+    </RecoilRoot>
+  </QueryClientProvider>
   // </React.StrictMode>
 );
 

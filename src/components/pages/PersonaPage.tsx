@@ -110,6 +110,7 @@ export default function PersonaPage() {
                         personaOverview={persona}
                         refetch={refetch}
                         unassignedPersona
+                        allPersonas={data || []}
                       />
                     );
                   })}
@@ -125,6 +126,7 @@ export default function PersonaPage() {
                         personaOverview={persona}
                         refetch={refetch}
                         unassignedPersona={false}
+                        allPersonas={data || []}
                       />
                     );
                   })}
@@ -139,6 +141,7 @@ export default function PersonaPage() {
                       personaOverview={persona}
                       refetch={refetch}
                       unassignedPersona={false}
+                      allPersonas={data || []}
                     />
                   ))}
               </div>

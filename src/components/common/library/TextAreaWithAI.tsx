@@ -222,7 +222,7 @@ export default function TextAreaWithAI(props: PropsType) {
                 defaultPrevented: false,// used to see if it's AI set value
               } as React.ChangeEvent<HTMLTextAreaElement>);
           }}
-          value={props.value}
+          value={props.value || ''}
           personalizationBtn
         />
       ) : props.inputType === "text-input" ? (
@@ -237,7 +237,7 @@ export default function TextAreaWithAI(props: PropsType) {
               );
           }}
           disabled={props.disabled}
-          value={props.value}
+          value={props.value || ''}
           withAsterisk={props.withAsterisk}
         />
       ) : (

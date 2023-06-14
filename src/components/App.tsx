@@ -30,6 +30,7 @@ import CopyCTAsModal from "@modals/CopyCTAsModal";
 import EditCTAModal from "@modals/EditCTAModal";
 import DemoFeedbackDetailsModal from "@modals/DemoFeedbackDetailsModal";
 import VoiceBuilderModal from '@modals/VoiceBuilderModal';
+import CreatePersonaModal from "@modals/CreatePersonaModal";
 
 export default function App() {
   // Site light or dark mode
@@ -117,6 +118,7 @@ export default function App() {
               clientProduct: ClientProductModal,
               voiceBuilder: VoiceBuilderModal,
               demoFeedbackDetails: DemoFeedbackDetailsModal,
+              createPersona: CreatePersonaModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

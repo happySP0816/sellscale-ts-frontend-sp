@@ -72,7 +72,7 @@ export default function UploadProspectsModal({
   const [fitReason, setFitReason] = useState("");
   const [icpMatchingPrompt, setICPMatchingPrompt] = useState("");
 
-  const [contactObjective, setContactObjective] = useState("");
+  const [contactObjective, setContactObjective] = useState('Set up a discovery call in order to identify a pain point');
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
@@ -597,7 +597,6 @@ export default function UploadProspectsModal({
               createPersona={{
                 name: createdPersona,
                 ctas: ctas.map((cta) => cta.cta),
-                description: description,
                 fitReason: fitReason,
                 icpMatchingPrompt: icpMatchingPrompt,
                 contactObjective: contactObjective,

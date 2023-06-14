@@ -221,39 +221,17 @@ export default function PersonaBrain(props: PropsType) {
             }}
           />
           <TextAreaWithAI
-            label="Persona Description"
-            description="Describe the persona using details like their job title, company size, industry, and more"
+            label="Persona Profile"
+            description="Generated profile of this persona"
             minRows={4}
             value={personaDescription}
             onChange={(e) => {
               setPersonaDescription(e.currentTarget.value);
               setNeedsSave(true);
             }}
-            loadingAIGenerate={loadingPersonaDescription}
-            onAIGenerateClicked={async () => {
-              await displayNotification(
-                "generate-persona-description",
-                generatePersonaDescription,
-                {
-                  title: "Generating persona description...",
-                  message: "This may take a few seconds.",
-                  color: "teal",
-                },
-                {
-                  title: "Persona description generated!",
-                  message: "Your persona description has been generated.",
-                  color: "teal",
-                },
-                {
-                  title: "Failed to generate persona description",
-                  message: "Please try again or contact SellScale team.",
-                  color: "red",
-                }
-              );
-            }}
           />
           <TextAreaWithAI
-            label="Persona Fit Reason"
+            label="Why They Buy"
             description="Explain why this persona is a good fit for your product or service"
             minRows={4}
             value={personaFitReason}

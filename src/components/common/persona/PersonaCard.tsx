@@ -64,6 +64,9 @@ import PersonaAnalyze from "./PersonaAnalyze";
 import PersonaSplit from "./PersonaSplit";
 import PersonaBrain from "./PersonaBrain";
 import PersonaFilters from "./PersonaFilters";
+import PersonaLearn from "./PersonaLearn";
+import PersonaLiSetup from "./PersonaLiSetup";
+import PersonaEmailSetup from "./PersonaEmailSetup";
 
 async function togglePersona(archetype_id: number, userToken: string) {
   const response = await fetch(`${API_URL}/client/archetype/toggle_active`, {
@@ -83,6 +86,7 @@ export default function PersonaCard(props: {
   personaOverview: PersonaOverview;
   refetch: () => void;
   unassignedPersona: boolean;
+  allPersonas: PersonaOverview[];
 }) {
   const theme = useMantineTheme();
   const mdScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.MD})`);
@@ -361,37 +365,32 @@ export default function PersonaCard(props: {
       )}
 
       <Collapse in={opened}>
-        <Tabs defaultValue="all-contacts" px="xs" color="teal">
+        <Tabs defaultValue={props.unassignedPersona ? 'analyze' : 'learn'} px="xs" color="teal">
           <Tabs.List>
-            <Tabs.Tab
-              value="all-contacts"
-              icon={<IconAddressBook size="1.1rem" />}
-            >
-              All Contacts
-            </Tabs.Tab>
+            {!props.unassignedPersona && (
+              <Tabs.Tab value="learn" icon={1}>
+                Learn
+              </Tabs.Tab>
+            )}
             {!props.unassignedPersona && (
               <Tabs.Tab
-                value="pulse"
-                icon={<IconActivityHeartbeat size="1.1rem" />}
+                value="prioritize"
+                icon={2}
               >
-                Pulse
+                Prioritize
               </Tabs.Tab>
             )}
             {!props.unassignedPersona && (
-              <Tabs.Tab value="tools" icon={<IconTool size="1.1rem" />}>
-                Tools
+              <Tabs.Tab value="li-setup" icon={3}>
+                LI Setup
               </Tabs.Tab>
             )}
             {!props.unassignedPersona && (
-              <Tabs.Tab value="brain" icon={<IconBrain size="1.1rem" />}>
-                Brain
+              <Tabs.Tab value="email-setup" icon={4}>
+                Email Setup
               </Tabs.Tab>
             )}
-            {!props.unassignedPersona && (
-              <Tabs.Tab value="filters" icon={<IconFilter size="1.1rem" />}>
-                Filters
-              </Tabs.Tab>
-            )}
+
             {props.unassignedPersona && (
               <Tabs.Tab value="analyze" icon={<IconAnalyze size="1.1rem" />}>
                 Analyze
@@ -407,9 +406,6 @@ export default function PersonaCard(props: {
                 </Tabs.Tab>
               )}
           </Tabs.List>
-          <Tabs.Panel value="all-contacts" pt="xs">
-            <ProspectTable_old personaSpecific={props.personaOverview.id} />
-          </Tabs.Panel>
           <Tabs.Panel value="pulse" pt="xs">
             <Pulse personaOverview={props.personaOverview} />
           </Tabs.Panel>
@@ -427,6 +423,19 @@ export default function PersonaCard(props: {
           </Tabs.Panel>
           <Tabs.Panel value="filters" pt="xs">
             <PersonaFilters archetype_id={props.personaOverview.id} />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="learn" pt="xs">
+            <PersonaBrain archetype_id={props.personaOverview.id} />
+          </Tabs.Panel>
+          <Tabs.Panel value="prioritize" pt="xs">
+            <Pulse personaOverview={props.personaOverview} />
+          </Tabs.Panel>
+          <Tabs.Panel value="li-setup" pt="xs">
+            <PersonaLiSetup persona={props.personaOverview} personas={props.allPersonas} />
+          </Tabs.Panel>
+          <Tabs.Panel value="email-setup" pt="xs">
+            <PersonaEmailSetup />
           </Tabs.Panel>
         </Tabs>
       </Collapse>

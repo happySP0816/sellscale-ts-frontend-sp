@@ -139,21 +139,11 @@ function convertColumn(columnName: string) {
 }
 
 type FileDropAndPreviewProps = {
-  personaId: string | null;
-  createPersona?: {
-    name: string;
-    ctas: string[];
-    description: string;
-    fitReason: string;
-    icpMatchingPrompt: string;
-    contactObjective: string;
-  };
-  onUploadSuccess?: () => void;
-  onUploadFailure?: () => void;
+  onFileUpload?: (jsonData: any[]) => void;
+  onColumnChange?: (jsonData: any[]) => void;
 };
 
-// personaId is null if creating a new persona
-export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
+export default function ProspectUploadAndPreview(props: FileDropAndPreviewProps) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
@@ -161,76 +151,21 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
   const [columnMappings, setColumnMappings] = useState<Map<string, string>>(
     new Map()
   );
-  const [preUploading, setPreUploading] = useState(false);
-  const queryCache = new QueryCache();
 
   useEffect(() => {
     if (fileJSON) {
       setColumnMappings(getDefaultColumnMappings(fileJSON));
+      props.onFileUpload && props.onFileUpload(processJSON());
     }
   }, [fileJSON]);
 
-  /**
-   * Checks if the user can upload the file
-   * @returns an array of strings, each string is a reason why the user can't upload
-   */
-  const checkCanUpload = () => {
-    const hasScrapeTarget = Array.from(columnMappings.values()).some(
-      (value) => {
-        return value === "linkedin_url" || value === "email";
-      }
-    );
-    // TODO: could check that the email and URLs are valid?
-
-    const hasPersona = props.createPersona
-      ? props.createPersona.name.length > 0
-      : props.personaId !== null && props.personaId.length > 0;
-    const hasCTA = props.createPersona
-      ? props.createPersona.ctas.length > 0
-      : true;
-
-    let failureReasons = [];
-    if (!hasPersona) {
-      failureReasons.push("Please select a persona to upload to.");
+  useEffect(() => {
+    if (fileJSON) {
+      props.onColumnChange && props.onColumnChange(processJSON());
     }
-    /*
-    if (!hasCTA) {
-      failureReasons.push(
-        "Please create at least one CTA for your new persona."
-      );
-    }
-    */
-    if (!hasScrapeTarget) {
-      failureReasons.push(
-        "Please map at least one column to a profile target (such as a LinkedIn URL or email)."
-      );
-    }
+  }, [columnMappings]);
 
-    return failureReasons;
-  };
-
-  const startUpload = async () => {
-    setPreUploading(true);
-
-    let archetype_id = props.personaId;
-    if (props.createPersona) {
-      const result = await createPersona(
-        userToken,
-        props.createPersona.name,
-        props.createPersona.ctas,
-        {
-          fitReason: props.createPersona.fitReason,
-          icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
-          contactObjective: props.createPersona.contactObjective,
-        }
-      );
-      if (result.status === "error") {
-        console.error("Failed to create persona & CTAs");
-        return;
-      }
-      archetype_id = result.data;
-    }
-
+  const processJSON = () => {
     const uploadJSON = (fileJSON as any[])
     .map((row) => {
       const mappedRow = {};
@@ -251,96 +186,11 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     })
     .filter((row: any) => row.linkedin_url || row.email);
 
-    const result = await uploadProspects(
-      +(archetype_id as string),
-      userToken,
-      uploadJSON
-    );
-    if (result.status === "error") {
-      console.error("Failed to start prospects upload");
-      showNotification({
-        id: "uploading-prospects-failed",
-        title: result.title,
-        message: result.message,
-        color: "red",
-        autoClose: false,
-      });
-      setPreUploading(false);
-      if (props.onUploadFailure) {
-        props.onUploadFailure();
-      }
-      return;
-    }
-
-    showNotification({
-      id: "uploading-prospects",
-      loading: true,
-      title: "Uploading prospects...",
-      message: "Check the persona for progress",
-      color: "teal",
-      autoClose: 10000,
-    });
-
-    closeAllModals();
-    setPreUploading(false);
-    // Invalidates the query for the personas data so that the new persona will be fetched
-    queryClient.invalidateQueries({ queryKey: ["query-personas-data"] });
-    queryCache.clear();
-
-    if (props.onUploadSuccess) {
-      props.onUploadSuccess();
-    }
-  };
-
-  const openModal = () =>
-    openConfirmModal({
-      title: <Title order={3}>Confirm Upload</Title>,
-      children: (
-        <>
-          <Text>We’re ready to process your file! Here’s the summary:</Text>
-          <List withPadding>
-            {Array.from(columnMappings.values())
-              .filter((value) => {
-                return value === "linkedin_url" || value === "email";
-              })
-              .map((value) => convertColumn(value))
-              .map((value) => (
-                <List.Item key={value}>
-                  {value === "linkedin_url" ? (
-                    <>
-                      You’re uploading <b>LinkedIn</b> prospects
-                    </>
-                  ) : value === "email" ? (
-                    <>
-                      You’re uploading <b>email</b> prospects
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </List.Item>
-              ))}
-          </List>
-          <Text pt="xs">
-            <>
-              You’re about to upload <b>{fileJSON?.length}</b> prospects.
-            </>
-          </Text>
-          <Text fs="italic" pt="xs">
-            Looks good?
-          </Text>
-        </>
-      ),
-      confirmProps: { color: "teal", variant: "outline" },
-      labels: { confirm: `Yes, let's do it! 🚀`, cancel: "Nevermind" },
-      onCancel: () => {
-        closeAllModals();
-      },
-      onConfirm: () => startUpload(),
-    });
+    return uploadJSON;
+  }
 
   return (
     <>
-      <LoadingOverlay visible={preUploading} overlayBlur={2} />
       {!fileJSON && (
         <Dropzone
           loading={false}
@@ -450,36 +300,6 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
             )}
             records={fileJSON.slice(0, PREVIEW_FIRST_N_ROWS)}
           />
-          <Center pt={20}>
-            <HoverCard
-              width={280}
-              position="top"
-              shadow="md"
-              withArrow
-              disabled={checkCanUpload().length === 0}
-            >
-              <HoverCard.Target>
-                <Button
-                  variant="outline"
-                  color={checkCanUpload().length > 0 ? "red" : "teal"}
-                  onClick={() => {
-                    if (checkCanUpload().length === 0) {
-                      openModal();
-                    }
-                  }}
-                >
-                  Start Upload!
-                </Button>
-              </HoverCard.Target>
-              <HoverCard.Dropdown>
-                <List size="sm">
-                  {checkCanUpload().map((reason, index) => (
-                    <List.Item key={index}>{reason}</List.Item>
-                  ))}
-                </List>
-              </HoverCard.Dropdown>
-            </HoverCard>
-          </Center>
         </Stack>
       )}
     </>

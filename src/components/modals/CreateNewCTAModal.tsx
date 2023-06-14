@@ -16,7 +16,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { Archetype } from "src";
+import { Archetype, PersonaOverview } from "src";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import createCTA from "@utils/requests/createCTA";
@@ -25,7 +25,7 @@ export default function CreateNewCTAModel({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ personaId: string; personas?: Archetype[] }>) {
+}: ContextModalProps<{ personaId: string; personas?: PersonaOverview[] }>) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);

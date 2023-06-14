@@ -9,7 +9,6 @@ export default async function createPersona(
   name: string,
   ctas: string[],
   extras: {
-    description: string;
     fitReason: string;
     icpMatchingPrompt: string;
     contactObjective: string;
@@ -24,7 +23,7 @@ export default async function createPersona(
     body: JSON.stringify({
       archetype: name,
       disable_ai_after_prospect_engaged: true,
-      description: extras.description,
+      description: '',
       fit_reason: extras.fitReason,
       icp_matching_prompt: extras.icpMatchingPrompt,
       contact_objective: extras.contactObjective,

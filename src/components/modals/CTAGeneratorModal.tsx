@@ -38,12 +38,12 @@ import {
 } from "@utils/requests/generateSequence";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Archetype } from "src";
+import { Archetype, PersonaOverview } from "src";
 
 interface CTAGeneratorProps extends Record<string, unknown> {
   personaId: string;
   personaName: string;
-  personas?: Archetype[];
+  personas?: PersonaOverview[];
 }
 
 const useStyles = createStyles((theme) => ({
@@ -143,7 +143,7 @@ export default function CTAGeneratorModal({
               placeholder="ex. VP of Sales, Head of HR"
               data={
                 innerProps.personas
-                  ? innerProps.personas.map((p) => p.archetype)
+                  ? innerProps.personas.map((p) => p.name)
                   : []
               }
               classNames={classes}

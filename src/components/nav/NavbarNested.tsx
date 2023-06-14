@@ -9,6 +9,7 @@ import {
   ScrollArea,
   Flex,
   Button,
+  useMantineTheme,
 } from "@mantine/core";
 import {
   IconSwitchHorizontal,
@@ -49,6 +50,7 @@ import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getOnboardingCompletionReport } from "@utils/requests/getOnboardingCompletionReport";
+import { hexToHexWithAlpha } from "@utils/general";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -134,14 +136,13 @@ const useStyles = createStyles((theme) => ({
     borderRadius: theme.radius.xl,
     fontWeight: 500,
 
-    backgroundColor: theme.colors.green[9],
     "&:hover": {
-      backgroundColor: theme.colors.green[7],
+      backgroundColor: theme.colors.green[9],
     },
   },
   setupLinkActive: {
     "&, &:hover": {
-      backgroundColor: theme.colors.green[7],
+      filter: 'brightness(1.2)',
       [`& .${getStylesRef("icon")}`]: {
         opacity: 0.9,
       },
@@ -299,6 +300,7 @@ export function NavbarNested(props: {
 }) {
   const { classes, cx } = useStyles();
   const navigate = useNavigate();
+  const theme = useMantineTheme();
 
   const userData = useRecoilValue(userDataState);
   const [navTab, setNavTab] = useRecoilState(navTabState);
@@ -355,7 +357,6 @@ export function NavbarNested(props: {
   const percentage = Math.round((completedStepsCount / stepsCount) * 100);
   // ------------------------------
 
-
   return (
     <AnimatedNavbar
       style={{
@@ -387,6 +388,8 @@ export function NavbarNested(props: {
               navigateToPage(navigate, "/setup");
               setTimeout(() => setNavTab("setup"), 100);
             }}
+            variant="gradient"
+            gradient={{ from: theme.colors.green[9], to: hexToHexWithAlpha(theme.colors.green[9], percentage/100) || '', deg: 90 }}
           >
             <IconFileDescription className={classes.linkIcon} stroke={1.5} />
             <span>Onboarding Setup - {percentage}%</span>

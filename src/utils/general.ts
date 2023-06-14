@@ -230,3 +230,27 @@ export function isURL(text: string){
 export function isLinkedInURL(text: string){
   return isURL(text) && text.includes("linkedin.com/in/");
 }
+
+export function hexToHexWithAlpha(hexColor: string, transparency: number): string | null {
+  // Remove the "#" character from the hex color code
+  hexColor = hexColor.replace("#", "");
+
+  // Ensure that the hex color code is valid
+  const isValidHex = /^([0-9A-F]{3}){1,2}$/i.test(hexColor);
+  if (!isValidHex) {
+    return null;
+  }
+
+  // Extract the RGB values
+  const red = parseInt(hexColor.substring(0, 2), 16);
+  const green = parseInt(hexColor.substring(2, 4), 16);
+  const blue = parseInt(hexColor.substring(4, 6), 16);
+
+  // Calculate the alpha value
+  const alpha = Math.round(transparency * 255).toString(16).padStart(2, '0');
+
+  // Create the hex color code with transparency
+  const hexColorWithAlpha = `#${red.toString(16).padStart(2, '0')}${green.toString(16).padStart(2, '0')}${blue.toString(16).padStart(2, '0')}${alpha}`;
+
+  return hexColorWithAlpha;
+}

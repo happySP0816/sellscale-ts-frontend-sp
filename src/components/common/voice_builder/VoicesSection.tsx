@@ -31,8 +31,6 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data);
-
   return (
     <>
       <Group position='right'>

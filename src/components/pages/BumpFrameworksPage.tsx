@@ -142,6 +142,7 @@ export default function BumpFrameworksPage() {
 
   const triggerGetPersonas = async () => {
     const result = await getPersonas(userToken);
+    console.log('got personas')
 
     if (result.status !== "success") {
       showNotification({
@@ -157,11 +158,10 @@ export default function BumpFrameworksPage() {
     for (const persona of personas) {
       if (persona.active) {
         activeArchetypes.push(persona.id);
+        break;
       }
     }
     setArchetypeID(activeArchetypes);
-
-    triggerGetBumpFrameworks([], [], activeArchetypes);
   }
 
   const triggerGetBumpFrameworks = async (
@@ -181,6 +181,7 @@ export default function BumpFrameworksPage() {
       }
     }
 
+    console.log('triggeringGET', overallStatuses, final_substatuses, archetypeID)
     const result = await getBumpFrameworks(
       userToken,
       manual_overall_statuses || overallStatuses,
@@ -324,7 +325,7 @@ export default function BumpFrameworksPage() {
 
   useEffect(() => {
     triggerGetPersonas();
-    setSelectorType("");
+    // setSelectorType("");
   }, [])
 
   useEffect(() => {
@@ -342,7 +343,7 @@ export default function BumpFrameworksPage() {
   useEffect(() => {
     if (selectorType === "") {
       setOverallStatuses([]);
-      triggerGetBumpFrameworks([], [], []);
+      triggerGetBumpFrameworks([], []);
     } else if (selectorType === "ACCEPTED") {
       setOverallStatuses(["ACCEPTED"]);
       triggerGetBumpFrameworks(["ACCEPTED"], [])

@@ -170,8 +170,6 @@ export default function VoiceBuilderFlow(props: { persona: Archetype; voiceBuild
 
     const response = await generateSamples(userToken, props.voiceBuilderOnboardingId, MSG_GEN_AMOUNT);
 
-    console.log(response);
-
     if (response.status === 'success') {
       setVoiceBuilderMessages((prev) => {
         const savedItems = prev.filter((item) => item.saved);

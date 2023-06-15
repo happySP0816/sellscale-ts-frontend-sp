@@ -37,8 +37,6 @@ export default function SchedulingCardContents(props: { prospect: Prospect }) {
     return await response.json();
   }
 
-  console.log(prospectDetails);
-
   return (
     <>
     <Flex justify='space-between'>

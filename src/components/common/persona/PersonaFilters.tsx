@@ -128,8 +128,6 @@ export default function PersonaFilters(props: PropsType) {
     })
 
     if (response.data.lead.company.current_company_names_inclusion.length > 0) {
-      console.log('current company inclusion', response.data.lead.company.current_company_names_inclusion)
-      console.log('lead form values', leadForm.values.currentCompaniesInclusion)
     }
 
     accountForm.setValues({

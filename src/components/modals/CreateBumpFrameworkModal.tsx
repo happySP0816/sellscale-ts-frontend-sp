@@ -68,7 +68,6 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
     //     finalArchetypeIDs = form.values.archetypes?.map((archetype) => archetype.archetype_id);
     //   }
     // }
-    // console.log('final', finalArchetypeIDs)
     if (archetypeID == null) {
       showNotification({
         title: "Error",

@@ -2,8 +2,6 @@ import XLSX from "xlsx";
 
 export async function convertFileToJSON(payload: File): Promise<any[] | DOMException> {
 
-  console.log(`Converting File to JSON: ${payload.name} (${payload.size} bytes)...`)
-
   const reader = new FileReader();
   reader.readAsBinaryString(payload);
 
@@ -25,8 +23,6 @@ export async function convertFileToJSON(payload: File): Promise<any[] | DOMExcep
     return e as DOMException;
   }
 
-  console.log('File converted to JSON (preview of first 20 rows):')
-  console.table(json.slice(0, 20));
   return json
 
 }

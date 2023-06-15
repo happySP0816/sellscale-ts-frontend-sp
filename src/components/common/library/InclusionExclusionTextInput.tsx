@@ -44,7 +44,6 @@ export default function InclusionExclusionTextInput(props: PropsType) {
   useShallowEffect(() => {
     if (props.defaultInclusion && props.defaultInclusion[0] !== '') {
       setInclusionList(props.defaultInclusion)
-      console.log('here')
     }
     if (props.defaultExclusion && props.defaultExclusion[0] !== '') {
       setExclusionList(props.defaultExclusion)

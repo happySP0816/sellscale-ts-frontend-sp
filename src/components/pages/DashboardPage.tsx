@@ -162,8 +162,6 @@ export default function DashboardSection() {
     prospectsQuestion.length +
     prospectsDemo.length;
 
-  console.log(all_prospectsDemo);
-
   return (
     <PageFrame>
       <Flex justify="center" pb={10}>

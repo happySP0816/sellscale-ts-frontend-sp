@@ -32,9 +32,6 @@ export default function EmailQueuedMessages() {
         return [];
       }
 
-      console.log("YEEEE");
-      console.log(res);
-
       let prospects = res.prospects.filter(
         (prospect: any) =>
           prospect.email_data &&

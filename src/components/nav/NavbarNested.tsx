@@ -217,8 +217,6 @@ export function NavbarNested(props: {
     // if (!fetchedPersonas) {
     //   setLoadingPersonas(true);
     //   getPersonas(userToken).then((j) => {
-    //     console.log("GOT HERE BOI");
-    //     console.log(j.data);
     //     setPersonaLinks(j.data);
     //     setLoadingPersonas(false);
     //   });

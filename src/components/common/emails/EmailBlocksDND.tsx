@@ -83,7 +83,6 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
         content: item,
       }
     }));
-    console.log('here')
 
     setLoading(false);
   }

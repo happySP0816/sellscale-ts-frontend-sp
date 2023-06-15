@@ -18,7 +18,6 @@ export default function SellScaleBrainProductsTab() {
       return response.status === 'success' ? response.data.sort((a: any, b: any) => a.name.localeCompare(b.name)) : [];
     },
   });
-  console.log(data);
 
   const rows = data?.map((item: any, index: number) => (
     <tr key={index}>

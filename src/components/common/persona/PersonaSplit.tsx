@@ -56,7 +56,6 @@ export default function PersonaSplit(props: PropsType) {
       if (res.status === 200) {
         setSplittingPersonas(true);
         setDisablePersonaSplitButton(true);
-        console.log("Splitting prospects into personas...");
       }
     });
   };

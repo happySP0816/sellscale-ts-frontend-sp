@@ -48,8 +48,6 @@ export default function LinkedInPage() {
       const result =
         response.status === "success" ? (response.data as Archetype[]) : [];
 
-      console.log(result);
-
       const personas = result.sort((a, b) => {
         if (a.active === b.active) {
           return (
@@ -60,8 +58,6 @@ export default function LinkedInPage() {
         }
       });
 
-      console.log(personas);
-
       if (currentPersonaId === -1) {
         setCurrentPersonaId(personas[0].id);
       }
@@ -69,8 +65,6 @@ export default function LinkedInPage() {
     },
     refetchOnWindowFocus: false,
   });
-
-  console.log(data);
 
   return (
     <PageFrame>

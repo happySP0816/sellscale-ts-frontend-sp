@@ -294,12 +294,6 @@ export default function DashCardContents(props: {
             onClick={async () => {
               setLoading(true);
 
-              console.log(response);
-              console.log(note);
-              console.log(qualified);
-              console.log(schedule);
-              console.log(purgatory);
-
               if (response.trim()) {
                 const result = await sendLinkedInMessage(
                   userToken,
@@ -308,7 +302,6 @@ export default function DashCardContents(props: {
                   false,
                   purgatory
                 );
-                console.log(result);
               }
 
               if (props.includeNote && note.trim()) {
@@ -317,7 +310,6 @@ export default function DashCardContents(props: {
                   props.prospect.id,
                   note.trim()
                 );
-                console.log(result);
               }
 
               if (props.includeQualified) {
@@ -327,7 +319,6 @@ export default function DashCardContents(props: {
                     props.prospect.id,
                     "SDR identified this prospect as a qualified target"
                   );
-                  console.log(result);
                 } else {
                   const result = await updateChannelStatus(
                     props.prospect.id,
@@ -335,7 +326,6 @@ export default function DashCardContents(props: {
                     "LINKEDIN",
                     "NOT_QUALIFIED"
                   );
-                  console.log(result);
                 }
               }
 
@@ -347,7 +337,6 @@ export default function DashCardContents(props: {
                     "LINKEDIN",
                     "DEMO_SET"
                   );
-                  console.log(result);
                 } else if (schedule === "NOT_INTERESTED") {
                   const result = await updateChannelStatus(
                     props.prospect.id,
@@ -355,7 +344,6 @@ export default function DashCardContents(props: {
                     "LINKEDIN",
                     "NOT_INTERESTED"
                   );
-                  console.log(result);
                 } else if (schedule === "WAITING") {
                   // Do nothing, TODO: add a note?
                 }

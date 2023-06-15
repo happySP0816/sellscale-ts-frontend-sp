@@ -137,7 +137,6 @@ export default function CampaignTable(props: { type: Channel }) {
         logout();
       }
       const res = await response.json();
-      console.log("analytics", res);
       if (!res || !res.outbound_campaigns) {
         return [];
       }
@@ -172,7 +171,6 @@ export default function CampaignTable(props: { type: Channel }) {
               ? campaign.analytics.prospect_demo_set.length
               : 0;
         }
-        console.log(campaign);
         return {
           uuid: campaign.uuid,
           id: campaign.id,

@@ -271,7 +271,6 @@ export default function PersonaCard(props: {
             spacing={8}
             sx={{ cursor: "pointer" }}
             onClick={() => {
-              console.log(props.personaOverview.id, currentPersonaId);
               if (props.personaOverview.id === currentPersonaId) {
                 setCurrentPersonaId(-1);
               } else {

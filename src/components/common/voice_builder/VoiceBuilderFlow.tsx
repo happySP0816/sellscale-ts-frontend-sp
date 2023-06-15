@@ -184,7 +184,7 @@ export default function VoiceBuilderFlow(props: { persona: Archetype; voiceBuild
   const [loadingMsgGen, setLoadingMsgGen] = useState(false);
   const [instructions, setInstructions] = useDebouncedState('', 200);
 
-  const canCreate = editingPhase > MAX_EDITING_PHASES;
+  const canCreate = editingPhase >= MAX_EDITING_PHASES;
 
   useEffect(() => {
     (async () => {

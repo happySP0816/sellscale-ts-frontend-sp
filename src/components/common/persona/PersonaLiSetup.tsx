@@ -171,6 +171,10 @@ export default function PersonaLiSetup(props: { persona: PersonaOverview, person
         paginationColor="teal"
         sortStatus={sortStatus}
         onSortStatusChange={handleSortStatusChange}
+        highlightOnHover
+        rowSx={{
+          cursor: "pointer",
+        }}
         rowContextMenu={{
           items: (cta) => [
             {

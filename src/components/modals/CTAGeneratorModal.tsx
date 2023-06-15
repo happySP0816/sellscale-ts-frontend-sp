@@ -149,6 +149,7 @@ export default function CTAGeneratorModal({
               classNames={classes}
               {...surveyForm.getInputProps("persona")}
               required
+              withinPortal
             />
 
             <TextInput

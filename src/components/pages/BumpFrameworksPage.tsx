@@ -114,7 +114,7 @@ export default function BumpFrameworksPage() {
   ] = useState<BumpFramework | null>(null);
   const [overallStatuses, setOverallStatuses] = useState<string[]>([]);
   const [substatuses, setSubstatuses] = useState<string[]>([]);
-  const [archetypeIDs, setArchetypeIDs] = useState<number[]>([]);
+  const [archetypeID, setArchetypeID] = useState<number[]>([]);
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
 
   const [pipelineData, setPipelineData] = useState<Map<string, any>>(new Map());
@@ -136,12 +136,7 @@ export default function BumpFrameworksPage() {
       title: "",
       description: "",
       default: false,
-      archetypes: [
-        {
-          archetype_id: -1,
-          archetype_name: "",
-        },
-      ],
+      bumped_count: null,
     },
   });
 
@@ -164,7 +159,7 @@ export default function BumpFrameworksPage() {
         activeArchetypes.push(persona.id);
       }
     }
-    setArchetypeIDs(activeArchetypes);
+    setArchetypeID(activeArchetypes);
 
     triggerGetBumpFrameworks([], [], activeArchetypes);
   }
@@ -190,7 +185,7 @@ export default function BumpFrameworksPage() {
       userToken,
       manual_overall_statuses || overallStatuses,
       manual_final_substatuses || final_substatuses,
-      manual_archetype_ids || archetypeIDs
+      manual_archetype_ids || archetypeID
     );
 
     if (result.status !== "success") {
@@ -220,7 +215,6 @@ export default function BumpFrameworksPage() {
       form.values.title = firstBumpFramework.title;
       form.values.description = firstBumpFramework.description;
       form.values.default = firstBumpFramework.default;
-      form.values.archetypes = firstBumpFramework.archetypes;
       let length = bumpFrameworkLengthMarks.find(
         (marks) => marks.api_label === firstBumpFramework.bump_length
       )?.value;
@@ -233,7 +227,6 @@ export default function BumpFrameworksPage() {
       form.values.title = "";
       form.values.description = "";
       form.values.default = false;
-      form.values.archetypes = [];
     }
 
     // Populate Pipeline Data
@@ -258,8 +251,8 @@ export default function BumpFrameworksPage() {
       form.values.description,
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
+      form.values.bumped_count,
       form.values.default,
-      form.values.archetypes?.map((archetype) => archetype.archetype_id)
     );
 
     if (result.status === "success") {
@@ -280,7 +273,7 @@ export default function BumpFrameworksPage() {
         bump_length: bumpFrameworkLengthMarks.find(
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
-        archetypes: form.values.archetypes,
+        bumped_count: selectedBumpFramework.bumped_count,
       });
     } else {
       showNotification({
@@ -317,7 +310,6 @@ export default function BumpFrameworksPage() {
       form.values.title = "";
       form.values.description = "";
       form.values.default = false;
-      form.values.archetypes = [];
     } else {
       showNotification({
         title: "Error",
@@ -332,22 +324,20 @@ export default function BumpFrameworksPage() {
 
   useEffect(() => {
     triggerGetPersonas();
-    // triggerGetBumpFrameworks();
     setSelectorType("");
   }, [])
 
   useEffect(() => {
-    if (archetypeIDs.length == 0) {
+    if (archetypeID.length == 0) {
       setBumpFrameworks([]);
       setSelectedBumpFramework(null);
       form.values.title = "";
       form.values.description = "";
       form.values.default = false;
-      form.values.archetypes = [];
       return;
     }
     triggerGetBumpFrameworks();
-  }, [archetypeIDs, overallStatuses, substatuses]);
+  }, [archetypeID, overallStatuses, substatuses]);
 
   useEffect(() => {
     if (selectorType === "") {
@@ -377,16 +367,16 @@ export default function BumpFrameworksPage() {
             onChange={(archetype) => {
               if (archetype.length == 0) {
                 setSelectorType("");
-                setArchetypeIDs([]);
+                setArchetypeID([]);
                 triggerGetBumpFrameworks([], [], []);
                 return;
               }
-              setArchetypeIDs(archetype.map((a) => a.archetype_id));
+              setArchetypeID(archetype.map((a) => a.archetype_id));
             }}
-            defaultValues={archetypeIDs}
-            selectMultiple={true}
-            label="Select Personas"
-            description="Select the personas whose bump frameworks you want to view."
+            defaultValues={archetypeID}
+            selectMultiple={false}
+            label="Select Persona"
+            description="Select the persona whose bump frameworks you want to view."
           />
         </Flex>
 
@@ -397,7 +387,7 @@ export default function BumpFrameworksPage() {
         <Flex align="center" justify='right'>
           <Button
             variant="outline"
-            disabled={archetypeIDs.length < 1}
+            disabled={archetypeID.length < 1}
             onClick={open}
           >
             Create New Framework
@@ -409,7 +399,7 @@ export default function BumpFrameworksPage() {
             backFunction={triggerGetBumpFrameworks}
             dataChannels={data_channels}
             status={selectorType}
-            archetypeIDs={archetypeIDs}
+            archetypeID={archetypeID[0]}
           />
         </Flex>
         <Flex mt="md">
@@ -443,7 +433,6 @@ export default function BumpFrameworksPage() {
                             form.values.title = framework.title;
                             form.values.description = framework.description;
                             form.values.default = framework.default;
-                            form.values.archetypes = framework.archetypes;
                             setBumpLengthValue(length);
                             setSelectedBumpFramework(framework);
                           }}
@@ -503,7 +492,7 @@ export default function BumpFrameworksPage() {
                           <Text mt="xs" fz="sm">
                             {framework.description}
                           </Text>
-                          <Flex wrap={"wrap"} mt="md">
+                          {/* <Flex wrap={"wrap"} mt="md">
                             {framework.archetypes.map((archetype) => {
                               return (
                                 <Badge
@@ -521,7 +510,7 @@ export default function BumpFrameworksPage() {
                                 </Badge>
                               );
                             })}
-                          </Flex>
+                          </Flex> */}
                         </Card>
                       );
                     })}
@@ -584,7 +573,7 @@ export default function BumpFrameworksPage() {
                           }}
                         />
                       </Tooltip>
-                      <Flex wrap="wrap" mt="xs" w="100%">
+                      {/* <Flex wrap="wrap" mt="xs" w="100%">
                         <PersonaSelect
                           disabled={false}
                           onChange={(archetypes) =>
@@ -597,7 +586,7 @@ export default function BumpFrameworksPage() {
                             (archetype) => archetype.archetype_id
                           )}
                         />
-                      </Flex>
+                      </Flex> */}
                       <Flex>
                         <Flex justify="space-between" w="100%">
                           <Flex>
@@ -621,9 +610,7 @@ export default function BumpFrameworksPage() {
                               selectedBumpFramework?.bump_length ==
                               bumpFrameworkLengthMarks.find(
                                 (mark) => mark.value === bumpLengthValue
-                              )?.api_label &&
-                              selectedBumpFramework?.archetypes ==
-                              form.values.archetypes ? (
+                              )?.api_label ? (
                               <></>
                             ) : (
                               <Button

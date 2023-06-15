@@ -23,7 +23,7 @@ interface CreateBumpFramework extends Record<string, unknown> {
   closeModal: () => void;
   backFunction: () => void;
   dataChannels: MsgResponse | undefined;
-  archetypeIDs: number[];
+  archetypeID: number | null;
   status?: string;
 }
 
@@ -34,7 +34,8 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
   const [selectedStatus, setSelectedStatus] = useState<string | null>('');
   const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>('');
-  const [archetypeIDs, setArchetypeIDs] = useState<number[]>([]);
+  const [archetypeID, setArchetypeID] = useState<number | null>(null);
+  const [bumpedCount, setBumpedCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
   const getActiveConvoSubstatusValues = () => {
@@ -58,26 +59,35 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
   const triggerCreateBumpFramework = async () => {
     setLoading(true);
 
-    let finalArchetypeIDs: any[] = []
-    if (form.values.archetypes != null) {
-      const firstArchetype = form.values.archetypes[0];
-      if (firstArchetype.archetype_id === -1) {
-        finalArchetypeIDs = archetypeIDs;
-      } else {
-        finalArchetypeIDs = form.values.archetypes?.map((archetype) => archetype.archetype_id);
-      }
+    // let finalArchetypeIDs: any[] = []
+    // if (form.values.archetypes != null) {
+    //   const firstArchetype = form.values.archetypes[0];
+    //   if (firstArchetype.archetype_id === -1) {
+    //     finalArchetypeIDs = archetypeIDs;
+    //   } else {
+    //     finalArchetypeIDs = form.values.archetypes?.map((archetype) => archetype.archetype_id);
+    //   }
+    // }
+    // console.log('final', finalArchetypeIDs)
+    if (archetypeID == null) {
+      showNotification({
+        title: "Error",
+        message: "Please select an archetype",
+        icon: <IconX radius="sm" color={theme.colors.red[7]} />,
+      });
+      return;
     }
-    console.log('final', finalArchetypeIDs)
 
     const result = await createBumpFramework(
       userToken,
+      archetypeID,
       selectedStatus as string,
       form.values.title,
       form.values.description,
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
+      bumpedCount,
       form.values.default,
-      finalArchetypeIDs,
       selectedSubstatus
     );
 
@@ -105,13 +115,8 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
     initialValues: {
       title: "",
       description: "",
+      archetypeID: null,
       default: false,
-      archetypes: [
-        {
-          archetype_id: -1,
-          archetype_name: "",
-        },
-      ],
     },
   });
 
@@ -126,8 +131,8 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       }
     }
 
-    if (props.archetypeIDs != null) {
-      setArchetypeIDs(props.archetypeIDs);
+    if (props.archetypeID != null) {
+      setArchetypeID(props.archetypeID);
     }
   }, [props.status])
 
@@ -191,10 +196,10 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           onChange={(archetypes) =>
             form.setFieldValue("archetypes", archetypes)
           }
-          selectMultiple={true}
+          selectMultiple={false}
           label="Personas"
           description="Select the personas this framework applies to."
-          defaultValues={props.archetypeIDs}
+          defaultValues={[archetypeID || -1]}
         />
       </Flex>
       <Select
@@ -245,7 +250,6 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           disabled={
             form.values.title.trim() == "" ||
             form.values.description.trim() == "" ||
-            form.values.archetypes.length == 0 ||
             selectedStatus == null ||
             (selectedStatus === "ACTIVE_CONVO" &&
               selectedSubstatus == null)

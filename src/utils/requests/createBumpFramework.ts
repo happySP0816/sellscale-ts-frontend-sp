@@ -4,17 +4,18 @@ import { API_URL } from "@constants/data";
 
 /**
  * Modifies a bump framework
- * @param userToken 
+ * @param userToken
+ * @param archetypeID
  * @param overallStatus
  * @param title
  * @param description
  * @param length
+ * @param bumpedCount
  * @param setDefault
- * @param archetype_ids
  * @param substatus
  * @returns - MsgResponse
  */
-export async function createBumpFramework(userToken: string, overallStatus: string, title: string, description: string, length: string, setDefault: boolean, archetype_ids: number[], substatus: string | null = ""): Promise<MsgResponse> {
+export async function createBumpFramework(userToken: string, archetypID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, setDefault: boolean, substatus: string | null = ""): Promise<MsgResponse> {
   if (!substatus) {
     substatus = "";
   }
@@ -28,12 +29,13 @@ export async function createBumpFramework(userToken: string, overallStatus: stri
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        archetype_id: archetypID,
         overall_status: overallStatus,
         title: title,
         description: description,
         default: setDefault,
         length: length,
-        archetype_ids: archetype_ids,
+        bumped_count: bumpedCount,
         substatus: substatus
       })
     }

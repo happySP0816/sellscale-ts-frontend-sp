@@ -10,11 +10,11 @@ import { API_URL } from "@constants/data";
  * @param title
  * @param description
  * @param length
+ * @param bumpedCount
  * @param setDefault
- * @param archetype_ids
  * @returns - MsgResponse
  */
-export async function patchBumpFramework(userToken: string, bumpFrameworkID: number, overallStatus: string, title: string, description: string, length: string, setDefault: boolean, archetype_ids: number[]): Promise<MsgResponse> {
+export async function patchBumpFramework(userToken: string, bumpFrameworkID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, setDefault: boolean): Promise<MsgResponse> {
 
   const response = await fetch(
     `${API_URL}/bump_framework/bump`,
@@ -31,7 +31,7 @@ export async function patchBumpFramework(userToken: string, bumpFrameworkID: num
         description: description,
         default: setDefault,
         length: length,
-        archetype_ids: archetype_ids,
+        bumped_count: bumpedCount,
       })
     }
   );

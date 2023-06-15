@@ -47,6 +47,7 @@ import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove
 import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsResearch";
 import { IconDots, IconPencil } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
+import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
 
 export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
   const userData = useRecoilValue(userDataState);
@@ -285,6 +286,10 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                                   : prospectDrawerStatuses.email,
                             }}
                           />
+
+                          {userData.scheduling_link && prospectDrawerStatuses.linkedin === 'ACTIVE_CONVO_SCHEDULING' && (
+                            <ProspectDetailsCalendarLink calendarLink={userData.scheduling_link} />
+                          )}
 
                           {channel.value === "LINKEDIN" &&
                             data.main.prospect_info.li

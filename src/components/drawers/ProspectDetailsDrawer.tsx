@@ -48,7 +48,7 @@ import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsRese
 import { IconDots, IconPencil } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
 
-export default function ProspectDetailsDrawer() {
+export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
   const userData = useRecoilValue(userDataState);
   const theme = useMantineTheme();
   const tableFilterChannel = useRecoilValue(prospectChannelState);
@@ -178,6 +178,7 @@ export default function ProspectDetailsDrawer() {
           marginTop: 10,
         }
       })}
+      zIndex={props.zIndex}
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       {data?.main.prospect_info && !isFetching && (

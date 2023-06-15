@@ -22,7 +22,7 @@ import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
 import createCTA from '@utils/requests/createCTA';
 import { IconUser } from '@tabler/icons';
-import VoiceBuilderFlow from '@common/voice_builder/VoiceBuilderFlow';
+import VoiceBuilderFlow from '@common/voice_builder/old_VoiceBuilderFlow';
 import { createVoiceBuilderOnboarding } from '@utils/requests/voiceBuilder';
 
 export const STARTING_INSTRUCTIONS = `Follow instructions to generate a short intro message:
@@ -32,8 +32,8 @@ export const STARTING_INSTRUCTIONS = `Follow instructions to generate a short in
 - Tie in the sentences together to make sure it's cohesive
 - Smoothly embed the call-to-action into the end of message.
 - Include a friendly greeting in the beginning.`
-export const MSG_GEN_AMOUNT = 4;
-export const MAX_EDITING_PHASES = 3;
+export const MSG_GEN_AMOUNT = 5;
+export const MIN_MSG_AMOUNT = 5;
 
 export default function VoiceBuilderModal({ context, id, innerProps }: ContextModalProps<{ personas: Archetype[] }>) {
   const theme = useMantineTheme();

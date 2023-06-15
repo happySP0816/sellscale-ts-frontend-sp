@@ -1,8 +1,9 @@
 import { atom } from "recoil";
+import { Prospect } from "src";
 
 const voiceBuilderMessagesState = atom({
   key: "voice-builder-messages",
-  default: [] as { id: number, value: string, saved: boolean }[],
+  default: [] as { id: number, value: string, prospect: Prospect | null }[],
 });
 
 export {

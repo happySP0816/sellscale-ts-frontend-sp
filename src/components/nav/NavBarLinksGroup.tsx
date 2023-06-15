@@ -153,14 +153,14 @@ export function LinksGroup({
   const hasLinkList = links.length > 1;
 
   const ChevronIcon = theme.dir === "ltr" ? IconChevronRight : IconChevronLeft;
-  const items = (hasLinkList ? links : []).map((link) => (
+  const items = (hasLinkList ? links : []).map((link, index) => (
     <Text<"a">
       component="a"
       className={cx(classes.link, {
         [classes.linkActive]: link.key === navTab,
       })}
       href={""}
-      key={link.label}
+      key={index}
       onClick={(event) => {
         event.preventDefault();
         navigateToPage(navigate, link.link);

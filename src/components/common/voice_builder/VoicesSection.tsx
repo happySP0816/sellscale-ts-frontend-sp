@@ -1,7 +1,9 @@
+import { prospectDrawerOpenState } from '@atoms/prospectAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { logout } from '@auth/core';
 import PersonaDetailsPatterns from '@common/persona/details/PersonaDetailsPatterns';
 import { API_URL } from '@constants/data';
+import ProspectDetailsDrawer from '@drawers/ProspectDetailsDrawer';
 import { Avatar, Badge, Text, Button, Group, ScrollArea, Select, Table, Title, useMantineTheme } from '@mantine/core';
 import { openContextModal } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
@@ -12,6 +14,8 @@ import { Archetype } from 'src';
 export default function VoicesSection(props: { personas?: Archetype[] }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
+
+  const prospectDrawerOpened = useRecoilValue(prospectDrawerOpenState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-voices`],
@@ -58,7 +62,6 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
             <tr>
               <th>Priority</th>
               <th>Name</th>
-              <th>Persona</th>
               <th>Channel</th>
               <th>Status</th>
             </tr>
@@ -82,7 +85,6 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
                   </Group>
                 </td>
 
-                <td>{item.archetype_id ? `#${item.archetype_id}` : 'N/A'}</td>
                 <td>{item.generated_message_type}</td>
                 <td>
                   {item.active ? (
@@ -98,6 +100,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
           </tbody>
         </Table>
       </ScrollArea>
+      {prospectDrawerOpened && <ProspectDetailsDrawer zIndex={1000} />}
     </>
   );
 }

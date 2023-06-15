@@ -48,8 +48,8 @@ const ItemComponent: TransferListItemComponent = ({ data, selected }: TransferLi
           if (item === oldMessage) {
             return {
               value: message,
-              saved: item.saved,
               id: item.id,
+              prospect: null,
             };
           }
           return item;
@@ -146,22 +146,22 @@ export default function VoiceBuilderFlow(props: { persona: Archetype; voiceBuild
   }, [instructions]);
 
   const sampleMessages = voiceBuilderMessages
-    .filter((item) => item.saved === false)
+    .filter((item) => false === false)
     .map((item) => ({ value: item.id + '', label: item.value }))
     .sort((a, b) => a.value.localeCompare(b.value));
   const savedMessages = voiceBuilderMessages
-    .filter((item) => item.saved === true)
+    .filter((item) => true === true)
     .map((item) => ({ value: item.id + '', label: item.value }))
     .sort((a, b) => a.value.localeCompare(b.value));
 
-  const canCreate = voiceBuilderMessages.filter((item) => item.saved).length >= MIN_MSG_AMOUNT;
+  const canCreate = voiceBuilderMessages.filter((item) => true).length >= MIN_MSG_AMOUNT;
 
   // Generate sample messages
   const generateMessages = async () => {
     setLoadingMsgGen(true);
 
     for (const message of voiceBuilderMessages) {
-      if (message.saved) {
+      if (true) {
         const response = await updateSample(userToken, message.id, message.value);
       } else {
         const response = await deleteSample(userToken, message.id);
@@ -174,7 +174,7 @@ export default function VoiceBuilderFlow(props: { persona: Archetype; voiceBuild
 
     if (response.status === 'success') {
       setVoiceBuilderMessages((prev) => {
-        const savedItems = prev.filter((item) => item.saved);
+        const savedItems = prev.filter((item) => true);
         const newItems = response.data.map((item: any) => {
           return { id: item.id, value: item.sample_completion, saved: false };
         });
@@ -211,8 +211,8 @@ export default function VoiceBuilderFlow(props: { persona: Archetype; voiceBuild
             mt={10}
             value={[sampleMessages, savedMessages]}
             onChange={(value) => {
-              let messages = value[0].map((item) => ({ id: +item.value, value: item.label, saved: false }));
-              messages = messages.concat(value[1].map((item) => ({ id: +item.value, value: item.label, saved: true })));
+              let messages = value[0].map((item) => ({ id: +item.value, value: item.label, prospect: null }));
+              messages = messages.concat(value[1].map((item) => ({ id: +item.value, value: item.label, prospect: null })));
               setVoiceBuilderMessages(messages);
             }}
             titles={['Samples', 'Saved Messages']}

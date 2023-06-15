@@ -82,10 +82,6 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
   const activeProspect = props.prospects.find((p) => p.id === drawerProspectId);
   const [reschedule, setReschedule] = useState(false);
 
-
-
-  console.log(activeProspect);
-
   const form = useForm({
     initialValues: {
       demoHappen: 'yes',

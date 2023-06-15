@@ -102,7 +102,6 @@ function VesselIntegrations() {
         return res.json();
       })
       .then((j) => {
-        console.log(j.mailboxes);
         setMailboxes(j.mailboxes);
         return;
       });

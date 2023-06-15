@@ -364,24 +364,16 @@ export default function ProspectDetailsViewConversation(
         return res.json();
       })
       .then(async (res) => {
-        console.log("GOT HERE");
-        console.log(res);
         let research_str = "";
         for (var i = 0; i < res.length; i++) {
           research_str += `- ${res[i].reason}\n`;
         }
-        console.log(research_str);
         setAccountResearch(research_str.trim());
       })
       .catch((err) => {
         console.log(err);
       });
   };
-
-  console.log(!emptyConvo);
-  console.log(loading);
-  console.log(messages.current);
-  console.log(autoBumpMessage.current);
 
   return (
     <>

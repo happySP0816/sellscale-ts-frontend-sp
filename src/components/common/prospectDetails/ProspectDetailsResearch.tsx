@@ -49,7 +49,6 @@ export default function ProspectDetailsResearch(props: PropsType) {
         setIsLoading(false);
       })
       .catch((err) => {
-        console.log(err);
         setIsLoading(false);
       });
   };

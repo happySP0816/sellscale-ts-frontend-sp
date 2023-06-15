@@ -65,7 +65,6 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
     setFetchingEmailGenerationPrompt(true);
     const response = await getEmailGenerationPrompt(userToken, innerProps.prospectId);
     setFetchingEmailGenerationPrompt(false);
-    console.log(response);
     if (response.status === 'success') {
       setEmailGenerationPrompt(response.data.prompt);
     }
@@ -78,7 +77,6 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
       innerProps.prospectId,
       innerProps.threadId,
     );
-    console.log('followup', response);
 
     if (response.status === 'success') {
       setEmailGenerationPrompt(response.data.data);

@@ -72,8 +72,6 @@ export default function CreatePersonaModal({
     });
   }, [persona]);
 
-  console.log(creationData);
-
   const [step, setStep] = useState(creationData.step);
   const nextStep = async () => {
     // Create persona if it doesn't exist

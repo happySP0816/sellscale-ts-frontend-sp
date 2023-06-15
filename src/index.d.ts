@@ -168,8 +168,7 @@ export type BumpFramework = {
   active: boolean;
   default: boolean;
   bump_length: string;
-  archetypes: {
-    archetype_id: number;
-    archetype_name: string;
-  }[];
+  bumped_count: number | null;
+  // client_archetype_id: number;
+  // client_archetype_archetype: string;
 };

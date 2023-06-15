@@ -165,6 +165,8 @@ export function NavbarNested(props: {
   const navigate = useNavigate();
   const theme = useMantineTheme();
 
+  const loggedIn = isLoggedIn();
+
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [navTab, setNavTab] = useRecoilState(navTabState);
@@ -182,6 +184,10 @@ export function NavbarNested(props: {
    useQuery({
       queryKey: [`query-personas-data-sidebar`],
       queryFn: async () => {
+        if (!loggedIn) {
+          setLoadingPersonas(false);
+          return [];
+        }
         setLoadingPersonas(true);
         const response = await getPersonas(userToken);
         const result =
@@ -211,8 +217,6 @@ export function NavbarNested(props: {
     // if (!fetchedPersonas) {
     //   setLoadingPersonas(true);
     //   getPersonas(userToken).then((j) => {
-    //     console.log("GOT HERE BOI");
-    //     console.log(j.data);
     //     setPersonaLinks(j.data);
     //     setLoadingPersonas(false);
     //   });
@@ -392,12 +396,18 @@ export function NavbarNested(props: {
     <LinksGroup {...item} key={item.mainKey} />
   ));
 
-  const loggedIn = isLoggedIn();
+  // Get Onboarding completion report
+  // --------------------------------
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-sdr-onboarding-completion-report`],
     queryFn: async () => {
-      const response = await getOnboardingCompletionReport(userToken);
+      var response;
+      if (loggedIn) {
+        response = await getOnboardingCompletionReport(userToken);
+      } else {
+        response = {};
+      }
       return response.status === "success" ? response.data : null;
     },
   });

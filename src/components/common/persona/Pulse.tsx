@@ -118,14 +118,12 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
     }
 
     setTestingPrompt(true);
-    console.log("triggering");
 
     const result = await getICPOneProspect(
       userToken,
       props.personaOverview.id,
       selectedProspect.id
     );
-    console.log(result);
 
     if (result.status === "success") {
       showNotification({

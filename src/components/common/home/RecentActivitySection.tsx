@@ -51,7 +51,6 @@ export default function RecentActivitySection() {
   }, [page]);
 
   useEffect(() => {
-    console.log(totalItems.current, allEngagementFeedItems.current.length);
     if(
       !scrollRef.current ||
       !outerScrollRef.current ||

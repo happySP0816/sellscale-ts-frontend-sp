@@ -34,7 +34,6 @@ export default function DemoFeedbackLineChart(props: PropsType) {
           var tempDataDict: any = {};
           for (var i = 0; i < data.data.length; i++) {
             const date = data.data[i].demo_date.substring(5, 16);
-            console.log(data.data[i]);
             individualPoints.push({
               id: data.data[i].company,
               data: [{ x: date, y: data.data[i].total_demo_count }],

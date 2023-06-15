@@ -58,7 +58,6 @@ export default function LinkedinQueuedMessages() {
   }, [page]);
 
   useEffect(() => {
-    console.log(totalItems.current, allMessages.current.length);
     if (
       !scrollRef.current ||
       !outerScrollRef.current ||

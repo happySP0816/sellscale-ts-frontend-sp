@@ -98,9 +98,6 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
 
       setNotes(res.prospect_info.details.notes);
 
-      console.log(res);
-      console.log(res_valid_channels);
-
       persona_id.current = res.prospect_info.details.persona_id
 
       return {

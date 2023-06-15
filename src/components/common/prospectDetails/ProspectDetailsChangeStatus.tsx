@@ -306,8 +306,6 @@ export default function ProspectDetailsChangeStatus(
 
   const items = [];
 
-  console.log(props.channelData);
-
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `prospect-next-status-options-${props.prospectId}-${props.channelData.value}`,

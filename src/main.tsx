@@ -72,7 +72,6 @@ const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.ready.then(async (registration) => {
       const result = await registration.unregister();
-      console.log("Unregistered service worker: ", result);
     });
   }
 })();

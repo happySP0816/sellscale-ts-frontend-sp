@@ -182,8 +182,6 @@ export function LinksGroup({
     </Text>
   ));
 
-  console.log(navTab);
-
   // Change the name of the label to show when the drawer is opened or not
   let linkLabel = label;
   if (!opened && links?.some((link) => link.key === navTab)) {

@@ -149,7 +149,9 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
               .then((response) => {
                 if (response.status === 'success') {
                   setSubject(response.data.subject);
-                  setBody(response.data.body.replace(/\n/gm, '<br>'));
+                  const body = response.data.body.replace(/\n/gm, '<br>');
+                  setBody(body);
+                  bodyRef.current = body;
                   setAiGenerated(true);
                 }
               })

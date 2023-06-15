@@ -13,7 +13,13 @@ export function testDelay(ms: number) {
  * @param name
  * @returns
  */
-export function splitName(name: string) {
+export function splitName(name: string | null) {
+  if (!name) {
+    return {
+      first: "",
+      last: "",
+    };
+  }
   let parts = name.split(" ");
   return {
     first: parts[0],

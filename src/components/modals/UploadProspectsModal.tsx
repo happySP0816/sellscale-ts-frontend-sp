@@ -262,7 +262,7 @@ export default function UploadProspectsModal({
       <Stack spacing="xl">
         {!isFetching && (
           <Select
-            label={innerProps.mode === "CREATE-ONLY" ? "Name" : "Set Persona"}
+            label={innerProps.mode === "CREATE-ONLY" ? "Descriptive Name" : "Set Persona"}
             defaultValue={
               defaultPersonas.current.length === 1 ||
               (defaultPersonas.current.length > 1 &&
@@ -276,7 +276,7 @@ export default function UploadProspectsModal({
               innerProps.mode === "ADD-ONLY"
                 ? "Select a persona for the prospects"
                 : innerProps.mode === "CREATE-ONLY"
-                ? "Create a persona for the prospects"
+                ? "eg. C-Suite Sales Leaders in tech companies"
                 : "Select or create a persona for the prospects"
             }
             nothingFound={
@@ -325,7 +325,7 @@ export default function UploadProspectsModal({
               withAsterisk
               value={fitReason}
               onChange={(e) => setFitReason(e.target.value)}
-              placeholder="To help their outbound team increase..."
+              placeholder="The AI will use this reasoning to reach out to prospects and explain why they are a good fit for your product."
               label="Why would this persona buy your product?"
               loadingAIGenerate={loadingPersonaBuyReasonGeneration}
               onAIGenerateClicked={async () => {

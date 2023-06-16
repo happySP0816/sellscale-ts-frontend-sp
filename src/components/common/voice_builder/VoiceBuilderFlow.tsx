@@ -273,6 +273,31 @@ export default function VoiceBuilderFlow(props: {
     setLoadingMsgGen(false);
   };
 
+  // Finalize voice building and create voice
+  const completeVoice = async () => {
+
+    // Clone so we don't have to deal with async global state changes bs
+    const currentMessages = _.cloneDeep(voiceBuilderMessages);
+
+    // Delete all samples that are empty
+    for (const message of currentMessages) {
+      if (message.value === "") {
+        await deleteSample(userToken, message.id);
+      } else {
+        await updateSample(userToken, message.id, message.value);
+      }
+    }
+
+    const response = await createVoice(
+      userToken,
+      props.voiceBuilderOnboardingId
+    );
+    if (response.status === "success") {
+      window.location.href = `/linkedin/voices`;
+    }
+
+  };
+
   console.log(voiceBuilderMessages);
 
   return (
@@ -312,13 +337,7 @@ export default function VoiceBuilderFlow(props: {
           disabled={loadingMsgGen}
           onClick={async () => {
             if (canCreate) {
-              const response = await createVoice(
-                userToken,
-                props.voiceBuilderOnboardingId
-              );
-              if (response.status === "success") {
-                window.location.href = `/linkedin/voices`;
-              }
+              await completeVoice();
             } else {
               await generateMessages();
               setEditingPhase(editingPhase + 1);

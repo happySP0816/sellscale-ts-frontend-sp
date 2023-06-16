@@ -61,7 +61,7 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
   const [emailBlocks, setEmailBlocks] = useState<string[]>([]);
 
   // Auto saving email blocks
-  const [debouncedEmailBlocks] = useDebouncedValue(emailBlocks, 400);
+  const [debouncedEmailBlocks] = useDebouncedValue(emailBlocks, 800);
   useEffect(() => {
     triggerPatchEmailBlocks();
   }, [debouncedEmailBlocks]);

@@ -177,7 +177,7 @@ export default function CTAGeneratorModal({
               <ScrollArea h={400}>
                 <Stack>
                   {generatedCTAs.map((cta, index) => (
-                    <Flex key={index}>
+                    <Flex key={index} gap={10} mx={15}>
                       <Container m={0} p={0}>
                         <Badge
                           w={150}
@@ -190,14 +190,18 @@ export default function CTAGeneratorModal({
                           ctaText={cta.cta}
                         ></CTAGeneratorExample>
                       </Container>
-                      <Flex direction="column" mx={8}>
+                      <Container m={0} p={0} sx={{ flexGrow: 1 }}>
                         <Textarea
-                          w={300}
                           placeholder="Your CTA"
                           value={cta.cta}
                           px={8}
                           sx={{
                             border: "solid 1px #333",
+                          }}
+                          styles={{
+                            input: {
+                              overflowY: "hidden",
+                            }
                           }}
                           onChange={(e) => {
                             const newGeneratedCTAs = [...generatedCTAs];
@@ -219,7 +223,7 @@ export default function CTAGeneratorModal({
                         >
                           {cta.cta.length}/{120}
                         </Text>
-                      </Flex>
+                      </Container>
                       <Button
                         disabled={!cta.enabled}
                         mt={10}

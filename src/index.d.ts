@@ -84,6 +84,16 @@ export interface Prospect {
   demo_date: any;
 }
 
+export interface ProspectShallow {
+  id: number;
+  full_name: string;
+  icp_fit_score: number;
+  icp_fit_reason: string;
+  title: string;
+  company: string;
+  li_public_id: string | null;
+};
+
 export interface CTA {
   id: number;
   archetype_id: number;

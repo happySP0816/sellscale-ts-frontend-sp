@@ -17,6 +17,21 @@ export async function generateEmail(
   return await processResponse(response, 'data');
 }
 
+export async function generateEmailAutomatic(
+  userToken: string,
+  prospect_id: number
+): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/ml/generate_email_automatic`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ prospect_id }),
+  });
+  return await processResponse(response, 'data');
+}
+
 
 export async function getEmailGenerationPrompt(
   userToken: string,

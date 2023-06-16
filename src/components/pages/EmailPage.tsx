@@ -41,9 +41,6 @@ export default function EmailPage() {
         {/* <Tabs.Panel value="sequences" pt="xs">
           <SequenceSection />
         </Tabs.Panel> */}
-        <Tabs.Panel value="blocks" pt="xs">
-          <EmailBlocksPage />
-        </Tabs.Panel>
         <Tabs.Panel value="personalizations" pt="xs">
           <PersonaDetailsTransformers channel="EMAIL" />
         </Tabs.Panel>

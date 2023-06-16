@@ -161,7 +161,7 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
   return (
     <>
       <LoadingOverlay visible={loading} />
-      <Flex direction='column' w='100%' pl='16px'>
+      <Flex direction='column' w='100%'>
 
         <Flex w='100%' justify={'space-between'} align='center'>
           <Textarea

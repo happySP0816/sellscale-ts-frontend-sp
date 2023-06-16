@@ -20,7 +20,7 @@ import { forwardRef, useEffect, useState } from 'react';
 
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
-import { Archetype, PersonaOverview } from 'src';
+import { Archetype, PersonaOverview, ProspectShallow } from 'src';
 
 import getICPClassificationPrompt from '@utils/requests/getICPClassificationPrompt';
 import { getArchetypeProspects } from '@utils/requests/getArchetypeProspects';
@@ -28,16 +28,6 @@ import postRunICPClassification from '@utils/requests/postRunICPClassification';
 import { valueToColor } from '@utils/general';
 import { getICPOneProspect } from '@utils/requests/getICPOneProspect';
 import { showNotification } from '@mantine/notifications';
-
-type ProspectType = {
-  id: number;
-  full_name: string;
-  icp_fit_score: number;
-  icp_fit_reason: string;
-  title: string;
-  company: string;
-  li_public_id: string | null;
-};
 
 interface ProspectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -68,8 +58,8 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   const { classes } = useStyles();
   const userToken = useRecoilValue(userTokenState);
   const [currentICPPrompt, setCurrentICPPrompt] = useState('');
-  const [prospects, setProspects] = useState<ProspectType[]>([]);
-  const [selectedProspect, setSelectedProspect] = useState<ProspectType>();
+  const [prospects, setProspects] = useState<ProspectShallow[]>([]);
+  const [selectedProspect, setSelectedProspect] = useState<ProspectShallow>();
   const [testingPrompt, setTestingPrompt] = useState(false);
 
   const ProspectSelectItem = forwardRef<HTMLDivElement, ProspectItemProps>(

@@ -94,7 +94,7 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
   }
 
   const triggerPatchEmailBlocks = async () => {
-    if (initialEmailBlocks == null) {
+    if (initialEmailBlocks === null) {
       return;
     }
     console.log('Saving email blocks...');

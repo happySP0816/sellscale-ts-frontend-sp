@@ -94,7 +94,6 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
   }
 
   const triggerPatchEmailBlocks = async () => {
-    setLoading(true);
     console.log('Saving email blocks...');
     const result = await patchEmailBlocks(userToken, archetypeId, emailBlocks);
 
@@ -103,7 +102,6 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
     }
 
     setInitialEmailBlocks(emailBlocks);
-    setLoading(false);
   }
 
   useEffect(() => {

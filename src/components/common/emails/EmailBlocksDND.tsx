@@ -57,11 +57,11 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
   const newBlockText = useRef<HTMLTextAreaElement>(null);
   const [blockTextEmpty, setBlockTextEmpty] = useState<boolean>(true);
 
-  const [initialEmailBlocks, setInitialEmailBlocks] = useState<string[]>([]);
+  const [initialEmailBlocks, setInitialEmailBlocks] = useState<string[] | null>(null);
   const [emailBlocks, setEmailBlocks] = useState<string[]>([]);
 
   // Auto saving email blocks
-  const [debouncedEmailBlocks] = useDebouncedValue(emailBlocks, 800);
+  const [debouncedEmailBlocks] = useDebouncedValue(emailBlocks, 300);
   useEffect(() => {
     triggerPatchEmailBlocks();
   }, [debouncedEmailBlocks]);
@@ -94,6 +94,9 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
   }
 
   const triggerPatchEmailBlocks = async () => {
+    if (initialEmailBlocks == null) {
+      return;
+    }
     console.log('Saving email blocks...');
     const result = await patchEmailBlocks(userToken, archetypeId, emailBlocks);
 

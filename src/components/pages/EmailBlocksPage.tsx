@@ -1,5 +1,5 @@
 import { userTokenState } from '@atoms/userAtoms';
-import EmailBlockPreview from '@common/email_blocks/EmailBlockPreview';
+import EmailBlockPreview from '@common/emails/EmailBlockPreview';
 import { EmailBlocksDND } from '@common/emails/EmailBlocksDND';
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
 import { Button, Card, Flex, LoadingOverlay, Text, Title } from '@mantine/core';

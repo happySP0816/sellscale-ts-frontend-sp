@@ -1,6 +1,6 @@
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { ActionIcon, Button, Card, Flex, LoadingOverlay, Text, Textarea } from "@mantine/core";
-import { useForceUpdate, useListState } from "@mantine/hooks";
+import { useDebouncedValue, useForceUpdate, useListState } from "@mantine/hooks";
 import { IconGripVertical, IconX } from "@tabler/icons";
 import { useEffect, useRef, useState } from "react";
 import getEmailBlocks from "@utils/requests/getEmailBlocks";
@@ -60,6 +60,12 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
   const [initialEmailBlocks, setInitialEmailBlocks] = useState<string[]>([]);
   const [emailBlocks, setEmailBlocks] = useState<string[]>([]);
 
+  // Auto saving email blocks
+  const [debouncedEmailBlocks] = useDebouncedValue(emailBlocks, 400);
+  useEffect(() => {
+    triggerPatchEmailBlocks();
+  }, [debouncedEmailBlocks]);
+
   const triggerGetEmailBlocks = async () => {
     setLoading(true);
 
@@ -89,21 +95,11 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
 
   const triggerPatchEmailBlocks = async () => {
     setLoading(true);
+    console.log('Saving email blocks...');
     const result = await patchEmailBlocks(userToken, archetypeId, emailBlocks);
 
     if (result.status !== "success") {
-      showNotification({
-        title: "Error",
-        message: "Could not save email blocks",
-        color: "red",
-      });
       return;
-    } else {
-      showNotification({
-        title: "Success",
-        message: "Saved email blocks",
-        color: "green",
-      });
     }
 
     setInitialEmailBlocks(emailBlocks);
@@ -208,16 +204,6 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
             </Droppable>
           </DragDropContext>
         </Flex>
-
-        <Button
-          disabled={JSON.stringify(initialEmailBlocks) === JSON.stringify(emailBlocks)} // Disabled when state and data objects are equal
-          onClick={triggerPatchEmailBlocks}
-          w='120px'
-        >
-          Save
-        </Button>
-
-
       </Flex>
     </>
   );

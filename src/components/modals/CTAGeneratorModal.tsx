@@ -28,6 +28,7 @@ import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconWriting } from "@tabler/icons";
+import { useQueryClient } from "@tanstack/react-query";
 import { valueToColor } from "@utils/general";
 import createCTA from "@utils/requests/createCTA";
 import { generateCTAs } from "@utils/requests/generateCTAs";
@@ -76,6 +77,7 @@ export default function CTAGeneratorModal({
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+  const queryClient = useQueryClient();
 
   const [generatedCTAs, setGeneratedCTAs] = useState<
     { cta: string; tag: string; enabled: boolean }[]
@@ -246,6 +248,9 @@ export default function CTAGeneratorModal({
                             innerProps.personaId,
                             cta.cta
                           );
+                          queryClient.invalidateQueries({
+                            queryKey: [`query-cta-data-${innerProps.personaId}`],
+                          });
                           if (response.status === "success") {
                             // Disable the CTA
                             const newGeneratedCTAs = [...generatedCTAs];

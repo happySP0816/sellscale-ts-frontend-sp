@@ -1,6 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
-import { Modal, TextInput, Text, Textarea, Tooltip, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay } from "@mantine/core";
+import { Modal, TextInput, Text, Textarea, Tooltip, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons";
@@ -25,6 +25,7 @@ interface CreateBumpFramework extends Record<string, unknown> {
   dataChannels: MsgResponse | undefined;
   archetypeID: number | null;
   status?: string;
+  bumpedCount?: number | null;
 }
 
 export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
@@ -34,8 +35,6 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
   const [selectedStatus, setSelectedStatus] = useState<string | null>('');
   const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>('');
-  const [archetypeID, setArchetypeID] = useState<number | null>(null);
-  const [bumpedCount, setBumpedCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
   const getActiveConvoSubstatusValues = () => {
@@ -59,16 +58,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
   const triggerCreateBumpFramework = async () => {
     setLoading(true);
 
-    // let finalArchetypeIDs: any[] = []
-    // if (form.values.archetypes != null) {
-    //   const firstArchetype = form.values.archetypes[0];
-    //   if (firstArchetype.archetype_id === -1) {
-    //     finalArchetypeIDs = archetypeIDs;
-    //   } else {
-    //     finalArchetypeIDs = form.values.archetypes?.map((archetype) => archetype.archetype_id);
-    //   }
-    // }
-    if (archetypeID == null) {
+    if (form.values.archetypeID == null) {
       showNotification({
         title: "Error",
         message: "Please select an archetype",
@@ -79,13 +69,13 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
 
     const result = await createBumpFramework(
       userToken,
-      archetypeID,
+      form.values.archetypeID,
       selectedStatus as string,
       form.values.title,
       form.values.description,
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
-      bumpedCount,
+      form.values.bumpedCount as number,
       form.values.default,
       selectedSubstatus
     );
@@ -114,8 +104,9 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
     initialValues: {
       title: "",
       description: "",
-      archetypeID: null,
+      archetypeID: props.archetypeID,
       default: false,
+      bumpedCount: props.bumpedCount,
     },
   });
 
@@ -128,10 +119,6 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
         setSelectedStatus("ACTIVE_CONVO");
         setSelectedSubstatus(props.status);
       }
-    }
-
-    if (props.archetypeID != null) {
-      setArchetypeID(props.archetypeID);
     }
   }, [props.status])
 
@@ -198,7 +185,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           selectMultiple={false}
           label="Personas"
           description="Select the personas this framework applies to."
-          defaultValues={[archetypeID || -1]}
+          defaultValues={[form.values.archetypeID || -1]}
         />
       </Flex>
       <Select
@@ -229,6 +216,18 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           onChange={setSelectedSubstatus}
           mt="md"
           withAsterisk
+        />
+      )}
+      {(selectedStatus === "BUMPED" && form.values.bumpedCount) && (
+        <NumberInput
+          label="Bump Number"
+          description="The position in the bump sequence."
+          placeholder="1"
+          value={form.values.bumpedCount}
+          onChange={(e) => {
+            form.setFieldValue("bumpedCount", e as number);
+          }}
+          min={1}
         />
       )}
       <Flex w="100%" justify="flex-end" direction={'column'}>

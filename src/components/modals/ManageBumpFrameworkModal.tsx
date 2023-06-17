@@ -137,6 +137,7 @@ export default function ManageBumpFramework({
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
         bumped_count: form.values.bumpedCount,
+        substatus: selectedBumpFramework.substatus,
       });
     } else {
       showNotification({
@@ -195,6 +196,7 @@ export default function ManageBumpFramework({
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
         bumped_count: form.values.bumpedCount,
+        substatus: innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : "",
       });
     } else {
       showNotification({

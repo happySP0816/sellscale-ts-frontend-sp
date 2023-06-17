@@ -175,6 +175,7 @@ export type BumpFramework = {
   title: string;
   description: string;
   overall_status: string;
+  substatus: string;
   active: boolean;
   default: boolean;
   bump_length: string;

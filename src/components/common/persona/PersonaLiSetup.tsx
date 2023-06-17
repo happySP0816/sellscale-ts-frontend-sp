@@ -138,8 +138,8 @@ export default function PersonaLiSetup(props: { persona: PersonaOverview; person
           <Accordion.Panel>
             <BumpFrameworksPage
               predefinedPersonaId={props.persona.id}
-              onPopulateBumpFrameworks={(bumpFrameworks) => {
-                if (bumpFrameworks.length > 0) {
+              onPopulateBumpFrameworks={(buckets) => {
+                if (buckets.ACCEPTED.total > 0 || Object.values(buckets.BUMPED).find(d => d.total > 0) || buckets.ACTIVE_CONVO.total > 0) {
                   setStepThreeComplete('COMPLETE');
                 }
               }}

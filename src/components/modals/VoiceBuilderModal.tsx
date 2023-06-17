@@ -106,7 +106,7 @@ export default function VoiceBuilderModal({
       {canBuildVoice && (
         <VoiceBuilderFlow persona={persona} voiceBuilderOnboardingId={voiceBuilderOnboardingId} />
       )}
-      {!canBuildVoice && (
+      {!canBuildVoice && voiceBuilderOnboardingId !== -1 && (
         <Text color='red' size='sm' mt='sm'>
           This persona needs at least 3 CTA in order to build a voice for it.
         </Text>

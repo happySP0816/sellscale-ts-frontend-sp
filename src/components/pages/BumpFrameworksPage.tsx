@@ -102,7 +102,7 @@ const bumpFrameworkLengthMarks = [
   { value: 100, label: "Long", api_label: "LONG" },
 ];
 
-export default function BumpFrameworksPage() {
+export default function BumpFrameworksPage(props: { predefinedPersonaId?: number, onPopulateBumpFrameworks?: (bumpFrameworks: BumpFramework[]) => void }) {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
 
@@ -114,7 +114,7 @@ export default function BumpFrameworksPage() {
   ] = useState<BumpFramework | null>(null);
   const [overallStatuses, setOverallStatuses] = useState<string[]>([]);
   const [substatuses, setSubstatuses] = useState<string[]>([]);
-  const [archetypeID, setArchetypeID] = useState<number[]>([]);
+  const [archetypeID, setArchetypeID] = useState<number[]>(props.predefinedPersonaId !== undefined ? [props.predefinedPersonaId] : []);
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
 
   const [pipelineData, setPipelineData] = useState<Map<string, any>>(new Map());
@@ -233,6 +233,11 @@ export default function BumpFrameworksPage() {
     // Populate Pipeline Data
     const pipelineData = getPipelineData(result.data.counts, theme);
     setPipelineData(pipelineData);
+
+    // BumpFrameworks have been updated, submit event to parent
+    if (props.onPopulateBumpFrameworks) {
+      props.onPopulateBumpFrameworks(bumpFrameworkArray);
+    }
 
     setLoadingBumpFrameworks(false);
   };
@@ -362,24 +367,27 @@ export default function BumpFrameworksPage() {
     <>
       <Flex direction="column">
         <Title>Bump Frameworks</Title>
-        <Flex mt="md">
-          <PersonaSelect
-            disabled={false}
-            onChange={(archetype) => {
-              if (archetype.length == 0) {
-                setSelectorType("");
-                setArchetypeID([]);
-                triggerGetBumpFrameworks([], [], []);
-                return;
-              }
-              setArchetypeID(archetype.map((a) => a.archetype_id));
-            }}
-            defaultValues={archetypeID}
-            selectMultiple={false}
-            label="Select Persona"
-            description="Select the persona whose bump frameworks you want to view."
-          />
-        </Flex>
+
+        {props.predefinedPersonaId === undefined && (
+          <Flex mt="md">
+            <PersonaSelect
+              disabled={false}
+              onChange={(archetype) => {
+                if (archetype.length == 0) {
+                  setSelectorType("");
+                  setArchetypeID([]);
+                  triggerGetBumpFrameworks([], [], []);
+                  return;
+                }
+                setArchetypeID(archetype.map((a) => a.archetype_id));
+              }}
+              defaultValues={archetypeID}
+              selectMultiple={false}
+              label="Select Persona"
+              description="Select the persona whose bump frameworks you want to view."
+            />
+          </Flex>
+        )}
 
         <Flex my='md' justify={'center'} align={'center'}>
           <PipelineSelector data={pipelineData} loadingData={loadingBumpFrameworks} cardSize='xs' maxCols={8} minimal />

@@ -31,29 +31,43 @@ export const STARTING_INSTRUCTIONS = `Follow instructions to generate a short in
 - Ensure that you mention key personalized elements
 - Tie in the sentences together to make sure it's cohesive
 - Smoothly embed the call-to-action into the end of message.
-- Include a friendly greeting in the beginning.`
+- Include a friendly greeting in the beginning.`;
 export const MSG_GEN_AMOUNT = 4;
 export const MAX_EDITING_PHASES = 3;
 
-export default function VoiceBuilderModal({ context, id, innerProps }: ContextModalProps<{ personas: Archetype[] }>) {
+export default function VoiceBuilderModal({
+  context,
+  id,
+  innerProps,
+}: ContextModalProps<{ predefinedPersonaId?: number; personas: Archetype[] }>) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
 
-  const [persona, setPersona] = useState<Archetype | undefined>(undefined);
+  const [persona, setPersona] = useState<Archetype | undefined>(
+    innerProps.personas.find((persona: Archetype) => persona.id === innerProps.predefinedPersonaId)
+  );
   const [voiceBuilderOnboardingId, setVoiceBuilderOnboardingId] = useState<number>(-1);
 
   useEffect(() => {
     if (!persona) return;
     (async () => {
-      const response = await createVoiceBuilderOnboarding(userToken, 'LINKEDIN', `${STARTING_INSTRUCTIONS}`, persona.id);
+      const response = await createVoiceBuilderOnboarding(
+        userToken,
+        'LINKEDIN',
+        `${STARTING_INSTRUCTIONS}`,
+        persona.id
+      );
       if (response.status === 'success') {
         setVoiceBuilderOnboardingId(response.data.id);
       }
     })();
   }, [persona]);
+
+
+  const canBuildVoice = persona && voiceBuilderOnboardingId !== -1 && (innerProps.predefinedPersonaId !== undefined || persona.ctas.length >= 3);
 
   return (
     <Paper
@@ -64,33 +78,35 @@ export default function VoiceBuilderModal({ context, id, innerProps }: ContextMo
     >
       <LoadingOverlay visible={loading} />
 
-      <Select
-        pb='xs'
-        withinPortal
-        placeholder='Select a persona'
-        color='teal'
-        // @ts-ignore
-        data={
-          innerProps.personas
-            ? innerProps.personas
-                .filter((persona: Archetype) => !persona?.archetype?.includes('Unassigned'))
-                .map((persona: Archetype) => ({
-                  value: persona.id + '',
-                  label: `(${persona.ctas.length} CTAs) ` + (persona.active ? '🟢 ' : '🔴 ') + persona.archetype,
-                }))
-            : []
-        }
-        icon={<IconUser size='1rem' />}
-        onChange={(value) => {
-          setPersona(innerProps.personas.find((persona: Archetype) => persona.id === parseInt(value ?? '-1')));
-        }}
-        value={persona?.id + '' ?? ''}
-      />
+      {innerProps.predefinedPersonaId === undefined && (
+        <Select
+          pb='xs'
+          withinPortal
+          placeholder='Select a persona'
+          color='teal'
+          // @ts-ignore
+          data={
+            innerProps.personas
+              ? innerProps.personas
+                  .filter((persona: Archetype) => !persona?.archetype?.includes('Unassigned'))
+                  .map((persona: Archetype) => ({
+                    value: persona.id + '',
+                    label: `(${persona.ctas.length} CTAs) ` + (persona.active ? '🟢 ' : '🔴 ') + persona.archetype,
+                  }))
+              : []
+          }
+          icon={<IconUser size='1rem' />}
+          onChange={(value) => {
+            setPersona(innerProps.personas.find((persona: Archetype) => persona.id === parseInt(value ?? '-1')));
+          }}
+          value={persona?.id + '' ?? ''}
+        />
+      )}
 
-      {persona && persona.ctas.length >= 3 && voiceBuilderOnboardingId !== -1 && (
+      {canBuildVoice && (
         <VoiceBuilderFlow persona={persona} voiceBuilderOnboardingId={voiceBuilderOnboardingId} />
       )}
-      {persona && persona.ctas.length < 3 && (
+      {!canBuildVoice && (
         <Text color='red' size='sm' mt='sm'>
           This persona needs at least 3 CTA in order to build a voice for it.
         </Text>

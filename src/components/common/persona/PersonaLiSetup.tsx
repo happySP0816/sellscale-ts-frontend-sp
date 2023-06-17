@@ -1,9 +1,24 @@
-import { userTokenState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { logout } from '@auth/core';
 import ComingSoonCard from '@common/library/ComingSoonCard';
 import TextAreaWithAI from '@common/library/TextAreaWithAI';
 import { API_URL } from '@constants/data';
-import { TextInput, Tabs, Box, Button, Flex, Select, Switch, Title } from '@mantine/core';
+import {
+  TextInput,
+  Tabs,
+  Box,
+  Button,
+  Flex,
+  Select,
+  Text,
+  Title,
+  Accordion,
+  Container,
+  Progress,
+  createStyles,
+  Group,
+  Badge,
+} from '@mantine/core';
 import { openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { ArchetypeCreation } from '@modals/CreatePersonaModal';
@@ -16,202 +31,166 @@ import { DataTableSortStatus, DataTable } from 'mantine-datatable';
 import { useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { CTA, Archetype, PersonaOverview } from 'src';
+import LinkedInCTAsStep from './linkedin/LinkedInCTAsStep';
+import LinkedInVoiceBuilderStep from './linkedin/LinkedInVoiceBuilderStep';
+import BumpFrameworksPage from '@pages/BumpFrameworksPage';
 
-const PAGE_SIZE = 10;
+type LiStepProgress = 'COMPLETE' | 'INCOMPLETE' | 'COMING_SOON' | 'OPTIONAL';
 
-export default function PersonaLiSetup(props: { persona: PersonaOverview, personas: PersonaOverview[] }) {
-  
-  const userToken = useRecoilValue(userTokenState);
+const useStyles = createStyles((theme) => ({
+  item: {
+    fontSize: theme.fontSizes.sm,
+    color: theme.colorScheme === 'dark' ? theme.colors.dark[1] : theme.colors.gray[7],
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.colors.gray[1],
+  },
+}));
+export default function PersonaLiSetup(props: { persona: PersonaOverview; personas: PersonaOverview[] }) {
+  const { classes } = useStyles();
+  const userData = useRecoilValue(userDataState);
 
-  const [page, setPage] = useState(1);
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-    columnAccessor: "percentage",
-    direction: "desc",
-  });
-  const totalRecords = useRef(0);
+  console.log(userData)
 
-  const handleSortStatusChange = (status: DataTableSortStatus) => {
-    setPage(1);
-    setSortStatus(status);
-  };
+  const [stepOneComplete, setStepOneComplete] = useState<LiStepProgress>('INCOMPLETE');
+  const [stepTwoComplete, setStepTwoComplete] = useState<LiStepProgress>('OPTIONAL');
+  const [stepThreeComplete, setStepThreeComplete] = useState<LiStepProgress>('INCOMPLETE');
+  const [stepFourComplete, setStepFourComplete] = useState<LiStepProgress>('COMING_SOON');
 
-  const { data, isFetching, refetch } = useQuery({
-    queryKey: [`query-cta-data-${props.persona.id}`, { page, sortStatus }],
-    queryFn: async ({ queryKey }) => {
-      // @ts-ignore
-      // eslint-disable-next-line
-      const [_key, { page, sortStatus }] = queryKey;
-
-      const response = await fetch(
-        `${API_URL}/client/archetype/${props.persona.id}/get_ctas`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-      if (response.status === 401) {
-        logout();
-      }
-      const res = await response.json();
-      if (!res || !res.ctas) {
-        return [];
-      }
-
-      totalRecords.current = res.ctas.length;
-      let pageData = chunk(res.ctas as CTA[], PAGE_SIZE)[page - 1]?.map(
-        (cta) => {
-          let totalResponded = 0;
-          if (cta.performance) {
-            for (const status in cta.performance.status_map) {
-              if (status !== "SENT_OUTREACH" && status !== "NOT_INTERESTED") {
-                totalResponded += cta.performance.status_map[status];
-              }
-            }
-          }
-          return {
-            ...cta,
-            percentage: cta.performance?.total_count
-              ? Math.round((totalResponded / cta.performance.total_count) * 100)
-              : 0,
-            total_responded: totalResponded,
-            total_count: cta.performance?.total_count,
-          };
-        }
-      );
-      if (!pageData) {
-        return [];
-      }
-
-      pageData = sortBy(pageData, ["active", sortStatus.columnAccessor]);
-      return sortStatus.direction === "desc" ? pageData.reverse() : pageData;
-    },
-    refetchOnWindowFocus: false,
-  });
+  let percentage = 0;
+  if (stepOneComplete !== 'INCOMPLETE') {
+    percentage += 33.3;
+  }
+  if (stepTwoComplete !== 'INCOMPLETE') {
+    percentage += 33.3;
+  }
+  if (stepThreeComplete !== 'INCOMPLETE') {
+    percentage += 33.3;
+  }
+  if (stepFourComplete !== 'INCOMPLETE') {
+    //
+  }
+  percentage = Math.ceil(percentage);
 
   return (
-    <Box>
-      <Flex direction="row-reverse" gap="sm" pb="xs">
-        <Button
-          size="sm"
-          variant="light"
-          onClick={() => {
-            openContextModal({
-              modal: "createNewCTA",
-              title: <Title order={3}>Create CTA</Title>,
-              innerProps: {
-                personaId: props.persona.id,
-                personas: props.personas,
-              },
-            });
-          }}
-        >
-          Create New CTA
-        </Button>
-      </Flex>
-      <DataTable
-        height={"min(670px, 100vh - 200px)"}
-        verticalAlignment="top"
-        loaderColor="teal"
-        noRecordsText={"No CTAs found"}
-        fetching={isFetching}
-        columns={[
-          {
-            accessor: "text_value",
-            title: "Call-to-Action",
-            sortable: true,
-          },
-          {
-            accessor: "percentage",
-            title: "%Accepted",
-            ellipsis: true,
-            sortable: true,
-            width: 100,
-            render: ({ percentage }) => `${percentage}%`,
-          },
-          {
-            accessor: "total_count",
-            title: "Prospects",
-            sortable: true,
-            render: ({ total_count, total_responded }) =>
-              `${total_responded} / ${total_count}`,
-          },
-          {
-            accessor: "active",
-            title: "Active",
-            render: ({ active, id }) => (
-              <Switch
-                color="teal"
-                checked={active}
-                onClick={async (e) => {
-                  if (data) {
-                    const result = await toggleCTA(userToken, id);
-                    if (result.status === "success") {
-                      const entry = data.filter((d) => d.id === id)[0];
-                      entry.active = !entry.active;
-                      refetch();
-                    }
-                  }
-                }}
-                styles={(theme) => ({
-                  track: {
-                    cursor: "pointer",
-                  },
-                })}
-              />
-            ),
-          },
-        ]}
-        records={data}
-        page={page}
-        onPageChange={setPage}
-        totalRecords={totalRecords.current}
-        recordsPerPage={PAGE_SIZE}
-        paginationColor="teal"
-        sortStatus={sortStatus}
-        onSortStatusChange={handleSortStatusChange}
-        highlightOnHover
-        rowSx={{
-          cursor: "pointer",
-        }}
-        rowContextMenu={{
-          items: (cta) => [
-            {
-              key: "edit",
-              icon: <IconPencil size={14} />,
-              title: `Edit CTA`,
-              disabled: !!(cta.total_count && cta.total_count > 0),
-              onClick: () => {
-                openContextModal({
-                  modal: "editCTA",
-                  title: <Title order={3}>Edit CTA</Title>,
-                  innerProps: {
-                    personaId: props.persona.id,
-                    cta: cta,
-                  },
-                });
-              }
-            },
-            {
-              key: "delete",
-              title: `Delete CTA`,
-              icon: <IconTrashX size={14} />,
-              color: "red",
-              onClick: async () => {
-                await deleteCTA(userToken, cta.id);
-                showNotification({
-                  title: "Success",
-                  message: "CTA has been deleted",
-                  color: "blue",
-                });
-                refetch();
-              }
-            },
-          ],
-        }}
-      />
-    </Box>
+    <>
+      <Container mb='lg'>
+        <Progress color='blue' size={5} value={percentage} radius='lg' />
+      </Container>
+
+      <Accordion chevronPosition='right' variant='separated'>
+        <Accordion.Item className={classes.item} value='li-step-1'>
+          <Accordion.Control>
+            <Group position='apart'>
+              <div>
+                <Title order={3}>Step 1/4: First Message CTAs</Title>
+                <Text fs='italic' c='dimmed' fz='sm'>
+                  SellScale will use these call-to-actions to influence initial LinkedIn messages.
+                </Text>
+              </div>
+              <ProgressBadge complete={stepOneComplete} />
+            </Group>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <LinkedInCTAsStep
+              persona={props.persona}
+              personas={props.personas}
+              onPopuateCTAs={(ctas) => {
+                if (ctas.length > 0) {
+                  setStepOneComplete('COMPLETE');
+                }
+              }}
+            />
+          </Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item className={classes.item} value='li-step-2'>
+          <Accordion.Control>
+            <Group position='apart'>
+              <div>
+                <Title order={3}>Step 2/4: Voice Style Builder</Title>
+                <Text fs='italic' c='dimmed' fz='sm'>
+                  SellScale will use this to customize the messaging for this specific persona.
+                </Text>
+              </div>
+              <ProgressBadge complete={stepTwoComplete} />
+            </Group>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <LinkedInVoiceBuilderStep
+              persona={props.persona}
+              personas={props.personas}
+            />
+            <Text ta="center">If you do not make a custom voice, we will use the tuned model for {userData?.client?.company}.</Text>
+          </Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item className={classes.item} value='li-step-3'>
+          <Accordion.Control>
+            <Group position='apart'>
+              <div>
+                <Title order={3}>Step 3/4: Follow-Up Frameworks</Title>
+                <Text fs='italic' c='dimmed' fz='sm'>
+                  SellScale uses this to influence how the follow ups work.
+                </Text>
+              </div>
+              <ProgressBadge complete={stepThreeComplete} />
+            </Group>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <BumpFrameworksPage
+              predefinedPersonaId={props.persona.id}
+              onPopulateBumpFrameworks={(bumpFrameworks) => {
+                if (bumpFrameworks.length > 0) {
+                  setStepThreeComplete('COMPLETE');
+                }
+              }}
+            />
+          </Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item className={classes.item} value='li-step-4'>
+          <Accordion.Control>
+            <Group position='apart'>
+              <div>
+                <Title order={3}>Step 4/4: Simulate</Title>
+                <Text fs='italic' c='dimmed' fz='sm'>
+                  Simulate your SellScale AI and how it would converse with a specific prospect.
+                </Text>
+              </div>
+              <ProgressBadge complete={stepFourComplete} />
+            </Group>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <ComingSoonCard />
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </>
   );
 }
 
+function ProgressBadge(props: { complete: LiStepProgress }) {
+
+  let text = 'Coming Soon';
+  let color = 'gray';
+  if (props.complete === 'COMPLETE') {
+    text = 'Complete';
+    color = 'green';
+  } else if (props.complete === 'INCOMPLETE') {
+    text = 'Incomplete';
+    color = 'red';
+  } else if (props.complete === 'OPTIONAL') {
+    text = 'Optional';
+    color = 'yellow';
+  }
+
+  return (
+    <Badge
+      size='xl'
+      variant='outline'
+      color={color}
+      styles={{ root: { textTransform: 'initial' } }}
+    >
+      {text}
+    </Badge>
+  );
+}

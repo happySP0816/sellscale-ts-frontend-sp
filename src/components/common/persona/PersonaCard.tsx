@@ -395,7 +395,7 @@ export default function PersonaCard(props: {
             <Pulse personaOverview={props.personaOverview} />
           </Tabs.Panel>
           <Tabs.Panel value='li-setup' pt='xs'>
-            <Title order={2}>LinkedIn First Message Setup</Title>
+            <Title order={2}>LinkedIn Setup</Title>
             <Text>
               Setup the LinkedIn account that will be used to send connection requests to prospects for this persona.
               This will configure both the initial connection request.

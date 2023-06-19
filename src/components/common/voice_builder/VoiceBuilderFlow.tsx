@@ -344,13 +344,14 @@ export default function VoiceBuilderFlow(props: {
               {count > 42 && <Text color="blue">Making final touches ...</Text>}
             </Container>
           )}
-          {voiceBuilderMessages.map((item) => (
-            <ItemComponent
-              key={item.id}
-              id={item.id}
-              defaultValue={item.value}
-            />
-          ))}
+          {!loadingMsgGen &&
+            voiceBuilderMessages.map((item) => (
+              <ItemComponent
+                key={item.id}
+                id={item.id}
+                defaultValue={item.value}
+              />
+            ))}
         </ScrollArea>
       </div>
 
@@ -370,6 +371,7 @@ export default function VoiceBuilderFlow(props: {
           variant="light"
           disabled={loadingMsgGen}
           onClick={async () => {
+            setCount(0);
             if (canCreate) {
               await completeVoice();
             } else {

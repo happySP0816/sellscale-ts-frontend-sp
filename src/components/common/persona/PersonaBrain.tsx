@@ -207,16 +207,19 @@ export default function PersonaBrain(props: PropsType) {
               );
             }}
           />
-          <TextAreaWithAI
-            label="Rich Persona Description"
-            description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc. Note that the AI will use this information to rank your prospects."
-            minRows={4}
-            value={personaICPMatchingInstructions}
-            onChange={(e) => {
-              setPersonaICPMatchingInstructions(e.currentTarget.value);
-              setNeedsSave(true);
-            }}
-          />
+          {/* TODO(AAKASH) delete component below if no use by July 20, 2023 */}
+          {false && (
+            <TextAreaWithAI
+              label="Rich Persona Description"
+              description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc. Note that the AI will use this information to rank your prospects."
+              minRows={4}
+              value={personaICPMatchingInstructions}
+              onChange={(e) => {
+                setPersonaICPMatchingInstructions(e.currentTarget.value);
+                setNeedsSave(true);
+              }}
+            />
+          )}
           <TextAreaWithAI
             label="Persona contact objective"
             description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral. The AI will use this information to generate messages."

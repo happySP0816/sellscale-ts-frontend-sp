@@ -12,15 +12,19 @@ import React from "react";
 
 type PropsType = {
   ctaText: string;
+  size?: "xs" | "sm" | "md" | "lg";
 };
 
 export default function CTAGeneratorExample(props: PropsType) {
   const { hovered, ref } = useHover();
   return (
-    <Popover position="right" withArrow shadow="md" opened={hovered}>
+    <Popover position="top" withArrow shadow="md" opened={hovered}>
       <Popover.Target>
         <Center ref={ref} py="md" className="cursor-pointer">
-          <Badge size="sm" color="gray">
+          <Badge
+            size={props.size || ""}
+            color={props.ctaText.length > 10 ? "orange" : "gray"}
+          >
             View example{" "}
           </Badge>
         </Center>

@@ -10,6 +10,8 @@ import {
   Textarea,
   LoadingOverlay,
   Card,
+  Container,
+  Box,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useState } from "react";
@@ -20,6 +22,7 @@ import { Archetype, PersonaOverview } from "src";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import createCTA from "@utils/requests/createCTA";
+import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
 
 export default function CreateNewCTAModel({
   context,
@@ -85,7 +88,7 @@ export default function CreateNewCTAModel({
           manually add a CTA, or use our AI-powered CTA generator to brainstorm.
         </Text>
 
-        <Card mt="md">
+        <Card mt="md" withBorder>
           <Text weight={"bold"}>AI-Powered CTA Generator</Text>
           <Text size="sm">
             Press the button below to generate 6 CTAs based on your persona in
@@ -112,23 +115,34 @@ export default function CreateNewCTAModel({
           </Button>
         </Card>
         <Flex direction="column">
-          <Textarea
-            mt="md"
-            required
-            placeholder={`I'd love to connect and learn more about you...`}
-            label="Call-to-Action"
-            withAsterisk
-            autosize
-            {...form.getInputProps("cta")}
-          />
-          <Text
-            size="xs"
-            color={
-              form.getInputProps("cta").value.length <= 120 ? "grey" : "red"
-            }
-          >
-            {form.getInputProps("cta").value.length}/{120}
-          </Text>
+          <Flex direction="row">
+            <Box w="75%">
+              <Textarea
+                mt="md"
+                required
+                placeholder={`I'd love to connect and learn more about you...`}
+                label="Call-to-Action"
+                withAsterisk
+                minRows={2}
+                autosize
+                {...form.getInputProps("cta")}
+              />
+              <Text
+                size="xs"
+                color={
+                  form.getInputProps("cta").value.length <= 120 ? "grey" : "red"
+                }
+              >
+                {form.getInputProps("cta").value.length}/{120}
+              </Text>
+            </Box>
+            <Box mt="md" w="25%" pt="xl">
+              <CTAGeneratorExample
+                ctaText={form.getInputProps("cta").value}
+                size="lg"
+              />
+            </Box>
+          </Flex>
         </Flex>
 
         {error && (

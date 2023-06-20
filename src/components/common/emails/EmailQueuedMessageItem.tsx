@@ -44,6 +44,8 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
       (1000 * 60 * 60 * 24)
   );
 
+  console.log(props.date_scheduled_to_send);
+
   return (
     <Card
       style={{

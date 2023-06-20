@@ -73,7 +73,7 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
           </Flex>
         </Flex>
         <Flex>
-          <Badge>{moment(props.date_scheduled_to_send).format("LL")}</Badge>
+          <Badge>{moment(props.date_scheduled_to_send).format("LL")} UTC</Badge>
         </Flex>
       </Flex>
       <Box pos="relative">

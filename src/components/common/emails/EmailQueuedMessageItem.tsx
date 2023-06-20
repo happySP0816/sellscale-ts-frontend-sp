@@ -19,10 +19,10 @@ import { IconEdit } from "@tabler/icons";
 
 import { patchLIMessage } from "@utils/requests/patchLIMessage";
 import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
 import DOMPurify from "dompurify";
-import moment from "moment";
+import moment from "moment-timezone";
 
 type MessageItemProps = {
   prospect_id: number;
@@ -38,6 +38,7 @@ type MessageItemProps = {
 export default function EmailQueuedMessageItem(props: MessageItemProps) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
 
   const daysDiff = Math.ceil(
     (new Date(props.date_scheduled_to_send).getTime() - new Date().getTime()) /
@@ -45,6 +46,12 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
   );
 
   console.log(props.date_scheduled_to_send);
+
+  const date = moment(props.date_scheduled_to_send);
+  const dateTZ = date.tz(userData.timezone || 'America/Los_Angeles');
+  const formattedDate = dateTZ.format("LL");
+
+  console.log(userData.timezone, dateTZ.toISOString());
 
   return (
     <Card
@@ -75,7 +82,7 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
           </Flex>
         </Flex>
         <Flex>
-          <Badge>{moment(props.date_scheduled_to_send).format("LL")} UTC</Badge>
+          <Badge>{formattedDate}</Badge>
         </Flex>
       </Flex>
       <Box pos="relative">

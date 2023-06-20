@@ -68,6 +68,7 @@
     "mantine-datatable": "^2.4.17",
     "mantine-react-table": "^0.9.5",
     "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-chartjs-2": "^5.2.0",

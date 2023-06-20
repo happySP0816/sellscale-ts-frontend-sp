@@ -10,6 +10,7 @@ import {
   Title,
   Flex,
   Button,
+  ActionIcon,
 } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
@@ -21,6 +22,8 @@ import { userTokenState } from "@atoms/userAtoms";
 import { useRecoilValue } from "recoil";
 import { useEffect, useState } from "react";
 import { getEmailMessages } from "@utils/requests/getEmails";
+import { IconTrash } from "@tabler/icons";
+import { showNotification } from "@mantine/notifications";
 
 const useStyles = createStyles((theme) => ({
   comment: {
@@ -89,29 +92,39 @@ export default function EmailThreadEntry(props: {
                 <Title order={3}>
                   {props.subject}
                 </Title>
-                <Button
-                  hidden={messages.length === 0}
-                  onClick={() => {
-                    if (messages.length === 0) {
-                      return;
-                    }
-                    openComposeEmailModal(
-                      userToken,
-                      messages[0]?.prospect_id,
-                      messages[0]?.prospect_email,
-                      messages[0]?.sdr_email,
-                      '',
-                      '',
-                      props.threadId,
-                      {
-                        threadSubject: messages[0]?.subject,
-                        messageId: messages[0]?.nylas_message_id,
-                      },
-                    );
-                  }}
-                >
-                  Reply to Thread
-                </Button>
+                <Group>
+                  <ActionIcon variant="subtle" color="blue" onClick={() => {
+                    showNotification({
+                      title: 'Coming Soon',
+                      message: 'This feature is coming soon!',
+                      color: 'yellow',
+                      autoClose: 2000,
+                    })
+                  }}><IconTrash size="1rem" /></ActionIcon>
+                  <Button
+                    hidden={messages.length === 0}
+                    onClick={() => {
+                      if (messages.length === 0) {
+                        return;
+                      }
+                      openComposeEmailModal(
+                        userToken,
+                        messages[0]?.prospect_id,
+                        messages[0]?.prospect_email,
+                        messages[0]?.sdr_email,
+                        '',
+                        '',
+                        props.threadId,
+                        {
+                          threadSubject: messages[0]?.subject,
+                          messageId: messages[0]?.nylas_message_id,
+                        },
+                      );
+                    }}
+                  >
+                    Reply to Thread
+                  </Button>
+                </Group>
               </Flex>
             </Flex>
           ),

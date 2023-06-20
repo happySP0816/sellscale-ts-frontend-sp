@@ -70,7 +70,9 @@ export default function UploadProspectsModal({
 
   const [description, setDescription] = useState("");
   const [fitReason, setFitReason] = useState("");
-  const [icpMatchingPrompt, setICPMatchingPrompt] = useState("");
+  const [icpMatchingPrompt, setICPMatchingPrompt] = useState(
+    "Describe your persona here ..."
+  );
 
   const [contactObjective, setContactObjective] = useState(
     "Set up a discovery call in order to identify a pain point"
@@ -262,7 +264,11 @@ export default function UploadProspectsModal({
       <Stack spacing="xl">
         {!isFetching && (
           <Select
-            label={innerProps.mode === "CREATE-ONLY" ? "Descriptive Name" : "Set Persona"}
+            label={
+              innerProps.mode === "CREATE-ONLY"
+                ? "Descriptive Name"
+                : "Set Persona"
+            }
             defaultValue={
               defaultPersonas.current.length === 1 ||
               (defaultPersonas.current.length > 1 &&
@@ -350,39 +356,42 @@ export default function UploadProspectsModal({
                 );
               }}
             />
-            <TextAreaWithAI
-              withAsterisk
-              value={
-                icpMatchingPrompt ||
-                "Role(s): \nSeniority: \nLocations: \nOther Notes:\n-\n-\n-\nTiers:\n- VERY HIGH FIT: \n- HIGH FIT: \n- MEDIUM FIT: \n- LOW FIT: \n- VERY LOW FIT:"
-              }
-              onChange={(e) => setICPMatchingPrompt(e.target.value)}
-              description="Describe the roles, seniority, location, tiers, and other notes to rank prospects in this persona."
-              minRows={4}
-              label="Describe how you want to rank the prospects in this persona."
-              loadingAIGenerate={loadingICPMatchingPromptGeneration}
-              onAIGenerateClicked={async () => {
-                await displayNotification(
-                  "generate-icp-matching-prompt",
-                  generateICPMatchingPrompt,
-                  {
-                    title: "Generating ICP matching prompt...",
-                    message: "This may take a few seconds.",
-                    color: "teal",
-                  },
-                  {
-                    title: "ICP matching prompt generated!",
-                    message: "Your persona fit reason has been generated.",
-                    color: "teal",
-                  },
-                  {
-                    title: "Failed to generate ICP matching prompt",
-                    message: "Please try again or contact SellScale team.",
-                    color: "red",
-                  }
-                );
-              }}
-            />
+            {/* TODO(AAKASH) delete component below if no use by July 20, 2023 */}
+            {false && (
+              <TextAreaWithAI
+                withAsterisk
+                value={
+                  icpMatchingPrompt ||
+                  "Role(s): \nSeniority: \nLocations: \nOther Notes:\n-\n-\n-\nTiers:\n- VERY HIGH FIT: \n- HIGH FIT: \n- MEDIUM FIT: \n- LOW FIT: \n- VERY LOW FIT:"
+                }
+                onChange={(e) => setICPMatchingPrompt(e.target.value)}
+                description="Describe the roles, seniority, location, tiers, and other notes to rank prospects in this persona."
+                minRows={4}
+                label="Describe how you want to rank the prospects in this persona."
+                loadingAIGenerate={loadingICPMatchingPromptGeneration}
+                onAIGenerateClicked={async () => {
+                  await displayNotification(
+                    "generate-icp-matching-prompt",
+                    generateICPMatchingPrompt,
+                    {
+                      title: "Generating ICP matching prompt...",
+                      message: "This may take a few seconds.",
+                      color: "teal",
+                    },
+                    {
+                      title: "ICP matching prompt generated!",
+                      message: "Your persona fit reason has been generated.",
+                      color: "teal",
+                    },
+                    {
+                      title: "Failed to generate ICP matching prompt",
+                      message: "Please try again or contact SellScale team.",
+                      color: "red",
+                    }
+                  );
+                }}
+              />
+            )}
             <Textarea
               mt="md"
               withAsterisk

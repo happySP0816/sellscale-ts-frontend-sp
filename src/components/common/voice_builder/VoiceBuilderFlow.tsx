@@ -21,9 +21,11 @@ import {
   Divider,
   ScrollArea,
   Tooltip,
+  Loader,
 } from "@mantine/core";
 import { Archetype, Prospect } from "src";
 import {
+  IconBrandLinkedin,
   IconEdit,
   IconHeart,
   IconHeartOff,
@@ -113,6 +115,19 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
           >
             {existingMessage?.prospect?.full_name || "Example Prospect"}
           </Anchor>
+          <Button
+            variant="subtle"
+            leftIcon={<IconBrandLinkedin />}
+            size="xs"
+            onClick={() => {
+              if (existingMessage?.prospect) {
+                window.open(
+                  "https://www." + existingMessage.prospect.linkedin_url,
+                  "_blank"
+                );
+              }
+            }}
+          />
           <Container
             m={0}
             p={0}
@@ -215,6 +230,7 @@ export default function VoiceBuilderFlow(props: {
   const [editingPhase, setEditingPhase] = useState(1);
   const [loadingMsgGen, setLoadingMsgGen] = useState(false);
   const [instructions, setInstructions] = useDebouncedState("", 200);
+  const [count, setCount] = useState(0);
 
   const canCreate = editingPhase >= MAX_EDITING_PHASES;
 
@@ -226,7 +242,14 @@ export default function VoiceBuilderFlow(props: {
         `${STARTING_INSTRUCTIONS}\n${instructions.trim()}`
       );
     })();
-  }, [instructions]);
+
+    const interval = setInterval(() => {
+      setCount(count + 1);
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [instructions, count, setCount]);
 
   // Generate sample messages
   const generateMessages = async () => {
@@ -275,7 +298,6 @@ export default function VoiceBuilderFlow(props: {
 
   // Finalize voice building and create voice
   const completeVoice = async () => {
-
     // Clone so we don't have to deal with async global state changes bs
     const currentMessages = _.cloneDeep(voiceBuilderMessages);
 
@@ -295,38 +317,51 @@ export default function VoiceBuilderFlow(props: {
     if (response.status === "success") {
       window.location.href = `/linkedin/voices`;
     }
-
   };
-
-  console.log(voiceBuilderMessages);
 
   return (
     <>
-      <Textarea
-        placeholder={`- Please adjust titles to be less formal (i.e. lowercase, acronyms).\n- Avoid using the word 'impressive'.`}
-        label="Additional Instructions"
-        minRows={2}
-        onChange={(e) => setInstructions(e.currentTarget.value)}
-      />
       <div style={{ position: "relative" }}>
-        <Text pt={15} px={2} fz="sm" fw={500}>
+        <Text pt={15} px={2} fz="sm" fw={400}>
           Please edit these messages to your liking or click to discard. Once
           you’re satisfied, click to continue.
         </Text>
         <ScrollArea style={{ position: "relative", height: 410 }}>
-          <LoadingOverlay variant="bars" visible={loadingMsgGen} />
           <Container>
             <Divider my="sm" />
           </Container>
-          {voiceBuilderMessages.map((item) => (
-            <ItemComponent
-              key={item.id}
-              id={item.id}
-              defaultValue={item.value}
-            />
-          ))}
+          {loadingMsgGen && (
+            <Container w="100%">
+              {<Loader mx="auto" variant="dots" />}
+              <Text color="blue">Generating messages ...</Text>
+              {count > 8 && <Text color="blue">Researching prospects ...</Text>}
+              {count > 16 && <Text color="blue">Writing sample copy ...</Text>}
+              {count > 24 && (
+                <Text color="blue">Applying previous edits ...</Text>
+              )}
+              {count > 30 && <Text color="blue">Finalizing messages ...</Text>}
+              {count > 36 && <Text color="blue">Almost there ...</Text>}
+              {count > 42 && <Text color="blue">Making final touches ...</Text>}
+            </Container>
+          )}
+          {!loadingMsgGen &&
+            voiceBuilderMessages.map((item) => (
+              <ItemComponent
+                key={item.id}
+                id={item.id}
+                defaultValue={item.value}
+              />
+            ))}
         </ScrollArea>
       </div>
+
+      <Textarea
+        placeholder={`- Please adjust titles to be less formal (i.e. lowercase, acronyms).\n- Avoid using the word 'impressive'.\n- Maintain a friendly & professional tone`}
+        label="Special Instructions"
+        description="Please provide any special instructions for the voice builder. This includes tone, formatting instructions, emojis vs no emojis, etc."
+        minRows={3}
+        onChange={(e) => setInstructions(e.currentTarget.value)}
+      />
       <Center mt={10}>
         <Button
           radius="xl"
@@ -336,6 +371,7 @@ export default function VoiceBuilderFlow(props: {
           variant="light"
           disabled={loadingMsgGen}
           onClick={async () => {
+            setCount(0);
             if (canCreate) {
               await completeVoice();
             } else {

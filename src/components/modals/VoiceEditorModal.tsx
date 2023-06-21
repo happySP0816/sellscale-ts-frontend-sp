@@ -12,7 +12,7 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { Archetype } from "src";
@@ -21,6 +21,7 @@ import { API_URL } from "@constants/data";
 import { logout } from "@auth/core";
 import { useQuery } from "@tanstack/react-query";
 import { showNotification } from "@mantine/notifications";
+import { setDatasets } from "react-chartjs-2/dist/utils";
 
 export default function VoiceEditorModal({
   context,
@@ -30,36 +31,50 @@ export default function VoiceEditorModal({
   persona_id: number;
   voiceId: number;
 }>) {
-  const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
-  const { data, isFetching, refetch } = useQuery({
-    queryKey: [`query-voice`],
-    queryFn: async () => {
-      const response = await fetch(
-        `${API_URL}/message_generation/stack_ranked_configurations/${innerProps.voiceId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-      if (response.status === 401) {
-        logout();
-      }
-      const res = await response.json();
-      return res;
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const [prompt, setPrompt] = useState(data?.data?.computed_prompt);
   const [promptChanged, setPromptChanged] = useState(false);
   const [selectedProspectId, setSelectedProspectId]: any = useState(null);
   const [loadingSample, setLoadingSample] = useState(false);
   const [savingPrompt, setSavingPrompt] = useState(false);
   const [generatedSample, setGeneratedSample] = useState("");
+
+  const [fetchedPromptData, setFetchedPromptData] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [prompt, setPrompt] = useState("");
+
+  useEffect(() => {
+    if (!fetchedPromptData) {
+      fetchPromptData();
+    }
+  }, []);
+
+  const fetchPromptData = () => {
+    setIsFetching(true);
+
+    const response = fetch(
+      `${API_URL}/message_generation/stack_ranked_configurations/${innerProps.voiceId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    )
+      .then((res) => {
+        if (res.status === 401) {
+          logout();
+        }
+        return res.json();
+      })
+      .then((j) => {
+        console.log(j.data.computed_prompt);
+        setPrompt(j.data?.computed_prompt);
+      })
+      .finally(() => {
+        setIsFetching(false);
+      });
+  };
 
   const generateSample = () => {
     setLoadingSample(true);
@@ -131,7 +146,6 @@ export default function VoiceEditorModal({
       .finally(() => {
         setSavingPrompt(false);
         setPromptChanged(false);
-        refetch();
         showNotification({
           title: "Prompt updated",
           message: "The prompt was updated successfully",
@@ -148,7 +162,7 @@ export default function VoiceEditorModal({
         position: "relative",
       }}
     >
-      <LoadingOverlay visible={loading} />
+      <LoadingOverlay visible={isFetching} />
       <Text>
         This is the raw prompt that will be used to generate LinkedIn messages
         for this voice. You can edit the prompt below then use the 'Simulation'

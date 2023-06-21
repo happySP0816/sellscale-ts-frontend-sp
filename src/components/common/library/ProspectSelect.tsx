@@ -25,22 +25,12 @@ let icpFitScoreMap = new Map<string, string>([
   ['4', 'VERY HIGH'],
 ]);
 
-const useStyles = createStyles((theme) => ({
-  icon: {
-    color: theme.colors.gray[6],
-  },
-}));
-
 export default function ProspectSelect(props: { personaId: number, onChange: (prospect: ProspectShallow | undefined) => void }) {
   
   const theme = useMantineTheme();
-  const { classes } = useStyles();
   const userToken = useRecoilValue(userTokenState);
   const [prospects, setProspects] = useState<ProspectShallow[]>([]);
   const [selectedProspect, setSelectedProspect] = useState<ProspectShallow>();
-
-  const [loading, setLoading] = useState(false);
-  const [previewEmail, setPreviewEmail] = useState<{ subject: string; body: string } | null>(null);
 
   useEffect(() => {
     (async () => {

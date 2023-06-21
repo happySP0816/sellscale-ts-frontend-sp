@@ -335,6 +335,12 @@ export function NavbarNested(props: {
           icon: IconMailFast,
           link: "/email/scheduled-emails",
         },
+        {
+          key: "email-bump-frameworks",
+          label: "Bump Frameworks",
+          icon: IconAdjustments,
+          link: "/email/bump-frameworks",
+        },
         // { // TODO(Aakash): hidden for now. may require code removal.
         //   key: 'email-sequences',
         //   label: 'Sequences',

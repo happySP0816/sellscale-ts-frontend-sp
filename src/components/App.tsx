@@ -32,6 +32,7 @@ import DemoFeedbackDetailsModal from "@modals/DemoFeedbackDetailsModal";
 import VoiceBuilderModal from "@modals/VoiceBuilderModal";
 import CreatePersonaModal from "@modals/CreatePersonaModal";
 import EditBumpFrameworkModal from "@modals/EditBumpFrameworkModal";
+import EditBumpFrameworkEmailModal from "@modals/EditBumpFrameworkEmailModal";
 import VoiceEditorModal from "@modals/VoiceEditorModal";
 
 export default function App() {
@@ -122,6 +123,7 @@ export default function App() {
               demoFeedbackDetails: DemoFeedbackDetailsModal,
               createPersona: CreatePersonaModal,
               editBumpFramework: EditBumpFrameworkModal,
+              editBumpFrameworkEmail: EditBumpFrameworkEmailModal,
               voiceEditor: VoiceEditorModal,
             }}
             modalProps={{

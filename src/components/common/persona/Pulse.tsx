@@ -96,7 +96,6 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
     const result = await getArchetypeProspects(userToken, props.personaOverview.id);
 
     if (result.status === 'success') {
-      console.log(result.data);
       setProspects(result.data);
     }
   };

@@ -48,8 +48,6 @@ export default function PersonaLiSetup(props: { persona: PersonaOverview; person
   const { classes } = useStyles();
   const userData = useRecoilValue(userDataState);
 
-  console.log(userData)
-
   const [stepOneComplete, setStepOneComplete] = useState<LiStepProgress>('INCOMPLETE');
   const [stepTwoComplete, setStepTwoComplete] = useState<LiStepProgress>('OPTIONAL');
   const [stepThreeComplete, setStepThreeComplete] = useState<LiStepProgress>('INCOMPLETE');

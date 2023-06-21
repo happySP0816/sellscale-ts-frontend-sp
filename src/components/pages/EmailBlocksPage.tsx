@@ -20,7 +20,7 @@ export default function EmailBlocksPage(props: { personaId: number }) {
         <Text>Use the interface on the left to 'create' and 'stack' blocks. These blocks will be used to influence how the AI generates emails.</Text>
         <Flex w='100%' mt={10} gap={25}>
           <Flex w='50%'>
-            <EmailBlocksDND archetypeId={props.personaId} />
+            <EmailBlocksDND archetypeId={props.personaId} autosave/>
           </Flex>
           <Flex w='50%' direction='column'>
             <EmailBlockPreview archetypeId={props.personaId} />

@@ -10,24 +10,10 @@ import { userTokenState } from "@atoms/userAtoms";
 import patchEmailBlocks from "@utils/requests/patchEmailBlocks";
 
 
-const useDragAndDropWithStrictMode = () => {
-  const [isDragAndDropEnabled, setIsDragAndDropEnabled] = useState(false);
-
-  useEffect(() => {
-    const animation = requestAnimationFrame(() => setIsDragAndDropEnabled(true));
-
-    return () => {
-      cancelAnimationFrame(animation);
-      setIsDragAndDropEnabled(false);
-    };
-  }, []);
-
-  return { isDragAndDropEnabled };
-};
-
-
 interface EmailBlockDNDProps {
   archetypeId: number,
+  emailBumpFrameworkId?: number,
+  autosave?: boolean,
   // initialData: {
   //   position: number;
   //   content: string;
@@ -36,16 +22,14 @@ interface EmailBlockDNDProps {
   //   position: number;
   //   content: string;
   // }[],
-  // getNewOrder: (data: {
-  //   position: number;
-  //   content: string;
-  // }[]) => void,
+  creating?: boolean,
+  getNewOrder?: (email_blocks: string[]) => void,
   // triggerSave: () => void,
 }
 
 
 // Note that this makes a bypass on React.StrictMode in order to render properly
-export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
+export const EmailBlocksDND = ({ archetypeId, emailBumpFrameworkId, autosave, creating, getNewOrder }: EmailBlockDNDProps) => {
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -53,7 +37,6 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
     {position: 0, content: "Add some email blocks above and remove me!"},
   ]);
   
-  const { isDragAndDropEnabled } = useDragAndDropWithStrictMode();
   const newBlockText = useRef<HTMLTextAreaElement>(null);
   const [blockTextEmpty, setBlockTextEmpty] = useState<boolean>(true);
 
@@ -63,13 +46,17 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
   // Auto saving email blocks
   const [debouncedEmailBlocks] = useDebouncedValue(emailBlocks, 300);
   useEffect(() => {
-    triggerPatchEmailBlocks();
+    if (autosave) {
+      triggerPatchEmailBlocks();
+    } else if (getNewOrder !== undefined) {
+      getNewOrder(debouncedEmailBlocks);
+    }
   }, [debouncedEmailBlocks]);
 
   const triggerGetEmailBlocks = async () => {
     setLoading(true);
 
-    const result = await getEmailBlocks(userToken, archetypeId);
+    const result = await getEmailBlocks(userToken, archetypeId, emailBumpFrameworkId);
 
     if (result.status !== "success") {
       showNotification({
@@ -97,7 +84,6 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
     if (initialEmailBlocks === null) {
       return;
     }
-    console.log('Saving email blocks...');
     const result = await patchEmailBlocks(userToken, archetypeId, emailBlocks);
 
     if (result.status !== "success") {
@@ -152,6 +138,9 @@ export const EmailBlocksDND = ({ archetypeId }: EmailBlockDNDProps) => {
   });
 
   useEffect(() => {
+    if (creating) {
+      return;
+    }
     triggerGetEmailBlocks();
   }, []);
 

@@ -272,7 +272,6 @@ export default function VoiceBuilderFlow(props: {
       props.voiceBuilderOnboardingId,
       MSG_GEN_AMOUNT
     );
-    console.log(response);
 
     // Delete all old samples
     for (const message of currentMessages) {

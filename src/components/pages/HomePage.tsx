@@ -20,7 +20,6 @@ import { setPageTitle } from "@utils/documentChange";
 import { useEffect, useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
-import BumpFrameworksPage from "./BumpFrameworksPage";
 import CalendarSection from "@common/home/CalendarSection";
 
 export default function HomePage() {

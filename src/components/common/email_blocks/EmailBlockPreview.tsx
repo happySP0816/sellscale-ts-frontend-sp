@@ -59,12 +59,9 @@ export default function EmailBlockPreview(props: { archetypeId: number }) {
 
   useEffect(() => {
     (async () => {
-      console.log('getting prospects ' + props.archetypeId);
       const result = await getArchetypeProspects(userToken, props.archetypeId);
-      console.log(result);
 
       if (result.status === 'success') {
-        console.log(result.data);
         setProspects(result.data);
       }
     })();

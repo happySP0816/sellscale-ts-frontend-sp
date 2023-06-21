@@ -183,3 +183,14 @@ export type BumpFramework = {
   // client_archetype_id: number;
   // client_archetype_archetype: string;
 };
+
+export type EmailBumpFramework = {
+  id: number;
+  title: string;
+  email_blocks: string[];
+  overall_status: string;
+  substatus: string;
+  active: boolean;
+  default: boolean;
+  bumped_count: number | null;
+}

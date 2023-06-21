@@ -45,13 +45,9 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
       (1000 * 60 * 60 * 24)
   );
 
-  console.log(props.date_scheduled_to_send);
-
   const date = moment(props.date_scheduled_to_send);
   const dateTZ = date.tz(userData.timezone || 'America/Los_Angeles');
   const formattedDate = dateTZ.format("LL");
-
-  console.log(userData.timezone, dateTZ.toISOString());
 
   return (
     <Card

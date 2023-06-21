@@ -21,40 +21,40 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
+import CreateBumpFrameworkEmailModal from '@modals/CreateBumpFrameworkEmailModal';
 import { IconBook, IconCheck, IconEdit, IconList, IconPlus, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { valueToColor } from '@utils/general';
-import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
+import { getEmailBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import getChannels from '@utils/requests/getChannels';
 import getPersonas from '@utils/requests/getPersonas';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { BumpFramework, MsgResponse } from 'src';
+import { EmailBumpFramework, MsgResponse } from 'src';
 
 
-type BumpFrameworkBuckets = {
+type EmailBumpFrameworkBuckets = {
   ACCEPTED: {
     total: number;
-    frameworks: BumpFramework[];
+    frameworks: EmailBumpFramework[];
   };
   BUMPED: Record<
     string,
     {
       total: number;
-      frameworks: BumpFramework[];
+      frameworks: EmailBumpFramework[];
     }
   >;
   ACTIVE_CONVO: {
     total: number;
-    frameworks: BumpFramework[];
+    frameworks: EmailBumpFramework[];
   };
 };
 
-function BumpBucketView(props: {
+function EmailBumpBucketView(props: {
   bumpBucket: {
     total: number;
-    frameworks: BumpFramework[];
+    frameworks: EmailBumpFramework[];
   };
   bucketViewTitle: string;
   bucketViewDescription: string;
@@ -86,7 +86,7 @@ function BumpBucketView(props: {
               <IconPlus size='1.25rem' />
             </ActionIcon>
           </Tooltip>
-          <CreateBumpFrameworkModal
+          <CreateBumpFrameworkEmailModal
             modalOpened={createBFModalOpened}
             openModal={open}
             closeModal={close}
@@ -143,21 +143,20 @@ function BumpBucketView(props: {
                           <Text fw='bold' fz='lg'>
                             {framework.title}
                           </Text>
-                          <Text maw='50rem'>{framework.description}</Text>
                         </Flex>
                       </Flex>
                       <Tooltip label='Edit Bump Framework' withinPortal>
                         <ActionIcon
                           onClick={() => {
                             openContextModal({
-                              modal: 'editBumpFramework',
+                              modal: 'editBumpFrameworkEmail',
                               title: <Title order={3}>Edit: {framework.title}</Title>,
                               innerProps: {
-                                bumpFrameworkID: framework.id,
+                                emailBumpFrameworkID: framework.id,
+                                archetypeID: props.archetypeID,
                                 overallStatus: framework.overall_status,
                                 title: framework.title,
-                                description: framework.description,
-                                bumpLength: framework.bump_length,
+                                emailBlocks: framework.email_blocks,
                                 default: framework.default,
                                 onSave: props.afterEdit,
                                 bumpedCount: framework.bumped_count,
@@ -202,63 +201,63 @@ function BumpBucketView(props: {
   );
 }
 
-function QuestionObjectionLibraryCard(props: {
-  archetypeID: number | null;
-  bumpFramework: BumpFramework;
-  afterEdit: () => void;
-}) {
-  const theme = useMantineTheme();
+// function QuestionObjectionLibraryCard(props: {
+//   archetypeID: number | null;
+//   bumpFramework: EmailBumpFramework;
+//   afterEdit: () => void;
+// }) {
+//   const theme = useMantineTheme();
 
-  const splitted_substatus = props.bumpFramework.substatus.split('ACTIVE_CONVO_')[1];
+//   const splitted_substatus = props.bumpFramework.substatus.split('ACTIVE_CONVO_')[1];
 
-  return (
-    <>
-      <Card withBorder p='sm' radius='md'>
-        <Card.Section px='md' pt='md'>
-          <Flex justify='space-between' align='center'>
-            <Title order={5}>{props.bumpFramework.title}</Title>
-            <ActionIcon
-              onClick={() => {
-                openContextModal({
-                  modal: 'editBumpFramework',
-                  title: <Title order={3}>Edit: {props.bumpFramework.title}</Title>,
-                  innerProps: {
-                    bumpFrameworkID: props.bumpFramework.id,
-                    overallStatus: props.bumpFramework.overall_status,
-                    title: props.bumpFramework.title,
-                    description: props.bumpFramework.description,
-                    bumpLength: props.bumpFramework.bump_length,
-                    default: props.bumpFramework.default,
-                    onSave: props.afterEdit,
-                    bumpedCount: props.bumpFramework.bumped_count,
-                  },
-                });
-              }}
-            >
-              <IconEdit size='1.25rem' />
-            </ActionIcon>
-          </Flex>
-        </Card.Section>
+//   return (
+//     <>
+//       <Card withBorder p='sm' radius='md'>
+//         <Card.Section px='md' pt='md'>
+//           <Flex justify='space-between' align='center'>
+//             <Title order={5}>{props.bumpFramework.title}</Title>
+//             <ActionIcon
+//               onClick={() => {
+//                 openContextModal({
+//                   modal: 'editBumpFramework',
+//                   title: <Title order={3}>Edit: {props.bumpFramework.title}</Title>,
+//                   innerProps: {
+//                     bumpFrameworkID: props.bumpFramework.id,
+//                     overallStatus: props.bumpFramework.overall_status,
+//                     title: props.bumpFramework.title,
+//                     description: props.bumpFramework.description,
+//                     bumpLength: props.bumpFramework.bump_length,
+//                     default: props.bumpFramework.default,
+//                     onSave: props.afterEdit,
+//                     bumpedCount: props.bumpFramework.bumped_count,
+//                   },
+//                 });
+//               }}
+//             >
+//               <IconEdit size='1.25rem' />
+//             </ActionIcon>
+//           </Flex>
+//         </Card.Section>
 
-        <Card.Section>
-          <Divider my='xs' />
-        </Card.Section>
-        <Flex mih='100px' align='center'>
-          <Text>{props.bumpFramework.description}</Text>
-        </Flex>
+//         <Card.Section>
+//           <Divider my='xs' />
+//         </Card.Section>
+//         <Flex mih='100px' align='center'>
+//           <Text>{props.bumpFramework.description}</Text>
+//         </Flex>
 
-        <Card.Section>
-          <Divider my='xs' />
-        </Card.Section>
-        <Badge color={valueToColor(theme, splitted_substatus)}>{splitted_substatus}</Badge>
-      </Card>
-    </>
-  );
-}
+//         <Card.Section>
+//           <Divider my='xs' />
+//         </Card.Section>
+//         <Badge color={valueToColor(theme, splitted_substatus)}>{splitted_substatus}</Badge>
+//       </Card>
+//     </>
+//   );
+// }
 
-export default function BumpFrameworksPage(props: {
+export default function BumpFrameworksEmailPage(props: {
   predefinedPersonaId?: number;
-  onPopulateBumpFrameworks?: (buckets: BumpFrameworkBuckets) => void;
+  onPopulateBumpFrameworks?: (buckets: EmailBumpFrameworkBuckets) => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
 
@@ -267,10 +266,10 @@ export default function BumpFrameworksPage(props: {
     props.predefinedPersonaId !== undefined ? props.predefinedPersonaId : null
   );
   const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
-  const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
-    useDisclosure();
+  // const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
+  //   useDisclosure();
 
-  const bumpBuckets = useRef<BumpFrameworkBuckets>({
+  const bumpBuckets = useRef<EmailBumpFrameworkBuckets>({
     ACCEPTED: {
       total: 0,
       frameworks: [],
@@ -280,7 +279,7 @@ export default function BumpFrameworksPage(props: {
       total: 0,
       frameworks: [],
     },
-  } as BumpFrameworkBuckets);
+  } as EmailBumpFrameworkBuckets);
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -291,6 +290,8 @@ export default function BumpFrameworksPage(props: {
   });
 
   const triggerGetPersonas = async () => {
+    setLoading(true);
+
     const result = await getPersonas(userToken);
 
     if (result.status !== 'success') {
@@ -310,13 +311,13 @@ export default function BumpFrameworksPage(props: {
       }
     }
 
-    return;
+    setLoading(false);
   };
 
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
 
-    const result = await getBumpFrameworks(userToken, [], [], [archetypeID as number]);
+    const result = await getEmailBumpFrameworks(userToken, [], [], [archetypeID as number]);
 
     if (result.status !== 'success') {
       setLoading(false);
@@ -340,8 +341,8 @@ export default function BumpFrameworksPage(props: {
         total: 0,
         frameworks: [],
       },
-    } as BumpFrameworkBuckets;
-    for (const bumpFramework of result.data.bump_frameworks as BumpFramework[]) {
+    } as EmailBumpFrameworkBuckets;
+    for (const bumpFramework of result.data.bump_frameworks as EmailBumpFramework[]) {
       const status = bumpFramework.overall_status;
       if (status === 'ACCEPTED') {
         newBumpBuckets.ACCEPTED.total += 1;
@@ -395,7 +396,7 @@ export default function BumpFrameworksPage(props: {
     <>
       <Flex direction='column'>
         <LoadingOverlay visible={loading} />
-        <Title>LinkedIn Bump Frameworks</Title>
+        <Title>Email Bump Frameworks</Title>
         {props.predefinedPersonaId === undefined && (
           <Flex mt='md'>
             <PersonaSelect
@@ -425,14 +426,14 @@ export default function BumpFrameworksPage(props: {
           </Tabs.List>
 
           <Tabs.Panel value='sequence'>
-            {!loading ? (
+            {(!loading && archetypeID) ? (
               <ScrollArea>
                 <Flex direction='column' ml='md'>
                   {/* Accepted */}
-                  <BumpBucketView
+                  <EmailBumpBucketView
                     bumpBucket={bumpBuckets.current?.ACCEPTED}
-                    bucketViewTitle={'Accepted Invitation'}
-                    bucketViewDescription={'Prospects who have accepted your connection request.'}
+                    bucketViewTitle={'Opened Email'}
+                    bucketViewDescription={'Prospects who have opened your email.'}
                     status={'ACCEPTED'}
                     dataChannels={dataChannels}
                     archetypeID={archetypeID}
@@ -449,7 +450,7 @@ export default function BumpFrameworksPage(props: {
                     }
                     return (
                       <Flex mt='md' w='100%'>
-                        <BumpBucketView
+                        <EmailBumpBucketView
                           bumpBucket={bumpBucket}
                           bucketViewTitle={`Bumped ${bumpCount} times`}
                           bucketViewDescription={`Prospects who have been bumped ${bumpCountInt - 1} time(s).`}
@@ -469,7 +470,7 @@ export default function BumpFrameworksPage(props: {
                     <Button variant='outline' mt='md' w='50%' onClick={openSequenceStep}>
                       Add another sequence step
                     </Button>
-                    <CreateBumpFrameworkModal
+                    <CreateBumpFrameworkEmailModal
                       modalOpened={addNewSequenceStepOpened}
                       openModal={openSequenceStep}
                       closeModal={closeSequenceStep}
@@ -490,7 +491,12 @@ export default function BumpFrameworksPage(props: {
           </Tabs.Panel>
 
           <Tabs.Panel value='qnolibrary'>
-            {!loading ? (
+            <Card withBorder shadow='xs' ml='md'>
+              <Flex w='100%' align='center' justify='center'>
+                Coming soon!
+              </Flex>
+            </Card>
+            {/* {!loading ? (
               <Flex direction='column' ml='xs'>
                 <Flex align='center' w='100%' justify='center'>
                   <Button variant='outline' mb='md' w='50%' onClick={openQuestionObjection}>
@@ -525,7 +531,7 @@ export default function BumpFrameworksPage(props: {
               <Flex justify='center'>
                 <Loader />
               </Flex>
-            )}
+            )} */}
           </Tabs.Panel>
         </Tabs>
       </Flex>

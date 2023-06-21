@@ -218,8 +218,9 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           withAsterisk
         />
       )}
-      {(selectedStatus === "BUMPED" && form.values.bumpedCount) && (
+      {(selectedStatus === "BUMPED" && form.values.bumpedCount != null) && (
         <NumberInput
+          mt='md'
           label="Bump Number"
           description="The position in the bump sequence."
           placeholder="1"
@@ -228,6 +229,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
             form.setFieldValue("bumpedCount", e as number);
           }}
           min={1}
+          withAsterisk
         />
       )}
       <Flex w="100%" justify="flex-end" direction={'column'}>

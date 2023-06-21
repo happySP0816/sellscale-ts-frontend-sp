@@ -6,6 +6,7 @@ import {
   Center,
   Flex,
   Group,
+  Loader,
   Select,
   Text,
   TextInput,
@@ -57,7 +58,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function EmailBlockPreview(props: { archetypeId: number }) {
+export default function EmailBlockPreview(props: { archetypeId: number, emailBlocks?: string[] }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const userToken = useRecoilValue(userTokenState);
@@ -75,8 +76,6 @@ export default function EmailBlockPreview(props: { archetypeId: number }) {
     content: '',
     editable: false,
   });
-
-  console.log(previewEmail?.body);
 
   useEffect(() => {
     previewBodyEditor && previewEmail?.body && previewBodyEditor.commands.setContent(previewEmail.body);
@@ -122,7 +121,7 @@ export default function EmailBlockPreview(props: { archetypeId: number }) {
 
   return (
     <>
-      <Card withBorder>
+      <Card withBorder h='fit'>
         <Text fz='lg' fw='bold'>
           Email Preview
         </Text>
@@ -159,7 +158,7 @@ export default function EmailBlockPreview(props: { archetypeId: number }) {
 
         {selectedProspect && (
           <>
-            <Card>
+            <Card withBorder my='sm' shadow='sm'>
               <Text fz='lg' fw='bold'>
                 {selectedProspect.full_name}
               </Text>
@@ -185,13 +184,14 @@ export default function EmailBlockPreview(props: { archetypeId: number }) {
             </Card>
             <Center>
               <Button
-                variant='light'
+                mt='md'
+                variant='filled'
                 color='teal'
                 radius='md'
                 loading={loading}
                 onClick={async () => {
                   setLoading(true);
-                  const response = await generateEmailAutomatic(userToken, selectedProspect.id);
+                  const response = await generateEmailAutomatic(userToken, selectedProspect.id, props.emailBlocks);
                   if (response.status === 'success') {
                     setPreviewEmail(response.data);
                   }
@@ -203,27 +203,35 @@ export default function EmailBlockPreview(props: { archetypeId: number }) {
             </Center>
           </>
         )}
-      </Card>
-      {previewEmail && (
-        <Card>
-          <TextInput label='Subject' value={previewEmail.subject} readOnly />
 
-          <Text mt='md' fz='sm' fw={500}>Body</Text>
-          <RichTextEditor
-            editor={previewBodyEditor}
-            styles={{
-              content: {
-                p: {
-                  fontSize: 14,
+        {loading && (
+          <Flex justify={'center'} mt='lg'>
+            <Loader size='xs'/>
+          </Flex>
+        )}
+
+        {(!loading && previewEmail) && (
+          <Card>
+            <TextInput label='Subject' value={previewEmail.subject} readOnly />
+
+            <Text mt='md' fz='sm' fw={500}>Body</Text>
+            <RichTextEditor
+              editor={previewBodyEditor}
+              styles={{
+                content: {
+                  p: {
+                    fontSize: 14,
+                  },
+                  minHeight: 200,
                 },
-                minHeight: 200,
-              },
-            }}
-          >
-            <RichTextEditor.Content />
-          </RichTextEditor>
-        </Card>
-      )}
+              }}
+            >
+              <RichTextEditor.Content />
+            </RichTextEditor>
+          </Card>
+        )}
+      </Card>
+
     </>
   );
 }

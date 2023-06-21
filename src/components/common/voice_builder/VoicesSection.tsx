@@ -45,7 +45,6 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
         logout();
       }
       const res = await response.json();
-      console.log(res);
       return res?.data.sort((a: any, b: any) => a.priority - b.priority) ?? [];
     },
     refetchOnWindowFocus: false,
@@ -134,7 +133,8 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
                           modal: "voiceEditor",
                           title: <Title order={3}>Voice Editor</Title>,
                           innerProps: {
-                            personas: props.personas,
+                            persona_id: item.archetype_id,
+                            voiceId: item.id,
                           },
                         });
                       }}

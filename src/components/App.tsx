@@ -29,9 +29,10 @@ import ClientProductModal from "@modals/ClientProductModal";
 import CopyCTAsModal from "@modals/CopyCTAsModal";
 import EditCTAModal from "@modals/EditCTAModal";
 import DemoFeedbackDetailsModal from "@modals/DemoFeedbackDetailsModal";
-import VoiceBuilderModal from '@modals/VoiceBuilderModal';
+import VoiceBuilderModal from "@modals/VoiceBuilderModal";
 import CreatePersonaModal from "@modals/CreatePersonaModal";
 import EditBumpFrameworkModal from "@modals/EditBumpFrameworkModal";
+import VoiceEditorModal from "@modals/VoiceEditorModal";
 
 export default function App() {
   // Site light or dark mode
@@ -121,10 +122,11 @@ export default function App() {
               demoFeedbackDetails: DemoFeedbackDetailsModal,
               createPersona: CreatePersonaModal,
               editBumpFramework: EditBumpFrameworkModal,
+              voiceEditor: VoiceEditorModal,
             }}
             modalProps={{
               closeOnClickOutside: false,
-              size: 'xl',
+              size: "xl",
             }}
           >
             <Notifications position="top-right" />

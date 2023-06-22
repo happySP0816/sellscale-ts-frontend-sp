@@ -42,6 +42,8 @@ import { generateEmail } from "@utils/requests/generateEmail";
 export const openComposeEmailModal = (
   userToken: string,
   prospectId: number,
+  archetypeId: number,
+  overallStatus: string,
   email: string,
   sdr_email: string,
   subject: string,
@@ -80,6 +82,8 @@ export const openComposeEmailModal = (
       body: body,
       from: sdr_email,
       prospectId: prospectId,
+      archetypeId: archetypeId,
+      overallStatus: overallStatus,
       threadId: threadId,
       reply: reply,
     },
@@ -88,6 +92,8 @@ export const openComposeEmailModal = (
 
 export default function ProspectDetailsViewEmails(props: {
   prospectId: number;
+  archetypeId: number;
+  overallStatus: string;
   email: string;
 }) {
   const userToken = useRecoilValue(userTokenState);
@@ -128,6 +134,8 @@ export default function ProspectDetailsViewEmails(props: {
                 openComposeEmailModal(
                   userToken,
                   props.prospectId,
+                  props.archetypeId,
+                  props.overallStatus,
                   props.email,
                   userData.sdr_email,
                   "",
@@ -154,6 +162,8 @@ export default function ProspectDetailsViewEmails(props: {
               subject={emailThread.subject}
               threadId={emailThread.nylas_thread_id}
               prospectId={props.prospectId}
+              archetypeId={props.archetypeId}
+              overallStatus={props.overallStatus}
             />
           ))}
         </ScrollArea>

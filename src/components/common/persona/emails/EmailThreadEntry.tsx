@@ -50,6 +50,8 @@ export default function EmailThreadEntry(props: {
   snippet: string;
   threadId: string;
   prospectId: number;
+  archetypeId: number;
+  overallStatus: string;
 }) {
   const { classes } = useStyles();
   const theme = useMantineTheme();
@@ -110,6 +112,8 @@ export default function EmailThreadEntry(props: {
                       openComposeEmailModal(
                         userToken,
                         messages[0]?.prospect_id,
+                        props.archetypeId,
+                        props.overallStatus,
                         messages[0]?.prospect_email,
                         messages[0]?.sdr_email,
                         '',

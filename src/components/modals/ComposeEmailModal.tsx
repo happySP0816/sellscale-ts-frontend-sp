@@ -2,7 +2,6 @@ import { userDataState, userTokenState } from '@atoms/userAtoms';
 import FlexSeparate from '@common/library/FlexSeparate';
 import RichTextArea from '@common/library/RichTextArea';
 import TextAreaWithAI from '@common/library/TextAreaWithAI';
-import { openComposeEmailModal } from '@common/prospectDetails/ProspectDetailsViewEmails';
 import {
   Text,
   Paper,
@@ -17,15 +16,19 @@ import {
   LoadingOverlay,
   Collapse,
   Card,
+  Select,
 } from '@mantine/core';
 import { ContextModalProps, closeAllModals } from '@mantine/modals';
+import { showNotification } from '@mantine/notifications';
 import { IconSend } from '@tabler/icons';
 import { generateEmail, getEmailGenerationPrompt } from '@utils/requests/generateEmail';
+import { getEmailBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import { getEmailFollowupPrompt } from '@utils/requests/getEmailFollowupPrompt';
 import { sendEmail } from '@utils/requests/sendEmail';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useRecoilValue } from 'recoil';
+import { EmailBumpFramework } from 'src';
 
 interface ComposeEmail extends Record<string, unknown> {
   email: string;
@@ -33,6 +36,8 @@ interface ComposeEmail extends Record<string, unknown> {
   body: string;
   from: string;
   prospectId: number;
+  archetypeId: number;
+  overallStatus: string;
   threadId: string;
   reply?: {
     threadSubject: string;
@@ -61,9 +66,29 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
   const [emailGenerationPrompt, setEmailGenerationPrompt] = useState('');
   const [collapseOpened, setCollapseOpened] = useState(false);
 
-  const fetchEmailGenerationPrompt = async () => {
+  const [bumpFrameworks, setBumpFrameworks] = useState<EmailBumpFramework[]>([]);
+  const [selectedBumpFramework, setSelectedBumpFramework] = useState<EmailBumpFramework | null>(null);
+
+  const triggerGetBumpFrameworks = async () => {
+
+    const result = await getEmailBumpFrameworks(userToken, [innerProps.overallStatus], [], [innerProps.archetypeID as number]);
+
+    if (result.status !== 'success') {
+      showNotification({
+        title: 'Error',
+        message: 'Could not get bump frameworks.',
+        color: 'red',
+        autoClose: false,
+      });
+      return;
+    }
+    setBumpFrameworks(result.data.bump_frameworks);
+
+  };
+
+  const fetchEmailGenerationPrompt = async (overrideFrameworkID?: number) => {
     setFetchingEmailGenerationPrompt(true);
-    const response = await getEmailGenerationPrompt(userToken, innerProps.prospectId);
+    const response = await getEmailGenerationPrompt(userToken, innerProps.prospectId, overrideFrameworkID || selectedBumpFramework?.id);
     setFetchingEmailGenerationPrompt(false);
     if (response.status === 'success') {
       setEmailGenerationPrompt(response.data.prompt);
@@ -101,6 +126,12 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
     }
   }, [fetchedEmailGenerationPrompt]);
 
+  useEffect(() => {
+    if (innerProps.reply) {
+      triggerGetBumpFrameworks();
+    }
+  }, [])
+
   return (
     <Paper
       p={0}
@@ -136,6 +167,28 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
       </div>
 
       <Center mt={15}>
+        {innerProps.reply &&
+          <Select
+            data={
+              bumpFrameworks.length > 0 ? (bumpFrameworks.map((framework) => ({
+                value: framework.id + '',
+                label: framework.title,
+              })) as any) : []
+            }
+            placeholder='Select a framework'
+            disabled={bumpFrameworks.length === 0}
+            radius='xl'
+            mr='lg'
+            value={selectedBumpFramework?.id + ''}
+            onChange={(newVal) => {
+              if (bumpFrameworks) {
+                const selected = bumpFrameworks.find((framework) => framework.id === parseInt(newVal as string));
+                setSelectedBumpFramework(selected as EmailBumpFramework);
+              }
+              fetchEmailGenerationPrompt(parseInt(newVal as string));
+            }}
+          />
+        }
         <Button
           size='sm'
           radius='xl'
@@ -208,7 +261,7 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
             if (innerProps.reply) {
               fetchEmailFollowupGenerationPrompt();
             } else {
-            fetchEmailGenerationPrompt()
+              fetchEmailGenerationPrompt()
             }
           }}
         >

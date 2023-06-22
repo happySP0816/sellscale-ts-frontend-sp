@@ -208,6 +208,8 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                     openComposeEmailModal(
                       userToken,
                       prospectId,
+                      data.main.prospect_info.details.archetype_id,
+                      prospectDrawerStatuses.overall,
                       data.main.prospect_info.email.email,
                       userData.sdr_email,
                       "",
@@ -319,6 +321,8 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                             userData.nylas_connected === true && (
                               <ProspectDetailsViewEmails
                                 prospectId={data.main.prospect_info.details.id}
+                                archetypeId={data.main.prospect_info.details.archetype_id}
+                                overallStatus={prospectDrawerStatuses.overall}
                                 email={data.main.prospect_info.email.email}
                               />
                             )}

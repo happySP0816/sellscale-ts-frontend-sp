@@ -35,7 +35,6 @@ import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";
 import { Channel, Prospect } from "src";
 import FlexSeparate from "@common/library/FlexSeparate";
-import ProspectDetailsViewEmails from "@common/prospectDetails/ProspectDetailsViewEmails";
 import { API_URL } from "@constants/data";
 import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove";
 import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsResearch";

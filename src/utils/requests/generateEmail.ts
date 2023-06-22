@@ -39,7 +39,8 @@ export async function generateEmailAutomatic(
 
 export async function getEmailGenerationPrompt(
   userToken: string,
-  prospectId: number
+  prospectId: number,
+  bumpFrameworkId?: number,
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/ml/get_generate_email_prompt`, {
     method: "POST",
@@ -47,7 +48,10 @@ export async function getEmailGenerationPrompt(
       Authorization: `Bearer ${userToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ prospect_id: prospectId }),
+    body: JSON.stringify({
+      prospect_id: prospectId,
+      bump_framework_id: bumpFrameworkId,
+    }),
   });
   return await processResponse(response);
 }

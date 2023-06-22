@@ -10,6 +10,8 @@ import {
   Flex,
   Box,
   LoadingOverlay,
+  Tabs,
+  Container,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { useEffect, useState } from "react";
@@ -22,6 +24,8 @@ import { logout } from "@auth/core";
 import { useQuery } from "@tanstack/react-query";
 import { showNotification } from "@mantine/notifications";
 import { setDatasets } from "react-chartjs-2/dist/utils";
+import { IconBrandOnedrive, IconChartTreemap, IconTool } from '@tabler/icons';
+import { IconChartBubble } from '@tabler/icons-react';
 
 export default function VoiceEditorModal({
   context,
@@ -42,6 +46,23 @@ export default function VoiceEditorModal({
   const [fetchedPromptData, setFetchedPromptData] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [prompt, setPrompt] = useState("");
+
+  const completionMatchingRegex = /completion: .*/g;
+  const matches = prompt.matchAll(completionMatchingRegex);
+
+  var completions = []
+  for (var match of matches){
+    var completion = match[0].replaceAll("completion: ", "");
+    completions.push(completion);
+  }
+
+  const instructionMatchingRegex = /^(.*?)\bprompt\b/s
+  const instructionMatches = prompt.match(instructionMatchingRegex);
+  const instruction = instructionMatches && instructionMatches[1].replaceAll("prompt: ", "");
+
+  console.log("SWAG")
+  console.log(completions)
+  console.log(instruction)
 
   useEffect(() => {
     if (!fetchedPromptData) {
@@ -68,7 +89,6 @@ export default function VoiceEditorModal({
         return res.json();
       })
       .then((j) => {
-        console.log(j.data.computed_prompt);
         setPrompt(j.data?.computed_prompt);
       })
       .finally(() => {
@@ -171,28 +191,103 @@ export default function VoiceEditorModal({
 
       <Divider mt="md" mb="md" />
 
-      <Textarea
-        minRows={15}
-        label="Raw Voice Prompt"
-        description="This is the raw prompt use by SellScale to generate messages in this voice"
-        placeholder="Raw voice prompt..."
-        defaultValue={prompt}
-        onChange={(e) => {
-          setPrompt(e.currentTarget.value);
-          setPromptChanged(true);
-        }}
-      />
-      <Button
-        color="green"
-        mt="sm"
-        disabled={!promptChanged}
-        onClick={() => {
-          saveUpdatedPrompt();
-        }}
-        loading={savingPrompt}
-      >
-        Save Prompt
-      </Button>
+    
+      <Tabs defaultValue="advanced">
+        <Tabs.List>
+          <Tabs.Tab value="edit_voice" icon={<IconChartBubble size="0.8rem" />}>Edit Voice Instruction & Samples</Tabs.Tab>
+          <Tabs.Tab value="advanced" ml="auto" icon={<IconTool size="0.8rem" />}>Advanced</Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="edit_voice" pt="xs">
+          <Flex direction='row'>
+            <Textarea
+                w='40%'
+                minRows={21}
+                label="Instruction"
+                description="This is the instruction that will be used to generate messages in this voice"
+                placeholder="Raw voice prompt..."
+                defaultValue={instruction || ""}
+                size='xs'
+                onChange={(e) => {
+                  console.log("Instruction changed")
+                  
+                  if (instruction) { 
+                    setPrompt(
+                      prompt.replaceAll(instruction, e.currentTarget.value)
+                    )
+                    console.log(prompt)
+                  }
+                 
+                }}
+              />  
+              <Card sx={{maxHeight: '450px', overflowY: 'scroll', width: '60%'}} m='sm' withBorder>
+                <Text>
+                  Completions ({completions.length} total completions)
+                </Text>
+                <Text size='xs'>
+                  These are the completions that will be used to generate messages in this voice.
+                  Edit the completions below to change how messages are generated.
+                </Text>
+                {
+                  completions.map((completion, index) => {
+                      return (
+                        <Textarea
+                          w='100%'
+                          icon={<IconChartTreemap size="0.8rem" />}
+                          minRows={8}
+                          mt="sm"
+                          size='xs'
+                          label={`Sample ${index + 1}`}
+                          placeholder="Raw voice prompt..."
+                          defaultValue={completion || ""}
+                          onChange={(e) => {
+                            console.log("Completion changed")
+                            console.log("Before: ")
+                            console.log(completion)
+
+                            console.log("After: ")
+                            console.log(e.currentTarget.value)
+                          }}
+                          />
+                      )
+                  })
+                }
+                
+              </Card>
+          </Flex>
+          
+        </Tabs.Panel>
+
+        <Tabs.Panel value="advanced" pt="xs">
+          <Card withBorder>
+            <Textarea
+              minRows={15}
+              label="Raw Voice Prompt"
+              description="This is the raw prompt use by SellScale to generate messages in this voice"
+              placeholder="Raw voice prompt..."
+              value={prompt}
+              onChange={(e) => {
+                setPrompt(e.currentTarget.value);
+                setPromptChanged(true);
+              }}
+            />     
+            <Button
+              color="green"
+              mt="sm"
+              disabled={!promptChanged}
+              onClick={() => {
+                saveUpdatedPrompt();
+              }}
+              loading={savingPrompt}
+            >
+              Save Prompt
+            </Button>
+          </Card>
+        </Tabs.Panel>
+    
+      </Tabs>
+     
+    
 
       <Card mt="md" p="md" withBorder>
         <Title order={4}>Simulate Voice</Title>

@@ -9,12 +9,14 @@ import {
   Badge,
   Box,
   Button,
+  Card,
   Center,
   CloseButton,
   DEFAULT_THEME,
   Divider,
   Flex,
   Group,
+  Loader,
   LoadingOverlay,
   Paper,
   ScrollArea,
@@ -96,6 +98,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
   const [messages, setMessages] = useState<LiSimMsg[]>([]);
 
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState('');
   const [messageDraft, setMessageDraft] = useState('');
 
@@ -159,6 +162,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
     setMessages([]);
     setMessageDraft('');
     setLoading(false);
+    setAiLoading(false);
     setLoadingMsg('');
   };
 
@@ -192,15 +196,19 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
 
     // A hacky way to check if we're currently in the middle of a msg generation
     if (loadingMsg === '') {
-      wait1Day(true);
+      wait2Day(true);
     }
   };
 
-  const wait1Day = async (invisible = false) => {
+  const wait2Day = async (invisible = false) => {
     if (!simulation) return;
 
     if(!invisible){
       setLoading(true);
+    }
+    if (invisible) {
+      setAiLoading(true);
+      scrollToBottom();
     }
     setLoadingMsg('Generating response...');
     const generateResponse = await generateResponseForLiConvoSim(userToken, simulation.id);
@@ -218,6 +226,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
     }
 
     setLoading(false);
+    setAiLoading(false);
     setLoadingMsg('');
     setSimulation(convoResponse.data.simulation);
     setMessages(convoResponse.data.messages.reverse());
@@ -373,6 +382,13 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
               />
             </div>
           ))}
+          {
+            aiLoading && (
+              <Card radius="md" shadow="md" style={{maxWidth: 550, marginRight: 'auto'}} withBorder>
+                <Loader variant="dots" />
+              </Card>
+            )
+          }
       </ScrollArea>
 
       {simulation && (
@@ -419,10 +435,10 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
               disabled={loading}
               rightIcon={<Icon24Hours size={14} />}
               onClick={() => {
-                wait1Day();
+                wait2Day(true);
               }}
             >
-              Wait 1 day
+              Wait 2 days
             </Button>
           </Stack>
         </Group>

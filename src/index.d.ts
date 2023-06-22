@@ -92,7 +92,18 @@ export interface ProspectShallow {
   title: string;
   company: string;
   li_public_id: string | null;
+  img_url: string,
 };
+
+export interface Simulation {
+  id: number;
+  client_sdr_id: number;
+  archetype_id: number;
+  prospect_id: number;
+  prospect?: Prospect;
+  type: string;
+  meta_data: Record<string, any>;
+}
 
 export interface CTA {
   id: number;

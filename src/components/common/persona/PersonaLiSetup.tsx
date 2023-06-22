@@ -34,6 +34,7 @@ import { CTA, Archetype, PersonaOverview } from 'src';
 import LinkedInCTAsStep from './linkedin/LinkedInCTAsStep';
 import LinkedInVoiceBuilderStep from './linkedin/LinkedInVoiceBuilderStep';
 import BumpFrameworksPage from '@pages/BumpFrameworksPage';
+import LinkedInConvoSimulator from '@common/simulators/linkedin/LinkedInConvoSimulator';
 
 type LiStepProgress = 'COMPLETE' | 'INCOMPLETE' | 'COMING_SOON' | 'OPTIONAL';
 
@@ -51,20 +52,20 @@ export default function PersonaLiSetup(props: { persona: PersonaOverview; person
   const [stepOneComplete, setStepOneComplete] = useState<LiStepProgress>('INCOMPLETE');
   const [stepTwoComplete, setStepTwoComplete] = useState<LiStepProgress>('OPTIONAL');
   const [stepThreeComplete, setStepThreeComplete] = useState<LiStepProgress>('INCOMPLETE');
-  const [stepFourComplete, setStepFourComplete] = useState<LiStepProgress>('COMING_SOON');
+  const [stepFourComplete, setStepFourComplete] = useState<LiStepProgress>('OPTIONAL');
 
   let percentage = 0;
   if (stepOneComplete !== 'INCOMPLETE') {
-    percentage += 33.3;
+    percentage += 25;
   }
   if (stepTwoComplete !== 'INCOMPLETE') {
-    percentage += 33.3;
+    percentage += 25;
   }
   if (stepThreeComplete !== 'INCOMPLETE') {
-    percentage += 33.3;
+    percentage += 25;
   }
   if (stepFourComplete !== 'INCOMPLETE') {
-    //
+    percentage += 25;
   }
   percentage = Math.ceil(percentage);
 
@@ -158,7 +159,7 @@ export default function PersonaLiSetup(props: { persona: PersonaOverview; person
             </Group>
           </Accordion.Control>
           <Accordion.Panel>
-            <ComingSoonCard />
+            <LinkedInConvoSimulator personaId={props.persona.id} />
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>

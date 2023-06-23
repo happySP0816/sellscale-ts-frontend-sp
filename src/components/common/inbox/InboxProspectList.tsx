@@ -149,7 +149,11 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
         email_status: p.email_status,
         in_purgatory: p.hidden_until ? new Date(p.hidden_until) > new Date() : false,
       };
-    }).sort((a, b) => b.icp_fit - a.icp_fit || removeExtraCharacters(a.name).localeCompare(removeExtraCharacters(b.name))) 
+    }).sort((a, b) =>
+      (b.new_msg_count ? 1 : 0) - (a.new_msg_count ? 1 : 0)
+      || b.icp_fit - a.icp_fit
+      || removeExtraCharacters(a.name).localeCompare(removeExtraCharacters(b.name))
+    )
   ?? [];
 
   // Filter by search

@@ -35,6 +35,7 @@ import {
   prospectDrawerOpenState,
 } from "@atoms/prospectAtoms";
 import { dashCardSeeAllDrawerOpenState } from "@atoms/dashboardAtoms";
+import { addProspectNote } from "@utils/requests/prospectNotes";
 
 export default function DashCardContents(props: {
   prospect: Prospect;

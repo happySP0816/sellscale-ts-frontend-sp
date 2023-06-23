@@ -99,7 +99,7 @@ export function ProspectConvoCard(props: {
             </Group>
             <Group position='apart' sx={{ flexWrap: 'nowrap' }}>
               <Text size={12} truncate fw={(!props.opened && props.new_msg_count > 0) ? 600 : undefined}>
-                {_.truncate(props.latest_msg, { length: 35 })}
+                {_.truncate(props.latest_msg, { length: 40 })}
               </Text>
               {!props.opened && props.new_msg_count > 0 && <Badge variant='filled'>{props.new_msg_count}</Badge>}
             </Group>

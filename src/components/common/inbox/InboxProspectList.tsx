@@ -44,43 +44,7 @@ import { convertDateToCasualTime, removeExtraCharacters } from '@utils/general';
 import { co } from '@fullcalendar/core/internal-common';
 import { count } from 'console';
 import loaderWithText from '@common/library/loaderWithText';
-
-export function icpFitToIcon(icp_fit: number, size: string = '0.7rem') {
-  switch (icp_fit) {
-    case 0:
-      return (
-        <Text color='red'>
-          <IconCircle4Filled size={size} />
-        </Text>
-      );
-    case 1:
-      return (
-        <Text color='orange'>
-          <IconCircle3Filled size={size} />
-        </Text>
-      );
-    case 2:
-      return (
-        <Text color='yellow'>
-          <IconCircle2Filled size={size} />
-        </Text>
-      );
-    case 3:
-      return (
-        <Text color='green'>
-          <IconCircle1Filled size={size} />
-        </Text>
-      );
-    case 4:
-      return (
-        <Text color='blue'>
-          <IconStarFilled size={size} />
-        </Text>
-      );
-    default:
-      break;
-  }
-}
+import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
@@ -163,6 +127,8 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [filtersState, setFiltersState] = useState<InboxProspectListFilterState>();
 
+  console.log('ProspectList', props.prospects);
+
   // Sort out uninitiated prospects and temp fill in unknown data
   let prospects =
     props.prospects?.map((p) => {
@@ -170,7 +136,7 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
         id: p.id,
         name: p.full_name,
         img_url: p.img_url,
-        icp_fit: 4,
+        icp_fit: p.icp_fit_score,
         latest_msg: p.li_last_message_from_prospect || 'No message found',
         latest_msg_time: convertDateToCasualTime(new Date(p.li_last_message_timestamp)),
         title: _.truncate(p.title, {
@@ -178,9 +144,12 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
           'separator': ' '
         }),
         new_msg_count: p.li_unread_messages,
+        persona_id: p.archetype_id,
         linkedin_status: p.linkedin_status,
+        email_status: p.email_status,
+        in_purgatory: p.hidden_until ? new Date(p.hidden_until) > new Date() : false,
       };
-    }).sort((a, b) => a.icp_fit - b.icp_fit || removeExtraCharacters(a.name).localeCompare(removeExtraCharacters(b.name))) 
+    }).sort((a, b) => b.icp_fit - a.icp_fit || removeExtraCharacters(a.name).localeCompare(removeExtraCharacters(b.name))) 
   ?? [];
 
   // Filter by search
@@ -196,6 +165,28 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
       return p.linkedin_status === filterSelectValue;
     });
   }
+  // Advanced filters
+  if(filtersState) {
+    if(filtersState.recentlyContacted === 'HIDE'){
+      prospects = prospects.filter((p) => p.in_purgatory);
+    } else if(filtersState.recentlyContacted === 'SHOW') {
+      prospects = prospects.filter((p) => !p.in_purgatory);
+    }
+
+    if(filtersState.channel === 'LINKEDIN') {
+      prospects = prospects.filter((p) => p.linkedin_status);
+    }
+    if(filtersState.channel === 'EMAIL') {
+      prospects = prospects.filter((p) => p.email_status);
+    }
+
+    if(filtersState.personaId) {
+      prospects = prospects.filter((p) => p.persona_id+'' === filtersState.personaId);
+    }
+
+    // nurturingMode todo
+  }
+
 
 
   useEffect(() => {

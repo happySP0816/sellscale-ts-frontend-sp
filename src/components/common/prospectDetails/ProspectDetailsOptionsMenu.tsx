@@ -19,10 +19,10 @@ export default function ProspectDetailsOptionsMenu(props: {
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
 
   return (
-    <Menu shadow="md" width={200}>
+    <Menu shadow="md" width={200} withArrow>
       <Menu.Target>
-        <ActionIcon>
-          <IconDots size="1.1rem" />
+        <ActionIcon radius='xl' variant='light'>
+          <IconDots size='1.125rem' />
         </ActionIcon>
       </Menu.Target>
 

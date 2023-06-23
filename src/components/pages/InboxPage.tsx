@@ -28,7 +28,7 @@ export default function InboxPage() {
         body: JSON.stringify({
           channel: "SELLSCALE",
           limit: 10000, // TODO: Maybe use pagination method instead
-          status: ["DEMO", "ACTIVE_CONVO"],
+          status: ["ACTIVE_CONVO"], // "DEMO", 
           show_purgatory: "ALL",
         }),
       });

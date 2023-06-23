@@ -1,5 +1,5 @@
 import { openedOutboundChannelState, openedProspectIdState } from '@atoms/inboxAtoms';
-import { userTokenState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
 import TextWithNewlines from '@common/library/TextWithNewlines';
 import loaderWithText from '@common/library/loaderWithText';
 import {
@@ -33,6 +33,8 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { LinkedInMessage, Prospect } from 'src';
 import { labelizeConvoSubstatus } from './utils';
 import { readLiMessages } from '@utils/requests/readMessages';
+import ProspectDetailsCalendarLink from '@common/prospectDetails/ProspectDetailsCalendarLink';
+import ProspectDetailsOptionsMenu from '@common/prospectDetails/ProspectDetailsOptionsMenu';
 
 export function ProspectConvoMessage(props: {
   img_url: string;
@@ -70,6 +72,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const queryClient = useQueryClient();
 
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const [openedOutboundChannel, setOpenedOutboundChannel] = useRecoilState(openedOutboundChannelState);
 
@@ -88,16 +91,22 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const { data: messages, isFetching: isFetchingMessages } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
     queryFn: async () => {
+
+      // TODO: We don't handle email messages yet
+      if(openedOutboundChannel === 'email') {
+        return [];
+      }
+
       const result = await getConversation(userToken, openedProspectId);
       // Indicate messages as read
       const readLiResult = await readLiMessages(userToken, openedProspectId);
       if (readLiResult.status === 'success' && readLiResult.data.updated) {
         // Update the prospect list
         queryClient.invalidateQueries({
-          queryKey: ["query-dash-get-prospects"],
+          queryKey: ['query-dash-get-prospects'],
         });
       }
-      return result.status === "success" ? (result.data.data.reverse() as LinkedInMessage[]) : [];
+      return result.status === 'success' ? (result.data.data.reverse() as LinkedInMessage[]) : [];
     },
     enabled: openedProspectId !== -1,
     refetchOnWindowFocus: false,
@@ -114,7 +123,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
 
   return (
     <Flex gap={0} direction='column' wrap='nowrap' h='100vh'>
-      <div style={{ height: HEADER_HEIGHT }}>
+      <div style={{ height: HEADER_HEIGHT, position: 'relative' }}>
         <Group position='apart' p={15} h={66} sx={{ flexWrap: 'nowrap' }}>
           <div style={{ overflow: 'hidden' }}>
             <Title order={3} truncate>
@@ -128,9 +137,9 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
             <Badge size='lg' color={'blue'}>
               {labelizeConvoSubstatus(statusValue)}
             </Badge>
-            <ActionIcon radius='xl' variant='light'>
-              <IconDots size='1.125rem' />
-            </ActionIcon>
+            <ProspectDetailsOptionsMenu
+              prospectId={openedProspectId}
+            />
           </Group>
         </Group>
         <Tabs
@@ -154,6 +163,11 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
             </Tabs.Tab>
           </Tabs.List>
         </Tabs>
+        {statusValue === 'ACTIVE_CONVO_SCHEDULING' && (
+          <div style={{ position: 'absolute', bottom: 7, right: 15 }}>
+            <ProspectDetailsCalendarLink calendarLink={userData.scheduling_link} width='250px' />
+          </div>
+        )}
       </div>
       <div
         style={{
@@ -164,18 +178,23 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
         <ScrollArea h={`calc((100vh - ${HEADER_HEIGHT}px)*0.75)`} viewportRef={viewport}>
           <div style={{ marginTop: 10, marginBottom: 10 }}>
             <LoadingOverlay loader={loaderWithText('')} visible={isFetchingMessages} />
-            {messages && messages.map((msg, i) => (
-              <ProspectConvoMessage
-                key={i}
-                img_url={msg.img_url}
-                name={`${msg.first_name} ${msg.last_name}`}
-                message={msg.message}
-                timestamp={convertDateToCasualTime(new Date(msg.date))}
-                is_me={msg.connection_degree === 'You'}
-              />
-            ))}
+            {messages &&
+              messages.map((msg, i) => (
+                <ProspectConvoMessage
+                  key={i}
+                  img_url={msg.img_url}
+                  name={`${msg.first_name} ${msg.last_name}`}
+                  message={msg.message}
+                  timestamp={convertDateToCasualTime(new Date(msg.date))}
+                  is_me={msg.connection_degree === 'You'}
+                />
+              ))}
             {messages && messages.length === 0 && (
-              <Center h={400}><Text fz='sm' fs="italic" c="dimmed">No conversation history found.</Text></Center>
+              <Center h={400}>
+                <Text fz='sm' fs='italic' c='dimmed'>
+                  No conversation history found.
+                </Text>
+              </Center>
             )}
           </div>
         </ScrollArea>

@@ -1,7 +1,11 @@
+import { userTokenState } from "@atoms/userAtoms";
 import { Modal, Title, Text, Stack, Select, Checkbox } from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
+import { getPersonasOverview } from "@utils/requests/getPersonas";
 import _ from "lodash";
 import { useEffect, useRef } from "react";
-import { Channel } from "src";
+import { useRecoilValue } from "recoil";
+import { Channel, PersonaOverview } from "src";
 
 export type InboxProspectListFilterState = {
   recentlyContacted: 'ALL' | 'HIDE' | 'SHOW';
@@ -24,6 +28,7 @@ export default function InboxProspectListFilter(props: {
   setFilters: (filters: InboxProspectListFilterState) => void
 }) {
 
+  const userToken = useRecoilValue(userTokenState);
   const filterState = useRef<InboxProspectListFilterState>(_.cloneDeep(defaultInboxProspectListFilterState));
 
   useEffect(() => {
@@ -31,6 +36,17 @@ export default function InboxProspectListFilter(props: {
       filterState.current = props.filters;
     }
   }, [props.filters]);
+
+  const { data } = useQuery({
+    queryKey: [`query-personas-data`],
+    queryFn: async () => {
+      const response = await getPersonasOverview(userToken);
+      return response.status === "success"
+          ? (response.data as PersonaOverview[])
+          : [];
+    },
+    refetchOnWindowFocus: false,
+  });
 
   return (
     <Modal
@@ -80,12 +96,10 @@ export default function InboxProspectListFilter(props: {
           onSearchChange={() => {}}
           searchValue={undefined}
           nothingFound='No persona found'
-          data={[]}
+          data={data ? data.map((persona) => ({ label: persona.name, value: persona.id+'' })) : []}
           onChange={(value) => {
-            if (value) {
-              filterState.current.personaId = value;
-              props.setFilters(filterState.current);
-            }
+            filterState.current.personaId = value || undefined;
+            props.setFilters(filterState.current);
           }}
         />
 

@@ -83,6 +83,7 @@ export interface Prospect {
   hidden_until: string;
   hidden_reason: string;
   demo_date: any;
+  icp_fit_score: number;
 }
 
 export interface ProspectShallow {

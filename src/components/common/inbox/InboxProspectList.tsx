@@ -120,7 +120,7 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
   const filterSelectOptions = prospectStatuses.map((status) => ({ ...status, count: -1 }));
-  filterSelectOptions.unshift({ label: 'All Status', value: 'ALL', count: -1 });
+  filterSelectOptions.unshift({ label: 'All Substatus', value: 'ALL', count: -1 });
 
   const [filterSelectValue, setFilterSelectValue] = useState(filterSelectOptions[0].value);
   const [searchFilter, setSearchFilter] = useState('');

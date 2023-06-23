@@ -123,7 +123,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
                   <ICPFitContents
                     icp_fit_score={data?.details.icp_fit_score}
                     icp_fit_reason={data?.details.icp_fit_reason}
-                    archetype={''}
+                    archetype={data?.details.persona}
                   />
                 </Popover.Dropdown>
               </Popover>
@@ -152,7 +152,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           <Flex gap={0} wrap='nowrap'>
             <div style={{ flexBasis: '10%', margin: 15 }}>
               <Text fw={500} fz={13}>
-                Status
+                Substatus
               </Text>
             </div>
             <div style={{ flexBasis: '90%', margin: 10 }}>

@@ -247,7 +247,7 @@ export function channelToIcon(channel: Channel, size: number) {
 export async function updateChannelStatus(
   prospectId: number,
   userToken: string,
-  channelType: string,
+  channelType: Channel,
   newStatus: string
 ) {
   return await fetch(`${API_URL}/prospect/${prospectId}`, {

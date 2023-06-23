@@ -48,7 +48,7 @@ export default function InboxPage() {
   return (
     <Grid columns={100} gutter={0}>
       <Grid.Col span={27} >
-        <InboxProspectList prospects={prospects} />
+        <InboxProspectList prospects={prospects} isFetching={isFetching} />
       </Grid.Col>
       <Grid.Col span={46}>
         <InboxProspectConvo prospects={prospects} />

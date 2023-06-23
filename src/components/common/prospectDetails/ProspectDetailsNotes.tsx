@@ -15,6 +15,7 @@ import {
 import { IconGitBranch } from "@tabler/icons";
 import { splitName } from "@utils/general";
 import displayNotification from "@utils/notificationFlow";
+import { addProspectNote } from "@utils/requests/prospectNotes";
 
 import { useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -51,37 +52,6 @@ const useStyles = createStyles((theme) => ({
     },
   },
 }));
-
-async function addProspectNote(
-  prospectId: number,
-  userToken: string,
-  newNote: string
-): Promise<MsgResponse> {
-  return await fetch(
-    `${API_URL}/prospect/add_note`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prospect_id: prospectId,
-        note: newNote,
-      }),
-    }
-  ).then(async (r) => {
-    const res = await r.json();
-    if(r.status === 200){
-      return { status: 'success', title: `Success`, message: `Added note.`, data: res.prospect_note_id } satisfies MsgResponse;
-    } else {
-      return { status: 'error', title: `Error (${r.status})`, message: res.message } satisfies MsgResponse;
-    }
-  }).catch((e) => {
-    console.error(e);
-    return { status: 'error', title: `Error while adding note`, message: e.message } satisfies MsgResponse;
-  });
-}
 
 type ProspectDetailsChangeStatusProps = {
   currentStatus: string;
@@ -166,8 +136,8 @@ export default function ProspectDetailsNotes(
               "add-prospect-note",
               async () => {
                 let result = await addProspectNote(
-                  props.prospectId,
                   userToken,
+                  props.prospectId,
                   newNote
                 );
                 if(result.status === 'success' && result.data) {

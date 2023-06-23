@@ -15,17 +15,33 @@ import {
   createStyles,
   Divider,
   Textarea,
+  Tabs,
 } from '@mantine/core';
 import { icpFitToIcon } from './InboxProspectList';
-import { IconBriefcase, IconBuildingStore, IconBrandLinkedin, IconMail, IconMap2 } from '@tabler/icons-react';
+import {
+  IconBriefcase,
+  IconBuildingStore,
+  IconBrandLinkedin,
+  IconMail,
+  IconMap2,
+  IconMessageCircle,
+  IconPhoto,
+  IconSettings,
+  IconInfoCircle,
+  IconUserSearch,
+  IconWriting,
+} from '@tabler/icons-react';
 import { openedProspectIdState, openedOutboundChannelState } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import { useEffect, useRef } from 'react';
 import { getProspectByID } from '@utils/requests/getProspectByID';
 import { prospectStatuses } from './utils';
-import { Prospect } from 'src';
+import { Channel, Prospect } from 'src';
+import ProspectDetailsResearch, { ProspectDetailsResearchTabs } from '@common/prospectDetails/ProspectDetailsResearch';
+import { updateProspectNote } from '@utils/requests/prospectNotes';
+import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChangeStatus';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -35,6 +51,7 @@ const useStyles = createStyles((theme) => ({
 
 export default function ProjectDetails(props: { prospects: Prospect[] }) {
   const theme = useMantineTheme();
+  const queryClient = useQueryClient();
   const { classes } = useStyles();
   const notesRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -52,7 +69,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   });
 
   console.log(data);
-  const status = { label: 'Accepted', value: 'accepted' };
+  const statusValue = data?.details?.linkedin_status || 'ACTIVE_CONVO';
 
   const icp_fit = 4; // TODO: Temporary
 
@@ -61,7 +78,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   // Set the notes in the input box when the data is loaded in
   useEffect(() => {
     if (notesRef.current) {
-      notesRef.current.value = data?.details.company ?? '';
+      notesRef.current.value = data?.details.notes[data?.details.notes.length-1]?.note ?? '';
     }
   }, [data]);
 
@@ -111,7 +128,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           </Flex>
         </Paper>
       </div>
-      {status && status.value !== 'uninitiated' && (
+      {statusValue !== 'uninitiated' && (
         <div style={{ flexBasis: '10%' }}>
           <Paper
             withBorder
@@ -136,7 +153,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
                   radius={theme.radius.lg}
                   styles={{
                     input: {
-                      backgroundColor: theme.colors['blue' /* getProspectStatusColor(status?.value) */][6],
+                      backgroundColor: theme.colors['blue'][6],
                       color: theme.white,
                       '&:focus': {
                         borderColor: 'transparent',
@@ -149,24 +166,20 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
                     },
                     item: {
                       '&[data-selected], &[data-selected]:hover': {
-                        backgroundColor: theme.colors['blue' /* getProspectStatusColor(status?.value) */][6],
+                        backgroundColor: theme.colors['blue'][6],
                       },
                     },
                   }}
                   data={prospectStatuses}
-                  value={status?.value}
+                  value={statusValue}
                   onChange={async (value) => {
                     if (!value) {
                       return;
                     }
-                    /*
-                    await updateProspectStatus(
-                      userToken,
-                      navOpenedProject.id,
-                      openedProspectId,
-                      openedOutboundChannel.toUpperCase(),
-                      value
-                    );*/
+                    await updateChannelStatus(openedProspectId, userToken, openedOutboundChannel.toUpperCase() as Channel, value);
+                    queryClient.invalidateQueries({
+                      queryKey: ["query-dash-get-prospects"],
+                    });
                     refetch();
                   }}
                 />
@@ -175,82 +188,99 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           </Paper>
         </div>
       )}
-      <div style={{ flexBasis: '30%' }}>
+
+      <div style={{ flexBasis: '55%' }}>
         <Divider />
-        <Stack mx={15} my={5} spacing={2}>
-          <Title order={5}>Details</Title>
+        <Tabs variant='pills' defaultValue='details' radius={theme.radius.lg} m={10}>
+          <Tabs.List>
+            <Tabs.Tab value='details' icon={<IconInfoCircle size='0.8rem' />}>
+              Details
+            </Tabs.Tab>
+            <Tabs.Tab value='research' icon={<IconUserSearch size='0.8rem' />}>
+              Research
+            </Tabs.Tab>
+            <Tabs.Tab value='notes' icon={<IconWriting size='0.8rem' />}>
+              Notes
+            </Tabs.Tab>
+          </Tabs.List>
 
-          {data?.details.title && (
-            <Group noWrap spacing={10} mt={3}>
-              <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
-              <Text size='xs'>{data.details.title}</Text>
-            </Group>
-          )}
+          <Tabs.Panel value='details' pt='xs'>
+            <Stack m={0} spacing={2}>
+              {data?.details.title && (
+                <Group noWrap spacing={10} mt={3}>
+                  <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
+                  <Text size='xs'>{data.details.title}</Text>
+                </Group>
+              )}
 
-          {data?.details.company && (
-            <Group noWrap spacing={10} mt={5}>
-              <IconBuildingStore stroke={1.5} size={16} className={classes.icon} />
-              <Text size='xs' component='a' target='_blank' rel='noopener noreferrer' href={''}>
-                {data.details.company}
-              </Text>
-            </Group>
-          )}
+              {data?.details.company && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconBuildingStore stroke={1.5} size={16} className={classes.icon} />
+                  <Text size='xs' component='a' target='_blank' rel='noopener noreferrer' href={''}>
+                    {data.details.company}
+                  </Text>
+                </Group>
+              )}
 
-          {linkedin_public_id && (
-            <Group noWrap spacing={10} mt={5}>
-              <IconBrandLinkedin stroke={1.5} size={16} className={classes.icon} />
-              <Text
-                size='xs'
-                component='a'
-                target='_blank'
-                rel='noopener noreferrer'
-                href={`https://www.linkedin.com/in/${linkedin_public_id}`}
-              >
-                linkedin.com/in/{linkedin_public_id}
-              </Text>
-            </Group>
-          )}
+              {linkedin_public_id && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconBrandLinkedin stroke={1.5} size={16} className={classes.icon} />
+                  <Text
+                    size='xs'
+                    component='a'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    href={`https://www.linkedin.com/in/${linkedin_public_id}`}
+                  >
+                    linkedin.com/in/{linkedin_public_id}
+                  </Text>
+                </Group>
+              )}
 
-          {data?.email.email && (
-            <Group noWrap spacing={10} mt={5}>
-              <IconMail stroke={1.5} size={16} className={classes.icon} />
-              <Text size='xs' component='a' href={`mailto:${data.email.email}`}>
-                {data.email.email}
-              </Text>
-            </Group>
-          )}
+              {data?.email.email && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconMail stroke={1.5} size={16} className={classes.icon} />
+                  <Text size='xs' component='a' href={`mailto:${data.email.email}`}>
+                    {data.email.email}
+                  </Text>
+                </Group>
+              )}
 
-          {data?.details.company && (
-            <Group noWrap spacing={10} mt={5}>
-              <IconMap2 stroke={1.5} size={16} className={classes.icon} />
-              <Text size='xs'>{data.details.company}</Text>
-            </Group>
-          )}
-        </Stack>
-      </div>
-      <div style={{ flexBasis: '25%' }}>
-        <Divider />
-        <Title order={5} mx={15} my={5}>
-          Notes
-        </Title>
-        <Textarea
-          ref={notesRef}
-          mx={10}
-          minRows={3}
-          maxRows={3}
-          radius={theme.radius.lg}
-          placeholder='Write notes here...'
-          onBlur={async (event) => {
-            /*
-            await updateProspectNotes(
-              userToken,
-              navOpenedProject.id,
-              openedProspectId,
-              event.currentTarget.value
-            );*/
-            refetch();
-          }}
-        />
+              {data?.details.company && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconMap2 stroke={1.5} size={16} className={classes.icon} />
+                  <Text size='xs'>{data.details.company}</Text>
+                </Group>
+              )}
+            </Stack>
+          </Tabs.Panel>
+
+          <Tabs.Panel value='research' pt='xs'>
+            <ScrollArea h={300}>
+              {openedProspectId !== -1 && (
+                <ProspectDetailsResearchTabs prospectId={openedProspectId} />
+              )}
+            </ScrollArea>
+          </Tabs.Panel>
+
+          <Tabs.Panel value='notes' pt='xs'>
+            <Textarea
+              ref={notesRef}
+              minRows={13}
+              maxRows={13}
+              radius={theme.radius.lg}
+              placeholder='Write notes here...'
+              onBlur={async (event) => {
+                await updateProspectNote(
+                  userToken,
+                  openedProspectId,
+                  event.currentTarget.value
+                );
+                refetch();
+              }}
+            />
+          </Tabs.Panel>
+        </Tabs>
       </div>
     </Flex>
   );

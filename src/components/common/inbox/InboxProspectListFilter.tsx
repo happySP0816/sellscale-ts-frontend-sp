@@ -1,4 +1,5 @@
 import { Modal, Title, Text, Stack, Select, Checkbox } from "@mantine/core";
+import _ from "lodash";
 import { useEffect, useRef } from "react";
 import { Channel } from "src";
 
@@ -23,7 +24,7 @@ export default function InboxProspectListFilter(props: {
   setFilters: (filters: InboxProspectListFilterState) => void
 }) {
 
-  const filterState = useRef<InboxProspectListFilterState>(defaultInboxProspectListFilterState);
+  const filterState = useRef<InboxProspectListFilterState>(_.cloneDeep(defaultInboxProspectListFilterState));
 
   useEffect(() => {
     if (props.filters){

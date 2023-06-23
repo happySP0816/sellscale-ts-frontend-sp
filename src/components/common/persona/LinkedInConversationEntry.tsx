@@ -1,3 +1,4 @@
+import TextWithNewline from "@common/library/TextWithNewlines";
 import {
   createStyles,
   Text,
@@ -77,10 +78,7 @@ export function LinkedInConversationEntry({
       </Group>
 
       <TypographyStylesProvider className={classes.body}>
-        <div
-          className={classes.content}
-          dangerouslySetInnerHTML={{ __html: body }}
-        />
+        <TextWithNewline className={classes.content}>{body}</TextWithNewline>
       </TypographyStylesProvider>
     </Paper>
   );

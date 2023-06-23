@@ -10,6 +10,7 @@ import {
   Group,
   Indicator,
   Input,
+  LoadingOverlay,
   Modal,
   ScrollArea,
   SegmentedControl,
@@ -39,9 +40,10 @@ import { HEADER_HEIGHT } from './InboxProspectConvo';
 import { getArchetypeProspects } from '@utils/requests/getArchetypeProspects';
 import { prospectStatuses } from './utils';
 import InboxProspectListFilter, { InboxProspectListFilterState, defaultInboxProspectListFilterState } from './InboxProspectListFilter';
-import { convertDateToCasualTime } from '@utils/general';
+import { convertDateToCasualTime, removeExtraCharacters } from '@utils/general';
 import { co } from '@fullcalendar/core/internal-common';
 import { count } from 'console';
+import loaderWithText from '@common/library/loaderWithText';
 
 export function icpFitToIcon(icp_fit: number, size: string = '0.7rem') {
   switch (icp_fit) {
@@ -135,7 +137,7 @@ export function ProspectConvoCard(props: {
               <Text size={12} truncate>
                 {_.truncate(props.latest_msg, { length: 35 })}
               </Text>
-              {props.new_msg_count > 0 && <Badge variant='filled'>{props.new_msg_count}</Badge>}
+              {!props.opened && props.new_msg_count > 0 && <Badge variant='filled'>{props.new_msg_count}</Badge>}
             </Group>
             <Text size={10} c='dimmed' fs='italic'>
               {props.title}
@@ -148,7 +150,7 @@ export function ProspectConvoCard(props: {
   );
 }
 
-export default function ProspectList(props: { prospects: Prospect[] }) {
+export default function ProspectList(props: { prospects: Prospect[], isFetching: boolean }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
@@ -178,7 +180,8 @@ export default function ProspectList(props: { prospects: Prospect[] }) {
         new_msg_count: p.li_unread_messages,
         linkedin_status: p.linkedin_status,
       };
-    }) ?? [];
+    }).sort((a, b) => a.icp_fit - b.icp_fit || removeExtraCharacters(a.name).localeCompare(removeExtraCharacters(b.name))) 
+  ?? [];
 
   // Filter by search
   if(searchFilter.trim()) {
@@ -204,6 +207,7 @@ export default function ProspectList(props: { prospects: Prospect[] }) {
   return (
     <>
       <Stack spacing={0} h={'100vh'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
+        <LoadingOverlay loader={loaderWithText('')} visible={props.isFetching && props.prospects.length === 0} />
         <Container pt={20} pb={10} px={20} m={0}>
           <Input styles={{
             input: { borderColor: searchFilter.trim() ? theme.colors.blue[theme.fn.primaryShade()] : undefined },

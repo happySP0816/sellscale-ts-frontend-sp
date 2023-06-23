@@ -27,7 +27,6 @@ import { showNotification } from "@mantine/notifications";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import { IconSend } from "@tabler/icons";
 import { sendLinkedInMessage } from "@utils/requests/sendMessage";
-import { addProspectNote } from "@utils/requests/addProspectNote";
 import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChangeStatus";
 import { useQueryClient } from "@tanstack/react-query";
 import { convertDateToLocalTime } from "@utils/general";

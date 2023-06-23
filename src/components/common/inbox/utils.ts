@@ -1,3 +1,4 @@
+import _ from "lodash";
 
 
 export const prospectStatuses = [
@@ -26,3 +27,8 @@ export const prospectStatuses = [
     value: "ACTIVE_CONVO",
   },
 ];
+
+export function labelizeConvoSubstatus(substatus: string) {
+  if(substatus === 'ACTIVE_CONVO') return 'Uncategorized';
+  return _.startCase(substatus.replace('ACTIVE_CONVO_', '').replaceAll('_', ' ').toLowerCase());
+}

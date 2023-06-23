@@ -23,14 +23,16 @@ import {
   Center,
 } from '@mantine/core';
 import { IconExternalLink, IconWriting, IconSend, IconBrandLinkedin, IconMail, IconDots } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
-import { convertDateToLocalTime } from '@utils/general';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { convertDateToCasualTime, convertDateToLocalTime } from '@utils/general';
 import { getConversation } from '@utils/requests/getConversation';
 import { getProspectByID } from '@utils/requests/getProspectByID';
 import DOMPurify from 'dompurify';
 import { useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { LinkedInMessage, Prospect } from 'src';
+import { labelizeConvoSubstatus } from './utils';
+import { readLiMessages } from '@utils/requests/readMessages';
 
 export function ProspectConvoMessage(props: {
   img_url: string;
@@ -65,6 +67,7 @@ export const HEADER_HEIGHT = 102;
 
 export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const theme = useMantineTheme();
+  const queryClient = useQueryClient();
 
   const userToken = useRecoilValue(userTokenState);
   const openedProspectId = useRecoilValue(openedProspectIdState);
@@ -86,6 +89,14 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
     queryFn: async () => {
       const result = await getConversation(userToken, openedProspectId);
+      // Indicate messages as read
+      const readLiResult = await readLiMessages(userToken, openedProspectId);
+      if (readLiResult.status === 'success' && readLiResult.data.updated) {
+        // Update the prospect list
+        queryClient.invalidateQueries({
+          queryKey: ["query-dash-get-prospects"],
+        });
+      }
       return result.status === "success" ? (result.data.data.reverse() as LinkedInMessage[]) : [];
     },
     enabled: openedProspectId !== -1,
@@ -97,7 +108,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   }, [isFetchingMessages]);
 
   console.log(data);
-  const status = { label: 'Accepted' }; //data ? getProspectStatus(data.prospect, openedOutboundChannel.toUpperCase() as "LINKEDIN" | "EMAIL") : undefined;
+  const statusValue = data?.details?.linkedin_status || 'ACTIVE_CONVO';
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
@@ -110,12 +121,12 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
               {data?.details.full_name}
             </Title>
             <Text weight={300} fs='italic' size={10} c='dimmed' truncate>
-              Last Updated: {convertDateToLocalTime(new Date())}
+              Last Updated: {convertDateToCasualTime(new Date())}
             </Text>
           </div>
           <Group sx={{ flexWrap: 'nowrap' }}>
-            <Badge size='lg' color={'blue' /* getProspectStatusColor(status?.value) */}>
-              {status?.label}
+            <Badge size='lg' color={'blue'}>
+              {labelizeConvoSubstatus(statusValue)}
             </Badge>
             <ActionIcon radius='xl' variant='light'>
               <IconDots size='1.125rem' />
@@ -159,7 +170,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
                 img_url={msg.img_url}
                 name={`${msg.first_name} ${msg.last_name}`}
                 message={msg.message}
-                timestamp={msg.date}
+                timestamp={convertDateToCasualTime(new Date(msg.date))}
                 is_me={msg.connection_degree === 'You'}
               />
             ))}

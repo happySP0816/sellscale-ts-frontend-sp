@@ -3,16 +3,18 @@ import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
- * Add a note to a prospect
- * @param userToken 
- * @param prospectId 
- * @param note 
+ * Indicate that LI messages have been read
+ * @param userToken
+ * @param messageID
+ * @param update 
  * @returns - MsgResponse
  */
-export async function addProspectNote(userToken: string, prospectId: number, note: string): Promise<MsgResponse> {
-
+export async function readLiMessages(
+  userToken: string,
+  prospectId: number,
+): Promise<MsgResponse> {
   const response = await fetch(
-    `${API_URL}/prospect/add_note`,
+    `${API_URL}/li_conversation/prospect/read_messages`,
     {
       method: "POST",
       headers: {
@@ -21,10 +23,8 @@ export async function addProspectNote(userToken: string, prospectId: number, not
       },
       body: JSON.stringify({
         "prospect_id": prospectId,
-        "note": note,
       }),
     }
   );
-  return await processResponse(response);
-
+  return await processResponse(response, 'data');
 }

@@ -2,6 +2,7 @@ import { EMAIL_REGEX, URL_REGEX } from "@constants/data";
 import { ex } from "@fullcalendar/core/internal-common";
 import { MantineColor, MantineTheme } from "@mantine/core";
 import { startCase } from "lodash";
+import moment from "moment";
 import { Channel } from "src";
 
 export function testDelay(ms: number) {
@@ -108,6 +109,17 @@ export function convertDateToShortFormat(date: Date) {
 export function convertDateToLocalTime(date: Date) {
   if(date.getTime() === 0) { return "Unknown Time"; }
   return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
+}
+
+
+/**
+ * Converts a date to a relative timeframe string (e.g. 2 hours ago)
+ */
+export function convertDateToCasualTime(date: Date) {
+  if (date.getTime() === 0) { return ""; }
+  const currentTime = moment();
+  const inputTime = moment(date);
+  return inputTime.from(currentTime);
 }
 
 

@@ -1,6 +1,7 @@
 import { prospectDrawerIdState, prospectDrawerOpenState } from '@atoms/prospectAtoms';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import ProspectSelect from '@common/library/ProspectSelect';
+import loaderWithText from '@common/library/loaderWithText';
 import { LinkedInConversationEntry } from '@common/persona/LinkedInConversationEntry';
 import AutoBumpFrameworkInfo from '@common/prospectDetails/AutoBumpFrameworkInfo';
 import ProspectDetailsDrawer from '@drawers/ProspectDetailsDrawer';
@@ -49,37 +50,6 @@ type LiSimMsg = {
   date?: string;
   meta_data?: Record<string, any>;
 };
-
-const customLoader = (text: string) => (
-  <Stack sx={{ position: 'relative' }}>
-    <svg
-      width='54'
-      height='54'
-      viewBox='0 0 38 38'
-      xmlns='http://www.w3.org/2000/svg'
-      stroke={DEFAULT_THEME.colors.blue[6]}
-    >
-      <g fill='none' fillRule='evenodd'>
-        <g transform='translate(1 1)' strokeWidth='2'>
-          <circle strokeOpacity='.5' cx='18' cy='18' r='18' />
-          <path d='M36 18c0-9.94-8.06-18-18-18'>
-            <animateTransform
-              attributeName='transform'
-              type='rotate'
-              from='0 18 18'
-              to='360 18 18'
-              dur='1s'
-              repeatCount='indefinite'
-            />
-          </path>
-        </g>
-      </g>
-    </svg>
-    <div style={{ position: 'absolute', left: '50%' }}>
-      <Text ta="center" sx={{position: 'relative', left: '-50%', top: 60, width: 220}}>{text}</Text>
-    </div>
-  </Stack>
-);
 
 export default function LinkedInConvoSimulator(props: { personaId: number }) {
   const theme = useMantineTheme();
@@ -337,7 +307,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
       )}
 
       <ScrollArea viewportRef={viewport} my={5} h={convoHeight}>
-        <LoadingOverlay loader={customLoader(loadingMsg)} visible={loading} />
+        <LoadingOverlay loader={loaderWithText(loadingMsg)} visible={loading} />
 
         {messages.length === 0 && (
           <Center h={convoHeight - 100}>

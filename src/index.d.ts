@@ -68,6 +68,7 @@ export interface Prospect {
   li_is_last_message_from_sdr: boolean;
   li_last_message_from_prospect: string;
   li_last_message_timestamp: Date;
+  li_unread_messages: number | null;
   linkedin_bio: string | null;
   linkedin_url: string;
   times_bumped: null;

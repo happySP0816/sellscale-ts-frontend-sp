@@ -98,7 +98,7 @@ export function ProspectConvoCard(props: {
               </Text>
             </Group>
             <Group position='apart' sx={{ flexWrap: 'nowrap' }}>
-              <Text size={12} truncate>
+              <Text size={12} truncate fw={(!props.opened && props.new_msg_count > 0) ? 600 : undefined}>
                 {_.truncate(props.latest_msg, { length: 35 })}
               </Text>
               {!props.opened && props.new_msg_count > 0 && <Badge variant='filled'>{props.new_msg_count}</Badge>}
@@ -137,10 +137,10 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
         name: p.full_name,
         img_url: p.img_url,
         icp_fit: p.icp_fit_score,
-        latest_msg: p.li_last_message_from_prospect || 'No message found',
+        latest_msg: p.li_is_last_message_from_sdr ? 'You: <TODO>' : `${p.first_name}: ${p.li_last_message_from_prospect || 'No message found'}`,
         latest_msg_time: convertDateToCasualTime(new Date(p.li_last_message_timestamp)),
         title: _.truncate(p.title, {
-          'length': 50,
+          'length': 48,
           'separator': ' '
         }),
         new_msg_count: p.li_unread_messages,

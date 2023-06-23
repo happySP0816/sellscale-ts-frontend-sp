@@ -333,14 +333,14 @@ export default function VoiceBuilderFlow(props: {
             <Container w="100%">
               {<Loader mx="auto" variant="dots" />}
               <Text color="blue">Generating messages ...</Text>
-              {count > 8 && <Text color="blue">Researching prospects ...</Text>}
-              {count > 16 && <Text color="blue">Writing sample copy ...</Text>}
-              {count > 24 && (
+              {count > 2 && <Text color="blue">Researching prospects ...</Text>}
+              {count > 3 && <Text color="blue">Writing sample copy ...</Text>}
+              {count > 5 && (
                 <Text color="blue">Applying previous edits ...</Text>
               )}
-              {count > 30 && <Text color="blue">Finalizing messages ...</Text>}
-              {count > 36 && <Text color="blue">Almost there ...</Text>}
-              {count > 42 && <Text color="blue">Making final touches ...</Text>}
+              {count > 7 && <Text color="blue">Finalizing messages ...</Text>}
+              {count > 9 && <Text color="blue">Almost there ...</Text>}
+              {count > 15 && <Text color="blue">Making final touches ...</Text>}
             </Container>
           )}
           {!loadingMsgGen &&

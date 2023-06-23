@@ -89,6 +89,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       return result.status === "success" ? (result.data.data.reverse() as LinkedInMessage[]) : [];
     },
     enabled: openedProspectId !== -1,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

@@ -28,13 +28,19 @@ import { convertDateToCasualTime, convertDateToLocalTime } from '@utils/general'
 import { getConversation } from '@utils/requests/getConversation';
 import { getProspectByID } from '@utils/requests/getProspectByID';
 import DOMPurify from 'dompurify';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { LinkedInMessage, Prospect } from 'src';
 import { labelizeConvoSubstatus } from './utils';
 import { readLiMessages } from '@utils/requests/readMessages';
 import ProspectDetailsCalendarLink from '@common/prospectDetails/ProspectDetailsCalendarLink';
 import ProspectDetailsOptionsMenu from '@common/prospectDetails/ProspectDetailsOptionsMenu';
+import { deleteAutoBumpMessage, getAutoBumpMessage } from '@utils/requests/autoBumpMessage';
+import { showNotification } from '@mantine/notifications';
+import { postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
+import { sendLinkedInMessage } from '@utils/requests/sendMessage';
+import _ from 'lodash';
+import InboxProspectConvoSendBox from './InboxProspectConvoSendBox';
 
 export function ProspectConvoMessage(props: {
   img_url: string;
@@ -71,6 +77,8 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
 
+  const sendBoxRef = useRef<any>();
+
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const openedProspectId = useRecoilValue(openedProspectIdState);
@@ -106,6 +114,17 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           queryKey: ['query-dash-get-prospects'],
         });
       }
+
+      // Set if we have an auto bump message generated
+      const autoBumpMsgResponse = await getAutoBumpMessage(
+        userToken,
+        openedProspectId
+      );
+      if (autoBumpMsgResponse.status === "success") {
+        sendBoxRef.current?.setAiGenerated(true);
+        sendBoxRef.current?.setMessageDraft(autoBumpMsgResponse.data.message);
+      }
+
       return result.status === 'success' ? (result.data.data.reverse() as LinkedInMessage[]) : [];
     },
     enabled: openedProspectId !== -1,
@@ -200,70 +219,13 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
         </ScrollArea>
       </div>
       <div style={{ height: `calc((100vh - ${HEADER_HEIGHT}px)*0.25)` }}>
-        <Paper
-          shadow='sm'
-          withBorder
-          radius={theme.radius.lg}
-          sx={{ display: 'flex', flexDirection: 'column', flexWrap: 'nowrap' }}
-          mx={10}
-          mb={10}
-          h={'calc(100% - 10px)'}
-        >
-          <div
-            style={{
-              flexBasis: '20%',
-              backgroundColor: theme.colors.dark[6],
-              borderTopLeftRadius: theme.radius.lg,
-              borderTopRightRadius: theme.radius.lg,
-            }}
-          >
-            <Flex wrap='nowrap' align='center'>
-              <Text color='white' fz={14} fw={500} pl={15} pt={5}>
-                Message via LinkedIn
-              </Text>
-              <Text
-                pl={10}
-                pt={5}
-                size='xs'
-                fs='italic'
-                color='gray.3'
-                component='a'
-                target='_blank'
-                rel='noopener noreferrer'
-                href={`https://www.linkedin.com/in/${linkedin_public_id}`}
-                /* TODO: Message convo link instead */
-              >
-                linkedin.com/in/{linkedin_public_id} <IconExternalLink size='0.65rem' />
-              </Text>
-            </Flex>
-          </div>
-          <div
-            style={{
-              flexBasis: '80%',
-              position: 'relative',
-              paddingLeft: 10,
-              paddingRight: 10,
-            }}
-          >
-            <Textarea minRows={3} maxRows={3} placeholder='Your message...' variant='unstyled' />
-            <div style={{ position: 'absolute', bottom: 10, left: 10 }}>
-              <Button
-                leftIcon={<IconWriting size='1rem' />}
-                variant='light'
-                color='gray'
-                radius={theme.radius.lg}
-                size='xs'
-              >
-                Generate Message
-              </Button>
-            </div>
-            <div style={{ position: 'absolute', bottom: 10, right: 10 }}>
-              <Button leftIcon={<IconSend size='1rem' />} radius={theme.radius.lg} size='xs'>
-                Send
-              </Button>
-            </div>
-          </div>
-        </Paper>
+        <InboxProspectConvoSendBox
+          ref={sendBoxRef}
+          linkedin_public_id={linkedin_public_id}
+          prospectId={openedProspectId}
+          messages={messages || []}
+          scrollToBottom={scrollToBottom}
+        />
       </div>
     </Flex>
   );

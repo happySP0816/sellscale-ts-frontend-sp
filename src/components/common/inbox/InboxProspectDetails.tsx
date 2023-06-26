@@ -17,6 +17,7 @@ import {
   Textarea,
   Tabs,
   Popover,
+  Button,
 } from '@mantine/core';
 import {
   IconBriefcase,
@@ -45,6 +46,7 @@ import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChan
 import ProspectDetailsCalendarLink from '@common/prospectDetails/ProspectDetailsCalendarLink';
 import { ICPFitContents, icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { useHover } from '@mantine/hooks';
+import postRunICPClassification from '@utils/requests/postRunICPClassification';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -130,9 +132,17 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
             </div>
             <div style={{ flexBasis: '90%' }}>
               <ScrollArea h={170} mb={2}>
-                <Text size={12} my={5} mr={8}>
-                  {data?.details.icp_fit_reason}
-                </Text>
+                {!data || data.details.icp_fit_reason ? (
+                  <Text size={12} my={5} mr={8}>
+                    {data?.details.icp_fit_reason}
+                  </Text>
+                ) : (
+                  <Button variant="default" size="md" my='sm' compact onClick={async () => {
+                    const result = await postRunICPClassification(userToken, data.details.persona_id, [data.details.id]);
+                  }}>
+                    Run ICP Fit
+                  </Button>
+                )}
               </ScrollArea>
             </div>
           </Flex>

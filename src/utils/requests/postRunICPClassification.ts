@@ -9,7 +9,7 @@ import { processResponse } from "./utils";
  * @param archetypeID
  * @returns - MsgResponse
  */
-export default async function postRunICPClassification(userToken: string, archetypeID: number): Promise<MsgResponse> {
+export default async function postRunICPClassification(userToken: string, archetypeID: number, prospect_ids?: number[]): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/ml/icp_classification/trigger/${archetypeID}`,
     {
@@ -19,7 +19,7 @@ export default async function postRunICPClassification(userToken: string, archet
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        prospect_ids: []
+        prospect_ids: prospect_ids || []
       }),
     }
   );

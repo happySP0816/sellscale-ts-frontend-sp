@@ -3,7 +3,6 @@ import { userDataState, userTokenState } from '@atoms/userAtoms';
 import ProspectSelect from '@common/library/ProspectSelect';
 import loaderWithText from '@common/library/loaderWithText';
 import { LinkedInConversationEntry } from '@common/persona/LinkedInConversationEntry';
-import AutoBumpFrameworkInfo from '@common/prospectDetails/AutoBumpFrameworkInfo';
 import ProspectDetailsDrawer from '@drawers/ProspectDetailsDrawer';
 import {
   ActionIcon,

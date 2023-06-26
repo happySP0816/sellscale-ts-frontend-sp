@@ -109,6 +109,7 @@ export default function ProspectDetailsViewConversation(
   useEffect(() => {
     if (messageDraft.trim().length === 0) {
       setAiGenerated(false);
+      autoBumpMessage.current = undefined;
     }
   }, [messageDraft]);
 
@@ -263,7 +264,13 @@ export default function ProspectDetailsViewConversation(
       userToken,
       props.prospect_id,
       msg,
-      aiGenerated
+      aiGenerated,
+      undefined,
+      autoBumpMessage.current?.bump_framework.id,
+      autoBumpMessage.current?.bump_framework.title,
+      autoBumpMessage.current?.bump_framework.description,
+      autoBumpMessage.current?.bump_framework.length,
+      autoBumpMessage.current?.account_research_points
     );
     if (result.status === "success") {
       let yourMessage = _.cloneDeep(messages.current)
@@ -275,6 +282,7 @@ export default function ProspectDetailsViewConversation(
         yourMessage.ai_generated = false;
         messages.current.push(yourMessage);
       }
+      autoBumpMessage.current = undefined;
     } else {
       showNotification({
         id: "send-linkedin-message-error",
@@ -453,6 +461,11 @@ export default function ProspectDetailsViewConversation(
                   name={message.author}
                   image={message.img_url}
                   aiGenerated={message.ai_generated}
+                  bumpFrameworkId={message.bump_framework_id}
+                  bumpFrameworkTitle={message.bump_framework_title}
+                  bumpFrameworkDescription={message.bump_framework_description}
+                  bumpFrameworkLength={message.bump_framework_length}
+                  accountResearchPoints={message.account_research_points}
                 />
               ))}
             </ScrollArea>

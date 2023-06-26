@@ -165,6 +165,11 @@ export interface LinkedInMessage {
   profile_url: string;
   urn_id: string;
   ai_generated: boolean;
+  bump_framework_id: number;
+  bump_framework_title: string;
+  bump_framework_description: string;
+  bump_framework_length: string;
+  account_research_points: string[],
 }
 
 export interface ProspectNote {

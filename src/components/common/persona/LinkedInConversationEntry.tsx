@@ -8,7 +8,11 @@ import {
   Paper,
   Badge,
   useMantineTheme,
+  HoverCard,
+  Stack,
+  List,
 } from "@mantine/core";
+import { IconInfoCircleFilled } from "@tabler/icons-react";
 import { nameToInitials, valueToColor } from "@utils/general";
 
 const useStyles = createStyles((theme) => ({
@@ -36,6 +40,11 @@ interface CommentHtmlProps {
   image: string;
   isLatest?: boolean;
   aiGenerated: boolean;
+  bumpFrameworkId?: number;
+  bumpFrameworkTitle?: string;
+  bumpFrameworkDescription?: string;
+  bumpFrameworkLength?: string;
+  accountResearchPoints?: string[];
 }
 
 export function LinkedInConversationEntry({
@@ -45,6 +54,11 @@ export function LinkedInConversationEntry({
   image,
   isLatest,
   aiGenerated,
+  bumpFrameworkId,
+  bumpFrameworkTitle,
+  bumpFrameworkDescription,
+  bumpFrameworkLength,
+  accountResearchPoints,
 }: CommentHtmlProps) {
   const { classes } = useStyles();
   const theme = useMantineTheme();
@@ -71,9 +85,58 @@ export function LinkedInConversationEntry({
           </Badge>
         )}
         {aiGenerated && (
-          <Badge sx={{ position: "absolute", top: 0, right: 0 }}>
-            AI
-          </Badge>
+          <HoverCard withinPortal position='left' width={320} shadow='md' withArrow openDelay={200} closeDelay={400}>
+            <HoverCard.Target>
+              <Badge sx={{ position: "absolute", top: 0, right: 0 }}>
+                AI
+              </Badge>
+            </HoverCard.Target>
+            <HoverCard.Dropdown>
+              <Group>
+                <Avatar radius='xl' color='blue' size='md'>
+                  <IconInfoCircleFilled size='1.9rem' />
+                </Avatar>
+                <Stack spacing={5}>
+                  <Text size='sm' weight={700} sx={{ lineHeight: 1 }}>
+                    Automatic Generated Response
+                  </Text>
+                  <Text color='dimmed' size='xs' sx={{ lineHeight: 1 }}>
+                    These data points where chosen by AI 🤖
+                  </Text>
+                </Stack>
+              </Group>
+
+              {bumpFrameworkId ? (
+                <>
+                  <Text size='sm' mt='md'>
+                    <span style={{ fontWeight: 550 }}>Framework:</span> {bumpFrameworkTitle}
+                  </Text>
+                  <Text size='sm'>
+                    {bumpFrameworkDescription}
+                  </Text>
+
+                  {bumpFrameworkLength && (
+                    <Badge color={valueToColor(theme, bumpFrameworkLength)} size='xs' variant='filled'>
+                    {bumpFrameworkLength}
+                  </Badge>
+                  )}
+
+                  <Text size='sm' mt='md'>
+                    <span style={{ fontWeight: 550 }}>Account Research:</span>
+                  </Text>
+                  <List>
+                    {accountResearchPoints?.map((point, index) => (
+                      <List.Item key={index}><Text size='xs'>{point}</Text></List.Item>
+                    ))}
+                  </List>
+                </>) : (
+                <Text size='sm' mt='md' fs={'italic'}>
+                  This message was generated before June 26th, 2023, prior to metadata capture.
+                </Text>
+              )}
+
+            </HoverCard.Dropdown>
+          </HoverCard>
         )}
       </Group>
 

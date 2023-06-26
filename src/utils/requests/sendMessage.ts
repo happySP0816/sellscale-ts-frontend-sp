@@ -16,7 +16,12 @@ export async function sendLinkedInMessage(
   prospectId: number,
   message: string,
   aiGenerated: boolean,
-  purgatory?: boolean
+  purgatory?: boolean,
+  bump_framework_id?: number,
+  bump_framework_title?: string,
+  bump_framework_description?: string,
+  bump_framework_length?: string,
+  account_research_points?: string[]
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/voyager/send_message`, {
     method: "POST",
@@ -29,6 +34,11 @@ export async function sendLinkedInMessage(
       message: message,
       ai_generated: aiGenerated,
       purgatory: purgatory ?? true,
+      bump_framework_id: bump_framework_id,
+      bump_framework_title: bump_framework_title,
+      bump_framework_description: bump_framework_description,
+      bump_framework_length: bump_framework_length,
+      account_research_points: account_research_points,
     }),
   });
   return await processResponse(response);

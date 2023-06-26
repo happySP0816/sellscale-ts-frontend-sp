@@ -209,7 +209,7 @@ function QuestionObjectionLibraryCard(props: {
 }) {
   const theme = useMantineTheme();
 
-  const splitted_substatus = props.bumpFramework.substatus.split('ACTIVE_CONVO_')[1];
+  const splitted_substatus = props.bumpFramework.substatus.replace('ACTIVE_CONVO_', '');
 
   return (
     <>

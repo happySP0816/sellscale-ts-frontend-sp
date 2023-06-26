@@ -111,7 +111,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       <div
         style={{
           flexBasis: '20%',
-          backgroundColor: theme.colors.dark[6],
+          backgroundColor: '#25262b',
           borderTopLeftRadius: theme.radius.lg,
           borderTopRightRadius: theme.radius.lg,
         }}

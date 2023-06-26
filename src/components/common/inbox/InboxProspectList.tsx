@@ -38,7 +38,7 @@ import { Prospect, ProspectShallow } from 'src';
 import { forwardRef, useEffect, useState } from 'react';
 import { HEADER_HEIGHT } from './InboxProspectConvo';
 import { getArchetypeProspects } from '@utils/requests/getArchetypeProspects';
-import { prospectStatuses } from './utils';
+import { labelizeConvoSubstatus, prospectStatuses } from './utils';
 import InboxProspectListFilter, { InboxProspectListFilterState, defaultInboxProspectListFilterState } from './InboxProspectListFilter';
 import { convertDateToCasualTime, removeExtraCharacters } from '@utils/general';
 import { co } from '@fullcalendar/core/internal-common';
@@ -120,7 +120,7 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
   const filterSelectOptions = prospectStatuses.map((status) => ({ ...status, count: -1 }));
-  filterSelectOptions.unshift({ label: 'All Substatus', value: 'ALL', count: -1 });
+  filterSelectOptions.unshift({ label: 'All Convos', value: 'ALL', count: -1 });
 
   const [filterSelectValue, setFilterSelectValue] = useState(filterSelectOptions[0].value);
   const [searchFilter, setSearchFilter] = useState('');
@@ -150,7 +150,8 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
         in_purgatory: p.hidden_until ? new Date(p.hidden_until) > new Date() : false,
       };
     }).sort((a, b) =>
-      (b.new_msg_count ? 1 : 0) - (a.new_msg_count ? 1 : 0)
+      b.linkedin_status.localeCompare(a.linkedin_status)
+      || (b.new_msg_count ? 1 : 0) - (a.new_msg_count ? 1 : 0)
       || b.icp_fit - a.icp_fit
       || removeExtraCharacters(a.name).localeCompare(removeExtraCharacters(b.name))
     )
@@ -249,20 +250,32 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
         </Group>
         <Divider />
         <ScrollArea h={`calc(100vh - ${HEADER_HEIGHT}px)`} sx={{ overflowX: 'hidden' }}>
-          {prospects.map((prospect: any, i: number) => (
-            <Container key={i} p={0} m={0} onClick={() => setOpenedProspectId(prospect.id)}>
-              <ProspectConvoCard
-                name={prospect.name}
-                title={prospect.title}
-                img_url={prospect.img_url}
-                latest_msg={prospect.latest_msg}
-                latest_msg_time={prospect.latest_msg_time}
-                icp_fit={prospect.icp_fit}
-                new_msg_count={prospect.new_msg_count}
-                opened={prospect.id === openedProspectId}
-              />
-            </Container>
+          {prospects.map((prospect, i: number) => (
+            <div key={i}>
+              {filterSelectValue === 'ALL' && (!prospects[i-1] || prospect.linkedin_status !== prospects[i-1].linkedin_status) && (
+                <div style={{ height: 20, backgroundColor: '#25262b', borderTopRightRadius: '1rem', borderBottomRightRadius: '1rem', }}>
+                  <Text color='white' ta="center" fz={13} fw={500}>
+                    {labelizeConvoSubstatus(prospect.linkedin_status)}
+                  </Text>
+                </div>
+              )}
+              <Container p={0} m={0} onClick={() => setOpenedProspectId(prospect.id)}>
+                <ProspectConvoCard
+                  name={prospect.name}
+                  title={prospect.title}
+                  img_url={prospect.img_url}
+                  latest_msg={prospect.latest_msg}
+                  latest_msg_time={prospect.latest_msg_time}
+                  icp_fit={prospect.icp_fit}
+                  new_msg_count={prospect.new_msg_count || 0}
+                  opened={prospect.id === openedProspectId}
+                />
+              </Container>
+            </div>
           ))}
+          {prospects.length === 0 && (
+            <Text mt={20} fz="sm" ta="center" c="dimmed" fs="italic">No active conversations found.</Text>
+          )}
         </ScrollArea>
         <Text sx={{ position: 'absolute', bottom: 5, right: 5, zIndex: 100 }} fs="italic" fz={10} c="dimmed">{prospects.length} prospects</Text>
       </Stack>

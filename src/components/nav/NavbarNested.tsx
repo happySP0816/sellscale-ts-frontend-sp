@@ -37,6 +37,7 @@ import {
   IconCalendarEvent,
   IconFileDescription,
   IconWall,
+  IconInbox,
 } from "@tabler/icons-react";
 import { LogoFull } from "@nav/Logo";
 import { LinksGroup } from "./NavBarLinksGroup";
@@ -257,6 +258,19 @@ export function NavbarNested(props: {
       ],
     },
     {
+      mainKey: "inbox",
+      label: "Inbox",
+      icon: IconInbox,
+      links: [
+        {
+          key: "inbox",
+          label: "Inbox",
+          icon: IconInbox,
+          link: "/inbox",
+        },
+      ],
+    },
+    {
       mainKey: "home",
       label: "Home",
       icon: IconHome,
@@ -438,6 +452,7 @@ export function NavbarNested(props: {
         display: loggedIn ? "flex" : "none",
         justifyContent: "space-between",
         transform: navStyles.x.to((x) => `translate3d(${x}%,0,0)`),
+        border: 0,
       }}
       width={{ base: NAV_BAR_SIDE_WIDTH }}
       p="md"

@@ -44,6 +44,10 @@ export default function InboxPage() {
     refetchOnWindowFocus: false,
   });
   const prospects = data ?? [];
+
+  if (prospects.length > 0) {
+    setPageTitle(`Inbox (${prospects.length})`);
+  }
   
   return (
     <Grid columns={100} gutter={0}>

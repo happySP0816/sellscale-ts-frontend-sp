@@ -10,7 +10,13 @@ const openedOutboundChannelState = atom({
   default: 'linkedin',
 });
 
+const openedBumpFameworksState = atom({
+  key: "inbox-opened-bump-framework-modal",
+  default: false,
+});
+
 export {
   openedProspectIdState,
   openedOutboundChannelState,
+  openedBumpFameworksState,
 };

@@ -117,9 +117,14 @@ export default function ICPFitPill(props: PropsType) {
   return (
     <Popover position='right' withArrow shadow='md' opened={hovered}>
       <Popover.Target>
+        <div style={{ position: 'relative' }}>
         <Badge color={icpFitToColor(props.icp_fit_score)} ref={ref}>
           {icpFitToLabel(props.icp_fit_score)}
         </Badge>
+        <div style={{ position: 'absolute', top: -5, left: -5 }}>
+          {icpFitToIcon(props.icp_fit_score)}
+        </div>
+        </div>
       </Popover.Target>
       <Popover.Dropdown>
         <ICPFitContents {...props} />

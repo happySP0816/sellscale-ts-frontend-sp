@@ -137,7 +137,7 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
         name: p.full_name,
         img_url: p.img_url,
         icp_fit: p.icp_fit_score,
-        latest_msg: p.li_is_last_message_from_sdr ? 'You: <TODO>' : `${p.first_name}: ${p.li_last_message_from_prospect || 'No message found'}`,
+        latest_msg: p.li_is_last_message_from_sdr ? `You: ${p.li_last_message_from_sdr || '...'}` : `${p.first_name}: ${p.li_last_message_from_prospect || 'No message found'}`,
         latest_msg_time: convertDateToCasualTime(new Date(p.li_last_message_timestamp)),
         title: _.truncate(p.title, {
           'length': 48,

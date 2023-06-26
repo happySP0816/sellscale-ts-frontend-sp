@@ -41,6 +41,7 @@ import { postBumpGenerateResponse } from '@utils/requests/postBumpGenerateRespon
 import { sendLinkedInMessage } from '@utils/requests/sendMessage';
 import _ from 'lodash';
 import InboxProspectConvoSendBox from './InboxProspectConvoSendBox';
+import InboxProspectConvoBumpFramework from './InboxProspectConvoBumpFramework';
 
 export function ProspectConvoMessage(props: {
   img_url: string;
@@ -78,11 +79,15 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const queryClient = useQueryClient();
 
   const sendBoxRef = useRef<any>();
+  // We keep a map of the prospectId to the bump framework ref in order to fix ref bugs for generating messages via btn
+  const bumpFrameworksRef = useRef<Map<number, any>>(new Map());
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const [openedOutboundChannel, setOpenedOutboundChannel] = useRecoilState(openedOutboundChannelState);
+
+  const prospect = _.cloneDeep(props.prospects.find((p) => p.id === openedProspectId));
 
   const viewport = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => viewport.current?.scrollTo({ top: viewport.current.scrollHeight, behavior: 'smooth' });
@@ -99,9 +104,8 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const { data: messages, isFetching: isFetchingMessages } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
     queryFn: async () => {
-
       // TODO: We don't handle email messages yet
-      if(openedOutboundChannel === 'email') {
+      if (openedOutboundChannel === 'email') {
         return [];
       }
 
@@ -116,11 +120,8 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       }
 
       // Set if we have an auto bump message generated
-      const autoBumpMsgResponse = await getAutoBumpMessage(
-        userToken,
-        openedProspectId
-      );
-      if (autoBumpMsgResponse.status === "success") {
+      const autoBumpMsgResponse = await getAutoBumpMessage(userToken, openedProspectId);
+      if (autoBumpMsgResponse.status === 'success') {
         sendBoxRef.current?.setAiGenerated(true);
         sendBoxRef.current?.setMessageDraft(autoBumpMsgResponse.data.message);
       }
@@ -133,6 +134,8 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
 
   useEffect(() => {
     scrollToBottom();
+    sendBoxRef.current?.setAiGenerated(false);
+    sendBoxRef.current?.setMessageDraft('');
   }, [isFetchingMessages]);
 
   console.log(data);
@@ -156,9 +159,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
             <Badge size='lg' color={'blue'}>
               {labelizeConvoSubstatus(statusValue)}
             </Badge>
-            <ProspectDetailsOptionsMenu
-              prospectId={openedProspectId}
-            />
+            <ProspectDetailsOptionsMenu prospectId={openedProspectId} />
           </Group>
         </Group>
         <Tabs
@@ -218,15 +219,27 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           </div>
         </ScrollArea>
       </div>
-      <div style={{ height: `calc((100vh - ${HEADER_HEIGHT}px)*0.25)` }}>
-        <InboxProspectConvoSendBox
-          ref={sendBoxRef}
-          linkedin_public_id={linkedin_public_id}
-          prospectId={openedProspectId}
+      <Stack style={{ height: `calc((100vh - ${HEADER_HEIGHT}px)*0.25)` }} justify='flex-end'>
+          <InboxProspectConvoSendBox
+            ref={sendBoxRef}
+            linkedin_public_id={linkedin_public_id}
+            prospectId={openedProspectId}
+            messages={messages || []}
+            scrollToBottom={scrollToBottom}
+            onGenerateMessage={async (prospectId) => {
+              return await bumpFrameworksRef.current?.get(prospectId)?.generateAIFollowup();
+            }}
+          />
+      </Stack>
+      {prospect && (
+        <InboxProspectConvoBumpFramework
+          ref={(ref) => {
+            bumpFrameworksRef.current.set(prospect.id, ref);
+          }}
+          prospect={prospect}
           messages={messages || []}
-          scrollToBottom={scrollToBottom}
         />
-      </div>
+      )}
     </Flex>
   );
 }

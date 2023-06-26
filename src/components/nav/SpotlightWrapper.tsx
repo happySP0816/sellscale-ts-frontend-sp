@@ -28,6 +28,7 @@ import {
 } from "@tabler/icons";
 import { navigateToPage } from "@utils/documentChange";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
+import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
@@ -169,11 +170,13 @@ export default function SpotlightWrapper({
           setQueryResult(false);
         } else {
           setQueryResult(null);
-          activateQueryPipeline(query, navigate, theme, userToken).then(
-            (result) => {
-              setQueryResult(result);
-            }
-          );
+          _.debounce(() => {
+            activateQueryPipeline(query, navigate, theme, userToken).then(
+              (result) => {
+                setQueryResult(result);
+              }
+            );
+          }, 500)();// debounce 500ms
         }
 
         if (queryResult) {

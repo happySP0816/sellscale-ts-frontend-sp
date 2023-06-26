@@ -222,14 +222,14 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
               {data?.details.title && (
                 <Group noWrap spacing={10} mt={3}>
                   <IconBriefcase stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='sm'>{data.details.title}</Text>
+                  <Text size='xs'>{data.details.title}</Text>
                 </Group>
               )}
 
               {data?.details.company && (
                 <Group noWrap spacing={10} mt={5}>
                   <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='sm' component='a' target='_blank' rel='noopener noreferrer' href={''}>
+                  <Text size='xs' component='a' target='_blank' rel='noopener noreferrer' href={''}>
                     {data.details.company}
                   </Text>
                 </Group>
@@ -239,7 +239,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
                 <Group noWrap spacing={10} mt={5}>
                   <IconBrandLinkedin stroke={1.5} size={18} className={classes.icon} />
                   <Text
-                    size='sm'
+                    size='xs'
                     component='a'
                     target='_blank'
                     rel='noopener noreferrer'
@@ -253,7 +253,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
               {data?.email.email && (
                 <Group noWrap spacing={10} mt={5}>
                   <IconMail stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='sm' component='a' href={`mailto:${data.email.email}`}>
+                  <Text size='xs' component='a' href={`mailto:${data.email.email}`}>
                     {data.email.email}
                   </Text>
                 </Group>
@@ -262,7 +262,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
               {data?.details.address && (
                 <Group noWrap spacing={10} mt={5}>
                   <IconMap2 stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='sm'>{data.details.address}</Text>
+                  <Text size='xs'>{data.details.address}</Text>
                 </Group>
               )}
             </Stack>

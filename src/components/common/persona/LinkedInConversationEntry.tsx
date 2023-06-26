@@ -40,11 +40,11 @@ interface CommentHtmlProps {
   image: string;
   isLatest?: boolean;
   aiGenerated: boolean;
-  bumpFrameworkId: number;
-  bumpFrameworkTitle: string;
-  bumpFrameworkDescription: string;
-  bumpFrameworkLength: string;
-  accountResearchPoints: string[];
+  bumpFrameworkId?: number;
+  bumpFrameworkTitle?: string;
+  bumpFrameworkDescription?: string;
+  bumpFrameworkLength?: string;
+  accountResearchPoints?: string[];
 }
 
 export function LinkedInConversationEntry({
@@ -114,9 +114,12 @@ export function LinkedInConversationEntry({
                   <Text size='sm'>
                     {bumpFrameworkDescription}
                   </Text>
-                  <Badge color={valueToColor(theme, bumpFrameworkLength)} size='xs' variant='filled'>
+
+                  {bumpFrameworkLength && (
+                    <Badge color={valueToColor(theme, bumpFrameworkLength)} size='xs' variant='filled'>
                     {bumpFrameworkLength}
                   </Badge>
+                  )}
 
                   <Text size='sm' mt='md'>
                     <span style={{ fontWeight: 550 }}>Account Research:</span>

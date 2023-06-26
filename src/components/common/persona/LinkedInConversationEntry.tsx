@@ -45,6 +45,7 @@ interface CommentHtmlProps {
   bumpFrameworkDescription?: string;
   bumpFrameworkLength?: string;
   accountResearchPoints?: string[];
+  cta?: string;
 }
 
 export function LinkedInConversationEntry({
@@ -59,6 +60,7 @@ export function LinkedInConversationEntry({
   bumpFrameworkDescription,
   bumpFrameworkLength,
   accountResearchPoints,
+  cta
 }: CommentHtmlProps) {
   const { classes } = useStyles();
   const theme = useMantineTheme();
@@ -98,7 +100,7 @@ export function LinkedInConversationEntry({
                 </Avatar>
                 <Stack spacing={5}>
                   <Text size='sm' weight={700} sx={{ lineHeight: 1 }}>
-                    Automatic Generated Response
+                    Automatic Generated {cta ? "Message" : "Response"}
                   </Text>
                   <Text color='dimmed' size='xs' sx={{ lineHeight: 1 }}>
                     These data points where chosen by AI 🤖
@@ -117,8 +119,8 @@ export function LinkedInConversationEntry({
 
                   {bumpFrameworkLength && (
                     <Badge color={valueToColor(theme, bumpFrameworkLength)} size='xs' variant='filled'>
-                    {bumpFrameworkLength}
-                  </Badge>
+                      {bumpFrameworkLength}
+                    </Badge>
                   )}
 
                   <Text size='sm' mt='md'>
@@ -130,9 +132,19 @@ export function LinkedInConversationEntry({
                     ))}
                   </List>
                 </>) : (
-                <Text size='sm' mt='md' fs={'italic'}>
-                  This message was generated before June 26th, 2023, prior to metadata capture.
-                </Text>
+                <>
+                  {cta ? (
+                    <>
+                      <Text size='sm' mt='md'>
+                        <span style={{ fontWeight: 550 }}>Call to Action:</span> {cta}
+                      </Text>
+                    </>
+                  ) : (
+                    <Text size='sm' mt='md' fs={'italic'}>
+                      This message was generated before June 26th, 2023, prior to metadata capture.
+                    </Text>
+                  )}
+                </>
               )}
 
             </HoverCard.Dropdown>
@@ -143,6 +155,6 @@ export function LinkedInConversationEntry({
       <TypographyStylesProvider className={classes.body}>
         <TextWithNewline className={classes.content}>{body}</TextWithNewline>
       </TypographyStylesProvider>
-    </Paper>
+    </Paper >
   );
 }

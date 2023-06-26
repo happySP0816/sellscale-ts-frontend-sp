@@ -55,7 +55,7 @@ type LiSimMsg = {
 export default function LinkedInConvoSimulator(props: { personaId: number }) {
   const theme = useMantineTheme();
   const viewport = useRef<HTMLDivElement>(null);
-  
+
   const [prospectDrawerOpened, setProspectDrawerOpened] = useRecoilState(prospectDrawerOpenState);
   const [prospectDrawerId, setProspectDrawerId] = useRecoilState(prospectDrawerIdState);
 
@@ -172,7 +172,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
   const wait2Day = async (invisible = false) => {
     if (!simulation) return;
 
-    if(!invisible){
+    if (!invisible) {
       setLoading(true);
     }
     if (invisible) {
@@ -333,31 +333,63 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
         )}
 
         {messages.length > 0 &&
-          messages.map((message, index) => (
-            <div
-              key={index}
-              style={{
-                maxWidth: 550,
-                marginLeft: message.connection_degree !== 'You' ? 'auto' : undefined,
-                marginRight: message.connection_degree === 'You' ? 'auto' : undefined,
-              }}
-            >
-              <LinkedInConversationEntry
-                postedAt={convertDateToLocalTime(new Date(message.date?.slice(0, -3).trim() || 0))}
-                body={message.message}
-                name={message.author}
-                image={message.connection_degree === 'You' ? userData.img_url : prospect.img_url}
-                aiGenerated={message.connection_degree === 'You'}
-              />
-            </div>
-          ))}
-          {
-            aiLoading && (
-              <Card radius="md" shadow="md" style={{maxWidth: 550, marginRight: 'auto'}} withBorder>
-                <Loader variant="dots" />
-              </Card>
+          messages.map((message, index) => {
+            console.log('message', message)
+            let metadata = {
+              bump_framework_id: undefined as number | undefined,
+              bump_framework_title: undefined as string | undefined,
+              bump_framework_description: undefined as string | undefined,
+              bump_framework_length: undefined as string | undefined,
+              account_research_points: undefined as string[] | undefined,
+              cta: undefined as string | undefined,
+            };
+            if (message.meta_data && message.meta_data.bump_framework_id) {
+              metadata.bump_framework_id = message.meta_data.bump_framework_id;
+              metadata.bump_framework_title = message.meta_data.bump_framework_title;
+              metadata.bump_framework_description = message.meta_data.bump_framework_description;
+              metadata.bump_framework_length = message.meta_data.bump_framework_length;
+              metadata.account_research_points = message.meta_data.account_research_points;
+              metadata.cta = message.meta_data.cta;
+            } else if (message.meta_data && message.meta_data.cta) {
+              metadata.bump_framework_id = undefined;
+              metadata.bump_framework_title = undefined;
+              metadata.bump_framework_description = undefined;
+              metadata.bump_framework_length = undefined;
+              metadata.account_research_points = undefined;
+              metadata.cta = message.meta_data.cta;
+            }
+            return (
+              <div
+                key={index}
+                style={{
+                  maxWidth: 550,
+                  marginLeft: message.connection_degree !== 'You' ? 'auto' : undefined,
+                  marginRight: message.connection_degree === 'You' ? 'auto' : undefined,
+                }}
+              >
+                <LinkedInConversationEntry
+                  postedAt={convertDateToLocalTime(new Date(message.date?.slice(0, -3).trim() || 0))}
+                  body={message.message}
+                  name={message.author}
+                  image={message.connection_degree === 'You' ? userData.img_url : prospect.img_url}
+                  aiGenerated={message.connection_degree === 'You'}
+                  bumpFrameworkId={metadata.bump_framework_id}
+                  bumpFrameworkTitle={metadata.bump_framework_title}
+                  bumpFrameworkDescription={metadata.bump_framework_description}
+                  bumpFrameworkLength={metadata.bump_framework_length}
+                  accountResearchPoints={metadata.account_research_points}
+                  cta={metadata.cta}
+                />
+              </div>
             )
-          }
+          })}
+        {
+          aiLoading && (
+            <Card radius="md" shadow="md" style={{ maxWidth: 550, marginRight: 'auto' }} withBorder>
+              <Loader variant="dots" />
+            </Card>
+          )
+        }
       </ScrollArea>
 
       {simulation && (

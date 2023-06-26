@@ -201,9 +201,9 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
   }, [props.prospects]);
 
   return (
-    <>
+    <div>
+      <LoadingOverlay loader={loaderWithText('')} visible={props.isFetching && props.prospects.length === 0} />
       <Stack spacing={0} h={'100vh'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
-        <LoadingOverlay loader={loaderWithText('')} visible={props.isFetching && props.prospects.length === 0} />
         <Container pt={20} pb={10} px={20} m={0}>
           <Input styles={{
             input: { borderColor: searchFilter.trim() ? theme.colors.blue[theme.fn.primaryShade()] : undefined },
@@ -286,6 +286,6 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
         filters={filtersState}
         setFilters={setFiltersState}
       />
-    </>
+    </div>
   );
 }

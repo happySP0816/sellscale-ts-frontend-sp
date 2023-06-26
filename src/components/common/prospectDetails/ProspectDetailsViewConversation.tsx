@@ -80,6 +80,7 @@ export default function ProspectDetailsViewConversation(
   const [selectedBumpFrameworkLengthAPI, setBumpFrameworkLengthAPI] = useState(
     "MEDIUM"
   );
+  const [selectedBumpFramework, setBumpFramework] = useState<BumpFramework>();
   const [accountResearch, setAccountResearch] = useState("");
   const [convoOutOfSync, setConvoOutOfSync] = useState(false);
 
@@ -101,8 +102,8 @@ export default function ProspectDetailsViewConversation(
     userData.li_voyager_connected
       ? []
       : props.conversation_entry_list.sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-        )
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      )
   );
 
   // If message was cleared, it's no longer ai generated
@@ -260,17 +261,45 @@ export default function ProspectDetailsViewConversation(
     // Delete the auto bump message if it exists
     await deleteAutoBumpMessage(userToken, props.prospect_id);
 
+    let metadata = {
+      bump_framework_id: undefined as number | undefined,
+      bump_framework_title: undefined as string | undefined,
+      bump_framework_description: undefined as string | undefined,
+      bump_framework_length: undefined as string | undefined,
+      account_research_points: undefined as string[] | undefined,
+    };
+    if (aiGenerated) {
+      if (selectedBumpFramework && accountResearch) {
+        metadata = {
+          bump_framework_id: selectedBumpFramework.id,
+          bump_framework_title: selectedBumpFramework.title,
+          bump_framework_description: selectedBumpFramework.description,
+          bump_framework_length: selectedBumpFramework.bump_length,
+          account_research_points: accountResearch.split('\n').map(point => point.replace(/^- /, '').trim())
+          ,
+        }
+      } else if (autoBumpMessage.current) {
+        metadata = {
+          bump_framework_id: autoBumpMessage.current.bump_framework.id,
+          bump_framework_title: autoBumpMessage.current.bump_framework.title,
+          bump_framework_description: autoBumpMessage.current.bump_framework.description,
+          bump_framework_length: autoBumpMessage.current.bump_framework.length,
+          account_research_points: autoBumpMessage.current.account_research_points,
+        }
+      }
+    }
+
     const result = await sendLinkedInMessage(
       userToken,
       props.prospect_id,
       msg,
       aiGenerated,
       undefined,
-      autoBumpMessage.current?.bump_framework.id,
-      autoBumpMessage.current?.bump_framework.title,
-      autoBumpMessage.current?.bump_framework.description,
-      autoBumpMessage.current?.bump_framework.length,
-      autoBumpMessage.current?.account_research_points
+      metadata.bump_framework_id,
+      metadata.bump_framework_title,
+      metadata.bump_framework_description,
+      metadata.bump_framework_length,
+      metadata.account_research_points
     );
     if (result.status === "success") {
       let yourMessage = _.cloneDeep(messages.current)
@@ -360,7 +389,7 @@ export default function ProspectDetailsViewConversation(
   ) => {
     fetch(
       `${API_URL}/research/personal_research_points?prospect_id=` +
-        props.prospect_id,
+      props.prospect_id,
       {
         method: "GET",
         headers: {
@@ -511,19 +540,39 @@ export default function ProspectDetailsViewConversation(
                 ],
               ])}
             />
-            {autoBumpMessage.current &&
-              autoBumpMessage.current.bump_framework.title && (
-                <AutoBumpFrameworkInfo
-                  bump_title={autoBumpMessage.current.bump_framework.title}
-                  bump_description={
-                    autoBumpMessage.current.bump_framework.description
-                  }
-                  bump_length={autoBumpMessage.current.bump_framework.length}
-                  account_research_points={
-                    autoBumpMessage.current.account_research_points ?? []
-                  }
-                />
-              )}
+            {aiGenerated && (
+              <>
+                {
+                  (selectedBumpFramework && accountResearch) ? (
+                    <AutoBumpFrameworkInfo
+                      bump_title={selectedBumpFramework.title}
+                      bump_description={selectedBumpFramework.description}
+                      bump_length={selectedBumpFramework.bump_length}
+                      account_research_points={accountResearch.split('\n').map(point => point.replace(/^- /, '').trim())}
+                    />
+                  ) : (
+                    <>
+                      {
+                        autoBumpMessage.current &&
+                        autoBumpMessage.current.bump_framework.title && (
+                          <AutoBumpFrameworkInfo
+                            bump_title={autoBumpMessage.current.bump_framework.title}
+                            bump_description={
+                              autoBumpMessage.current.bump_framework.description
+                            }
+                            bump_length={autoBumpMessage.current.bump_framework.length}
+                            account_research_points={
+                              autoBumpMessage.current.account_research_points ?? []
+                            }
+                          />
+                        )
+                      }
+                    </>
+                  )
+                }
+              </>
+            )}
+
           </div>
           <Flex>
             <Button
@@ -594,6 +643,7 @@ export default function ProspectDetailsViewConversation(
               convo_history={messages.current}
               onBumpFrameworkSelected={async (bumpFramework) => {
                 if (bumpFramework) {
+                  setBumpFramework(bumpFramework)
                   setBumpFrameworkId(bumpFramework.id);
                   setBumpFrameworkLengthAPI(bumpFramework.bump_length);
 

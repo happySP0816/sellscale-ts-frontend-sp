@@ -209,7 +209,7 @@ function QuestionObjectionLibraryCard(props: {
 }) {
   const theme = useMantineTheme();
 
-  const splitted_substatus = props.bumpFramework.substatus.replace('ACTIVE_CONVO_', '');
+  const splitted_substatus = props.bumpFramework.substatus.split('ACTIVE_CONVO_')[1];
 
   return (
     <>
@@ -304,7 +304,7 @@ export default function BumpFrameworksPage(props: {
 
     const personas = result.data;
     for (const persona of personas) {
-      if (persona.active) {
+      if (persona.active && !props.predefinedPersonaId) {
         setArchetypeID(persona.id);
         break;
       }

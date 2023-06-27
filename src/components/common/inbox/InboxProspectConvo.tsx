@@ -139,6 +139,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       // Set if we have an auto bump message generated
       const autoBumpMsgResponse = await getAutoBumpMessage(userToken, openedProspectId);
       if (autoBumpMsgResponse.status === 'success') {
+        console.log(autoBumpMsgResponse.data.message)
         sendBoxRef.current?.setAiGenerated(true);
         sendBoxRef.current?.setMessageDraft(autoBumpMsgResponse.data.message);
       }

@@ -209,7 +209,7 @@ function QuestionObjectionLibraryCard(props: {
 }) {
   const theme = useMantineTheme();
 
-  const splitted_substatus = props.bumpFramework.substatus.replace('ACTIVE_CONVO_', '');
+  const splitted_substatus = props.bumpFramework?.substatus?.replace('ACTIVE_CONVO_', '');
 
   return (
     <>
@@ -250,7 +250,7 @@ function QuestionObjectionLibraryCard(props: {
         <Card.Section>
           <Divider my='xs' />
         </Card.Section>
-        <Badge color={valueToColor(theme, splitted_substatus)}>{splitted_substatus}</Badge>
+        <Badge color={valueToColor(theme, splitted_substatus || "ACTIVE_CONVO")}>{splitted_substatus || "ACTIVE_CONVO"}</Badge>
       </Card>
     </>
   );
@@ -304,7 +304,7 @@ export default function BumpFrameworksPage(props: {
 
     const personas = result.data;
     for (const persona of personas) {
-      if (persona.active) {
+      if (persona.active && !props.predefinedPersonaId) {
         setArchetypeID(persona.id);
         break;
       }

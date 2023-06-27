@@ -367,8 +367,8 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
                   marginRight: message.connection_degree === 'You' ? 'auto' : undefined,
                 }}
               >{
-                  index == 1 && (
-                    <Divider my={2} label="Sent after prospect accepts invite" labelPosition="center"/>
+                  index == 1 && message.connection_degree === 'You' && (
+                    <Divider my={2} label="Sent after prospect accepts invite" labelPosition="center" mt='sm' mb='sm' />
                   )
                 }
                 <LinkedInConversationEntry

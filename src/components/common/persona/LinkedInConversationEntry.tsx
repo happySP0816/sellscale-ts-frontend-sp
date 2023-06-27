@@ -81,7 +81,7 @@ export function LinkedInConversationEntry({
         {aiGenerated && (
           <AiMetaDataBadge
             location={{ position: 'absolute', top: 0, right: 0 }}
-            direction='left'
+            direction='top'
             bumpFrameworkId={bumpFrameworkId || 0}
             bumpFrameworkTitle={bumpFrameworkTitle || ''}
             bumpFrameworkDescription={bumpFrameworkDescription || ''}

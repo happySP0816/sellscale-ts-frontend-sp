@@ -52,6 +52,7 @@ export function ProspectConvoMessage(props: {
   bumpFrameworkDescription?: string;
   bumpFrameworkLength?: string;
   accountResearchPoints?: string[];
+  cta?: string;
 }) {
   return (
     <Container py={5}>
@@ -72,6 +73,7 @@ export function ProspectConvoMessage(props: {
                     bumpFrameworkDescription={props.bumpFrameworkDescription || ''}
                     bumpFrameworkLength={props.bumpFrameworkLength || ''}
                     accountResearchPoints={props.accountResearchPoints || []}
+                    cta={props.cta || ''}
                   />
                 )}
               </Group>
@@ -228,6 +230,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
                   bumpFrameworkDescription={msg.bump_framework_description}
                   bumpFrameworkLength={msg.bump_framework_length}
                   accountResearchPoints={msg.account_research_points}
+                  cta={''}
                 />
               ))}
             {messages && messages.length === 0 && (

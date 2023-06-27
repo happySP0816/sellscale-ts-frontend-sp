@@ -87,7 +87,7 @@ export function LinkedInConversationEntry({
             bumpFrameworkDescription={bumpFrameworkDescription || ''}
             bumpFrameworkLength={bumpFrameworkLength || ''}
             accountResearchPoints={accountResearchPoints || []}
-            cta={cta}
+            cta={cta || ''}
           />
         )}
       </Group>

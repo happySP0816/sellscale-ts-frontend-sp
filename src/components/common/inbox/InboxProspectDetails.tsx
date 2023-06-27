@@ -55,6 +55,9 @@ import ICPFitPill, { ICPFitContents, icpFitToIcon } from '@common/pipeline/ICPFi
 import { useHover } from '@mantine/hooks';
 import postRunICPClassification from '@utils/requests/postRunICPClassification';
 import { DateTimePicker } from '@mantine/dates';
+import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSelector';
+import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
+import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -78,20 +81,6 @@ const useStyles = createStyles((theme) => ({
       transform: 'scale(1.05)',
     },
   },
-
-  input: {
-    height: rem(54),
-    paddingTop: rem(18),
-  },
-
-  label: {
-    position: 'absolute',
-    pointerEvents: 'none',
-    fontSize: theme.fontSizes.xs,
-    paddingLeft: theme.spacing.sm,
-    paddingTop: `calc(${theme.spacing.sm} / 2)`,
-    zIndex: 1,
-  },
 }));
 
 export default function ProjectDetails(props: { prospects: Prospect[] }) {
@@ -105,6 +94,13 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   const userToken = useRecoilValue(userTokenState);
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const openedOutboundChannel = useRecoilValue(openedOutboundChannelState);
+
+  const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
+    demosDrawerOpenState
+  );
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(
+    demosDrawerProspectIdState
+  );
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
@@ -203,17 +199,18 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           ) : (
             <Stack spacing={10}>
               <Box mx={10}>
-                <DateTimePicker
-                  label="Demo Scheduled For"
-                  placeholder="Select date and time"
-                  size="xs"
-                  radius="md"
-                  popoverProps={{ withinPortal: true }}
-                  classNames={classes}
-                />
+                <ProspectDemoDateSelector prospectId={openedProspectId} />
               </Box>
               <Box mx={10} mb={10}>
-                <Button variant="light" radius="md" fullWidth>
+                <Button
+                  variant="light"
+                  radius="md"
+                  fullWidth
+                  onClick={() => {
+                    setDrawerProspectId(openedProspectId);
+                    setDemosDrawerOpened(true);
+                  }}
+                >
                   Give Demo Feedback
                 </Button>
               </Box>
@@ -366,6 +363,9 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           </Tabs.Panel>
         </Tabs>
       </div>
+      {true && demosDrawerOpened && (
+        <DemoFeedbackDrawer prospects={props.prospects} refetch={refetch} />
+      )}
     </Flex>
   );
 }

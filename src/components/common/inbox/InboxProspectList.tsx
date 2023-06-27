@@ -33,16 +33,13 @@ import _ from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
-import { openedProspectIdState } from '@atoms/inboxAtoms';
+import { nurturingModeState, openedProspectIdState } from '@atoms/inboxAtoms';
 import { Prospect, ProspectShallow } from 'src';
 import { forwardRef, useEffect, useState } from 'react';
 import { HEADER_HEIGHT } from './InboxProspectConvo';
-import { getArchetypeProspects } from '@utils/requests/getArchetypeProspects';
-import { labelizeConvoSubstatus, prospectStatuses } from './utils';
+import { labelizeConvoSubstatus, prospectStatuses, nurturingProspectStatuses } from './utils';
 import InboxProspectListFilter, { InboxProspectListFilterState, defaultInboxProspectListFilterState } from './InboxProspectListFilter';
 import { convertDateToCasualTime, removeExtraCharacters } from '@utils/general';
-import { co } from '@fullcalendar/core/internal-common';
-import { count } from 'console';
 import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 
@@ -119,7 +116,9 @@ export default function ProspectList(props: { prospects: Prospect[], isFetching:
   const userToken = useRecoilValue(userTokenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
-  const filterSelectOptions = prospectStatuses.map((status) => ({ ...status, count: -1 }));
+  const nurturingMode = useRecoilValue(nurturingModeState);
+
+  const filterSelectOptions = (nurturingMode ? nurturingProspectStatuses : prospectStatuses).map((status) => ({ ...status, count: -1 }));
   filterSelectOptions.unshift({ label: 'All Convos', value: 'ALL', count: -1 });
 
   const [filterSelectValue, setFilterSelectValue] = useState(filterSelectOptions[0].value);

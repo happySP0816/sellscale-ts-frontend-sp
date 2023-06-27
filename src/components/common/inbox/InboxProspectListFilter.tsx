@@ -1,24 +1,23 @@
+import { nurturingModeState } from "@atoms/inboxAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { Modal, Title, Text, Stack, Select, Checkbox } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
 import _ from "lodash";
-import { useEffect, useRef } from "react";
-import { useRecoilValue } from "recoil";
+import { useEffect, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { Channel, PersonaOverview } from "src";
 
 export type InboxProspectListFilterState = {
   recentlyContacted: 'ALL' | 'HIDE' | 'SHOW';
   channel: Channel;
   personaId: string | undefined;
-  nurturingMode: boolean;
 }
 
 export const defaultInboxProspectListFilterState: InboxProspectListFilterState = {
   recentlyContacted: 'ALL',
   channel: 'SELLSCALE',
   personaId: undefined,
-  nurturingMode: false,
 };
 
 export default function InboxProspectListFilter(props: {
@@ -30,6 +29,7 @@ export default function InboxProspectListFilter(props: {
 
   const userToken = useRecoilValue(userTokenState);
   const filterState = useRef<InboxProspectListFilterState>(_.cloneDeep(defaultInboxProspectListFilterState));
+  const [nurturingMode, setNurturingMode] = useRecoilState(nurturingModeState);
 
   useEffect(() => {
     if (props.filters){
@@ -105,7 +105,7 @@ export default function InboxProspectListFilter(props: {
 
         <div style={{ paddingTop: 10, paddingBottom: 10 }}>
           <Checkbox
-            defaultChecked={filterState.current.nurturingMode}
+            defaultChecked={nurturingMode}
             label={
               <Text fw={500} fz='xs'>
                 Nurturing Mode
@@ -113,8 +113,7 @@ export default function InboxProspectListFilter(props: {
             }
             size='xs'
             onChange={(event) => {
-              filterState.current.nurturingMode = event.currentTarget.checked;
-              props.setFilters(filterState.current);
+              setNurturingMode(event.currentTarget.checked);
             }}
           />
         </div>

@@ -15,8 +15,14 @@ const openedBumpFameworksState = atom({
   default: false,
 });
 
+const nurturingModeState = atom({
+  key: "inbox-nurturing-mode",
+  default: false,
+});
+
 export {
   openedProspectIdState,
   openedOutboundChannelState,
   openedBumpFameworksState,
+  nurturingModeState,
 };

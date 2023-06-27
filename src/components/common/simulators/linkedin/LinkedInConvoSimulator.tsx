@@ -366,7 +366,11 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
                   marginLeft: message.connection_degree !== 'You' ? 'auto' : undefined,
                   marginRight: message.connection_degree === 'You' ? 'auto' : undefined,
                 }}
-              >
+              >{
+                  index == 1 && (
+                    <Divider my={2} label="Sent after prospect accepts invite" labelPosition="center"/>
+                  )
+                }
                 <LinkedInConversationEntry
                   postedAt={convertDateToLocalTime(new Date(message.date?.slice(0, -3).trim() || 0))}
                   body={message.message}
@@ -380,6 +384,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
                   accountResearchPoints={metadata.account_research_points}
                   cta={metadata.cta}
                 />
+                
               </div>
             )
           })}

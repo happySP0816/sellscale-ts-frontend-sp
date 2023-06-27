@@ -177,7 +177,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           </div>
           <Group sx={{ flexWrap: 'nowrap' }}>
             <Badge size='lg' color={'blue'}>
-              {labelizeConvoSubstatus(statusValue)}
+              {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
             </Badge>
             <ProspectDetailsOptionsMenu prospectId={openedProspectId} />
           </Group>

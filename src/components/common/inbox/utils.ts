@@ -28,7 +28,19 @@ export const prospectStatuses = [
   },
 ];
 
-export function labelizeConvoSubstatus(substatus: string) {
+export const nurturingProspectStatuses = [
+  {
+    label: "Accepted",
+    value: "ACCEPTED",
+  },
+  {
+    label: "Bumped",
+    value: "RESPONDED",
+  },
+];
+
+export function labelizeConvoSubstatus(substatus: string, bump_count?: number) {
   if(substatus === 'ACTIVE_CONVO') return 'Uncategorized';
+  if(substatus === 'RESPONDED') return (bump_count && bump_count > 0) ? `Bumped #${bump_count}` : 'Bumped';
   return _.startCase(substatus.replace('ACTIVE_CONVO_', '').replaceAll('_', ' ').toLowerCase());
 }

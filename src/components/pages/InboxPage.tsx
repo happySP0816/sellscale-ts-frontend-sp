@@ -1,3 +1,4 @@
+import { nurturingModeState } from "@atoms/inboxAtoms";
 import { userTokenState, userDataState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import InboxProspectConvo from "@common/inbox/InboxProspectConvo";
@@ -15,10 +16,19 @@ export default function InboxPage() {
   setPageTitle("Inbox");
 
   const userToken = useRecoilValue(userTokenState);
+  const nurturingMode = useRecoilValue(nurturingModeState);
 
   const { data, isFetching, refetch } = useQuery({
-    queryKey: [`query-dash-get-prospects`],
-    queryFn: async () => {
+    queryKey: [
+      `query-dash-get-prospects`,
+      { nurturingMode },
+    ],
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { nurturingMode }] =
+        queryKey;
+
       const response = await fetch(`${API_URL}/prospect/get_prospects`, {
         method: "POST",
         headers: {
@@ -28,7 +38,7 @@ export default function InboxPage() {
         body: JSON.stringify({
           channel: "SELLSCALE",
           limit: 10000, // TODO: Maybe use pagination method instead
-          status: ["ACTIVE_CONVO"], // "DEMO", 
+          status: nurturingMode ? ['ACCEPTED', 'BUMPED'] : ["ACTIVE_CONVO"],
           show_purgatory: "ALL",
         }),
       });

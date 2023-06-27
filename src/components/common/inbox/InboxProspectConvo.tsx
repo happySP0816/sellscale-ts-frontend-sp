@@ -139,10 +139,8 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       // Set if we have an auto bump message generated
       const autoBumpMsgResponse = await getAutoBumpMessage(userToken, openedProspectId);
       if (autoBumpMsgResponse.status === 'success') {
-        setTimeout(() => {
-          sendBoxRef.current?.setAiGenerated(true);
-          sendBoxRef.current?.setMessageDraft(autoBumpMsgResponse.data.message);
-        }, 500);// temp solution to fix the bug where the message is not set
+        sendBoxRef.current?.setAiGenerated(true);
+        sendBoxRef.current?.setMessageDraft(autoBumpMsgResponse.data.message);
       }
 
       return result.status === 'success' ? (result.data.data.reverse() as LinkedInMessage[]) : [];
@@ -153,9 +151,12 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
 
   useEffect(() => {
     scrollToBottom();
+  }, [isFetchingMessages]);
+
+  useEffect(() => {
     sendBoxRef.current?.setAiGenerated(false);
     sendBoxRef.current?.setMessageDraft('');
-  }, [isFetchingMessages]);
+  }, [openedProspectId]);
 
   console.log(data);
   const statusValue = data?.details?.linkedin_status || 'ACTIVE_CONVO';

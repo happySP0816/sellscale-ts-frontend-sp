@@ -110,12 +110,12 @@ export default forwardRef(function InboxProspectConvoSendBox(
       mx={10}
       mb={10}
       h={'calc(100% - 10px)'}
-      mah={165}
+      mah={195}
     >
       <LoadingOverlay visible={msgLoading} />
       <div
         style={{
-          flexBasis: '20%',
+          flexBasis: '15%',
           backgroundColor: '#25262b',
           borderTopLeftRadius: theme.radius.lg,
           borderTopRightRadius: theme.radius.lg,
@@ -152,15 +152,15 @@ export default forwardRef(function InboxProspectConvoSendBox(
       </div>
       <div
         style={{
-          flexBasis: '80%',
+          flexBasis: '85%',
           position: 'relative',
           paddingLeft: 10,
           paddingRight: 10,
         }}
       >
         <Textarea
-          minRows={3}
-          maxRows={3}
+          minRows={5}
+          maxRows={5}
           placeholder='Your message...'
           variant='unstyled'
           value={messageDraft}
@@ -174,11 +174,11 @@ export default forwardRef(function InboxProspectConvoSendBox(
             ],
           ])}
         />
-        <Group style={{ position: 'absolute', bottom: 10, left: 10 }}>
+        <Group style={{ position: 'absolute', bottom: 5, left: 10 }}>
           <Button
             leftIcon={<IconWriting size='1rem' />}
             variant='light'
-            color='gray'
+            color="gray.8"
             radius={theme.radius.lg}
             size='xs'
             onClick={async () => {
@@ -194,12 +194,12 @@ export default forwardRef(function InboxProspectConvoSendBox(
             Generate Message
           </Button>
           <Tooltip label="Bump Frameworks" withArrow>
-            <ActionIcon variant="light" radius="xl" size={30} onClick={() => setOpenBumpFrameworks(true)}>
+            <ActionIcon variant="light" color="gray.8" radius="xl" size={30} onClick={() => setOpenBumpFrameworks(true)}>
               <IconMessage2Cog size="1.125rem" />
             </ActionIcon>
           </Tooltip>
         </Group>
-        <div style={{ position: 'absolute', bottom: 10, right: 10 }}>
+        <div style={{ position: 'absolute', bottom: 5, right: 10 }}>
           <Button leftIcon={<IconSend size='1rem' />} radius={theme.radius.lg} size='xs'
             onClick={() => sendMessage()}
           >

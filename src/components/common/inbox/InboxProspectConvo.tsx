@@ -211,11 +211,11 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       </div>
       <div
         style={{
-          height: `calc((100vh - ${HEADER_HEIGHT}px)*0.75)`,
+          height: `calc((100vh - ${HEADER_HEIGHT}px)*0.70)`,
           alignItems: 'stretch',
         }}
       >
-        <ScrollArea h={`calc((100vh - ${HEADER_HEIGHT}px)*0.75)`} viewportRef={viewport}>
+        <ScrollArea h={`calc((100vh - ${HEADER_HEIGHT}px)*0.70)`} viewportRef={viewport}>
           <div style={{ marginTop: 10, marginBottom: 10 }}>
             <LoadingOverlay loader={loaderWithText('')} visible={isFetchingMessages} />
             {messages &&
@@ -246,7 +246,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           </div>
         </ScrollArea>
       </div>
-      <Stack style={{ height: `calc((100vh - ${HEADER_HEIGHT}px)*0.25)` }} justify='flex-end'>
+      <Stack style={{ height: `calc((100vh - ${HEADER_HEIGHT}px)*0.30)` }} justify='flex-end'>
         <InboxProspectConvoSendBox
           ref={sendBoxRef}
           linkedin_public_id={linkedin_public_id}

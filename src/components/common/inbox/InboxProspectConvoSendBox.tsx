@@ -91,9 +91,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
     queryClient.invalidateQueries({
       queryKey: [`query-dash-get-prospects`],
     });
-    queryClient.invalidateQueries({
-      queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
-    });
+    setTimeout(() => {
+      queryClient.invalidateQueries({
+        queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
+      });
+    }, 1000);
   };
 
   return (

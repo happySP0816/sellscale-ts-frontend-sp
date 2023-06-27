@@ -38,7 +38,7 @@ export default function InboxPage() {
         body: JSON.stringify({
           channel: "SELLSCALE",
           limit: 10000, // TODO: Maybe use pagination method instead
-          status: nurturingMode ? ['ACCEPTED', 'BUMPED'] : ["ACTIVE_CONVO"],
+          status: nurturingMode ? ['ACCEPTED', 'BUMPED'] : ['ACTIVE_CONVO', 'DEMO'],
           show_purgatory: "ALL",
         }),
       });

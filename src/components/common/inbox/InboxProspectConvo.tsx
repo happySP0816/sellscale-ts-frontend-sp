@@ -78,7 +78,7 @@ export function ProspectConvoMessage(props: {
                 )}
               </Group>
               <Text weight={400} size={11} c='dimmed' pr={10}>
-                {props.timestamp /* Mar 21, 7:39 PM */}
+                {props.timestamp}
               </Text>
             </Group>
             <TextWithNewlines style={{ fontSize: '0.875rem' }}>{props.message}</TextWithNewlines>

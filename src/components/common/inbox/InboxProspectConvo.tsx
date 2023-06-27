@@ -27,7 +27,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { convertDateToCasualTime, convertDateToLocalTime } from '@utils/general';
 import { getConversation } from '@utils/requests/getConversation';
 import { getProspectByID } from '@utils/requests/getProspectByID';
-import DOMPurify from 'dompurify';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { LinkedInMessage, Prospect } from 'src';
@@ -35,13 +34,11 @@ import { labelizeConvoSubstatus } from './utils';
 import { readLiMessages } from '@utils/requests/readMessages';
 import ProspectDetailsCalendarLink from '@common/prospectDetails/ProspectDetailsCalendarLink';
 import ProspectDetailsOptionsMenu from '@common/prospectDetails/ProspectDetailsOptionsMenu';
-import { deleteAutoBumpMessage, getAutoBumpMessage } from '@utils/requests/autoBumpMessage';
-import { showNotification } from '@mantine/notifications';
-import { postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
-import { sendLinkedInMessage } from '@utils/requests/sendMessage';
+import { getAutoBumpMessage } from '@utils/requests/autoBumpMessage';
 import _ from 'lodash';
 import InboxProspectConvoSendBox from './InboxProspectConvoSendBox';
 import InboxProspectConvoBumpFramework from './InboxProspectConvoBumpFramework';
+import { AiMetaDataBadge } from '@common/persona/LinkedInConversationEntry';
 
 export function ProspectConvoMessage(props: {
   img_url: string;
@@ -49,6 +46,12 @@ export function ProspectConvoMessage(props: {
   message: string;
   timestamp: string;
   is_me: boolean;
+  aiGenerated: boolean;
+  bumpFrameworkId?: number;
+  bumpFrameworkTitle?: string;
+  bumpFrameworkDescription?: string;
+  bumpFrameworkLength?: string;
+  accountResearchPoints?: string[];
 }) {
   return (
     <Container py={5}>
@@ -59,7 +62,19 @@ export function ProspectConvoMessage(props: {
         <div style={{ flexBasis: '90%' }}>
           <Stack spacing={5}>
             <Group position='apart'>
-              <Title order={6}>{props.name}</Title>
+              <Group spacing={10}>
+                <Title order={6}>{props.name}</Title>
+                {props.aiGenerated && (
+                  <AiMetaDataBadge
+                    location={{ position: 'relative' }}
+                    bumpFrameworkId={props.bumpFrameworkId || 0}
+                    bumpFrameworkTitle={props.bumpFrameworkTitle || ''}
+                    bumpFrameworkDescription={props.bumpFrameworkDescription || ''}
+                    bumpFrameworkLength={props.bumpFrameworkLength || ''}
+                    accountResearchPoints={props.accountResearchPoints || []}
+                  />
+                )}
+              </Group>
               <Text weight={400} size={11} c='dimmed' pr={10}>
                 {props.timestamp /* Mar 21, 7:39 PM */}
               </Text>
@@ -207,6 +222,12 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
                   message={msg.message}
                   timestamp={convertDateToCasualTime(new Date(msg.date))}
                   is_me={msg.connection_degree === 'You'}
+                  aiGenerated={msg.ai_generated}
+                  bumpFrameworkId={msg.bump_framework_id}
+                  bumpFrameworkTitle={msg.bump_framework_title}
+                  bumpFrameworkDescription={msg.bump_framework_description}
+                  bumpFrameworkLength={msg.bump_framework_length}
+                  accountResearchPoints={msg.account_research_points}
                 />
               ))}
             {messages && messages.length === 0 && (
@@ -220,16 +241,16 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
         </ScrollArea>
       </div>
       <Stack style={{ height: `calc((100vh - ${HEADER_HEIGHT}px)*0.25)` }} justify='flex-end'>
-          <InboxProspectConvoSendBox
-            ref={sendBoxRef}
-            linkedin_public_id={linkedin_public_id}
-            prospectId={openedProspectId}
-            messages={messages || []}
-            scrollToBottom={scrollToBottom}
-            onGenerateMessage={async (prospectId) => {
-              return await bumpFrameworksRef.current?.get(prospectId)?.generateAIFollowup();
-            }}
-          />
+        <InboxProspectConvoSendBox
+          ref={sendBoxRef}
+          linkedin_public_id={linkedin_public_id}
+          prospectId={openedProspectId}
+          messages={messages || []}
+          scrollToBottom={scrollToBottom}
+          onGenerateMessage={async (prospectId) => {
+            return await bumpFrameworksRef.current?.get(prospectId)?.generateAIFollowup();
+          }}
+        />
       </Stack>
       {prospect && (
         <InboxProspectConvoBumpFramework

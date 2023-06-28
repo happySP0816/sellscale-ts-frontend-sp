@@ -42,7 +42,7 @@ import InboxProspectListFilter, {
   InboxProspectListFilterState,
   defaultInboxProspectListFilterState,
 } from './InboxProspectListFilter';
-import { convertDateToCasualTime, removeExtraCharacters } from '@utils/general';
+import { convertDateToCasualTime, isWithinLastXDays, removeExtraCharacters } from '@utils/general';
 import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 
@@ -134,6 +134,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   }));
   filterSelectOptions.unshift({ label: 'All Convos', value: 'ALL', count: -1 });
 
+  const [segmentedSection, setSegmentedSection] = useState('RECOMMENDED');
   const [filterSelectValue, setFilterSelectValue] = useState(filterSelectOptions[0].value);
   const [searchFilter, setSearchFilter] = useState('');
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -158,6 +159,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
             ? `You: ${p.li_last_message_from_sdr || '...'}`
             : `${p.first_name}: ${p.li_last_message_from_prospect || 'No message found'}`,
           latest_msg_time: convertDateToCasualTime(new Date(p.li_last_message_timestamp)),
+          latest_msg_datetime: new Date(p.li_last_message_timestamp),
           latest_msg_from_sdr: p.li_is_last_message_from_sdr,
           title: _.truncate(p.title, {
             length: 48,
@@ -205,8 +207,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
 
     if (filtersState.channel === 'LINKEDIN') {
       prospects = prospects.filter((p) => p.linkedin_status);
-    }
-    if (filtersState.channel === 'EMAIL') {
+    } else if (filtersState.channel === 'EMAIL') {
       prospects = prospects.filter((p) => p.email_status);
     }
 
@@ -214,7 +215,17 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
       prospects = prospects.filter((p) => p.persona_id + '' === filtersState.personaId);
     }
 
-    // nurturingMode todo
+    if (filtersState.respondedLast === 'THEM') {
+      prospects = prospects.filter((p) => !p.latest_msg_from_sdr);
+    } else if (filtersState.respondedLast === 'YOU') {
+      prospects = prospects.filter((p) => p.latest_msg_from_sdr);
+    }
+  }
+
+  // Recommended Filter
+  if (segmentedSection === 'RECOMMENDED') {
+    prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
+    prospects = prospects.filter((p) => !p.latest_msg_from_sdr || isWithinLastXDays(p.latest_msg_datetime, 3));
   }
 
   useEffect(() => {
@@ -222,6 +233,12 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
       setOpenedProspectId(prospects[0].id);
     }
   }, [props.prospects]);
+
+  useEffect(() => {
+    if (segmentedSection === 'RECOMMENDED') {
+      setFilterSelectValue('ALL');
+    }
+  }, [segmentedSection]);
 
   return (
     <div>
@@ -239,37 +256,62 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
             placeholder='Search...'
           />
         </Container>
-        <Group pt={0} pb={5} px={20} m={0} position='apart' sx={{ flexWrap: 'nowrap' }}>
-          <Select
-            data={filterSelectOptions.map((o) => {
-              let count = o.count;
-              if (o.value !== 'ALL') {
-                count = props.prospects.filter((p) => p.linkedin_status === o.value).length;
-              }
-              return {
-                ...o,
-                count,
-              };
-            })}
-            variant='unstyled'
+        <Group spacing={0} pt={0} pb={5} px={20} m={0} position='apart' sx={{ flexWrap: 'nowrap' }}>
+          <SegmentedControl
             size='xs'
-            itemComponent={StatusSelectItem}
-            value={filterSelectValue}
-            onChange={(value) => {
-              if (value) {
-                setFilterSelectValue(value);
+            value={segmentedSection}
+            onChange={setSegmentedSection}
+            styles={{
+              label: {
+                padding: '0.1875rem 0.1rem',
               }
             }}
-            styles={(theme) => ({
-              input: {
-                color: filterSelectValue !== filterSelectOptions[0].value ? theme.colors.blue[7] : theme.colors.gray[7],
-                fontSize: 11,
-                fontWeight: 600,
-                maxWidth: 130,
-                paddingLeft: 10,
-              },
-            })}
+            data={[
+              { label: (
+                <Text mx={10} my={5}>Recommended</Text>
+              ), value: 'RECOMMENDED' },
+              { label: (
+                <Select
+                  data={filterSelectOptions.map((o) => {
+                    let count = o.count;
+                    if (o.value !== 'ALL') {
+                      count = props.prospects.filter((p) => p.linkedin_status === o.value).length;
+                    }
+                    return {
+                      ...o,
+                      count,
+                    };
+                  })}
+                  withinPortal
+                  variant='unstyled'
+                  size='xs'
+                  itemComponent={StatusSelectItem}
+                  value={filterSelectValue}
+                  onClick={(e) => setSegmentedSection('SELECT')}
+                  onChange={(value) => {
+                    if (value) {
+                      setFilterSelectValue(value);
+                    }
+                  }}
+                  styles={(theme) => ({
+                    input: {
+                      color: filterSelectValue !== filterSelectOptions[0].value ? theme.colors.blue[7] : theme.colors.gray[7],
+                      fontSize: 11,
+                      fontWeight: 600,
+                      maxWidth: 130,
+                      paddingLeft: 10,
+                    },
+                    wrapper: {
+                      width: 130,
+                    }
+                  })}
+                />
+              ), value: 'SELECT' },
+            ]}
           />
+
+
+          
           <ActionIcon
             variant='transparent'
             color={_.isEqual(filtersState, defaultInboxProspectListFilterState) || !filtersState ? 'gray.6' : 'blue.6'}

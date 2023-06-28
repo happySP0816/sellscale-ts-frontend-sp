@@ -10,12 +10,14 @@ import { Channel, PersonaOverview } from "src";
 
 export type InboxProspectListFilterState = {
   recentlyContacted: 'ALL' | 'HIDE' | 'SHOW';
+  respondedLast: 'ALL' | 'THEM' | 'YOU';
   channel: Channel;
   personaId: string | undefined;
 }
 
 export const defaultInboxProspectListFilterState: InboxProspectListFilterState = {
   recentlyContacted: 'ALL',
+  respondedLast: 'ALL',
   channel: 'SELLSCALE',
   personaId: undefined,
 };
@@ -66,6 +68,22 @@ export default function InboxProspectListFilter(props: {
           onChange={(value) => {
             if (value === 'ALL' || value === 'HIDE' || value === 'SHOW') {
               filterState.current.recentlyContacted = value;
+              props.setFilters(filterState.current);
+            }
+          }}
+        />
+
+        <Select
+          label='Last Responded'
+          defaultValue={filterState.current.respondedLast}
+          data={[
+            { value: 'ALL', label: 'Either' },
+            { value: 'THEM', label: 'Them' },
+            { value: 'YOU', label: 'You' },
+          ]}
+          onChange={(value) => {
+            if (value === 'ALL' || value === 'THEM' || value === 'YOU') {
+              filterState.current.respondedLast = value;
               props.setFilters(filterState.current);
             }
           }}

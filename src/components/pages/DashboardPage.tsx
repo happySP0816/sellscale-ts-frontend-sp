@@ -13,7 +13,7 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
-import { convertDateToLocalTime, splitName } from "@utils/general";
+import { convertDateToLocalTime, isWithinLastXDays, splitName } from "@utils/general";
 import { useRecoilState, useRecoilValue } from "recoil";
 import NotificationCard from "../common/home/dashboard/NotificationCard";
 import {
@@ -107,7 +107,7 @@ export default function DashboardSection() {
             latest_msgs.length > 0 && 
             (latest_msgs[0].connection_degree !== "You"
             // Message is over 3 days old
-            || (Date.now() - new Date(latest_msgs[0].date).getTime()) > (3 * 24 * 60 * 60 * 1000));
+            || isWithinLastXDays(new Date(latest_msgs[0].date), 3));
         return p.linkedin_status === li_status && last_msg_from_prospect;
       })
       .sort((a, b) => a.full_name.localeCompare(b.full_name));

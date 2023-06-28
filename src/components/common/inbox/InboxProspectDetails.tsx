@@ -174,7 +174,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
               </Center>
             </Box>
             <Box>
-              <Text fz='xs'>- {data?.details.persona}</Text>
+              <Text fz='xs'>- <u>{data?.details.persona}</u></Text>
             </Box>
           </Flex>
 

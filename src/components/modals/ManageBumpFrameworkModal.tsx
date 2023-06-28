@@ -1,15 +1,10 @@
 import {
-  Anchor,
   Button,
-  Group,
   Text,
   Paper,
   useMantineTheme,
-  Image,
   TextInput,
   LoadingOverlay,
-  List,
-  ThemeIcon,
   Flex,
   Stack,
   Card,
@@ -19,12 +14,13 @@ import {
   ScrollArea,
   Slider,
   Tooltip,
+  NumberInput,
+  Select,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
-import { IconCheck, IconUser, IconX } from "@tabler/icons";
+import { IconCheck, IconX } from "@tabler/icons";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { API_URL } from "@constants/data";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { useState } from "react";
@@ -34,7 +30,6 @@ import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
 import { createBumpFramework } from "@utils/requests/createBumpFramework";
 import { postBumpDeactivate } from "@utils/requests/postBumpDeactivate";
 import { BumpFramework } from "src";
-import PersonaSelect from "@common/persona/PersonaSplitSelect";
 
 const bumpFrameworkLengthMarks = [
   { value: 0, label: "Short", api_label: "SHORT" },
@@ -96,15 +91,6 @@ export default function ManageBumpFramework({
       return;
     }
 
-    if (form.values.archetypeID == null) {
-      showNotification({
-        title: "Error",
-        message: "Please select an archetype",
-        color: theme.colors.red[7],
-      })
-      return;
-    }
-
     const result = await patchBumpFramework(
       userToken,
       selectedBumpFramework?.id,
@@ -113,7 +99,7 @@ export default function ManageBumpFramework({
       form.values.description,
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
-      form.values.bumpedCount,
+      form.values.bumpedCount as number,
       form.values.default,
     );
 
@@ -136,7 +122,7 @@ export default function ManageBumpFramework({
         bump_length: bumpFrameworkLengthMarks.find(
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
-        bumped_count: form.values.bumpedCount,
+        bumped_count: form.values.bumpedCount as number,
         substatus: selectedBumpFramework.substatus,
       });
     } else {
@@ -154,24 +140,15 @@ export default function ManageBumpFramework({
   const triggerCreateBumpFramework = async () => {
     setLoadingBumpFrameworks(true);
 
-    if (form.values.archetypeID == null) {
-      showNotification({
-        title: "Error",
-        message: "Please select an archetype",
-        color: theme.colors.red[7],
-      })
-      return;
-    }
-
     const result = await createBumpFramework(
       userToken,
-      form.values.archetypeID,
+      innerProps.archetypeId,
       innerProps.overallStatus,
       form.values.title,
       form.values.description,
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
-      form.values.bumpedCount,
+      form.values.bumpedCount as number,
       form.values.default,
       innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : null,
     );
@@ -195,7 +172,7 @@ export default function ManageBumpFramework({
         bump_length: bumpFrameworkLengthMarks.find(
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
-        bumped_count: form.values.bumpedCount,
+        bumped_count: form.values.bumpedCount as number,
         substatus: innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : "",
       });
     } else {
@@ -234,7 +211,7 @@ export default function ManageBumpFramework({
       form.values.title = "";
       form.values.description = "";
       form.values.default = false;
-      form.values.bumpedCount = -1;
+      form.values.bumpedCount = undefined;
     } else {
       showNotification({
         title: "Error",
@@ -259,8 +236,7 @@ export default function ManageBumpFramework({
       title: "",
       description: "",
       default: false,
-      archetypeID: null,
-      bumpedCount: -1,
+      bumpedCount: undefined as number | undefined,
     },
   });
 
@@ -303,7 +279,7 @@ export default function ManageBumpFramework({
                 form.values.title = "";
                 form.values.description = "";
                 form.values.default = false;
-                form.values.bumpedCount = -1;
+                form.values.bumpedCount = undefined;
                 setBumpLengthValue(50);
                 setSelectedBumpFramework(null);
               }}
@@ -417,16 +393,20 @@ export default function ManageBumpFramework({
                   }}
                 />
               </Tooltip>
-              {/* <Flex wrap='wrap' mt='xs' w='100%'>
-                <PersonaSelect
-                  disabled={false}
-                  onChange={(archetypes) => updateArchetypes(archetypes)}
-                  selectMultiple={true}
-                  label="Personas"
-                  description="Select the personas this framework applies to."
-                  defaultValues={form.values.archetypes.map(archetype => archetype.archetype_id)}
-                />
-              </Flex> */}
+              {
+                form.values.bumpedCount ? (
+                  <NumberInput
+                    label="Bump Number"
+                    description="The position in the bump sequence."
+                    placeholder="1"
+                    value={form.values.bumpedCount as number}
+                    onChange={(e) => {
+                      form.setFieldValue("bumpedCount", e as number);
+                    }}
+                    min={1}
+                  />
+                ) : <></>
+              }
               {selectedBumpFramework == null && (
                 <Switch
                   pt="md"
@@ -479,7 +459,9 @@ export default function ManageBumpFramework({
                           selectedBumpFramework?.bump_length ==
                           bumpFrameworkLengthMarks.find(
                             (mark) => mark.value === bumpLengthValue
-                          )?.api_label
+                          )?.api_label &&
+                          selectedBumpFramework.bumped_count ==
+                          form.values.bumpedCount
                         ) ? <></> : (
                           <Button
                             mt="md"

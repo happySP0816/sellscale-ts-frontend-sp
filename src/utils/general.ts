@@ -282,3 +282,14 @@ export function hexToHexWithAlpha(hexColor: string, transparency: number): strin
 export function removeExtraCharacters(str: string) {
   return str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '').trim();
 }
+
+
+/**
+ * Checks if a date is within the last X days
+ * @param date
+ * @param days
+ * @returns - Whether the date is within the last X days
+*/
+export function isWithinLastXDays(date: Date, days: number) {
+  return (Date.now() - date.getTime()) > (days * 24 * 60 * 60 * 1000);
+}

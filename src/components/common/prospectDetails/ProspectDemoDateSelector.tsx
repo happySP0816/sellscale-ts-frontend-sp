@@ -1,18 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { DatePicker } from '@mantine/dates';
-import { Text } from '@mantine/core';
+import { DatePicker, DateTimePicker } from '@mantine/dates';
+import { Text, createStyles, rem } from '@mantine/core';
 import { API_URL } from '@constants/data';
 import { useRecoilState } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import displayNotification from '@utils/notificationFlow';
 
-type PropsType = {
-  prospectId: number;
-};
+const useStyles = createStyles((theme) => ({
+  input: {
+    height: rem(54),
+    paddingTop: rem(18),
+  },
 
-export default function ProspectDemoDateSelector(props: PropsType) {
+  label: {
+    position: 'absolute',
+    pointerEvents: 'none',
+    fontSize: theme.fontSizes.xs,
+    paddingLeft: theme.spacing.sm,
+    paddingTop: `calc(${theme.spacing.sm} / 2)`,
+    zIndex: 1,
+  },
+}));
+
+export default function ProspectDemoDateSelector(props: { prospectId: number }) {
+
+  const { classes } = useStyles();
+
   const [userToken] = useRecoilState(userTokenState);
-  const [demoDate, setDemoDate] = useState(null);
+  const [demoDate, setDemoDate] = useState<Date | null>(null);
   const [fetchedDemoDate, setFetchedDemoDate] = useState(false);
 
   const getProspectDemoDate = async (): Promise<Date | null> => {
@@ -55,17 +70,15 @@ export default function ProspectDemoDateSelector(props: PropsType) {
     title: string;
     message: string;
   }> => {
-    const url = `${API_URL}/prospect/${props.prospectId}/demo_date`;
-    const data = {
-      demo_date: value,
-    };
-    return fetch(url, {
+    return fetch(`${API_URL}/prospect/${props.prospectId}/demo_date`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${userToken}`,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        demo_date: value,
+      }),
     })
       .then((response) => {
         getProspectDemoDate();
@@ -92,12 +105,18 @@ export default function ProspectDemoDateSelector(props: PropsType) {
   };
 
   return (
-    <div>
-      <Text>When is this demo scheduled for?</Text>
-      <DatePicker
-        placeholder='Select date'
-        value={demoDate}
-        onChange={async (value) => {
+    <DateTimePicker
+      label="Demo Scheduled For"
+      placeholder="Select date and time"
+      size="xs"
+      radius="md"
+      dropdownType="modal"
+      classNames={classes}
+      value={demoDate}
+      onChange={async (value) => {
+        updateProspectDemoDate(value?.toISOString());
+        setDemoDate(new Date(value?.toISOString() || ''));
+          /*
           await displayNotification(
             'update-prospect-demo-date',
             () => updateProspectDemoDate(value),
@@ -117,9 +136,8 @@ export default function ProspectDemoDateSelector(props: PropsType) {
               color: 'red',
             }
           );
-        }}
-        mt={'md'}
-      />
-    </div>
+          */
+      }}
+    />
   );
 }

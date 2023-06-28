@@ -18,6 +18,9 @@ import {
   Tabs,
   Popover,
   Button,
+  Box,
+  UnstyledButton,
+  rem,
 } from '@mantine/core';
 import {
   IconBriefcase,
@@ -31,12 +34,16 @@ import {
   IconInfoCircle,
   IconUserSearch,
   IconWriting,
+  IconX,
+  IconCalendarEvent,
+  IconTrash,
+  IconExternalLink,
 } from '@tabler/icons-react';
 import { openedProspectIdState, openedOutboundChannelState } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRecoilValue, useRecoilState } from 'recoil';
-import { useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { getProspectByID } from '@utils/requests/getProspectByID';
 import { prospectStatuses } from './utils';
 import { Channel, Prospect } from 'src';
@@ -44,13 +51,35 @@ import ProspectDetailsResearch, { ProspectDetailsResearchTabs } from '@common/pr
 import { updateProspectNote } from '@utils/requests/prospectNotes';
 import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChangeStatus';
 import ProspectDetailsCalendarLink from '@common/prospectDetails/ProspectDetailsCalendarLink';
-import { ICPFitContents, icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
+import ICPFitPill, { ICPFitContents, icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { useHover } from '@mantine/hooks';
 import postRunICPClassification from '@utils/requests/postRunICPClassification';
+import { DateTimePicker } from '@mantine/dates';
+import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSelector';
+import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
+import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
 
 const useStyles = createStyles((theme) => ({
   icon: {
     color: theme.colors.gray[6],
+  },
+
+  item: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    borderRadius: theme.radius.md,
+    height: 60,
+    width: 88,
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[9] : theme.white,
+    transition: 'box-shadow 150ms ease, transform 100ms ease',
+
+    '&:hover': {
+      boxShadow: `${theme.shadows.md} !important`,
+      transform: 'scale(1.05)',
+    },
   },
 }));
 
@@ -66,6 +95,13 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const openedOutboundChannel = useRecoilValue(openedOutboundChannelState);
 
+  const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
+    demosDrawerOpenState
+  );
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(
+    demosDrawerProspectIdState
+  );
+
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
     queryFn: async () => {
@@ -76,7 +112,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   });
 
   console.log(data);
-  const statusValue = data?.details?.linkedin_status || 'ACTIVE_CONVO';
+  const statusValue = data?.details?.linkedin_status || 'ACCEPTED';
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
@@ -86,6 +122,20 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
       notesRef.current.value = data?.details.notes[data?.details.notes.length - 1]?.note ?? '';
     }
   }, [data]);
+
+  // For changing the status of the prospect
+  const changeStatus = async (status: string) => {
+    await updateChannelStatus(
+      openedProspectId,
+      userToken,
+      openedOutboundChannel.toUpperCase() as Channel,
+      status
+    );
+    queryClient.invalidateQueries({
+      queryKey: ['query-dash-get-prospects'],
+    });
+    refetch();
+  };
 
   return (
     <Flex gap={0} wrap='nowrap' direction='column' h='100vh' sx={{ borderLeft: '0.0625rem solid #dee2e6' }}>
@@ -110,44 +160,65 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
             display: 'flex',
             flexDirection: 'column',
             flexWrap: 'nowrap',
-            backgroundColor: theme.colors.gray[1],
           }}
-          mt={10}
-          mx={10}
+          m={10}
         >
-          <Flex gap={0} wrap='nowrap'>
-            <div style={{ flexBasis: '10%', margin: 5 }}>
-              <Popover position='right' withArrow shadow='md' opened={icpHovered}>
-                <Popover.Target>
-                  <div ref={icpRef}>{icpFitToIcon(data?.details.icp_fit_score, '1.5rem')}</div>
-                </Popover.Target>
-                <Popover.Dropdown>
-                  <ICPFitContents
-                    icp_fit_score={data?.details.icp_fit_score}
-                    icp_fit_reason={data?.details.icp_fit_reason}
-                    archetype={data?.details.persona}
-                  />
-                </Popover.Dropdown>
-              </Popover>
-            </div>
-            <div style={{ flexBasis: '90%' }}>
-              <ScrollArea h={170} mb={2}>
-                {!data || data.details.icp_fit_reason ? (
-                  <Text size={12} my={5} mr={8}>
-                    {data?.details.icp_fit_reason}
-                  </Text>
-                ) : (
-                  <Button variant="default" size="md" my='sm' compact onClick={async () => {
-                    const result = await postRunICPClassification(userToken, data.details.persona_id, [data.details.id]);
-                  }}>
-                    Run ICP Fit
-                  </Button>
-                )}
-              </ScrollArea>
-            </div>
+          <Flex gap={5} justify="center" align="center" my={10} wrap='nowrap'>
+            <Box>
+              <Center>
+                <ICPFitPill
+                  icp_fit_score={data?.details.icp_fit_score}
+                  icp_fit_reason={data?.details.icp_fit_reason}
+                  archetype={data?.details.persona}
+                />
+              </Center>
+            </Box>
+            <Box>
+              <Text fz='xs'>- <u>{data?.details.persona}</u></Text>
+            </Box>
           </Flex>
+
+          {statusValue !== 'DEMO_SET' ? (
+            <Flex gap={10} justify='center' wrap='nowrap' mb='xs' mx='xs'>
+              <StatusBlockButton
+                title='Demo Set'
+                icon={<IconCalendarEvent color={theme.colors.pink[6]} size={24} />}
+                onClick={async () => { await changeStatus('DEMO_SET') }}
+              />
+              <StatusBlockButton
+                title='Not Interested'
+                icon={<IconX color={theme.colors.red[6]} size={24} />}
+                onClick={async () => { await changeStatus('NOT_INTERESTED') }}
+              />
+              <StatusBlockButton
+                title='Not Qualified'
+                icon={<IconTrash color={theme.colors.red[6]} size={24} />}
+                onClick={async () => { await changeStatus('NOT_QUALIFIED') }}
+              />
+            </Flex>
+          ) : (
+            <Stack spacing={10}>
+              <Box mx={10}>
+                <ProspectDemoDateSelector prospectId={openedProspectId} />
+              </Box>
+              <Box mx={10} mb={10}>
+                <Button
+                  variant="light"
+                  radius="md"
+                  fullWidth
+                  onClick={() => {
+                    setDrawerProspectId(openedProspectId);
+                    setDemosDrawerOpened(true);
+                  }}
+                >
+                  Give Demo Feedback
+                </Button>
+              </Box>
+            </Stack>
+          )}
         </Paper>
       </div>
+      {statusValue !== 'DEMO_SET' && statusValue !== 'ACCEPTED' && statusValue !== 'RESPONDED' && (
       <div style={{ flexBasis: '10%' }}>
         <Paper
           withBorder
@@ -157,7 +228,8 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
             flexDirection: 'column',
             flexWrap: 'nowrap',
           }}
-          m={10}
+          mx={10}
+          mb={10}
         >
           <Flex gap={0} wrap='nowrap'>
             <div style={{ flexBasis: '10%', margin: 15 }}>
@@ -195,22 +267,14 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
                   if (!value) {
                     return;
                   }
-                  await updateChannelStatus(
-                    openedProspectId,
-                    userToken,
-                    openedOutboundChannel.toUpperCase() as Channel,
-                    value
-                  );
-                  queryClient.invalidateQueries({
-                    queryKey: ['query-dash-get-prospects'],
-                  });
-                  refetch();
+                  await changeStatus(value);
                 }}
               />
             </div>
           </Flex>
         </Paper>
       </div>
+      )}
 
       <div style={{ flexBasis: '55%' }}>
         <Divider />
@@ -239,8 +303,8 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
               {data?.details.company && (
                 <Group noWrap spacing={10} mt={5}>
                   <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='xs' component='a' target='_blank' rel='noopener noreferrer' href={''}>
-                    {data.details.company}
+                  <Text size='xs' component='a' target='_blank' rel='noopener noreferrer' href={data.company?.url || undefined}>
+                    {data.details.company} {data.company?.url && (<IconExternalLink size='0.55rem' />)}
                   </Text>
                 </Group>
               )}
@@ -255,7 +319,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
                     rel='noopener noreferrer'
                     href={`https://www.linkedin.com/in/${linkedin_public_id}`}
                   >
-                    linkedin.com/in/{linkedin_public_id}
+                    linkedin.com/in/{linkedin_public_id} <IconExternalLink size='0.55rem' />
                   </Text>
                 </Group>
               )}
@@ -264,7 +328,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
                 <Group noWrap spacing={10} mt={5}>
                   <IconMail stroke={1.5} size={18} className={classes.icon} />
                   <Text size='xs' component='a' href={`mailto:${data.email.email}`}>
-                    {data.email.email}
+                    {data.email.email} <IconExternalLink size='0.55rem' />
                   </Text>
                 </Group>
               )}
@@ -299,6 +363,30 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           </Tabs.Panel>
         </Tabs>
       </div>
+      {true && demosDrawerOpened && (
+        <DemoFeedbackDrawer prospects={props.prospects} refetch={refetch} />
+      )}
     </Flex>
+  );
+}
+
+function StatusBlockButton(props: { title: string; icon: ReactNode; onClick: () => void }) {
+  const { classes, theme } = useStyles();
+
+  return (
+    <UnstyledButton
+      className={classes.item}
+      onClick={async () => {
+        props.onClick();
+      }}
+      sx={{
+        border: 'solid 1px #999',
+      }}
+    >
+      {props.icon}
+      <Text size='xs' mt={3}>
+        {props.title}
+      </Text>
+    </UnstyledButton>
   );
 }

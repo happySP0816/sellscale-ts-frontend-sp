@@ -360,8 +360,8 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
             </Text>
           )}
         </ScrollArea>
-        <Text sx={{ position: 'absolute', bottom: 5, right: 5, zIndex: 100 }} fs='italic' fz={10} c='dimmed'>
-          {prospects.length} prospects
+        <Text sx={{ position: 'absolute', top: HEADER_HEIGHT, right: 5, zIndex: 100 }} fs='italic' fz={8} c='dimmed'>
+          {prospects.length} convos
         </Text>
       </Stack>
 

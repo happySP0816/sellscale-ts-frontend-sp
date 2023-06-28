@@ -36,7 +36,15 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
     (async () => {
       const result = await getArchetypeProspects(userToken, props.personaId);
       if (result.status === 'success') {
-        setProspects(result.data);
+        setProspects((prev) => {
+          const prospects = result.data as ProspectShallow[];
+          return prospects.sort((a, b) => {
+            if (a.icp_fit_score === b.icp_fit_score) {
+              return a.full_name.localeCompare(b.full_name);
+            }
+            return b.icp_fit_score - a.icp_fit_score;
+          });
+        });
       }
     })();
   }, []);

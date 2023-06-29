@@ -1,34 +1,28 @@
 import { useEffect, useState } from "react";
-import CreateBumpInstructionModal from "./CreateBumpInstructionModal";
 import {
   Alert,
   Button,
   Card,
-  Chip,
-  Container,
   Flex,
   Grid,
+  HoverCard,
   Loader,
-  LoadingOverlay,
+  Paper,
   Select,
   Slider,
   Text,
   Textarea,
   Title,
-  Tooltip,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { API_URL } from "@constants/data";
 
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
 import { openContextModal } from "@mantine/modals";
 import { prospectDrawerStatusesState } from "@atoms/prospectAtoms";
-import { autoFillAccountResearch } from "@utils/requests/autoFillAccountResearch";
 import { BumpFramework, LinkedInMessage } from "src";
 import { autoSelectBumpFramework } from "@utils/requests/autoSelectBumpFramework";
-import { IconAlertCircle, IconRobot, IconTruckLoading } from "@tabler/icons";
-import { IconSelect } from "@tabler/icons-react";
+import TextWithNewline from "@common/library/TextWithNewlines";
 
 type PropsType = {
   client_sdr_id: number;
@@ -202,35 +196,39 @@ export default function SelectBumpInstruction(props: PropsType) {
           </Button>
         </Grid.Col>
       </Grid>
-      <Tooltip
-        multiline
-        width={220}
-        withArrow
-        label="Control how long you want the generated bump to be."
-      >
-        <Slider
-          label={null}
-          step={50}
-          marks={bumpFrameworkLengthMarks}
-          mt="xs"
-          mb="xl"
-          p="md"
-          value={bumpLengthValue}
-          onChange={(value) => {
-            setBumpLengthValue(value);
-            let bumpLength = bumpFrameworkLengthMarks.find(
-              (marks) => marks.value === value
-            )?.api_label;
-            if (bumpLength == null) {
-              bumpLength = "MEDIUM";
-            }
-            if (selectedBumpFramework) {
-              selectedBumpFramework.bump_length = bumpLength;
-            }
-            props.onBumpFrameworkSelected(selectedBumpFramework);
-          }}
-        />
-      </Tooltip>
+      <HoverCard width={280} shadow="md">
+        <HoverCard.Target>
+          <Slider
+            label={null}
+            step={50}
+            marks={bumpFrameworkLengthMarks}
+            mt="xs"
+            mb="xl"
+            p="md"
+            value={bumpLengthValue}
+            onChange={(value) => {
+              setBumpLengthValue(value);
+              let bumpLength = bumpFrameworkLengthMarks.find(
+                (marks) => marks.value === value
+              )?.api_label;
+              if (bumpLength == null) {
+                bumpLength = "MEDIUM";
+              }
+              if (selectedBumpFramework) {
+                selectedBumpFramework.bump_length = bumpLength;
+              }
+              props.onBumpFrameworkSelected(selectedBumpFramework);
+            }}
+          />
+        </HoverCard.Target>
+        <HoverCard.Dropdown style={{ "backgroundColor": "rgb(34, 37, 41)", "padding": 0 }}>
+          <Paper style={{ "backgroundColor": "rgb(34, 37, 41)", "color": "white", "padding": 10 }}>
+            <TextWithNewline breakheight="10px">
+              {"Control how long you want the generated bump to be:\n\nShort: 1-2 sentences\nMedium: 3-4 sentences\nLong: 2 paragraphs"}
+            </TextWithNewline>
+          </Paper>
+        </HoverCard.Dropdown>
+      </HoverCard>
       <Textarea
         mt="md"
         value={props.account_research}

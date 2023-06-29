@@ -38,7 +38,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           id?: number,
           length?: string,
           title?: string
-        }, accountResearch?: string) => {
+        }, accountResearch?: string[]) => {
           setMessageDraft(msg);
           // Patching the response into a bump framework
           if (bumpFramework) {
@@ -55,7 +55,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   default: false,
                   bump_length: '',
                   bumped_count: null,
-                  accountResearch: undefined,
+                  account_research: undefined,
                 }
               } else {
                 newFramework = { ...prev };
@@ -73,7 +73,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 newFramework.bump_length = bumpFramework.length;
               }
               if(accountResearch){
-                newFramework.accountResearch = accountResearch;
+                newFramework.account_research = accountResearch;
               }
               return newFramework;
             });
@@ -107,7 +107,18 @@ export default forwardRef(function InboxProspectConvoSendBox(
     // Delete the auto bump message if it exists
     await deleteAutoBumpMessage(userToken, props.prospectId);
 
-    const result = await sendLinkedInMessage(userToken, props.prospectId, msg, aiGenerated);
+    const result = await sendLinkedInMessage(
+      userToken,
+      props.prospectId,
+      msg,
+      aiGenerated,
+      undefined,
+      selectedBumpFramework?.id,
+      selectedBumpFramework?.title,
+      selectedBumpFramework?.description,
+      selectedBumpFramework?.bump_length,
+      selectedBumpFramework?.account_research
+    );
     if (result.status === 'success') {
       /*
       let yourMessage = _.cloneDeep(props.messages)
@@ -130,19 +141,12 @@ export default forwardRef(function InboxProspectConvoSendBox(
       });
     }
     setMsgLoading(false);
+    setAiGenerated(false);
     setTimeout(() => props.scrollToBottom && props.scrollToBottom(), 100);
-
-    queryClient.invalidateQueries({
-      queryKey: [`query-dash-get-prospects`],
+    
+    queryClient.refetchQueries({
+      queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
     });
-    setTimeout(() => {
-      queryClient.invalidateQueries({
-        queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
-      });
-    }, 1000);
   };
 
   console.log(selectedBumpFramework);
@@ -263,7 +267,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
             bump_title={selectedBumpFramework.title}
             bump_description={selectedBumpFramework.description}
             bump_length={selectedBumpFramework.bump_length}
-            account_research_points={selectedBumpFramework.accountResearch ? (selectedBumpFramework.accountResearch.split('\n').map(point => point.replace(/^- /, '').trim())) : []}
+            account_research_points={selectedBumpFramework.account_research || []}
           />
         )}
       </div>

@@ -1,6 +1,7 @@
 import { userTokenState } from "@atoms/userAtoms";
+import TextWithNewline from "@common/library/TextWithNewlines";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
-import { Modal, TextInput, Text, Textarea, Tooltip, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput } from "@mantine/core";
+import { Modal, TextInput, Text, Textarea, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, HoverCard, Paper } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons";
@@ -25,13 +26,14 @@ interface CreateBumpFramework extends Record<string, unknown> {
   dataChannels: MsgResponse | undefined;
   archetypeID: number | null;
   status?: string;
+  showStatus?: boolean;
   bumpedCount?: number | null;
 }
 
 export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
   const [userToken] = useRecoilState(userTokenState);
   const theme = useMantineTheme();
-  
+
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
   const [selectedStatus, setSelectedStatus] = useState<string | null>('');
   const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>('');
@@ -105,7 +107,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       title: "",
       description: "",
       archetypeID: props.archetypeID,
-      default: false,
+      default: true,
       bumpedCount: props.bumpedCount,
     },
   });
@@ -154,26 +156,30 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
         align="center"
         justify={'center'}
       >
-        <Tooltip
-          multiline
-          width={220}
-          withArrow
-          label="Control how long you want the generated bump to be."
-        >
-          <Slider
-            label={null}
-            step={50}
-            marks={bumpFrameworkLengthMarks}
-            mt="xs"
-            mb="xl"
-            p="md"
-            w='75%'
-            value={bumpLengthValue}
-            onChange={(value) => {
-              setBumpLengthValue(value);
-            }}
-          />
-        </Tooltip>
+        <HoverCard width={280} shadow="md">
+          <HoverCard.Target>
+            <Slider
+              label={null}
+              step={50}
+              marks={bumpFrameworkLengthMarks}
+              mt="xs"
+              mb="xl"
+              p="md"
+              w='75%'
+              value={bumpLengthValue}
+              onChange={(value) => {
+                setBumpLengthValue(value);
+              }}
+            />
+          </HoverCard.Target>
+          <HoverCard.Dropdown style={{ "backgroundColor": "rgb(34, 37, 41)", "padding": 0 }}>
+            <Paper style={{ "backgroundColor": "rgb(34, 37, 41)", "color": "white", "padding": 10 }}>
+              <TextWithNewline breakheight="10px">
+                {"Control how long you want the generated bump to be:\n\nShort: 1-2 sentences\nMedium: 3-4 sentences\nLong: 2 paragraphs"}
+              </TextWithNewline>
+            </Paper>
+          </HoverCard.Dropdown>
+        </HoverCard>
       </Flex>
 
       <Flex wrap="wrap" mt="xs" w="100%">
@@ -188,24 +194,26 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           defaultValues={[form.values.archetypeID || -1]}
         />
       </Flex>
-      <Select
-        label="Status"
-        description="Which status should use this bump?"
-        placeholder="select status..."
-        data={props.dataChannels?.data[
-          "SELLSCALE"
-        ]?.statuses_available?.map((status: string) => {
-          return {
-            label:
-              props.dataChannels?.data["SELLSCALE"][status].name,
-            value: status,
-          };
-        })}
-        value={selectedStatus ? selectedStatus : null}
-        onChange={setSelectedStatus}
-        mt="md"
-        withAsterisk
-      />
+      {props.showStatus && (
+        <Select
+          label="Status"
+          description="Which status should use this bump?"
+          placeholder="select status..."
+          data={props.dataChannels?.data[
+            "SELLSCALE"
+          ]?.statuses_available?.map((status: string) => {
+            return {
+              label:
+                props.dataChannels?.data["SELLSCALE"][status].name,
+              value: status,
+            };
+          })}
+          value={selectedStatus ? selectedStatus : null}
+          onChange={setSelectedStatus}
+          mt="md"
+          withAsterisk
+        />
+      )}
       {selectedStatus === "ACTIVE_CONVO" && (
         <Select
           label="Substatus"
@@ -218,7 +226,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           withAsterisk
         />
       )}
-      {(selectedStatus === "BUMPED" && form.values.bumpedCount != null) && (
+      {(selectedStatus === "BUMPED" && form.values.bumpedCount != null && props.showStatus) && (
         <NumberInput
           mt='md'
           label="Bump Number"
@@ -235,6 +243,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       <Flex w="100%" justify="flex-end" direction={'column'}>
         <Switch
           pt="md"
+          my='md'
           label="Make default?"
           labelPosition="right"
           checked={form.values.default}

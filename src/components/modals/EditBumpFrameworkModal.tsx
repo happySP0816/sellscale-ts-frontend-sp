@@ -1,5 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { Button, Flex, LoadingOverlay, NumberInput, Paper, Slider, Switch, Text, TextInput, Textarea, Title, Tooltip, useMantineTheme } from "@mantine/core";
+import TextWithNewline from "@common/library/TextWithNewlines";
+import { Button, Card, Flex, HoverCard, LoadingOverlay, NumberInput, Paper, Slider, Switch, Text, TextInput, Textarea, useMantineTheme } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -158,35 +159,43 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
       <Text fz="sm" mt="md">
         Bump Length
       </Text>
-      <Tooltip
-        multiline
-        width={220}
-        withArrow
-        label="Control how long you want the generated bump to be."
-      >
-        <Slider
-          label={null}
-          step={50}
-          marks={bumpFrameworkLengthMarks}
-          mb="xl"
-          p="md"
-          value={bumpLengthValue}
-          onChange={(value) => {
-            setBumpLengthValue(value);
-          }}
-        />
-      </Tooltip>
+        <HoverCard width={280} shadow="md">
+          <HoverCard.Target>
+            <Flex w='100%' align='center' justify='center'>
+              <Slider
+                label={null}
+                step={50}
+                marks={bumpFrameworkLengthMarks}
+                mb="xl"
+                p="md"
+                w='90%'
+                value={bumpLengthValue}
+                onChange={(value) => {
+                  setBumpLengthValue(value);
+                }}
+              />
+            </Flex>
+          </HoverCard.Target>
+          <HoverCard.Dropdown style={{ "backgroundColor": "rgb(34, 37, 41)", "padding": 0 }}>
+            <Paper style={{ "backgroundColor": "rgb(34, 37, 41)", "color": "white", "padding": 10 }}>
+              <TextWithNewline breakheight="10px">
+                {"Control how long you want the generated bump to be:\n\nShort: 1-2 sentences\nMedium: 3-4 sentences\nLong: 2 paragraphs"}
+              </TextWithNewline>
+            </Paper>
+          </HoverCard.Dropdown>
+        </HoverCard>
       {
-        form.values.bumpedCount != null ? (
+        (form.values.bumpedCount != null && form.values.bumpedCount > 0) ? (
           <NumberInput
             label="Bump Number"
             description="The position in the bump sequence."
             placeholder="1"
-            value={form.values.bumpedCount as number}
+            value={form.values.bumpedCount + 1 as number}
             onChange={(e) => {
-              form.setFieldValue("bumpedCount", e as number);
+              form.setFieldValue("bumpedCount", e as number - 1);
             }}
-            min={1}
+            min={2}
+            max={4}
           />
         ) : <></>
       }

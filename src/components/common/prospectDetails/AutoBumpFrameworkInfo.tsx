@@ -1,3 +1,4 @@
+import TextWithNewline from '@common/library/TextWithNewlines';
 import { HoverCard, Text, Avatar, Group, Stack, Anchor, ActionIcon, Badge, useMantineTheme, List } from '@mantine/core';
 import { IconInfoCircleFilled } from '@tabler/icons-react';
 import { valueToColor } from '@utils/general';
@@ -42,9 +43,9 @@ export default function AutoBumpFrameworkInfo(props: {
           <Text size='sm' mt='md'>
             <span style={{ fontWeight: 550 }}>Framework:</span> {props.bump_title}
           </Text>
-          <Text size='sm'>
+          <TextWithNewline style={{fontSize: '14px'}} breakheight='10px'>
             {props.bump_description}
-          </Text>
+          </TextWithNewline>
           <Badge color={valueToColor(theme, props.bump_length)} size='xs' variant='filled'>
             {props.bump_length}
           </Badge>

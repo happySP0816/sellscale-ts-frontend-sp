@@ -155,12 +155,12 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
           name: p.full_name,
           img_url: p.img_url,
           icp_fit: p.icp_fit_score,
-          latest_msg: p.li_is_last_message_from_sdr
+          latest_msg: (p.li_is_last_message_from_sdr || nurturingMode)
             ? `You: ${p.li_last_message_from_sdr || '...'}`
             : `${p.first_name}: ${p.li_last_message_from_prospect || 'No message found'}`,
           latest_msg_time: convertDateToCasualTime(new Date(p.li_last_message_timestamp)),
           latest_msg_datetime: new Date(p.li_last_message_timestamp),
-          latest_msg_from_sdr: p.li_is_last_message_from_sdr,
+          latest_msg_from_sdr: p.li_is_last_message_from_sdr || nurturingMode,
           title: _.truncate(p.title, {
             length: 48,
             separator: ' ',
@@ -177,7 +177,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
         (a, b) =>
           _.findIndex(filterSelectOptions, (o) => o.value === a.linkedin_status) -
             _.findIndex(filterSelectOptions, (o) => o.value === b.linkedin_status) ||
-          (b.new_msg_count ? 1 : 0) - (a.new_msg_count ? 1 : 0) ||
+          (!b.latest_msg_from_sdr && b.new_msg_count ? 1 : 0) - (!a.latest_msg_from_sdr && a.new_msg_count ? 1 : 0) ||
           b.icp_fit - a.icp_fit ||
           removeExtraCharacters(a.name).localeCompare(removeExtraCharacters(b.name))
       ) ?? [];

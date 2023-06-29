@@ -269,6 +269,7 @@ export default function BumpFrameworksPage(props: {
   const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
   const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
     useDisclosure();
+  const [maximumBumpSoftLock, setMaximumBumpSoftLock] = useState(false);
 
   const bumpBuckets = useRef<BumpFrameworkBuckets>({
     ACCEPTED: {
@@ -359,6 +360,9 @@ export default function BumpFrameworksPage(props: {
           };
         }
         newBumpBuckets.BUMPED[bumpCount].total += 1;
+        if (bumpCount >= 3) {
+          setMaximumBumpSoftLock(true);
+        }
         if (bumpFramework.default) {
           newBumpBuckets.BUMPED[bumpCount].frameworks.unshift(bumpFramework);
         } else {
@@ -431,7 +435,7 @@ export default function BumpFrameworksPage(props: {
                   {/* Accepted */}
                   <BumpBucketView
                     bumpBucket={bumpBuckets.current?.ACCEPTED}
-                    bucketViewTitle={'Accepted Invitation'}
+                    bucketViewTitle={'First / Initial Followup'}
                     bucketViewDescription={'Prospects who have accepted your connection request.'}
                     status={'ACCEPTED'}
                     dataChannels={dataChannels}
@@ -444,15 +448,24 @@ export default function BumpFrameworksPage(props: {
                   {Object.keys(bumpBuckets.current?.BUMPED).map((bumpCount) => {
                     const bumpCountInt = parseInt(bumpCount);
                     const bumpBucket = bumpBuckets.current?.BUMPED[bumpCountInt];
-                    if (bumpCount === '0' || !bumpBucket) {
+
+                    const bumpToFollowupMap: Record<string, string> = {
+                      '1': 'Second',
+                      '2': 'Third',
+                      '3': 'Fourth',
+                      '4': 'Fifth',
+                      '5': 'Sixth',
+                    }
+                    const followupString = bumpToFollowupMap[bumpCount];
+                    if (followupString == undefined) {
                       return;
                     }
                     return (
                       <Flex mt='md' w='100%'>
                         <BumpBucketView
                           bumpBucket={bumpBucket}
-                          bucketViewTitle={`Bumped ${bumpCount} times`}
-                          bucketViewDescription={`Prospects who have been bumped ${bumpCountInt - 1} time(s).`}
+                          bucketViewTitle={`${followupString} Followup`}
+                          bucketViewDescription={`This is followup #${bumpCountInt + 1}`}
                           status={'BUMPED'}
                           dataChannels={dataChannels}
                           archetypeID={archetypeID}
@@ -465,10 +478,15 @@ export default function BumpFrameworksPage(props: {
                   })}
 
                   {/* Add another to sequence */}
-                  <Flex justify='center'>
-                    <Button variant='outline' mt='md' w='50%' onClick={openSequenceStep}>
+                  <Flex justify='center' align='center' w='100%' direction="column">
+                    <Button variant='outline' mt='md' w='50%' onClick={openSequenceStep} disabled={maximumBumpSoftLock}>
                       Add another sequence step
                     </Button>
+                    {maximumBumpSoftLock && (
+                      <Text color='grey' fz='sm'>
+                        We strongly recommend no more than 4 followups.
+                      </Text>
+                    )}
                     <CreateBumpFrameworkModal
                       modalOpened={addNewSequenceStepOpened}
                       openModal={openSequenceStep}

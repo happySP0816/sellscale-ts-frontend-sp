@@ -52,7 +52,7 @@ export const generateAIFollowup = async (userToken: string, prospectId: number, 
     userToken,
     prospectId,
     bumpFramework?.id,
-    bumpFramework?.accountResearch,
+    bumpFramework?.account_research?.join('\n') || '',
     bumpFramework?.bump_length || 'MEDIUM',
   );
 
@@ -137,13 +137,13 @@ export default function InboxProspectConvoBumpFramework(props: {
         prospect_id={props.prospect.id}
         persona_id={props.prospect.archetype_id}
         overall_status={props.prospect.overall_status}
-        account_research={bumpFramework?.accountResearch || ''}
+        account_research={bumpFramework?.account_research?.join('\n') || ''}
         convo_history={props.messages}
         onBumpFrameworkSelected={async (bumpFramework) => {
           if(bumpFramework){
             // Autofill generated account research
             const newAccountResearch = await autoFillBumpFrameworkAccountResearch(userToken, props.prospect.id);
-            setBumpFramework({ ...bumpFramework, accountResearch: newAccountResearch });
+            setBumpFramework({ ...bumpFramework, account_research: newAccountResearch.split('\n') });
           }
         }}
         onAccountResearchChanged={(research) => {

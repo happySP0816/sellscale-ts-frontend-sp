@@ -1,4 +1,5 @@
 import { nurturingModeState } from "@atoms/inboxAtoms";
+import { prospectShowPurgatoryState } from "@atoms/prospectAtoms";
 import { userTokenState, userDataState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import InboxProspectConvo from "@common/inbox/InboxProspectConvo";

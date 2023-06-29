@@ -33,7 +33,7 @@ const prospectChannelState = atom({
 
 const prospectShowPurgatoryState = atom({
   key: "prospect-show-purgatory",
-  default: false,
+  default: false as boolean | 'ALL',
 });
 
 export {

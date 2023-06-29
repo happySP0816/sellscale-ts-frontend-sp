@@ -263,7 +263,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
             bump_title={selectedBumpFramework.title}
             bump_description={selectedBumpFramework.description}
             bump_length={selectedBumpFramework.bump_length}
-            account_research_points={selectedBumpFramework.accountResearch ? (selectedBumpFramework.accountResearch.split('\n').map(point => point.replace(/^- /, '').trim())) : []}
+            account_research_points={selectedBumpFramework?.accountResearch ? (
+              selectedBumpFramework.accountResearch.split('\n').map(point => point.replace(/^- /, '').trim())
+            ) : []}
           />
         )}
       </div>

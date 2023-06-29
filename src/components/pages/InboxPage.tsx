@@ -27,8 +27,7 @@ export default function InboxPage() {
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { nurturingMode }] =
-        queryKey;
+      const [_key, { nurturingMode }] = queryKey;
 
       const response = await fetch(`${API_URL}/prospect/get_prospects`, {
         method: "POST",

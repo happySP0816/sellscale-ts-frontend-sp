@@ -1,10 +1,10 @@
-import { openedProspectIdState, openedOutboundChannelState, openedBumpFameworksState } from '@atoms/inboxAtoms';
+import { openedProspectIdState, openedOutboundChannelState, openedBumpFameworksState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon, LoadingOverlay, Tooltip } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
-import { IconExternalLink, IconWriting, IconSend, IconChevronUp, IconChevronDown } from '@tabler/icons';
-import { IconMessage2Cog } from '@tabler/icons-react';
+import { IconExternalLink, IconWriting, IconSend, IconChevronUp, IconChevronDown, IconSettings } from '@tabler/icons';
+import { IconMessage2Cog, IconSettingsFilled } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { deleteAutoBumpMessage } from '@utils/requests/autoBumpMessage';
 import { postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
@@ -12,7 +12,9 @@ import { sendLinkedInMessage } from '@utils/requests/sendMessage';
 import _, { get } from 'lodash';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { LinkedInMessage } from 'src';
+import { BumpFramework, LinkedInMessage } from 'src';
+import { generateAIFollowup } from './InboxProspectConvoBumpFramework';
+import AutoBumpFrameworkInfo from '@common/prospectDetails/AutoBumpFrameworkInfo';
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -21,10 +23,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
     linkedin_public_id: string;
     scrollToBottom?: () => void;
     msgLoading?: boolean;
-    onGenerateMessage: (prospectId: number) => Promise<{
-      msg: any;
-      aiGenerated: boolean;
-    }>;
   },
   ref
 ) {
@@ -35,7 +33,52 @@ export default forwardRef(function InboxProspectConvoSendBox(
         getAiGenerated: () => aiGenerated,
         setAiGenerated: setAiGenerated,
         getMessageDraft: () => messageDraft,
-        setMessageDraft: setMessageDraft,
+        setMessageDraft: (msg: string, bumpFramework?: {
+          description?: string,
+          id?: number,
+          length?: string,
+          title?: string
+        }, accountResearch?: string) => {
+          setMessageDraft(msg);
+          // Patching the response into a bump framework
+          if (bumpFramework) {
+            setBumpFramework((prev) => {
+              let newFramework: BumpFramework;
+              if(!prev) {
+                newFramework = {
+                  id: -1,
+                  title: '',
+                  description: '',
+                  overall_status: '',
+                  substatus: '',
+                  active: true,
+                  default: false,
+                  bump_length: '',
+                  bumped_count: null,
+                  accountResearch: undefined,
+                }
+              } else {
+                newFramework = { ...prev };
+              }
+              if(bumpFramework.description){
+                newFramework.description = bumpFramework.description;
+              }
+              if(bumpFramework.id){
+                newFramework.id = bumpFramework.id;
+              }
+              if(bumpFramework.title){
+                newFramework.title = bumpFramework.title;
+              }
+              if(bumpFramework.length){
+                newFramework.bump_length = bumpFramework.length;
+              }
+              if(accountResearch){
+                newFramework.accountResearch = accountResearch;
+              }
+              return newFramework;
+            });
+          }
+        },
       };
     },
     []
@@ -50,6 +93,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const openedOutboundChannel = useRecoilValue(openedOutboundChannelState);
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
+  const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState);
 
   const [messageDraft, setMessageDraft] = useState('');
   const [aiGenerated, setAiGenerated] = useState(false);
@@ -100,6 +144,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
       });
     }, 1000);
   };
+
+  console.log(selectedBumpFramework);
 
   return (
     <Paper
@@ -175,29 +221,35 @@ export default forwardRef(function InboxProspectConvoSendBox(
           ])}
         />
         <Group style={{ position: 'absolute', bottom: 5, left: 10 }}>
-          <Button
-            leftIcon={<IconWriting size='1rem' />}
-            variant='light'
-            color="gray.8"
-            radius={theme.radius.lg}
-            size='xs'
-            onClick={async () => {
-              setMsgLoading(true);
-              const result = await props.onGenerateMessage(props.prospectId);
-              if(result) {
+          <Button.Group>
+            <Button
+              leftIcon={<IconWriting size='1rem' />}
+              variant='outline'
+              color="gray.8"
+              radius={theme.radius.lg}
+              size='xs'
+              onClick={async () => {
+                setMsgLoading(true);
+                const result = await generateAIFollowup(userToken, props.prospectId, selectedBumpFramework);
                 setMessageDraft(result.msg);
                 setAiGenerated(result.aiGenerated);
                 setMsgLoading(false);
-              }
-            }}
-          >
-            Generate Message
-          </Button>
-          <Tooltip label="Bump Frameworks" withArrow>
-            <ActionIcon variant="light" color="gray.8" radius="xl" size={30} onClick={() => setOpenBumpFrameworks(true)}>
-              <IconMessage2Cog size="1.125rem" />
-            </ActionIcon>
-          </Tooltip>
+              }}
+            >
+              Generate Message
+            </Button>
+            <Tooltip label={selectedBumpFramework ? `Using ${selectedBumpFramework.title}` : `Configure Msg Gen`} withArrow>
+            <Button
+              variant="outline"
+              color="gray.8"
+              radius={theme.radius.lg}
+              size='xs'
+              onClick={() => setOpenBumpFrameworks(true)}
+            >
+              {selectedBumpFramework ? (<IconSettingsFilled size="1.225rem" />) : (<IconSettings size="1.225rem" />)}
+            </Button>
+            </Tooltip>
+          </Button.Group>
         </Group>
         <div style={{ position: 'absolute', bottom: 5, right: 10 }}>
           <Button leftIcon={<IconSend size='1rem' />} radius={theme.radius.lg} size='xs'
@@ -206,6 +258,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
             Send
           </Button>
         </div>
+        {aiGenerated && selectedBumpFramework && selectedBumpFramework.id !== -1 && (
+          <AutoBumpFrameworkInfo
+            bump_title={selectedBumpFramework.title}
+            bump_description={selectedBumpFramework.description}
+            bump_length={selectedBumpFramework.bump_length}
+            account_research_points={selectedBumpFramework.accountResearch ? (selectedBumpFramework.accountResearch.split('\n').map(point => point.replace(/^- /, '').trim())) : []}
+          />
+        )}
       </div>
     </Paper>
   );

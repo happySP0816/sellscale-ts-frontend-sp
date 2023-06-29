@@ -12,9 +12,9 @@ import { API_URL } from "@constants/data";
 export async function postBumpGenerateResponse(
   userToken: string,
   prospectID: number,
-  bumpFrameworkID: number,
-  accountResearch: string | null,
-  bumpLength: string | null,
+  bumpFrameworkID: number | undefined,
+  accountResearch: string | undefined,
+  bumpLength: string | undefined,
 ): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/li_conversation/prospect/generate_response`,

@@ -275,7 +275,7 @@ export default function ProspectDetailsViewConversation(
           bump_framework_title: selectedBumpFramework.title,
           bump_framework_description: selectedBumpFramework.description,
           bump_framework_length: selectedBumpFramework.bump_length,
-          account_research_points: accountResearch.split('\n').map(point => point.replace(/^- /, '').trim())
+          account_research_points: accountResearch?.split('\n')?.map(point => point.replace(/^- /, '').trim())
           ,
         }
       } else if (autoBumpMessage.current) {

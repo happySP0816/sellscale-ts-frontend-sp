@@ -136,11 +136,17 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
         });
       }
 
+      console.log(result);
+
       // Set if we have an auto bump message generated
       const autoBumpMsgResponse = await getAutoBumpMessage(userToken, openedProspectId);
       if (autoBumpMsgResponse.status === 'success') {
         sendBoxRef.current?.setAiGenerated(true);
-        sendBoxRef.current?.setMessageDraft(autoBumpMsgResponse.data.message);
+        sendBoxRef.current?.setMessageDraft(
+          autoBumpMsgResponse.data.message, 
+          autoBumpMsgResponse.data.bump_framework,
+          autoBumpMsgResponse.data.account_research_points
+        );
       }
 
       return result.status === 'success' ? (result.data.data.reverse() as LinkedInMessage[]) : [];
@@ -253,16 +259,10 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           prospectId={openedProspectId}
           messages={messages || []}
           scrollToBottom={scrollToBottom}
-          onGenerateMessage={async (prospectId) => {
-            return await bumpFrameworksRef.current?.get(prospectId)?.generateAIFollowup();
-          }}
         />
       </Stack>
       {prospect && (
         <InboxProspectConvoBumpFramework
-          ref={(ref) => {
-            bumpFrameworksRef.current.set(prospect.id, ref);
-          }}
           prospect={prospect}
           messages={messages || []}
         />

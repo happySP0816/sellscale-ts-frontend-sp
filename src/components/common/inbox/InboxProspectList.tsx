@@ -170,7 +170,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
           linkedin_status: p.linkedin_status,
           overall_status: p.overall_status,
           email_status: p.email_status,
-          in_purgatory: p.hidden_until ? new Date(p.hidden_until) > new Date() : false,
+          in_purgatory: p.hidden_until ? new Date(p.hidden_until).getTime() > new Date().getTime() : false,
         };
       })
       .sort(
@@ -224,7 +224,9 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
 
   // Recommended Filter
   if (segmentedSection === 'RECOMMENDED') {
-    prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
+    if(!nurturingMode) {
+      prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
+    }
     prospects = prospects.filter((p) => !p.latest_msg_from_sdr || isWithinLastXDays(p.latest_msg_datetime, 3));
   }
 

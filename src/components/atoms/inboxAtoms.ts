@@ -1,4 +1,5 @@
 import { atom } from "recoil";
+import { BumpFramework } from "src";
 
 const openedProspectIdState = atom({
   key: "inbox-opened-prospect-id",
@@ -20,9 +21,15 @@ const nurturingModeState = atom({
   default: false,
 });
 
+const selectedBumpFrameworkState = atom({
+  key: "inbox-selected-bump-framework",
+  default: undefined as BumpFramework | undefined,
+});
+
 export {
   openedProspectIdState,
   openedOutboundChannelState,
   openedBumpFameworksState,
   nurturingModeState,
+  selectedBumpFrameworkState,
 };

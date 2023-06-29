@@ -224,7 +224,9 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
 
   // Recommended Filter
   if (segmentedSection === 'RECOMMENDED') {
-    prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
+    if(!nurturingMode) {
+      prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
+    }
     prospects = prospects.filter((p) => !p.latest_msg_from_sdr || isWithinLastXDays(p.latest_msg_datetime, 3));
   }
 

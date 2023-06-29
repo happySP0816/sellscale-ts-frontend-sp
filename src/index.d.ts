@@ -201,6 +201,7 @@ export type BumpFramework = {
   bumped_count: number | null;
   // client_archetype_id: number;
   // client_archetype_archetype: string;
+  accountResearch?: string;
 };
 
 export type EmailBumpFramework = {

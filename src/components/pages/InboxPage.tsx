@@ -40,7 +40,7 @@ export default function InboxPage() {
           channel: "SELLSCALE",
           limit: 10000, // TODO: Maybe use pagination method instead
           status: nurturingMode ? ['ACCEPTED', 'BUMPED'] : ['ACTIVE_CONVO', 'DEMO'],
-          show_purgatory: "ALL",
+          show_purgatory: 'ALL',
         }),
       });
       if (response.status === 401) {

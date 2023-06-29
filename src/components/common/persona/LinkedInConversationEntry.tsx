@@ -154,7 +154,9 @@ export function AiMetaDataBadge(props: {
             <Text size='sm' mt='md'>
               <span style={{ fontWeight: 550 }}>Framework:</span> {props.bumpFrameworkTitle}
             </Text>
-            <Text size='sm'>{props.bumpFrameworkDescription}</Text>
+            <TextWithNewline style={{fontSize: '14px'}} breakheight='10px'>
+              {props.bumpFrameworkDescription}
+            </TextWithNewline>
 
             {props.bumpFrameworkLength && (
               <Badge color={valueToColor(theme, props.bumpFrameworkLength)} size='xs' variant='filled'>

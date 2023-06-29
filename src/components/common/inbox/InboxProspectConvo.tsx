@@ -129,12 +129,15 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       const result = await getConversation(userToken, openedProspectId);
       // Indicate messages as read
       const readLiResult = await readLiMessages(userToken, openedProspectId);
-      if (readLiResult.status === 'success' && readLiResult.data.updated) {
-        // Update the prospect list
-        queryClient.invalidateQueries({
-          queryKey: ['query-dash-get-prospects'],
-        });
-      }
+      if (readLiResult.status === 'success' && readLiResult.data.updated) {}
+
+      // Refetch the prospect list
+      queryClient.refetchQueries({
+        queryKey: [`query-dash-get-prospects`],
+      });
+      queryClient.refetchQueries({
+        queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
+      });
 
       console.log(result);
 

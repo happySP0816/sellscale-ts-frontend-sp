@@ -132,18 +132,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
     setMsgLoading(false);
     setAiGenerated(false);
     setTimeout(() => props.scrollToBottom && props.scrollToBottom(), 100);
-
+    
     queryClient.refetchQueries({
-      queryKey: [`query-dash-get-prospects`],
+      queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
     });
-    setTimeout(() => {
-      queryClient.refetchQueries({
-        queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
-      });
-      queryClient.refetchQueries({
-        queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
-      });
-    }, 1000);
   };
 
   console.log(selectedBumpFramework);

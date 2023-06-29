@@ -53,7 +53,7 @@ export const generateAIFollowup = async (userToken: string, prospectId: number, 
     prospectId,
     bumpFramework?.id,
     bumpFramework?.accountResearch,
-    bumpFramework?.bump_length,
+    bumpFramework?.bump_length || 'MEDIUM',
   );
 
   if (result.status === 'success') {

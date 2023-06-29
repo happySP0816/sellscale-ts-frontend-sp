@@ -107,7 +107,18 @@ export default forwardRef(function InboxProspectConvoSendBox(
     // Delete the auto bump message if it exists
     await deleteAutoBumpMessage(userToken, props.prospectId);
 
-    const result = await sendLinkedInMessage(userToken, props.prospectId, msg, aiGenerated);
+    const result = await sendLinkedInMessage(
+      userToken,
+      props.prospectId,
+      msg,
+      aiGenerated,
+      undefined,
+      selectedBumpFramework?.id,
+      selectedBumpFramework?.title,
+      selectedBumpFramework?.description,
+      selectedBumpFramework?.bump_length,
+      selectedBumpFramework?.account_research
+    );
     if (result.status === 'success') {
       /*
       let yourMessage = _.cloneDeep(props.messages)

@@ -136,6 +136,8 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
         });
       }
 
+      console.log(result);
+
       // Set if we have an auto bump message generated
       const autoBumpMsgResponse = await getAutoBumpMessage(userToken, openedProspectId);
       if (autoBumpMsgResponse.status === 'success') {

@@ -258,7 +258,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
             Send
           </Button>
         </div>
-        {aiGenerated && selectedBumpFramework && (
+        {aiGenerated && selectedBumpFramework && selectedBumpFramework.id !== -1 && (
           <AutoBumpFrameworkInfo
             bump_title={selectedBumpFramework.title}
             bump_description={selectedBumpFramework.description}

@@ -199,6 +199,7 @@ const dontShowStatuses = [
   "ACTIVE_CONVO_QUAL_NEEDED",
   "ACTIVE_CONVO_QUESTION",
   "ACTIVE_CONVO_SCHEDULING",
+  "ACTIVE_CONVO_REVIVAL",
 ];
 
 const useStyles = createStyles((theme) => ({
@@ -457,6 +458,7 @@ export default function ProspectDetailsChangeStatus(
             { value: "ACTIVE_CONVO_OBJECTION", label: "Objection" },
             { value: "ACTIVE_CONVO_SCHEDULING", label: "Scheduling" },
             { value: "ACTIVE_CONVO_NEXT_STEPS", label: "Next Steps" },
+            { value: "ACTIVE_CONVO_REVIVAL", label: "Revival (AI Follow Ups Needed)" },
           ]}
           defaultValue={props.channelData.currentStatus}
           onChange={async (value) => {

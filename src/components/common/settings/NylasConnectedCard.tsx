@@ -159,7 +159,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                   component="a"
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={nylasClientId ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code` : ''}
+                  href={nylasClientId ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scopes=email` : ''}
                   my={20}
                   variant="outline"
                   size="md"

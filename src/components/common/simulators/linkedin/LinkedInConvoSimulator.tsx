@@ -27,7 +27,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
-import { Icon24Hours, IconExternalLink, IconRefresh, IconRobot, IconSend } from '@tabler/icons';
+import { Icon24Hours, IconExternalLink, IconRefresh, IconReload, IconRobot, IconSend } from '@tabler/icons';
 import { IconPlayerPlayFilled } from '@tabler/icons-react';
 import { convertDateToLocalTime, formatToLabel, testDelay, valueToColor } from '@utils/general';
 import {
@@ -123,6 +123,15 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
 
     const updateResponse = await updateLiConvoSim(userToken, sim_id);
     return updateResponse.status === 'success';
+  };
+
+  const resetSimulation = async () => {
+    console.log('Resetting simulation');
+
+    const oldProspect = _.cloneDeep(prospect);
+    clearSimulation();
+    setProspect(oldProspect);
+    startupSimulation();
   };
 
   const clearSimulation = () => {
@@ -298,15 +307,15 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
               </Group>
             </Group>
             <div>
-              <Tooltip label='Refresh Simulation' withArrow>
+              <Tooltip label='Reset Simulation' withArrow>
                 <ActionIcon
                   color='gray.0'
                   variant='transparent'
                   onClick={() => {
-                    refreshSimulation();
+                    resetSimulation();
                   }}
                 >
-                  <IconRefresh size='1.3rem' />
+                  <IconReload size='1.3rem' />
                 </ActionIcon>
               </Tooltip>
             </div>

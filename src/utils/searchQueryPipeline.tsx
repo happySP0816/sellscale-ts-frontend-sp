@@ -5,6 +5,7 @@ import { NavigateFunction } from "react-router-dom";
 import { navigateToPage } from "./documentChange";
 import { nameToInitials, valueToColor } from "./general";
 import { API_URL } from "@constants/data";
+import { getProspects } from "./requests/getProspects";
 
 /**
  * 
@@ -24,27 +25,19 @@ export async function activateQueryPipeline(query: string, navigate: NavigateFun
 
 async function checkProspects(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string){
 
-  const response = await fetch(
-    `${API_URL}/prospect/get_prospects`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: query,
-        show_purgatory: 'ALL',
-      }),
-    }
+  const response = await getProspects(
+    userToken,
+    query,
+    undefined,
+    undefined,
+    undefined,
+    'ALL',
   );
-  if(response.status === 401){ logout() }
-  const res = await response.json();
-  if (!res || !res.prospects) {
+  if(response.status === 'error'){
     return [];
   }
 
-  return res.prospects.map((prospect: any) => {
+  return response.data.map((prospect: any) => {
     return {
       title: prospect.full_name,
       description: prospect.title,

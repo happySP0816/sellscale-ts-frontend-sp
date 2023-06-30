@@ -5,6 +5,8 @@ import { Card, LoadingOverlay, Stack } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import EmailQueuedMessageItem from "./EmailQueuedMessageItem";
+import { Prospect } from "src";
+import { getProspects } from "@utils/requests/getProspects";
 
 export default function EmailQueuedMessages() {
   const userToken = useRecoilValue(userTokenState);
@@ -12,27 +14,18 @@ export default function EmailQueuedMessages() {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-queued-emails-prospects-all`],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/prospect/get_prospects`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          channel: "EMAIL",
-          limit: 99,
-          show_purgatory: "ALL",
-        }),
-      });
-      if (response.status === 401) {
-        logout();
-      }
-      const res = await response.json();
-      if (!res || !res.prospects) {
-        return [];
-      }
 
-      let prospects = res.prospects.filter(
+      const response = await getProspects(
+        userToken,
+        undefined,
+        "EMAIL",
+        99,
+        undefined,
+        'ALL',
+      );
+      let prospects = response.status === 'success' ? response.data as Prospect[] : [];
+
+      prospects = prospects.filter(
         (prospect: any) =>
           prospect.email_data &&
           prospect.email_data.date_scheduled_to_send &&

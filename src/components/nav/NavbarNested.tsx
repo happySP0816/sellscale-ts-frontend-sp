@@ -56,6 +56,7 @@ import { getOnboardingCompletionReport } from "@utils/requests/getOnboardingComp
 import { hexToHexWithAlpha } from "@utils/general";
 import getPersonas from "@utils/requests/getPersonas";
 import { Archetype } from 'src';
+import { getInboxNotifs } from "@utils/requests/getProspects";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -178,6 +179,8 @@ export function NavbarNested(props: {
   const [loadingPersonas, setLoadingPersonas] = useState(false);
   const [personaLinks, setPersonaLinks]: any = useState([]);
 
+  const inboxCount = Object.values(getInboxNotifs()).reduce((prev, cur) => prev+cur, 0);
+
   const navStyles = useSpring({
     x: props.isMobileView && !props.navOpened ? -NAV_BAR_SIDE_WIDTH * 2 : 0,
   });
@@ -259,12 +262,12 @@ export function NavbarNested(props: {
     },
     {
       mainKey: "inbox",
-      label: "Inbox",
+      label: `Inbox ${inboxCount ? `(${inboxCount})` : ""}`,
       icon: IconInbox,
       links: [
         {
           key: "inbox",
-          label: "Inbox",
+          label: `Inbox ${inboxCount ? `(${inboxCount})` : ""}`,
           icon: IconInbox,
           link: "/inbox",
         },

@@ -188,7 +188,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
               href={`https://www.linkedin.com/in/${props.linkedin_public_id}`}
               /* TODO: Message convo link instead */
             >
-              linkedin.com/in/{props.linkedin_public_id} <IconExternalLink size='0.65rem' />
+              linkedin.com/in/{_.truncate(props.linkedin_public_id, {length: 20})} <IconExternalLink size='0.65rem' />
             </Text>
           </Flex>
           {false && ( // TODO: Added chat box expanding

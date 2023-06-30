@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DatePicker, DateTimePicker } from '@mantine/dates';
+import { DatePicker, DatePickerInput, DateTimePicker } from '@mantine/dates';
 import { Text, createStyles, rem } from '@mantine/core';
 import { API_URL } from '@constants/data';
 import { useRecoilState } from 'recoil';
@@ -105,7 +105,7 @@ export default function ProspectDemoDateSelector(props: { prospectId: number }) 
   };
 
   return (
-    <DateTimePicker
+    <DatePickerInput
       label="Demo Scheduled For"
       placeholder="Select date and time"
       size="xs"

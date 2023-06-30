@@ -9,6 +9,7 @@ import { API_URL } from "@constants/data";
 import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { setPageTitle } from "@utils/documentChange";
+import { getProspects, populateInboxNotifs } from "@utils/requests/getProspects";
 import { useRecoilValue } from "recoil";
 import { Prospect } from "src";
 
@@ -29,34 +30,24 @@ export default function InboxPage() {
       // eslint-disable-next-line
       const [_key, { nurturingMode }] = queryKey;
 
-      const response = await fetch(`${API_URL}/prospect/get_prospects`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          channel: "SELLSCALE",
-          limit: 10000, // TODO: Maybe use pagination method instead
-          status: nurturingMode ? ['ACCEPTED', 'BUMPED'] : ['ACTIVE_CONVO', 'DEMO'],
-          show_purgatory: 'ALL',
-        }),
-      });
-      if (response.status === 401) {
-        logout();
-      }
-      const res = await response.json();
-      if (!res || !res.prospects) {
-        return [];
-      }
-      return res.prospects as Prospect[];
+      const response = await getProspects(
+        userToken,
+        undefined,
+        "SELLSCALE",
+        10000, // TODO: Maybe use pagination method instead
+        nurturingMode ? ['ACCEPTED', 'BUMPED'] : ['ACTIVE_CONVO', 'DEMO'],
+        'ALL',
+      );
+      return response.status === 'success' ? response.data as Prospect[] : [];
+      
     },
     refetchOnWindowFocus: false,
   });
   const prospects = data ?? [];
 
   if (prospects.length > 0) {
-    setPageTitle(`Inbox (${prospects.length})`);
+    const notifCount = populateInboxNotifs(prospects);
+    setPageTitle(`Inbox (${notifCount})`);
   }
   
   return (

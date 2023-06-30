@@ -152,7 +152,10 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
       .map((p) => {
         return {
           id: p.id,
-          name: p.full_name,
+          name: _.truncate(p.full_name, {
+            length: 48,
+            separator: ' ',
+          }),
           img_url: p.img_url,
           icp_fit: p.icp_fit_score,
           latest_msg: (p.li_is_last_message_from_sdr || nurturingMode)

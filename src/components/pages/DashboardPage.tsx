@@ -37,6 +37,7 @@ import DemoFeedbackSeeAllDrawer from "@drawers/DemoFeedbackSeeAllDrawer";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
 import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import PageFrame from "@common/PageFrame";
+import { getProspects } from "@utils/requests/getProspects";
 
 export default function DashboardSection() {
   const userToken = useRecoilValue(userTokenState);
@@ -69,27 +70,15 @@ export default function DashboardSection() {
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-dash-get-prospects`],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/prospect/get_prospects`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          channel: "SELLSCALE",
-          limit: 10000, // TODO: Maybe use pagination method instead
-          status: ["DEMO", "ACTIVE_CONVO"],
-          show_purgatory: "ALL",
-        }),
-      });
-      if (response.status === 401) {
-        logout();
-      }
-      const res = await response.json();
-      if (!res || !res.prospects) {
-        return [];
-      }
-      return res.prospects as Prospect[];
+      const response = await getProspects(
+        userToken,
+        undefined,
+        "SELLSCALE",
+        10000, // TODO: Maybe use pagination method instead
+        ["DEMO", "ACTIVE_CONVO"],
+        'ALL',
+      );
+      return response.status === 'success' ? response.data as Prospect[] : [];
     },
     refetchOnWindowFocus: false,
   });

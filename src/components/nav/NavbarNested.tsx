@@ -56,7 +56,7 @@ import { getOnboardingCompletionReport } from "@utils/requests/getOnboardingComp
 import { hexToHexWithAlpha } from "@utils/general";
 import getPersonas from "@utils/requests/getPersonas";
 import { Archetype } from 'src';
-import { getInboxNotifs } from "@utils/requests/getProspects";
+import { getInboxNotifs } from "@common/inbox/utils";
 
 const useStyles = createStyles((theme) => ({
   navbar: {

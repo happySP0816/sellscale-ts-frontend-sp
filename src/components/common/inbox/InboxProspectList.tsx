@@ -203,9 +203,9 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   // Advanced filters
   if (filtersState) {
     if (filtersState.recentlyContacted === 'HIDE') {
-      prospects = prospects.filter((p) => p.in_purgatory);
-    } else if (filtersState.recentlyContacted === 'SHOW') {
       prospects = prospects.filter((p) => !p.in_purgatory);
+    } else if (filtersState.recentlyContacted === 'SHOW') {
+      prospects = prospects.filter((p) => p.in_purgatory);
     }
 
     if (filtersState.channel === 'LINKEDIN') {
@@ -231,6 +231,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
       prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
     }
     prospects = prospects.filter((p) => !p.latest_msg_from_sdr || isWithinLastXDays(p.latest_msg_datetime, 3));
+    prospects = prospects.filter((p) => !p.in_purgatory);
   }
 
   useEffect(() => {

@@ -21,7 +21,7 @@ export default function ProspectDetailsOptionsMenu(props: {
   return (
     <Menu shadow="md" width={200} withArrow>
       <Menu.Target>
-        <ActionIcon radius='xl' variant='light'>
+        <ActionIcon color='gray.8' radius='xl' variant='default'>
           <IconDots size='1.125rem' />
         </ActionIcon>
       </Menu.Target>
@@ -47,9 +47,9 @@ export default function ProspectDetailsOptionsMenu(props: {
                     : theme.white,
               })}
             >
-              <Calendar
+              <DatePicker
                 minDate={new Date()}
-                onDateChange={async (date) => {
+                onChange={async (date) => {
                   if(!date){ return; }
                   let timeDiff = date.getTime() - new Date().getTime();
                   let daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
@@ -80,6 +80,7 @@ export default function ProspectDetailsOptionsMenu(props: {
                     }
                   );
                   setOpened(false);
+                  location.reload();
                 }}
               />
             </Popover.Dropdown>

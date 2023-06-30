@@ -168,6 +168,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   }, [openedProspectId]);
 
   console.log(data);
+  console.log(prospect);
   const statusValue = data?.details?.linkedin_status || 'ACTIVE_CONVO';
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
@@ -181,7 +182,11 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
               {data?.details.full_name}
             </Title>
             <Text weight={300} fs='italic' size={10} c='dimmed' truncate>
-              Last Updated: {convertDateToCasualTime(new Date())}
+              {(prospect && new Date(prospect.hidden_until).getTime() > new Date().getTime()) ? (
+                <>Snoozed Until: {convertDateToLocalTime(new Date(prospect.hidden_until))}</>
+              ) : (
+                <>Last Updated: {convertDateToCasualTime(new Date())}</>
+              )}
             </Text>
           </div>
           <Group sx={{ flexWrap: 'nowrap' }}>

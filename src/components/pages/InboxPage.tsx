@@ -5,11 +5,12 @@ import { logout } from "@auth/core";
 import InboxProspectConvo from "@common/inbox/InboxProspectConvo";
 import InboxProspectDetails from "@common/inbox/InboxProspectDetails";
 import InboxProspectList from "@common/inbox/InboxProspectList";
+import { populateInboxNotifs } from "@common/inbox/utils";
 import { API_URL } from "@constants/data";
 import { Grid } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { setPageTitle } from "@utils/documentChange";
-import { getProspects, populateInboxNotifs } from "@utils/requests/getProspects";
+import { getProspects } from "@utils/requests/getProspects";
 import { useRecoilValue } from "recoil";
 import { Prospect } from "src";
 

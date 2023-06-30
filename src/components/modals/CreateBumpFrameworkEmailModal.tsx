@@ -99,7 +99,7 @@ export default function CreateBumpFrameworkEmailModal(props: CreateBumpFramework
       title: "",
       objective: "",
       archetypeID: props.archetypeID,
-      default: false,
+      default: true,
       bumpedCount: props.bumpedCount,
     },
   });

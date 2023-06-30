@@ -117,7 +117,7 @@ export default function EditEmailBumpFrameworkModal({ context, id, innerProps }:
                 {...form.getInputProps("title")}
               />
               {
-                form.values.bumpedCount != null ? (
+                (form.values.bumpedCount != null && form.values.bumpedCount > 0) ? (
                   <NumberInput
                     mt='sm'
                     label="Bump Number"

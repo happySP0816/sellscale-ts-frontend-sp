@@ -81,7 +81,7 @@ export function LinkedInConversationEntry({
         {aiGenerated && (
           <AiMetaDataBadge
             location={{ position: 'absolute', top: 0, right: 0 }}
-            direction='left'
+            direction='top'
             bumpFrameworkId={bumpFrameworkId || 0}
             bumpFrameworkTitle={bumpFrameworkTitle || ''}
             bumpFrameworkDescription={bumpFrameworkDescription || ''}
@@ -154,7 +154,9 @@ export function AiMetaDataBadge(props: {
             <Text size='sm' mt='md'>
               <span style={{ fontWeight: 550 }}>Framework:</span> {props.bumpFrameworkTitle}
             </Text>
-            <Text size='sm'>{props.bumpFrameworkDescription}</Text>
+            <TextWithNewline style={{fontSize: '14px'}} breakheight='10px'>
+              {props.bumpFrameworkDescription}
+            </TextWithNewline>
 
             {props.bumpFrameworkLength && (
               <Badge color={valueToColor(theme, props.bumpFrameworkLength)} size='xs' variant='filled'>

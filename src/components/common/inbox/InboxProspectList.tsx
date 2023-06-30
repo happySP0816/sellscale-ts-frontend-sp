@@ -333,14 +333,15 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
                 (!prospects[i - 1] || prospect.linkedin_status !== prospects[i - 1].linkedin_status) && (
                   <div
                     style={{
-                      height: 20,
-                      backgroundColor: '#25262b',
-                      borderTopRightRadius: '1rem',
-                      borderBottomRightRadius: '1rem',
+                      backgroundColor: prospect.linkedin_status === 'ACTIVE_CONVO_REVIVAL' ? '#2c8c91' : '#25262b',
+                      padding: '6px'
                     }}
                   >
-                    <Text color='white' ta='center' fz={13} fw={500}>
-                      {labelizeConvoSubstatus(prospect.linkedin_status)}
+                    <Text color='white' ta='center' fz={13} fw={700}>
+                      {labelizeConvoSubstatus(prospect.linkedin_status)} 
+                    </Text>
+                    <Text color='white' ta='center' fz={11} fw={300}>
+                      {prospects.filter((p) => p.linkedin_status === prospect.linkedin_status).length} prospect(s)
                     </Text>
                   </div>
                 )}

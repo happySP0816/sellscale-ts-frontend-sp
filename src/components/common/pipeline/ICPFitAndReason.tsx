@@ -4,6 +4,7 @@ import { useHover } from '@mantine/hooks';
 import { IconCrown, IconDots, IconHandGrab, IconLoader, IconMoodSmile, IconQuestionMark, IconThumbDown, IconX } from '@tabler/icons';
 import { IconCircle4Filled, IconCircle3Filled, IconCircle2Filled, IconCircle1Filled, IconStarFilled, IconCircle5Filled, IconCircle6Filled, IconCircle7Filled, IconCircle9Filled, IconCircle8Filled, IconHelpCircleFilled } from '@tabler/icons-react';
 import { valueToColor } from '@utils/general';
+import _ from 'lodash';
 
 type PropsType = {
   icp_fit_score: number;
@@ -115,7 +116,7 @@ export default function ICPFitPill(props: PropsType) {
   const { hovered, ref } = useHover();
 
   return (
-    <Popover position='right' withArrow shadow='md' opened={hovered}>
+    <Popover position='right' withArrow shadow='md' opened={hovered} withinPortal>
       <Popover.Target>
         <div style={{ position: 'relative' }}>
         <Badge color={icpFitToColor(props.icp_fit_score)} ref={ref}>
@@ -156,7 +157,7 @@ export function ICPFitContents(props: PropsType) {
           size='xs'
           color={valueToColor(theme, props.archetype || 'Persona Unassigned')}
         >
-          {props.archetype || 'Persona Unassigned'}
+          {_.truncate(props.archetype, {length: 50}) || 'Persona Unassigned'}
         </Badge>
       )}
 

@@ -20,6 +20,7 @@ import {
   TextInput,
   Rating,
   Textarea,
+  Box,
 } from '@mantine/core';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import {
@@ -31,7 +32,10 @@ import {
 } from '@atoms/prospectAtoms';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import ProspectDetailsSummary from '../common/prospectDetails/ProspectDetailsSummary';
-import ProspectDetailsChangeStatus, { channelToIcon, updateChannelStatus } from '../common/prospectDetails/ProspectDetailsChangeStatus';
+import ProspectDetailsChangeStatus, {
+  channelToIcon,
+  updateChannelStatus,
+} from '../common/prospectDetails/ProspectDetailsChangeStatus';
 import ProspectDetailsCompany from '../common/prospectDetails/ProspectDetailsCompany';
 import ProspectDetailsNotes from '../common/prospectDetails/ProspectDetailsNotes';
 import { userTokenState } from '@atoms/userAtoms';
@@ -59,8 +63,9 @@ import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSe
 import { useForm } from '@mantine/form';
 import { DemoRating } from '@common/home/dashboard/demo/DemoRating';
 import { showNotification } from '@mantine/notifications';
+import ICPFitPill from '@common/pipeline/ICPFitAndReason';
 
-export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refetch: () => void }) {
+export default function DemoFeedbackDrawer(props: { prospects: Prospect[]; refetch: () => void }) {
   const theme = useMantineTheme();
   const queryClient = new QueryClient();
 
@@ -97,11 +102,9 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
     }
   }, [form.values.demoHappen]);
 
-
   if (!activeProspect) return <></>;
 
   const submitDemoFeedback = async (values: typeof form.values) => {
-
     const res = await fetch(`${API_URL}/client/demo_feedback`, {
       method: 'POST',
       headers: {
@@ -117,12 +120,11 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
     });
 
     if (res.status === 200) {
-
       await updateChannelStatus(
         activeProspect.id,
         userToken,
-        "LINKEDIN",
-        values.demoHappen === 'yes' ? "DEMO_WON" : "DEMO_LOSS",
+        'LINKEDIN',
+        values.demoHappen === 'yes' ? 'DEMO_WON' : 'DEMO_LOSS'
       );
 
       props.refetch();
@@ -134,16 +136,15 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
         title: 'Feedback Submitted',
         message: 'Your feedback has been submitted. Thank you!',
         color: 'green',
-        autoClose: 3000
+        autoClose: 3000,
       });
-
     } else {
       showNotification({
         id: 'demo-feedback-submit-fail',
         title: 'Feedback Failed to Submit',
         message: `Failed to submit your feedback (${res.status}). Please try again.`,
         color: 'red',
-        autoClose: false
+        autoClose: false,
       });
     }
   };
@@ -157,7 +158,7 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
       }}
       title={<Title order={3}>Demo Feedback</Title>}
       padding='xl'
-      size="lg"
+      size='lg'
       position='right'
       sx={{ position: 'relative' }}
     >
@@ -165,7 +166,7 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
       <Text fz='sm'>You scheduled a demo - how did it go? Your feedback will be used to improve our AI.</Text>
 
       <div style={{ marginTop: 20 }}>
-        <Paper withBorder p='xs' radius='md'>
+        <Paper withBorder p='xs' radius='md' sx={{ position: 'relative' }}>
           <Flex justify='space-between'>
             <div>
               <Avatar size='md' radius='xl' src={activeProspect.img_url} />
@@ -179,6 +180,13 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
               </Text>
             </div>
           </Flex>
+          <Box sx={{ position: 'absolute', right: 10, top: 10 }}>
+            <ICPFitPill
+              icp_fit_score={activeProspect.icp_fit_score}
+              icp_fit_reason={activeProspect.icp_fit_reason}
+              archetype={activeProspect.archetype_name}
+            />
+          </Box>
         </Paper>
       </div>
 
@@ -205,7 +213,14 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[], refet
                 </Text>
                 <DemoRating {...form.getInputProps('demoRating')} />
               </Stack>
-              <Textarea autosize minRows={2} maxRows={6} required label='What did you like / what would you change?' {...form.getInputProps('feedback')} />
+              <Textarea
+                autosize
+                minRows={2}
+                maxRows={6}
+                required
+                label='What did you like / what would you change?'
+                {...form.getInputProps('feedback')}
+              />
             </>
           )}
         </Stack>

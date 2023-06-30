@@ -85,6 +85,9 @@ export interface Prospect {
   hidden_reason: string;
   demo_date: any;
   icp_fit_score: number;
+  icp_fit_reason: string;
+  icp_fit_error: string;
+  archetype_name: string;
 }
 
 export interface ProspectShallow {

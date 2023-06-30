@@ -58,6 +58,7 @@ import { DateTimePicker } from '@mantine/dates';
 import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSelector';
 import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
 import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
+import _ from 'lodash';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -174,7 +175,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
               </Center>
             </Box>
             <Box>
-              <Text fz='xs'>- <u>{data?.details.persona}</u></Text>
+              <Text fz='xs'>- <u>{_.truncate(data?.details.persona, {length: 25})}</u></Text>
             </Box>
           </Flex>
 

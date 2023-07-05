@@ -20,7 +20,9 @@ import {
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
+import GoogleLogo from './g-logo.png'
 import {
+  IconBrandGoogle,
   IconBrandLinkedin,
   IconBriefcase,
   IconCloudDownload,
@@ -163,11 +165,14 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                   my={20}
                   variant="outline"
                   size="md"
-                  color="pink"
-                  rightIcon={<IconPlugConnected size="1rem" />}
+                  color="gray"
+                  sx={{'height': '40px', fontFamily: 'Roboto, sans-serif;', fontSize: '14px', color: '#00000088', }}
+                  pl='8px'
+                  pr='8px'
+                  leftIcon={<img src={GoogleLogo} width='18px' height='18px' />}
                   loading={isFetching}
                 >
-                  Connect Email & Calendar
+                  Sign In with Google
                 </Button>
               </Center>
             </>

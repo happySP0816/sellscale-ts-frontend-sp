@@ -166,13 +166,13 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                   variant="outline"
                   size="md"
                   color="gray"
-                  sx={{'height': '40px', fontFamily: 'Roboto, sans-serif;', fontSize: '14px', color: '#00000088', }}
+                  sx={{'height': '40px', fontFamily: 'Roboto, sans-serif;', fontSize: '14px', color: '#00000088',textTransform: 'uppercase' }}
                   pl='8px'
-                  pr='8px'
-                  leftIcon={<img src={GoogleLogo} width='18px' height='18px' />}
+                  pr='30px'
+                  leftIcon={<img src={GoogleLogo} width='18px' height='18px' style={{marginRight: '24px', marginLeft: '8px', marginTop: '11px', marginBottom: '11px'}} />}
                   loading={isFetching}
                 >
-                  Sign In with Google
+                  SIGN IN WITH GOOGLE
                 </Button>
               </Center>
             </>

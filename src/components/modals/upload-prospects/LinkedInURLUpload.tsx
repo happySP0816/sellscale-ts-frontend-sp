@@ -1,5 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { Button, Flex, TextInput } from "@mantine/core";
+import { Button, Flex, Text, TextInput } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { createProspectFromLinkedinLink } from "@utils/requests/createProspectFromLinkedinLink";
 import { useState } from "react";
@@ -60,25 +60,34 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
         withAsterisk
         error={
           url.length > 0 && !url.includes('linkedin.com/in/') && !url.includes('linkedin.com/sales/lead/') ?
-          'Please submit a valid LinkedIn URL'
-          :
-          null
+            'Please submit a valid LinkedIn URL'
+            :
+            null
         }
         disabled={loading}
       />
-      <Flex justify={'right'}>
-      <Button
-        mt='md'
-        disabled={!url || (url.length > 0 && !url.includes('linkedin.com/in/') && !url.includes('linkedin.com/sales/lead/'))}
-        color='teal'
-        w='128px'
-        onClick={triggerUploadProspectFromLinkedInURL}
-        loading={loading}
-      >
-        Upload
-      </Button>
+      <Flex justify='flex-end'>
+        <Button
+          mt='md'
+          disabled={!url || (url.length > 0 && !url.includes('linkedin.com/in/') && !url.includes('linkedin.com/sales/lead/'))}
+          color='teal'
+          w='128px'
+          onClick={triggerUploadProspectFromLinkedInURL}
+          loading={loading}
+        >
+          Upload
+        </Button>
       </Flex>
-      
+      <Flex justify={'flex-end'}>
+        {
+          url.length > 0 && (url.includes('linkedin.com/in/') || url.includes('linkedin.com/sales/lead/')) &&
+          <Text fz='xs' mt='xs'>
+            Note: This may take upwards of 1 minute.
+          </Text>
+        }
+      </Flex>
+
+
     </Flex>
   )
 }

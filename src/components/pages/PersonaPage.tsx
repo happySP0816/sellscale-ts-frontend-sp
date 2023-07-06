@@ -185,7 +185,7 @@ export default function PersonaPage() {
         )}
       </PageFrame>
       <PersonaDetailsDrawer personaOverviews={data} />
-      <PersonaUploadDrawer personaOverviews={data} />
+      <PersonaUploadDrawer personaOverviews={data} afterUpload={refetch}/>
       <UploadDetailsDrawer />
     </>
   );

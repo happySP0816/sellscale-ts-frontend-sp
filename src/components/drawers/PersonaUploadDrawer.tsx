@@ -1,4 +1,4 @@
-import { Drawer, Tabs, Title } from "@mantine/core";
+import { Drawer, Flex, Tabs, Title } from "@mantine/core";
 import FileDropAndPreview from "@modals/upload-prospects/FileDropAndPreview";
 import { useRecoilState } from "recoil";
 import { Archetype, PersonaOverview } from "src";
@@ -8,9 +8,11 @@ import {
 } from "../atoms/personaAtoms";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import CreatePersona from "@common/persona/CreatePersona";
+import LinkedInURLUpload from "@modals/upload-prospects/LinkedInURLUpload";
 
 export default function PersonaUploadDrawer(props: {
   personaOverviews: PersonaOverview[] | undefined;
+  afterUpload: () => void;
 }) {
   const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
   const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
@@ -41,6 +43,7 @@ export default function PersonaUploadDrawer(props: {
       <Tabs defaultValue="from-file" px="xs" color="teal">
         <Tabs.List>
           <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
+          <Tabs.Tab value="from-link">Import from Link</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="from-file" pt="xs">
           <FileDropAndPreview
@@ -48,9 +51,14 @@ export default function PersonaUploadDrawer(props: {
             onUploadSuccess={closeDrawer}
           />
         </Tabs.Panel>
-        <Tabs.Panel value="from-crm" pt="xs">
-          <ComingSoonCard h={200} />
+        <Tabs.Panel value="from-link" pt="xs">
+          <Flex w='100%' my='md'>
+            <LinkedInURLUpload archetypeID={currentPersonaId} afterUpload={props.afterUpload}/>
+          </Flex>
         </Tabs.Panel>
+        {/* <Tabs.Panel value="from-crm" pt="xs">
+          <ComingSoonCard h={200} />
+        </Tabs.Panel> */}
       </Tabs>
     </Drawer>
   );

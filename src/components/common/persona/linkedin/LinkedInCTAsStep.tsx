@@ -4,7 +4,7 @@ import { logout } from '@auth/core';
 import ComingSoonCard from '@common/library/ComingSoonCard';
 import TextAreaWithAI from '@common/library/TextAreaWithAI';
 import { API_URL } from '@constants/data';
-import { TextInput, Tabs, Box, Button, Flex, Select, Switch, Title } from '@mantine/core';
+import { Text, Tabs, Box, Button, Flex, Select, Switch, Title } from '@mantine/core';
 import { openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { ArchetypeCreation } from '@modals/CreatePersonaModal';
@@ -14,6 +14,7 @@ import { deleteCTA } from '@utils/requests/createCTA';
 import toggleCTA from '@utils/requests/toggleCTA';
 import { chunk, sortBy } from 'lodash';
 import { DataTableSortStatus, DataTable } from 'mantine-datatable';
+import moment from 'moment';
 import { useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { CTA, Archetype, PersonaOverview } from 'src';
@@ -126,6 +127,13 @@ export default function LinkedInCTAsStep(props: { persona: PersonaOverview, pers
             accessor: "text_value",
             title: "Call-to-Action",
             sortable: true,
+            render: ({ text_value, expiration_date }) => (
+              <Text>{text_value} {expiration_date ? 
+                (new Date().getTime() > new Date(expiration_date).getTime() ?
+                  <Text c="red">(Expired on {moment(expiration_date).format('MM/DD/YYYY')})</Text> : <Text c="violet">(⏰ Expiring {moment(expiration_date).format('MM/DD/YYYY')})</Text>
+                )
+              : ''}</Text>
+            ),
           },
           {
             accessor: "percentage",
@@ -145,10 +153,11 @@ export default function LinkedInCTAsStep(props: { persona: PersonaOverview, pers
           {
             accessor: "active",
             title: "Active",
-            render: ({ active, id }) => (
+            render: ({ active, id, expiration_date }) => (
               <Switch
                 color="teal"
                 checked={active}
+                disabled={(expiration_date && new Date().getTime() > new Date(expiration_date).getTime()) || undefined}
                 onClick={async (e) => {
                   if (data) {
                     const result = await toggleCTA(userToken, id);

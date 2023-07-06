@@ -23,6 +23,7 @@ import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import createCTA from "@utils/requests/createCTA";
 import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
+import { DateInput } from "@mantine/dates";
 
 export default function CreateNewCTAModel({
   context,
@@ -33,6 +34,7 @@ export default function CreateNewCTAModel({
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expirationDate, setExpirationDate] = useState<Date | null>(null);
   const userToken = useRecoilValue(userTokenState);
 
   const form = useForm({
@@ -44,7 +46,7 @@ export default function CreateNewCTAModel({
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
-    const result = await createCTA(userToken, innerProps.personaId, values.cta);
+    const result = await createCTA(userToken, innerProps.personaId, values.cta, expirationDate || undefined);
 
     setLoading(false);
 
@@ -144,6 +146,27 @@ export default function CreateNewCTAModel({
             </Box>
           </Flex>
         </Flex>
+
+        <Group my={20}>
+          <Box>
+                <Text fz='sm' fw={500}>
+                  Set CTA Expiration
+                </Text>
+                <Text fz='xs' c="dimmed">
+                  This CTA will automatically deactivate after the date set (optional).
+                </Text>
+          </Box>
+          <Box>
+            <DateInput
+              value={expirationDate}
+              onChange={setExpirationDate}
+              placeholder="Set Expiration Date"
+              clearable
+              maw={400}
+              mx="auto"
+            />
+          </Box>
+        </Group>
 
         {error && (
           <Text color="red" size="sm" mt="sm">

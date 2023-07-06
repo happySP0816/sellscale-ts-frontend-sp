@@ -230,7 +230,7 @@ export function NavbarNested(props: {
     let newTab = activeSubTab
       ? `${activeTab.trim()}-${activeSubTab.trim()}`
       : activeTab.trim();
-    newTab = newTab === "" || newTab === "home" ? "dashboard" : newTab;
+    newTab = newTab === "" || newTab === "home" ? "inbox" : newTab;
     navigateToPage(
       navigate,
       `/${newTab.replace("-", "/")}`,
@@ -246,19 +246,6 @@ export function NavbarNested(props: {
       label: "Search",
       icon: IconSearch,
       links: [{ key: "search", label: "Search", icon: IconSearch, link: "/" }],
-    },
-    {
-      mainKey: "dashboard",
-      label: "Dashboard",
-      icon: IconCheckbox,
-      links: [
-        {
-          key: "dashboard",
-          label: "Dashboard",
-          icon: IconCheckbox,
-          link: "/dashboard",
-        },
-      ],
     },
     {
       mainKey: "inbox",

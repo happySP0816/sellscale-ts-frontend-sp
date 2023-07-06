@@ -116,6 +116,7 @@ export interface CTA {
   archetype_id: number;
   active: boolean;
   text_value: string;
+  expiration_date?: string;
   performance?: {
     status_map: Record<string, number>;
     total_count: number;

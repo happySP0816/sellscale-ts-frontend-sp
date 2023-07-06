@@ -10,6 +10,7 @@ import {
   Textarea,
   LoadingOverlay,
   Card,
+  Box,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useState } from "react";
@@ -20,6 +21,7 @@ import { Archetype, CTA } from "src";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import createCTA, { updateCTA } from "@utils/requests/createCTA";
+import { DateInput } from "@mantine/dates";
 
 export default function EditCTAModal({
   context,
@@ -31,6 +33,7 @@ export default function EditCTAModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const userToken = useRecoilValue(userTokenState);
+  const [expirationDate, setExpirationDate] = useState<Date | null>(innerProps.cta.expiration_date ? new Date(innerProps.cta.expiration_date) : null);
 
   const form = useForm({
     initialValues: {
@@ -41,7 +44,7 @@ export default function EditCTAModal({
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
-    const result = await updateCTA(userToken, innerProps.cta.id, values.cta);
+    const result = await updateCTA(userToken, innerProps.cta.id, values.cta, expirationDate || undefined);
 
     setLoading(false);
 
@@ -99,6 +102,27 @@ export default function EditCTAModal({
             {form.getInputProps("cta").value.length}/{120}
           </Text>
         </Flex>
+
+        <Group my={20}>
+          <Box>
+                <Text fz='sm' fw={500}>
+                  Set CTA Expiration
+                </Text>
+                <Text fz='xs' c="dimmed">
+                  This CTA will automatically deactivate after the date set (optional).
+                </Text>
+          </Box>
+          <Box>
+            <DateInput
+              value={expirationDate}
+              onChange={setExpirationDate}
+              placeholder="Set Expiration Date"
+              clearable
+              maw={400}
+              mx="auto"
+            />
+          </Box>
+        </Group>
 
         {error && (
           <Text color="red" size="sm" mt="sm">

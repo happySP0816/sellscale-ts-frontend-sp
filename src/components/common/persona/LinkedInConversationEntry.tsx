@@ -137,7 +137,7 @@ export function AiMetaDataBadge(props: {
         >
           {
             props.badgeBFTitle ? (
-              props.bumpFrameworkTitle ?  props.bumpFrameworkTitle.slice(0, 15) + "..." : 'AI'
+              props.bumpFrameworkTitle && props.bumpFrameworkTitle.length > 20 ?  props.bumpFrameworkTitle.slice(0, 20) + "..." : props.bumpFrameworkTitle || 'AI'
             ) : (
               'AI'
             )

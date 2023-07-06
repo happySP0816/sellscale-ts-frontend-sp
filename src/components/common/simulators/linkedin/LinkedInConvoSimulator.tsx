@@ -392,6 +392,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
                   bumpFrameworkLength={metadata.bump_framework_length}
                   accountResearchPoints={metadata.account_research_points}
                   cta={metadata.cta}
+                  badgeBFTitle
                 />
                 
               </div>

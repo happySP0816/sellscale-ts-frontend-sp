@@ -47,6 +47,7 @@ interface CommentHtmlProps {
   bumpFrameworkLength?: string;
   accountResearchPoints?: string[];
   cta?: string;
+  badgeBFTitle?: boolean;
 }
 
 export function LinkedInConversationEntry({
@@ -62,6 +63,7 @@ export function LinkedInConversationEntry({
   bumpFrameworkLength,
   accountResearchPoints,
   cta,
+  badgeBFTitle,
 }: CommentHtmlProps) {
   const { classes } = useStyles();
   const theme = useMantineTheme();
@@ -88,6 +90,7 @@ export function LinkedInConversationEntry({
             bumpFrameworkLength={bumpFrameworkLength || ''}
             accountResearchPoints={accountResearchPoints || []}
             cta={cta || ''}
+            badgeBFTitle={badgeBFTitle}
           />
         )}
       </Group>
@@ -108,6 +111,7 @@ export function AiMetaDataBadge(props: {
   bumpFrameworkLength: string;
   accountResearchPoints: string[];
   cta?: string;
+  badgeBFTitle?: boolean;
 }) {
   const theme = useMantineTheme();
   return (
@@ -131,7 +135,13 @@ export function AiMetaDataBadge(props: {
             cursor: 'pointer',
           }}
         >
-          AI
+          {
+            props.badgeBFTitle ? (
+              props.bumpFrameworkTitle ?  props.bumpFrameworkTitle.slice(0, 15) + "..." : 'AI'
+            ) : (
+              'AI'
+            )
+          }
         </Badge>
       </HoverCard.Target>
       <HoverCard.Dropdown>
@@ -154,7 +164,7 @@ export function AiMetaDataBadge(props: {
             <Text size='sm' mt='md'>
               <span style={{ fontWeight: 550 }}>Framework:</span> {props.bumpFrameworkTitle}
             </Text>
-            <TextWithNewline style={{fontSize: '14px'}} breakheight='10px'>
+            <TextWithNewline style={{ fontSize: '14px' }} breakheight='10px'>
               {props.bumpFrameworkDescription}
             </TextWithNewline>
 

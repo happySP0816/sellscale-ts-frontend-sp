@@ -40,7 +40,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
     } else {
       showNotification({
         title: "Error",
-        message: "Failed to upload prospect from LinkedIn URL",
+        message: result.message || "Could not upload. Double check profile URL and for duplicate entry.",
         color: "red",
         autoClose: 3000,
       })

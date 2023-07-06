@@ -22,7 +22,8 @@ import { useDisclosure } from '@mantine/hooks';
 import { openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
-import { IconBook, IconCheck, IconEdit, IconList, IconPlus, IconX } from '@tabler/icons';
+import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
+import { IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconTransferIn, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
@@ -62,12 +63,14 @@ function BumpBucketView(props: {
   dataChannels: MsgResponse | undefined;
   archetypeID: number | null;
   afterCreate: () => void;
+  afterClone: () => void;
   afterEdit: () => void;
   bumpedCount?: number;
 }) {
   const theme = useMantineTheme();
 
   const [createBFModalOpened, { open, close }] = useDisclosure();
+  const [cloneBFModalOpened, { open: openClone, close: closeClone }] = useDisclosure();
   const [showAll, setShowAll] = useState(false);
 
   return (
@@ -81,11 +84,18 @@ function BumpBucketView(props: {
               {props.bucketViewDescription}
             </Text>
           </Flex>
-          <Tooltip label='Create a new Bump Framework' withinPortal>
-            <ActionIcon onClick={open}>
-              <IconPlus size='1.25rem' />
-            </ActionIcon>
-          </Tooltip>
+          <Flex>
+            <Tooltip label='Clone an existing Bump Framework' withinPortal>
+              <ActionIcon onClick={openClone}>
+                <IconFolders size='1.25rem' />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label='Create a new Bump Framework' withinPortal>
+              <ActionIcon onClick={open}>
+                <IconPlus size='1.25rem' />
+              </ActionIcon>
+            </Tooltip>
+          </Flex>
           <CreateBumpFrameworkModal
             modalOpened={createBFModalOpened}
             openModal={open}
@@ -96,6 +106,15 @@ function BumpBucketView(props: {
             archetypeID={props.archetypeID}
             bumpedCount={props.bumpedCount}
           />
+          <CloneBumpFrameworkModal
+            modalOpened={cloneBFModalOpened}
+            openModal={openClone}
+            closeModal={closeClone}
+            backFunction={props.afterClone}
+            archetypeID={props.archetypeID as number}
+            status={props.status}
+            bumpedCount={props.bumpedCount}
+          />
         </Flex>
         <Card.Section>
           <Divider mt='sm' />
@@ -103,9 +122,11 @@ function BumpBucketView(props: {
 
         {/* Bump Frameworks */}
         <Card.Section px='xs'>
-          {props.bumpBucket && Object.keys(props.bumpBucket).length === 0 ? (
+          {props.bumpBucket && props.bumpBucket.total === 0 ? (
             // No Bump Frameworks
-            <Text>Please create a Bump Framework using the + button above.</Text>
+            <Flex justify='center' align='center'>
+              <Text my='md'>Please create a Bump Framework using the + button above.</Text>
+            </Flex>
           ) : (
             <>
               {props.bumpBucket.frameworks.map((framework, index) => {
@@ -122,9 +143,9 @@ function BumpBucketView(props: {
                           ml='md'
                           onLabel='Default'
                           offLabel='Default'
-                          checked={framework.default}
+                          checked={framework.default === true}
                           thumbIcon={
-                            framework.default ? (
+                            framework.default === true ? (
                               <IconCheck size='0.8rem' color={theme.colors.teal[theme.fn.primaryShade()]} stroke={3} />
                             ) : (
                               <IconX size='0.8rem' color={theme.colors.red[theme.fn.primaryShade()]} stroke={3} />
@@ -133,7 +154,7 @@ function BumpBucketView(props: {
                           disabled={true}
                           styles={{
                             label: {
-                              backgroundColor: framework.default
+                              backgroundColor: framework.default === true
                                 ? theme.colors.teal[theme.fn.primaryShade()]
                                 : theme.colors.red[theme.fn.primaryShade()],
                             },
@@ -336,7 +357,20 @@ export default function BumpFrameworksPage(props: {
         total: 0,
         frameworks: [],
       },
-      BUMPED: {},
+      BUMPED: {
+        1: {
+          total: 0,
+          frameworks: [],
+        },
+        2: {
+          total: 0,
+          frameworks: [],
+        },
+        3: {
+          total: 0,
+          frameworks: [],
+        },
+      },
       ACTIVE_CONVO: {
         total: 0,
         frameworks: [],
@@ -354,10 +388,7 @@ export default function BumpFrameworksPage(props: {
       } else if (status === 'BUMPED') {
         const bumpCount = bumpFramework.bumped_count as number;
         if (!(bumpCount in newBumpBuckets.BUMPED)) {
-          newBumpBuckets.BUMPED[bumpCount] = {
-            total: 0,
-            frameworks: [],
-          };
+          continue;
         }
         newBumpBuckets.BUMPED[bumpCount].total += 1;
         if (bumpCount >= 3) {
@@ -442,6 +473,7 @@ export default function BumpFrameworksPage(props: {
                     archetypeID={archetypeID}
                     afterCreate={triggerGetBumpFrameworks}
                     afterEdit={triggerGetBumpFrameworks}
+                    afterClone={triggerGetBumpFrameworks}
                   />
 
                   {/* Bumped (map) */}
@@ -472,13 +504,14 @@ export default function BumpFrameworksPage(props: {
                           afterCreate={triggerGetBumpFrameworks}
                           afterEdit={triggerGetBumpFrameworks}
                           bumpedCount={bumpCountInt}
+                          afterClone={triggerGetBumpFrameworks}
                         />
                       </Flex>
                     );
                   })}
 
                   {/* Add another to sequence */}
-                  <Flex justify='center' align='center' w='100%' direction="column">
+                  {/* <Flex justify='center' align='center' w='100%' direction="column">
                     <Button variant='outline' mt='md' w='50%' onClick={openSequenceStep} disabled={maximumBumpSoftLock}>
                       Add another sequence step
                     </Button>
@@ -497,7 +530,7 @@ export default function BumpFrameworksPage(props: {
                       archetypeID={archetypeID}
                       bumpedCount={Object.keys(bumpBuckets.current?.BUMPED).length + 1}
                     />
-                  </Flex>
+                  </Flex> */}
                 </Flex>
               </ScrollArea>
             ) : (

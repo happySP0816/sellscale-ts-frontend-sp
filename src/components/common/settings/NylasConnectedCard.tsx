@@ -96,7 +96,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                 size="xl"
                 variant="filled"
                 color="blue"
-                pr={3}
+                pr={8}
                 rightSection={
                   <ActionIcon
                     size="xs"
@@ -129,7 +129,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                       });
                     }}
                   >
-                    <IconX size={15} />
+                    <IconX size={15} color='white'/>
                   </ActionIcon>
                 }
                 styles={{ root: { textTransform: "initial" } }}

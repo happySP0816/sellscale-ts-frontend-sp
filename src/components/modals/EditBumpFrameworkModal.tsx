@@ -24,6 +24,7 @@ interface EditBumpFramework extends Record<string, unknown> {
   default: boolean;
   onSave: () => void;
   bumpedCount?: number;
+  bumpDelayDays: number;
 }
 
 export default function EditBumpFrameworkModal({ context, id, innerProps }: ContextModalProps<EditBumpFramework>) {
@@ -39,6 +40,7 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
       title: innerProps.title,
       description: innerProps.description,
       bumpedCount: innerProps.bumpedCount ?? null,
+      bumpDelayDays: innerProps.bumpDelayDays,
       default: innerProps.default,
     },
   });
@@ -81,6 +83,7 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
       form.values.bumpedCount,
+      form.values.bumpDelayDays,
       form.values.default,
     );
 
@@ -159,31 +162,31 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
       <Text fz="sm" mt="md">
         Bump Length
       </Text>
-        <HoverCard width={280} shadow="md">
-          <HoverCard.Target>
-            <Flex w='100%' align='center' justify='center'>
-              <Slider
-                label={null}
-                step={50}
-                marks={bumpFrameworkLengthMarks}
-                mb="xl"
-                p="md"
-                w='90%'
-                value={bumpLengthValue}
-                onChange={(value) => {
-                  setBumpLengthValue(value);
-                }}
-              />
-            </Flex>
-          </HoverCard.Target>
-          <HoverCard.Dropdown style={{ "backgroundColor": "rgb(34, 37, 41)", "padding": 0 }}>
-            <Paper style={{ "backgroundColor": "rgb(34, 37, 41)", "color": "white", "padding": 10 }}>
-              <TextWithNewline breakheight="10px">
-                {"Control how long you want the generated bump to be:\n\nShort: 1-2 sentences\nMedium: 3-4 sentences\nLong: 2 paragraphs"}
-              </TextWithNewline>
-            </Paper>
-          </HoverCard.Dropdown>
-        </HoverCard>
+      <HoverCard width={280} shadow="md">
+        <HoverCard.Target>
+          <Flex w='100%' align='center' justify='center'>
+            <Slider
+              label={null}
+              step={50}
+              marks={bumpFrameworkLengthMarks}
+              mb="xl"
+              p="md"
+              w='90%'
+              value={bumpLengthValue}
+              onChange={(value) => {
+                setBumpLengthValue(value);
+              }}
+            />
+          </Flex>
+        </HoverCard.Target>
+        <HoverCard.Dropdown style={{ "backgroundColor": "rgb(34, 37, 41)", "padding": 0 }}>
+          <Paper style={{ "backgroundColor": "rgb(34, 37, 41)", "color": "white", "padding": 10 }}>
+            <TextWithNewline breakheight="10px">
+              {"Control how long you want the generated bump to be:\n\nShort: 1-2 sentences\nMedium: 3-4 sentences\nLong: 2 paragraphs"}
+            </TextWithNewline>
+          </Paper>
+        </HoverCard.Dropdown>
+      </HoverCard>
       {
         (form.values.bumpedCount != null && form.values.bumpedCount > 0) ? (
           <NumberInput
@@ -199,6 +202,21 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
           />
         ) : <></>
       }
+      {
+        (innerProps.overallStatus == "ACCEPTED" || innerProps.overallStatus == "BUMPED") && (
+          <NumberInput
+            label="Bump Delay Days"
+            description="The number of days to wait before bumping."
+            placeholder="1"
+            value={form.values.bumpDelayDays as number}
+            onChange={(e) => {
+              form.setFieldValue("bumpDelayDays", e as number);
+            }}
+            min={2}
+          />
+        )
+      }
+
       <Flex>
         <Flex justify="space-between" w="100%">
           <Flex>
@@ -224,7 +242,9 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
                 (mark) => mark.value === bumpLengthValue
               )?.api_label &&
               innerProps.bumpedCount ==
-              form.values.bumpedCount ?
+              form.values.bumpedCount &&
+              innerProps.bumpDelayDays ==
+              form.values.bumpDelayDays ?
               (
                 <></>
               ) : (

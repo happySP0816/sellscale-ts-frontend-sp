@@ -100,6 +100,7 @@ export default function ManageBumpFramework({
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
       form.values.bumpedCount as number,
+      form.values.bumpDelayDays,
       form.values.default,
     );
 
@@ -123,6 +124,7 @@ export default function ManageBumpFramework({
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
         bumped_count: form.values.bumpedCount as number,
+        bump_delay_days: form.values.bumpDelayDays as number,
         substatus: selectedBumpFramework.substatus,
       });
     } else {
@@ -149,6 +151,7 @@ export default function ManageBumpFramework({
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
       form.values.bumpedCount as number,
+      form.values.bumpDelayDays,
       form.values.default,
       innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : null,
     );
@@ -173,6 +176,7 @@ export default function ManageBumpFramework({
           (mark) => mark.value === bumpLengthValue
         )?.api_label as string,
         bumped_count: form.values.bumpedCount as number,
+        bump_delay_days: 2,
         substatus: innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : "",
       });
     } else {
@@ -237,6 +241,7 @@ export default function ManageBumpFramework({
       description: "",
       default: true,
       bumpedCount: undefined as number | undefined,
+      bumpDelayDays: 2,
     },
   });
 
@@ -280,6 +285,7 @@ export default function ManageBumpFramework({
                 form.values.description = "";
                 form.values.default = false;
                 form.values.bumpedCount = undefined;
+                form.values.bumpDelayDays = 2;
                 setBumpLengthValue(50);
                 setSelectedBumpFramework(null);
               }}
@@ -302,6 +308,7 @@ export default function ManageBumpFramework({
                       form.values.description = framework.description;
                       form.values.default = framework.default;
                       form.values.bumpedCount = framework.bumped_count as number;
+                      form.values.bumpDelayDays = framework.bump_delay_days;
                       setBumpLengthValue(length);
                       setSelectedBumpFramework(framework);
                     }}
@@ -411,6 +418,19 @@ export default function ManageBumpFramework({
                   />
                 ) : <></>
               }
+              <NumberInput
+                mt='md'
+                label="Bump Delay"
+                description="The number of days to wait before sending the bump."
+                placeholder="2"
+                value={form.values.bumpDelayDays}
+                onChange={(e) => {
+                  form.setFieldValue("bumpDelayDays", e as number);
+                }}
+                min={2}
+                withAsterisk
+              />
+
               {selectedBumpFramework == null && (
                 <Switch
                   pt="md"
@@ -465,7 +485,9 @@ export default function ManageBumpFramework({
                             (mark) => mark.value === bumpLengthValue
                           )?.api_label &&
                           selectedBumpFramework.bumped_count ==
-                          form.values.bumpedCount
+                          form.values.bumpedCount &&
+                          selectedBumpFramework.bump_delay_days ==
+                          form.values.bumpDelayDays
                         ) ? <></> : (
                           <Button
                             mt="md"

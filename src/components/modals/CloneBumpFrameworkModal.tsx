@@ -160,6 +160,7 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
                       selectedBumpFramework.bump_length === 'SHORT' ? '1-2 sentences' : selectedBumpFramework.bump_length === 'MEDIUM' ? '3-4 sentences' : '2 paragraphs'
                     })
                   </Text>
+                  <Text mt='sm'><span style={{ fontWeight: 600 }}>Delay:</span> {selectedBumpFramework.bump_delay_days} day wait</Text>
                 </Card>
               ) : (
                 <Card

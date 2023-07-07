@@ -454,7 +454,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
                 wait2Day(true);
               }}
             >
-              Wait 2 days
+              Wait until next bump
             </Button>
           </Stack>
         </Group>

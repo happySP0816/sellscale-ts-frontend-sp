@@ -165,6 +165,9 @@ function BumpBucketView(props: {
                             {framework.title}
                           </Text>
                           <Text maw='50rem'>{framework.description}</Text>
+                          <Text fz='xs' fs='italic' mt='4px'>
+                            {framework.bump_delay_days} day delay
+                          </Text>
                         </Flex>
                       </Flex>
                       <Tooltip label='Edit Bump Framework' withinPortal>
@@ -182,6 +185,7 @@ function BumpBucketView(props: {
                                 default: framework.default,
                                 onSave: props.afterEdit,
                                 bumpedCount: framework.bumped_count,
+                                bumpDelayDays: framework.bump_delay_days,
                               },
                             });
                           }}
@@ -252,6 +256,7 @@ function QuestionObjectionLibraryCard(props: {
                     default: props.bumpFramework.default,
                     onSave: props.afterEdit,
                     bumpedCount: props.bumpFramework.bumped_count,
+                    bumpDelayDays: props.bumpFramework.bump_delay_days,
                   },
                 });
               }}

@@ -11,11 +11,12 @@ import { API_URL } from "@constants/data";
  * @param description
  * @param length
  * @param bumpedCount
+ * @param bumpDelayDays
  * @param setDefault
  * @param substatus
  * @returns - MsgResponse
  */
-export async function createBumpFramework(userToken: string, archetypID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, setDefault: boolean, substatus: string | null = ""): Promise<MsgResponse> {
+export async function createBumpFramework(userToken: string, archetypID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, bumpDelayDays: number, setDefault: boolean, substatus: string | null = ""): Promise<MsgResponse> {
   if (!substatus) {
     substatus = "";
   }
@@ -36,6 +37,7 @@ export async function createBumpFramework(userToken: string, archetypID: number,
         default: setDefault,
         length: length,
         bumped_count: bumpedCount,
+        bump_delay_days: bumpDelayDays,
         substatus: substatus
       })
     }

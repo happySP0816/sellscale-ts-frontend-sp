@@ -203,6 +203,7 @@ export type BumpFramework = {
   default: boolean;
   bump_length: string;
   bumped_count: number | null;
+  bump_delay_days: number;
   // client_archetype_id: number;
   // client_archetype_archetype: string;
   account_research?: string[];

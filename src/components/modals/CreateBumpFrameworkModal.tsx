@@ -64,7 +64,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       showNotification({
         title: "Error",
         message: "Please select an archetype",
-        icon: <IconX radius="sm" color={theme.colors.red[7]} />,
+        color: "red",
       });
       return;
     }
@@ -78,6 +78,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
         ?.api_label as string,
       form.values.bumpedCount as number,
+      form.values.bumpDelayDays,
       form.values.default,
       selectedSubstatus
     );
@@ -86,7 +87,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       showNotification({
         title: "Success",
         message: "Bump Framework created successfully",
-        icon: <IconCheck radius="sm" color={theme.colors.green[7]} />,
+        color: "green",
       });
       form.reset();
       props.backFunction();
@@ -95,7 +96,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       showNotification({
         title: "Error",
         message: result.message,
-        icon: <IconX radius="sm" color={theme.colors.red[7]} />,
+        color: "red",
       });
     }
 
@@ -109,6 +110,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       archetypeID: props.archetypeID,
       default: true,
       bumpedCount: props.bumpedCount,
+      bumpDelayDays: 2,
     },
   });
 
@@ -241,19 +243,34 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
         />
       )}
       <Flex w="100%" justify="flex-end" direction={'column'}>
-        <Switch
-          pt="md"
-          my='md'
-          label="Make default?"
-          labelPosition="right"
-          checked={form.values.default}
-          onChange={(e) => {
-            form.setFieldValue(
-              "default",
-              e.currentTarget.checked
-            );
-          }}
-        />
+        <Flex justify='space-between' align='center'>
+          <NumberInput
+            mt='md'
+            label="Bump Delay"
+            description="The number of days to wait before sending the bump."
+            placeholder="2"
+            value={form.values.bumpDelayDays}
+            onChange={(e) => {
+              form.setFieldValue("bumpDelayDays", e as number);
+            }}
+            min={2}
+            withAsterisk
+          />
+          <Switch
+            pt="md"
+            my='md'
+            label="Make default?"
+            labelPosition="right"
+            checked={form.values.default}
+            onChange={(e) => {
+              form.setFieldValue(
+                "default",
+                e.currentTarget.checked
+              );
+            }}
+          />
+        </Flex>
+
         <Button
           mt="md"
           disabled={

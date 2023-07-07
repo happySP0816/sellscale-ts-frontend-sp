@@ -125,6 +125,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+  const [showPurgatorySection, setShowPurgatorySection] = useState(true);
 
   const nurturingMode = useRecoilValue(nurturingModeState);
 
@@ -331,39 +332,52 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
         </Group>
         <Divider />
         <ScrollArea h={`calc(100vh - ${HEADER_HEIGHT}px)`} sx={{ overflowX: 'hidden' }}>
-          {prospects.map((prospect, i: number) => (
-            <div key={i}>
-              {filterSelectValue === 'ALL' &&
-                (!prospects[i - 1] || prospect.linkedin_status !== prospects[i - 1].linkedin_status) && (
-                  <div
-                    style={{
-                      backgroundColor: prospect.linkedin_status === 'ACTIVE_CONVO_REVIVAL' ? '#2c8c91' : prospect.in_purgatory ? '#858585' : '#25262b',
-                      padding: '6px'
-                    }}
-                  >
-                    <Text color='white' ta='center' fz={13} fw={700}>
-                      {labelizeConvoSubstatus(prospect.linkedin_status)} 
-                    </Text>
-                    <Text color='white' ta='center' fz={11} fw={300}>
-                      {prospects.filter((p) => p.linkedin_status === prospect.linkedin_status).length} prospect(s)
-                    </Text>
-                  </div>
-                )}
-              <Container p={0} m={0} onClick={() => setOpenedProspectId(prospect.id)} opacity={prospect.in_purgatory ? 0.5 : 1}>
-                <ProspectConvoCard
-                  name={prospect.name}
-                  title={prospect.title}
-                  img_url={prospect.img_url}
-                  latest_msg={prospect.latest_msg}
-                  latest_msg_time={prospect.latest_msg_time}
-                  icp_fit={prospect.icp_fit}
-                  new_msg_count={prospect.new_msg_count || 0}
-                  latest_msg_from_sdr={prospect.latest_msg_from_sdr}
-                  opened={prospect.id === openedProspectId}
-                />
-              </Container>
-            </div>
-          ))}
+          {
+            [false, true].map((in_purgatory_section) => {
+              return <>
+               {in_purgatory_section && <Container pt='24px' pb='24px'>
+                <Divider ta='center' fz={7} fw={500} color='gray' labelPosition='center' label={'Waiting to here back from ' + prospects.filter((p) => p.in_purgatory).length + ' prospect(s)'} /> 
+                <Text color='blue' align='center'fw={600} fz={12} sx={{cursor: 'pointer'}} onClick={() => setShowPurgatorySection(!showPurgatorySection)}>{showPurgatorySection ? 'View' : 'Hide'} Prospects</Text>          
+                  
+                </Container>}
+                {((in_purgatory_section && !showPurgatorySection) || !in_purgatory_section) && prospects.filter((prospect) => prospect.in_purgatory == in_purgatory_section).map((prospect, i: number) => (
+                    <div key={i}>
+                     
+                      
+                      {filterSelectValue === 'ALL' &&
+                        (!prospects[i - 1] || prospect.linkedin_status !== prospects[i - 1].linkedin_status) && (
+                          <div
+                            style={{
+                              backgroundColor: prospect.linkedin_status === 'ACTIVE_CONVO_REVIVAL' ? '#2c8c91' : prospect.in_purgatory ? '#858585' : '#25262b',
+                              padding: '4px'
+                            }}
+                          >
+                            <Text color='white' ta='center' fz={11} fw={700}>
+                              {labelizeConvoSubstatus(prospect.linkedin_status)} 
+                            </Text>
+                            <Text color='white' ta='center' fz={9} fw={300}>
+                              {prospects.filter((p) => p.linkedin_status === prospect.linkedin_status).length} prospect(s)
+                            </Text>
+                          </div>
+                        )}
+                      <Container p={0} m={0} onClick={() => setOpenedProspectId(prospect.id)} opacity={prospect.in_purgatory ? 0.5 : 1}>
+                        <ProspectConvoCard
+                          name={prospect.name}
+                          title={prospect.title}
+                          img_url={prospect.img_url}
+                          latest_msg={prospect.latest_msg}
+                          latest_msg_time={prospect.latest_msg_time}
+                          icp_fit={prospect.icp_fit}
+                          new_msg_count={prospect.new_msg_count || 0}
+                          latest_msg_from_sdr={prospect.latest_msg_from_sdr}
+                          opened={prospect.id === openedProspectId}
+                        />
+                      </Container>
+                    </div>
+                  ))}
+              </>
+            })
+          }
           {prospects.length === 0 && (
             <Text mt={20} fz='sm' ta='center' c='dimmed' fs='italic'>
               No active conversations found.

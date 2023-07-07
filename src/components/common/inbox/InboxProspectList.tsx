@@ -230,9 +230,12 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
     if(!nurturingMode) {
       prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
     }
-    prospects = prospects.filter((p) => !p.latest_msg_from_sdr || isWithinLastXDays(p.latest_msg_datetime, 3));
-    prospects = prospects.filter((p) => !p.in_purgatory);
+    // prospects = prospects.filter((p) => !p.latest_msg_from_sdr || isWithinLastXDays(p.latest_msg_datetime, 3)); // todo(Aakash) - uncomment this to show only prospects that have been responded to in the last 3 days
+    // prospects = prospects.filter((p) => !p.in_purgatory);
   }
+
+  // sort by if in purgatory
+  prospects = prospects.sort((a, b) => (a.in_purgatory ? 1 : 0) - (b.in_purgatory ? 1 : 0));
 
   useEffect(() => {
     if (prospects.length > 0 && openedProspectId === -1) {
@@ -273,9 +276,9 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
               }
             }}
             data={[
-              { label: (
-                <Text mx={10} my={5}>Recommended</Text>
-              ), value: 'RECOMMENDED' },
+              // { label: (
+              //   <Text mx={10} my={5}>Recommended</Text>
+              // ), value: 'RECOMMENDED' },
               { label: (
                 <Select
                   data={filterSelectOptions.map((o) => {
@@ -334,7 +337,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
                 (!prospects[i - 1] || prospect.linkedin_status !== prospects[i - 1].linkedin_status) && (
                   <div
                     style={{
-                      backgroundColor: prospect.linkedin_status === 'ACTIVE_CONVO_REVIVAL' ? '#2c8c91' : '#25262b',
+                      backgroundColor: prospect.linkedin_status === 'ACTIVE_CONVO_REVIVAL' ? '#2c8c91' : prospect.in_purgatory ? '#858585' : '#25262b',
                       padding: '6px'
                     }}
                   >
@@ -346,7 +349,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
                     </Text>
                   </div>
                 )}
-              <Container p={0} m={0} onClick={() => setOpenedProspectId(prospect.id)}>
+              <Container p={0} m={0} onClick={() => setOpenedProspectId(prospect.id)} opacity={prospect.in_purgatory ? 0.5 : 1}>
                 <ProspectConvoCard
                   name={prospect.name}
                   title={prospect.title}

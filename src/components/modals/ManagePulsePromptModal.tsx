@@ -8,12 +8,14 @@ import {
   Textarea,
   TextInput,
   useMantineTheme,
+  Text
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { ContextModalProps } from "@mantine/modals";
+import { ContextModalProps, openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconPencil } from "@tabler/icons";
 import postICPClassificationPromptChange from "@utils/requests/postICPClassificationPromptChange";
+import postRunICPClassification from "@utils/requests/postRunICPClassification";
 import { useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { Archetype, PersonaOverview } from "src";
@@ -57,7 +59,7 @@ export default function ManagePulsePrompt({
     handleSaveChanges(prompt);
   }
 
-  async function handleSaveChanges(prompt: string) {
+  async function handleSaveChanges(prompt: string, runPrompt = false) {
     setLoading(true);
 
     if (
@@ -103,6 +105,25 @@ export default function ManagePulsePrompt({
           color: "teal",
           autoClose: 3000,
         });
+        if (runPrompt) {
+          const result = await postRunICPClassification(userToken, innerProps.personaOverview.id)
+          if (result.status === 'success') {
+            showNotification({
+              id: "run-pulse-prompt",
+              title: "Pulse Prompt Running",
+              message: "Pulse Prompt is running on all prospects. This may take a while.",
+              color: "teal",
+              autoClose: 3000,
+            })
+          } else {
+            showNotification({
+              id: "run-pulse-prompt-fail",
+              title: "Pulse Prompt Not Ran",
+              message: "Pulse Prompt could not be ran. Please contact support, or run manually from the Classify tab.",
+              color: "red",
+            })
+          }
+        }
       } else if (innerProps.mode === "CREATE") {
         showNotification({
           id: "create-pulse-prompt",
@@ -154,7 +175,19 @@ export default function ManagePulsePrompt({
               variant="outline"
               radius="lg"
               color="teal"
-              onClick={() => handleSaveChanges(currentICPPrompt)}
+              onClick={() => {
+                openConfirmModal({
+                  title: 'Run Pulse Prompt on All Prospects',
+                  children: (
+                    <Text size='sm'>
+                      Now that you've edited your ICP Pulse Prompt, would you like to run your prompt on all prospects? This will use credits.
+                    </Text>
+                  ),
+                  labels: { confirm: 'Save & Run', cancel: 'Save' },
+                  onCancel: () => handleSaveChanges(currentICPPrompt),
+                  onConfirm: () => handleSaveChanges(currentICPPrompt, true),
+                });
+              }}
             >
               Save Changes
             </Button>

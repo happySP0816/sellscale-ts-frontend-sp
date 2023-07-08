@@ -26,7 +26,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import { Archetype, CTA } from "src";
 import {
-  currentPersonaIdState,
+  currentProjectState,
   detailsDrawerOpenState,
 } from "@atoms/personaAtoms";
 import displayNotification from "@utils/notificationFlow";
@@ -37,9 +37,7 @@ import { API_URL } from "@constants/data";
 const PAGE_SIZE = 20;
 
 export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
-    currentPersonaIdState
-  );
+  const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
 
   const [page, setPage] = useState(1);
@@ -55,14 +53,14 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
   };
 
   const { data, isFetching, refetch } = useQuery({
-    queryKey: [`query-cta-data-${currentPersonaId}`, { page, sortStatus }],
+    queryKey: [`query-cta-data-${currentProject?.id}`, { page, sortStatus }],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
       const [_key, { page, sortStatus }] = queryKey;
 
       const response = await fetch(
-        `${API_URL}/client/archetype/${currentPersonaId}/get_ctas`,
+        `${API_URL}/client/archetype/${currentProject?.id}/get_ctas`,
         {
           method: "GET",
           headers: {
@@ -107,39 +105,12 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
       return sortStatus.direction === "desc" ? pageData.reverse() : pageData;
     },
     refetchOnWindowFocus: false,
-    enabled: currentPersonaId !== -1,
+    enabled: !!currentProject,
   });
 
   return (
     <Box>
       <Flex direction="row-reverse" gap="sm" pb="xs">
-        {props.personas && (
-          <Select
-            pr="sm"
-            pb="xs"
-            w="50%"
-            placeholder="Select a persona"
-            color="teal"
-            // @ts-ignore
-            data={
-              props.personas
-                ? props.personas
-                    .filter(
-                      (persona: Archetype) =>
-                        !persona?.archetype?.includes("Unassigned")
-                    )
-                    .map((persona: Archetype) => ({
-                      value: persona.id + "",
-                      label:
-                        `(${persona.ctas.length} CTAs) ` + (persona.active ? "🟢 " : "🔴 ") + persona.archetype,
-                    }))
-                : []
-            }
-            icon={<IconUser size="1rem" />}
-            value={currentPersonaId + ""}
-            onChange={(value) => setCurrentPersonaId(value ? +value : -1)}
-          />
-        )}
         <Button
           color="gray"
           size="sm"
@@ -149,7 +120,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
               modal: "createNewCTA",
               title: <Title order={3}>Create CTA</Title>,
               innerProps: {
-                personaId: currentPersonaId,
+                personaId: currentProject?.id,
                 personas: props.personas,
               },
             });
@@ -157,7 +128,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
         >
           Create New CTA
         </Button>
-        {props.personas?.find((persona) => persona.id === currentPersonaId)?.ctas.length === 0 && (
+        {props.personas?.find((persona) => persona.id === currentProject?.id)?.ctas.length === 0 && (
           <Button
             color="gray"
             size="sm"
@@ -167,7 +138,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
                 modal: "copyCTAs",
                 title: <Title order={3}>Copy CTAs</Title>,
                 innerProps: {
-                  personaId: currentPersonaId,
+                  personaId: currentProject?.id,
                   personas: props.personas,
                 },
               });
@@ -250,7 +221,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
                   modal: "editCTA",
                   title: <Title order={3}>Edit CTA</Title>,
                   innerProps: {
-                    personaId: currentPersonaId,
+                    personaId: currentProject?.id,
                     cta: cta,
                   },
                 });

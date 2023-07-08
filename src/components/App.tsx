@@ -34,6 +34,7 @@ import CreatePersonaModal from "@modals/CreatePersonaModal";
 import EditBumpFrameworkModal from "@modals/EditBumpFrameworkModal";
 import EditBumpFrameworkEmailModal from "@modals/EditBumpFrameworkEmailModal";
 import VoiceEditorModal from "@modals/VoiceEditorModal";
+import AccountModal from "@modals/AccountModal";
 
 export default function App() {
   // Site light or dark mode
@@ -50,9 +51,8 @@ export default function App() {
       ? "dark"
       : "light";
 
-  const [colorScheme, setColorScheme] = useState<ColorScheme>(
-    currentColorScheme
-  );
+  const [colorScheme, setColorScheme] =
+    useState<ColorScheme>(currentColorScheme);
   const toggleColorScheme = (value?: ColorScheme) => {
     let nextColorScheme = value || (colorScheme === "dark" ? "light" : "dark");
     setColorScheme(nextColorScheme);
@@ -125,6 +125,7 @@ export default function App() {
               editBumpFramework: EditBumpFrameworkModal,
               editBumpFrameworkEmail: EditBumpFrameworkEmailModal,
               voiceEditor: VoiceEditorModal,
+              account: AccountModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

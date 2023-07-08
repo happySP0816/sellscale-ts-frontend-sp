@@ -16,12 +16,18 @@ import { useLoaderData } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import EmailBlocksPage from "./EmailBlocksPage";
 import BumpFrameworksEmailPage from "./BumpFrameworksEmailPage";
+import { currentProjectState } from "@atoms/personaAtoms";
 
 export default function EmailPage() {
   setPageTitle("Email");
 
   const userData = useRecoilValue(userDataState);
   const { tabId } = useLoaderData() as { tabId: string };
+
+  const currentProject = useRecoilValue(currentProjectState);
+  if(!currentProject) {
+    return <></>;
+  }
 
   return (
     <PageFrame>

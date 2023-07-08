@@ -14,14 +14,12 @@ import { userTokenState } from "@atoms/userAtoms";
 import { useQuery } from "@tanstack/react-query";
 import { Archetype } from "src";
 import { useEffect, useState } from "react";
-import { currentPersonaIdState } from "@atoms/personaAtoms";
 
 /* 
 export default function AnalyticsPage() {
   setPageTitle("Analytics");
 
   const userToken = useRecoilValue(userTokenState);
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-analytics-personas-data`],
@@ -38,9 +36,6 @@ export default function AnalyticsPage() {
         }
       });
 
-      if(currentPersonaId === -1){
-        setCurrentPersonaId(personas[0].id);
-      }
       return personas;
     },
     refetchOnWindowFocus: false,
@@ -64,8 +59,6 @@ export default function AnalyticsPage() {
                 : []
             }
             icon={<IconUser size="1rem" />}
-            value={currentPersonaId+''}
-            onChange={(value) => setCurrentPersonaId(value ? +value : -1)}
           />
       </FlexSeparate>
       <Tabs defaultValue="transformers" px="xs" color="teal">

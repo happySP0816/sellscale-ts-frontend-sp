@@ -11,6 +11,7 @@ export async function getProspects(userToken: string,
   limit?: number,
   status?: string[],
   show_purgatory?: boolean | 'ALL',
+  persona_id?: number,
 ): Promise<MsgResponse> {
 
   const response = await fetch(
@@ -27,6 +28,7 @@ export async function getProspects(userToken: string,
         limit: limit,
         status: status,
         show_purgatory: show_purgatory,
+        persona_id: persona_id,
       }),
     }
   );

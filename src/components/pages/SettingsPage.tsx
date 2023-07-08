@@ -1,5 +1,5 @@
 import PageFrame from "@common/PageFrame";
-import { Flex, Paper, Select, SimpleGrid, Tabs, Text } from "@mantine/core";
+import { Flex, LoadingOverlay, Paper, Select, SimpleGrid, Tabs, Text } from "@mantine/core";
 import { useVesselLink } from "@vesselapi/react-vessel-link";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -11,6 +11,7 @@ import {
   IconCalendar,
   IconCheck,
   IconInbox,
+  IconLogout,
   IconMail,
   IconMailbox,
   IconX,
@@ -18,7 +19,7 @@ import {
 import PageTitle from "@nav/PageTitle";
 import { useQuery } from "@tanstack/react-query";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
-import { getUserInfo } from "@auth/core";
+import { getUserInfo, logout } from "@auth/core";
 import NylasConnectedCard from "@common/settings/NylasConnectedCard";
 import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
 import { navigateToPage } from "@utils/documentChange";
@@ -461,6 +462,10 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="slackbot" pl="xs">
           <SlackbotSection />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="logout" pl="xs">
+          <LoadingOverlay visible />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

@@ -39,6 +39,7 @@ import _ from 'lodash';
 import InboxProspectConvoSendBox from './InboxProspectConvoSendBox';
 import InboxProspectConvoBumpFramework from './InboxProspectConvoBumpFramework';
 import { AiMetaDataBadge } from '@common/persona/LinkedInConversationEntry';
+import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 
 export function ProspectConvoMessage(props: {
   img_url: string;

@@ -1,4 +1,3 @@
-import { currentPersonaIdState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import FlexSeparate from "@common/library/FlexSeparate";
@@ -39,6 +38,7 @@ import PersonaCard from "../common/persona/PersonaCard";
 import PersonaUploadDrawer from "../drawers/PersonaUploadDrawer";
 import { useEffect } from "react";
 import { useLoaderData } from "react-router-dom";
+import { currentProjectState } from "@atoms/personaAtoms";
 
 export default function PersonaPage() {
   setPageTitle(`Personas`);
@@ -46,9 +46,7 @@ export default function PersonaPage() {
   const forceUpdate = useForceUpdate();
   const userToken = useRecoilValue(userTokenState);
 
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
-    currentPersonaIdState
-  );
+  const currentProject = useRecoilValue(currentProjectState);
 
   const loaderData: any = useLoaderData();
   const personaId = loaderData?.personaId;
@@ -62,7 +60,6 @@ export default function PersonaPage() {
           ? (response.data as PersonaOverview[])
           : [];
       if (personaId) {
-        setCurrentPersonaId(parseInt(personaId));
         return result.filter((p) => p.id === parseInt(personaId));
       }
 

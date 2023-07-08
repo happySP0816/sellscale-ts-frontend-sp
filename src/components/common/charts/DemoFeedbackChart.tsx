@@ -1,4 +1,3 @@
-import { currentPersonaIdState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import React from "react";
 import { Tabs, Divider } from "@mantine/core";

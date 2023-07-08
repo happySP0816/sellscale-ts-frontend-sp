@@ -148,7 +148,7 @@ type FileDropAndPreviewProps = {
     icpMatchingPrompt: string;
     contactObjective: string;
   };
-  onUploadSuccess?: () => void;
+  onUploadSuccess?: (archetypeId: number) => void;
   onUploadFailure?: () => void;
 };
 
@@ -288,7 +288,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     queryCache.clear();
 
     if (props.onUploadSuccess) {
-      props.onUploadSuccess();
+      props.onUploadSuccess(parseInt(archetype_id || '-1'));
     }
   };
 

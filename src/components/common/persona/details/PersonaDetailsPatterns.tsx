@@ -28,7 +28,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import { Archetype, Channel, CTA } from "src";
 import {
-  currentPersonaIdState,
+  currentProjectState,
   detailsDrawerOpenState,
 } from "@atoms/personaAtoms";
 import PatternCard from "./PatternCard";
@@ -38,15 +38,13 @@ import { API_URL } from "@constants/data";
 const PAGE_SIZE = 20;
 
 export default function PersonaDetailsPatterns() {
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
-    currentPersonaIdState
-  );
+  const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
   const [channel, setChannel] = useState<Channel>('LINKEDIN');
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
-      `query-patterns-data-${currentPersonaId}-${channel}`,
+      `query-patterns-data-${currentProject?.id}-${channel}`,
       { channel },
     ],
     queryFn: async ({ queryKey }) => {
@@ -55,7 +53,7 @@ export default function PersonaDetailsPatterns() {
       const [_key, { channel }] = queryKey;
 
       const response = await fetch(
-        `${API_URL}/message_generation/stack_ranked_configuration_priority?generated_message_type=${channel}&archetype_id=${currentPersonaId}`,
+        `${API_URL}/message_generation/stack_ranked_configuration_priority?generated_message_type=${channel}&archetype_id=${currentProject?.id}`,
         {
           method: "GET",
           headers: {
@@ -70,7 +68,7 @@ export default function PersonaDetailsPatterns() {
       return res ?? [];
     },
     refetchOnWindowFocus: false,
-    enabled: currentPersonaId !== -1,
+    enabled: !!currentProject,
   });
 
   return (

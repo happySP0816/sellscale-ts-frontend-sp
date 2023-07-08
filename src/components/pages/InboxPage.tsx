@@ -1,4 +1,5 @@
 import { nurturingModeState } from "@atoms/inboxAtoms";
+import { currentProjectState } from "@atoms/personaAtoms";
 import { prospectShowPurgatoryState } from "@atoms/prospectAtoms";
 import { userTokenState, userDataState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
@@ -15,11 +16,12 @@ import { useRecoilValue } from "recoil";
 import { Prospect } from "src";
 
 
-export default function InboxPage() {
+export default function InboxPage(props: { all?: boolean }) {
   setPageTitle("Inbox");
 
   const userToken = useRecoilValue(userTokenState);
   const nurturingMode = useRecoilValue(nurturingModeState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
@@ -38,6 +40,7 @@ export default function InboxPage() {
         10000, // TODO: Maybe use pagination method instead
         nurturingMode ? ['ACCEPTED', 'BUMPED'] : ['ACTIVE_CONVO', 'DEMO'],
         'ALL',
+        props.all ? undefined : currentProject?.id,
       );
       return response.status === 'success' ? response.data as Prospect[] : [];
       
@@ -54,7 +57,7 @@ export default function InboxPage() {
   return (
     <Grid columns={100} gutter={0}>
       <Grid.Col span={27} >
-        <InboxProspectList prospects={prospects} isFetching={isFetching} />
+        <InboxProspectList prospects={prospects} isFetching={isFetching} all={props.all} />
       </Grid.Col>
       <Grid.Col span={46}>
         <InboxProspectConvo prospects={prospects} />

@@ -16,6 +16,7 @@ import {
   prospectShowPurgatoryState,
 } from "@atoms/prospectAtoms";
 import { useEffect, useState } from "react";
+import { currentProjectState } from "@atoms/personaAtoms";
 
 function getPipelineSelectorData(data: any) {
   return new Map()
@@ -56,18 +57,21 @@ function getPipelineSelectorData(data: any) {
     });
 }
 
-export default function AllContactsSection() {
-  //const { prospectId } = useLoaderData() as { prospectId: string };
+export default function AllContactsSection(props: { all?: boolean }) {
+
+  const currentProject = useRecoilValue(currentProjectState);
+  const { prospectId } = useLoaderData() as {
+    prospectId: string;
+  };
   const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
-  /*
   useEffect(() => {
-    if(prospectId && prospectId.trim().length > 0){
-      setProspectId(+prospectId.trim())
+    if (prospectId && prospectId.trim().length > 0) {
+      setProspectId(+prospectId.trim());
       setOpened(true);
     }
   }, [prospectId]);
-  */
+  
 
   const userToken = useRecoilValue(userTokenState);
   const showPurgatory = useRecoilValue(prospectShowPurgatoryState);
@@ -110,7 +114,7 @@ export default function AllContactsSection() {
         loadingData={loadingData}
       />
       <div style={{ paddingTop: 15 }}>
-        <ProspectTable_old />
+        <ProspectTable_old personaSpecific={props.all ? undefined : currentProject?.id} />
       </div>
     </div>
   );

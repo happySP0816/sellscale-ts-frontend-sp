@@ -1,4 +1,4 @@
-import { currentPersonaIdState } from "@atoms/personaAtoms";
+import { currentProjectState } from "@atoms/personaAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import PageFrame from "@common/PageFrame";
 import CampaignTable from "@common/campaigns/CampaignTable";
@@ -37,9 +37,6 @@ export default function LinkedInPage() {
 
   const { tabId } = useLoaderData() as { tabId: string };
   const userToken = useRecoilValue(userTokenState);
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
-    currentPersonaIdState
-  );
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-linkedin-personas-data`],
@@ -58,13 +55,15 @@ export default function LinkedInPage() {
         }
       });
 
-      if (currentPersonaId === -1) {
-        setCurrentPersonaId(personas[0].id);
-      }
       return personas;
     },
     refetchOnWindowFocus: false,
   });
+
+  const currentProject = useRecoilValue(currentProjectState);
+  if(!currentProject) {
+    return <></>;
+  }
 
   return (
     <PageFrame>
@@ -108,27 +107,6 @@ export default function LinkedInPage() {
           <PersonaDetailsCTAs personas={data} />
         </Tabs.Panel>
         <Tabs.Panel value="personalizations" pt="xs">
-          <FlexSeparate alignItems="flex-end">
-            <div></div>
-            <Select
-              pr="sm"
-              pb="xs"
-              placeholder="Select a persona"
-              color="teal"
-              // @ts-ignore
-              data={
-                data
-                  ? data.map((persona: Archetype) => ({
-                      value: persona.id + "",
-                      label: persona.archetype,
-                    }))
-                  : []
-              }
-              icon={<IconUser size="1rem" />}
-              value={currentPersonaId + ""}
-              onChange={(value) => setCurrentPersonaId(value ? +value : -1)}
-            />
-          </FlexSeparate>
           <PersonaDetailsTransformers channel="LINKEDIN" />
         </Tabs.Panel>
         <Tabs.Panel value="campaign-analytics" pt="xs">

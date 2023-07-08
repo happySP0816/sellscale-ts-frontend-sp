@@ -1,3 +1,4 @@
+import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import InclusionExclusionTextInput from "@common/library/InclusionExclusionTextInput";
 import { Button, Card, Container, Flex, LoadingOverlay, MultiSelect, Tabs, Text, Title } from "@mantine/core";
@@ -7,11 +8,7 @@ import { IconBuilding, IconUsers } from "@tabler/icons";
 import { getProspectFilters } from "@utils/requests/getProspectFilters";
 import { patchProspectFilters } from "@utils/requests/patchProspectFilters";
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
-
-type PropsType = {
-  archetype_id: number,
-}
+import { useRecoilState, useRecoilValue } from "recoil";
 
 
 const formOptions = {
@@ -60,9 +57,11 @@ const formOptions = {
 }
 
 
-export default function PersonaFilters(props: PropsType) {
+export default function PersonaFilters() {
   const [userToken] = useRecoilState(userTokenState);
   const [loading, setLoading] = useState(false);
+
+  const currentProject = useRecoilValue(currentProjectState);
 
   const leadForm = useForm({
     initialValues: {
@@ -103,7 +102,7 @@ export default function PersonaFilters(props: PropsType) {
   const triggerGetProspectFilters = async () => {
     setLoading(true);
 
-    const response = await getProspectFilters(userToken, props.archetype_id);
+    const response = await getProspectFilters(userToken, currentProject?.id || -1);
 
     leadForm.setValues({
       currentCompaniesInclusion: response.data.lead.company.current_company_names_inclusion,
@@ -147,7 +146,7 @@ export default function PersonaFilters(props: PropsType) {
 
     const response = await patchProspectFilters(
       userToken,
-      props.archetype_id,
+      currentProject?.id || -1,
       leadForm.values.currentCompaniesInclusion,
       leadForm.values.currentCompaniesExclusion,
       leadForm.values.pastCompaniesInclusion,

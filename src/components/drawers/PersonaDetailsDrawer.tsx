@@ -33,7 +33,7 @@ import { logout } from "@auth/core";
 import { useQuery } from "@tanstack/react-query";
 import CampaignProspects from "@common/campaigns/CampaignProspects";
 import CampaignCTAs from "@common/campaigns/CampaignCTAs";
-import { currentPersonaIdState, detailsDrawerOpenState } from "@atoms/personaAtoms";
+import { currentProjectState, detailsDrawerOpenState } from "@atoms/personaAtoms";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import PersonaDetailsTransformers from "@common/persona/details/PersonaDetailsTransformers";
 import { DataTableSortStatus } from "mantine-datatable";
@@ -42,10 +42,10 @@ import _ from "lodash";
 export default function PersonaDetailsDrawer(props: { personaOverviews: PersonaOverview[] | undefined }) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useRecoilState(detailsDrawerOpenState);
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
+  const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
 
-  const persona = props.personaOverviews?.find((persona) => persona.id === currentPersonaId);
+  const persona = props.personaOverviews?.find((persona) => persona.id === currentProject?.id);
   if(!persona) {
     return (<></>)
   }

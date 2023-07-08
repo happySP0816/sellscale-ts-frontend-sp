@@ -7,9 +7,11 @@ import { useRecoilValue } from "recoil";
 import EmailQueuedMessageItem from "./EmailQueuedMessageItem";
 import { Prospect } from "src";
 import { getProspects } from "@utils/requests/getProspects";
+import { currentProjectState } from "@atoms/personaAtoms";
 
-export default function EmailQueuedMessages() {
+export default function EmailQueuedMessages(props: { all?: boolean }) {
   const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-queued-emails-prospects-all`],
@@ -22,6 +24,7 @@ export default function EmailQueuedMessages() {
         99,
         undefined,
         'ALL',
+        props.all ? undefined : currentProject?.id,
       );
       let prospects = response.status === 'success' ? response.data as Prospect[] : [];
 

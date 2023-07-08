@@ -45,6 +45,7 @@ import InboxProspectListFilter, {
 import { convertDateToCasualTime, isWithinLastXDays, removeExtraCharacters } from '@utils/general';
 import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
+import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
@@ -121,7 +122,7 @@ export function ProspectConvoCard(props: {
   );
 }
 
-export default function ProspectList(props: { prospects: Prospect[]; isFetching: boolean }) {
+export default function ProspectList(props: { prospects: Prospect[]; isFetching: boolean, all?: boolean }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
@@ -394,6 +395,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
         setOpen={setFilterModalOpen}
         filters={filtersState}
         setFilters={setFiltersState}
+        all={props.all}
       />
     </div>
   );

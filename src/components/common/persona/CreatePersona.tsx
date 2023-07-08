@@ -35,6 +35,7 @@ export default function CreatePersona(props: PropsType) {
       return;
     }
     setCreatingPersona(false);
+    return result.data as number;
     window.location.reload();
   };
 

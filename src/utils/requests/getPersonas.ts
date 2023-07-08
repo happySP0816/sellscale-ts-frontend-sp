@@ -26,6 +26,27 @@ export default async function getPersonas(userToken: string): Promise<MsgRespons
 
 
 /**
+ * Get persona from an SDR
+ * @param userToken 
+ * @returns - MsgResponse
+ */
+export async function getSinglePersona(userToken: string, personaId: number): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${API_URL}/client/archetype/${personaId}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response);
+
+}
+
+
+/**
  * Get all personas for a user
  * @param userToken 
  * @returns - MsgResponse

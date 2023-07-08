@@ -1,3 +1,4 @@
+import { currentProjectState } from "@atoms/personaAtoms";
 import { sequenceDrawerOpenState } from "@atoms/sequenceAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
@@ -20,9 +21,9 @@ export default function CurrentSequences() {
   const userToken = useRecoilValue(userTokenState);
   const totalRecords = useRef(0);
   const [data, setData] = useState<any[]>([]);
-  const [personaId, setPersonaId] = useState<number>(-1);
   const [sequenceId, setSequenceId] = useState<number>(-1);
   const [opened, setOpened] = useRecoilState(sequenceDrawerOpenState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const [page, setPage] = useState(1);
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
@@ -56,9 +57,10 @@ export default function CurrentSequences() {
   useEffect(() => {
     (async () => {
       totalRecords.current = 0;
+      if (!currentProject) { return; }
 
       const response = await fetch(
-        `${API_URL}/email_generation/all_sequences?archetype_id=${personaId}`,
+        `${API_URL}/email_generation/all_sequences?archetype_id=${currentProject?.id}`,
         {
           method: "GET",
           headers: {
@@ -90,23 +92,12 @@ export default function CurrentSequences() {
       pageData = _.sortBy(pageData, sortStatus.columnAccessor);
       setData(sortStatus.direction === "desc" ? pageData.reverse() : pageData);
     })();
-  }, [personas, personaId, page, sortStatus]);
+  }, [personas, page, sortStatus]);
 
   return (
     <Paper withBorder p="md" mt={25} radius="md" w="100%">
       <FlexSeparate>
         <Title order={2}>Your Sequences</Title>
-        <Select
-          pr="sm"
-          pb="xs"
-          placeholder="Select a persona"
-          color="teal"
-          // @ts-ignore
-          data={personas ?? []}
-          icon={<IconUser size="1rem" />}
-          value={personaId + ""}
-          onChange={(value) => setPersonaId(value ? +value : -1)}
-        />
       </FlexSeparate>
       <Text>Here are sequences that you've created on SellScale.</Text>
 

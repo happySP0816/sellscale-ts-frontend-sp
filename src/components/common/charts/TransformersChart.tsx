@@ -1,4 +1,3 @@
-import { currentPersonaIdState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { Center, Paper, useMantineTheme, Avatar } from "@mantine/core";
 import { valueToColor } from "@utils/general";
@@ -18,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Channel } from "src";
 import { IconChartHistogram } from "@tabler/icons";
+import { currentProjectState } from "@atoms/personaAtoms";
 
 ChartJS.register(
   CategoryScale,
@@ -30,14 +30,13 @@ ChartJS.register(
 
 export default function TransformersChart(props: { channel: Channel }) {
   const theme = useMantineTheme();
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
-    currentPersonaIdState
-  );
+  const currentProject = useRecoilValue(currentProjectState);
+
   const userToken = useRecoilValue(userTokenState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
-      `query-transformers-chart-data-${currentPersonaId}-${props.channel}`,
+      `query-transformers-chart-data-${currentProject?.id}-${props.channel}`,
       { channel: props.channel },
     ],
     queryFn: async ({ queryKey }) => {
@@ -47,7 +46,7 @@ export default function TransformersChart(props: { channel: Channel }) {
 
       const response = await getTransformers(
         userToken,
-        currentPersonaId,
+        currentProject?.id || -1,
         channel === "EMAIL"
       );
       const result =
@@ -64,7 +63,7 @@ export default function TransformersChart(props: { channel: Channel }) {
       });
     },
     refetchOnWindowFocus: false,
-    enabled: currentPersonaId !== -1,
+    enabled: !!currentProject,
   });
 
   if (!data || isFetching) {

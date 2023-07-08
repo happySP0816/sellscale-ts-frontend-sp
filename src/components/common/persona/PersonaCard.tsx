@@ -44,7 +44,7 @@ import {
 } from '@tabler/icons';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { Archetype, PersonaOverview } from 'src';
-import { uploadDrawerOpenState, currentPersonaIdState, detailsDrawerOpenState } from '@atoms/personaAtoms';
+import { uploadDrawerOpenState, detailsDrawerOpenState, currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { useQueryClient } from '@tanstack/react-query';
 import FlexSeparate from '@common/library/FlexSeparate';
@@ -90,8 +90,8 @@ export default function PersonaCard(props: {
 
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
   const [detailsDrawerOpened, setDetailsDrawerOpened] = useRecoilState(detailsDrawerOpenState);
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(currentPersonaIdState);
-  const [opened, { open, close }] = useDisclosure(props.personaOverview.id === currentPersonaId);
+  const currentProject = useRecoilValue(currentProjectState);
+  const [opened, { open, close }] = useDisclosure(true);
   const [selectorType, setSelectorType] = useRecoilState(prospectSelectorTypeState);
 
   const [tabValue, setTabValue] = useState<TabsValue>(props.unassignedPersona ? 'analyze' : 'contacts');
@@ -128,12 +128,12 @@ export default function PersonaCard(props: {
   */
 
   useEffect(() => {
-    if (props.personaOverview.id === currentPersonaId) {
+    if (true) {
       open();
     } else {
       close();
     }
-  }, [currentPersonaId]);
+  }, [currentProject]);
 
   // Temp Fix: Make sure the prospect table selector is set to all when the persona is opened - to prevent ProspectTable bug
   useEffect(() => {
@@ -190,7 +190,6 @@ export default function PersonaCard(props: {
   };
 
   const openUploadProspects = () => {
-    setCurrentPersonaId(props.personaOverview.id);
     setUploadDrawerOpened(true);
   };
 
@@ -230,11 +229,7 @@ export default function PersonaCard(props: {
             spacing={8}
             sx={{ cursor: 'pointer' }}
             onClick={() => {
-              if (props.personaOverview.id === currentPersonaId) {
-                setCurrentPersonaId(-1);
-              } else {
-                setCurrentPersonaId(props.personaOverview.id);
-              }
+              
             }}
           >
             <Box>
@@ -373,7 +368,7 @@ export default function PersonaCard(props: {
             <PersonaBrain archetype_id={props.personaOverview.id} />
           </Tabs.Panel>
           <Tabs.Panel value='filters' pt='xs'>
-            <PersonaFilters archetype_id={props.personaOverview.id} />
+            <PersonaFilters />
           </Tabs.Panel>
 
           <Tabs.Panel value='teach' pt='xs'>

@@ -28,7 +28,7 @@ type EngagementFeedItemType = {
 }
 
 
-export default function RecentActivitySection() {
+export default function RecentActivitySection(props: { all?: boolean }) {
   const [page, setPage] = useDebouncedState(0, 300);
   const userToken = useRecoilValue(userTokenState);
   const [isFetching, setIsFetching] = useState(false);

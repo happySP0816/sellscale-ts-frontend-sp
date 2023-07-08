@@ -2,8 +2,8 @@ import { API_URL } from "@constants/data";
 import { SetterOrUpdater } from "recoil";
 
 export function isLoggedIn(){
-  return localStorage.getItem('user-token')
-    && localStorage.getItem('user-data');
+  return !!(localStorage.getItem('user-token')
+    && localStorage.getItem('user-data'));
 }
 
 export function login(email: string, setUserData: SetterOrUpdater<any>){

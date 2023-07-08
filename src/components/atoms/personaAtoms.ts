@@ -1,5 +1,6 @@
 import { ArchetypeCreation } from "@modals/CreatePersonaModal";
 import { atom } from "recoil";
+import { PersonaOverview } from "src";
 
 const uploadDrawerOpenState = atom({
   key: "persona-upload-drawer-open",
@@ -11,10 +12,11 @@ const detailsDrawerOpenState = atom({
   default: false,
 });
 
-const currentPersonaIdState = atom({
-  key: "persona-current-id",
-  default: -1,
+const currentProjectState = atom({
+  key: "project-current",
+  default: null as PersonaOverview | null,
 });
+
 
 // NOT USED
 const personaCreationState = atom({
@@ -51,6 +53,6 @@ const personaCreationState = atom({
 export {
   uploadDrawerOpenState,
   detailsDrawerOpenState,
-  currentPersonaIdState,
   personaCreationState,
+  currentProjectState,
 };

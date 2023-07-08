@@ -14,7 +14,7 @@ import {
   useNavigationType,
 } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
-import HomePage from "./components/pages/HomePage";
+import HomePage from "./components/pages/old/HomePage";
 import PersonaPage from "./components/pages/PersonaPage";
 import PipelinePage from "./components/pages/old/PipelinePage";
 import MissingPage from "./components/pages/MissingPage";
@@ -32,6 +32,14 @@ import AuthCalendlyPage from "@pages/AuthCalendlyPage";
 import SetupPage from "@pages/SetupPage";
 import DashboardSection from "@pages/DashboardPage";
 import InboxPage from "@pages/InboxPage";
+import AllContactsSection from "@common/home/AllContactsSection";
+import { Box } from "@mantine/core";
+import RecentActivitySection from "@common/home/RecentActivitySection";
+import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
+import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
+import ContactsPage from "@pages/ContactsPage";
+import ToolsPage from "@pages/ToolsPage";
+import SetupPersonaCard from "@common/persona/SetupPersonaCard";
 
 const queryClient = new QueryClient();
 
@@ -100,10 +108,10 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<InboxPage />} />,
       },
       {
-        path: "home/:tabId/:prospectId?",
-        element: <RestrictedRoute page={<HomePage />} />,
+        path: "contacts/:prospectId?",
+        element: <RestrictedRoute page={<ContactsPage />} />,
         loader: async ({ params }: { params: any }) => {
-          return { tabId: params.tabId, prospectId: params.prospectId };
+          return { prospectId: params.prospectId };
         },
       },
       {
@@ -116,6 +124,13 @@ const router = sentryCreateBrowserRouter([
       {
         path: "email/:tabId?",
         element: <RestrictedRoute page={<EmailPage />} />,
+        loader: async ({ params }: { params: any }) => {
+          return { tabId: params.tabId };
+        },
+      },
+      {
+        path: "tools/:tabId?",
+        element: <RestrictedRoute page={<ToolsPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { tabId: params.tabId };
         },
@@ -167,6 +182,35 @@ const router = sentryCreateBrowserRouter([
         path: "login",
         element: <LoginPage />,
       },
+      {
+        path: "projectsetup",
+        element: <SetupPersonaCard />,
+      },
+
+      {
+        path: "all/inboxes",
+        element: <RestrictedRoute page={<InboxPage all/>} />,
+      },
+      {
+        path: "all/contacts/:prospectId?",
+        element: <RestrictedRoute page={<Box p='md'><AllContactsSection all /></Box>} />,
+        loader: async ({ params }: { params: any }) => {
+          return { prospectId: params.prospectId };
+        },
+      },
+      {
+        path: "all/recent-activity",
+        element: <RestrictedRoute page={<Box p='md'><RecentActivitySection all /></Box>} />,
+      },
+      {
+        path: "all/email-messages",
+        element: <RestrictedRoute page={<Box p='md'><EmailQueuedMessages all /></Box>} />,
+      },
+      {
+        path: "all/linkedin-messages",
+        element: <RestrictedRoute page={<Box p='md'><LinkedinQueuedMessages all /></Box>} />,
+      },
+
       {
         path: "*",
         element: <MissingPage />,

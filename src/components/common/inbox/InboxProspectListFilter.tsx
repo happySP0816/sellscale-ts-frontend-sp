@@ -26,7 +26,8 @@ export default function InboxProspectListFilter(props: {
   open: boolean,
   setOpen: (open: boolean) => void
   filters?: InboxProspectListFilterState,
-  setFilters: (filters: InboxProspectListFilterState) => void
+  setFilters: (filters: InboxProspectListFilterState) => void,
+  all?: boolean,
 }) {
 
   const userToken = useRecoilValue(userTokenState);
@@ -105,21 +106,23 @@ export default function InboxProspectListFilter(props: {
           }}
         />
 
-        <Select
-          label='Persona'
-          placeholder='Filter by persona'
-          defaultValue={filterState.current.personaId}
-          searchable
-          clearable
-          onSearchChange={() => {}}
-          searchValue={undefined}
-          nothingFound='No persona found'
-          data={data ? data.map((persona) => ({ label: persona.name, value: persona.id+'' })) : []}
-          onChange={(value) => {
-            filterState.current.personaId = value || undefined;
-            props.setFilters(filterState.current);
-          }}
-        />
+        {!props.all && (
+          <Select
+            label='Persona'
+            placeholder='Filter by persona'
+            defaultValue={filterState.current.personaId}
+            searchable
+            clearable
+            onSearchChange={() => {}}
+            searchValue={undefined}
+            nothingFound='No persona found'
+            data={data ? data.map((persona) => ({ label: persona.name, value: persona.id+'' })) : []}
+            onChange={(value) => {
+              filterState.current.personaId = value || undefined;
+              props.setFilters(filterState.current);
+            }}
+          />
+        )}
 
         <div style={{ paddingTop: 10, paddingBottom: 10 }}>
           <Checkbox

@@ -47,6 +47,7 @@ import { API_URL } from "@constants/data";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import displayNotification from "@utils/notificationFlow";
 import CreatePersona from "@common/persona/CreatePersona";
+import { getSinglePersona } from "@utils/requests/getPersonas";
 
 export default function UploadProspectsModal({
   context,
@@ -516,6 +517,11 @@ export default function UploadProspectsModal({
                     }
                   : undefined
               }
+              onUploadSuccess={async (archetypeId) => {
+                //const response = await getSinglePersona(userToken, archetypeId);
+                //console.log(response);
+                window.location.reload();
+              }}
             />
           </Tabs.Panel>
           <Tabs.Panel value="from-crm" pt="xs">

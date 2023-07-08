@@ -59,6 +59,7 @@ import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSe
 import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
 import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
 import _ from 'lodash';
+import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 
 const useStyles = createStyles((theme) => ({
   icon: {

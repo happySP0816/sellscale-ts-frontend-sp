@@ -25,11 +25,14 @@ import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
 import { version } from '../../../package.json';
 import { NavbarNested } from "./NavbarNested";
+import { MainHeader, NAV_HEADER_HEIGHT } from "./MainHeader";
+import { currentProjectState } from "@atoms/personaAtoms";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
 
   const userData = useRecoilValue(userDataState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.SM})`,
@@ -46,9 +49,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       className={"h-full"}
       fixed={true}
       navbar={
-        <NavbarNested isMobileView navOpened />
+        <>
+          {isLoggedIn() && currentProject && (
+            <NavbarNested isMobileView navOpened />
+          )}
+        </>
       }
       header={
+
+        <MainHeader />
+        /*
         isMobileView ? (
           <Header height={NAV_BAR_TOP_WIDTH}>
             <div
@@ -84,13 +94,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </Header>
         ) : (
           <></>
-        )
+        )*/
       }
       styles={(theme) => ({
         main: {
           padding: 0,
-          marginTop: isMobileView ? NAV_BAR_TOP_WIDTH : 0,
-          marginLeft: isMobileView ? 0 : NAV_BAR_SIDE_WIDTH,
+          marginTop: NAV_HEADER_HEIGHT, //isMobileView ? NAV_BAR_TOP_WIDTH : 0,
+          marginLeft: (isLoggedIn() && currentProject) ? NAV_BAR_SIDE_WIDTH : 0, //isMobileView ? 0 : NAV_BAR_SIDE_WIDTH,
         },
         body: {
           backgroundColor:

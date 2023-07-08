@@ -1,4 +1,3 @@
-import { currentPersonaIdState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import TransformersChart from "@common/charts/TransformersChart";
@@ -11,14 +10,13 @@ import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Channel } from "src";
+import { currentProjectState } from "@atoms/personaAtoms";
 
 const PAGE_SIZE = 20;
 
 export default function TransformersTable(props: { channel: Channel }) {
   const theme = useMantineTheme();
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
-    currentPersonaIdState
-  );
+  const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
 
   // Pagination and sorting
@@ -36,7 +34,7 @@ export default function TransformersTable(props: { channel: Channel }) {
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
-      `query-transformers-data-${currentPersonaId}-${props.channel}`,
+      `query-transformers-data-${currentProject?.id}-${props.channel}`,
       { page, sortStatus, channel: props.channel },
     ],
     queryFn: async ({ queryKey }) => {
@@ -44,7 +42,7 @@ export default function TransformersTable(props: { channel: Channel }) {
       // eslint-disable-next-line
       const [_key, { page, sortStatus, channel }] = queryKey;
 
-      const response = await getTransformers(userToken, currentPersonaId, channel === 'EMAIL');
+      const response = await getTransformers(userToken, currentProject?.id || -1, channel === 'EMAIL');
       const result =
         response.status === "success" ? (response.data as any[]) : [];
 
@@ -68,7 +66,7 @@ export default function TransformersTable(props: { channel: Channel }) {
       return sortStatus.direction === "desc" ? pageData.reverse() : pageData;
     },
     refetchOnWindowFocus: false,
-    enabled: currentPersonaId !== -1,
+    enabled: !!currentProject,
   });
 
   return (

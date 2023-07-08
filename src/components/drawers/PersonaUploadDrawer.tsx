@@ -1,9 +1,9 @@
 import { Drawer, Flex, Tabs, Title } from "@mantine/core";
 import FileDropAndPreview from "@modals/upload-prospects/FileDropAndPreview";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype, PersonaOverview } from "src";
 import {
-  currentPersonaIdState,
+  currentProjectState,
   uploadDrawerOpenState,
 } from "../atoms/personaAtoms";
 import ComingSoonCard from "@common/library/ComingSoonCard";
@@ -15,19 +15,16 @@ export default function PersonaUploadDrawer(props: {
   afterUpload: () => void;
 }) {
   const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
-    currentPersonaIdState
-  );
+  const currentProject = useRecoilValue(currentProjectState);
 
   const persona = props.personaOverviews?.find(
-    (persona) => persona.id === currentPersonaId
+    (persona) => persona.id === currentProject?.id
   );
   if (!persona) {
     return <></>;
   }
 
   const closeDrawer = () => {
-    setCurrentPersonaId(-1);
     setOpened(false);
   };
 
@@ -67,9 +64,6 @@ export default function PersonaUploadDrawer(props: {
 /*
 export default function PersonaUploadDrawer(props: {}) {
   const [opened, setOpened] = useRecoilState(uploadDrawerOpenState);
-  const [currentPersonaId, setCurrentPersonaId] = useRecoilState(
-    currentPersonaIdState
-  );
   const userToken = useRecoilValue(userTokenState);
 
   const theme = useMantineTheme();
@@ -90,7 +84,7 @@ export default function PersonaUploadDrawer(props: {}) {
         if(json instanceof DOMException) {
           return { status: 'error', title: `Error while uploading`, message: json.message };
         } else {
-          return await uploadProspects(currentPersonaId, userToken, json);
+          
         }
       },
       {

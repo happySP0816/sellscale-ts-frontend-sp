@@ -22,7 +22,7 @@ type MessageType = {
   archetype: string;
 };
 
-export default function LinkedinQueuedMessages() {
+export default function LinkedinQueuedMessages(props: { all?: boolean }) {
   const [isFetching, setIsFetching] = useState(false);
   const [page, setPage] = useDebouncedState(0, 300);
   const userToken = useRecoilValue(userTokenState);

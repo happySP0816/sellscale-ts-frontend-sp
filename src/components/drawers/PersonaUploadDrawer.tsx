@@ -50,7 +50,7 @@ export default function PersonaUploadDrawer(props: {
         </Tabs.Panel>
         <Tabs.Panel value="from-link" pt="xs">
           <Flex w='100%' my='md'>
-            <LinkedInURLUpload archetypeID={currentPersonaId} afterUpload={props.afterUpload}/>
+            <LinkedInURLUpload afterUpload={props.afterUpload}/>
           </Flex>
         </Tabs.Panel>
         {/* <Tabs.Panel value="from-crm" pt="xs">

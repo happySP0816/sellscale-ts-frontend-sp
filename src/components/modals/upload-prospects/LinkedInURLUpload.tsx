@@ -1,3 +1,4 @@
+import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { Button, Flex, Text, TextInput } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
@@ -7,7 +8,6 @@ import { useRecoilValue } from "recoil";
 
 
 type LinkedInUrlUploadProps = {
-  archetypeID: number;
   afterUpload: () => void;
 }
 
@@ -15,6 +15,7 @@ type LinkedInUrlUploadProps = {
 export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const [url, setURL] = useState<string>("");
 
@@ -23,7 +24,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
 
     const result = await createProspectFromLinkedinLink(
       userToken,
-      props.archetypeID,
+      currentProject?.id || -1,
       url,
     )
     if (result.status === 'success') {

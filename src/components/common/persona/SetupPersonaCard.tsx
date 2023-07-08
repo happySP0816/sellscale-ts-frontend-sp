@@ -49,7 +49,7 @@ export default function SetupPersonaCard() {
         allPersonas={data || []}
       />
       <PersonaDetailsDrawer personaOverviews={data} />
-      <PersonaUploadDrawer personaOverviews={data} />
+      <PersonaUploadDrawer personaOverviews={data} afterUpload={() => {}} />
       <UploadDetailsDrawer />
     </>
   )

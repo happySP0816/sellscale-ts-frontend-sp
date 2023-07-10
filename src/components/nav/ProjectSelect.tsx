@@ -67,7 +67,7 @@ export function ProjectSelect() {
       setProjects(result);
 
       const firstActiveProject = result.find((project) => project.active);
-      // if (firstActiveProject) setCurrentProject(firstActiveProject);
+      if (firstActiveProject) setCurrentProject(firstActiveProject);
 
     })();
   }, []);

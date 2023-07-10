@@ -411,7 +411,7 @@ export default function BumpFrameworksEmailPage(props: {
                 if (archetype.length == 0) {
                   return;
                 }
-                setArchetypeID(currentProject?.id);
+                setArchetypeID(currentProject?.id || null);
               }}
               defaultValues={archetypeID ? [archetypeID] : []}
               selectMultiple={false}

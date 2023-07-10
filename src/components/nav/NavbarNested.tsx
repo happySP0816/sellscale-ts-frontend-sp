@@ -60,6 +60,8 @@ import { hexToHexWithAlpha } from "@utils/general";
 import getPersonas from "@utils/requests/getPersonas";
 import { Archetype } from "src";
 import { getInboxNotifs } from "@common/inbox/utils";
+import { ProjectSelect } from './ProjectSelect';
+import { currentProjectState } from '@atoms/personaAtoms';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -163,6 +165,7 @@ export function NavbarNested(props: {
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [navTab, setNavTab] = useRecoilState(navTabState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const activeTab = location.pathname?.split("/")[1];
   const activeSubTab = location.pathname?.split("/")[2];
@@ -366,50 +369,32 @@ export function NavbarNested(props: {
       className={classes.navbar}
     >
       <Navbar.Section className={classes.header} grow component={ScrollArea}>
-        <Box m='sm'>
-          <Button
-            size="md"
-            fullWidth
-            className={cx(classes.setupLink, {
-              [classes.setupLinkActive]: "projectsetup" === navTab,
-            })}
-            onClick={(event) => {
-              event.preventDefault();
-              navigateToPage(navigate, "/projectsetup");
-              setTimeout(() => setNavTab("projectsetup"), 100);
-            }}
-            variant="gradient"
-            gradient={{
-              from: theme.colors.green[9],
-              to: theme.colors.green[9],
-              deg: 90,
-            }}
-          >
-            <IconFileDescription className={classes.linkIcon} stroke={1.5} />
-            <Text>Setup Project</Text>
-          </Button>
-        </Box>
-
+        {currentProject?.id && 
+          <Box mt='sm' mb='sm'>
+            <ProjectSelect />
+          </Box>
+        }
         <div>{links}</div>
       </Navbar.Section>
 
       <Navbar.Section className={classes.footer}>
 
-        <a
-          href="#"
-          className={cx(classes.link, {
-            [classes.linkActive]:
-              "settings" === navTab || navTab.startsWith("settings-"),
-          })}
-          onClick={(event) => {
-            event.preventDefault();
-            navigateToPage(navigate, "/settings");
-            setTimeout(() => setNavTab("settings"), 100);
-          }}
-        >
-          <IconSettings className={classes.linkIcon} stroke={1.5} />
-          <span>Project Settings</span>
-        </a>
+        <Box m='sm'>
+          <Button
+            size="xs"
+            w='100%'
+            onClick={(event) => {
+              event.preventDefault();
+              navigateToPage(navigate, "/projectsetup");
+              setTimeout(() => setNavTab("projectsetup"), 100);
+            }}
+            color='grape'
+          >
+            <IconFileDescription className={classes.linkIcon} stroke={1.5} />
+            <Text>Complete Persona Setup</Text>
+          </Button>
+        </Box>
+        
 
         {/*
         <a

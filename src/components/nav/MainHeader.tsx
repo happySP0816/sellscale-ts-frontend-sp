@@ -10,6 +10,7 @@ import {
   Code,
   Box,
   Button,
+  Text,
   Flex,
   getStylesRef,
 } from "@mantine/core";
@@ -31,6 +32,8 @@ import { navTabState } from "@atoms/navAtoms";
 import { GlobalPageSelect } from "./GlobalPageSelect";
 import ProfileIcon from "./ProfileIcon";
 import { useEffect } from "react";
+import { IconSettings } from '@tabler/icons';
+import { currentProjectState } from '@atoms/personaAtoms';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -110,6 +113,7 @@ export function MainHeader() {
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [navTab, setNavTab] = useRecoilState(navTabState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   // Update the navTab state when the URL changes
   const activeTab = location.pathname?.split("/")[1];
@@ -164,7 +168,6 @@ export function MainHeader() {
 
   const percentage = Math.round((completedStepsCount / stepsCount) * 100);
   // ------------------------------
-
   return (
     <Header height={NAV_HEADER_HEIGHT} className={classes.header} mb={120}>
       <Box mx={20}>
@@ -173,9 +176,11 @@ export function MainHeader() {
             <LogoFull size={28} />
             <Code className={classes.version}>v{version}</Code>
 
-            <Box pl={60} pr={10}>
-              <ProjectSelect />
-            </Box>
+            {!currentProject?.id &&
+              <Box pl={60} pr={10}>
+                <ProjectSelect />
+              </Box>
+            }
 
             <SearchBar />
           </Group>
@@ -213,6 +218,20 @@ export function MainHeader() {
 
             <Box px={10}>
               <GlobalPageSelect />
+            </Box>
+
+            <Box mt="xs">
+            <a
+              href="#"
+              onClick={(event) => {
+              event.preventDefault();
+              navigateToPage(navigate, "/settings");
+              setTimeout(() => setNavTab("settings"), 100);
+              setCurrentProject(null);
+              }}
+            >
+              <IconSettings className={classes.linkIcon} stroke={1.5} />
+            </a>
             </Box>
 
             <Box>

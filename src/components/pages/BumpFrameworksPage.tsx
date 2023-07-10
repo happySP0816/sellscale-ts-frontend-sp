@@ -25,7 +25,7 @@ import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
 import { IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconTransferIn, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
-import { valueToColor } from '@utils/general';
+import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import getChannels from '@utils/requests/getChannels';
 import getPersonas from '@utils/requests/getPersonas';
@@ -165,9 +165,6 @@ function BumpBucketView(props: {
                             {framework.title}
                           </Text>
                           <Text maw='50rem'>{framework.description}</Text>
-                          <Text fz='xs' fs='italic' mt='4px'>
-                            {framework.bump_delay_days} day delay
-                          </Text>
                         </Flex>
                       </Flex>
                       <Tooltip label='Edit Bump Framework' withinPortal>
@@ -194,6 +191,23 @@ function BumpBucketView(props: {
                         </ActionIcon>
                       </Tooltip>
                     </Flex>
+                    <Card.Section>
+                      <Flex align={'center'} justify={'center'} w='100%'>
+                        <Tooltip
+                          label={`Prospect will be snoozed for ${framework.bump_delay_days} days after bump is sent`}
+                          withinPortal
+                        >
+                          <Badge
+                            mt='12px'
+                            size='md'
+                            color={valueToColor(theme, formatToLabel(framework.bump_delay_days + ''))}
+                            variant='filled'
+                          >
+                            {framework.bump_delay_days} day snooze
+                          </Badge>
+                        </Tooltip>
+                      </Flex>
+                    </Card.Section>
                     <Card.Section>
                       <Divider mt='sm' />
                     </Card.Section>

@@ -118,7 +118,7 @@ export function AiMetaDataBadge(props: {
     <HoverCard
       withinPortal
       position={props.direction}
-      width={320}
+      width={500}
       shadow='md'
       withArrow
       openDelay={200}

@@ -45,6 +45,7 @@ import _ from "lodash";
 import FlexSeparate from "@common/library/FlexSeparate";
 import { API_URL } from "@constants/data";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
+import { currentProjectState } from '@atoms/personaAtoms';
 
 /**
  * Gets the default statuses for a given selector type (based on channel)
@@ -155,6 +156,9 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
   );
   const userToken = useRecoilValue(userTokenState);
   const totalRecords = useRef(0);
+  const [currentProject, setCurrentProject] = useRecoilState(
+    currentProjectState
+  );
 
   const [search, setSearch] = useDebouncedState("", 200);
   const [statuses, setStatuses] = useState<string[] | null>(null);
@@ -419,7 +423,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             clearable
             label="Filter by Persona"
             placeholder="Select persona"
-            value={personaId ? personaId + "" : null}
+            defaultValue={currentProject?.id + ""}
             onChange={(value) =>
               value ? setPersonaId(+value) : setPersonaId(null)
             }

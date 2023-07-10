@@ -62,6 +62,8 @@ import { Archetype } from "src";
 import { getInboxNotifs } from "@common/inbox/utils";
 import { ProjectSelect } from './ProjectSelect';
 import { currentProjectState } from '@atoms/personaAtoms';
+import { IconAt, IconBrain, IconMessage, IconMilitaryRank, IconTimelineEventPlus } from '@tabler/icons';
+import PersonaCardMini from '@common/persona/PersonaCardMini';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -224,9 +226,22 @@ export function NavbarNested(props: {
         },
       ],
     },
+     {
+      mainKey: "teach",
+      label: `1. Teach`,
+      icon: IconBrain,
+      links: [
+        {
+          key: "teach",
+          label: `Teach`,
+          icon: IconBrain,
+          link: "/teach",
+        },
+      ],
+    },
     {
       mainKey: "contacts",
-      label: `Contacts`,
+      label: `2. Contacts`,
       icon: IconAddressBook,
       links: [
         {
@@ -238,33 +253,52 @@ export function NavbarNested(props: {
       ],
     },
     {
-      mainKey: "linkedin",
-      label: "LinkedIn",
-      icon: IconBrandLinkedin,
+      mainKey: "prioritize",
+      label: `3. Prioritize`,
+      icon: IconMilitaryRank,
       links: [
         {
-          key: "linkedin-messages",
-          label: "Scheduled Messages",
-          icon: IconMailFast,
-          link: "/linkedin/messages",
+          key: "prioritize",
+          label: `prioritize`,
+          icon: IconMilitaryRank,
+          link: "/prioritize",
         },
+      ],
+    },
+    {
+      mainKey: "linkedin",
+      label: "4. LinkedIn",
+      icon: IconBrandLinkedin,
+      links: [
         // {
-        //   key: "linkedin-ctas",
-        //   label: "CTAs",
-        //   icon: IconSpeakerphone,
-        //   link: "/linkedin/ctas",
+        //   key: "linkedin-messages",
+        //   label: "Scheduled Messages",
+        //   icon: IconMailFast,
+        //   link: "/linkedin/messages",
         // },
+        {
+          key: "linkedin-ctas",
+          label: "CTAs",
+          icon: IconSpeakerphone,
+          link: "/linkedin/ctas",
+        },
         {
           key: "linkedin-bump-frameworks",
           label: "Bump Frameworks",
           icon: IconAdjustments,
           link: "/linkedin/bump-frameworks",
         },
-        {
-          key: "linkedin-campaign-analytics",
-          label: "Campaign Analytics",
-          icon: IconReport,
-          link: "/linkedin/campaign-analytics",
+        // {
+        //   key: "linkedin-campaign-analytics",
+        //   label: "Campaign Analytics",
+        //   icon: IconReport,
+        //   link: "/linkedin/campaign-analytics",
+        // },
+         {
+          key: "linkedin-simulate",
+          label: "Simulate",
+          icon: IconMessage,
+          link: "/linkedin/simulate",
         },
         {
           key: "linkedin-voices",
@@ -276,14 +310,20 @@ export function NavbarNested(props: {
     },
     {
       mainKey: "email",
-      label: "Email",
+      label: "5. Email",
       icon: IconMail,
       links: [
+        // {
+        //   key: "email-scheduled-emails",
+        //   label: "Scheduled Emails",
+        //   icon: IconMailFast,
+        //   link: "/email/scheduled-emails",
+        // },
         {
-          key: "email-scheduled-emails",
-          label: "Scheduled Emails",
-          icon: IconMailFast,
-          link: "/email/scheduled-emails",
+          key: "email-blocks",
+          label: "Email Blocks",
+          icon: IconWall,
+          link: "/email/blocks",
         },
         {
           key: "email-bump-frameworks",
@@ -297,24 +337,18 @@ export function NavbarNested(props: {
         //   icon: IconListDetails,
         //   link: '/email/sequences',
         // },
-        // {
-        //   key: "email-blocks",
-        //   label: "Email Blocks",
-        //   icon: IconWall,
-        //   link: "/email/blocks",
-        // },
         /*       {
               key: "email-personalizations",
               label: "Personalizations",
               icon: IconAffiliate,
               link: "/email/personalizations",
             }, */
-        {
-          key: "email-campaign-analytics",
-          label: "Campaign Analytics",
-          icon: IconReport,
-          link: "/email/campaign-analytics",
-        },
+        // {
+        //   key: "email-campaign-analytics",
+        //   label: "Campaign Analytics",
+        //   icon: IconReport,
+        //   link: "/email/campaign-analytics",
+        // },
         // { key: 'email-email-details', label: 'Sequence Analysis', icon: IconReport, link: '/email/email-details' },
       ],
     },
@@ -346,6 +380,12 @@ export function NavbarNested(props: {
           label: "Demo Calendar",
           icon: IconCalendarEvent,
           link: "/tools/calendar",
+        },
+         {
+          key: "email-scraper",
+          label: "Email Scraper",
+          icon: IconAt,
+          link: "/tools/email-scraper",
         },
       ],
     },
@@ -379,22 +419,18 @@ export function NavbarNested(props: {
 
       <Navbar.Section className={classes.footer}>
 
-        <Box m='sm'>
-          <Button
-            size="xs"
-            w='100%'
-            onClick={(event) => {
-              event.preventDefault();
-              navigateToPage(navigate, "/projectsetup");
-              setTimeout(() => setNavTab("projectsetup"), 100);
-            }}
-            color='grape'
-          >
-            <IconFileDescription className={classes.linkIcon} stroke={1.5} />
-            <Text>Complete Persona Setup</Text>
-          </Button>
-        </Box>
-        
+        {currentProject && <Box>
+            <PersonaCardMini 
+              personaOverview={currentProject} 
+              refetch={() => {}} 
+              unassignedPersona={currentProject?.is_unassigned_contact_archetype} 
+              allPersonas={[]}
+              onClick={() => {
+                    navigateToPage(navigate, "/projectsetup");
+                    setTimeout(() => setNavTab("projectsetup"), 100);
+                }}/>
+          </Box>
+        }
 
         {/*
         <a

@@ -140,7 +140,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   };
 
   return (
-    <Flex gap={0} wrap='nowrap' direction='column' h='100vh' sx={{ borderLeft: '0.0625rem solid #dee2e6' }}>
+    <Flex gap={0} wrap='nowrap' direction='column' h={'calc(100vh - ' + NAV_HEADER_HEIGHT + 'px)'} sx={{ borderLeft: '0.0625rem solid #dee2e6' }}>
       <div style={{ flexBasis: '20%' }}>
         <Stack spacing={0}>
           <Center>

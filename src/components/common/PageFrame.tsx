@@ -12,9 +12,9 @@ export default function PageFrame({ children }: { children: React.ReactNode }) {
       px={5}
       py={15}
       sx={(theme) => ({
-        width: `clamp(260px, ${
-          smScreenOrLess ? "80vw" : "calc(100vw - 280px)"
-        }, 1100px)`,
+        width: `clamp(50px, ${
+          smScreenOrLess ? "90vw" : "calc(100vw - 50px)"
+        }, 1300px)`,
         maxWidth: "100%",
       })}
     >

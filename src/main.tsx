@@ -40,6 +40,12 @@ import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
 import ContactsPage from "@pages/ContactsPage";
 import ToolsPage from "@pages/ToolsPage";
 import SetupPersonaCard from "@common/persona/SetupPersonaCard";
+import PersonaBrain from '@common/persona/PersonaBrain';
+import Pulse from '@common/persona/Pulse';
+import { PulseWrapper } from '@common/persona/Pulse copy';
+import { LinkedinConvoSimulatorPage } from '@common/simulators/linkedin/LinkedinConvoSimulatorPage';
+import PullProspectEmailsCard from '@common/credits/PullProspectEmailsCard';
+import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
 
 const queryClient = new QueryClient();
 
@@ -108,11 +114,23 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<InboxPage />} />,
       },
       {
+        path: "teach",
+        element: <RestrictedRoute page={<PersonaBrain />} />,
+      },
+      {
+        path: "prioritize",
+        element: <RestrictedRoute page={<PulseWrapper />} />,
+      },
+      {
         path: "contacts/:prospectId?",
         element: <RestrictedRoute page={<ContactsPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { prospectId: params.prospectId };
         },
+      },
+      {
+        path: "/linkedin/simulate",
+        element: <RestrictedRoute page={<LinkedinConvoSimulatorPage />} />,
       },
       {
         path: "linkedin/:tabId?",
@@ -127,6 +145,10 @@ const router = sentryCreateBrowserRouter([
         loader: async ({ params }: { params: any }) => {
           return { tabId: params.tabId };
         },
+      },
+      {
+        path: "tools/email-scraper",
+        element: <RestrictedRoute page={<PullProspectEmailsCardPage />} />,
       },
       {
         path: "tools/:tabId?",

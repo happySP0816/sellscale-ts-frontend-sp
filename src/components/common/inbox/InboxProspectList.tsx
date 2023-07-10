@@ -46,6 +46,7 @@ import { convertDateToCasualTime, isWithinLastXDays, removeExtraCharacters } fro
 import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
+import { currentProjectState } from '@atoms/personaAtoms';
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
@@ -127,6 +128,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   const userToken = useRecoilValue(userTokenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const [showPurgatorySection, setShowPurgatorySection] = useState(true);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const nurturingMode = useRecoilValue(nurturingModeState);
 
@@ -140,7 +142,11 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   const [filterSelectValue, setFilterSelectValue] = useState(filterSelectOptions[0].value);
   const [searchFilter, setSearchFilter] = useState('');
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [filtersState, setFiltersState] = useState<InboxProspectListFilterState>();
+  const [filtersState, setFiltersState] = useState<InboxProspectListFilterState>({
+    recentlyContacted: 'ALL',
+    respondedLast: 'ALL',
+    channel: 'SELLSCALE',
+  });
 
   console.log('ProspectList', props.prospects);
 
@@ -216,8 +222,8 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
       prospects = prospects.filter((p) => p.email_status);
     }
 
-    if (filtersState.personaId) {
-      prospects = prospects.filter((p) => p.persona_id + '' === filtersState.personaId);
+    if (currentProject?.id) {
+      prospects = prospects.filter((p) => p.persona_id + '' === currentProject?.id + '');
     }
 
     if (filtersState.respondedLast === 'THEM') {

@@ -1,3 +1,4 @@
+import { currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
 import {
@@ -29,7 +30,7 @@ import { getEmailBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import getChannels from '@utils/requests/getChannels';
 import getPersonas from '@utils/requests/getPersonas';
 import { useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { EmailBumpFramework, MsgResponse } from 'src';
 
 
@@ -262,8 +263,9 @@ export default function BumpFrameworksEmailPage(props: {
   const userToken = useRecoilValue(userTokenState);
 
   const [loading, setLoading] = useState(false);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const [archetypeID, setArchetypeID] = useState<number | null>(
-    props.predefinedPersonaId !== undefined ? props.predefinedPersonaId : null
+    currentProject?.id || null
   );
   const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
   // const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
@@ -305,7 +307,11 @@ export default function BumpFrameworksEmailPage(props: {
 
     const personas = result.data;
     for (const persona of personas) {
-      if (persona.active) {
+      if (currentProject?.id) {
+        setArchetypeID(currentProject?.id);
+        break;
+      }
+      else if (persona.active) {
         setArchetypeID(persona.id);
         break;
       }
@@ -405,7 +411,7 @@ export default function BumpFrameworksEmailPage(props: {
                 if (archetype.length == 0) {
                   return;
                 }
-                setArchetypeID(archetype[0].archetype_id);
+                setArchetypeID(currentProject?.id);
               }}
               defaultValues={archetypeID ? [archetypeID] : []}
               selectMultiple={false}

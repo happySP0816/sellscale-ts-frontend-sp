@@ -1,4 +1,5 @@
 import { nurturingModeState } from "@atoms/inboxAtoms";
+import { currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from "@atoms/userAtoms";
 import { Modal, Title, Text, Stack, Select, Checkbox } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
@@ -12,14 +13,12 @@ export type InboxProspectListFilterState = {
   recentlyContacted: 'ALL' | 'HIDE' | 'SHOW';
   respondedLast: 'ALL' | 'THEM' | 'YOU';
   channel: Channel;
-  personaId: string | undefined;
 }
 
 export const defaultInboxProspectListFilterState: InboxProspectListFilterState = {
   recentlyContacted: 'ALL',
   respondedLast: 'ALL',
   channel: 'SELLSCALE',
-  personaId: undefined,
 };
 
 export default function InboxProspectListFilter(props: {
@@ -33,6 +32,7 @@ export default function InboxProspectListFilter(props: {
   const userToken = useRecoilValue(userTokenState);
   const filterState = useRef<InboxProspectListFilterState>(_.cloneDeep(defaultInboxProspectListFilterState));
   const [nurturingMode, setNurturingMode] = useRecoilState(nurturingModeState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   useEffect(() => {
     if (props.filters){
@@ -110,17 +110,14 @@ export default function InboxProspectListFilter(props: {
           <Select
             label='Persona'
             placeholder='Filter by persona'
-            defaultValue={filterState.current.personaId}
+            defaultValue={currentProject?.id + '' || null}
             searchable
             clearable
             onSearchChange={() => {}}
             searchValue={undefined}
             nothingFound='No persona found'
             data={data ? data.map((persona) => ({ label: persona.name, value: persona.id+'' })) : []}
-            onChange={(value) => {
-              filterState.current.personaId = value || undefined;
-              props.setFilters(filterState.current);
-            }}
+           
           />
         )}
 

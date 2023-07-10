@@ -176,11 +176,10 @@ export function MainHeader() {
             <LogoFull size={28} />
             <Code className={classes.version}>v{version}</Code>
 
-            {!currentProject?.id &&
-              <Box pl={60} pr={10}>
+              <Box pl={60} pr={10} opacity={currentProject?.id ? '0' : ''}>
                 <ProjectSelect />
               </Box>
-            }
+            
 
             <SearchBar />
           </Group>

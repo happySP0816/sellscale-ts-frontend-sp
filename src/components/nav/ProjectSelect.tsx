@@ -67,12 +67,10 @@ export function ProjectSelect() {
       setProjects(result);
 
       const firstActiveProject = result.find((project) => project.active);
-      if (firstActiveProject) setCurrentProject(firstActiveProject);
+      if (firstActiveProject && !window.location.href.includes("/all") ) setCurrentProject(firstActiveProject);
 
     })();
   }, []);
-
-  console.log(projects);
 
   return (
     <Menu
@@ -92,7 +90,7 @@ export function ProjectSelect() {
           pr={12}
           w={250}
         >
-          {currentProject?.name || "Select Project"}
+          {currentProject?.name || "Select Persona"}
         </Button>
       </Menu.Target>
       <Menu.Dropdown>

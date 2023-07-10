@@ -47,6 +47,7 @@ import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 import { currentProjectState } from '@atoms/personaAtoms';
+import { NAV_BAR_TOP_WIDTH } from '@constants/data';
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
@@ -260,7 +261,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   return (
     <div>
       <LoadingOverlay loader={loaderWithText('')} visible={props.isFetching && props.prospects.length === 0} />
-      <Stack spacing={0} h={'100vh'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
+      <Stack spacing={0} h={'calc(100vh - ' + NAV_HEADER_HEIGHT + 'px)'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
         <Container pt={20} pb={10} px={20} m={0}>
           <Input
             styles={{

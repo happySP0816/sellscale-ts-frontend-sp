@@ -1,18 +1,22 @@
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import PersonaCard from "./PersonaCard";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { useQuery } from "@tanstack/react-query";
 import { isLoggedIn } from "@auth/core";
-import { getPersonasOverview } from "@utils/requests/getPersonas";
+import { getAllUploads, getPersonasOverview } from "@utils/requests/getPersonas";
 import { PersonaOverview } from "src";
 import { userTokenState } from "@atoms/userAtoms";
 import PersonaDetailsDrawer from "@drawers/PersonaDetailsDrawer";
 import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
 import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
+import { useEffect, useState } from 'react';
 
 export default function SetupPersonaCard() {
 
   const userToken = useRecoilValue(userTokenState);
+  const [uploads, setUploads] = useState<any[]>([]);
+  const [fetchedUploads, setFetchedUploads] = useState(false);
+  let [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
@@ -28,7 +32,6 @@ export default function SetupPersonaCard() {
     refetchOnWindowFocus: false,
   });
 
-  let currentProject = useRecoilValue(currentProjectState);
   if(!currentProject) {
     return <></>;
   }
@@ -39,6 +42,21 @@ export default function SetupPersonaCard() {
       currentProject = new_currentProject;
     }
   }
+
+  const fetchUploads = () => {
+    if (fetchedUploads) return;
+   
+    if (!currentProject) return;
+    getAllUploads(userToken, currentProject?.id).then((res) => {
+      if (!currentProject) return;
+      currentProject.uploads = res.data;
+      setCurrentProject(currentProject);
+    });
+    setFetchedUploads(true);
+  }
+  fetchUploads();
+    
+  
 
   return (
     <>

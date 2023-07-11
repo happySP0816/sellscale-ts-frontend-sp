@@ -175,7 +175,7 @@ export default function AllContactsSection(props: { all?: boolean }) {
                     {isUploading ? 'Upload in Progress...' : 'Latest Upload'}
                   </Button>
                 </>
-              ) : 'Swag'}
+              ) : ''}
             {currentProject?.id && (
               <Button
                 variant='filled'

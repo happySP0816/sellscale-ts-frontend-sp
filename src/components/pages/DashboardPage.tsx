@@ -428,7 +428,7 @@ export default function DashboardSection() {
       )}
       {!isFetching && demosDrawerOpened && (
         <>
-          <DemoFeedbackDrawer prospects={all_prospectsDemo} refetch={refetch} />
+          <DemoFeedbackDrawer refetch={refetch} />
         </>
       )}
       {!isFetching && demoFeedbackDrawerOpened && (

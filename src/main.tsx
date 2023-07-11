@@ -46,6 +46,7 @@ import { PulseWrapper } from '@common/persona/Pulse copy';
 import { LinkedinConvoSimulatorPage } from '@common/simulators/linkedin/LinkedinConvoSimulatorPage';
 import PullProspectEmailsCard from '@common/credits/PullProspectEmailsCard';
 import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
+import EmailBlocksPage from '@pages/EmailBlocksPage';
 
 const queryClient = new QueryClient();
 
@@ -145,6 +146,10 @@ const router = sentryCreateBrowserRouter([
         loader: async ({ params }: { params: any }) => {
           return { tabId: params.tabId };
         },
+      },
+       {
+        path: "email/blocks",
+        element: <RestrictedRoute page={<EmailBlocksPage />} />,
       },
       {
         path: "tools/email-scraper",

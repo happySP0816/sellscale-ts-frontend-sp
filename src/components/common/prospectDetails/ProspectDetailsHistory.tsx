@@ -95,12 +95,12 @@ function historyEventToDescription(theme: MantineTheme, item: HistoryItem) {
     case "STATUS_CHANGE":
       return (
         <>
-          Status changed from{" "}
-          <Badge color={valueToColor(theme, formatToLabel(item.from))}>
+          Status changed to{" "}
+          {/* <Badge color={valueToColor(theme, formatToLabel(item.from))} size='xs'>
             {formatToLabel(item.from)}
           </Badge>{" "}
-          to{" "}
-          <Badge color={valueToColor(theme, formatToLabel(item.to))}>
+          to{" "} */}
+          <Badge color={valueToColor(theme, formatToLabel(item.to))} size='xs'>
             {formatToLabel(item.to)}
           </Badge>
         </>
@@ -167,6 +167,8 @@ export default function ProspectDetailsHistory(props: { prospectId: number }) {
     return _.isEqual(_.omit(obj1, 'date'), _.omit(obj2, 'date'));
   });
   events = _.sortBy(events, (item) => new Date(item.date));
+  // sort reversed
+  events = events.reverse();
 
   return (
     <Box p='xs'>
@@ -177,7 +179,7 @@ export default function ProspectDetailsHistory(props: { prospectId: number }) {
             bullet={historyEventToIcon(item.event)}
             lineVariant="dashed"
           >
-            <Text color="dimmed" size="sm">
+            <Text color="dimmed" size="xs">
               {historyEventToDescription(theme, item)}
             </Text>
             <Text size="xs" mt={4}>

@@ -9,12 +9,14 @@ import InboxProspectList from "@common/inbox/InboxProspectList";
 import { populateInboxNotifs } from "@common/inbox/utils";
 import { API_URL } from "@constants/data";
 import { Grid } from "@mantine/core";
+import { NAV_HEADER_HEIGHT } from "@nav/MainHeader";
 import { useQuery } from "@tanstack/react-query";
 import { setPageTitle } from "@utils/documentChange";
 import { getProspects } from "@utils/requests/getProspects";
 import { useRecoilValue } from "recoil";
 import { Prospect } from "src";
 
+export const INBOX_PAGE_HEIGHT = `calc(100vh - ${NAV_HEADER_HEIGHT}px)`;
 
 export default function InboxPage(props: { all?: boolean }) {
   setPageTitle("Inbox");
@@ -55,7 +57,7 @@ export default function InboxPage(props: { all?: boolean }) {
   }
   
   return (
-    <Grid columns={100} gutter={0}>
+    <Grid columns={100} gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: 'hidden' }}>
       <Grid.Col span={27} >
         <InboxProspectList prospects={prospects} isFetching={isFetching} all={props.all} />
       </Grid.Col>

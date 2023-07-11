@@ -46,6 +46,7 @@ import { convertDateToCasualTime, isWithinLastXDays, removeExtraCharacters } fro
 import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
+import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
@@ -254,7 +255,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   return (
     <div>
       <LoadingOverlay loader={loaderWithText('')} visible={props.isFetching && props.prospects.length === 0} />
-      <Stack spacing={0} h={'100vh'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
+      <Stack spacing={0} h={'100%'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
         <Container pt={20} pb={10} px={20} m={0}>
           <Input
             styles={{
@@ -332,7 +333,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
           </ActionIcon>
         </Group>
         <Divider />
-        <ScrollArea h={`calc(100vh - ${HEADER_HEIGHT}px)`} sx={{ overflowX: 'hidden' }}>
+        <ScrollArea h={`calc(${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)`} sx={{ overflowX: 'hidden' }}>
           {
             [false, true].map((in_purgatory_section) => {
               return <>

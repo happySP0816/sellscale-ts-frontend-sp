@@ -40,6 +40,7 @@ import InboxProspectConvoSendBox from './InboxProspectConvoSendBox';
 import InboxProspectConvoBumpFramework from './InboxProspectConvoBumpFramework';
 import { AiMetaDataBadge } from '@common/persona/LinkedInConversationEntry';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
+import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
 
 export function ProspectConvoMessage(props: {
   img_url: string;
@@ -175,7 +176,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
   return (
-    <Flex gap={0} direction='column' wrap='nowrap' h='100vh'>
+    <Flex gap={0} direction='column' wrap='nowrap' h={'100%'}>
       <div style={{ height: HEADER_HEIGHT, position: 'relative' }}>
         <Group position='apart' p={15} h={66} sx={{ flexWrap: 'nowrap' }}>
           <div style={{ overflow: 'hidden' }}>
@@ -226,11 +227,11 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       </div>
       <div
         style={{
-          height: `calc((100vh - ${HEADER_HEIGHT}px)*0.70)`,
+          height: `calc((${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)*0.70)`,
           alignItems: 'stretch',
         }}
       >
-        <ScrollArea h={`calc((100vh - ${HEADER_HEIGHT}px)*0.70)`} viewportRef={viewport}>
+        <ScrollArea h={`calc((${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)*0.70)`} viewportRef={viewport}>
           <div style={{ marginTop: 10, marginBottom: 10 }}>
             <LoadingOverlay loader={loaderWithText('')} visible={isFetchingMessages} />
             {messages &&
@@ -261,7 +262,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           </div>
         </ScrollArea>
       </div>
-      <Stack style={{ height: `calc((100vh - ${HEADER_HEIGHT}px)*0.30)` }} justify='flex-end'>
+      <Stack style={{ height: `calc((${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)*0.30)` }} justify='flex-end'>
         <InboxProspectConvoSendBox
           ref={sendBoxRef}
           linkedin_public_id={linkedin_public_id}

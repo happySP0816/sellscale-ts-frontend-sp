@@ -101,6 +101,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           padding: 0,
           marginTop: NAV_HEADER_HEIGHT, //isMobileView ? NAV_BAR_TOP_WIDTH : 0,
           marginLeft: (isLoggedIn() && currentProject) ? NAV_BAR_SIDE_WIDTH : 0, //isMobileView ? 0 : NAV_BAR_SIDE_WIDTH,
+          minHeight: `calc(100vh - ${NAV_HEADER_HEIGHT}px)`,
         },
         body: {
           backgroundColor:

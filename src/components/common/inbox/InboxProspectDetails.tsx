@@ -60,6 +60,8 @@ import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
 import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
 import _ from 'lodash';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
+import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
+import ProspectDetailsHistory from '@common/prospectDetails/ProspectDetailsHistory';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -140,7 +142,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   };
 
   return (
-    <Flex gap={0} wrap='nowrap' direction='column' h='100vh' sx={{ borderLeft: '0.0625rem solid #dee2e6' }}>
+    <Flex gap={0} wrap='nowrap' direction='column' h={'100%'} sx={{ borderLeft: '0.0625rem solid #dee2e6' }}>
       <div style={{ flexBasis: '20%' }}>
         <Stack spacing={0}>
           <Center>
@@ -288,12 +290,12 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
             <Tabs.Tab value='research' icon={<IconUserSearch size='0.8rem' />}>
               Research
             </Tabs.Tab>
-            <Tabs.Tab value='notes' icon={<IconWriting size='0.8rem' />}>
-              Notes
+            <Tabs.Tab value='history' icon={<IconWriting size='0.8rem' />}>
+              History
             </Tabs.Tab>
           </Tabs.List>
 
-          <Tabs.Panel value='details' pt='xs' h={'calc(100vh - 470px)'}>
+          <Tabs.Panel value='details' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 470px)`}>
             <Stack mx={8} spacing={2}>
               {data?.details.title && (
                 <Group noWrap spacing={10} mt={3}>
@@ -344,13 +346,20 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
             </Stack>
           </Tabs.Panel>
 
-          <Tabs.Panel value='research' pt='xs' h={'calc(100vh - 470px)'}>
+          <Tabs.Panel value='research' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
             <ScrollArea h={'100%'}>
               {openedProspectId !== -1 && <ProspectDetailsResearchTabs prospectId={openedProspectId} />}
             </ScrollArea>
           </Tabs.Panel>
 
-          <Tabs.Panel value='notes' pt='xs' h={'calc(100vh - 470px)'}>
+          <Tabs.Panel value='history' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
+            <ScrollArea h={'100%'}>
+              {openedProspectId !== -1 && <ProspectDetailsHistory prospectId={openedProspectId} />}
+            </ScrollArea>
+          </Tabs.Panel>
+
+          {/* NOT USED CURRENTLY */}
+          <Tabs.Panel value='notes' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
             <Textarea
               ref={notesRef}
               autosize

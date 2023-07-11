@@ -15,6 +15,7 @@ import {
   Tooltip,
   Text,
   Center,
+  Paper,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
@@ -48,6 +49,7 @@ import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsRese
 import { IconDots, IconPencil } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
 import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
+import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 
 export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
   const userData = useRecoilValue(userDataState);
@@ -326,6 +328,18 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                                 email={data.main.prospect_info.email.email}
                               />
                             )}
+
+
+                          {channel.value === "LINKEDIN" && (
+
+                            <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
+                              <Title order={4}>Prospect History</Title>
+                              <ScrollArea h={500}>
+                              <ProspectDetailsHistory prospectId={data.main.prospect_info.details.id} />
+                              </ScrollArea>
+                            </Card>
+
+                          )}
                         </Tabs.Panel>
                       )
                     )}

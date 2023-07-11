@@ -46,12 +46,8 @@ import { convertDateToCasualTime, isWithinLastXDays, removeExtraCharacters } fro
 import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
-<<<<<<< HEAD
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
-=======
 import { currentProjectState } from '@atoms/personaAtoms';
-import { NAV_BAR_TOP_WIDTH } from '@constants/data';
->>>>>>> 0c976fe8b5c6a1eae8f37b5092b708960349f8f6
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
@@ -265,11 +261,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   return (
     <div>
       <LoadingOverlay loader={loaderWithText('')} visible={props.isFetching && props.prospects.length === 0} />
-<<<<<<< HEAD
       <Stack spacing={0} h={'100%'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
-=======
-      <Stack spacing={0} h={'calc(100vh - ' + NAV_HEADER_HEIGHT + 'px)'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
->>>>>>> 0c976fe8b5c6a1eae8f37b5092b708960349f8f6
         <Container pt={20} pb={10} px={20} m={0}>
           <Input
             styles={{

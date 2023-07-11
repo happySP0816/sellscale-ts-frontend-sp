@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Avatar,
   Badge,
+  Box,
   Checkbox,
   Container,
   Divider,
@@ -344,8 +345,8 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
             [false, true].map((in_purgatory_section) => {
               return <>
                {in_purgatory_section && <Container pt='24px' pb='24px'>
-                <Divider ta='center' fz={7} fw={500} color='gray' labelPosition='center' label={'Waiting to here back from ' + prospects.filter((p) => p.in_purgatory).length + ' prospect(s)'} /> 
-                <Text color='blue' align='center'fw={600} fz={12} sx={{cursor: 'pointer'}} onClick={() => setShowPurgatorySection(!showPurgatorySection)}>{showPurgatorySection ? 'View' : 'Hide'} Prospects</Text>          
+                <Divider ta='center' fz={7} fw={500} color='gray' labelPosition='center' label={'Recently contacted ' + prospects.filter((p) => p.in_purgatory).length + ' prospect' + (prospects.filter((p) => p.in_purgatory).length > 1 ? 's' : '')} /> 
+                <Text color='blue' align='center'fw={600} fz={12} sx={{cursor: 'pointer'}} onClick={() => setShowPurgatorySection(!showPurgatorySection)}>{showPurgatorySection ? 'View' : 'Hide'} Prospect{(prospects.filter((p) => p.in_purgatory).length > 1 ? 's' : '')}</Text>          
                   
                 </Container>}
                 {((in_purgatory_section && !showPurgatorySection) || !in_purgatory_section) && prospects.filter((prospect) => prospect.in_purgatory == in_purgatory_section).map((prospect, i: number) => (
@@ -391,10 +392,15 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
               No active conversations found.
             </Text>
           )}
+
+          <Box h='50px'>
+
+          </Box>
         </ScrollArea>
         <Text sx={{ position: 'absolute', top: HEADER_HEIGHT, right: 5, zIndex: 100 }} fs='italic' fz={8} c='dimmed'>
           {prospects.length} convos
         </Text>
+
       </Stack>
 
       <InboxProspectListFilter

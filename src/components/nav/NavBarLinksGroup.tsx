@@ -13,6 +13,8 @@ import {
   Code,
 } from "@mantine/core";
 import {
+  IconAlertCircleFilled,
+  IconAlertHexagon,
   IconArrowNarrowRight,
   IconCalendarStats,
   IconChevronLeft,
@@ -24,6 +26,9 @@ import { navTabState } from "@atoms/navAtoms";
 import { useRecoilState } from "recoil";
 import { useOs } from "@mantine/hooks";
 import { openSpotlight } from "@mantine/spotlight";
+import { IconAlertCircle, IconCheckbox, IconDots, IconNotification } from '@tabler/icons';
+import { API_URL } from '@constants/data';
+import { currentProjectState } from '@atoms/personaAtoms';
 
 const useStyles = createStyles((theme) => ({
   control: {
@@ -144,6 +149,12 @@ export function LinksGroup({
 
   const [navTab, setNavTab] = useRecoilState(navTabState);
   const [opened, setOpened] = useState(false);
+  const userToken = localStorage.getItem("user-token");
+
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+
+  const [fetchedSetupTabsCompleteForPersonaId, setFetchedSetupTabsCompleteForPersonaId] = useState(-1);
+  const [setupTabsComplete, setSetupTabsComplete] = useState<any>({});
 
   // When change what's active, make sure the correct drawer is open
   useEffect(() => {
@@ -177,7 +188,8 @@ export function LinksGroup({
         <div>
           <link.icon className={classes.linkIcon} size={15} stroke={1.5} />
         </div>
-        <div>{link.label}</div>
+        <Text mr='md'>{link.label}</Text>
+        {setupTabsComplete[link.key] !== undefined && !setupTabsComplete[link.key] ? <IconAlertHexagon size={15} stroke={1.5} color='red'/> : null}
       </Flex>
     </Text>
   ));
@@ -189,6 +201,26 @@ export function LinksGroup({
       links?.find((link) => link.key === navTab)?.label
     }`;
   }
+
+  useEffect(() => {
+    if (fetchedSetupTabsCompleteForPersonaId !== currentProject?.id && currentProject?.id) {
+      setFetchedSetupTabsCompleteForPersonaId(currentProject?.id);
+      fetch(`${API_URL}/client/persona/setup_status/${currentProject?.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }).then(
+        (res) => {
+          res.json().then(({data}) => {
+            setSetupTabsComplete(data);
+            console.log(data);
+          });
+        }
+      )
+    }
+  }, [currentProject]);
 
   return (
     <>
@@ -219,7 +251,8 @@ export function LinksGroup({
         }}
       >
         <Icon className={classes.linkIcon} stroke={1.5} />
-        <span>{linkLabel}</span>
+        <Text mr="sm">{linkLabel}</Text>
+        {setupTabsComplete[mainKey] !== undefined && !setupTabsComplete[mainKey] ? <IconAlertHexagon size={15} stroke={1.5} color='red'/> : null}
         {hasLinkList && (
           <ChevronIcon
             className={classes.chevron}

@@ -15,8 +15,9 @@ import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import displayNotification from "@utils/notificationFlow";
 import { MsgResponse } from "src";
 import { showNotification } from "@mantine/notifications";
+import { currentProjectState } from '@atoms/personaAtoms';
 type PropsType = {
-  archetype_id: number;
+  archetype_id?: number;
 };
 
 export default function PersonaBrain(props: PropsType) {
@@ -34,9 +35,13 @@ export default function PersonaBrain(props: PropsType) {
   const [personaContactObjective, setPersonaContactObjective] = useState("");
   const [needsSave, setNeedsSave] = useState(false);
 
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  
+  const archetype_id = props.archetype_id || currentProject?.id
+
   const fetchPersonaDetails = async () => {
     setLoadingPersona(true);
-    await fetch(`${API_URL}/client/archetype/${props.archetype_id}`, {
+    await fetch(`${API_URL}/client/archetype/${archetype_id}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${userToken}`,
@@ -60,7 +65,7 @@ export default function PersonaBrain(props: PropsType) {
   const savePersonaDetails = async () => {
     setLoadingPersona(true);
     await fetch(
-      `${API_URL}/client/archetype/${props.archetype_id}/update_description_and_fit`,
+      `${API_URL}/client/archetype/${archetype_id}/update_description_and_fit`,
       {
         method: "POST",
         headers: {
@@ -148,7 +153,7 @@ export default function PersonaBrain(props: PropsType) {
 
   return (
     <Flex>
-      <Container>
+      <Container mt='md'>
         <Card>
           <LoadingOverlay visible={loadingPersona} overlayBlur={2} />
           <Title order={4}>Persona Brain</Title>

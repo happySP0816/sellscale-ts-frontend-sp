@@ -176,7 +176,11 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
   return (
+<<<<<<< HEAD
     <Flex gap={0} direction='column' wrap='nowrap' h={'100%'}>
+=======
+    <Flex gap={0} direction='column' wrap='nowrap' h={'calc(100vh - ' + NAV_HEADER_HEIGHT + 'px)'}>
+>>>>>>> 0c976fe8b5c6a1eae8f37b5092b708960349f8f6
       <div style={{ height: HEADER_HEIGHT, position: 'relative' }}>
         <Group position='apart' p={15} h={66} sx={{ flexWrap: 'nowrap' }}>
           <div style={{ overflow: 'hidden' }}>

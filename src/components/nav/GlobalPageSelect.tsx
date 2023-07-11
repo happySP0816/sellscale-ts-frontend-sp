@@ -42,27 +42,27 @@ const useStyles = createStyles((theme) => ({
 
 const options = [
   {
-    label: 'All Inboxes',
+    label: 'Global Inboxes',
     icon: <IconInbox size="1rem" stroke={1.5} />,
     value: 'all-inboxes',
   },
   {
-    label: 'All Contacts',
+    label: 'Global Contacts',
     icon: <IconAddressBook size="1rem" stroke={1.5} />,
     value: 'all-contacts',
   },
   {
-    label: 'All Recent Activity',
+    label: 'Global Recent Activity',
     icon: <IconActivity size="1rem" stroke={1.5} />,
     value: 'all-recent-activity',
   },
   {
-    label: 'LinkedIn Messages',
+    label: 'Global LinkedIn Messages',
     icon: <IconBrandLinkedin size="1rem" stroke={1.5} />,
     value: 'all-linkedin-messages',
   },
   {
-    label: 'Email Messages',
+    label: 'Global Email Messages',
     icon: <IconMail size="1rem" stroke={1.5} />,
     value: 'all-email-messages',
   },
@@ -78,20 +78,20 @@ export function GlobalPageSelect() {
 
   return (
     <Menu
-      width={190}
+      width={250}
       withinPortal
       withArrow
     >
       <Menu.Target>
         <Button
           size='sm'
-          color='gray'
+          sx={{backgroundColor: options.find((option) => option.value === navTab)?.label ? '#4298f5' : ''}}
           className={classes.select}
           rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
           pr={12}
           leftIcon={<IconInbox size="1.2rem" stroke={2} />}
         >
-          {options.find((option) => option.value === navTab)?.label || 'All Inboxes'}
+          {options.find((option) => option.value === navTab)?.label || 'Global View'}
         </Button>
       </Menu.Target>
       <Menu.Dropdown>

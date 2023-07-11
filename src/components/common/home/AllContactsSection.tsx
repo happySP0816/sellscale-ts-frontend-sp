@@ -1,5 +1,5 @@
-import { Container, useMantineTheme } from "@mantine/core";
-import { IconUserPlus } from "@tabler/icons";
+import { ActionIcon, Box, Button, Collapse, Container, Flex, Text, useMantineTheme } from "@mantine/core";
+import { IconUpload, IconUserPlus } from "@tabler/icons";
 import { useMediaQuery } from "@mantine/hooks";
 import { API_URL, SCREEN_SIZES } from "@constants/data";
 import PipelineSelector, { icons } from "../pipeline/PipelineSelector";
@@ -16,7 +16,11 @@ import {
   prospectShowPurgatoryState,
 } from "@atoms/prospectAtoms";
 import { useEffect, useState } from "react";
-import { currentProjectState } from "@atoms/personaAtoms";
+import { currentProjectState, uploadDrawerOpenState } from "@atoms/personaAtoms";
+import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
+import { getAllUploads } from '@utils/requests/getPersonas';
+import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from '@atoms/uploadAtoms';
+import UploadDetailsDrawer from '@drawers/UploadDetailsDrawer';
 
 function getPipelineSelectorData(data: any) {
   return new Map()
@@ -59,10 +63,11 @@ function getPipelineSelectorData(data: any) {
 
 export default function AllContactsSection(props: { all?: boolean }) {
 
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const { prospectId } = useLoaderData() as {
     prospectId: string;
   };
+  const [showPipelineSelector, setShowPipelineSelector] = useState(false);
   const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
   useEffect(() => {
@@ -71,11 +76,18 @@ export default function AllContactsSection(props: { all?: boolean }) {
       setOpened(true);
     }
   }, [prospectId]);
-  
+
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
+  const openUploadProspects = () => {
+    setUploadDrawerOpened(true);
+  };
 
   const userToken = useRecoilValue(userTokenState);
   const showPurgatory = useRecoilValue(prospectShowPurgatoryState);
   const [loadingData, setLoadingData] = useState(false);
+
+  const [uploads, setUploads] = useState<any[]>([]);
+  const [fetchedUploads, setFetchedUploads] = useState(false);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-pipeline-details`, { showPurgatory }],
@@ -106,16 +118,85 @@ export default function AllContactsSection(props: { all?: boolean }) {
     refetchOnWindowFocus: false,
   });
 
+  const [prospectUploadDrawerOpened, setProspectUploadDrawerOpened] = useRecoilState(prospectUploadDrawerOpenState);
+  const [prospectUploadDrawerId, setProspectUploadDrawerId] = useRecoilState(prospectUploadDrawerIdState);
+  const isUploading =
+    currentProject?.uploads &&
+    currentProject?.uploads.length > 0 &&
+    currentProject?.uploads[0].stats.in_progress > 0;
+
+  const openUploadHistory = () => {
+    setProspectUploadDrawerId(currentProject?.uploads && currentProject?.uploads[0].id);
+    setProspectUploadDrawerOpened(true);
+  };
+
+  const fetchUploads = () => {
+    if (fetchedUploads) return;
+    if (!currentProject) return;
+    getAllUploads(userToken, currentProject?.id).then((res) => {
+      console.log(res)
+      setCurrentProject(Object.assign({uploads: res.data}, currentProject));
+    });
+    setFetchedUploads(true);
+  }
+  fetchUploads();
+
+  console.log(currentProject)
+
   const PIPELINE_SELECTOR_DATA = getPipelineSelectorData(data);
   return (
     <div>
-      <PipelineSelector
-        data={PIPELINE_SELECTOR_DATA}
-        loadingData={loadingData}
-      />
+      <PersonaUploadDrawer personaOverviews={currentProject ? [currentProject] : []} afterUpload={() => {}}/>
+      
+      <Collapse in={showPipelineSelector}>
+        <PipelineSelector
+          data={PIPELINE_SELECTOR_DATA}
+          loadingData={loadingData}
+        />
+      </Collapse>
+     
+      <Flex  justify="flex-end" mt='sm'>
+        <Box>
+          <Button 
+            variant='subtle' 
+            color='gray' 
+            size='sm' 
+            mr='md'
+            sx={{cursor: 'pointer'}} 
+            onClick={() => {setShowPipelineSelector(!showPipelineSelector)}}>
+              {showPipelineSelector ? 'Hide' : 'Show'} Pipeline Selector +
+          </Button>
+        </Box>
+        <Box>
+          <Flex direction='row'>
+            {currentProject?.uploads && currentProject?.uploads.length > 0 ? (
+                <>
+                  <Button variant='outline' color='dark' size='sm' mr='md' onClick={openUploadHistory}>
+                    {isUploading ? 'Upload in Progress...' : 'Latest Upload'}
+                  </Button>
+                </>
+              ) : ''}
+            {currentProject?.id && (
+              <Button
+                variant='filled'
+                color='teal'
+                radius='md'
+                ml='auto'
+                mr='0'
+                rightIcon={<IconUpload size={14} />}
+                onClick={openUploadProspects}
+              >
+                Upload New Prospects
+              </Button>
+            )}
+          </Flex>
+        </Box>
+      </Flex>
+
       <div style={{ paddingTop: 15 }}>
         <ProspectTable_old personaSpecific={props.all ? undefined : currentProject?.id} />
       </div>
+      <UploadDetailsDrawer/>
     </div>
   );
 }

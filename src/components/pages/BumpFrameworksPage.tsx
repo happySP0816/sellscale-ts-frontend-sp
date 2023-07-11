@@ -25,13 +25,15 @@ import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
 import { IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconTransferIn, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
-import { valueToColor } from '@utils/general';
+import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import getChannels from '@utils/requests/getChannels';
 import getPersonas from '@utils/requests/getPersonas';
 import { useEffect, useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { BumpFramework, MsgResponse } from 'src';
+import { set } from 'lodash';
+import { currentProjectState } from '@atoms/personaAtoms';
 
 
 type BumpFrameworkBuckets = {
@@ -165,9 +167,6 @@ function BumpBucketView(props: {
                             {framework.title}
                           </Text>
                           <Text maw='50rem'>{framework.description}</Text>
-                          <Text fz='xs' fs='italic' mt='4px'>
-                            {framework.bump_delay_days} day delay
-                          </Text>
                         </Flex>
                       </Flex>
                       <Tooltip label='Edit Bump Framework' withinPortal>
@@ -194,6 +193,23 @@ function BumpBucketView(props: {
                         </ActionIcon>
                       </Tooltip>
                     </Flex>
+                    <Card.Section>
+                      <Flex align={'center'} justify={'center'} w='100%'>
+                        <Tooltip
+                          label={`Prospect will be snoozed for ${framework.bump_delay_days} days after bump is sent`}
+                          withinPortal
+                        >
+                          <Badge
+                            mt='12px'
+                            size='md'
+                            color={valueToColor(theme, formatToLabel(framework.bump_delay_days + ''))}
+                            variant='filled'
+                          >
+                            {framework.bump_delay_days} day snooze
+                          </Badge>
+                        </Tooltip>
+                      </Flex>
+                    </Card.Section>
                     <Card.Section>
                       <Divider mt='sm' />
                     </Card.Section>
@@ -296,6 +312,7 @@ export default function BumpFrameworksPage(props: {
   const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
     useDisclosure();
   const [maximumBumpSoftLock, setMaximumBumpSoftLock] = useState(false);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const bumpBuckets = useRef<BumpFrameworkBuckets>({
     ACCEPTED: {
@@ -331,6 +348,10 @@ export default function BumpFrameworksPage(props: {
 
     const personas = result.data;
     for (const persona of personas) {
+      if (currentProject?.id) {
+        setArchetypeID(currentProject?.id)
+        break
+      }
       if (persona.active && !props.predefinedPersonaId) {
         setArchetypeID(persona.id);
         break;
@@ -443,6 +464,10 @@ export default function BumpFrameworksPage(props: {
               onChange={(archetype) => {
                 if (archetype.length == 0) {
                   return;
+                }
+                if (currentProject?.id) {
+                  setArchetypeID(currentProject?.id)
+                  return
                 }
                 setArchetypeID(archetype[0].archetype_id);
               }}

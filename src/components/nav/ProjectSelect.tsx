@@ -10,6 +10,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
+import { IconLayoutSidebar } from '@tabler/icons';
 import {
   IconSquareCheck,
   IconPackage,
@@ -66,31 +67,30 @@ export function ProjectSelect() {
       setProjects(result);
 
       const firstActiveProject = result.find((project) => project.active);
-      if (firstActiveProject) setCurrentProject(firstActiveProject);
+      if (firstActiveProject && !window.location.href.includes("/all") ) setCurrentProject(firstActiveProject);
 
     })();
   }, []);
-
-  console.log(projects);
 
   return (
     <Menu
       transitionProps={{ transition: "pop-top-left" }}
       position="top-start"
-      width={280}
+      width={250}
       withinPortal
       withArrow
     >
       <Menu.Target>
         <Button
           size="sm"
-          color="gray"
+          sx={{backgroundColor: currentProject?.id ? '#4298f5' : ''}}
           className={classes.select}
+          leftIcon={<IconLayoutSidebar size="1.05rem" stroke={1.5} />}
           rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
           pr={12}
-          w={200}
+          w={250}
         >
-          {currentProject?.name || "Select Project"}
+          {currentProject?.name || "Select Persona"}
         </Button>
       </Menu.Target>
       <Menu.Dropdown>
@@ -123,11 +123,11 @@ export function ProjectSelect() {
           onClick={() => {
             openContextModal({
               modal: "uploadProspects",
-              title: <Title order={3}>Create Project</Title>,
+              title: <Title order={3}>Create Persona</Title>,
               innerProps: { mode: "CREATE-ONLY" },
             });
           }}
-        >Create New Project</Menu.Item>
+        >Create New Persona</Menu.Item>
       </Menu.Dropdown>
     </Menu>
   );

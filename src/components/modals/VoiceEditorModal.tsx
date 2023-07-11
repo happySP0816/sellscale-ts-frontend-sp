@@ -60,10 +60,6 @@ export default function VoiceEditorModal({
   const instructionMatches = prompt.match(instructionMatchingRegex);
   const instruction = instructionMatches && instructionMatches[1].replaceAll("prompt: ", "");
 
-  console.log("SWAG")
-  console.log(completions)
-  console.log(instruction)
-
   useEffect(() => {
     if (!fetchedPromptData) {
       fetchPromptData();

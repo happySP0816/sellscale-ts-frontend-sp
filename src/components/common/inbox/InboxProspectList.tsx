@@ -46,7 +46,12 @@ import { convertDateToCasualTime, isWithinLastXDays, removeExtraCharacters } fro
 import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
+<<<<<<< HEAD
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
+=======
+import { currentProjectState } from '@atoms/personaAtoms';
+import { NAV_BAR_TOP_WIDTH } from '@constants/data';
+>>>>>>> 0c976fe8b5c6a1eae8f37b5092b708960349f8f6
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
@@ -128,6 +133,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   const userToken = useRecoilValue(userTokenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const [showPurgatorySection, setShowPurgatorySection] = useState(true);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const nurturingMode = useRecoilValue(nurturingModeState);
 
@@ -141,7 +147,11 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   const [filterSelectValue, setFilterSelectValue] = useState(filterSelectOptions[0].value);
   const [searchFilter, setSearchFilter] = useState('');
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [filtersState, setFiltersState] = useState<InboxProspectListFilterState>();
+  const [filtersState, setFiltersState] = useState<InboxProspectListFilterState>({
+    recentlyContacted: 'ALL',
+    respondedLast: 'ALL',
+    channel: 'SELLSCALE',
+  });
 
   console.log('ProspectList', props.prospects);
 
@@ -217,8 +227,8 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
       prospects = prospects.filter((p) => p.email_status);
     }
 
-    if (filtersState.personaId) {
-      prospects = prospects.filter((p) => p.persona_id + '' === filtersState.personaId);
+    if (currentProject?.id) {
+      prospects = prospects.filter((p) => p.persona_id + '' === currentProject?.id + '');
     }
 
     if (filtersState.respondedLast === 'THEM') {
@@ -255,7 +265,11 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   return (
     <div>
       <LoadingOverlay loader={loaderWithText('')} visible={props.isFetching && props.prospects.length === 0} />
+<<<<<<< HEAD
       <Stack spacing={0} h={'100%'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
+=======
+      <Stack spacing={0} h={'calc(100vh - ' + NAV_HEADER_HEIGHT + 'px)'} sx={(theme) => ({ backgroundColor: theme.colors.gray[1], position: 'relative' })}>
+>>>>>>> 0c976fe8b5c6a1eae8f37b5092b708960349f8f6
         <Container pt={20} pb={10} px={20} m={0}>
           <Input
             styles={{

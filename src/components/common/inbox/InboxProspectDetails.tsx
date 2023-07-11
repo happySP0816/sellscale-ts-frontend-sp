@@ -142,7 +142,11 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   };
 
   return (
+<<<<<<< HEAD
     <Flex gap={0} wrap='nowrap' direction='column' h={'100%'} sx={{ borderLeft: '0.0625rem solid #dee2e6' }}>
+=======
+    <Flex gap={0} wrap='nowrap' direction='column' h={'calc(100vh - ' + NAV_HEADER_HEIGHT + 'px)'} sx={{ borderLeft: '0.0625rem solid #dee2e6' }}>
+>>>>>>> 0c976fe8b5c6a1eae8f37b5092b708960349f8f6
       <div style={{ flexBasis: '20%' }}>
         <Stack spacing={0}>
           <Center>

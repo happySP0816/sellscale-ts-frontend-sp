@@ -60,6 +60,10 @@ import { hexToHexWithAlpha } from "@utils/general";
 import getPersonas from "@utils/requests/getPersonas";
 import { Archetype } from "src";
 import { getInboxNotifs } from "@common/inbox/utils";
+import { ProjectSelect } from './ProjectSelect';
+import { currentProjectState } from '@atoms/personaAtoms';
+import { IconAt, IconBrain, IconMessage, IconMilitaryRank, IconTimelineEventPlus } from '@tabler/icons';
+import PersonaCardMini from '@common/persona/PersonaCardMini';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -163,6 +167,7 @@ export function NavbarNested(props: {
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
   const [navTab, setNavTab] = useRecoilState(navTabState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const activeTab = location.pathname?.split("/")[1];
   const activeSubTab = location.pathname?.split("/")[2];
@@ -221,9 +226,22 @@ export function NavbarNested(props: {
         },
       ],
     },
+     {
+      mainKey: "teach",
+      label: `1. Teach`,
+      icon: IconBrain,
+      links: [
+        {
+          key: "teach",
+          label: `Teach`,
+          icon: IconBrain,
+          link: "/teach",
+        },
+      ],
+    },
     {
       mainKey: "contacts",
-      label: `Contacts`,
+      label: `2. Contacts`,
       icon: IconAddressBook,
       links: [
         {
@@ -235,33 +253,52 @@ export function NavbarNested(props: {
       ],
     },
     {
-      mainKey: "linkedin",
-      label: "LinkedIn",
-      icon: IconBrandLinkedin,
+      mainKey: "prioritize",
+      label: `3. Prioritize`,
+      icon: IconMilitaryRank,
       links: [
         {
-          key: "linkedin-messages",
-          label: "Scheduled Messages",
-          icon: IconMailFast,
-          link: "/linkedin/messages",
+          key: "prioritize",
+          label: `prioritize`,
+          icon: IconMilitaryRank,
+          link: "/prioritize",
         },
+      ],
+    },
+    {
+      mainKey: "linkedin",
+      label: "4. LinkedIn",
+      icon: IconBrandLinkedin,
+      links: [
         // {
-        //   key: "linkedin-ctas",
-        //   label: "CTAs",
-        //   icon: IconSpeakerphone,
-        //   link: "/linkedin/ctas",
+        //   key: "linkedin-messages",
+        //   label: "Scheduled Messages",
+        //   icon: IconMailFast,
+        //   link: "/linkedin/messages",
         // },
+        {
+          key: "linkedin-ctas",
+          label: "CTAs",
+          icon: IconSpeakerphone,
+          link: "/linkedin/ctas",
+        },
         {
           key: "linkedin-bump-frameworks",
           label: "Bump Frameworks",
           icon: IconAdjustments,
           link: "/linkedin/bump-frameworks",
         },
-        {
-          key: "linkedin-campaign-analytics",
-          label: "Campaign Analytics",
-          icon: IconReport,
-          link: "/linkedin/campaign-analytics",
+        // {
+        //   key: "linkedin-campaign-analytics",
+        //   label: "Campaign Analytics",
+        //   icon: IconReport,
+        //   link: "/linkedin/campaign-analytics",
+        // },
+         {
+          key: "linkedin-simulate",
+          label: "Simulate",
+          icon: IconMessage,
+          link: "/linkedin/simulate",
         },
         {
           key: "linkedin-voices",
@@ -273,14 +310,20 @@ export function NavbarNested(props: {
     },
     {
       mainKey: "email",
-      label: "Email",
+      label: "5. Email",
       icon: IconMail,
       links: [
+        // {
+        //   key: "email-scheduled-emails",
+        //   label: "Scheduled Emails",
+        //   icon: IconMailFast,
+        //   link: "/email/scheduled-emails",
+        // },
         {
-          key: "email-scheduled-emails",
-          label: "Scheduled Emails",
-          icon: IconMailFast,
-          link: "/email/scheduled-emails",
+          key: "email-blocks",
+          label: "Email Blocks",
+          icon: IconWall,
+          link: "/email/blocks",
         },
         {
           key: "email-bump-frameworks",
@@ -294,24 +337,18 @@ export function NavbarNested(props: {
         //   icon: IconListDetails,
         //   link: '/email/sequences',
         // },
-        // {
-        //   key: "email-blocks",
-        //   label: "Email Blocks",
-        //   icon: IconWall,
-        //   link: "/email/blocks",
-        // },
         /*       {
               key: "email-personalizations",
               label: "Personalizations",
               icon: IconAffiliate,
               link: "/email/personalizations",
             }, */
-        {
-          key: "email-campaign-analytics",
-          label: "Campaign Analytics",
-          icon: IconReport,
-          link: "/email/campaign-analytics",
-        },
+        // {
+        //   key: "email-campaign-analytics",
+        //   label: "Campaign Analytics",
+        //   icon: IconReport,
+        //   link: "/email/campaign-analytics",
+        // },
         // { key: 'email-email-details', label: 'Sequence Analysis', icon: IconReport, link: '/email/email-details' },
       ],
     },
@@ -344,6 +381,12 @@ export function NavbarNested(props: {
           icon: IconCalendarEvent,
           link: "/tools/calendar",
         },
+         {
+          key: "email-scraper",
+          label: "Email Scraper",
+          icon: IconAt,
+          link: "/tools/email-scraper",
+        },
       ],
     },
   ];
@@ -366,50 +409,28 @@ export function NavbarNested(props: {
       className={classes.navbar}
     >
       <Navbar.Section className={classes.header} grow component={ScrollArea}>
-        <Box m='sm'>
-          <Button
-            size="md"
-            fullWidth
-            className={cx(classes.setupLink, {
-              [classes.setupLinkActive]: "projectsetup" === navTab,
-            })}
-            onClick={(event) => {
-              event.preventDefault();
-              navigateToPage(navigate, "/projectsetup");
-              setTimeout(() => setNavTab("projectsetup"), 100);
-            }}
-            variant="gradient"
-            gradient={{
-              from: theme.colors.green[9],
-              to: theme.colors.green[9],
-              deg: 90,
-            }}
-          >
-            <IconFileDescription className={classes.linkIcon} stroke={1.5} />
-            <Text>Setup Project</Text>
-          </Button>
-        </Box>
-
+        {currentProject?.id && 
+          <Box mt='sm' mb='sm'>
+            <ProjectSelect />
+          </Box>
+        }
         <div>{links}</div>
       </Navbar.Section>
 
       <Navbar.Section className={classes.footer}>
 
-        <a
-          href="#"
-          className={cx(classes.link, {
-            [classes.linkActive]:
-              "settings" === navTab || navTab.startsWith("settings-"),
-          })}
-          onClick={(event) => {
-            event.preventDefault();
-            navigateToPage(navigate, "/settings");
-            setTimeout(() => setNavTab("settings"), 100);
-          }}
-        >
-          <IconSettings className={classes.linkIcon} stroke={1.5} />
-          <span>Project Settings</span>
-        </a>
+        {currentProject && <Box>
+            <PersonaCardMini 
+              personaOverview={currentProject} 
+              refetch={() => {}} 
+              unassignedPersona={currentProject?.is_unassigned_contact_archetype} 
+              allPersonas={[]}
+              onClick={() => {
+                    navigateToPage(navigate, "/projectsetup");
+                    setTimeout(() => setNavTab("projectsetup"), 100);
+                }}/>
+          </Box>
+        }
 
         {/*
         <a

@@ -12,8 +12,8 @@ export default function PageFrame({ children }: { children: React.ReactNode }) {
       px={5}
       py={15}
       sx={(theme) => ({
-        width: `clamp(260px, ${
-          smScreenOrLess ? "80vw" : "calc(100vw - 280px)"
+        width: `clamp(50px, ${
+          smScreenOrLess ? "180vw" : "calc(100vw - 180px)"
         }, 1100px)`,
         maxWidth: "100%",
       })}

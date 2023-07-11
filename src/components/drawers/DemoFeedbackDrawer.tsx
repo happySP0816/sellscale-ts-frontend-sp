@@ -147,6 +147,15 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void }) {
           'LINKEDIN',
           'DEMO_WON'
         );
+      } else if (values.demoHappen === 'reschedule') {
+
+      } else {
+        await updateChannelStatus(
+          activeProspect.id,
+          userToken,
+          'LINKEDIN',
+          'DEMO_LOST'
+        );
       }
       
       showNotification({

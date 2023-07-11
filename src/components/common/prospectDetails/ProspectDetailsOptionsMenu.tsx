@@ -13,12 +13,14 @@ import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import {
   Tooltip
 } from "@mantine/core";
+import { openedProspectIdState } from '@atoms/inboxAtoms';
 export default function ProspectDetailsOptionsMenu(props: {
   prospectId: number;
 }) {
   const userToken = useRecoilValue(userTokenState);
   const queryClient = new QueryClient();
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
   return (
     <>
@@ -77,7 +79,11 @@ export default function ProspectDetailsOptionsMenu(props: {
                   }
                 );
                 setOpened(false);
-                location.reload();
+                setOpenedProspectId(-1);
+                queryClient.invalidateQueries({
+                  queryKey: [`query-dash-get-prospects`],
+                });
+                // location.reload();
               }}
             />
           </Popover.Dropdown>  

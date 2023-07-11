@@ -462,7 +462,7 @@ export default function ProspectDetailsChangeStatus(
           </Button>
          
       }
-      <DemoFeedbackDrawer refetch={() => {}} />
+      <DemoFeedbackDrawer refetch={refetch} />
 
       {props.channelData.currentStatus &&
         props.channelData.currentStatus.includes("DEMO") && (

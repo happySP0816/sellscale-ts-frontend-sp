@@ -268,6 +268,10 @@ export default function VoiceEditorModal({
                       const promptKey = "prompt_" + i
                       const completionKey = "completion_" + i
 
+                      if (!stackRankedConfigurationData[promptKey]) {
+                        return null
+                      }
+
                       return (
                         <Textarea
                           w='100%'

@@ -154,7 +154,7 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void }) {
           activeProspect.id,
           userToken,
           'LINKEDIN',
-          'DEMO_LOST'
+          'DEMO_LOSS'
         );
       }
       

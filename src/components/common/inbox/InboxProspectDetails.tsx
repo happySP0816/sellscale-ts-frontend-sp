@@ -215,6 +215,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
                 >
                   Give Demo Feedback
                 </Button>
+                <DemoFeedbackDrawer refetch={refetch} />
               </Box>
             </Stack>
           )}
@@ -365,9 +366,6 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           </Tabs.Panel>
         </Tabs>
       </div>
-      {true && demosDrawerOpened && (
-        <DemoFeedbackDrawer prospects={props.prospects} refetch={refetch} />
-      )}
     </Flex>
   );
 }

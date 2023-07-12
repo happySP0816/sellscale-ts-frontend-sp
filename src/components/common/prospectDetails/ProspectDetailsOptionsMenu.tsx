@@ -80,8 +80,11 @@ export default function ProspectDetailsOptionsMenu(props: {
                 );
                 setOpened(false);
                 setOpenedProspectId(-1);
-                queryClient.invalidateQueries({
+                queryClient.refetchQueries({
                   queryKey: [`query-dash-get-prospects`],
+                });
+                queryClient.refetchQueries({
+                  queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
                 });
                 // location.reload();
               }}

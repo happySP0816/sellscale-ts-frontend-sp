@@ -459,10 +459,14 @@ export default function ProspectDetailsChangeStatus(
             }}
           >
             Give Demo Feedback
-          </Button>
-         
+          </Button>    
       }
-      <DemoFeedbackDrawer refetch={refetch} />
+
+      <DemoFeedbackDrawer refetch={refetch} onSubmit={() => {
+          queryClient.refetchQueries({
+            queryKey: [`query-prospect-details-${props.prospectId}`],
+          });
+        }}/>
 
       {props.channelData.currentStatus &&
         props.channelData.currentStatus.includes("DEMO") && (

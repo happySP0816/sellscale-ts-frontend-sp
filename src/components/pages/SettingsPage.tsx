@@ -19,7 +19,7 @@ import {
 import PageTitle from "@nav/PageTitle";
 import { useQuery } from "@tanstack/react-query";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
-import { getUserInfo, logout } from "@auth/core";
+import { getUserInfo, logout, syncLocalStorage } from "@auth/core";
 import NylasConnectedCard from "@common/settings/NylasConnectedCard";
 import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
 import { navigateToPage } from "@utils/documentChange";
@@ -31,12 +31,14 @@ import CalendarAndScheduling from "@common/settings/CalendarAndScheduling";
 import {
   IconAdjustmentsFilled,
   IconBrain,
+  IconMessage2Bolt,
   IconTrashFilled,
 } from "@tabler/icons-react";
 import DoNotContactList from "@common/settings/DoNotContactList";
 import SellScaleBrain from "@common/settings/SellScaleBrain";
 import SettingPreferences from "@common/settings/SettingPreferences";
 import SlackbotSection from "@common/slackbot/SlackbotSection";
+import MessageAutomation from "@common/settings/MessageAutomation";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -372,10 +374,8 @@ export default function SettingsPage() {
   useQuery({
     queryKey: [`query-get-accounts-connected`],
     queryFn: async () => {
-      const info = await getUserInfo(userToken);
-      setUserData(info);
-      localStorage.setItem("user-data", JSON.stringify(info));
-      return info;
+      await syncLocalStorage(userToken, setUserData);
+      return true;
     },
   });
 
@@ -392,6 +392,12 @@ export default function SettingsPage() {
             icon={<IconAdjustmentsFilled size="0.8rem" />}
           >
             Preferences
+          </Tabs.Tab>
+          <Tabs.Tab
+            value="message-automation"
+            icon={<IconMessage2Bolt size="0.8rem" />}
+          >
+            Message Automation
           </Tabs.Tab>
           <Tabs.Tab
             value="linkedinConnection"
@@ -462,6 +468,10 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="slackbot" pl="xs">
           <SlackbotSection />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="message-automation" pl="xs">
+          <MessageAutomation />
         </Tabs.Panel>
 
         <Tabs.Panel value="logout" pl="xs">

@@ -94,8 +94,9 @@ export function ProjectSelect() {
         </Button>
       </Menu.Target>
       <Menu.Dropdown>
-        {projects.map((project) => (
+        {projects.map((project, i) => (
           <Menu.Item
+            key={i}
             disabled={project.id === currentProject?.id}
             icon={project.active ? (
               <IconCircleFilled

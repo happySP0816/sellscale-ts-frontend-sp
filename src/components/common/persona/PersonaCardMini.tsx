@@ -163,7 +163,13 @@ export default function PersonaCardMini(props: {
   };
 
   return (
-    <Paper withBorder p='xs' my={20} radius='md' sx={{cursor: 'pointer'}}>
+    <Paper p='xs' my={20} radius='md' sx={{
+      cursor: 'pointer',
+      backgroundColor: theme.fn.lighten(
+        theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+        0.1
+      ),
+    }}>
       <Box onClick={props.onClick}>
       <FlexSeparate>
         <Group noWrap={true}>
@@ -197,7 +203,7 @@ export default function PersonaCardMini(props: {
           )}
 
             <Box>
-              <Text fz={17} fw={400}>
+              <Text fz={17} fw={400} c='gray.0'>
                 {props.personaOverview.name}
               </Text>
             </Box>
@@ -207,7 +213,14 @@ export default function PersonaCardMini(props: {
       {false ? (
         <Loader variant='dots' color='green' />
       ) : (
-        <Progress mt={10} size={17} sections={getStatusUsedPercentage()} animate={isUploading} opacity={0.8} />
+        <Progress mt={10} size={17} sections={getStatusUsedPercentage()} animate={isUploading} opacity={0.8} styles={{
+          root: {
+            backgroundColor: theme.fn.lighten(
+              theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+              0.15
+            ),
+          }
+        }} />
       )}
       </Box>
 
@@ -224,6 +237,11 @@ export default function PersonaCardMini(props: {
               radius='md'
               rightIcon={<IconUpload size={14} />}
               onClick={openUploadProspects}
+              sx={{
+                '&:hover': {
+                  backgroundColor: 'initial'
+                },
+              }}
             >
               Upload More Prospects
             </Button>

@@ -4,8 +4,10 @@ import { processResponse } from "./utils";
 
 export async function updateClientSDR(
   userToken: string,
-  name: string,
-  title: string,
+  name?: string,
+  title?: string,
+  disable_ai_on_prospect_respond?: boolean,
+  disable_ai_on_message_send?: boolean,
 ): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/client/sdr`,
@@ -18,6 +20,8 @@ export async function updateClientSDR(
       body: JSON.stringify({
         "name": name,
         "title": title,
+        "disable_ai_on_prospect_respond": disable_ai_on_prospect_respond,
+        "disable_ai_on_message_send": disable_ai_on_message_send,
       }),
     }
   );

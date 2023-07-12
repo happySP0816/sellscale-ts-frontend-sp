@@ -120,7 +120,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
     enabled: openedProspectId !== -1,
   });
 
-  const { data: messages, isFetching: isFetchingMessages } = useQuery({
+  const { data: messages, isFetching: isFetchingMessages, refetch } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
     queryFn: async () => {
       // TODO: We don't handle email messages yet
@@ -175,7 +175,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
-  const ai_disabled = !prospect || (prospect.li_last_message_from_sdr !== null && userData.disable_ai_on_message_send) || (prospect.li_last_message_from_prospect !== null && userData.disable_ai_on_prospect_respond);
+  const ai_disabled = !prospect || (prospect.deactivate_ai_engagement) || (prospect.li_last_message_from_sdr !== null && userData.disable_ai_on_message_send) || (prospect.li_last_message_from_prospect !== null && userData.disable_ai_on_prospect_respond);
 
   return (
     <Flex gap={0} direction='column' wrap='nowrap' h={'100%'} bg='white'>
@@ -197,7 +197,11 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
             <Badge size='lg' color={'blue'}>
               {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
             </Badge>
-            <ProspectDetailsOptionsMenu prospectId={openedProspectId} />
+            <ProspectDetailsOptionsMenu
+              prospectId={openedProspectId}
+              aiEnabled={!prospect?.deactivate_ai_engagement || true}
+              refetch={refetch}
+            />
           </Group>
         </Group>
         <Tabs

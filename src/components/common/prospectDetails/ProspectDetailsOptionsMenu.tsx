@@ -1,6 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import { ActionIcon, Box, Menu, Popover, Text } from "@mantine/core";
-import { IconDots, IconTrash, IconAlarm } from "@tabler/icons";
+import { IconDots, IconTrash, IconAlarm, IconRobot } from "@tabler/icons";
 import { QueryClient } from "@tanstack/react-query";
 import displayNotification from "@utils/notificationFlow";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -14,13 +14,42 @@ import {
   Tooltip
 } from "@mantine/core";
 import { openedProspectIdState } from '@atoms/inboxAtoms';
+import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
+import { showNotification } from "@mantine/notifications";
 export default function ProspectDetailsOptionsMenu(props: {
   prospectId: number;
+  aiEnabled: boolean;
+  refetch: () => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
   const queryClient = new QueryClient();
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+
+  const [aiEnabled, setAIEnabled] = useState<boolean>(props.aiEnabled);
+
+  const triggerAIEnableToggle = async () => {
+
+    const result = await patchProspectAIEnabled(userToken, props.prospectId)
+
+    if (result.status === 'success') {
+      showNotification({
+        title: "Success",
+        message: "AI Enabled status updated.",
+        color: "green",
+        autoClose: 3000,
+      })
+    } else {
+      showNotification({
+        title: "Error",
+        message: "Something went wrong. Please try again later.",
+        color: "red",
+        autoClose: 5000,
+      });
+    }
+
+    props.refetch()
+  }
 
   return (
     <>
@@ -101,6 +130,16 @@ export default function ProspectDetailsOptionsMenu(props: {
 
         <Menu.Dropdown>
           <Menu.Label>Settings</Menu.Label>
+
+          <Menu.Item
+            icon={<IconRobot size={14} />}
+            onClick={async () => {
+              setAIEnabled(!aiEnabled)
+              triggerAIEnableToggle();
+            }}
+          >
+            {aiEnabled ? 'Disable AI' : 'Enable AI'}
+          </Menu.Item>
 
           <Menu.Item
             color="red.4"

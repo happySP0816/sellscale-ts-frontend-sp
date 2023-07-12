@@ -123,6 +123,8 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
     });
   }, [data]);
 
+  console.log(data)
+
   return (
     <Drawer
       opened={actuallyOpened}
@@ -154,6 +156,8 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                 </Badge>
                 <ProspectDetailsOptionsMenu
                   prospectId={data.main.prospect_info.details.id}
+                  aiEnabled={data.main.prospect_info.details.ai_enabled}
+                  refetch={refetch}
                 />
               </>
             )}

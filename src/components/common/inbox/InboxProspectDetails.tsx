@@ -21,6 +21,7 @@ import {
   Box,
   UnstyledButton,
   rem,
+  Card,
 } from '@mantine/core';
 import {
   IconBriefcase,
@@ -151,11 +152,58 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           <Title order={4} ta='center'>
             {data?.details.full_name}
           </Title>
-          <Text size={10} c='dimmed' fs='italic' ta='center'>
-            {data?.details.title}
-          </Text>
+
+          <Card m='xs' withBorder>
+            {data?.details.title && (
+                <Group noWrap spacing={10} mt={3}>
+                  <IconBriefcase stroke={1.5} size={18} className={classes.icon} />
+                  <Text size='xs'>{data.details.title}</Text>
+                </Group>
+              )}
+
+              {data?.details.company && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
+                  <Text size='xs' component='a' target='_blank' rel='noopener noreferrer' href={data.company?.url || undefined}>
+                    {data.details.company} {data.company?.url && (<IconExternalLink size='0.55rem' />)}
+                  </Text>
+                </Group>
+              )}
+
+              {linkedin_public_id && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconBrandLinkedin stroke={1.5} size={18} className={classes.icon} />
+                  <Text
+                    size='xs'
+                    component='a'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    href={`https://www.linkedin.com/in/${linkedin_public_id}`}
+                  >
+                    linkedin.com/in/{linkedin_public_id} <IconExternalLink size='0.55rem' />
+                  </Text>
+                </Group>
+              )}
+
+              {data?.email.email && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconMail stroke={1.5} size={18} className={classes.icon} />
+                  <Text size='xs' component='a' href={`mailto:${data.email.email}`}>
+                    {data.email.email} <IconExternalLink size='0.55rem' />
+                  </Text>
+                </Group>
+              )}
+
+              {data?.details.address && (
+                <Group noWrap spacing={10} mt={5}>
+                  <IconMap2 stroke={1.5} size={18} className={classes.icon} />
+                  <Text size='xs'>{data.details.address}</Text>
+                </Group>
+              )}
+          </Card>
         </Stack>
       </div>
+      <Divider/>
       <div style={{ flexBasis: '15%' }}>
         <Paper
           withBorder
@@ -217,6 +265,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
                 >
                   Give Demo Feedback
                 </Button>
+                <DemoFeedbackDrawer refetch={refetch} />
               </Box>
             </Stack>
           )}
@@ -282,69 +331,15 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
 
       <div style={{ flexBasis: '55%' }}>
         <Divider />
-        <Tabs variant='pills' defaultValue='details' radius={theme.radius.lg} m={10}>
+        <Tabs variant='pills' defaultValue='history' radius={theme.radius.lg} m={10}>
           <Tabs.List>
-            <Tabs.Tab value='details' icon={<IconInfoCircle size='0.8rem' />}>
-              Details
-            </Tabs.Tab>
-            <Tabs.Tab value='research' icon={<IconUserSearch size='0.8rem' />}>
-              Research
-            </Tabs.Tab>
             <Tabs.Tab value='history' icon={<IconWriting size='0.8rem' />}>
               History
             </Tabs.Tab>
+            <Tabs.Tab value='notes' icon={<IconWriting size='0.8rem' />}>
+              Notes
+            </Tabs.Tab>
           </Tabs.List>
-
-          <Tabs.Panel value='details' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 470px)`}>
-            <Stack mx={8} spacing={2}>
-              {data?.details.title && (
-                <Group noWrap spacing={10} mt={3}>
-                  <IconBriefcase stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='xs'>{data.details.title}</Text>
-                </Group>
-              )}
-
-              {data?.details.company && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='xs' component='a' target='_blank' rel='noopener noreferrer' href={data.company?.url || undefined}>
-                    {data.details.company} {data.company?.url && (<IconExternalLink size='0.55rem' />)}
-                  </Text>
-                </Group>
-              )}
-
-              {linkedin_public_id && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconBrandLinkedin stroke={1.5} size={18} className={classes.icon} />
-                  <Text
-                    size='xs'
-                    component='a'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    href={`https://www.linkedin.com/in/${linkedin_public_id}`}
-                  >
-                    linkedin.com/in/{linkedin_public_id} <IconExternalLink size='0.55rem' />
-                  </Text>
-                </Group>
-              )}
-
-              {data?.email.email && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconMail stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='xs' component='a' href={`mailto:${data.email.email}`}>
-                    {data.email.email} <IconExternalLink size='0.55rem' />
-                  </Text>
-                </Group>
-              )}
-
-              {data?.details.address && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconMap2 stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='xs'>{data.details.address}</Text>
-                </Group>
-              )}
-            </Stack>
-          </Tabs.Panel>
 
           <Tabs.Panel value='research' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
             <ScrollArea h={'100%'}>
@@ -354,11 +349,12 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
 
           <Tabs.Panel value='history' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
             <ScrollArea h={'100%'}>
-              {openedProspectId !== -1 && <ProspectDetailsHistory prospectId={openedProspectId} />}
+              <Card withBorder pb='100px'>
+                {openedProspectId !== -1 && <ProspectDetailsHistory prospectId={openedProspectId} />}
+              </Card>
             </ScrollArea>
           </Tabs.Panel>
 
-          {/* NOT USED CURRENTLY */}
           <Tabs.Panel value='notes' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
             <Textarea
               ref={notesRef}
@@ -374,9 +370,6 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           </Tabs.Panel>
         </Tabs>
       </div>
-      {true && demosDrawerOpened && (
-        <DemoFeedbackDrawer prospects={props.prospects} refetch={refetch} />
-      )}
     </Flex>
   );
 }

@@ -24,7 +24,7 @@ import { logout } from "@auth/core";
 import { useQuery } from "@tanstack/react-query";
 import { showNotification } from "@mantine/notifications";
 import { setDatasets } from "react-chartjs-2/dist/utils";
-import { IconBrandOnedrive, IconChartTreemap, IconTool } from '@tabler/icons';
+import { IconAlertCircle, IconBrandOnedrive, IconChartTreemap, IconTool } from '@tabler/icons';
 import { IconChartBubble } from '@tabler/icons-react';
 
 export default function VoiceEditorModal({
@@ -46,19 +46,11 @@ export default function VoiceEditorModal({
   const [fetchedPromptData, setFetchedPromptData] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [stackRankedConfigurationData, setStackRankedConfigurationData] = useState<any>({});
 
-  const completionMatchingRegex = /completion: .*/g;
-  const matches = prompt.matchAll(completionMatchingRegex);
-
-  var completions = []
-  for (var match of matches){
-    var completion = match[0].replaceAll("completion: ", "");
-    completions.push(completion);
-  }
-
-  const instructionMatchingRegex = /^(.*?)\bprompt\b/s
-  const instructionMatches = prompt.match(instructionMatchingRegex);
-  const instruction = instructionMatches && instructionMatches[1].replaceAll("prompt: ", "");
+  const [editViewMode, setEditViewMode] = useState("advanced");
+  
+  const [stackRankedConfigurationDataChanged, setStackRankedConfigurationDataChanged] = useState(false);
 
   useEffect(() => {
     if (!fetchedPromptData) {
@@ -85,7 +77,11 @@ export default function VoiceEditorModal({
         return res.json();
       })
       .then((j) => {
+        setStackRankedConfigurationData(j.data)
         setPrompt(j.data?.computed_prompt);
+        if (j.data?.prompt_1) {
+          setEditViewMode("edit_voice")
+        }
       })
       .finally(() => {
         setIsFetching(false);
@@ -171,6 +167,53 @@ export default function VoiceEditorModal({
       });
   };
 
+  const saveStackRankedConfigurationData = () => {
+    setSavingPrompt(true);
+
+    console.log(innerProps.voiceId)
+    console.log(stackRankedConfigurationData?.instruction)
+
+    fetch(
+      `${API_URL}/message_generation/stack_ranked_configuration_tool/update_stack_ranked_configuration_data`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          configuration_id: innerProps.voiceId,
+          instruction: stackRankedConfigurationData?.instruction,
+          completion_1: stackRankedConfigurationData?.completion_1,
+          completion_2: stackRankedConfigurationData?.completion_2,
+          completion_3: stackRankedConfigurationData?.completion_3,
+          completion_4: stackRankedConfigurationData?.completion_4,
+          completion_5: stackRankedConfigurationData?.completion_5,
+          completion_6: stackRankedConfigurationData?.completion_6,
+          completion_7: stackRankedConfigurationData?.completion_7,
+        }),
+      }
+    )
+      .then((res) => {
+        if (res.status === 401) {
+          logout();
+        }
+        setStackRankedConfigurationDataChanged(false)
+        setSavingPrompt(false);
+      })
+      .finally(() => {
+        setSavingPrompt(false);
+        setStackRankedConfigurationDataChanged(false)
+        showNotification({
+          title: "Configuration updated",
+          message: "The configuration was updated successfully",
+          color: "green",
+          autoClose: 5000,
+        });
+        fetchPromptData();
+      });
+  };
+
   return (
     <Paper
       p={0}
@@ -186,12 +229,10 @@ export default function VoiceEditorModal({
       </Text>
 
       <Divider mt="md" mb="md" />
-
-    
-      <Tabs defaultValue="advanced">
+      <Tabs value={editViewMode}>
         <Tabs.List>
-          <Tabs.Tab value="edit_voice" icon={<IconChartBubble size="0.8rem" />}>Edit Voice Instruction & Samples</Tabs.Tab>
-          <Tabs.Tab value="advanced" ml="auto" icon={<IconTool size="0.8rem" />}>Advanced</Tabs.Tab>
+          {editViewMode === 'edit_voice' && <Tabs.Tab value="edit_voice" icon={<IconChartBubble size="0.8rem" />}>Edit Voice Instruction & Samples</Tabs.Tab>}
+          {editViewMode === 'advanced' && <Tabs.Tab value="advanced" icon={<IconTool size="0.8rem" />}>Advanced Edit Mode</Tabs.Tab>}
         </Tabs.List>
 
         <Tabs.Panel value="edit_voice" pt="xs">
@@ -201,31 +242,36 @@ export default function VoiceEditorModal({
                 minRows={21}
                 label="Instruction"
                 description="This is the instruction that will be used to generate messages in this voice"
-                placeholder="Raw voice prompt..."
-                defaultValue={instruction || ""}
+                defaultValue={stackRankedConfigurationData?.instruction?.replace("Follow instructions to generate a short intro message:\n", "")}
                 size='xs'
                 onChange={(e) => {
                   console.log("Instruction changed")
+                  setStackRankedConfigurationDataChanged(true)
                   
-                  if (instruction) { 
-                    setPrompt(
-                      prompt.replaceAll(instruction, e.currentTarget.value)
-                    )
-                    console.log(prompt)
+                  if (stackRankedConfigurationData?.instruction) { 
+                    stackRankedConfigurationData.instruction = "Follow instructions to generate a short intro message:\n" + e.currentTarget.value
+                    setStackRankedConfigurationData(stackRankedConfigurationData)
                   }
                  
                 }}
               />  
               <Card sx={{maxHeight: '450px', overflowY: 'scroll', width: '60%'}} m='sm' withBorder>
                 <Text>
-                  Completions ({completions.length} total completions)
+                  Completions
                 </Text>
                 <Text size='xs'>
                   These are the completions that will be used to generate messages in this voice.
                   Edit the completions below to change how messages are generated.
                 </Text>
                 {
-                  completions.map((completion, index) => {
+                  [1,2,3,4,5,6,7].map((i, index) => {
+                      const promptKey = "prompt_" + i
+                      const completionKey = "completion_" + i
+
+                      if (!stackRankedConfigurationData[promptKey]) {
+                        return null
+                      }
+
                       return (
                         <Textarea
                           w='100%'
@@ -235,14 +281,18 @@ export default function VoiceEditorModal({
                           size='xs'
                           label={`Sample ${index + 1}`}
                           placeholder="Raw voice prompt..."
-                          defaultValue={completion || ""}
+                          defaultValue={stackRankedConfigurationData[completionKey]}
                           onChange={(e) => {
-                            console.log("Completion changed")
+                            setStackRankedConfigurationDataChanged(true)
+                            console.log("Completion " + promptKey + " changed")
                             console.log("Before: ")
-                            console.log(completion)
+                            console.log(stackRankedConfigurationData[completionKey])
 
                             console.log("After: ")
                             console.log(e.currentTarget.value)
+
+                            stackRankedConfigurationData[completionKey] = e.currentTarget.value
+                            setStackRankedConfigurationData(stackRankedConfigurationData)
                           }}
                           />
                       )
@@ -251,11 +301,30 @@ export default function VoiceEditorModal({
                 
               </Card>
           </Flex>
+
+          <Button
+            color="green"
+            mt="sm"
+            disabled={!stackRankedConfigurationDataChanged}
+            onClick={() => {
+              setStackRankedConfigurationDataChanged(false)
+              saveStackRankedConfigurationData();
+            }}
+            loading={savingPrompt}
+          >
+            Save Configuration
+          </Button>
           
         </Tabs.Panel>
 
         <Tabs.Panel value="advanced" pt="xs">
           <Card withBorder>
+            <Card withBorder mb='xs'>
+              <IconAlertCircle size="1.2rem" color='red' />
+              <Text color='red' weight={700} size='xs'>
+                WARNING: This voice was made using the old voice builder so it will need to be edited using the raw prompt. Please contact a SellScale engineer if you need help fixing this voice.
+              </Text>
+            </Card>
             <Textarea
               minRows={15}
               label="Raw Voice Prompt"

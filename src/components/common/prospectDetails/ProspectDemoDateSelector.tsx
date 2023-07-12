@@ -113,6 +113,7 @@ export default function ProspectDemoDateSelector(props: { prospectId: number }) 
       dropdownType="modal"
       classNames={classes}
       value={demoDate}
+      mt='xs'
       onChange={async (value) => {
         updateProspectDemoDate(value?.toISOString());
         setDemoDate(new Date(value?.toISOString() || ''));

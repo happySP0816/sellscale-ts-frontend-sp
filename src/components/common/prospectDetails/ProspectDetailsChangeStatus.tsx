@@ -46,6 +46,8 @@ import { Channel } from "src";
 import { getChannelStatusOptions } from "@utils/requests/getChannels";
 import { API_URL } from "@constants/data";
 import ProspectDemoDateSelector from "./ProspectDemoDateSelector";
+import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
+import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
 
 const linkedinStatusOptions = [
   {
@@ -307,6 +309,13 @@ export default function ProspectDetailsChangeStatus(
 
   const items = [];
 
+  const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
+    demosDrawerOpenState
+  );
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(
+    demosDrawerProspectIdState
+  );
+
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `prospect-next-status-options-${props.prospectId}-${props.channelData.value}`,
@@ -435,9 +444,25 @@ export default function ProspectDetailsChangeStatus(
         splitName(props.prospectName).first
       }'s ${formatToLabel(props.channelData.value)} status.`}</Text>
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
-      <SimpleGrid cols={3} mt="md">
-        {items}
-      </SimpleGrid>
+      {
+        !props.channelData.currentStatus?.includes('DEMO') ?
+        <SimpleGrid cols={3} mt="md">
+          {items}
+        </SimpleGrid> :
+        <Button
+            variant="light"
+            radius="md"
+            fullWidth
+            onClick={() => {
+              setDrawerProspectId(props.prospectId);
+              setDemosDrawerOpened(true);
+            }}
+          >
+            Give Demo Feedback
+          </Button>
+         
+      }
+      <DemoFeedbackDrawer refetch={refetch} />
 
       {props.channelData.currentStatus &&
         props.channelData.currentStatus.includes("DEMO") && (
@@ -476,6 +501,7 @@ export default function ProspectDetailsChangeStatus(
           }}
         />
       )}
+     
     </Card>
   );
 }

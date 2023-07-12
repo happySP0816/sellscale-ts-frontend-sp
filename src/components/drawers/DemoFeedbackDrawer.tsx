@@ -64,8 +64,9 @@ import { useForm } from '@mantine/form';
 import { DemoRating } from '@common/home/dashboard/demo/DemoRating';
 import { showNotification } from '@mantine/notifications';
 import ICPFitPill from '@common/pipeline/ICPFitAndReason';
+import { getProspects } from '@utils/requests/getProspects';
 
-export default function DemoFeedbackDrawer(props: { prospects: Prospect[]; refetch: () => void }) {
+export default function DemoFeedbackDrawer(props: { refetch: () => void }) {
   const theme = useMantineTheme();
   const queryClient = new QueryClient();
 
@@ -76,14 +77,33 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[]; refet
   const [drawerOpened, setDrawerOpened] = useRecoilState(demosDrawerOpenState);
   const [actuallyOpened, setActuallyOpened] = useState(false);
   useEffect(() => {
-    setTimeout(() => {
-      setActuallyOpened(drawerOpened);
-    }, 100);
-  }, []);
+    if (drawerOpened !== actuallyOpened){
+      setTimeout(() => {
+        setActuallyOpened(drawerOpened);
+      }, 100);
+    } 
+  }, [drawerOpened]);
 
   const userToken = useRecoilValue(userTokenState);
 
-  const activeProspect = props.prospects.find((p) => p.id === drawerProspectId);
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [`query-dash-get-prospects`],
+    queryFn: async () => {
+      const response = await getProspects(
+        userToken,
+        undefined,
+        "SELLSCALE",
+        10000, // TODO: Maybe use pagination method instead
+        ["DEMO"],
+        'ALL',
+      );
+      return response.status === 'success' ? response.data as Prospect[] : [];
+    },
+    refetchOnWindowFocus: false,
+  });
+  const prospects = data ?? [];
+
+  const activeProspect = prospects.find((p) => p.id === drawerProspectId);
   const [reschedule, setReschedule] = useState(false);
 
   const form = useForm({
@@ -120,17 +140,24 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[]; refet
     });
 
     if (res.status === 200) {
-      await updateChannelStatus(
-        activeProspect.id,
-        userToken,
-        'LINKEDIN',
-        values.demoHappen === 'yes' ? 'DEMO_WON' : 'DEMO_LOSS'
-      );
+      if (values.demoHappen === 'yes') {
+        await updateChannelStatus(
+          activeProspect.id,
+          userToken,
+          'LINKEDIN',
+          'DEMO_WON'
+        );
+      } else if (values.demoHappen === 'reschedule') {
 
-      props.refetch();
-      setDrawerOpened(false);
-      setDrawerProspectId(-1);
-
+      } else {
+        await updateChannelStatus(
+          activeProspect.id,
+          userToken,
+          'LINKEDIN',
+          'DEMO_LOSS'
+        );
+      }
+      
       showNotification({
         id: 'demo-feedback-submit',
         title: 'Feedback Submitted',
@@ -147,6 +174,10 @@ export default function DemoFeedbackDrawer(props: { prospects: Prospect[]; refet
         autoClose: false,
       });
     }
+
+    props.refetch();
+    setDrawerOpened(false);
+    setDrawerProspectId(-1);
   };
 
   return (

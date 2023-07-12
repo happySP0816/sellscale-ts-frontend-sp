@@ -1,3 +1,4 @@
+import { currentProjectState } from '@atoms/personaAtoms';
 import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
@@ -20,12 +21,13 @@ import { openContextModal } from "@mantine/modals";
 import { IconPencil } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { valueToColor } from "@utils/general";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype } from "src";
 
 export default function VoicesSection(props: { personas?: Archetype[] }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const prospectDrawerOpened = useRecoilValue(prospectDrawerOpenState);
 
@@ -33,7 +35,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
     queryKey: [`query-voices`],
     queryFn: async () => {
       const response = await fetch(
-        `${API_URL}/message_generation/stack_ranked_configurations`,
+        `${API_URL}/message_generation/stack_ranked_configurations` + (currentProject?.id ? `?archetype_id=${currentProject?.id}` : ``) ,
         {
           method: "GET",
           headers: {

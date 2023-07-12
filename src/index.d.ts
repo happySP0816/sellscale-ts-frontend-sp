@@ -219,3 +219,15 @@ export type EmailBumpFramework = {
   default: boolean;
   bumped_count: number | null;
 }
+
+export type SalesNavigatorLaunch = {
+  id: number,
+  sales_navigator_config_id: number,
+  client_sdr_id: number,
+  sales_navigator_url: string,
+  scrape_count: number,
+  status: string,
+  pb_container_id: string,
+  result_available: boolean,
+  launch_date: Date,
+}

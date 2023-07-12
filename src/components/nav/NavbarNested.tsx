@@ -239,22 +239,10 @@ export function NavbarNested(props: {
         },
       ],
     },
-    {
-      mainKey: "contacts",
-      label: `2. Contacts`,
-      icon: IconAddressBook,
-      links: [
-        {
-          key: "contacts",
-          label: `Contacts`,
-          icon: IconAddressBook,
-          link: "/contacts",
-        },
-      ],
-    },
+    
     {
       mainKey: "prioritize",
-      label: `3. Prioritize`,
+      label: `2. Prioritize`,
       icon: IconMilitaryRank,
       links: [
         {
@@ -263,6 +251,38 @@ export function NavbarNested(props: {
           icon: IconMilitaryRank,
           link: "/prioritize",
         },
+      ],
+    },
+    // {
+    //   mainKey: "contacts",
+    //   label: `3. Contacts`,
+    //   icon: IconAddressBook,
+    //   links: [
+    //     {
+    //       key: "contacts",
+    //       label: `Contacts`,
+    //       icon: IconAddressBook,
+    //       link: "/contacts",
+    //     },
+    //   ],
+    // },
+    {
+      mainKey: "contacts",
+      label: `3. Contacts`,
+      icon: IconAddressBook,
+      links: [
+        {
+          key: "contacts-view",
+          label: `View Contacts`,
+          icon: IconAddressBook,
+          link: "/contacts/view",
+        },
+        {
+          key: "contacts-find",
+          label: `Find Contacts`,
+          icon: IconSearch,
+          link: "/contacts/find",
+        }
       ],
     },
     {

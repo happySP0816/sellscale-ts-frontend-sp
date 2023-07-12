@@ -47,6 +47,7 @@ import { LinkedinConvoSimulatorPage } from '@common/simulators/linkedin/Linkedin
 import PullProspectEmailsCard from '@common/credits/PullProspectEmailsCard';
 import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
 import EmailBlocksPage from '@pages/EmailBlocksPage';
+import FindContactsPage from "@pages/FindContactsPage";
 
 const queryClient = new QueryClient();
 
@@ -123,7 +124,11 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<PulseWrapper />} />,
       },
       {
-        path: "contacts/:prospectId?",
+        path: "contacts/find",
+        element: <RestrictedRoute page={<FindContactsPage />} />
+      },
+      {
+        path: "contacts/view/:prospectId?",
         element: <RestrictedRoute page={<ContactsPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { prospectId: params.prospectId };

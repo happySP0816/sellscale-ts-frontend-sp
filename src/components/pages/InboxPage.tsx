@@ -65,42 +65,47 @@ export default function InboxPage(props: { all?: boolean }) {
     <Loader m='88px 88px'/>
   </Card>;
 
-  if (queryComplete && prospects.length === 0) return (
-    <Container w='100%' mt='200px'  sx={{justifyContent: 'center', textAlign: 'center'}}>
-      <Title fw='800' sx={{fontSize: '120px', color: '#e3e3e3', margin: '0% auto', textAlign: 'center'}}><span style={{marginRight: '100px'}}>Inbox</span><span style={{marginLeft: '80px'}}>Zero</span></Title>
-      <img src={RobotEmailImage} width='300px' style={{marginTop: '-180px', marginLeft: '50px' }} />
-      <Text>
-        <span style={{fontSize: '24px'}}>You have no prospects in your inbox.</span>
-      </Text>
-      <Text mt='md'>
-        Try one of these other tabs instead:
-      </Text>
-      <Flex justify={'center'} mt='xs'>
-        <Button variant='outline' onClick={() => {
-          window.location.href = '/all/contacts';
-        }} leftIcon={<IconWorld/>} color='grape'>
-          Contacts
-        </Button>
-        <Button variant='outline' onClick={() => {
-          window.location.href = '/all/recent-activity'
-        }} leftIcon={<IconList/>} ml='xs' color='orange'>
-          Recent Activity
-        </Button>
-      </Flex>
-    </Container>
-  );
   
   return (
     <Grid columns={100} gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: 'hidden' }}>
       <Grid.Col span={27} >
         <InboxProspectList prospects={prospects} isFetching={isFetching} all={props.all} />
       </Grid.Col>
-      <Grid.Col span={46}>
-        <InboxProspectConvo prospects={prospects} />
-      </Grid.Col>
-      <Grid.Col span={27}>
-        <InboxProspectDetails prospects={prospects} />
-      </Grid.Col>
+      {!(queryComplete && prospects.length === 0) ? 
+          <>
+            <Grid.Col span={46}>
+              <InboxProspectConvo prospects={prospects} />
+            </Grid.Col>
+            <Grid.Col span={27}>
+              <InboxProspectDetails prospects={prospects} />
+            </Grid.Col>
+          </>
+        :
+        <Grid.Col span={73}>
+          <Container w='100%' mt='200px'  sx={{justifyContent: 'center', textAlign: 'center'}}>
+            <Title fw='800' sx={{fontSize: '120px', color: '#e3e3e3', margin: '0% auto', textAlign: 'center'}}><span style={{marginRight: '100px'}}>Inbox</span><span style={{marginLeft: '80px'}}>Zero</span></Title>
+            <img src={RobotEmailImage} width='300px' style={{marginTop: '-180px', marginLeft: '50px' }} />
+            <Text>
+              <span style={{fontSize: '24px'}}>You have no prospects in your inbox.</span>
+            </Text>
+            <Text mt='md'>
+              Try one of these other tabs instead:
+            </Text>
+            <Flex justify={'center'} mt='xs'>
+              <Button variant='outline' onClick={() => {
+                window.location.href = '/all/contacts';
+              }} leftIcon={<IconWorld/>} color='grape'>
+                Contacts
+              </Button>
+              <Button variant='outline' onClick={() => {
+                window.location.href = '/all/recent-activity'
+              }} leftIcon={<IconList/>} ml='xs' color='orange'>
+                Recent Activity
+              </Button>
+            </Flex>
+          </Container>
+        </Grid.Col>
+        }
     </Grid>
   );
 

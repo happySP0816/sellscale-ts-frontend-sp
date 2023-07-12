@@ -17,6 +17,11 @@ const currentProjectState = atom({
   default: null as PersonaOverview | null,
 });
 
+const currentInboxCountState = atom({
+  key: "inbox-count",
+  default: 0,
+});
+
 
 // NOT USED
 const personaCreationState = atom({
@@ -55,4 +60,5 @@ export {
   detailsDrawerOpenState,
   personaCreationState,
   currentProjectState,
+  currentInboxCountState,
 };

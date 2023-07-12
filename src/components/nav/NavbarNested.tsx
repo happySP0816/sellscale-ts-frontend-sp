@@ -61,7 +61,7 @@ import getPersonas from "@utils/requests/getPersonas";
 import { Archetype } from "src";
 import { getInboxNotifs } from "@common/inbox/utils";
 import { ProjectSelect } from './ProjectSelect';
-import { currentProjectState } from '@atoms/personaAtoms';
+import { currentInboxCountState, currentProjectState } from '@atoms/personaAtoms';
 import { IconAt, IconBrain, IconMessage, IconMilitaryRank, IconTimelineEventPlus } from '@tabler/icons';
 import PersonaCardMini from '@common/persona/PersonaCardMini';
 
@@ -175,10 +175,7 @@ export function NavbarNested(props: {
   const [loadingPersonas, setLoadingPersonas] = useState(false);
   const [personaLinks, setPersonaLinks]: any = useState([]);
 
-  const inboxCount = Object.values(getInboxNotifs()).reduce(
-    (prev, cur) => prev + cur,
-    0
-  );
+  const inboxCount = useRecoilValue(currentInboxCountState)
 
   const navStyles = useSpring({
     x: props.isMobileView && !props.navOpened ? -NAV_BAR_SIDE_WIDTH * 2 : 0,

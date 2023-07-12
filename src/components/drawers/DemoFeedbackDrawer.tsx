@@ -66,7 +66,7 @@ import { showNotification } from '@mantine/notifications';
 import ICPFitPill from '@common/pipeline/ICPFitAndReason';
 import { getProspects } from '@utils/requests/getProspects';
 
-export default function DemoFeedbackDrawer(props: { refetch: () => void }) {
+export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmit?: () => void }) {
   const theme = useMantineTheme();
   const queryClient = new QueryClient();
 
@@ -175,9 +175,12 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void }) {
       });
     }
 
+    if (props.onSubmit) props.onSubmit();
     props.refetch();
+
     setDrawerOpened(false);
     setDrawerProspectId(-1);
+    
   };
 
   return (

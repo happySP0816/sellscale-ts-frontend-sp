@@ -18,7 +18,7 @@ import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
 import { showNotification } from "@mantine/notifications";
 export default function ProspectDetailsOptionsMenu(props: {
   prospectId: number;
-  aiEnabled: boolean;
+  aiEnabled?: boolean;
   refetch: () => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
@@ -26,7 +26,7 @@ export default function ProspectDetailsOptionsMenu(props: {
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
-  const [aiEnabled, setAIEnabled] = useState<boolean>(props.aiEnabled);
+  const [aiEnabled, setAIEnabled] = useState<boolean>(props.aiEnabled || true);
 
   const triggerAIEnableToggle = async () => {
 
@@ -130,16 +130,18 @@ export default function ProspectDetailsOptionsMenu(props: {
 
         <Menu.Dropdown>
           <Menu.Label>Settings</Menu.Label>
-
-          <Menu.Item
-            icon={<IconRobot size={14} />}
-            onClick={async () => {
-              setAIEnabled(!aiEnabled)
-              triggerAIEnableToggle();
-            }}
-          >
-            {aiEnabled ? 'Disable AI' : 'Enable AI'}
-          </Menu.Item>
+          
+          {props.aiEnabled !== undefined && (
+            <Menu.Item
+              icon={<IconRobot size={14} />}
+              onClick={async () => {
+                setAIEnabled(!aiEnabled)
+                triggerAIEnableToggle();
+              }}
+            >
+              {aiEnabled ? 'Disable AI' : 'Enable AI'}
+            </Menu.Item>
+          )}
 
           <Menu.Item
             color="red.4"

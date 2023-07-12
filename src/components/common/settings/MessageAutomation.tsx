@@ -38,6 +38,8 @@ export default function MessageAutomation() {
           label="Disable AI when I send a message"
           checked={messageSendOption}
           onChange={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
             if(event.currentTarget.checked){
               open();
             } else {

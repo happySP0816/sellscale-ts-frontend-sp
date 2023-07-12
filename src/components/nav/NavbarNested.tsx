@@ -59,7 +59,6 @@ import { getOnboardingCompletionReport } from "@utils/requests/getOnboardingComp
 import { hexToHexWithAlpha } from "@utils/general";
 import getPersonas from "@utils/requests/getPersonas";
 import { Archetype } from "src";
-import { getInboxNotifs } from "@common/inbox/utils";
 import { ProjectSelect } from './ProjectSelect';
 import { currentInboxCountState, currentProjectState } from '@atoms/personaAtoms';
 import { IconAt, IconBrain, IconMessage, IconMilitaryRank, IconTimelineEventPlus } from '@tabler/icons';

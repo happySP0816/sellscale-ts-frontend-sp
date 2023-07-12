@@ -15,7 +15,7 @@ import {
 import { nameToInitials, valueToColor } from "@utils/general";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import { useRef, useState } from "react";
-import { IconEdit } from "@tabler/icons";
+import { IconEdit, IconTrash } from "@tabler/icons";
 
 import { patchLIMessage } from "@utils/requests/patchLIMessage";
 import { useRecoilValue } from "recoil";
@@ -23,6 +23,8 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
 import DOMPurify from "dompurify";
 import moment from "moment-timezone";
+import { removeProspectFromContactList } from "@common/prospectDetails/ProspectDetailsRemove";
+import { openConfirmModal } from "@mantine/modals";
 
 type MessageItemProps = {
   prospect_id: number;
@@ -33,6 +35,7 @@ type MessageItemProps = {
   subject: string;
   body: string;
   date_scheduled_to_send: string;
+  refresh: () => void;
 };
 
 export default function EmailQueuedMessageItem(props: MessageItemProps) {
@@ -42,8 +45,31 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
 
   const daysDiff = Math.ceil(
     (new Date(props.date_scheduled_to_send).getTime() - new Date().getTime()) /
-      (1000 * 60 * 60 * 24)
+    (1000 * 60 * 60 * 24)
   );
+
+  const triggerRemoveProspectFromContactList = async () => {
+    const response = await removeProspectFromContactList(props.prospect_id, userToken);
+    if (response.status === "success") {
+      showNotification({
+        id: "prospect-removed",
+        title: "Prospect removed",
+        message: "This prospect has been removed successfully",
+        color: "green",
+        autoClose: 3000,
+      });
+    } else {
+      showNotification({
+        id: "prospect-removed",
+        title: "Prospect removal failed",
+        message: "This prospect could not be removed. Please try again, or contact support.",
+        color: "red",
+        autoClose: false,
+      })
+    }
+
+    props.refresh();
+  }
 
   const date = moment(props.date_scheduled_to_send);
   const dateTZ = date.tz(userData.timezone || 'America/Los_Angeles');
@@ -77,8 +103,30 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
             </Text>
           </Flex>
         </Flex>
-        <Flex>
-          <Badge>{formattedDate}</Badge>
+        <Flex align='flex-start'>
+          <Flex align='center'>
+            <Tooltip label={"Remove this prospect"} withinPortal withArrow>
+              <ActionIcon
+                variant='transparent'
+                onClick={() => {
+                  openConfirmModal({
+                    title: "Remove this prospect?",
+                    children: (
+                      <Text>
+                        Are you sure you want to remove this prospect? This will remove them from your pipeline and block messages across all channels.
+                      </Text>
+                    ),
+                    labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                    onCancel: () => { },
+                    onConfirm: () => { triggerRemoveProspectFromContactList() },
+                  })
+                }}
+              >
+                <IconTrash size='.875rem' />
+              </ActionIcon>
+            </Tooltip>
+            <Badge>{formattedDate}</Badge>
+          </Flex>
         </Flex>
       </Flex>
       <Box pos="relative">

@@ -161,7 +161,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                   component="a"
                   target="_blank"
                   rel="noopener noreferrer"
-                  href={nylasClientId ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scopes=email` : ''}
+                  href={nylasClientId ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scopes=email.read_only,email.send` : ''}
                   my={20}
                   variant="outline"
                   size="md"
@@ -174,7 +174,11 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                 >
                   SIGN IN WITH GOOGLE
                 </Button>
+
               </Center>
+               <Text color='gray' size='xs'>
+                  (App’s) use and transfer to any other app of information received from Google APIs will adhere to <a target="_blank" href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements
+                </Text>
             </>
           )}
         </div>

@@ -97,6 +97,7 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
                   icp_fit_score={messageItem.icp_fit_score}
                   icp_fit_reason={messageItem.icp_fit_reason}
                   archetype={messageItem.archetype}
+                  refresh={triggerGetMessagesQueuedForOutreach}
                 />
               </div>
             );

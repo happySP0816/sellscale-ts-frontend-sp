@@ -62,7 +62,6 @@ export default function ToolsPage() {
         </Tabs.List>
 
         <Tabs.Panel value="filters" pt="xs">
-          <PersonaFilters />
           {tabId === "filters" && <PersonaFilters />}
         </Tabs.Panel>
         <Tabs.Panel value="custom-data-point-importer" pt="xs">

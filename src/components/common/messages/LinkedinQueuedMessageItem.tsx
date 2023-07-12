@@ -14,13 +14,15 @@ import {
 import { nameToInitials, valueToColor } from "@utils/general";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import { useRef, useState } from "react";
-import { IconEdit } from "@tabler/icons";
+import { IconEdit, IconTrash } from "@tabler/icons";
 
 import { patchLIMessage } from "@utils/requests/patchLIMessage";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
 import ICPFitPill from "@common/pipeline/ICPFitAndReason";
+import { removeProspectFromContactList } from "@common/prospectDetails/ProspectDetailsRemove";
+import { openConfirmModal } from "@mantine/modals";
 
 type MessageItemProps = {
   prospect_id: number;
@@ -34,6 +36,7 @@ type MessageItemProps = {
   icp_fit_score: number;
   icp_fit_reason: string;
   archetype: string;
+  refresh: () => void;
 };
 
 export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
@@ -116,6 +119,32 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
     setIsLoading(false);
   };
 
+  const triggerRemoveProspectFromContactList = async () => {
+    setIsLoading(true);
+
+    const response = await removeProspectFromContactList(props.prospect_id, userToken);
+    if (response.status === "success") {
+      showNotification({
+        id: "prospect-removed",
+        title: "Prospect removed",
+        message: "This prospect has been removed successfully",
+        color: "green",
+        autoClose: 3000,
+      });
+    } else {
+      showNotification({
+        id: "prospect-removed",
+        title: "Prospect removal failed",
+        message: "This prospect could not be removed. Please try again, or contact support.",
+        color: "red",
+        autoClose: false,
+      })
+    }
+
+    props.refresh();
+    setIsLoading(false);
+  }
+
   return (
     <Card
       style={{
@@ -161,18 +190,43 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
             </Text>
           </Flex>
         </Flex>
-        <Flex>
-          <Tooltip
-            width={200}
-            multiline
-            label={
-              "We send LinkedIn messages strategically and randomly throughout the day. We can't reveal the exact time, but rest assured that this message is number " +
-              (props.index + 1) +
-              " in line!"
-            }
-          >
-            <Badge>Position in Queue to be sent: {props.index + 1}</Badge>
-          </Tooltip>
+        <Flex align='flex-start'>
+          <Flex align='center'>
+            <Tooltip label={"Remove this prospect"} withinPortal withArrow>
+              <ActionIcon
+                variant='transparent'
+                onClick={() => {
+                  openConfirmModal({
+                    title: "Remove this prospect?",
+                    children: (
+                      <Text>
+                        Are you sure you want to remove this prospect? This will remove them from your pipeline and block messages across all channels.
+                      </Text>
+                    ),
+                    labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                    onCancel: () => {},
+                    onConfirm: () => {triggerRemoveProspectFromContactList()},
+                  })
+                }}
+              >
+                <IconTrash size='.875rem' />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip
+              width={200}
+              withinPortal
+              withArrow
+              multiline
+              label={
+                "We send LinkedIn messages strategically and randomly throughout the day. We can't reveal the exact time, but rest assured that this message is number " +
+                (props.index + 1) +
+                " in line!"
+              }
+            >
+              <Badge>Position in Queue to be sent: {props.index + 1}</Badge>
+            </Tooltip>
+          </Flex>
+
         </Flex>
       </Flex>
       <Box pos="relative">

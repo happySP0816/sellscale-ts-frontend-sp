@@ -175,7 +175,14 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
-  const ai_disabled = !prospect || (prospect.li_last_message_from_sdr !== null && userData.disable_ai_on_message_send) || (prospect.li_last_message_from_prospect !== null && userData.disable_ai_on_prospect_respond);
+  // Disable AI based on SDR settings
+  let ai_disabled = !prospect || (prospect.li_last_message_from_prospect !== null && userData.disable_ai_on_prospect_respond);
+  if (userData.disable_ai_on_message_send){
+    const human_sent_msg = messages?.find(msg => !msg.ai_generated && msg.connection_degree == 'You')
+    if(human_sent_msg !== undefined){
+      ai_disabled = true
+    }
+  }
 
   return (
     <Flex gap={0} direction='column' wrap='nowrap' h={'100%'} bg='white'>
@@ -238,7 +245,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           position: 'relative',
         }}
       >
-        {(ai_disabled || prospect.deactivate_ai_engagement) && <Badge variant="filled" sx={{ position: 'absolute', top: 10, right: 10, zIndex: 100 }} color="red">AI Disabled</Badge>}
+        {(ai_disabled || prospect?.deactivate_ai_engagement) && <Badge variant="filled" sx={{ position: 'absolute', top: 10, right: 10, zIndex: 100 }} color="red">AI Disabled</Badge>}
         <ScrollArea h={`calc((${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)*0.70)`} viewportRef={viewport}>
           <div style={{ marginTop: 10, marginBottom: 10 }}>
             <LoadingOverlay loader={loaderWithText('')} visible={isFetchingMessages} />

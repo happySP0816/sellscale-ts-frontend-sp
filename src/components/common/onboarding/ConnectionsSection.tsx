@@ -211,7 +211,7 @@ export default function ConnectionsSection() {
               rel='noopener noreferrer'
               href={
                 nylasClientId
-                  ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scopes=email`
+                  ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scopes=email.read_only,email.send`
                   : ''
               }
               my={20}

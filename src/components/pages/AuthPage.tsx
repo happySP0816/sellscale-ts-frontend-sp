@@ -74,14 +74,12 @@ export default function AuthPage() {
       
       if(tokenType === 'magic_links'){
         sendAuthToken(authToken, email).then(async (response) => {
-          localStorage.removeItem('inboxNotifs')
           await authorize(response.token, setUserToken, setUserData);
           navigateToPage(navigate, redirect);
         });
         
       } else if(tokenType === 'direct'){
         (async () => {
-          localStorage.removeItem('inboxNotifs')
           await authorize(authToken, setUserToken, setUserData);
           navigateToPage(navigate, redirect);
         })();

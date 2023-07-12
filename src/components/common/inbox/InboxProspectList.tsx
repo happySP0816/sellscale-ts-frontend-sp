@@ -32,7 +32,7 @@ import {
 } from '@tabler/icons-react';
 import _ from 'lodash';
 import { useQuery } from '@tanstack/react-query';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import { nurturingModeState, openedProspectIdState } from '@atoms/inboxAtoms';
 import { Prospect, ProspectShallow } from 'src';
@@ -48,7 +48,7 @@ import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
-import { currentProjectState } from '@atoms/personaAtoms';
+import { currentInboxCountState, currentProjectState } from '@atoms/personaAtoms';
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
@@ -131,6 +131,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const [showPurgatorySection, setShowPurgatorySection] = useState(true);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentInboxCount, setCurrentInboxCount] = useRecoilState(currentInboxCountState);
 
   const nurturingMode = useRecoilValue(nurturingModeState);
 
@@ -258,6 +259,8 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
       setFilterSelectValue('ALL');
     }
   }, [segmentedSection]);
+
+  setCurrentInboxCount(prospects.length);
 
   return (
     <div>

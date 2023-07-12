@@ -167,9 +167,11 @@ export function MainHeader() {
   stepsCount -= 4; // TEMP: Remove the 4 coming soon steps that are always false
 
   const percentage = Math.round((completedStepsCount / stepsCount) * 100);
+
+  if(!isLoggedIn()){  }
   // ------------------------------
   return (
-    <Header height={NAV_HEADER_HEIGHT} className={classes.header} mb={120}>
+    <Header height={NAV_HEADER_HEIGHT} className={classes.header} mb={120} opacity={!isLoggedIn() ? 0 : '100%'}>
       <Box mx={20}>
         <div className={classes.inner}>
           <Group position="apart" noWrap>

@@ -66,6 +66,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
                   date_scheduled_to_send={
                     prospect.email_data.date_scheduled_to_send
                   }
+                  refresh={refetch}
                 />
               ))}
           </>

@@ -3,6 +3,7 @@ import createPersona from "@utils/requests/createPersona";
 import { Button, Card, Text, Title } from "@mantine/core";
 import { useRecoilState } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
+import { currentProjectState } from '@atoms/personaAtoms';
 
 type PropsType = {
   createPersona: {
@@ -17,6 +18,7 @@ type PropsType = {
 export default function CreatePersona(props: PropsType) {
   const [creatingPersona, setCreatingPersona] = React.useState(false);
   const [userToken] = useRecoilState(userTokenState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState)
 
   const createPersonaHandler = async () => {
     setCreatingPersona(true);
@@ -35,8 +37,9 @@ export default function CreatePersona(props: PropsType) {
       return;
     }
     setCreatingPersona(false);
-    return result.data as number;
     window.location.reload();
+    setCurrentProject(result.data)
+    return result.data as number;
   };
 
   return (

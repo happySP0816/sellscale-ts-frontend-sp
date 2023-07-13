@@ -208,7 +208,7 @@ export function NavbarNested(props: {
     refetchOnWindowFocus: false,
   });
 
-  const siteLinks = [
+  var siteLinks = [
     {
       mainKey: "inbox",
       label: `Inbox ${inboxCount ? `(${inboxCount})` : ""}`,
@@ -407,6 +407,29 @@ export function NavbarNested(props: {
     },
   ];
 
+  // If unassigned contact archetype, filter all sections besides Contacts and Inbox (mainKeys.) Then add a split contact tab too
+  if (currentProject?.is_unassigned_contact_archetype) {
+    siteLinks = siteLinks.filter((link) => {
+      return link.mainKey === "contacts" || link.mainKey === "inbox";
+    });
+    var additional_links = [
+      {
+        mainKey: "split/contacts",
+        label: `Split Contacts`,
+        icon: IconSwitchHorizontal,
+        links: [
+          {
+            key: "split/contacts",
+            label: `Split`,
+            icon: IconSwitchHorizontal,
+            link: "/split/contacts",
+          },
+        ],
+      }
+    ]
+    siteLinks = siteLinks.concat(additional_links);
+  }
+
   const links = siteLinks.map((item) => (
     <LinksGroup {...item} key={item.mainKey} />
   ));
@@ -448,19 +471,6 @@ export function NavbarNested(props: {
           </Box>
         }
 
-        {/*
-        <a
-          href="#"
-          className={classes.link}
-          onClick={(event) => {
-            event.preventDefault();
-            logout(true);
-          }}
-        >
-          <IconLogout className={classes.linkIcon} stroke={1.5} />
-          <span>Logout</span>
-        </a>
-        */}
       </Navbar.Section>
     </AnimatedNavbar>
   );

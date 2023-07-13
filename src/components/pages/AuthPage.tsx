@@ -71,17 +71,19 @@ export default function AuthPage() {
         console.error('Invalid token', tokenType);
         return;
       }
-
+      
       if(tokenType === 'magic_links'){
         sendAuthToken(authToken, email).then(async (response) => {
           await authorize(response.token, setUserToken, setUserData);
           navigateToPage(navigate, redirect);
         });
+        
       } else if(tokenType === 'direct'){
         (async () => {
           await authorize(authToken, setUserToken, setUserData);
           navigateToPage(navigate, redirect);
         })();
+        
       } else {
         showNotification({
           id: 'auth-invalid-token-type',

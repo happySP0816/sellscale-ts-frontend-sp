@@ -1,5 +1,7 @@
+import { currentInboxCountState } from '@atoms/personaAtoms';
 import { isWithinLastXDays } from "@utils/general";
 import _ from "lodash";
+import { useRecoilState } from 'recoil';
 import { Prospect } from "src";
 
 
@@ -82,21 +84,6 @@ export function populateInboxNotifs(prospects: Prospect[]){
   for (const [projectId, count] of inboxNotifs.entries()) {
     obj[projectId] = count;
   }
-  localStorage.setItem('inboxNotifs', JSON.stringify(obj));
 
   return recommendedProspects.length;
-}
-
-/**
- * Get inbox notifications
- * @returns - Map of project id to number of inbox notifications
- */
-export function getInboxNotifs(): Record<string, number>{
-
-  const inboxNotifs = localStorage.getItem('inboxNotifs');
-  if (inboxNotifs === null) {
-    return {};
-  }
-  return JSON.parse(inboxNotifs);
-
 }

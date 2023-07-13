@@ -156,20 +156,20 @@ export default forwardRef(function InboxProspectConvoSendBox(
     <Paper
       shadow='sm'
       withBorder
-      radius={theme.radius.lg}
+      radius={theme.radius.md}
       sx={{ display: 'flex', flexDirection: 'column', flexWrap: 'nowrap', position: 'relative' }}
       mx={10}
       mb={10}
-      h={'calc(100% - 10px)'}
-      mah={195}
+      pb={8}
+      mah={240}
     >
       <LoadingOverlay visible={msgLoading} />
       <div
         style={{
           flexBasis: '15%',
           backgroundColor: '#25262b',
-          borderTopLeftRadius: theme.radius.lg,
-          borderTopRightRadius: theme.radius.lg,
+          borderTopLeftRadius: theme.radius.md,
+          borderTopRightRadius: theme.radius.md,
         }}
       >
         <Group spacing={0} position='apart'>
@@ -211,9 +211,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
       >
         <Textarea
           minRows={5}
-          maxRows={5}
+          maxRows={8}
+          mt='xs'       
+          color='gray'
           placeholder='Your message...'
-          variant='unstyled'
           value={messageDraft}
           onChange={(event) => setMessageDraft(event.currentTarget.value)}
           onKeyDown={getHotkeyHandler([
@@ -225,7 +226,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
             ],
           ])}
         />
-        <Group style={{ position: 'absolute', bottom: 5, left: 10 }}>
+        <Group pt='xs'>
           <Button.Group>
             <Button
               leftIcon={<IconWriting size='1rem' />}

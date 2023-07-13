@@ -482,7 +482,12 @@ export default function ProspectDetailsViewConversation(
                   ? messages.current.length - msgCount
                   : 0,
                 messages.current.length
-              ).map((message, index) => (
+              ).sort((a, b) => {
+                if (a.date === b.date) {
+                  return a.connection_degree === 'You' ? -1 : 1;
+                }
+                return new Date(a.date).getTime() - new Date(b.date).getTime()
+              }).map((message, index) => (
                 <LinkedInConversationEntry
                   key={`message-${index}`}
                   postedAt={convertDateToLocalTime(new Date(message.date))}

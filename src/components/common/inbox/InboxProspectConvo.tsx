@@ -21,6 +21,7 @@ import {
   ScrollArea,
   LoadingOverlay,
   Center,
+  Box,
 } from '@mantine/core';
 import { IconExternalLink, IconWriting, IconSend, IconBrandLinkedin, IconMail, IconDots } from '@tabler/icons-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -274,6 +275,9 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
                 </Text>
               </Center>
             )}
+            <Box sx={{width: '100%', height: '50px'}}>
+
+            </Box>
           </div>
         </ScrollArea>
       </div>

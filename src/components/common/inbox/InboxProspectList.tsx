@@ -49,6 +49,8 @@ import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
 import { currentProjectState } from '@atoms/personaAtoms';
+import { setPageTitle } from '@utils/documentChange';
+import { populateInboxNotifs } from './utils';
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
@@ -259,6 +261,13 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
     }
   }, [segmentedSection]);
 
+  
+  if (prospects.length > 0) {
+    // @ts-ignore
+    const notifCount = populateInboxNotifs(prospects.filter((prospect) => !prospect.in_purgatory));
+    setPageTitle(`Inbox (${notifCount})`);
+  }
+
   return (
     <div>
       <LoadingOverlay loader={loaderWithText('')} visible={props.isFetching && props.prospects.length === 0} />
@@ -342,8 +351,8 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
         <Divider />
         <ScrollArea h={`calc(${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)`} sx={{ overflowX: 'hidden' }}>
           {
-            [false, true].map((in_purgatory_section) => {
-              return <>
+            [false, true].map((in_purgatory_section, i) => {
+              return <div key={i}>
                {in_purgatory_section && <Container pt='24px' pb='24px'>
                 <Divider ta='center' fz={7} fw={500} color='gray' labelPosition='center' label={'Recently contacted ' + prospects.filter((p) => p.in_purgatory).length + ' prospect' + (prospects.filter((p) => p.in_purgatory).length > 1 ? 's' : '')} /> 
                 <Text color='blue' align='center'fw={600} fz={12} sx={{cursor: 'pointer'}} onClick={() => setShowPurgatorySection(!showPurgatorySection)}>{showPurgatorySection ? 'View' : 'Hide'} Prospect{(prospects.filter((p) => p.in_purgatory).length > 1 ? 's' : '')}</Text>          
@@ -384,7 +393,7 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
                       </Container>
                     </div>
                   ))}
-              </>
+              </div>
             })
           }
           {prospects.length === 0 && (

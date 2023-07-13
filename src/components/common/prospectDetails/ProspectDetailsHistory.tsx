@@ -175,6 +175,7 @@ export default function ProspectDetailsHistory(props: { prospectId: number }) {
       <Timeline bulletSize={24} lineWidth={2}>
         {events?.map((item, i) => (
           <Timeline.Item
+            key={i}
             title={_.startCase(item.event.toLowerCase())}
             bullet={historyEventToIcon(item.event)}
             lineVariant="dashed"

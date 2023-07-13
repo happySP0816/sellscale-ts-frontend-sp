@@ -56,11 +56,6 @@ export default function InboxPage(props: { all?: boolean }) {
   });
   const prospects = data ?? [];
 
-  if (prospects.length > 0) {
-    const notifCount = populateInboxNotifs(prospects);
-    setPageTitle(`Inbox (${notifCount})`);
-  }
-
   if (!queryComplete) return <Card w='250px' h='250px' m='10% auto' withBorder>
     <Loader m='88px 88px'/>
   </Card>;

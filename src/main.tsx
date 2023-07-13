@@ -48,6 +48,8 @@ import PullProspectEmailsCard from '@common/credits/PullProspectEmailsCard';
 import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
 import EmailBlocksPage from '@pages/EmailBlocksPage';
 import FindContactsPage from "@pages/FindContactsPage";
+import PersonaSplit from '@common/persona/PersonaSplit';
+import { PersonaSplitPage } from '@common/persona/PersonaSplitPage';
 
 const queryClient = new QueryClient();
 
@@ -242,7 +244,10 @@ const router = sentryCreateBrowserRouter([
         path: "all/linkedin-messages",
         element: <RestrictedRoute page={<Box p='md'><LinkedinQueuedMessages all /></Box>} />,
       },
-
+      {
+        path: "/split/contacts",
+        element: <RestrictedRoute page={<PersonaSplitPage />} />,
+      },
       {
         path: "*",
         element: <MissingPage />,

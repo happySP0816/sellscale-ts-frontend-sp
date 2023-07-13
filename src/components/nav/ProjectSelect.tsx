@@ -10,7 +10,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
-import { IconLayoutSidebar } from '@tabler/icons';
+import { IconCircle, IconCircleCheck, IconGridDots, IconLayoutSidebar, IconQuestionCircle, IconStack } from '@tabler/icons';
 import {
   IconSquareCheck,
   IconPackage,
@@ -20,6 +20,8 @@ import {
   IconCircleFilled,
   IconCircleDashed,
   IconPlus,
+  IconStack3,
+  IconCircle4Filled,
 } from "@tabler/icons-react";
 import { navigateToPage } from "@utils/documentChange";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
@@ -96,18 +98,25 @@ export function ProjectSelect() {
       <Menu.Dropdown>
         {projects.map((project, i) => (
           <Menu.Item
+            opacity={project.id === currentProject?.id ? 0.5 : 1}
             key={i}
             disabled={project.id === currentProject?.id}
             icon={project.active ? (
-              <IconCircleFilled
+              <IconCircleCheck
                 size="1rem"
-                color={theme.colors.blue[6]}
+                color='green'
+                stroke={1.5}
+              />
+            ) : project.is_unassigned_contact_archetype ? (
+              <IconStack3
+                size="1rem"
+                color='blue'
                 stroke={1.5}
               />
             ) : (
               <IconCircleDashed
                 size="1rem"
-                color={theme.colors.red[6]}
+                color='red'
                 stroke={1.5}
               />
             )}

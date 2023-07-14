@@ -2,7 +2,6 @@
 <br/>
 
 ## Supercharge your outbound with AI
-
 <br/>
 <br/>
 

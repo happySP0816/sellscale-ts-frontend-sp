@@ -1,11 +1,22 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
-import { Button, Flex, Text, TextInput } from "@mantine/core";
+import { Avatar, Button, Flex, Group, Text, TextInput, Title, createStyles } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
+import { IconBriefcase, IconSocial } from "@tabler/icons";
 import { createProspectFromLinkedinLink } from "@utils/requests/createProspectFromLinkedinLink";
+import { getProspectByID } from "@utils/requests/getProspectByID";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
 
+const useStyles = createStyles((theme) => ({
+  icon: {
+    color: theme.colorScheme === 'dark' ? theme.colors.dark[3] : theme.colors.gray[5],
+  },
+
+  name: {
+    fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+  },
+}));
 
 type LinkedInUrlUploadProps = {
   afterUpload: () => void;
@@ -13,14 +24,18 @@ type LinkedInUrlUploadProps = {
 
 
 export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
+  const { classes } = useStyles();
+  
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
   const currentProject = useRecoilValue(currentProjectState);
 
   const [url, setURL] = useState<string>("");
+  const [prospectDetails, setProspectDetails] = useState<any>();
 
   const triggerUploadProspectFromLinkedInURL = async () => {
     setLoading(true);
+    setProspectDetails(undefined);
 
     const result = await createProspectFromLinkedinLink(
       userToken,
@@ -37,6 +52,12 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
       setURL("");
 
       props.afterUpload();
+
+      const prospectResponse = await getProspectByID(userToken, result.data.prospect_id);
+      if (prospectResponse.status === 'success') {
+        setProspectDetails(prospectResponse.data);
+      }
+
       setLoading(false);
     } else {
       showNotification({
@@ -50,6 +71,9 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
 
     setLoading(false);
   }
+
+  console.log(prospectDetails);
+  const linkedin_public_id = prospectDetails?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
   return (
     <Flex w='100%' direction='column'>
@@ -88,6 +112,43 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
         }
       </Flex>
 
+      {prospectDetails && (
+        <Group noWrap spacing={10} align='flex-start' pt='xs'>
+          <Avatar
+            src={
+              prospectDetails.profile_pic
+            }
+            size={94}
+            radius='md'
+          />
+          <div>
+            <Title order={3}>
+              {prospectDetails.full_name}
+            </Title>
+
+            <Group noWrap spacing={10} mt={3}>
+              <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
+              <Text size='xs' color='dimmed'>
+                {prospectDetails.title}
+              </Text>
+            </Group>
+
+            <Group noWrap spacing={10} mt={5}>
+              <IconSocial stroke={1.5} size={16} className={classes.icon} />
+              <Text
+                size='xs'
+                color='dimmed'
+                component='a'
+                target='_blank'
+                rel='noopener noreferrer'
+                href={`https://www.linkedin.com/in/${linkedin_public_id}`}
+              >
+                linkedin.com/in/{linkedin_public_id}
+              </Text>
+            </Group>
+          </div>
+        </Group>
+      )}
 
     </Flex>
   )

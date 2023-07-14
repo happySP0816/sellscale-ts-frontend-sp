@@ -40,9 +40,7 @@ import SendLiOutreachModal from "@modals/SendLiOutreachModal";
 
 export default function App() {
   // Site light or dark mode
-  const isSystemDarkMode =
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isSystemDarkMode = false; // window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   const savedSiteTheme = localStorage.getItem("site-theme");
   const currentColorScheme: ColorScheme =
     savedSiteTheme != null

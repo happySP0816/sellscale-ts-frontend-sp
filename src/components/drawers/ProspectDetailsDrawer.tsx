@@ -50,6 +50,7 @@ import { IconDots, IconPencil } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
 import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
+import ProspectReferralCard from "./ProspectReferralCard";
 
 export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
   const userData = useRecoilValue(userDataState);
@@ -156,6 +157,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                 </Badge>
                 <ProspectDetailsOptionsMenu
                   prospectId={data.main.prospect_info.details.id}
+                  archetypeId={data.main.prospect_info.details.persona_id}
                   aiEnabled={data.main.prospect_info.details.ai_enabled}
                   refetch={refetch}
                 />
@@ -214,7 +216,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                     openComposeEmailModal(
                       userToken,
                       prospectId,
-                      data.main.prospect_info.details.archetype_id,
+                      data.main.prospect_info.details.persona_id,
                       prospectDrawerStatuses.overall,
                       data.main.prospect_info.email.email,
                       userData.sdr_email,
@@ -232,6 +234,12 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                     : "Email integration not connected. Connect via Settings."}
                 </Text>
               </Center>
+            )}
+            {data.main.prospect_info.referrals.length > 0 && (
+              <ProspectReferralCard prospects={data.main.prospect_info.referrals} />
+            )}
+            {data.main.prospect_info.referred.length > 0 && (
+              <ProspectReferralCard prospects={data.main.prospect_info.referred} referredBy />
             )}
           </div>
 
@@ -327,7 +335,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                             userData.nylas_connected === true && (
                               <ProspectDetailsViewEmails
                                 prospectId={data.main.prospect_info.details.id}
-                                archetypeId={data.main.prospect_info.details.archetype_id}
+                                archetypeId={data.main.prospect_info.details.persona_id}
                                 overallStatus={prospectDrawerStatuses.overall}
                                 email={data.main.prospect_info.email.email}
                               />

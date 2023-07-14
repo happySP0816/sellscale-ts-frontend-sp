@@ -207,6 +207,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
             </Badge>
             <ProspectDetailsOptionsMenu
               prospectId={openedProspectId}
+              archetypeId={prospect?.archetype_id || -1}
               aiEnabled={ai_disabled ? undefined : !prospect?.deactivate_ai_engagement}
               refetch={refetch}
             />

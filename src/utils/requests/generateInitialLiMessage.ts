@@ -3,16 +3,15 @@ import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
- * Creates a prospect using a LinkedInLink
- * @param userToken
- * @param archetypeID
- * @param url
+ * Generate initial LI message for a prospect
+ * @param userToken 
+ * @param prospectId 
  * @returns - MsgResponse
  */
-export async function createProspectFromLinkedinLink(userToken: string, archetypeID: number, url: string): Promise<MsgResponse> {
+export async function generateInitialLiMessage(userToken: string, prospectId: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/prospect/from_link`,
+    `${API_URL}/message_generation/generate_init_li_message`,
     {
       method: "POST",
       headers: {
@@ -20,12 +19,11 @@ export async function createProspectFromLinkedinLink(userToken: string, archetyp
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        archetype_id: archetypeID,
-        url: url,
-        live: true,
+        prospect_id: prospectId,
       })
     }
   );
+
   return await processResponse(response, 'data');
 
 }

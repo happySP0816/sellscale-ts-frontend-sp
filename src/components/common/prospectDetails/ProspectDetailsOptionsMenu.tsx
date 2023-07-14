@@ -1,6 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { ActionIcon, Box, Menu, Popover, Text } from "@mantine/core";
-import { IconDots, IconTrash, IconAlarm, IconRobot } from "@tabler/icons";
+import { ActionIcon, Box, Menu, Popover, Text, Title } from "@mantine/core";
+import { IconDots, IconTrash, IconAlarm, IconRobot, IconUserPlus } from "@tabler/icons";
 import { QueryClient } from "@tanstack/react-query";
 import displayNotification from "@utils/notificationFlow";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -16,8 +16,10 @@ import {
 import { openedProspectIdState } from '@atoms/inboxAtoms';
 import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
 import { showNotification } from "@mantine/notifications";
+import { openContextModal } from "@mantine/modals";
 export default function ProspectDetailsOptionsMenu(props: {
   prospectId: number;
+  archetypeId: number;
   aiEnabled?: boolean;
   refetch: () => void;
 }) {
@@ -50,6 +52,8 @@ export default function ProspectDetailsOptionsMenu(props: {
 
     props.refetch()
   }
+
+  console.log(props.archetypeId);
 
   return (
     <>
@@ -142,6 +146,22 @@ export default function ProspectDetailsOptionsMenu(props: {
               {aiEnabled ? 'Disable AI' : 'Enable AI'}
             </Menu.Item>
           )}
+
+          <Menu.Item
+            icon={<IconUserPlus size={14} />}
+            onClick={async () => {
+              openContextModal({
+                modal: 'addProspect',
+                title: <Title order={3}>Add Referred Prospect</Title>,
+                innerProps: {
+                  archetypeId: props.archetypeId,
+                  sourceProspectId: props.prospectId,
+                },
+              });
+            }}
+          >
+            Add Referred Prospect
+          </Menu.Item>
 
           <Menu.Item
             color="red.4"

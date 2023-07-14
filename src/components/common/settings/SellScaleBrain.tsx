@@ -26,9 +26,13 @@ import SellScaleBrainPersonasTab from "./SellScaleBrain/SellScaleBrainPersonasTa
 import SellScaleBrainUserTab from "./SellScaleBrain/SellScaleBrainUserTab";
 import SellScaleBrainCompanyTab from "./SellScaleBrain/SellScaleBrainCompanyTab";
 import SellScaleBrainProductsTab from "./SellScaleBrain/SellScaleBrainProductsTab";
+import { useSearchParams } from "react-router-dom";
 
 export default function SellScaleBrain() {
   const [userToken] = useRecoilState(userTokenState);
+
+  const [searchParams] = useSearchParams();
+  const tabValue = searchParams.get('tab') || 'company_info';
 
   return (
     <Paper withBorder m="xs" p="md" radius="md">
@@ -40,7 +44,7 @@ export default function SellScaleBrain() {
           you provide, the more accurate your experience will be.
         </Text>
 
-        <Tabs variant="outline" defaultValue="company_info" mt="lg">
+        <Tabs variant="outline" defaultValue={tabValue} mt="lg">
           <Tabs.List>
             <Tabs.Tab
               value="company_info"

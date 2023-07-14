@@ -116,12 +116,14 @@ function GeneralOnboarding(props: { data: any }) {
           title: 'Company Information',
           description: 'Collect general company information',
           link: '/settings/sellScaleBrain',
+          searchParams: new URLSearchParams({ tab: 'company_info' }),
           complete: props.data.general.company_info,
         },
         {
           title: 'SDR Information',
           description: 'Collect general SDR information',
           link: '/settings/sellScaleBrain',
+          searchParams: new URLSearchParams({ tab: 'user_info' }),
           complete: props.data.general.sdr_info,
         },
         {
@@ -214,7 +216,7 @@ function MessageGenerationOnboarding(props: { data: any }) {
 }
 
 interface OnboardingTableProps {
-  data: { title: string; description: string; link: string | null; complete: boolean }[];
+  data: { title: string; description: string; link: string | null; complete: boolean, searchParams?: URLSearchParams }[];
 }
 export function OnboardingTable({ data }: OnboardingTableProps) {
   const navigate = useNavigate();
@@ -241,7 +243,7 @@ export function OnboardingTable({ data }: OnboardingTableProps) {
           disabled={item.link === null}
           onClick={() => {
             if (item.link) {
-              navigateToPage(navigate, item.link);
+              navigateToPage(navigate, item.link, item.searchParams);
             }
           }}
         >

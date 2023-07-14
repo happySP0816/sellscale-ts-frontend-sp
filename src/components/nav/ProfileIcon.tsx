@@ -66,7 +66,7 @@ export default function ProfileIcon() {
         <HoverCard.Target>
           <Indicator
             label={<IconBrandLinkedin size={10} />}
-            size={10}
+            size={11}
             offset={4}
             position="bottom-start"
             color={userData?.li_voyager_connected ? "blue" : "red"}
@@ -74,7 +74,7 @@ export default function ProfileIcon() {
           >
             <Indicator
               label={<IconMail size={10} />}
-              size={10}
+              size={11}
               offset={4}
               position="bottom-end"
               color={userData?.nylas_connected ? "blue" : "red"}

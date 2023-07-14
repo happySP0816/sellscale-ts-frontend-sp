@@ -16,11 +16,16 @@ import {
   rem,
   Stack,
   ActionIcon,
+  Indicator,
+  HoverCard,
+  Button,
 } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
-import { IconCheck, IconX } from "@tabler/icons";
+import { IconBrandLinkedin, IconCheck, IconMail, IconX } from "@tabler/icons";
+import { navigateToPage } from "@utils/documentChange";
 import { nameToInitials, valueToColor } from "@utils/general";
+import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
 const useStyles = createStyles((theme) => ({
@@ -43,6 +48,7 @@ const useStyles = createStyles((theme) => ({
 export default function ProfileIcon() {
   const theme = useMantineTheme();
   const { classes } = useStyles();
+  const navigate = useNavigate();
   const userData = useRecoilValue(userDataState);
 
   return (
@@ -56,14 +62,98 @@ export default function ProfileIcon() {
         });
       }}
     >
-      <Avatar
-        src={userData?.img_url}
-        alt={`${userData?.sdr_name}'s Profile Picture`}
-        color={valueToColor(theme, userData?.sdr_name)}
-        radius="xl"
-      >
-        {nameToInitials(userData?.sdr_name)}
-      </Avatar>
+      <HoverCard width={200} shadow="md" openDelay={800}>
+        <HoverCard.Target>
+          <Indicator
+            label={<IconBrandLinkedin size={10} />}
+            size={10}
+            offset={4}
+            position="bottom-start"
+            color={userData?.li_voyager_connected ? "blue" : "red"}
+            disabled={!userData?.weekly_li_outbound_target}
+          >
+            <Indicator
+              label={<IconMail size={10} />}
+              size={10}
+              offset={4}
+              position="bottom-end"
+              color={userData?.nylas_connected ? "blue" : "red"}
+              disabled={!userData?.weekly_email_outbound_target}
+            >
+              <Avatar
+                src={userData?.img_url}
+                alt={`${userData?.sdr_name}'s Profile Picture`}
+                color={valueToColor(theme, userData?.sdr_name)}
+                radius="xl"
+              >
+                {nameToInitials(userData?.sdr_name)}
+              </Avatar>
+            </Indicator>
+          </Indicator>
+        </HoverCard.Target>
+        <HoverCard.Dropdown>
+          <Group>
+                {userData?.weekly_li_outbound_target ? (
+                  <Button
+                    color={userData?.li_voyager_connected ? "blue" : "red"}
+                    variant="light"
+                    radius="xl"
+                    compact
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      navigateToPage(navigate, '/settings/linkedinConnection');
+                    }}
+                  >
+                    LinkedIn is {userData?.li_voyager_connected ? 'Connected' : 'Disconnected'}
+                  </Button>
+                ) : (
+                  <Button
+                    color="gray"
+                    variant="light"
+                    radius="xl"
+                    compact
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      navigateToPage(navigate, '/settings/linkedinConnection');
+                    }}
+                  >
+                    LinkedIn Not Setup
+                  </Button>
+                )}
+                {userData?.weekly_email_outbound_target ? (
+                  <Button
+                    color={userData?.nylas_connected ? "blue" : "red"}
+                    variant="light"
+                    radius="xl"
+                    compact
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      navigateToPage(navigate, '/settings/emailConnection');
+                    }}
+                  >
+                    Email is {userData?.nylas_connected ? 'Connected' : 'Disconnected'}
+                  </Button>
+                ) : (
+                  <Button
+                    color="gray"
+                    variant="light"
+                    radius="xl"
+                    compact
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      navigateToPage(navigate, '/settings/emailConnection');
+                    }}
+                  >
+                    Email Not Setup
+                  </Button>
+                )}
+              </Group>
+        </HoverCard.Dropdown>
+      </HoverCard>
     </Center>
   );
 }

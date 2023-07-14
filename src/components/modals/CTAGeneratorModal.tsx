@@ -42,9 +42,9 @@ import { useRecoilValue } from "recoil";
 import { Archetype, PersonaOverview } from "src";
 
 interface CTAGeneratorProps extends Record<string, unknown> {
-  personaId: string;
+  personaId: number;
   personaName: string;
-  personas?: PersonaOverview[];
+  personas?: Archetype[];
 }
 
 const useStyles = createStyles((theme) => ({
@@ -116,6 +116,8 @@ export default function CTAGeneratorModal({
     }
   };
 
+  console.log(innerProps.personas);
+
   return (
     <Paper
       p={0}
@@ -144,8 +146,8 @@ export default function CTAGeneratorModal({
               label="Which persona?"
               placeholder="ex. VP of Sales, Head of HR"
               data={
-                innerProps.personas
-                  ? innerProps.personas.map((p) => p.name)
+                innerProps.personas // @ts-ignore
+                  ? innerProps.personas.map((p) => ({ value: p.name || p.archetype }))
                   : []
               }
               classNames={classes}

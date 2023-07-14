@@ -29,7 +29,7 @@ export default function CreateNewCTAModel({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ personaId: string; personas?: PersonaOverview[] }>) {
+}: ContextModalProps<{ personaId: number; personas?: Archetype[] }>) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);

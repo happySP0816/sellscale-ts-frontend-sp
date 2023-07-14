@@ -112,9 +112,8 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
     <Box>
       <Flex direction="row-reverse" gap="sm" pb="xs">
         <Button
-          color="gray"
+          color="teal"
           size="sm"
-          variant="light"
           onClick={() => {
             openContextModal({
               modal: "createNewCTA",
@@ -130,7 +129,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
         </Button>
         {props.personas?.find((persona) => persona.id === currentProject?.id)?.ctas.length === 0 && (
           <Button
-            color="gray"
+            color="teal"
             size="sm"
             variant="light"
             onClick={() => {

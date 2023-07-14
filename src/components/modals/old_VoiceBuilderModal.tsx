@@ -90,7 +90,7 @@ export default function VoiceBuilderModal({ context, id, innerProps }: ContextMo
       {persona && persona.ctas.length >= 3 && voiceBuilderOnboardingId !== -1 && (
         <VoiceBuilderFlow persona={persona} voiceBuilderOnboardingId={voiceBuilderOnboardingId} />
       )}
-      {persona && persona.ctas.length < 3 && (
+      {persona && persona.ctas.length < 2 && (
         <Text color='red' size='sm' mt='sm'>
           This persona needs at least 3 CTA in order to build a voice for it.
         </Text>

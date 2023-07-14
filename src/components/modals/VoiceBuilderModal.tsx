@@ -32,7 +32,7 @@ export const STARTING_INSTRUCTIONS = `Follow instructions to generate a short in
 - Tie in the sentences together to make sure it's cohesive
 - Smoothly embed the call-to-action into the end of message.
 - Include a friendly greeting in the beginning.`;
-export const MSG_GEN_AMOUNT = 4;
+export const MSG_GEN_AMOUNT = 6;
 export const MAX_EDITING_PHASES = 3;
 
 export default function VoiceBuilderModal({
@@ -71,10 +71,12 @@ export default function VoiceBuilderModal({
     })();
   }, [persona]);
 
+  // persona exists, voice builder onboarding id exists, has CTAs, and more than 4 samples
   const canBuildVoice =
     persona &&
     voiceBuilderOnboardingId !== -1 &&
-    (innerProps.predefinedPersonaId !== undefined || persona.ctas.length >= 3);
+    (innerProps.predefinedPersonaId !== undefined || persona.ctas.length >= 2);
+    
 
   return (
     <Paper

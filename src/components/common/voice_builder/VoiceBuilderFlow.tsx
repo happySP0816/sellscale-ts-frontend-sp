@@ -26,6 +26,7 @@ import {
 import { Archetype, Prospect } from "src";
 import {
   IconBrandLinkedin,
+  IconCheck,
   IconEdit,
   IconHeart,
   IconHeartOff,
@@ -53,7 +54,7 @@ import {
   prospectDrawerIdState,
   prospectDrawerOpenState,
 } from "@atoms/prospectAtoms";
-import _ from "lodash";
+import _, { sample } from "lodash";
 import { el } from "@fullcalendar/core/internal-common";
 
 const ItemComponent = (props: { id: number; defaultValue: string }) => {
@@ -302,9 +303,12 @@ export default function VoiceBuilderFlow(props: {
 
     // Delete all samples that are empty
     for (const message of currentMessages) {
+      console.log(message.value)
       if (message.value === "") {
+        console.log("deleting sample: " + message.id)
         await deleteSample(userToken, message.id);
       } else {
+        console.log("updating sample: " + message.id)
         await updateSample(userToken, message.id, message.value);
       }
     }
@@ -367,21 +371,34 @@ export default function VoiceBuilderFlow(props: {
           size="md"
           m="auto"
           compact
+          color='grape'
+          leftIcon={<IconRefresh />}
           variant="light"
           disabled={loadingMsgGen}
           onClick={async () => {
             setCount(0);
-            if (canCreate) {
-              await completeVoice();
-            } else {
-              await generateMessages();
-              setEditingPhase(editingPhase + 1);
-            }
+            await generateMessages();
+            setEditingPhase(editingPhase + 1);
           }}
         >
-          {canCreate
-            ? `Create Voice`
-            : `Continue ${editingPhase}/${MAX_EDITING_PHASES}`}
+          Generate New Samples
+        </Button>
+
+        <Button
+          radius="xl"
+          size="md"
+          m="auto"
+          color='green'
+          compact
+          leftIcon={<IconCheck />}
+          variant="light"
+          disabled={loadingMsgGen || voiceBuilderMessages.length < 4}
+          onClick={async () => {
+            setCount(0);
+            await completeVoice();
+          }}
+        >
+          Looks Good! Create Voice with {voiceBuilderMessages.length} Samples
         </Button>
       </Center>
     </>

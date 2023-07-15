@@ -237,7 +237,7 @@ export default function SelectBumpInstruction(props: PropsType) {
         }}
         placeholder="(optional) 'Acme Corp. raised a $20m Series B'"
         label="Account Research"
-        description="AI will use this information to write the bump."
+        description="AI might use this information to write the bump."
         minRows={2}
         maxRows={4}
         autosize

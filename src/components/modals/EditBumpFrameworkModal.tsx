@@ -1,6 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import TextWithNewline from "@common/library/TextWithNewlines";
-import { Button, Card, Flex, HoverCard, LoadingOverlay, NumberInput, Paper, Slider, Switch, Text, TextInput, Textarea, useMantineTheme } from "@mantine/core";
+import { Button, Card, Flex, HoverCard, LoadingOverlay, NumberInput, Paper, Slider, Switch, Text, TextInput, Textarea, Tooltip, useMantineTheme } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -24,6 +24,7 @@ interface EditBumpFramework extends Record<string, unknown> {
   default: boolean;
   onSave: () => void;
   bumpedCount?: number;
+  useAccountResearch: boolean;
   bumpDelayDays: number;
 }
 
@@ -42,6 +43,7 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
       bumpedCount: innerProps.bumpedCount ?? null,
       bumpDelayDays: innerProps.bumpDelayDays,
       default: innerProps.default,
+      useAccountResearch: innerProps.useAccountResearch,
     },
   });
 
@@ -85,6 +87,7 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
       form.values.bumpedCount,
       form.values.bumpDelayDays,
       form.values.default,
+      form.values.useAccountResearch,
     );
 
     if (result.status === "success") {
@@ -136,17 +139,41 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
           placeholder={"Mention the Super Bowl"}
           {...form.getInputProps("title")}
         />
-        <Switch
-          label="Default Framework?"
-          labelPosition="left"
-          checked={form.values.default}
-          onChange={(e) => {
-            form.setFieldValue(
-              "default",
-              e.currentTarget.checked
-            );
-          }}
-        />
+        <Flex direction='column' align='flex-end'>
+
+
+          <Switch
+            label="Default Framework"
+            labelPosition="left"
+            checked={form.values.default}
+            onChange={(e) => {
+              form.setFieldValue(
+                "default",
+                e.currentTarget.checked
+              );
+            }}
+          />
+          <Tooltip
+            withinPortal
+            withArrow
+            label='Using account research leads to more personalized messages, but may not be the best for straightforward messages.'
+          >
+            <span>
+              <Switch
+                mt='xs'
+                label="Use Account Research"
+                labelPosition="left"
+                checked={form.values.useAccountResearch}
+                onChange={(e) => {
+                  form.setFieldValue(
+                    "useAccountResearch",
+                    e.currentTarget.checked
+                  );
+                }}
+              />
+            </span>
+          </Tooltip>
+        </Flex>
       </Flex>
 
       <Textarea
@@ -244,7 +271,9 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
               innerProps.bumpedCount ==
               form.values.bumpedCount &&
               innerProps.bumpDelayDays ==
-              form.values.bumpDelayDays ?
+              form.values.bumpDelayDays &&
+              innerProps.useAccountResearch ==
+              form.values.useAccountResearch ?
               (
                 <></>
               ) : (

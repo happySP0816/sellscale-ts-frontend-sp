@@ -49,7 +49,8 @@ export default function CopyCTAsModal({
 
     let failed = false;
     for(const cta of ctas) {
-      const result = await createCTA(userToken, innerProps.personaId, cta.text_value);
+      const personaIdAsNumber = +innerProps.personaId;
+      const result = await createCTA(userToken, personaIdAsNumber, cta.text_value);
       if (result.status === 'error'){
         failed = true;
       }

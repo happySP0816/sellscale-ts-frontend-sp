@@ -57,6 +57,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   bumped_count: null,
                   bump_delay_days: 2,
                   account_research: undefined,
+                  use_account_research: false,
                 }
               } else {
                 newFramework = { ...prev };

@@ -15,6 +15,7 @@ import {
   Slider,
   NumberInput,
   HoverCard,
+  Tooltip,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { IconCheck, IconX } from "@tabler/icons";
@@ -102,6 +103,7 @@ export default function ManageBumpFramework({
       form.values.bumpedCount as number,
       form.values.bumpDelayDays,
       form.values.default,
+      form.values.useAccountResearch,
     );
 
     if (result.status === "success") {
@@ -126,6 +128,7 @@ export default function ManageBumpFramework({
         bumped_count: form.values.bumpedCount as number,
         bump_delay_days: form.values.bumpDelayDays as number,
         substatus: selectedBumpFramework.substatus,
+        use_account_research: form.values.useAccountResearch,
       });
     } else {
       showNotification({
@@ -154,6 +157,7 @@ export default function ManageBumpFramework({
       form.values.bumpDelayDays,
       form.values.default,
       innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : null,
+      form.values.useAccountResearch,
     );
 
     if (result.status === "success") {
@@ -178,6 +182,7 @@ export default function ManageBumpFramework({
         bumped_count: form.values.bumpedCount as number,
         bump_delay_days: 2,
         substatus: innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : "",
+        use_account_research: form.values.useAccountResearch,
       });
     } else {
       showNotification({
@@ -242,6 +247,7 @@ export default function ManageBumpFramework({
       default: true,
       bumpedCount: undefined as number | undefined,
       bumpDelayDays: 2,
+      useAccountResearch: true,
     },
   });
 
@@ -309,6 +315,7 @@ export default function ManageBumpFramework({
                       form.values.default = framework.default;
                       form.values.bumpedCount = framework.bumped_count as number;
                       form.values.bumpDelayDays = framework.bump_delay_days;
+                      form.values.useAccountResearch = framework.use_account_research;
                       setBumpLengthValue(length);
                       setSelectedBumpFramework(framework);
                     }}
@@ -354,15 +361,35 @@ export default function ManageBumpFramework({
                   Create New Framework
                 </Text>
               ) : (
-                <Flex justify={"flex-end"}>
+                <Flex justify={"flex-end"} align='flex-end' direction='column'>
                   <Switch
-                    label="Default Framework?"
+                    label="Default Framework"
                     labelPosition="left"
                     checked={form.values.default}
                     onChange={(e) => {
                       form.setFieldValue("default", e.currentTarget.checked);
                     }}
                   />
+                  <Tooltip
+                    withinPortal
+                    withArrow
+                    label='Using account research leads to more personalized messages, but may not be the best for straightforward messages.'
+                  >
+                    <span>
+                      <Switch
+                        mt='xs'
+                        label="Use Account Research"
+                        labelPosition="left"
+                        checked={form.values.useAccountResearch}
+                        onChange={(e) => {
+                          form.setFieldValue(
+                            "useAccountResearch",
+                            e.currentTarget.checked
+                          );
+                        }}
+                      />
+                    </span>
+                  </Tooltip>
                 </Flex>
               )}
 
@@ -432,15 +459,38 @@ export default function ManageBumpFramework({
               />
 
               {selectedBumpFramework == null && (
-                <Switch
-                  pt="md"
-                  label="Make default?"
-                  labelPosition="right"
-                  checked={form.values.default}
-                  onChange={(e) => {
-                    form.setFieldValue("default", e.currentTarget.checked);
-                  }}
-                />
+                <Flex direction="column">
+                  <Switch
+                    pt="md"
+                    label="Make Default"
+                    labelPosition="right"
+                    checked={form.values.default}
+                    onChange={(e) => {
+                      form.setFieldValue("default", e.currentTarget.checked);
+                    }}
+                  />
+                  <Tooltip
+                    withinPortal
+                    withArrow
+                    label='Using account research leads to more personalized messages, but may not be the best for straightforward messages.'
+                  >
+                    <span>
+                      <Switch
+                        mt='xs'
+                        label="Use Account Research"
+                        labelPosition="right"
+                        checked={form.values.useAccountResearch}
+                        onChange={(e) => {
+                          form.setFieldValue(
+                            "useAccountResearch",
+                            e.currentTarget.checked
+                          );
+                        }}
+                      />
+                    </span>
+                  </Tooltip>
+                </Flex>
+
               )}
 
               <Flex>
@@ -487,7 +537,9 @@ export default function ManageBumpFramework({
                           selectedBumpFramework.bumped_count ==
                           form.values.bumpedCount &&
                           selectedBumpFramework.bump_delay_days ==
-                          form.values.bumpDelayDays
+                          form.values.bumpDelayDays &&
+                          selectedBumpFramework.use_account_research ==
+                          form.values.useAccountResearch
                         ) ? <></> : (
                           <Button
                             mt="md"

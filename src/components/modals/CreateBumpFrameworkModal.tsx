@@ -1,7 +1,7 @@
 import { userTokenState } from "@atoms/userAtoms";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
-import { Modal, TextInput, Text, Textarea, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, HoverCard, Paper } from "@mantine/core";
+import { Modal, TextInput, Text, Textarea, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, HoverCard, Paper, Tooltip } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons";
@@ -80,7 +80,8 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       form.values.bumpedCount as number,
       form.values.bumpDelayDays,
       form.values.default,
-      selectedSubstatus
+      selectedSubstatus,
+      form.values.useAccountResearch
     );
 
     if (result.status === "success") {
@@ -111,6 +112,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       default: true,
       bumpedCount: props.bumpedCount,
       bumpDelayDays: 2,
+      useAccountResearch: true,
     },
   });
 
@@ -256,19 +258,40 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
             min={2}
             withAsterisk
           />
-          <Switch
-            pt="md"
-            my='md'
-            label="Make default?"
-            labelPosition="right"
-            checked={form.values.default}
-            onChange={(e) => {
-              form.setFieldValue(
-                "default",
-                e.currentTarget.checked
-              );
-            }}
-          />
+          <Flex direction='column' align='flex-end'>
+            <Switch
+              pt="md"
+              label="Make default"
+              labelPosition="left"
+              checked={form.values.default}
+              onChange={(e) => {
+                form.setFieldValue(
+                  "default",
+                  e.currentTarget.checked
+                );
+              }}
+            />
+            <Tooltip
+              withinPortal
+              withArrow
+              label='Using account research leads to more personalized messages, but may not be the best for straightforward messages.'
+            >
+              <span>
+                <Switch
+                  pt="md"
+                  label="Use Account Research"
+                  labelPosition="left"
+                  checked={form.values.useAccountResearch}
+                  onChange={(e) => {
+                    form.setFieldValue(
+                      "useAccountResearch",
+                      e.currentTarget.checked
+                    );
+                  }}
+                />
+              </span>
+            </Tooltip>
+          </Flex>
         </Flex>
 
         <Button

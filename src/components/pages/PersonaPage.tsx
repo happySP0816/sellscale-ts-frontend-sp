@@ -37,12 +37,13 @@ import PageFrame from "../common/PageFrame";
 import PersonaCard from "../common/persona/PersonaCard";
 import PersonaUploadDrawer from "../drawers/PersonaUploadDrawer";
 import { useEffect } from "react";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useSearchParams } from "react-router-dom";
 import { currentProjectState } from "@atoms/personaAtoms";
 
 export default function PersonaPage() {
   setPageTitle(`Personas`);
 
+  const [searchParams] = useSearchParams();
   const forceUpdate = useForceUpdate();
   const userToken = useRecoilValue(userTokenState);
 
@@ -81,6 +82,17 @@ export default function PersonaPage() {
       forceUpdate();
     })();
   }, [data]);
+
+  useEffect(() => {
+    const create = searchParams.get('create');
+    if(create){
+      openContextModal({
+        modal: "uploadProspects",
+        title: <Title order={3}>Create Persona</Title>,
+        innerProps: { mode: "CREATE-ONLY" },
+      });
+    }
+  }, []);
 
   return (
     <>

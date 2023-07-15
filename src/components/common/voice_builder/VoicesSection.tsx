@@ -21,11 +21,14 @@ import { openContextModal } from "@mantine/modals";
 import { IconPencil } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { valueToColor } from "@utils/general";
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype } from "src";
 
 export default function VoicesSection(props: { personas?: Archetype[] }) {
   const theme = useMantineTheme();
+  const [searchParams] = useSearchParams();
   const userToken = useRecoilValue(userTokenState);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
@@ -51,6 +54,19 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
     },
     refetchOnWindowFocus: false,
   });
+
+  useEffect(() => {
+    const create = searchParams.get('create');
+    if(create){
+      openContextModal({
+        modal: "voiceBuilder",
+        title: <Title order={3}>Voice Builder</Title>,
+        innerProps: {
+          personas: props.personas,
+        },
+      });
+    }
+  }, []);
 
   return (
     <>

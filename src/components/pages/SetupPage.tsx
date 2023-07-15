@@ -76,7 +76,7 @@ export default function SetupPage() {
       <Accordion chevronPosition='right' defaultValue='general' variant='separated'>
         <Accordion.Item className={classes.item} value='general'>
           <Accordion.Control>
-            <Title order={3}>General Onboarding</Title>
+            <Title order={3}>1. General Onboarding</Title>
             <Text fs="italic" c="dimmed" fz="sm">Autobiographical info</Text>
           </Accordion.Control>
           <Accordion.Panel>
@@ -86,7 +86,7 @@ export default function SetupPage() {
 
         <Accordion.Item className={classes.item} value='persona'>
           <Accordion.Control>
-            <Title order={3}>Persona Onboarding</Title>
+            <Title order={3}>2. Create Your First Persona</Title>
             <Text fs="italic" c="dimmed" fz="sm">Tell your AI who to target</Text>
           </Accordion.Control>
           <Accordion.Panel>
@@ -96,7 +96,7 @@ export default function SetupPage() {
 
         <Accordion.Item className={classes.item} value='msg-gen'>
           <Accordion.Control>
-            <Title order={3}>Message Generation Onboarding</Title>
+            <Title order={3}>3. Message Generation Onboarding</Title>
             <Text fs="italic" c="dimmed" fz="sm">Tell your AI how to write</Text>
           </Accordion.Control>
           <Accordion.Panel>
@@ -155,16 +155,17 @@ function PersonaOnboarding(props: { data: any }) {
       data={[
         {
           title: 'Create Personas',
-          description: 'Create your first persona',
+          description: 'Create your persona',
           link: '/personas',
+          searchParams: new URLSearchParams({ create: 'true' }),
           complete: props.data.persona.create_personas,
         },
-        {
-          title: 'Create Persona Linkedin Filters',
-          description: 'Select filters we can apply on Linkedin to find targets',
-          link: null,
-          complete: props.data.persona.linkedin_filters,
-        },
+        // {
+        //   title: 'Create Persona Linkedin Filters',
+        //   description: 'Select filters we can apply on Linkedin to find targets',
+        //   link: null,
+        //   complete: props.data.persona.linkedin_filters,
+        // },
         {
           title: 'Add Do Not Contact List Filters',
           description: 'Customize who they do not want to target',
@@ -187,15 +188,10 @@ function MessageGenerationOnboarding(props: { data: any }) {
           complete: props.data.msg_gen.create_linkedin_ctas,
         },
         {
-          title: 'Create Email Style',
-          description: 'Customize the email prompt',
-          link: null,
-          complete: props.data.msg_gen.create_email_style,
-        },
-        {
           title: 'Voice Builder',
           description: 'Customize the AI voice for outbound',
-          link: null,
+          link: '/linkedin/voices',
+          searchParams: new URLSearchParams({ create: 'true' }),
           complete: props.data.msg_gen.voice_builder,
         },
         {
@@ -207,7 +203,7 @@ function MessageGenerationOnboarding(props: { data: any }) {
         {
           title: 'Bump Frameworks for Email',
           description: 'Customize how the AI responses on email',
-          link: null,
+          link: '/email/blocks',
           complete: props.data.msg_gen.bump_framework_email,
         },
       ]}

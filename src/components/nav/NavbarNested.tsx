@@ -42,6 +42,7 @@ import {
   IconTools,
   IconFilter,
   IconFileLambda,
+  IconTrash,
 } from "@tabler/icons-react";
 import { LogoFull } from "@nav/Logo";
 import { LinksGroup } from "./NavBarLinksGroup";
@@ -403,6 +404,12 @@ export function NavbarNested(props: {
           icon: IconAt,
           link: "/tools/email-scraper",
         },
+        {
+          key: "tools-contacts-clean",
+          label: `Clean Contacts`,
+          icon: IconTrash,
+          link: "/tools/contacts-clean",
+        }
       ],
     },
   ];

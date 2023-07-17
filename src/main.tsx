@@ -50,6 +50,7 @@ import EmailBlocksPage from '@pages/EmailBlocksPage';
 import FindContactsPage from "@pages/FindContactsPage";
 import PersonaSplit from '@common/persona/PersonaSplit';
 import { PersonaSplitPage } from '@common/persona/PersonaSplitPage';
+import CleanContactsPage from "@pages/CleanContactsPage";
 
 const queryClient = new QueryClient();
 
@@ -128,6 +129,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "contacts/find",
         element: <RestrictedRoute page={<FindContactsPage />} />
+      },
+      {
+        path: "tools/contacts-clean",
+        element: <RestrictedRoute page={<CleanContactsPage />} />
       },
       {
         path: "contacts/view/:prospectId?",

@@ -62,6 +62,8 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
       });
       setLoading(false);
       context.closeModal(id);
+      alert("Bump Framework deactivated successfully");
+      innerProps.onSave();
     } else {
       showNotification({
         title: "Error",

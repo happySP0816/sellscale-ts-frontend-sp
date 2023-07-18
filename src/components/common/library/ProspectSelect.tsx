@@ -1,5 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { createStyles, useMantineTheme, Text, Flex, Badge, Select } from "@mantine/core";
+import { createStyles, useMantineTheme, Text, Flex, Badge, Select, Loader, Card } from "@mantine/core";
 import { valueToColor } from "@utils/general";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
 import { useState, useEffect, forwardRef } from "react";
@@ -31,9 +31,11 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
   const userToken = useRecoilValue(userTokenState);
   const [prospects, setProspects] = useState<ProspectShallow[]>([]);
   const [selectedProspect, setSelectedProspect] = useState<ProspectShallow>();
+  const [loadingProspects, setLoadingProspects] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
+      setLoadingProspects(true);
       const result = await getArchetypeProspects(userToken, props.personaId);
       if (result.status === 'success') {
         setProspects((prev) => {
@@ -46,6 +48,7 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
           });
         });
       }
+      setLoadingProspects(false);
     })();
   }, []);
 
@@ -68,6 +71,10 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
       </div>
     )
   );
+  
+  if (loadingProspects) {
+    return <Card><Loader m='auto 0%' /></Card>;
+  }
   
   return (
     <Select

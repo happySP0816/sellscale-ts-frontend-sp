@@ -23,7 +23,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import CreateBumpFrameworkEmailModal from '@modals/CreateBumpFrameworkEmailModal';
-import { IconBook, IconCheck, IconEdit, IconList, IconPlus, IconX } from '@tabler/icons';
+import { IconBook, IconCheck, IconEdit, IconList, IconPlus, IconRobot, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { valueToColor } from '@utils/general';
 import { getEmailBumpFrameworks } from '@utils/requests/getBumpFrameworks';

@@ -155,11 +155,8 @@ export default function PersonaCard(props: {
 
   const WARNING_PERCENTAGE = 25;
   const getStatusUsedPercentage = () => {
-    let usedEmail = props.personaOverview.num_prospects - props.personaOverview.num_unused_email_prospects;
-    let usedLi = props.personaOverview.num_prospects - props.personaOverview.num_unused_li_prospects;
 
-    let unusedVal = props.personaOverview.num_prospects - (usedEmail + usedLi);
-    let usedVal = props.personaOverview.num_prospects - unusedVal;
+    let unusedVal = props.personaOverview.num_unused_li_prospects;
 
     let m = 100 / props.personaOverview.num_prospects;
     let percentData = [];

@@ -212,17 +212,30 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
 
 
   let convoHeight = (messages.length || 1) * 150 + 150;
-  if (convoHeight > 500) { convoHeight = 500; }
+  if (convoHeight > 800) { convoHeight = 800; }
 
   if (!prospect) {
     return (
       <>
-        <ProspectSelect
-          personaId={props.personaId}
-          onChange={(prospect) => {
-            setProspect(prospect);
-          }}
-        />
+        <Paper withBorder p='lg' radius='md' shadow='md'>
+          <Group position='apart' mb='xs'>
+            <Text fz='xl' fw={500}>
+              LinkedIn Conversation Simulator
+            </Text>
+          </Group>
+          <Text c='dimmed' fz='sm'>
+            This is a simulation of a potential conversation between you ({userData.sdr_name}) and a prospect.
+          </Text>
+          <Text c='dimmed' fz='sm'>
+            Select a prospect to start the simulation.
+          </Text>
+          <ProspectSelect
+            personaId={props.personaId}
+            onChange={(prospect) => {
+              setProspect(prospect);
+            }}
+          />
+        </Paper>
       </>
     );
   }

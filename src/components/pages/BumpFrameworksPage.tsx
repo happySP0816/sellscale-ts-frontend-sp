@@ -23,7 +23,7 @@ import { openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
-import { IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconTransferIn, IconX } from '@tabler/icons';
+import { IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconRobot, IconTransferIn, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
@@ -34,6 +34,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { BumpFramework, MsgResponse } from 'src';
 import { set } from 'lodash';
 import { currentProjectState } from '@atoms/personaAtoms';
+import LinkedInConvoSimulator from '@common/simulators/linkedin/LinkedInConvoSimulator';
 
 
 type BumpFrameworkBuckets = {
@@ -489,6 +490,9 @@ export default function BumpFrameworksPage(props: {
             <Tabs.Tab value='qnolibrary' icon={<IconBook size='0.8rem' />}>
               Questions & Objections Library
             </Tabs.Tab>
+            <Tabs.Tab value='simulate' icon={<IconRobot size='0.8rem' />}>
+              Simulate LinkedIn Conversation
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value='sequence'>
@@ -609,6 +613,14 @@ export default function BumpFrameworksPage(props: {
                 <Loader />
               </Flex>
             )}
+          </Tabs.Panel>
+
+          <Tabs.Panel value='simulate'>
+            <Card withBorder m='sm'>
+              <LinkedInConvoSimulator personaId={
+                archetypeID as number
+              } />
+              </Card>
           </Tabs.Panel>
         </Tabs>
       </Flex>

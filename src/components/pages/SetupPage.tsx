@@ -63,7 +63,7 @@ export default function SetupPage() {
     stepsCount += Object.keys(data[key]).length;
     completedStepsCount += Object.values(data[key]).flat().filter((item: any) => item).length;
   }
-  stepsCount -= 4; // TEMP: Remove the 4 coming soon steps that are always false
+  stepsCount -= 1; // TEMP: Remove the 4 coming soon steps that are always false
 
   const percentage = Math.round((completedStepsCount / stepsCount) * 100);
 

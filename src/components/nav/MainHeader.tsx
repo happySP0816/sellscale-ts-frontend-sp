@@ -164,7 +164,9 @@ export function MainHeader() {
       .flat()
       .filter((item: any) => item).length;
   }
-  stepsCount -= 4; // TEMP: Remove the 4 coming soon steps that are always false
+  stepsCount -= 1; // TEMP: Remove the 4 coming soon steps that are always false
+
+  // alert(completedStepsCount + " / " + stepsCount)
 
   const percentage = Math.round((completedStepsCount / stepsCount) * 100);
 

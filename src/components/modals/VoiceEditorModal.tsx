@@ -48,6 +48,8 @@ export default function VoiceEditorModal({
   const [prompt, setPrompt] = useState("");
   const [stackRankedConfigurationData, setStackRankedConfigurationData] = useState<any>({});
 
+  const [randomFlag, setRandomFlag] = useState(false);
+
   const [editViewMode, setEditViewMode] = useState("advanced");
   
   const [stackRankedConfigurationDataChanged, setStackRankedConfigurationDataChanged] = useState(false);
@@ -273,28 +275,33 @@ export default function VoiceEditorModal({
                       }
 
                       return (
-                        <Textarea
-                          w='100%'
-                          icon={<IconChartTreemap size="0.8rem" />}
-                          minRows={8}
-                          mt="sm"
-                          size='xs'
-                          label={`Sample ${index + 1}`}
-                          placeholder="Raw voice prompt..."
-                          defaultValue={stackRankedConfigurationData[completionKey]}
-                          onChange={(e) => {
-                            setStackRankedConfigurationDataChanged(true)
-                            console.log("Completion " + promptKey + " changed")
-                            console.log("Before: ")
-                            console.log(stackRankedConfigurationData[completionKey])
+                        <>
+                          <Textarea
+                            w='100%'
+                            icon={<IconChartTreemap size="0.8rem" />}
+                            minRows={8}
+                            mt="sm"
+                            size='xs'
+                            label={`Sample ${index + 1}`}
+                            placeholder="Raw voice prompt..."
+                            defaultValue={stackRankedConfigurationData[completionKey]}
+                            onChange={(e) => {
+                              setStackRankedConfigurationDataChanged(true)
+                              console.log("Completion " + promptKey + " changed")
+                              console.log("Before: ")
+                              console.log(stackRankedConfigurationData[completionKey])
 
-                            console.log("After: ")
-                            console.log(e.currentTarget.value)
+                              console.log("After: ")
+                              console.log(e.currentTarget.value)
 
-                            stackRankedConfigurationData[completionKey] = e.currentTarget.value
-                            setStackRankedConfigurationData(stackRankedConfigurationData)
-                          }}
-                          />
+                              stackRankedConfigurationData[completionKey] = e.currentTarget.value
+                              setStackRankedConfigurationData(stackRankedConfigurationData)
+
+                              setRandomFlag(!randomFlag)
+                            }}
+                            error={stackRankedConfigurationData[completionKey].length > 300 ? "Completion is too long. Please shorten it to 300 characters or less." : null}
+                            />
+                          </>
                       )
                   })
                 }

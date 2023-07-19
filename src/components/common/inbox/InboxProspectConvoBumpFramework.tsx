@@ -23,25 +23,13 @@ import {
   Center,
   Modal,
 } from '@mantine/core';
-import { IconExternalLink, IconWriting, IconSend, IconBrandLinkedin, IconMail, IconDots } from '@tabler/icons-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { convertDateToCasualTime, convertDateToLocalTime } from '@utils/general';
-import { getConversation } from '@utils/requests/getConversation';
-import { getProspectByID } from '@utils/requests/getProspectByID';
-import DOMPurify from 'dompurify';
+
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { BumpFramework, LinkedInMessage, Prospect } from 'src';
-import { labelizeConvoSubstatus } from './utils';
-import { readLiMessages } from '@utils/requests/readMessages';
-import ProspectDetailsCalendarLink from '@common/prospectDetails/ProspectDetailsCalendarLink';
-import ProspectDetailsOptionsMenu from '@common/prospectDetails/ProspectDetailsOptionsMenu';
-import { deleteAutoBumpMessage, getAutoBumpMessage } from '@utils/requests/autoBumpMessage';
 import { showNotification } from '@mantine/notifications';
 import { postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
-import { sendLinkedInMessage } from '@utils/requests/sendMessage';
 import _, { String } from 'lodash';
-import InboxProspectConvoSendBox from './InboxProspectConvoSendBox';
 import SelectBumpInstruction from '@common/bump_instructions/SelectBumpInstruction';
 import { API_URL } from '@constants/data';
 import { prospectDrawerStatusesState } from '@atoms/prospectAtoms';

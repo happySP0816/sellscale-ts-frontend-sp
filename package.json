@@ -63,6 +63,7 @@
     "chart.js": "^4.3.0",
     "dayjs": "^1.11.7",
     "env-cmd": "^10.1.0",
+    "fuzzball": "^2.1.2",
     "isomorphic-dompurify": "^1.2.0",
     "lodash": "^4.17.21",
     "mantine-datatable": "^2.4.17",

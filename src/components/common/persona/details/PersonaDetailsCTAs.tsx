@@ -33,6 +33,7 @@ import displayNotification from "@utils/notificationFlow";
 import createCTA, { deleteCTA } from "@utils/requests/createCTA";
 import toggleCTA from "@utils/requests/toggleCTA";
 import { API_URL } from "@constants/data";
+import CTAGeneratorExample from '@common/cta_generator/CTAGeneratorExample';
 
 const PAGE_SIZE = 20;
 
@@ -158,6 +159,13 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
             accessor: "text_value",
             title: "Call-to-Action",
             sortable: true,
+            render: ({ text_value }) => <Flex direction='row'>
+              <Box mr='xs'>
+              <CTAGeneratorExample ctaText={text_value} size='xs' /> 
+              </Box>
+              <Text>{text_value}</Text> 
+            
+            </Flex>,
           },
           {
             accessor: "percentage",

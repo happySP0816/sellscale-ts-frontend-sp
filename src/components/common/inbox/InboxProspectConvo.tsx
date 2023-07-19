@@ -154,6 +154,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           autoBumpMsgResponse.data.bump_framework,
           autoBumpMsgResponse.data.account_research_points
         );
+        sendBoxRef.current?.setAiMessage(autoBumpMsgResponse.data.message);
       }
 
       return result.status === 'success' ? (result.data.data.reverse() as LinkedInMessage[]) : [];
@@ -172,6 +173,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   useEffect(() => {
     sendBoxRef.current?.setAiGenerated(false);
     sendBoxRef.current?.setMessageDraft('');
+    sendBoxRef.current?.setAiMessage('');
   }, [openedProspectId]);
 
   const triggerGetBumpFrameworks = async () => {

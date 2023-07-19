@@ -35,6 +35,7 @@ import { BumpFramework, MsgResponse } from 'src';
 import { set } from 'lodash';
 import { currentProjectState } from '@atoms/personaAtoms';
 import LinkedInConvoSimulator from '@common/simulators/linkedin/LinkedInConvoSimulator';
+import TextWithNewline from '@common/library/TextWithNewlines';
 
 
 type BumpFrameworkBuckets = {
@@ -167,7 +168,7 @@ function BumpBucketView(props: {
                           <Text fw='bold' fz='lg'>
                             {framework.title}
                           </Text>
-                          <Text maw='50rem'>{framework.description}</Text>
+                          <TextWithNewline breakheight='6px' style={{fontSize: '80%'}}>{framework.description}</TextWithNewline>
                         </Flex>
                       </Flex>
                       <Tooltip label='Edit Bump Framework' withinPortal>
@@ -289,7 +290,7 @@ function QuestionObjectionLibraryCard(props: {
           <Divider my='xs' />
         </Card.Section>
         <Flex mih='100px' align='center'>
-          <Text>{props.bumpFramework.description}</Text>
+          <TextWithNewline>{props.bumpFramework.description}</TextWithNewline>
         </Flex>
 
         <Card.Section>

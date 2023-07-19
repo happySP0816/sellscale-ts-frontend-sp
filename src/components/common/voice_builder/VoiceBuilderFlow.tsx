@@ -313,12 +313,9 @@ export default function VoiceBuilderFlow(props: {
 
     // Delete all samples that are empty
     for (const message of currentMessages) {
-      console.log(message.value)
       if (message.value === "") {
-        console.log("deleting sample: " + message.id)
         await deleteSample(userToken, message.id);
       } else {
-        console.log("updating sample: " + message.id)
         await updateSample(userToken, message.id, message.value);
       }
     }

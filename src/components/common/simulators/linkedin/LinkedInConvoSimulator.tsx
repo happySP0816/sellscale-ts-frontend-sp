@@ -71,12 +71,6 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
   const [loadingMsg, setLoadingMsg] = useState('');
   const [messageDraft, setMessageDraft] = useState('');
 
-  console.log(userData);
-  console.log(prospect);
-
-  console.log(simulation);
-  console.log(messages);
-
   const scrollToBottom = () => viewport.current?.scrollTo({ top: viewport.current.scrollHeight, behavior: 'smooth' });
 
   useEffect(() => {
@@ -119,14 +113,11 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
     const sim_id = simulation ? simulation.id : simulation_id;
     if (!sim_id) return false;
 
-    console.log('Refreshing simulation');
-
     const updateResponse = await updateLiConvoSim(userToken, sim_id);
     return updateResponse.status === 'success';
   };
 
   const resetSimulation = async () => {
-    console.log('Resetting simulation');
 
     const oldProspect = _.cloneDeep(prospect);
     clearSimulation();
@@ -356,7 +347,6 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
 
         {messages.length > 0 &&
           messages.map((message, index) => {
-            console.log('message', message)
             let metadata = {
               bump_framework_id: undefined as number | undefined,
               bump_framework_title: undefined as string | undefined,

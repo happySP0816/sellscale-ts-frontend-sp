@@ -53,8 +53,6 @@ export default function ProspectDetailsOptionsMenu(props: {
     props.refetch()
   }
 
-  console.log(props.archetypeId);
-
   return (
     <>
         <Popover

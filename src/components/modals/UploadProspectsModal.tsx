@@ -519,7 +519,6 @@ export default function UploadProspectsModal({
               }
               onUploadSuccess={async (archetypeId) => {
                 //const response = await getSinglePersona(userToken, archetypeId);
-                //console.log(response);
                 window.location.reload();
               }}
             />

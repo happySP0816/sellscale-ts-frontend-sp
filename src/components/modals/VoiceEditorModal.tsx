@@ -172,9 +172,6 @@ export default function VoiceEditorModal({
   const saveStackRankedConfigurationData = () => {
     setSavingPrompt(true);
 
-    console.log(innerProps.voiceId)
-    console.log(stackRankedConfigurationData?.instruction)
-
     fetch(
       `${API_URL}/message_generation/stack_ranked_configuration_tool/update_stack_ranked_configuration_data`,
       {
@@ -247,7 +244,6 @@ export default function VoiceEditorModal({
                 defaultValue={stackRankedConfigurationData?.instruction?.replace("Follow instructions to generate a short intro message:\n", "")}
                 size='xs'
                 onChange={(e) => {
-                  console.log("Instruction changed")
                   setStackRankedConfigurationDataChanged(true)
                   
                   if (stackRankedConfigurationData?.instruction) { 
@@ -287,12 +283,6 @@ export default function VoiceEditorModal({
                             defaultValue={stackRankedConfigurationData[completionKey]}
                             onChange={(e) => {
                               setStackRankedConfigurationDataChanged(true)
-                              console.log("Completion " + promptKey + " changed")
-                              console.log("Before: ")
-                              console.log(stackRankedConfigurationData[completionKey])
-
-                              console.log("After: ")
-                              console.log(e.currentTarget.value)
 
                               stackRankedConfigurationData[completionKey] = e.currentTarget.value
                               setStackRankedConfigurationData(stackRankedConfigurationData)

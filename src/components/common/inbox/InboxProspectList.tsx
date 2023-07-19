@@ -151,8 +151,6 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
     channel: 'SELLSCALE',
   });
 
-  console.log('ProspectList', props.prospects);
-
   // Sort out uninitiated prospects and temp fill in unknown data
   let prospects =
     props.prospects

@@ -215,7 +215,6 @@ export function LinksGroup({
         (res) => {
           res.json().then(({data}) => {
             setSetupTabsComplete(data);
-            console.log(data);
           });
         }
       )

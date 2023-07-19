@@ -48,6 +48,7 @@ import { prospectDrawerStatusesState } from '@atoms/prospectAtoms';
 
 
 export const generateAIFollowup = async (userToken: string, prospectId: number, bumpFramework: BumpFramework | undefined) => {
+
   const result = await postBumpGenerateResponse(
     userToken,
     prospectId,
@@ -131,7 +132,7 @@ export default function InboxProspectConvoBumpFramework(props: {
       opened={open}
       onClose={() => setOpen(false)}
       title={<Title order={4}>Message Generation Config</Title>}
-    >
+    > 
       <SelectBumpInstruction
         client_sdr_id={userData.id}
         prospect_id={props.prospect.id}
@@ -139,11 +140,11 @@ export default function InboxProspectConvoBumpFramework(props: {
         overall_status={props.prospect.overall_status}
         account_research={bumpFramework?.account_research?.join('\n') || ''}
         convo_history={props.messages}
-        onBumpFrameworkSelected={async (bumpFramework) => {
-          if(bumpFramework){
+        onBumpFrameworkSelected={async (newBF, length) => {
+          if (newBF) {
             // Autofill generated account research
             const newAccountResearch = await autoFillBumpFrameworkAccountResearch(userToken, props.prospect.id);
-            setBumpFramework({ ...bumpFramework, account_research: newAccountResearch.split('\n') });
+            setBumpFramework({ ...newBF, bump_length: length as string, account_research: newAccountResearch.split('\n') });
           }
         }}
         onAccountResearchChanged={(research) => {
@@ -153,6 +154,7 @@ export default function InboxProspectConvoBumpFramework(props: {
             }
           });
         }}
+        manualBumpFramework={bumpFramework}
       />
     </Modal>
   );

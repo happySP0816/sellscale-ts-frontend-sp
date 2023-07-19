@@ -41,8 +41,6 @@ export default function AccountModal({
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
 
-  console.log(userData);
-
   const enabledIcon = (
     <Avatar color="blue" radius="sm">
       <IconCheck size="1.1rem" />

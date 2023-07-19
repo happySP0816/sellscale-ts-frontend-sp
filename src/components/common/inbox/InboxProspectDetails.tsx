@@ -116,7 +116,6 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
     enabled: openedProspectId !== -1,
   });
 
-  console.log(data);
   const statusValue = data?.details?.linkedin_status || 'ACCEPTED';
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';

@@ -646,11 +646,11 @@ export default function ProspectDetailsViewConversation(
               overall_status={props.overall_status}
               account_research={accountResearch}
               convo_history={messages.current}
-              onBumpFrameworkSelected={async (bumpFramework) => {
+              onBumpFrameworkSelected={async (bumpFramework, length) => {
                 if (bumpFramework) {
                   setBumpFramework(bumpFramework)
                   setBumpFrameworkId(bumpFramework.id);
-                  setBumpFrameworkLengthAPI(bumpFramework.bump_length);
+                  setBumpFrameworkLengthAPI(length ?? bumpFramework.bump_length);
 
                   // Autofill account research
                   await autoFillBumpFrameworkAccountResearch(bumpFramework);

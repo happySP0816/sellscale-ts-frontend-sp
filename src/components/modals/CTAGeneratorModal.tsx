@@ -116,8 +116,6 @@ export default function CTAGeneratorModal({
     }
   };
 
-  console.log(innerProps.personas);
-
   return (
     <Paper
       p={0}

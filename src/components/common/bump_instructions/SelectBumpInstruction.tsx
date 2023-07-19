@@ -31,8 +31,9 @@ type PropsType = {
   overall_status: string;
   account_research: string;
   convo_history: LinkedInMessage[];
-  onBumpFrameworkSelected: (bumpFramework: BumpFramework | undefined) => void;
+  onBumpFrameworkSelected: (bumpFramework: BumpFramework | undefined, length?: string) => void;
   onAccountResearchChanged: (accountResearch: string) => void;
+  manualBumpFramework?: BumpFramework;
 };
 
 const bumpFrameworkLengthMarks = [
@@ -91,6 +92,12 @@ export default function SelectBumpInstruction(props: PropsType) {
     }
     */
 
+    // If manual bump framework is provided, don't auto select
+    if (props.manualBumpFramework) {
+      setLoadingBumpFrameworks(false);
+      return
+    }
+
     // Select default framework based on convo history
     const response = await autoSelectBumpFramework(
       userToken,
@@ -122,6 +129,12 @@ export default function SelectBumpInstruction(props: PropsType) {
   useEffect(() => {
     triggerGetBumpFrameworks();
   }, [prospectDrawerStatuses]);
+
+  useEffect(() => {
+    if (props.manualBumpFramework) {
+      setSelectedBumpFramework(props.manualBumpFramework);
+    }
+  }, [])
 
   return (
     <Card withBorder mt="sm">
@@ -215,9 +228,9 @@ export default function SelectBumpInstruction(props: PropsType) {
                 bumpLength = "MEDIUM";
               }
               if (selectedBumpFramework) {
-                selectedBumpFramework.bump_length = bumpLength;
+                setSelectedBumpFramework({ ...selectedBumpFramework, bump_length: bumpLength })
               }
-              props.onBumpFrameworkSelected(selectedBumpFramework);
+              props.onBumpFrameworkSelected(selectedBumpFramework, bumpLength);
             }}
           />
         </HoverCard.Target>

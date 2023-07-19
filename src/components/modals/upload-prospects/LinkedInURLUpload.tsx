@@ -72,7 +72,6 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
     setLoading(false);
   }
 
-  console.log(prospectDetails);
   const linkedin_public_id = prospectDetails?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
   return (

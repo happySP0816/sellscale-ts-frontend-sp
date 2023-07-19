@@ -1,4 +1,4 @@
-import { openedOutboundChannelState, openedProspectIdState } from '@atoms/inboxAtoms';
+import { openedOutboundChannelState, openedProspectIdState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import TextWithNewlines from '@common/library/TextWithNewlines';
 import loaderWithText from '@common/library/loaderWithText';
@@ -42,6 +42,7 @@ import InboxProspectConvoBumpFramework from './InboxProspectConvoBumpFramework';
 import { AiMetaDataBadge } from '@common/persona/LinkedInConversationEntry';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
+import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 
 export function ProspectConvoMessage(props: {
   img_url: string;
@@ -106,6 +107,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const userData = useRecoilValue(userDataState);
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const [openedOutboundChannel, setOpenedOutboundChannel] = useRecoilState(openedOutboundChannelState);
+  const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState);
 
   const prospect = _.cloneDeep(props.prospects.find((p) => p.id === openedProspectId));
 
@@ -142,7 +144,6 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
         queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
       });
 
-      console.log(result);
 
       // Set if we have an auto bump message generated
       const autoBumpMsgResponse = await getAutoBumpMessage(userToken, openedProspectId);
@@ -163,6 +164,9 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
 
   useEffect(() => {
     scrollToBottom();
+    if (isFetchingMessages) {
+      triggerGetBumpFrameworks();
+    }
   }, [isFetchingMessages]);
 
   useEffect(() => {
@@ -170,8 +174,35 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
     sendBoxRef.current?.setMessageDraft('');
   }, [openedProspectId]);
 
-  console.log(data);
-  console.log(prospect);
+  const triggerGetBumpFrameworks = async () => {
+    setBumpFramework(undefined);
+
+    if (!prospect) {
+      return;
+    }
+
+    // This needs changing in the future to be more rigid
+    let substatuses: string[] = [];
+    if (prospect.linkedin_status?.includes("ACTIVE_CONVO_")) {
+      substatuses = [prospect.linkedin_status];
+    }
+
+    const result = await getBumpFrameworks(
+      userToken,
+      [prospect.overall_status],
+      substatuses,
+      [prospect.archetype_id]
+    );
+    if (result.status === 'success') {
+      sendBoxRef.current?.setBumpFrameworks(result.data.bump_frameworks);
+    }
+  }
+
+  // // On load we should get the bump frameworks
+  // useEffect(() => {
+  //   triggerGetBumpFrameworks();
+  // }, [])
+
   const statusValue = data?.details?.linkedin_status || 'ACTIVE_CONVO';
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';

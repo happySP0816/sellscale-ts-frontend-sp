@@ -124,8 +124,6 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
     });
   }, [data]);
 
-  console.log(data)
-
   return (
     <Drawer
       opened={actuallyOpened}

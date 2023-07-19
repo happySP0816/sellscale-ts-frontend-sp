@@ -134,14 +134,11 @@ export default function AllContactsSection(props: { all?: boolean }) {
     if (fetchedUploads) return;
     if (!currentProject) return;
     getAllUploads(userToken, currentProject?.id).then((res) => {
-      console.log(res)
       setCurrentProject(Object.assign({uploads: res.data}, currentProject));
     });
     setFetchedUploads(true);
   }
   fetchUploads();
-
-  console.log(currentProject)
 
   const PIPELINE_SELECTOR_DATA = getPipelineSelectorData(data);
   return (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Checkbox,
+  Title,
   Group,
   Avatar,
   Text,
@@ -22,6 +23,8 @@ import {
   ScrollArea,
   Tooltip,
   Loader,
+  Card,
+  Box,
 } from "@mantine/core";
 import { Archetype, Prospect } from "src";
 import {
@@ -56,6 +59,10 @@ import {
 } from "@atoms/prospectAtoms";
 import _, { sample } from "lodash";
 import { el } from "@fullcalendar/core/internal-common";
+import ProspectSelect from '@common/library/ProspectSelect';
+import { showNotification } from '@mantine/notifications';
+import { API_URL } from '@constants/data';
+import TextAlign from '@tiptap/extension-text-align';
 
 const ItemComponent = (props: { id: number; defaultValue: string }) => {
   const [message, setMessage] = useState<string>(props.defaultValue);
@@ -218,6 +225,7 @@ export default function VoiceBuilderFlow(props: {
   const [voiceBuilderMessages, setVoiceBuilderMessages] = useRecoilState(
     voiceBuilderMessagesState
   );
+  const [simulationProspectId, setSimulationProspectId]: any = useState(-1);
   const userToken = useRecoilValue(userTokenState);
 
   // Set global state to loaded messages
@@ -230,6 +238,8 @@ export default function VoiceBuilderFlow(props: {
 
   const [editingPhase, setEditingPhase] = useState(1);
   const [loadingMsgGen, setLoadingMsgGen] = useState(false);
+  const [loadingSimulationSample, setLoadingSample] = useState(false);
+  const [generatedSimulationCompletion, setGeneratedSimulationCompletion] = useState("");
   const [instructions, setInstructions] = useDebouncedState("", 200);
   const [count, setCount] = useState(0);
 
@@ -322,6 +332,54 @@ export default function VoiceBuilderFlow(props: {
     }
   };
 
+  const generateSample = () => {
+    console.log("generating sample");
+    // console log instructions and messages
+    var prompt = STARTING_INSTRUCTIONS + '\n' + instructions + '\n' + voiceBuilderMessages.map((item) => item.value).join('\n') + '\n' + 'prompt: {prompt}\ncompletion:';
+    console.log(prompt);
+    setLoadingSample(true);
+    setGeneratedSimulationCompletion("");
+    showNotification({
+      title: "Generating sample...",
+      message: "Wait a few seconds while we generate a sample message",
+      color: "blue",
+      autoClose: 5000,
+    });
+    fetch(
+      `${API_URL}/message_generation/stack_ranked_configuration/generate_completion_for_prospect`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prospect_id: simulationProspectId,
+          computed_prompt: prompt,
+        }),
+      }
+    )
+      .then((res) => {
+        const data = res.json();
+        return data;
+      })
+      .then((data) => {
+        setGeneratedSimulationCompletion(data?.completion);
+        showNotification({
+          title: "Sample generated",
+          message: "The sample message was generated successfully",
+          color: "green",
+          autoClose: 5000,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setLoadingSample(false);
+      });
+  };
+
   return (
     <>
       <div style={{ position: "relative" }}>
@@ -401,6 +459,48 @@ export default function VoiceBuilderFlow(props: {
           Looks Good! Create Voice with {voiceBuilderMessages.length} Samples
         </Button>
       </Center>
+
+      <Divider my="sm" />
+        
+      <Card mt="md" p="md" withBorder>
+        <Title order={4}>Simulate Voice</Title>
+        <Text>
+          Use the simulation section to test this voice on a prospect. You can
+          select a persona then hit 'Generate' to see what the message would
+          look like.
+        </Text>
+        <Flex direction="row">
+          <Box sx={{ width: "80%" }}>
+            <ProspectSelect
+              onChange={(prospect) => {
+                setSimulationProspectId(prospect?.id);
+              }}
+              personaId={props.persona.id}
+            />
+          </Box>
+          <Box pt="md">
+            <Button
+              color="grape"
+              mt="xl"
+              ml="lg"
+              loading={loadingSimulationSample}
+              onClick={() => {
+                generateSample();
+              }}
+            >
+              Generate
+            </Button>
+          </Box>
+        </Flex>
+        {generatedSimulationCompletion && <Textarea 
+          value={generatedSimulationCompletion} 
+          minRows={6}
+          label='Generated Sample'
+          description='This is what the message would look like if you sent it to the prospect.'
+          mt='xs' 
+          error={generatedSimulationCompletion.length > 300 ? 'Message is too long. It must be less than 300 characters.' : undefined} 
+        />}
+      </Card>
     </>
   );
 }

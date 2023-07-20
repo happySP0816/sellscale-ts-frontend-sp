@@ -68,6 +68,7 @@ export default function SendLiOutreachModal({
         color: "blue",
         autoClose: 3000,
       });
+      window.location.href = "/all/linkedin-messages"
     } else {
       showNotification({
         id: "sent-message-error",
@@ -98,6 +99,9 @@ export default function SendLiOutreachModal({
             withAsterisk
             autosize
             {...form.getInputProps("message")}
+            error={
+              form.getInputProps("message").value?.length > 300 ? 'Message must be less than 300 characters' : ''
+            }
           />
         </Flex>
 
@@ -113,6 +117,7 @@ export default function SendLiOutreachModal({
               ml="auto"
               mr="auto"
               size="md"
+              disabled={form.getInputProps("message").value?.length > 300}
             >
               Send Request
             </Button>

@@ -51,6 +51,7 @@ import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsO
 import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 import ProspectReferralCard from "./ProspectReferralCard";
+import { openContextModal } from '@mantine/modals';
 
 export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
   const userData = useRecoilValue(userDataState);
@@ -236,9 +237,11 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
             {data.main.prospect_info.referrals.length > 0 && (
               <ProspectReferralCard prospects={data.main.prospect_info.referrals} />
             )}
-            {data.main.prospect_info.referred.length > 0 && (
-              <ProspectReferralCard prospects={data.main.prospect_info.referred} referredBy />
-            )}
+            <Flex direction='row'>
+              {data.main.prospect_info.referred.length > 0 && (
+                <ProspectReferralCard prospects={data.main.prospect_info.referred} referredBy />
+              )}
+            </Flex>
           </div>
 
           <ScrollArea

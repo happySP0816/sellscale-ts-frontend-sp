@@ -97,7 +97,7 @@ export default function AddProspectModal({
       showNotification({
         id: "prospect-added-error",
         title: "Error while adding prospect",
-        message: "Please contact an administrator.",
+        message: "Please contact an administrator. This prospect may have already been added by you or someone else in your organization.",
         color: "red",
         autoClose: false,
       });

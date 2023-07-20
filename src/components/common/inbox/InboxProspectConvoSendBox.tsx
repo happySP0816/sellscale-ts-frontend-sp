@@ -294,6 +294,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
             bump_description={selectedBumpFramework.description}
             bump_length={selectedBumpFramework.bump_length}
             account_research_points={selectedBumpFramework.account_research || []}
+            bump_number_sent={selectedBumpFramework.etl_num_times_used}
+            bump_number_converted={selectedBumpFramework.etl_num_times_converted}
           />
         )}
       </div>

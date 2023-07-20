@@ -17,13 +17,15 @@ import {
   Loader,
   Badge,
   ScrollArea,
+  Stack,
+  HoverCard,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
-import { IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconRobot, IconTransferIn, IconX } from '@tabler/icons';
+import { IconAnalyze, IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconRobot, IconTransferIn, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
@@ -35,6 +37,7 @@ import { BumpFramework, MsgResponse } from 'src';
 import { set } from 'lodash';
 import { currentProjectState } from '@atoms/personaAtoms';
 import LinkedInConvoSimulator from '@common/simulators/linkedin/LinkedInConvoSimulator';
+import { DataTable } from 'mantine-datatable';
 import TextWithNewline from '@common/library/TextWithNewlines';
 
 
@@ -139,31 +142,48 @@ function BumpBucketView(props: {
                   return <></>;
                 }
 
+                let bumpConversionRate
+                if (framework.etl_num_times_converted && framework.etl_num_times_used) {
+                  bumpConversionRate = framework.etl_num_times_converted / framework.etl_num_times_used * 100
+                }
+
                 return (
                   <>
                     <Flex justify='space-between' align='center' pt='xs'>
                       <Flex direction='row' align='center'>
-                        <Switch
-                          ml='md'
-                          onLabel='Default'
-                          offLabel='Default'
-                          checked={framework.default === true}
-                          thumbIcon={
-                            framework.default === true ? (
-                              <IconCheck size='0.8rem' color={theme.colors.teal[theme.fn.primaryShade()]} stroke={3} />
-                            ) : (
-                              <IconX size='0.8rem' color={theme.colors.red[theme.fn.primaryShade()]} stroke={3} />
-                            )
+                        <Flex direction='column' align='center' justify='center' ml='md'>
+                          <Switch
+                            onLabel='Default'
+                            offLabel='Default'
+                            checked={framework.default === true}
+                            thumbIcon={
+                              framework.default === true ? (
+                                <IconCheck size='0.8rem' color={theme.colors.teal[theme.fn.primaryShade()]} stroke={3} />
+                              ) : (
+                                <IconX size='0.8rem' color={theme.colors.red[theme.fn.primaryShade()]} stroke={3} />
+                              )
+                            }
+                            disabled={true}
+                            styles={{
+                              label: {
+                                backgroundColor: framework.default === true
+                                  ? theme.colors.teal[theme.fn.primaryShade()]
+                                  : theme.colors.red[theme.fn.primaryShade()],
+                              },
+                            }}
+                          />
+                          {bumpConversionRate &&
+                            <Tooltip
+                              label={`Prospects reply to this bump directly, ${bumpConversionRate.toFixed(2)}% of the time`}
+                              withinPortal
+                              withArrow
+                            >
+                              <Badge mt='xs' variant='outline' size='xs' color={'green'}>
+                                {bumpConversionRate.toFixed(2)}%
+                              </Badge>
+                            </Tooltip>
                           }
-                          disabled={true}
-                          styles={{
-                            label: {
-                              backgroundColor: framework.default === true
-                                ? theme.colors.teal[theme.fn.primaryShade()]
-                                : theme.colors.red[theme.fn.primaryShade()],
-                            },
-                          }}
-                        />
+                        </Flex>
                         <Flex direction='column' ml='xl'>
                           <Text fw='bold' fz='lg'>
                             {framework.title}
@@ -300,6 +320,104 @@ function QuestionObjectionLibraryCard(props: {
       </Card>
     </>
   );
+}
+
+function BumpFrameworkAnalysisTable(props: {
+  bumpBucket: {
+    total: number;
+    frameworks: BumpFramework[];
+  },
+  bucketViewDescription: string;
+  bucketViewTitle: string;
+  showSubstatus?: boolean;
+}) {
+
+  return (
+    <Flex direction='column' w='100%'>
+      <Flex>
+        <Title order={5}>{props.bucketViewTitle}</Title>
+        <Text ml='sm' fz='sm' color='gray'>- {props.bucketViewDescription}</Text>
+      </Flex>
+
+      {props.bumpBucket?.frameworks?.length > 0 ? (
+        <DataTable
+          mt='sm'
+          withBorder
+          shadow='sm'
+          borderRadius="sm"
+          highlightOnHover
+          records={props.bumpBucket.frameworks}
+          columns={[
+            {
+              accessor: 'title',
+              title: "Title",
+              sortable: true,
+              width: '50%',
+              render: ({ title, description }) => {
+                return (
+                  <HoverCard
+                    withinPortal
+                    withArrow
+                    width='460px'
+                    styles={{
+                      dropdown: {
+                        padding: '12px',
+                        border: '1px solid green',
+                      },
+                    }}
+                  >
+                    <HoverCard.Target>
+                      <Text>
+                        {title}
+                      </Text>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <Title order={3}>
+                        {title}
+                      </Title>
+                      <Text mt='xs'>
+                        {description}
+                      </Text>
+                    </HoverCard.Dropdown>
+                  </HoverCard>
+
+                )
+              }
+            },
+            {
+              accessor: "etl_num_times_used",
+              title: "Times Used",
+              sortable: true,
+              render: ({ etl_num_times_used }) => (etl_num_times_used ? etl_num_times_used : 0),
+            },
+            {
+              accessor: "etl_num_times_converted",
+              title: "Times Converted",
+              sortable: true,
+              render: ({ etl_num_times_converted }) => (etl_num_times_converted ? etl_num_times_converted : 0),
+            },
+            {
+              accessor: "etl_conversion_rate",
+              title: "Conversion Rate",
+              sortable: true,
+              render: ({ etl_num_times_used, etl_num_times_converted }) => {
+                if (etl_num_times_used && etl_num_times_converted) {
+                  const percentage = etl_num_times_converted / etl_num_times_used * 100;
+                  return `${percentage.toFixed(2)}%`
+                }
+                return `0%`;
+              }
+            }
+
+          ]}
+        />
+      ) : (
+        <Flex justify='center' mt='xl'>
+          <Loader />
+        </Flex>
+      )}
+    </Flex>
+  )
 }
 
 export default function BumpFrameworksPage(props: {
@@ -494,6 +612,9 @@ export default function BumpFrameworksPage(props: {
             <Tabs.Tab value='simulate' icon={<IconRobot size='0.8rem' />}>
               Simulate LinkedIn Conversation
             </Tabs.Tab>
+            <Tabs.Tab value='analytics' icon={<IconAnalyze size='0.8rem' />}>
+              Analytics
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value='sequence'>
@@ -621,7 +742,59 @@ export default function BumpFrameworksPage(props: {
               <LinkedInConvoSimulator personaId={
                 archetypeID as number
               } />
-              </Card>
+            </Card>
+          </Tabs.Panel>
+
+          <Tabs.Panel value='analytics'>
+            {!loading && bumpBuckets.current &&
+              <Stack mx='md'>
+                {/* Table for Step 1 */}
+                <Flex>
+                  <BumpFrameworkAnalysisTable
+                    bucketViewTitle='First / Initial Followup'
+                    bucketViewDescription='Prospects who have accepted your connection request.'
+                    bumpBucket={bumpBuckets.current?.ACCEPTED}
+                  />
+                </Flex>
+
+                {/* Table for Step 2 */}
+                <Flex mt='md'>
+                  <BumpFrameworkAnalysisTable
+                    bucketViewTitle='Second Followup'
+                    bucketViewDescription='This is followup #2'
+                    bumpBucket={bumpBuckets.current?.BUMPED[1]}
+                  />
+                </Flex>
+
+                {/* Table for Step 3 */}
+                <Flex mt='md'>
+                  <BumpFrameworkAnalysisTable
+                    bucketViewTitle='Third Followup'
+                    bucketViewDescription='This is followup #3'
+                    bumpBucket={bumpBuckets.current?.BUMPED[2]}
+                  />
+                </Flex>
+
+                {/* Table for Step 4 */}
+                <Flex mt='md'>
+                  <BumpFrameworkAnalysisTable
+                    bucketViewTitle='Fourth Followup'
+                    bucketViewDescription='This is followup #4'
+                    bumpBucket={bumpBuckets.current?.BUMPED[3]}
+                  />
+                </Flex>
+
+                {/* Table for Questions & Objections */}
+                <Flex mt='md'>
+                  <BumpFrameworkAnalysisTable
+                    bucketViewTitle='Questions & Objections'
+                    bucketViewDescription='Prospects who have responded with a question or objection.'
+                    bumpBucket={bumpBuckets.current?.ACTIVE_CONVO}
+                  />
+                </Flex>
+
+              </Stack>
+            }
           </Tabs.Panel>
         </Tabs>
       </Flex>

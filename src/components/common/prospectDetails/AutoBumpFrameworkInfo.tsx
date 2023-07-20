@@ -1,15 +1,26 @@
 import TextWithNewline from '@common/library/TextWithNewlines';
-import { HoverCard, Text, Avatar, Group, Stack, Anchor, ActionIcon, Badge, useMantineTheme, List } from '@mantine/core';
+import { HoverCard, Text, Avatar, Flex, ActionIcon, Badge, useMantineTheme, List, Tooltip } from '@mantine/core';
 import { IconInfoCircleFilled } from '@tabler/icons-react';
 import { valueToColor } from '@utils/general';
+import { useEffect, useState } from 'react';
+
 
 export default function AutoBumpFrameworkInfo(props: {
   bump_title: string;
   bump_description: string;
   bump_length: string;
   account_research_points: string[];
+  bump_number_sent?: number;
+  bump_number_converted?: number;
 }) {
   const theme = useMantineTheme();
+  const [bumpConversionRate, setBumpConversionRate] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (props.bump_number_sent && props.bump_number_converted) {
+      setBumpConversionRate(props.bump_number_converted / props.bump_number_sent * 100)
+    }
+  }, [props.bump_number_sent, props.bump_number_converted])
 
   return (
     <div
@@ -25,25 +36,34 @@ export default function AutoBumpFrameworkInfo(props: {
             <IconInfoCircleFilled size='1.625rem' />
           </ActionIcon>
         </HoverCard.Target>
-        <HoverCard.Dropdown>
-          <Group>
-            <Avatar radius='xl' color='blue' size='md'>
-              <IconInfoCircleFilled size='1.9rem' />
-            </Avatar>
-            <Stack spacing={5}>
-              <Text size='sm' weight={700} sx={{ lineHeight: 1 }}>
-                Automatic Generated Response
-              </Text>
-              <Text color='dimmed' size='xs' sx={{ lineHeight: 1 }}>
-                These data points where chosen by AI 🤖
-              </Text>
-            </Stack>
-          </Group>
+        <HoverCard.Dropdown miw='500px'>
+          <Flex justify='space-between'>
+            <Flex>
+              <Avatar radius='xl' color='blue' size='sm'>
+                <IconInfoCircleFilled size='1.9rem' />
+              </Avatar>
+              <Flex direction='column' ml='sm'>
+                <Text size='sm' weight={700} sx={{ lineHeight: 1 }}>
+                  Automatic Generated Response
+                </Text>
+                <Text color='dimmed' size='xs' sx={{ lineHeight: 1 }}>
+                  These data points were chosen by AI 🤖
+                </Text>
+              </Flex>
+            </Flex>
+            <Tooltip
+              label={bumpConversionRate ? `${bumpConversionRate.toFixed(2)}% of prospects converted` : 'No conversion data available, yet.'}
+            >
+            <Badge>
+              {(bumpConversionRate && bumpConversionRate.toFixed(2)) || "UNKOWN "}%
+            </Badge>
+            </Tooltip>
+          </Flex>
 
           <Text size='sm' mt='md'>
             <span style={{ fontWeight: 550 }}>Framework:</span> {props.bump_title}
           </Text>
-          <TextWithNewline style={{fontSize: '14px'}} breakheight='10px'>
+          <TextWithNewline style={{ fontSize: '14px' }} breakheight='10px'>
             {props.bump_description}
           </TextWithNewline>
           <Badge color={valueToColor(theme, props.bump_length)} size='xs' variant='filled'>

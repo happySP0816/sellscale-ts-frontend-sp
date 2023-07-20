@@ -44,7 +44,7 @@ import InboxProspectConvoBumpFramework from './InboxProspectConvoBumpFramework';
 import { AiMetaDataBadge } from '@common/persona/LinkedInConversationEntry';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
-import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
+import { getBumpFrameworks, getSingleBumpFramework } from '@utils/requests/getBumpFrameworks';
 
 export function ProspectConvoMessage(props: {
   img_url: string;
@@ -60,6 +60,26 @@ export function ProspectConvoMessage(props: {
   accountResearchPoints?: string[];
   cta?: string;
 }) {
+  const userToken = useRecoilValue(userTokenState);
+  const theme = useMantineTheme();
+
+  const [bumpNumberConverted, setBumpNumberConverted] = useState<number | undefined>(undefined);
+  const [bumpNumberUsed, setBumpNumberUsed] = useState<number | undefined>(undefined);
+
+  const triggerGetSingleBumpFramework = async (id: number) => {
+    const result = await getSingleBumpFramework(userToken, id);
+    if (result) {
+      setBumpNumberConverted(result.data.bump_framework.etl_num_times_converted);
+      setBumpNumberUsed(result.data.bump_framework.etl_num_times_used);
+    }
+  }
+
+  useEffect(() => {
+    if (props.bumpFrameworkId) {
+      triggerGetSingleBumpFramework(props.bumpFrameworkId);
+    }
+  }, [])
+
   return (
     <Container py={5}>
       <Flex gap={0} wrap='nowrap'>
@@ -78,6 +98,8 @@ export function ProspectConvoMessage(props: {
                     bumpFrameworkTitle={props.bumpFrameworkTitle || ''}
                     bumpFrameworkDescription={props.bumpFrameworkDescription || ''}
                     bumpFrameworkLength={props.bumpFrameworkLength || ''}
+                    bumpNumberConverted={bumpNumberConverted}
+                    bumpNumberUsed={bumpNumberUsed}
                     accountResearchPoints={props.accountResearchPoints || []}
                     cta={props.cta || ''}
                   />
@@ -136,7 +158,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       const result = await getConversation(userToken, openedProspectId);
       // Indicate messages as read
       const readLiResult = await readLiMessages(userToken, openedProspectId);
-      if (readLiResult.status === 'success' && readLiResult.data.updated) {}
+      if (readLiResult.status === 'success' && readLiResult.data.updated) { }
 
       // Refetch the prospect list
       queryClient.refetchQueries({
@@ -152,7 +174,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       if (autoBumpMsgResponse.status === 'success') {
         sendBoxRef.current?.setAiGenerated(true);
         sendBoxRef.current?.setMessageDraft(
-          autoBumpMsgResponse.data.message, 
+          autoBumpMsgResponse.data.message,
           autoBumpMsgResponse.data.bump_framework,
           autoBumpMsgResponse.data.account_research_points
         );
@@ -213,9 +235,9 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
 
   // Disable AI based on SDR settings
   let ai_disabled = !prospect || (prospect.li_last_message_from_prospect !== null && userData.disable_ai_on_prospect_respond);
-  if (userData.disable_ai_on_message_send){
+  if (userData.disable_ai_on_message_send) {
     const human_sent_msg = messages?.find(msg => !msg.ai_generated && msg.connection_degree == 'You')
-    if(human_sent_msg !== undefined){
+    if (human_sent_msg !== undefined) {
       ai_disabled = true
     }
   }
@@ -331,7 +353,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
                 </Text>
               </Center>
             )}
-            <Box sx={{width: '100%', height: '50px'}}>
+            <Box sx={{ width: '100%', height: '50px' }}>
 
             </Box>
           </div>

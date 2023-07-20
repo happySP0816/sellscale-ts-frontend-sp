@@ -45,6 +45,35 @@ export async function getBumpFrameworks(
 }
 
 
+/**
+ * Gets single bump framework
+ * @param userToken
+ * @param bumpID
+ * @returns - MsgResponse
+ */
+export async function getSingleBumpFramework(userToken: string, bumpID: number): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/bump_framework/bump/${bumpID}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      }
+    }
+  );
+  return await processResponse(response, "data");
+
+}
+
+
+/**
+ * Gets email bump frameworks
+ * @param userToken
+ * @param overallStatuses
+ * @param substatuses
+ * @param archetype_ids
+ * @returns - MsgResponse
+ */
 export async function getEmailBumpFrameworks(userToken: string, overallStatuses: string[], substatuses: string[], archetype_ids: number[]): Promise<MsgResponse> {
   const overall_statuses_string = overallStatuses.join(',');
   const substatuses_string = substatuses.join(',');

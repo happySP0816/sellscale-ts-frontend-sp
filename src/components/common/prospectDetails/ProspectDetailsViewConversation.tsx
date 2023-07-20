@@ -554,6 +554,8 @@ export default function ProspectDetailsViewConversation(
                       bump_description={selectedBumpFramework.description}
                       bump_length={selectedBumpFramework.bump_length}
                       account_research_points={accountResearch.split('\n').map(point => point.replace(/^- /, '').trim())}
+                      bump_number_sent={selectedBumpFramework.etl_num_times_used}
+                      bump_number_converted={selectedBumpFramework.etl_num_times_converted}
                     />
                   ) : (
                     <>
@@ -569,6 +571,8 @@ export default function ProspectDetailsViewConversation(
                             account_research_points={
                               autoBumpMessage.current.account_research_points ?? []
                             }
+                            bump_number_sent={autoBumpMessage.current.bump_framework.etl_num_times_used}
+                            bump_number_converted={autoBumpMessage.current.bump_framework.etl_num_times_converted}
                           />
                         )
                       }

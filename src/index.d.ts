@@ -208,6 +208,8 @@ export type BumpFramework = {
   // client_archetype_id: number;
   // client_archetype_archetype: string;
   account_research?: string[];
+  etl_num_times_used?: number;
+  etl_num_times_converted?: number;
 };
 
 export type EmailBumpFramework = {

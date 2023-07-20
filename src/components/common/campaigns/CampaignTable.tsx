@@ -32,6 +32,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { useDebouncedState, useMediaQuery } from "@mantine/hooks";
 import { API_URL, SCREEN_SIZES } from "@constants/data";
 import { Campaign, Channel } from "src";
+import { currentProjectState } from "@atoms/personaAtoms";
 
 /* For if we want to add something like this in the future:
 interface ItemProps extends React.ComponentPropsWithoutRef<"div"> {
@@ -76,7 +77,7 @@ const ALL_TYPES = [
 
 const PAGE_SIZE = 20;
 
-export default function CampaignTable(props: { type: Channel }) {
+export default function CampaignTable(props: { type?: Channel }) {
   const theme = useMantineTheme();
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
 
@@ -84,6 +85,8 @@ export default function CampaignTable(props: { type: Channel }) {
   const [campaignId, setCampaignId] = useRecoilState(campaignDrawerIdState);
   const userToken = useRecoilValue(userTokenState);
   const totalRecords = useRef(0);
+
+  const currentProject = useRecoilValue(currentProjectState);
 
   const [search, setSearch] = useDebouncedState("", 200);
   //const [filterDate, setFilterDate] = useState<DateRangePickerValue>([null, null]);
@@ -122,6 +125,7 @@ export default function CampaignTable(props: { type: Channel }) {
           status: ["COMPLETE"],
           limit: PAGE_SIZE,
           offset: (page - 1) * PAGE_SIZE,
+          archetype_id: currentProject?.id || -1,
           //campaign_start_date: filterDate[0] ? formatDate(new Date(filterDate[0])) : undefined,
           //campaign_end_date: filterDate[1] ? formatDate(new Date(filterDate[1])) : undefined,
           filters: [

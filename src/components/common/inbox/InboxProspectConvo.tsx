@@ -1,4 +1,4 @@
-import { openedOutboundChannelState, openedProspectIdState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
+import { currentConvoMessageState, openedOutboundChannelState, openedProspectIdState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import TextWithNewlines from '@common/library/TextWithNewlines';
 import loaderWithText from '@common/library/loaderWithText';
@@ -132,6 +132,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const [openedOutboundChannel, setOpenedOutboundChannel] = useRecoilState(openedOutboundChannelState);
   const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState);
+  const [currentConvoMessages, setCurrentConvoMessages] = useRecoilState(currentConvoMessageState);
 
   const prospect = _.cloneDeep(props.prospects.find((p) => p.id === openedProspectId));
 
@@ -147,7 +148,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
     enabled: openedProspectId !== -1,
   });
 
-  const { data: messages, isFetching: isFetchingMessages, refetch } = useQuery({
+  const { isFetching: isFetchingMessages, refetch } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
     queryFn: async () => {
       // TODO: We don't handle email messages yet
@@ -181,7 +182,9 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
         sendBoxRef.current?.setAiMessage(autoBumpMsgResponse.data.message);
       }
 
-      return result.status === 'success' ? (result.data.data.reverse() as LinkedInMessage[]) : [];
+      const finalMessages = result.status === 'success' ? (result.data.data.reverse() as LinkedInMessage[]) : [];
+      setCurrentConvoMessages(finalMessages);
+      return finalMessages;
     },
     enabled: openedProspectId !== -1,
     refetchOnWindowFocus: false,
@@ -236,7 +239,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
   // Disable AI based on SDR settings
   let ai_disabled = !prospect || (prospect.li_last_message_from_prospect !== null && userData.disable_ai_on_prospect_respond);
   if (userData.disable_ai_on_message_send) {
-    const human_sent_msg = messages?.find(msg => !msg.ai_generated && msg.connection_degree == 'You')
+    const human_sent_msg = currentConvoMessages?.find(msg => !msg.ai_generated && msg.connection_degree == 'You')
     if (human_sent_msg !== undefined) {
       ai_disabled = true
     }
@@ -328,8 +331,8 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
         <ScrollArea h={`calc((${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)*0.70)`} viewportRef={viewport}>
           <div style={{ marginTop: 10, marginBottom: 10 }}>
             <LoadingOverlay loader={loaderWithText('')} visible={isFetchingMessages} />
-            {messages &&
-              messages.map((msg, i) => (
+            {currentConvoMessages &&
+              currentConvoMessages.map((msg, i) => (
                 <ProspectConvoMessage
                   key={i}
                   img_url={msg.img_url}
@@ -346,7 +349,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
                   cta={''}
                 />
               ))}
-            {messages && messages.length === 0 && (
+            {currentConvoMessages && currentConvoMessages.length === 0 && (
               <Center h={400}>
                 <Text fz='sm' fs='italic' c='dimmed'>
                   No conversation history found.
@@ -364,14 +367,14 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           ref={sendBoxRef}
           linkedin_public_id={linkedin_public_id}
           prospectId={openedProspectId}
-          messages={messages || []}
+          messages={currentConvoMessages || []}
           scrollToBottom={scrollToBottom}
         />
       </Stack>
       {prospect && (
         <InboxProspectConvoBumpFramework
           prospect={prospect}
-          messages={messages || []}
+          messages={currentConvoMessages || []}
         />
       )}
     </Flex>

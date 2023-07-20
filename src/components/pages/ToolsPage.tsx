@@ -15,6 +15,7 @@ import {
   IconCalendarEvent,
   IconCheckbox,
   IconClipboardData,
+  IconMilitaryRank,
 } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { useEffect, useState } from "react";
@@ -24,6 +25,7 @@ import CalendarSection from "@common/home/CalendarSection";
 import PersonaFilters from "@common/persona/PersonaFilters";
 import { currentProjectState } from "@atoms/personaAtoms";
 import CustomResearchPointCard from "@common/persona/CustomResearchPointCard";
+import CampaignTable from "@common/campaigns/CampaignTable";
 
 export default function ToolsPage() {
   setPageTitle("Tools");
@@ -59,6 +61,9 @@ export default function ToolsPage() {
           <Tabs.Tab value="calendar" icon={<IconCalendarEvent size="1.1rem" />}>
             Demo Calendar
           </Tabs.Tab>
+          <Tabs.Tab value="campaigns" icon={<IconMilitaryRank size="1.1rem" />}>
+            Campaigns
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="filters" pt="xs">
@@ -72,6 +77,9 @@ export default function ToolsPage() {
         </Tabs.Panel>
         <Tabs.Panel value="calendar" pt="xs">
           {tabId === "calendar" && <CalendarSection />}
+        </Tabs.Panel>
+        <Tabs.Panel value="campaigns" pt="xs">
+          {tabId === "campaigns" && <CampaignTable />}
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

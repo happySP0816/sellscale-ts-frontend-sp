@@ -1,4 +1,4 @@
-import { openedProspectIdState, openedOutboundChannelState, openedBumpFameworksState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
+import { openedProspectIdState, openedOutboundChannelState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoMessageState } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon, LoadingOverlay, Tooltip, Select } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
@@ -85,6 +85,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
   const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState);
+  const [currentConvoMessages, setCurrentConvoMessages] = useRecoilState(currentConvoMessageState);
 
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
   const [messageDraft, setMessageDraft] = useState('');
@@ -113,7 +114,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
       selectedBumpFramework?.account_research
     );
     if (result.status === 'success') {
-      /*
       let yourMessage = _.cloneDeep(props.messages)
         .reverse()
         .find((msg) => msg.connection_degree === 'You');
@@ -121,9 +121,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
         yourMessage.message = msg;
         yourMessage.date = new Date().toUTCString();
         yourMessage.ai_generated = false;
-        messages.current.push(yourMessage);
+        setCurrentConvoMessages(
+          ([...currentConvoMessages || [], yourMessage])
+        );
       }
-      */
     } else {
       showNotification({
         id: 'send-linkedin-message-error',
@@ -137,9 +138,11 @@ export default forwardRef(function InboxProspectConvoSendBox(
     setAiGenerated(false);
     setTimeout(() => props.scrollToBottom && props.scrollToBottom(), 100);
 
+    /*
     queryClient.refetchQueries({
       queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
     });
+    */
   };
 
   // If messageDraft is cleared, odds are that the AI generated message was cleared, and the new message is likely not to be AI generated

@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { BumpFramework } from "src";
+import { BumpFramework, LinkedInMessage } from "src";
 
 const openedProspectIdState = atom({
   key: "inbox-opened-prospect-id",
@@ -26,10 +26,16 @@ const selectedBumpFrameworkState = atom({
   default: undefined as BumpFramework | undefined,
 });
 
+const currentConvoMessageState = atom({
+  key: "inbox-current-convo-messages",
+  default: undefined as LinkedInMessage[] | undefined,
+});
+
 export {
   openedProspectIdState,
   openedOutboundChannelState,
   openedBumpFameworksState,
   nurturingModeState,
   selectedBumpFrameworkState,
+  currentConvoMessageState,
 };

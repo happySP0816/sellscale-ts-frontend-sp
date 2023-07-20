@@ -409,7 +409,15 @@ export function NavbarNested(props: {
           label: `Clean Contacts`,
           icon: IconTrash,
           link: "/tools/contacts-clean",
-        }
+        },
+        /*
+        {
+          key: "tools-campaigns",
+          label: `Campaigns`,
+          icon: IconMilitaryRank,
+          link: "/tools/campaigns",
+        },
+        */
       ],
     },
   ];

@@ -22,6 +22,8 @@ import {
   LoadingOverlay,
   Center,
   Box,
+  Loader,
+  Skeleton,
 } from '@mantine/core';
 import { IconExternalLink, IconWriting, IconSend, IconBrandLinkedin, IconMail, IconDots } from '@tabler/icons-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -216,6 +218,26 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
     if(human_sent_msg !== undefined){
       ai_disabled = true
     }
+  }
+
+  if (!openedProspectId || openedProspectId == -1) {
+    return (
+      <Flex
+        direction='column'
+        align='left'
+        p='sm'
+        mt='lg'
+        h={`calc(${INBOX_PAGE_HEIGHT} - 100px)`}
+      >
+        <Skeleton height={50} circle mb="xl" />
+        <Skeleton height={8} radius="xl" />
+        <Skeleton height={50} mt={12}  />
+        <Skeleton height={50} mt={12} />
+        <Skeleton height={40} w='50%' mt={12} />
+        <Skeleton height={50} mt={12} />
+        <Skeleton height={20} w='80%' mt={12} />
+      </Flex>
+    );
   }
 
   return (

@@ -425,8 +425,8 @@ export default function BumpFrameworksPage(props: {
   onPopulateBumpFrameworks?: (buckets: BumpFrameworkBuckets) => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
-
   const [loading, setLoading] = useState(false);
+
   const [archetypeID, setArchetypeID] = useState<number | null>(
     props.predefinedPersonaId !== undefined ? props.predefinedPersonaId : null
   );
@@ -567,7 +567,11 @@ export default function BumpFrameworksPage(props: {
   };
 
   useEffect(() => {
-    triggerGetPersonas();
+    if (currentProject?.id) {
+      setArchetypeID(currentProject?.id)
+    } else {
+      triggerGetPersonas();
+    }
   }, []);
 
   useEffect(() => {

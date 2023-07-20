@@ -19,6 +19,7 @@ import {
   MantineTheme,
   Box,
   ThemeIcon,
+  Loader,
 } from "@mantine/core";
 import {
   IconBrandTelegram,
@@ -116,13 +117,19 @@ export default function ProspectDetailsHistory(props: { prospectId: number }) {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
   const [history, setHistory] = useState<any>();
+  const [historyFetchedForId, setHistoryFetchedForId] = useState<number>(-1);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
-  useEffect(() => {
+  if (historyFetchedForId !== props.prospectId) {
+    setHistoryFetchedForId(props.prospectId);
+    setLoadingHistory(true);
     (async () => {
       const response = await getProspectLiHistory(userToken, props.prospectId);
       setHistory(response.data);
+      setLoadingHistory(false);
     })();
-  }, []);
+    
+  }
 
   // Format the events into a sortable timeline
   let events: HistoryItem[] = [];
@@ -169,6 +176,14 @@ export default function ProspectDetailsHistory(props: { prospectId: number }) {
   events = _.sortBy(events, (item) => new Date(item.date));
   // sort reversed
   events = events.reverse();
+
+  if (loadingHistory) {
+    return (
+      <Box p='xs'>
+        <Loader m='auto auto'/>
+      </Box>
+    );
+  }
 
   return (
     <Box p='xs'>

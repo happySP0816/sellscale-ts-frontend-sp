@@ -1,6 +1,8 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { createStyles, Avatar, Text, Group, useMantineTheme, Badge, Flex, Switch, LoadingOverlay } from "@mantine/core";
+import { createStyles, Avatar, Text, Group, useMantineTheme, Badge, Flex, Switch, LoadingOverlay, ActionIcon } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
+import EditProspectModal from "@modals/EditProspectModal";
 import {
   IconPhoneCall,
   IconAt,
@@ -8,6 +10,7 @@ import {
   IconMail,
   IconSocial,
   IconBuildingStore,
+  IconPencil,
 } from "@tabler/icons";
 import { nameToInitials, valueToColor } from "@utils/general";
 import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
@@ -56,6 +59,8 @@ export default function ProspectDetailsSummary(
 
   const [aiEnabled, setAIEnabled] = useState<boolean>(props.aiEnabled)
   const [loading, setLoading] = useState<boolean>(false)
+
+  const [editProspectModalOpened, { open: openProspectModal, close: closeProspectModal }] = useDisclosure()
 
   const triggerAIEnableToggle = async () => {
     setLoading(true)
@@ -117,62 +122,79 @@ export default function ProspectDetailsSummary(
             }}
           />
         </Flex>
-        <Group noWrap spacing={10} mt={3}>
-          <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
-          <Text size="xs" color="dimmed">
-            {props.title}
-          </Text>
-        </Group>
+        <Flex justify='space-between'>
+          <Flex direction='column'>
+            <Group noWrap spacing={10} mt={3}>
+              <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
+              <Text size="xs" color="dimmed">
+                {props.title}
+              </Text>
+            </Group>
 
-        {props.email && (
-          <Group noWrap spacing={10} mt={5}>
-            <IconMail stroke={1.5} size={16} className={classes.icon} />
-            <Text
-              size="xs"
-              color="dimmed"
-              component="a"
-              href={`mailto:${props.email}`}
-            >
-              {props.email}
-            </Text>
-          </Group>
-        )}
+            {props.email && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconMail stroke={1.5} size={16} className={classes.icon} />
+                <Text
+                  size="xs"
+                  color="dimmed"
+                  component="a"
+                  href={`mailto:${props.email}`}
+                >
+                  {props.email}
+                </Text>
+              </Group>
+            )}
 
-        {props.linkedin && (
-          <Group noWrap spacing={10} mt={5}>
-            <IconSocial stroke={1.5} size={16} className={classes.icon} />
-            <Text
-              size="xs"
-              color="dimmed"
-              component="a"
-              target="_blank"
-              rel="noopener noreferrer"
-              href={`https://${props.linkedin}`}
-            >
-              {props.linkedin}
-            </Text>
-          </Group>
-        )}
+            {props.linkedin && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconSocial stroke={1.5} size={16} className={classes.icon} />
+                <Text
+                  size="xs"
+                  color="dimmed"
+                  component="a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={`https://${props.linkedin}`}
+                >
+                  {props.linkedin}
+                </Text>
+              </Group>
+            )}
 
-        {props.companyName && (
-          <Group noWrap spacing={10} mt={5}>
-            <IconBuildingStore
-              stroke={1.5}
-              size={16}
-              className={classes.icon}
+            {props.companyName && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconBuildingStore
+                  stroke={1.5}
+                  size={16}
+                  className={classes.icon}
+                />
+                <Text
+                  size="xs"
+                  color="dimmed"
+                  component="a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={companyURL}
+                >
+                  {props.companyName}
+                </Text>
+              </Group>
+            )}
+          </Flex>
+          <Flex>
+            <ActionIcon onClick={openProspectModal}>
+              <IconPencil size='1rem' />
+            </ActionIcon>
+            <EditProspectModal
+              modalOpened={editProspectModalOpened}
+              openModal={openProspectModal}
+              closeModal={closeProspectModal}
+              backFunction={props.refetch}
+              prospectID={props.prospectID}
             />
-            <Text
-              size="xs"
-              color="dimmed"
-              component="a"
-              target="_blank"
-              rel="noopener noreferrer"
-              href={companyURL}
-            >
-              {props.companyName}
-            </Text>
-          </Group>
-        )}
+          </Flex>
+        </Flex>
+
       </Flex>
     </Group>
   );

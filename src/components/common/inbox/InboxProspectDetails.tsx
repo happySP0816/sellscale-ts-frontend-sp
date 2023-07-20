@@ -24,6 +24,7 @@ import {
   Card,
   Loader,
   Skeleton,
+  ActionIcon,
 } from '@mantine/core';
 import {
   IconBriefcase,
@@ -41,6 +42,7 @@ import {
   IconCalendarEvent,
   IconTrash,
   IconExternalLink,
+  IconPencil,
 } from '@tabler/icons-react';
 import { openedProspectIdState, openedOutboundChannelState } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
@@ -55,16 +57,17 @@ import { updateProspectNote } from '@utils/requests/prospectNotes';
 import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChangeStatus';
 import ProspectDetailsCalendarLink from '@common/prospectDetails/ProspectDetailsCalendarLink';
 import ICPFitPill, { ICPFitContents, icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
-import { useHover } from '@mantine/hooks';
+import { useDisclosure, useHover } from '@mantine/hooks';
 import postRunICPClassification from '@utils/requests/postRunICPClassification';
 import { DateTimePicker } from '@mantine/dates';
 import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSelector';
 import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
 import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
 import ProspectDetailsHistory from '@common/prospectDetails/ProspectDetailsHistory';
+import EditProspectModal from '@modals/EditProspectModal';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -120,6 +123,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
 
   const statusValue = data?.details?.linkedin_status || 'ACCEPTED';
 
+  const [editProspectModalOpened, { open: openProspectModal, close: closeProspectModal }] = useDisclosure()
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
@@ -175,56 +179,66 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
           </Title>
 
           <Card m='xs' withBorder>
+            <ActionIcon onClick={openProspectModal} pos={'absolute'} right='5px' top='4px'>
+              <IconPencil size='1rem' />
+            </ActionIcon>
+            <EditProspectModal
+              modalOpened={editProspectModalOpened}
+              openModal={openProspectModal}
+              closeModal={closeProspectModal}
+              backFunction={refetch}
+              prospectID={openedProspectId}
+            />
             {data?.details.title && (
-                <Group noWrap spacing={10} mt={3}>
-                  <IconBriefcase stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='xs'>{data.details.title}</Text>
-                </Group>
-              )}
+              <Group noWrap spacing={10} mt={3}>
+                <IconBriefcase stroke={1.5} size={18} className={classes.icon} />
+                <Text size='xs'>{data.details.title}</Text>
+              </Group>
+            )}
 
-              {data?.details.company && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='xs' component='a' target='_blank' rel='noopener noreferrer' href={data.company?.url || undefined}>
-                    {data.details.company} {data.company?.url && (<IconExternalLink size='0.55rem' />)}
-                  </Text>
-                </Group>
-              )}
+            {data?.details.company && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconBuildingStore stroke={1.5} size={18} className={classes.icon} />
+                <Text size='xs' component='a' target='_blank' rel='noopener noreferrer' href={data.company?.url || undefined}>
+                  {data.details.company} {data.company?.url && (<IconExternalLink size='0.55rem' />)}
+                </Text>
+              </Group>
+            )}
 
-              {linkedin_public_id && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconBrandLinkedin stroke={1.5} size={18} className={classes.icon} />
-                  <Text
-                    size='xs'
-                    component='a'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    href={`https://www.linkedin.com/in/${linkedin_public_id}`}
-                  >
-                    linkedin.com/in/{linkedin_public_id} <IconExternalLink size='0.55rem' />
-                  </Text>
-                </Group>
-              )}
+            {linkedin_public_id && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconBrandLinkedin stroke={1.5} size={18} className={classes.icon} />
+                <Text
+                  size='xs'
+                  component='a'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  href={`https://www.linkedin.com/in/${linkedin_public_id}`}
+                >
+                  linkedin.com/in/{linkedin_public_id} <IconExternalLink size='0.55rem' />
+                </Text>
+              </Group>
+            )}
 
-              {data?.email.email && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconMail stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='xs' component='a' href={`mailto:${data.email.email}`}>
-                    {data.email.email} <IconExternalLink size='0.55rem' />
-                  </Text>
-                </Group>
-              )}
+            {data?.email.email && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconMail stroke={1.5} size={18} className={classes.icon} />
+                <Text size='xs' component='a' href={`mailto:${data.email.email}`}>
+                  {data.email.email} <IconExternalLink size='0.55rem' />
+                </Text>
+              </Group>
+            )}
 
-              {data?.details.address && (
-                <Group noWrap spacing={10} mt={5}>
-                  <IconMap2 stroke={1.5} size={18} className={classes.icon} />
-                  <Text size='xs'>{data.details.address}</Text>
-                </Group>
-              )}
+            {data?.details.address && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconMap2 stroke={1.5} size={18} className={classes.icon} />
+                <Text size='xs'>{data.details.address}</Text>
+              </Group>
+            )}
           </Card>
         </Stack>
       </div>
-      <Divider/>
+      <Divider />
       <div style={{ flexBasis: '15%' }}>
         <Paper
           withBorder
@@ -247,7 +261,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
               </Center>
             </Box>
             <Box>
-              <Text fz='xs'>- <u>{_.truncate(data?.details.persona, {length: 25})}</u></Text>
+              <Text fz='xs'>- <u>{_.truncate(data?.details.persona, { length: 25 })}</u></Text>
             </Box>
           </Flex>
 
@@ -293,61 +307,61 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
         </Paper>
       </div>
       {statusValue !== 'DEMO_SET' && statusValue !== 'ACCEPTED' && statusValue !== 'RESPONDED' && (
-      <div style={{ flexBasis: '10%' }}>
-        <Paper
-          withBorder
-          radius={theme.radius.lg}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexWrap: 'nowrap',
-          }}
-          mx={10}
-          mb={10}
-        >
-          <Flex gap={0} wrap='nowrap'>
-            <div style={{ flexBasis: '10%', margin: 15 }}>
-              <Text fw={500} fz={13}>
-                Substatus
-              </Text>
-            </div>
-            <div style={{ flexBasis: '90%', margin: 10 }}>
-              <Select
-                size='xs'
-                variant='filled'
-                radius={theme.radius.lg}
-                styles={{
-                  input: {
-                    backgroundColor: theme.colors['blue'][6],
-                    color: theme.white,
-                    '&:focus': {
-                      borderColor: 'transparent',
-                    },
-                  },
-                  rightSection: {
-                    svg: {
-                      color: `${theme.white}!important`,
-                    },
-                  },
-                  item: {
-                    '&[data-selected], &[data-selected]:hover': {
+        <div style={{ flexBasis: '10%' }}>
+          <Paper
+            withBorder
+            radius={theme.radius.lg}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              flexWrap: 'nowrap',
+            }}
+            mx={10}
+            mb={10}
+          >
+            <Flex gap={0} wrap='nowrap'>
+              <div style={{ flexBasis: '10%', margin: 15 }}>
+                <Text fw={500} fz={13}>
+                  Substatus
+                </Text>
+              </div>
+              <div style={{ flexBasis: '90%', margin: 10 }}>
+                <Select
+                  size='xs'
+                  variant='filled'
+                  radius={theme.radius.lg}
+                  styles={{
+                    input: {
                       backgroundColor: theme.colors['blue'][6],
+                      color: theme.white,
+                      '&:focus': {
+                        borderColor: 'transparent',
+                      },
                     },
-                  },
-                }}
-                data={prospectStatuses}
-                value={statusValue}
-                onChange={async (value) => {
-                  if (!value) {
-                    return;
-                  }
-                  await changeStatus(value);
-                }}
-              />
-            </div>
-          </Flex>
-        </Paper>
-      </div>
+                    rightSection: {
+                      svg: {
+                        color: `${theme.white}!important`,
+                      },
+                    },
+                    item: {
+                      '&[data-selected], &[data-selected]:hover': {
+                        backgroundColor: theme.colors['blue'][6],
+                      },
+                    },
+                  }}
+                  data={prospectStatuses}
+                  value={statusValue}
+                  onChange={async (value) => {
+                    if (!value) {
+                      return;
+                    }
+                    await changeStatus(value);
+                  }}
+                />
+              </div>
+            </Flex>
+          </Paper>
+        </div>
       )}
 
       <div style={{ flexBasis: '55%' }}>

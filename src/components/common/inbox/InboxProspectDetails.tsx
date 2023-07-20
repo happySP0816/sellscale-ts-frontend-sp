@@ -22,6 +22,8 @@ import {
   UnstyledButton,
   rem,
   Card,
+  Loader,
+  Skeleton,
 } from '@mantine/core';
 import {
   IconBriefcase,
@@ -97,7 +99,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   const { hovered: icpHovered, ref: icpRef } = useHover();
 
   const userToken = useRecoilValue(userTokenState);
-  const openedProspectId = useRecoilValue(openedProspectIdState);
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const openedOutboundChannel = useRecoilValue(openedOutboundChannelState);
 
   const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
@@ -117,6 +119,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
   });
 
   const statusValue = data?.details?.linkedin_status || 'ACCEPTED';
+
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
@@ -138,8 +141,27 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
     queryClient.invalidateQueries({
       queryKey: ['query-dash-get-prospects'],
     });
+    setOpenedProspectId(-1);
     refetch();
   };
+
+  if (!openedProspectId || openedProspectId == -1) {
+    return (
+      <Flex
+        direction='column'
+        align='left'
+        p='sm'
+        mt='lg'
+        h={`calc(${INBOX_PAGE_HEIGHT} - 100px)`}
+      >
+        <Skeleton height={50} circle mb="xl" />
+        <Skeleton height={8} radius="xl" />
+        <Skeleton height={8} mt={6} radius="xl" />
+        <Skeleton height={8} mt={6} width="70%" radius="xl" />
+        <Skeleton height={50} mt={6} width="70%" radius="xl" />
+      </Flex>
+    );
+  }
 
   return (
     <Flex gap={0} wrap='nowrap' direction='column' h={'100%'} sx={{ borderLeft: '0.0625rem solid #dee2e6' }}>

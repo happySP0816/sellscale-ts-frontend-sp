@@ -84,6 +84,8 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
     setLoadingMsg('Spinning up simulation...');
     const createResponse = await createLiConvoSim(userToken, props.personaId, prospect.id);
     if (createResponse.status !== 'success') {
+      setLoading(false);
+      setLoadingMsg('');
       return;
     }
     const sim_id = createResponse.data;
@@ -91,6 +93,8 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
     setLoadingMsg('Generating initial message...');
     const initMsgResponse = await generateInitialMessageForLiConvoSim(userToken, sim_id);
     if (initMsgResponse.status !== 'success') {
+      setLoading(false);
+      setLoadingMsg('');
       return;
     }
 
@@ -100,6 +104,8 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
     setLoadingMsg('Fetching messages...');
     const convoResponse = await getLiConvoSim(userToken, sim_id);
     if (convoResponse.status !== 'success') {
+      setLoading(false);
+      setLoadingMsg('');
       return;
     }
 

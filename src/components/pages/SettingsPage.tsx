@@ -37,8 +37,9 @@ import {
 import DoNotContactList from "@common/settings/DoNotContactList";
 import SellScaleBrain from "@common/settings/SellScaleBrain";
 import SettingPreferences from "@common/settings/SettingPreferences";
-import SlackbotSection from "@common/slackbot/SlackbotSection";
+import SlackbotSection from "@common/slack/SlackbotSection";
 import MessageAutomation from "@common/settings/MessageAutomation";
+import SlackWebhookSection from "@common/slack/SlackWebhookSection";
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -468,6 +469,7 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="slackbot" pl="xs">
           <SlackbotSection />
+          <SlackWebhookSection />
         </Tabs.Panel>
 
         <Tabs.Panel value="message-automation" pl="xs">

@@ -3,7 +3,7 @@ import { Title, Text, Paper, Container } from '@mantine/core';
 export default function SlackbotSection() {
   return (
     <Paper withBorder m='xs' p='md' radius='md'>
-      <Title order={2}>Integrate SellScale with your Slack</Title>
+      <Title order={3}>Integrate SellScale with your Slack</Title>
       <Text>With our Slack bot, you can view and manage your outbound all from within Slack!</Text>
 
       <Container mt='sm'>

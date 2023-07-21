@@ -88,6 +88,7 @@ export interface Prospect {
   icp_fit_reason: string;
   icp_fit_error: string;
   archetype_name: string;
+  pipeline_notifications_webhook_url: string;
 }
 
 export interface ProspectShallow {

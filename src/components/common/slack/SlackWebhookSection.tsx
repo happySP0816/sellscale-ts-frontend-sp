@@ -64,7 +64,7 @@ export default function SlackbotSection() {
               value={webhook}
               placeholder='https://hooks.slack.com/services/...'
               onChange={(event) => setWebhook(event.currentTarget.value)}
-              error={webhook.startsWith("https://hooks.slack.com/services/") ? false : 'Please enter a valid Slack Webhook URL'}
+              error={webhook && (webhook?.startsWith("https://hooks.slack.com/services/") ? false : 'Please enter a valid Slack Webhook URL')}
             />
         }
 

@@ -188,7 +188,7 @@ function BumpBucketView(props: {
                           <Text fw='bold' fz='lg'>
                             {framework.title}
                           </Text>
-                          <TextWithNewline breakheight='6px' style={{fontSize: '80%'}}>{framework.description}</TextWithNewline>
+                          <TextWithNewline breakheight='6px' style={{ fontSize: '80%' }}>{framework.description}</TextWithNewline>
                         </Flex>
                       </Flex>
                       <Tooltip label='Edit Bump Framework' withinPortal>
@@ -330,6 +330,7 @@ function BumpFrameworkAnalysisTable(props: {
   bucketViewDescription: string;
   bucketViewTitle: string;
   showSubstatus?: boolean;
+  persona?: string;
 }) {
 
   return (
@@ -371,13 +372,18 @@ function BumpFrameworkAnalysisTable(props: {
                         {title}
                       </Text>
                     </HoverCard.Target>
-                    <HoverCard.Dropdown>
+                    <HoverCard.Dropdown p='md'>
                       <Title order={3}>
                         {title}
                       </Title>
-                      <Text mt='xs'>
-                        {description}
-                      </Text>
+                      <Badge mt='xs' size='sm'>
+                        {props.persona}
+                      </Badge>
+                      <Flex mt='md'>
+                        <TextWithNewline breakheight='10px'>
+                          {description}
+                        </TextWithNewline>
+                      </Flex>
                     </HoverCard.Dropdown>
                   </HoverCard>
 
@@ -487,6 +493,7 @@ export default function BumpFrameworksPage(props: {
     setLoading(true);
 
     const result = await getBumpFrameworks(userToken, [], [], [archetypeID as number]);
+    console.log(result)
 
     if (result.status !== 'success') {
       setLoading(false);
@@ -758,6 +765,7 @@ export default function BumpFrameworksPage(props: {
                     bucketViewTitle='First / Initial Followup'
                     bucketViewDescription='Prospects who have accepted your connection request.'
                     bumpBucket={bumpBuckets.current?.ACCEPTED}
+                    persona={currentProject?.name}
                   />
                 </Flex>
 
@@ -767,6 +775,7 @@ export default function BumpFrameworksPage(props: {
                     bucketViewTitle='Second Followup'
                     bucketViewDescription='This is followup #2'
                     bumpBucket={bumpBuckets.current?.BUMPED[1]}
+                    persona={currentProject?.name}
                   />
                 </Flex>
 
@@ -776,6 +785,7 @@ export default function BumpFrameworksPage(props: {
                     bucketViewTitle='Third Followup'
                     bucketViewDescription='This is followup #3'
                     bumpBucket={bumpBuckets.current?.BUMPED[2]}
+                    persona={currentProject?.name}
                   />
                 </Flex>
 
@@ -785,6 +795,7 @@ export default function BumpFrameworksPage(props: {
                     bucketViewTitle='Fourth Followup'
                     bucketViewDescription='This is followup #4'
                     bumpBucket={bumpBuckets.current?.BUMPED[3]}
+                    persona={currentProject?.name}
                   />
                 </Flex>
 
@@ -794,6 +805,7 @@ export default function BumpFrameworksPage(props: {
                     bucketViewTitle='Questions & Objections'
                     bucketViewDescription='Prospects who have responded with a question or objection.'
                     bumpBucket={bumpBuckets.current?.ACTIVE_CONVO}
+                    persona={currentProject?.name}
                   />
                 </Flex>
 

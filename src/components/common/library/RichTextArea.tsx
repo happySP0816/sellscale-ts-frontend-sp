@@ -27,7 +27,7 @@ function InsertPersonalizationControl() {
   );
 }
 
-export default function RichTextArea(props: { personalizationBtn?: boolean, value?: string, onChange?: (value: string) => void }) {
+export default function RichTextArea(props: { personalizationBtn?: boolean, height?: number, value?: string, onChange?: (value: string) => void }) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -60,7 +60,7 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, valu
           p: {
             fontSize: 14,
           },
-          minHeight: 200,
+          minHeight: props.height || 200,
         }
       }}
     >

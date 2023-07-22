@@ -68,8 +68,13 @@ export interface Prospect {
   li_is_last_message_from_sdr: boolean;
   li_last_message_from_prospect: string;
   li_last_message_from_sdr: string;
-  li_last_message_timestamp: Date;
+  li_last_message_timestamp: string;
   li_unread_messages: number | null;
+  email_is_last_message_from_sdr: boolean | null;
+  email_last_message_from_prospect: string | null;
+  email_last_message_from_sdr: string | null;
+  email_last_message_timestamp: string | null;
+  email_unread_messages: number | null;
   linkedin_bio: string | null;
   linkedin_url: string;
   times_bumped: null;
@@ -175,6 +180,36 @@ export interface LinkedInMessage {
   bump_framework_description: string;
   bump_framework_length: string;
   account_research_points: string[],
+}
+
+export interface EmailMessage {
+  ai_generated: boolean | null;
+  bcc: string[];
+  body: string;
+  cc: string[];
+  client_sdr_id: number;
+  date_received: string;
+  email_conversation_thread_id: number;
+  files: any[]
+  from_prospect: boolean;
+  from_sdr: boolean;
+  id: number;
+  message_from: {
+    email: string;
+    name: string;
+  }[];
+  message_to: {
+    email: string;
+    name: string;
+  }[];
+  nylas_message_id: string;
+  nylas_thread_id: string;
+  prospect_email: string;
+  prospect_id: number;
+  reply_to: string[];
+  sdr_email: string;
+  snippet: string;
+  subject: string;
 }
 
 export interface ProspectNote {

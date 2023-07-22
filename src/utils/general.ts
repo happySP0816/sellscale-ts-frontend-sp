@@ -294,3 +294,18 @@ export function removeExtraCharacters(str: string) {
 export function isWithinLastXDays(date: Date, days: number) {
   return (Date.now() - date.getTime()) > (days * 24 * 60 * 60 * 1000);
 }
+
+/**
+ * Removes HTML tags from a string
+ * @param text
+ * @returns - String with HTML tags removed
+ * 
+ * WARNING:
+ * If someone is trying to break your application, this regex will not protect you.
+ * It should only be used if you already know the format of your input.
+ * To safely strip tags, you must use a parser.
+ */
+export function removeHTML(text: string | null) {
+  if(!text) { return ''; }
+  return text.replace(/<\/?[^>]+(>|$)/g, " ");
+}

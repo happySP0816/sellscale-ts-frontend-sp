@@ -1,4 +1,4 @@
-import { openedProspectIdState, openedOutboundChannelState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoMessageState } from '@atoms/inboxAtoms';
+import { openedProspectIdState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoLiMessageState, currentConvoChannelState, currentConvoEmailMessageState } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon, LoadingOverlay, Tooltip, Select } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
@@ -15,12 +15,15 @@ import { BumpFramework, LinkedInMessage, Prospect } from 'src';
 import { generateAIFollowup } from './InboxProspectConvoBumpFramework';
 import AutoBumpFrameworkInfo from '@common/prospectDetails/AutoBumpFrameworkInfo';
 import { ratio as fuzzratio } from 'fuzzball';
+import { sendEmail } from '@utils/requests/sendEmail';
+import RichTextArea from '@common/library/RichTextArea';
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
     prospectId: number;
-    messages: LinkedInMessage[];
     linkedin_public_id: string;
+    email: string;
+    nylasMessageId?: string;
     scrollToBottom?: () => void;
     msgLoading?: boolean;
   },
@@ -81,11 +84,12 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [expanded, setExpanded] = useState(false);
 
   const openedProspectId = useRecoilValue(openedProspectIdState);
-  const openedOutboundChannel = useRecoilValue(openedOutboundChannelState);
+  const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
 
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
   const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState);
-  const [currentConvoMessages, setCurrentConvoMessages] = useRecoilState(currentConvoMessageState);
+  const [currentConvoLiMessages, setCurrentConvoLiMessages] = useRecoilState(currentConvoLiMessageState);
+  const [currentConvoEmailMessages, setCurrentConvoEmailMessages] = useRecoilState(currentConvoEmailMessageState);
 
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
   const [messageDraft, setMessageDraft] = useState('');
@@ -101,48 +105,88 @@ export default forwardRef(function InboxProspectConvoSendBox(
     // Delete the auto bump message if it exists
     await deleteAutoBumpMessage(userToken, props.prospectId);
 
-    const result = await sendLinkedInMessage(
-      userToken,
-      props.prospectId,
-      msg,
-      aiGenerated,
-      undefined,
-      selectedBumpFramework?.id,
-      selectedBumpFramework?.title,
-      selectedBumpFramework?.description,
-      selectedBumpFramework?.bump_length,
-      selectedBumpFramework?.account_research
-    );
-    if (result.status === 'success') {
-      let yourMessage = _.cloneDeep(props.messages)
-        .reverse()
-        .find((msg) => msg.connection_degree === 'You');
-      if (yourMessage) {
-        yourMessage.message = msg;
-        yourMessage.date = new Date().toUTCString();
-        yourMessage.ai_generated = false;
-        setCurrentConvoMessages(
-          ([...currentConvoMessages || [], yourMessage])
-        );
+    if(openedOutboundChannel === 'LINKEDIN'){
+
+      const result = await sendLinkedInMessage(
+        userToken,
+        props.prospectId,
+        msg,
+        aiGenerated,
+        undefined,
+        selectedBumpFramework?.id,
+        selectedBumpFramework?.title,
+        selectedBumpFramework?.description,
+        selectedBumpFramework?.bump_length,
+        selectedBumpFramework?.account_research
+      );
+      if (result.status === 'success') {
+        let yourMessage = _.cloneDeep(currentConvoLiMessages || [])
+          .reverse()
+          .find((msg) => msg.connection_degree === 'You');
+        if (yourMessage) {
+          yourMessage.message = msg;
+          yourMessage.date = new Date().toUTCString();
+          yourMessage.ai_generated = false;
+          setCurrentConvoLiMessages(
+            ([...currentConvoLiMessages || [], yourMessage])
+          );
+        } else {
+          queryClient.refetchQueries({
+            queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
+          });
+        }
+      } else {
+        showNotification({
+          id: 'send-linkedin-message-error',
+          title: 'Error',
+          message: 'Failed to send message. Please try again later.',
+          color: 'red',
+          autoClose: false,
+        });
       }
+
     } else {
-      showNotification({
-        id: 'send-linkedin-message-error',
-        title: 'Error',
-        message: 'Failed to send message. Please try again later.',
-        color: 'red',
-        autoClose: false,
-      });
+
+      const result = await sendEmail(
+        userToken,
+        props.prospectId,
+        '',
+        msg,
+        aiGenerated,
+        props.nylasMessageId
+      );
+      if (result.status === 'success') {
+        let yourMessage = _.cloneDeep(currentConvoEmailMessages || [])
+          .reverse()
+          .find((msg) => msg.from_sdr);
+        if (yourMessage) {
+          yourMessage.body = msg;
+          yourMessage.date_received = new Date().toUTCString();
+          yourMessage.ai_generated = false;
+          setCurrentConvoEmailMessages(
+            ([...currentConvoEmailMessages || [], yourMessage])
+          );
+        } else {
+          queryClient.refetchQueries({
+            queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
+          });
+        }
+      } else {
+        showNotification({
+          id: 'send-email-message-error',
+          title: 'Error',
+          message: 'Failed to send message. Please try again later.',
+          color: 'red',
+          autoClose: false,
+        });
+      }
+
     }
+
     setMsgLoading(false);
     setAiGenerated(false);
     setTimeout(() => props.scrollToBottom && props.scrollToBottom(), 100);
 
-    /*
-    queryClient.refetchQueries({
-      queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
-    });
-    */
   };
 
   // If messageDraft is cleared, odds are that the AI generated message was cleared, and the new message is likely not to be AI generated
@@ -181,7 +225,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         <Group spacing={0} position='apart'>
           <Flex wrap='nowrap' align='center'>
             <Text color='white' fz={14} fw={500} pl={15} pt={5}>
-              Message via LinkedIn
+              Message via {openedOutboundChannel === 'LINKEDIN' ? 'LinkedIn' : 'Email'}
             </Text>
             <Text
               pl={10}
@@ -192,10 +236,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
               component='a'
               target='_blank'
               rel='noopener noreferrer'
-              href={`https://www.linkedin.com/in/${props.linkedin_public_id}`}
-            /* TODO: Message convo link instead */
+              href={openedOutboundChannel === 'LINKEDIN' ? `https://www.linkedin.com/in/${props.linkedin_public_id}` : `mailto:${props.email}`}
             >
-              linkedin.com/in/{_.truncate(props.linkedin_public_id, { length: 20 })} <IconExternalLink size='0.65rem' />
+              {openedOutboundChannel === 'LINKEDIN' ? `linkedin.com/in/${_.truncate(props.linkedin_public_id, { length: 20 })}` : props.email} <IconExternalLink size='0.65rem' />
             </Text>
           </Flex>
           {false && ( // TODO: Added chat box expanding
@@ -215,23 +258,33 @@ export default forwardRef(function InboxProspectConvoSendBox(
           paddingRight: 10,
         }}
       >
-        <Textarea
-          minRows={5}
-          maxRows={8}
-          mt='xs'
-          color='gray'
-          placeholder='Your message...'
-          value={messageDraft}
-          onChange={(event) => setMessageDraft(event.currentTarget.value)}
-          onKeyDown={getHotkeyHandler([
-            [
-              "mod+Enter",
-              () => {
-                sendMessage();
-              },
-            ],
-          ])}
-        />
+
+        {openedOutboundChannel === 'LINKEDIN' ? (
+          <Textarea
+            minRows={5}
+            maxRows={8}
+            mt='xs'
+            color='gray'
+            placeholder='Your message...'
+            value={messageDraft}
+            onChange={(event) => setMessageDraft(event.currentTarget.value)}
+            onKeyDown={getHotkeyHandler([
+              [
+                "mod+Enter",
+                () => {
+                  sendMessage();
+                },
+              ],
+            ])}
+          />
+        ) : (
+          <RichTextArea
+            onChange={(value) => setMessageDraft(value)}
+            value={messageDraft}
+            height={110}
+          />
+        )}
+
         <Flex justify='space-between' align='center' mt='xs'>
           <Group>
             <Button.Group>

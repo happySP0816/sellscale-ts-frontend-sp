@@ -1,14 +1,9 @@
 import { atom } from "recoil";
-import { BumpFramework, LinkedInMessage } from "src";
+import { BumpFramework, Channel, EmailMessage, LinkedInMessage, ProspectEmail } from "src";
 
 const openedProspectIdState = atom({
   key: "inbox-opened-prospect-id",
   default: -1,
-});
-
-const openedOutboundChannelState = atom({
-  key: "inbox-opened-outbound-channel",
-  default: 'linkedin',
 });
 
 const openedBumpFameworksState = atom({
@@ -26,16 +21,25 @@ const selectedBumpFrameworkState = atom({
   default: undefined as BumpFramework | undefined,
 });
 
-const currentConvoMessageState = atom({
-  key: "inbox-current-convo-messages",
+const currentConvoChannelState = atom({
+  key: "inbox-current-convo-channel",
+  default: 'LINKEDIN' as Channel,
+});
+const currentConvoLiMessageState = atom({
+  key: "inbox-current-convo-li-messages",
   default: undefined as LinkedInMessage[] | undefined,
+});
+const currentConvoEmailMessageState = atom({
+  key: "inbox-current-convo-email-messages",
+  default: undefined as EmailMessage[] | undefined,
 });
 
 export {
   openedProspectIdState,
-  openedOutboundChannelState,
   openedBumpFameworksState,
   nurturingModeState,
   selectedBumpFrameworkState,
-  currentConvoMessageState,
+  currentConvoChannelState,
+  currentConvoLiMessageState,
+  currentConvoEmailMessageState,
 };

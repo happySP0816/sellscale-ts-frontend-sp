@@ -1,4 +1,4 @@
-import { openedBumpFameworksState, openedOutboundChannelState, openedProspectIdState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
+import { openedBumpFameworksState, openedProspectIdState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import TextWithNewlines from '@common/library/TextWithNewlines';
 import loaderWithText from '@common/library/loaderWithText';

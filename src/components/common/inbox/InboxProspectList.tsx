@@ -43,7 +43,7 @@ import InboxProspectListFilter, {
   InboxProspectListFilterState,
   defaultInboxProspectListFilterState,
 } from './InboxProspectListFilter';
-import { convertDateToCasualTime, isWithinLastXDays, removeExtraCharacters } from '@utils/general';
+import { convertDateToCasualTime, isWithinLastXDays, removeExtraCharacters, removeHTML } from '@utils/general';
 import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
@@ -159,6 +159,14 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
         return filterSelectOptions.find((option) => option.value === p.linkedin_status);
       })
       .map((p) => {
+
+        const li_soonest = new Date(p.li_last_message_timestamp).getTime() > new Date(p.email_last_message_timestamp || -1).getTime();
+        const is_last_message_from_sdr = li_soonest ? p.li_is_last_message_from_sdr : p.email_is_last_message_from_sdr;
+        const last_message_from_sdr = li_soonest ? p.li_last_message_from_sdr : removeHTML(p.email_last_message_from_sdr);
+        const last_message_from_prospect = li_soonest ? p.li_last_message_from_prospect : removeHTML(p.email_last_message_from_prospect);
+        const last_message_timestamp = li_soonest ? p.li_last_message_timestamp : p.email_last_message_timestamp;
+        const unread_messages = li_soonest ? p.li_unread_messages : p.email_unread_messages;
+
         return {
           id: p.id,
           name: _.truncate(p.full_name, {
@@ -167,17 +175,17 @@ export default function ProspectList(props: { prospects: Prospect[]; isFetching:
           }),
           img_url: p.img_url,
           icp_fit: p.icp_fit_score,
-          latest_msg: (p.li_is_last_message_from_sdr || nurturingMode)
-            ? `You: ${p.li_last_message_from_sdr || '...'}`
-            : `${p.first_name}: ${p.li_last_message_from_prospect || 'No message found'}`,
-          latest_msg_time: convertDateToCasualTime(new Date(p.li_last_message_timestamp)),
-          latest_msg_datetime: new Date(p.li_last_message_timestamp),
-          latest_msg_from_sdr: p.li_is_last_message_from_sdr || nurturingMode,
+          latest_msg: (is_last_message_from_sdr || nurturingMode)
+            ? `You: ${last_message_from_sdr || '...'}`
+            : `${p.first_name}: ${last_message_from_prospect || 'No message found'}`,
+          latest_msg_time: convertDateToCasualTime(new Date(last_message_timestamp || -1)),
+          latest_msg_datetime: new Date(last_message_timestamp || -1),
+          latest_msg_from_sdr: is_last_message_from_sdr || nurturingMode,
           title: _.truncate(p.title, {
             length: 48,
             separator: ' ',
           }),
-          new_msg_count: p.li_unread_messages,
+          new_msg_count: unread_messages,
           persona_id: p.archetype_id,
           linkedin_status: p.linkedin_status,
           overall_status: p.overall_status,

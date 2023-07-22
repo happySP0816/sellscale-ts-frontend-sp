@@ -44,7 +44,7 @@ import {
   IconExternalLink,
   IconPencil,
 } from '@tabler/icons-react';
-import { openedProspectIdState, openedOutboundChannelState } from '@atoms/inboxAtoms';
+import { openedProspectIdState, currentConvoChannelState } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRecoilValue, useRecoilState } from 'recoil';
@@ -103,7 +103,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
 
   const userToken = useRecoilValue(userTokenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
-  const openedOutboundChannel = useRecoilValue(openedOutboundChannelState);
+  const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
 
   const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
     demosDrawerOpenState

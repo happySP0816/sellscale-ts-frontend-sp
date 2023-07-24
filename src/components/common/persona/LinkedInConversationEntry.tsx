@@ -16,7 +16,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { IconInfoCircleFilled } from '@tabler/icons-react';
-import { nameToInitials, valueToColor } from '@utils/general';
+import { nameToInitials, proxyURL, valueToColor } from '@utils/general';
 import { getSingleBumpFramework } from '@utils/requests/getBumpFrameworks';
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
@@ -96,7 +96,7 @@ export function LinkedInConversationEntry({
   return (
     <Paper withBorder radius='md' className={classes.comment} p='lg' mb='xs'>
       <Group sx={{ position: 'relative' }}>
-        <Avatar src={image} radius='xl' alt={name} color={valueToColor(theme, name)}>
+        <Avatar src={proxyURL(image)} radius='xl' alt={name} color={valueToColor(theme, name)}>
           {nameToInitials(name)}
         </Avatar>
         <div>

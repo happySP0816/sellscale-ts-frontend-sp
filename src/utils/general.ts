@@ -1,4 +1,4 @@
-import { EMAIL_REGEX, URL_REGEX } from "@constants/data";
+import { EMAIL_REGEX, PROXY_SERVER_URL, URL_REGEX } from "@constants/data";
 import { ex } from "@fullcalendar/core/internal-common";
 import { MantineColor, MantineTheme } from "@mantine/core";
 import { startCase } from "lodash";
@@ -308,4 +308,15 @@ export function isWithinLastXDays(date: Date, days: number) {
 export function removeHTML(text: string | null) {
   if(!text) { return ''; }
   return text.replace(/<\/?[^>]+(>|$)/g, " ");
+}
+
+
+/**
+ * Returns a URL that proxies the given URL
+ * @param url 
+ * @returns - URL that proxies the given URL
+ */
+export function proxyURL(url?: string | null) {
+  if(!url) { return undefined; }
+  return `${PROXY_SERVER_URL}?url=${encodeURIComponent(url)}`;
 }

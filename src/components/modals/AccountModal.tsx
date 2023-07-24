@@ -27,7 +27,7 @@ import { showNotification } from "@mantine/notifications";
 import createCTA, { updateCTA } from "@utils/requests/createCTA";
 import { DateInput } from "@mantine/dates";
 import CreditsCard from "@common/credits/CreditsCard";
-import { valueToColor, nameToInitials } from "@utils/general";
+import { valueToColor, nameToInitials, proxyURL } from "@utils/general";
 import { IconCheck, IconLogout, IconX } from "@tabler/icons";
 import { logout } from "@auth/core";
 
@@ -59,7 +59,7 @@ export default function AccountModal({
         position: 'relative',
       }}
     >
-      <Avatar src={userData?.img_url} alt={`${userData?.sdr_name}'s Profile Picture`} color={valueToColor(theme, userData?.sdr_name)} size={120} radius={120} mx="auto">
+      <Avatar src={proxyURL(userData?.img_url)} alt={`${userData?.sdr_name}'s Profile Picture`} color={valueToColor(theme, userData?.sdr_name)} size={120} radius={120} mx="auto">
         {nameToInitials(userData?.sdr_name)}
       </Avatar>
       <Text ta="center" fz="lg" weight={500} mt="md">

@@ -4,7 +4,7 @@ import { Flex, Title, Text, Badge, useMantineTheme, Card, Stack, Avatar, Button,
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { setPageTitle } from "@utils/documentChange"
-import { nameToInitials, valueToColor } from "@utils/general";
+import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { getCleanableProspects } from "@utils/requests/getCleanableProspects";
 import { postUnassignContacts } from "@utils/requests/postUnassignContacts";
 import { useEffect, useState } from "react";
@@ -124,7 +124,7 @@ export default function CleanContactsPage() {
                     <Card key={index} withBorder>
                       <Flex align='center'>
                         <Avatar
-                          src={prospect.img_url}
+                          src={proxyURL(prospect.img_url)}
                           alt={prospect.full_name}
                           color={valueToColor(theme, prospect.full_name)}
                           radius="md"

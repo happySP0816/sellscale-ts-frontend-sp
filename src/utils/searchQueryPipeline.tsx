@@ -3,7 +3,7 @@ import { MantineTheme, Image, Avatar } from "@mantine/core";
 import { SpotlightAction } from "@mantine/spotlight";
 import { NavigateFunction } from "react-router-dom";
 import { navigateToPage } from "./documentChange";
-import { nameToInitials, valueToColor } from "./general";
+import { nameToInitials, proxyURL, valueToColor } from "./general";
 import { API_URL } from "@constants/data";
 import { getProspects } from "./requests/getProspects";
 
@@ -46,7 +46,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       onTrigger: () => navigateToPage(navigate, `/all/contacts/${prospect.id}`),
       icon: (
         <Avatar
-          src={prospect.img_url}
+          src={proxyURL(prospect.img_url)}
           alt={prospect.full_name}
           color={valueToColor(theme, prospect.full_name)}
           radius="lg"

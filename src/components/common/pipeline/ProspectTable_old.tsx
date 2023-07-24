@@ -35,7 +35,7 @@ import {
 } from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { formatToLabel, nameToInitials, valueToColor } from "@utils/general";
+import { formatToLabel, nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
@@ -485,7 +485,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               return (
                 <Flex>
                   <Avatar
-                    src={x.img_url}
+                    src={proxyURL(x.img_url)}
                     alt={x.full_name}
                     color={valueToColor(theme, x.full_name)}
                     radius="lg"

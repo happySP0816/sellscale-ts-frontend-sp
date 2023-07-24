@@ -43,7 +43,7 @@ import InboxProspectListFilter, {
   InboxProspectListFilterState,
   defaultInboxProspectListFilterState,
 } from './InboxProspectListFilter';
-import { convertDateToCasualTime, isWithinLastXDays, removeExtraCharacters, removeHTML } from '@utils/general';
+import { convertDateToCasualTime, isWithinLastXDays, proxyURL, removeExtraCharacters, removeHTML } from '@utils/general';
 import loaderWithText from '@common/library/loaderWithText';
 import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
@@ -95,7 +95,7 @@ export function ProspectConvoCard(props: {
       >
         <div style={{ flex: 0 }}>
           <Indicator position='top-start' offset={5} inline label={icpFitToIcon(props.icp_fit)} size={0} m={5}>
-            <Avatar size='md' radius='xl' src={props.img_url} />
+            <Avatar size='md' radius='xl' src={proxyURL(props.img_url)} />
           </Indicator>
         </div>
         <div style={{ flexGrow: 1 }}>

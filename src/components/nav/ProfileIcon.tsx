@@ -24,7 +24,7 @@ import { useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import { IconBrandLinkedin, IconCheck, IconMail, IconX } from "@tabler/icons";
 import { navigateToPage } from "@utils/documentChange";
-import { nameToInitials, valueToColor } from "@utils/general";
+import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
@@ -81,7 +81,7 @@ export default function ProfileIcon() {
               disabled={!userData?.weekly_email_outbound_target}
             >
               <Avatar
-                src={userData?.img_url}
+                src={proxyURL(userData?.img_url)}
                 alt={`${userData?.sdr_name}'s Profile Picture`}
                 color={valueToColor(theme, userData?.sdr_name)}
                 radius="xl"
@@ -195,7 +195,7 @@ export function ProfileCard() {
         <UnstyledButton className={classes.user}>
           <Group>
             <Avatar
-              src={userData?.img_url}
+              src={proxyURL(userData?.img_url)}
               alt={`${name}'s Profile Picture`}
               color={valueToColor(theme, userData?.sdr_name)}
               radius="xl"

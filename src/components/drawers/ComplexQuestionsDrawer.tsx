@@ -32,7 +32,7 @@ import ProspectDetailsChangeStatus, {
 import ProspectDetailsCompany from "../common/prospectDetails/ProspectDetailsCompany";
 import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes";
 import { userTokenState } from "@atoms/userAtoms";
-import { formatToLabel, valueToColor } from "@utils/general";
+import { formatToLabel, proxyURL, valueToColor } from "@utils/general";
 import { logout } from "@auth/core";
 import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";
@@ -98,7 +98,7 @@ export default function ComplexQuestionsDrawer(props: {
           <Stack spacing={5}>
             <Flex justify="space-between">
               <div>
-                <Avatar size="md" radius="xl" src={activeProspect.img_url} />
+                <Avatar size="md" radius="xl" src={proxyURL(activeProspect.img_url)} />
               </div>
               <div style={{ flexGrow: 1, marginLeft: 10 }}>
                 <Text fw={700} fz="sm">

@@ -3,7 +3,7 @@ import { Avatar, Button, Flex, LoadingOverlay, Modal, TextInput, Title, useManti
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconBrandLinkedin, IconBriefcase, IconBuildingStore, IconDeviceFloppy, IconMail } from "@tabler/icons";
-import { nameToInitials, valueToColor } from "@utils/general";
+import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { getProspectByID } from "@utils/requests/getProspectByID";
 import { patchProspect } from "@utils/requests/patchProspect";
 import { useEffect, useState } from "react";
@@ -117,7 +117,7 @@ export default function EditProspectModal(props: EditProspect) {
       <Flex mb='lg'>
         <Flex>
           <Avatar
-            src={prospect?.img_url}
+            src={proxyURL(prospect?.img_url)}
             alt={prospect?.full_name}
             color={valueToColor(theme, prospect?.full_name || "")}
             radius="md"

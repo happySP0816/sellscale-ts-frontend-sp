@@ -3,6 +3,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { Avatar, Button, Flex, Group, Text, TextInput, Title, createStyles } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { IconBriefcase, IconSocial } from "@tabler/icons";
+import { proxyURL } from "@utils/general";
 import { createProspectFromLinkedinLink } from "@utils/requests/createProspectFromLinkedinLink";
 import { getProspectByID } from "@utils/requests/getProspectByID";
 import { useState } from "react";
@@ -115,7 +116,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
         <Group noWrap spacing={10} align='flex-start' pt='xs'>
           <Avatar
             src={
-              prospectDetails.profile_pic
+              proxyURL(prospectDetails.profile_pic)
             }
             size={94}
             radius='md'

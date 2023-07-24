@@ -68,6 +68,7 @@ import { NAV_HEADER_HEIGHT } from '@nav/MainHeader';
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
 import ProspectDetailsHistory from '@common/prospectDetails/ProspectDetailsHistory';
 import EditProspectModal from '@modals/EditProspectModal';
+import { proxyURL } from '@utils/general';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -172,7 +173,7 @@ export default function ProjectDetails(props: { prospects: Prospect[] }) {
       <div style={{ flexBasis: '20%' }}>
         <Stack spacing={0}>
           <Center>
-            <Avatar size='xl' radius={100} mt={20} mb={8} src={data?.details.profile_pic} />
+            <Avatar size='xl' radius={100} mt={20} mb={8} src={proxyURL(data?.details.profile_pic)} />
           </Center>
           <Title order={4} ta='center'>
             {data?.details.full_name}

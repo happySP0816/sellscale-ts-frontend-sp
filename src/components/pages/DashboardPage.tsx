@@ -13,7 +13,7 @@ import {
   LoadingOverlay,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
-import { convertDateToLocalTime, isWithinLastXDays, splitName } from "@utils/general";
+import { convertDateToLocalTime, isWithinLastXDays, proxyURL, splitName } from "@utils/general";
 import { useRecoilState, useRecoilValue } from "recoil";
 import NotificationCard from "../common/home/dashboard/NotificationCard";
 import {
@@ -284,7 +284,7 @@ export default function DashboardSection() {
                           <Avatar
                             size="md"
                             radius="xl"
-                            src={prospectsQuestion[0]?.img_url}
+                            src={proxyURL(prospectsQuestion[0]?.img_url)}
                           />
                         </Indicator>
                       </div>
@@ -334,7 +334,7 @@ export default function DashboardSection() {
                             <Avatar
                               size="md"
                               radius="xl"
-                              src={prospectsDemo[0]?.img_url}
+                              src={proxyURL(prospectsDemo[0]?.img_url)}
                             />
                           </Indicator>
                         </div>

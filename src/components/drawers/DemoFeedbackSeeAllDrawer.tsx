@@ -29,7 +29,7 @@ import ProspectDetailsChangeStatus, { channelToIcon } from '../common/prospectDe
 import ProspectDetailsCompany from '../common/prospectDetails/ProspectDetailsCompany';
 import ProspectDetailsNotes from '../common/prospectDetails/ProspectDetailsNotes';
 import { userTokenState } from '@atoms/userAtoms';
-import { convertDateToLocalTime, formatToLabel, valueToColor } from '@utils/general';
+import { convertDateToLocalTime, formatToLabel, proxyURL, valueToColor } from '@utils/general';
 import { logout } from '@auth/core';
 import getChannels, { getChannelOptions } from '@utils/requests/getChannels';
 import { useEffect, useRef, useState } from 'react';
@@ -84,7 +84,7 @@ export default function DemoFeedbackSeeAllDrawer(props: { prospects: Prospect[] 
         <Flex justify='space-between'>
           <div>
             <Indicator inline size={12} offset={5} position='top-end' color='violet' withBorder>
-              <Avatar size='md' radius='xl' src={prospect.img_url} />
+              <Avatar size='md' radius='xl' src={proxyURL(prospect.img_url)} />
             </Indicator>
           </div>
           <div style={{ flexGrow: 1, marginLeft: 10 }}>

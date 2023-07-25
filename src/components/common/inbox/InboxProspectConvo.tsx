@@ -81,6 +81,12 @@ export function ProspectConvoMessage(props: {
   bumpFrameworkDescription?: string;
   bumpFrameworkLength?: string;
   accountResearchPoints?: string[];
+  initialMessageId?: number;
+  initialMessageCTAId?: number;
+  initialMessageCTAText?: string;
+  initialMessageResearchPoints?: string[];
+  initialMessageStackRankedConfigID?: number;
+  initialMessageStackRankedConfigName?: string;
   cta?: string;
 }) {
   const userToken = useRecoilValue(userTokenState);
@@ -132,6 +138,18 @@ export function ProspectConvoMessage(props: {
                     bumpNumberConverted={bumpNumberConverted}
                     bumpNumberUsed={bumpNumberUsed}
                     accountResearchPoints={props.accountResearchPoints || []}
+                    initialMessageId={props.initialMessageId || 0}
+                    initialMessageCTAId={props.initialMessageCTAId || 0}
+                    initialMessageCTAText={props.initialMessageCTAText || ""}
+                    initialMessageResearchPoints={
+                      props.initialMessageResearchPoints || []
+                    }
+                    initialMessageStackRankedConfigID={
+                      props.initialMessageStackRankedConfigID || 0
+                    }
+                    initialMessageStackRankedConfigName={
+                      props.initialMessageStackRankedConfigName || ""
+                    }
                     cta={props.cta || ""}
                   />
                 )}
@@ -183,17 +201,12 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
     props.prospects.find((p) => p.id === openedProspectId)
   );
 
-  console.log(prospect)
-
   const viewport = useRef<HTMLDivElement>(null);
   const scrollToBottom = () =>
     viewport.current?.scrollTo({
       top: viewport.current.scrollHeight,
       behavior: "smooth",
     });
-
-  console.log(emailThread)
-  console.log(currentConvoEmailMessages)
 
   const { data, isFetching } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
@@ -292,6 +305,7 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
           ? (result.data.data.reverse() as LinkedInMessage[])
           : [];
       setCurrentConvoLiMessages(finalMessages);
+      console.log('finalMessages', finalMessages)
       return finalMessages;
     },
     enabled:
@@ -547,6 +561,12 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
                   bumpFrameworkDescription={msg.bump_framework_description}
                   bumpFrameworkLength={msg.bump_framework_length}
                   accountResearchPoints={msg.account_research_points}
+                  initialMessageId={msg.initial_message_id}
+                  initialMessageCTAId={msg.initial_message_cta_id}
+                  initialMessageCTAText={msg.initial_message_cta_text}
+                  initialMessageResearchPoints={msg.initial_message_research_points}
+                  initialMessageStackRankedConfigID={msg.initial_message_stack_ranked_config_id}
+                  initialMessageStackRankedConfigName={msg.initial_message_stack_ranked_config_name}
                   cta={""}
                 />
               ))}
@@ -578,6 +598,12 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
                     bumpFrameworkDescription={undefined}
                     bumpFrameworkLength={undefined}
                     accountResearchPoints={[]}
+                    initialMessageId={undefined}
+                    initialMessageCTAId={undefined}
+                    initialMessageCTAText={undefined}
+                    initialMessageResearchPoints={[]}
+                    initialMessageStackRankedConfigID={undefined}
+                    initialMessageStackRankedConfigName={undefined}
                     cta={""}
                   />
                 </Box>

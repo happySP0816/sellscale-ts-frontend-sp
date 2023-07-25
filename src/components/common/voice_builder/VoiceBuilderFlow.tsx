@@ -330,10 +330,8 @@ export default function VoiceBuilderFlow(props: {
   };
 
   const generateSample = () => {
-    console.log("generating sample");
     // console log instructions and messages
     var prompt = STARTING_INSTRUCTIONS + '\n' + instructions + '\n' + voiceBuilderMessages.map((item) => item.value).join('\n') + '\n' + 'prompt: {prompt}\ncompletion:';
-    console.log(prompt);
     setLoadingSample(true);
     setGeneratedSimulationCompletion("");
     showNotification({

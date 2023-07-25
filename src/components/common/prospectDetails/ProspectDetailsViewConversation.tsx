@@ -500,6 +500,12 @@ export default function ProspectDetailsViewConversation(
                   bumpFrameworkDescription={message.bump_framework_description}
                   bumpFrameworkLength={message.bump_framework_length}
                   accountResearchPoints={message.account_research_points}
+                  initialMessageId={message.initial_message_id}
+                  initialMessageCTAId={message.initial_message_cta_id}
+                  initialMessageCTAText={message.initial_message_cta_text}
+                  initialMessageResearchPoints={message.initial_message_research_points}
+                  initialMessageStackRankedConfigID={message.initial_message_stack_ranked_config_id}
+                  initialMessageStackRankedConfigName={message.initial_message_stack_ranked_config_name}
                 />
               ))}
             </ScrollArea>

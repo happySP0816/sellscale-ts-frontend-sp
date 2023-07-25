@@ -52,6 +52,12 @@ interface CommentHtmlProps {
   bumpFrameworkDescription?: string;
   bumpFrameworkLength?: string;
   accountResearchPoints?: string[];
+  initialMessageId?: number;
+  initialMessageCTAId?: number;
+  initialMessageCTAText?: string;
+  initialMessageResearchPoints?: string[];
+  initialMessageStackRankedConfigID?: number;
+  initialMessageStackRankedConfigName?: string;
   cta?: string;
   badgeBFTitle?: boolean;
 }
@@ -68,6 +74,12 @@ export function LinkedInConversationEntry({
   bumpFrameworkDescription,
   bumpFrameworkLength,
   accountResearchPoints,
+  initialMessageId,
+  initialMessageCTAId,
+  initialMessageCTAText,
+  initialMessageResearchPoints,
+  initialMessageStackRankedConfigID,
+  initialMessageStackRankedConfigName,
   cta,
   badgeBFTitle,
 }: CommentHtmlProps) {
@@ -81,7 +93,6 @@ export function LinkedInConversationEntry({
   const triggerGetSingleBumpFramework = async (id: number) => {
     const result = await getSingleBumpFramework(userToken, id);
     if (result) {
-      console.log(result.data)
       setBumpNumberConverted(result.data.bump_framework.etl_num_times_converted);
       setBumpNumberUsed(result.data.bump_framework.etl_num_times_used);
     }
@@ -114,6 +125,12 @@ export function LinkedInConversationEntry({
             bumpFrameworkTitle={bumpFrameworkTitle || ''}
             bumpFrameworkDescription={bumpFrameworkDescription || ''}
             bumpFrameworkLength={bumpFrameworkLength || ''}
+            initialMessageId={initialMessageId || 0}
+            initialMessageCTAId={initialMessageCTAId || 0}
+            initialMessageCTAText={initialMessageCTAText || ''}
+            initialMessageResearchPoints={initialMessageResearchPoints || []}
+            initialMessageStackRankedConfigID={initialMessageStackRankedConfigID || 0}
+            initialMessageStackRankedConfigName={initialMessageStackRankedConfigName || ''}
             bumpNumberConverted={bumpNumberConverted}
             bumpNumberUsed={bumpNumberUsed}
             accountResearchPoints={accountResearchPoints || []}
@@ -138,6 +155,12 @@ export function AiMetaDataBadge(props: {
   bumpFrameworkDescription: string;
   bumpFrameworkLength: string;
   accountResearchPoints: string[];
+  initialMessageId?: number;
+  initialMessageCTAId?: number;
+  initialMessageCTAText?: string;
+  initialMessageResearchPoints?: string[];
+  initialMessageStackRankedConfigID?: number;
+  initialMessageStackRankedConfigName?: string;
   bumpNumberUsed?: number;
   bumpNumberConverted?: number;
   cta?: string;
@@ -151,7 +174,6 @@ export function AiMetaDataBadge(props: {
     if (props.bumpNumberUsed && props.bumpNumberConverted) {
       setBumpConversionRate(props.bumpNumberUsed / props.bumpNumberConverted * 100)
     }
-    console.log('here', props.bumpNumberUsed, props.bumpNumberConverted)
   }, [props.bumpNumberUsed, props.bumpNumberConverted])
 
   return (
@@ -192,20 +214,22 @@ export function AiMetaDataBadge(props: {
             </Avatar>
             <Flex direction='column' ml='sm'>
               <Text size='sm' weight={700} sx={{ lineHeight: 1 }}>
-                Automatic Generated Response
+                {props.bumpFrameworkId ? "Automatic Generated Response" : "Generated Message"}
               </Text>
-              <Text color='dimmed' size='xs' sx={{ lineHeight: 1 }}>
-                These data points were chosen by AI 🤖
+              <Text color='dimmed' size='xs' sx={{ lineHeight: 1.2 }} mt='4px'>
+                {props.bumpFrameworkId ? "These data points were chosen by AI 🤖" : "This message was generated using the following information."}
               </Text>
             </Flex>
           </Flex>
-          <Tooltip
-            label={bumpConversionRate ? `${bumpConversionRate.toFixed(2)}% of prospects converted` : 'No conversion data available, yet.'}
-          >
-            <Badge>
-              {(bumpConversionRate && bumpConversionRate.toFixed(2)) || "UNKOWN "}%
-            </Badge>
-          </Tooltip>
+          {bumpConversionRate && (
+            <Tooltip
+              label={bumpConversionRate ? `${bumpConversionRate.toFixed(2)}% of prospects converted` : 'No conversion data available, yet.'}
+            >
+              <Badge>
+                {(bumpConversionRate && bumpConversionRate.toFixed(2)) || "UNKOWN "}%
+              </Badge>
+            </Tooltip>
+          )}
         </Flex>
 
         {props.bumpFrameworkId ? (
@@ -236,20 +260,44 @@ export function AiMetaDataBadge(props: {
           </>
         ) : (
           <>
-            {props.cta ? (
+            {(props.initialMessageId || props.cta) ? (
               <>
-                <Text size='sm' mt='md'>
-                  <span style={{ fontWeight: 550 }}>Call to Action:</span> {props.cta}
-                </Text>
+                {
+                  props.initialMessageId ? (
+                    <>
+                      <Text size='sm' mt='sm'>
+                        <span style={{ fontWeight: 550 }}>CTA:</span> {props.initialMessageCTAText}
+                      </Text>
+                      <Text size='sm' mt='sm'>
+                        <span style={{ fontWeight: 550 }}>Voice:</span> {props.initialMessageStackRankedConfigName}
+                      </Text>
+                      <Text size='sm' mt='md'>
+                        <span style={{ fontWeight: 550 }}>Research Points:</span>
+                      </Text>
+                      <List>
+                        {props.initialMessageResearchPoints?.map((point, index) => (
+                          <List.Item key={index}>
+                            <Text size='xs'>{point}</Text>
+                          </List.Item>
+                        ))}
+                      </List>
+                    </>
+                  ) : (
+                    <Text size='sm' mt='md'>
+                      <span style={{ fontWeight: 550 }}>Call to Action:</span> {props.cta}
+                    </Text>
+                  )
+                }
               </>
             ) : (
               <Text size='sm' mt='md' fs={'italic'}>
                 This message was generated before June 26th, 2023, prior to metadata capture.
               </Text>
-            )}
+            )
+            }
           </>
         )}
-      </HoverCard.Dropdown>
-    </HoverCard>
+      </HoverCard.Dropdown >
+    </HoverCard >
   );
 }

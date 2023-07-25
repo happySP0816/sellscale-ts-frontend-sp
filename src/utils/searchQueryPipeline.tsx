@@ -30,7 +30,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
     userToken,
     query,
     undefined,
-    15,
+    30,
     undefined,
     'ALL',
   );

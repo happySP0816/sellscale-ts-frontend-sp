@@ -29,7 +29,7 @@ import {
 import { navigateToPage } from "@utils/documentChange";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
@@ -149,17 +149,15 @@ export default function SpotlightWrapper({
     SpotlightAction[] | null | false
   >(null);
 
-  console.log("queryResult", queryResult, query);
-  
-
-  const debouncedActivateQuery = _.debounce((queryValue: string) => {
-    activateQueryPipeline(queryValue, navigate, theme, userToken).then(
-      (result) => {
-        setQueryResult(result);
-      }
-    );
-  }, 500);// debounce 500ms
-
+  useEffect(() => {
+    if(query){
+      activateQueryPipeline(query, navigate, theme, userToken).then(
+        (result) => {
+          setQueryResult(result);
+        }
+      );
+    }
+  }, [query]);
 
   return (
     <SpotlightProvider
@@ -173,7 +171,6 @@ export default function SpotlightWrapper({
           setQueryResult(false);
         } else {
           setQueryResult(null);
-          debouncedActivateQuery(query.trim());
         }
       }}
       actions={(queryResult === null) ? [] : (
@@ -188,7 +185,11 @@ export default function SpotlightWrapper({
       disabled={notLoggedIn}
       filter={(query: string, actions: SpotlightAction[]) => {
         actions.sort((a, b) => {
-          return a.title.localeCompare(b.title);
+          if(a.group === b.group){
+            return a.title.localeCompare(b.title);
+          } else {
+            return (b.group || '').localeCompare(a.group || '')
+          }
         })
         return actions;
       }}

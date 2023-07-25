@@ -247,6 +247,7 @@ export function isURL(text: string){
 }
 
 export function isLinkedInURL(text: string){
+  if (typeof text !== "string") return false;  // sanity check
   return isURL(text) && text.includes("linkedin.com/in/");
 }
 

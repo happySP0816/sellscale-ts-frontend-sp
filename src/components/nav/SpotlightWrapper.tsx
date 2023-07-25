@@ -177,8 +177,8 @@ export default function SpotlightWrapper({
           debouncedActivateQuery(query.trim());
         }
       }}
-      actions={queryResult === null ? [] : (
-        queryResult === false ? mainActions : [...queryResult, ...mainActions]
+      actions={(queryResult === null) ? [] : (
+        (queryResult === false || query === '') ? mainActions : [...queryResult, ...mainActions]
       )}
       actionComponent={CustomAction}
       searchIcon={<IconSearch size={18} />}
@@ -188,7 +188,7 @@ export default function SpotlightWrapper({
       limit={30}
       disabled={notLoggedIn}
       nothingFoundMessage={
-        (query !== "" && queryResult === false) ? (
+        (query !== "" && queryResult !== null) ? (
           <Text c="dimmed" fs="italic">
             Nothing found
           </Text>

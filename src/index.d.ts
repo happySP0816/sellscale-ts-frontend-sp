@@ -180,6 +180,12 @@ export interface LinkedInMessage {
   bump_framework_description: string;
   bump_framework_length: string;
   account_research_points: string[],
+  initial_message_id: number;
+  initial_message_cta_id: number;
+  initial_message_cta_text: string;
+  initial_message_research_points: string[];
+  initial_message_stack_ranked_config_id: number;
+  initial_message_stack_ranked_config_name: string;
 }
 
 export interface EmailMessage {

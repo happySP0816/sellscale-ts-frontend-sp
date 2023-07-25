@@ -23,15 +23,6 @@ export async function patchProspect(
   company_website?: string,
 ): Promise<MsgResponse> {
 
-  console.log(
-    JSON.stringify({
-      "title": title,
-        "email": email,
-        "linkedin_url": linkedin_url,
-        "company_name": company_name,
-        "company_website": company_website,
-    })
-  )
   const response = await fetch(
     `${API_URL}/prospect/${prospectID}/entity`,
     {

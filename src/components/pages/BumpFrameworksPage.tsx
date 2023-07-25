@@ -30,11 +30,9 @@ import { useQuery } from '@tanstack/react-query';
 import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import getChannels from '@utils/requests/getChannels';
-import getPersonas from '@utils/requests/getPersonas';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { BumpFramework, MsgResponse } from 'src';
-import { set } from 'lodash';
 import { currentProjectState } from '@atoms/personaAtoms';
 import LinkedInConvoSimulator from '@common/simulators/linkedin/LinkedInConvoSimulator';
 import { DataTable } from 'mantine-datatable';
@@ -433,14 +431,12 @@ export default function BumpFrameworksPage(props: {
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
 
-  const [archetypeID, setArchetypeID] = useState<number | null>(
-    props.predefinedPersonaId !== undefined ? props.predefinedPersonaId : null
-  );
   const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
   const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
     useDisclosure();
   const [maximumBumpSoftLock, setMaximumBumpSoftLock] = useState(false);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const archetypeID = currentProject?.id || -1;
 
   const bumpBuckets = useRef<BumpFrameworkBuckets>({
     ACCEPTED: {
@@ -462,44 +458,17 @@ export default function BumpFrameworksPage(props: {
     refetchOnWindowFocus: false,
   });
 
-  const triggerGetPersonas = async () => {
-    const result = await getPersonas(userToken);
-
-    if (result.status !== 'success') {
-      showNotification({
-        title: 'Error',
-        message: 'Could not get personas',
-        color: 'red',
-      });
-      return;
-    }
-
-    const personas = result.data;
-    for (const persona of personas) {
-      if (currentProject?.id) {
-        setArchetypeID(currentProject?.id)
-        break
-      }
-      if (persona.active && !props.predefinedPersonaId) {
-        setArchetypeID(persona.id);
-        break;
-      }
-    }
-
-    return;
-  };
-
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
 
-    const result = await getBumpFrameworks(userToken, [], [], [archetypeID as number]);
+    const result = await getBumpFrameworks(userToken, [], [], [archetypeID]);
     console.log(result)
 
     if (result.status !== 'success') {
       setLoading(false);
       showNotification({
         title: 'Error',
-        message: 'Could not get bump frameworks.',
+        message: 'Could not get bump frameworks for archetype ID ' + archetypeID,
         color: 'red',
         autoClose: false,
       });
@@ -573,13 +542,6 @@ export default function BumpFrameworksPage(props: {
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (currentProject?.id) {
-      setArchetypeID(currentProject?.id)
-    } else {
-      triggerGetPersonas();
-    }
-  }, []);
 
   useEffect(() => {
     triggerGetBumpFrameworks();
@@ -590,27 +552,6 @@ export default function BumpFrameworksPage(props: {
       <Flex direction='column'>
         <LoadingOverlay visible={loading} />
         <Title>LinkedIn Bump Frameworks</Title>
-        {props.predefinedPersonaId === undefined && (
-          <Flex mt='md'>
-            <PersonaSelect
-              disabled={false}
-              onChange={(archetype) => {
-                if (archetype.length == 0) {
-                  return;
-                }
-                if (currentProject?.id) {
-                  setArchetypeID(currentProject?.id)
-                  return
-                }
-                setArchetypeID(archetype[0].archetype_id);
-              }}
-              defaultValues={archetypeID ? [archetypeID] : []}
-              selectMultiple={false}
-              label='Select Persona'
-              description='Select the persona whose bump frameworks you want to view.'
-            />
-          </Flex>
-        )}
 
         <Tabs color='blue' variant='outline' defaultValue='sequence' my='lg' orientation='vertical'>
           <Tabs.List>

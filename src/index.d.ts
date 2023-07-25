@@ -247,7 +247,7 @@ export type BumpFramework = {
   bumped_count: number | null;
   bump_delay_days: number;
   use_account_research: boolean;
-  // client_archetype_id: number;
+  client_archetype_id: number;
   // client_archetype_archetype: string;
   account_research?: string[];
   etl_num_times_used?: number;

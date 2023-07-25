@@ -154,7 +154,6 @@ export default function SpotlightWrapper({
   useEffect(() => {
     if(query){
       activateQueryPipeline(query, navigate, theme, userToken).then((result) => {
-        console.log(query, currentQuery.current);
         if(query === currentQuery.current){
           setQueryResult(result);
         }

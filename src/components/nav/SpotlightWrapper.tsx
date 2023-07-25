@@ -29,7 +29,7 @@ import {
 import { navigateToPage } from "@utils/documentChange";
 import { activateQueryPipeline } from "@utils/searchQueryPipeline";
 import _ from "lodash";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 
@@ -143,6 +143,8 @@ export default function SpotlightWrapper({
   }
 
   const userToken = useRecoilValue(userTokenState);
+
+  const currentQuery = useRef("");
   const [query, setQuery] = useDebouncedState("", 400);
   // For queryResult, null = loading and false = failed to find.
   const [queryResult, setQueryResult] = useState<
@@ -152,7 +154,7 @@ export default function SpotlightWrapper({
   useEffect(() => {
     if(query){
       activateQueryPipeline(query, navigate, theme, userToken).then((response) => {
-        console.log(response.query, query);
+        console.log(response.query, query, currentQuery.current);
         if(response.query === query){
           setQueryResult(response.result);
         }
@@ -168,6 +170,7 @@ export default function SpotlightWrapper({
          * That callback fetches the result data and updates queryResult accordingly.
          */
         setQuery(query.trim());
+        currentQuery.current = query.trim();
         if (query.trim() === "") {
           setQueryResult(false);
         } else {

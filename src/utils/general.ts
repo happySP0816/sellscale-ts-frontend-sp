@@ -239,10 +239,12 @@ export function getBrowserExtensionURL(isFirefox: boolean){
 
 
 export function isEmail(text: string){
+  if (typeof text !== "string") return false;  // sanity check
   return !!text.match(EMAIL_REGEX);
 }
 
 export function isURL(text: string){
+  if (typeof text !== "string") return false;  // sanity check
   return !!text.match(URL_REGEX);
 }
 

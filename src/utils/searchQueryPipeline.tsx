@@ -6,6 +6,7 @@ import { navigateToPage } from "./documentChange";
 import { nameToInitials, proxyURL, valueToColor } from "./general";
 import { API_URL } from "@constants/data";
 import { getProspects } from "./requests/getProspects";
+import { Prospect } from "src";
 
 /**
  * 
@@ -29,7 +30,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
     userToken,
     query,
     undefined,
-    undefined,
+    15,
     undefined,
     'ALL',
   );
@@ -37,7 +38,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
     return [];
   }
 
-  return response.data.map((prospect: any) => {
+  return response.data.map((prospect: Prospect) => {
     return {
       title: prospect.full_name,
       description: prospect.title,

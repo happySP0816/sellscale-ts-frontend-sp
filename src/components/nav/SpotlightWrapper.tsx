@@ -153,7 +153,6 @@ export default function SpotlightWrapper({
   
 
   const debouncedActivateQuery = _.debounce((queryValue: string) => {
-    console.log('got here')
     activateQueryPipeline(queryValue, navigate, theme, userToken).then(
       (result) => {
         setQueryResult(result);
@@ -187,6 +186,12 @@ export default function SpotlightWrapper({
       shortcut={["mod + K"]}
       limit={30}
       disabled={notLoggedIn}
+      filter={(query: string, actions: SpotlightAction[]) => {
+        actions.sort((a, b) => {
+          return a.title.localeCompare(b.title);
+        })
+        return actions;
+      }}
       nothingFoundMessage={
         (query !== "" && queryResult !== null) ? (
           <Text c="dimmed" fs="italic">

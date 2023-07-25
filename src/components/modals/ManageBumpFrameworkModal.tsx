@@ -129,6 +129,7 @@ export default function ManageBumpFramework({
         bump_delay_days: form.values.bumpDelayDays as number,
         substatus: selectedBumpFramework.substatus,
         use_account_research: form.values.useAccountResearch,
+        client_archetype_id: selectedBumpFramework.client_archetype_id,
       });
     } else {
       showNotification({
@@ -183,6 +184,7 @@ export default function ManageBumpFramework({
         bump_delay_days: 2,
         substatus: innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : "",
         use_account_research: form.values.useAccountResearch,
+        client_archetype_id: innerProps.archetypeId,
       });
     } else {
       showNotification({

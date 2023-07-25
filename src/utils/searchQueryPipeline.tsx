@@ -14,19 +14,13 @@ import { Prospect } from "src";
  * @param navigate 
  * @returns - SplotlightActions, or null (= loading) or false (= failed to find).
  */
-export async function activateQueryPipeline(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string): Promise<{
-  query: string,
-  result: SpotlightAction[] | null | false,
-}> {
+export async function activateQueryPipeline(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string): Promise<SpotlightAction[] | null | false> {
 
   const prospects = await checkProspects(query, navigate, theme, userToken)
   //const campaigns = await checkCampaigns(query, navigate, theme, userToken)
 
   // TODO: Add more checks here.
-  return {
-    query: query,
-    result: [/*...campaigns,*/ ...prospects]
-  };
+  return [/*...campaigns,*/ ...prospects];
 }
 
 async function checkProspects(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string){

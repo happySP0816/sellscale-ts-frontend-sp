@@ -89,7 +89,7 @@ export default function CustomResearchPointCard(props: {}) {
       showNotification({
         id: 'file-upload-success',
         title: `Custom Data Point Added`,
-        message: `Please allow some time for it to propagate through our systems!`,
+        message: `Please allow some time for it to propagate through our systems! It may take a few minutes.`,
         color: 'blue',
         autoClose: 5000,
       });

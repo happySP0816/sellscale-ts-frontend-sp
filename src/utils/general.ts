@@ -239,14 +239,17 @@ export function getBrowserExtensionURL(isFirefox: boolean){
 
 
 export function isEmail(text: string){
+  if (typeof text !== "string") return false;  // sanity check
   return !!text.match(EMAIL_REGEX);
 }
 
 export function isURL(text: string){
+  if (typeof text !== "string") return false;  // sanity check
   return !!text.match(URL_REGEX);
 }
 
 export function isLinkedInURL(text: string){
+  if (typeof text !== "string") return false;  // sanity check
   return isURL(text) && text.includes("linkedin.com/in/");
 }
 

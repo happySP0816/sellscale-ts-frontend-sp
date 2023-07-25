@@ -32,6 +32,15 @@ export default function CustomResearchPointCard(props: {}) {
       return;
     }
 
+    // show notification in progress
+    showNotification({
+      id: 'file-upload-in-progress',
+      title: `Uploading file`,
+      message: `Please wait while we process your file`,
+      color: 'blue',
+      autoClose: 5000,
+    });
+
     const entries = [];
     for(const row of result) {
 
@@ -68,11 +77,19 @@ export default function CustomResearchPointCard(props: {}) {
     }
 
     const response = await uploadCustomResearchPoint(userToken, description, entries);
+    // show notification about uploading entries.length points
+    showNotification({
+      id: 'file-upload-in-progress',
+      title: `Uploading file`,
+      message: `Please wait while we process your file with ${entries.length} entries`,
+      color: 'blue',
+      autoClose: 5000,
+    });
     if (response.status === 'success') {
       showNotification({
         id: 'file-upload-success',
         title: `Custom Data Point Added`,
-        message: `Please allow some time for it to propagate through our systems!`,
+        message: `Please allow some time for it to propagate through our systems! It may take a few minutes.`,
         color: 'blue',
         autoClose: 5000,
       });

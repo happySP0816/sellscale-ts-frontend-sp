@@ -36,7 +36,8 @@ import EditBumpFrameworkEmailModal from "@modals/EditBumpFrameworkEmailModal";
 import VoiceEditorModal from "@modals/VoiceEditorModal";
 import AccountModal from "@modals/AccountModal";
 import AddProspectModal from "@modals/AddProspectModal";
-import SendLiOutreachModal from "@modals/SendLiOutreachModal";
+import SendLiOutreachModal from "@modals/SendOutreachModal";
+import SendOutreachModal from "@modals/SendOutreachModal";
 
 export default function App() {
   // Site light or dark mode
@@ -127,7 +128,7 @@ export default function App() {
               voiceEditor: VoiceEditorModal,
               account: AccountModal,
               addProspect: AddProspectModal,
-              sendLiOutreach: SendLiOutreachModal,
+              sendOutreach: SendOutreachModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

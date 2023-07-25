@@ -80,10 +80,12 @@ export default function AddProspectModal({
       context.closeModal(id);
 
       openContextModal({
-        modal: 'sendLiOutreach',
-        title: <Title order={3}>Send a Connection Request</Title>,
+        modal: 'sendOutreach',
+        title: <Title order={3}>Send Outreach</Title>,
         innerProps: {
           prospectId: prospectId,
+          archetypeId: innerProps.archetypeId,
+          email: values.email,
         },
       });
 

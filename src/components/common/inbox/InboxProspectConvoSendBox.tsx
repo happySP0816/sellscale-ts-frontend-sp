@@ -107,7 +107,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
     if(openedOutboundChannel === 'LINKEDIN'){
 
-      const result = await sendLinkedInMessage(
+      sendLinkedInMessage(
         userToken,
         props.prospectId,
         msg,
@@ -119,7 +119,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         selectedBumpFramework?.bump_length,
         selectedBumpFramework?.account_research
       );
-      if (result.status === 'success') {
+      if (true) {
         let yourMessage = _.cloneDeep(currentConvoLiMessages || [])
           .reverse()
           .find((msg) => msg.connection_degree === 'You');
@@ -147,7 +147,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
     } else {
 
-      const result = await sendEmail(
+      sendEmail(
         userToken,
         props.prospectId,
         '',
@@ -155,7 +155,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         aiGenerated,
         props.nylasMessageId
       );
-      if (result.status === 'success') {
+      if (true) {
         let yourMessage = _.cloneDeep(currentConvoEmailMessages || [])
           .reverse()
           .find((msg) => msg.from_sdr);

@@ -272,11 +272,22 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
 
       // For LinkedIn //
 
-      const result = await getConversation(userToken, openedProspectId);
+      const result = await getConversation(userToken, openedProspectId, false);
+      getConversation(userToken, openedProspectId, true).then((updatedResult) => {
+        console.log('- Fetched updated convo')
+
+        const finalMessages = updatedResult.status === "success"
+          ? (updatedResult.data.data.reverse() as LinkedInMessage[])
+          : [];
+        setCurrentConvoLiMessages(finalMessages);
+      });
+
       // Indicate messages as read
-      const readLiResult = await readLiMessages(userToken, openedProspectId);
-      if (readLiResult.status === "success" && readLiResult.data.updated) {
-      }
+      readLiMessages(userToken, openedProspectId).then((readLiResult) => {
+        console.log('- Read Li Messages')
+        if (readLiResult.status === "success" && readLiResult.data.updated) {
+        }
+      });
 
       // Refetch the prospect list
       queryClient.refetchQueries({
@@ -287,26 +298,28 @@ export default function ProspectConvo(props: { prospects: Prospect[] }) {
       });
 
       // Set if we have an auto bump message generated
-      const autoBumpMsgResponse = await getAutoBumpMessage(
+      getAutoBumpMessage(
         userToken,
         openedProspectId
-      );
-      if (autoBumpMsgResponse.status === "success") {
-        sendBoxRef.current?.setAiGenerated(true);
-        sendBoxRef.current?.setMessageDraft(
-          autoBumpMsgResponse.data.message,
-          autoBumpMsgResponse.data.bump_framework,
-          autoBumpMsgResponse.data.account_research_points
-        );
-        sendBoxRef.current?.setAiMessage(autoBumpMsgResponse.data.message);
-      }
+      ).then((autoBumpMsgResponse) => {
+        console.log('- Fetched auto bump response')
+        if (autoBumpMsgResponse.status === "success") {
+          sendBoxRef.current?.setAiGenerated(true);
+          sendBoxRef.current?.setMessageDraft(
+            autoBumpMsgResponse.data.message,
+            autoBumpMsgResponse.data.bump_framework,
+            autoBumpMsgResponse.data.account_research_points
+          );
+          sendBoxRef.current?.setAiMessage(autoBumpMsgResponse.data.message);
+        }
+      });
 
       const finalMessages =
         result.status === "success"
           ? (result.data.data.reverse() as LinkedInMessage[])
           : [];
       setCurrentConvoLiMessages(finalMessages);
-      console.log('finalMessages', finalMessages)
+      console.log('Finished loading convo')
       return finalMessages;
     },
     enabled:

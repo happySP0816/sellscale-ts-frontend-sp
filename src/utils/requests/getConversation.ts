@@ -10,10 +10,11 @@ import { API_URL } from "@constants/data";
  */
 export async function getConversation(
   userToken: string,
-  prospectId: number
+  prospectId: number,
+  check_for_update?: boolean
 ): Promise<MsgResponse> {
   const response = await fetch(
-    `${API_URL}/voyager/conversation?prospect_id=${prospectId}`,
+    `${API_URL}/voyager/conversation?prospect_id=${prospectId}&check_for_update=${check_for_update === undefined ? true : check_for_update}`,
     {
       method: "GET",
       headers: {

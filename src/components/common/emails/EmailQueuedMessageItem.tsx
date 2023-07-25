@@ -12,7 +12,7 @@ import {
   useMantineTheme,
   Textarea,
 } from "@mantine/core";
-import { nameToInitials, valueToColor } from "@utils/general";
+import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import { useRef, useState } from "react";
 import { IconEdit, IconTrash } from "@tabler/icons";
@@ -85,7 +85,7 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
         <Flex>
           <Flex mr="sm">
             <Avatar
-              src={props.img_url}
+              src={proxyURL(props.img_url)}
               alt={props.full_name}
               color={valueToColor(theme, props.full_name)}
               radius="lg"

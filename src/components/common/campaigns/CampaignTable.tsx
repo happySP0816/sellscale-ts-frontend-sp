@@ -45,7 +45,7 @@ const SelectRepresent = forwardRef<HTMLDivElement, ItemProps>(
   ({ image, label, description, ...others }: ItemProps, ref: any) => (
     <div ref={ref} {...others}>
       <Group noWrap>
-        <Avatar src={image} />
+        <Avatar src={proxyURL(image)} />
 
         <div>
           <Text>{label}</Text>

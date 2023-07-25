@@ -7,6 +7,7 @@ import { useRecoilValue } from "recoil";
 import { Prospect } from "src";
 import ProspectDetailsViewConversation from "@common/prospectDetails/ProspectDetailsViewConversation";
 import { showNotification } from "@mantine/notifications";
+import { proxyURL } from "@utils/general";
 
 
 export default function SchedulingCardContents(props: { prospect: Prospect }) {
@@ -45,7 +46,7 @@ export default function SchedulingCardContents(props: { prospect: Prospect }) {
           <Avatar
             size="md"
             radius="xl"
-            src={props.prospect.img_url}
+            src={proxyURL(props.prospect.img_url)}
           />
         </Indicator>
       </div>

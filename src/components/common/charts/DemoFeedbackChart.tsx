@@ -18,6 +18,7 @@ import {
 import {
   convertDateToLocalTime,
   formatToLabel,
+  proxyURL,
   valueToColor,
 } from "@utils/general";
 import getTransformers from "@utils/requests/getTransformers";
@@ -299,7 +300,7 @@ export default function DemoFeedbackChart() {
               >
                 <Flex justify="space-between">
                   <div>
-                    <Avatar size="md" radius="xl" src={prospect_img_url} />
+                    <Avatar size="md" radius="xl" src={proxyURL(prospect_img_url)} />
                   </div>
                   <div style={{ flexGrow: 1, marginLeft: 10 }}>
                     <Text fw={700} fz="sm">

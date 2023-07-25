@@ -149,14 +149,18 @@ export default function SpotlightWrapper({
     SpotlightAction[] | null | false
   >(null);
 
-  const [actions, setActions] = useState<SpotlightAction[]>(mainActions);
+  console.log("queryResult", queryResult, query);
+  
 
-  // Fix bug with query result not updating the actual displayed results
-  useEffect(() => {
-    if (queryResult && queryResult.length > 0) {
-      setActions([...queryResult, ...mainActions]);
-    }
-  }, [queryResult]);
+  const debouncedActivateQuery = _.debounce((queryValue: string) => {
+    console.log('got here')
+    activateQueryPipeline(queryValue, navigate, theme, userToken).then(
+      (result) => {
+        setQueryResult(result);
+      }
+    );
+  }, 500);// debounce 500ms
+
 
   return (
     <SpotlightProvider
@@ -170,22 +174,12 @@ export default function SpotlightWrapper({
           setQueryResult(false);
         } else {
           setQueryResult(null);
-          _.debounce(() => {
-            activateQueryPipeline(query, navigate, theme, userToken).then(
-              (result) => {
-                setQueryResult(result);
-              }
-            );
-          }, 500)();// debounce 500ms
-        }
-
-        if (queryResult) {
-          setActions([...queryResult, ...mainActions]);
-        } else {
-          setActions(mainActions);
+          debouncedActivateQuery(query.trim());
         }
       }}
-      actions={actions}
+      actions={queryResult === null ? [] : (
+        queryResult === false ? mainActions : [...queryResult, ...mainActions]
+      )}
       actionComponent={CustomAction}
       searchIcon={<IconSearch size={18} />}
       searchPlaceholder={"Search..."}
@@ -194,8 +188,7 @@ export default function SpotlightWrapper({
       limit={30}
       disabled={notLoggedIn}
       nothingFoundMessage={
-        query !== "" &&
-        (queryResult === false || (queryResult && queryResult.length === 0)) ? (
+        (query !== "" && queryResult === false) ? (
           <Text c="dimmed" fs="italic">
             Nothing found
           </Text>

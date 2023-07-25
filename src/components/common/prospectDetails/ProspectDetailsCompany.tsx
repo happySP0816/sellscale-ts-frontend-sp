@@ -9,6 +9,7 @@ import {
   createStyles,
   Badge,
 } from "@mantine/core";
+import { proxyURL } from "@utils/general";
 import { useState } from "react";
 
 const useStyles = createStyles((theme) => ({
@@ -70,7 +71,7 @@ export default function ProspectDetailsCompany(
             theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.white,
         })}
       >
-        <Avatar src={props.logo} size={60} radius={60} mx="auto" />
+        <Avatar src={proxyURL(props.logo)} size={60} radius={60} mx="auto" />
         <Text align="center" size="lg" weight={500} mt="md">
           {props.company_name}
         </Text>

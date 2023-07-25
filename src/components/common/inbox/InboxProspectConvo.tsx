@@ -44,6 +44,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   convertDateToCasualTime,
   convertDateToLocalTime,
+  proxyURL,
 } from "@utils/general";
 import { getConversation } from "@utils/requests/getConversation";
 import { getProspectByID } from "@utils/requests/getProspectByID";
@@ -119,7 +120,7 @@ export function ProspectConvoMessage(props: {
     <Container py={5} sx={{ flex: 1 }}>
       <Flex gap={0} wrap="nowrap">
         <div style={{ flexBasis: "10%" }}>
-          <Avatar size="md" radius="xl" m={5} src={props.img_url} />
+          <Avatar size="md" radius="xl" m={5} src={proxyURL(props.img_url)} />
         </div>
         <div style={{ flexBasis: "90%" }}>
           <Stack spacing={5}>

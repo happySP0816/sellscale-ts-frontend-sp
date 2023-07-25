@@ -12,7 +12,7 @@ import {
   IconBuildingStore,
   IconPencil,
 } from "@tabler/icons";
-import { nameToInitials, valueToColor } from "@utils/general";
+import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -91,7 +91,7 @@ export default function ProspectDetailsSummary(
     <Group noWrap align="flex-start" pb="xs" w='100%'>
       <LoadingOverlay visible={loading} />
       <Avatar
-        src={props.profilePic}
+        src={proxyURL(props.profilePic)}
         alt={props.fullName}
         color={valueToColor(theme, props.fullName)}
         radius="md"

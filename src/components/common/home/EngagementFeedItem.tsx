@@ -14,6 +14,7 @@ import {
   convertDateToLocalTime,
   formatToLabel,
   nameToInitials,
+  proxyURL,
   valueToColor,
 } from "@utils/general";
 import { LinkedInConversationEntry } from "@common/persona/LinkedInConversationEntry";
@@ -112,7 +113,7 @@ export default function EngagementFeedItem(props: EngagementFeedItemProps) {
         <Group>
           <Avatar
             color={valueToColor(theme, prospectName as string)}
-            src={prospectImgURL}
+            src={proxyURL(prospectImgURL)}
           >
             {nameToInitials(prospectName as string)}
           </Avatar>

@@ -34,7 +34,7 @@ import { clearAuthTokens } from "@utils/requests/clearAuthTokens";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import LinkedInAuthOption from "./LinkedInAuthOption";
-import { getBrowserExtensionURL } from "@utils/general";
+import { getBrowserExtensionURL, proxyURL } from "@utils/general";
 import { useEffect, useState } from "react";
 import getLiProfile from "@utils/requests/getLiProfile";
 
@@ -245,10 +245,10 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
               <Group noWrap spacing={10} align="flex-start" pt="xs">
                 <Avatar
                   src={
-                    data.miniProfile.picture["com.linkedin.common.VectorImage"]
+                    proxyURL(data.miniProfile.picture["com.linkedin.common.VectorImage"]
                       .rootUrl +
                     data.miniProfile.picture["com.linkedin.common.VectorImage"]
-                      .artifacts[2].fileIdentifyingUrlPathSegment
+                      .artifacts[2].fileIdentifyingUrlPathSegment)
                   }
                   size={94}
                   radius="md"

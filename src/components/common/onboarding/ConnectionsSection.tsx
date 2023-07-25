@@ -14,7 +14,7 @@ import {
 } from '@mantine/core';
 import { IconBriefcase, IconCloudDownload, IconMail, IconPlugConnected, IconSocial } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
-import { valueToColor, nameToInitials, formatToLabel, getBrowserExtensionURL } from '@utils/general';
+import { valueToColor, nameToInitials, formatToLabel, getBrowserExtensionURL, proxyURL } from '@utils/general';
 import getLiProfile from '@utils/requests/getLiProfile';
 import getNylasAccountDetails from '@utils/requests/getNylasAccountDetails';
 import getNylasClientID from '@utils/requests/getNylasClientID';
@@ -88,9 +88,9 @@ export default function ConnectionsSection() {
               <Group noWrap spacing={10} align='flex-start' pt='xs'>
                 <Avatar
                   src={
-                    li_data.miniProfile.picture['com.linkedin.common.VectorImage'].rootUrl +
+                    proxyURL(li_data.miniProfile.picture['com.linkedin.common.VectorImage'].rootUrl +
                     li_data.miniProfile.picture['com.linkedin.common.VectorImage'].artifacts[2]
-                      .fileIdentifyingUrlPathSegment
+                      .fileIdentifyingUrlPathSegment)
                   }
                   size={94}
                   radius='md'

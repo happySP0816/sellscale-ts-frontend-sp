@@ -29,7 +29,7 @@ import { IconSend } from "@tabler/icons";
 import { sendLinkedInMessage } from "@utils/requests/sendMessage";
 import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChangeStatus";
 import { useQueryClient } from "@tanstack/react-query";
-import { convertDateToLocalTime } from "@utils/general";
+import { convertDateToLocalTime, proxyURL } from "@utils/general";
 import {
   prospectDrawerIdState,
   prospectDrawerOpenState,
@@ -117,7 +117,7 @@ export default function DashCardContents(props: {
           color="violet"
           withBorder
         >
-          <Avatar size="md" radius="xl" src={img_url} />
+          <Avatar size="md" radius="xl" src={proxyURL(img_url)} />
         </Indicator>
       </div>
       <div style={{ flexGrow: 1, marginLeft: 10 }}>

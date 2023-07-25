@@ -19,7 +19,7 @@ import ProspectDetailsDrawer from "../../drawers/ProspectDetailsDrawer";
 
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
-import { formatToLabel, nameToInitials, valueToColor } from "@utils/general";
+import { formatToLabel, nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { useDebouncedState } from "@mantine/hooks";
 import { Prospect } from "src";
 import { chunk } from "lodash";
@@ -147,7 +147,7 @@ export default function CampaignProspects({
               return (
                 <Flex>
                   <Avatar
-                    src={x.img_url}
+                    src={proxyURL(x.img_url)}
                     alt={x.full_name}
                     color={valueToColor(theme, x.full_name)}
                     radius="lg"

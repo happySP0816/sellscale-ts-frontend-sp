@@ -151,11 +151,12 @@ export default function SpotlightWrapper({
 
   useEffect(() => {
     if(query){
-      activateQueryPipeline(query, navigate, theme, userToken).then(
-        (result) => {
-          setQueryResult(result);
+      activateQueryPipeline(query, navigate, theme, userToken).then((response) => {
+        console.log(response.query, query);
+        if(response.query === query){
+          setQueryResult(response.result);
         }
-      );
+      });
     }
   }, [query]);
 
@@ -174,7 +175,7 @@ export default function SpotlightWrapper({
         }
       }}
       actions={(queryResult === null) ? [] : (
-        (queryResult === false || query === '') ? mainActions : [...queryResult, ...mainActions]
+        (queryResult === false || query === '') ? mainActions : [...queryResult]
       )}
       actionComponent={CustomAction}
       searchIcon={<IconSearch size={18} />}

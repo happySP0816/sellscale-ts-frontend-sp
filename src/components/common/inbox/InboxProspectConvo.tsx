@@ -50,7 +50,7 @@ import { getConversation } from "@utils/requests/getConversation";
 import { getProspectByID } from "@utils/requests/getProspectByID";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Channel, EmailMessage, LinkedInMessage, Prospect } from "src";
+import { Channel, EmailMessage, LinkedInMessage, Prospect, ProspectShallow } from "src";
 import { labelizeConvoSubstatus } from "./utils";
 import { readLiMessages } from "@utils/requests/readMessages";
 import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
@@ -171,7 +171,7 @@ export function ProspectConvoMessage(props: {
 
 export const HEADER_HEIGHT = 102;
 
-export default function ProspectConvo(props: { prospects: Prospect[] }) {
+export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
 

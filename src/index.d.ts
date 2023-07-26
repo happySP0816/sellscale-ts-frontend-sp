@@ -99,12 +99,36 @@ export interface Prospect {
 export interface ProspectShallow {
   id: number;
   full_name: string;
+  first_name: string;
+  last_name: string;
+  company: string;
+  title: string;
+  email: string;
   icp_fit_score: number;
   icp_fit_reason: string;
-  title: string;
-  company: string;
   li_public_id: string | null;
-  img_url: string,
+  img_url: string;
+  archetype_id: number;
+  hidden_until: string;
+  hidden_reason: string;
+  demo_date: string;
+  deactivate_ai_engagement: boolean;
+  is_lead: boolean;
+  overall_status: string;
+  linkedin_status: string;
+  email_status: string;
+  li_urn_id: string;
+  li_conversation_urn_id: string;
+  li_last_message_timestamp: string;
+  li_is_last_message_from_sdr: boolean;
+  li_last_message_from_prospect: string;
+  li_last_message_from_sdr: string;
+  li_unread_messages: number;
+  email_last_message_timestamp: string;
+  email_is_last_message_from_sdr: boolean;
+  email_last_message_from_prospect: string;
+  email_last_message_from_sdr: string;
+  email_unread_messages: number;
 };
 
 export interface Simulation {

@@ -12,6 +12,7 @@ export async function getProspects(userToken: string,
   status?: string[],
   show_purgatory?: boolean | 'ALL',
   persona_id?: number,
+  shallow_data?: boolean,
 ): Promise<MsgResponse> {
 
   const response = await fetch(
@@ -29,6 +30,7 @@ export async function getProspects(userToken: string,
         status: status,
         show_purgatory: show_purgatory,
         persona_id: persona_id,
+        shallow_data: shallow_data,
       }),
     }
   );

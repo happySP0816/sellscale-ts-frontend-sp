@@ -15,7 +15,7 @@ import { setPageTitle } from "@utils/documentChange";
 import { getProspects } from "@utils/requests/getProspects";
 import { useState } from 'react';
 import { useRecoilValue } from "recoil";
-import { Prospect } from "src";
+import { Prospect, ProspectShallow } from "src";
 import RobotEmailImage from "./robot_emails.png";
 import { Icon360, IconBrandSuperhuman, IconList, IconWorld } from '@tabler/icons';
 
@@ -47,10 +47,10 @@ export default function InboxPage(props: { all?: boolean }) {
         nurturingMode ? ['ACCEPTED', 'BUMPED'] : ['ACTIVE_CONVO', 'DEMO'],
         'ALL',
         props.all ? undefined : currentProject?.id,
+        true,
       );
       setQueryComplete(true);
-      return response.status === 'success' ? response.data as Prospect[] : [];
-      
+      return response.status === 'success' ? response.data as ProspectShallow[] : [];
     },
     refetchOnWindowFocus: false,
   });

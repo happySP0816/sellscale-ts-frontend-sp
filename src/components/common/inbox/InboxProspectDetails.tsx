@@ -51,7 +51,7 @@ import { useRecoilValue, useRecoilState } from 'recoil';
 import { ReactNode, useEffect, useRef } from 'react';
 import { getProspectByID } from '@utils/requests/getProspectByID';
 import { prospectStatuses } from './utils';
-import { Channel, Prospect } from 'src';
+import { Channel, Prospect, ProspectShallow } from 'src';
 import ProspectDetailsResearch, { ProspectDetailsResearchTabs } from '@common/prospectDetails/ProspectDetailsResearch';
 import { updateProspectNote } from '@utils/requests/prospectNotes';
 import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChangeStatus';
@@ -94,7 +94,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function ProjectDetails(props: { prospects: Prospect[] }) {
+export default function ProjectDetails(props: { prospects: ProspectShallow[] }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const { classes } = useStyles();

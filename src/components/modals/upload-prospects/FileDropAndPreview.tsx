@@ -125,7 +125,7 @@ function determineColumns(
           </Stack>
         ),
         render: (value: any) => {
-          return <Text sx={{ wordBreak: "break-word" }}>{value[key]}</Text>;
+          return <Text sx={{ wordBreak: "break-word" }}>{_.truncate(value[key], {length: 60})}</Text>;
         },
       };
     });

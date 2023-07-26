@@ -125,7 +125,7 @@ export function ProspectConvoCard(props: {
   );
 }
 
-export default function ProspectList(props: { prospects: Prospect[]; isFetching: boolean, all?: boolean }) {
+export default function ProspectList(props: { prospects: ProspectShallow[]; isFetching: boolean, all?: boolean }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);

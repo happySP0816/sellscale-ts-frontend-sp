@@ -26,7 +26,7 @@ import {
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, LinkedInMessage, Prospect } from 'src';
+import { BumpFramework, LinkedInMessage, Prospect, ProspectShallow } from 'src';
 import { showNotification } from '@mantine/notifications';
 import { postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
 import _, { String } from 'lodash';
@@ -92,7 +92,7 @@ export const autoFillBumpFrameworkAccountResearch = (userToken: string, prospect
 
 
 export default function InboxProspectConvoBumpFramework(props: {
-    prospect: Prospect;
+    prospect: ProspectShallow;
     messages: LinkedInMessage[];
 }) {
 

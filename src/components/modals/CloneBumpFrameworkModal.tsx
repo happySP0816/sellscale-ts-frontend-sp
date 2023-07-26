@@ -1,13 +1,43 @@
 import { userTokenState } from "@atoms/userAtoms";
 
-import { Modal, Text,Flex, Select, Button, useMantineTheme, Card, Loader } from "@mantine/core";
+import { Modal, Text,Flex, Select, Button, useMantineTheme, Card, Loader, Badge } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons";
+import { valueToColor } from "@utils/general";
 import { cloneBumpFramework } from "@utils/requests/cloneBumpFramework";
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { BumpFramework } from "src";
+
+interface BumpItemProps extends React.ComponentPropsWithoutRef<'div'> {
+  label: string;
+  persona: string;
+  acceptance: string;
+}
+
+const SelectBumpItem = forwardRef<HTMLDivElement, BumpItemProps>(
+  ({ label, persona, acceptance, ...others }, ref) => (
+    <div ref={ref} {...others}>
+      <Flex justify={'space-between'}>
+        <Flex>
+          {label}
+          <Badge
+            ml='sm'
+            size='xs'
+            color={valueToColor(useMantineTheme(), persona)}
+          >
+            {persona}
+          </Badge>
+        </Flex>
+        <Flex>
+          {acceptance}
+        </Flex>
+      </Flex>
+
+    </div>
+  )
+)
 
 
 interface CloneBumpFramework extends Record<string, unknown> {
@@ -134,11 +164,18 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
             {/* SELECT */}
             <Select
               mt='md'
+              itemComponent={SelectBumpItem}
               data={
                 bumpFrameworks?.map((bumpFramework) => {
+                  let acceptance = 0;
+                  if (bumpFramework.etl_num_times_used && bumpFramework.etl_num_times_converted) {
+                    acceptance = Math.round((bumpFramework.etl_num_times_converted / bumpFramework.etl_num_times_used) * 100);
+                  }
                   return {
                     value: bumpFramework.id + '',
                     label: bumpFramework.title,
+                    persona: bumpFramework.client_archetype_archetype,
+                    acceptance: acceptance + '%',
                   }
                 })
               }

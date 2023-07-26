@@ -51,7 +51,7 @@ import { useRecoilValue, useRecoilState } from 'recoil';
 import { ReactNode, useEffect, useRef } from 'react';
 import { getProspectByID } from '@utils/requests/getProspectByID';
 import { prospectStatuses } from './utils';
-import { Channel, Prospect, ProspectShallow } from 'src';
+import { Channel, Prospect, ProspectDetails, ProspectShallow } from 'src';
 import ProspectDetailsResearch, { ProspectDetailsResearchTabs } from '@common/prospectDetails/ProspectDetailsResearch';
 import { updateProspectNote } from '@utils/requests/prospectNotes';
 import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChangeStatus';
@@ -117,7 +117,7 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
-      return response.status === 'success' ? response.data : [];
+      return response.status === 'success' ? response.data as ProspectDetails : undefined;
     },
     enabled: openedProspectId !== -1,
   });
@@ -255,9 +255,9 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
             <Box>
               <Center>
                 <ICPFitPill
-                  icp_fit_score={data?.details.icp_fit_score}
-                  icp_fit_reason={data?.details.icp_fit_reason}
-                  archetype={data?.details.persona}
+                  icp_fit_score={data?.details.icp_fit_score || 0}
+                  icp_fit_reason={data?.details.icp_fit_reason || ''}
+                  archetype={data?.details.persona || ''}
                 />
               </Center>
             </Box>

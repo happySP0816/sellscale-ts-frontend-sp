@@ -50,7 +50,7 @@ import { getConversation } from "@utils/requests/getConversation";
 import { getProspectByID } from "@utils/requests/getProspectByID";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Channel, EmailMessage, LinkedInMessage, Prospect, ProspectShallow } from "src";
+import { Channel, EmailMessage, LinkedInMessage, Prospect, ProspectDetails, ProspectShallow } from "src";
 import { labelizeConvoSubstatus } from "./utils";
 import { readLiMessages } from "@utils/requests/readMessages";
 import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
@@ -213,7 +213,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
-      return response.status === "success" ? response.data : [];
+      return response.status === "success" ? response.data as ProspectDetails : undefined;
     },
     enabled: openedProspectId !== -1,
   });

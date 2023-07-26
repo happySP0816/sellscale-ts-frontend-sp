@@ -131,6 +131,64 @@ export interface ProspectShallow {
   email_unread_messages: number;
 };
 
+export interface ProspectDetails {
+  details: {
+    id: number;
+    full_name: string;
+    title: string;
+    company: string;
+    address: string;
+    status: string;
+    overall_status: string;
+    linkedin_status: string;
+    bump_count: number;
+    icp_fit_score: number;
+    icp_fit_reason: string;
+    email_status: string;
+    profile_pic: string;
+    ai_responses_disabled: boolean;
+    notes: any[];
+    persona: string;
+    persona_id: number;
+    demo_date: string;
+  },
+  data: Prospect,
+  li: {
+    li_conversation_url: string;
+    li_conversation_thread: string;
+    li_profile: string;
+  },
+  email: {
+    email: string;
+    email_status: string;
+  },
+  company: {
+    logo: string;
+    name: string;
+    location: string;
+    tags: string[];
+    tagline: string;
+    description: string;
+    url: string;
+    employee_count: string;
+  },
+  referrals: { id: number, full_name: string }[],
+  referred: { id: number, full_name: string }[],
+}
+
+export interface DemoFeedback {
+  client_id: number;
+  client_sdr_id: number;
+  demo_date: string;
+  feedback: string;
+  id: number;
+  prospect_id: number;
+  prospect_img_url: string;
+  prospect_name: string;
+  rating: string;
+  status: string;
+}
+
 export interface Simulation {
   id: number;
   client_sdr_id: number;

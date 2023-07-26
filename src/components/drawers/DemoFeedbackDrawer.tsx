@@ -65,6 +65,7 @@ import { DemoRating } from '@common/home/dashboard/demo/DemoRating';
 import { showNotification } from '@mantine/notifications';
 import ICPFitPill from '@common/pipeline/ICPFitAndReason';
 import { getProspects } from '@utils/requests/getProspects';
+import DemoFeedbackCard from '@common/demo_feedback/DemoFeedbackCard';
 
 export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmit?: () => void }) {
   const theme = useMantineTheme();
@@ -200,28 +201,7 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       <Text fz='sm'>You scheduled a demo - how did it go? Your feedback will be used to improve our AI.</Text>
 
       <div style={{ marginTop: 20 }}>
-        <Paper withBorder p='xs' radius='md' sx={{ position: 'relative' }}>
-          <Flex justify='space-between'>
-            <div>
-              <Avatar size='md' radius='xl' src={proxyURL(activeProspect.img_url)} />
-            </div>
-            <div style={{ flexGrow: 1, marginLeft: 10 }}>
-              <Text fw={700} fz='sm'>
-                Demo with {activeProspect.full_name}
-              </Text>
-              <Text fz='sm' c='dimmed'>
-                {convertDateToLocalTime(new Date(activeProspect.demo_date))}
-              </Text>
-            </div>
-          </Flex>
-          <Box sx={{ position: 'absolute', right: 10, top: 10 }}>
-            <ICPFitPill
-              icp_fit_score={activeProspect.icp_fit_score}
-              icp_fit_reason={activeProspect.icp_fit_reason}
-              archetype={activeProspect.archetype_name}
-            />
-          </Box>
-        </Paper>
+        <DemoFeedbackCard prospect={activeProspect} />
       </div>
 
       <form onSubmit={form.onSubmit((values) => submitDemoFeedback(values))}>

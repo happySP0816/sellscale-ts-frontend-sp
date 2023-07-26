@@ -8,6 +8,7 @@ import { createProspectFromLinkedinLink } from "@utils/requests/createProspectFr
 import { getProspectByID } from "@utils/requests/getProspectByID";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
+import { ProspectDetails } from "src";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -32,7 +33,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
   const currentProject = useRecoilValue(currentProjectState);
 
   const [url, setURL] = useState<string>("");
-  const [prospectDetails, setProspectDetails] = useState<any>();
+  const [prospectDetails, setProspectDetails] = useState<ProspectDetails>();
 
   const triggerUploadProspectFromLinkedInURL = async () => {
     setLoading(true);
@@ -56,7 +57,7 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
 
       const prospectResponse = await getProspectByID(userToken, result.data.prospect_id);
       if (prospectResponse.status === 'success') {
-        setProspectDetails(prospectResponse.data);
+        setProspectDetails(prospectResponse.data satisfies ProspectDetails);
       }
 
       setLoading(false);
@@ -116,20 +117,20 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
         <Group noWrap spacing={10} align='flex-start' pt='xs'>
           <Avatar
             src={
-              proxyURL(prospectDetails.profile_pic)
+              proxyURL(prospectDetails.details.profile_pic)
             }
             size={94}
             radius='md'
           />
           <div>
             <Title order={3}>
-              {prospectDetails.full_name}
+              {prospectDetails.details.full_name}
             </Title>
 
             <Group noWrap spacing={10} mt={3}>
               <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
               <Text size='xs' color='dimmed'>
-                {prospectDetails.title}
+                {prospectDetails.details.title}
               </Text>
             </Group>
 

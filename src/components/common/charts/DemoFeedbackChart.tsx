@@ -35,7 +35,7 @@ import _ from "lodash";
 import { Bar } from "react-chartjs-2";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Channel } from "src";
+import { Channel, DemoFeedback } from "src";
 import {
   IconChartHistogram,
   IconMoodEmpty,
@@ -128,7 +128,7 @@ export default function DemoFeedbackChart() {
 
       const response = await getDemoFeedback(userToken);
       let results =
-        response.status === "success" ? (response.data as any[]) : [];
+        response.status === "success" ? (response.data as DemoFeedback[]) : [];
 
       // Sort data
       results = _.sortBy(results, sortStatus.columnAccessor);

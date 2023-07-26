@@ -4,9 +4,9 @@ import { MsgResponse } from "src";
 import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
-export default async function getDemoFeedback(userToken: string): Promise<MsgResponse> {
+export default async function getDemoFeedback(userToken: string, prospectId?: number): Promise<MsgResponse> {
   const response = await fetch(
-    `${API_URL}/client/demo_feedback`,
+    `${API_URL}/client/demo_feedback${prospectId ? `?prospect_id=${prospectId}` : ''}`,
     {
       method: "GET",
       headers: {
@@ -14,5 +14,5 @@ export default async function getDemoFeedback(userToken: string): Promise<MsgRes
       },
     }
   );
-  return await processResponse(response, 'data');
+  return await processResponse(response, 'data', false);
 }

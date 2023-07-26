@@ -42,12 +42,15 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { formatToLabel, splitName, valueToColor } from "@utils/general";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Channel } from "src";
+import { Channel, DemoFeedback, ProspectDetails } from "src";
 import { getChannelStatusOptions } from "@utils/requests/getChannels";
 import { API_URL } from "@constants/data";
 import ProspectDemoDateSelector from "./ProspectDemoDateSelector";
 import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
 import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
+import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
+import { getProspectByID } from "@utils/requests/getProspectByID";
+import getDemoFeedback from "@utils/requests/getDemoFeedback";
 
 const linkedinStatusOptions = [
   {
@@ -316,6 +319,24 @@ export default function ProspectDetailsChangeStatus(
     demosDrawerProspectIdState
   );
 
+  const { data: prospectData } = useQuery({
+    queryKey: [`query-get-dashboard-prospect-${props.prospectId}`],
+    queryFn: async () => {
+      const response = await getProspectByID(userToken, props.prospectId);
+      return response.status === "success" ? response.data as ProspectDetails : undefined;
+    },
+    enabled: props.prospectId !== -1,
+  });
+
+  const { data: demoFeedback } = useQuery({
+    queryKey: [`query-get-prospect-demo-feedback-${props.prospectId}`],
+    queryFn: async () => {
+      const response = await getDemoFeedback(userToken, props.prospectId);
+      return response.status === "success" ? response.data[0] as DemoFeedback : undefined;
+    },
+    enabled: props.prospectId !== -1,
+  });
+
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
       `prospect-next-status-options-${props.prospectId}-${props.channelData.value}`,
@@ -449,7 +470,11 @@ export default function ProspectDetailsChangeStatus(
         <SimpleGrid cols={3} mt="md">
           {items}
         </SimpleGrid> :
-        <Button
+        <>
+          {prospectData && demoFeedback ? (
+            <DemoFeedbackCard prospect={prospectData.data} demoFeedback={demoFeedback} />
+          ) : (
+            <Button
             variant="light"
             radius="md"
             fullWidth
@@ -459,7 +484,9 @@ export default function ProspectDetailsChangeStatus(
             }}
           >
             Give Demo Feedback
-          </Button>    
+          </Button>
+          )}
+        </>
       }
 
       <DemoFeedbackDrawer refetch={refetch} onSubmit={() => {
@@ -469,7 +496,7 @@ export default function ProspectDetailsChangeStatus(
         }}/>
 
       {props.channelData.currentStatus &&
-        props.channelData.currentStatus.includes("DEMO") && (
+        props.channelData.currentStatus.includes("DEMO") && !demoFeedback && (
           <ProspectDemoDateSelector prospectId={props.prospectId} />
         )}
       {props.channelData.currentStatus?.startsWith("ACTIVE_CONVO") && (

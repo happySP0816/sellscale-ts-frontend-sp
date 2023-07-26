@@ -138,16 +138,16 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
     >
       <LoadingOverlay visible={loading} />
       <TextInput
-        label="Title"
-        placeholder={"Mention the Super Bowl"}
+        label="Template nickname"
+        placeholder={"Sports introduction"}
         withAsterisk
         {...form.getInputProps("title")}
       />
       <Textarea
         mt="md"
-        label="Description"
+        label="Prompt Instructions"
         placeholder={
-          "Mention the Super Bowl which is coming up soon."
+          "These are instructions the AI will read to craft a personalized message"
         }
         withAsterisk
         autosize

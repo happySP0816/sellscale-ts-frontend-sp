@@ -137,8 +137,8 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
         <TextInput
           w='50%'
           mr='xs'
-          label="Title"
-          placeholder={"Mention the Super Bowl"}
+          label="Template nickname"
+          placeholder={"Sports introduction"}
           {...form.getInputProps("title")}
         />
         <Flex direction='column' align='flex-end'>
@@ -180,9 +180,9 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
 
       <Textarea
         mt="md"
-        label="Description"
+        label="Prompt Instructions"
         placeholder={
-          "Mention the Super Bowl which is coming up soon."
+          "These are instructions the AI will read to craft a personalized message"
         }
         {...form.getInputProps("description")}
         minRows={3}

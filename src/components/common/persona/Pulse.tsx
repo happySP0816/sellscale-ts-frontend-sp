@@ -16,6 +16,7 @@ import {
   Stack,
   Box,
   List,
+  Collapse,
 } from '@mantine/core';
 import { openConfirmModal, openContextModal } from '@mantine/modals';
 import { IconBrain, IconBrandLinkedin, IconPencil, IconTestPipe } from '@tabler/icons';
@@ -64,6 +65,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   const [prospects, setProspects] = useState<ProspectShallow[]>([]);
   const [selectedProspect, setSelectedProspect] = useState<ProspectShallow>();
   const [testingPrompt, setTestingPrompt] = useState(false);
+  const [detailsOpened, setDetailsOpened] = useState(false);
 
   const ProspectSelectItem = forwardRef<HTMLDivElement, ProspectItemProps>(
     ({ label, icpFit, title, company, ...others }: ProspectItemProps, ref) => (
@@ -184,13 +186,32 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
             label='Ideal Customer Profile (ICP) Description'
             description={
               <Box>
-                <Text>Filters our AI searches for:</Text>
-                <List size="xs">
-                  <List.Item><Text fz='xs' c='dimmed'>School</Text></List.Item>
-                  <List.Item><Text fz='xs' c='dimmed'>Company size</Text></List.Item>
-                  <List.Item><Text fz='xs' c='dimmed'>Title</Text></List.Item>
-                  <List.Item><Text fz='xs' c='dimmed'>Company description</Text></List.Item>
-                </List>
+                <Text>Filters our AI searches for:
+                  <Text
+                    pl='xs'
+                    c="blue.4"
+                    fw='bold'
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => setDetailsOpened((prev) => !prev)}
+                    span
+                  >{detailsOpened ? 'Hide' : 'Show'}</Text>
+                </Text>
+
+                <Collapse in={detailsOpened}>
+                  <List size="xs">
+                    <List.Item><Text fz='xs' c='dimmed'>Prospect Name</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Prospect Title</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Prospect LinkedIn Bio</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Prospect Location</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Prospect Education</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Company Name</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Company Size</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Company Industry</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Company Location</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Company Tagline</Text></List.Item>
+                    <List.Item><Text fz='xs' c='dimmed'>Company Description</Text></List.Item>
+                  </List>
+                </Collapse>
               </Box>
             }
             minRows={4}

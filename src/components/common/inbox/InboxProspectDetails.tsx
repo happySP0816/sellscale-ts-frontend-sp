@@ -51,7 +51,7 @@ import { useRecoilValue, useRecoilState } from 'recoil';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { getProspectByID } from '@utils/requests/getProspectByID';
 import { prospectStatuses } from './utils';
-import { Channel, Prospect, ProspectDetails, ProspectShallow } from 'src';
+import { Channel, DemoFeedback, Prospect, ProspectDetails, ProspectShallow } from 'src';
 import ProspectDetailsResearch, { ProspectDetailsResearchTabs } from '@common/prospectDetails/ProspectDetailsResearch';
 import { updateProspectNote } from '@utils/requests/prospectNotes';
 import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChangeStatus';
@@ -71,6 +71,8 @@ import EditProspectModal from '@modals/EditProspectModal';
 import { proxyURL } from '@utils/general';
 import { IconDeviceFloppy } from '@tabler/icons';
 import { showNotification } from '@mantine/notifications';
+import getDemoFeedback from '@utils/requests/getDemoFeedback';
+import DemoFeedbackCard from '@common/demo_feedback/DemoFeedbackCard';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -122,6 +124,15 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
       return response.status === 'success' ? response.data as ProspectDetails : undefined;
+    },
+    enabled: openedProspectId !== -1,
+  });
+
+  const { data: demoFeedback } = useQuery({
+    queryKey: [`query-get-prospect-demo-feedback-${openedProspectId}`],
+    queryFn: async () => {
+      const response = await getDemoFeedback(userToken, openedProspectId);
+      return response.status === "success" ? response.data[0] as DemoFeedback : undefined;
     },
     enabled: openedProspectId !== -1,
   });
@@ -331,17 +342,21 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
                 <ProspectDemoDateSelector prospectId={openedProspectId} />
               </Box>
               <Box mx={10} mb={10}>
-                <Button
-                  variant="light"
-                  radius="md"
-                  fullWidth
-                  onClick={() => {
-                    setDrawerProspectId(openedProspectId);
-                    setDemosDrawerOpened(true);
-                  }}
-                >
-                  Give Demo Feedback
-                </Button>
+                {data && demoFeedback ? (
+                  <DemoFeedbackCard prospect={data.data} demoFeedback={demoFeedback} />
+                ) : (
+                  <Button
+                    variant="light"
+                    radius="md"
+                    fullWidth
+                    onClick={() => {
+                      setDrawerProspectId(openedProspectId);
+                      setDemosDrawerOpened(true);
+                    }}
+                  >
+                    Give Demo Feedback
+                  </Button>
+                )}
                 <DemoFeedbackDrawer refetch={refetch} />
               </Box>
             </Stack>

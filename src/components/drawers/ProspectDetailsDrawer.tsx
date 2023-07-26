@@ -348,7 +348,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                             <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
                               <Title order={4}>Prospect History</Title>
                               <ScrollArea h={500}>
-                              <ProspectDetailsHistory prospectId={data.main.prospect_info.details.id} />
+                              <ProspectDetailsHistory prospectId={data.main.prospect_info.details.id} forceRefresh={false}/>
                               </ScrollArea>
                             </Card>
 

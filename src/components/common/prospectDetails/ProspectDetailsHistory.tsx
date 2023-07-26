@@ -86,7 +86,7 @@ function historyEventToDescription(theme: MantineTheme, item: HistoryItem) {
     case "INTRO_MESSAGE":
       return `Sent outreach: "${item.message.trim()}"`;
     case "NOTE":
-      return `Wrote note: "${item.message.trim()}"`;
+      return `Updated note: "${item.message.trim()}"`;
     case "MESSAGE":
       if (item.author === "You") {
         return `Sent message: "${item.message.trim()}"`;
@@ -113,7 +113,7 @@ function historyEventToDescription(theme: MantineTheme, item: HistoryItem) {
   }
 }
 
-export default function ProspectDetailsHistory(props: { prospectId: number }) {
+export default function ProspectDetailsHistory(props: { prospectId: number, forceRefresh: boolean }) {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
   const [history, setHistory] = useState<any>();
@@ -130,6 +130,16 @@ export default function ProspectDetailsHistory(props: { prospectId: number }) {
     })();
     
   }
+
+  useEffect(() => {
+    setHistoryFetchedForId(props.prospectId);
+    setLoadingHistory(true);
+    (async () => {
+      const response = await getProspectLiHistory(userToken, props.prospectId);
+      setHistory(response.data);
+      setLoadingHistory(false);
+    })();
+  }, [props.forceRefresh]);
 
   // Format the events into a sortable timeline
   let events: HistoryItem[] = [];

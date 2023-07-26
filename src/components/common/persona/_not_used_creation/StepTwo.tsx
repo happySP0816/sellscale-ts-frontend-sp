@@ -28,6 +28,7 @@ export default function StepTwo(props: { onChange: (data: {
         onChange={(e) => setFitReason(e.target.value)}
         placeholder='To help their outbound team increase...'
         label='Why would this persona buy your product?'
+        description="This information is used by the AI to construct value prop messages"
       />
 
       <TextAreaWithAI

@@ -334,6 +334,7 @@ export default function UploadProspectsModal({
               onChange={(e) => setFitReason(e.target.value)}
               placeholder="The AI will use this reasoning to reach out to prospects and explain why they are a good fit for your product."
               label="Why would this persona buy your product?"
+              description="This information is used by the AI to construct value prop messages"
               loadingAIGenerate={loadingPersonaBuyReasonGeneration}
               onAIGenerateClicked={async () => {
                 await displayNotification(

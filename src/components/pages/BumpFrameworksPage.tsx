@@ -1,4 +1,4 @@
-import { userTokenState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
 import {
   Flex,
@@ -21,11 +21,11 @@ import {
   HoverCard,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { openContextModal } from '@mantine/modals';
+import { openConfirmModal, openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
-import { IconAnalyze, IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconRobot, IconTransferIn, IconX } from '@tabler/icons';
+import { IconAlertTriangle, IconAnalyze, IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconRobot, IconSearch, IconTransferIn, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
@@ -37,6 +37,7 @@ import { currentProjectState } from '@atoms/personaAtoms';
 import LinkedInConvoSimulator from '@common/simulators/linkedin/LinkedInConvoSimulator';
 import { DataTable } from 'mantine-datatable';
 import TextWithNewline from '@common/library/TextWithNewlines';
+import postToggleAutoBump from '@utils/requests/postToggleAutoBump';
 
 
 type BumpFrameworkBuckets = {
@@ -183,9 +184,24 @@ function BumpBucketView(props: {
                           }
                         </Flex>
                         <Flex direction='column' ml='xl'>
-                          <Text fw='bold' fz='lg'>
-                            {framework.title}
-                          </Text>
+                          <Flex direction='row'>
+                            <Text fw='bold' fz='lg' mr='8px'>
+                              {framework.title}
+                            </Text>
+                            {
+                              framework.use_account_research &&
+                              <Tooltip
+                                withArrow
+                                withinPortal
+                                label='This BumpFramework will use Account Research'
+                              >
+                                <div>
+                                  <IconSearch size='.75rem' stroke='2px' />
+                                </div>
+                              </Tooltip>
+                            }
+
+                          </Flex>
                           <TextWithNewline breakheight='6px' style={{ fontSize: '80%' }}>{framework.description}</TextWithNewline>
                         </Flex>
                       </Flex>
@@ -429,6 +445,7 @@ export default function BumpFrameworksPage(props: {
   onPopulateBumpFrameworks?: (buckets: BumpFrameworkBuckets) => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
+  const [userData, setUserData] = useRecoilState(userDataState);
   const [loading, setLoading] = useState(false);
 
   const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
@@ -457,6 +474,37 @@ export default function BumpFrameworksPage(props: {
     },
     refetchOnWindowFocus: false,
   });
+
+  const triggerToggleAutoBump = async () => {
+    let status = userData.auto_bump
+    let old_status
+    if (status == true) {
+      status = "Disabled"
+      old_status = "Enabled"
+    } else {
+      status = "Enabled"
+      old_status = "Disabled"
+    }
+
+    const result = await postToggleAutoBump(userToken);
+
+    if (result.status === 'success') {
+      setUserData({ ...userData, auto_bump: !userData.auto_bump });
+      showNotification({
+        title: `AutoBump ${status}`,
+        message: `AutoBump has been ${status.toLower()}. You can ${old_status.toLowerCase()} it at any time.`,
+        color: 'green',
+        icon: <IconCheck size='1rem' />,
+      })
+    } else {
+      showNotification({
+        title: 'Error',
+        message: 'Something went wrong. Please try again later.',
+        color: 'red',
+        icon: <IconAlertTriangle size='1rem' />,
+      })
+    }
+  }
 
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
@@ -551,7 +599,65 @@ export default function BumpFrameworksPage(props: {
     <>
       <Flex direction='column'>
         <LoadingOverlay visible={loading} />
-        <Title>LinkedIn Bump Frameworks</Title>
+        <Flex justify='space-between'>
+          <Title>LinkedIn Bump Frameworks</Title>
+          <Tooltip label={userData.auto_bump ? 'AutoBump Enabled' : 'AutoBump Disabled'} withinPortal withArrow>
+            <ActionIcon
+              variant='outline'
+              color={userData.auto_bump ? 'pink' : 'gray'}
+              onClick={() => {
+                let status = userData.auto_bump
+                let old_status
+                if (status == true) {
+                  status = "Disable"
+                  old_status = "enable"
+                } else {
+                  status = "Enable"
+                  old_status = "disable"
+                }
+                openConfirmModal({
+                  title: (
+                    <Flex direction='row' align='center' justify='space-between'>
+                      <Title order={3}>
+                        AutoBump
+                      </Title>
+                      <Badge
+                        color={userData.auto_bump ? 'green' : 'red'}
+                        variant='filled'
+                        ml='sm'
+                      >
+                        {userData.auto_bump ? 'Enabled' : 'Disabled'}
+                      </Badge>
+                    </Flex>
+                  ),
+                  children: (
+                    <>
+                      <Text fz='sm'>
+                        AutoBump is SellScale AI's system for automatically sending follow-up messages to prospects. AutoBumps are sent when a prospect does not respond to a message, and are sent at random times between 9am and 5pm in your timezone on workdays.
+                      </Text>
+                      <Card mt='sm' mb='md' withBorder shadow='sm'>
+                        <Text fw='bold'>
+                          Please test your bump frameworks before enabling AutoBump. AutoBump will always use your default bump framework, so make sure it is working as expected.
+                        </Text>
+                      </Card>
+
+                      <Text mt='md' fz='sm'>
+                        AutoBumps using personalized bump frameworks see a significant increase in response rates.
+                      </Text>
+                    </>
+                  ),
+                  labels: { confirm: status, cancel: 'Cancel' },
+                  cancelProps: { color: "gray" },
+                  confirmProps: { color: userData.auto_bump ? 'red' : 'pink' },
+                  onCancel: () => { },
+                  onConfirm: () => { triggerToggleAutoBump() }
+                })
+              }}
+            >
+              <IconRobot size='1.2rem' />
+            </ActionIcon>
+          </Tooltip>
+        </Flex>
 
         <Tabs color='blue' variant='outline' defaultValue='sequence' my='lg' orientation='vertical'>
           <Tabs.List>

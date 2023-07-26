@@ -48,7 +48,7 @@ import { openedProspectIdState, currentConvoChannelState } from '@atoms/inboxAto
 import { userTokenState } from '@atoms/userAtoms';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRecoilValue, useRecoilState } from 'recoil';
-import { ReactNode, useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { getProspectByID } from '@utils/requests/getProspectByID';
 import { prospectStatuses } from './utils';
 import { Channel, Prospect, ProspectShallow } from 'src';
@@ -69,6 +69,8 @@ import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
 import ProspectDetailsHistory from '@common/prospectDetails/ProspectDetailsHistory';
 import EditProspectModal from '@modals/EditProspectModal';
 import { proxyURL } from '@utils/general';
+import { IconDeviceFloppy } from '@tabler/icons';
+import { showNotification } from '@mantine/notifications';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -99,6 +101,8 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
   const queryClient = useQueryClient();
   const { classes } = useStyles();
   const notesRef = useRef<HTMLTextAreaElement | null>(null);
+  const [noteLoading, setNoteLoading] = useState(false);
+  const [forcedHistoryRefresh, setForcedHistoryRefresh] = useState(false);
 
   const { hovered: icpHovered, ref: icpRef } = useHover();
 
@@ -134,6 +138,43 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
       notesRef.current.value = data?.details.notes[data?.details.notes.length - 1]?.note ?? '';
     }
   }, [data]);
+
+  const triggerUpdateProspectNote = async () => {
+    setNoteLoading(true);
+
+    if (notesRef.current?.value === "") {
+      showNotification({
+        title: 'Error',
+        message: 'Please enter a note',
+        color: 'red',
+        autoClose: 5000,
+      })
+      setNoteLoading(false);
+      return;
+    }
+
+    if (notesRef.current) {
+      const result = await updateProspectNote(userToken, openedProspectId, notesRef.current.value);
+      if (result.status === 'success') {
+        showNotification({
+          title: 'Note saved',
+          message: 'The note has been added successfully',
+          color: 'green',
+          autoClose: 5000,
+        })
+      } else {
+        showNotification({
+          title: 'Error',
+          message: 'There was an error saving the note',
+          color: 'red',
+          autoClose: 5000,
+        })
+      }
+    }
+
+    setForcedHistoryRefresh(!forcedHistoryRefresh) // Hacky way to force refresh
+    setNoteLoading(false);
+  }
 
   // For changing the status of the prospect
   const changeStatus = async (status: string) => {
@@ -386,7 +427,7 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
           <Tabs.Panel value='history' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
             <ScrollArea h={'100%'}>
               <Card withBorder pb='100px'>
-                {openedProspectId !== -1 && <ProspectDetailsHistory prospectId={openedProspectId} />}
+                {openedProspectId !== -1 && <ProspectDetailsHistory prospectId={openedProspectId} forceRefresh={forcedHistoryRefresh} />}
               </Card>
             </ScrollArea>
           </Tabs.Panel>
@@ -396,13 +437,22 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
               ref={notesRef}
               autosize
               minRows={5}
-              radius={theme.radius.lg}
+              radius={theme.radius.sm}
               placeholder='Write notes here...'
-              onBlur={async (event) => {
-                await updateProspectNote(userToken, openedProspectId, event.currentTarget.value);
-                refetch();
+              onChange={(e) => {
+                notesRef.current!.value = e.target.value;
               }}
             />
+            <Flex mt='md'>
+              <Button
+                size='xs'
+                onClick={triggerUpdateProspectNote}
+                loading={noteLoading}
+              >
+                Save Note
+              </Button>
+            </Flex>
+
           </Tabs.Panel>
         </Tabs>
       </div>

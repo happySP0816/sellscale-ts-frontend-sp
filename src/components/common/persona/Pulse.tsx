@@ -13,6 +13,9 @@ import {
   Badge,
   useMantineTheme,
   createStyles,
+  Stack,
+  Box,
+  List,
 } from '@mantine/core';
 import { openConfirmModal, openContextModal } from '@mantine/modals';
 import { IconBrain, IconBrandLinkedin, IconPencil, IconTestPipe } from '@tabler/icons';
@@ -178,8 +181,19 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
           <Textarea
             defaultValue={currentICPPrompt}
             placeholder='No prompt? Send SellScale a prompt request through here.'
-            label='Ideal Customer Profile Description'
-            description='Description of your Ideal Customer Profile (ICP) that SellScale AI will use to filter prospects.'
+            label='Ideal Customer Profile (ICP) Description'
+            description={
+              <Box>
+                <Text>Filters our AI searches for:</Text>
+                <List size="xs">
+                  <List.Item><Text fz='xs' c='dimmed'>School</Text></List.Item>
+                  <List.Item><Text fz='xs' c='dimmed'>Company size</Text></List.Item>
+                  <List.Item><Text fz='xs' c='dimmed'>Title</Text></List.Item>
+                  <List.Item><Text fz='xs' c='dimmed'>Company description</Text></List.Item>
+                </List>
+              </Box>
+            }
+            minRows={4}
             autosize
             disabled
           />

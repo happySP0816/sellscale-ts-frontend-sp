@@ -55,7 +55,7 @@ export default function ManageBumpFramework({
   const [
     selectedBumpFramework,
     setSelectedBumpFramework,
-  ] = useState<BumpFramework | null>(null);
+  ] = useState<any | null>(null);
 
   const [loadingBumpFrameworks, setLoadingBumpFrameworks] = useState(false);
   const userToken = useRecoilValue(userTokenState);

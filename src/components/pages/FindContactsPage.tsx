@@ -114,7 +114,7 @@ export default function FindContactsPage() {
                   placeholder="100"
                   withAsterisk
                   min={0}
-                  max={150}
+                  max={400}
                   value={salesNavigatorForm.values.numberOfContacts}
                   onChange={(event) => salesNavigatorForm.setFieldValue("numberOfContacts", event as number)}
                   required

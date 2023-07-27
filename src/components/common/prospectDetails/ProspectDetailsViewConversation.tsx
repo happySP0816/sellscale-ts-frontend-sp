@@ -556,6 +556,7 @@ export default function ProspectDetailsViewConversation(
                 {
                   (selectedBumpFramework && accountResearch) ? (
                     <AutoBumpFrameworkInfo
+                      useBumpFramework={selectedBumpFramework === null}
                       bump_title={selectedBumpFramework.title}
                       bump_description={selectedBumpFramework.description}
                       bump_length={selectedBumpFramework.bump_length}
@@ -569,6 +570,7 @@ export default function ProspectDetailsViewConversation(
                         autoBumpMessage.current &&
                         autoBumpMessage.current.bump_framework.title && (
                           <AutoBumpFrameworkInfo
+                            useBumpFramework={true}
                             bump_title={autoBumpMessage.current.bump_framework.title}
                             bump_description={
                               autoBumpMessage.current.bump_framework.description

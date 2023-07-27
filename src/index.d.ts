@@ -357,4 +357,5 @@ export type SalesNavigatorLaunch = {
   pb_container_id: string,
   result_available: boolean,
   launch_date: Date,
+  name: string,
 }

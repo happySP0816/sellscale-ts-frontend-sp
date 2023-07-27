@@ -196,9 +196,12 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const checkFuzz = useCallback(
     debounce((message, aiMessage) => {
+      console.log('checking fuzz', message, aiMessage)
       const ratio = fuzzratio(message, aiMessage);
       ratio > 50 && setAiGenerated(true);
       ratio <= 50 && setAiGenerated(false);
+      console.log('fuzz ratio', ratio)
+      console.log('ai generated', aiGenerated)
     }, 200), []
   )
 
@@ -297,6 +300,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 onClick={async () => {
                   setMsgLoading(true);
                   const result = await generateAIFollowup(userToken, props.prospectId, selectedBumpFramework);
+                  console.log(result)
                   setMessageDraft(result.msg);
                   setAiMessage(result.msg);
                   setAiGenerated(result.aiGenerated);
@@ -320,7 +324,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 }
                 styles={{
                   input: { borderColor: 'black', borderRight: '0', borderLeft: '0' },
-                  dropdown: {minWidth: 150}
+                  dropdown: { minWidth: 150 }
                 }}
                 onChange={(value) => {
                   const selected = bumpFrameworks.find((bf) => bf.id === parseInt(value as string));
@@ -349,14 +353,15 @@ export default forwardRef(function InboxProspectConvoSendBox(
             Send
           </Button>
         </Flex>
-        {aiGenerated && selectedBumpFramework && selectedBumpFramework.id !== -1 && (
+        {aiGenerated && (
           <AutoBumpFrameworkInfo
-            bump_title={selectedBumpFramework.title}
-            bump_description={selectedBumpFramework.description}
-            bump_length={selectedBumpFramework.bump_length}
-            account_research_points={selectedBumpFramework.account_research || []}
-            bump_number_sent={selectedBumpFramework.etl_num_times_used}
-            bump_number_converted={selectedBumpFramework.etl_num_times_converted}
+            useBumpFramework={selectedBumpFramework !== undefined}
+            bump_title={selectedBumpFramework?.title || 'None'}
+            bump_description={selectedBumpFramework?.description || 'No framework'}
+            bump_length={selectedBumpFramework?.bump_length || 'No length'}
+            account_research_points={selectedBumpFramework?.account_research || []}
+            bump_number_sent={selectedBumpFramework?.etl_num_times_used}
+            bump_number_converted={selectedBumpFramework?.etl_num_times_converted}
           />
         )}
       </div>

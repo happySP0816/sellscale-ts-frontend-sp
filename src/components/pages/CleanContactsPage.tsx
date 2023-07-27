@@ -1,8 +1,9 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
-import { Flex, Title, Text, Badge, useMantineTheme, Card, Stack, Avatar, Button, ScrollArea, Loader } from "@mantine/core";
+import { Flex, Title, Text, Badge, useMantineTheme, Card, Stack, Avatar, Button, ScrollArea, Loader, ActionIcon, Tooltip } from "@mantine/core";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
+import { IconRefresh } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange"
 import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { getCleanableProspects } from "@utils/requests/getCleanableProspects";
@@ -19,6 +20,7 @@ export default function CleanContactsPage() {
 
   const [loading, setLoading] = useState(false)
   const [previewProspects, setPreviewProspects] = useState<Prospect[]>([])
+  const [prospectCount, setProspectCount] = useState(0)
 
   const triggerGetUnassignableContacts = async () => {
     setLoading(true)
@@ -37,6 +39,7 @@ export default function CleanContactsPage() {
     const response = await getCleanableProspects(userToken, currentProject.id)
     if (response.status === 'success') {
       setPreviewProspects(response.data.prospects)
+      setProspectCount(response.data.total_count)
     }
 
     setLoading(false)
@@ -58,8 +61,8 @@ export default function CleanContactsPage() {
     const response = await postUnassignContacts(userToken, currentProject.id)
     if (response.status === 'success') {
       showNotification({
-        title: 'Contacts Cleaned',
-        message: 'All contacts have been cleaned.',
+        title: 'Success',
+        message: 'The contacts have been queued for reassignment. Feel free to leave this page.',
         color: 'green',
         autoClose: 5000,
       })
@@ -89,7 +92,7 @@ export default function CleanContactsPage() {
 
         <Title>Clean Contacts</Title>
         <Text mt='md'>
-          Use this tool to help clean contacts which may be unsuitable for this Persona. This tool will quickly move all
+          Use this tool to help clean contacts which may be unsuitable for this Persona. This tool will move all
           <Badge color={'red'} size='sm' mx='4px' variant='filled'>
             low
           </Badge>
@@ -108,18 +111,27 @@ export default function CleanContactsPage() {
         </Text>
 
         <Card withBorder shadow="sm" mt='lg'>
-          <Title order={5}>
-            Cleanup Preview
-          </Title>
-          <Text>These prospects will be reassigned. If something looks incorrect, please readjust your ICP prompt.</Text>
+          <Flex justify={'space-between'}>
+            <Flex direction="column">
+              <Title order={5}>
+                Cleanup Preview (sample of 10)
+              </Title>
+              <Text>These prospects will be reassigned. If something looks incorrect, please readjust your ICP prompt.</Text>
+            </Flex>
+            <Tooltip label='Refresh' withinPortal withArrow>
+              <ActionIcon variant="transparent" onClick={triggerGetUnassignableContacts}>
+                <IconRefresh size='1rem' />
+              </ActionIcon>
+            </Tooltip>
+          </Flex>
           {
             loading ? (
               <Flex align='center' justify='center' mt='md'>
                 <Loader variant='oval' size='md' />
               </Flex>
             ) : (
-              <ScrollArea h={400} mt='md'>
-                <Stack mt='sm'>
+              <ScrollArea h={400} mt='xs'>
+                <Stack mt='xs'>
                   {previewProspects.map((prospect, index) => (
                     <Card key={index} withBorder>
                       <Flex align='center'>
@@ -155,9 +167,14 @@ export default function CleanContactsPage() {
               openConfirmModal({
                 title: 'Clean Contacts',
                 children: (
+                  <>
                   <Text>
-                    Are you sure you want to clean contacts. This will remove prospects from this persona and move them to the Unassigned persona. SellScale AI will not reach out to these prospects.
+                    Are you sure you want to clean contacts. This will remove all {prospectCount} prospects from this persona and move them to the Unassigned persona. SellScale AI will not reach out to these prospects.
                   </Text>
+                  <Text fw='bold' mt='md'>
+                    Estimated cleanup time: {Math.ceil(prospectCount / 40)} minutes
+                  </Text>
+                  </>
                 ),
                 labels: { confirm: 'Clean', cancel: 'Cancel' },
                 confirmProps: { color: 'red' },
@@ -165,7 +182,7 @@ export default function CleanContactsPage() {
                 onConfirm: () => { triggerPostUnassignContacts() }
               })
             }}>
-            Clean Contacts
+            Clean {prospectCount} Contacts
           </Button>
         </Flex>
 

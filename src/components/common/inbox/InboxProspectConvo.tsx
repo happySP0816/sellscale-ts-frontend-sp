@@ -274,7 +274,6 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
 
       const result = await getConversation(userToken, openedProspectId, false);
       getConversation(userToken, openedProspectId, true).then((updatedResult) => {
-        console.log('- Fetched updated convo')
 
         const finalMessages = updatedResult.status === "success"
           ? (updatedResult.data.data.reverse() as LinkedInMessage[])
@@ -284,7 +283,6 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
 
       // Indicate messages as read
       readLiMessages(userToken, openedProspectId).then((readLiResult) => {
-        console.log('- Read Li Messages')
         if (readLiResult.status === "success" && readLiResult.data.updated) {
         }
       });
@@ -302,7 +300,6 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
         userToken,
         openedProspectId
       ).then((autoBumpMsgResponse) => {
-        console.log('- Fetched auto bump response')
         if (autoBumpMsgResponse.status === "success") {
           sendBoxRef.current?.setAiGenerated(true);
           sendBoxRef.current?.setMessageDraft(
@@ -319,7 +316,6 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
           ? (result.data.data.reverse() as LinkedInMessage[])
           : [];
       setCurrentConvoLiMessages(finalMessages);
-      console.log('Finished loading convo')
       return finalMessages;
     },
     enabled:

@@ -105,7 +105,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
     // Delete the auto bump message if it exists
     await deleteAutoBumpMessage(userToken, props.prospectId);
 
-    if(openedOutboundChannel === 'LINKEDIN'){
+    if (openedOutboundChannel === 'LINKEDIN') {
 
       sendLinkedInMessage(
         userToken,
@@ -298,6 +298,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   setMsgLoading(true);
                   const result = await generateAIFollowup(userToken, props.prospectId, selectedBumpFramework);
                   setMessageDraft(result.msg);
+                  setAiMessage(result.msg);
                   setAiGenerated(result.aiGenerated);
                   setMsgLoading(false);
                 }}
@@ -305,6 +306,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 Generate Message
               </Button>
               <Select
+                withinPortal
                 placeholder={bumpFrameworks.length > 0 ? "Select Framework" : "Loading..."}
                 radius={0}
                 size='xs'
@@ -316,7 +318,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     };
                   }) : []
                 }
-                styles={{ input: { borderColor: 'black', borderRight: '0', borderLeft: '0' } }}
+                styles={{
+                  input: { borderColor: 'black', borderRight: '0', borderLeft: '0' },
+                  dropdown: {minWidth: 150}
+                }}
                 onChange={(value) => {
                   const selected = bumpFrameworks.find((bf) => bf.id === parseInt(value as string));
                   if (selected) {

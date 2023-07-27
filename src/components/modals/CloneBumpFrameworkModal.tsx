@@ -75,14 +75,6 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
       true,
       props.bumpedCount as number,
     )
-    
-    // log entire payload including user token, status, etc and result
-    console.log('userToken', userToken);
-    console.log('status', props.status);
-    console.log('archetypeID', props.archetypeID);
-    console.log('bumpedCount', props.bumpedCount);
-    console.log('result', result);
-
 
     if (result.status === 'success') {
       setBumpFrameworks(result.data.bump_frameworks);

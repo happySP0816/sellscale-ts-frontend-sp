@@ -109,9 +109,7 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
     return <></>;
   }
 
-  console.log(existingMessage?.meta_data);
   const researchPoints = _.cloneDeep(existingMessage?.meta_data.research_points.map((p: any) => p.value));
-  console.log(researchPoints);
 
   return (
     <Container>
@@ -414,8 +412,6 @@ export default function VoiceBuilderFlow(props: {
         setLoadingSample(false);
       });
   };
-
-  console.log('got here');
 
   return (
     <>

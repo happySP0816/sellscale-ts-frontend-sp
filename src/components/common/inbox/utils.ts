@@ -27,7 +27,7 @@ export const prospectStatuses = [
     value: "ACTIVE_CONVO_NEXT_STEPS",
   },
   {
-    label: " Revival (AI Follow Ups Needed)",
+    label: " Revival (Needs a Follow Up)",
     value: "ACTIVE_CONVO_REVIVAL",
   },
   {

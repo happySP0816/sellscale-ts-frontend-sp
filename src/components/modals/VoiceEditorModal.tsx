@@ -26,6 +26,22 @@ import { showNotification } from "@mantine/notifications";
 import { setDatasets } from "react-chartjs-2/dist/utils";
 import { IconAlertCircle, IconBrandOnedrive, IconChartTreemap, IconTool } from '@tabler/icons';
 import { IconChartBubble } from '@tabler/icons-react';
+import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
+
+
+function metaDataFromPrompt(prompt: string){
+
+  let s = prompt.split('>notes: ')[1].replace('<>response:', '');
+  let s_parts = s.split(/\\n/gm);
+
+  const cta = s_parts[s_parts.length - 1].substring(1).trim();
+  const research = s.replace(cta, '').trim().split(/\\n/gm).map((s) => s.substring(1).trim()).filter((s) => s.length > 0);
+
+  return {
+    research,
+    cta,
+  };
+}
 
 export default function VoiceEditorModal({
   context,
@@ -270,8 +286,31 @@ export default function VoiceEditorModal({
                         return null
                       }
 
+                      const meta_data = metaDataFromPrompt(stackRankedConfigurationData[promptKey]);
+
                       return (
-                        <>
+                        <Box>
+                          <AiMetaDataBadge
+                            location={{ position: "relative", top: 35, left: 70 }}
+                            bumpFrameworkId={0}
+                            bumpFrameworkTitle={""}
+                            bumpFrameworkDescription={""}
+                            bumpFrameworkLength={""}
+                            bumpNumberConverted={undefined}
+                            bumpNumberUsed={undefined}
+                            accountResearchPoints={
+                              meta_data.research || []
+                            }
+                            initialMessageId={-1}
+                            initialMessageCTAId={0}
+                            initialMessageCTAText={meta_data.cta || ''}
+                            initialMessageResearchPoints={
+                              meta_data.research || []
+                            }
+                            initialMessageStackRankedConfigID={undefined}
+                            initialMessageStackRankedConfigName={'Baseline Linkedin'}
+                            cta={meta_data.cta || ''}
+                          />
                           <Textarea
                             w='100%'
                             icon={<IconChartTreemap size="0.8rem" />}
@@ -290,8 +329,8 @@ export default function VoiceEditorModal({
                               setRandomFlag(!randomFlag)
                             }}
                             error={stackRankedConfigurationData[completionKey].length > 300 ? "Completion is too long. Please shorten it to 300 characters or less." : null}
-                            />
-                          </>
+                          />
+                        </Box>
                       )
                   })
                 }

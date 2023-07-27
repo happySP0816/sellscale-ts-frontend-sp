@@ -59,10 +59,11 @@ import {
 } from "@atoms/prospectAtoms";
 import _, { sample } from "lodash";
 import { el } from "@fullcalendar/core/internal-common";
-import ProspectSelect from '@common/library/ProspectSelect';
-import { showNotification } from '@mantine/notifications';
-import { API_URL } from '@constants/data';
-import TextAlign from '@tiptap/extension-text-align';
+import ProspectSelect from "@common/library/ProspectSelect";
+import { showNotification } from "@mantine/notifications";
+import { API_URL } from "@constants/data";
+import TextAlign from "@tiptap/extension-text-align";
+import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
 
 const ItemComponent = (props: { id: number; defaultValue: string }) => {
   const [message, setMessage] = useState<string>(props.defaultValue);
@@ -92,6 +93,7 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
               id: item.id,
               value: newMessage !== undefined ? newMessage : message,
               prospect: item.prospect,
+              meta_data: item.meta_data,
             };
           }
           return item;
@@ -106,6 +108,10 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
   if (!editing && !message) {
     return <></>;
   }
+
+  console.log(existingMessage?.meta_data);
+  const researchPoints = _.cloneDeep(existingMessage?.meta_data.research_points.map((p: any) => p.value));
+  console.log(researchPoints);
 
   return (
     <Container>
@@ -136,6 +142,29 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
               }
             }}
           />
+          {existingMessage && (
+            <AiMetaDataBadge
+              location={{ position: "relative", top: -5 }}
+              bumpFrameworkId={0}
+              bumpFrameworkTitle={""}
+              bumpFrameworkDescription={""}
+              bumpFrameworkLength={""}
+              bumpNumberConverted={undefined}
+              bumpNumberUsed={undefined}
+              accountResearchPoints={
+                researchPoints || []
+              }
+              initialMessageId={-1}
+              initialMessageCTAId={existingMessage.meta_data.cta.id || 0}
+              initialMessageCTAText={existingMessage.meta_data.cta.text_value || ""}
+              initialMessageResearchPoints={
+                researchPoints || []
+              }
+              initialMessageStackRankedConfigID={undefined}
+              initialMessageStackRankedConfigName={'Baseline Linkedin'}
+              cta={existingMessage.meta_data.cta.text_value || ""}
+            />
+          )}
           <Container
             m={0}
             p={0}
@@ -239,7 +268,8 @@ export default function VoiceBuilderFlow(props: {
   const [editingPhase, setEditingPhase] = useState(1);
   const [loadingMsgGen, setLoadingMsgGen] = useState(false);
   const [loadingSimulationSample, setLoadingSample] = useState(false);
-  const [generatedSimulationCompletion, setGeneratedSimulationCompletion] = useState("");
+  const [generatedSimulationCompletion, setGeneratedSimulationCompletion] =
+    useState("");
   const [instructions, setInstructions] = useDebouncedState("", 200);
   const [count, setCount] = useState(0);
 
@@ -291,6 +321,8 @@ export default function VoiceBuilderFlow(props: {
     }
 
     if (response.status === "success") {
+      console.log(response.data);
+
       // Replace global state with only new samples
       setVoiceBuilderMessages((prev) => {
         return response.data.map((item: any) => {
@@ -298,6 +330,7 @@ export default function VoiceBuilderFlow(props: {
             id: item.id,
             value: item.sample_completion,
             prospect: item.prospect,
+            meta_data: item.meta_data,
           };
         });
       });
@@ -331,7 +364,14 @@ export default function VoiceBuilderFlow(props: {
 
   const generateSample = () => {
     // console log instructions and messages
-    var prompt = STARTING_INSTRUCTIONS + '\n' + instructions + '\n' + voiceBuilderMessages.map((item) => item.value).join('\n') + '\n' + 'prompt: {prompt}\ncompletion:';
+    var prompt =
+      STARTING_INSTRUCTIONS +
+      "\n" +
+      instructions +
+      "\n" +
+      voiceBuilderMessages.map((item) => item.value).join("\n") +
+      "\n" +
+      "prompt: {prompt}\ncompletion:";
     setLoadingSample(true);
     setGeneratedSimulationCompletion("");
     showNotification({
@@ -374,6 +414,8 @@ export default function VoiceBuilderFlow(props: {
         setLoadingSample(false);
       });
   };
+
+  console.log('got here');
 
   return (
     <>
@@ -424,7 +466,7 @@ export default function VoiceBuilderFlow(props: {
           size="md"
           m="auto"
           compact
-          color='grape'
+          color="grape"
           leftIcon={<IconRefresh />}
           variant="light"
           disabled={loadingMsgGen}
@@ -441,7 +483,7 @@ export default function VoiceBuilderFlow(props: {
           radius="xl"
           size="md"
           m="auto"
-          color='green'
+          color="green"
           compact
           leftIcon={<IconCheck />}
           variant="light"
@@ -456,7 +498,7 @@ export default function VoiceBuilderFlow(props: {
       </Center>
 
       <Divider my="sm" />
-        
+
       <Card mt="md" p="md" withBorder>
         <Title order={4}>Simulate Voice</Title>
         <Text>
@@ -487,14 +529,20 @@ export default function VoiceBuilderFlow(props: {
             </Button>
           </Box>
         </Flex>
-        {generatedSimulationCompletion && <Textarea 
-          value={generatedSimulationCompletion} 
-          minRows={6}
-          label='Generated Sample'
-          description='This is what the message would look like if you sent it to the prospect.'
-          mt='xs' 
-          error={generatedSimulationCompletion.length > 300 ? 'Message is too long. It must be less than 300 characters.' : undefined} 
-        />}
+        {generatedSimulationCompletion && (
+          <Textarea
+            value={generatedSimulationCompletion}
+            minRows={6}
+            label="Generated Sample"
+            description="This is what the message would look like if you sent it to the prospect."
+            mt="xs"
+            error={
+              generatedSimulationCompletion.length > 300
+                ? "Message is too long. It must be less than 300 characters."
+                : undefined
+            }
+          />
+        )}
       </Card>
     </>
   );

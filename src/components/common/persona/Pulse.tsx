@@ -32,6 +32,7 @@ import postRunICPClassification from '@utils/requests/postRunICPClassification';
 import { valueToColor } from '@utils/general';
 import { getICPOneProspect } from '@utils/requests/getICPOneProspect';
 import { showNotification } from '@mantine/notifications';
+import { useDebouncedState } from '@mantine/hooks';
 
 interface ProspectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -61,7 +62,9 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const userToken = useRecoilValue(userTokenState);
+  const [loading, setLoading] = useState(false);
   const [currentICPPrompt, setCurrentICPPrompt] = useState('');
+  const [testSearchValue, setTestSearchValue] = useDebouncedState('', 300);
   const [prospects, setProspects] = useState<ProspectShallow[]>([]);
   const [selectedProspect, setSelectedProspect] = useState<ProspectShallow>();
   const [testingPrompt, setTestingPrompt] = useState(false);
@@ -97,13 +100,26 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
     }
   };
 
-  const triggerGetArchetypeProspects = async () => {
-    const result = await getArchetypeProspects(userToken, props.personaOverview.id);
+  const triggerGetArchetypeProspects = async (search?: string) => {
+    setLoading(true);
+
+    let result
+    if (search === "") {
+      result = await getArchetypeProspects(userToken, props.personaOverview.id);
+    } else {
+      result = await getArchetypeProspects(userToken, props.personaOverview.id, search);
+    }
 
     if (result.status === 'success') {
       setProspects(result.data);
     }
+
+    setLoading(false);
   };
+
+  useEffect(() => {
+    triggerGetArchetypeProspects(testSearchValue)
+  }, [testSearchValue]);
 
   const triggerGetICPOneProspect = async () => {
     if (!selectedProspect) {
@@ -275,8 +291,11 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                   placeholder='Pick one'
                   itemComponent={ProspectSelectItem}
                   searchable
+                  onSearchChange={(value) => {
+                    setTestSearchValue(value);
+                  }}
                   clearable
-                  nothingFound='No prospects found'
+                  nothingFound={loading ? 'Grabbing prospects...' : 'No prospects found'}
                   value={selectedProspect ? selectedProspect.id + '' : '-1'}
                   data={prospects.map((prospect) => {
                     return {

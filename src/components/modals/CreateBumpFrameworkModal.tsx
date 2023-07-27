@@ -36,7 +36,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
 
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
   const [selectedStatus, setSelectedStatus] = useState<string | null>('');
-  const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>('');
+  const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const getActiveConvoSubstatusValues = () => {
@@ -246,18 +246,24 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
       )}
       <Flex w="100%" justify="flex-end" direction={'column'}>
         <Flex justify='space-between' align='center'>
-          <NumberInput
-            mt='md'
-            label="Bump Delay"
-            description="The number of days to wait before sending the bump."
-            placeholder="2"
-            value={form.values.bumpDelayDays}
-            onChange={(e) => {
-              form.setFieldValue("bumpDelayDays", e as number);
-            }}
-            min={2}
-            withAsterisk
-          />
+          {
+            (selectedStatus === "BUMPED" || selectedStatus === "ACCEPTED") &&  (
+              <NumberInput
+                mt='md'
+                label="Bump Delay"
+                description="The number of days to wait before sending the bump."
+                placeholder="2"
+                value={form.values.bumpDelayDays}
+                onChange={(e) => {
+                  form.setFieldValue("bumpDelayDays", e as number);
+                }}
+                min={2}
+                withAsterisk
+              />
+            )
+          }
+          <Flex></Flex>
+
           <Flex direction='column' align='flex-end'>
             <Switch
               pt="md"

@@ -2,6 +2,7 @@ import {
   currentConvoChannelState,
   currentConvoEmailMessageState,
   currentConvoLiMessageState,
+  fetchingProspectIdState,
   openedProspectIdState,
   selectedBumpFrameworkState,
 } from "@atoms/inboxAtoms";
@@ -184,6 +185,8 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const currentProject = useRecoilValue(currentProjectState);
 
+  const [fetchingProspectId, setFetchingProspectId] = useRecoilState(fetchingProspectIdState)
+
   const [selectedBumpFramework, setBumpFramework] = useRecoilState(
     selectedBumpFrameworkState
   );
@@ -255,7 +258,6 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
       const [_key, { emailThread }] = queryKey;
 
       // For Email //
-
       if (openedOutboundChannel === "EMAIL") {
         const response = await getEmailMessages(
           userToken,
@@ -279,6 +281,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
           ? (updatedResult.data.data.reverse() as LinkedInMessage[])
           : [];
         setCurrentConvoLiMessages(finalMessages);
+        setFetchingProspectId(-1)
       });
 
       // Indicate messages as read

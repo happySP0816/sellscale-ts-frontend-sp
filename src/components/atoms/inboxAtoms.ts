@@ -11,6 +11,11 @@ const openedBumpFameworksState = atom({
   default: false,
 });
 
+const fetchingProspectIdState = atom({
+  key: "inbox-fetching-prospect-id",
+  default: -1,
+});
+
 const nurturingModeState = atom({
   key: "inbox-nurturing-mode",
   default: false,
@@ -42,4 +47,5 @@ export {
   currentConvoChannelState,
   currentConvoLiMessageState,
   currentConvoEmailMessageState,
+  fetchingProspectIdState
 };

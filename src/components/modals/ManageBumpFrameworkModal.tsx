@@ -447,19 +447,23 @@ export default function ManageBumpFramework({
                   />
                 ) : <></>
               }
-              <NumberInput
-                mt='md'
-                label="Bump Delay"
-                description="The number of days to wait before sending the bump."
-                placeholder="2"
-                value={form.values.bumpDelayDays}
-                onChange={(e) => {
-                  form.setFieldValue("bumpDelayDays", e as number);
-                }}
-                min={2}
-                withAsterisk
-              />
-
+              {
+                (innerProps.overallStatus == 'ACCEPTED' || innerProps.overallStatus == 'BUMPED') ? (
+                  <NumberInput
+                    mt='md'
+                    label="Bump Delay"
+                    description="The number of days to wait before sending the bump."
+                    placeholder="2"
+                    value={form.values.bumpDelayDays}
+                    onChange={(e) => {
+                      form.setFieldValue("bumpDelayDays", e as number);
+                    }}
+                    min={2}
+                    withAsterisk
+                  />
+                ) : <></>
+              }
+              
               {selectedBumpFramework == null && (
                 <Flex direction="column">
                   <Switch

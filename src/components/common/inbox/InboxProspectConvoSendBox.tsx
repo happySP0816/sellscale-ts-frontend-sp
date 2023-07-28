@@ -114,7 +114,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         color: "green",
         autoClose: 3000,
       })
-      setTimeout(() => setFetchingProspectId(-1), 5000);
+      setTimeout(() => setFetchingProspectId(-1), 15000);
 
       setFetchingProspectId(openedProspectId)
       sendLinkedInMessage(

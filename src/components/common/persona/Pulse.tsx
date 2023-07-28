@@ -154,7 +154,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
 
   const openRunAllModal = () =>
     openConfirmModal({
-      title: 'Run Pulse Prompt on All Prospects',
+      title: 'Run AI Filter on All Prospects',
       children: (
         <Text size='sm'>
           Are you sure you want to run the pulse prompt on all prospects? This may take a while and will cost you
@@ -199,7 +199,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
           <Textarea
             defaultValue={currentICPPrompt}
             placeholder='No prompt? Send SellScale a prompt request through here.'
-            label='Ideal Customer Profile (ICP) Description'
+            label='Describe your ideal customer profile (ICP)'
             description={
               <Box>
                 <Text>Filters our AI searches for:
@@ -244,7 +244,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
               currentICPPrompt
                 ? openContextModal({
                     modal: 'managePulsePrompt',
-                    title: <Title order={3}>Edit Pulse Prompt</Title>,
+                    title: <Title order={3}>Edit AI Filter</Title>,
                     innerProps: {
                       mode: 'EDIT',
                       personaOverview: props.personaOverview,
@@ -254,7 +254,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                   })
                 : openContextModal({
                     modal: 'managePulsePrompt',
-                    title: <Title order={3}>Create Pulse Prompt</Title>,
+                    title: <Title order={3}>Create AI Filter</Title>,
                     innerProps: {
                       mode: 'CREATE',
                       personaOverview: props.personaOverview,
@@ -264,7 +264,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                   });
             }}
           >
-            {currentICPPrompt ? 'Edit Pulse Prompt' : 'Create New Pulse Prompt'}
+            {currentICPPrompt ? 'Edit AI Filter' : 'Create New AI Filter'}
           </Button>
         </Flex>
         <Flex w='40%'>
@@ -281,7 +281,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
 
               <Tabs.Panel value='test' pt='xs'>
                 <Text fz='lg' fw='bold' mt='xs'>
-                  Test Pulse Prompt
+                  Test AI Filter
                 </Text>
                 <Text fz='sm'>Test your pulse prompt on a prospect of your choosing.</Text>
 

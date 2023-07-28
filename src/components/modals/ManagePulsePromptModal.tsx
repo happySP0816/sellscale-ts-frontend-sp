@@ -70,7 +70,7 @@ export default function ManagePulsePrompt({
         id: "edit-pulse-prompt-fail-no-changes",
         title: "No Changes Detected",
         message:
-          "You have not made any changes to your Pulse Prompt. Please make changes to your Pulse Prompt before requesting to save changes.",
+          "You have not made any changes to your AI Filter. Please make changes to your AI Filter before requesting to save changes.",
         color: "red",
         autoClose: 5000,
       });
@@ -82,7 +82,7 @@ export default function ManagePulsePrompt({
         id: "pulse-prompt-request-no-prompt",
         title: "No Prompt Detected",
         message:
-          "You have not entered a Pulse Prompt. Please enter a Pulse Prompt before requesting to save changes.",
+          "You have not entered a AI Filter. Please enter a AI Filter before requesting to save changes.",
         color: "red",
         autoClose: 5000,
       });
@@ -100,8 +100,8 @@ export default function ManagePulsePrompt({
       if (innerProps.mode === "EDIT") {
         showNotification({
           id: "edit-pulse-prompt",
-          title: "Pulse Prompt Edited",
-          message: "Pulse Prompt has been edited successfully.",
+          title: "AI Filter Edited",
+          message: "AI Filter has been edited successfully.",
           color: "teal",
           autoClose: 3000,
         });
@@ -110,16 +110,16 @@ export default function ManagePulsePrompt({
           if (result.status === 'success') {
             showNotification({
               id: "run-pulse-prompt",
-              title: "Pulse Prompt Running",
-              message: "Pulse Prompt is running on all prospects. This may take a while.",
+              title: "AI Filter Running",
+              message: "AI Filter is running on all prospects. This may take a while.",
               color: "teal",
               autoClose: 3000,
             })
           } else {
             showNotification({
               id: "run-pulse-prompt-fail",
-              title: "Pulse Prompt Not Ran",
-              message: "Pulse Prompt could not be ran. Please contact support, or run manually from the Classify tab.",
+              title: "AI Filter Not Ran",
+              message: "AI Filter could not be ran. Please contact support, or run manually from the Classify tab.",
               color: "red",
             })
           }
@@ -127,8 +127,8 @@ export default function ManagePulsePrompt({
       } else if (innerProps.mode === "CREATE") {
         showNotification({
           id: "create-pulse-prompt",
-          title: "Pulse Prompt Created",
-          message: "Pulse Prompt has been created successfully.",
+          title: "AI Filter Created",
+          message: "AI Filter has been created successfully.",
           color: "teal",
           autoClose: 3000,
         });
@@ -136,9 +136,9 @@ export default function ManagePulsePrompt({
     } else {
       showNotification({
         id: "pulse-prompt-request-fail",
-        title: "Pulse Prompt Request Failed",
+        title: "AI Filter Request Failed",
         message:
-          "Pulse Prompt could not be modified. Please try again or contact support.",
+          "AI Filter could not be modified. Please try again or contact support.",
       });
     }
 
@@ -163,7 +163,7 @@ export default function ManagePulsePrompt({
           <>
             <Textarea
               defaultValue={currentICPPrompt}
-              label="Your current Pulse Prompt"
+              label="Your current AI Filter"
               description="Make as many changes as you would like."
               onChange={(e) => setCurrentICPPrompt(e.currentTarget.value)}
               withAsterisk
@@ -177,10 +177,10 @@ export default function ManagePulsePrompt({
               color="teal"
               onClick={() => {
                 openConfirmModal({
-                  title: 'Run Pulse Prompt on All Prospects',
+                  title: 'Run AI Filter on All Prospects',
                   children: (
                     <Text size='sm'>
-                      Now that you've edited your ICP Pulse Prompt, would you like to run your prompt on all prospects? This will use credits.
+                      Now that you've edited your AI Filter, would you like to run your prompt on all prospects? This will use credits.
                     </Text>
                   ),
                   labels: { confirm: 'Save & Run', cancel: 'Save' },
@@ -245,7 +245,7 @@ export default function ManagePulsePrompt({
                 radius="lg"
                 color="teal"
               >
-                Create New Pulse Prompt
+                Create New AI Filter
               </Button>
             </form>
           </>

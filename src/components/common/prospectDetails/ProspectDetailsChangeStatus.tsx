@@ -514,7 +514,7 @@ export default function ProspectDetailsChangeStatus(
             { value: "ACTIVE_CONVO_OBJECTION", label: "Objection" },
             { value: "ACTIVE_CONVO_SCHEDULING", label: "Scheduling" },
             { value: "ACTIVE_CONVO_NEXT_STEPS", label: "Next Steps" },
-            { value: "ACTIVE_CONVO_REVIVAL", label: "Revival (AI Follow Ups Needed)" },
+            { value: "ACTIVE_CONVO_REVIVAL", label: "Queued for AI Revival" },
           ]}
           defaultValue={props.channelData.currentStatus}
           onChange={async (value) => {

@@ -27,7 +27,7 @@ export const prospectStatuses = [
     value: "ACTIVE_CONVO_NEXT_STEPS",
   },
   {
-    label: " Revival (AI Follow Ups Needed)",
+    label: "Queued for AI Revival",
     value: "ACTIVE_CONVO_REVIVAL",
   },
   {
@@ -55,7 +55,7 @@ export function labelizeConvoSubstatus(substatus: string, bump_count?: number) {
   if(substatus === 'ACTIVE_CONVO') return 'Uncategorized';
   if(substatus === 'DEMO_SET') return 'Demoing';
   if(substatus === 'RESPONDED') return (bump_count && bump_count > 0) ? `Bumped #${bump_count}` : 'Bumped';
-  if (substatus == 'ACTIVE_CONVO_REVIVAL') return "🤖 Revival (AI Follow Ups Needed)"
+  if (substatus == 'ACTIVE_CONVO_REVIVAL') return "Queued for AI Revival"
   return _.startCase(substatus.replace('ACTIVE_CONVO_', '').replaceAll('_', ' ').toLowerCase());
 }
 

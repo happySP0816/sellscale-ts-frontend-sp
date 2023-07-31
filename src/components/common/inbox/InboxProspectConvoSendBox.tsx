@@ -1,8 +1,8 @@
-import { openedProspectIdState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoLiMessageState, currentConvoChannelState, currentConvoEmailMessageState } from '@atoms/inboxAtoms';
+import { openedProspectIdState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoLiMessageState, currentConvoChannelState, currentConvoEmailMessageState, fetchingProspectIdState } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon, LoadingOverlay, Tooltip, Select } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
-import { showNotification } from '@mantine/notifications';
+import { hideNotification, showNotification } from '@mantine/notifications';
 import { IconExternalLink, IconWriting, IconSend, IconChevronUp, IconChevronDown, IconSettings } from '@tabler/icons';
 import { IconMessage2Cog, IconSettingsFilled } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -85,6 +85,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
+  const [fetchingProspectId, setFetchingProspectId] = useRecoilState(fetchingProspectIdState)
 
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
   const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState);
@@ -106,7 +107,16 @@ export default forwardRef(function InboxProspectConvoSendBox(
     await deleteAutoBumpMessage(userToken, props.prospectId);
 
     if (openedOutboundChannel === 'LINKEDIN') {
+      showNotification({
+        id: "send-linkedin-message",
+        title: "Sending message ...",
+        message: '',
+        color: "green",
+        autoClose: 3000,
+      })
+      setTimeout(() => setFetchingProspectId(-1), 15000);
 
+      setFetchingProspectId(openedProspectId)
       sendLinkedInMessage(
         userToken,
         props.prospectId,

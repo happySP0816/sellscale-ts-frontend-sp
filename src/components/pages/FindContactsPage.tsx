@@ -1,13 +1,14 @@
 import { userTokenState } from "@atoms/userAtoms";
 import { Card, Flex, Tabs, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Button, ActionIcon, Badge, useMantineTheme, Loader } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconBrandLinkedin, IconDownload } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { valueToColor } from "@utils/general";
 import getSalesNavigatorLaunches, { getSalesNavigatorLaunch } from "@utils/requests/getSalesNavigatorLaunches";
 import postLaunchSalesNavigator from "@utils/requests/postLaunchSalesNavigator";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { SalesNavigatorLaunch } from "src";
 
@@ -18,6 +19,7 @@ export default function FindContactsPage() {
 
   const [loading, setLoading] = useState(false)
   const [launches, setLaunches] = useState<SalesNavigatorLaunch[]>([])
+  const launchName = useRef<HTMLInputElement>(null)
 
   const triggerGetSalesNavigatorLaunches = async () => {
     setLoading(true)
@@ -45,7 +47,7 @@ export default function FindContactsPage() {
   const triggerPostLaunchSalesNavigator = async () => {
     setLoading(true)
 
-    const result = await postLaunchSalesNavigator(userToken, salesNavigatorForm.values.url, salesNavigatorForm.values.numberOfContacts)
+    const result = await postLaunchSalesNavigator(userToken, salesNavigatorForm.values.url, salesNavigatorForm.values.numberOfContacts, launchName.current!.value)
     if (result.status != 'success') {
       showNotification({
         title: "Could not launch Scraper",
@@ -107,14 +109,14 @@ export default function FindContactsPage() {
                   true
                 }
               />
-              <Tooltip label="The number of contacts to find, capped at 150 contacts per search." withinPortal withArrow>
+              <Tooltip label="The number of contacts to find, capped at 400 contacts per search." withinPortal withArrow>
                 <NumberInput
                   ml='lg'
                   label="Number of contacts"
                   placeholder="100"
                   withAsterisk
                   min={0}
-                  max={150}
+                  max={400}
                   value={salesNavigatorForm.values.numberOfContacts}
                   onChange={(event) => salesNavigatorForm.setFieldValue("numberOfContacts", event as number)}
                   required
@@ -128,7 +130,25 @@ export default function FindContactsPage() {
                   !salesNavigatorForm.values.url.startsWith("https://www.linkedin.com/sales/search/people?")
                 }
                 loading={loading}
-                onClick={() => triggerPostLaunchSalesNavigator()}
+                onClick={() => {
+                  openConfirmModal({
+                    title: "Launch Sales Navigator",
+                    children: (
+                      <TextInput
+                        withAsterisk
+                        label='Name your Sales Navigator search'
+                        description='This name will be used to help you to identify your search in the future.'
+                        placeholder="My Sales Navigator Search"
+                        ref={launchName}
+                        onChange={(event) => { launchName.current!.value = event.currentTarget.value }}
+                      />
+                    ),
+                    labels: { confirm: 'Launch Scraper', cancel: 'Cancel' },
+                    confirmProps: { disabled: launchName.current?.value === "" },
+                    onCancel: () => { },
+                    onConfirm: () => { triggerPostLaunchSalesNavigator() }
+                  })
+                }}
               >
                 Find Contacts
               </Button>
@@ -158,7 +178,7 @@ export default function FindContactsPage() {
                   <Flex align='center' justify='space-between'>
                     <Flex align='center'>
                       <Title order={5}>
-                        Scrape #{launches.length - index}
+                        {launch.name || `Scrape #${launches.length - index}`} 
                       </Title>
                       <Text ml='sm' fz='xs'>
                         {date}
@@ -188,7 +208,7 @@ export default function FindContactsPage() {
                   <Text>
                     {launch.scrape_count} contacts
                   </Text>
-                  <Anchor size='sm' href={launch.sales_navigator_url}>Original Search</Anchor>
+                  <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">Original Search</Anchor>
                 </Card>
               )
             })}

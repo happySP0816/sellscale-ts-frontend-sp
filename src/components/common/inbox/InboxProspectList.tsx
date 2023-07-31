@@ -11,6 +11,7 @@ import {
   Group,
   Indicator,
   Input,
+  Loader,
   LoadingOverlay,
   Modal,
   ScrollArea,
@@ -19,6 +20,7 @@ import {
   Stack,
   Text,
   Title,
+  Tooltip,
   useMantineTheme,
 } from '@mantine/core';
 import {
@@ -34,7 +36,7 @@ import _ from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
-import { nurturingModeState, openedProspectIdState } from '@atoms/inboxAtoms';
+import { fetchingProspectIdState, nurturingModeState, openedProspectIdState } from '@atoms/inboxAtoms';
 import { Prospect, ProspectShallow } from 'src';
 import { forwardRef, useEffect, useState } from 'react';
 import { HEADER_HEIGHT } from './InboxProspectConvo';
@@ -72,6 +74,7 @@ const StatusSelectItem = forwardRef<HTMLDivElement, StatusSelectItemProps>(
 );
 
 export function ProspectConvoCard(props: {
+  id: number,
   name: string;
   title: string;
   img_url: string;
@@ -82,6 +85,8 @@ export function ProspectConvoCard(props: {
   icp_fit: number;
   opened: boolean;
 }) {
+  const fetchingProspectId = useRecoilValue(fetchingProspectIdState)
+
   return (
     <>
       <Flex
@@ -112,7 +117,14 @@ export function ProspectConvoCard(props: {
               <Text size={12} truncate fw={!props.opened && !props.latest_msg_from_sdr ? 600 : 300}>
                 {_.truncate(props.latest_msg, { length: 30 })}
               </Text>
-              {!props.opened && !props.latest_msg_from_sdr && props.new_msg_count > 0 && <Badge variant='filled'>{props.new_msg_count}</Badge>}
+              {
+                fetchingProspectId === props.id && (
+                  <Tooltip label="Sending message..." position="top">
+                    <Loader size='xs' variant='dots'/>
+                  </Tooltip>
+                )
+              }
+              {/* {!props.opened && !props.latest_msg_from_sdr && props.new_msg_count > 0 && <Badge variant='filled'>{props.new_msg_count}</Badge>} */}
             </Group>
             <Text size={10} c='dimmed' fs='italic'>
               {props.title}
@@ -380,6 +392,7 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
                         )}
                       <Container p={0} m={0} onClick={() => setOpenedProspectId(prospect.id)} opacity={prospect.in_purgatory ? 0.5 : 1}>
                         <ProspectConvoCard
+                          id={prospect.id}
                           name={prospect.name}
                           title={prospect.title}
                           img_url={prospect.img_url}

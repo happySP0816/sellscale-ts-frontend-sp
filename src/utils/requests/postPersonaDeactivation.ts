@@ -3,16 +3,15 @@ import { MsgResponse } from "src";
 import { processResponse } from "./utils";
 
 /**
- * Launches a sales navigator scrape
+ * Deactivates a persona
  * @param userToken
- * @param sales_navigator_url
- * @param scrape_count
- * @param name
+ * @param archetypeID
+ * @param hardDeactivate
  * @returns - MsgResponse
  */
-export default async function postLaunchSalesNavigator(userToken: string, sales_navigator_url: string, scrape_count: number, name: string): Promise<MsgResponse> {
+export async function deactivatePersona(userToken: string, archetypeID: number, hardDeactivate: boolean = false): Promise<MsgResponse> {
   const response = await fetch(
-    `${API_URL}/automation/phantom_buster/sales_navigator/launch`,
+    `${API_URL}/client/archetype/${archetypeID}/deactivate`,
     {
       method: "POST",
       headers: {
@@ -20,12 +19,9 @@ export default async function postLaunchSalesNavigator(userToken: string, sales_
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        sales_navigator_url: sales_navigator_url,
-        scrape_count: scrape_count,
-        name: name,
+        hard_deactivate: hardDeactivate,
       }),
     }
   );
-
   return await processResponse(response);
 }

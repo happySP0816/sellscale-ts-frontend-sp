@@ -420,6 +420,19 @@ export function NavbarNested(props: {
         */
       ],
     },
+    {
+      mainKey: "settings",
+      label: "Persona Settings",
+      icon: IconSettings,
+      links: [
+        {
+          key: "settings-persona",
+          label: `Persona Settings`,
+          icon: IconSettings,
+          link: "/persona/settings",
+        },
+      ]
+    }
   ];
 
   // If unassigned contact archetype, filter all sections besides Contacts and Inbox (mainKeys.) Then add a split contact tab too
@@ -480,8 +493,8 @@ export function NavbarNested(props: {
               unassignedPersona={currentProject?.is_unassigned_contact_archetype} 
               allPersonas={[]}
               onClick={() => {
-                    navigateToPage(navigate, "/projectsetup");
-                    setTimeout(() => setNavTab("projectsetup"), 100);
+                    navigateToPage(navigate, "/persona/settings");
+                    setTimeout(() => setNavTab("/persona/settings"), 100);
                 }}/>
           </Box>
         }

@@ -139,10 +139,10 @@ export default function PersonaCardMini(props: {
           unusedVal * m < WARNING_PERCENTAGE
             ? 'red.9'
             : unusedVal * m < WARNING_PERCENTAGE * 2
-            ? 'orange.9'
-            : unusedVal * m < WARNING_PERCENTAGE * 3
-            ? 'yellow.9'
-            : 'teal.9',
+              ? 'orange.9'
+              : unusedVal * m < WARNING_PERCENTAGE * 3
+                ? 'yellow.9'
+                : 'teal.9',
         label: label,
         tooltip: label,
       });
@@ -168,82 +168,50 @@ export default function PersonaCardMini(props: {
       ),
     }}>
       <Box onClick={props.onClick}>
-      <FlexSeparate>
-        <Group noWrap={true}>
-          {!props.unassignedPersona && (
-            <Switch
-              checked={props.personaOverview.active}
-              onChange={async (event) => {
-                const res = await togglePersona(props.personaOverview.id, userToken);
-                window.location.reload();
-                if (res.status === 200) {
-                  props.refetch();
-                }
-              }}
-              color='teal'
-              size='sm'
-              onLabel='ON'
-              offLabel='OFF'
-              styles={{
-                track: {
-                  cursor: 'pointer',
-                },
-              }}
-              thumbIcon={
-                props.personaOverview.active ? (
-                  <IconCheck size={12} color={theme.colors.teal[theme.fn.primaryShade()]} stroke={3} />
-                ) : (
-                  <IconX size={12} color={theme.colors.red[theme.fn.primaryShade()]} stroke={3} />
-                )
-              }
-            />
-          )}
-
-            <Box>
-              <Text fz={17} fw={400} c='gray.0'>
-                {props.personaOverview.name}
-              </Text>
-            </Box>
-        </Group>
-    
-      </FlexSeparate>
-      {false ? (
-        <Loader variant='dots' color='green' />
-      ) : (
-        <Progress mt={10} size={17} sections={getStatusUsedPercentage()} animate={isUploading} opacity={0.8} styles={{
-          root: {
-            backgroundColor: theme.fn.lighten(
-              theme.fn.variant({ variant: "filled", color: "dark" }).background!,
-              0.15
-            ),
-          }
-        }} />
-      )}
+        <Flex align='center' justify='center'>
+          <Box>
+            <Text fz={17} fw={400} c='gray.0'>
+              {props.personaOverview.name}
+            </Text>
+          </Box>
+        </Flex>
+        {false ? (
+          <Loader variant='dots' color='green' />
+        ) : (
+          <Progress mt={10} size={17} sections={getStatusUsedPercentage()} animate={isUploading} opacity={0.8} styles={{
+            root: {
+              backgroundColor: theme.fn.lighten(
+                theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+                0.15
+              ),
+            }
+          }} />
+        )}
       </Box>
 
       {mdScreenOrLess ? (
-            <ActionIcon color='teal' radius='xl'  onClick={openUploadProspects}>
-              <IconUpload size={14} />
-            </ActionIcon>
-          ) : (
-            <Button
-              variant='outline'
-              color='teal'
-              mt='md'
-              w='100%'
-              radius='md'
-              rightIcon={<IconUpload size={14} />}
-              onClick={openUploadProspects}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'initial'
-                },
-              }}
-            >
-              Upload More Prospects
-            </Button>
-          )}
-      <PersonaUploadDrawer personaOverviews={currentProject ? [currentProject] : []} afterUpload={() => {}}/>
+        <ActionIcon color='teal' radius='xl' onClick={openUploadProspects}>
+          <IconUpload size={14} />
+        </ActionIcon>
+      ) : (
+        <Button
+          variant='outline'
+          color='teal'
+          mt='md'
+          w='100%'
+          radius='md'
+          rightIcon={<IconUpload size={14} />}
+          onClick={openUploadProspects}
+          sx={{
+            '&:hover': {
+              backgroundColor: 'initial'
+            },
+          }}
+        >
+          Upload More Prospects
+        </Button>
+      )}
+      <PersonaUploadDrawer personaOverviews={currentProject ? [currentProject] : []} afterUpload={() => { }} />
     </Paper>
   );
 }

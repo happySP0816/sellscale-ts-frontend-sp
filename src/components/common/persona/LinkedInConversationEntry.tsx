@@ -172,7 +172,8 @@ export function AiMetaDataBadge(props: {
 
   useEffect(() => {
     if (props.bumpNumberUsed && props.bumpNumberConverted) {
-      setBumpConversionRate(props.bumpNumberUsed / props.bumpNumberConverted * 100)
+      const percent = (props.bumpNumberUsed / props.bumpNumberConverted) * 100;
+      setBumpConversionRate(percent > 100 ? 100 : percent)
     }
   }, [props.bumpNumberUsed, props.bumpNumberConverted])
 

@@ -25,6 +25,10 @@ const selectedBumpFrameworkState = atom({
   key: "inbox-selected-bump-framework",
   default: undefined as BumpFramework | undefined,
 });
+const allBumpFrameworksState = atom({
+  key: "inbox-all-bump-frameworks",
+  default: [] as BumpFramework[],
+});
 
 const currentConvoChannelState = atom({
   key: "inbox-current-convo-channel",
@@ -47,5 +51,6 @@ export {
   currentConvoChannelState,
   currentConvoLiMessageState,
   currentConvoEmailMessageState,
-  fetchingProspectIdState
+  fetchingProspectIdState,
+  allBumpFrameworksState,
 };

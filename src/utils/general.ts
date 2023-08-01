@@ -116,7 +116,7 @@ export function convertDateToLocalTime(date: Date) {
  * Converts a date to a relative timeframe string (e.g. 2 hours ago)
  */
 export function convertDateToCasualTime(date: Date) {
-  if (date.getTime() === 0) { return ""; }
+  if (date.getTime() === 0 || date.getTime() === -1) { return ""; }
   const currentTime = moment();
   const inputTime = moment(date);
   return inputTime.from(currentTime);

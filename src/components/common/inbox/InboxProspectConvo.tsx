@@ -314,6 +314,9 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
         }
       });
 
+      // Update the bump frameworks
+      triggerGetBumpFrameworks();
+
       const finalMessages =
         result.status === "success"
           ? (result.data.data.reverse() as LinkedInMessage[])
@@ -667,6 +670,9 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
         <InboxProspectConvoBumpFramework
           prospect={prospect}
           messages={currentConvoLiMessages || []}
+          onClose={() => {
+            triggerGetBumpFrameworks();
+          }}
         />
       )}
     </Flex>

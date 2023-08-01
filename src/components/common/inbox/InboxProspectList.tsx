@@ -19,6 +19,7 @@ import {
   Select,
   Stack,
   Text,
+  ThemeIcon,
   Title,
   Tooltip,
   useMantineTheme,
@@ -31,6 +32,7 @@ import {
   IconCircle2Filled,
   IconCircle3Filled,
   IconStarFilled,
+  IconInfoCircle,
 } from '@tabler/icons-react';
 import _ from 'lodash';
 import { useQuery } from '@tanstack/react-query';
@@ -40,7 +42,7 @@ import { fetchingProspectIdState, nurturingModeState, openedProspectIdState } fr
 import { Prospect, ProspectShallow } from 'src';
 import { forwardRef, useEffect, useState } from 'react';
 import { HEADER_HEIGHT } from './InboxProspectConvo';
-import { labelizeConvoSubstatus, prospectStatuses, nurturingProspectStatuses } from './utils';
+import { labelizeConvoSubstatus, prospectStatuses, nurturingProspectStatuses, getStatusDetails } from './utils';
 import InboxProspectListFilter, {
   InboxProspectListFilterState,
   defaultInboxProspectListFilterState,
@@ -257,7 +259,7 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
   // Recommended Filter
   if (segmentedSection === 'RECOMMENDED') {
     if(!nurturingMode) {
-      prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
+      //prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
     }
     // prospects = prospects.filter((p) => !p.latest_msg_from_sdr || isWithinLastXDays(p.latest_msg_datetime, 3)); // todo(Aakash) - uncomment this to show only prospects that have been responded to in the last 3 days
     // prospects = prospects.filter((p) => !p.in_purgatory);
@@ -278,7 +280,7 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
     }
   }, [segmentedSection]);
 
-  setCurrentInboxCount(prospects.length);
+  setCurrentInboxCount(prospects.filter((p) => !p.in_purgatory).length);
 
   return (
     <div>
@@ -379,7 +381,8 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
                           <div
                             style={{
                               backgroundColor: prospect.linkedin_status === 'ACTIVE_CONVO_REVIVAL' ? '#2c8c91' : prospect.in_purgatory ? '#858585' : '#25262b',
-                              padding: '4px'
+                              padding: '4px',
+                              position: 'relative',
                             }}
                           >
                             <Text color='white' ta='center' fz={11} fw={700}>
@@ -388,6 +391,18 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
                             <Text color='white' ta='center' fz={9} fw={300}>
                               {prospects.filter((p) => p.linkedin_status === prospect.linkedin_status).length} prospect(s)
                             </Text>
+                            <Box sx={{ position: 'absolute', right: 5, top: 2 }}>
+                              <Tooltip
+                                label={<Text ta="center">{getStatusDetails(prospect.linkedin_status)?.description}</Text>}
+                                position="bottom"
+                                withArrow
+                                withinPortal
+                                multiline
+                                width={260}
+                              >
+                                <IconInfoCircle color='#fff' size='0.9rem' />
+                              </Tooltip>
+                            </Box>
                           </div>
                         )}
                       <Container p={0} m={0} onClick={() => setOpenedProspectId(prospect.id)} opacity={prospect.in_purgatory ? 0.5 : 1}>

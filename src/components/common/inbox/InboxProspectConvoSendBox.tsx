@@ -128,7 +128,11 @@ export default forwardRef(function InboxProspectConvoSendBox(
         selectedBumpFramework?.description,
         selectedBumpFramework?.bump_length,
         selectedBumpFramework?.account_research
-      );
+      ).then(() => {
+        queryClient.refetchQueries({
+          queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
+        });
+      });
       if (true) {
         let yourMessage = _.cloneDeep(currentConvoLiMessages || [])
           .reverse()
@@ -321,7 +325,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
               </Button>
               <Select
                 withinPortal
-                placeholder={bumpFrameworks.length > 0 ? "Select Framework" : "Loading..."}
+                placeholder={bumpFrameworks.length > 0 ? "Select Framework" : "No Frameworks"}
                 radius={0}
                 size='xs'
                 data={

@@ -94,6 +94,7 @@ export const autoFillBumpFrameworkAccountResearch = (userToken: string, prospect
 export default function InboxProspectConvoBumpFramework(props: {
     prospect: ProspectShallow;
     messages: LinkedInMessage[];
+    onClose?: () => void;
 }) {
 
   const [open, setOpen] = useRecoilState(openedBumpFameworksState);
@@ -118,7 +119,10 @@ export default function InboxProspectConvoBumpFramework(props: {
   return (
     <Modal
       opened={open}
-      onClose={() => setOpen(false)}
+      onClose={() => {
+        setOpen(false);
+        props.onClose && props.onClose();
+      }}
       title={<Title order={4}>Message Generation Config</Title>}
     > 
       <SelectBumpInstruction

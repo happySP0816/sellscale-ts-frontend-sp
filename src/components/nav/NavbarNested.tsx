@@ -212,12 +212,12 @@ export function NavbarNested(props: {
   var siteLinks = [
     {
       mainKey: "inbox",
-      label: `Inbox ${inboxCount ? `(${inboxCount})` : ""}`,
+      label: `Inbox ${inboxCount ? `(${inboxCount})` : "(0)"}`,
       icon: IconInbox,
       links: [
         {
           key: "inbox",
-          label: `Inbox ${inboxCount ? `(${inboxCount})` : ""}`,
+          label: `Inbox ${inboxCount ? `(${inboxCount})` : "(0)"}`,
           icon: IconInbox,
           link: "/inbox",
         },

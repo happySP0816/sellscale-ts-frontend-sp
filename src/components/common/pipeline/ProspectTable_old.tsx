@@ -180,7 +180,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
     columnAccessor: "full_name",
     direction: "asc",
   });
-  const [selectedRecords, setSelectedRecords] = useState<Prospect[]>([]);
+  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
 
   const handleSortStatusChange = (status: DataTableSortStatus) => {
     setPage(1);

@@ -114,6 +114,7 @@ type PropsType = {
   label: string;
   description: string;
   defaultValues?: number[];
+  exclude?: number[];
 };
 
 export default function PersonaSelect({
@@ -123,6 +124,7 @@ export default function PersonaSelect({
   label,
   description,
   defaultValues,
+  exclude
 }: PropsType) {
   const [userToken] = useRecoilState(userTokenState);
   const [selectedValues, setSelectedValues] = useState<string[]>([]); // [1, 2, 3]
@@ -144,10 +146,13 @@ export default function PersonaSelect({
     },
   });
 
-  const personaOptions = data?.data || [];
+  let personaOptions = data?.data || [];
   for (let i = 0; i < personaOptions.length; i++) {
     personaOptions[i]["label"] = personaOptions[i].name;
     personaOptions[i]["value"] = personaOptions[i].id.toString();
+  }
+  if (exclude) {
+    personaOptions = personaOptions.filter((x: any) => !exclude.includes(x.id));
   }
 
   useEffect(() => {

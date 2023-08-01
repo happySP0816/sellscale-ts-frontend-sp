@@ -9,7 +9,7 @@ import _ from 'lodash';
 type PropsType = {
   icp_fit_score: number;
   icp_fit_reason: string;
-  archetype: string;
+  archetype?: string;
 };
 
 const icpFitScoreMap = new Map<string, string>([

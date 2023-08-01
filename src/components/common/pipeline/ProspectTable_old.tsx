@@ -16,6 +16,7 @@ import {
   Switch,
   Group,
   SegmentedControl,
+  Card,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useEffect, useRef, useState } from "react";
@@ -40,12 +41,13 @@ import { StatGridInfo } from "./PipelineSelector";
 import { useDebouncedState, usePrevious } from "@mantine/hooks";
 import { logout } from "@auth/core";
 import getChannels from "@utils/requests/getChannels";
-import { Channel, PersonaOverview } from "src";
+import { Channel, PersonaOverview, Prospect } from "src";
 import _ from "lodash";
 import FlexSeparate from "@common/library/FlexSeparate";
 import { API_URL } from "@constants/data";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { currentProjectState } from '@atoms/personaAtoms';
+import BulkActions from "@common/persona/BulkActions";
 
 /**
  * Gets the default statuses for a given selector type (based on channel)
@@ -178,6 +180,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
     columnAccessor: "full_name",
     direction: "asc",
   });
+  const [selectedRecords, setSelectedRecords] = useState<Prospect[]>([]);
 
   const handleSortStatusChange = (status: DataTableSortStatus) => {
     setPage(1);
@@ -280,11 +283,11 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             channel === "SELLSCALE"
               ? prospect.overall_status
               : channel === "EMAIL"
-              ? prospect.email_status
-              : prospect.linkedin_status,
+                ? prospect.email_status
+                : prospect.linkedin_status,
           channels: [
             prospect.linkedin_status &&
-            prospect.linkedin_status !== "PROSPECTED"
+              prospect.linkedin_status !== "PROSPECTED"
               ? "LINKEDIN"
               : undefined,
             prospect.email_status ? "EMAIL" : undefined,
@@ -327,6 +330,10 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
     })();
   }, []);
 
+  useEffect(() => {
+    console.log(selectedRecords)
+  }, [selectedRecords])
+
   return (
     <Box>
       <Grid grow>
@@ -349,14 +356,14 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show channels (other than SELLSCALE)
-                  Object.keys(data_channels.data)
-                    .filter((x) => x !== "SELLSCALE")
-                    .map((channel) => {
-                      return {
-                        label: formatToLabel(channel),
-                        value: channel,
-                      };
-                    })
+                Object.keys(data_channels.data)
+                  .filter((x) => x !== "SELLSCALE")
+                  .map((channel) => {
+                    return {
+                      label: formatToLabel(channel),
+                      value: channel,
+                    };
+                  })
             }
             mb="md"
             clearable
@@ -376,25 +383,25 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               !data_channels || data_channels.status !== "success"
                 ? []
                 : // Otherwise, show {channel} statuses
-                  (data_channels.data[channel]
-                    ? data_channels.data[channel].statuses_available
-                    : []
-                  )
-                    .map((status: string) => {
-                      let label = formatToLabel(
-                        data_channels.data[channel][status]?.enum_val
-                      );
-                      // Patch for Active Convo to show Unassigned
-                      if (label === "Active Convo" && channel === "LINKEDIN") {
-                        label = "Active Convo Unassigned";
-                      }
+                (data_channels.data[channel]
+                  ? data_channels.data[channel].statuses_available
+                  : []
+                )
+                  .map((status: string) => {
+                    let label = formatToLabel(
+                      data_channels.data[channel][status]?.enum_val
+                    );
+                    // Patch for Active Convo to show Unassigned
+                    if (label === "Active Convo" && channel === "LINKEDIN") {
+                      label = "Active Convo Unassigned";
+                    }
 
-                      return {
-                        label: label,
-                        value: status,
-                      };
-                    })
-                    .sort((a: any, b: any) => a.label.localeCompare(b.label))
+                    return {
+                      label: label,
+                      value: status,
+                    };
+                  })
+                  .sort((a: any, b: any) => a.label.localeCompare(b.label))
             }
             mb="md"
             label={`Filter by ${formatToLabel(
@@ -447,6 +454,15 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           </Switch.Group>
         </Grid.Col>
       </Grid>
+
+      {
+        selectedRecords.length > 0 && (
+          <BulkActions selectedProspects={selectedRecords} backFunc={() => {
+            setSelectedRecords([])
+            refetch()
+          }}/>
+        )
+      }
 
       {(statuses?.includes("BUMPED") || statuses?.includes("RESPONDED")) && (
         <SegmentedControl
@@ -536,7 +552,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
                       <>
                         {formatToLabel(status)} #
                         {review_details.times_bumped &&
-                        review_details.times_bumped >= 1
+                          review_details.times_bumped >= 1
                           ? review_details.times_bumped
                           : "?"}
                       </>
@@ -633,6 +649,9 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
         paginationColor="teal"
         sortStatus={sortStatus}
         onSortStatusChange={handleSortStatusChange}
+        selectedRecords={selectedRecords}
+        onSelectedRecordsChange={setSelectedRecords}
+        isRecordSelectable={(record) => selectedRecords.length < 100 || selectedRecords.includes(record)}
       />
 
       {opened && <ProspectDetailsDrawer />}

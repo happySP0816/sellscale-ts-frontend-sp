@@ -145,7 +145,7 @@ export function ProspectDetailsResearchTabs(props: { prospectId: number }) {
             <tbody>
               {accountResearchArray.map((item: any, index: any) => {
                 return (
-                  <tr key={item.title}>
+                  <tr key={index}>
                     <td>{item.title}</td>
                     <td>{item.reason}</td>
                   </tr>

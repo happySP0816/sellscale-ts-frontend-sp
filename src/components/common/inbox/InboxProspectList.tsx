@@ -38,7 +38,7 @@ import _ from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
-import { fetchingProspectIdState, nurturingModeState, openedProspectIdState } from '@atoms/inboxAtoms';
+import { fetchingProspectIdState, nurturingModeState, openedProspectIdState, openedProspectLoadingState, tempHiddenProspectsState } from '@atoms/inboxAtoms';
 import { Prospect, ProspectShallow } from 'src';
 import { forwardRef, useEffect, useState } from 'react';
 import { HEADER_HEIGHT } from './InboxProspectConvo';
@@ -146,6 +146,8 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
   const [showPurgatorySection, setShowPurgatorySection] = useState(true);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const [currentInboxCount, setCurrentInboxCount] = useRecoilState(currentInboxCountState);
+  const [openedProspectLoading, setOpenedProspectLoading] = useRecoilState(openedProspectLoadingState);
+  const tempHiddenProspects = useRecoilValue(tempHiddenProspectsState);
 
   const nurturingMode = useRecoilValue(nurturingModeState);
 
@@ -181,6 +183,12 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
         const last_message_timestamp = li_soonest ? p.li_last_message_timestamp : p.email_last_message_timestamp;
         const unread_messages = li_soonest ? p.li_unread_messages : p.email_unread_messages;
 
+        // Hack to temp hide prospect when we send a message
+        let is_purgatory = p.hidden_until ? new Date(p.hidden_until).getTime() > new Date().getTime() : false;
+        if (tempHiddenProspects.includes(p.id)) {
+          is_purgatory = true;
+        }
+
         return {
           id: p.id,
           name: _.truncate(p.full_name, {
@@ -204,7 +212,7 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
           linkedin_status: p.linkedin_status,
           overall_status: p.overall_status,
           email_status: p.email_status,
-          in_purgatory: p.hidden_until ? new Date(p.hidden_until).getTime() > new Date().getTime() : false,
+          in_purgatory: is_purgatory,
         };
       })
       .sort(
@@ -405,7 +413,12 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
                             </Box>
                           </div>
                         )}
-                      <Container p={0} m={0} onClick={() => setOpenedProspectId(prospect.id)} opacity={prospect.in_purgatory ? 0.5 : 1}>
+                      <Container p={0} m={0} onClick={() => {
+                        if(!openedProspectLoading) {
+                          setOpenedProspectLoading(true);
+                          setOpenedProspectId(prospect.id);
+                        }
+                      }} opacity={prospect.in_purgatory ? 0.5 : 1}>
                         <ProspectConvoCard
                           id={prospect.id}
                           name={prospect.name}

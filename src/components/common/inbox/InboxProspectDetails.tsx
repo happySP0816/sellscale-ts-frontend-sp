@@ -188,7 +188,7 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
   }
 
   // For changing the status of the prospect
-  const changeStatus = async (status: string) => {
+  const changeStatus = async (status: string, changeProspect?: boolean) => {
     await updateChannelStatus(
       openedProspectId,
       userToken,
@@ -198,7 +198,9 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
     queryClient.invalidateQueries({
       queryKey: ['query-dash-get-prospects'],
     });
-    setOpenedProspectId(-1);
+    if(changeProspect || changeProspect === undefined){
+      setOpenedProspectId(-1);
+    }
     refetch();
   };
 
@@ -318,12 +320,12 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
             </Box>
           </Flex>
 
-          {statusValue !== 'DEMO_SET' ? (
+          {!statusValue.startsWith('DEMO_') ? (
             <Flex gap={10} justify='center' wrap='nowrap' mb='xs' mx='xs'>
               <StatusBlockButton
                 title='Demo Set'
                 icon={<IconCalendarEvent color={theme.colors.pink[6]} size={24} />}
-                onClick={async () => { await changeStatus('DEMO_SET') }}
+                onClick={async () => { await changeStatus('DEMO_SET', false) }}
               />
               <StatusBlockButton
                 title='Not Interested'
@@ -363,7 +365,7 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
           )}
         </Paper>
       </div>
-      {statusValue !== 'DEMO_SET' && statusValue !== 'ACCEPTED' && statusValue !== 'RESPONDED' && (
+      {!statusValue.startsWith('DEMO_') && statusValue !== 'ACCEPTED' && statusValue !== 'RESPONDED' && (
         <div style={{ flexBasis: '10%' }}>
           <Paper
             withBorder

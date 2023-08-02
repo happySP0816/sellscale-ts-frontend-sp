@@ -5,6 +5,16 @@ const openedProspectIdState = atom({
   key: "inbox-opened-prospect-id",
   default: -1,
 });
+const openedProspectLoadingState = atom({
+  key: "inbox-opened-prospect-loading",
+  default: false,
+});
+
+// Hacky solution to temp hiding prospects
+const tempHiddenProspectsState = atom({
+  key: "inbox-temp-hidden-prospects",
+  default: [] as number[],// ids of prospects that are temp hidden
+});
 
 const openedBumpFameworksState = atom({
   key: "inbox-opened-bump-framework-modal",
@@ -45,6 +55,7 @@ const currentConvoEmailMessageState = atom({
 
 export {
   openedProspectIdState,
+  openedProspectLoadingState,
   openedBumpFameworksState,
   nurturingModeState,
   selectedBumpFrameworkState,
@@ -53,4 +64,5 @@ export {
   currentConvoEmailMessageState,
   fetchingProspectIdState,
   allBumpFrameworksState,
+  tempHiddenProspectsState,
 };

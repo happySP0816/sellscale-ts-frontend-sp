@@ -4,6 +4,7 @@ import {
   currentConvoLiMessageState,
   fetchingProspectIdState,
   openedProspectIdState,
+  openedProspectLoadingState,
   selectedBumpFrameworkState,
 } from "@atoms/inboxAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -185,6 +186,8 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const currentProject = useRecoilValue(currentProjectState);
 
+  const [openedProspectLoading, setOpenedProspectLoading] = useRecoilState(openedProspectLoadingState);
+
   const [fetchingProspectId, setFetchingProspectId] = useRecoilState(fetchingProspectIdState)
 
   const [selectedBumpFramework, setBumpFramework] = useRecoilState(
@@ -256,6 +259,9 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
       // @ts-ignore
       // eslint-disable-next-line
       const [_key, { emailThread }] = queryKey;
+
+      setCurrentConvoEmailMessages(undefined);
+      setCurrentConvoLiMessages(undefined);
 
       // For Email //
       if (openedOutboundChannel === "EMAIL") {
@@ -342,6 +348,13 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
     sendBoxRef.current?.setMessageDraft("");
     sendBoxRef.current?.setAiMessage("");
   }, [openedProspectId]);
+
+  // The prospect is no longer loading if we are not fetching any data
+  useEffect(() => {
+    if(!isFetching && !isFetchingThreads && !isFetchingMessages) {
+      setOpenedProspectLoading(false);
+    }
+  }, [isFetching, isFetchingThreads, isFetchingMessages]);
 
   const triggerGetBumpFrameworks = async () => {
     setBumpFramework(undefined);
@@ -522,7 +535,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
           <div style={{ marginTop: 10, marginBottom: 10 }}>
             <LoadingOverlay
               loader={loaderWithText("")}
-              visible={isFetchingMessages || isFetchingThreads}
+              visible={isFetching || isFetchingThreads || isFetchingMessages}
             />
             {openedOutboundChannel === "EMAIL" && (
               <Select

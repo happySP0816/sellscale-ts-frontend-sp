@@ -1,4 +1,4 @@
-import { openedProspectIdState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoLiMessageState, currentConvoChannelState, currentConvoEmailMessageState, fetchingProspectIdState } from '@atoms/inboxAtoms';
+import { openedProspectIdState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoLiMessageState, currentConvoChannelState, currentConvoEmailMessageState, fetchingProspectIdState, tempHiddenProspectsState } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon, LoadingOverlay, Tooltip, Select } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
@@ -92,6 +92,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [currentConvoLiMessages, setCurrentConvoLiMessages] = useRecoilState(currentConvoLiMessageState);
   const [currentConvoEmailMessages, setCurrentConvoEmailMessages] = useRecoilState(currentConvoEmailMessageState);
 
+  const [tempHiddenProspects, setTempHiddenProspects] = useRecoilState(tempHiddenProspectsState);
+
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
   const [messageDraft, setMessageDraft] = useState('');
   const [aiMessage, setAiMessage] = useState('');
@@ -105,6 +107,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
     // Delete the auto bump message if it exists
     await deleteAutoBumpMessage(userToken, props.prospectId);
+
+    // Hack to update the prospect list to temp show they're in purgatory
+    setTempHiddenProspects(tempHiddenProspects.concat([props.prospectId]));
 
     if (openedOutboundChannel === 'LINKEDIN') {
       showNotification({

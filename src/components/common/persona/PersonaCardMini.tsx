@@ -21,6 +21,7 @@ import {
   Box,
   Divider,
   TabsValue,
+  Badge,
 } from '@mantine/core';
 import {
   IconActivityHeartbeat,
@@ -166,14 +167,26 @@ export default function PersonaCardMini(props: {
         theme.fn.variant({ variant: "filled", color: "dark" }).background!,
         0.1
       ),
+      position: 'relative',
     }}>
       <Box onClick={props.onClick}>
         <Flex align='center' justify='center'>
-          <Box>
+          <Group>
+            <Badge
+              size="xs"
+              variant="outline"
+              color={props.personaOverview.active ? 'teal' : 'red'}
+              sx={{
+                position: 'absolute',
+                top: 10,
+                left: 10,
+                fontSize: 6,
+              }}
+            >{props.personaOverview.active ? 'Active' : 'Inactive'}</Badge>
             <Text fz={17} fw={400} c='gray.0'>
               {props.personaOverview.name}
             </Text>
-          </Box>
+          </Group>
         </Flex>
         {false ? (
           <Loader variant='dots' color='green' />

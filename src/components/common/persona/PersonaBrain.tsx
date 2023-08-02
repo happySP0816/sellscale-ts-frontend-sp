@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Card,
   Container,
@@ -15,7 +16,7 @@ import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import displayNotification from "@utils/notificationFlow";
 import { MsgResponse } from "src";
 import { showNotification } from "@mantine/notifications";
-import { currentProjectState } from '@atoms/personaAtoms';
+import { currentProjectState } from "@atoms/personaAtoms";
 type PropsType = {
   archetype_id?: number;
 };
@@ -25,7 +26,7 @@ export default function PersonaBrain(props: PropsType) {
   const [fetchedPersona, setFetchedPersona] = useState(false);
   const [loadingPersona, setLoadingPersona] = useState(false);
 
-  const [personaName, setPersonaName] = useState("");
+  const [personaName, setPersonaName] = useState('');
   const [loadingPersonaFitReason, setLoadingPersonaFitReason] = useState(false);
   const [personaFitReason, setPersonaFitReason] = useState("");
   const [
@@ -34,10 +35,11 @@ export default function PersonaBrain(props: PropsType) {
   ] = useState("");
   const [personaContactObjective, setPersonaContactObjective] = useState("");
   const [needsSave, setNeedsSave] = useState(false);
-
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   
-  const archetype_id = props.archetype_id || currentProject?.id
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
+
+  const archetype_id = props.archetype_id || currentProject?.id;
 
   const fetchPersonaDetails = async () => {
     setLoadingPersona(true);
@@ -54,6 +56,8 @@ export default function PersonaBrain(props: PropsType) {
         setPersonaFitReason(persona.persona_fit_reason);
         setPersonaICPMatchingInstructions(persona.icp_matching_prompt);
         setPersonaContactObjective(persona.persona_contact_objective);
+
+        setFetchedPersona(true);
       })
       .catch((err) => {
         console.log(err);
@@ -99,11 +103,88 @@ export default function PersonaBrain(props: PropsType) {
   };
 
   useEffect(() => {
-    if (!fetchedPersona) {
-      fetchPersonaDetails();
-      setFetchedPersona(true);
-    }
-  }, [fetchedPersona]);
+    fetchPersonaDetails();
+  }, [archetype_id]);
+
+  if(!archetype_id){
+    return <></>;
+  }
+
+  return (
+    <Flex>
+      <Container mt="md">
+        <Card>
+          <LoadingOverlay visible={loadingPersona} overlayBlur={2} />
+          <Title order={4}>Persona Brain</Title>
+          <Text size="sm" mb="lg">
+            This is what SellScale knows about this persona. Adjust the
+            information below to improve the accuracy of SellScale's
+            recommendations, message generations, email generations, and more.
+          </Text>
+
+          {fetchedPersona && <PersonaBasicForm
+            personaName={personaName}
+            personaFitReason={personaFitReason}
+            personaICPMatchingInstructions={personaICPMatchingInstructions}
+            personaContactObjective={personaContactObjective}
+            onUpdate={(data) => {
+              setPersonaName(data.personaName);
+              setPersonaFitReason(data.personaFitReason);
+              setPersonaICPMatchingInstructions(
+                data.personaICPMatchingInstructions
+              );
+              setPersonaContactObjective(data.personaContactObjective);
+              setNeedsSave(true);
+            }}
+          />}
+
+          <Button
+            color="blue"
+            variant="light"
+            mt="md"
+            disabled={!needsSave}
+            onClick={savePersonaDetails}
+          >
+            Save Persona Information
+          </Button>
+          <Button
+            color="red"
+            variant="outline"
+            mt="md"
+            ml="lg"
+            onClick={fetchPersonaDetails}
+            hidden={!needsSave}
+          >
+            Cancel Edits
+          </Button>
+        </Card>
+      </Container>
+    </Flex>
+  );
+}
+
+export function PersonaBasicForm(props: {
+  personaName: string;
+  personaFitReason: string;
+  personaICPMatchingInstructions: string;
+  personaContactObjective: string;
+  onUpdate: (data: {
+    personaName: string;
+    personaFitReason: string;
+    personaICPMatchingInstructions: string;
+    personaContactObjective: string;
+  }) => void;
+}) {
+
+  const [userToken] = useRecoilState(userTokenState);
+
+  const [personaName, setPersonaName] = useState(props.personaName);
+  const [loadingPersonaFitReason, setLoadingPersonaFitReason] = useState(false);
+  const [personaFitReason, setPersonaFitReason] = useState(props.personaFitReason);
+  const [personaICPMatchingInstructions, setPersonaICPMatchingInstructions] =
+    useState(props.personaICPMatchingInstructions);
+  const [personaContactObjective, setPersonaContactObjective] = useState(props.personaContactObjective);
+
 
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaFitReason(true);
@@ -147,115 +228,100 @@ export default function PersonaBrain(props: PropsType) {
       });
     setPersonaFitReason(res.data.description);
     setLoadingPersonaFitReason(false);
-    setNeedsSave(true);
+    sendUpdate();
     return res as MsgResponse;
   };
 
+  const sendUpdate = () => {
+    setTimeout(() => {
+      props.onUpdate({
+        personaName: personaName,
+        personaFitReason: personaFitReason,
+        personaICPMatchingInstructions: personaICPMatchingInstructions,
+        personaContactObjective: personaContactObjective,
+      });
+    }, 1);
+  }
+
+  useEffect(() => {
+    sendUpdate();
+  }, []);
+
   return (
-    <Flex>
-      <Container mt='md'>
-        <Card>
-          <LoadingOverlay visible={loadingPersona} overlayBlur={2} />
-          <Title order={4}>Persona Brain</Title>
-          <Text size="sm" mb="lg">
-            This is what SellScale knows about this persona. Adjust the
-            information below to improve the accuracy of SellScale's
-            recommendations, message generations, email generations, and more.
-          </Text>
-          <TextAreaWithAI
-            label="Descriptive Persona Name"
-            description='Give a short name to this persona. For example, "Sales Manager" or "Marketing Director". The AI will use this name when generating messages and splitting prospects.'
-            minRows={1}
-            value={personaName}
-            onChange={(e) => {
-              setPersonaName(e.currentTarget.value);
-              setNeedsSave(true);
-            }}
-          />
-          {/* <TextAreaWithAI
-            label="Persona Profile"
-            description="Generated profile of this persona"
-            minRows={4}
-            value={''}
-            onChange={(e) => {
-            }}
-          /> */}
-          <TextAreaWithAI
-            label="Why do they buy your product?"
-            description="Explain why this persona is a good fit for your product or service. This will be used by the AI to generate emails and messages."
-            minRows={4}
-            value={personaFitReason}
-            onChange={(e) => {
-              setPersonaFitReason(e.currentTarget.value);
-              setNeedsSave(true);
-            }}
-            loadingAIGenerate={loadingPersonaFitReason}
-            onAIGenerateClicked={async () => {
-              await displayNotification(
-                "generate-persona-buy-reason",
-                generatePersonaBuyReason,
-                {
-                  title: "Generating persona buying reason...",
-                  message: "This may take a few seconds.",
-                  color: "teal",
-                },
-                {
-                  title: "Persona buying reason generated!",
-                  message: "Your persona buying reason has been generated.",
-                  color: "teal",
-                },
-                {
-                  title: "Failed to generate persona buying reason",
-                  message: "Please try again or contact SellScale team.",
-                  color: "red",
-                }
-              );
-            }}
-          />
-          {/* TODO(AAKASH) delete component below if no use by July 20, 2023 */}
-          {false && (
-            <TextAreaWithAI
-              label="Rich Persona Description"
-              description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc. Note that the AI will use this information to rank your prospects."
-              minRows={4}
-              value={personaICPMatchingInstructions}
-              onChange={(e) => {
-                setPersonaICPMatchingInstructions(e.currentTarget.value);
-                setNeedsSave(true);
-              }}
-            />
-          )}
-          <TextAreaWithAI
-            label="Persona contact objective"
-            description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral. The AI will use this information to generate messages."
-            minRows={4}
-            value={personaContactObjective}
-            onChange={(e) => {
-              setPersonaContactObjective(e.currentTarget.value);
-              setNeedsSave(true);
-            }}
-          />
-          <Button
-            color="blue"
-            variant="light"
-            mt="md"
-            disabled={!needsSave}
-            onClick={savePersonaDetails}
-          >
-            Save Persona Information
-          </Button>
-          <Button
-            color="red"
-            variant="outline"
-            mt="md"
-            ml="lg"
-            onClick={fetchPersonaDetails}
-            hidden={!needsSave}
-          >
-            Cancel Edits
-          </Button>
-        </Card>
-      </Container>
-    </Flex>
+    <Box>
+      <TextAreaWithAI
+        label="Descriptive Persona Name"
+        description='Give a short name to this persona. For example, "Sales Manager" or "Marketing Director". The AI will use this name when generating messages and splitting prospects.'
+        minRows={1}
+        value={personaName}
+        onChange={(e) => {
+          setPersonaName(e.currentTarget.value);
+          sendUpdate();
+        }}
+      />
+      {/* <TextAreaWithAI
+          label="Persona Profile"
+          description="Generated profile of this persona"
+          minRows={4}
+          value={''}
+          onChange={(e) => {
+          }}
+        /> */}
+      <TextAreaWithAI
+        label="Why do they buy your product?"
+        description="Explain why this persona is a good fit for your product or service. This will be used by the AI to generate emails and messages."
+        minRows={4}
+        value={personaFitReason}
+        onChange={(e) => {
+          setPersonaFitReason(e.currentTarget.value);
+          sendUpdate();
+        }}
+        loadingAIGenerate={loadingPersonaFitReason}
+        onAIGenerateClicked={async () => {
+          await displayNotification(
+            "generate-persona-buy-reason",
+            generatePersonaBuyReason,
+            {
+              title: "Generating persona buying reason...",
+              message: "This may take a few seconds.",
+              color: "teal",
+            },
+            {
+              title: "Persona buying reason generated!",
+              message: "Your persona buying reason has been generated.",
+              color: "teal",
+            },
+            {
+              title: "Failed to generate persona buying reason",
+              message: "Please try again or contact SellScale team.",
+              color: "red",
+            }
+          );
+        }}
+      />
+      {/* TODO(AAKASH) delete component below if no use by July 20, 2023 */}
+      {false && (
+        <TextAreaWithAI
+          label="Rich Persona Description"
+          description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc. Note that the AI will use this information to rank your prospects."
+          minRows={4}
+          value={personaICPMatchingInstructions}
+          onChange={(e) => {
+            setPersonaICPMatchingInstructions(e.currentTarget.value);
+            sendUpdate();
+          }}
+        />
+      )}
+      <TextAreaWithAI
+        label="Persona contact objective"
+        description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral. The AI will use this information to generate messages."
+        minRows={4}
+        value={personaContactObjective}
+        onChange={(e) => {
+          setPersonaContactObjective(e.currentTarget.value);
+          sendUpdate();
+        }}
+      />
+    </Box>
   );
 }

@@ -8,9 +8,18 @@ import {
   Text,
   createStyles,
   useMantineTheme,
+  Flex,
+  Group,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
-import { IconCircle, IconCircleCheck, IconGridDots, IconLayoutSidebar, IconQuestionCircle, IconStack } from '@tabler/icons';
+import {
+  IconCircle,
+  IconCircleCheck,
+  IconGridDots,
+  IconLayoutSidebar,
+  IconQuestionCircle,
+  IconStack,
+} from "@tabler/icons";
 import {
   IconSquareCheck,
   IconPackage,
@@ -60,7 +69,7 @@ export function ProjectSelect() {
 
   useEffect(() => {
     (async () => {
-      if(!isLoggedIn()) return;
+      if (!isLoggedIn()) return;
       const response = await getPersonasOverview(userToken);
       const result =
         response.status === "success"
@@ -69,76 +78,95 @@ export function ProjectSelect() {
       setProjects(result);
 
       const firstActiveProject = result.find((project) => project.active);
-      if (firstActiveProject && !window.location.href.includes("/all") ) setCurrentProject(firstActiveProject);
-
+      if (firstActiveProject && !window.location.href.includes("/all"))
+        setCurrentProject(firstActiveProject);
     })();
   }, []);
 
   return (
-    <Menu
-      transitionProps={{ transition: "pop-top-left" }}
-      position="top-start"
-      width={250}
-      withinPortal
-      withArrow
+    <Button
+      size="sm"
+      sx={{ backgroundColor: currentProject?.id ? "#4298f5" : "" }}
+      className={classes.select}
+      leftIcon={<IconLayoutSidebar size="1.05rem" stroke={1.5} />}
+      rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
+      pr={12}
+      w={250}
+      onClick={() => {
+        openContextModal({
+          modal: "personaSelect",
+          title: (
+            <Flex w="100%" pr="6px">
+              <Flex dir="row" justify="space-between" align={"center"} w="100%">
+                <Title order={3}>Your Personas</Title>
+                <Group>
+                  <Button
+                    variant="subtle"
+                    compact
+                    onClick={() => {
+                      openContextModal({
+                        modal: "uploadProspects",
+                        title: <Title order={3}>Create Persona</Title>,
+                        innerProps: { mode: "CREATE-ONLY" },
+                      });
+                    }}
+                  >
+                    New Persona
+                  </Button>
+                </Group>
+              </Flex>
+            </Flex>
+          ),
+          innerProps: {},
+          styles: { title: { width: "100%" } },
+        });
+      }}
     >
-      <Menu.Target>
-        <Button
-          size="sm"
-          sx={{backgroundColor: currentProject?.id ? '#4298f5' : ''}}
-          className={classes.select}
-          leftIcon={<IconLayoutSidebar size="1.05rem" stroke={1.5} />}
-          rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
-          pr={12}
-          w={250}
-        >
-          {currentProject?.name || "Select Persona"}
-        </Button>
-      </Menu.Target>
-      <Menu.Dropdown>
-        {projects.map((project, i) => (
-          <Menu.Item
-            opacity={project.id === currentProject?.id ? 0.5 : 1}
-            key={i}
-            disabled={project.id === currentProject?.id}
-            icon={project.active ? (
-              <IconCircleCheck
-                size="1rem"
-                color='green'
-                stroke={1.5}
-              />
-            ) : project.is_unassigned_contact_archetype ? (
-              <IconStack3
-                size="1rem"
-                color='blue'
-                stroke={1.5}
-              />
-            ) : (
-              <IconCircleDashed
-                size="1rem"
-                color='red'
-                stroke={1.5}
-              />
-            )}
-            onClick={() => {
-              setCurrentProject(project);
-              navigateToPage(navigate, `/inbox`);
-            }}
-          >
-            {project.name}
-          </Menu.Item>
-        ))}
-        <Menu.Divider />
-        <Menu.Item icon={<IconPlus size={14} />}
-          onClick={() => {
-            openContextModal({
-              modal: "uploadProspects",
-              title: <Title order={3}>Create Persona</Title>,
-              innerProps: { mode: "CREATE-ONLY" },
-            });
-          }}
-        >Create New Persona</Menu.Item>
-      </Menu.Dropdown>
-    </Menu>
+      {currentProject?.name || "Select Persona"}
+    </Button>
+    // <Menu.Dropdown>
+    //   {projects.map((project, i) => (
+    //     <Menu.Item
+    //       opacity={project.id === currentProject?.id ? 0.5 : 1}
+    //       key={i}
+    //       disabled={project.id === currentProject?.id}
+    //       icon={project.active ? (
+    //         <IconCircleCheck
+    //           size="1rem"
+    //           color='green'
+    //           stroke={1.5}
+    //         />
+    //       ) : project.is_unassigned_contact_archetype ? (
+    //         <IconStack3
+    //           size="1rem"
+    //           color='blue'
+    //           stroke={1.5}
+    //         />
+    //       ) : (
+    //         <IconCircleDashed
+    //           size="1rem"
+    //           color='red'
+    //           stroke={1.5}
+    //         />
+    //       )}
+    //       onClick={() => {
+    //         setCurrentProject(project);
+    //         navigateToPage(navigate, `/inbox`);
+    //       }}
+    //     >
+    //       {project.name}
+    //     </Menu.Item>
+    //   ))}
+    //   <Menu.Divider />
+    //   <Menu.Item icon={<IconPlus size={14} />}
+    //     onClick={() => {
+    //       openContextModal({
+    //         modal: "uploadProspects",
+    //         title: <Title order={3}>Create Persona</Title>,
+    //         innerProps: { mode: "CREATE-ONLY" },
+    //       });
+    //     }}
+    //   >Create New Persona</Menu.Item>
+    // </Menu.Dropdown>
   );
 }

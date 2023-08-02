@@ -12,6 +12,8 @@ import {
   Box,
   Flex,
   Select,
+  ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { useRef, useState } from "react";
@@ -150,7 +152,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
       </Flex>
       <DataTable
         height={"min(670px, 100vh - 200px)"}
-        verticalAlignment="top"
+        verticalAlignment="center"
         loaderColor="teal"
         noRecordsText={"No CTAs found"}
         fetching={isFetching}
@@ -159,13 +161,49 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
             accessor: "text_value",
             title: "Call-to-Action",
             sortable: true,
-            render: ({ text_value }) => <Flex direction='row'>
-              <Box mr='xs'>
-              <CTAGeneratorExample ctaText={text_value} size='xs' /> 
-              </Box>
-              <Text>{text_value}</Text> 
-            
-            </Flex>,
+            render: (record) => {
+              const isDisabled = !!(record.total_count && record.total_count > 0);
+
+              return (
+                <Flex direction='row' align='center' justify='space-between'>
+                  <Flex>
+                    <Flex mr='xs'>
+                      <CTAGeneratorExample ctaText={record.text_value} size='xs' />
+                    </Flex>
+                    <Flex>
+                      <Text>{record.text_value}</Text>
+                    </Flex>
+                  </Flex>
+                  <Flex miw='24px'>
+                    <Tooltip
+                      withArrow
+                      withinPortal
+                      label={isDisabled ? "CTAs that have been used cannot be edited" : "Edit CTA"}
+                    >
+                      <div>
+                        <ActionIcon
+                          size='xs'
+                          variant='transparent'
+                          disabled={isDisabled}
+                          onClick={() => {
+                            openContextModal({
+                              modal: "editCTA",
+                              title: <Title order={3}>Edit CTA</Title>,
+                              innerProps: {
+                                personaId: currentProject?.id,
+                                cta: record,
+                              },
+                            });
+                          }}
+                        >
+                          <IconPencil color='black' stroke={"1"} />
+                        </ActionIcon>
+                      </div>
+                    </Tooltip>
+                  </Flex>
+                </Flex>
+              )
+            }
           },
           {
             accessor: "percentage",
@@ -252,6 +290,6 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
           ],
         }}
       />
-    </Box>
+    </Box >
   );
 }

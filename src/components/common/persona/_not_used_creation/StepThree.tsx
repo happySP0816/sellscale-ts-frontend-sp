@@ -11,7 +11,7 @@ export default function StepThree(props: { persona: ArchetypeCreation }) {
 
   return (
     <>
-      <Pulse
+      {/* <Pulse
         personaOverview={{
           active: props.persona.active,
           id: props.persona.id,
@@ -21,9 +21,10 @@ export default function StepThree(props: { persona: ArchetypeCreation }) {
           num_unused_li_prospects: props.persona.performance.total_prospects,
           icp_matching_prompt: props.persona.icp_matching_prompt,
           is_unassigned_contact_archetype: props.persona.is_unassigned_contact_archetype,
+
           uploads: props.persona.uploads,
         }}
-      />
+      /> */}
     </>
   );
 }

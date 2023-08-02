@@ -64,7 +64,7 @@ export default function ClonePersonaModal({
 
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
   // Persona Basics

@@ -137,10 +137,12 @@ export default function ClonePersonaModal({
             <Center>
               <Button
                 variant="light"
+                loading={loading}
                 leftIcon={<IconCopy size='0.9rem' />}
                 onClick={async () => {
                   if(!basics.current) { return; }
 
+                  setLoading(true);
                   const response = await clonePersona(userToken, innerProps.persona.id, basics.current, {
                     ctas: cloneCTAs,
                     bumpFrameworks: cloneBumpFrameworks,
@@ -150,6 +152,7 @@ export default function ClonePersonaModal({
                   if(response.status === 'success') {
                     // Success!
                   }
+                  setLoading(false);
                   
                   context.closeModal(id);
                 }}

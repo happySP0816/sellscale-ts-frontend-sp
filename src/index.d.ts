@@ -187,6 +187,8 @@ export interface DemoFeedback {
   prospect_name: string;
   rating: string;
   status: string;
+  demo_date: Date;
+  next_demo_date: Date;
 }
 
 export interface Simulation {

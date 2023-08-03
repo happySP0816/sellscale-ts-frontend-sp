@@ -13,11 +13,11 @@ const useStyles = createStyles((theme) => ({
   },
 
   label: {
-    position: 'absolute',
+    position: 'relative',
     pointerEvents: 'none',
     fontSize: theme.fontSizes.xs,
+    top: "28px",
     paddingLeft: theme.spacing.sm,
-    paddingTop: `calc(${theme.spacing.sm} / 2)`,
     zIndex: 1,
   },
 }));
@@ -105,18 +105,19 @@ export default function ProspectDemoDateSelector(props: { prospectId: number }) 
   };
 
   return (
-    <DatePickerInput
-      label="Demo Scheduled For"
-      placeholder="Select date and time"
-      size="xs"
-      radius="md"
-      dropdownType="modal"
-      classNames={classes}
-      value={demoDate}
-      mt='xs'
-      onChange={async (value) => {
-        updateProspectDemoDate(value?.toISOString());
-        setDemoDate(new Date(value?.toISOString() || ''));
+    <div>
+      <DatePickerInput
+        label="Demo Scheduled For"
+        placeholder="Select date and time"
+        size="xs"
+        radius="md"
+        dropdownType="modal"
+        classNames={classes}
+        value={demoDate}
+        mt='-24px'
+        onChange={async (value) => {
+          updateProspectDemoDate(value?.toISOString());
+          setDemoDate(new Date(value?.toISOString() || ''));
           /*
           await displayNotification(
             'update-prospect-demo-date',
@@ -138,7 +139,8 @@ export default function ProspectDemoDateSelector(props: { prospectId: number }) 
             }
           );
           */
-      }}
-    />
+        }}
+      />
+    </div>
   );
 }

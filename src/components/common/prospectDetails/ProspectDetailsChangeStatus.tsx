@@ -14,8 +14,9 @@ import {
   Center,
   LoadingOverlay,
   Select,
+  ScrollArea,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   IconHeartHandshake,
   IconMailboxOff,
@@ -328,14 +329,18 @@ export default function ProspectDetailsChangeStatus(
     enabled: props.prospectId !== -1,
   });
 
-  const { data: demoFeedback } = useQuery({
+  const { data: demoFeedbacks, refetch: refreshDemoFeedback } = useQuery({
     queryKey: [`query-get-prospect-demo-feedback-${props.prospectId}`],
     queryFn: async () => {
       const response = await getDemoFeedback(userToken, props.prospectId);
-      return response.status === "success" ? response.data[0] as DemoFeedback : undefined;
+      return response.status === "success" ? response.data as DemoFeedback[] : undefined;
     },
     enabled: props.prospectId !== -1,
   });
+
+  useEffect(() => {
+    refreshDemoFeedback()
+  }, [prospectData])
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
@@ -461,42 +466,52 @@ export default function ProspectDetailsChangeStatus(
           {formatToLabel(props.channelData.currentStatus)}
         </Badge>
       </Group>
-      <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${
-        splitName(props.prospectName).first
-      }'s ${formatToLabel(props.channelData.value)} status.`}</Text>
+      <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${splitName(props.prospectName).first
+        }'s ${formatToLabel(props.channelData.value)} status.`}</Text>
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       {
         !props.channelData.currentStatus?.includes('DEMO') ?
-        <SimpleGrid cols={3} mt="md">
-          {items}
-        </SimpleGrid> :
-        <>
-          {prospectData && demoFeedback ? (
-            <DemoFeedbackCard prospect={prospectData.data} demoFeedback={demoFeedback} />
-          ) : (
+          <SimpleGrid cols={3} mt="md">
+            {items}
+          </SimpleGrid> :
+          <>
+            {demoFeedbacks && demoFeedbacks.length > 0 && prospectData && (
+              <ScrollArea h='250px'>
+                {demoFeedbacks?.map((feedback, index) => {
+                  return (
+                    <div
+
+                      style={{ marginBottom: 10 }}
+                    >
+                      <DemoFeedbackCard prospect={prospectData.data} index={index + 1} demoFeedback={feedback} refreshDemoFeedback={refreshDemoFeedback} />
+                    </div>
+                  )
+                })}
+              </ScrollArea>
+            )}
+
             <Button
-            variant="light"
-            radius="md"
-            fullWidth
-            onClick={() => {
-              setDrawerProspectId(props.prospectId);
-              setDemosDrawerOpened(true);
-            }}
-          >
-            Give Demo Feedback
-          </Button>
-          )}
-        </>
+              variant="light"
+              radius="md"
+              fullWidth
+              onClick={() => {
+                setDrawerProspectId(props.prospectId);
+                setDemosDrawerOpened(true);
+              }}
+            >
+              {(demoFeedbacks && demoFeedbacks.length > 0) ? 'Add' : 'Give'} Demo Feedback
+            </Button>
+          </>
       }
 
       <DemoFeedbackDrawer refetch={refetch} onSubmit={() => {
-          queryClient.refetchQueries({
-            queryKey: [`query-prospect-details-${props.prospectId}`],
-          });
-        }}/>
+        queryClient.refetchQueries({
+          queryKey: [`query-prospect-details-${props.prospectId}`],
+        });
+      }} />
 
       {props.channelData.currentStatus &&
-        props.channelData.currentStatus.includes("DEMO") && !demoFeedback && (
+        props.channelData.currentStatus.includes("DEMO") && !demoFeedbacks && (
           <ProspectDemoDateSelector prospectId={props.prospectId} />
         )}
       {props.channelData.currentStatus?.startsWith("ACTIVE_CONVO") && (
@@ -532,7 +547,7 @@ export default function ProspectDetailsChangeStatus(
           }}
         />
       )}
-     
+
     </Card>
   );
 }

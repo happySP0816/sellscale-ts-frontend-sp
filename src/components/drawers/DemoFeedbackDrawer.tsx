@@ -21,51 +21,31 @@ import {
   Rating,
   Textarea,
   Box,
+  Checkbox,
 } from '@mantine/core';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import {
-  prospectDrawerIdState,
-  prospectDrawerOpenState,
-  prospectDrawerNotesState,
-  prospectChannelState,
-  prospectDrawerStatusesState,
-} from '@atoms/prospectAtoms';
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import ProspectDetailsSummary from '../common/prospectDetails/ProspectDetailsSummary';
-import ProspectDetailsChangeStatus, {
+import {
   channelToIcon,
   updateChannelStatus,
 } from '../common/prospectDetails/ProspectDetailsChangeStatus';
-import ProspectDetailsCompany from '../common/prospectDetails/ProspectDetailsCompany';
-import ProspectDetailsNotes from '../common/prospectDetails/ProspectDetailsNotes';
 import { userTokenState } from '@atoms/userAtoms';
-import { convertDateToLocalTime, formatToLabel, proxyURL, valueToColor } from '@utils/general';
-import { logout } from '@auth/core';
-import getChannels, { getChannelOptions } from '@utils/requests/getChannels';
 import { useEffect, useRef, useState } from 'react';
 import { Channel, Prospect } from 'src';
-import FlexSeparate from '@common/library/FlexSeparate';
 import { API_URL } from '@constants/data';
-import ProspectDetailsRemove from '@common/prospectDetails/ProspectDetailsRemove';
-import ProspectDetailsResearch from '@common/prospectDetails/ProspectDetailsResearch';
-import { IconDots } from '@tabler/icons';
-import ProspectDetailsOptionsMenu from '@common/prospectDetails/ProspectDetailsOptionsMenu';
 import {
   demosDrawerOpenState,
-  demosDrawerProspectIdState,
-  questionsDrawerOpenState,
-  schedulingDrawerOpenState,
+  demosDrawerProspectIdState
 } from '@atoms/dashboardAtoms';
-import SchedulingCardContents from '@common/home/dashboard/SchedulingCardContents';
 import Assistant from '@assets/images/assistant.svg';
-import TextAreaWithAI from '@common/library/TextAreaWithAI';
 import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSelector';
 import { useForm } from '@mantine/form';
 import { DemoRating } from '@common/home/dashboard/demo/DemoRating';
 import { showNotification } from '@mantine/notifications';
-import ICPFitPill from '@common/pipeline/ICPFitAndReason';
 import { getProspects } from '@utils/requests/getProspects';
 import DemoFeedbackCard from '@common/demo_feedback/DemoFeedbackCard';
+import { DatePicker, DatePickerInput } from '@mantine/dates';
+import postSubmitDemoFeedback from '@utils/requests/postSubmitDemoFeedback';
 
 export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmit?: () => void }) {
   const theme = useMantineTheme();
@@ -78,11 +58,11 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
   const [drawerOpened, setDrawerOpened] = useRecoilState(demosDrawerOpenState);
   const [actuallyOpened, setActuallyOpened] = useState(false);
   useEffect(() => {
-    if (drawerOpened !== actuallyOpened){
+    if (drawerOpened !== actuallyOpened) {
       setTimeout(() => {
         setActuallyOpened(drawerOpened);
       }, 100);
-    } 
+    }
   }, [drawerOpened]);
 
   const userToken = useRecoilValue(userTokenState);
@@ -106,41 +86,44 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
 
   const activeProspect = prospects.find((p) => p.id === drawerProspectId);
   const [reschedule, setReschedule] = useState(false);
+  const [showedUp, setShowedUp] = useState(false);
+  const [followup, setFollowup] = useState(false);
 
   const form = useForm({
     initialValues: {
       demoHappen: 'yes',
       demoRating: 3,
       feedback: '',
+      followupDate: undefined,
     },
   });
 
   useEffect(() => {
     if (form.values.demoHappen === 'reschedule') {
       setReschedule(true);
+    } else if (form.values.demoHappen === 'yes') {
+      setReschedule(false);
+      setShowedUp(true);
     } else {
       setReschedule(false);
+      setShowedUp(false);
     }
   }, [form.values.demoHappen]);
 
   if (!activeProspect) return <></>;
 
   const submitDemoFeedback = async (values: typeof form.values) => {
-    const res = await fetch(`${API_URL}/client/demo_feedback`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}`,
-      },
-      body: JSON.stringify({
-        prospect_id: activeProspect.id,
-        status: values.demoHappen === 'yes' ? 'OCCURRED' : 'NO-SHOW',
-        rating: `${values.demoRating}/5`,
-        feedback: values.feedback,
-      }),
-    });
+    
+    const res = await postSubmitDemoFeedback(
+      userToken,
+      activeProspect.id,
+      values.demoHappen === 'yes' ? 'OCCURRED' : 'NO-SHOW',
+      `${values.demoRating}/5`,
+      values.feedback,
+      values.followupDate
+    )
 
-    if (res.status === 200) {
+    if (res.status === 'success') {
       if (values.demoHappen === 'yes') {
         await updateChannelStatus(
           activeProspect.id,
@@ -158,7 +141,6 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
           'DEMO_LOSS'
         );
       }
-      
       showNotification({
         id: 'demo-feedback-submit',
         title: 'Feedback Submitted',
@@ -181,7 +163,6 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
 
     setDrawerOpened(false);
     setDrawerProspectId(-1);
-    
   };
 
   return (
@@ -200,9 +181,9 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       <Avatar src={Assistant} alt='AI Assistant' size={30} />
       <Text fz='sm'>You scheduled a demo - how did it go? Your feedback will be used to improve our AI.</Text>
 
-      <div style={{ marginTop: 20 }}>
+      {/* <div style={{ marginTop: 20 }}>
         <DemoFeedbackCard prospect={activeProspect} />
-      </div>
+      </div> */}
 
       <form onSubmit={form.onSubmit((values) => submitDemoFeedback(values))}>
         <Stack style={{ marginTop: 20 }}>
@@ -235,24 +216,48 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
                 label='What did you like / what would you change?'
                 {...form.getInputProps('feedback')}
               />
+              {
+                showedUp && (
+                  <Stack spacing={5}>
+                    <Text fw='bold' fz='md'>Follow up</Text>
+                    <Checkbox
+                      label='I have a followup meeting scheduled with this Prospect.'
+                      checked={followup}
+                      onChange={(e) => setFollowup(e.target.checked)}
+                    />
+                    <Flex align='center' justify='center' mt='md'>
+                      {
+                        followup && (
+                          <DatePicker
+                            size='xs'
+                            {...form.getInputProps('followupDate')}
+                          />
+                        )
+                      }
+                    </Flex>
+                  </Stack>
+                )
+              }
             </>
           )}
         </Stack>
 
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-          }}
+        <Flex
+          justify='center'
+          mt='xl'
+        // style={{
+        //   position: 'absolute',
+        //   bottom: 0,
+        //   left: '50%',
+        //   transform: 'translate(-50%, -50%)',
+        // }}
         >
           <Group>
             <Button hidden={reschedule} type='submit' color='green' radius='xl'>
               Submit feedback
             </Button>
           </Group>
-        </div>
+        </Flex>
       </form>
     </Drawer>
   );

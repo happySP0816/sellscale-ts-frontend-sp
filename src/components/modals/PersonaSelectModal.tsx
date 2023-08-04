@@ -18,6 +18,7 @@ import {
   Badge,
   Center,
   ThemeIcon,
+  Divider,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { ReactNode, useEffect, useState } from "react";
@@ -89,7 +90,7 @@ export default function PersonaSelectModal({
       <LoadingOverlay visible={loading} />
       <Group position="apart" sx={{ flexDirection: "column", height: "100%" }}>
         <ScrollArea h="60vh" w="100%">
-          <Stack py={4}>
+          <Stack py={4} spacing={0}>
             {projects
               .filter((project) => !project.is_unassigned_contact_archetype)
               .map((project, index) => (
@@ -141,10 +142,10 @@ export default function PersonaSelectModal({
                 span
                 p={4}
                 sx={{
-                  border: "none",
+                  backgroundColor: "transparent",
                   borderRadius: 10,
                   ":hover": {
-                    border: "solid",
+                    backgroundColor: theme.colors.gray[1],
                   },
                 }}
               >
@@ -165,13 +166,27 @@ function PersonaOption(props: {
   onCloneClick?: () => void;
   onActivateClick?: () => void;
 }) {
+  const theme = useMantineTheme();
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
 
   const { hovered, ref } = useHover();
 
   return (
-    <Flex gap={10} wrap="nowrap" w={"100%"} h={30}>
+    <Box>
+    <Box
+      py={10}
+      sx={{
+        backgroundColor: hovered || currentProject?.id === props.persona.id ? theme.colors.gray[1] : "transparent",
+      }}
+    >
+    <Flex
+      ref={ref}
+      gap={10}
+      wrap="nowrap"
+      w={"100%"}
+      h={30}
+    >
       <Box sx={{ flexBasis: "15%" }}>
         <Center>
           <Badge color={props.persona.active ? "teal" : "red"}>
@@ -180,7 +195,6 @@ function PersonaOption(props: {
         </Center>
       </Box>
       <Box
-        ref={ref}
         sx={{
           flexBasis: "78%",
           cursor: "pointer",
@@ -194,10 +208,6 @@ function PersonaOption(props: {
           span
           p={4}
           sx={{
-            border:
-              hovered || currentProject?.id === props.persona.id
-                ? "solid"
-                : "none",
             borderRadius: 10,
           }}
         >
@@ -219,5 +229,8 @@ function PersonaOption(props: {
         </Menu>
       </Box>
     </Flex>
+    </Box>
+    <Divider m={0} />
+    </Box>
   );
 }

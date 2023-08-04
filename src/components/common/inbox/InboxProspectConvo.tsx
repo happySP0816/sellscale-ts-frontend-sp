@@ -186,6 +186,9 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const currentProject = useRecoilValue(currentProjectState);
 
+  // This is used to fix a bug with the hacky way we're doing message loading now
+  const currentMessagesProspectId = useRef(-1);
+
   const [openedProspectLoading, setOpenedProspectLoading] = useRecoilState(openedProspectLoadingState);
 
   const [fetchingProspectId, setFetchingProspectId] = useRecoilState(fetchingProspectIdState)
@@ -286,7 +289,9 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
         const finalMessages = updatedResult.status === "success"
           ? (updatedResult.data.data.reverse() as LinkedInMessage[])
           : [];
-        setCurrentConvoLiMessages(finalMessages);
+        if(openedProspectId === currentMessagesProspectId.current){
+          setCurrentConvoLiMessages(finalMessages);
+        }
         setFetchingProspectId(-1)
       });
 
@@ -347,6 +352,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
     sendBoxRef.current?.setAiGenerated(false);
     sendBoxRef.current?.setMessageDraft("");
     sendBoxRef.current?.setAiMessage("");
+    currentMessagesProspectId.current = openedProspectId;
   }, [openedProspectId]);
 
   // The prospect is no longer loading if we are not fetching any data

@@ -141,7 +141,9 @@ export function LinkedInConversationEntry({
       </Group>
 
       <TypographyStylesProvider className={classes.body}>
-        <TextWithNewline className={classes.content}>{body}</TextWithNewline>
+        <Text size='xs'>
+          <TextWithNewline className={classes.content}>{body}</TextWithNewline>
+        </Text>
       </TypographyStylesProvider>
     </Paper>
   );

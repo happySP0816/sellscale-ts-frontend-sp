@@ -19,13 +19,14 @@ import {
   ScrollArea,
   Stack,
   HoverCard,
+  Container,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { openConfirmModal, openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
-import { IconAlertTriangle, IconAnalyze, IconBook, IconCheck, IconEdit, IconFolders, IconList, IconPlus, IconRobot, IconSearch, IconTransferIn, IconX } from '@tabler/icons';
+import { IconAlertTriangle, IconAnalyze, IconArrowLeft, IconArrowLeftBar, IconArrowRight, IconBook, IconCheck, IconEdit, IconFolders, IconList, IconMessage, IconPlus, IconRobot, IconSearch, IconTransferIn, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
@@ -38,6 +39,7 @@ import LinkedInConvoSimulator from '@common/simulators/linkedin/LinkedInConvoSim
 import { DataTable } from 'mantine-datatable';
 import TextWithNewline from '@common/library/TextWithNewlines';
 import postToggleAutoBump from '@utils/requests/postToggleAutoBump';
+import PersonaDetailsCTAs from '@common/persona/details/PersonaDetailsCTAs';
 
 
 type BumpFrameworkBuckets = {
@@ -454,6 +456,7 @@ export default function BumpFrameworksPage(props: {
   const [maximumBumpSoftLock, setMaximumBumpSoftLock] = useState(false);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const archetypeID = currentProject?.id || -1;
+  const [collapseSimulation, setCollapseSimulator] = useState(false);
 
   const bumpBuckets = useRef<BumpFrameworkBuckets>({
     ACCEPTED: {
@@ -599,7 +602,7 @@ export default function BumpFrameworksPage(props: {
       <Flex direction='column'>
         <LoadingOverlay visible={loading} />
         <Flex justify='space-between'>
-          <Title>LinkedIn Bump Frameworks</Title>
+          <Title mb='xs'>LinkedIn Setup</Title>
           <Tooltip label={userData.auto_bump ? 'AutoBump Enabled' : 'AutoBump Disabled'} withinPortal withArrow>
             <ActionIcon
               variant='outline'
@@ -658,207 +661,232 @@ export default function BumpFrameworksPage(props: {
           </Tooltip>
         </Flex>
 
-        <Tabs color='blue' variant='outline' defaultValue='sequence' my='lg' orientation='vertical'>
-          <Tabs.List>
-            <Tabs.Tab value='sequence' icon={<IconList size='0.8rem' />}>
-              Sequence
-            </Tabs.Tab>
-            <Tabs.Tab value='qnolibrary' icon={<IconBook size='0.8rem' />}>
-              Questions & Objections Library
-            </Tabs.Tab>
-            <Tabs.Tab value='simulate' icon={<IconRobot size='0.8rem' />}>
-              Simulate LinkedIn Conversation
-            </Tabs.Tab>
-            <Tabs.Tab value='analytics' icon={<IconAnalyze size='0.8rem' />}>
-              Analytics
-            </Tabs.Tab>
-          </Tabs.List>
+        <Flex direction={'row'}>
+            <Card withBorder w={collapseSimulation ? '85%' : '60%'}>
+                    <Tabs color='blue' variant='outline' defaultValue='ctas' my='lg' orientation='horizontal'>
+                    <Tabs.List>
+                      <Tabs.Tab value='ctas' icon={<IconList size='0.8rem' />}>
+                        CTAs
+                      </Tabs.Tab>
+                      <Tabs.Tab value='sequence' icon={<IconList size='0.8rem' />}>
+                        Sequence
+                      </Tabs.Tab>
+                      <Tabs.Tab value='qnolibrary' icon={<IconBook size='0.8rem' />}>
+                        Objection Library
+                      </Tabs.Tab>
+                      <Tabs.Tab value='analytics' icon={<IconAnalyze size='0.8rem' />}>
+                        Analytics
+                      </Tabs.Tab>
+                    </Tabs.List>
 
-          <Tabs.Panel value='sequence'>
-            {!loading ? (
-              <ScrollArea>
-                <Flex direction='column' ml='md'>
-                  {/* Accepted */}
-                  <BumpBucketView
-                    bumpBucket={bumpBuckets.current?.ACCEPTED}
-                    bucketViewTitle={'First / Initial Followup'}
-                    bucketViewDescription={'Prospects who have accepted your connection request.'}
-                    status={'ACCEPTED'}
-                    dataChannels={dataChannels}
-                    archetypeID={archetypeID}
-                    afterCreate={triggerGetBumpFrameworks}
-                    afterEdit={triggerGetBumpFrameworks}
-                    afterClone={triggerGetBumpFrameworks}
-                  />
+                    <Tabs.Panel value='ctas' pt='xs'>
+                        <PersonaDetailsCTAs />
+                    </Tabs.Panel>
 
-                  {/* Bumped (map) */}
-                  {Object.keys(bumpBuckets.current?.BUMPED).map((bumpCount) => {
-                    const bumpCountInt = parseInt(bumpCount);
-                    const bumpBucket = bumpBuckets.current?.BUMPED[bumpCountInt];
+                    <Tabs.Panel value='sequence' pt='xs'>
+                      {!loading ? (
+                        <ScrollArea>
+                          <Flex direction='column' ml='md'>
+                            {/* Accepted */}
+                            <BumpBucketView
+                              bumpBucket={bumpBuckets.current?.ACCEPTED}
+                              bucketViewTitle={'First / Initial Followup'}
+                              bucketViewDescription={'Prospects who have accepted your connection request.'}
+                              status={'ACCEPTED'}
+                              dataChannels={dataChannels}
+                              archetypeID={archetypeID}
+                              afterCreate={triggerGetBumpFrameworks}
+                              afterEdit={triggerGetBumpFrameworks}
+                              afterClone={triggerGetBumpFrameworks}
+                            />
 
-                    const bumpToFollowupMap: Record<string, string> = {
-                      '1': 'Second',
-                      '2': 'Third',
-                      '3': 'Fourth',
-                      '4': 'Fifth',
-                      '5': 'Sixth',
-                    }
-                    const followupString = bumpToFollowupMap[bumpCount];
-                    if (followupString == undefined) {
-                      return;
-                    }
-                    return (
-                      <Flex mt='md' w='100%'>
-                        <BumpBucketView
-                          bumpBucket={bumpBucket}
-                          bucketViewTitle={`${followupString} Followup`}
-                          bucketViewDescription={`This is followup #${bumpCountInt + 1}`}
-                          status={'BUMPED'}
-                          dataChannels={dataChannels}
-                          archetypeID={archetypeID}
-                          afterCreate={triggerGetBumpFrameworks}
-                          afterEdit={triggerGetBumpFrameworks}
-                          bumpedCount={bumpCountInt}
-                          afterClone={triggerGetBumpFrameworks}
-                        />
-                      </Flex>
-                    );
-                  })}
+                            {/* Bumped (map) */}
+                            {Object.keys(bumpBuckets.current?.BUMPED).map((bumpCount) => {
+                              const bumpCountInt = parseInt(bumpCount);
+                              const bumpBucket = bumpBuckets.current?.BUMPED[bumpCountInt];
 
-                  {/* Add another to sequence */}
-                  {/* <Flex justify='center' align='center' w='100%' direction="column">
-                    <Button variant='outline' mt='md' w='50%' onClick={openSequenceStep} disabled={maximumBumpSoftLock}>
-                      Add another sequence step
-                    </Button>
-                    {maximumBumpSoftLock && (
-                      <Text color='grey' fz='sm'>
-                        We strongly recommend no more than 4 followups.
-                      </Text>
-                    )}
-                    <CreateBumpFrameworkModal
-                      modalOpened={addNewSequenceStepOpened}
-                      openModal={openSequenceStep}
-                      closeModal={closeSequenceStep}
-                      backFunction={triggerGetBumpFrameworks}
-                      dataChannels={dataChannels}
-                      status={'BUMPED'}
-                      archetypeID={archetypeID}
-                      bumpedCount={Object.keys(bumpBuckets.current?.BUMPED).length + 1}
-                    />
-                  </Flex> */}
-                </Flex>
-              </ScrollArea>
-            ) : (
-              <Flex justify='center' mt='xl'>
-                <Loader />
-              </Flex>
-            )}
-          </Tabs.Panel>
+                              const bumpToFollowupMap: Record<string, string> = {
+                                '1': 'Second',
+                                '2': 'Third',
+                                '3': 'Fourth',
+                                '4': 'Fifth',
+                                '5': 'Sixth',
+                              }
+                              const followupString = bumpToFollowupMap[bumpCount];
+                              if (followupString == undefined) {
+                                return;
+                              }
+                              return (
+                                <Flex mt='md' w='100%'>
+                                  <BumpBucketView
+                                    bumpBucket={bumpBucket}
+                                    bucketViewTitle={`${followupString} Followup`}
+                                    bucketViewDescription={`This is followup #${bumpCountInt + 1}`}
+                                    status={'BUMPED'}
+                                    dataChannels={dataChannels}
+                                    archetypeID={archetypeID}
+                                    afterCreate={triggerGetBumpFrameworks}
+                                    afterEdit={triggerGetBumpFrameworks}
+                                    bumpedCount={bumpCountInt}
+                                    afterClone={triggerGetBumpFrameworks}
+                                  />
+                                </Flex>
+                              );
+                            })}
 
-          <Tabs.Panel value='qnolibrary'>
-            {!loading ? (
-              <Flex direction='column' ml='xs'>
-                <Flex align='center' w='100%' justify='center'>
-                  <Button variant='outline' mb='md' w='50%' onClick={openQuestionObjection}>
-                    Add another question/objection
-                  </Button>
-                </Flex>
+                            {/* Add another to sequence */}
+                            {/* <Flex justify='center' align='center' w='100%' direction="column">
+                              <Button variant='outline' mt='md' w='50%' onClick={openSequenceStep} disabled={maximumBumpSoftLock}>
+                                Add another sequence step
+                              </Button>
+                              {maximumBumpSoftLock && (
+                                <Text color='grey' fz='sm'>
+                                  We strongly recommend no more than 4 followups.
+                                </Text>
+                              )}
+                              <CreateBumpFrameworkModal
+                                modalOpened={addNewSequenceStepOpened}
+                                openModal={openSequenceStep}
+                                closeModal={closeSequenceStep}
+                                backFunction={triggerGetBumpFrameworks}
+                                dataChannels={dataChannels}
+                                status={'BUMPED'}
+                                archetypeID={archetypeID}
+                                bumpedCount={Object.keys(bumpBuckets.current?.BUMPED).length + 1}
+                              />
+                            </Flex> */}
+                          </Flex>
+                        </ScrollArea>
+                      ) : (
+                        <Flex justify='center' mt='xl'>
+                          <Loader />
+                        </Flex>
+                      )}
+                    </Tabs.Panel>
 
-                <CreateBumpFrameworkModal
-                  modalOpened={addNewQuestionObjectionOpened}
-                  openModal={openQuestionObjection}
-                  closeModal={closeQuestionObjection}
-                  backFunction={triggerGetBumpFrameworks}
-                  status='ACTIVE_CONVO'
-                  dataChannels={dataChannels}
-                  archetypeID={archetypeID}
-                />
-                <Grid>
-                  {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
-                    return (
-                      <Grid.Col span={6}>
-                        <QuestionObjectionLibraryCard
-                          bumpFramework={bumpBuckets.current?.ACTIVE_CONVO.frameworks[index]}
-                          archetypeID={archetypeID}
-                          afterEdit={triggerGetBumpFrameworks}
-                        />
-                      </Grid.Col>
-                    );
-                  })}
-                </Grid>
-              </Flex>
-            ) : (
-              <Flex justify='center'>
-                <Loader />
-              </Flex>
-            )}
-          </Tabs.Panel>
+                    <Tabs.Panel value='qnolibrary'  pt='xs'>
+                      {!loading ? (
+                        <Flex direction='column' ml='xs'>
+                          <Flex align='center' w='100%' justify='center'>
+                            <Button variant='outline' mb='md' w='50%' onClick={openQuestionObjection}>
+                              Add another question/objection
+                            </Button>
+                          </Flex>
 
-          <Tabs.Panel value='simulate'>
-            <Card withBorder m='sm'>
-              <LinkedInConvoSimulator personaId={
-                archetypeID as number
-              } />
+                          <CreateBumpFrameworkModal
+                            modalOpened={addNewQuestionObjectionOpened}
+                            openModal={openQuestionObjection}
+                            closeModal={closeQuestionObjection}
+                            backFunction={triggerGetBumpFrameworks}
+                            status='ACTIVE_CONVO'
+                            dataChannels={dataChannels}
+                            archetypeID={archetypeID}
+                          />
+                          <Grid>
+                            {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
+                              return (
+                                <Grid.Col span={6}>
+                                  <QuestionObjectionLibraryCard
+                                    bumpFramework={bumpBuckets.current?.ACTIVE_CONVO.frameworks[index]}
+                                    archetypeID={archetypeID}
+                                    afterEdit={triggerGetBumpFrameworks}
+                                  />
+                                </Grid.Col>
+                              );
+                            })}
+                          </Grid>
+                        </Flex>
+                      ) : (
+                        <Flex justify='center'>
+                          <Loader />
+                        </Flex>
+                      )}
+                    </Tabs.Panel>
+
+                    <Tabs.Panel value='analytics'  pt='xs'>
+                      {!loading && bumpBuckets.current &&
+                        <Stack mx='md'>
+                          {/* Table for Step 1 */}
+                          <Flex>
+                            <BumpFrameworkAnalysisTable
+                              bucketViewTitle='First / Initial Followup'
+                              bucketViewDescription='Prospects who have accepted your connection request.'
+                              bumpBucket={bumpBuckets.current?.ACCEPTED}
+                              persona={currentProject?.name}
+                            />
+                          </Flex>
+
+                          {/* Table for Step 2 */}
+                          <Flex mt='md'>
+                            <BumpFrameworkAnalysisTable
+                              bucketViewTitle='Second Followup'
+                              bucketViewDescription='This is followup #2'
+                              bumpBucket={bumpBuckets.current?.BUMPED[1]}
+                              persona={currentProject?.name}
+                            />
+                          </Flex>
+
+                          {/* Table for Step 3 */}
+                          <Flex mt='md'>
+                            <BumpFrameworkAnalysisTable
+                              bucketViewTitle='Third Followup'
+                              bucketViewDescription='This is followup #3'
+                              bumpBucket={bumpBuckets.current?.BUMPED[2]}
+                              persona={currentProject?.name}
+                            />
+                          </Flex>
+
+                          {/* Table for Step 4 */}
+                          <Flex mt='md'>
+                            <BumpFrameworkAnalysisTable
+                              bucketViewTitle='Fourth Followup'
+                              bucketViewDescription='This is followup #4'
+                              bumpBucket={bumpBuckets.current?.BUMPED[3]}
+                              persona={currentProject?.name}
+                            />
+                          </Flex>
+
+                          {/* Table for Questions & Objections */}
+                          <Flex mt='md'>
+                            <BumpFrameworkAnalysisTable
+                              bucketViewTitle='Questions & Objections'
+                              bucketViewDescription='Prospects who have responded with a question or objection.'
+                              bumpBucket={bumpBuckets.current?.ACTIVE_CONVO}
+                              persona={currentProject?.name}
+                            />
+                          </Flex>
+
+                        </Stack>
+                      }
+                    </Tabs.Panel>
+                  </Tabs>
+          </Card>
+          <Card withBorder ml='xs' w={collapseSimulation ? '15%' : '40%'}>
+              {
+                !collapseSimulation ? 
+                <Button variant='outline' size='xs' color='gray' mb='xs' rightIcon={<IconArrowRight />} onClick={() => {setCollapseSimulator(!collapseSimulation)}}>Hide</Button> :
+                <Button variant='outline' size='xs' color='gray' mb='xs' leftIcon={<IconArrowLeft />} onClick={() => {setCollapseSimulator(!collapseSimulation)}}>Show</Button>
+              }
+
+              {
+                collapseSimulation &&
+                <Card withBorder align='center'>
+                  <Text color='#42b9f5'>
+                    Show Conversation Simulator  
+                  </Text>
+                  <IconMessage color='#42b9f5' size='3rem' />
+                </Card>
+              }
+              
+              <Container opacity={collapseSimulation ? 0 : 1}>
+                <LinkedInConvoSimulator personaId={
+                    archetypeID as number
+                  } />
+              </Container>
+              
             </Card>
-          </Tabs.Panel>
-
-          <Tabs.Panel value='analytics'>
-            {!loading && bumpBuckets.current &&
-              <Stack mx='md'>
-                {/* Table for Step 1 */}
-                <Flex>
-                  <BumpFrameworkAnalysisTable
-                    bucketViewTitle='First / Initial Followup'
-                    bucketViewDescription='Prospects who have accepted your connection request.'
-                    bumpBucket={bumpBuckets.current?.ACCEPTED}
-                    persona={currentProject?.name}
-                  />
-                </Flex>
-
-                {/* Table for Step 2 */}
-                <Flex mt='md'>
-                  <BumpFrameworkAnalysisTable
-                    bucketViewTitle='Second Followup'
-                    bucketViewDescription='This is followup #2'
-                    bumpBucket={bumpBuckets.current?.BUMPED[1]}
-                    persona={currentProject?.name}
-                  />
-                </Flex>
-
-                {/* Table for Step 3 */}
-                <Flex mt='md'>
-                  <BumpFrameworkAnalysisTable
-                    bucketViewTitle='Third Followup'
-                    bucketViewDescription='This is followup #3'
-                    bumpBucket={bumpBuckets.current?.BUMPED[2]}
-                    persona={currentProject?.name}
-                  />
-                </Flex>
-
-                {/* Table for Step 4 */}
-                <Flex mt='md'>
-                  <BumpFrameworkAnalysisTable
-                    bucketViewTitle='Fourth Followup'
-                    bucketViewDescription='This is followup #4'
-                    bumpBucket={bumpBuckets.current?.BUMPED[3]}
-                    persona={currentProject?.name}
-                  />
-                </Flex>
-
-                {/* Table for Questions & Objections */}
-                <Flex mt='md'>
-                  <BumpFrameworkAnalysisTable
-                    bucketViewTitle='Questions & Objections'
-                    bucketViewDescription='Prospects who have responded with a question or objection.'
-                    bumpBucket={bumpBuckets.current?.ACTIVE_CONVO}
-                    persona={currentProject?.name}
-                  />
-                </Flex>
-
-              </Stack>
-            }
-          </Tabs.Panel>
-        </Tabs>
+        </Flex>
+        
       </Flex>
     </>
   );

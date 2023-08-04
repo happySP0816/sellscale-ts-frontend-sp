@@ -293,17 +293,17 @@ export function NavbarNested(props: {
         //   icon: IconMailFast,
         //   link: "/linkedin/messages",
         // },
+        // {
+        //   key: "linkedin-ctas",
+        //   label: "CTAs",
+        //   icon: IconSpeakerphone,
+        //   link: "/linkedin/ctas",
+        // },
         {
-          key: "linkedin-ctas",
-          label: "CTAs",
-          icon: IconSpeakerphone,
-          link: "/linkedin/ctas",
-        },
-        {
-          key: "linkedin-bump-frameworks",
-          label: "Bump Frameworks",
+          key: "linkedin-setup",
+          label: "Linkedin Setup",
           icon: IconAdjustments,
-          link: "/linkedin/bump-frameworks",
+          link: "/linkedin/setup",
         },
         // {
         //   key: "linkedin-campaign-analytics",
@@ -311,12 +311,12 @@ export function NavbarNested(props: {
         //   icon: IconReport,
         //   link: "/linkedin/campaign-analytics",
         // },
-         {
-          key: "linkedin-simulate",
-          label: "Simulate",
-          icon: IconMessage,
-          link: "/linkedin/simulate",
-        },
+        //  {
+        //   key: "linkedin-simulate",
+        //   label: "Simulate",
+        //   icon: IconMessage,
+        //   link: "/linkedin/simulate",
+        // },
         {
           key: "linkedin-voices",
           label: "Voices",

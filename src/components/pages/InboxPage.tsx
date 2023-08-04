@@ -13,11 +13,12 @@ import { NAV_HEADER_HEIGHT } from "@nav/MainHeader";
 import { useQuery } from "@tanstack/react-query";
 import { setPageTitle } from "@utils/documentChange";
 import { getProspects } from "@utils/requests/getProspects";
-import { useState } from 'react';
-import { useRecoilValue } from "recoil";
+import { useEffect, useState } from 'react';
+import { useRecoilState, useRecoilValue } from "recoil";
 import { Prospect, ProspectShallow } from "src";
 import RobotEmailImage from "./robot_emails.png";
 import { Icon360, IconBrandSuperhuman, IconList, IconWorld } from '@tabler/icons';
+import DemoFeedbackDrawer from "@drawers/DemoFeedbackDrawer";
 
 export const INBOX_PAGE_HEIGHT = `calc(100vh - ${NAV_HEADER_HEIGHT}px)`;
 
@@ -57,31 +58,30 @@ export default function InboxPage(props: { all?: boolean }) {
   const prospects = data ?? [];
 
   if (!queryComplete) return <Card w='250px' h='250px' m='10% auto' withBorder>
-    <Loader m='88px 88px'/>
+    <Loader m='88px 88px' />
   </Card>;
 
-  
   return (
     <Grid columns={100} gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: 'hidden' }}>
       <Grid.Col span={27} >
         <InboxProspectList prospects={prospects} isFetching={isFetching} all={props.all} />
       </Grid.Col>
-      {!(queryComplete && prospects.length === 0) ? 
-          <>
-            <Grid.Col span={46}>
-              <InboxProspectConvo prospects={prospects} />
-            </Grid.Col>
-            <Grid.Col span={27}>
-              <InboxProspectDetails prospects={prospects} />
-            </Grid.Col>
-          </>
+      {!(queryComplete && prospects.length === 0) ?
+        <>
+          <Grid.Col span={46}>
+            <InboxProspectConvo prospects={prospects} />
+          </Grid.Col>
+          <Grid.Col span={27}>
+            <InboxProspectDetails prospects={prospects} />
+          </Grid.Col>
+        </>
         :
         <Grid.Col span={73}>
-          <Container w='100%' mt='200px'  sx={{justifyContent: 'center', textAlign: 'center'}}>
-            <Title fw='800' sx={{fontSize: '120px', color: '#e3e3e3', margin: '0% auto', textAlign: 'center'}}><span style={{marginRight: '100px'}}>Inbox</span><span style={{marginLeft: '80px'}}>Zero</span></Title>
-            <img src={RobotEmailImage} width='300px' style={{marginTop: '-180px', marginLeft: '50px' }} />
+          <Container w='100%' mt='200px' sx={{ justifyContent: 'center', textAlign: 'center' }}>
+            <Title fw='800' sx={{ fontSize: '120px', color: '#e3e3e3', margin: '0% auto', textAlign: 'center' }}><span style={{ marginRight: '100px' }}>Inbox</span><span style={{ marginLeft: '80px' }}>Zero</span></Title>
+            <img src={RobotEmailImage} width='300px' style={{ marginTop: '-180px', marginLeft: '50px' }} />
             <Text>
-              <span style={{fontSize: '24px'}}>You have no prospects in your inbox.</span>
+              <span style={{ fontSize: '24px' }}>You have no prospects in your inbox.</span>
             </Text>
             <Text mt='md'>
               Try one of these other tabs instead:
@@ -94,18 +94,18 @@ export default function InboxPage(props: { all?: boolean }) {
               </Button>
               <Button variant='outline' onClick={() => {
                 window.location.href = '/all/contacts';
-              }} leftIcon={<IconWorld/>} color='grape'>
+              }} leftIcon={<IconWorld />} color='grape'>
                 Contacts
               </Button>
               <Button variant='outline' onClick={() => {
                 window.location.href = '/all/recent-activity'
-              }} leftIcon={<IconList/>} ml='xs' color='orange'>
+              }} leftIcon={<IconList />} ml='xs' color='orange'>
                 Recent Activity
               </Button>
             </Flex>
           </Container>
         </Grid.Col>
-        }
+      }
     </Grid>
   );
 

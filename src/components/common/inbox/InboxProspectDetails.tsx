@@ -128,11 +128,11 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
     enabled: openedProspectId !== -1,
   });
 
-  const { data: demoFeedback } = useQuery({
+  const { data: demoFeedbacks, refetch: refreshDemoFeedback } = useQuery({
     queryKey: [`query-get-prospect-demo-feedback-${openedProspectId}`],
     queryFn: async () => {
       const response = await getDemoFeedback(userToken, openedProspectId);
-      return response.status === "success" ? response.data[0] as DemoFeedback : undefined;
+      return response.status === "success" ? response.data as DemoFeedback[] : undefined;
     },
     enabled: openedProspectId !== -1,
   });
@@ -198,7 +198,7 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
     queryClient.invalidateQueries({
       queryKey: ['query-dash-get-prospects'],
     });
-    if(changeProspect || changeProspect === undefined){
+    if (changeProspect || changeProspect === undefined) {
       setOpenedProspectId(-1);
     }
     refetch();
@@ -294,185 +294,200 @@ export default function ProjectDetails(props: { prospects: ProspectShallow[] }) 
         </Stack>
       </div>
       <Divider />
-      <div style={{ flexBasis: '15%' }}>
-        <Paper
-          withBorder
-          radius={theme.radius.lg}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexWrap: 'nowrap',
-          }}
-          m={10}
-        >
-          <Flex gap={5} justify="center" align="center" my={10} wrap='nowrap'>
-            <Box>
-              <Center>
-                <ICPFitPill
-                  icp_fit_score={data?.details.icp_fit_score || 0}
-                  icp_fit_reason={data?.details.icp_fit_reason || ''}
-                  archetype={data?.details.persona || ''}
-                />
-              </Center>
-            </Box>
-            <Box>
-              <Text fz='xs'>- <u>{_.truncate(data?.details.persona, { length: 25 })}</u></Text>
-            </Box>
-          </Flex>
-
-          {!statusValue.startsWith('DEMO_') ? (
-            <Flex gap={10} justify='center' wrap='nowrap' mb='xs' mx='xs'>
-              <StatusBlockButton
-                title='Demo Set'
-                icon={<IconCalendarEvent color={theme.colors.pink[6]} size={24} />}
-                onClick={async () => { await changeStatus('DEMO_SET', false) }}
-              />
-              <StatusBlockButton
-                title='Not Interested'
-                icon={<IconX color={theme.colors.red[6]} size={24} />}
-                onClick={async () => { await changeStatus('NOT_INTERESTED') }}
-              />
-              <StatusBlockButton
-                title='Not Qualified'
-                icon={<IconTrash color={theme.colors.red[6]} size={24} />}
-                onClick={async () => { await changeStatus('NOT_QUALIFIED') }}
-              />
-            </Flex>
-          ) : (
-            <Stack spacing={10}>
-              <Box mx={10}>
-                <ProspectDemoDateSelector prospectId={openedProspectId} />
-              </Box>
-              <Box mx={10} mb={10}>
-                {data && demoFeedback ? (
-                  <DemoFeedbackCard prospect={data.data} demoFeedback={demoFeedback} />
-                ) : (
-                  <Button
-                    variant="light"
-                    radius="md"
-                    fullWidth
-                    onClick={() => {
-                      setDrawerProspectId(openedProspectId);
-                      setDemosDrawerOpened(true);
-                    }}
-                  >
-                    Give Demo Feedback
-                  </Button>
-                )}
-                <DemoFeedbackDrawer refetch={refetch} />
-              </Box>
-            </Stack>
-          )}
-        </Paper>
-      </div>
-      {!statusValue.startsWith('DEMO_') && statusValue !== 'ACCEPTED' && statusValue !== 'RESPONDED' && (
-        <div style={{ flexBasis: '10%' }}>
-          <Paper
-            withBorder
-            radius={theme.radius.lg}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              flexWrap: 'nowrap',
-            }}
-            mx={10}
-            mb={10}
-          >
-            <Flex gap={0} wrap='nowrap'>
-              <div style={{ flexBasis: '10%', margin: 15 }}>
-                <Text fw={500} fz={13}>
-                  Substatus
-                </Text>
-              </div>
-              <div style={{ flexBasis: '90%', margin: 10 }}>
-                <Select
-                  size='xs'
-                  variant='filled'
-                  radius={theme.radius.lg}
-                  styles={{
-                    input: {
-                      backgroundColor: theme.colors['blue'][6],
-                      color: theme.white,
-                      '&:focus': {
-                        borderColor: 'transparent',
-                      },
-                    },
-                    rightSection: {
-                      svg: {
-                        color: `${theme.white}!important`,
-                      },
-                    },
-                    item: {
-                      '&[data-selected], &[data-selected]:hover': {
-                        backgroundColor: theme.colors['blue'][6],
-                      },
-                    },
-                  }}
-                  data={prospectStatuses}
-                  value={statusValue}
-                  onChange={async (value) => {
-                    if (!value) {
-                      return;
-                    }
-                    await changeStatus(value);
-                  }}
-                />
-              </div>
-            </Flex>
-          </Paper>
-        </div>
-      )}
-
-      <div style={{ flexBasis: '55%' }}>
-        <Divider />
-        <Tabs variant='pills' defaultValue='history' radius={theme.radius.lg} m={10}>
-          <Tabs.List>
-            <Tabs.Tab value='history' icon={<IconWriting size='0.8rem' />}>
-              History
-            </Tabs.Tab>
-            <Tabs.Tab value='notes' icon={<IconWriting size='0.8rem' />}>
-              Notes
-            </Tabs.Tab>
-          </Tabs.List>
-
-          <Tabs.Panel value='research' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
-            <ScrollArea h={'100%'}>
-              {openedProspectId !== -1 && <ProspectDetailsResearchTabs prospectId={openedProspectId} />}
-            </ScrollArea>
-          </Tabs.Panel>
-
-          <Tabs.Panel value='history' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
-            <ScrollArea h={'100%'}>
-              <Card withBorder pb='100px'>
-                {openedProspectId !== -1 && <ProspectDetailsHistory prospectId={openedProspectId} forceRefresh={forcedHistoryRefresh} />}
-              </Card>
-            </ScrollArea>
-          </Tabs.Panel>
-
-          <Tabs.Panel value='notes' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
-            <Textarea
-              ref={notesRef}
-              autosize
-              minRows={5}
-              radius={theme.radius.sm}
-              placeholder='Write notes here...'
-              onChange={(e) => {
-                notesRef.current!.value = e.target.value;
+      <ScrollArea h='60vh'>
+        <div>
+          <div style={{ flexBasis: '15%' }}>
+            <Paper
+              withBorder
+              radius={theme.radius.lg}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                flexWrap: 'nowrap',
               }}
-            />
-            <Flex mt='md'>
-              <Button
-                size='xs'
-                onClick={triggerUpdateProspectNote}
-                loading={noteLoading}
-              >
-                Save Note
-              </Button>
-            </Flex>
+              m={10}
+            >
+              <Flex gap={5} justify="center" align="center" my={10} wrap='nowrap'>
+                <Box>
+                  <Center>
+                    <ICPFitPill
+                      icp_fit_score={data?.details.icp_fit_score || 0}
+                      icp_fit_reason={data?.details.icp_fit_reason || ''}
+                      archetype={data?.details.persona || ''}
+                    />
+                  </Center>
+                </Box>
+                <Box>
+                  <Text fz='xs'>- <u>{_.truncate(data?.details.persona, { length: 25 })}</u></Text>
+                </Box>
+              </Flex>
 
-          </Tabs.Panel>
-        </Tabs>
-      </div>
+              {!statusValue.startsWith('DEMO_') ? (
+                <Flex gap={10} justify='center' wrap='nowrap' mb='xs' mx='xs'>
+                  <StatusBlockButton
+                    title='Demo Set'
+                    icon={<IconCalendarEvent color={theme.colors.pink[6]} size={24} />}
+                    onClick={async () => { await changeStatus('DEMO_SET', false) }}
+                  />
+                  <StatusBlockButton
+                    title='Not Interested'
+                    icon={<IconX color={theme.colors.red[6]} size={24} />}
+                    onClick={async () => { await changeStatus('NOT_INTERESTED') }}
+                  />
+                  <StatusBlockButton
+                    title='Not Qualified'
+                    icon={<IconTrash color={theme.colors.red[6]} size={24} />}
+                    onClick={async () => { await changeStatus('NOT_QUALIFIED') }}
+                  />
+                </Flex>
+              ) : (
+                <Stack spacing={10}>
+                  <Box mx={10} mb={10}>
+                    {data && demoFeedbacks && demoFeedbacks.length > 0 && (
+                      <ScrollArea h='250px'>
+                        {demoFeedbacks?.map((feedback, index) => (
+                          <div
+                            style={{ marginBottom: 10 }}
+                          >
+                            <DemoFeedbackCard prospect={data.data} index={index + 1} demoFeedback={feedback} refreshDemoFeedback={refreshDemoFeedback} />
+                          </div>
+                        ))}
+                      </ScrollArea>
+                    )}
+                    <>
+                      {!demoFeedbacks || demoFeedbacks.length === 0 && (
+                        <Box mx={10} mb={10}>
+                          <ProspectDemoDateSelector prospectId={openedProspectId} />
+                        </Box>
+                      )}
+                      <Button
+                        variant="light"
+                        radius="md"
+                        fullWidth
+                        onClick={() => {
+                          setDrawerProspectId(openedProspectId);
+                          setDemosDrawerOpened(true);
+                        }}
+                      >
+                        {(demoFeedbacks && demoFeedbacks.length > 0) ? 'Add' : 'Give'} Demo Feedback
+                      </Button>
+                    </>
+                    <DemoFeedbackDrawer refetch={refetch} />
+                  </Box>
+                </Stack>
+              )}
+            </Paper>
+          </div>
+          {!statusValue.startsWith('DEMO_') && statusValue !== 'ACCEPTED' && statusValue !== 'RESPONDED' && (
+            <div style={{ flexBasis: '10%' }}>
+              <Paper
+                withBorder
+                radius={theme.radius.lg}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flexWrap: 'nowrap',
+                }}
+                mx={10}
+                mb={10}
+              >
+                <Flex gap={0} wrap='nowrap'>
+                  <div style={{ flexBasis: '10%', margin: 15 }}>
+                    <Text fw={500} fz={13}>
+                      Substatus
+                    </Text>
+                  </div>
+                  <div style={{ flexBasis: '90%', margin: 10 }}>
+                    <Select
+                      size='xs'
+                      variant='filled'
+                      radius={theme.radius.lg}
+                      styles={{
+                        input: {
+                          backgroundColor: theme.colors['blue'][6],
+                          color: theme.white,
+                          '&:focus': {
+                            borderColor: 'transparent',
+                          },
+                        },
+                        rightSection: {
+                          svg: {
+                            color: `${theme.white}!important`,
+                          },
+                        },
+                        item: {
+                          '&[data-selected], &[data-selected]:hover': {
+                            backgroundColor: theme.colors['blue'][6],
+                          },
+                        },
+                      }}
+                      data={prospectStatuses}
+                      value={statusValue}
+                      onChange={async (value) => {
+                        if (!value) {
+                          return;
+                        }
+                        await changeStatus(value);
+                      }}
+                    />
+                  </div>
+                </Flex>
+              </Paper>
+            </div>
+          )}
+
+          <div style={{ flexBasis: '55%' }}>
+            <Divider />
+            <Tabs variant='pills' defaultValue='history' radius={theme.radius.lg} m={10}>
+              <Tabs.List>
+                <Tabs.Tab value='history' icon={<IconWriting size='0.8rem' />}>
+                  History
+                </Tabs.Tab>
+                <Tabs.Tab value='notes' icon={<IconWriting size='0.8rem' />}>
+                  Notes
+                </Tabs.Tab>
+              </Tabs.List>
+
+              <Tabs.Panel value='research' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
+                <ScrollArea h={'100%'}>
+                  {openedProspectId !== -1 && <ProspectDetailsResearchTabs prospectId={openedProspectId} />}
+                </ScrollArea>
+              </Tabs.Panel>
+
+              <Tabs.Panel value='history' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
+                <ScrollArea h={'100%'}>
+                  <Card withBorder pb='100px'>
+                    {openedProspectId !== -1 && <ProspectDetailsHistory prospectId={openedProspectId} forceRefresh={forcedHistoryRefresh} />}
+                  </Card>
+                </ScrollArea>
+              </Tabs.Panel>
+
+              <Tabs.Panel value='notes' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
+                <Textarea
+                  ref={notesRef}
+                  autosize
+                  minRows={5}
+                  radius={theme.radius.sm}
+                  placeholder='Write notes here...'
+                  onChange={(e) => {
+                    notesRef.current!.value = e.target.value;
+                  }}
+                />
+                <Flex mt='md'>
+                  <Button
+                    size='xs'
+                    onClick={triggerUpdateProspectNote}
+                    loading={noteLoading}
+                  >
+                    Save Note
+                  </Button>
+                </Flex>
+
+              </Tabs.Panel>
+            </Tabs>
+          </div>
+        </div>
+      </ScrollArea>
     </Flex>
   );
 }

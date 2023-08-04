@@ -1,60 +1,83 @@
 import ICPFitPill from "@common/pipeline/ICPFitAndReason";
-import { Paper, Flex, Avatar, Box, Text, Button } from "@mantine/core";
+import { Paper, Flex, Avatar, Box, Text, Button, ActionIcon } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import EditDemoFeedbackModal from "@modals/EditDemoFeedbackModal";
+import { IconPencil } from "@tabler/icons";
 import { proxyURL, convertDateToLocalTime } from "@utils/general";
 import { DemoFeedback, Prospect } from "src";
 
-export default function DemoFeedbackCard(props: { prospect: Prospect, demoFeedback?: DemoFeedback }) {
+export default function DemoFeedbackCard(props: { prospect: Prospect, index?: number, demoFeedback?: DemoFeedback, refreshDemoFeedback?: () => void }) {
+  
+  if (props.demoFeedback === undefined) return <></>;
+  
+  const [editDemoFeedbackModal, { open: openEditDemoFeedbackModal, close: closeeditDemoFeedbackModal }] = useDisclosure()
+  
   return (
-    <Paper withBorder p="xs" radius="md" sx={{ position: "relative" }}>
+    <Paper
+      withBorder
+      p="xs"
+      radius="md"
+      sx={{ position: "relative" }}
+    >
       <Flex justify="space-between">
-        <div>
+        <Flex direction='row'>
           <Avatar
             size="md"
             radius="xl"
+            mr='4px'
             src={proxyURL(props.prospect.img_url)}
           />
-        </div>
-        <div style={{ flexGrow: 1, marginLeft: 10 }}>
-          <Text fw={700} fz="sm">
-            Demo with {props.prospect.full_name}
-          </Text>
-          <Text fz="sm" c="dimmed">
-            {convertDateToLocalTime(new Date(props.prospect.demo_date))}
-          </Text>
-        </div>
-      </Flex>
-      <Box sx={{ position: "absolute", right: 10, top: 10 }}>
-        {props.demoFeedback && false ? (// TEMP DISABLED
-          <Button color="green" compact>
-            Edit
-          </Button>
-        ) : (
-          <ICPFitPill
-            icp_fit_score={props.prospect.icp_fit_score}
-            icp_fit_reason={props.prospect.icp_fit_reason}
-            archetype={props.prospect.archetype_name}
+          <Flex direction='column'>
+            <Text fw={700} fz="sm">
+              Demo {props.index && `#${props.index}`} with {props.prospect.full_name}
+            </Text>
+            <Text fz="sm" c="dimmed">
+              {new Date(props.demoFeedback.demo_date).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+            </Text>
+          </Flex>
+        </Flex>
+        <Flex>
+          <ActionIcon size='xs' variant='transparent' onClick={openEditDemoFeedbackModal}>
+            <IconPencil size={"1rem"} />
+          </ActionIcon>
+          <EditDemoFeedbackModal
+            modalOpened={editDemoFeedbackModal}
+            openModal={openEditDemoFeedbackModal}
+            closeModal={closeeditDemoFeedbackModal}
+            backFunction={() => {props.refreshDemoFeedback?.()}}
+            demoFeedback={props.demoFeedback}
           />
-        )}
-      </Box>
+        </Flex>
+      </Flex>
 
       {props.demoFeedback && (
         <>
           <Box mt={5}>
             <Text fz="sm">
-              <b>Status</b> {props.demoFeedback.status}
+              <b>Status:</b> {props.demoFeedback.status}
             </Text>
             <Text fz="sm">
-              <b>Rating</b> {props.demoFeedback.rating}
+              <b>Rating:</b> {props.demoFeedback.rating}
             </Text>
           </Box>
           <Box>
             <Text fz="sm" fw={700}>
-              Feedback
+              Feedback:
             </Text>
             <Text fz="sm">
               {props.demoFeedback.feedback}
             </Text>
           </Box>
+          {props.demoFeedback.next_demo_date && (
+            <Box mt='sm'>
+              <Text fz="sm" fw='700'>
+                Followup demo date:
+              </Text>
+              <Text fz='sm'>
+                {new Date(props.demoFeedback.next_demo_date).toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </Text>
+            </Box>
+          )}
         </>
       )}
 

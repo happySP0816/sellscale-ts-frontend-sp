@@ -81,8 +81,6 @@ export default function ClonePersonaModal({
   const [cloneVoices, setCloneVoices] = useState(true);
   const [cloneEmailBlocks, setCloneEmailBlocks] = useState(true);
 
-  console.log(basics);
-
   return (
     <Paper
       p={0}

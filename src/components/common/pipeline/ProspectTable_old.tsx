@@ -330,10 +330,6 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
     })();
   }, []);
 
-  useEffect(() => {
-    console.log(selectedRecords)
-  }, [selectedRecords])
-
   return (
     <Box>
       <Grid grow>

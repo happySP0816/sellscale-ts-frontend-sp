@@ -26,9 +26,6 @@ import {
 } from "@atoms/prospectAtoms";
 import { useQuery } from "@tanstack/react-query";
 import ProspectDetailsSummary from "../common/prospectDetails/ProspectDetailsSummary";
-import ProspectDetailsChangeStatus, {
-  channelToIcon,
-} from "../common/prospectDetails/ProspectDetailsChangeStatus";
 import ProspectDetailsCompany from "../common/prospectDetails/ProspectDetailsCompany";
 import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes";
 import { userTokenState } from "@atoms/userAtoms";

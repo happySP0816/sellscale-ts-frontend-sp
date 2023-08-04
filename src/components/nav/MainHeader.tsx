@@ -132,7 +132,7 @@ export function MainHeader() {
     let newTab = activeSubTab
       ? `${activeTab.trim()}-${activeSubTab.trim()}`
       : activeTab.trim();
-    newTab = newTab === "" || newTab === "home" ? "inbox" : newTab;
+    newTab = newTab === "" || newTab === "home" ? "all/inboxes" : newTab;
     navigateToPage(
       navigate,
       `/${newTab.replace("-", "/")}`,

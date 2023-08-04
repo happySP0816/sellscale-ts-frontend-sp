@@ -215,12 +215,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const checkFuzz = useCallback(
     debounce((message, aiMessage) => {
-      console.log('checking fuzz', message, aiMessage)
       const ratio = fuzzratio(message, aiMessage);
       ratio > 50 && setAiGenerated(true);
       ratio <= 50 && setAiGenerated(false);
-      console.log('fuzz ratio', ratio)
-      console.log('ai generated', aiGenerated)
     }, 200), []
   )
 
@@ -319,7 +316,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 onClick={async () => {
                   setMsgLoading(true);
                   const result = await generateAIFollowup(userToken, props.prospectId, selectedBumpFramework);
-                  console.log(result)
                   setMessageDraft(result.msg);
                   setAiMessage(result.msg);
                   setAiGenerated(result.aiGenerated);

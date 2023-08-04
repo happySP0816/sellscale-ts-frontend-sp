@@ -319,8 +319,6 @@ export default function VoiceBuilderFlow(props: {
     }
 
     if (response.status === "success") {
-      console.log(response.data);
-
       // Replace global state with only new samples
       setVoiceBuilderMessages((prev) => {
         return response.data.map((item: any) => {

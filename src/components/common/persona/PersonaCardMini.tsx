@@ -174,12 +174,12 @@ export default function PersonaCardMini(props: {
           <Group>
             <Badge
               size="xs"
-              variant="outline"
+              variant="filled"
               color={props.personaOverview.active ? 'teal' : 'red'}
               sx={{
                 position: 'absolute',
-                top: 10,
-                left: 10,
+                top: -5,
+                left: -5,
                 fontSize: 6,
               }}
             >{props.personaOverview.active ? 'Active' : 'Inactive'}</Badge>

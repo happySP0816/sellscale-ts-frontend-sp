@@ -30,7 +30,7 @@ import {
   IconTestPipe,
   IconTrash,
 } from "@tabler/icons";
-import { forwardRef, useEffect, useState } from "react";
+import { ComponentPropsWithoutRef, forwardRef, useEffect, useState } from "react";
 
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -52,8 +52,9 @@ import {
   icpFitToLabel,
 } from "@common/pipeline/ICPFitAndReason";
 import { updateProspect } from "@utils/requests/updateProspect";
+import { getProspectsForICP } from "@utils/requests/getProspectsForICP";
 
-interface ProspectItemProps extends React.ComponentPropsWithoutRef<"div"> {
+interface ProspectItemProps extends ComponentPropsWithoutRef<"div"> {
   label: string;
   icpFit: number;
   title: string;
@@ -77,6 +78,16 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
+export type ProspectICP = {
+  id: string;
+  company: string;
+  full_name: string;
+  title: string;
+  icp_fit_score: string;
+  icp_fit_score_override: string;
+  in_icp_sample: string | false;
+}
+
 export default function Pulse(props: { personaOverview: PersonaOverview }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -85,7 +96,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   const [currentICPPrompt, setCurrentICPPrompt] = useState("");
   const [testSearchValue, setTestSearchValue] = useDebouncedState("", 300);
 
-  const [sampleProspects, setSampleProspects] = useState<ProspectShallow[]>([]);
+  const [sampleProspects, setSampleProspects] = useState<ProspectICP[]>([]);
   const [overrideMap, setOverrideMap] = useState<Map<number, string>>(
     new Map()
   );
@@ -100,28 +111,27 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   } = useQuery({
     queryKey: [`query-isp-fit-prospects`],
     queryFn: async () => {
-      const response = await getProspects(
-        userToken,
-        undefined,
-        "SELLSCALE",
-        10000, // TODO: Maybe use pagination method instead
-        undefined,
-        "ALL",
-        props.personaOverview.id,
-        true
-      );
-      const prospects =
-        response.status === "success"
-          ? (response.data as ProspectShallow[])
-          : [];
+      const response = await getProspectsForICP(userToken, props.personaOverview.id);
+      if (response.status === "error") {
+        return [];
+      }
+
+      const all_prospects: ProspectICP[] = [];
+      all_prospects.push(...response.data.high_data);
+      all_prospects.push(...response.data.low_data);
+      all_prospects.push(...response.data.medium_data);
+      all_prospects.push(...response.data.very_high_data);
+      all_prospects.push(...response.data.very_low_data);
+
+      console.log(all_prospects);
 
       setSampleProspects((prev) => {
         return _.uniqBy(
-          [...prev, ...prospects.filter((prospect) => prospect.in_icp_sample)],
+          [...prev, ...all_prospects.filter((prospect) => prospect.in_icp_sample && prospect.in_icp_sample.startsWith("t"))],
           "id"
         );
       });
-      return prospects;
+      return all_prospects;
     },
     refetchOnWindowFocus: false,
   });
@@ -250,17 +260,17 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
     for (const prospect of sampleProspects) {
       console.log(
         prospect.icp_fit_score_override,
-        overrideMap.get(prospect.id),
+        overrideMap.get(+prospect.id),
         prospect.icp_fit_score
       );
 
-      const overrideLabel = overrideMap.has(prospect.id)
-        ? overrideMap.get(prospect.id)
+      const overrideLabel = overrideMap.has(+prospect.id)
+        ? overrideMap.get(+prospect.id)
         : prospect.icp_fit_score_override
-        ? icpFitToLabel(prospect.icp_fit_score_override)
+        ? icpFitToLabel(+prospect.icp_fit_score_override)
         : null;
       if (overrideLabel) {
-        if (icpFitToLabel(prospect.icp_fit_score) === overrideLabel) {
+        if (icpFitToLabel(+prospect.icp_fit_score) === overrideLabel) {
           correct++;
         }
         checked++;
@@ -271,14 +281,14 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
       : Math.round((correct / checked) * 100) + "%";
   };
 
-  const getFitLabel = (prospect: ProspectShallow) => {
-    if(overrideMap.has(prospect.id)){
-      return overrideMap.get(prospect.id)+'';
+  const getFitLabel = (prospect: ProspectICP) => {
+    if(overrideMap.has(+prospect.id)){
+      return overrideMap.get(+prospect.id)+'';
     }
     if(prospect.icp_fit_score_override){
-      return icpFitToLabel(prospect.icp_fit_score_override);
+      return icpFitToLabel(+prospect.icp_fit_score_override);
     }
-    return icpFitToLabel(prospect.icp_fit_score);
+    return icpFitToLabel(+prospect.icp_fit_score);
   }
 
   return (
@@ -461,7 +471,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                       onChange={async (value) => {
                         const foundProspect = prospects?.find(
                           (prospect) =>
-                            prospect.id === (parseInt(value || "") || -1)
+                            prospect.id === value
                         );
                         if (foundProspect) {
                           setSampleProspects((prev) => {
@@ -469,7 +479,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                           });
                           const response = await updateProspect(
                             userToken,
-                            foundProspect.id,
+                            +foundProspect.id,
                             undefined,
                             true,
                             undefined
@@ -511,7 +521,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                                 });
                                 const response = await updateProspect(
                                   userToken,
-                                  prospect.id,
+                                  +prospect.id,
                                   undefined,
                                   false,
                                   undefined
@@ -524,7 +534,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                           <Grid.Col span={8}>
                             <ProspectSelectItem
                               label={prospect.full_name}
-                              icpFit={prospect.icp_fit_score}
+                              icpFit={+prospect.icp_fit_score}
                               title={prospect.title}
                               company={prospect.company}
                             />
@@ -543,11 +553,11 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                               onChange={async (value) => {
                                 if (!value) return;
                                 setOverrideMap((prev) => {
-                                  return new Map(prev).set(prospect.id, value);
+                                  return new Map(prev).set(+prospect.id, value);
                                 });
                                 const response = await updateProspect(
                                   userToken,
-                                  prospect.id,
+                                  +prospect.id,
                                   undefined,
                                   true,
                                   getScoreFromLabel(value)
@@ -592,7 +602,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                           getICPOneProspect(
                             userToken,
                             props.personaOverview.id,
-                            prospect.id
+                            +prospect.id
                           );
                         }
 

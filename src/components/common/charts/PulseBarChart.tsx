@@ -4,6 +4,7 @@ import {
   prospectDrawerOpenState,
 } from "@atoms/prospectAtoms";
 import { userTokenState } from "@atoms/userAtoms";
+import { ProspectICP } from "@common/persona/Pulse";
 import {
   getIcpFitScoreMap,
   icpFitToColor,
@@ -23,6 +24,7 @@ import { ResponsiveBar } from "@nivo/bar";
 import { useQuery } from "@tanstack/react-query";
 import { formatToLabel, valueToColor } from "@utils/general";
 import { getProspects } from "@utils/requests/getProspects";
+import { getProspectsForICP } from "@utils/requests/getProspectsForICP";
 import _ from "lodash";
 import { DataTable } from "mantine-datatable";
 import { useEffect, useState } from "react";
@@ -42,43 +44,61 @@ export default function PulseBarChart(props: {}) {
   const currentProject = useRecoilValue(currentProjectState);
 
   const {
-    data: prospects,
+    data: raw_data,
     isFetching,
     refetch,
   } = useQuery({
     queryKey: [`query-isp-fit-chart-prospects`],
     queryFn: async () => {
-      const response = await getProspects(
-        userToken,
-        undefined,
-        "SELLSCALE",
-        10000, // TODO: Maybe use pagination method instead
-        undefined,
-        "ALL",
-        currentProject?.id,
-        true
-      );
-      return response.status === "success"
-        ? (response.data as ProspectShallow[])
-        : [];
+      const response = await getProspectsForICP(userToken, currentProject?.id || -1);
+      if (response.status === "error") {
+        return null;
+      }
+      return response.data;
     },
     refetchOnWindowFocus: false,
     enabled: !!currentProject,
   });
 
-  console.log(prospects);
+  console.log(raw_data);
 
-  const grouped_data = _.groupBy(
-    prospects || [],
-    (prospect) => prospect.icp_fit_score
-  );
-
-  const data = Object.keys(grouped_data).reverse().map((key) => ({
-    icp_score: key,
-    icp_label: icpFitToLabel(parseInt(key)),
-    icp_color: icpFitToColor(parseInt(key)),
-    count: grouped_data[key].length,
-  }));
+  const data = raw_data ? [
+    {
+      icp_score: '4',
+      icp_label: icpFitToLabel(parseInt('4')),
+      icp_color: icpFitToColor(parseInt('4')),
+      count: raw_data.very_high_count,
+      data: raw_data.very_high_data as ProspectICP[],
+    },
+    {
+      icp_score: '3',
+      icp_label: icpFitToLabel(parseInt('3')),
+      icp_color: icpFitToColor(parseInt('3')),
+      count: raw_data.high_count,
+      data: raw_data.high_data as ProspectICP[],
+    },
+    {
+      icp_score: '2',
+      icp_label: icpFitToLabel(parseInt('2')),
+      icp_color: icpFitToColor(parseInt('2')),
+      count: raw_data.medium_count,
+      data: raw_data.medium_data as ProspectICP[],
+    },
+    {
+      icp_score: '1',
+      icp_label: icpFitToLabel(parseInt('1')),
+      icp_color: icpFitToColor(parseInt('1')),
+      count: raw_data.low_count,
+      data: raw_data.low_data as ProspectICP[],
+    },
+    {
+      icp_score: '0',
+      icp_label: icpFitToLabel(parseInt('0')),
+      icp_color: icpFitToColor(parseInt('0')),
+      count: raw_data.very_low_count,
+      data: raw_data.very_low_data as ProspectICP[],
+    },
+  ] : [];
 
   return (
     <Box sx={{ position: "relative" }}>
@@ -236,9 +256,9 @@ export default function PulseBarChart(props: {}) {
                 //   title: "Fit Reason",
                 // },
               ]}
-              records={grouped_data[d.icp_score]}
+              records={d.data}
               onRowClick={(prospect, rowIndex, event) => {
-                setProspectId(prospect.id);
+                setProspectId(+prospect.id);
                 setProspectDrawerOpened(true);
               }}
             />

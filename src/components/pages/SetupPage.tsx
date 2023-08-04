@@ -195,9 +195,9 @@ function MessageGenerationOnboarding(props: { data: any }) {
           complete: props.data.msg_gen.voice_builder,
         },
         {
-          title: 'Bump Frameworks for LinkedIn',
+          title: 'Setup LinkedIn',
           description: 'Customize how the AI responses on LinkedIn',
-          link: '/linkedin/bump-frameworks',
+          link: '/linkedin/setup',
           complete: props.data.msg_gen.bump_framework_linkedin,
         },
         {

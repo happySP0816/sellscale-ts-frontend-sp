@@ -94,7 +94,7 @@ export default function LinkedInPage() {
             Voices
           </Tabs.Tab>
           <Tabs.Tab
-            value="bump-frameworks"
+            value="setup"
             icon={<IconClipboardData size="1.1rem" />}
           >
             Bump Frameworks
@@ -115,7 +115,7 @@ export default function LinkedInPage() {
         <Tabs.Panel value="voices" pt="xs">
           <VoicesSection personas={data} />
         </Tabs.Panel>
-        <Tabs.Panel value="bump-frameworks" pt="xs">
+        <Tabs.Panel value="setup" pt="xs">
           <BumpFrameworksPage />
         </Tabs.Panel>
       </Tabs>

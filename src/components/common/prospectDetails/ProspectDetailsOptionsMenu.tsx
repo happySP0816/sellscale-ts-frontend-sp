@@ -55,73 +55,8 @@ export default function ProspectDetailsOptionsMenu(props: {
 
   return (
     <>
-        <Popover
-          width={300}
-          trapFocus
-          position="right-start"
-          withArrow
-          shadow="md"
-        >
-          <Popover.Target>
-            <Tooltip label='Snooze prospect' position='bottom'>
-              <Box sx={{cursor: 'pointer'}} pt='xs'>
-                <IconAlarm color='gray'/>
-              </Box>
-            </Tooltip>
-          </Popover.Target>
-          <Popover.Dropdown
-            sx={(theme) => ({
-              background:
-                theme.colorScheme === "dark"
-                  ? theme.colors.dark[7]
-                  : theme.white,
-            })}
-          >
-            <DatePicker
-              minDate={new Date()}
-              onChange={async (date) => {
-                if(!date){ return; }
-                let timeDiff = date.getTime() - new Date().getTime();
-                let daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-                await displayNotification(
-                  "snooze-prospect",
-                  async () => {
-                    let result = await snoozeProspect(
-                      userToken,
-                      props.prospectId,
-                      daysDiff
-                    );
-                    return result;
-                  },
-                  {
-                    title: `Snoozing prospect for ${daysDiff} days...`,
-                    message: `Working with servers...`,
-                    color: "teal",
-                  },
-                  {
-                    title: `Snoozed!`,
-                    message: `Your prospect has been snoozed from outreach for ${daysDiff} days.`,
-                    color: "teal",
-                  },
-                  {
-                    title: `Error while snoozing your prospect.`,
-                    message: `Please try again later.`,
-                    color: "red",
-                  }
-                );
-                setOpened(false);
-                setOpenedProspectId(-1);
-                queryClient.refetchQueries({
-                  queryKey: [`query-dash-get-prospects`],
-                });
-                queryClient.refetchQueries({
-                  queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
-                });
-                // location.reload();
-              }}
-            />
-          </Popover.Dropdown>  
-      </Popover>
+
+    
           
       <Menu shadow="md" width={200} withArrow>
         <Menu.Target>
@@ -240,3 +175,31 @@ onClick={async () => {
 
 
 */
+
+
+
+{/* <Popover
+width={300}
+trapFocus
+position="right-start"
+withArrow
+shadow="md"
+>
+<Popover.Target>
+  <Tooltip label='Snooze prospect' position='bottom'>
+    <Box sx={{cursor: 'pointer'}} pt='xs'>
+      <IconAlarm color='gray'/>
+    </Box>
+  </Tooltip>
+</Popover.Target>
+<Popover.Dropdown
+  sx={(theme) => ({
+    background:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[7]
+        : theme.white,
+  })}
+>
+  
+</Popover.Dropdown>  
+</Popover> */}

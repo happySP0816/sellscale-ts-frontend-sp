@@ -471,30 +471,22 @@ export default function ProjectDetails(props: {
                         ))}
                       </ScrollArea>
                     )}
-                    <>
-                      {!demoFeedbacks ||
-                        (demoFeedbacks.length === 0 && (
-                          <Box mx={10} mb={10}>
-                            <ProspectDemoDateSelector
-                              prospectId={openedProspectId}
-                            />
-                          </Box>
-                        ))}
-                      <Button
-                        variant="light"
-                        radius="md"
-                        fullWidth
-                        onClick={() => {
-                          setDrawerProspectId(openedProspectId);
-                          setDemosDrawerOpened(true);
-                        }}
-                      >
-                        {demoFeedbacks && demoFeedbacks.length > 0
-                          ? "Add"
-                          : "Give"}{" "}
-                        Demo Feedback
-                      </Button>
-                    </>
+                    <Button
+                      variant="light"
+                      radius="md"
+                      fullWidth
+                      onClick={() => {
+                        setDrawerProspectId(openedProspectId);
+                        setDemosDrawerOpened(true);
+                      }}
+                    >
+                      {(demoFeedbacks && demoFeedbacks.length > 0) ? 'Add' : 'Give'} Demo Feedback
+                    </Button>
+                    {(!demoFeedbacks || demoFeedbacks.length === 0) && (
+                      <Box mx={10} mb={10} mt={10}>
+                        <ProspectDemoDateSelector prospectId={openedProspectId} />
+                      </Box>
+                    )}
                     <DemoFeedbackDrawer refetch={refetch} />
                   </Box>
                 </Stack>

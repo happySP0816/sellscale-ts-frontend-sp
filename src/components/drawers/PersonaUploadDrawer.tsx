@@ -40,7 +40,7 @@ export default function PersonaUploadDrawer(props: {
       <Tabs defaultValue="from-file" px="xs" color="teal">
         <Tabs.List>
           <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
-          <Tabs.Tab value="from-link">Import from Link</Tabs.Tab>
+          <Tabs.Tab value="from-link">Import One Prospect</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="from-file" pt="xs">
           <FileDropAndPreview

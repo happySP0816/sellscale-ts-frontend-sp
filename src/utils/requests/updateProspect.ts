@@ -11,7 +11,9 @@ import { API_URL } from "@constants/data";
 export async function updateProspect(
   userToken: string,
   prospectId: number,
-  email?: string
+  email?: string,
+  in_icp_sample?: boolean,
+  icp_fit_score_override?: number,
 ): Promise<MsgResponse> {
 
   const response = await fetch(
@@ -24,6 +26,8 @@ export async function updateProspect(
       },
       body: JSON.stringify({
         email: email,
+        in_icp_sample: in_icp_sample,
+        icp_fit_score_override: icp_fit_score_override,
       })
     }
   );

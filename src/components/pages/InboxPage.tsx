@@ -88,6 +88,11 @@ export default function InboxPage(props: { all?: boolean }) {
             </Text>
             <Flex justify={'center'} mt='xs'>
               <Button variant='outline' onClick={() => {
+                window.location.href = '/all/inboxes';
+              }} leftIcon={<IconWorld/>} color='blue'>
+                Global Inbox
+              </Button>
+              <Button variant='outline' onClick={() => {
                 window.location.href = '/all/contacts';
               }} leftIcon={<IconWorld/>} color='grape'>
                 Contacts

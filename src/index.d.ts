@@ -94,6 +94,8 @@ export interface Prospect {
   icp_fit_error: string;
   archetype_name: string;
   pipeline_notifications_webhook_url: string;
+  in_icp_sample: boolean | null;
+  icp_fit_score_override: number | null;
 }
 
 export interface ProspectShallow {
@@ -129,6 +131,8 @@ export interface ProspectShallow {
   email_last_message_from_prospect: string;
   email_last_message_from_sdr: string;
   email_unread_messages: number;
+  in_icp_sample: boolean | null;
+  icp_fit_score_override: number | null;
 };
 
 export interface ProspectDetails {

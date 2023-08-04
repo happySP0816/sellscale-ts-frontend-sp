@@ -42,7 +42,7 @@ import ToolsPage from "@pages/ToolsPage";
 import SetupPersonaCard from "@common/persona/SetupPersonaCard";
 import PersonaBrain from '@common/persona/PersonaBrain';
 import Pulse from '@common/persona/Pulse';
-import { PulseWrapper } from '@common/persona/Pulse copy';
+import { PulseWrapper } from '@common/persona/PulseWrapper';
 import { LinkedinConvoSimulatorPage } from '@common/simulators/linkedin/LinkedinConvoSimulatorPage';
 import PullProspectEmailsCard from '@common/credits/PullProspectEmailsCard';
 import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';

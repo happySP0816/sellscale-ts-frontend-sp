@@ -37,6 +37,8 @@ import { useNavigate } from "react-router-dom";
 import { IconArrowsLeftRight, IconCopy, IconDots, IconMessageCircle, IconPhoto, IconPower, IconSearch, IconSettings, IconStack3, IconTrash } from "@tabler/icons";
 import { useHover } from "@mantine/hooks";
 import { navigateToPage } from "@utils/documentChange";
+import _ from "lodash";
+import { openedProspectIdState } from "@atoms/inboxAtoms";
 
 export default function PersonaSelectModal({
   context,
@@ -51,6 +53,7 @@ export default function PersonaSelectModal({
   const [_, setCurrentProject] = useRecoilState(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
   const [projects, setProjects] = useState<PersonaOverview[]>([]);
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
   useEffect(() => {
     (async () => {
@@ -94,6 +97,7 @@ export default function PersonaSelectModal({
                   key={index}
                   persona={project}
                   onClick={() => {
+                    setOpenedProspectId(-1);
                     setCurrentProject(project);
                     navigateToPage(navigate, `/inbox`);
                     context.closeModal(id);
@@ -126,6 +130,7 @@ export default function PersonaSelectModal({
                 cursor: "pointer",
               }}
               onClick={() => {
+                setOpenedProspectId(-1);
                 setCurrentProject(unassignedPersona);
                 navigateToPage(navigate, `/inbox`);
                 context.closeModal(id);
@@ -196,7 +201,7 @@ function PersonaOption(props: {
             borderRadius: 10,
           }}
         >
-          {props.persona.name}
+          {_.truncate(props.persona.name, { length: 50 })}
         </Text>
       </Box>
       <Box sx={{ flexBasis: "7%" }}>

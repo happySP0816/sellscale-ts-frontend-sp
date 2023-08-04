@@ -13,14 +13,14 @@ type PropsType = {
 };
 
 const icpFitScoreMap = new Map<string, string>([
+  ['4', 'VERY HIGH'],
+  ['3', 'HIGH'],
+  ['2', 'MEDIUM'],
+  ['1', 'LOW'],
+  ['0', 'VERY LOW'],
   ['-3', 'QUEUED'],
   ['-2', 'CALCULATING'],
   ['-1', 'ERROR'],
-  ['0', 'VERY LOW'],
-  ['1', 'LOW'],
-  ['2', 'MEDIUM'],
-  ['3', 'HIGH'],
-  ['4', 'VERY HIGH'],
 ]);
 const icpFitColorMap = new Map<string, MantineColor>([
   ['-3', 'grape'],
@@ -39,6 +39,30 @@ export function icpFitToLabel(icp_fit: number) {
 
 export function icpFitToColor(icp_fit: number) {
   return icpFitColorMap.get(icp_fit+'') || 'gray';
+}
+
+export function getIcpFitScoreMap(onlyFinal: boolean = false) {
+  if(onlyFinal){
+    const icpFitScoreMapFinal = new Map<string, string>();
+    icpFitScoreMap.forEach((value, key) => {
+      if(parseInt(key) >= 0){
+        icpFitScoreMapFinal.set(key, value);
+      }
+    });
+    return icpFitScoreMapFinal;
+  } else {
+    return icpFitScoreMap;
+  }
+}
+
+export function getScoreFromLabel(label: string) {
+  let score = 0;
+  icpFitScoreMap.forEach((value, key) => {
+    if(value.toUpperCase() === label.toUpperCase()){
+      score = parseInt(key);
+    }
+  });
+  return score;
 }
 
 export function icpFitToIcon(icp_fit: number, size: string = '0.7rem') {

@@ -870,7 +870,7 @@ export default function BumpFrameworksPage(props: {
 
               {
                 collapseSimulation &&
-                <Card withBorder align='center'>
+                <Card withBorder>
                   <Text color='#42b9f5'>
                     Show Conversation Simulator  
                   </Text>

@@ -19,7 +19,6 @@ import {
   Paper,
   LoadingOverlay,
 } from "@mantine/core";
-import { ResponsiveBar } from "@nivo/bar";
 import { useQuery } from "@tanstack/react-query";
 import { formatToLabel, valueToColor } from "@utils/general";
 import { getProspects } from "@utils/requests/getProspects";

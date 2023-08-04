@@ -67,6 +67,12 @@ export default function FindContactsPage() {
 
   useEffect(() => {
     triggerGetSalesNavigatorLaunches()
+
+    // Call myFunction every 20 seconds
+    const intervalId = setInterval(triggerGetSalesNavigatorLaunches, 20000); // 20,000 milliseconds = 20 seconds
+
+    // Clean up the interval when the component is unmounted
+    return () => clearInterval(intervalId);
   }, [])
 
   const salesNavigatorForm = useForm({

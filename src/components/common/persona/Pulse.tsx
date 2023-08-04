@@ -271,6 +271,16 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
       : Math.round((correct / checked) * 100) + "%";
   };
 
+  const getFitLabel = (prospect: ProspectShallow) => {
+    if(overrideMap.has(prospect.id)){
+      return overrideMap.get(prospect.id)+'';
+    }
+    if(prospect.icp_fit_score_override){
+      return icpFitToLabel(prospect.icp_fit_score_override);
+    }
+    return icpFitToLabel(prospect.icp_fit_score);
+  }
+
   return (
     <Paper withBorder p="xs" my={20} radius="md">
       <Flex>
@@ -521,10 +531,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                           </Grid.Col>
                           <Grid.Col span={3}>
                             <Select
-                              value={
-                                overrideMap.get(prospect.id) ||
-                                icpFitToLabel(prospect.icp_fit_score)
-                              }
+                              value={getFitLabel(prospect)}
                               data={[...getIcpFitScoreMap(true).values()].map(
                                 (icp) => {
                                   return {

@@ -31,10 +31,10 @@ export default function BulkActions(props: PropsType) {
 
         </Flex>
         {
-          props.selectedProspects.length >= 500 &&
+          props.selectedProspects.length >= 100 &&
           <Flex mt='xs'>
             <Text color='red' size='xs'>
-              Note: Only 500 Prospects are selectable as part of Bulk Actions
+              Note: Only 100 Prospects are selectable as part of Bulk Actions
             </Text>
           </Flex>
         }

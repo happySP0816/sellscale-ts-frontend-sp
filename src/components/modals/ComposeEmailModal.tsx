@@ -143,8 +143,8 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
     >
       <LoadingOverlay visible={generatingEmail} />
       <Group position='apart' px={10} pt={10}>
-        <Text>To: {innerProps.email}</Text>
         <Text>From: {innerProps.from}</Text>
+        <Text>To: {innerProps.email}</Text>
       </Group>
 
       <div style={{ paddingTop: 10 }}>

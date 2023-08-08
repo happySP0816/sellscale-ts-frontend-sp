@@ -482,8 +482,11 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
           value={openedOutboundChannel}
           onTabChange={(value) => {
             if (value) {
+              sendBoxRef.current?.setAiGenerated(false)
+              sendBoxRef.current?.setAiMessage("")
+              sendBoxRef.current?.setMessageDraft("")
               setOpenedOutboundChannel(value as Channel);
-
+              
               if (value === "EMAIL") {
                 queryClient.refetchQueries({
                   queryKey: [

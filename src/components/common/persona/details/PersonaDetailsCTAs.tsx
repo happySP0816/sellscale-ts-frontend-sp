@@ -35,7 +35,8 @@ import displayNotification from "@utils/notificationFlow";
 import createCTA, { deleteCTA } from "@utils/requests/createCTA";
 import toggleCTA from "@utils/requests/toggleCTA";
 import { API_URL } from "@constants/data";
-import CTAGeneratorExample from '@common/cta_generator/CTAGeneratorExample';
+import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
+import moment from "moment";
 
 const PAGE_SIZE = 20;
 
@@ -130,7 +131,8 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
         >
           Create New CTA
         </Button>
-        {props.personas?.find((persona) => persona.id === currentProject?.id)?.ctas.length === 0 && (
+        {props.personas?.find((persona) => persona.id === currentProject?.id)
+          ?.ctas.length === 0 && (
           <Button
             color="teal"
             size="sm"
@@ -162,28 +164,58 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
             title: "Call-to-Action",
             sortable: true,
             render: (record) => {
-              const isDisabled = !!(record.total_count && record.total_count > 0);
+              const isDisabled = !!(
+                record.total_count && record.total_count > 0
+              );
 
               return (
-                <Flex direction='row' align='center' justify='space-between'>
+                <Flex direction="row" align="center" justify="space-between">
                   <Flex>
-                    <Flex mr='xs'>
-                      <CTAGeneratorExample ctaText={record.text_value} size='xs' />
+                    <Flex mr="xs">
+                      <CTAGeneratorExample
+                        ctaText={record.text_value}
+                        size="xs"
+                      />
                     </Flex>
                     <Flex>
-                      <Text>{record.text_value}</Text>
+                      <Text>
+                        {record.text_value}{" "}
+                        {record.expiration_date ? (
+                          new Date().getTime() >
+                          new Date(record.expiration_date).getTime() ? (
+                            <Text c="red">
+                              (Expired on{" "}
+                              {moment(record.expiration_date).format(
+                                "MM/DD/YYYY"
+                              )}
+                              )
+                            </Text>
+                          ) : (
+                            <Text c="violet">
+                              (⏰ Expiring{" "}
+                              {moment(record.expiration_date).format("MM/DD/YYYY")})
+                            </Text>
+                          )
+                        ) : (
+                          ""
+                        )}
+                      </Text>
                     </Flex>
                   </Flex>
-                  <Flex miw='24px'>
+                  <Flex miw="24px">
                     <Tooltip
                       withArrow
                       withinPortal
-                      label={isDisabled ? "CTAs that have been used cannot be edited" : "Edit CTA"}
+                      label={
+                        isDisabled
+                          ? "CTAs that have been used cannot be edited"
+                          : "Edit CTA"
+                      }
                     >
                       <div>
                         <ActionIcon
-                          size='xs'
-                          variant='transparent'
+                          size="xs"
+                          variant="transparent"
                           disabled={isDisabled}
                           onClick={() => {
                             openContextModal({
@@ -196,14 +228,14 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
                             });
                           }}
                         >
-                          <IconPencil color='black' stroke={"1"} />
+                          <IconPencil color="black" stroke={"1"} />
                         </ActionIcon>
                       </div>
                     </Tooltip>
                   </Flex>
                 </Flex>
-              )
-            }
+              );
+            },
           },
           {
             accessor: "percentage",
@@ -270,7 +302,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
                     cta: cta,
                   },
                 });
-              }
+              },
             },
             {
               key: "delete",
@@ -285,11 +317,11 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
                   color: "blue",
                 });
                 refetch();
-              }
+              },
             },
           ],
         }}
       />
-    </Box >
+    </Box>
   );
 }

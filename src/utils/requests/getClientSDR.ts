@@ -43,6 +43,6 @@ export async function getSDRGeneralInfo(
       }
     }
   );
-  return await processResponse(response);
+  return await processResponse(response, 'data');
 
 }

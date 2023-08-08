@@ -40,6 +40,7 @@ import { useHover } from "@mantine/hooks";
 import { navigateToPage } from "@utils/documentChange";
 import _ from "lodash";
 import { openedProspectIdState } from "@atoms/inboxAtoms";
+import { getSDRGeneralInfo } from "@utils/requests/getClientSDR";
 
 export default function PersonaSelectModal({
   context,
@@ -54,6 +55,7 @@ export default function PersonaSelectModal({
   const [_, setCurrentProject] = useRecoilState(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
   const [projects, setProjects] = useState<PersonaOverview[]>([]);
+  const [projectStatMap, setProjectStatMap] = useState(new Map());
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
 
   useEffect(() => {
@@ -71,9 +73,20 @@ export default function PersonaSelectModal({
       //   setCurrentProject(firstActiveProject);
       // }
 
+      const info_response = await getSDRGeneralInfo(userToken);
+      if(info_response.status === 'success'){
+        const notifMap = new Map();
+        for(const d of info_response.data){
+          notifMap.set(d.client_archetype_id, d.sellscale_needs_to_clear + d.sdr_needs_to_clear);
+        }
+        setProjectStatMap(notifMap);
+      }
+
       setLoading(false);
     })();
   }, []);
+
+  console.log(projectStatMap);
 
   const unassignedPersona = projects.find(
     (project) => project.is_unassigned_contact_archetype
@@ -97,6 +110,7 @@ export default function PersonaSelectModal({
                 <PersonaOption
                   key={index}
                   persona={project}
+                  inboxNotifs={projectStatMap.get(project.id)}
                   onClick={() => {
                     setOpenedProspectId(-1);
                     setCurrentProject(project);
@@ -161,6 +175,7 @@ export default function PersonaSelectModal({
 
 function PersonaOption(props: {
   persona: PersonaOverview;
+  inboxNotifs: number;
   onClick?: () => void;
   onSettingsClick?: () => void;
   onCloneClick?: () => void;
@@ -213,6 +228,7 @@ function PersonaOption(props: {
         >
           {_.truncate(props.persona.name, { length: 50 })}
         </Text>
+        <Badge>{props.inboxNotifs}</Badge>
       </Box>
       <Box sx={{ flexBasis: "7%" }}>
         <Menu shadow="md" width={200}>

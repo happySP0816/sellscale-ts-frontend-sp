@@ -43,33 +43,6 @@ const useStyles = createStyles((theme) => ({
 
 }));
 
-const options = [
-  {
-    label: 'Global Inboxes',
-    icon: <IconInbox size="1rem" stroke={1.5} />,
-    value: 'all-inboxes',
-  },
-  {
-    label: 'Global Contacts',
-    icon: <IconAddressBook size="1rem" stroke={1.5} />,
-    value: 'all-contacts',
-  },
-  {
-    label: 'Global Recent Activity',
-    icon: <IconActivity size="1rem" stroke={1.5} />,
-    value: 'all-recent-activity',
-  },
-  {
-    label: 'Global LinkedIn Messages',
-    icon: <IconBrandLinkedin size="1rem" stroke={1.5} />,
-    value: 'all-linkedin-messages',
-  },
-  {
-    label: 'Global Email Messages',
-    icon: <IconMail size="1rem" stroke={1.5} />,
-    value: 'all-email-messages',
-  },
-];
 
 export function GlobalPageSelect() {
   const theme = useMantineTheme();
@@ -85,9 +58,47 @@ export function GlobalPageSelect() {
   useEffect(() => {
     (async () => {
       const response = await getSDRGeneralInfo(userToken);
-      console.log(response);
+      if(response.status === 'success'){
+        let totalNotifCount = 0;
+        for(const d of response.data){
+          totalNotifCount += d.sellscale_needs_to_clear;
+          totalNotifCount += d.sdr_needs_to_clear;
+        }
+        setTotalNotifCount(totalNotifCount);
+      }
     })();
   }, []);
+
+
+  const options = [
+    {
+      label: `Global Inboxes `+(totalNotifCount > 0 ? `(${totalNotifCount})` : ``),
+      icon: <IconInbox size="1rem" stroke={1.5} />,
+      value: 'all-inboxes',
+    },
+    {
+      label: 'Global Contacts',
+      icon: <IconAddressBook size="1rem" stroke={1.5} />,
+      value: 'all-contacts',
+    },
+    {
+      label: 'Global Recent Activity',
+      icon: <IconActivity size="1rem" stroke={1.5} />,
+      value: 'all-recent-activity',
+    },
+    {
+      label: 'Global LinkedIn Messages',
+      icon: <IconBrandLinkedin size="1rem" stroke={1.5} />,
+      value: 'all-linkedin-messages',
+    },
+    {
+      label: 'Global Email Messages',
+      icon: <IconMail size="1rem" stroke={1.5} />,
+      value: 'all-email-messages',
+    },
+  ];
+
+  console.log(totalNotifCount);
 
   return (
     <Menu

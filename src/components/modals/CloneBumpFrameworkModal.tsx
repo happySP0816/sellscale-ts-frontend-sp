@@ -1,23 +1,25 @@
+import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 
-import { Modal, Text,Flex, Select, Button, useMantineTheme, Card, Loader, Badge } from "@mantine/core";
+import { Modal, Text, Flex, Select, Button, useMantineTheme, Card, Loader, Badge, Tooltip } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
-import { IconCheck, IconX } from "@tabler/icons";
+import { IconAlertTriangle, IconCheck, IconX } from "@tabler/icons";
 import { valueToColor } from "@utils/general";
 import { cloneBumpFramework } from "@utils/requests/cloneBumpFramework";
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
 import { forwardRef, useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { BumpFramework } from "src";
 
 interface BumpItemProps extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
   persona: string;
   acceptance: string;
+  isSamePersona: boolean;
 }
 
 const SelectBumpItem = forwardRef<HTMLDivElement, BumpItemProps>(
-  ({ label, persona, acceptance, ...others }, ref) => (
+  ({ label, persona, acceptance, isSamePersona, ...others }, ref) => (
     <div ref={ref} {...others}>
       <Flex justify={'space-between'}>
         <Flex>
@@ -29,6 +31,14 @@ const SelectBumpItem = forwardRef<HTMLDivElement, BumpItemProps>(
           >
             {persona}
           </Badge>
+          {
+            isSamePersona &&
+            <Tooltip label='This framework is from your current archetype and would be a duplicate.' withinPortal withArrow>
+              <Flex ml='sm'>
+                <IconAlertTriangle size='.8rem' />
+              </Flex>
+            </Tooltip>
+          }
         </Flex>
         <Flex>
           {acceptance}
@@ -53,9 +63,8 @@ interface CloneBumpFramework extends Record<string, unknown> {
 
 export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
   const [userToken] = useRecoilState(userTokenState);
-  const theme = useMantineTheme();
+  const currentProject = useRecoilValue(currentProjectState);
 
-  const [bumpLengthValue, setBumpLengthValue] = useState(50);
   const [loading, setLoading] = useState(false);
 
   const [colloquialStatus, setColloquialStatus] = useState<string | null>(null);
@@ -70,7 +79,7 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
       [props.status],
       [],
       [],
-      [props.archetypeID],
+      [],
       false,
       true,
       props.bumpedCount as number,
@@ -168,6 +177,7 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
                     label: bumpFramework.title,
                     persona: bumpFramework.client_archetype_archetype,
                     acceptance: acceptance + '%',
+                    isSamePersona: bumpFramework.client_archetype_archetype === currentProject?.name,
                   }
                 })
               }
@@ -199,6 +209,15 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
                     })
                   </Text>
                   <Text mt='sm'><span style={{ fontWeight: 600 }}>Delay:</span> {selectedBumpFramework.bump_delay_days} day wait</Text>
+                  {
+                    selectedBumpFramework.client_archetype_archetype === currentProject?.name &&
+                    <Flex align='center' mt='sm'>
+                      <IconAlertTriangle color='red' size='1.2rem'/> 
+                      <Text ml='4px' color='red' fw='bold'>
+                        This framework is from the same persona as the current project.
+                      </Text>
+                    </Flex>
+                  }
                 </Card>
               ) : (
                 <Card
@@ -213,7 +232,7 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
                         bumpFrameworks.length === 0 ? (
                           <Text>No frameworks found for this step. Please create one.</Text>
                         ) : (
-                        <Text>Please select a framework to preview.</Text>
+                          <Text>Please select a framework to preview.</Text>
                         )
                       )
                     }

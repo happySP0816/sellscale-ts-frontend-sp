@@ -93,6 +93,7 @@ import getDemoFeedback from "@utils/requests/getDemoFeedback";
 import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
 import displayNotification from "@utils/notificationFlow";
 import { snoozeProspect } from "@utils/requests/snoozeProspect";
+import EmailStoreView from "@common/prospectDetails/EmailStoreView";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -352,16 +353,17 @@ export default function ProjectDetails(props: {
             )}
 
             {data?.email.email && (
-              <Group noWrap spacing={10} mt={5}>
-                <IconMail stroke={1.5} size={18} className={classes.icon} />
-                <Text
-                  size="xs"
-                  component="a"
-                  href={`mailto:${data.email.email}`}
-                >
-                  {data.email.email} <IconExternalLink size="0.55rem" />
-                </Text>
-              </Group>
+              <EmailStoreView email={data.email.email} emailStore={data.data.email_store} />
+              // <Group noWrap spacing={10} mt={5}>
+              //   <IconMail stroke={1.5} size={18} className={classes.icon} />
+              //   <Text
+              //     size="xs"
+              //     component="a"
+              //     href={`mailto:${data.email.email}`}
+              //   >
+              //     {data.email.email} <IconExternalLink size="0.55rem" />
+              //   </Text>
+              // </Group>
             )}
 
             {data?.details.address && (

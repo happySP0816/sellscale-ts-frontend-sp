@@ -1,5 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { createStyles, Avatar, Text, Group, useMantineTheme, Badge, Flex, Switch, LoadingOverlay, ActionIcon } from "@mantine/core";
+import { createStyles, Avatar, Text, Group, useMantineTheme, Badge, Flex, Switch, LoadingOverlay, ActionIcon, Tooltip, HoverCard, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import EditProspectModal from "@modals/EditProspectModal";
@@ -16,6 +16,8 @@ import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
 import { useState } from "react";
 import { useRecoilValue } from "recoil";
+import { EmailStore } from "src";
+import EmailStoreView from "./EmailStoreView";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -42,6 +44,7 @@ type ProspectDetailsSummaryProps = {
   companyName: string | null;
   companyURL?: string;
   persona?: string;
+  email_store?: EmailStore | null;
 };
 
 export default function ProspectDetailsSummary(
@@ -132,17 +135,7 @@ export default function ProspectDetailsSummary(
             </Group>
 
             {props.email && (
-              <Group noWrap spacing={10} mt={5}>
-                <IconMail stroke={1.5} size={16} className={classes.icon} />
-                <Text
-                  size="xs"
-                  color="dimmed"
-                  component="a"
-                  href={`mailto:${props.email}`}
-                >
-                  {props.email}
-                </Text>
-              </Group>
+              <EmailStoreView email={props.email} emailStore={props.email_store as EmailStore} />
             )}
 
             {props.linkedin && (

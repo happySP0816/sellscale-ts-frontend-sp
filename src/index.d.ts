@@ -96,6 +96,7 @@ export interface Prospect {
   pipeline_notifications_webhook_url: string;
   in_icp_sample: boolean | null;
   icp_fit_score_override: number | null;
+  email_store: EmailStore;
 }
 
 export interface ProspectShallow {
@@ -367,4 +368,24 @@ export type SalesNavigatorLaunch = {
   result_available: boolean,
   launch_date: Date,
   name: string,
+}
+
+export type EmailStore = {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  company_name: string;
+  hunter_status: string;
+  hunter_score: number;
+  hunter_regexp: boolean;
+  hunter_gibberish: boolean;
+  hunter_disposable: boolean;
+  hunter_webmail: boolean;
+  hunter_mx_records: boolean;
+  hunter_smtp_server: boolean;
+  hunter_smtp_check: boolean;
+  hunter_accept_all: boolean;
+  hunter_block: boolean;
+  hunter_sources: {}[];
 }

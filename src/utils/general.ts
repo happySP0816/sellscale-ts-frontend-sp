@@ -1,6 +1,7 @@
 import { EMAIL_REGEX, PROXY_SERVER_URL, URL_REGEX } from "@constants/data";
 import { ex } from "@fullcalendar/core/internal-common";
 import { MantineColor, MantineTheme } from "@mantine/core";
+import _ from "lodash";
 import { startCase } from "lodash";
 import moment from "moment";
 import { Channel } from "src";
@@ -323,3 +324,23 @@ export function proxyURL(url?: string | null) {
   if(!url) { return undefined; }
   return `${PROXY_SERVER_URL}?url=${encodeURIComponent(url)}`;
 }
+
+/**
+ * Returns a random number of items from a list
+ * @param list 
+ * @param numItems 
+ * @returns 
+ */
+export function getRandomItems<T>(list: T[], numItems: number): T[] {
+  // Ensure the requested number of items doesn't exceed the length of the list
+  const itemCount = Math.min(numItems, list.length);
+
+  // Create an array of unique random indices
+  const randomIndices = _.uniq(_.times(itemCount, () => _.random(0, list.length - 1)));
+
+  // Use the random indices to select the random items
+  const randomItems = randomIndices.map(index => list[index]);
+
+  return randomItems;
+}
+

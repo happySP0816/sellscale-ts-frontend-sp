@@ -1,6 +1,7 @@
 
 import { navTabState } from '@atoms/navAtoms';
 import { currentProjectState } from '@atoms/personaAtoms';
+import { userTokenState } from '@atoms/userAtoms';
 import { Button, Menu, Text, createStyles, useMantineTheme } from '@mantine/core';
 import {
   IconSquareCheck,
@@ -16,8 +17,10 @@ import {
   IconMail,
 } from '@tabler/icons-react';
 import { navigateToPage } from '@utils/documentChange';
+import { getSDRGeneralInfo } from '@utils/requests/getClientSDR';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 
 const useStyles = createStyles((theme) => ({
@@ -73,8 +76,18 @@ export function GlobalPageSelect() {
   const { classes } = useStyles();
   const navigate = useNavigate();
 
+  const userToken = useRecoilValue(userTokenState);
+
   const [navTab, setNavTab] = useRecoilState(navTabState);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+
+  const [totalNotifCount, setTotalNotifCount] = useState(-1);
+  useEffect(() => {
+    (async () => {
+      const response = await getSDRGeneralInfo(userToken);
+      console.log(response);
+    })();
+  }, []);
 
   return (
     <Menu

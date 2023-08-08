@@ -21,6 +21,7 @@ import {
   Divider,
   Grid,
   ActionIcon,
+  Checkbox,
 } from "@mantine/core";
 import { openConfirmModal, openContextModal } from "@mantine/modals";
 import {
@@ -39,7 +40,7 @@ import { Archetype, PersonaOverview, ProspectShallow } from "src";
 import getICPClassificationPrompt from "@utils/requests/getICPClassificationPrompt";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
 import postRunICPClassification from "@utils/requests/postRunICPClassification";
-import { valueToColor } from "@utils/general";
+import { getRandomItems, valueToColor } from "@utils/general";
 import { getICPOneProspect } from "@utils/requests/getICPOneProspect";
 import { showNotification } from "@mantine/notifications";
 import { useDebouncedState } from "@mantine/hooks";
@@ -47,12 +48,30 @@ import { useQuery } from "@tanstack/react-query";
 import { getProspects } from "@utils/requests/getProspects";
 import _, { set } from "lodash";
 import {
+  ICPFitPillOnly,
   getIcpFitScoreMap,
   getScoreFromLabel,
   icpFitToLabel,
 } from "@common/pipeline/ICPFitAndReason";
 import { updateProspect } from "@utils/requests/updateProspect";
 import { getProspectsForICP } from "@utils/requests/getProspectsForICP";
+import postICPClassificationPromptChange from "@utils/requests/postICPClassificationPromptChange";
+
+
+
+interface LabelItemProps extends React.ComponentPropsWithoutRef<'div'> {
+  icp_fit: number;
+}
+
+const LabelSelectItem = forwardRef<HTMLDivElement, LabelItemProps>(
+  ({ icp_fit, ...others }: LabelItemProps, ref) => (
+    <div ref={ref} {...others}>
+      <ICPFitPillOnly icp_fit_score={icp_fit} />
+    </div>
+  )
+);
+
+
 
 interface ProspectItemProps extends ComponentPropsWithoutRef<"div"> {
   label: string;
@@ -101,8 +120,48 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
     new Map()
   );
 
+  console.log(props.personaOverview);
+
   const [testingPrompt, setTestingPrompt] = useState(false);
   const [detailsOpened, setDetailsOpened] = useState(false);
+
+  const [optionFilters, setOptionFilters] = useState<{
+    prospect_name: boolean;
+    prospect_title: boolean;
+    prospect_linkedin_bio: boolean;
+    prospect_location: boolean;
+    prospect_education: boolean;
+    company_name: boolean;
+    company_size: boolean;
+    company_industry: boolean;
+    company_location: boolean;
+    company_tagline: boolean;
+    company_description: boolean;
+    // @ts-ignore
+  }>(props.personaOverview.icp_matching_option_filters || {
+    prospect_name: false,
+    prospect_title: false,
+    prospect_linkedin_bio: false,
+    prospect_location: false,
+    prospect_education: false,
+    company_name: false,
+    company_size: false,
+    company_industry: false,
+    company_location: false,
+    company_tagline: false,
+    company_description: false,
+  });
+
+  useEffect(() => {
+    (async () => {
+      const result = await postICPClassificationPromptChange(
+        userToken,
+        props.personaOverview.id,
+        currentICPPrompt,
+        optionFilters
+      );
+    })();
+  }, [optionFilters]);
 
   const {
     data: prospects,
@@ -134,6 +193,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
       return all_prospects;
     },
     refetchOnWindowFocus: false,
+    refetchInterval: 10000,
   });
 
   const ProspectSelectItem = forwardRef<HTMLDivElement, ProspectItemProps>(
@@ -291,6 +351,22 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
     return icpFitToLabel(+prospect.icp_fit_score);
   }
 
+  const selectRandomProspects = async (amount: number) => {
+    const randomProspects = getRandomItems(prospects || [], amount);
+    for(const prospect of randomProspects){
+      setSampleProspects((prev) => {
+        return _.uniqBy([...prev, prospect], "id");
+      });
+      const response = await updateProspect(
+        userToken,
+        +prospect.id,
+        undefined,
+        true,
+        undefined
+      );
+    }
+  }
+
   return (
     <Paper withBorder p="xs" my={20} radius="md">
       <Flex>
@@ -318,59 +394,81 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                 <Collapse in={detailsOpened}>
                   <List size="xs">
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Prospect Name
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.prospect_name}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_name: event?.currentTarget?.checked}))}
+                        label="Prospect Name"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Prospect Title
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.prospect_title}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_title: event?.currentTarget?.checked}))}
+                        label="Prospect Title"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Prospect LinkedIn Bio
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.prospect_linkedin_bio}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_linkedin_bio: event?.currentTarget?.checked}))}
+                        label="Prospect LinkedIn Bio"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Prospect Location
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.prospect_location}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_location: event?.currentTarget?.checked}))}
+                        label="Prospect Location"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Prospect Education
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.prospect_education}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_education: event?.currentTarget?.checked}))}
+                        label="Prospect Education"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Company Name
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.company_name}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_name: event?.currentTarget?.checked}))}
+                        label="Company Name"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Company Size
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.company_size}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_size: event?.currentTarget?.checked}))}
+                        label="Company Size"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Company Industry
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.company_industry}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_industry: event?.currentTarget?.checked}))}
+                        label="Company Industry"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Company Location
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.company_location}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_location: event?.currentTarget?.checked}))}
+                        label="Company Location"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Company Tagline
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.company_tagline}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_tagline: event?.currentTarget?.checked}))}
+                        label="Company Tagline"
+                      />
                     </List.Item>
                     <List.Item>
-                      <Text fz="xs" c="dimmed">
-                        Company Description
-                      </Text>
+                      <Checkbox
+                        checked={optionFilters.company_description}
+                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_description: event?.currentTarget?.checked}))}
+                        label="Company Description"
+                      />
                     </List.Item>
                   </List>
                 </Collapse>
@@ -439,74 +537,90 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                       it does.
                     </Text>
 
-                    <Select
-                      mt="md"
-                      label="Select a prospect"
-                      placeholder="Add to sample set"
-                      itemComponent={ProspectSelectItem}
-                      searchable
-                      onSearchChange={(value) => {
-                        setTestSearchValue(value);
-                      }}
-                      clearable
-                      nothingFound={
-                        loading ? "Grabbing prospects..." : "No prospects found"
-                      }
-                      value={"-1"}
-                      data={
-                        prospects
-                          ?.filter(
-                            (prospect) => !sampleProspects.includes(prospect)
-                          )
-                          .map((prospect) => {
-                            return {
-                              value: prospect.id + "",
-                              label: prospect.full_name,
-                              icpFit: prospect.icp_fit_score,
-                              title: prospect.title,
-                              company: prospect.company,
-                            };
-                          }) || []
-                      }
-                      onChange={async (value) => {
-                        const foundProspect = prospects?.find(
-                          (prospect) =>
-                            prospect.id === value
-                        );
-                        if (foundProspect) {
-                          setSampleProspects((prev) => {
-                            return _.uniqBy([...prev, foundProspect], "id");
-                          });
-                          const response = await updateProspect(
-                            userToken,
-                            +foundProspect.id,
-                            undefined,
-                            true,
-                            undefined
-                          );
+                    <Group grow>
+                      <Select
+                        mt="md"
+                        label="Select a prospect"
+                        placeholder="Add to sample set"
+                        itemComponent={ProspectSelectItem}
+                        searchable
+                        onSearchChange={(value) => {
+                          setTestSearchValue(value);
+                        }}
+                        clearable
+                        nothingFound={
+                          loading ? "Grabbing prospects..." : "No prospects found"
                         }
-                      }}
-                    />
+                        value={"-1"}
+                        data={
+                          prospects
+                            ?.filter(
+                              (prospect) => !sampleProspects.includes(prospect)
+                            )
+                            .map((prospect) => {
+                              return {
+                                value: prospect.id + "",
+                                label: prospect.full_name,
+                                icpFit: prospect.icp_fit_score,
+                                title: prospect.title,
+                                company: prospect.company,
+                              };
+                            }) || []
+                        }
+                        onChange={async (value) => {
+                          const foundProspect = prospects?.find(
+                            (prospect) =>
+                              prospect.id === value
+                          );
+                          if (foundProspect) {
+                            setSampleProspects((prev) => {
+                              return _.uniqBy([...prev, foundProspect], "id");
+                            });
+                            const response = await updateProspect(
+                              userToken,
+                              +foundProspect.id,
+                              undefined,
+                              true,
+                              undefined
+                            );
+                          }
+                        }}
+                      />
+                      <Button
+                      mt={40}
+                      size="xs"
+                        onClick={async () => {
+                          await selectRandomProspects(10);
+                        }}
+                      >
+                        Add 10 Random Prospects
+                      </Button>
+                    </Group>
 
                     <Box>
                       <Grid>
                         <Grid.Col span={1}>
                           <Text fz="xs" c="dimmed"></Text>
                         </Grid.Col>
-                        <Grid.Col span={8}>
+                        <Grid.Col span={6}>
                           <Text fz="xs" c="dimmed">
                             Prospect
                           </Text>
                         </Grid.Col>
+                        <Grid.Col span={2}>
+                          <Text fz="xs" c="dimmed">
+                            AI Label
+                          </Text>
+                        </Grid.Col>
                         <Grid.Col span={3}>
                           <Text fz="xs" c="dimmed">
-                            Override ICP Fit
+                            Manual Label
                           </Text>
                         </Grid.Col>
                       </Grid>
                     </Box>
 
-                    {sampleProspects.map((prospect, index) => (
+                    {sampleProspects.sort((a, b) => parseInt(a.icp_fit_score) > parseInt(b.icp_fit_score) ? -1 : 1).map((prospect, index) => (
                       <Box key={index} m={5} sx={{ position: "relative" }}>
                         <Divider m={5} />
 
@@ -541,12 +655,14 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                           </Grid.Col>
                           <Grid.Col span={3}>
                             <Select
+                              itemComponent={LabelSelectItem}
                               value={getFitLabel(prospect)}
                               data={[...getIcpFitScoreMap(true).values()].map(
                                 (icp) => {
                                   return {
                                     value: icp,
                                     label: icp,
+                                    icp_fit: getScoreFromLabel(icp),
                                   };
                                 }
                               )}

@@ -18,7 +18,9 @@ import {
   Title,
   Badge,
   Paper,
+  Text,
   LoadingOverlay,
+  Stack,
 } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { formatToLabel, valueToColor } from "@utils/general";
@@ -58,8 +60,6 @@ export default function PulseBarChart(props: {}) {
     refetchOnWindowFocus: false,
     enabled: !!currentProject,
   });
-
-  console.log(raw_data);
 
   const data = raw_data ? [
     {
@@ -102,7 +102,7 @@ export default function PulseBarChart(props: {}) {
   return (
     <Box sx={{ position: "relative" }}>
       <LoadingOverlay visible={isFetching} />
-      <div style={{ height: "400px" }}>
+      <div style={{ height: "600px" }}>
         <Bar
           options={{
             responsive: true,
@@ -232,6 +232,16 @@ export default function PulseBarChart(props: {}) {
                   accessor: "full_name",
                   title: "Name",
                   width: 150,
+                  render: ({ full_name, title, company }) => (
+                    <Stack spacing={2}>
+                      <Text>
+                        <strong>{full_name}</strong>
+                      </Text>
+                      <Text>
+                        {title} @ {company}
+                      </Text>
+                    </Stack>
+                  ),
                 },
                 // {
                 //   accessor: "overall_status",

@@ -245,6 +245,7 @@ export interface PersonaOverview {
   num_unused_email_prospects: number;
   num_unused_li_prospects: number;
   icp_matching_prompt: string;
+  icp_matching_option_filters: Record<string, boolean>;
   is_unassigned_contact_archetype: boolean;
   persona_fit_reason: string;
   persona_contact_objective: string;

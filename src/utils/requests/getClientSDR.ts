@@ -23,3 +23,26 @@ export async function getSDR(
   return await processResponse(response);
 
 }
+
+
+/**
+ * Gets SDR general info
+ * @param userToken 
+ * @returns - MsgResponse
+ */
+export async function getSDRGeneralInfo(
+  userToken: string,
+): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${API_URL}/client/sdr/general_info`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      }
+    }
+  );
+  return await processResponse(response);
+
+}

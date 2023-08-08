@@ -202,6 +202,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                 companyName={data.main.prospect_info.company.name}
                 companyURL={data.main.prospect_info.company.url}
                 persona={data.main.prospect_info.details.persona}
+                email_store={data.main.prospect_info.data.email_store}
               />
             </Flex>
             {data.main.prospect_info.email.email && (

@@ -1,9 +1,10 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { Card, Flex, Tabs, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Button, ActionIcon, Badge, useMantineTheme, Loader } from "@mantine/core";
+import YourNetworkSection from "@common/your_network/YourNetworkSection";
+import { Card, Flex, Tabs, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Button, ActionIcon, Badge, useMantineTheme, Loader, Group, Stack, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconBrandLinkedin, IconDownload } from "@tabler/icons";
+import { IconAffiliate, IconBrandLinkedin, IconDownload } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { valueToColor } from "@utils/general";
 import getSalesNavigatorLaunches, { getSalesNavigatorLaunch } from "@utils/requests/getSalesNavigatorLaunches";
@@ -90,6 +91,7 @@ export default function FindContactsPage() {
       <Tabs defaultValue="linkedin-sales-navigator" mt='md'>
         <Tabs.List>
           <Tabs.Tab value="linkedin-sales-navigator" icon={<IconBrandLinkedin size="0.8rem" />}>LinkedIn Sales Navigator</Tabs.Tab>
+          <Tabs.Tab value="your-network" icon={<IconAffiliate size="0.8rem" />}>Your Network</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="linkedin-sales-navigator" pt="xs">
@@ -219,6 +221,10 @@ export default function FindContactsPage() {
               )
             })}
           </Card>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="your-network" pt="xs">
+          <YourNetworkSection />
         </Tabs.Panel>
 
       </Tabs>

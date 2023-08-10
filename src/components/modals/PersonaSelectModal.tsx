@@ -77,7 +77,8 @@ export default function PersonaSelectModal({
       if(info_response.status === 'success'){
         const notifMap = new Map();
         for(const d of info_response.data){
-          notifMap.set(d.client_archetype_id, d.sellscale_needs_to_clear + d.sdr_needs_to_clear);
+          const total = d.sellscale_needs_to_clear + d.sdr_needs_to_clear;
+          notifMap.set(d.client_archetype_id, total > 0 ? total : 0);
         }
         setProjectStatMap(notifMap);
       }
@@ -228,7 +229,7 @@ function PersonaOption(props: {
         >
           {_.truncate(props.persona.name, { length: 50 })}
         </Text>
-        <Badge>{props.inboxNotifs}</Badge>
+        {props.inboxNotifs > 0 && <Badge>{props.inboxNotifs}</Badge>}
       </Box>
       <Box sx={{ flexBasis: "7%" }}>
         <Menu shadow="md" width={200}>

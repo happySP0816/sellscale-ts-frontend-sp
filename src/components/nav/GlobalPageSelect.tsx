@@ -72,7 +72,7 @@ export function GlobalPageSelect() {
 
   const options = [
     {
-      label: `Global Inboxes `+(totalNotifCount !== -1 ? `(${totalNotifCount})` : ``),
+      label: `Global Inboxes `+(totalNotifCount > -1 ? `(${totalNotifCount})` : ``),
       icon: <IconInbox size="1rem" stroke={1.5} />,
       value: 'all-inboxes',
     },

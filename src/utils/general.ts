@@ -160,6 +160,7 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   years_of_experience_at_current_job: 'red',
   current_job_specialties: 'pink',
   no_show: 'red',
+  none: 'gray',
 
   terrible: 'red',
   poor: 'orange',

@@ -97,6 +97,14 @@ export default function PulseBarChart(props: {}) {
       count: raw_data.very_low_count,
       data: raw_data.very_low_data as ProspectICP[],
     },
+
+    {
+      icp_score: '-1',
+      icp_label: 'Unscored',
+      icp_color: icpFitToColor(parseInt('-1')),
+      count: raw_data.error_count + raw_data.queued_count + raw_data.calculating_count,
+      data: [...raw_data.error_data, ...raw_data.queued_data, ...raw_data.calculating_data] as ProspectICP[],
+    },
   ] : [];
 
   return (
@@ -238,7 +246,13 @@ export default function PulseBarChart(props: {}) {
                         <strong>{full_name}</strong>
                       </Text>
                       <Text>
-                        {title} @ {company}
+                        {_.truncate(title, {
+                          length: 45,
+                          separator: ' ',
+                        })} @ {_.truncate(company, {
+                          length: 45,
+                          separator: ' ',
+                        })}
                       </Text>
                     </Stack>
                   ),

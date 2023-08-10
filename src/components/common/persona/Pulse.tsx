@@ -22,16 +22,26 @@ import {
   Grid,
   ActionIcon,
   Checkbox,
+  Loader,
+  ThemeIcon,
+  rem,
 } from "@mantine/core";
 import { openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
   IconBrandLinkedin,
   IconPencil,
+  IconPhoto,
   IconTestPipe,
   IconTrash,
 } from "@tabler/icons";
-import { ComponentPropsWithoutRef, forwardRef, useEffect, useState } from "react";
+import {
+  ComponentPropsWithoutRef,
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -56,10 +66,9 @@ import {
 import { updateProspect } from "@utils/requests/updateProspect";
 import { getProspectsForICP } from "@utils/requests/getProspectsForICP";
 import postICPClassificationPromptChange from "@utils/requests/postICPClassificationPromptChange";
+import { IconPointFilled } from "@tabler/icons-react";
 
-
-
-interface LabelItemProps extends React.ComponentPropsWithoutRef<'div'> {
+interface LabelItemProps extends React.ComponentPropsWithoutRef<"div"> {
   icp_fit: number;
 }
 
@@ -70,8 +79,6 @@ const LabelSelectItem = forwardRef<HTMLDivElement, LabelItemProps>(
     </div>
   )
 );
-
-
 
 interface ProspectItemProps extends ComponentPropsWithoutRef<"div"> {
   label: string;
@@ -94,12 +101,13 @@ export type ProspectICP = {
   icp_fit_score: string;
   icp_fit_score_override: string;
   in_icp_sample: string | false;
-}
+};
 
 export default function Pulse(props: { personaOverview: PersonaOverview }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
 
+  const firstLoad = useRef(true);
   const [loading, setLoading] = useState(false);
   const [currentICPPrompt, setCurrentICPPrompt] = useState("");
   const [testSearchValue, setTestSearchValue] = useDebouncedState("", 300);
@@ -108,8 +116,6 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   const [overrideMap, setOverrideMap] = useState<Map<number, string>>(
     new Map()
   );
-
-  console.log(props.personaOverview);
 
   const [testingPrompt, setTestingPrompt] = useState(false);
   const [detailsOpened, setDetailsOpened] = useState(false);
@@ -126,20 +132,21 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
     company_location: boolean;
     company_tagline: boolean;
     company_description: boolean;
-    // @ts-ignore
-  }>(props.personaOverview.icp_matching_option_filters || {
-    prospect_name: false,
-    prospect_title: false,
-    prospect_linkedin_bio: false,
-    prospect_location: false,
-    prospect_education: false,
-    company_name: false,
-    company_size: false,
-    company_industry: false,
-    company_location: false,
-    company_tagline: false,
-    company_description: false,
-  });
+  }>(// @ts-ignore
+    props.personaOverview.icp_matching_option_filters || {
+      prospect_name: false,
+      prospect_title: false,
+      prospect_linkedin_bio: false,
+      prospect_location: false,
+      prospect_education: false,
+      company_name: false,
+      company_size: false,
+      company_industry: false,
+      company_location: false,
+      company_tagline: false,
+      company_description: false,
+    }
+  );
 
   useEffect(() => {
     (async () => {
@@ -159,7 +166,10 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   } = useQuery({
     queryKey: [`query-isp-fit-prospects`],
     queryFn: async () => {
-      const response = await getProspectsForICP(userToken, props.personaOverview.id);
+      const response = await getProspectsForICP(
+        userToken,
+        props.personaOverview.id
+      );
       if (response.status === "error") {
         return [];
       }
@@ -175,10 +185,19 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
 
       setSampleProspects((prev) => {
         return _.uniqBy(
-          [...prev, ...all_prospects.filter((prospect) => prospect.in_icp_sample && prospect.in_icp_sample.startsWith("t"))],
+          [
+            ...prev,
+            ...all_prospects.filter(
+              (prospect) =>
+                prospect.in_icp_sample && prospect.in_icp_sample.startsWith("t")
+            ),
+          ],
           "id"
         );
       });
+
+      firstLoad.current = false;
+
       return all_prospects;
     },
     refetchOnWindowFocus: false,
@@ -191,14 +210,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
         <Flex justify={"space-between"}>
           <Text>{label}</Text>
           {icpFit ? (
-            <Badge
-              color={valueToColor(
-                theme,
-                getIcpFitScoreMap().get(icpFit.toString()) || "NONE"
-              )}
-            >
-              {getIcpFitScoreMap().get(icpFit.toString())}
-            </Badge>
+            <ICPFitPillOnly icp_fit_score={icpFit} />
           ) : (
             <Badge color={valueToColor(theme, "NONE")}>NONE</Badge>
           )}
@@ -331,18 +343,18 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   };
 
   const getFitLabel = (prospect: ProspectICP) => {
-    if(overrideMap.has(+prospect.id)){
-      return overrideMap.get(+prospect.id)+'';
+    if (overrideMap.has(+prospect.id)) {
+      return overrideMap.get(+prospect.id) + "";
     }
-    if(prospect.icp_fit_score_override){
+    if (prospect.icp_fit_score_override) {
       return icpFitToLabel(+prospect.icp_fit_score_override);
     }
     return icpFitToLabel(+prospect.icp_fit_score);
-  }
+  };
 
   const selectRandomProspects = async (amount: number) => {
     const randomProspects = getRandomItems(prospects || [], amount);
-    for(const prospect of randomProspects){
+    for (const prospect of randomProspects) {
       setSampleProspects((prev) => {
         return _.uniqBy([...prev, prospect], "id");
       });
@@ -354,7 +366,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
         undefined
       );
     }
-  }
+  };
 
   return (
     <Paper withBorder p="xs" my={20} radius="md">
@@ -385,77 +397,133 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.prospect_name}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_name: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_name: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Prospect Name"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.prospect_title}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_title: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_title: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Prospect Title"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.prospect_linkedin_bio}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_linkedin_bio: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_linkedin_bio:
+                              event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Prospect LinkedIn Bio"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.prospect_location}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_location: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_location: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Prospect Location"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.prospect_education}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, prospect_education: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_education: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Prospect Education"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.company_name}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_name: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_name: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Company Name"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.company_size}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_size: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_size: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Company Size"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.company_industry}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_industry: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_industry: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Company Industry"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.company_location}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_location: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_location: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Company Location"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.company_tagline}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_tagline: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_tagline: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Company Tagline"
                       />
                     </List.Item>
                     <List.Item>
                       <Checkbox
                         checked={optionFilters.company_description}
-                        onChange={(event) => setOptionFilters((prev) => ({...prev, company_description: event?.currentTarget?.checked}))}
+                        onChange={(event) =>
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_description: event?.currentTarget?.checked,
+                          }))
+                        }
                         label="Company Description"
                       />
                     </List.Item>
@@ -502,7 +570,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
         </Flex>
         <Flex w="50%">
           <Paper withBorder p="xs" w="100%" sx={{ position: "relative" }}>
-            <LoadingOverlay visible={isFetching} />
+            <LoadingOverlay visible={isFetching && firstLoad.current} />
             <Tabs defaultValue="test" color="teal" h={"100%"}>
               <Tabs.List>
                 <Tabs.Tab value="test" icon={<IconTestPipe size="0.8rem" />}>
@@ -538,7 +606,9 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                         }}
                         clearable
                         nothingFound={
-                          loading ? "Grabbing prospects..." : "No prospects found"
+                          loading
+                            ? "Grabbing prospects..."
+                            : "No prospects found"
                         }
                         value={"-1"}
                         data={
@@ -558,8 +628,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                         }
                         onChange={async (value) => {
                           const foundProspect = prospects?.find(
-                            (prospect) =>
-                              prospect.id === value
+                            (prospect) => prospect.id === value
                           );
                           if (foundProspect) {
                             setSampleProspects((prev) => {
@@ -576,8 +645,8 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                         }}
                       />
                       <Button
-                      mt={40}
-                      size="xs"
+                        mt={40}
+                        size="xs"
                         onClick={async () => {
                           await selectRandomProspects(10);
                         }}
@@ -609,70 +678,89 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                       </Grid>
                     </Box>
 
-                    {sampleProspects.sort((a, b) => parseInt(a.icp_fit_score) > parseInt(b.icp_fit_score) ? -1 : 1).map((prospect, index) => (
-                      <Box key={index} m={5} sx={{ position: "relative" }}>
-                        <Divider m={5} />
+                    {sampleProspects
+                      .sort((a, b) =>
+                        parseInt(a.icp_fit_score) > parseInt(b.icp_fit_score)
+                          ? -1
+                          : 1
+                      )
+                      .map((prospect, index) => (
+                        <Box key={index} m={5} sx={{ position: "relative" }}>
+                          <Divider m={5} />
 
-                        <Grid>
-                          <Grid.Col span={1}>
-                            <ActionIcon
-                              onClick={async () => {
-                                setSampleProspects((prev) => {
-                                  return prev.filter(
-                                    (p) => p.id !== prospect.id
+                          <Grid>
+                            <Grid.Col span={1}>
+                              <Group noWrap spacing={0}>
+                                <ActionIcon
+                                  onClick={async () => {
+                                    setSampleProspects((prev) => {
+                                      return prev.filter(
+                                        (p) => p.id !== prospect.id
+                                      );
+                                    });
+                                    const response = await updateProspect(
+                                      userToken,
+                                      +prospect.id,
+                                      undefined,
+                                      false,
+                                      undefined
+                                    );
+                                  }}
+                                >
+                                  <IconTrash size="0.9rem" />
+                                </ActionIcon>
+                                <ThemeIcon
+                                  variant="outline"
+                                  color="red"
+                                  size={5}
+                                  radius={10}
+                                >
+                                  <IconPointFilled size={rem(14)} />
+                                </ThemeIcon>
+                              </Group>
+                            </Grid.Col>
+                            <Grid.Col span={8}>
+                              <ProspectSelectItem
+                                label={prospect.full_name}
+                                icpFit={+prospect.icp_fit_score}
+                                title={prospect.title}
+                                company={prospect.company}
+                              />
+                            </Grid.Col>
+                            <Grid.Col span={3}>
+                              <Select
+                                itemComponent={LabelSelectItem}
+                                value={getFitLabel(prospect)}
+                                data={[...getIcpFitScoreMap(true).values()].map(
+                                  (icp) => {
+                                    return {
+                                      value: icp,
+                                      label: icp,
+                                      icp_fit: getScoreFromLabel(icp),
+                                    };
+                                  }
+                                )}
+                                onChange={async (value) => {
+                                  if (!value) return;
+                                  setOverrideMap((prev) => {
+                                    return new Map(prev).set(
+                                      +prospect.id,
+                                      value
+                                    );
+                                  });
+                                  const response = await updateProspect(
+                                    userToken,
+                                    +prospect.id,
+                                    undefined,
+                                    true,
+                                    getScoreFromLabel(value)
                                   );
-                                });
-                                const response = await updateProspect(
-                                  userToken,
-                                  +prospect.id,
-                                  undefined,
-                                  false,
-                                  undefined
-                                );
-                              }}
-                            >
-                              <IconTrash size="0.9rem" />
-                            </ActionIcon>
-                          </Grid.Col>
-                          <Grid.Col span={8}>
-                            <ProspectSelectItem
-                              label={prospect.full_name}
-                              icpFit={+prospect.icp_fit_score}
-                              title={prospect.title}
-                              company={prospect.company}
-                            />
-                          </Grid.Col>
-                          <Grid.Col span={3}>
-                            <Select
-                              itemComponent={LabelSelectItem}
-                              value={getFitLabel(prospect)}
-                              data={[...getIcpFitScoreMap(true).values()].map(
-                                (icp) => {
-                                  return {
-                                    value: icp,
-                                    label: icp,
-                                    icp_fit: getScoreFromLabel(icp),
-                                  };
-                                }
-                              )}
-                              onChange={async (value) => {
-                                if (!value) return;
-                                setOverrideMap((prev) => {
-                                  return new Map(prev).set(+prospect.id, value);
-                                });
-                                const response = await updateProspect(
-                                  userToken,
-                                  +prospect.id,
-                                  undefined,
-                                  true,
-                                  getScoreFromLabel(value)
-                                );
-                              }}
-                            />
-                          </Grid.Col>
-                        </Grid>
-                      </Box>
-                    ))}
+                                }}
+                              />
+                            </Grid.Col>
+                          </Grid>
+                        </Box>
+                      ))}
 
                     {/* {selectedProspect && (
                   <>
@@ -773,6 +861,13 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                 )}
               </Tabs.Panel>
             </Tabs>
+
+            {isFetching && !firstLoad.current && (
+              <Loader
+                variant="dots"
+                sx={{ position: "absolute", right: 15, bottom: 20 }}
+              />
+            )}
           </Paper>
         </Flex>
       </Flex>
@@ -820,15 +915,7 @@ export function ProspectOverview(props: { prospect: ProspectShallow }) {
             Fit:
           </Text>
           {selectedProspect.icp_fit_score ? (
-            <Badge
-              color={valueToColor(
-                theme,
-                getIcpFitScoreMap().get(selectedProspect.icp_fit_score.toString()) ||
-                  "NONE"
-              )}
-            >
-              {getIcpFitScoreMap().get(selectedProspect.icp_fit_score.toString())}
-            </Badge>
+            <ICPFitPillOnly icp_fit_score={selectedProspect.icp_fit_score} />
           ) : (
             <Badge color={valueToColor(theme, "NONE")}>None</Badge>
           )}

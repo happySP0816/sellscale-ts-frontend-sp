@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useRecoilValue } from "recoil";
 import { EmailStore } from "src";
 import EmailStoreView from "./EmailStoreView";
+import { ICPFitPillOnly } from "@common/pipeline/ICPFitAndReason";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -45,6 +46,7 @@ type ProspectDetailsSummaryProps = {
   companyURL?: string;
   persona?: string;
   email_store?: EmailStore | null;
+  icp_score?: number;
 };
 
 export default function ProspectDetailsSummary(
@@ -104,16 +106,19 @@ export default function ProspectDetailsSummary(
       </Avatar>
       <Flex direction='column' w='100%'>
         <Flex w='100%' justify='space-between' pr='xs'>
-          <Badge
-            mb='4px'
-            p='xs'
-            variant='outline'
-            radius='sm'
-            size='xs'
-            color={valueToColor(theme, props.persona || "Persona Unassigned")}
-          >
-            {props.persona || "Persona Unassigned"}
-          </Badge>
+          <Group>
+            <Badge
+              mb='4px'
+              p='xs'
+              variant='outline'
+              radius='sm'
+              size='xs'
+              color={valueToColor(theme, props.persona || "Persona Unassigned")}
+            >
+              {props.persona || "Persona Unassigned"}
+            </Badge>
+            <ICPFitPillOnly icp_fit_score={props.icp_score || -3} />
+          </Group>
           <Switch
             label='AI enabled 🤖'
             labelPosition='right'

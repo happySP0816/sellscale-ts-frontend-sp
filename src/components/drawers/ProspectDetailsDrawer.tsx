@@ -125,6 +125,8 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
     });
   }, [data]);
 
+  console.log(data?.main.prospect_info);
+
   return (
     <Drawer
       opened={actuallyOpened}
@@ -203,6 +205,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                 companyURL={data.main.prospect_info.company.url}
                 persona={data.main.prospect_info.details.persona}
                 email_store={data.main.prospect_info.data.email_store}
+                icp_score={data.main.prospect_info.details.icp_fit_score}
               />
             </Flex>
             {data.main.prospect_info.email.email && (

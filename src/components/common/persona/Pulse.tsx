@@ -80,17 +80,6 @@ interface ProspectItemProps extends ComponentPropsWithoutRef<"div"> {
   company: string;
 }
 
-let icpFitScoreMap = new Map<string, string>([
-  ["-3", "QUEUED"],
-  ["-2", "CALCULATING"],
-  ["-1", "ERROR"],
-  ["0", "VERY LOW"],
-  ["1", "LOW"],
-  ["2", "MEDIUM"],
-  ["3", "HIGH"],
-  ["4", "VERY HIGH"],
-]);
-
 const useStyles = createStyles((theme) => ({
   icon: {
     color: theme.colors.gray[6],
@@ -205,10 +194,10 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
             <Badge
               color={valueToColor(
                 theme,
-                icpFitScoreMap.get(icpFit.toString()) || "NONE"
+                getIcpFitScoreMap().get(icpFit.toString()) || "NONE"
               )}
             >
-              {icpFitScoreMap.get(icpFit.toString())}
+              {getIcpFitScoreMap().get(icpFit.toString())}
             </Badge>
           ) : (
             <Badge color={valueToColor(theme, "NONE")}>NONE</Badge>
@@ -834,11 +823,11 @@ export function ProspectOverview(props: { prospect: ProspectShallow }) {
             <Badge
               color={valueToColor(
                 theme,
-                icpFitScoreMap.get(selectedProspect.icp_fit_score.toString()) ||
+                getIcpFitScoreMap().get(selectedProspect.icp_fit_score.toString()) ||
                   "NONE"
               )}
             >
-              {icpFitScoreMap.get(selectedProspect.icp_fit_score.toString())}
+              {getIcpFitScoreMap().get(selectedProspect.icp_fit_score.toString())}
             </Badge>
           ) : (
             <Badge color={valueToColor(theme, "NONE")}>None</Badge>

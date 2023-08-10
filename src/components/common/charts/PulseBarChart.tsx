@@ -21,7 +21,9 @@ import {
   Text,
   LoadingOverlay,
   Stack,
+  Center,
 } from "@mantine/core";
+import { useElementSize } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { formatToLabel, valueToColor } from "@utils/general";
 import { getProspects } from "@utils/requests/getProspects";
@@ -43,6 +45,8 @@ export default function PulseBarChart(props: {}) {
 
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
+
+  const { ref: tablesRef, width: tablesWidth, height: tablesHeight } = useElementSize();
 
   const {
     data: raw_data,
@@ -110,7 +114,7 @@ export default function PulseBarChart(props: {}) {
   return (
     <Box sx={{ position: "relative" }}>
       <LoadingOverlay visible={isFetching} />
-      <div style={{ height: "600px" }}>
+      <Center sx={{ height: tablesWidth/2 }}>
         <Bar
           options={{
             responsive: true,
@@ -216,8 +220,8 @@ export default function PulseBarChart(props: {}) {
         role="application"
         ariaLabel="ICP Fit Score Distribution"
     /> */}
-      </div>
-      <Group align="flex-start" grow>
+      </Center>
+      <Group ref={tablesRef} align="flex-start" grow>
         {data.map((d, index) => (
           <Paper key={index} p={5}>
             <Title order={4}>

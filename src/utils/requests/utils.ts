@@ -71,15 +71,15 @@ async function getResponseJSON(key: string, response: Response, showNotif: boole
   }
 
   if (errMsg) {
-    if(showNotif){
-      showNotification({
-        id: key+"-error",
-        title: "Error",
-        message: `An error occurred, our engineers have been notified. Please try again later.`,
-        color: "red",
-        autoClose: false,
-      });
-    }
+    // if(showNotif){
+    //   showNotification({
+    //     id: key+"-error",
+    //     title: "Error",
+    //     message: `An error occurred, our engineers have been notified. Please try again later.`,
+    //     color: "red",
+    //     autoClose: false,
+    //   });
+    // }
 
     const userToken = localStorage.getItem("user-token");
     if(userToken && showNotif){

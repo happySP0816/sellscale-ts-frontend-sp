@@ -1,5 +1,6 @@
 import { userTokenState } from '@atoms/userAtoms';
 import {
+  ActionIcon,
   Badge,
   Button,
   Card,
@@ -10,29 +11,21 @@ import {
   Select,
   Text,
   TextInput,
-  Textarea,
-  Title,
   createStyles,
   useMantineTheme,
 } from '@mantine/core';
-import { RichTextEditor, Link } from '@mantine/tiptap';
-import Highlight from '@tiptap/extension-highlight';
+import { RichTextEditor } from '@mantine/tiptap';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-import TextAlign from '@tiptap/extension-text-align';
-import Superscript from '@tiptap/extension-superscript';
-import SubScript from '@tiptap/extension-subscript';
-import Placeholder from '@tiptap/extension-placeholder';
-import { IconBrandLinkedin } from '@tabler/icons';
+import { IconBrandLinkedin, IconX } from '@tabler/icons';
 import { useEditor } from '@tiptap/react';
 import { valueToColor } from '@utils/general';
 import { generateEmailAutomatic } from '@utils/requests/generateEmail';
 import { getArchetypeProspects } from '@utils/requests/getArchetypeProspects';
-import DOMPurify from 'dompurify';
 import { forwardRef, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { ProspectShallow } from 'src';
+import { EmailBumpFramework, ProspectShallow } from 'src';
 import { Markdown } from 'tiptap-markdown';
+import { getEmailBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 
 interface ProspectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -58,7 +51,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function EmailBlockPreview(props: { archetypeId: number, emailBlocks?: string[] }) {
+export default function EmailBlockPreview(props: { archetypeId: number, emailBlocks?: string[], selectEmailBlock?: boolean }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const userToken = useRecoilValue(userTokenState);
@@ -67,6 +60,18 @@ export default function EmailBlockPreview(props: { archetypeId: number, emailBlo
 
   const [loading, setLoading] = useState(false);
   const [previewEmail, setPreviewEmail] = useState<{ subject: string; body: string } | null>(null);
+
+  const [bumpFrameworkEmails, setBumpFrameworkEmails] = useState<EmailBumpFramework[]>([]);
+  const [selectedBumpFramework, setSelectedBumpFramework] = useState<EmailBumpFramework | undefined>(undefined);
+  const triggerGetEmailBumpFrameworks = async () => {
+    setLoading(true);
+    const result = await getEmailBumpFrameworks(userToken, ['ACCEPTED', 'BUMPED'], [], [props.archetypeId]);
+
+    if (result.status === 'success') {
+      setBumpFrameworkEmails(result.data.bump_frameworks);
+    }
+    setLoading(false);
+  }
 
   const previewBodyEditor = useEditor({
     extensions: [
@@ -97,6 +102,10 @@ export default function EmailBlockPreview(props: { archetypeId: number, emailBlo
         });
       }
     })();
+
+    if (props.selectEmailBlock) {
+      triggerGetEmailBumpFrameworks();
+    }
   }, []);
 
   const ProspectSelectItem = forwardRef<HTMLDivElement, ProspectItemProps>(
@@ -127,38 +136,69 @@ export default function EmailBlockPreview(props: { archetypeId: number, emailBlo
         </Text>
         <Text fz='sm'>Test your email block configuration on a prospect of your choosing.</Text>
 
-        <Select
-          mt='md'
-          label='Select a prospect'
-          placeholder='Pick one'
-          itemComponent={ProspectSelectItem}
-          searchable
-          clearable
-          nothingFound='No prospects found'
-          value={selectedProspect ? selectedProspect.id + '' : '-1'}
-          data={prospects.map((prospect) => {
-            return {
-              value: prospect.id + '',
-              label: prospect.full_name,
-              icpFit: prospect.icp_fit_score,
-              title: prospect.title,
-              company: prospect.company,
-            };
-          })}
-          onChange={(value) => {
-            if (!value) {
-              setSelectedProspect(undefined);
-              return;
-            }
-            const foundProspect = prospects.find((prospect) => prospect.id === (parseInt(value) || -1));
-            setSelectedProspect(foundProspect);
-          }}
-          withinPortal
-        />
+        {props.selectEmailBlock && (
+          <>
+            <Select
+              mt='xs'
+              label='Select a framework'
+              placeholder='Pick one'
+              searchable
+              clearable
+              nothingFound='No bump frameworks found'
+              value={selectedBumpFramework ? selectedBumpFramework.id + '' : '-1'}
+              data={bumpFrameworkEmails.map((bumpFrameworkEmail: EmailBumpFramework) => {
+                return {
+                  value: bumpFrameworkEmail.id + '',
+                  label: bumpFrameworkEmail.title,
+                };
+              })}
+              onChange={(value) => {
+                if (!value) {
+                  setSelectedBumpFramework(undefined);
+                  return;
+                }
+                const foundBumpFramework = bumpFrameworkEmails.find((bumpFrameworkEmail) => bumpFrameworkEmail.id === (parseInt(value) || -1));
+                setSelectedBumpFramework(foundBumpFramework);
+              }}
+              withinPortal
+            />
+          </>
+        )}
+
+        {(!props.selectEmailBlock || (props.selectEmailBlock && selectedBumpFramework)) && (
+          <Select
+            mt='xs'
+            label='Select a prospect'
+            placeholder='Pick one'
+            itemComponent={ProspectSelectItem}
+            searchable
+            clearable
+            nothingFound='No prospects found'
+            value={selectedProspect ? selectedProspect.id + '' : '-1'}
+            data={prospects.map((prospect) => {
+              return {
+                value: prospect.id + '',
+                label: prospect.full_name,
+                icpFit: prospect.icp_fit_score,
+                title: prospect.title,
+                company: prospect.company,
+              };
+            })}
+            onChange={(value) => {
+              if (!value) {
+                setSelectedProspect(undefined);
+                return;
+              }
+              const foundProspect = prospects.find((prospect) => prospect.id === (parseInt(value) || -1));
+              setSelectedProspect(foundProspect);
+            }}
+            withinPortal
+          />
+        )}
 
         {selectedProspect && (
           <>
-            <Card withBorder my='sm' shadow='sm'>
+            <Card withBorder mt='xl' mb='lg' shadow='sm'>
               <Text fz='lg' fw='bold'>
                 {selectedProspect.full_name}
               </Text>
@@ -183,30 +223,38 @@ export default function EmailBlockPreview(props: { archetypeId: number, emailBlo
               )}
             </Card>
             <Center>
-              <Button
-                mt='md'
-                variant='filled'
-                color='teal'
-                radius='md'
-                loading={loading}
-                onClick={async () => {
-                  setLoading(true);
-                  const response = await generateEmailAutomatic(userToken, selectedProspect.id, props.emailBlocks);
-                  if (response.status === 'success') {
-                    setPreviewEmail(response.data);
-                  }
-                  setLoading(false);
-                }}
-              >
-                Generate Preview
-              </Button>
+              <Flex align='center'>
+                <Button
+                  variant='filled'
+                  color='teal'
+                  radius='md'
+                  loading={loading}
+                  onClick={async () => {
+                    setLoading(true);
+                    const response = await generateEmailAutomatic(userToken, selectedProspect.id, props.emailBlocks || selectedBumpFramework?.email_blocks || []);
+                    if (response.status === 'success') {
+                      setPreviewEmail(response.data);
+                    }
+                    setLoading(false);
+                  }}
+                >
+                  Generate Preview
+                </Button>
+                {
+                  previewEmail && (
+                    <ActionIcon ml='xs' size='sm' onClick={() => {setPreviewEmail(null)}}>
+                      <IconX />
+                    </ActionIcon>
+                  )
+                }
+              </Flex>
             </Center>
           </>
         )}
 
         {loading && (
           <Flex justify={'center'} mt='lg'>
-            <Loader size='xs'/>
+            <Loader size='xs' />
           </Flex>
         )}
 

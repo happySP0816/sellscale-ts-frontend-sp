@@ -181,8 +181,6 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
       all_prospects.push(...response.data.very_high_data);
       all_prospects.push(...response.data.very_low_data);
 
-      console.log(all_prospects);
-
       setSampleProspects((prev) => {
         return _.uniqBy(
           [
@@ -319,12 +317,6 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
     let correct = 0;
     let checked = 0;
     for (const prospect of sampleProspects) {
-      console.log(
-        prospect.icp_fit_score_override,
-        overrideMap.get(+prospect.id),
-        prospect.icp_fit_score
-      );
-
       const overrideLabel = overrideMap.has(+prospect.id)
         ? overrideMap.get(+prospect.id)
         : prospect.icp_fit_score_override

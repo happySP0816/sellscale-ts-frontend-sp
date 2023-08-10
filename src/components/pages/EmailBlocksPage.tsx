@@ -28,7 +28,7 @@ export default function EmailBlocksPage(props: { personaId?: number }) {
             <EmailBlocksDND archetypeId={personaId} autosave/>
           </Flex>
           <Flex w='50%' direction='column'>
-            <EmailBlockPreview archetypeId={personaId} />
+            <EmailBlockPreview archetypeId={personaId} selectEmailBlock={false} />
           </Flex>
         </Flex>
       </Card>

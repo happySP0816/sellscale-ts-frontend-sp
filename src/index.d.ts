@@ -280,6 +280,30 @@ export interface LinkedInMessage {
   initial_message_stack_ranked_config_name: string;
 }
 
+export interface EmailThread {
+  client_sdr_id: number;
+  first_message_timestamp: string;
+  has_attachments: boolean;
+  id: number;
+  last_message_received_timestamp: string;
+  last_message_sent_timestamp: string;
+  last_message_timestamp: string;
+  nylas_data_raw: {},
+  nylas_message_ids: string[];
+  nylas_thread_id: string;
+  participants: {
+    email: string;
+    name: string;
+  }[];
+  prospect_email: string;
+  prospect_id: number;
+  sdr_email: string;
+  snippet: string;
+  subject: string;
+  unread: boolean;
+  version: number;
+}
+
 export interface EmailMessage {
   ai_generated: boolean | null;
   bcc: string[];
@@ -355,6 +379,7 @@ export type EmailBumpFramework = {
   active: boolean;
   default: boolean;
   bumped_count: number | null;
+  // TODO: MISSING A LOT OF FIELDS
 }
 
 export type SalesNavigatorLaunch = {

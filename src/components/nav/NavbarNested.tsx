@@ -337,17 +337,17 @@ export function NavbarNested(props: {
         //   link: "/email/scheduled-emails",
         // },
         {
+          key: "email-setup",
+          label: "Email Setup",
+          icon: IconAdjustments,
+          link: "/email/setup",
+        },
+        {
           key: "email-blocks",
           label: "Email Blocks",
           icon: IconWall,
           link: "/email/blocks",
-        },
-        {
-          key: "email-bump-frameworks",
-          label: "Bump Frameworks",
-          icon: IconAdjustments,
-          link: "/email/bump-frameworks",
-        },
+        }
         // { // TODO(Aakash): hidden for now. may require code removal.
         //   key: 'email-sequences',
         //   label: 'Sequences',

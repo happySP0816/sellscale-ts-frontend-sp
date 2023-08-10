@@ -196,13 +196,13 @@ function MessageGenerationOnboarding(props: { data: any }) {
         },
         {
           title: 'Setup LinkedIn',
-          description: 'Customize how the AI responses on LinkedIn',
+          description: 'Customize how the AI responds on LinkedIn',
           link: '/linkedin/setup',
           complete: props.data.msg_gen.bump_framework_linkedin,
         },
         {
           title: 'Bump Frameworks for Email',
-          description: 'Customize how the AI responses on email',
+          description: 'Customize how the AI responds on email',
           link: '/email/blocks',
           complete: props.data.msg_gen.bump_framework_email,
         },

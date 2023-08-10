@@ -20,6 +20,7 @@ interface CreateBumpFrameworkEmail extends Record<string, unknown> {
   dataChannels: MsgResponse | undefined;
   archetypeID: number | null;
   status?: string;
+  showStatus?: boolean;
   bumpedCount?: number | null;
 }
 
@@ -150,24 +151,26 @@ export default function CreateBumpFrameworkEmailModal(props: CreateBumpFramework
                 defaultValues={[form.values.archetypeID || -1]}
               />
             </Flex>
-            <Select
-              label="Status"
-              description="Which status should use this bump?"
-              placeholder="select status..."
-              data={props.dataChannels?.data[
-                "SELLSCALE"
-              ]?.statuses_available?.map((status: string) => {
-                return {
-                  label:
-                    props.dataChannels?.data["SELLSCALE"][status].name,
-                  value: status,
-                };
-              })}
-              value={selectedStatus ? selectedStatus : null}
-              onChange={setSelectedStatus}
-              mt="md"
-              withAsterisk
-            />
+            {props.showStatus && (
+              <Select
+                label="Status"
+                description="Which status should use this bump?"
+                placeholder="select status..."
+                data={props.dataChannels?.data[
+                  "SELLSCALE"
+                ]?.statuses_available?.map((status: string) => {
+                  return {
+                    label:
+                      props.dataChannels?.data["SELLSCALE"][status].name,
+                    value: status,
+                  };
+                })}
+                value={selectedStatus ? selectedStatus : null}
+                onChange={setSelectedStatus}
+                mt="md"
+                withAsterisk
+              />
+            )}
             {selectedStatus === "ACTIVE_CONVO" && (
               <Select
                 label="Substatus"
@@ -180,7 +183,7 @@ export default function CreateBumpFrameworkEmailModal(props: CreateBumpFramework
                 withAsterisk
               />
             )}
-            {(selectedStatus === "BUMPED" && form.values.bumpedCount != null) && (
+            {(selectedStatus === "BUMPED" && form.values.bumpedCount != null && props.showStatus) && (
               <NumberInput
                 mt="md"
                 label="Bump Number"
@@ -242,7 +245,7 @@ export default function CreateBumpFrameworkEmailModal(props: CreateBumpFramework
           </Flex>
           <Flex maw='50%' mah='80vh'>
             <ScrollArea type='hover'>
-              <EmailBlockPreview archetypeId={props.archetypeID as number} emailBlocks={emailBlocks} />
+              <EmailBlockPreview archetypeId={props.archetypeID as number} emailBlocks={emailBlocks} selectEmailBlock={false} />
             </ScrollArea>
           </Flex>
         </Flex>

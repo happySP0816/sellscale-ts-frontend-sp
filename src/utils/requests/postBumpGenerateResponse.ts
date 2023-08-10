@@ -3,7 +3,7 @@ import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
- * Generates a response given a Bump Framework ID
+ * Generates a response to a LinkedIn conversation given a Bump Framework ID
  * @param userToken
  * @param prospectID
  * @param bumpFrameworkID
@@ -33,4 +33,40 @@ export async function postBumpGenerateResponse(
     }
   );
   return await processResponse(response);
+}
+
+
+/**
+ * Generates a response to an email thread given a Bump Framework ID
+ * @param userToken
+ * @param prospectID
+ * @param emailThreadID // NOTE THAT THIS IS THE NYLAS THREAD ID
+ * @param emailBumpFrameworkID
+ * @param customAccountResearch
+ * @returns - MsgResponse
+ */
+export async function postBumpGenerateEmailResponse(
+  userToken: string,
+  prospectID: number,
+  emailThreadID: string,
+  emailBumpFrameworkID?: number,
+  customAccountResearch?: string[]
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/email_generation/generate/email_response`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prospect_id: prospectID,
+        email_thread_id: emailThreadID,
+        email_bump_framework_id: emailBumpFrameworkID,
+        custom_account_research: customAccountResearch,
+      }),
+    }
+  )
+  return await processResponse(response, 'data');
 }

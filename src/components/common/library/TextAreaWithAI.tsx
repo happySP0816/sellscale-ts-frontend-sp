@@ -215,7 +215,7 @@ export default function TextAreaWithAI(props: PropsType) {
       {/* Main Text */}
       {props.inputType === "rich-text-area" ? (
         <RichTextArea
-          onChange={(value) => {
+          onChange={(value, rawValue) => {
             props.onChange &&
               props.onChange({
                 currentTarget: { value },

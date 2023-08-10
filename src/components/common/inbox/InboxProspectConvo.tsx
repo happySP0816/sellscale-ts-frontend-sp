@@ -6,6 +6,7 @@ import {
   openedProspectIdState,
   openedProspectLoadingState,
   selectedBumpFrameworkState,
+  selectedEmailThread,
 } from "@atoms/inboxAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import TextWithNewlines from "@common/library/TextWithNewlines";
@@ -52,7 +53,7 @@ import { getConversation } from "@utils/requests/getConversation";
 import { getProspectByID } from "@utils/requests/getProspectByID";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { Channel, EmailMessage, LinkedInMessage, Prospect, ProspectDetails, ProspectShallow } from "src";
+import { Channel, EmailMessage, EmailThread, LinkedInMessage, Prospect, ProspectDetails, ProspectShallow } from "src";
 import { labelizeConvoSubstatus } from "./utils";
 import { readLiMessages } from "@utils/requests/readMessages";
 import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
@@ -66,6 +67,7 @@ import { NAV_HEADER_HEIGHT } from "@nav/MainHeader";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import {
   getBumpFrameworks,
+  getEmailBumpFrameworks,
   getSingleBumpFramework,
 } from "@utils/requests/getBumpFrameworks";
 import { getEmailMessages, getEmailThreads } from "@utils/requests/getEmails";
@@ -196,6 +198,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
   const [selectedBumpFramework, setBumpFramework] = useRecoilState(
     selectedBumpFrameworkState
   );
+  const [selectedThread, setSelectedThread] = useRecoilState(selectedEmailThread);
 
   const [openedOutboundChannel, setOpenedOutboundChannel] = useRecoilState(
     currentConvoChannelState
@@ -205,7 +208,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
   );
   const [currentConvoEmailMessages, setCurrentConvoEmailMessages] =
     useRecoilState(currentConvoEmailMessageState);
-  const [emailThread, setEmailThread] = useState<any>();
+  const [emailThread, setEmailThread] = useState<EmailThread>();
 
   const prospect = _.cloneDeep(
     props.prospects.find((p) => p.id === openedProspectId)
@@ -236,16 +239,18 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
         10,
         0
       );
-      const threads = response.status === "success" ? response.data : [];
-      
-      if(threads.length > 0) {
+      const threads = response.status === "success" ? response.data as EmailThread[] : [];
+
+      if (threads.length > 0) {
         const sortedThreads = threads.sort((a: any, b: any) => {
           return new Date(b.last_message_timestamp).getTime() - new Date(a.last_message_timestamp).getTime();
         })
         setEmailThread(sortedThreads[0]);
+        setSelectedThread(sortedThreads[0]);
         return sortedThreads;
       } else {
         setEmailThread(undefined);
+        setSelectedThread(undefined);
         return [];
       }
     },
@@ -282,14 +287,13 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
       }
 
       // For LinkedIn //
-
       const result = await getConversation(userToken, openedProspectId, false);
       getConversation(userToken, openedProspectId, true).then((updatedResult) => {
 
         const finalMessages = updatedResult.status === "success"
           ? (updatedResult.data.data.reverse() as LinkedInMessage[])
           : [];
-        if(openedProspectId === currentMessagesProspectId.current){
+        if (openedProspectId === currentMessagesProspectId.current) {
           setCurrentConvoLiMessages(finalMessages);
         }
         setFetchingProspectId(-1)
@@ -310,20 +314,22 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
       });
 
       // Set if we have an auto bump message generated
-      getAutoBumpMessage(
-        userToken,
-        openedProspectId
-      ).then((autoBumpMsgResponse) => {
-        if (autoBumpMsgResponse.status === "success") {
-          sendBoxRef.current?.setAiGenerated(true);
-          sendBoxRef.current?.setMessageDraft(
-            autoBumpMsgResponse.data.message,
-            autoBumpMsgResponse.data.bump_framework,
-            autoBumpMsgResponse.data.account_research_points
-          );
-          sendBoxRef.current?.setAiMessage(autoBumpMsgResponse.data.message);
-        }
-      });
+      if (openedOutboundChannel === "LINKEDIN") {
+        getAutoBumpMessage(
+          userToken,
+          openedProspectId
+        ).then((autoBumpMsgResponse) => {
+          if (autoBumpMsgResponse.status === "success") {
+            sendBoxRef.current?.setAiGenerated(true);
+            sendBoxRef.current?.setMessageDraft(
+              autoBumpMsgResponse.data.message,
+              autoBumpMsgResponse.data.bump_framework,
+              autoBumpMsgResponse.data.account_research_points
+            );
+            sendBoxRef.current?.setAiMessage(autoBumpMsgResponse.data.message);
+          }
+        });
+      }
 
       // Update the bump frameworks
       triggerGetBumpFrameworks();
@@ -357,7 +363,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
 
   // The prospect is no longer loading if we are not fetching any data
   useEffect(() => {
-    if(!isFetching && !isFetchingThreads && !isFetchingMessages) {
+    if (!isFetching && !isFetchingThreads && !isFetchingMessages) {
       setOpenedProspectLoading(false);
     }
   }, [isFetching, isFetchingThreads, isFetchingMessages]);
@@ -369,21 +375,37 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
       return;
     }
 
-    // This needs changing in the future to be more rigid
-    let substatuses: string[] = [];
-    if (prospect.linkedin_status?.includes("ACTIVE_CONVO_")) {
-      substatuses = [prospect.linkedin_status];
+    if (openedOutboundChannel === "LINKEDIN") {
+      // This needs changing in the future to be more rigid
+      let substatuses: string[] = [];
+      if (prospect.linkedin_status?.includes("ACTIVE_CONVO_")) {
+        substatuses = [prospect.linkedin_status];
+      }
+
+      const result = await getBumpFrameworks(
+        userToken,
+        [prospect.overall_status],
+        substatuses,
+        [prospect.archetype_id]
+      );
+
+      if (result.status === "success") {
+        sendBoxRef.current?.setBumpFrameworks(result.data.bump_frameworks);
+      }
+    } else {
+      // TODO: In the future need to add substatuses for Objection Library
+      const result = await getEmailBumpFrameworks(
+        userToken,
+        [prospect.overall_status],
+        [],
+        [prospect.archetype_id]
+      );
+
+      if (result.status === "success") {
+        sendBoxRef.current?.setEmailBumpFrameworks(result.data.bump_frameworks);
+      }
     }
 
-    const result = await getBumpFrameworks(
-      userToken,
-      [prospect.overall_status],
-      substatuses,
-      [prospect.archetype_id]
-    );
-    if (result.status === "success") {
-      sendBoxRef.current?.setBumpFrameworks(result.data.bump_frameworks);
-    }
   };
 
   // // On load we should get the bump frameworks
@@ -449,7 +471,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
             </Title>
             <Text weight={300} fs="italic" size={10} c="dimmed" truncate>
               {prospect &&
-              new Date(prospect.hidden_until).getTime() >
+                new Date(prospect.hidden_until).getTime() >
                 new Date().getTime() ? (
                 <>
                   Snoozed Until:{" "}
@@ -486,16 +508,17 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
               sendBoxRef.current?.setAiMessage("")
               sendBoxRef.current?.setMessageDraft("")
               setOpenedOutboundChannel(value as Channel);
-              
+
+              // Pretty bad to set timeout, but we need this channel to update
+              setTimeout(refetch, 1)
+
               if (value === "EMAIL") {
                 queryClient.refetchQueries({
                   queryKey: [
                     `query-prospect-email-threads-${openedProspectId}`,
                   ],
                 });
-              }
-
-              refetch();
+              }              
             }
           }}
         >
@@ -550,7 +573,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
               <Select
                 sx={{ position: "absolute", right: 5, top: 5 }}
                 placeholder="Select a Thread"
-                value={emailThread?.id}
+                value={emailThread?.id + ''}
                 onChange={(threadId) => {
                   if (threadId === "create") {
                     openComposeEmailModal(
@@ -558,20 +581,23 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
                       openedProspectId,
                       currentProject?.id || -1,
                       '',
-                      emailThread.prospect_email,
+                      emailThread?.prospect_email as string,
                       userData.sdr_email,
                       "",
                       "",
                       ""
                     );
                   } else if (threadId) {
-                    setEmailThread(threads.find((t: any) => t.id === threadId));
+                    const selectedThread = threads?.find((t: EmailThread) => t.id + '' === threadId);
+                    setEmailThread(selectedThread as EmailThread);
+                    sendBoxRef.current?.setEmailThread(selectedThread as EmailThread);
+                    setSelectedThread(selectedThread)
                   }
                 }}
                 size="xs"
                 data={[
-                  ...(threads?.map((t: any) => ({
-                    value: t.id,
+                  ...(threads?.map((t: EmailThread) => ({
+                    value: t.id + '',
                     label: t.subject,
                     group: "Threads",
                   })) || []),

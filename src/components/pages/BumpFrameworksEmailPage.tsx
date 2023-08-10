@@ -1,5 +1,6 @@
 import { currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from '@atoms/userAtoms';
+import EmailBlockPreview from '@common/emails/EmailBlockPreview';
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
 import {
   Flex,
@@ -264,9 +265,7 @@ export default function BumpFrameworksEmailPage(props: {
 
   const [loading, setLoading] = useState(false);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
-  const [archetypeID, setArchetypeID] = useState<number | null>(
-    currentProject?.id || null
-  );
+  const archetypeID = currentProject?.id || -1;
   const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
   // const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
   //   useDisclosure();
@@ -290,35 +289,6 @@ export default function BumpFrameworksEmailPage(props: {
     },
     refetchOnWindowFocus: false,
   });
-
-  const triggerGetPersonas = async () => {
-    setLoading(true);
-
-    const result = await getPersonas(userToken);
-
-    if (result.status !== 'success') {
-      showNotification({
-        title: 'Error',
-        message: 'Could not get personas',
-        color: 'red',
-      });
-      return;
-    }
-
-    const personas = result.data;
-    for (const persona of personas) {
-      if (currentProject?.id) {
-        setArchetypeID(currentProject?.id);
-        break;
-      }
-      else if (persona.active) {
-        setArchetypeID(persona.id);
-        break;
-      }
-    }
-
-    setLoading(false);
-  };
 
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
@@ -391,118 +361,138 @@ export default function BumpFrameworksEmailPage(props: {
   };
 
   useEffect(() => {
-    triggerGetPersonas();
-  }, []);
-
-  useEffect(() => {
     triggerGetBumpFrameworks();
   }, [archetypeID]);
 
+  if (currentProject === undefined || currentProject === null) {
+    return <></>;
+  }
+
   return (
-    <>
-      <Flex direction='column'>
-        <LoadingOverlay visible={loading} />
-        <Title>Email Bump Frameworks</Title>
-        {props.predefinedPersonaId === undefined && (
-          <Flex mt='md'>
-            <PersonaSelect
-              disabled={false}
-              onChange={(archetype) => {
-                if (archetype.length == 0) {
-                  return;
-                }
-                setArchetypeID(currentProject?.id || null);
-              }}
-              defaultValues={archetypeID ? [archetypeID] : []}
-              selectMultiple={false}
-              label='Select Persona'
-              description='Select the persona whose bump frameworks you want to view.'
-            />
-          </Flex>
-        )}
 
-        <Tabs color='blue' variant='outline' defaultValue='sequence' my='lg' orientation='vertical'>
-          <Tabs.List>
-            <Tabs.Tab value='sequence' icon={<IconList size='0.8rem' />}>
-              Sequence
-            </Tabs.Tab>
-            <Tabs.Tab value='qnolibrary' icon={<IconBook size='0.8rem' />}>
-              Questions & Objections Library
-            </Tabs.Tab>
-          </Tabs.List>
+    <Flex direction='column'>
+      <LoadingOverlay visible={loading} />
+      <Title>Email Setup</Title>
 
-          <Tabs.Panel value='sequence'>
-            {(!loading && archetypeID) ? (
-              <ScrollArea>
-                <Flex direction='column' ml='md'>
-                  {/* Accepted */}
-                  <EmailBumpBucketView
-                    bumpBucket={bumpBuckets.current?.ACCEPTED}
-                    bucketViewTitle={'Opened Email'}
-                    bucketViewDescription={'Prospects who have opened your email.'}
-                    status={'ACCEPTED'}
-                    dataChannels={dataChannels}
-                    archetypeID={archetypeID}
-                    afterCreate={triggerGetBumpFrameworks}
-                    afterEdit={triggerGetBumpFrameworks}
-                  />
+      <Card mt='md' withBorder>
+        <Card.Section px='md'>
+          <Tabs color='blue' variant='outline' defaultValue='sequence' my='lg' orientation='horizontal'>
+            <Tabs.List>
+              <Tabs.Tab value='sequence' icon={<IconList size='0.8rem' />}>
+                Sequence
+              </Tabs.Tab>
+              <Tabs.Tab value='qnolibrary' icon={<IconBook size='0.8rem' />}>
+                Questions & Objections Library
+              </Tabs.Tab>
+            </Tabs.List>
 
-                  {/* Bumped (map) */}
-                  {Object.keys(bumpBuckets.current?.BUMPED).map((bumpCount) => {
-                    const bumpCountInt = parseInt(bumpCount);
-                    const bumpBucket = bumpBuckets.current?.BUMPED[bumpCountInt];
-                    if (bumpCount === '0' || !bumpBucket) {
-                      return;
-                    }
-                    return (
-                      <Flex mt='md' w='100%'>
+            <Tabs.Panel value='sequence'>
+              <Flex direction='row' mt='md'>
+                <Flex w='60%' direction='column'>
+                  <Flex direction='column'>
+                    <Title order={3}>Email Bump Frameworks</Title>
+                    <Text fz='md' mt='2px'>Configure your first email and followup emails using Email Bump Frameworks. Default frameworks are always prioritized.</Text>
+                  </Flex>
+                  <Divider mt='sm' mb='md' />
+                  {(!loading && archetypeID) ? (
+                    <ScrollArea w='100%'>
+                      <Flex direction='column'>
+                        {/* Accepted */}
                         <EmailBumpBucketView
-                          bumpBucket={bumpBucket}
-                          bucketViewTitle={`Bumped ${bumpCount} times`}
-                          bucketViewDescription={`Prospects who have been bumped ${bumpCountInt - 1} time(s).`}
-                          status={'BUMPED'}
+                          bumpBucket={bumpBuckets.current?.ACCEPTED}
+                          bucketViewTitle={'First / Initial Followup'}
+                        bucketViewDescription={'Prospects who have opened your email.'}
+                          status={'ACCEPTED'}
                           dataChannels={dataChannels}
                           archetypeID={archetypeID}
                           afterCreate={triggerGetBumpFrameworks}
                           afterEdit={triggerGetBumpFrameworks}
-                          bumpedCount={bumpCountInt}
                         />
+
+                        {/* Bumped (map) */}
+                        {Object.keys(bumpBuckets.current?.BUMPED).map((bumpCount) => {
+                          const bumpCountInt = parseInt(bumpCount);
+                          const bumpBucket = bumpBuckets.current?.BUMPED[bumpCountInt];
+
+                          const bumpToFollowupMap: Record<string, string> = {
+                            '1': 'Second',
+                            '2': 'Third',
+                            '3': 'Fourth',
+                            '4': 'Fifth',
+                            '5': 'Sixth',
+                            '6': 'Seventh',
+                            '7': 'Eighth',
+                            '8': 'Ninth',
+                            '9': 'Tenth',
+                          }
+                          const followupString = bumpToFollowupMap[bumpCount];
+                          if (followupString == undefined) {
+                            return;
+                          }
+
+                          if (bumpCount === '0' || !bumpBucket) {
+                            return;
+                          }
+                          return (
+                            <Flex mt='md' w='100%'>
+                              <EmailBumpBucketView
+                                bumpBucket={bumpBucket}
+                                bucketViewTitle={`${followupString} Followup`}
+                                bucketViewDescription={`This is followup #${bumpCountInt + 1}`}
+                                status={'BUMPED'}
+                                dataChannels={dataChannels}
+                                archetypeID={archetypeID}
+                                afterCreate={triggerGetBumpFrameworks}
+                                afterEdit={triggerGetBumpFrameworks}
+                                bumpedCount={bumpCountInt}
+                              />
+                            </Flex>
+                          );
+                        })}
+
+                        {/* Add another to sequence */}
+                        <Flex justify='center'>
+                          <Button variant='outline' mt='md' w='50%' onClick={openSequenceStep} disabled={Object.keys(bumpBuckets.current?.BUMPED).length > 10}>
+                            Add another sequence step
+                          </Button>
+                          <CreateBumpFrameworkEmailModal
+                            modalOpened={addNewSequenceStepOpened}
+                            openModal={openSequenceStep}
+                            closeModal={closeSequenceStep}
+                            backFunction={triggerGetBumpFrameworks}
+                            dataChannels={dataChannels}
+                            status={'BUMPED'}
+                            showStatus={false}
+                            archetypeID={archetypeID}
+                            bumpedCount={Object.keys(bumpBuckets.current?.BUMPED).length + 1}
+                          />
+                          {
+                            Object.keys(bumpBuckets.current?.BUMPED).length > 10 && (
+                              <Text color='red' mt='md' mb='md'>You have reached the maximum number of sequence steps.</Text>
+                            )
+                          }
+                        </Flex>
                       </Flex>
-                    );
-                  })}
-
-                  {/* Add another to sequence */}
-                  <Flex justify='center'>
-                    <Button variant='outline' mt='md' w='50%' onClick={openSequenceStep}>
-                      Add another sequence step
-                    </Button>
-                    <CreateBumpFrameworkEmailModal
-                      modalOpened={addNewSequenceStepOpened}
-                      openModal={openSequenceStep}
-                      closeModal={closeSequenceStep}
-                      backFunction={triggerGetBumpFrameworks}
-                      dataChannels={dataChannels}
-                      status={'BUMPED'}
-                      archetypeID={archetypeID}
-                      bumpedCount={Object.keys(bumpBuckets.current?.BUMPED).length + 1}
-                    />
-                  </Flex>
+                    </ScrollArea>
+                  ) : (
+                    <Flex justify='center'>
+                      <Loader />
+                    </Flex>
+                  )}
                 </Flex>
-              </ScrollArea>
-            ) : (
-              <Flex justify='center' mt='xl'>
-                <Loader />
+                <Flex ml='sm'>
+                  <EmailBlockPreview archetypeId={currentProject.id} selectEmailBlock />
+                </Flex>
               </Flex>
-            )}
-          </Tabs.Panel>
+            </Tabs.Panel>
 
-          <Tabs.Panel value='qnolibrary'>
-            <Card withBorder shadow='xs' ml='md'>
-              <Flex w='100%' align='center' justify='center'>
-                Coming soon!
-              </Flex>
-            </Card>
-            {/* {!loading ? (
+            <Tabs.Panel value='qnolibrary'>
+              <Card withBorder shadow='xs' mt='md'>
+                <Flex w='100%' align='center' justify='center'>
+                  Coming soon!
+                </Flex>
+              </Card>
+              {/* {!loading ? (
               <Flex direction='column' ml='xs'>
                 <Flex align='center' w='100%' justify='center'>
                   <Button variant='outline' mb='md' w='50%' onClick={openQuestionObjection}>
@@ -538,9 +528,12 @@ export default function BumpFrameworksEmailPage(props: {
                 <Loader />
               </Flex>
             )} */}
-          </Tabs.Panel>
-        </Tabs>
-      </Flex>
-    </>
+            </Tabs.Panel>
+          </Tabs>
+        </Card.Section>
+      </Card>
+
+    </Flex>
+
   );
 }

@@ -197,7 +197,7 @@ export default function EditEmailBumpFrameworkModal({ context, id, innerProps }:
 
           <Flex w='50%' mah='80vh'>
             <ScrollArea type='hover'>
-              <EmailBlockPreview archetypeId={innerProps.archetypeID as number} emailBlocks={emailBlocks} />
+              <EmailBlockPreview archetypeId={innerProps.archetypeID as number} emailBlocks={emailBlocks} selectEmailBlock={false} />
             </ScrollArea>
           </Flex>
 

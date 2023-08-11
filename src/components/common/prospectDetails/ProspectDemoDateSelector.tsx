@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { DatePicker, DatePickerInput, DateTimePicker } from '@mantine/dates';
-import { Text, createStyles, rem } from '@mantine/core';
+import { Text, Title, createStyles, rem } from '@mantine/core';
 import { API_URL } from '@constants/data';
 import { useRecoilState } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import displayNotification from '@utils/notificationFlow';
+import { openContextModal } from '@mantine/modals';
+import { isWithinLastXDays } from '@utils/general';
 
 const useStyles = createStyles((theme) => ({
   input: {
@@ -64,7 +66,8 @@ export default function ProspectDemoDateSelector(props: { prospectId: number }) 
   }, []);
 
   const updateProspectDemoDate = async (
-    value: any
+    value: any,
+    send_reminder: boolean,
   ): Promise<{
     status: string;
     title: string;
@@ -78,6 +81,7 @@ export default function ProspectDemoDateSelector(props: { prospectId: number }) 
       },
       body: JSON.stringify({
         demo_date: value,
+        send_reminder: send_reminder,
       }),
     })
       .then((response) => {
@@ -116,8 +120,25 @@ export default function ProspectDemoDateSelector(props: { prospectId: number }) 
         value={demoDate}
         mt='-24px'
         onChange={async (value) => {
-          updateProspectDemoDate(value?.toISOString());
-          setDemoDate(new Date(value?.toISOString() || ''));
+
+          const date = new Date(value?.toISOString() || '');
+          setDemoDate(date);
+
+          if(!isWithinLastXDays(date, 7)){
+            openContextModal({
+              modal: "confirm",
+              title: <Title order={3}>Send Demo Reminder?</Title>,
+              innerProps: {
+                description: 'Do you want SellScale to send a reminder to the prospect 24 hours beforehand about the demo?',
+                confirmBtn: 'Yes',
+                rejectBtn: 'No',
+                onConfirm: async () => {updateProspectDemoDate(value?.toISOString(), true)},
+                onReject: async () => {updateProspectDemoDate(value?.toISOString(), false)},
+              },
+            });
+          } else {
+            updateProspectDemoDate(value?.toISOString(), false);
+          }
           /*
           await displayNotification(
             'update-prospect-demo-date',

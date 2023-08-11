@@ -40,6 +40,7 @@ import SendLiOutreachModal from "@modals/SendOutreachModal";
 import SendOutreachModal from "@modals/SendOutreachModal";
 import PersonaSelectModal from "@modals/PersonaSelectModal";
 import ClonePersonaModal from "@modals/ClonePersonaModal";
+import ConfirmModal from "@modals/ConfirmModal";
 
 export default function App() {
   // Site light or dark mode
@@ -133,6 +134,7 @@ export default function App() {
               sendOutreach: SendOutreachModal,
               personaSelect: PersonaSelectModal,
               clonePersona: ClonePersonaModal,
+              confirm: ConfirmModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

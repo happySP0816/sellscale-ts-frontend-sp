@@ -496,7 +496,7 @@ export default function BumpFrameworksEmailPage(props: {
               <Flex direction='column' ml='xs'>
                 <Flex align='center' w='100%' justify='center'>
                   <Button variant='outline' mb='md' w='50%' onClick={openQuestionObjection}>
-                    Add another question/objection
+                    Add another type of reply
                   </Button>
                 </Flex>
 

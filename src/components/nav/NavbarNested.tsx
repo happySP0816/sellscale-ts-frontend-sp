@@ -311,18 +311,18 @@ export function NavbarNested(props: {
         //   icon: IconReport,
         //   link: "/linkedin/campaign-analytics",
         // },
-        //  {
-        //   key: "linkedin-simulate",
-        //   label: "Simulate",
-        //   icon: IconMessage,
-        //   link: "/linkedin/simulate",
-        // },
-        {
-          key: "linkedin-voices",
-          label: "Voices",
-          icon: IconVocabulary,
-          link: "/linkedin/voices",
+         {
+          key: "linkedin-simulate",
+          label: "Simulate",
+          icon: IconMessage,
+          link: "/linkedin/simulate",
         },
+        // {
+        //   key: "linkedin-voices",
+        //   label: "Voices",
+        //   icon: IconVocabulary,
+        //   link: "/linkedin/voices",
+        // },
       ],
     },
     {

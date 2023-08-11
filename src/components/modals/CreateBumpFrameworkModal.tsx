@@ -138,7 +138,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
     >
       <LoadingOverlay visible={loading} />
       <TextInput
-        label="Template nickname"
+        label={selectedStatus?.includes("ACTIVE_CONVO") ? 'Prospect reply' : "Template nickname"}
         placeholder={"Sports introduction"}
         withAsterisk
         {...form.getInputProps("title")}

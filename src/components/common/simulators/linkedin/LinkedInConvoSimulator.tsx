@@ -12,6 +12,7 @@ import {
   Card,
   Center,
   CloseButton,
+  Collapse,
   DEFAULT_THEME,
   Divider,
   Flex,
@@ -27,7 +28,7 @@ import {
   Tooltip,
   useMantineTheme,
 } from '@mantine/core';
-import { getHotkeyHandler } from '@mantine/hooks';
+import { getHotkeyHandler, useDisclosure } from '@mantine/hooks';
 import { Icon24Hours, IconExternalLink, IconRefresh, IconReload, IconRobot, IconSend, IconWand } from '@tabler/icons';
 import { IconPlayerPlayFilled } from '@tabler/icons-react';
 import { convertDateToLocalTime, formatToLabel, testDelay, valueToColor } from '@utils/general';
@@ -53,7 +54,7 @@ type LiSimMsg = {
   meta_data?: Record<string, any>;
 };
 
-export default function LinkedInConvoSimulator(props: { personaId: number }) {
+export default function LinkedInConvoSimulator(props: { personaId: number, sequenceSetUpMode?: boolean }) {
   const theme = useMantineTheme();
   const viewport = useRef<HTMLDivElement>(null);
 
@@ -71,6 +72,8 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
   const [aiLoading, setAiLoading] = useState(false);
   const [loadingMsg, setLoadingMsg] = useState('');
   const [messageDraft, setMessageDraft] = useState('');
+
+  const [opened, { toggle }] = useDisclosure(false);
 
   const scrollToBottom = () => viewport.current?.scrollTo({ top: viewport.current.scrollHeight, behavior: 'smooth' });
 
@@ -218,15 +221,17 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
         <Paper withBorder p='lg' radius='md' shadow='md'>
           <Group position='apart' mb='xs'>
             <Text fz='xl' fw={500}>
-              LinkedIn Conversation Simulator
+              Select Prospect
             </Text>
           </Group>
-          <Text c='dimmed' fz='xs'>
-            This is a simulation of a potential conversation between you ({userData.sdr_name}) and a prospect.
-          </Text>
-          <Text c='dimmed' fz='xs'>
-            Select a prospect to start the simulation.
-          </Text>
+          {!props.sequenceSetUpMode && <>
+            <Text c='dimmed' fz='xs'>
+              This is a simulation of a potential conversation between you ({userData.sdr_name}) and a prospect.
+            </Text>
+            <Text c='dimmed' fz='xs'>
+              Select a prospect to start the simulation.
+            </Text>
+          </>}
           <ProspectSelect
             personaId={props.personaId}
             onChange={(prospect) => {
@@ -241,21 +246,24 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
   return (
     <>
       {prospectDrawerOpened && <ProspectDetailsDrawer />}
-      <Paper withBorder p='lg' radius='md' shadow='md'>
+      <Paper withBorder p='lg' radius='md' shadow='md' mb='lg'>
         <Group position='apart' mb='xs'>
           <Text fz='xl' fw={500}>
-            LinkedIn Conversation Simulator
+            Select Prospect
           </Text>
         </Group>
-        <Text c='dimmed' fz='xs'>
-          This is a simulation of a potential conversation between you ({userData.sdr_name}) and {prospect.full_name}{' '}
-          from {prospect.full_name}'s perspective.
-        </Text>
-        <br/>
-        <Text c='dimmed' fz='xs'>
-          Send messages as if you were {prospect.full_name} and see how the AI responds on your behalf.
-        </Text>
-        <Group position='right' mt='md'>
+        {!props.sequenceSetUpMode && <>
+          <Text c='dimmed' fz='xs'>
+            This is a simulation of a potential conversation between you ({userData.sdr_name}) and {prospect.full_name}{' '}
+            from {prospect.full_name}'s perspective.
+          </Text>
+          <br/>
+          <Text c='dimmed' fz='xs'>
+            Send messages as if you were {prospect.full_name} and see how the AI responds on your behalf.
+          </Text>
+        </>}
+        
+        <Group position='left' mt='md'>
           <Button
             variant='outline'
             size='xs'
@@ -278,79 +286,6 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
           </Button>
         </Group>
       </Paper>
-
-      {simulation && (
-        <Box
-          mt='md'
-          sx={(theme) => ({
-            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[4],
-            textAlign: 'center',
-            padding: theme.spacing.xl,
-            borderRadius: theme.radius.md,
-          })}
-        >
-          <Group position='apart'>
-            <HoverCard>
-              <HoverCard.Target>
-                <Flex align='center' gap='xs'>
-                  <Badge color='blue' variant='filled' size='xs' p='xs' sx={{cursor: 'pointer'}}>
-                    <Text fw={700} size='xs' color='white'>
-                      Simulation State
-                    </Text>
-                  </Badge>
-                </Flex>
-              </HoverCard.Target>
-              <HoverCard.Dropdown>
-                <Group>
-                    <Text fw={700} size='xs'>
-                      Overall Status:{' '}
-                    </Text>
-                    <Badge
-                      color={valueToColor(theme, formatToLabel(simulation.meta_data?.overall_status))}
-                      variant='filled'
-                    >
-                      {`${formatToLabel(simulation.meta_data?.overall_status)}`}
-                    </Badge>
-                    <Divider orientation='vertical' c='gray.0' />
-                  </Group>
-                  <br/>
-                  <Group>
-                    <Text fw={700} size='xs'>
-                      LinkedIn Status:{' '}
-                    </Text>
-                    <Badge color={valueToColor(theme, formatToLabel(simulation.meta_data?.li_status))} variant='filled'>
-                      {`${formatToLabel(simulation.meta_data?.li_status)}`}
-                    </Badge>
-                    <Divider orientation='vertical' c='gray.0' />
-                  </Group>
-                  <br/>
-                  <Group>
-                    <Text fw={700} size='xs'>
-                      Bump Count: {simulation.meta_data?.bump_count}
-                    </Text>
-                  </Group>
-                
-              </HoverCard.Dropdown>
-            </HoverCard>
-            
-            <div>
-              <Tooltip label='Reset Simulation' withArrow>
-                <ActionIcon
-                  color='gray.0'
-                  variant='transparent'
-                  onClick={() => {
-                    resetSimulation();
-                  }}
-                >
-                  <IconReload size='1.3rem' />
-                </ActionIcon>
-              </Tooltip>
-            </div>
-            
-            
-          </Group>
-        </Box>
-      )}
 
       <ScrollArea viewportRef={viewport} my={5} h={convoHeight}>
         <LoadingOverlay loader={loaderWithText(loadingMsg)} visible={loading} />
@@ -437,6 +372,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
 
       {simulation && (
         <Group w='100%'>
+          {!props.sequenceSetUpMode && 
             <Textarea
               w='100%'
               minRows={2}
@@ -456,6 +392,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
                 ],
               ])}
             />
+          }
           <Flex w='100%'>
             
             <Button
@@ -463,7 +400,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
               radius='xl'
               size='xs'
               mr='xs'
-              w='50%'
+              w='100%'
               color='violet'
               disabled={loading}
               rightIcon={<Icon24Hours size={14} />}
@@ -474,23 +411,109 @@ export default function LinkedInConvoSimulator(props: { personaId: number }) {
               Wait until next bump
             </Button>
 
-            <Button
-              variant='light'
-              radius='xl'
-              w='50%'
-              size='xs'
-              color='blue'
-              disabled={loading}
-              rightIcon={<IconSend size={14} />}
-              onClick={() => {
-                sendMessage();
-              }}
-            >
-              Send
-            </Button>
+            {!props.sequenceSetUpMode &&
+              <Button
+                variant='light'
+                radius='xl'
+                w='100%'
+                size='xs'
+                color='blue'
+                disabled={loading}
+                rightIcon={<IconSend size={14} />}
+                onClick={() => {
+                  sendMessage();
+                }}
+              >
+                Send
+              </Button>
+}
           </Flex>
         </Group>
       )}
+
+      {simulation && (
+      <Box maw={400} mx="auto">
+        <Group position="center" mb={5}>
+          <Button variant='subtle' color='gray' mt='lg' size='xs' onClick={toggle}>Advanced</Button>
+        </Group>
+
+        <Collapse in={opened}>
+          
+              <Box
+                mt='md'
+                sx={(theme) => ({
+                  backgroundColor: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[4],
+                  textAlign: 'center',
+                  padding: theme.spacing.xl,
+                  borderRadius: theme.radius.md,
+                })}
+              >
+                <Group position='apart'>
+                  <HoverCard>
+                    <HoverCard.Target>
+                      <Flex align='center' gap='xs'>
+                        <Badge color='blue' variant='filled' size='xs' p='xs' sx={{cursor: 'pointer'}}>
+                          <Text fw={700} size='xs' color='white'>
+                            Simulation State
+                          </Text>
+                        </Badge>
+                      </Flex>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <Group>
+                          <Text fw={700} size='xs'>
+                            Overall Status:{' '}
+                          </Text>
+                          <Badge
+                            color={valueToColor(theme, formatToLabel(simulation.meta_data?.overall_status))}
+                            variant='filled'
+                          >
+                            {`${formatToLabel(simulation.meta_data?.overall_status)}`}
+                          </Badge>
+                          <Divider orientation='vertical' c='gray.0' />
+                        </Group>
+                        <br/>
+                        <Group>
+                          <Text fw={700} size='xs'>
+                            LinkedIn Status:{' '}
+                          </Text>
+                          <Badge color={valueToColor(theme, formatToLabel(simulation.meta_data?.li_status))} variant='filled'>
+                            {`${formatToLabel(simulation.meta_data?.li_status)}`}
+                          </Badge>
+                          <Divider orientation='vertical' c='gray.0' />
+                        </Group>
+                        <br/>
+                        <Group>
+                          <Text fw={700} size='xs'>
+                            Bump Count: {simulation.meta_data?.bump_count}
+                          </Text>
+                        </Group>
+                      
+                    </HoverCard.Dropdown>
+                  </HoverCard>
+                  
+                  <div>
+                    <Tooltip label='Reset Simulation' withArrow>
+                      <ActionIcon
+                        color='gray.0'
+                        variant='transparent'
+                        onClick={() => {
+                          resetSimulation();
+                        }}
+                      >
+                        <IconReload size='1.3rem' />
+                      </ActionIcon>
+                    </Tooltip>
+                  </div>
+                  
+                  
+                </Group>
+              </Box>
+            
+        </Collapse>
+      </Box>
+      )}
+      
     </>
   );
 }

@@ -40,7 +40,7 @@ import moment from "moment";
 
 const PAGE_SIZE = 20;
 
-export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
+export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCTAsLoaded?: (data: any) => void }) {
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
 
@@ -111,6 +111,10 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[] }) {
     refetchOnWindowFocus: false,
     enabled: !!currentProject,
   });
+
+  if (data && props.onCTAsLoaded) {
+    props.onCTAsLoaded(data);
+  }
 
   return (
     <Box>

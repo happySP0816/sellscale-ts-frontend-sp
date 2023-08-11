@@ -98,8 +98,6 @@ export function GlobalPageSelect() {
     },
   ];
 
-  console.log(totalNotifCount);
-
   return (
     <Menu
       width={250}

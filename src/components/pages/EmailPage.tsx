@@ -46,7 +46,7 @@ export default function EmailPage() {
         <Tabs.Panel value="scheduled-emails" pt="xs">
           <EmailQueuedMessages />
         </Tabs.Panel>
-        <Tabs.Panel value="bump-frameworks" pt="xs">
+        <Tabs.Panel value="setup" pt="xs">
           <BumpFrameworksEmailPage />
         </Tabs.Panel>
         <Tabs.Panel value="campaign-analytics" pt="xs">

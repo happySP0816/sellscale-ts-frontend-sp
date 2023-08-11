@@ -87,8 +87,6 @@ export default function PersonaSelectModal({
     })();
   }, []);
 
-  console.log(projectStatMap);
-
   const unassignedPersona = projects.find(
     (project) => project.is_unassigned_contact_archetype
   );

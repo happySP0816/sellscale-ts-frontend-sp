@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { BumpFramework, Channel, EmailMessage, LinkedInMessage, ProspectEmail } from "src";
+import { BumpFramework, Channel, EmailBumpFramework, EmailMessage, EmailThread, LinkedInMessage, ProspectEmail } from "src";
 
 const openedProspectIdState = atom({
   key: "inbox-opened-prospect-id",
@@ -37,7 +37,21 @@ const selectedBumpFrameworkState = atom({
 });
 const allBumpFrameworksState = atom({
   key: "inbox-all-bump-frameworks",
-  default: [] as BumpFramework[],
+  default: [] as BumpFramework[] | undefined,
+});
+
+const selectedEmailBumpFrameworkState = atom({
+  key: "inbox-selected-email-bump-framework",
+  default: undefined as EmailBumpFramework | undefined,
+});
+const allEmailBumpFrameworksState = atom({
+  key: "inbox-all-email-bump-frameworks",
+  default: [] as EmailBumpFramework[] | undefined,
+});
+
+const selectedEmailThread = atom({
+  key: "inbox-selected-email-thread",
+  default: undefined as EmailThread | undefined,
 });
 
 const currentConvoChannelState = atom({
@@ -65,4 +79,7 @@ export {
   fetchingProspectIdState,
   allBumpFrameworksState,
   tempHiddenProspectsState,
+  selectedEmailBumpFrameworkState,
+  allEmailBumpFrameworksState,
+  selectedEmailThread,
 };

@@ -3,7 +3,7 @@ import {
   Link,
   useRichTextEditorContext,
 } from "@mantine/tiptap";
-import { useEditor } from "@tiptap/react";
+import { JSONContent, useEditor } from "@tiptap/react";
 import Highlight from "@tiptap/extension-highlight";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -13,6 +13,7 @@ import SubScript from "@tiptap/extension-subscript";
 import { IconRobot } from "@tabler/icons";
 import Placeholder from '@tiptap/extension-placeholder';
 import { useEffect } from "react";
+import { ScrollArea } from "@mantine/core";
 
 function InsertPersonalizationControl() {
   const { editor } = useRichTextEditorContext();
@@ -27,7 +28,7 @@ function InsertPersonalizationControl() {
   );
 }
 
-export default function RichTextArea(props: { personalizationBtn?: boolean, height?: number, value?: string, onChange?: (value: string) => void }) {
+export default function RichTextArea(props: { personalizationBtn?: boolean, height?: number, value?: string | JSONContent, onChange?: (value: string, rawValue: JSONContent) => void }) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -41,8 +42,8 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
     ],
     content: props.value ?? "",
     onUpdate({ editor }) {
-      if(props.onChange) {
-        props.onChange(editor.getHTML());
+      if (props.onChange) {
+        props.onChange(editor.getHTML(), editor.getJSON());
       }
     },
   });
@@ -55,7 +56,7 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
   return (
     <RichTextEditor
       editor={editor}
-      styles={{ 
+      styles={{
         content: {
           p: {
             fontSize: 14,
@@ -98,8 +99,9 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
           <RichTextEditor.Unlink />
         </RichTextEditor.ControlsGroup>
       </RichTextEditor.Toolbar>
-
-      <RichTextEditor.Content />
+      <ScrollArea h={200}>
+        <RichTextEditor.Content />
+      </ScrollArea>
     </RichTextEditor>
   );
 }

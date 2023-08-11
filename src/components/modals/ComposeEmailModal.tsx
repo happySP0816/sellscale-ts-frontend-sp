@@ -1,6 +1,5 @@
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import FlexSeparate from '@common/library/FlexSeparate';
-import RichTextArea from '@common/library/RichTextArea';
 import TextAreaWithAI from '@common/library/TextAreaWithAI';
 import {
   Text,

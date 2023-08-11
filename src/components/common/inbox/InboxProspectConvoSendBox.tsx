@@ -1,6 +1,6 @@
-import { openedProspectIdState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoLiMessageState, currentConvoChannelState, currentConvoEmailMessageState, fetchingProspectIdState, tempHiddenProspectsState } from '@atoms/inboxAtoms';
+import { openedProspectIdState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoLiMessageState, currentConvoChannelState, currentConvoEmailMessageState, fetchingProspectIdState, tempHiddenProspectsState, selectedEmailBumpFrameworkState, selectedEmailThread } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
-import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon, LoadingOverlay, Tooltip, Select } from '@mantine/core';
+import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon, LoadingOverlay, Tooltip, Select, Box } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { hideNotification, showNotification } from '@mantine/notifications';
 import { IconExternalLink, IconWriting, IconSend, IconChevronUp, IconChevronDown, IconSettings } from '@tabler/icons';
@@ -11,12 +11,15 @@ import { sendLinkedInMessage } from '@utils/requests/sendMessage';
 import _, { debounce, get } from 'lodash';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, LinkedInMessage, Prospect } from 'src';
-import { generateAIFollowup } from './InboxProspectConvoBumpFramework';
+import { BumpFramework, EmailBumpFramework, EmailThread, LinkedInMessage, Prospect } from 'src';
+import { generateAIEmailReply, generateAIFollowup } from './InboxProspectConvoBumpFramework';
 import AutoBumpFrameworkInfo from '@common/prospectDetails/AutoBumpFrameworkInfo';
 import { ratio as fuzzratio } from 'fuzzball';
 import { sendEmail } from '@utils/requests/sendEmail';
 import RichTextArea from '@common/library/RichTextArea';
+import TextAreaWithAI from '@common/library/TextAreaWithAI';
+import { JSONContent } from '@tiptap/react';
+import DOMPurify from 'dompurify';
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -71,6 +74,22 @@ export default forwardRef(function InboxProspectConvoSendBox(
               }
             }
           }
+        },
+        setEmailBumpFrameworks: (emailBumpFrameworks: EmailBumpFramework[]) => {
+          setEmailBumpFrameworks(emailBumpFrameworks);
+          // Set the default bump framework
+          if (emailBumpFrameworks.length > 0) {
+            setEmailBumpFramework(emailBumpFrameworks[0]);
+            for (let i = 0; i < emailBumpFrameworks.length; i++) {
+              if (emailBumpFrameworks[i].default) {
+                setEmailBumpFramework(emailBumpFrameworks[i]);
+                break;
+              }
+            }
+          }
+        },
+        setEmailThread: (emailThread: EmailThread) => {
+          setCurrentConvoEmailThread(emailThread);
         }
       };
     },
@@ -88,14 +107,28 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [fetchingProspectId, setFetchingProspectId] = useRecoilState(fetchingProspectIdState)
 
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
-  const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState);
+  const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState); // LinkedIn
+  const [selectedEmailBumpFramework, setEmailBumpFramework] = useRecoilState(selectedEmailBumpFrameworkState); // Email
   const [currentConvoLiMessages, setCurrentConvoLiMessages] = useRecoilState(currentConvoLiMessageState);
   const [currentConvoEmailMessages, setCurrentConvoEmailMessages] = useRecoilState(currentConvoEmailMessageState);
+  const [currentConvoEmailThread, setCurrentConvoEmailThread] = useRecoilState(selectedEmailThread);
 
   const [tempHiddenProspects, setTempHiddenProspects] = useRecoilState(tempHiddenProspectsState);
 
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
-  const [messageDraft, setMessageDraft] = useState('');
+  const [emailBumpFrameworks, setEmailBumpFrameworks] = useState<EmailBumpFramework[]>([]);
+
+  // We use this to store the value of the text area
+  const [messageDraft, _setMessageDraft] = useState('');
+  // We use this to store the raw value of the rich text editor
+  const messageDraftRichRaw = useRef<JSONContent | string>();
+
+  // We use this to set the value of the text area (for both rich text and normal text)
+  const setMessageDraft = (value: string) => {
+    messageDraftRichRaw.current = value;
+    _setMessageDraft(value);
+  }
+
   const [aiMessage, setAiMessage] = useState('');
   const [aiGenerated, setAiGenerated] = useState(false);
   const [msgLoading, setMsgLoading] = useState(props.msgLoading || false);
@@ -230,7 +263,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       mx={10}
       mb={10}
       pb={8}
-      mah={240}
+      mah={500}
     >
       <LoadingOverlay visible={msgLoading} />
       <div
@@ -286,7 +319,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
             color='gray'
             placeholder='Your message...'
             value={messageDraft}
-            onChange={(event) => setMessageDraft(event.currentTarget.value)}
+            onChange={(event) => _setMessageDraft(event.currentTarget.value)}
             onKeyDown={getHotkeyHandler([
               [
                 "mod+Enter",
@@ -297,11 +330,16 @@ export default forwardRef(function InboxProspectConvoSendBox(
             ])}
           />
         ) : (
-          <RichTextArea
-            onChange={(value) => setMessageDraft(value)}
-            value={messageDraft}
-            height={110}
-          />
+          <Box mt='xs'>
+            <RichTextArea
+              onChange={(value, rawValue) => {
+                messageDraftRichRaw.current = rawValue;
+                _setMessageDraft(value);
+              }}
+              value={DOMPurify.sanitize((messageDraftRichRaw.current ?? "").replaceAll('\n',  `<br style="display: block; content: ' '; margin: 0 0 "/>`))}
+              height={110}
+            />
+          </Box>
         )}
 
         <Flex justify='space-between' align='center' mt='xs'>
@@ -315,14 +353,32 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 size='xs'
                 onClick={async () => {
                   setMsgLoading(true);
-                  const result = await generateAIFollowup(userToken, props.prospectId, selectedBumpFramework);
-                  setMessageDraft(result.msg);
-                  setAiMessage(result.msg);
-                  setAiGenerated(result.aiGenerated);
+                  if (openedOutboundChannel === 'LINKEDIN') {
+                    const result = await generateAIFollowup(userToken, props.prospectId, selectedBumpFramework);
+                    setMessageDraft(result.msg);
+                    setAiMessage(result.msg);
+                    setAiGenerated(result.aiGenerated);
+                  } else if (openedOutboundChannel === 'EMAIL') {
+                    if (!currentConvoEmailThread) {
+                      showNotification({
+                        id: 'send-email-message-error',
+                        title: 'Error',
+                        message: 'Please select an email thread',
+                        color: 'red',
+                        autoClose: false,
+                      })
+                      setMsgLoading(false);
+                      return;
+                    }
+                    const result = await generateAIEmailReply(userToken, props.prospectId, currentConvoEmailThread.nylas_thread_id, selectedEmailBumpFramework)
+                    setMessageDraft(result.message);
+                    setAiMessage(result.message);
+                    setAiGenerated(result.aiGenerated);
+                  }
                   setMsgLoading(false);
                 }}
               >
-                Generate Message
+                Generate {openedOutboundChannel === 'LINKEDIN' ? 'Message' : 'Email'}
               </Button>
               <Select
                 withinPortal
@@ -330,22 +386,40 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 radius={0}
                 size='xs'
                 data={
-                  bumpFrameworks.length > 0 ? bumpFrameworks.map((bf: BumpFramework) => {
-                    return {
-                      value: bf.id + "",
-                      label: (bf.default ? "🟢 " : "⚪️ ") + bf.title,
-                    };
-                  }) : []
+                  openedOutboundChannel === 'LINKEDIN' ? (
+                    bumpFrameworks.length > 0 ? bumpFrameworks.map((bf: BumpFramework) => {
+                      return {
+                        value: bf.id + "",
+                        label: (bf.default ? "🟢 " : "⚪️ ") + bf.title,
+                      };
+                    }) : []
+                  ) : (
+                    emailBumpFrameworks.length > 0 ? emailBumpFrameworks.map((bf: EmailBumpFramework) => {
+                      return {
+                        value: bf.id + "",
+                        label: (bf.default ? "🟢 " : "⚪️ ") + bf.title,
+                      };
+                    }) : []
+                  )
+
                 }
                 styles={{
                   input: { borderColor: 'black', borderRight: '0', borderLeft: '0' },
                   dropdown: { minWidth: 150 }
                 }}
                 onChange={(value) => {
-                  const selected = bumpFrameworks.find((bf) => bf.id === parseInt(value as string));
-                  if (selected) {
-                    setBumpFramework(selected);
+                  if (openedOutboundChannel === 'LINKEDIN') {
+                    const selected = bumpFrameworks.find((bf) => bf.id === parseInt(value as string));
+                    if (selected) {
+                      setBumpFramework(selected);
+                    }
+                  } else if (openedOutboundChannel === 'EMAIL') {
+                    const selected = emailBumpFrameworks.find((bf) => bf.id === parseInt(value as string));
+                    if (selected) {
+                      setEmailBumpFramework(selected);
+                    }
                   }
+
                 }}
                 value={selectedBumpFramework ? selectedBumpFramework.id + "" : undefined}
               />

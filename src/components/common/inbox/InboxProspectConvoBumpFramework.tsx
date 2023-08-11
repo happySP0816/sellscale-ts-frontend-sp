@@ -26,9 +26,9 @@ import {
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, LinkedInMessage, Prospect, ProspectShallow } from 'src';
+import { BumpFramework, EmailBumpFramework, LinkedInMessage, Prospect, ProspectShallow } from 'src';
 import { showNotification } from '@mantine/notifications';
-import { postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
+import { postBumpGenerateEmailResponse, postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
 import _, { String } from 'lodash';
 import SelectBumpInstruction from '@common/bump_instructions/SelectBumpInstruction';
 import { API_URL } from '@constants/data';
@@ -65,6 +65,39 @@ export const generateAIFollowup = async (userToken: string, prospectId: number, 
     return { msg: '', aiGenerated: false };
   }
 };
+
+
+export const generateAIEmailReply = async (userToken: string, prospectId: number, emailThreadID: string, emailBumpFramework: EmailBumpFramework | undefined) => {
+
+  const result = await postBumpGenerateEmailResponse(
+    userToken,
+    prospectId,
+    emailThreadID,
+    emailBumpFramework?.id,
+    [], // emailBumpFramework?.account_research?
+  )
+
+  if (result.status === 'success') {
+    showNotification({
+      id: 'generate-ai-followup-success',
+      title: 'Success',
+      message: 'Message generated.',
+      color: 'green',
+      autoClose: true,
+    });
+    return { message: result.data.message, aiGenerated: true };
+  } else {
+    showNotification({
+      id: 'generate-ai-followup-error',
+      title: 'Error',
+      message: 'Failed to generate message. Please try again later.',
+      color: 'red',
+      autoClose: false,
+    });
+    return { message: '', aiGenerated: false };
+  }
+
+}
 
 
 export const autoFillBumpFrameworkAccountResearch = (userToken: string, prospectId: number) => {

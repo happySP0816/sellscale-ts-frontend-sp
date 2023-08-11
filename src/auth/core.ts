@@ -33,6 +33,7 @@ export function logout(noCheck = false){
     localStorage.removeItem('user-token');
     localStorage.removeItem('user-data');
     document.cookie = `token=; SameSite=None; Secure`;
+    if (window.location.href.includes('login')){ return; }
     window.location.href = '/';
   }
 

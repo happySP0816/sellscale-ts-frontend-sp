@@ -206,6 +206,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                 persona={data.main.prospect_info.details.persona}
                 email_store={data.main.prospect_info.data.email_store}
                 icp_score={data.main.prospect_info.details.icp_fit_score}
+                icp_reason={data.main.prospect_info.details.icp_fit_reason}
               />
             </Flex>
             {data.main.prospect_info.email.email && (

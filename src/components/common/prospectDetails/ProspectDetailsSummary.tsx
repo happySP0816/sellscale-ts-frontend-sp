@@ -1,5 +1,21 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { createStyles, Avatar, Text, Group, useMantineTheme, Badge, Flex, Switch, LoadingOverlay, ActionIcon, Tooltip, HoverCard, Title } from "@mantine/core";
+import {
+  createStyles,
+  Avatar,
+  Text,
+  Group,
+  useMantineTheme,
+  Badge,
+  Flex,
+  Switch,
+  LoadingOverlay,
+  ActionIcon,
+  Tooltip,
+  HoverCard,
+  Title,
+  Stack,
+  Box,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import EditProspectModal from "@modals/EditProspectModal";
@@ -18,7 +34,7 @@ import { useState } from "react";
 import { useRecoilValue } from "recoil";
 import { EmailStore } from "src";
 import EmailStoreView from "./EmailStoreView";
-import { ICPFitPillOnly } from "@common/pipeline/ICPFitAndReason";
+import ICPFitPill, { ICPFitPillOnly } from "@common/pipeline/ICPFitAndReason";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -47,6 +63,7 @@ type ProspectDetailsSummaryProps = {
   persona?: string;
   email_store?: EmailStore | null;
   icp_score?: number;
+  icp_reason?: string;
 };
 
 export default function ProspectDetailsSummary(
@@ -58,80 +75,91 @@ export default function ProspectDetailsSummary(
   const companyURL =
     props.companyName && !props.companyURL
       ? `https://www.google.com/search?q=${encodeURIComponent(
-        props.companyName
-      )}`
+          props.companyName
+        )}`
       : props.companyURL;
 
-  const [aiEnabled, setAIEnabled] = useState<boolean>(props.aiEnabled)
-  const [loading, setLoading] = useState<boolean>(false)
+  const [aiEnabled, setAIEnabled] = useState<boolean>(props.aiEnabled);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const [editProspectModalOpened, { open: openProspectModal, close: closeProspectModal }] = useDisclosure()
+  const [
+    editProspectModalOpened,
+    { open: openProspectModal, close: closeProspectModal },
+  ] = useDisclosure();
 
   const triggerAIEnableToggle = async () => {
-    setLoading(true)
+    setLoading(true);
 
-    const result = await patchProspectAIEnabled(userToken, props.prospectID)
+    const result = await patchProspectAIEnabled(userToken, props.prospectID);
 
-    if (result.status === 'success') {
+    if (result.status === "success") {
       showNotification({
         title: "Success",
         message: "AI Enabled status updated.",
         color: "green",
         autoClose: 3000,
-      })
+      });
     } else {
       showNotification({
         title: "Error",
         message: "Something went wrong. Please try again later.",
         color: "red",
         autoClose: 5000,
-      })
+      });
     }
 
-    setLoading(false)
-    props.refetch()
-  }
+    setLoading(false);
+    props.refetch();
+  };
 
   return (
-    <Group noWrap align="flex-start" pb="xs" w='100%'>
+    <Group noWrap align="flex-start" pb="xs" w="100%">
       <LoadingOverlay visible={loading} />
-      <Avatar
-        src={proxyURL(props.profilePic)}
-        alt={props.fullName}
-        color={valueToColor(theme, props.fullName)}
-        radius="md"
-        size={94}
-      >
-        {nameToInitials(props.fullName)}
-      </Avatar>
-      <Flex direction='column' w='100%'>
-        <Flex w='100%' justify='space-between' pr='xs'>
+      <Stack spacing={0}>
+        <Avatar
+          src={proxyURL(props.profilePic)}
+          alt={props.fullName}
+          color={valueToColor(theme, props.fullName)}
+          radius="md"
+          size={94}
+        >
+          {nameToInitials(props.fullName)}
+        </Avatar>
+        <Box m={5}>
+          <ICPFitPill
+            icp_fit_score={props.icp_score || -3}
+            icp_fit_reason={props.icp_reason || "No ICP fit reason found."}
+            archetype={props.persona}
+          />
+        </Box>
+      </Stack>
+      <Flex direction="column" w="100%">
+        <Flex w="100%" justify="space-between" pr="xs">
           <Group>
             <Badge
-              mb='4px'
-              p='xs'
-              variant='outline'
-              radius='sm'
-              size='xs'
+              mb="4px"
+              p="xs"
+              variant="outline"
+              radius="sm"
+              size="xs"
               color={valueToColor(theme, props.persona || "Persona Unassigned")}
             >
               {props.persona || "Persona Unassigned"}
             </Badge>
-            <ICPFitPillOnly icp_fit_score={props.icp_score || -3} />
           </Group>
           <Switch
-            label='AI enabled 🤖'
-            labelPosition='right'
-            size='sm'
+            label="AI enabled 🤖"
+            labelPosition="right"
+            size="sm"
             checked={aiEnabled}
             onChange={() => {
-              setAIEnabled(!aiEnabled)
-              triggerAIEnableToggle()
+              setAIEnabled(!aiEnabled);
+              triggerAIEnableToggle();
             }}
           />
         </Flex>
-        <Flex justify='space-between'>
-          <Flex direction='column'>
+        <Flex justify="space-between">
+          <Flex direction="column">
             <Group noWrap spacing={10} mt={3}>
               <IconBriefcase stroke={1.5} size={16} className={classes.icon} />
               <Text size="xs" color="dimmed">
@@ -140,7 +168,10 @@ export default function ProspectDetailsSummary(
             </Group>
 
             {props.email && (
-              <EmailStoreView email={props.email} emailStore={props.email_store as EmailStore} />
+              <EmailStoreView
+                email={props.email}
+                emailStore={props.email_store as EmailStore}
+              />
             )}
 
             {props.linkedin && (
@@ -181,7 +212,7 @@ export default function ProspectDetailsSummary(
           </Flex>
           <Flex>
             <ActionIcon onClick={openProspectModal}>
-              <IconPencil size='1rem' />
+              <IconPencil size="1rem" />
             </ActionIcon>
             <EditProspectModal
               modalOpened={editProspectModalOpened}
@@ -192,7 +223,6 @@ export default function ProspectDetailsSummary(
             />
           </Flex>
         </Flex>
-
       </Flex>
     </Group>
   );

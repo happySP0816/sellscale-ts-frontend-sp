@@ -128,6 +128,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
     messageDraftRichRaw.current = value;
     _setMessageDraft(value);
   }
+  // For email we have to use this ref instead, otherwise the textbox does a weird refocusing.
+  const messageDraftEmail = useRef('')
 
   const [aiMessage, setAiMessage] = useState('');
   const [aiGenerated, setAiGenerated] = useState(false);
@@ -135,8 +137,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const sendMessage = async () => {
     setMsgLoading(true);
-    const msg = messageDraft;
-    setMessageDraft('');
+    
 
     // Delete the auto bump message if it exists
     await deleteAutoBumpMessage(userToken, props.prospectId);
@@ -145,6 +146,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
     setTempHiddenProspects(tempHiddenProspects.concat([props.prospectId]));
 
     if (openedOutboundChannel === 'LINKEDIN') {
+      const msg = messageDraft;
+      setMessageDraft('');
       showNotification({
         id: "send-linkedin-message",
         title: "Sending message ...",
@@ -198,16 +201,43 @@ export default forwardRef(function InboxProspectConvoSendBox(
       }
 
     } else {
+      if (currentConvoEmailMessages === undefined || currentConvoEmailMessages.length === 0) {
+        showNotification({
+          id: 'send-email-message-error',
+          title: 'Error',
+          message: 'Please select an email thread',
+          color: 'red',
+          autoClose: false,
+        })
+        setMsgLoading(false);
+        return;
+      }
+      const msg = messageDraftEmail.current;
+      if (msg.length === 0) {
+        showNotification({
+          id: 'send-email-message-error',
+          title: 'Error',
+          message: 'Please enter a message',
+          color: 'red',
+          autoClose: false,
+        })
+        setMsgLoading(false);
+        return;
+      }
 
-      sendEmail(
+      // Get the last message
+      console.log(currentConvoEmailMessages)
+      const replyToMessageID = currentConvoEmailMessages[currentConvoEmailMessages.length - 1].nylas_message_id
+      console.log('reply', replyToMessageID)
+      const result = await sendEmail(
         userToken,
         props.prospectId,
-        '',
+        `Re: ${currentConvoEmailThread?.subject}`,
         msg,
         aiGenerated,
-        props.nylasMessageId
+        replyToMessageID
       );
-      if (true) {
+      if (result.status === 'success') {
         let yourMessage = _.cloneDeep(currentConvoEmailMessages || [])
           .reverse()
           .find((msg) => msg.from_sdr);
@@ -223,6 +253,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
             queryKey: [`query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`],
           });
         }
+        messageDraftEmail.current = ''
+        messageDraftRichRaw.current = ''
+        setMessageDraft('')
       } else {
         showNotification({
           id: 'send-email-message-error',
@@ -334,9 +367,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
             <RichTextArea
               onChange={(value, rawValue) => {
                 messageDraftRichRaw.current = rawValue;
-                _setMessageDraft(value);
+                messageDraftEmail.current = value;
               }}
-              value={DOMPurify.sanitize((messageDraftRichRaw.current ?? "").replaceAll('\n',  `<br style="display: block; content: ' '; margin: 0 0 "/>`))}
+              value={messageDraftRichRaw.current}
               height={110}
             />
           </Box>
@@ -371,8 +404,11 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       return;
                     }
                     const result = await generateAIEmailReply(userToken, props.prospectId, currentConvoEmailThread.nylas_thread_id, selectedEmailBumpFramework)
-                    setMessageDraft(result.message);
-                    setAiMessage(result.message);
+                    // Clean the result
+                    const message = result.message.replaceAll('\n', `<br />`)
+                    messageDraftEmail.current = message
+                    setMessageDraft(message)
+                    setAiMessage(message);
                     setAiGenerated(result.aiGenerated);
                   }
                   setMsgLoading(false);

@@ -137,7 +137,7 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
         <TextInput
           w='50%'
           mr='xs'
-          label="Template nickname"
+          label={innerProps.overallStatus?.includes("ACTIVE_CONVO") ? 'Prospect reply' : "Template nickname"}
           placeholder={"Sports introduction"}
           {...form.getInputProps("title")}
         />

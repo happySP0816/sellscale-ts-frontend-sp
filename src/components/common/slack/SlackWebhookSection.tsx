@@ -1,8 +1,9 @@
 import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { Title, Text, Paper, Container, TextInput, Button, Loader, Flex } from '@mantine/core';
+import { Title, Text, Paper, Container, TextInput, Button, Loader, Flex, Box } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { getSDR } from '@utils/requests/getClientSDR';
 import { patchSlackWebhook } from '@utils/requests/patchSlackWebhook';
+import { sendTestSlackWebhook } from '@utils/requests/sendTestSlackWebhook';
 import { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
@@ -37,6 +38,29 @@ export default function SlackbotSection() {
     setLoading(false)
   }
 
+  const triggerSendSlackWebhook = async () => {
+    setLoading(true)
+
+    const result = await sendTestSlackWebhook(userToken)
+    if (result.status === 'success') {
+      showNotification({
+        title: 'Success',
+        message: 'Sent notification to Slack',
+        color: 'green',
+        autoClose: 5000,
+      })
+    } else {
+      showNotification({
+        title: 'Error',
+        message: 'Failed to send notification to Slack',
+        color: 'red',
+        autoClose: 5000,
+      })
+    }
+
+    setLoading(false)
+  }
+
   const triggerGetSDR = async () => {
     setLoading(true)
 
@@ -54,8 +78,8 @@ export default function SlackbotSection() {
 
   return (
     <Paper withBorder m='xs' p='md' radius='md'>
-      <Title order={3}>Add custom Slack Webhook</Title>
-      <Text>We provide Slack connection channels to send you alerts, but if you have a custom Webhook for your channel, add it here.</Text>
+      <Title order={3}>Setup Slack Channel for Company Pipeline</Title>
+      <Text>Set up a company pipeline channel via Slack below to let users known of live notifications.</Text>
 
       <Flex direction='column'>
         {
@@ -76,6 +100,14 @@ export default function SlackbotSection() {
         >
           Save
         </Button>
+
+        {userData.pipeline_notifications_webhook_url && (
+          <Box>
+            <Button onClick={triggerSendSlackWebhook}>
+              Send Test Notification
+            </Button>
+          </Box>
+        )}
       </Flex>
 
     </Paper>

@@ -3,26 +3,22 @@ import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 /**
- * Updates the slack webhook link for an SDR
+ * Sends a test slack webhook messafor for a client
  * @param userToken
  * @param webhook
  * @returns - MsgResponse
  */
-export async function patchSlackWebhook(
-  userToken: string,
-  webhook: string
+export async function sendTestSlackWebhook(
+  userToken: string
 ): Promise<MsgResponse> {
   const response = await fetch(
-    `${API_URL}/client/webhook`,
+    `${API_URL}/client/test_webhook`,
     {
-      method: "PATCH",
+      method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        "webhook": webhook
-      }),
     }
   );
   return await processResponse(response);

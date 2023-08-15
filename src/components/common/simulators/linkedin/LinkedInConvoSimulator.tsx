@@ -191,9 +191,9 @@ export default function LinkedInConvoSimulator(props: { personaId: number, seque
     }
     setLoadingMsg('Generating response...');
     const generateResponse = await generateResponseForLiConvoSim(userToken, simulation.id);
-    if (generateResponse.status !== 'success') {
-      return;
-    }
+    // if (generateResponse.status !== 'success') {
+    //   return;
+    // }
 
     setLoadingMsg('Updating state...');
     await refreshSimulation();

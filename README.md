@@ -1,7 +1,7 @@
 <img src="https://uploads-ssl.webflow.com/6353a854c4fa2d460377c061/63642a6e9b19034a8b42547d_Group%2018-p-500.png" style="width: 200px;">
 <br/>
 
-## Supercharge your outbound with AI
+## Supercharge your outbound with AI!
 <br/>
 <br/>
 

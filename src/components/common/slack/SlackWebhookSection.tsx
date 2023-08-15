@@ -1,4 +1,5 @@
 import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { syncLocalStorage } from '@auth/core';
 import { Title, Text, Paper, Container, TextInput, Button, Loader, Flex, Box } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { getSDR } from '@utils/requests/getClientSDR';
@@ -12,7 +13,14 @@ export default function SlackbotSection() {
   const [userData, setUserData] = useRecoilState(userDataState);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [webhook, setWebhook] = useState<string>(userData.pipeline_notifications_webhook_url);
+  const [webhook, setWebhook] = useState<string>('');
+
+  useEffect(() => {
+    syncLocalStorage(userToken, setUserData).then(() => {
+      setWebhook(userData.client.pipeline_notifications_webhook_url);
+    });
+  }, []);
+
 
   const triggerPatchSlackWebhook = async () => {
     setLoading(true)
@@ -33,7 +41,7 @@ export default function SlackbotSection() {
         autoClose: 5000,
       })
     }
-    triggerGetSDR()
+    await syncLocalStorage(userToken, setUserData);
 
     setLoading(false)
   }
@@ -60,21 +68,6 @@ export default function SlackbotSection() {
 
     setLoading(false)
   }
-
-  const triggerGetSDR = async () => {
-    setLoading(true)
-
-    const result = await getSDR(userToken)
-    if (result.status === 'success') {
-      setUserData({ userData, ...result.data.sdr_info, pipeline_notifications_webhook_url: result.data.sdr_info.pipeline_notifications_webhook_url || '' })
-    }
-
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    triggerGetSDR()
-  }, [])
 
   return (
     <Paper withBorder m='xs' p='md' radius='md'>

@@ -95,7 +95,7 @@ export default function SlackbotSection() {
         </Button>
 
         {userData.pipeline_notifications_webhook_url && (
-          <Box>
+          <Box my='md'>
             <Button onClick={triggerSendSlackWebhook}>
               Send Test Notification
             </Button>

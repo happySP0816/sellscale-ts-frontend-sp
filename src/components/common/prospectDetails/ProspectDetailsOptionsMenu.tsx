@@ -1,6 +1,12 @@
 import { userTokenState } from "@atoms/userAtoms";
 import { ActionIcon, Box, Menu, Popover, Text, Title } from "@mantine/core";
-import { IconDots, IconTrash, IconAlarm, IconRobot, IconUserPlus } from "@tabler/icons";
+import {
+  IconDots,
+  IconTrash,
+  IconAlarm,
+  IconRobot,
+  IconUserPlus,
+} from "@tabler/icons";
 import { QueryClient } from "@tanstack/react-query";
 import displayNotification from "@utils/notificationFlow";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -10,10 +16,8 @@ import { Calendar, DatePicker } from "@mantine/dates";
 import { useState } from "react";
 import dayjs from "dayjs";
 import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
-import {
-  Tooltip
-} from "@mantine/core";
-import { openedProspectIdState } from '@atoms/inboxAtoms';
+import { Tooltip } from "@mantine/core";
+import { openedProspectIdState } from "@atoms/inboxAtoms";
 import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
 import { showNotification } from "@mantine/notifications";
 import { openContextModal } from "@mantine/modals";
@@ -26,21 +30,22 @@ export default function ProspectDetailsOptionsMenu(props: {
   const userToken = useRecoilValue(userTokenState);
   const queryClient = new QueryClient();
   const [opened, setOpened] = useRecoilState(prospectDrawerOpenState);
-  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(
+    openedProspectIdState
+  );
 
   const [aiEnabled, setAIEnabled] = useState<boolean>(props.aiEnabled || true);
 
   const triggerAIEnableToggle = async () => {
+    const result = await patchProspectAIEnabled(userToken, props.prospectId);
 
-    const result = await patchProspectAIEnabled(userToken, props.prospectId)
-
-    if (result.status === 'success') {
+    if (result.status === "success") {
       showNotification({
         title: "Success",
         message: "AI Enabled status updated.",
         color: "green",
         autoClose: 3000,
-      })
+      });
     } else {
       showNotification({
         title: "Error",
@@ -50,33 +55,30 @@ export default function ProspectDetailsOptionsMenu(props: {
       });
     }
 
-    props.refetch()
-  }
+    props.refetch();
+  };
 
   return (
     <>
-
-    
-          
       <Menu shadow="md" width={200} withArrow>
         <Menu.Target>
-          <ActionIcon color='gray.8' radius='xl' variant='default'>
-            <IconDots size='1.125rem' />
+          <ActionIcon color="gray.8" radius="xl" variant="default">
+            <IconDots size="1.125rem" />
           </ActionIcon>
         </Menu.Target>
 
         <Menu.Dropdown>
           <Menu.Label>Settings</Menu.Label>
-          
+
           {props.aiEnabled !== undefined && (
             <Menu.Item
               icon={<IconRobot size={14} />}
               onClick={async () => {
-                setAIEnabled(!aiEnabled)
+                setAIEnabled(!aiEnabled);
                 triggerAIEnableToggle();
               }}
             >
-              {aiEnabled ? 'Disable AI' : 'Enable AI'}
+              {aiEnabled ? "Disable AI" : "Enable AI"}
             </Menu.Item>
           )}
 
@@ -84,7 +86,7 @@ export default function ProspectDetailsOptionsMenu(props: {
             icon={<IconUserPlus size={14} />}
             onClick={async () => {
               openContextModal({
-                modal: 'addProspect',
+                modal: "addProspect",
                 title: <Title order={3}>Add Referred Prospect</Title>,
                 innerProps: {
                   archetypeId: props.archetypeId,
@@ -94,6 +96,67 @@ export default function ProspectDetailsOptionsMenu(props: {
             }}
           >
             Add Referred Prospect
+          </Menu.Item>
+
+          <Menu.Item closeMenuOnClick={false} icon={<IconAlarm size={14} />}>
+            <Popover
+              width={300}
+              trapFocus
+              position="right-start"
+              withArrow
+              shadow="md"
+            >
+              <Popover.Target>
+                <Text>Snooze Outreach</Text>
+              </Popover.Target>
+              <Popover.Dropdown
+                sx={(theme) => ({
+                  background:
+                    theme.colorScheme === "dark"
+                      ? theme.colors.dark[7]
+                      : theme.white,
+                })}
+              >
+                <DatePicker
+                  minDate={new Date()}
+                  onChange={async (date) => {
+                    if (!date) {
+                      return;
+                    }
+                    let timeDiff = date.getTime() - new Date().getTime();
+                    let daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                    await displayNotification(
+                      "snooze-prospect",
+                      async () => {
+                        let result = await snoozeProspect(
+                          userToken,
+                          props.prospectId,
+                          daysDiff
+                        );
+                        return result;
+                      },
+                      {
+                        title: `Snoozing prospect for ${daysDiff} days...`,
+                        message: `Working with servers...`,
+                        color: "teal",
+                      },
+                      {
+                        title: `Snoozed!`,
+                        message: `Your prospect has been snoozed from outreach for ${daysDiff} days.`,
+                        color: "teal",
+                      },
+                      {
+                        title: `Error while snoozing your prospect.`,
+                        message: `Please try again later.`,
+                        color: "red",
+                      }
+                    );
+                    setOpened(false);
+                    location.reload();
+                  }}
+                />
+              </Popover.Dropdown>
+            </Popover>
           </Menu.Item>
 
           <Menu.Item
@@ -176,9 +239,8 @@ onClick={async () => {
 
 */
 
-
-
-{/* <Popover
+{
+  /* <Popover
 width={300}
 trapFocus
 position="right-start"
@@ -202,4 +264,5 @@ shadow="md"
 >
   
 </Popover.Dropdown>  
-</Popover> */}
+</Popover> */
+}

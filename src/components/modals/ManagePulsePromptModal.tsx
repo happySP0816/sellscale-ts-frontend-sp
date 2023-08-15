@@ -8,7 +8,11 @@ import {
   Textarea,
   TextInput,
   useMantineTheme,
-  Text
+  Text,
+  Box,
+  Checkbox,
+  Collapse,
+  List
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps, openConfirmModal } from "@mantine/modals";
@@ -16,7 +20,7 @@ import { showNotification } from "@mantine/notifications";
 import { IconPencil } from "@tabler/icons";
 import postICPClassificationPromptChange from "@utils/requests/postICPClassificationPromptChange";
 import postRunICPClassification from "@utils/requests/postRunICPClassification";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { Archetype, PersonaOverview } from "src";
 
@@ -32,13 +36,47 @@ export default function ManagePulsePrompt({
   personaOverview: PersonaOverview;
   backfillICPPrompt: Function;
   icpPrompt: string;
+  icpFilters: any;
 }>) {
+
+  console.log(innerProps.icpFilters);
+
   const theme = useMantineTheme();
   const [currentICPPrompt, setCurrentICPPrompt] = useState(
     innerProps.icpPrompt
   );
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
+
+  const [detailsOpened, setDetailsOpened] = useState(false);
+
+  const [optionFilters, setOptionFilters] = useState<{
+    prospect_name: boolean;
+    prospect_title: boolean;
+    prospect_linkedin_bio: boolean;
+    prospect_location: boolean;
+    prospect_education: boolean;
+    company_name: boolean;
+    company_size: boolean;
+    company_industry: boolean;
+    company_location: boolean;
+    company_tagline: boolean;
+    company_description: boolean;
+  }>(// @ts-ignore
+    innerProps.icpFilters || {
+      prospect_name: false,
+      prospect_title: false,
+      prospect_linkedin_bio: false,
+      prospect_location: false,
+      prospect_education: false,
+      company_name: false,
+      company_size: false,
+      company_industry: false,
+      company_location: false,
+      company_tagline: false,
+      company_description: false,
+    }
+  );
 
   const form = useForm({
     initialValues: {
@@ -62,36 +100,37 @@ export default function ManagePulsePrompt({
   async function handleSaveChanges(prompt: string, runPrompt = false) {
     setLoading(true);
 
-    if (
-      innerProps.mode === "EDIT" &&
-      currentICPPrompt === innerProps.personaOverview.icp_matching_prompt
-    ) {
-      showNotification({
-        id: "edit-pulse-prompt-fail-no-changes",
-        title: "No Changes Detected",
-        message:
-          "You have not made any changes to your AI Filter. Please make changes to your AI Filter before requesting to save changes.",
-        color: "red",
-        autoClose: 5000,
-      });
+    // if (
+    //   innerProps.mode === "EDIT" &&
+    //   currentICPPrompt === innerProps.personaOverview.icp_matching_prompt
+    // ) {
+    //   showNotification({
+    //     id: "edit-pulse-prompt-fail-no-changes",
+    //     title: "No Changes Detected",
+    //     message:
+    //       "You have not made any changes to your AI Filter. Please make changes to your AI Filter before requesting to save changes.",
+    //     color: "red",
+    //     autoClose: 5000,
+    //   });
 
-      setLoading(false);
-      return;
-    } else if (currentICPPrompt === "") {
-      showNotification({
-        id: "pulse-prompt-request-no-prompt",
-        title: "No Prompt Detected",
-        message:
-          "You have not entered a AI Filter. Please enter a AI Filter before requesting to save changes.",
-        color: "red",
-        autoClose: 5000,
-      });
-    }
+    //   setLoading(false);
+    //   return;
+    // } else if (currentICPPrompt === "") {
+    //   showNotification({
+    //     id: "pulse-prompt-request-no-prompt",
+    //     title: "No Prompt Detected",
+    //     message:
+    //       "You have not entered a AI Filter. Please enter a AI Filter before requesting to save changes.",
+    //     color: "red",
+    //     autoClose: 5000,
+    //   });
+    // }
 
     const result = await postICPClassificationPromptChange(
       userToken,
       innerProps.personaOverview.id,
-      prompt
+      prompt,
+      optionFilters
     );
 
     setLoading(false);
@@ -169,6 +208,171 @@ export default function ManagePulsePrompt({
               withAsterisk
               autosize
             />
+
+              <Box>
+                <Text>
+                  Filters our AI searches for:
+                  <Text
+                    pl="xs"
+                    c="blue.4"
+                    fw="bold"
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => setDetailsOpened((prev) => !prev)}
+                    span
+                  >
+                    {detailsOpened ? "Hide" : "Show"}
+                  </Text>
+                </Text>
+
+                <Collapse in={detailsOpened}>
+                  <List size="xs">
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.prospect_name}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_name: state,
+                          }));
+                        }}
+                        label="Prospect Name"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.prospect_title}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_title: state,
+                          }));
+                        }}
+                        label="Prospect Title"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.prospect_linkedin_bio}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_linkedin_bio: state,
+                          }));
+                        }}
+                        label="Prospect LinkedIn Bio"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.prospect_location}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_location: state,
+                          }));
+                        }}
+                        label="Prospect Location"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.prospect_education}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            prospect_education: state,
+                          }));
+                        }}
+                        label="Prospect Education"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.company_name}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_name: state,
+                          }));
+                        }}
+                        label="Company Name"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.company_size}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_size: state,
+                          }));
+                        }}
+                        label="Company Size"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.company_industry}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_industry: state,
+                          }));
+                        }}
+                        label="Company Industry"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.company_location}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_location: state,
+                          }));
+                        }}
+                        label="Company Location"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.company_tagline}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_tagline: state,
+                          }));
+                        }}
+                        label="Company Tagline"
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <Checkbox
+                        checked={optionFilters.company_description}
+                        onChange={(event) => {
+                          const state = !!(event?.currentTarget?.checked);
+                          setOptionFilters((prev) => ({
+                            ...prev,
+                            company_description: state,
+                          }));
+                        }}
+                        label="Company Description"
+                      />
+                    </List.Item>
+                  </List>
+                </Collapse>
+              </Box>
+
             <Button
               mt="xs"
               rightIcon={<IconPencil size="1rem" />}

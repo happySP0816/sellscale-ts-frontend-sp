@@ -110,6 +110,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   const firstLoad = useRef(true);
   const [loading, setLoading] = useState(false);
   const [currentICPPrompt, setCurrentICPPrompt] = useState("");
+  const [currentICPFilters, setCurrentICPFilters] = useState<any>();
   const [testSearchValue, setTestSearchValue] = useDebouncedState("", 300);
 
   const [sampleProspects, setSampleProspects] = useState<ProspectICP[]>([]);
@@ -118,46 +119,6 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   );
 
   const [testingPrompt, setTestingPrompt] = useState(false);
-  const [detailsOpened, setDetailsOpened] = useState(false);
-
-  const [optionFilters, setOptionFilters] = useState<{
-    prospect_name: boolean;
-    prospect_title: boolean;
-    prospect_linkedin_bio: boolean;
-    prospect_location: boolean;
-    prospect_education: boolean;
-    company_name: boolean;
-    company_size: boolean;
-    company_industry: boolean;
-    company_location: boolean;
-    company_tagline: boolean;
-    company_description: boolean;
-  }>(// @ts-ignore
-    props.personaOverview.icp_matching_option_filters || {
-      prospect_name: false,
-      prospect_title: false,
-      prospect_linkedin_bio: false,
-      prospect_location: false,
-      prospect_education: false,
-      company_name: false,
-      company_size: false,
-      company_industry: false,
-      company_location: false,
-      company_tagline: false,
-      company_description: false,
-    }
-  );
-
-  useEffect(() => {
-    (async () => {
-      const result = await postICPClassificationPromptChange(
-        userToken,
-        props.personaOverview.id,
-        currentICPPrompt,
-        optionFilters
-      );
-    })();
-  }, [optionFilters]);
 
   const {
     data: prospects,
@@ -226,8 +187,11 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
       props.personaOverview.id
     );
 
+    console.log(result);
+
     if (result.status === "success") {
-      setCurrentICPPrompt(result.data);
+      setCurrentICPPrompt(result.data.prompt);
+      setCurrentICPFilters(result.data.filters);
     } else {
       setCurrentICPPrompt("");
     }
@@ -369,159 +333,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
             placeholder="No prompt? Send SellScale a prompt request through here."
             label="Describe your ideal customer profile (ICP)"
             description={
-              <Box>
-                <Text>
-                  Filters our AI searches for:
-                  <Text
-                    pl="xs"
-                    c="blue.4"
-                    fw="bold"
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => setDetailsOpened((prev) => !prev)}
-                    span
-                  >
-                    {detailsOpened ? "Hide" : "Show"}
-                  </Text>
-                </Text>
-
-                <Collapse in={detailsOpened}>
-                  <List size="xs">
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.prospect_name}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            prospect_name: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Prospect Name"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.prospect_title}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            prospect_title: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Prospect Title"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.prospect_linkedin_bio}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            prospect_linkedin_bio:
-                              event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Prospect LinkedIn Bio"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.prospect_location}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            prospect_location: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Prospect Location"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.prospect_education}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            prospect_education: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Prospect Education"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.company_name}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            company_name: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Company Name"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.company_size}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            company_size: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Company Size"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.company_industry}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            company_industry: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Company Industry"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.company_location}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            company_location: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Company Location"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.company_tagline}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            company_tagline: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Company Tagline"
-                      />
-                    </List.Item>
-                    <List.Item>
-                      <Checkbox
-                        checked={optionFilters.company_description}
-                        onChange={(event) =>
-                          setOptionFilters((prev) => ({
-                            ...prev,
-                            company_description: event?.currentTarget?.checked,
-                          }))
-                        }
-                        label="Company Description"
-                      />
-                    </List.Item>
-                  </List>
-                </Collapse>
-              </Box>
+              ""
             }
             minRows={4}
             autosize
@@ -543,6 +355,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                       personaOverview: props.personaOverview,
                       backfillICPPrompt: triggerGetICPClassificationPrompt,
                       icpPrompt: currentICPPrompt,
+                      icpFilters: currentICPFilters,
                     },
                   })
                 : openContextModal({

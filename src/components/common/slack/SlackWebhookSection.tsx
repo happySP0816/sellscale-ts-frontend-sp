@@ -86,7 +86,7 @@ export default function SlackbotSection() {
         }
 
         <Button
-          disabled={webhook === userData.pipeline_notifications_webhook_url}
+          disabled={webhook === userData.client.pipeline_notifications_webhook_url}
           mt='md'
           onClick={() => triggerPatchSlackWebhook()}
           loading={loading}
@@ -94,7 +94,7 @@ export default function SlackbotSection() {
           Save
         </Button>
 
-        {userData.pipeline_notifications_webhook_url && (
+        {userData.client.pipeline_notifications_webhook_url && (
           <Box my='md'>
             <Button onClick={triggerSendSlackWebhook}>
               Send Test Notification

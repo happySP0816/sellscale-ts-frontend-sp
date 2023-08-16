@@ -61,9 +61,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
       openContextModal({
         modal: "voiceBuilder",
         title: <Title order={3}>Voice Builder</Title>,
-        innerProps: {
-          personas: props.personas,
-        },
+        innerProps: { },
       });
     }
   }, []);
@@ -77,9 +75,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
             openContextModal({
               modal: "voiceBuilder",
               title: <Title order={3}>Voice Builder</Title>,
-              innerProps: {
-                personas: props.personas,
-              },
+              innerProps: { },
             });
           }}
         >

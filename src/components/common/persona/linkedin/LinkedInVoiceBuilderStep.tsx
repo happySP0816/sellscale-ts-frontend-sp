@@ -33,10 +33,7 @@ export default function LinkedInVoiceBuilderStep(props: { persona: PersonaOvervi
             openContextModal({
               modal: 'voiceBuilder',
               title: <Title order={3}>Voice Builder</Title>,
-              innerProps: {
-                predefinedPersonaId: props.persona.id,
-                personas: props.personas,
-              },
+              innerProps: { },
             });
           }}
         >

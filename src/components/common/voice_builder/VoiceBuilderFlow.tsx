@@ -26,7 +26,7 @@ import {
   Card,
   Box,
 } from "@mantine/core";
-import { Archetype, Prospect } from "src";
+import { Archetype, PersonaOverview, Prospect } from "src";
 import {
   IconBrandLinkedin,
   IconCheck,
@@ -246,7 +246,7 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
 };
 
 export default function VoiceBuilderFlow(props: {
-  persona: Archetype;
+  persona: PersonaOverview;
   voiceBuilderOnboardingId: number;
 }) {
   const [voiceBuilderMessages, setVoiceBuilderMessages] = useRecoilState(

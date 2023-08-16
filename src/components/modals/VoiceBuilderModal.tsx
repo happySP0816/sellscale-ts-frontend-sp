@@ -11,6 +11,7 @@ import {
   LoadingOverlay,
   Card,
   Select,
+  Skeleton,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useState } from "react";
@@ -24,6 +25,7 @@ import createCTA from "@utils/requests/createCTA";
 import { IconUser } from "@tabler/icons";
 import VoiceBuilderFlow from "@common/voice_builder/VoiceBuilderFlow";
 import { createVoiceBuilderOnboarding } from "@utils/requests/voiceBuilder";
+import { currentProjectState } from "@atoms/personaAtoms";
 
 export const STARTING_INSTRUCTIONS = `Follow instructions to generate a short intro message:
 - If mentioning title, colloquialize it (i.e. make Vice President -> VP)
@@ -39,43 +41,42 @@ export default function VoiceBuilderModal({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ predefinedPersonaId?: number; personas: Archetype[] }>) {
+}: ContextModalProps<{ }>) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
 
-  const [persona, setPersona] = useState<Archetype | undefined>(
-    innerProps.personas?.find(
-      (persona: Archetype) => persona.id === innerProps.predefinedPersonaId
-    )
-  );
+  const currentProject = useRecoilValue(currentProjectState);
+
   const [
     voiceBuilderOnboardingId,
     setVoiceBuilderOnboardingId,
   ] = useState<number>(-1);
 
   useEffect(() => {
-    if (!persona) return;
+    if (!currentProject) return;
     (async () => {
+      setLoading(true);
       const response = await createVoiceBuilderOnboarding(
         userToken,
         "LINKEDIN",
         `${STARTING_INSTRUCTIONS}`,
-        persona.id
+        currentProject.id
       );
       if (response.status === "success") {
         setVoiceBuilderOnboardingId(response.data.id);
       }
+      setLoading(false);
     })();
-  }, [persona]);
+  }, [currentProject]);
 
   // persona exists, voice builder onboarding id exists, has CTAs, and more than 4 samples
   const canBuildVoice =
-    persona &&
-    voiceBuilderOnboardingId !== -1 &&
-    (innerProps.predefinedPersonaId !== undefined || persona.ctas.length >= 2);
+    currentProject &&
+    voiceBuilderOnboardingId !== -1;
+    // && currentProject.ctas.length >= 2
     
 
   return (
@@ -86,45 +87,14 @@ export default function VoiceBuilderModal({
       }}
     >
       <LoadingOverlay visible={loading} />
-
-      {innerProps.predefinedPersonaId === undefined && (
-        <Select
-          pb="xs"
-          withinPortal
-          placeholder="Select a persona"
-          color="teal"
-          // @ts-ignore
-          data={
-            innerProps.personas
-              ? innerProps.personas
-                  .filter(
-                    (persona: Archetype) =>
-                      !persona?.archetype?.includes("Unassigned")
-                  )
-                  .map((persona: Archetype) => ({
-                    value: persona.id + "",
-                    label:
-                      `(${persona.ctas.length} CTAs) ` +
-                      (persona.active ? "🟢 " : "🔴 ") +
-                      persona.archetype,
-                  }))
-              : []
-          }
-          icon={<IconUser size="1rem" />}
-          onChange={(value) => {
-            setPersona(
-              innerProps.personas.find(
-                (persona: Archetype) => persona.id === parseInt(value ?? "-1")
-              )
-            );
-          }}
-          value={persona?.id + "" ?? ""}
-        />
+      {loading && (
+        <Skeleton height={500}>
+        </Skeleton>
       )}
 
       {canBuildVoice && (
         <VoiceBuilderFlow
-          persona={persona}
+          persona={currentProject}
           voiceBuilderOnboardingId={voiceBuilderOnboardingId}
         />
       )}

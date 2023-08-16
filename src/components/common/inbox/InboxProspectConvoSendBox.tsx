@@ -3,7 +3,7 @@ import { userTokenState } from '@atoms/userAtoms';
 import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon, LoadingOverlay, Tooltip, Select, Box } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { hideNotification, showNotification } from '@mantine/notifications';
-import { IconExternalLink, IconWriting, IconSend, IconChevronUp, IconChevronDown, IconSettings } from '@tabler/icons';
+import { IconExternalLink, IconWriting, IconSend, IconChevronUp, IconChevronDown, IconSettings, IconArrowsDiagonalMinimize2 } from '@tabler/icons';
 import { IconMessage2Cog, IconSettingsFilled } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { deleteAutoBumpMessage } from '@utils/requests/autoBumpMessage';
@@ -29,6 +29,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
     nylasMessageId?: string;
     scrollToBottom?: () => void;
     msgLoading?: boolean;
+    minimizedSendBox: () => void;
   },
   ref
 ) {
@@ -99,8 +100,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
-
-  const [expanded, setExpanded] = useState(false);
 
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
@@ -326,10 +325,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
               {openedOutboundChannel === 'LINKEDIN' ? `linkedin.com/in/${_.truncate(props.linkedin_public_id, { length: 20 })}` : props.email} <IconExternalLink size='0.65rem' />
             </Text>
           </Flex>
-          {false && ( // TODO: Added chat box expanding
+          {true && ( // TODO: Added chat box expanding
             <div style={{ paddingRight: 5 }}>
-              <ActionIcon color='gray.3' size='lg' variant='transparent' onClick={() => setExpanded((prev) => !prev)}>
-                {expanded ? <IconChevronDown size='1.525rem' /> : <IconChevronUp size='1.525rem' />}
+              <ActionIcon color='gray.0' size='lg' variant='transparent' onClick={props.minimizedSendBox}>
+                <IconArrowsDiagonalMinimize2 size='1rem' />
               </ActionIcon>
             </div>
           )}

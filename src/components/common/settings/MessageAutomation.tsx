@@ -1,10 +1,11 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { syncLocalStorage } from "@auth/core";
-import { Box, Modal, Stack, Switch, Title, Text, Button, Center, Card, Notification } from "@mantine/core";
+import { Box, Modal, Stack, Switch, Title, Text, Button, Center, Card, Notification, TextInput, Flex, Badge, ActionIcon, rem } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconAlertTriangle, IconCheck } from "@tabler/icons";
+import { IconAlertTriangle, IconCheck, IconX } from "@tabler/icons";
+import patchSDRBlacklist from "@utils/requests/postPatchBlacklist";
 import postToggleAutoBump from "@utils/requests/postToggleAutoBump";
 import { updateClientSDR } from "@utils/requests/updateClientSDR";
 import { useEffect, useState } from "react";
@@ -14,10 +15,14 @@ export default function MessageAutomation() {
 
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
+  const [loading, setLoading] = useState(false);
 
   const [prospectRespondOption, setProspectRespondOption] = useState(userData.disable_ai_on_prospect_respond);
   const [messageSendOption, setMessageSendOption] = useState(userData.disable_ai_on_message_send);
   const [opened, { open, close }] = useDisclosure(false);
+
+  const [blacklistWords, setBlacklistWords] = useState(userData.blacklisted_words); // ['howdy', 'hello', 'hi']
+  const [newBlacklistWord, setNewBlacklistWord] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -57,6 +62,30 @@ export default function MessageAutomation() {
         icon: <IconAlertTriangle size='1rem' />,
       })
     }
+  }
+
+  const triggerUpdateBlacklistWords = async () => {
+    setLoading(true);
+
+    const response = await patchSDRBlacklist(userToken, blacklistWords);
+    if (response.status === 'success') {
+      setUserData({ ...userData, blacklisted_words: blacklistWords });
+      showNotification({
+        title: 'Success',
+        message: 'Blacklist words updated successfully.',
+        color: 'green',
+        icon: <IconCheck size='1rem' />,
+      })
+    } else {
+      showNotification({
+        title: 'Error',
+        message: 'Blacklist words could not be saved. Please try again later.',
+        color: 'red',
+        icon: <IconAlertTriangle size='1rem' />,
+      })
+    }
+
+    setLoading(false);
   }
 
   return (
@@ -142,6 +171,70 @@ export default function MessageAutomation() {
             >
 
             </Switch>
+          </Card>
+
+          <Card withBorder shadow='md'>
+            <Title order={4}>
+              Blacklist Words
+            </Title>
+            <Text mt='sm' lh='1.5rem'>
+              Our AI will not send any messages that contain words that are in your blacklist. This is useful for preventing the AI from sending messages that may not fit your speaking style. Case-insensitive (capitalizations don't matter).
+            </Text>
+
+            <TextInput
+              mt='sm'
+              label="Add a new word to your blacklist"
+              placeholder="e.g. 'howdy'"
+              value={newBlacklistWord}
+              onChange={(event) => setNewBlacklistWord(event.currentTarget.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && newBlacklistWord.length > 0) {
+                  setBlacklistWords([...blacklistWords, newBlacklistWord]);
+                  setNewBlacklistWord('');
+                }
+              }}
+            />
+
+            <Flex mt='md'>
+              {
+                !blacklistWords || blacklistWords.length > 0 ?
+                  (
+                    <>
+                      {
+                        blacklistWords && blacklistWords.map((word: string) => {
+                          const removeButton = ( // Removes the word from the blacklist
+                            <ActionIcon
+                              mx='-5px'
+                              size="xs"
+                              variant="transparent"
+                              onClick={() => {
+                                const newBlacklistWords = blacklistWords.filter((w: string) => w !== word);
+                                setBlacklistWords(newBlacklistWords);
+                              }}
+                            >
+                              <IconX size={rem(10)} />
+                            </ActionIcon>
+                          );
+
+                          return (
+                            <Badge rightSection={removeButton} mx='2px'>
+                              {word}
+                            </Badge>
+                          )
+                        })
+                      }
+                    </>
+
+                  ) : (
+                    <Text fz='xs' color='gray'>No blacklisted words.</Text>
+                  )
+              }
+            </Flex>
+            <Flex mt='sm' justify={'flex-end'}>
+              <Button onClick={triggerUpdateBlacklistWords}>
+                Save
+              </Button>
+            </Flex>
           </Card>
         </Stack>
       </Box>

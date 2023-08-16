@@ -35,12 +35,6 @@ import {
 import { valueToColor } from "@utils/general";
 import _ from "lodash";
 
-type PropsType = {
-  icp_fit_score: number;
-  icp_fit_reason: string;
-  archetype?: string;
-};
-
 const icpFitScoreMap = new Map<string, string>([
   ["4", "VERY HIGH"],
   ["3", "HIGH"],
@@ -165,7 +159,11 @@ export function icpFitToIcon(icp_fit: number, size: string = "0.7rem") {
   }
 }
 
-export default function ICPFitPill(props: PropsType) {
+export default function ICPFitPill(props: {
+  icp_fit_score: number;
+  icp_fit_reason: string;
+  archetype?: string;
+}) {
   const { hovered, ref } = useHover();
 
   return (
@@ -200,7 +198,11 @@ export function ICPFitPillOnly(props: { icp_fit_score: number }) {
   );
 }
 
-export function ICPFitContents(props: PropsType) {
+export function ICPFitContents(props: {
+  icp_fit_score: number;
+  icp_fit_reason: string;
+  archetype?: string;
+}) {
   const theme = useMantineTheme();
 
   return (

@@ -57,7 +57,7 @@ import { useDebouncedState } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { getProspects } from "@utils/requests/getProspects";
 import _, { set } from "lodash";
-import {
+import ICPFitPill, {
   ICPFitPillOnly,
   getIcpFitScoreMap,
   getScoreFromLabel,
@@ -85,6 +85,7 @@ interface ProspectItemProps extends ComponentPropsWithoutRef<"div"> {
   icpFit: number;
   title: string;
   company: string;
+  reason: string;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -101,6 +102,7 @@ export type ProspectICP = {
   icp_fit_score: string;
   icp_fit_score_override: string;
   in_icp_sample: string | false;
+  icp_fit_reason: string;
 };
 
 export default function Pulse(props: { personaOverview: PersonaOverview }) {
@@ -164,12 +166,12 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   });
 
   const ProspectSelectItem = forwardRef<HTMLDivElement, ProspectItemProps>(
-    ({ label, icpFit, title, company, ...others }: ProspectItemProps, ref) => (
+    ({ label, icpFit, reason, title, company, ...others }: ProspectItemProps, ref) => (
       <div ref={ref} {...others}>
         <Flex justify={"space-between"}>
           <Text>{label}</Text>
           {icpFit ? (
-            <ICPFitPillOnly icp_fit_score={icpFit} />
+            <ICPFitPill icp_fit_score={icpFit} icp_fit_reason={reason} />
           ) : (
             <Badge color={valueToColor(theme, "NONE")}>NONE</Badge>
           )}
@@ -426,6 +428,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                                 value: prospect.id + "",
                                 label: prospect.full_name,
                                 icpFit: prospect.icp_fit_score,
+                                reason: prospect.icp_fit_reason,
                                 title: prospect.title,
                                 company: prospect.company,
                               };
@@ -528,6 +531,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                               <ProspectSelectItem
                                 label={prospect.full_name}
                                 icpFit={+prospect.icp_fit_score}
+                                reason={prospect.icp_fit_reason}
                                 title={prospect.title}
                                 company={prospect.company}
                               />

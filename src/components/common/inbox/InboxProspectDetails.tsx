@@ -87,7 +87,7 @@ import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 import EditProspectModal from "@modals/EditProspectModal";
 import { proxyURL } from "@utils/general";
-import { IconAlarm, IconDeviceFloppy } from "@tabler/icons";
+import { IconAlarm, IconDeviceFloppy, IconHomeHeart } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import getDemoFeedback from "@utils/requests/getDemoFeedback";
 import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
@@ -312,6 +312,18 @@ export default function ProjectDetails(props: {
               </Group>
             )}
 
+            {data?.data.location && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconHomeHeart stroke={1.5} size={16} className={classes.icon} />
+                <Text
+                  size="xs"
+                  color="dimmed"
+                >
+                  {data.data.location}
+                </Text>
+              </Group>
+            )}
+
             {data?.details.company && (
               <Group noWrap spacing={10} mt={5}>
                 <IconBuildingStore
@@ -328,6 +340,22 @@ export default function ProjectDetails(props: {
                 >
                   {data.details.company}{" "}
                   {data.company?.url && <IconExternalLink size="0.55rem" />}
+                </Text>
+              </Group>
+            )}
+
+            {data?.data.company_hq && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconBuildingStore
+                  stroke={1.5}
+                  size={16}
+                  className={classes.icon}
+                />
+                <Text
+                  size="xs"
+                  color="dimmed"
+                >
+                  {data.data.company_hq}
                 </Text>
               </Group>
             )}

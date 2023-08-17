@@ -105,6 +105,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
 
       persona_id.current = res.prospect_info.details.persona_id
 
+      console.log(res)
       return {
         main: res,
         channels: res_channels.status === "success" ? res_channels.data : {},
@@ -201,8 +202,10 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                 email={data.main.prospect_info.email.email}
                 linkedin={data.main.prospect_info.li.li_profile}
                 profilePic={data.main.prospect_info.details.profile_pic}
+                location={data.main.prospect_info.data.location}
                 companyName={data.main.prospect_info.company.name}
                 companyURL={data.main.prospect_info.company.url}
+                companyHQ={data.main.prospect_info.data.company_hq}
                 persona={data.main.prospect_info.details.persona}
                 email_store={data.main.prospect_info.data.email_store}
                 icp_score={data.main.prospect_info.details.icp_fit_score}

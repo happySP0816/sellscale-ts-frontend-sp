@@ -51,8 +51,10 @@ export interface Prospect {
   batch: string;
   client_id: number;
   client_sdr_id: number;
+  location: string;
   company: string;
   company_url: string;
+  company_hq: string;
   deactivate_ai_engagement: boolean;
   email: string;
   employee_count: string;

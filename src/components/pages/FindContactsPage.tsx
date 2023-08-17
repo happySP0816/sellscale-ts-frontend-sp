@@ -113,7 +113,7 @@ export default function FindContactsPage() {
                 required
                 withAsterisk
                 error={
-                  salesNavigatorForm.values.url && !salesNavigatorForm.values.url.startsWith("https://www.linkedin.com/sales/search/people?") &&
+                  salesNavigatorForm.values.url && !salesNavigatorForm.values.url.startsWith("https://www.linkedin.com/sales/search/people") &&
                   true
                 }
               />
@@ -135,7 +135,7 @@ export default function FindContactsPage() {
                 disabled={
                   salesNavigatorForm.values.numberOfContacts === 0 ||
                   salesNavigatorForm.values.url === "" ||
-                  !salesNavigatorForm.values.url.startsWith("https://www.linkedin.com/sales/search/people?")
+                  !salesNavigatorForm.values.url.startsWith("https://www.linkedin.com/sales/search/people")
                 }
                 loading={loading}
                 onClick={() => {
@@ -216,7 +216,7 @@ export default function FindContactsPage() {
                   <Text>
                     {launch.scrape_count} contacts
                   </Text>
-                  <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">Original Search</Anchor>
+                  <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">View Original Filters</Anchor>
                 </Card>
               )
             })}

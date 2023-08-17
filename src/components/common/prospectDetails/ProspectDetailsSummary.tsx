@@ -27,6 +27,7 @@ import {
   IconSocial,
   IconBuildingStore,
   IconPencil,
+  IconHomeHeart,
 } from "@tabler/icons";
 import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
@@ -58,8 +59,10 @@ type ProspectDetailsSummaryProps = {
   email: string | null;
   linkedin: string | null;
   profilePic: string | null;
+  location: string | null;
   companyName: string | null;
   companyURL?: string;
+  companyHQ?: string;
   persona?: string;
   email_store?: EmailStore | null;
   icp_score?: number;
@@ -75,8 +78,8 @@ export default function ProspectDetailsSummary(
   const companyURL =
     props.companyName && !props.companyURL
       ? `https://www.google.com/search?q=${encodeURIComponent(
-          props.companyName
-        )}`
+        props.companyName
+      )}`
       : props.companyURL;
 
   const [aiEnabled, setAIEnabled] = useState<boolean>(props.aiEnabled);
@@ -136,16 +139,19 @@ export default function ProspectDetailsSummary(
       <Flex direction="column" w="100%">
         <Flex w="100%" justify="space-between" pr="xs">
           <Group>
-            <Badge
-              mb="4px"
-              p="xs"
-              variant="outline"
-              radius="sm"
-              size="xs"
-              color={valueToColor(theme, props.persona || "Persona Unassigned")}
-            >
-              {props.persona || "Persona Unassigned"}
-            </Badge>
+            <Tooltip label={props.persona || "Persona Unassigned"} withArrow withinPortal position='bottom'>
+              <Badge
+                mb="4px"
+                p="xs"
+                variant="outline"
+                radius="sm"
+                size="xs"
+                color={valueToColor(theme, props.persona || "Persona Unassigned")}
+              >
+                {(props.persona && (props.persona.slice(0, 30) + " ...")) || "Persona Unassigned"}
+              </Badge>
+            </Tooltip>
+
           </Group>
           <Switch
             label="AI enabled 🤖"
@@ -166,6 +172,18 @@ export default function ProspectDetailsSummary(
                 {props.title}
               </Text>
             </Group>
+
+            {props.location && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconHomeHeart stroke={1.5} size={16} className={classes.icon} />
+                <Text
+                  size="xs"
+                  color="dimmed"
+                >
+                  {props.location}
+                </Text>
+              </Group>
+            )}
 
             {props.email && (
               <EmailStoreView
@@ -206,6 +224,22 @@ export default function ProspectDetailsSummary(
                   href={companyURL}
                 >
                   {props.companyName}
+                </Text>
+              </Group>
+            )}
+
+            {props.companyHQ && (
+              <Group noWrap spacing={10} mt={5}>
+                <IconBuildingStore
+                  stroke={1.5}
+                  size={16}
+                  className={classes.icon}
+                />
+                <Text
+                  size="xs"
+                  color="dimmed"
+                >
+                  {props.companyHQ}
                 </Text>
               </Group>
             )}

@@ -185,8 +185,6 @@ function PersonaOption(props: {
 
   const { hovered, ref } = useHover();
 
-  console.log(props.persona);
-
   return (
     <Box>
     <Box

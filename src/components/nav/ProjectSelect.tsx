@@ -88,10 +88,12 @@ export function ProjectSelect() {
       if (!activeProject){
         activeProject = null;
       }
-      setCurrentProject(activeProject);
 
-      // if (firstActiveProject && !window.location.href.includes("/all"))
-      //   setCurrentProject(firstActiveProject);
+      if(window.location.href.includes("/all")){
+        setCurrentProject(null);
+      } else {
+        setCurrentProject(activeProject);
+      }
     })();
   }, []);
 

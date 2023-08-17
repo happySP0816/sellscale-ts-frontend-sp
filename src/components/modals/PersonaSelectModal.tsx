@@ -185,6 +185,8 @@ function PersonaOption(props: {
 
   const { hovered, ref } = useHover();
 
+  console.log(props.persona);
+
   return (
     <Box>
     <Box
@@ -209,7 +211,7 @@ function PersonaOption(props: {
       </Box>
       <Box
         sx={{
-          flexBasis: "78%",
+          flexBasis: "58%",
           cursor: "pointer",
         }}
         onClick={() => {
@@ -227,6 +229,15 @@ function PersonaOption(props: {
           {_.truncate(props.persona.name, { length: 50 })}
         </Text>
         {props.inboxNotifs > 0 && <Badge>{props.inboxNotifs}</Badge>}
+      </Box>
+      <Box
+        sx={{
+          flexBasis: "20%",
+        }}
+      > 
+        <Text fz={10} c="dimmed" fs="italic">
+          {props.persona.num_prospects} prospects
+        </Text>
       </Box>
       <Box sx={{ flexBasis: "7%" }}>
         <Menu shadow="md" width={200}>

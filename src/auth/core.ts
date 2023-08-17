@@ -87,3 +87,12 @@ export async function getUserInfo(userToken: string | null) {
 
   return res.sdr_info;
 }
+
+
+export function saveCurrentPersonaId(personaId: string){
+  localStorage.setItem('opened-persona-id', personaId);
+}
+
+export function getCurrentPersonaId(){
+  return localStorage.getItem('opened-persona-id');
+}

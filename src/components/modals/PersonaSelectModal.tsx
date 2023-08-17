@@ -32,7 +32,7 @@ import createCTA from "@utils/requests/createCTA";
 import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
 import { DateInput } from "@mantine/dates";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { isLoggedIn } from "@auth/core";
+import { isLoggedIn, saveCurrentPersonaId } from "@auth/core";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { useNavigate } from "react-router-dom";
 import { IconArrowsLeftRight, IconCopy, IconDots, IconMessageCircle, IconPhoto, IconPower, IconSearch, IconSettings, IconStack3, IconTrash } from "@tabler/icons";
@@ -181,8 +181,7 @@ function PersonaOption(props: {
   onActivateClick?: () => void;
 }) {
   const theme = useMantineTheme();
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const { hovered, ref } = useHover();
 

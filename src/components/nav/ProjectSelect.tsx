@@ -1,6 +1,6 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
-import { isLoggedIn } from "@auth/core";
+import { getCurrentPersonaId, isLoggedIn } from "@auth/core";
 import {
   Button,
   Menu,
@@ -77,9 +77,21 @@ export function ProjectSelect() {
           : [];
       setProjects(result);
 
-      const firstActiveProject = result.find((project) => project.active);
-      if (firstActiveProject && !window.location.href.includes("/all"))
-        setCurrentProject(firstActiveProject);
+      const currentPersonaId = getCurrentPersonaId();
+      let activeProject = null;
+      if (currentPersonaId) {
+        activeProject = result.find((project) => project.id === +currentPersonaId);
+      }
+      if (!activeProject){
+        activeProject = result.find((project) => project.active);
+      }
+      if (!activeProject){
+        activeProject = null;
+      }
+      setCurrentProject(activeProject);
+
+      // if (firstActiveProject && !window.location.href.includes("/all"))
+      //   setCurrentProject(firstActiveProject);
     })();
   }, []);
 

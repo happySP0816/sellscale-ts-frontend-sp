@@ -9,7 +9,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
@@ -36,8 +36,7 @@ export default function PersonaBrain(props: PropsType) {
   const [personaContactObjective, setPersonaContactObjective] = useState("");
   const [needsSave, setNeedsSave] = useState(false);
   
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const archetype_id = props.archetype_id || currentProject?.id;
 

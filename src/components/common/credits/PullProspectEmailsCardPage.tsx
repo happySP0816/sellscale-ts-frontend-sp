@@ -1,10 +1,10 @@
 import { currentProjectState } from '@atoms/personaAtoms'
 import PageFrame from '@common/PageFrame';
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import PullProspectEmailsCard from './PullProspectEmailsCard';
 
 export const PullProspectEmailsCardPage = () => {
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   if (!currentProject) {
     return null

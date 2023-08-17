@@ -1,5 +1,6 @@
+import { saveCurrentPersonaId } from "@auth/core";
 import { ArchetypeCreation } from "@modals/CreatePersonaModal";
-import { atom } from "recoil";
+import { atom, selector } from "recoil";
 import { PersonaOverview } from "src";
 
 const uploadDrawerOpenState = atom({
@@ -12,9 +13,25 @@ const detailsDrawerOpenState = atom({
   default: false,
 });
 
-const currentProjectState = atom({
-  key: "project-current",
+const _internal_currentProjectState = atom({
+  key: "project-current-internal",
   default: null as PersonaOverview | null,
+});
+const currentProjectState = selector({
+  key: 'project-current',
+  get: ({get}) => {
+    const currentProject = get(_internal_currentProjectState);
+    currentProject && saveCurrentPersonaId(currentProject.id+'');
+    return currentProject;
+  },
+  set: ({set}, newValue) => {
+    if(newValue) {
+      saveCurrentPersonaId((newValue as PersonaOverview).id+'');
+    } else {
+      saveCurrentPersonaId('');
+    }
+    set(_internal_currentProjectState, newValue);
+  }
 });
 
 const currentInboxCountState = atom({

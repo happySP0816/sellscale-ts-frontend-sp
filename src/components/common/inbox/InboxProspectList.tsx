@@ -144,7 +144,7 @@ export default function ProspectList(props: { prospects: ProspectShallow[]; isFe
   const userToken = useRecoilValue(userTokenState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const [showPurgatorySection, setShowPurgatorySection] = useState(true);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const currentProject = useRecoilValue(currentProjectState);
   const [currentInboxCount, setCurrentInboxCount] = useRecoilState(currentInboxCountState);
   const [openedProspectLoading, setOpenedProspectLoading] = useRecoilState(openedProspectLoadingState);
   const tempHiddenProspects = useRecoilValue(tempHiddenProspectsState);

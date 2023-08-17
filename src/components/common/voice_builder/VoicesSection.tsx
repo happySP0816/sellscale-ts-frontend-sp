@@ -30,7 +30,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
   const theme = useMantineTheme();
   const [searchParams] = useSearchParams();
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   const prospectDrawerOpened = useRecoilValue(prospectDrawerOpenState);
 

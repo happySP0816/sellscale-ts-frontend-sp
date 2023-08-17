@@ -1,13 +1,12 @@
 import { currentProjectState } from "@atoms/personaAtoms";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import Pulse from "./Pulse";
 import { Box, Stack, Tabs } from "@mantine/core";
 import { IconMessageCircle, IconSettings } from "@tabler/icons";
 import PulseBarChart from "@common/charts/PulseBarChart";
 
 export const PulseWrapper = () => {
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   if (!currentProject) return null;
 

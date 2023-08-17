@@ -32,7 +32,7 @@ export default function InboxProspectListFilter(props: {
   const userToken = useRecoilValue(userTokenState);
   const filterState = useRef<InboxProspectListFilterState>(_.cloneDeep(defaultInboxProspectListFilterState));
   const [nurturingMode, setNurturingMode] = useRecoilState(nurturingModeState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const currentProject = useRecoilValue(currentProjectState);
 
   useEffect(() => {
     if (props.filters){

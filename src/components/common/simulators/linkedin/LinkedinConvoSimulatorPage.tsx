@@ -1,11 +1,11 @@
 import { currentProjectState } from '@atoms/personaAtoms';
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useRecoilValue } from 'recoil'
 import LinkedInConvoSimulator from './LinkedInConvoSimulator';
 import PageFrame from '@common/PageFrame';
 import { Card } from '@mantine/core';
 
 export const LinkedinConvoSimulatorPage = () => {
-    const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+    const currentProject = useRecoilValue(currentProjectState);
 
     if (!currentProject) return null;
 

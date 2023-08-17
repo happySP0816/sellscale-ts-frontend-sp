@@ -14,7 +14,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 
 export default function EmailBlocksPage(props: { personaId?: number }) {
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState)
+  const currentProject = useRecoilValue(currentProjectState);
 
   const personaId = currentProject?.id !== undefined ? currentProject.id : props.personaId ? props.personaId : -1;
 

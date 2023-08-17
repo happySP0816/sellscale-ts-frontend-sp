@@ -17,7 +17,7 @@ export function SearchBar({ isSmall }: { isSmall?: boolean }) {
     >
       <Group spacing="xs" sx={{ flexWrap: 'nowrap' }}>
         <IconSearch size={14} stroke={2} />
-        <Text size="sm" pr={(isSmall) ? 0 : 85}>
+        <Text size="sm" sx={{ textWrap: 'nowrap' }} pr={(isSmall) ? 0 : 85}>
           Search everywhere
         </Text>
         {!isSmall && (

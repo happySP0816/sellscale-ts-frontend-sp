@@ -39,6 +39,7 @@ export function LogoFull(props: { size?: number }) {
     >
       <Image
         height={props.size || 26}
+        sx={{ minWidth: '100px' }}
         fit="contain"
         src={LogoImg}
         alt="SellScale Sight"

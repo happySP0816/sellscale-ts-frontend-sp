@@ -264,11 +264,19 @@ export default function UploadProspectsModal({
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       <Stack spacing="xl">
         {!isFetching && (
-          <Select
+
+          <>
+          {innerProps.mode === "CREATE-ONLY" ? (
+            <TextInput
+              placeholder="eg. C-Suite Sales Leaders in tech companies"
+              label="Descriptive Name"
+              value={createdPersona}
+              onChange={(e) => setCreatedPersona(e.currentTarget.value)}
+            />
+          ) : (
+            <Select
             label={
-              innerProps.mode === "CREATE-ONLY"
-                ? "Descriptive Name"
-                : "Set Persona"
+              "Set Persona"
             }
             defaultValue={
               defaultPersonas.current.length === 1 ||
@@ -282,20 +290,15 @@ export default function UploadProspectsModal({
             placeholder={
               innerProps.mode === "ADD-ONLY"
                 ? "Select a persona for the prospects"
-                : innerProps.mode === "CREATE-ONLY"
-                ? "eg. C-Suite Sales Leaders in tech companies"
                 : "Select or create a persona for the prospects"
             }
             nothingFound={
-              innerProps.mode === "CREATE-ONLY"
-                ? "Input a persona name"
-                : "Nothing found"
+              "Nothing found"
             }
             icon={<IconUsers size={14} />}
             searchable
             creatable={
-              innerProps.mode === "ADD-CREATE" ||
-              innerProps.mode === "CREATE-ONLY"
+              innerProps.mode === "ADD-CREATE"
             }
             clearable
             getCreateLabel={(query) => (
@@ -324,6 +327,10 @@ export default function UploadProspectsModal({
               setSelectedPersona(value);
             }}
           />
+          )}
+          </>
+
+
         )}
 
         {innerProps.mode === "CREATE-ONLY" && (

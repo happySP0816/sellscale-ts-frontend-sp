@@ -224,7 +224,7 @@ function PersonaOption(props: {
             borderRadius: 10,
           }}
         >
-          {_.truncate(props.persona.name, { length: 50 })}
+          {_.truncate(props.persona.name, { length: 45 })}
         </Text>
         {props.inboxNotifs > 0 && <Badge>{props.inboxNotifs}</Badge>}
       </Box>

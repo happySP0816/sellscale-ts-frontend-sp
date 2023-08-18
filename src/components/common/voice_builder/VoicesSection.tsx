@@ -50,7 +50,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
         logout();
       }
       const res = await response.json();
-      return res?.data.sort((a: any, b: any) => a.priority - b.priority) ?? [];
+      return (res?.data.sort((a: any, b: any) => b.priority - a.priority) ?? []) as any[];
     },
     refetchOnWindowFocus: false,
   });
@@ -87,7 +87,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
         <Table verticalSpacing="sm" horizontalSpacing="md">
           <thead>
             <tr>
-              <th>Priority</th>
+              <th style={{ minWidth: '90px' }}>Priority</th>
               <th>Name</th>
               <th>Channel</th>
               <th>Status</th>
@@ -101,10 +101,10 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
                   <td>
                     <Avatar
                       size={40}
-                      color={valueToColor(theme, item.name)}
+                      color={valueToColor(theme, (data.indexOf(item)+1)+'')}
                       radius={40}
                     >
-                      #{item.priority}
+                      #{data.indexOf(item)+1}
                     </Avatar>
                   </td>
                   <td>

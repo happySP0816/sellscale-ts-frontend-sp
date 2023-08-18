@@ -168,6 +168,15 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   good: 'lime',
   great: 'green',
   excellent: 'teal',
+
+  '0': 'indigo',
+  '1': 'blue',
+  '2': 'cyan',
+  '3': 'green',
+  '4': 'lime',
+  '5': 'yellow',
+  '6': 'orange',
+  '7': 'red',
 };
 export function valueToColor(theme: MantineTheme, value: string): MantineColor {
   if(!value) { return "gray"; }

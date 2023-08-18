@@ -52,6 +52,7 @@ import PersonaSplit from '@common/persona/PersonaSplit';
 import { PersonaSplitPage } from '@common/persona/PersonaSplitPage';
 import CleanContactsPage from "@pages/CleanContactsPage";
 import PersonaSettingsPage from "@pages/PersonaSettingsPage";
+import EmailSimulatePage from "@pages/EmailSimulatePage";
 
 const queryClient = new QueryClient();
 
@@ -164,9 +165,13 @@ const router = sentryCreateBrowserRouter([
           return { tabId: params.tabId };
         },
       },
-       {
+      {
         path: "email/blocks",
         element: <RestrictedRoute page={<EmailBlocksPage />} />,
+      },
+      {
+        path: "email/simulate",
+        element: <RestrictedRoute page={<EmailSimulatePage />} />,
       },
       {
         path: "tools/email-scraper",

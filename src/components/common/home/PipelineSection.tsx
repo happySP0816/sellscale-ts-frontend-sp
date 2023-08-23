@@ -169,8 +169,9 @@ export default function PipelineSection() {
             <Indicator color="pink" inline processing size={15} offset={12}>
               <Box sx={{ visibility: "hidden" }}>.</Box>
             </Indicator>{" "}
-            - {data?.filter((d) => d.category !== 'not_interested').length} active opportunities • Sorted by last contacted •
-            Last updated {moment(new Date()).format("MMMM D, YYYY")}
+            - {data?.filter((d) => d.category !== "not_interested").length}{" "}
+            active opportunities • Sorted by last contacted • Last updated{" "}
+            {moment(new Date()).format("MMMM D, YYYY")}
           </Text>
         </Box>
         <Box>
@@ -396,13 +397,56 @@ export default function PipelineSection() {
   );
 }
 
-function PipelineArrow(props: { label: string; ending?: boolean }) {
+function PipelineArrow(props: {
+  label: string;
+  ending?: boolean;
+  height?: number;
+}) {
+  let height = props.height || 40;
+  let arrowHeight = Math.sqrt((height * height) / 2);
+  let extensionWidth = 10;
+
   return (
-    <Paper radius={0} withBorder>
-      <Center h={40}>
-        <Title order={5}>{props.label}</Title>
-      </Center>
-    </Paper>
+    <Box sx={{ position: "relative" }}>
+      <Paper radius={0} h={height} withBorder>
+        <Center h={height}>
+          <Title order={5}>{props.label}</Title>
+        </Center>
+      </Paper>
+
+      {!props.ending && (
+        <>
+          <Paper
+            radius={0}
+            h={height}
+            w={extensionWidth}
+            withBorder
+            sx={{
+              borderWidth: "1px 0px 1px 0!important",
+              position: "absolute",
+              right: -(extensionWidth - 1),
+              top: 0,
+              zIndex: 10,
+            }}
+          ></Paper>
+
+          <Paper
+            h={arrowHeight}
+            w={arrowHeight}
+            radius={0}
+            withBorder
+            sx={{
+              borderWidth: "1px 1px 0 0!important",
+              position: "absolute",
+              right: -(arrowHeight / 2 + extensionWidth - 1),
+              top: (height - arrowHeight) / 2,
+              transform: "rotate(45deg)",
+              zIndex: 10,
+            }}
+          ></Paper>
+        </>
+      )}
+    </Box>
   );
 }
 
@@ -500,6 +544,7 @@ function PipelineProspect(props: { prospect: ProspectPipeline }) {
               styles={{
                 indicator: {
                   backgroundColor: "#00000000", // transparent
+                  zIndex: 1,
                 },
               }}
             >

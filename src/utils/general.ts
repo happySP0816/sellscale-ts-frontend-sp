@@ -360,6 +360,7 @@ export function getRandomItems<T>(list: T[], numItems: number): T[] {
  * @returns - Favicon URL
  */
 export async function getFavIconFromURL(url: string): Promise<string | null> {
+  if (!(import.meta.env.PROD)) {return null;}
 
   const urlParts = url.split('://');
   let cleanURL = urlParts.length > 1 ? urlParts[1] : urlParts[0];

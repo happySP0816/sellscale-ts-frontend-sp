@@ -30,3 +30,4 @@ export const SITE_NAME = "SellScale";
 // @ts-ignore
 export const API_URL = import.meta.env.VITE_API_URL;
 export const PROXY_SERVER_URL = import.meta.env.VITE_PROXY_SERVER_URL;
+export const ICON_GRABBER_URL = import.meta.env.VITE_ICON_GRABBER_URL;

@@ -1,4 +1,4 @@
-import { EMAIL_REGEX, PROXY_SERVER_URL, URL_REGEX } from "@constants/data";
+import { EMAIL_REGEX, ICON_GRABBER_URL, PROXY_SERVER_URL, URL_REGEX } from "@constants/data";
 import { ex } from "@fullcalendar/core/internal-common";
 import { MantineColor, MantineTheme } from "@mantine/core";
 import _ from "lodash";
@@ -362,9 +362,10 @@ export function getRandomItems<T>(list: T[], numItems: number): T[] {
 export async function getFavIconFromURL(url: string): Promise<string | null> {
 
   const urlParts = url.split('://');
-  const cleanURL = urlParts.length > 1 ? urlParts[1] : urlParts[0];
+  let cleanURL = urlParts.length > 1 ? urlParts[1] : urlParts[0];
+  cleanURL = cleanURL.split('/')[0];
 
-  const response = await fetch(`https://favicongrabber.com/api/grab/${encodeURIComponent(cleanURL)}`);
+  const response = await fetch(`${ICON_GRABBER_URL}/${cleanURL}`);
   if(!response.ok) return null;
 
   const data = await response.json();

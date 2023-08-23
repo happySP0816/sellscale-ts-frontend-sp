@@ -467,7 +467,7 @@ function PipelineColumnHeader(props: {
       <Title order={6}>{props.title}</Title>
       <Text fz="xs" c="dimmed">
         Raw: ${rawContractSize.toLocaleString()} | Conversion:{" "}
-        {props.conversion}%
+        {props.conversion*100}%
       </Text>
       <Text fz="xs" fw={700} c="pink.7">
         Predicted Total: $

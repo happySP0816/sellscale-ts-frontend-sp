@@ -12,6 +12,7 @@ import {
   LoadingOverlay,
   Tabs,
   Container,
+  Switch,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { useEffect, useState } from "react";
@@ -21,7 +22,7 @@ import { Archetype } from "src";
 import ProspectSelect from "@common/library/ProspectSelect";
 import { API_URL } from "@constants/data";
 import { logout } from "@auth/core";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { showNotification } from "@mantine/notifications";
 import { setDatasets } from "react-chartjs-2/dist/utils";
 import { IconAlertCircle, IconBrandOnedrive, IconChartTreemap, IconTool } from '@tabler/icons';
@@ -52,6 +53,7 @@ export default function VoiceEditorModal({
   voiceId: number;
 }>) {
   const userToken = useRecoilValue(userTokenState);
+  const queryClient = useQueryClient();
 
   const [promptChanged, setPromptChanged] = useState(false);
   const [selectedProspectId, setSelectedProspectId]: any = useState(null);
@@ -70,11 +72,34 @@ export default function VoiceEditorModal({
   
   const [stackRankedConfigurationDataChanged, setStackRankedConfigurationDataChanged] = useState(false);
 
+  const [enabled, setEnabled] = useState(false);
+
   useEffect(() => {
     if (!fetchedPromptData) {
       fetchPromptData();
     }
   }, []);
+
+  useEffect(() => {
+    fetch(
+      `${API_URL}/message_generation/stack_ranked_configuration_tool/set_active`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          configuration_id: innerProps.voiceId,
+          set_active: enabled,
+        }),
+      }
+    ).then((res) => {
+      queryClient.invalidateQueries({
+        queryKey: [`query-voices`],
+      });
+    })
+  }, [enabled]);
 
   const fetchPromptData = () => {
     setIsFetching(true);
@@ -95,6 +120,7 @@ export default function VoiceEditorModal({
         return res.json();
       })
       .then((j) => {
+        setEnabled(j.data?.active);
         setStackRankedConfigurationData(j.data)
         setPrompt(j.data?.computed_prompt);
         if (j.data?.prompt_1) {
@@ -242,6 +268,12 @@ export default function VoiceEditorModal({
         for this voice. You can edit the prompt below then use the 'Simulation'
         section to test this voice on a prospect.
       </Text>
+
+      {!stackRankedConfigurationData?.name?.includes('Baseline') && (
+        <Box pt='sm'>
+          <Switch label="Active" checked={enabled} onChange={(event) => setEnabled(event.currentTarget.checked)} />
+        </Box>
+      )}
 
       <Divider mt="md" mb="md" />
       <Tabs value={editViewMode}>

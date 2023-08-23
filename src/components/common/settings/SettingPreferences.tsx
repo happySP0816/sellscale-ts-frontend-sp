@@ -22,11 +22,11 @@ export default function SettingPreferences() {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
 
-  const [activeConvoPercentage, setActiveConvoPercentage] = useState(userData.conversion_percentages.active_convo || 0.02);
-  const [schedulingPercentage, setSchedulingPercentage] = useState(userData.conversion_percentages.scheduling || 0.1);
-  const [demoSetPercentage, setDemoSetPercentage] = useState(userData.conversion_percentages.demo_set || 0.2);
-  const [closedDemoPercentage, setClosedDemoPercentage] = useState(userData.conversion_percentages.demo_won || 0.5);
-  const [notInterestedPercentage, setNotInterestedPercentage] = useState(userData.conversion_percentages.not_interested || 0);
+  const [activeConvoPercentage, setActiveConvoPercentage] = useState(userData.conversion_percentages?.active_convo || 0.02);
+  const [schedulingPercentage, setSchedulingPercentage] = useState(userData.conversion_percentages?.scheduling || 0.1);
+  const [demoSetPercentage, setDemoSetPercentage] = useState(userData.conversion_percentages?.demo_set || 0.2);
+  const [closedDemoPercentage, setClosedDemoPercentage] = useState(userData.conversion_percentages?.demo_won || 0.5);
+  const [notInterestedPercentage, setNotInterestedPercentage] = useState(userData.conversion_percentages?.not_interested || 0);
   useEffect(() => {
     updateConversionPercentages(
       userToken,

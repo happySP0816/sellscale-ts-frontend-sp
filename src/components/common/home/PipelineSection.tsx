@@ -131,16 +131,14 @@ export default function PipelineSection() {
     refetchOnWindowFocus: false,
   });
 
-  console.log(data);
-
   const activeConvoPercentage =
-    userData.conversion_percentages.active_convo || 0.02;
+    userData.conversion_percentages?.active_convo || 0.02;
   const schedulingPercentage =
-    userData.conversion_percentages.scheduling || 0.1;
-  const demoSetPercentage = userData.conversion_percentages.demo_set || 0.2;
-  const closedDemoPercentage = userData.conversion_percentages.demo_won || 0.5;
+    userData.conversion_percentages?.scheduling || 0.1;
+  const demoSetPercentage = userData.conversion_percentages?.demo_set || 0.2;
+  const closedDemoPercentage = userData.conversion_percentages?.demo_won || 0.5;
   const notInterestedPercentage =
-    userData.conversion_percentages.not_interested || 0;
+    userData.conversion_percentages?.not_interested || 0;
   const activeConvo_size =
     getProspectList(data || [], "active_convo").reduce(
       (acc, prospect) => acc + parseInt(prospect.contract_size),
@@ -171,7 +169,7 @@ export default function PipelineSection() {
             <Indicator color="pink" inline processing size={15} offset={12}>
               <Box sx={{ visibility: "hidden" }}>.</Box>
             </Indicator>{" "}
-            - {data?.length} active opportunities • Sorted by last contacted •
+            - {data?.filter((d) => d.category !== 'not_interested').length} active opportunities • Sorted by last contacted •
             Last updated {moment(new Date()).format("MMMM D, YYYY")}
           </Text>
         </Box>

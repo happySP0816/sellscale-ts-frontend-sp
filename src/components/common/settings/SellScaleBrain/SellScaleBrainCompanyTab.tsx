@@ -7,6 +7,7 @@ import {
   Container,
   LoadingOverlay,
   MultiSelect,
+  NumberInput,
   Text,
   TextInput,
   Textarea,
@@ -27,6 +28,7 @@ export default function SellScaleBrainCompanyTab() {
   const [companyCaseStudy, setCompanyCaseStudy] = React.useState("");
   const [valuePropsKeyPoints, setValuePropsKeyPoints] = React.useState("");
   const [toneAttributes, setToneAttributes]: any = React.useState([]);
+  const [contractSize, setContractSize] = useState(0);
 
   const [toneOptions, setToneOptions] = useState([
     { value: "professional", label: "Professional" },
@@ -62,6 +64,7 @@ export default function SellScaleBrainCompanyTab() {
     setToneAttributes(data.tone_attributes);
     setFetchingCompany(false);
     setNeedsSave(false);
+    setContractSize(data.contract_size);
   };
 
   const saveCompany = async () => {
@@ -80,6 +83,7 @@ export default function SellScaleBrainCompanyTab() {
         case_study: companyCaseStudy,
         value_prop_key_points: valuePropsKeyPoints,
         tone_attributes: toneAttributes,
+        contract_size: contractSize,
       }),
     });
     setFetchingCompany(false);
@@ -172,6 +176,21 @@ export default function SellScaleBrainCompanyTab() {
               setNeedsSave(true);
             }}
             mb="sm"
+          />
+
+          <NumberInput
+            label="Default Contract Size"
+            value={contractSize}
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+            formatter={(value) =>
+              !Number.isNaN(parseFloat(value))
+                ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+                : "$ "
+            }
+            onChange={(value) => {
+              setContractSize(value || 0);
+              setNeedsSave(true);
+            }}
           />
 
           <Button

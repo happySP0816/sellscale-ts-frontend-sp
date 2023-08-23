@@ -43,6 +43,7 @@ import {
   IconFilter,
   IconFileLambda,
   IconTrash,
+  IconFilterDollar,
 } from "@tabler/icons-react";
 import { LogoFull } from "@nav/Logo";
 import { LinksGroup } from "./NavBarLinksGroup";
@@ -381,12 +382,6 @@ export function NavbarNested(props: {
       icon: IconTools,
       links: [
         {
-          key: "tools-filters",
-          label: "Filters",
-          icon: IconFilter,
-          link: "/tools/filters",
-        },
-        {
           key: "tools-custom-data-point-importer",
           label: "Custom Data Point Importer",
           icon: IconFileLambda,
@@ -409,6 +404,12 @@ export function NavbarNested(props: {
           label: "Email Scraper",
           icon: IconAt,
           link: "/tools/email-scraper",
+        },
+        {
+          key: "tools-filters",
+          label: "Filters",
+          icon: IconFilter,
+          link: "/tools/filters",
         },
         {
           key: "tools-contacts-clean",

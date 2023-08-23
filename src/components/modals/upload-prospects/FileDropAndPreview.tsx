@@ -147,6 +147,7 @@ type FileDropAndPreviewProps = {
     fitReason: string;
     icpMatchingPrompt: string;
     contactObjective: string;
+    contractSize: number;
   };
   onUploadSuccess?: (archetypeId: number) => void;
   onUploadFailure?: () => void;
@@ -222,6 +223,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
           fitReason: props.createPersona.fitReason,
           icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
           contactObjective: props.createPersona.contactObjective,
+          contractSize: props.createPersona.contractSize,
         }
       );
       if (result.status === "error") {

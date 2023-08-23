@@ -255,7 +255,9 @@ export async function updateChannelStatus(
   prospectId: number,
   userToken: string,
   channelType: Channel,
-  newStatus: string
+  newStatus: string,
+  override: boolean = false,
+  quietly: boolean = false,
 ) {
   return await fetch(`${API_URL}/prospect/${prospectId}`, {
     method: "PATCH",
@@ -266,6 +268,8 @@ export async function updateChannelStatus(
     body: JSON.stringify({
       new_status: newStatus,
       channel_type: channelType,
+      override_status: override,
+      quietly: quietly,
     }),
   })
     .then(async (r) => {

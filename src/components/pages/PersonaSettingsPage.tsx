@@ -38,6 +38,7 @@ export default function PersonaSettingsPage() {
     personaFitReason: string;
     personaICPMatchingInstructions: string;
     personaContactObjective: string;
+    personaContractSize: number;
   }>();
 
   const triggerActivatePersona = async () => {
@@ -194,6 +195,7 @@ export default function PersonaSettingsPage() {
                   personaContactObjective={
                     currentProject.persona_contact_objective
                   }
+                  personaContractSize={currentProject.contract_size}
                   onUpdate={(data) => {
                     basics.current = data;
                   }}
@@ -214,6 +216,7 @@ export default function PersonaSettingsPage() {
                           updated_persona_fit_reason: basics.current?.personaFitReason,
                           updated_persona_icp_matching_prompt: basics.current?.personaICPMatchingInstructions,
                           updated_persona_contact_objective: basics.current?.personaContactObjective,
+                          updated_persona_contract_size: basics.current?.personaContractSize,
                         }),
                       }
                     );

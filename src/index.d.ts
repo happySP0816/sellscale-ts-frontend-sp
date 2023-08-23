@@ -99,6 +99,7 @@ export interface Prospect {
   in_icp_sample: boolean | null;
   icp_fit_score_override: number | null;
   email_store: EmailStore;
+  contract_size: number;
 }
 
 export interface ProspectShallow {
@@ -136,6 +137,7 @@ export interface ProspectShallow {
   email_unread_messages: number;
   in_icp_sample: boolean | null;
   icp_fit_score_override: number | null;
+  contract_size: number;
 };
 
 export interface ProspectDetails {
@@ -238,6 +240,7 @@ export interface Archetype {
   icp_matching_prompt: string;
   is_unassigned_contact_archetype: boolean;
   ctas: CTA[];
+  contract_size: number;
 }
 
 export interface PersonaOverview {
@@ -253,6 +256,7 @@ export interface PersonaOverview {
   persona_fit_reason: string;
   persona_contact_objective: string;
   uploads?: any[];
+  contract_size: number;
 }
 
 export interface LinkedInMessage {

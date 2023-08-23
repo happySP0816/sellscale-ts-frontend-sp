@@ -354,3 +354,34 @@ export function getRandomItems<T>(list: T[], numItems: number): T[] {
   return randomItems;
 }
 
+/**
+ * Returns the favicon URL for a given website
+ * @param url 
+ * @returns - Favicon URL
+ */
+export async function getFavIconFromURL(url: string): Promise<string | null> {
+
+  const urlParts = url.split('://');
+  const cleanURL = urlParts.length > 1 ? urlParts[1] : urlParts[0];
+
+  const response = await fetch(`https://favicongrabber.com/api/grab/${encodeURIComponent(cleanURL)}`);
+  if(!response.ok) return null;
+
+  const data = await response.json();
+  if(!data.icons || data.icons.length === 0) return null;
+
+  // Find the largest icon
+  let largestIcon = null;
+  for(const icon of data.icons){
+    if(largestIcon) {
+      if(icon.sizes && parseInt(icon.sizes) > parseInt(largestIcon.sizes)){
+        largestIcon = icon;
+      }
+    } else {
+      largestIcon = icon;
+    }
+  }
+
+  return largestIcon.src;
+}
+

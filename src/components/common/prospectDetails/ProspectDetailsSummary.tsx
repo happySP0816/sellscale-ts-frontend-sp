@@ -28,6 +28,7 @@ import {
   IconBuildingStore,
   IconPencil,
   IconHomeHeart,
+  IconBrandCashapp,
 } from "@tabler/icons";
 import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { patchProspectAIEnabled } from "@utils/requests/patchProspectAIEnabled";
@@ -67,6 +68,7 @@ type ProspectDetailsSummaryProps = {
   email_store?: EmailStore | null;
   icp_score?: number;
   icp_reason?: string;
+  contractSize?: number;
 };
 
 export default function ProspectDetailsSummary(
@@ -223,14 +225,14 @@ export default function ProspectDetailsSummary(
                   rel="noopener noreferrer"
                   href={companyURL}
                 >
-                  {props.companyName}
+                  {props.companyName}, {props.companyHQ}
                 </Text>
               </Group>
             )}
 
-            {props.companyHQ && (
+            {(
               <Group noWrap spacing={10} mt={5}>
-                <IconBuildingStore
+                <IconBrandCashapp
                   stroke={1.5}
                   size={16}
                   className={classes.icon}
@@ -239,7 +241,7 @@ export default function ProspectDetailsSummary(
                   size="xs"
                   color="dimmed"
                 >
-                  {props.companyHQ}
+                  {props.contractSize || 0}, contract size
                 </Text>
               </Group>
             )}

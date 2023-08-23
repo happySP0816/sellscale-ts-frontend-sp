@@ -5,6 +5,7 @@ import {
   Container,
   Flex,
   LoadingOverlay,
+  NumberInput,
   Text,
   Title,
 } from "@mantine/core";
@@ -26,16 +27,15 @@ export default function PersonaBrain(props: PropsType) {
   const [fetchedPersona, setFetchedPersona] = useState(false);
   const [loadingPersona, setLoadingPersona] = useState(false);
 
-  const [personaName, setPersonaName] = useState('');
+  const [personaName, setPersonaName] = useState("");
   const [loadingPersonaFitReason, setLoadingPersonaFitReason] = useState(false);
   const [personaFitReason, setPersonaFitReason] = useState("");
-  const [
-    personaICPMatchingInstructions,
-    setPersonaICPMatchingInstructions,
-  ] = useState("");
+  const [personaICPMatchingInstructions, setPersonaICPMatchingInstructions] =
+    useState("");
   const [personaContactObjective, setPersonaContactObjective] = useState("");
+  const [personaContractSize, setPersonaContractSize] = useState(0);
   const [needsSave, setNeedsSave] = useState(false);
-  
+
   const currentProject = useRecoilValue(currentProjectState);
 
   const archetype_id = props.archetype_id || currentProject?.id;
@@ -105,7 +105,7 @@ export default function PersonaBrain(props: PropsType) {
     fetchPersonaDetails();
   }, [archetype_id]);
 
-  if(!archetype_id){
+  if (!archetype_id) {
     return <></>;
   }
 
@@ -121,21 +121,25 @@ export default function PersonaBrain(props: PropsType) {
             recommendations, message generations, email generations, and more.
           </Text>
 
-          {fetchedPersona && <PersonaBasicForm
-            personaName={personaName}
-            personaFitReason={personaFitReason}
-            personaICPMatchingInstructions={personaICPMatchingInstructions}
-            personaContactObjective={personaContactObjective}
-            onUpdate={(data) => {
-              setPersonaName(data.personaName);
-              setPersonaFitReason(data.personaFitReason);
-              setPersonaICPMatchingInstructions(
-                data.personaICPMatchingInstructions
-              );
-              setPersonaContactObjective(data.personaContactObjective);
-              setNeedsSave(true);
-            }}
-          />}
+          {fetchedPersona && (
+            <PersonaBasicForm
+              personaName={personaName}
+              personaFitReason={personaFitReason}
+              personaICPMatchingInstructions={personaICPMatchingInstructions}
+              personaContactObjective={personaContactObjective}
+              personaContractSize={personaContractSize}
+              onUpdate={(data) => {
+                setPersonaName(data.personaName);
+                setPersonaFitReason(data.personaFitReason);
+                setPersonaICPMatchingInstructions(
+                  data.personaICPMatchingInstructions
+                );
+                setPersonaContactObjective(data.personaContactObjective);
+                setPersonaContractSize(data.personaContractSize);
+                setNeedsSave(true);
+              }}
+            />
+          )}
 
           <Button
             color="blue"
@@ -167,23 +171,30 @@ export function PersonaBasicForm(props: {
   personaFitReason: string;
   personaICPMatchingInstructions: string;
   personaContactObjective: string;
+  personaContractSize: number;
   onUpdate: (data: {
     personaName: string;
     personaFitReason: string;
     personaICPMatchingInstructions: string;
     personaContactObjective: string;
+    personaContractSize: number;
   }) => void;
 }) {
-
   const [userToken] = useRecoilState(userTokenState);
 
   const [personaName, setPersonaName] = useState(props.personaName);
   const [loadingPersonaFitReason, setLoadingPersonaFitReason] = useState(false);
-  const [personaFitReason, setPersonaFitReason] = useState(props.personaFitReason);
+  const [personaFitReason, setPersonaFitReason] = useState(
+    props.personaFitReason
+  );
   const [personaICPMatchingInstructions, setPersonaICPMatchingInstructions] =
     useState(props.personaICPMatchingInstructions);
-  const [personaContactObjective, setPersonaContactObjective] = useState(props.personaContactObjective);
-
+  const [personaContactObjective, setPersonaContactObjective] = useState(
+    props.personaContactObjective
+  );
+  const [personaContractSize, setPersonaContractSize] = useState(
+    props.personaContractSize
+  );
 
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaFitReason(true);
@@ -238,9 +249,10 @@ export function PersonaBasicForm(props: {
         personaFitReason: personaFitReason,
         personaICPMatchingInstructions: personaICPMatchingInstructions,
         personaContactObjective: personaContactObjective,
+        personaContractSize: personaContractSize,
       });
     }, 1);
-  }
+  };
 
   useEffect(() => {
     sendUpdate();
@@ -318,6 +330,20 @@ export function PersonaBasicForm(props: {
         value={personaContactObjective}
         onChange={(e) => {
           setPersonaContactObjective(e.currentTarget.value);
+          sendUpdate();
+        }}
+      />
+      <NumberInput
+        label="Default Contract Size"
+        value={personaContractSize}
+        parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+        formatter={(value) =>
+          !Number.isNaN(parseFloat(value))
+            ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+            : "$ "
+        }
+        onChange={(value) => {
+          setPersonaContractSize(value || 0);
           sendUpdate();
         }}
       />

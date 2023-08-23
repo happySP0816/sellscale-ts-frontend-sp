@@ -12,6 +12,7 @@ type PropsType = {
     fitReason: string;
     icpMatchingPrompt: string;
     contactObjective: string;
+    contractSize: number;
   };
 };
 
@@ -30,6 +31,7 @@ export default function CreatePersona(props: PropsType) {
         fitReason: props.createPersona.fitReason,
         icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
         contactObjective: props.createPersona.contactObjective,
+        contractSize: props.createPersona.contractSize,
       }
     );
     if (result.status === "error") {

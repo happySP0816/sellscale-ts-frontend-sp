@@ -19,6 +19,7 @@ import {
   FocusTrap,
   LoadingOverlay,
   Tabs,
+  NumberInput,
 } from "@mantine/core";
 import { ContextModalProps } from "@mantine/modals";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -39,7 +40,7 @@ import { DataTable } from "mantine-datatable";
 import FileDropAndPreview from "./upload-prospects/FileDropAndPreview";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import { Archetype, MsgResponse } from "src";
 import ComingSoonCard from "@common/library/ComingSoonCard";
@@ -55,6 +56,7 @@ export default function UploadProspectsModal({
   innerProps,
 }: ContextModalProps<{ mode: "ADD-ONLY" | "ADD-CREATE" | "CREATE-ONLY" }>) {
   const theme = useMantineTheme();
+  const userData = useRecoilValue(userDataState);
   const [personas, setPersonas] = useState<
     { value: string; label: string; group: string | undefined }[]
   >([]);
@@ -78,6 +80,8 @@ export default function UploadProspectsModal({
   const [contactObjective, setContactObjective] = useState(
     "Set up a discovery call in order to identify a pain point"
   );
+
+  const [personaContractSize, setPersonaContractSize] = useState(userData.client.contract_size);
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
@@ -410,6 +414,20 @@ export default function UploadProspectsModal({
               placeholder="To get a demo scheduled with the goal of potentially integrating our product into their workflow."
               onChange={(e) => setContactObjective(e.target.value)}
             />
+
+<NumberInput
+        label="Default Contract Size"
+        value={personaContractSize}
+        parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+        formatter={(value) =>
+          !Number.isNaN(parseFloat(value))
+            ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+            : "$ "
+        }
+        onChange={(value) => {
+          setPersonaContractSize(value || 0);
+        }}
+      />
           </Stack>
         )}
 
@@ -522,6 +540,7 @@ export default function UploadProspectsModal({
                       fitReason: fitReason,
                       icpMatchingPrompt: icpMatchingPrompt,
                       contactObjective: contactObjective,
+                      contractSize: personaContractSize,
                     }
                   : undefined
               }
@@ -542,6 +561,7 @@ export default function UploadProspectsModal({
                 fitReason: fitReason,
                 icpMatchingPrompt: icpMatchingPrompt,
                 contactObjective: contactObjective,
+                contractSize: personaContractSize,
               }}
             />
           </Tabs.Panel>

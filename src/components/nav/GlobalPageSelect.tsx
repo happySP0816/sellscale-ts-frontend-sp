@@ -15,6 +15,7 @@ import {
   IconActivity,
   IconBrandLinkedin,
   IconMail,
+  IconFilterDollar,
 } from '@tabler/icons-react';
 import { navigateToPage } from '@utils/documentChange';
 import { getSDRGeneralInfo } from '@utils/requests/getClientSDR';
@@ -80,6 +81,11 @@ export function GlobalPageSelect() {
       label: 'Global Contacts',
       icon: <IconAddressBook size="1rem" stroke={1.5} />,
       value: 'all-contacts',
+    },
+    {
+      label: 'Global Pipeline',
+      icon: <IconFilterDollar size="1rem" stroke={1.5} />,
+      value: 'all-pipeline',
     },
     {
       label: 'Global Recent Activity',

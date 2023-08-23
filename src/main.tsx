@@ -53,6 +53,7 @@ import { PersonaSplitPage } from '@common/persona/PersonaSplitPage';
 import CleanContactsPage from "@pages/CleanContactsPage";
 import PersonaSettingsPage from "@pages/PersonaSettingsPage";
 import EmailSimulatePage from "@pages/EmailSimulatePage";
+import PipelineSection from "@common/home/PipelineSection";
 
 const queryClient = new QueryClient();
 
@@ -250,6 +251,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "all/recent-activity",
         element: <RestrictedRoute page={<Box p='md'><RecentActivitySection all /></Box>} />,
+      },
+      {
+        path: "all/pipeline",
+        element: <RestrictedRoute page={<Box p='md'><PipelineSection /></Box>} />,
       },
       {
         path: "all/email-messages",

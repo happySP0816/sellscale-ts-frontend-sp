@@ -14,6 +14,7 @@ export async function updateProspect(
   email?: string,
   in_icp_sample?: boolean,
   icp_fit_score_override?: number,
+  contract_size?: number,
 ): Promise<MsgResponse> {
 
   const response = await fetch(
@@ -28,6 +29,7 @@ export async function updateProspect(
         email: email,
         in_icp_sample: in_icp_sample,
         icp_fit_score_override: icp_fit_score_override,
+        contract_size: contract_size,
       })
     }
   );

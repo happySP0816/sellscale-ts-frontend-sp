@@ -26,6 +26,8 @@ import PersonaFilters from "@common/persona/PersonaFilters";
 import { currentProjectState } from "@atoms/personaAtoms";
 import CustomResearchPointCard from "@common/persona/CustomResearchPointCard";
 import CampaignTable from "@common/campaigns/CampaignTable";
+import { IconFilterDollar } from "@tabler/icons-react";
+import PipelineSection from "@common/home/PipelineSection";
 
 export default function ToolsPage() {
   setPageTitle("Tools");

@@ -21,6 +21,7 @@ export async function patchProspect(
   linkedin_url?: string,
   company_name?: string,
   company_website?: string,
+  contract_size?: number,
 ): Promise<MsgResponse> {
 
   const response = await fetch(
@@ -37,6 +38,7 @@ export async function patchProspect(
         "linkedin_url": linkedin_url,
         "company_name": company_name,
         "company_website": company_website,
+        "contract_size": contract_size,
       }),
     }
   );

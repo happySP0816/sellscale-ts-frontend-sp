@@ -3,6 +3,7 @@ import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src";
 import createCTA from "./createCTA";
 import { API_URL } from "@constants/data";
+import { ex } from "@fullcalendar/core/internal-common";
 
 export default async function createPersona(
   userToken: string,
@@ -12,6 +13,7 @@ export default async function createPersona(
     fitReason: string;
     icpMatchingPrompt: string;
     contactObjective: string;
+    contractSize: number;
   }
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/archetype`, {
@@ -27,6 +29,7 @@ export default async function createPersona(
       fit_reason: extras.fitReason,
       icp_matching_prompt: extras.icpMatchingPrompt,
       contact_objective: extras.contactObjective,
+      contract_size: extras.contractSize,
     }),
   });
   if (response.status === 401) {

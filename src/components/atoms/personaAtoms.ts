@@ -66,6 +66,7 @@ const personaCreationState = atom({
       fitReason: '',
       contactObjective: '',
       fileJSON: [],
+      contract_size: 0,
     } as ArchetypeCreation,
     step: 0,
   },

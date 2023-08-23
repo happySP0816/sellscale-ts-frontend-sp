@@ -95,6 +95,7 @@ export default function ClonePersonaModal({
           personaFitReason={innerProps.persona.persona_fit_reason}
           personaICPMatchingInstructions={innerProps.persona.icp_matching_prompt}
           personaContactObjective={innerProps.persona.persona_contact_objective}
+          personaContractSize={innerProps.persona.contract_size}
           onUpdate={(data) => {
             basics.current = data;
           }}

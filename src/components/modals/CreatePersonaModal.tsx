@@ -80,6 +80,7 @@ export default function CreatePersonaModal({
         fitReason: persona.fitReason,
         icpMatchingPrompt: persona.icp_matching_prompt,
         contactObjective: persona.contactObjective,
+        contractSize: 10000,
       });
       if (response.status === 'success') {
         setPersona({

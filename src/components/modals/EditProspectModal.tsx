@@ -58,6 +58,7 @@ export default function EditProspectModal(props: EditProspect) {
         linkedinURL: result.data.li.li_profile,
         companyName: result.data.details.company,
         companyWebsite: result.data.details.company_url,
+        contractSize: result.data.data.contract_size || 0,
       });
     } else {
       showNotification({

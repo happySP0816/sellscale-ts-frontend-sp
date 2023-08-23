@@ -376,10 +376,10 @@ export type BumpFramework = {
   etl_num_times_converted?: number;
 };
 
-export type EmailBumpFramework = {
+export type EmailSequenceStep = {
   id: number;
   title: string;
-  email_blocks: string[];
+  template: string;
   overall_status: string;
   substatus: string;
   active: boolean;

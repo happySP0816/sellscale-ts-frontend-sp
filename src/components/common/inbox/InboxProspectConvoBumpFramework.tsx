@@ -26,7 +26,7 @@ import {
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, EmailBumpFramework, LinkedInMessage, Prospect, ProspectShallow } from 'src';
+import { BumpFramework, EmailSequenceStep, LinkedInMessage, Prospect, ProspectShallow } from 'src';
 import { showNotification } from '@mantine/notifications';
 import { postBumpGenerateEmailResponse, postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
 import _, { String } from 'lodash';
@@ -67,14 +67,14 @@ export const generateAIFollowup = async (userToken: string, prospectId: number, 
 };
 
 
-export const generateAIEmailReply = async (userToken: string, prospectId: number, emailThreadID: string, emailBumpFramework: EmailBumpFramework | undefined) => {
+export const generateAIEmailReply = async (userToken: string, prospectId: number, emailThreadID: string, emailSequenceStep: EmailSequenceStep | undefined) => {
 
   const result = await postBumpGenerateEmailResponse(
     userToken,
     prospectId,
     emailThreadID,
-    emailBumpFramework?.id,
-    [], // emailBumpFramework?.account_research?
+    emailSequenceStep?.id,
+    [], // EmailSequenceStep?.account_research?
   )
 
   if (result.status === 'success') {

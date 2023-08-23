@@ -2,17 +2,17 @@ import { userTokenState } from "@atoms/userAtoms";
 import EmailBlockPreview from "@common/emails/EmailBlockPreview";
 import { EmailBlocksDND } from "@common/emails/EmailBlocksDND";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
-import { Modal, TextInput, Text, Textarea, Tooltip, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, Divider, ScrollArea } from "@mantine/core";
+import { Modal, TextInput, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, Divider, ScrollArea } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons";
-import { createEmailBumpFramework } from "@utils/requests/createBumpFramework";
+import { createEmailSequenceStep } from "@utils/requests/emailSequencing";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import { MsgResponse } from "src";
 
 
-interface CreateBumpFrameworkEmail extends Record<string, unknown> {
+interface CreateEmailSequenceStep extends Record<string, unknown> {
   modalOpened: boolean;
   openModal: () => void;
   closeModal: () => void;
@@ -24,14 +24,14 @@ interface CreateBumpFrameworkEmail extends Record<string, unknown> {
   bumpedCount?: number | null;
 }
 
-export default function CreateBumpFrameworkEmailModal(props: CreateBumpFrameworkEmail) {
+export default function CreateEmailSequenceStepModal(props: CreateEmailSequenceStep) {
   const [userToken] = useRecoilState(userTokenState);
   const theme = useMantineTheme();
   const [loading, setLoading] = useState(false);
 
   const [selectedStatus, setSelectedStatus] = useState<string | null>('');
   const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>('');
-  const [emailBlocks, setEmailBlocks] = useState<string[]>([]);
+  const [template, setTemplate] = useState<string>('');
 
 
   const getActiveConvoSubstatusValues = () => {
@@ -64,12 +64,12 @@ export default function CreateBumpFrameworkEmailModal(props: CreateBumpFramework
       return;
     }
 
-    const result = await createEmailBumpFramework(
+    const result = await createEmailSequenceStep(
       userToken,
       form.values.archetypeID,
       selectedStatus as string,
       form.values.title,
-      emailBlocks,
+      "TODO: REPLACE ME WITH TEMPLATE",
       form.values.bumpedCount as number,
       form.values.default,
       selectedSubstatus
@@ -220,7 +220,7 @@ export default function CreateBumpFrameworkEmailModal(props: CreateBumpFramework
                     selectedSubstatus == null) ||
                   (selectedStatus === "BUMPED" &&
                     (form.values.bumpedCount == null || form.values.bumpedCount < 1)) ||
-                  emailBlocks.length === 0
+                  template.length === 0
                 }
                 onClick={() => {
                   triggerCreateBumpFramework();
@@ -239,13 +239,13 @@ export default function CreateBumpFrameworkEmailModal(props: CreateBumpFramework
               <EmailBlocksDND
                 archetypeId={props.archetypeID as number}
                 creating
-                getNewOrder={(newEmailBlocks) => { setEmailBlocks(newEmailBlocks) }}
+                getNewOrder={(newEmailBlocks) => { setTemplate("TODO:REPLACE ME") }}
               />
             </ScrollArea>
           </Flex>
           <Flex maw='50%' mah='80vh'>
             <ScrollArea type='hover'>
-              <EmailBlockPreview archetypeId={props.archetypeID as number} emailBlocks={emailBlocks} selectEmailBlock={false} />
+              <EmailBlockPreview archetypeId={props.archetypeID as number} template={template} selectTemplate={false} />
             </ScrollArea>
           </Flex>
         </Flex>

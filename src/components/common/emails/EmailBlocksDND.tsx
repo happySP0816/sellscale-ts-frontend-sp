@@ -12,7 +12,7 @@ import patchEmailBlocks from "@utils/requests/patchEmailBlocks";
 
 interface EmailBlockDNDProps {
   archetypeId: number,
-  emailBumpFrameworkId?: number,
+  emailSequenceStepId?: number,
   autosave?: boolean,
   // initialData: {
   //   position: number;
@@ -29,7 +29,7 @@ interface EmailBlockDNDProps {
 
 
 // Note that this makes a bypass on React.StrictMode in order to render properly
-export const EmailBlocksDND = ({ archetypeId, emailBumpFrameworkId, autosave, creating, getNewOrder }: EmailBlockDNDProps) => {
+export const EmailBlocksDND = ({ archetypeId, emailSequenceStepId, autosave, creating, getNewOrder }: EmailBlockDNDProps) => {
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -56,7 +56,7 @@ export const EmailBlocksDND = ({ archetypeId, emailBumpFrameworkId, autosave, cr
   const triggerGetEmailBlocks = async () => {
     setLoading(true);
 
-    const result = await getEmailBlocks(userToken, archetypeId, emailBumpFrameworkId);
+    const result = await getEmailBlocks(userToken, archetypeId, emailSequenceStepId);
 
     if (result.status !== "success") {
       showNotification({

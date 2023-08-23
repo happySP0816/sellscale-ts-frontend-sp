@@ -41,7 +41,7 @@ export async function postBumpGenerateResponse(
  * @param userToken
  * @param prospectID
  * @param emailThreadID // NOTE THAT THIS IS THE NYLAS THREAD ID
- * @param emailBumpFrameworkID
+ * @param emailSequenceStepID
  * @param customAccountResearch
  * @returns - MsgResponse
  */
@@ -49,7 +49,7 @@ export async function postBumpGenerateEmailResponse(
   userToken: string,
   prospectID: number,
   emailThreadID: string,
-  emailBumpFrameworkID?: number,
+  emailSequenceStepID?: number,
   customAccountResearch?: string[]
 ): Promise<MsgResponse> {
   const response = await fetch(
@@ -63,7 +63,7 @@ export async function postBumpGenerateEmailResponse(
       body: JSON.stringify({
         prospect_id: prospectID,
         email_thread_id: emailThreadID,
-        email_bump_framework_id: emailBumpFrameworkID,
+        email_bump_framework_id: emailSequenceStepID,
         custom_account_research: customAccountResearch,
       }),
     }

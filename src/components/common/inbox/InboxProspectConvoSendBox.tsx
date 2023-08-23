@@ -1,4 +1,4 @@
-import { openedProspectIdState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoLiMessageState, currentConvoChannelState, currentConvoEmailMessageState, fetchingProspectIdState, tempHiddenProspectsState, selectedEmailBumpFrameworkState, selectedEmailThread } from '@atoms/inboxAtoms';
+import { openedProspectIdState, openedBumpFameworksState, selectedBumpFrameworkState, currentConvoLiMessageState, currentConvoChannelState, currentConvoEmailMessageState, fetchingProspectIdState, tempHiddenProspectsState, selectedEmailSequenceStepState, selectedEmailThread } from '@atoms/inboxAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon, LoadingOverlay, Tooltip, Select, Box } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
@@ -11,7 +11,7 @@ import { sendLinkedInMessage } from '@utils/requests/sendMessage';
 import _, { debounce, get } from 'lodash';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, EmailBumpFramework, EmailThread, LinkedInMessage, Prospect } from 'src';
+import { BumpFramework, EmailSequenceStep, EmailThread, LinkedInMessage, Prospect } from 'src';
 import { generateAIEmailReply, generateAIFollowup } from './InboxProspectConvoBumpFramework';
 import AutoBumpFrameworkInfo from '@common/prospectDetails/AutoBumpFrameworkInfo';
 import { ratio as fuzzratio } from 'fuzzball';
@@ -76,14 +76,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
             }
           }
         },
-        setEmailBumpFrameworks: (emailBumpFrameworks: EmailBumpFramework[]) => {
-          setEmailBumpFrameworks(emailBumpFrameworks);
+        setEmailSequenceSteps: (emailSequenceSteps: EmailSequenceStep[]) => {
+          setEmailSequenceSteps(emailSequenceSteps);
           // Set the default bump framework
-          if (emailBumpFrameworks.length > 0) {
-            setEmailBumpFramework(emailBumpFrameworks[0]);
-            for (let i = 0; i < emailBumpFrameworks.length; i++) {
-              if (emailBumpFrameworks[i].default) {
-                setEmailBumpFramework(emailBumpFrameworks[i]);
+          if (emailSequenceSteps.length > 0) {
+            setEmailSequenceStep(emailSequenceSteps[0]);
+            for (let i = 0; i < emailSequenceSteps.length; i++) {
+              if (emailSequenceSteps[i].default) {
+                setEmailSequenceStep(emailSequenceSteps[i]);
                 break;
               }
             }
@@ -107,7 +107,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
   const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState); // LinkedIn
-  const [selectedEmailBumpFramework, setEmailBumpFramework] = useRecoilState(selectedEmailBumpFrameworkState); // Email
+  const [selectedEmailSequenceStep, setEmailSequenceStep] = useRecoilState(selectedEmailSequenceStepState); // Email
   const [currentConvoLiMessages, setCurrentConvoLiMessages] = useRecoilState(currentConvoLiMessageState);
   const [currentConvoEmailMessages, setCurrentConvoEmailMessages] = useRecoilState(currentConvoEmailMessageState);
   const [currentConvoEmailThread, setCurrentConvoEmailThread] = useRecoilState(selectedEmailThread);
@@ -115,7 +115,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [tempHiddenProspects, setTempHiddenProspects] = useRecoilState(tempHiddenProspectsState);
 
   const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
-  const [emailBumpFrameworks, setEmailBumpFrameworks] = useState<EmailBumpFramework[]>([]);
+  const [emailSequenceSteps, setEmailSequenceSteps] = useState<EmailSequenceStep[]>([]);
 
   // We use this to store the value of the text area
   const [messageDraft, _setMessageDraft] = useState('');
@@ -402,7 +402,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       setMsgLoading(false);
                       return;
                     }
-                    const result = await generateAIEmailReply(userToken, props.prospectId, currentConvoEmailThread.nylas_thread_id, selectedEmailBumpFramework)
+                    const result = await generateAIEmailReply(userToken, props.prospectId, currentConvoEmailThread.nylas_thread_id, selectedEmailSequenceStep)
                     // Clean the result
                     const message = result.message.replaceAll('\n', `<br />`)
                     messageDraftEmail.current = message
@@ -429,10 +429,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       };
                     }) : []
                   ) : (
-                    emailBumpFrameworks.length > 0 ? emailBumpFrameworks.map((bf: EmailBumpFramework) => {
+                    emailSequenceSteps.length > 0 ? emailSequenceSteps.map((step: EmailSequenceStep) => {
                       return {
-                        value: bf.id + "",
-                        label: (bf.default ? "🟢 " : "⚪️ ") + bf.title,
+                        value: step.id + "",
+                        label: (step.default ? "🟢 " : "⚪️ ") + step.title,
                       };
                     }) : []
                   )
@@ -449,9 +449,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       setBumpFramework(selected);
                     }
                   } else if (openedOutboundChannel === 'EMAIL') {
-                    const selected = emailBumpFrameworks.find((bf) => bf.id === parseInt(value as string));
+                    const selected = emailSequenceSteps.find((step) => step.id === parseInt(value as string));
                     if (selected) {
-                      setEmailBumpFramework(selected);
+                      setEmailSequenceStep(selected);
                     }
                   }
 

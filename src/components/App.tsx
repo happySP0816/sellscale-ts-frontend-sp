@@ -32,7 +32,7 @@ import DemoFeedbackDetailsModal from "@modals/DemoFeedbackDetailsModal";
 import VoiceBuilderModal from "@modals/VoiceBuilderModal";
 import CreatePersonaModal from "@modals/CreatePersonaModal";
 import EditBumpFrameworkModal from "@modals/EditBumpFrameworkModal";
-import EditBumpFrameworkEmailModal from "@modals/EditBumpFrameworkEmailModal";
+import EditEmailSequenceStepModal from "@modals/EditEmailSequenceStepModal";
 import VoiceEditorModal from "@modals/VoiceEditorModal";
 import AccountModal from "@modals/AccountModal";
 import AddProspectModal from "@modals/AddProspectModal";
@@ -127,7 +127,7 @@ export default function App() {
               demoFeedbackDetails: DemoFeedbackDetailsModal,
               createPersona: CreatePersonaModal,
               editBumpFramework: EditBumpFrameworkModal,
-              editBumpFrameworkEmail: EditBumpFrameworkEmailModal,
+              editEmailSequenceStepModal: EditEmailSequenceStepModal,
               voiceEditor: VoiceEditorModal,
               account: AccountModal,
               addProspect: AddProspectModal,

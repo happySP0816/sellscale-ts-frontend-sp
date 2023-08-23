@@ -20,14 +20,14 @@ import {
 import { ContextModalProps, closeAllModals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { IconSend } from '@tabler/icons';
+import { getEmailSequenceSteps } from '@utils/requests/emailSequencing';
 import { generateEmail, getEmailGenerationPrompt } from '@utils/requests/generateEmail';
-import { getEmailBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import { getEmailFollowupPrompt } from '@utils/requests/getEmailFollowupPrompt';
 import { sendEmail } from '@utils/requests/sendEmail';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useRecoilValue } from 'recoil';
-import { EmailBumpFramework } from 'src';
+import { EmailSequenceStep } from 'src';
 
 interface ComposeEmail extends Record<string, unknown> {
   email: string;
@@ -65,12 +65,12 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
   const [emailGenerationPrompt, setEmailGenerationPrompt] = useState('');
   const [collapseOpened, setCollapseOpened] = useState(false);
 
-  const [bumpFrameworks, setBumpFrameworks] = useState<EmailBumpFramework[]>([]);
-  const [selectedBumpFramework, setSelectedBumpFramework] = useState<EmailBumpFramework | null>(null);
+  const [bumpFrameworks, setBumpFrameworks] = useState<EmailSequenceStep[]>([]);
+  const [selectedBumpFramework, setSelectedBumpFramework] = useState<EmailSequenceStep | null>(null);
 
-  const triggerGetBumpFrameworks = async () => {
+  const triggerGetEmailSequenceSteps = async () => {
 
-    const result = await getEmailBumpFrameworks(userToken, [innerProps.overallStatus], [], [innerProps.archetypeID as number]);
+    const result = await getEmailSequenceSteps(userToken, [innerProps.overallStatus], [], [innerProps.archetypeID as number]);
 
     if (result.status !== 'success') {
       showNotification({
@@ -127,7 +127,7 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
 
   useEffect(() => {
     if (innerProps.reply) {
-      triggerGetBumpFrameworks();
+      triggerGetEmailSequenceSteps();
     }
   }, [])
 
@@ -182,7 +182,7 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
             onChange={(newVal) => {
               if (bumpFrameworks) {
                 const selected = bumpFrameworks.find((framework) => framework.id === parseInt(newVal as string));
-                setSelectedBumpFramework(selected as EmailBumpFramework);
+                setSelectedBumpFramework(selected as EmailSequenceStep);
               }
               fetchEmailGenerationPrompt(parseInt(newVal as string));
             }}

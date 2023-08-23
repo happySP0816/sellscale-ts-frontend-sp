@@ -15,7 +15,7 @@ import { setPageTitle } from "@utils/documentChange";
 import { useLoaderData } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import EmailBlocksPage from "./EmailBlocksPage";
-import BumpFrameworksEmailPage from "./BumpFrameworksEmailPage";
+import EmailSequencingPage from "./EmailSequencingPage";
 import { currentProjectState } from "@atoms/personaAtoms";
 
 export default function EmailPage() {
@@ -47,7 +47,7 @@ export default function EmailPage() {
           <EmailQueuedMessages />
         </Tabs.Panel>
         <Tabs.Panel value="setup" pt="xs">
-          <BumpFrameworksEmailPage />
+          <EmailSequencingPage />
         </Tabs.Panel>
         <Tabs.Panel value="campaign-analytics" pt="xs">
           <CampaignTable type="EMAIL" />

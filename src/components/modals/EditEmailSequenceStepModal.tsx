@@ -5,28 +5,27 @@ import { Button, Divider, Flex, LoadingOverlay, NumberInput, Paper, ScrollArea, 
 import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { patchEmailBumpFramework } from "@utils/requests/patchBumpFramework";
-import { postEmailBumpDeactivate } from "@utils/requests/postBumpDeactivate";
+import { patchSequenceStep, postSequenceStepDeactivate } from "@utils/requests/emailSequencing";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 
-interface EditBumpFrameworkEmail extends Record<string, unknown> {
-  emailBumpFrameworkID: number;
+interface EditEmailSequenceStep extends Record<string, unknown> {
+  emailSequenceStepID: number;
   archetypeID: number;
   overallStatus: string; // Note that this is used as an identifier
   title: string;
-  emailBlocks: string[];
+  template: string;
   default: boolean;
   onSave: () => void;
   bumpedCount?: number;
 }
 
-export default function EditEmailBumpFrameworkModal({ context, id, innerProps }: ContextModalProps<EditBumpFrameworkEmail>) {
+export default function EditEmailSequenceStepModal({ context, id, innerProps }: ContextModalProps<EditEmailSequenceStep>) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
 
-  const [emailBlocks, setEmailBlocks] = useState<string[]>(innerProps.emailBlocks);
+  const [template, setTemplate] = useState<string>(innerProps.template);
 
   const form = useForm({
     initialValues: {
@@ -39,9 +38,9 @@ export default function EditEmailBumpFrameworkModal({ context, id, innerProps }:
   const triggerPostBumpDeactivate = async () => {
     setLoading(true);
 
-    const result = await postEmailBumpDeactivate(
+    const result = await postSequenceStepDeactivate(
       userToken,
-      innerProps.emailBumpFrameworkID,
+      innerProps.emailSequenceStepID,
     );
     if (result.status === "success") {
       showNotification({
@@ -62,15 +61,15 @@ export default function EditEmailBumpFrameworkModal({ context, id, innerProps }:
     setLoading(false);
   };
 
-  const triggerEditEmailBumpFramework = async () => {
+  const triggerEditEmailSequenceStep = async () => {
     setLoading(true);
 
-    const result = await patchEmailBumpFramework(
+    const result = await patchSequenceStep(
       userToken,
-      innerProps.emailBumpFrameworkID,
+      innerProps.emailSequenceStepID,
       innerProps.overallStatus,
       form.values.title,
-      emailBlocks,
+      'TODO: REPLACE ME WITH TEMPLATE',
       form.values.bumpedCount,
       form.values.default,
     );
@@ -146,12 +145,12 @@ export default function EditEmailBumpFrameworkModal({ context, id, innerProps }:
               <ScrollArea type='hover' mt='xl' offsetScrollbars>
                 <EmailBlocksDND
                   archetypeId={innerProps.archetypeID as number}
-                  emailBumpFrameworkId={innerProps.emailBumpFrameworkID as number}
+                  emailSequenceStepId={innerProps.emailSequenceStepID as number}
                   getNewOrder={(newEmailBlocks) => {
                     if (newEmailBlocks.length === 0) {
                       return;
                     }
-                    setEmailBlocks(newEmailBlocks)
+                    setTemplate("TODO: REPLACE ME")
                   }}
                 />
               </ScrollArea>
@@ -175,15 +174,15 @@ export default function EditEmailBumpFrameworkModal({ context, id, innerProps }:
                       form.values.default &&
                       innerProps.bumpedCount ==
                       form.values.bumpedCount &&
-                      innerProps.emailBlocks ==
-                      emailBlocks ?
+                      innerProps.template ==
+                      template ?
                       (
                         <></>
                       ) : (
                         <Button
                           mt="md"
                           onClick={() => {
-                            triggerEditEmailBumpFramework();
+                            triggerEditEmailSequenceStep();
                           }}
                         >
                           Save
@@ -197,7 +196,7 @@ export default function EditEmailBumpFrameworkModal({ context, id, innerProps }:
 
           <Flex w='50%' mah='80vh'>
             <ScrollArea type='hover'>
-              <EmailBlockPreview archetypeId={innerProps.archetypeID as number} emailBlocks={emailBlocks} selectEmailBlock={false} />
+              <EmailBlockPreview archetypeId={innerProps.archetypeID as number} template={template} selectTemplate={false} />
             </ScrollArea>
           </Flex>
 

@@ -24,52 +24,132 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import CreateBumpFrameworkEmailModal from "@modals/CreateBumpFrameworkEmailModal";
+import CreateEmailSequenceStepModal from "@modals/CreateEmailSequenceStepModal.tsx";
 import {
-  IconBook,
   IconCheck,
   IconEdit,
-  IconList,
   IconMessages,
   IconPlus,
-  IconRobot,
   IconX,
 } from "@tabler/icons";
 import { IconBrandTelegram, IconMessageUp } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { valueToColor } from "@utils/general";
-import { getEmailBumpFrameworks } from "@utils/requests/getBumpFrameworks";
+import { getEmailSequenceSteps } from "@utils/requests/emailSequencing";
 import getChannels from "@utils/requests/getChannels";
-import getPersonas from "@utils/requests/getPersonas";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { EmailBumpFramework, MsgResponse } from "src";
+import { EmailSequenceStep, MsgResponse } from "src";
 
-type EmailBumpFrameworkBuckets = {
+type EmailSequenceStepBuckets = {
+  PROSPECTED: {
+    total: number;
+    templates: EmailSequenceStep[];
+  }
   ACCEPTED: {
     total: number;
-    frameworks: EmailBumpFramework[];
+    templates: EmailSequenceStep[];
   };
   BUMPED: Record<
     string,
     {
       total: number;
-      frameworks: EmailBumpFramework[];
+      templates: EmailSequenceStep[];
     }
   >;
   ACTIVE_CONVO: {
     total: number;
-    frameworks: EmailBumpFramework[];
+    templates: EmailSequenceStep[];
   };
 };
 
-function EmailBumpBucketView(props: {
-  bumpBucket: {
+function EmailInitialOutboundView(props: {
+  initialOutboundBucket: {
+    total: number,
+    templates: EmailSequenceStep[];
+  },
+  archetypeID: number | null;
+  afterCreate: () => void;
+  afterEdit: () => void;
+}) {
+
+  const [showAll, setShowAll] = useState(false);
+
+  return (
+    <>
+      <Card shadow="sm" padding="sm" withBorder w="100%">
+        {/* Header */}
+        <Flex justify="space-between" align="center">
+          <Flex align="center">
+            <Title order={5}>First Message</Title>
+            <Text ml="sm" size="xs">
+              Hyperpersonalized cold outreach sent to the prospect.
+            </Text>
+          </Flex>
+
+        </Flex>
+        <Card.Section>
+          <Divider mt="sm" />
+          <Flex px='md' direction='column'>
+            {/* Subject Line */}
+            <Flex direction='row' mt='sm' mb='6px'>
+              <Title order={5}>Subject Line: </Title>
+            </Flex>
+
+            {/* Body */}
+            {props.initialOutboundBucket?.templates?.map((template, index) => {
+              if (index > 0 && !showAll) {
+                return <></>;
+              }
+
+              return (
+                <>
+                  <Flex direction='row' align={'center'} mb='md'>
+                  <Text fz='sm'>
+                    {props.initialOutboundBucket.templates[0]?.template}
+                  </Text>
+                  <Tooltip label="Edit Template" withinPortal>
+                    <ActionIcon
+                      onClick={() => {
+                        openContextModal({
+                          modal: "editEmailSequenceStepModal",
+                          title: (
+                            <Title order={3}>Edit: {template.title}</Title>
+                          ),
+                          innerProps: {
+                            emailSequenceStepID: template.id,
+                            archetypeID: props.archetypeID,
+                            overallStatus: template.overall_status,
+                            title: template.title,
+                            template: template.template,
+                            default: template.default,
+                            onSave: props.afterEdit,
+                            bumpedCount: template.bumped_count,
+                          },
+                        });
+                      }}
+                    >
+                      <IconEdit size="1.25rem" />
+                    </ActionIcon>
+                  </Tooltip>
+                  </Flex>
+                </>
+              )
+            })
+            }
+          </Flex>
+        </Card.Section>
+      </Card>
+    </>
+  )
+}
+
+function EmailSequenceStepView(props: {
+  sequenceBucket: {
     total: number;
-    frameworks: EmailBumpFramework[];
+    templates: EmailSequenceStep[];
   };
-  bucketViewTitle: string;
-  bucketViewDescription: string;
+  sequenceStepTitle: string;
+  sequenceStepDescription: string;
   status: string;
   dataChannels: MsgResponse | undefined;
   archetypeID: number | null;
@@ -79,7 +159,7 @@ function EmailBumpBucketView(props: {
 }) {
   const theme = useMantineTheme();
 
-  const [createBFModalOpened, { open, close }] = useDisclosure();
+  const [createSequenceStepModalOpened, { open, close }] = useDisclosure();
   const [showAll, setShowAll] = useState(false);
 
   return (
@@ -88,18 +168,18 @@ function EmailBumpBucketView(props: {
         {/* Header */}
         <Flex justify="space-between" align="center">
           <Flex align="center">
-            <Title order={5}>{props.bucketViewTitle}</Title>
+            <Title order={5}>{props.sequenceStepTitle}</Title>
             <Text ml="sm" size="xs">
-              {props.bucketViewDescription}
+              {props.sequenceStepDescription}
             </Text>
           </Flex>
-          <Tooltip label="Create a new Bump Framework" withinPortal>
+          <Tooltip label="Create a new Template" withinPortal>
             <ActionIcon onClick={open}>
               <IconPlus size="1.25rem" />
             </ActionIcon>
           </Tooltip>
-          <CreateBumpFrameworkEmailModal
-            modalOpened={createBFModalOpened}
+          <CreateEmailSequenceStepModal
+            modalOpened={createSequenceStepModalOpened}
             openModal={open}
             closeModal={close}
             backFunction={props.afterCreate}
@@ -113,17 +193,17 @@ function EmailBumpBucketView(props: {
           <Divider mt="sm" />
         </Card.Section>
 
-        {/* Bump Frameworks */}
+        {/* Sequence Steps */}
         <Card.Section px="xs">
-          {props.bumpBucket && Object.keys(props.bumpBucket).length === 0 ? (
-            // No Bump Frameworks
+          {props.sequenceBucket && Object.keys(props.sequenceBucket).length === 0 ? (
+            // No Sequence Steps
             <Text>
-              Please create a Bump Framework using the + button above.
+              Please create a Sequence Step using the + button above.
             </Text>
           ) : (
             <>
-              {props.bumpBucket.frameworks.map((framework, index) => {
-                // Show only the first Bump Framework of not showing all
+              {props.sequenceBucket?.templates?.map((template, index) => {
+                // Show only the first Sequence Step of not showing all
                 if (index > 0 && !showAll) {
                   return <></>;
                 }
@@ -136,9 +216,9 @@ function EmailBumpBucketView(props: {
                           ml="md"
                           onLabel="Default"
                           offLabel="Default"
-                          checked={framework.default}
+                          checked={template.default}
                           thumbIcon={
-                            framework.default ? (
+                            template.default ? (
                               <IconCheck
                                 size="0.8rem"
                                 color={
@@ -159,7 +239,7 @@ function EmailBumpBucketView(props: {
                           disabled={true}
                           styles={{
                             label: {
-                              backgroundColor: framework.default
+                              backgroundColor: template.default
                                 ? theme.colors.teal[theme.fn.primaryShade()]
                                 : theme.colors.red[theme.fn.primaryShade()],
                             },
@@ -167,27 +247,27 @@ function EmailBumpBucketView(props: {
                         />
                         <Flex direction="column" ml="xl">
                           <Text fw="bold" fz="lg">
-                            {framework.title}
+                            {template.title}
                           </Text>
                         </Flex>
                       </Flex>
-                      <Tooltip label="Edit Bump Framework" withinPortal>
+                      <Tooltip label="Edit Template" withinPortal>
                         <ActionIcon
                           onClick={() => {
                             openContextModal({
-                              modal: "editBumpFrameworkEmail",
+                              modal: "editEmailSequenceStepModal",
                               title: (
-                                <Title order={3}>Edit: {framework.title}</Title>
+                                <Title order={3}>Edit: {template.title}</Title>
                               ),
                               innerProps: {
-                                emailBumpFrameworkID: framework.id,
+                                emailSequenceStepID: template.id,
                                 archetypeID: props.archetypeID,
-                                overallStatus: framework.overall_status,
-                                title: framework.title,
-                                emailBlocks: framework.email_blocks,
-                                default: framework.default,
+                                overallStatus: template.overall_status,
+                                title: template.title,
+                                template: template.template,
+                                default: template.default,
                                 onSave: props.afterEdit,
-                                bumpedCount: framework.bumped_count,
+                                bumpedCount: template.bumped_count,
                               },
                             });
                           }}
@@ -202,7 +282,7 @@ function EmailBumpBucketView(props: {
                   </>
                 );
               })}
-              {props.bumpBucket.frameworks.length > 1 && (
+              {props.sequenceBucket.templates.length > 1 && (
                 <Card.Section>
                   <Flex justify="center">
                     <Button
@@ -218,7 +298,7 @@ function EmailBumpBucketView(props: {
                     >
                       {showAll
                         ? "Hide"
-                        : `Show all ${props.bumpBucket.total} frameworks...`}
+                        : `Show all ${props.sequenceBucket.total} frameworks...`}
                     </Button>
                   </Flex>
                 </Card.Section>
@@ -233,7 +313,7 @@ function EmailBumpBucketView(props: {
 
 // function QuestionObjectionLibraryCard(props: {
 //   archetypeID: number | null;
-//   bumpFramework: EmailBumpFramework;
+//   bumpFramework: EmailSequenceStep;
 //   afterEdit: () => void;
 // }) {
 //   const theme = useMantineTheme();
@@ -285,9 +365,9 @@ function EmailBumpBucketView(props: {
 //   );
 // }
 
-export default function BumpFrameworksEmailPage(props: {
+export default function EmailSequencingPage(props: {
   predefinedPersonaId?: number;
-  onPopulateBumpFrameworks?: (buckets: EmailBumpFrameworkBuckets) => void;
+  onPopulateSequenceSteps?: (buckets: EmailSequenceStepBuckets) => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
 
@@ -302,17 +382,21 @@ export default function BumpFrameworksEmailPage(props: {
   // const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
   //   useDisclosure();
 
-  const bumpBuckets = useRef<EmailBumpFrameworkBuckets>({
+  const sequenceBuckets = useRef<EmailSequenceStepBuckets>({
+    PROSPECTED: {
+      total: 0,
+      templates: [],
+    },
     ACCEPTED: {
       total: 0,
-      frameworks: [],
+      templates: [],
     },
     BUMPED: {},
     ACTIVE_CONVO: {
       total: 0,
-      frameworks: [],
+      templates: [],
     },
-  } as EmailBumpFrameworkBuckets);
+  } as EmailSequenceStepBuckets);
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -322,10 +406,10 @@ export default function BumpFrameworksEmailPage(props: {
     refetchOnWindowFocus: false,
   });
 
-  const triggerGetBumpFrameworks = async () => {
+  const triggerGetEmailSequenceSteps = async () => {
     setLoading(true);
 
-    const result = await getEmailBumpFrameworks(
+    const result = await getEmailSequenceSteps(
       userToken,
       [],
       [],
@@ -336,7 +420,7 @@ export default function BumpFrameworksEmailPage(props: {
       setLoading(false);
       showNotification({
         title: "Error",
-        message: "Could not get bump frameworks.",
+        message: "Could not get sequence steps.",
         color: "red",
         autoClose: false,
       });
@@ -344,62 +428,73 @@ export default function BumpFrameworksEmailPage(props: {
     }
 
     // Populate bump buckets
-    let newBumpBuckets = {
+    let newsequenceBuckets = {
+      PROSPECTED: {
+        total: 0,
+        templates: [],
+      },
       ACCEPTED: {
         total: 0,
-        frameworks: [],
+        templates: [],
       },
       BUMPED: {},
       ACTIVE_CONVO: {
         total: 0,
-        frameworks: [],
+        templates: [],
       },
-    } as EmailBumpFrameworkBuckets;
+    } as EmailSequenceStepBuckets;
     for (const bumpFramework of result.data
-      .bump_frameworks as EmailBumpFramework[]) {
+      .sequence_steps as EmailSequenceStep[]) {
       const status = bumpFramework.overall_status;
-      if (status === "ACCEPTED") {
-        newBumpBuckets.ACCEPTED.total += 1;
+      if (status === "PROSPECTED") {
+        newsequenceBuckets.PROSPECTED.total += 1;
         if (bumpFramework.default) {
-          newBumpBuckets.ACCEPTED.frameworks.unshift(bumpFramework);
+          newsequenceBuckets.PROSPECTED.templates.unshift(bumpFramework);
         } else {
-          newBumpBuckets.ACCEPTED.frameworks.push(bumpFramework);
+          newsequenceBuckets.PROSPECTED.templates.push(bumpFramework);
+        }
+      } else if (status === "ACCEPTED") {
+        newsequenceBuckets.ACCEPTED.total += 1;
+        if (bumpFramework.default) {
+          newsequenceBuckets.ACCEPTED.templates.unshift(bumpFramework);
+        } else {
+          newsequenceBuckets.ACCEPTED.templates.push(bumpFramework);
         }
       } else if (status === "BUMPED") {
         const bumpCount = bumpFramework.bumped_count as number;
-        if (!(bumpCount in newBumpBuckets.BUMPED)) {
-          newBumpBuckets.BUMPED[bumpCount] = {
+        if (!(bumpCount in newsequenceBuckets.BUMPED)) {
+          newsequenceBuckets.BUMPED[bumpCount] = {
             total: 0,
-            frameworks: [],
+            templates: [],
           };
         }
-        newBumpBuckets.BUMPED[bumpCount].total += 1;
+        newsequenceBuckets.BUMPED[bumpCount].total += 1;
         if (bumpFramework.default) {
-          newBumpBuckets.BUMPED[bumpCount].frameworks.unshift(bumpFramework);
+          newsequenceBuckets.BUMPED[bumpCount].templates.unshift(bumpFramework);
         } else {
-          newBumpBuckets.BUMPED[bumpCount].frameworks.push(bumpFramework);
+          newsequenceBuckets.BUMPED[bumpCount].templates.push(bumpFramework);
         }
       } else if (status === "ACTIVE_CONVO") {
-        newBumpBuckets.ACTIVE_CONVO.total += 1;
+        newsequenceBuckets.ACTIVE_CONVO.total += 1;
         if (bumpFramework.default) {
-          newBumpBuckets.ACTIVE_CONVO.frameworks.unshift(bumpFramework);
+          newsequenceBuckets.ACTIVE_CONVO.templates.unshift(bumpFramework);
         } else {
-          newBumpBuckets.ACTIVE_CONVO.frameworks.push(bumpFramework);
+          newsequenceBuckets.ACTIVE_CONVO.templates.push(bumpFramework);
         }
       }
     }
-    bumpBuckets.current = newBumpBuckets;
+    sequenceBuckets.current = newsequenceBuckets;
 
     // BumpFrameworks have been updated, submit event to parent
-    if (props.onPopulateBumpFrameworks) {
-      props.onPopulateBumpFrameworks(newBumpBuckets);
+    if (props.onPopulateSequenceSteps) {
+      props.onPopulateSequenceSteps(newsequenceBuckets);
     }
 
     setLoading(false);
   };
 
   useEffect(() => {
-    triggerGetBumpFrameworks();
+    triggerGetEmailSequenceSteps();
   }, [archetypeID]);
 
   if (currentProject === undefined || currentProject === null) {
@@ -416,19 +511,13 @@ export default function BumpFrameworksEmailPage(props: {
           <Tabs
             color="blue"
             variant="outline"
-            defaultValue="initial"
+            defaultValue="sequence"
             my="lg"
             orientation="horizontal"
           >
             <Tabs.List>
-              <Tabs.Tab
-                value="initial"
-                icon={<IconBrandTelegram size="0.8rem" />}
-              >
-                Initial Outreach
-              </Tabs.Tab>
               <Tabs.Tab value="sequence" icon={<IconMessageUp size="0.8rem" />}>
-                Bumping
+                Sequence
               </Tabs.Tab>
               <Tabs.Tab
                 value="qnolibrary"
@@ -438,55 +527,52 @@ export default function BumpFrameworksEmailPage(props: {
               </Tabs.Tab>
             </Tabs.List>
 
-            <Tabs.Panel value="initial">
-              <Flex w="100%" mt={10} gap={25}>
-                <Flex w="50%">
-                  <EmailBlocksDND archetypeId={currentProject.id} autosave />
-                </Flex>
-                <Flex w="50%" direction="column">
-                  <EmailBlockPreview
-                    archetypeId={currentProject.id}
-                    selectEmailBlock={false}
-                  />
-                </Flex>
-              </Flex>
-            </Tabs.Panel>
-
             <Tabs.Panel value="sequence">
               <Flex direction="row" mt="md">
                 <Flex w="60%" direction="column">
-                  <Flex direction="column">
-                    <Title order={3}>Email Bump Frameworks</Title>
+                  <Flex direction="column" mb='md'>
+                    <Title order={3}>Email Sequencing</Title>
                     <Text fz="md" mt="2px">
                       Configure your first email and followup emails using Email
-                      Bump Frameworks. Default frameworks are always
+                      Sequencing Templates. Default templates are always
                       prioritized.
                     </Text>
                   </Flex>
-                  <Divider mt="sm" mb="md" />
+
+                  {/* First Message */}
+                  <EmailInitialOutboundView
+                    initialOutboundBucket={sequenceBuckets.current?.PROSPECTED}
+                    archetypeID={archetypeID}
+                    afterCreate={triggerGetEmailSequenceSteps}
+                    afterEdit={triggerGetEmailSequenceSteps}
+                  />
+
+                  <Divider label='After sending your hyperpersonalized cold email' labelPosition='center' mt='md' mb='md' />
+
+                  {/* Sequence Steps */}
                   {!loading && archetypeID ? (
                     <ScrollArea w="100%">
                       <Flex direction="column">
                         {/* Accepted */}
-                        <EmailBumpBucketView
-                          bumpBucket={bumpBuckets.current?.ACCEPTED}
-                          bucketViewTitle={"First / Initial Followup"}
-                          bucketViewDescription={
-                            "Prospects who have opened your email."
+                        <EmailSequenceStepView
+                          sequenceBucket={sequenceBuckets.current?.ACCEPTED}
+                          sequenceStepTitle={"First / Initial Followup"}
+                          sequenceStepDescription={
+                            "Prospects who have not received any followup."
                           }
                           status={"ACCEPTED"}
                           dataChannels={dataChannels}
                           archetypeID={archetypeID}
-                          afterCreate={triggerGetBumpFrameworks}
-                          afterEdit={triggerGetBumpFrameworks}
+                          afterCreate={triggerGetEmailSequenceSteps}
+                          afterEdit={triggerGetEmailSequenceSteps}
                         />
 
                         {/* Bumped (map) */}
-                        {Object.keys(bumpBuckets.current?.BUMPED).map(
+                        {Object.keys(sequenceBuckets.current?.BUMPED).map(
                           (bumpCount) => {
                             const bumpCountInt = parseInt(bumpCount);
-                            const bumpBucket =
-                              bumpBuckets.current?.BUMPED[bumpCountInt];
+                            const sequenceBucket =
+                              sequenceBuckets.current?.BUMPED[bumpCountInt];
 
                             const bumpToFollowupMap: Record<string, string> = {
                               "1": "Second",
@@ -504,22 +590,21 @@ export default function BumpFrameworksEmailPage(props: {
                               return;
                             }
 
-                            if (bumpCount === "0" || !bumpBucket) {
+                            if (bumpCount === "0" || !sequenceBucket) {
                               return;
                             }
                             return (
                               <Flex mt="md" w="100%">
-                                <EmailBumpBucketView
-                                  bumpBucket={bumpBucket}
-                                  bucketViewTitle={`${followupString} Followup`}
-                                  bucketViewDescription={`This is followup #${
-                                    bumpCountInt + 1
-                                  }`}
+                                <EmailSequenceStepView
+                                  sequenceBucket={sequenceBucket}
+                                  sequenceStepTitle={`${followupString} Followup`}
+                                  sequenceStepDescription={`This is followup #${bumpCountInt + 1
+                                    }`}
                                   status={"BUMPED"}
                                   dataChannels={dataChannels}
                                   archetypeID={archetypeID}
-                                  afterCreate={triggerGetBumpFrameworks}
-                                  afterEdit={triggerGetBumpFrameworks}
+                                  afterCreate={triggerGetEmailSequenceSteps}
+                                  afterEdit={triggerGetEmailSequenceSteps}
                                   bumpedCount={bumpCountInt}
                                 />
                               </Flex>
@@ -535,33 +620,33 @@ export default function BumpFrameworksEmailPage(props: {
                             w="50%"
                             onClick={openSequenceStep}
                             disabled={
-                              Object.keys(bumpBuckets.current?.BUMPED).length >
+                              Object.keys(sequenceBuckets.current?.BUMPED).length >
                               10
                             }
                           >
                             Add another sequence step
                           </Button>
-                          <CreateBumpFrameworkEmailModal
+                          <CreateEmailSequenceStepModal
                             modalOpened={addNewSequenceStepOpened}
                             openModal={openSequenceStep}
                             closeModal={closeSequenceStep}
-                            backFunction={triggerGetBumpFrameworks}
+                            backFunction={triggerGetEmailSequenceSteps}
                             dataChannels={dataChannels}
                             status={"BUMPED"}
                             showStatus={false}
                             archetypeID={archetypeID}
                             bumpedCount={
-                              Object.keys(bumpBuckets.current?.BUMPED).length +
+                              Object.keys(sequenceBuckets.current?.BUMPED).length +
                               1
                             }
                           />
-                          {Object.keys(bumpBuckets.current?.BUMPED).length >
+                          {Object.keys(sequenceBuckets.current?.BUMPED).length >
                             10 && (
-                            <Text color="red" mt="md" mb="md">
-                              You have reached the maximum number of sequence
-                              steps.
-                            </Text>
-                          )}
+                              <Text color="red" mt="md" mb="md">
+                                You have reached the maximum number of sequence
+                                steps.
+                              </Text>
+                            )}
                         </Flex>
                       </Flex>
                     </ScrollArea>
@@ -574,7 +659,7 @@ export default function BumpFrameworksEmailPage(props: {
                 <Flex ml="sm">
                   <EmailBlockPreview
                     archetypeId={currentProject.id}
-                    selectEmailBlock
+                    selectTemplate
                   />
                 </Flex>
               </Flex>
@@ -604,11 +689,11 @@ export default function BumpFrameworksEmailPage(props: {
                   archetypeID={archetypeID}
                 />
                 <Grid>
-                  {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
+                  {Object.keys(sequenceBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
                     return (
                       <Grid.Col span={6}>
                         <QuestionObjectionLibraryCard
-                          bumpFramework={bumpBuckets.current?.ACTIVE_CONVO.frameworks[index]}
+                          bumpFramework={sequenceBuckets.current?.ACTIVE_CONVO.frameworks[index]}
                           archetypeID={archetypeID}
                           afterEdit={triggerGetBumpFrameworks}
                         />

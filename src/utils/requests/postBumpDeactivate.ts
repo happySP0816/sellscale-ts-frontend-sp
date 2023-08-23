@@ -27,30 +27,3 @@ export async function postBumpDeactivate(userToken: string, bumpFrameworkID: num
   return await processResponse(response);
 
 }
-
-
-/**
- * Deactivates an email bump
- * @param userToken 
- * @param bumpFrameworkID
- * @returns - MsgResponse
- */
-export async function postEmailBumpDeactivate(userToken: string, bumpFrameworkID: number): Promise<MsgResponse> {
-
-  const response = await fetch(
-    `${API_URL}/bump_framework_email/bump/deactivate`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        bump_framework_id: bumpFrameworkID,
-      })
-    }
-  );
-  return await processResponse(response);
-
-}
-

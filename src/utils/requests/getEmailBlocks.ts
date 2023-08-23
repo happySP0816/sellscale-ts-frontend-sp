@@ -7,13 +7,13 @@ import { API_URL } from "@constants/data";
  * Gets all email blocks for a persona
  * @param userToken
  * @param archetypeId
- * @param emailBumpFrameworkID
+ * @param EmailSequenceStepID
  * @returns - MsgResponse
  */
-export default async function getEmailBlocks(userToken: string, archetypeId: number, emailBumpFrameworkID?: number): Promise<MsgResponse> {
+export default async function getEmailBlocks(userToken: string, archetypeId: number, EmailSequenceStepID?: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/client/archetype/${archetypeId}/email_blocks${emailBumpFrameworkID ? ('/' + emailBumpFrameworkID) : ''}`,
+    `${API_URL}/client/archetype/${archetypeId}/email_blocks${EmailSequenceStepID ? ('/' + EmailSequenceStepID) : ''}`,
     {
       method: "GET",
       headers: {

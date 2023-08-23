@@ -23,9 +23,10 @@ import { generateEmailAutomatic } from '@utils/requests/generateEmail';
 import { getArchetypeProspects } from '@utils/requests/getArchetypeProspects';
 import { forwardRef, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { EmailBumpFramework, ProspectShallow } from 'src';
+import { EmailSequenceStep, ProspectShallow } from 'src';
 import { Markdown } from 'tiptap-markdown';
-import { getEmailBumpFrameworks } from '@utils/requests/getBumpFrameworks';
+import { getEmailSequenceSteps } from '@utils/requests/emailSequencing';
+
 
 interface ProspectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -51,7 +52,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function EmailBlockPreview(props: { archetypeId: number, emailBlocks?: string[], selectEmailBlock?: boolean }) {
+export default function EmailBlockPreview(props: { archetypeId: number, template?: string, selectTemplate?: boolean }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const userToken = useRecoilValue(userTokenState);
@@ -61,14 +62,14 @@ export default function EmailBlockPreview(props: { archetypeId: number, emailBlo
   const [loading, setLoading] = useState(false);
   const [previewEmail, setPreviewEmail] = useState<{ subject: string; body: string } | null>(null);
 
-  const [bumpFrameworkEmails, setBumpFrameworkEmails] = useState<EmailBumpFramework[]>([]);
-  const [selectedBumpFramework, setSelectedBumpFramework] = useState<EmailBumpFramework | undefined>(undefined);
-  const triggerGetEmailBumpFrameworks = async () => {
+  const [emailSequenceSteps, setemailSequenceSteps] = useState<EmailSequenceStep[]>([]);
+  const [selectedSequenceStep, setSelectedSequenceStep] = useState<EmailSequenceStep | undefined>(undefined);
+  const triggerGetEmailSequenceSteps = async () => {
     setLoading(true);
-    const result = await getEmailBumpFrameworks(userToken, ['ACCEPTED', 'BUMPED'], [], [props.archetypeId]);
+    const result = await getEmailSequenceSteps(userToken, ['ACCEPTED', 'BUMPED'], [], [props.archetypeId]);
 
     if (result.status === 'success') {
-      setBumpFrameworkEmails(result.data.bump_frameworks);
+      setemailSequenceSteps(result.data.sequence_steps);
     }
     setLoading(false);
   }
@@ -103,8 +104,8 @@ export default function EmailBlockPreview(props: { archetypeId: number, emailBlo
       }
     })();
 
-    if (props.selectEmailBlock) {
-      triggerGetEmailBumpFrameworks();
+    if (props.selectTemplate) {
+      triggerGetEmailSequenceSteps();
     }
   }, []);
 
@@ -136,7 +137,7 @@ export default function EmailBlockPreview(props: { archetypeId: number, emailBlo
         </Text>
         <Text fz='sm'>Test your email block configuration on a prospect of your choosing.</Text>
 
-        {props.selectEmailBlock && (
+        {props.selectTemplate && (
           <>
             <Select
               mt='xs'
@@ -145,27 +146,27 @@ export default function EmailBlockPreview(props: { archetypeId: number, emailBlo
               searchable
               clearable
               nothingFound='No bump frameworks found'
-              value={selectedBumpFramework ? selectedBumpFramework.id + '' : '-1'}
-              data={bumpFrameworkEmails.map((bumpFrameworkEmail: EmailBumpFramework) => {
+              value={selectedSequenceStep ? selectedSequenceStep.id + '' : '-1'}
+              data={emailSequenceSteps.map((sequenceStep: EmailSequenceStep) => {
                 return {
-                  value: bumpFrameworkEmail.id + '',
-                  label: bumpFrameworkEmail.title,
+                  value: sequenceStep.id + '',
+                  label: sequenceStep.title,
                 };
               })}
               onChange={(value) => {
                 if (!value) {
-                  setSelectedBumpFramework(undefined);
+                  setSelectedSequenceStep(undefined);
                   return;
                 }
-                const foundBumpFramework = bumpFrameworkEmails.find((bumpFrameworkEmail) => bumpFrameworkEmail.id === (parseInt(value) || -1));
-                setSelectedBumpFramework(foundBumpFramework);
+                const foundSequenceStep = emailSequenceSteps.find((sequenceStep) => sequenceStep.id === (parseInt(value) || -1));
+                setSelectedSequenceStep(foundSequenceStep);
               }}
               withinPortal
             />
           </>
         )}
 
-        {(!props.selectEmailBlock || (props.selectEmailBlock && selectedBumpFramework)) && (
+        {(!props.selectTemplate || (props.selectTemplate && selectedSequenceStep)) && (
           <Select
             mt='xs'
             label='Select a prospect'
@@ -231,7 +232,7 @@ export default function EmailBlockPreview(props: { archetypeId: number, emailBlo
                   loading={loading}
                   onClick={async () => {
                     setLoading(true);
-                    const response = await generateEmailAutomatic(userToken, selectedProspect.id, props.emailBlocks || selectedBumpFramework?.email_blocks || []);
+                    const response = await generateEmailAutomatic(userToken, selectedProspect.id, props.template || selectedSequenceStep?.template || '');
                     if (response.status === 'success') {
                       setPreviewEmail(response.data);
                     }

@@ -82,7 +82,6 @@ import { NAV_HEADER_HEIGHT } from "@nav/MainHeader";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import {
   getBumpFrameworks,
-  getEmailBumpFrameworks,
   getSingleBumpFramework,
 } from "@utils/requests/getBumpFrameworks";
 import { getEmailMessages, getEmailThreads } from "@utils/requests/getEmails";
@@ -90,6 +89,7 @@ import { openComposeEmailModal } from "@common/prospectDetails/ProspectDetailsVi
 import { currentProjectState } from "@atoms/personaAtoms";
 import { useHover } from "@mantine/hooks";
 import DOMPurify from "dompurify";
+import { getEmailSequenceSteps } from "@utils/requests/emailSequencing";
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -477,7 +477,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
       }
     } else {
       // TODO: In the future need to add substatuses for Objection Library
-      const result = await getEmailBumpFrameworks(
+      const result = await getEmailSequenceSteps(
         userToken,
         [prospect.overall_status],
         [],
@@ -485,7 +485,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
       );
 
       if (result.status === "success") {
-        sendBoxRef.current?.setEmailBumpFrameworks(result.data.bump_frameworks);
+        sendBoxRef.current?.setEmailSequenceSteps(result.data.bump_frameworks);
       }
     }
   };

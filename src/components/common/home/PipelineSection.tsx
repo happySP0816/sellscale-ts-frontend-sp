@@ -24,6 +24,7 @@ import {
   Avatar,
   ActionIcon,
   Button,
+  LoadingOverlay,
 } from "@mantine/core";
 import {
   convertDateToCasualTime,
@@ -162,6 +163,7 @@ export default function PipelineSection() {
 
   return (
     <>
+      <LoadingOverlay visible={isFetching} />
       <Stack>
         <Box>
           <Title>Pipeline</Title>
@@ -269,7 +271,7 @@ export default function PipelineSection() {
                 id: "not_interested",
                 header: (
                   <PipelineColumnHeader
-                    title="Closed Loss, Not Interested"
+                    title="Not Interested now"
                     category={"not_interested"}
                     conversion={notInterestedPercentage}
                   />
@@ -558,14 +560,14 @@ function PipelineProspect(props: { prospect: ProspectPipeline }) {
               </Avatar>
             </Indicator>
             <Stack spacing={0}>
-              <Text fz="sm" fw={700} h={16}>
-                {props.prospect.company_name}
+              <Text fz="sm" fw={700} h={16} truncate>
+                {_.truncate(props.prospect.company_name, { length: 16 })}
               </Text>
-              <Text fz={10} h={13}>
-                {props.prospect.full_name}
+              <Text fz={10} h={13} truncate>
+                {_.truncate(props.prospect.full_name, { length: 22 })}
               </Text>
               <Text fz={8} fw={400} fs="italic">
-                {props.prospect.title}
+                {_.truncate(props.prospect.title, { length: 50 })}
               </Text>
             </Stack>
           </Group>
@@ -591,7 +593,7 @@ function PipelineProspect(props: { prospect: ProspectPipeline }) {
             <Text fz={8} fw={700} c="dimmed" tt="uppercase" ta="right">
               Last Updated:
             </Text>
-            <Text fz={10} h={13} ta="right">
+            <Text fz={10} h={13} ta="right" truncate>
               {convertDateToCasualTime(
                 new Date(props.prospect.last_updated + " UTC")
               )}

@@ -2,6 +2,7 @@ import { co, cx } from "@fullcalendar/core/internal-common";
 import {
   Box,
   Paper,
+  ScrollArea,
   SimpleGrid,
   Stack,
   createStyles,
@@ -53,6 +54,7 @@ export default function DndColumns(props: {
     }
   >;
   wrapInPaper?: boolean;
+  listHeight?: number;
   onColumnChange?: (startColId: string, endColId: string, itemId: string) => void;
 }) {
   const { classes, cx } = useStyles();
@@ -150,29 +152,31 @@ export default function DndColumns(props: {
     }[];
   }) => {
     return (
-      <Droppable droppableId={col.id} direction="vertical">
-        {(provided) => (
-          <div style={{ minHeight: 200 }} {...provided.droppableProps} ref={provided.innerRef}>
-            {col.data.map((d, index) => (
-              <Draggable key={d.id} index={index} draggableId={d.id}>
-                {(provided, snapshot) => (
-                  <div
-                    className={cx(classes.item, {
-                      [classes.itemDragging]: snapshot.isDragging,
-                    })}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    ref={provided.innerRef}
-                  >
-                    {d.content}
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
+      <ScrollArea h={props.listHeight || 400}>
+        <Droppable droppableId={col.id} direction="vertical">
+          {(provided) => (
+            <div style={{ minHeight: 200 }} {...provided.droppableProps} ref={provided.innerRef}>
+              {col.data.map((d, index) => (
+                <Draggable key={d.id} index={index} draggableId={d.id}>
+                  {(provided, snapshot) => (
+                    <div
+                      className={cx(classes.item, {
+                        [classes.itemDragging]: snapshot.isDragging,
+                      })}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      ref={provided.innerRef}
+                    >
+                      {d.content}
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </ScrollArea>
     );
   };
 

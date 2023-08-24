@@ -33,15 +33,15 @@ export async function createEmailSubjectLineTemplate(userToken: string, archetyp
 /**
  * Gets email subject line templates
  * @param userToken
- * @param archetypeIDS
+ * @param archetypeID
  * @param activeOnly
  * @returns - MsgResponse
  */
-export async function getEmailSubjectLineTemplates(userToken: string, archetypeIDS: number[], activeOnly: boolean): Promise<MsgResponse> {
-  const archetype_ids_string = archetypeIDS.join(',');
+export async function getEmailSubjectLineTemplates(userToken: string, archetypeID: number, activeOnly: boolean): Promise<MsgResponse> {
+  const archetype_id_string = archetypeID.toString();
 
   const response = await fetch(
-    `${API_URL}/email_sequence/subject_line?archetype_ids=${archetype_ids_string}&active_only=${activeOnly}`,
+    `${API_URL}/email_sequence/subject_line?archetype_id=${archetype_id_string}&active_only=${activeOnly}`,
     {
       method: "GET",
       headers: {
@@ -49,7 +49,7 @@ export async function getEmailSubjectLineTemplates(userToken: string, archetypeI
       }
     }
   );
-  return await processResponse(response);
+  return await processResponse(response, "data");
 
 }
 
@@ -115,21 +115,20 @@ export async function postEmailSubjectLineTemplateDeactivate(userToken: string, 
  * @returns - MsgResponse
  */
 export async function postEmailSubjectLineTemplateActivate(userToken: string, emailSubjectLineID: number): Promise<MsgResponse> {
-  
-    const response = await fetch(
-      `${API_URL}/email_sequence/subject_line/activate`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email_subject_line_template_id: emailSubjectLineID,
-        })
-      }
-    );
-    return await processResponse(response);
-  
-  }
-  
+
+  const response = await fetch(
+    `${API_URL}/email_sequence/subject_line/activate`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email_subject_line_template_id: emailSubjectLineID,
+      })
+    }
+  );
+  return await processResponse(response);
+
+}

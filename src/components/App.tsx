@@ -41,6 +41,7 @@ import SendOutreachModal from "@modals/SendOutreachModal";
 import PersonaSelectModal from "@modals/PersonaSelectModal";
 import ClonePersonaModal from "@modals/ClonePersonaModal";
 import ConfirmModal from "@modals/ConfirmModal";
+import PatchEmailSubjectLineModal from "@modals/PatchEmailSubjectLineModal";
 
 export default function App() {
   // Site light or dark mode
@@ -122,6 +123,7 @@ export default function App() {
               managePulsePrompt: ManagePulsePrompt,
               viewEmailThread: ViewEmailThreadModal,
               manageBumpFramework: ManageBumpFramework,
+              patchEmailSubjectLine: PatchEmailSubjectLineModal,
               clientProduct: ClientProductModal,
               voiceBuilder: VoiceBuilderModal,
               demoFeedbackDetails: DemoFeedbackDetailsModal,

@@ -388,6 +388,20 @@ export type EmailSequenceStep = {
   // TODO: MISSING A LOT OF FIELDS
 }
 
+
+export type SubjectLineTemplate = {
+  id: number;
+  subject_line: string;
+  client_sdr_id: number;
+  client_archetype_id: number;
+  client_archetype_archetype: string;
+  active: boolean;
+  times_used: number;
+  times_accepted: number;
+  sellscale_generated: boolean;
+}
+
+
 export type SalesNavigatorLaunch = {
   id: number,
   sales_navigator_config_id: number,

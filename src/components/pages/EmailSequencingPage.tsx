@@ -25,20 +25,24 @@ import { useDisclosure } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import CreateEmailSequenceStepModal from "@modals/CreateEmailSequenceStepModal.tsx";
+import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
+import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
 import {
   IconCheck,
   IconEdit,
   IconMessages,
   IconPlus,
+  IconSearch,
   IconX,
 } from "@tabler/icons";
 import { IconBrandTelegram, IconMessageUp } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { getEmailSequenceSteps } from "@utils/requests/emailSequencing";
+import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines";
 import getChannels from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { EmailSequenceStep, MsgResponse } from "src";
+import { EmailSequenceStep, MsgResponse, SubjectLineTemplate } from "src";
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -71,8 +75,35 @@ function EmailInitialOutboundView(props: {
   afterCreate: () => void;
   afterEdit: () => void;
 }) {
+  const userToken = useRecoilValue(userTokenState);
+  const [randomSubjectLineTemplate, setRandomSubjectLineTemplate] = useState<SubjectLineTemplate>();
+
+  const triggerGetEmailSubjectLineTemplates = async () => {
+    const result = await getEmailSubjectLineTemplates(userToken, props.archetypeID as number, false);
+    if (result.status != 'success') {
+      showNotification({
+        title: 'Error',
+        message: result.message,
+        color: 'red',
+      })
+    }
+
+    const templates = result.data.subject_line_templates as SubjectLineTemplate[];
+    if (templates.length === 0) {
+      setRandomSubjectLineTemplate(undefined);
+      return;
+    }
+    const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+    setRandomSubjectLineTemplate(randomTemplate);
+  }
+
+  useEffect(() => {
+    triggerGetEmailSubjectLineTemplates();
+  }, []);
 
   const [showAll, setShowAll] = useState(false);
+
+  const [manageSubjectLineOpened, { open: openManageSubject, close: closeManageSubject }] = useDisclosure();
 
   return (
     <>
@@ -91,8 +122,33 @@ function EmailInitialOutboundView(props: {
           <Divider mt="sm" />
           <Flex px='md' direction='column'>
             {/* Subject Line */}
-            <Flex direction='row' mt='sm' mb='6px'>
+            <Flex direction='row' mt='sm' mb='6px' align='center'>
               <Title order={5}>Subject Line: </Title>
+              <Text
+                ml='12px'
+                mr='4px'
+                variant="gradient"
+                gradient={{ from: 'pink', to: 'purple', deg: 45 }}
+
+              >
+                {randomSubjectLineTemplate?.subject_line || "Add a Subject Line!"}
+              </Text>
+              <Tooltip label="Edit or create a subject line" withinPortal withArrow>
+                <ActionIcon
+                  size='xs'
+                  variant="transparent"
+                  onClick={openManageSubject}
+                >
+                  <IconSearch size={'.8rem'} />
+                </ActionIcon>
+              </Tooltip>
+              <ManageEmailSubjectLineTemplatesModal
+                modalOpened={manageSubjectLineOpened}
+                openModal={openManageSubject}
+                closeModal={closeManageSubject}
+                backFunction={triggerGetEmailSubjectLineTemplates}
+                archetypeID={props.archetypeID}
+              />
             </Flex>
 
             {/* Body */}
@@ -104,33 +160,33 @@ function EmailInitialOutboundView(props: {
               return (
                 <>
                   <Flex direction='row' align={'center'} mb='md'>
-                  <Text fz='sm'>
-                    {props.initialOutboundBucket.templates[0]?.template}
-                  </Text>
-                  <Tooltip label="Edit Template" withinPortal>
-                    <ActionIcon
-                      onClick={() => {
-                        openContextModal({
-                          modal: "editEmailSequenceStepModal",
-                          title: (
-                            <Title order={3}>Edit: {template.title}</Title>
-                          ),
-                          innerProps: {
-                            emailSequenceStepID: template.id,
-                            archetypeID: props.archetypeID,
-                            overallStatus: template.overall_status,
-                            title: template.title,
-                            template: template.template,
-                            default: template.default,
-                            onSave: props.afterEdit,
-                            bumpedCount: template.bumped_count,
-                          },
-                        });
-                      }}
-                    >
-                      <IconEdit size="1.25rem" />
-                    </ActionIcon>
-                  </Tooltip>
+                    <Text fz='sm'>
+                      {props.initialOutboundBucket.templates[0]?.template}
+                    </Text>
+                    <Tooltip label="Edit Template" withinPortal>
+                      <ActionIcon
+                        onClick={() => {
+                          openContextModal({
+                            modal: "editEmailSequenceStepModal",
+                            title: (
+                              <Title order={3}>Edit: {template.title}</Title>
+                            ),
+                            innerProps: {
+                              emailSequenceStepID: template.id,
+                              archetypeID: props.archetypeID,
+                              overallStatus: template.overall_status,
+                              title: template.title,
+                              template: template.template,
+                              default: template.default,
+                              onSave: props.afterEdit,
+                              bumpedCount: template.bumped_count,
+                            },
+                          });
+                        }}
+                      >
+                        <IconEdit size="1.25rem" />
+                      </ActionIcon>
+                    </Tooltip>
                   </Flex>
                 </>
               )

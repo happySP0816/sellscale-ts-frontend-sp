@@ -76,7 +76,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function NuturePage() {
+export default function NurturePage() {
   const data = [
     {
       id: 1,

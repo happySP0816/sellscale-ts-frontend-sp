@@ -32,7 +32,7 @@ import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
 import { useLoaderData } from "react-router-dom";
 import VoicesSection from "@common/voice_builder/VoicesSection";
 import BumpFrameworksPage from "./BumpFrameworksPage";
-import NuturePage from "./NuturePage";
+import NurturePage from "./NurturePage";
 
 export default function LinkedInPage() {
   setPageTitle("LinkedIn");
@@ -102,10 +102,10 @@ export default function LinkedInPage() {
             Bump Frameworks
           </Tabs.Tab>
           <Tabs.Tab
-            value="nuture"
+            value="nurture"
             icon={<IconSeeding size="1.1rem" />}
           >
-            Nuture
+            Nurture
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="messages" pt="xs">
@@ -126,8 +126,8 @@ export default function LinkedInPage() {
         <Tabs.Panel value="setup" pt="xs">
           <BumpFrameworksPage />
         </Tabs.Panel>
-        <Tabs.Panel value="nuture" pt="xs">
-          <NuturePage />
+        <Tabs.Panel value="nurture" pt="xs">
+          <NurturePage />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

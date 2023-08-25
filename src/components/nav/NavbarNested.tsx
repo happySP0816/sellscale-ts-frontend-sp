@@ -318,12 +318,12 @@ export function NavbarNested(props: {
           icon: IconMessage,
           link: "/linkedin/simulate",
         },
-        // If is it Vasti, show nuture tab
+        // If is it Vasti, show nurture tab
         userData.id === 11 ? {
-          key: "linkedin-nuture",
-          label: "Nuture",
+          key: "linkedin-nurture",
+          label: "Nurture",
           icon: IconSeeding,
-          link: "/linkedin/nuture",
+          link: "/linkedin/nurture",
         } : undefined,
       ],
     },

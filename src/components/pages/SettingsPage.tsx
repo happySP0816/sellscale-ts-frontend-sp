@@ -392,7 +392,7 @@ export default function SettingsPage() {
             value="preferences"
             icon={<IconAdjustmentsFilled size="0.8rem" />}
           >
-            Preferences
+            Pipeline
           </Tabs.Tab>
           <Tabs.Tab
             value="message-automation"

@@ -36,7 +36,6 @@ export const PulseWrapper = () => {
           />
         </Tabs.Panel>
       </Tabs>
-      
     </Box>
   );
 };

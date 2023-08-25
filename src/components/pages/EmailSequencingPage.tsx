@@ -42,7 +42,6 @@ import {
   createEmailSequenceStep,
   getEmailSequenceSteps,
 } from "@utils/requests/emailSequencing";
-import { getEmailSequenceSteps } from "@utils/requests/emailSequencing";
 import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines";
 import getChannels from "@utils/requests/getChannels";
 import { useEffect, useRef, useState } from "react";

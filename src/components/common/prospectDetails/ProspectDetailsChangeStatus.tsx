@@ -36,6 +36,7 @@ import {
   IconTrash,
   IconBrandLinkedin,
   IconMessageDots,
+  IconSeeding,
 } from "@tabler/icons";
 import { startCase } from "lodash";
 import displayNotification from "@utils/notificationFlow";
@@ -97,9 +98,9 @@ const linkedinStatusOptions = [
     status: "DEMO_WON",
   },
   {
-    title: "Not Interested",
-    icon: IconX,
-    color: "red",
+    title: "Nurture",
+    icon: IconSeeding,
+    color: "green",
     status: "NOT_INTERESTED",
   },
   {
@@ -109,7 +110,7 @@ const linkedinStatusOptions = [
     status: "DEMO_LOSS",
   },
   {
-    title: "Not Qualified",
+    title: "Remove",
     icon: IconTrash,
     color: "red",
     status: "NOT_QUALIFIED",
@@ -190,9 +191,9 @@ const emailStatusOptions = [
     status: "DEMO_LOST",
   },
   {
-    title: "Not Interested",
-    icon: IconX,
-    color: "red",
+    title: "Nurture",
+    icon: IconSeeding,
+    color: "green",
     status: "NOT_INTERESTED",
   },
 ];

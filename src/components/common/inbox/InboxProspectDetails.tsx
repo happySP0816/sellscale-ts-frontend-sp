@@ -87,7 +87,7 @@ import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 import EditProspectModal from "@modals/EditProspectModal";
 import { proxyURL } from "@utils/general";
-import { IconAlarm, IconDeviceFloppy, IconHomeHeart } from "@tabler/icons";
+import { IconAlarm, IconDeviceFloppy, IconHomeHeart, IconSeeding } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import getDemoFeedback from "@utils/requests/getDemoFeedback";
 import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
@@ -469,14 +469,14 @@ export default function ProjectDetails(props: {
                       }}
                     />
                     <StatusBlockButton
-                      title="Not Interested"
-                      icon={<IconX color={theme.colors.red[6]} size={24} />}
+                      title="Nurture"
+                      icon={<IconSeeding color={theme.colors.green[6]} size={24} />}
                       onClick={async () => {
                         await changeStatus("NOT_INTERESTED");
                       }}
                     />
                     <StatusBlockButton
-                      title="Not Qualified"
+                      title="Remove"
                       icon={<IconTrash color={theme.colors.red[6]} size={24} />}
                       onClick={async () => {
                         await changeStatus("NOT_QUALIFIED");

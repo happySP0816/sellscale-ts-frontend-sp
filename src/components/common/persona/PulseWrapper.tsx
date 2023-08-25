@@ -16,7 +16,7 @@ export const PulseWrapper = () => {
 
   return (
     <Box m='md'>
-      <Tabs defaultValue="gallery">
+      <Tabs defaultValue="ai_filter">
         <Tabs.List>
           <Tabs.Tab value="ai_filter" icon={<IconRobot size="0.8rem" />}>AI Filtering</Tabs.Tab>
           <Tabs.Tab value="rule_based_filter" icon={<IconRuler size="0.8rem" />}>Rule Based Filter</Tabs.Tab>

@@ -4,7 +4,6 @@ import { MantineColor, MantineTheme } from "@mantine/core";
 import _ from "lodash";
 import { startCase } from "lodash";
 import moment from "moment";
-import { Channel } from "src";
 
 export function testDelay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -386,4 +385,3 @@ export async function getFavIconFromURL(url: string): Promise<string | null> {
 
   return largestIcon.src;
 }
-

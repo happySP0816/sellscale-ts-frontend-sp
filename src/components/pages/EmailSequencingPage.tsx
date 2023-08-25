@@ -24,6 +24,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
+import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
 import CreateEmailSequenceStepModal from "@modals/CreateEmailSequenceStepModal.tsx";
 import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
 import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
@@ -37,6 +38,10 @@ import {
 } from "@tabler/icons";
 import { IconBrandTelegram, IconMessageUp } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import {
+  createEmailSequenceStep,
+  getEmailSequenceSteps,
+} from "@utils/requests/emailSequencing";
 import { getEmailSequenceSteps } from "@utils/requests/emailSequencing";
 import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines";
 import getChannels from "@utils/requests/getChannels";
@@ -48,7 +53,7 @@ type EmailSequenceStepBuckets = {
   PROSPECTED: {
     total: number;
     templates: EmailSequenceStep[];
-  }
+  };
   ACCEPTED: {
     total: number;
     templates: EmailSequenceStep[];
@@ -68,9 +73,9 @@ type EmailSequenceStepBuckets = {
 
 function EmailInitialOutboundView(props: {
   initialOutboundBucket: {
-    total: number,
+    total: number;
     templates: EmailSequenceStep[];
-  },
+  };
   archetypeID: number | null;
   afterCreate: () => void;
   afterEdit: () => void;
@@ -102,6 +107,7 @@ function EmailInitialOutboundView(props: {
   }, []);
 
   const [showAll, setShowAll] = useState(false);
+  const [editSequenceStepModalOpened, { open, close }] = useDisclosure();
 
   const [manageSubjectLineOpened, { open: openManageSubject, close: closeManageSubject }] = useDisclosure();
 
@@ -116,11 +122,10 @@ function EmailInitialOutboundView(props: {
               Hyperpersonalized cold outreach sent to the prospect.
             </Text>
           </Flex>
-
         </Flex>
         <Card.Section>
           <Divider mt="sm" />
-          <Flex px='md' direction='column'>
+          <Flex px="md" direction="column">
             {/* Subject Line */}
             <Flex direction='row' mt='sm' mb='6px' align='center'>
               <Title order={5}>Subject Line: </Title>
@@ -159,44 +164,56 @@ function EmailInitialOutboundView(props: {
 
               return (
                 <>
-                  <Flex direction='row' align={'center'} mb='md'>
-                    <Text fz='sm'>
+                  <Flex direction="row" align={"center"} mb="md">
+                    <Text fz="sm">
                       {props.initialOutboundBucket.templates[0]?.template}
                     </Text>
                     <Tooltip label="Edit Template" withinPortal>
-                      <ActionIcon
-                        onClick={() => {
-                          openContextModal({
-                            modal: "editEmailSequenceStepModal",
-                            title: (
-                              <Title order={3}>Edit: {template.title}</Title>
-                            ),
-                            innerProps: {
-                              emailSequenceStepID: template.id,
-                              archetypeID: props.archetypeID,
-                              overallStatus: template.overall_status,
-                              title: template.title,
-                              template: template.template,
-                              default: template.default,
-                              onSave: props.afterEdit,
-                              bumpedCount: template.bumped_count,
-                            },
-                          });
-                        }}
-                      >
+                      <ActionIcon onClick={open}>
                         <IconEdit size="1.25rem" />
                       </ActionIcon>
                     </Tooltip>
+                    <EmailSequenceStepModal
+                      modalOpened={editSequenceStepModalOpened}
+                      openModal={open}
+                      closeModal={close}
+                      type={"EDIT"}
+                      backFunction={props.afterEdit}
+                      status={template.overall_status}
+                      archetypeID={props.archetypeID || -1}
+                      bumpedCount={template.bumped_count}
+                      title={template.title}
+                      isDefault={template.default}
+                      sequence={template.template}
+                      onFinish={async (
+                        title,
+                        sequence,
+                        isDefault,
+                        status,
+                        substatus
+                      ) => {
+                        const result = await createEmailSequenceStep(
+                          userToken,
+                          props.archetypeID || -1,
+                          status ?? "",
+                          title,
+                          sequence,
+                          template.bumped_count,
+                          isDefault,
+                          substatus
+                        );
+                        return result.status === "success";
+                      }}
+                    />
                   </Flex>
                 </>
-              )
-            })
-            }
+              );
+            })}
           </Flex>
         </Card.Section>
       </Card>
     </>
-  )
+  );
 }
 
 function EmailSequenceStepView(props: {
@@ -214,8 +231,11 @@ function EmailSequenceStepView(props: {
   bumpedCount?: number;
 }) {
   const theme = useMantineTheme();
+  const userToken = useRecoilValue(userTokenState);
 
   const [createSequenceStepModalOpened, { open, close }] = useDisclosure();
+  const [editSequenceStepModalOpened, { open: openEdit, close: closeEdit }] =
+    useDisclosure();
   const [showAll, setShowAll] = useState(false);
 
   return (
@@ -234,15 +254,29 @@ function EmailSequenceStepView(props: {
               <IconPlus size="1.25rem" />
             </ActionIcon>
           </Tooltip>
-          <CreateEmailSequenceStepModal
+          <EmailSequenceStepModal
             modalOpened={createSequenceStepModalOpened}
             openModal={open}
             closeModal={close}
+            type={"CREATE"}
             backFunction={props.afterCreate}
             dataChannels={props.dataChannels}
             status={props.status}
-            archetypeID={props.archetypeID}
+            archetypeID={props.archetypeID || -1}
             bumpedCount={props.bumpedCount}
+            onFinish={async (title, sequence, isDefault, status, substatus) => {
+              const result = await createEmailSequenceStep(
+                userToken,
+                props.archetypeID || -1,
+                status ?? "",
+                title,
+                sequence,
+                props.bumpedCount || 0,
+                isDefault,
+                substatus
+              );
+              return result.status === "success";
+            }}
           />
         </Flex>
         <Card.Section>
@@ -251,11 +285,10 @@ function EmailSequenceStepView(props: {
 
         {/* Sequence Steps */}
         <Card.Section px="xs">
-          {props.sequenceBucket && Object.keys(props.sequenceBucket).length === 0 ? (
+          {props.sequenceBucket &&
+          Object.keys(props.sequenceBucket).length === 0 ? (
             // No Sequence Steps
-            <Text>
-              Please create a Sequence Step using the + button above.
-            </Text>
+            <Text>Please create a Sequence Step using the + button above.</Text>
           ) : (
             <>
               {props.sequenceBucket?.templates?.map((template, index) => {
@@ -309,29 +342,44 @@ function EmailSequenceStepView(props: {
                       </Flex>
                       <Tooltip label="Edit Template" withinPortal>
                         <ActionIcon
-                          onClick={() => {
-                            openContextModal({
-                              modal: "editEmailSequenceStepModal",
-                              title: (
-                                <Title order={3}>Edit: {template.title}</Title>
-                              ),
-                              innerProps: {
-                                emailSequenceStepID: template.id,
-                                archetypeID: props.archetypeID,
-                                overallStatus: template.overall_status,
-                                title: template.title,
-                                template: template.template,
-                                default: template.default,
-                                onSave: props.afterEdit,
-                                bumpedCount: template.bumped_count,
-                              },
-                            });
-                          }}
+                          onClick={openEdit}
                         >
                           <IconEdit size="1.25rem" />
                         </ActionIcon>
                       </Tooltip>
                     </Flex>
+                    <EmailSequenceStepModal
+                        modalOpened={editSequenceStepModalOpened}
+                        openModal={openEdit}
+                        closeModal={closeEdit}
+                        type={"EDIT"}
+                        backFunction={props.afterEdit}
+                        status={template.overall_status}
+                        archetypeID={props.archetypeID || -1}
+                        bumpedCount={template.bumped_count}
+                        title={template.title}
+                        isDefault={template.default}
+                        sequence={template.template}
+                        onFinish={async (
+                          title,
+                          sequence,
+                          isDefault,
+                          status,
+                          substatus
+                        ) => {
+                          const result = await createEmailSequenceStep(
+                            userToken,
+                            props.archetypeID || -1,
+                            status ?? "",
+                            title,
+                            sequence,
+                            template.bumped_count || 0,
+                            isDefault,
+                            substatus
+                          );
+                          return result.status === "success";
+                        }}
+                      />
                     <Card.Section>
                       <Divider mt="sm" />
                     </Card.Section>
@@ -586,7 +634,7 @@ export default function EmailSequencingPage(props: {
             <Tabs.Panel value="sequence">
               <Flex direction="row" mt="md">
                 <Flex w="60%" direction="column">
-                  <Flex direction="column" mb='md'>
+                  <Flex direction="column" mb="md">
                     <Title order={3}>Email Sequencing</Title>
                     <Text fz="md" mt="2px">
                       Configure your first email and followup emails using Email
@@ -603,7 +651,12 @@ export default function EmailSequencingPage(props: {
                     afterEdit={triggerGetEmailSequenceSteps}
                   />
 
-                  <Divider label='After sending your hyperpersonalized cold email' labelPosition='center' mt='md' mb='md' />
+                  <Divider
+                    label="After sending your hyperpersonalized cold email"
+                    labelPosition="center"
+                    mt="md"
+                    mb="md"
+                  />
 
                   {/* Sequence Steps */}
                   {!loading && archetypeID ? (
@@ -654,8 +707,9 @@ export default function EmailSequencingPage(props: {
                                 <EmailSequenceStepView
                                   sequenceBucket={sequenceBucket}
                                   sequenceStepTitle={`${followupString} Followup`}
-                                  sequenceStepDescription={`This is followup #${bumpCountInt + 1
-                                    }`}
+                                  sequenceStepDescription={`This is followup #${
+                                    bumpCountInt + 1
+                                  }`}
                                   status={"BUMPED"}
                                   dataChannels={dataChannels}
                                   archetypeID={archetypeID}
@@ -676,33 +730,54 @@ export default function EmailSequencingPage(props: {
                             w="50%"
                             onClick={openSequenceStep}
                             disabled={
-                              Object.keys(sequenceBuckets.current?.BUMPED).length >
-                              10
+                              Object.keys(sequenceBuckets.current?.BUMPED)
+                                .length > 10
                             }
                           >
                             Add another sequence step
                           </Button>
-                          <CreateEmailSequenceStepModal
+                          <EmailSequenceStepModal
                             modalOpened={addNewSequenceStepOpened}
                             openModal={openSequenceStep}
                             closeModal={closeSequenceStep}
+                            type={"CREATE"}
                             backFunction={triggerGetEmailSequenceSteps}
                             dataChannels={dataChannels}
                             status={"BUMPED"}
                             showStatus={false}
                             archetypeID={archetypeID}
                             bumpedCount={
-                              Object.keys(sequenceBuckets.current?.BUMPED).length +
-                              1
+                              Object.keys(sequenceBuckets.current?.BUMPED)
+                                .length + 1
                             }
+                            onFinish={async (
+                              title,
+                              sequence,
+                              isDefault,
+                              status,
+                              substatus
+                            ) => {
+                              const result = await createEmailSequenceStep(
+                                userToken,
+                                archetypeID,
+                                status ?? "",
+                                title,
+                                sequence,
+                                Object.keys(sequenceBuckets.current?.BUMPED)
+                                  .length + 1,
+                                isDefault,
+                                substatus
+                              );
+                              return result.status === "success";
+                            }}
                           />
                           {Object.keys(sequenceBuckets.current?.BUMPED).length >
                             10 && (
-                              <Text color="red" mt="md" mb="md">
-                                You have reached the maximum number of sequence
-                                steps.
-                              </Text>
-                            )}
+                            <Text color="red" mt="md" mb="md">
+                              You have reached the maximum number of sequence
+                              steps.
+                            </Text>
+                          )}
                         </Flex>
                       </Flex>
                     </ScrollArea>

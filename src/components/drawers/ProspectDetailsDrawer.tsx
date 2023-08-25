@@ -105,7 +105,6 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
 
       persona_id.current = res.prospect_info.details.persona_id
 
-      console.log(res)
       return {
         main: res,
         channels: res_channels.status === "success" ? res_channels.data : {},
@@ -125,8 +124,6 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
       email: data.main.prospect_info.details.email_status,
     });
   }, [data]);
-
-  console.log(data?.main.prospect_info);
 
   return (
     <Drawer
@@ -225,6 +222,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                       userToken,
                       prospectId,
                       data.main.prospect_info.details.persona_id,
+                      prospectDrawerStatuses.email,
                       prospectDrawerStatuses.overall,
                       data.main.prospect_info.email.email,
                       userData.sdr_email,
@@ -346,6 +344,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                               <ProspectDetailsViewEmails
                                 prospectId={data.main.prospect_info.details.id}
                                 archetypeId={data.main.prospect_info.details.persona_id}
+                                emailStatus={prospectDrawerStatuses.email}
                                 overallStatus={prospectDrawerStatuses.overall}
                                 email={data.main.prospect_info.email.email}
                               />

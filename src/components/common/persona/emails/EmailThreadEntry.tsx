@@ -51,6 +51,7 @@ export default function EmailThreadEntry(props: {
   threadId: string;
   prospectId: number;
   archetypeId: number;
+  emailStatus: string;
   overallStatus: string;
 }) {
   const { classes } = useStyles();
@@ -113,6 +114,7 @@ export default function EmailThreadEntry(props: {
                         userToken,
                         messages[0]?.prospect_id,
                         props.archetypeId,
+                        props.emailStatus,
                         props.overallStatus,
                         messages[0]?.prospect_email,
                         messages[0]?.sdr_email,

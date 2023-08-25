@@ -1,5 +1,6 @@
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import FlexSeparate from '@common/library/FlexSeparate';
+import RichTextArea from '@common/library/RichTextArea';
 import TextAreaWithAI from '@common/library/TextAreaWithAI';
 import {
   Text,
@@ -16,16 +17,18 @@ import {
   Collapse,
   Card,
   Select,
+  Tooltip,
+  Box,
 } from '@mantine/core';
-import { ContextModalProps, closeAllModals } from '@mantine/modals';
+import { ContextModalProps, closeAllModals, openConfirmModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { IconSend } from '@tabler/icons';
+import { IconSend, IconSettings, IconWriting } from '@tabler/icons';
+import { IconSettingsFilled } from '@tabler/icons-react';
+import { JSONContent } from '@tiptap/react';
+import { postGenerateInitialEmail } from '@utils/requests/emailMessageGeneration';
 import { getEmailSequenceSteps } from '@utils/requests/emailSequencing';
-import { generateEmail, getEmailGenerationPrompt } from '@utils/requests/generateEmail';
-import { getEmailFollowupPrompt } from '@utils/requests/getEmailFollowupPrompt';
 import { sendEmail } from '@utils/requests/sendEmail';
 import { useEffect, useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { useRecoilValue } from 'recoil';
 import { EmailSequenceStep } from 'src';
 
@@ -35,7 +38,8 @@ interface ComposeEmail extends Record<string, unknown> {
   body: string;
   from: string;
   prospectId: number;
-  archetypeId: number;
+  archetypeID: number;
+  emailStatus: string;
   overallStatus: string;
   threadId: string;
   reply?: {
@@ -51,26 +55,86 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
   const theme = useMantineTheme();
 
   const [subject, setSubject] = useState(innerProps.subject);
+  const [subjectPrompt, setSubjectPrompt] = useState('');
 
-  const [body, setBody] = useState(innerProps.body);
-  const bodyRef = useRef('');
+  const [body, _setBody] = useState(innerProps.body);
+  // We use this to store the raw value of the rich text editor
+  const bodyRich = useRef<JSONContent | string>();
+  const bodyRef = useRef('')
+  const [bodyPrompt, setBodyPrompt] = useState('');
+  const setBody = (value: string) => {
+    bodyRich.current = value;
+    _setBody(value);
+  }
 
   const [sending, setSending] = useState(false);
   const [generatingEmail, setGeneratingEmail] = useState(false);
 
   const [aiGenerated, setAiGenerated] = useState(false);
 
-  const [fetchedEmailGenerationPrompt, setFetchedEmailGenerationPrompt] = useState(false);
-  const [fetchingEmailGenerationPrompt, setFetchingEmailGenerationPrompt] = useState(false);
-  const [emailGenerationPrompt, setEmailGenerationPrompt] = useState('');
-  const [collapseOpened, setCollapseOpened] = useState(false);
+  const [isFirstEmail, setIsFirstEmail] = useState(false);
+  const [sequenceSteps, setSequenceSteps] = useState<EmailSequenceStep[]>([]);
+  const [selectedSequenceStep, setSelectedSequenceStep] = useState<EmailSequenceStep | null>(null);
 
-  const [bumpFrameworks, setBumpFrameworks] = useState<EmailSequenceStep[]>([]);
-  const [selectedBumpFramework, setSelectedBumpFramework] = useState<EmailSequenceStep | null>(null);
+
+  const triggerPostGenerateInitialEmail = async () => {
+    setGeneratingEmail(true);
+
+    if (!selectedSequenceStep) {
+      showNotification({
+        title: 'Error',
+        message: 'Please select a template, or create a new one.',
+        color: 'red',
+        autoClose: false,
+      });
+      setGeneratingEmail(false);
+      return;
+    }
+
+    const result = await postGenerateInitialEmail(
+      userToken,
+      innerProps.prospectId,
+      selectedSequenceStep?.id,
+      null,
+      null,
+      null
+    )
+    if (result.status != 'success') {
+      showNotification({
+        title: 'Error',
+        message: 'Could not generate email.',
+        color: 'red',
+      })
+      setGeneratingEmail(false);
+      return;
+    }
+    const data = result.data;
+
+    const email_body = data.email_body;
+    const processed_email_body = email_body.completion.replaceAll('\n', '<br/>')
+    bodyRef.current = processed_email_body;
+    setBody(processed_email_body);
+    setBodyPrompt(email_body.prompt);
+
+    const subject_line = data.subject_line;
+    setSubject(subject_line.completion);
+    setSubjectPrompt(subject_line.prompt);
+
+    setAiGenerated(true);
+    setGeneratingEmail(false);
+
+    return;
+  };
+
 
   const triggerGetEmailSequenceSteps = async () => {
+    var sequenceStatus = innerProps.emailStatus;
+    if (innerProps.overallStatus === 'PROSPECTED' || innerProps.emailStatus === null) {
+      setIsFirstEmail(true);
+      sequenceStatus = 'PROSPECTED';
+    }
 
-    const result = await getEmailSequenceSteps(userToken, [innerProps.overallStatus], [], [innerProps.archetypeID as number]);
+    const result = await getEmailSequenceSteps(userToken, [sequenceStatus], [], [innerProps.archetypeID as number]);
 
     if (result.status !== 'success') {
       showNotification({
@@ -81,54 +145,22 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
       });
       return;
     }
-    setBumpFrameworks(result.data.bump_frameworks);
+    
+    console.log(innerProps);
 
-  };
+    setSequenceSteps(result.data.sequence_steps);
 
-  const fetchEmailGenerationPrompt = async (overrideFrameworkID?: number) => {
-    setFetchingEmailGenerationPrompt(true);
-    const response = await getEmailGenerationPrompt(userToken, innerProps.prospectId, overrideFrameworkID || selectedBumpFramework?.id);
-    setFetchingEmailGenerationPrompt(false);
-    if (response.status === 'success') {
-      setEmailGenerationPrompt(response.data.prompt);
-    }
-  };
-
-  const fetchEmailFollowupGenerationPrompt = async () => {
-    setFetchedEmailGenerationPrompt(true);
-    const response = await getEmailFollowupPrompt(
-      userToken,
-      innerProps.prospectId,
-      innerProps.threadId,
-    );
-
-    if (response.status === 'success') {
-      setEmailGenerationPrompt(response.data.data);
-    }
   };
 
   // If body was cleared, it's no longer ai generated
   useEffect(() => {
-    if (bodyRef.current.trim().length == 0) {
+    if (body.trim().length == 0) {
       setAiGenerated(false);
     }
-  }, [bodyRef.current]);
+  }, [body]);
 
   useEffect(() => {
-    if (!fetchedEmailGenerationPrompt) {
-      if (innerProps.reply) {
-        fetchEmailFollowupGenerationPrompt();
-      } else {
-        fetchEmailGenerationPrompt();
-      }
-      setFetchedEmailGenerationPrompt(true);
-    }
-  }, [fetchedEmailGenerationPrompt]);
-
-  useEffect(() => {
-    if (innerProps.reply) {
-      triggerGetEmailSequenceSteps();
-    }
+    triggerGetEmailSequenceSteps();
   }, [])
 
   return (
@@ -146,138 +178,118 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
         <Text>To: {innerProps.email}</Text>
       </Group>
 
-      <div style={{ paddingTop: 10 }}>
+      <Flex pt={10} direction='column' h='400px'>
         <TextAreaWithAI
           placeholder='Subject'
           value={subject}
           onChange={(event) => setSubject(event.currentTarget.value)}
           inputType='text-input'
         />
-        <TextAreaWithAI
-          value={body}
-          onChange={(e) => {
-            bodyRef.current = e.currentTarget.value;
-            if (e.defaultPrevented) {
-              setBody(e.currentTarget.value);
-            }
-          }}
-          inputType='rich-text-area'
-        />
-      </div>
-
-      <Center mt={15}>
-        {innerProps.reply &&
-          <Select
-            data={
-              bumpFrameworks.length > 0 ? (bumpFrameworks.map((framework) => ({
-                value: framework.id + '',
-                label: framework.title,
-              })) as any) : []
-            }
-            placeholder='Select a framework'
-            disabled={bumpFrameworks.length === 0}
-            radius='xl'
-            mr='lg'
-            value={selectedBumpFramework?.id + ''}
-            onChange={(newVal) => {
-              if (bumpFrameworks) {
-                const selected = bumpFrameworks.find((framework) => framework.id === parseInt(newVal as string));
-                setSelectedBumpFramework(selected as EmailSequenceStep);
-              }
-              fetchEmailGenerationPrompt(parseInt(newVal as string));
+        <Box mt='xs'>
+          <RichTextArea
+            onChange={(value, rawValue) => {
+              bodyRich.current = rawValue;
+              bodyRef.current = value;
             }}
+            value={bodyRich.current}
+            height={250}
           />
-        }
-        <Button
-          size='sm'
-          radius='xl'
-          variant='light'
-          mr='lg'
-          color='grape'
-          disabled={!emailGenerationPrompt}
-          onClick={async () => {
-            setGeneratingEmail(true);
-            generateEmail(userToken, emailGenerationPrompt)
-              .then((response) => {
-                if (response.status === 'success') {
-                  setSubject(response.data.subject);
-                  const body = response.data.body.replace(/\n/gm, '<br>');
-                  setBody(body);
-                  bodyRef.current = body;
-                  setAiGenerated(true);
+        </Box>
+      </Flex>
+
+      <Flex direction='row' align='center' justify={'space-between'}>
+        <Group>
+          <Button.Group>
+            <Button
+              leftIcon={<IconWriting size='1rem' />}
+              variant='outline'
+              color="gray.8"
+              radius={theme.radius.lg}
+              size='xs'
+              onClick={triggerPostGenerateInitialEmail}
+            >
+              Generate
+            </Button>
+            <Select
+              withinPortal
+              placeholder={sequenceSteps.length > 0 ? "Select Template" : "No Templates"}
+              radius={0}
+              size='xs'
+              data={
+                sequenceSteps.length > 0 ? sequenceSteps.map((step: EmailSequenceStep) => {
+                  return {
+                    value: step.id + "",
+                    label: (step.default ? "🟢 " : "⚪️ ") + step.title,
+                  };
+                }) : []
+              }
+              styles={{
+                input: { borderColor: 'black', borderRight: '0', borderLeft: '0' },
+                dropdown: { minWidth: 150 }
+              }}
+              onChange={(value) => {
+                const selected = sequenceSteps.find((step) => step.id === parseInt(value as string));
+                if (selected) {
+                  setSelectedSequenceStep(selected);
                 }
-              })
-              .catch((e) => {
-                console.log(e);
-              })
-              .finally(() => {
-                setGeneratingEmail(false);
-              });
-          }}
-        >
-          Generate Email with AI
-        </Button>
+              }}
+              value={selectedSequenceStep ? selectedSequenceStep.id + "" : undefined}
+            />
+            <Tooltip label={'Preview coming soon'} withArrow>
+              <Button
+                variant="outline"
+                color="gray.8"
+                radius={theme.radius.lg}
+                size='xs'
+              >
+                {selectedSequenceStep ? (<IconSettingsFilled size="1.225rem" />) : (<IconSettings size="1.225rem" />)}
+              </Button>
+            </Tooltip>
+          </Button.Group>
+        </Group>
         <Button
           radius='xl'
           leftIcon={<IconSend size='0.9rem' />}
           loading={sending}
-          onClick={async () => {
-            setSending(true);
-            const result = await sendEmail(
-              userToken,
-              innerProps.prospectId,
-              subject,
-              bodyRef.current,
-              aiGenerated,
-              innerProps.reply?.messageId
-            );
-            closeAllModals();
-            context.closeModal(id);
+          disabled={sending || subject.length === 0 || bodyRef.current?.trim().length === 0}
+          onClick={() => {
+            openConfirmModal({
+              title: 'Send Email?',
+              children: (
+                <>
+                  {
+                    isFirstEmail ? (
+                      <Text>
+                        Please review your email carefully. After you send this, this Prospect will not appear in any email campaigns! We will still manage the relationship for you.
+                      </Text>
+                    ) : (
+                      <Text>
+                        Please review your email message. We manage relationships automatically for you, but you can still send emails, such as this one, manually.
+                      </Text>
+                    )
+                  }
+                </>),
+              labels: { confirm: 'Confirm', cancel: 'Cancel' },
+              onCancel: () => { },
+              onConfirm: () => {
+                // setSending(true);
+                // const result = await sendEmail(
+                //   userToken,
+                //   innerProps.prospectId,
+                //   subject,
+                //   bodyRich.current as string,
+                //   aiGenerated,
+                //   innerProps.reply?.messageId
+                // );
+                // closeAllModals();
+                // context.closeModal(id);
+              },
+            })
           }}
         >
           Send {innerProps.reply ? 'Reply' : 'Email'}
         </Button>
-      </Center>
-
-      <Card mt='md'>
-        <Button
-          size='xs'
-          radius='xl'
-          variant='outline'
-          mr='lg'
-          color='gray'
-          onClick={() => setCollapseOpened(!collapseOpened)}
-        >
-          {!collapseOpened ? 'View' : 'Hide'} Email {!innerProps.reply ? 'Generation' : 'Followup'} Prompt
-        </Button>
-        <Button
-          size='xs'
-          radius='xl'
-          variant='outline'
-          mr='lg'
-          color='gray'
-          onClick={() => {
-            if (innerProps.reply) {
-              fetchEmailFollowupGenerationPrompt();
-            } else {
-              fetchEmailGenerationPrompt()
-            }
-          }}
-        >
-          Regenerate Email {!innerProps.reply ? 'Generation' : 'Followup'} Prompt
-        </Button>
-        <Collapse in={collapseOpened} mt='sm'>
-          <LoadingOverlay visible={fetchingEmailGenerationPrompt} />
-          <Textarea
-            mt='sm'
-            label='Email Generation Prompt'
-            description=" This is the prompt that is being used to generate the email. Feel free to edit it to your liking and then click the 'Generate Email with AI' button to generate a new email."
-            value={emailGenerationPrompt}
-            minRows={10}
-            onChange={(e: any) => setEmailGenerationPrompt(e.target.value)}
-          />
-        </Collapse>
-      </Card>
-    </Paper>
+      </Flex >
+    </Paper >
   );
 }

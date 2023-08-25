@@ -43,6 +43,7 @@ export const openComposeEmailModal = (
   userToken: string,
   prospectId: number,
   archetypeId: number,
+  emailStatus: string,
   overallStatus: string,
   email: string,
   sdr_email: string,
@@ -83,6 +84,7 @@ export const openComposeEmailModal = (
       from: sdr_email,
       prospectId: prospectId,
       archetypeId: archetypeId,
+      emailStatus: emailStatus,
       overallStatus: overallStatus,
       threadId: threadId,
       reply: reply,
@@ -93,6 +95,7 @@ export const openComposeEmailModal = (
 export default function ProspectDetailsViewEmails(props: {
   prospectId: number;
   archetypeId: number;
+  emailStatus: string;
   overallStatus: string;
   email: string;
 }) {
@@ -135,6 +138,7 @@ export default function ProspectDetailsViewEmails(props: {
                   userToken,
                   props.prospectId,
                   props.archetypeId,
+                  props.emailStatus,
                   props.overallStatus,
                   props.email,
                   userData.sdr_email,
@@ -163,6 +167,7 @@ export default function ProspectDetailsViewEmails(props: {
               threadId={emailThread.nylas_thread_id}
               prospectId={props.prospectId}
               archetypeId={props.archetypeId}
+              emailStatus={props.emailStatus}
               overallStatus={props.overallStatus}
             />
           ))}

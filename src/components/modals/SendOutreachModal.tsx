@@ -153,6 +153,7 @@ export default function SendOutreachModal({
               innerProps.prospectId,
               innerProps.archetypeId,
               'SENT_OUTREACH',
+              'SENT_OUTREACH',
               innerProps.email || '',
               userData.sdr_email,
               "",

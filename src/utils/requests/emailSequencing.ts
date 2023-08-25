@@ -66,7 +66,6 @@ export async function getEmailSequenceSteps(userToken: string, overallStatuses: 
     }
   );
   return await processResponse(response);
-
 }
 
 

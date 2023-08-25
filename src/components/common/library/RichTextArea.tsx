@@ -99,7 +99,7 @@ export default function RichTextArea(props: { personalizationBtn?: boolean, heig
           <RichTextEditor.Unlink />
         </RichTextEditor.ControlsGroup>
       </RichTextEditor.Toolbar>
-      <ScrollArea h={200}>
+      <ScrollArea h={props.height || 200}>
         <RichTextEditor.Content />
       </ScrollArea>
     </RichTextEditor>

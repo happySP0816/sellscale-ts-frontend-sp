@@ -155,7 +155,7 @@ export function ProspectConvoMessage(props: {
   useLayoutEffect(() => {
     setTimeout(() => {
       const elements = document.querySelectorAll(`.gmail_quote`);
-      if(elements.length > 0){
+      if (elements.length > 0) {
         const parent = elements[0].parentNode;
         if (parent) {
           // TODO: Add collapse button
@@ -164,7 +164,7 @@ export function ProspectConvoMessage(props: {
           parent.removeChild(elements[0]);
         }
       }
-    
+
       const element = document.getElementById(uniqueId);
       if (element) {
         setFinalMessage(element.innerHTML);
@@ -182,55 +182,55 @@ export function ProspectConvoMessage(props: {
           __html: DOMPurify.sanitize(props.message),
         }}
       />
-    <Container py={5} sx={{ flex: 1 }}>
-      <Flex gap={0} wrap="nowrap">
-        <div style={{ flexBasis: "10%" }}>
-          <Avatar size="md" radius="xl" m={5} src={proxyURL(props.img_url)} />
-        </div>
-        <div style={{ flexBasis: "90%" }}>
-          <Stack spacing={5}>
-            <Group position="apart">
-              <Group spacing={10}>
-                <Title order={6}>{props.name}</Title>
-                {props.aiGenerated && (
-                  <AiMetaDataBadge
-                    location={{ position: "relative" }}
-                    bumpFrameworkId={props.bumpFrameworkId || 0}
-                    bumpFrameworkTitle={props.bumpFrameworkTitle || ""}
-                    bumpFrameworkDescription={
-                      props.bumpFrameworkDescription || ""
-                    }
-                    bumpFrameworkLength={props.bumpFrameworkLength || ""}
-                    bumpNumberConverted={bumpNumberConverted}
-                    bumpNumberUsed={bumpNumberUsed}
-                    accountResearchPoints={props.accountResearchPoints || []}
-                    initialMessageId={props.initialMessageId || 0}
-                    initialMessageCTAId={props.initialMessageCTAId || 0}
-                    initialMessageCTAText={props.initialMessageCTAText || ""}
-                    initialMessageResearchPoints={
-                      props.initialMessageResearchPoints || []
-                    }
-                    initialMessageStackRankedConfigID={
-                      props.initialMessageStackRankedConfigID || 0
-                    }
-                    initialMessageStackRankedConfigName={
-                      props.initialMessageStackRankedConfigName || ""
-                    }
-                    cta={props.cta || ""}
-                  />
-                )}
+      <Container py={5} sx={{ flex: 1 }}>
+        <Flex gap={0} wrap="nowrap">
+          <div style={{ flexBasis: "10%" }}>
+            <Avatar size="md" radius="xl" m={5} src={proxyURL(props.img_url)} />
+          </div>
+          <div style={{ flexBasis: "90%" }}>
+            <Stack spacing={5}>
+              <Group position="apart">
+                <Group spacing={10}>
+                  <Title order={6}>{props.name}</Title>
+                  {props.aiGenerated && (
+                    <AiMetaDataBadge
+                      location={{ position: "relative" }}
+                      bumpFrameworkId={props.bumpFrameworkId || 0}
+                      bumpFrameworkTitle={props.bumpFrameworkTitle || ""}
+                      bumpFrameworkDescription={
+                        props.bumpFrameworkDescription || ""
+                      }
+                      bumpFrameworkLength={props.bumpFrameworkLength || ""}
+                      bumpNumberConverted={bumpNumberConverted}
+                      bumpNumberUsed={bumpNumberUsed}
+                      accountResearchPoints={props.accountResearchPoints || []}
+                      initialMessageId={props.initialMessageId || 0}
+                      initialMessageCTAId={props.initialMessageCTAId || 0}
+                      initialMessageCTAText={props.initialMessageCTAText || ""}
+                      initialMessageResearchPoints={
+                        props.initialMessageResearchPoints || []
+                      }
+                      initialMessageStackRankedConfigID={
+                        props.initialMessageStackRankedConfigID || 0
+                      }
+                      initialMessageStackRankedConfigName={
+                        props.initialMessageStackRankedConfigName || ""
+                      }
+                      cta={props.cta || ""}
+                    />
+                  )}
+                </Group>
+                <Text weight={400} size={11} c="dimmed" pr={10}>
+                  {props.timestamp}
+                </Text>
               </Group>
-              <Text weight={400} size={11} c="dimmed" pr={10}>
-                {props.timestamp}
-              </Text>
-            </Group>
-            <TextWithNewlines style={{ fontSize: "0.875rem" }}>
-              {finalMessage}
-            </TextWithNewlines>
-          </Stack>
-        </div>
-      </Flex>
-    </Container>
+              <TextWithNewlines style={{ fontSize: "0.875rem" }}>
+                {finalMessage}
+              </TextWithNewlines>
+            </Stack>
+          </div>
+        </Flex>
+      </Container>
     </>
   );
 }
@@ -553,7 +553,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
             </Title>
             <Text weight={300} fs="italic" size={10} c="dimmed" truncate>
               {prospect &&
-              new Date(prospect.hidden_until).getTime() >
+                new Date(prospect.hidden_until).getTime() >
                 new Date().getTime() ? (
                 <>
                   Snoozed Until:{" "}
@@ -683,11 +683,11 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
                   Back to Threads
                 </Badge>
                 <Box
-                sx={{
-                  backgroundColor: 'white',
-                  borderRadius: '10px',
-                  padding: '0px 5px',
-                }}
+                  sx={{
+                    backgroundColor: 'white',
+                    borderRadius: '10px',
+                    padding: '0px 5px',
+                  }}
                 >
                   <Title order={5}>{_.truncate(emailThread?.subject, { length: 36 })}</Title>
                 </Box>
@@ -745,7 +745,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
                       name={
                         msg.message_from.length > 0
                           ? msg.message_from[0].name ||
-                            msg.message_from[0].email
+                          msg.message_from[0].email
                           : "Unknown"
                       }
                       message={msg.body}
@@ -823,10 +823,10 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
                 prospectId={openedProspectId}
                 nylasMessageId={
                   currentConvoEmailMessages &&
-                  currentConvoEmailMessages.length > 0
+                    currentConvoEmailMessages.length > 0
                     ? currentConvoEmailMessages[
-                        currentConvoEmailMessages.length - 1
-                      ].nylas_message_id
+                      currentConvoEmailMessages.length - 1
+                    ].nylas_message_id
                     : undefined
                 }
                 scrollToBottom={scrollToBottom}
@@ -901,8 +901,9 @@ function EmailThreadsSection(props: {
               openComposeEmailModal(
                 userToken,
                 props.prospect.id,
-                currentProject?.id || -1,
-                "",
+                currentProject?.id || props.prospect.archetype_id || -1,
+                props.prospect.email_status,
+                props.prospect.overall_status,
                 props.prospect.email,
                 userData.sdr_email,
                 "",

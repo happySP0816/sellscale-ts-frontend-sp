@@ -63,7 +63,7 @@ import getPersonas from "@utils/requests/getPersonas";
 import { Archetype } from "src";
 import { ProjectSelect } from './ProjectSelect';
 import { currentInboxCountState, currentProjectState } from '@atoms/personaAtoms';
-import { IconAt, IconBrain, IconMessage, IconMilitaryRank, IconTimelineEventPlus } from '@tabler/icons';
+import { IconAt, IconBrain, IconMessage, IconMilitaryRank, IconSeeding, IconTimelineEventPlus } from '@tabler/icons';
 import PersonaCardMini from '@common/persona/PersonaCardMini';
 
 const useStyles = createStyles((theme) => ({
@@ -210,7 +210,7 @@ export function NavbarNested(props: {
     refetchOnWindowFocus: false,
   });
 
-  var siteLinks = [
+  let siteLinks = [
     {
       mainKey: "inbox",
       label: `Inbox ${inboxCount ? `(${inboxCount})` : "(0)"}`,
@@ -318,12 +318,13 @@ export function NavbarNested(props: {
           icon: IconMessage,
           link: "/linkedin/simulate",
         },
-        // {
-        //   key: "linkedin-voices",
-        //   label: "Voices",
-        //   icon: IconVocabulary,
-        //   link: "/linkedin/voices",
-        // },
+        // If is it Vasti, show nuture tab
+        userData.id === 11 ? {
+          key: "linkedin-nuture",
+          label: "Nuture",
+          icon: IconSeeding,
+          link: "/linkedin/nuture",
+        } : undefined,
       ],
     },
     {
@@ -447,7 +448,7 @@ export function NavbarNested(props: {
     siteLinks = siteLinks.filter((link) => {
       return link.mainKey === "contacts" || link.mainKey === "inbox";
     });
-    var additional_links = [
+    let additional_links = [
       {
         mainKey: "split/contacts",
         label: `Split Contacts`,

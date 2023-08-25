@@ -134,18 +134,24 @@ interface LinksGroupProps {
   icon: React.FC<any>;
   label: string;
   mainKey: string;
-  links: { label: string; link: string; key: string; icon: React.FC<any> }[];
+  links: ({ label: string; link: string; key: string; icon: React.FC<any> } | undefined)[];
 }
 
 export function LinksGroup({
   icon: Icon,
   label,
   mainKey,
-  links,
+  links: rawLinks,
 }: LinksGroupProps) {
   const { classes, theme, cx } = useStyles();
   const navigate = useNavigate();
   const os = useOs();
+  const links = rawLinks.filter((link) => link !== undefined) as {
+    label: string;
+    link: string;
+    key: string;
+    icon: React.FC<any>;
+  }[];
 
   const [navTab, setNavTab] = useRecoilState(navTabState);
   const [opened, setOpened] = useState(false);

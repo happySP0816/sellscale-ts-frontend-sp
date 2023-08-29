@@ -61,9 +61,7 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
     _setSequence(value);
   }
 
-  console.log(sequence);
-
-  const triggerCreateBumpFramework = async () => {
+  const triggerCreateOrSave = async () => {
     setLoading(true);
 
     const success = await props.onFinish(
@@ -77,8 +75,8 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
     if (success) {
       showNotification({
         title: "Success",
-        message: "Step created successfully",
-        icon: <IconCheck radius="sm" color={theme.colors.green[7]} />,
+        message: `Successfully ${props.type === "CREATE" ? "created" : "saved"} the step`,
+        icon: <IconCheck radius="sm" />,
       });
       form.reset();
       props.backFunction();
@@ -86,8 +84,8 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
     } else {
       showNotification({
         title: "Error",
-        message: "There was an error creating the step",
-        icon: <IconX radius="sm" color={theme.colors.red[7]} />,
+        message: `There was an error ${props.type === "CREATE" ? "creating" : "saving"} the step`,
+        icon: <IconX radius="sm" />,
       });
     }
 
@@ -125,12 +123,13 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
       scrollAreaComponent={ScrollArea.Autosize}
     >
       <LoadingOverlay visible={loading} />
-      <Stack>
+      <Stack h={450}>
         <Group position="apart">
           <TextInput
             label="Title"
             placeholder={"Mention the Super Bowl"}
             withAsterisk
+            w='400px'
             {...form.getInputProps("title")}
           />
           <Group>
@@ -156,9 +155,7 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
               //       form.values.bumpedCount < 1)) ||
               //   template.length === 0
               // }
-              onClick={() => {
-                triggerCreateBumpFramework();
-              }}
+              onClick={triggerCreateOrSave}
             >
               {props.type === "CREATE" ? "Create" : "Save"}
             </Button>
@@ -167,6 +164,7 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
         <Flex gap={10} wrap="nowrap" w={"100%"}>
           <Box sx={{ flexBasis: "60%" }}>
             <DynamicRichTextArea
+              height={300}
               onChange={(value, rawValue) => {
                 sequenceRichRaw.current = rawValue;
                 _setSequence(value);

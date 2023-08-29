@@ -133,7 +133,7 @@ export default function EmailBlockPreview(props: { archetypeId: number, template
     <>
       <Card withBorder h='fit'>
         <Text fz='lg' fw='bold'>
-          Email Preview
+          Email Preview - Coming Soon
         </Text>
         <Text fz='sm'>Test your email block configuration on a prospect of your choosing.</Text>
 

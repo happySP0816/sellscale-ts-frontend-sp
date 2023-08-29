@@ -429,7 +429,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       };
                     }) : []
                   ) : (
-                    emailSequenceSteps.length > 0 ? emailSequenceSteps.map((step: EmailSequenceStep) => {
+                    emailSequenceSteps?.length > 0 ? emailSequenceSteps.map((step: EmailSequenceStep) => {
                       return {
                         value: step.id + "",
                         label: (step.default ? "🟢 " : "⚪️ ") + step.title,

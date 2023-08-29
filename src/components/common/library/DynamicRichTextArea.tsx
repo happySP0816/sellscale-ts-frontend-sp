@@ -82,56 +82,86 @@ function InsertControl(props: { insert: DynamicInsert }) {
 //   // return found;
 // }
 
+
+interface JSONContentItem {
+  type: string;
+  content?: JSONContentItem[];
+  attrs?: { [key: string]: string };
+  text?: string;
+}
+
+// Function to format the fields in the JSON content
+function formatFields(obj: JSONContentItem, inserts: DynamicInsert[]) {
+  // If the object has no content, return
+  if (obj.content === undefined) return;
+
+  // Loop through the content
+  const textParts: any[] = [];
+  for (let i = 0; i < obj.content.length; i++) {
+    // If the type is not text, then recurse
+    const partCopy = obj.content[i];
+    if (partCopy.type !== "text" || !partCopy.text) {
+      formatFields(obj.content[i], inserts);
+      continue;
+    }
+
+    // Split the text into insert parts
+    const matches = [...partCopy.text.matchAll(FORMAT_REGEX)];
+    if (matches.length === 0) {
+      textParts.push(partCopy);
+      continue;
+    }
+
+    // Remove the first match and prefix text and add it to the parts
+    let curText = partCopy.text;
+    for (const match of matches) {
+      const newParts = curText.split(match[0]);
+      if (newParts.length > 1) {
+        curText = curText.replace(newParts[0], "").replace(match[0], "");
+      }
+      const insert =
+        inserts.find((insert) => insert.key === match[1]) ||
+        inserts.find((insert) => insert.key === "custom");
+      if (!insert) {
+        console.error(`Could not find custom insert!`);
+        continue;
+      }
+
+      textParts.push({
+        type: "text",
+        text: newParts[0],
+      });
+      textParts.push({
+        type: "text",
+        text:
+          insert.key === "custom"
+            ? match[1].replace("custom=", "")
+            : insert.label,
+        marks: [{ type: `insert-${insert.key}` }],
+      });
+    }
+
+    // Add the remaining text to the parts
+    textParts.push({
+      type: "text",
+      text: curText === "" ? " " : curText,
+    });
+
+  }
+
+  // Set and remove empty text nodes
+  if (textParts.length != 0) {
+    obj.content = textParts.filter((textPart) => textPart.text !== "");
+  }
+}
+
+
 function formatJSONContent(json: JSONContent, inserts: DynamicInsert[]) {
   const content = Object.values(json)[1];
-  for (const paragraph of content) {
-    if (paragraph && paragraph.content) {
-      const parts: any[] = [];
-      for (const part of paragraph.content) {
-        // Split the text into insert parts
-        const matches = [...part.text.matchAll(FORMAT_REGEX)];
-        if (matches.length === 0) {
-          parts.push(part);
-          continue;
-        }
 
-        // Remove the first match and prefix text and add it to the parts
-        let curText = part.text;
-        for (const match of matches) {
-          const newParts = curText.split(match[0]);
-          if (newParts.length > 1) {
-            curText = curText.replace(newParts[0], "").replace(match[0], "");
-          }
-          const insert =
-            inserts.find((insert) => insert.key === match[1]) ||
-            inserts.find((insert) => insert.key === "custom");
-          if (!insert) {
-            console.error(`Could not find custom insert!`);
-            continue;
-          }
-
-          parts.push({
-            type: "text",
-            text: newParts[0],
-          });
-          parts.push({
-            type: "text",
-            text:
-              insert.key === "custom"
-                ? match[1].replace("custom=", "")
-                : insert.label,
-            marks: [{ type: `insert-${insert.key}` }],
-          });
-        }
-        // Add the remaining text to the parts
-        parts.push({
-          type: "text",
-          text: curText === "" ? " " : curText,
-        });
-      }
-      // Set and remove empty text nodes
-      paragraph.content = parts.filter((part) => part.text !== "");
-    }
+  for (const obj of content) {
+    // Format the fields
+    formatFields(obj, inserts);
   }
 
   json.content = content;
@@ -188,12 +218,11 @@ export default function DynamicRichTextArea(props: {
           .getHTML()
           .replace(regex, (match, insertKey, insertLabel) => {
             if (insertKey === "custom") {
-              return `[[${
-                props.signifyCustomInsert === undefined ||
+              return `[[${props.signifyCustomInsert === undefined ||
                 props.signifyCustomInsert
-                  ? `custom=`
-                  : ``
-              }${insertLabel}]]`;
+                ? `custom=`
+                : ``
+                }${insertLabel}]]`;
             } else {
               return `[[${insertKey}]]`;
             }

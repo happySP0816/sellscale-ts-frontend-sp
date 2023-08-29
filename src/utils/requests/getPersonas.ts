@@ -68,6 +68,27 @@ export async function getPersonasOverview(userToken: string): Promise<MsgRespons
 
 
 /**
+ * Get all personas for a user
+ * @param userToken 
+ * @returns - MsgResponse
+ */
+export async function getPersonasCampaignView(userToken: string): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${API_URL}/client/archetype/get_archetypes/campaign_view`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response, 'data');
+
+}
+
+
+/**
  * Get all uploads for a persona
  * @param userToken 
  * @param personaId 

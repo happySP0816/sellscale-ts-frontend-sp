@@ -16,6 +16,7 @@ import {
   IconBrandLinkedin,
   IconMail,
   IconFilterDollar,
+  IconTargetArrow,
 } from '@tabler/icons-react';
 import { navigateToPage } from '@utils/documentChange';
 import { getSDRGeneralInfo } from '@utils/requests/getClientSDR';
@@ -101,6 +102,11 @@ export function GlobalPageSelect() {
       label: 'Global Email Messages',
       icon: <IconMail size="1rem" stroke={1.5} />,
       value: 'all-email-messages',
+    },
+    {
+      label: 'Global Campaigns',
+      icon: <IconTargetArrow size="1rem" stroke={1.5} />,
+      value: 'all-campaigns',
     },
   ];
 

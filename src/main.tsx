@@ -54,6 +54,7 @@ import CleanContactsPage from "@pages/CleanContactsPage";
 import PersonaSettingsPage from "@pages/PersonaSettingsPage";
 import EmailSimulatePage from "@pages/EmailSimulatePage";
 import PipelineSection from "@common/home/PipelineSection";
+import PersonaCampaigns from "@common/campaigns/PersonaCampaigns";
 
 const queryClient = new QueryClient();
 
@@ -259,6 +260,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "all/email-messages",
         element: <RestrictedRoute page={<Box p='md'><EmailQueuedMessages all /></Box>} />,
+      },
+      {
+        path: "all/campaigns",
+        element: <RestrictedRoute page={<Box p='md'><PersonaCampaigns /></Box>} />,
       },
       {
         path: "all/linkedin-messages",

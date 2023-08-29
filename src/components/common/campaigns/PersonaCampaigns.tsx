@@ -240,8 +240,6 @@ function PersonCampaignCard(props: { persona: CampaignPersona, project?: Persona
     openedProspectIdState
   );
 
-  console.log(props.persona);
-
   const types: ChannelSection[] = [
     {
       id: 1,

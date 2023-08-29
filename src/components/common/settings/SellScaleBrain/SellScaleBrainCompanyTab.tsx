@@ -215,7 +215,6 @@ export default function SellScaleBrainCompanyTab() {
           </Button>
         </Card>
       </Container>
-      <DoNotContactList />
     </Box>
   );
 }

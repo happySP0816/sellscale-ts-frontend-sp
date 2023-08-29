@@ -1,5 +1,14 @@
 import PageFrame from "@common/PageFrame";
-import { Flex, LoadingOverlay, Paper, Select, SimpleGrid, Tabs, Text } from "@mantine/core";
+import {
+  Flex,
+  Group,
+  LoadingOverlay,
+  Paper,
+  Select,
+  SimpleGrid,
+  Tabs,
+  Text,
+} from "@mantine/core";
 import { useVesselLink } from "@vesselapi/react-vessel-link";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -353,7 +362,6 @@ function VesselIntegrations() {
 }
 
 export default function SettingsPage() {
-
   const { tabId } = useLoaderData() as { tabId: string };
 
   const userToken = useRecoilValue(userTokenState);
@@ -364,9 +372,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const nylasCode = searchParams.get("code");
-    if (nylasCode){
-      exchangeNylasClientID(userToken, nylasCode)
-      .then((response) => {
+    if (nylasCode) {
+      exchangeNylasClientID(userToken, nylasCode).then((response) => {
         window.location.href = "/settings";
       });
     }
@@ -427,10 +434,7 @@ export default function SettingsPage() {
           >
             Do Not Contact Filters
           </Tabs.Tab>
-          <Tabs.Tab
-            value="slackbot"
-            icon={<IconBrandSlack size="0.8rem" />}
-          >
+          <Tabs.Tab value="slackbot" icon={<IconBrandSlack size="0.8rem" />}>
             Slack Connection
           </Tabs.Tab>
         </Tabs.List>
@@ -456,7 +460,10 @@ export default function SettingsPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="doNotContact" pl="xs">
-          <DoNotContactList forSDR />
+          <Group noWrap>
+            <DoNotContactList forSDR />
+            <DoNotContactList />
+          </Group>
         </Tabs.Panel>
 
         <Tabs.Panel value="sellScaleBrain" pl="xs">

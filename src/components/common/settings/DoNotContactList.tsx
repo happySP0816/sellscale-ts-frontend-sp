@@ -21,19 +21,39 @@ const urlRegex: RegExp = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-z0-9\-]+(?:\.[a-
 export default function DoNotContactList() {
   const [userToken] = useRecoilState(userTokenState);
   const [fetchedData, setFetchedData] = useState(false);
-  const [keywords, setKeywords]: any = useState([
+  const [keywords, setKeywords] = useState<{ value: string, label: string }[]>([
     // { value: "staffing", label: "staffing" },
   ]);
-  const [companyNames, setCompanyNames]: any = useState([
+  const [companyNames, setCompanyNames] = useState<{ value: string, label: string }[]>([
     // { value: "Medicus", label: "medicus" },
   ]);
-  const [selectedCompanies, setSelectedCompanies] = useState([]);
-  const [selectedKeywords, setSelectedKeywords] = useState([]);
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [needsSave, setNeedsSave] = useState(false);
+
+  const [keywordSearchValue, setKeywordSearchValue] = useState('');
+  const [companySearchValue, setCompanySearchValue] = useState('');
 
   // Save as nothing tracking state
   // - No clean, bug-free way to do this without a component restructure
   const [saveAsNothing, setSaveAsNothing] = useState(false);
+
+  // Replace all newlines in pasted text with an escaped newline
+  useEffect(() => {
+    addEventListener('paste', (event) => {
+      event.preventDefault(); // Prevent default paste behavior
+    
+      const clipboardData = event.clipboardData;
+      const pastedText = clipboardData?.getData('text'); // Get the pasted text
+      if(!pastedText) return;
+    
+      // Modify the pasted content
+      const modifiedText = pastedText.replace(/\r|\n/gm, '\\n');
+    
+      // Insert the modified content into the editable element
+      document.execCommand('insertHTML', false, modifiedText);
+    });
+  }, [])
 
   const getKeywords = async () => {
     const res = await fetch(`${API_URL}/client/do_not_contact_filters`, {
@@ -147,6 +167,33 @@ export default function DoNotContactList() {
             setKeywords((current: any) => [...current, item]);
             return item;
           }}
+          searchValue={keywordSearchValue}
+          onSearchChange={(query) => {
+
+            // If search value includes any newlines, add those items
+            let newValue = query;
+            let newKeywords: { value: string, label: string }[] = [];
+
+            const matches = [...query.matchAll(/(.*?)\\n/gm)];
+            for(const match of matches) {
+              newKeywords.push({ value: match[1], label: match[1] });
+              newValue = newValue.replace(match[0], '');
+            }
+
+            // If there are more than 4 being added, add the last input to the list as well
+            if(matches.length > 4){
+              newKeywords.push({ value: newValue, label: newValue });
+              newValue = '';
+            }
+            
+            if(matches.length > 0) {
+              setKeywords((current) => [...current, ...newKeywords]);
+              setSelectedKeywords((current) => [...current, ...newKeywords.map(x => x.value)]);
+              setNeedsSave(true);
+              setSaveAsNothing(false);
+            }
+            setKeywordSearchValue(newValue);
+          }}
         />
       </Card>
       <Card mt="md">
@@ -173,6 +220,33 @@ export default function DoNotContactList() {
             const item: any = { value: query, label: query };
             setCompanyNames((current: any) => [...current, item]);
             return item;
+          }}
+          searchValue={companySearchValue}
+          onSearchChange={(query) => {
+
+            // If search value includes any newlines, add those items
+            let newValue = query;
+            let newCompanyNames: { value: string, label: string }[] = [];
+
+            const matches = [...query.matchAll(/(.*?)\\n/gm)];
+            for(const match of matches) {
+              newCompanyNames.push({ value: match[1], label: match[1] });
+              newValue = newValue.replace(match[0], '');
+            }
+
+            // If there are more than 4 being added, add the last input to the list as well
+            if(matches.length > 4){
+              newCompanyNames.push({ value: newValue, label: newValue });
+              newValue = '';
+            }
+            
+            if(matches.length > 0) {
+              setCompanyNames((current) => [...current, ...newCompanyNames]);
+              setSelectedCompanies((current) => [...current, ...newCompanyNames.map(x => x.value)]);
+              setNeedsSave(true);
+              setSaveAsNothing(false);
+            }
+            setCompanySearchValue(newValue);
           }}
         />
       </Card>

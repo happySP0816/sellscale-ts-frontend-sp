@@ -78,8 +78,6 @@ export default function PersonaCampaigns() {
     personas.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  console.log(userData);
-
   useEffect(() => {
     (async () => {
       if (!isLoggedIn()) return;

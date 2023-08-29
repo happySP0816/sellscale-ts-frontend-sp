@@ -8,7 +8,7 @@ import { API_URL } from "@constants/data";
  * @param archetypeID
  * @param overallStatus
  * @param title
- * @param email_blocks
+ * @param template
  * @param bumpedCount
  * @param setDefault
  * @param substatus

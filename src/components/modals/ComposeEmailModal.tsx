@@ -28,6 +28,7 @@ import { JSONContent } from '@tiptap/react';
 import { postGenerateInitialEmail } from '@utils/requests/emailMessageGeneration';
 import { getEmailSequenceSteps } from '@utils/requests/emailSequencing';
 import { sendEmail } from '@utils/requests/sendEmail';
+import DOMPurify from 'dompurify';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { EmailSequenceStep } from 'src';
@@ -145,12 +146,42 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
       });
       return;
     }
-    
-    console.log(innerProps);
 
     setSequenceSteps(result.data.sequence_steps);
 
   };
+
+  const triggerSendEmail = async () => {
+    setSending(true);
+
+    const result = await sendEmail(
+      userToken,
+      innerProps.prospectId,
+      subject,
+      bodyRich.current as string,
+      aiGenerated,
+      innerProps.reply?.messageId
+    );
+    if (result.status !== 'success') {
+      showNotification({
+        title: 'Error',
+        message: 'Could not send email.',
+        color: 'red',
+      });
+      setSending(false);
+      return;
+    }
+
+    showNotification({
+      title: 'Success',
+      message: 'Email sent.',
+      color: 'green',
+    });
+    setSending(false);
+
+    closeAllModals();
+    context.closeModal(id);
+  }
 
   // If body was cleared, it's no longer ai generated
   useEffect(() => {
@@ -251,39 +282,67 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
           radius='xl'
           leftIcon={<IconSend size='0.9rem' />}
           loading={sending}
-          disabled={sending || subject.length === 0 || bodyRef.current?.trim().length === 0}
           onClick={() => {
+            if (sending || subject.length === 0 || bodyRef.current?.trim().length === 0) {
+              showNotification({
+                title: 'Error',
+                message: 'Please fill out subject and body.',
+                color: 'red',
+              });
+              return;
+            }
+
             openConfirmModal({
               title: 'Send Email?',
               children: (
                 <>
                   {
                     isFirstEmail ? (
-                      <Text>
-                        Please review your email carefully. After you send this, this Prospect will not appear in any email campaigns! We will still manage the relationship for you.
-                      </Text>
+                      <>
+                        <Text>
+                          Please review your email carefully. After you send this, this Prospect will not appear in any email campaigns! We will still manage the relationship for you.
+                        </Text>
+                        <Box
+                          sx={() => ({
+                            border: '1px solid #E0E0E0',
+                            borderRadius: '8px',
+                            backgroundColor: '#F5F5F5',
+                          })}
+                          px='md'
+                          mt='sm'
+                        >
+                          <Text fz="sm">
+                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(bodyRef.current) }} />
+                          </Text>
+                        </Box>
+
+                      </>
+
                     ) : (
-                      <Text>
-                        Please review your email message. We manage relationships automatically for you, but you can still send emails, such as this one, manually.
-                      </Text>
+                      <>
+                        <Text>
+                          Please review your email message. We manage relationships automatically for you, but you can still send emails, such as this one, manually.
+                        </Text>
+                        <Box
+                          sx={() => ({
+                            border: '1px solid #E0E0E0',
+                            borderRadius: '8px',
+                            backgroundColor: '#F5F5F5',
+                          })}
+                          px='md'
+                          mt='sm'
+                        >
+                          <Text fz="sm">
+                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(bodyRef.current) }} />
+                          </Text>
+                        </Box>
+                      </>
                     )
                   }
                 </>),
               labels: { confirm: 'Confirm', cancel: 'Cancel' },
-              onCancel: () => { },
-              onConfirm: () => {
-                // setSending(true);
-                // const result = await sendEmail(
-                //   userToken,
-                //   innerProps.prospectId,
-                //   subject,
-                //   bodyRich.current as string,
-                //   aiGenerated,
-                //   innerProps.reply?.messageId
-                // );
-                // closeAllModals();
-                // context.closeModal(id);
-              },
+              onCancel: () => { bodyRich.current = bodyRich.current },
+              onConfirm: () => { triggerSendEmail() },
             })
           }}
         >

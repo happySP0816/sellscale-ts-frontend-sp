@@ -25,6 +25,7 @@ import {
   Loader,
   Card,
   Box,
+  useMantineTheme,
 } from "@mantine/core";
 import { Archetype, PersonaOverview, Prospect } from "src";
 import {
@@ -36,6 +37,7 @@ import {
   IconPencil,
   IconRefresh,
   IconTrash,
+  IconX,
 } from "@tabler/icons";
 import { getHotkeyHandler, useDebouncedState } from "@mantine/hooks";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -252,6 +254,8 @@ export default function VoiceBuilderFlow(props: {
   const [voiceBuilderMessages, setVoiceBuilderMessages] = useRecoilState(
     voiceBuilderMessagesState
   );
+
+  const theme = useMantineTheme();
   const [simulationProspectId, setSimulationProspectId]: any = useState(-1);
   const userToken = useRecoilValue(userTokenState);
 
@@ -405,6 +409,11 @@ export default function VoiceBuilderFlow(props: {
       })
       .catch((err) => {
         console.log(err);
+        showNotification({
+          title: "Error",
+          message: err,
+          icon: <IconX radius="sm" color={theme.colors.red[7]} />,
+        });
       })
       .finally(() => {
         setLoadingSample(false);
@@ -422,6 +431,7 @@ export default function VoiceBuilderFlow(props: {
           <Container>
             <Divider my="sm" />
           </Container>
+
           {loadingMsgGen && (
             <Container w="100%">
               {<Loader mx="auto" variant="dots" />}

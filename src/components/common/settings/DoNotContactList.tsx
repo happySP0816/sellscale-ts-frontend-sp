@@ -43,6 +43,7 @@ export default function DoNotContactList() {
     addEventListener('paste', (event) => {
       event.preventDefault(); // Prevent default paste behavior
     
+      // @ts-ignore
       const clipboardData = event.clipboardData;
       const pastedText = clipboardData?.getData('text'); // Get the pasted text
       if(!pastedText) return;

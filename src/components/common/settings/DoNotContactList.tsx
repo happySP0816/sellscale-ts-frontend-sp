@@ -16,9 +16,8 @@ import { showNotification } from "@mantine/notifications";
 import { API_URL } from "@constants/data";
 import DoNotContactListCaughtProspects from "./DoNotContactListCaughtProspects";
 
-const urlRegex: RegExp = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-z0-9\-]+(?:\.[a-z]{2,})+(?:\/[\w\-\.\?\=\&]*)*$/i;
 
-export default function DoNotContactList() {
+export default function DoNotContactList(props: { forSDR?: boolean }) {
   const [userToken] = useRecoilState(userTokenState);
   const [fetchedData, setFetchedData] = useState(false);
   const [keywords, setKeywords] = useState<{ value: string, label: string }[]>([
@@ -57,7 +56,7 @@ export default function DoNotContactList() {
   }, [])
 
   const getKeywords = async () => {
-    const res = await fetch(`${API_URL}/client/do_not_contact_filters`, {
+    const res = await fetch(`${API_URL}/client${props.forSDR ? `/sdr` : ``}/do_not_contact_filters`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -101,7 +100,7 @@ export default function DoNotContactList() {
   }, [fetchedData]);
 
   const saveFilters = async () => {
-    const resp = await fetch(`${API_URL}/client/do_not_contact_filters`, {
+    const resp = await fetch(`${API_URL}/client${props.forSDR ? `/sdr` : ``}/do_not_contact_filters`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -264,7 +263,7 @@ export default function DoNotContactList() {
 
       <Divider mt="lg" mb="lg" />
 
-      <DoNotContactListCaughtProspects />
+      <DoNotContactListCaughtProspects forSDR={props.forSDR} />
     </Paper>
   );
 }

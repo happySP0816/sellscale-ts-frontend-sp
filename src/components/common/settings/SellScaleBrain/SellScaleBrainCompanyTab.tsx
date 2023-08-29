@@ -14,6 +14,7 @@ import {
 } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
+import DoNotContactList from "../DoNotContactList";
 
 export default function SellScaleBrainCompanyTab() {
   const [userToken] = useRecoilState(userTokenState);
@@ -214,6 +215,7 @@ export default function SellScaleBrainCompanyTab() {
           </Button>
         </Card>
       </Container>
+      <DoNotContactList />
     </Box>
   );
 }

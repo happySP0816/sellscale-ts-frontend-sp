@@ -456,7 +456,7 @@ export default function SettingsPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="doNotContact" pl="xs">
-          <DoNotContactList />
+          <DoNotContactList forSDR />
         </Tabs.Panel>
 
         <Tabs.Panel value="sellScaleBrain" pl="xs">

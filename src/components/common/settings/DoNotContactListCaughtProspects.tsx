@@ -19,7 +19,7 @@ import { Prospect } from "src";
 import { openConfirmModal } from "@mantine/modals";
 import displayNotification from "@utils/notificationFlow";
 
-export default function DoNotContactListCaughtProspects() {
+export default function DoNotContactListCaughtProspects(props: { forSDR?: boolean }) {
   const [userToken] = useRecoilState(userTokenState);
   const [caughtProspects, setCaughtProspects] = useState([]); // [ { id: 1, name: "John Doe", company: "Medicus", title: "CEO" }
   const [fetchedCaughtProspects, setFetchedCaughtProspects] = useState(false); // [ { id: 1, name: "John Doe", company: "Medicus", title: "CEO" }
@@ -29,7 +29,7 @@ export default function DoNotContactListCaughtProspects() {
   const fetchCaughtProspects = async () => {
     setLoading(true);
     const res = await fetch(
-      `${API_URL}/client/do_not_contact_filters/caught_prospects`,
+      `${API_URL}/client${props.forSDR ? `/sdr` : ``}/do_not_contact_filters/caught_prospects`,
       {
         method: "GET",
         headers: {
@@ -47,7 +47,7 @@ export default function DoNotContactListCaughtProspects() {
   const removeProspectFromContactList = async () => {
     setLoading(true);
     const resp = await fetch(
-      `${API_URL}/client/do_not_contact_filters/remove_prospects`,
+      `${API_URL}/client${props.forSDR ? `/sdr` : ``}/do_not_contact_filters/remove_prospects`,
       {
         method: "POST",
         headers: {

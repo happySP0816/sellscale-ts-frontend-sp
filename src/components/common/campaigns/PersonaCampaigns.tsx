@@ -1,6 +1,6 @@
 import { openedProspectIdState } from "@atoms/inboxAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { isLoggedIn } from "@auth/core";
 import PageFrame from "@common/PageFrame";
 import {
@@ -67,6 +67,7 @@ type CampaignPersona = {
 
 export default function PersonaCampaigns() {
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
 
   const [projects, setProjects] = useState<PersonaOverview[]>([]);
   const [personas, setPersonas] = useState<CampaignPersona[]>([]);
@@ -76,6 +77,8 @@ export default function PersonaCampaigns() {
   const filteredProjects = personas.filter((personas) =>
     personas.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  console.log(userData);
 
   useEffect(() => {
     (async () => {
@@ -169,7 +172,7 @@ export default function PersonaCampaigns() {
                 <Text fw={500}>
                   LinkedIn:{" "}
                   <Text c="blue" fw={600} span>
-                    75/100
+                  {userData.weekly_li_outbound_target}/100
                   </Text>
                 </Text>
               </Button>
@@ -184,7 +187,7 @@ export default function PersonaCampaigns() {
                 <Text fw={500}>
                   Email:{" "}
                   <Text c="blue" fw={600} span>
-                    75/100
+                    {userData.weekly_email_outbound_target}/100
                   </Text>
                 </Text>
               </Button>

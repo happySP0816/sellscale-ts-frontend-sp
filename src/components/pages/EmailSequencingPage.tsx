@@ -126,7 +126,7 @@ function EmailInitialOutboundView(props: {
         {/* Header */}
         <Flex justify="space-between" align="center">
           <Flex align="center">
-            <Title order={5}>First Message</Title>
+            <Title order={5}>Email 1</Title>
             <Text ml="sm" size="xs">
               Hyperpersonalized cold outreach sent to the prospect.
             </Text>
@@ -783,7 +783,7 @@ export default function EmailSequencingPage(props: {
                         {/* Accepted */}
                         <EmailSequenceStepView
                           sequenceBucket={sequenceBuckets.current?.ACCEPTED}
-                          sequenceStepTitle={"First / Initial Followup"}
+                          sequenceStepTitle={"Email 2"}
                           sequenceStepDescription={
                             "Prospects who have not received any followup."
                           }
@@ -824,9 +824,8 @@ export default function EmailSequencingPage(props: {
                               <Flex mt="md" w="100%">
                                 <EmailSequenceStepView
                                   sequenceBucket={sequenceBucket}
-                                  sequenceStepTitle={`${followupString} Followup`}
-                                  sequenceStepDescription={`This is followup #${bumpCountInt + 1
-                                    }`}
+                                  sequenceStepTitle={`Email ${bumpCountInt + 2}`}
+                                  sequenceStepDescription={`This is followup #${bumpCountInt + 1}`}
                                   status={"BUMPED"}
                                   dataChannels={dataChannels}
                                   archetypeID={archetypeID}

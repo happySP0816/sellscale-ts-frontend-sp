@@ -49,6 +49,7 @@ import SettingPreferences from "@common/settings/SettingPreferences";
 import SlackbotSection from "@common/slack/SlackbotSection";
 import MessageAutomation from "@common/settings/MessageAutomation";
 import SlackWebhookSection from "@common/slack/SlackWebhookSection";
+import DoNotContactFiltersPage from '@common/settings/DoNotContactFiltersPage';
 
 function VesselIntegrations() {
   const userToken = useRecoilValue(userTokenState);
@@ -461,8 +462,7 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="doNotContact" pl="xs">
           <Group noWrap>
-            <DoNotContactList forSDR />
-            <DoNotContactList />
+            <DoNotContactFiltersPage />
           </Group>
         </Tabs.Panel>
 

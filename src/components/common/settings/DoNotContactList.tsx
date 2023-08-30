@@ -129,9 +129,9 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
   };
 
   return (
-    <Paper withBorder m="xs" p="md" radius="md" w='30vw' h='100vh'>
+    <Paper withBorder m="xs" p="md" radius="md" h='100vh'>
       <Box>
-        <Title order={3}>{props.forSDR ? 'SDR:' : 'Company:'} Do Not Contact Filters</Title>{" "}
+        <Title order={3}>{props.forSDR ? 'User:' : 'Company:'} Do Not Contact Filters</Title>{" "}
         <Text size="sm">
           You can specify what conditions need to be met to automatically remove
           prospects from SellScale AI outreach.

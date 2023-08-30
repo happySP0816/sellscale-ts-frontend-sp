@@ -117,14 +117,14 @@ export default function FindContactsPage() {
                   true
                 }
               />
-              <Tooltip label="The number of contacts to find, capped at 400 contacts per search." withinPortal withArrow>
+              <Tooltip label="The number of contacts to find, capped at 1,000 contacts per search." withinPortal withArrow>
                 <NumberInput
                   ml='lg'
                   label="Number of contacts"
                   placeholder="100"
                   withAsterisk
                   min={0}
-                  max={400}
+                  max={1000}
                   value={salesNavigatorForm.values.numberOfContacts}
                   onChange={(event) => salesNavigatorForm.setFieldValue("numberOfContacts", event as number)}
                   required

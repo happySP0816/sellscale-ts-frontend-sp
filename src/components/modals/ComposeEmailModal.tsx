@@ -153,12 +153,17 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
 
   const triggerSendEmail = async () => {
     setSending(true);
+  
+    let body = bodyRich.current as string;
+    if (typeof bodyRich.current !== 'string') {
+      body = bodyRef.current;
+    }
 
     const result = await sendEmail(
       userToken,
       innerProps.prospectId,
       subject,
-      bodyRich.current as string,
+      body as string,
       aiGenerated,
       innerProps.reply?.messageId
     );

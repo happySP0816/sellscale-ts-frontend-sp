@@ -129,7 +129,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
   };
 
   return (
-    <Paper withBorder m="xs" p="md" radius="md">
+    <Paper withBorder m="xs" p="md" radius="md" w='30vw' h='100vh'>
       <Box>
         <Title order={3}>{props.forSDR ? 'SDR:' : 'Company:'} Do Not Contact Filters</Title>{" "}
         <Text size="sm">

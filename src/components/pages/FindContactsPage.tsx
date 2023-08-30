@@ -117,7 +117,7 @@ export default function FindContactsPage() {
                   true
                 }
               />
-              <Tooltip label="The number of contacts to find, capped at 1,000 contacts per search." withinPortal withArrow>
+              <Tooltip label="The number of contacts to find; capped at 1,000 contacts per search." withinPortal withArrow>
                 <NumberInput
                   ml='lg'
                   label="Number of contacts"

@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useRecoilState } from "recoil";
 import { campaignDrawerIdState, campaignDrawerOpenState } from "@atoms/campaignAtoms";
 import { setPageTitle } from "@utils/documentChange";
-import PageTitle from "@nav/PageTitle";
+import PageTitle from "@nav/old/PageTitle";
 /* 
 export default function CampaignsPage() {
   setPageTitle("Campaigns");

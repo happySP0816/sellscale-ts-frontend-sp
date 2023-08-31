@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 import { login } from "@auth/core";
 import { useRecoilState } from "recoil";
 import { userDataState } from "@atoms/userAtoms";
-import { LogoFull } from "@nav/Logo";
+import { LogoFull } from "@nav/old/Logo";
 import { API_URL, EMAIL_REGEX } from "@constants/data";
 import { setPageTitle } from "@utils/documentChange";
 

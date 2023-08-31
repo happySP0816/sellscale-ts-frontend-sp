@@ -46,7 +46,7 @@ export default function PersonaSelectModal({
   context,
   id,
   innerProps,
-}: ContextModalProps<{}>) {
+}: ContextModalProps<{ onClick?: (persona: PersonaOverview) => void }>) {
   const theme = useMantineTheme();
 
   const navigate = useNavigate();
@@ -113,7 +113,11 @@ export default function PersonaSelectModal({
                   onClick={() => {
                     setOpenedProspectId(-1);
                     setCurrentProject(project);
-                    navigateToPage(navigate, `/inbox`);
+                    if(innerProps.onClick) {
+                      innerProps.onClick(project);
+                    } else {
+                      navigateToPage(navigate, `/inbox`);
+                    }
                     context.closeModal(id);
                   }}
                   onSettingsClick={() => {
@@ -146,7 +150,11 @@ export default function PersonaSelectModal({
               onClick={() => {
                 setOpenedProspectId(-1);
                 setCurrentProject(unassignedPersona);
-                navigateToPage(navigate, `/inbox`);
+                if(innerProps.onClick) {
+                  innerProps.onClick(unassignedPersona);
+                } else {
+                  navigateToPage(navigate, `/inbox`);
+                }
                 context.closeModal(id);
               }}
             >

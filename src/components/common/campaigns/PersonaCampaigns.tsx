@@ -3,6 +3,8 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { isLoggedIn } from "@auth/core";
 import PageFrame from "@common/PageFrame";
+import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
+import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
 import {
   Stack,
   Group,
@@ -20,6 +22,7 @@ import {
   Switch,
   useMantineTheme,
   ScrollArea,
+  Tabs,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import {
@@ -45,7 +48,10 @@ import {
   formatToLabel,
 } from "@utils/general";
 import { getSDRGeneralInfo } from "@utils/requests/getClientSDR";
-import getPersonas, { getPersonasCampaignView, getPersonasOverview } from "@utils/requests/getPersonas";
+import getPersonas, {
+  getPersonasCampaignView,
+  getPersonasOverview,
+} from "@utils/requests/getPersonas";
 import _ from "lodash";
 import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -116,106 +122,132 @@ export default function PersonaCampaigns() {
             Create New Campaign
           </Button>
         </Group>
-        <Divider />
-        <Group position="apart">
-          <Group>
-            <TextInput
-              radius="md"
-              placeholder="Search"
-              rightSection={<IconSearch color="#767e85" size="1.0rem" />}
-              w={250}
-              styles={{
-                input: {
-                  backgroundColor: "transparent",
-                },
-              }}
-              value={search}
-              onChange={(event) => setSearch(event.currentTarget.value)}
-            />
-            <Select
-              radius="md"
-              placeholder="Sort by"
-              data={[]}
-              w={100}
-              styles={{
-                input: {
-                  backgroundColor: "transparent",
-                },
-              }}
-            />
-            <Button
-              variant="outline"
-              color="gray"
-              radius="md"
-              sx={{
-                border: "0.0625rem solid #ced4da;",
-              }}
-              rightIcon={
-                <IconAdjustmentsHorizontal color="#767e85" size="1.0rem" />
-              }
-            >
-              <Text fw={400}>Filters</Text>
-            </Button>
-          </Group>
-          <Box>
-            <Button.Group>
-              <Button
-                variant="outline"
-                color="gray"
-                radius="md"
-                sx={{
-                  border: "0.0625rem solid #ced4da;",
-                }}
-              >
-                <Text fw={500}>
-                  LinkedIn:{" "}
-                  <Text c="blue" fw={600} span>
-                  {userData.weekly_li_outbound_target}/100
-                  </Text>
-                </Text>
-              </Button>
-              <Button
-                variant="outline"
-                color="gray"
-                radius="md"
-                sx={{
-                  border: "0.0625rem solid #ced4da;",
-                }}
-              >
-                <Text fw={500}>
-                  Email:{" "}
-                  <Text c="blue" fw={600} span>
-                    {userData.weekly_email_outbound_target}/100
-                  </Text>
-                </Text>
-              </Button>
-              <Button
-                variant="light"
-                radius="md"
-                leftIcon={<IconPlus size="1rem" />}
-                sx={{
-                  border: "0.0625rem solid #cbe5ff;",
-                }}
-              >
-                Add Credits
-              </Button>
-            </Button.Group>
-          </Box>
-        </Group>
-        <ScrollArea h={500}>
-          <Stack>
-            {filteredProjects.map((persona, index) => (
-              <PersonCampaignCard key={index} persona={persona} project={projects.find((project) => project.id == persona.id)} />
-            ))}
-            {filteredProjects.length === 0 && (
-              <Center h={200}>
-                <Text fs="italic" c="dimmed">
-                  No campaigns found.
-                </Text>
-              </Center>
-            )}
-          </Stack>
-        </ScrollArea>
+        <Tabs defaultValue="overview">
+          <Tabs.List>
+            <Tabs.Tab value="overview">Overview</Tabs.Tab>
+            <Tabs.Tab value="outreach">Queued for AI Outreach</Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="overview" pt="xs">
+            <Stack>
+              <Group position="apart">
+                <Group>
+                  <TextInput
+                    radius="md"
+                    placeholder="Search"
+                    rightSection={<IconSearch color="#767e85" size="1.0rem" />}
+                    w={250}
+                    styles={{
+                      input: {
+                        backgroundColor: "transparent",
+                      },
+                    }}
+                    value={search}
+                    onChange={(event) => setSearch(event.currentTarget.value)}
+                  />
+                  <Select
+                    radius="md"
+                    placeholder="Sort by"
+                    data={[]}
+                    w={100}
+                    styles={{
+                      input: {
+                        backgroundColor: "transparent",
+                      },
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    color="gray"
+                    radius="md"
+                    sx={{
+                      border: "0.0625rem solid #ced4da;",
+                    }}
+                    rightIcon={
+                      <IconAdjustmentsHorizontal
+                        color="#767e85"
+                        size="1.0rem"
+                      />
+                    }
+                  >
+                    <Text fw={400}>Filters</Text>
+                  </Button>
+                </Group>
+                <Box>
+                  <Button.Group>
+                    <Button
+                      variant="outline"
+                      color="gray"
+                      radius="md"
+                      sx={{
+                        border: "0.0625rem solid #ced4da;",
+                      }}
+                    >
+                      <Text fw={500}>
+                        LinkedIn:{" "}
+                        <Text c="blue" fw={600} span>
+                          {userData.weekly_li_outbound_target}/100
+                        </Text>
+                      </Text>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      color="gray"
+                      radius="md"
+                      sx={{
+                        border: "0.0625rem solid #ced4da;",
+                      }}
+                    >
+                      <Text fw={500}>
+                        Email:{" "}
+                        <Text c="blue" fw={600} span>
+                          {userData.weekly_email_outbound_target}/100
+                        </Text>
+                      </Text>
+                    </Button>
+                    <Button
+                      variant="light"
+                      radius="md"
+                      leftIcon={<IconPlus size="1rem" />}
+                      sx={{
+                        border: "0.0625rem solid #cbe5ff;",
+                      }}
+                    >
+                      Add Credits
+                    </Button>
+                  </Button.Group>
+                </Box>
+              </Group>
+              <ScrollArea h={500}>
+                <Stack>
+                  {filteredProjects.map((persona, index) => (
+                    <PersonCampaignCard
+                      key={index}
+                      persona={persona}
+                      project={projects.find(
+                        (project) => project.id == persona.id
+                      )}
+                    />
+                  ))}
+                  {filteredProjects.length === 0 && (
+                    <Center h={200}>
+                      <Text fs="italic" c="dimmed">
+                        No campaigns found.
+                      </Text>
+                    </Center>
+                  )}
+                </Stack>
+              </ScrollArea>
+            </Stack>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="outreach" pt="xs">
+            <Group position="center" noWrap>
+              <LinkedinQueuedMessages all />
+              <EmailQueuedMessages all />
+            </Group>
+          </Tabs.Panel>
+        </Tabs>
       </Stack>
     </PageFrame>
   );
@@ -232,7 +264,10 @@ type ChannelSection = {
   date: string;
 };
 
-function PersonCampaignCard(props: { persona: CampaignPersona, project?: PersonaOverview }) {
+function PersonCampaignCard(props: {
+  persona: CampaignPersona;
+  project?: PersonaOverview;
+}) {
   const navigate = useNavigate();
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
@@ -240,24 +275,33 @@ function PersonCampaignCard(props: { persona: CampaignPersona, project?: Persona
     openedProspectIdState
   );
 
+  const userData = useRecoilValue(userDataState);
+  console.log(userData);
+
   const types: ChannelSection[] = [
     {
       id: 1,
       type: "LinkedIn",
-      active: true,
+      active: !!userData?.weekly_li_outbound_target,
       icon: <IconBrandLinkedin size="0.925rem" />,
-      sends: props.persona.li_sent+props.persona.li_opened+props.persona.li_replied,
-      opens: props.persona.li_opened+props.persona.li_replied,
+      sends:
+        props.persona.li_sent +
+        props.persona.li_opened +
+        props.persona.li_replied,
+      opens: props.persona.li_opened + props.persona.li_replied,
       replies: props.persona.li_replied,
       date: props.persona.created_at,
     },
     {
       id: 2,
       type: "Email",
-      active: true,
+      active: !!userData?.weekly_email_outbound_target,
       icon: <IconMail size="0.925rem" />,
-      sends: props.persona.emails_sent+props.persona.emails_opened+props.persona.emails_replied,
-      opens: props.persona.emails_opened+props.persona.emails_replied,
+      sends:
+        props.persona.emails_sent +
+        props.persona.emails_opened +
+        props.persona.emails_replied,
+      opens: props.persona.emails_opened + props.persona.emails_replied,
       replies: props.persona.emails_replied,
       date: props.persona.created_at,
     },
@@ -297,6 +341,12 @@ function PersonCampaignCard(props: { persona: CampaignPersona, project?: Persona
                 backgroundColor: theme.colors.blue[5],
                 //color: theme.colors.blue[2],
               })}
+              onClick={() => {
+                if (props.project == undefined) return;
+                setOpenedProspectId(-1);
+                setCurrentProject(props.project);
+                navigateToPage(navigate, `/persona/settings`);
+              }}
             >
               Edit
             </Button>
@@ -315,7 +365,7 @@ function PersonCampaignCard(props: { persona: CampaignPersona, project?: Persona
               if (props.project == undefined) return;
               setOpenedProspectId(-1);
               setCurrentProject(props.project);
-              navigateToPage(navigate, `/contacts/view`);
+              navigateToPage(navigate, `/prioritize`);
             }}
           >
             Contacts
@@ -325,7 +375,12 @@ function PersonCampaignCard(props: { persona: CampaignPersona, project?: Persona
           {types.map((section, index) => (
             <Box key={index}>
               {index > 0 && <Divider />}
-              <PersonCampaignCardSection section={section} />
+              <PersonCampaignCardSection section={section} onClick={() => {
+                 if (props.project == undefined) return;
+                 setOpenedProspectId(-1);
+                 setCurrentProject(props.project);
+                 navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
+              }} />
             </Box>
           ))}
         </Box>
@@ -334,13 +389,18 @@ function PersonCampaignCard(props: { persona: CampaignPersona, project?: Persona
   );
 }
 
-function PersonCampaignCardSection(props: { section: ChannelSection }) {
+function PersonCampaignCardSection(props: { section: ChannelSection, onClick?: () => void }) {
   const theme = useMantineTheme();
   const [checked, setChecked] = useState(props.section.active);
 
   return (
     <>
-      <Group position="apart" p="xs" spacing={0}>
+      <Group position="apart" p="xs" spacing={0}
+        onClick={props.onClick}
+        sx={{
+          cursor: "pointer",
+        }}
+      >
         <Box sx={{ flexBasis: "30%" }}>
           <Group spacing={8}>
             <ActionIcon color="blue" radius="xl" variant="light" size="sm">
@@ -379,7 +439,9 @@ function PersonCampaignCardSection(props: { section: ChannelSection }) {
           <Group>
             <Switch
               checked={checked}
-              onChange={(event) => setChecked(event.currentTarget.checked)}
+              onChange={(event) => {
+                setChecked(event.currentTarget.checked);
+              }}
               color="teal"
               size="xs"
               thumbIcon={

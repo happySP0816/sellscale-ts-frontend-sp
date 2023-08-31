@@ -25,7 +25,7 @@ import {
   IconMailbox,
   IconX,
 } from "@tabler/icons";
-import PageTitle from "@nav/PageTitle";
+import PageTitle from "@nav/old/PageTitle";
 import { useQuery } from "@tanstack/react-query";
 import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
 import { getUserInfo, logout, syncLocalStorage } from "@auth/core";

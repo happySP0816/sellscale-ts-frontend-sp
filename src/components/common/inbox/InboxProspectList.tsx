@@ -70,7 +70,7 @@ import {
 } from "@utils/general";
 import loaderWithText from "@common/library/loaderWithText";
 import { icpFitToIcon } from "@common/pipeline/ICPFitAndReason";
-import { NAV_HEADER_HEIGHT } from "@nav/MainHeader";
+import { NAV_HEADER_HEIGHT } from "@nav/old/MainHeader";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import {
   currentInboxCountState,

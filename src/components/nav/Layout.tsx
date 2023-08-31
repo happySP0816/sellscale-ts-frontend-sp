@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { IconSearch, IconSettings } from "@tabler/icons";
 import {
   AppShell,
   Navbar,
@@ -8,24 +7,15 @@ import {
   useMantineTheme,
   Container,
   Text,
+  Box,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { NAV_BAR_SIDE_WIDTH, NAV_BAR_TOP_WIDTH, SCREEN_SIZES } from "@constants/data";
-import SidePanel from "@nav/old/SidePanel";
-import ProfileIcon, { ProfileCard } from "@nav/ProfileIcon";
-import { LogoFull } from "@nav/Logo";
-import { animated, useSpring } from "@react-spring/web";
-import { openSpotlight } from "@mantine/spotlight";
 import { useRecoilValue } from "recoil";
 import { isLoggedIn } from "@auth/core";
-import LogoutBtn from "@nav/LogoutBtn";
 import { userDataState } from "@atoms/userAtoms";
-import NavTab from "./old/NavTab";
-import { navigateToPage } from "@utils/documentChange";
-import { useNavigate } from "react-router-dom";
 import { version } from '../../../package.json';
-import { NavbarNested } from "./NavbarNested";
-import { MainHeader, NAV_HEADER_HEIGHT } from "./MainHeader";
+import SideNavbar from "./SideNavbar";
 import { currentProjectState } from "@atoms/personaAtoms";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -50,14 +40,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       fixed={true}
       navbar={
         <>
-          {isLoggedIn() && currentProject && (
-            <NavbarNested isMobileView navOpened />
+          {isLoggedIn() && (
+            <SideNavbar />
           )}
         </>
       }
       header={
-
-        <MainHeader />
+        undefined
         /*
         isMobileView ? (
           <Header height={NAV_BAR_TOP_WIDTH}>
@@ -99,9 +88,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       styles={(theme) => ({
         main: {
           padding: 0,
-          marginTop: NAV_HEADER_HEIGHT, //isMobileView ? NAV_BAR_TOP_WIDTH : 0,
-          marginLeft: (isLoggedIn() && currentProject) ? NAV_BAR_SIDE_WIDTH : 0, //isMobileView ? 0 : NAV_BAR_SIDE_WIDTH,
-          minHeight: `calc(100vh - ${NAV_HEADER_HEIGHT}px)`,
+          marginTop: 0, //isMobileView ? NAV_BAR_TOP_WIDTH : 0,
+          marginLeft: 0, //isMobileView ? 0 : NAV_BAR_SIDE_WIDTH,
+          height: `100vh`,
         },
         body: {
           backgroundColor:
@@ -109,11 +98,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               ? theme.colors.dark[8]
               : theme.colors.gray[0],
           backgroundSize: "cover",
-          overflowY: "auto",
         },
       })}
     >
-      <main>{children}</main>
+      <main style={{
+        overflowY: "auto",
+        height: "100vh",
+      }}>{children}</main>
     </AppShell>
   );
 }

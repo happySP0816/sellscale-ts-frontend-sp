@@ -18,7 +18,7 @@ import {
 } from "@mantine/core";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import PageTitle from "@nav/PageTitle";
+import PageTitle from "@nav/old/PageTitle";
 import { IconSettings } from "@tabler/icons";
 import { activatePersona } from "@utils/requests/postPersonaActivation";
 import { deactivatePersona } from "@utils/requests/postPersonaDeactivation";

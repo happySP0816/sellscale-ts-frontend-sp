@@ -19,7 +19,7 @@ import {
 } from "@atoms/prospectAtoms";
 import { useEffect } from "react";
 import { setPageTitle } from "@utils/documentChange";
-import PageTitle from "@nav/PageTitle";
+import PageTitle from "@nav/old/PageTitle";
 
 function getPipelineSelectorData(data: any) {
   return new Map()

@@ -1,6 +1,6 @@
 import EmailAnalyticsTable from "@common/analytics/EmailAnalyticsTable";
 import PageFrame from "@common/PageFrame";
-import PageTitle from "@nav/PageTitle";
+import PageTitle from "@nav/old/PageTitle";
 import { Center, Tabs, Text, Select, SelectItem } from "@mantine/core";
 import { setPageTitle } from "@utils/documentChange";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";

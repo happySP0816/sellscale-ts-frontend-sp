@@ -78,7 +78,7 @@ import _, { set } from "lodash";
 import InboxProspectConvoSendBox from "./InboxProspectConvoSendBox";
 import InboxProspectConvoBumpFramework from "./InboxProspectConvoBumpFramework";
 import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
-import { NAV_HEADER_HEIGHT } from "@nav/MainHeader";
+import { NAV_HEADER_HEIGHT } from "@nav/old/MainHeader";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import {
   getBumpFrameworks,

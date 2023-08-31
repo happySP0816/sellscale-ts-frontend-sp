@@ -16,8 +16,8 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronDown, IconFileDescription } from "@tabler/icons-react";
-import { LogoFull } from "@nav/Logo";
-import { version } from "../../../package.json";
+import { LogoFull } from "@nav/old/Logo";
+import { version } from "../../../../package.json";
 import { ProjectSelect } from "./ProjectSelect";
 import { SearchBar } from "./SearchBar";
 import { navigateToPage } from "@utils/documentChange";

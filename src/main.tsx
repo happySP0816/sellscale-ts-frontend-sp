@@ -55,6 +55,7 @@ import PersonaSettingsPage from "@pages/PersonaSettingsPage";
 import EmailSimulatePage from "@pages/EmailSimulatePage";
 import PipelineSection from "@common/home/PipelineSection";
 import PersonaCampaigns from "@common/campaigns/PersonaCampaigns";
+import AdvancedPage from "@pages/AdvancedPage";
 
 const queryClient = new QueryClient();
 
@@ -250,11 +251,26 @@ const router = sentryCreateBrowserRouter([
         },
       },
       {
+        path: "contacts/:prospectId?",
+        element: <RestrictedRoute page={<Box p='md'><AllContactsSection all /></Box>} />,
+        loader: async ({ params }: { params: any }) => {
+          return { prospectId: params.prospectId };
+        },
+      },
+      {
         path: "all/recent-activity",
         element: <RestrictedRoute page={<Box p='md'><RecentActivitySection all /></Box>} />,
       },
       {
+        path: "notifications",
+        element: <RestrictedRoute page={<Box p='md'><RecentActivitySection all /></Box>} />,
+      },
+      {
         path: "all/pipeline",
+        element: <RestrictedRoute page={<Box p='md'><PipelineSection /></Box>} />,
+      },
+      {
+        path: "analytics",
         element: <RestrictedRoute page={<Box p='md'><PipelineSection /></Box>} />,
       },
       {
@@ -266,12 +282,20 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<Box p='md'><PersonaCampaigns /></Box>} />,
       },
       {
+        path: "campaigns",
+        element: <RestrictedRoute page={<Box p='md'><PersonaCampaigns /></Box>} />,
+      },
+      {
         path: "all/linkedin-messages",
         element: <RestrictedRoute page={<Box p='md'><LinkedinQueuedMessages all /></Box>} />,
       },
       {
         path: "/split/contacts",
         element: <RestrictedRoute page={<PersonaSplitPage />} />,
+      },
+      {
+        path: "/advanced",
+        element: <RestrictedRoute page={<AdvancedPage />} />,
       },
       {
         path: "*",

@@ -42,7 +42,7 @@ import { PersonaOverview } from "src";
 const useStyles = createStyles((theme) => ({
   select: {
     backgroundColor: theme.fn.lighten(
-      theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+      theme.fn.variant({ variant: "filled", color: "blue" }).background!,
       0.15
     ),
     color: theme.white,
@@ -50,14 +50,14 @@ const useStyles = createStyles((theme) => ({
 
     "&:hover": {
       backgroundColor: theme.fn.lighten(
-        theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+        theme.fn.variant({ variant: "filled", color: "blue" }).background!,
         0.18
       ),
     },
   },
 }));
 
-export function ProjectSelect() {
+export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => void }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const navigate = useNavigate();
@@ -100,12 +100,12 @@ export function ProjectSelect() {
   return (
     <Button
       size="sm"
-      sx={{ backgroundColor: currentProject?.id ? "#4298f5" : "" }}
       className={classes.select}
       leftIcon={<IconLayoutSidebar size="1.05rem" stroke={1.5} />}
       rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
       pr={12}
       w={250}
+      color='blue'
       onClick={() => {
         openContextModal({
           modal: "personaSelect",
@@ -131,56 +131,16 @@ export function ProjectSelect() {
               </Flex>
             </Flex>
           ),
-          innerProps: {},
+          innerProps: {
+            onClick: (persona: PersonaOverview) => {
+              props.onClick && props.onClick(persona);
+            },
+          },
           styles: { title: { width: "100%" } },
         });
       }}
     >
       {currentProject?.name || "Select Persona"}
     </Button>
-    // <Menu.Dropdown>
-    //   {projects.map((project, i) => (
-    //     <Menu.Item
-    //       opacity={project.id === currentProject?.id ? 0.5 : 1}
-    //       key={i}
-    //       disabled={project.id === currentProject?.id}
-    //       icon={project.active ? (
-    //         <IconCircleCheck
-    //           size="1rem"
-    //           color='green'
-    //           stroke={1.5}
-    //         />
-    //       ) : project.is_unassigned_contact_archetype ? (
-    //         <IconStack3
-    //           size="1rem"
-    //           color='blue'
-    //           stroke={1.5}
-    //         />
-    //       ) : (
-    //         <IconCircleDashed
-    //           size="1rem"
-    //           color='red'
-    //           stroke={1.5}
-    //         />
-    //       )}
-    //       onClick={() => {
-    //         setCurrentProject(project);
-    //         navigateToPage(navigate, `/inbox`);
-    //       }}
-    //     >
-    //       {project.name}
-    //     </Menu.Item>
-    //   ))}
-    //   <Menu.Divider />
-    //   <Menu.Item icon={<IconPlus size={14} />}
-    //     onClick={() => {
-    //       openContextModal({
-    //         modal: "uploadProspects",
-    //         title: <Title order={3}>Create Persona</Title>,
-    //         innerProps: { mode: "CREATE-ONLY" },
-    //       });
-    //     }}
-    //   >Create New Persona</Menu.Item>
-    // </Menu.Dropdown>
   );
 }

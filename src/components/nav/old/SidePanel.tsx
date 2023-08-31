@@ -25,8 +25,8 @@ import { useOs } from "@mantine/hooks";
 import { openSpotlight } from "@mantine/spotlight";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { navTabState } from "@atoms/navAtoms";
-import { LogoFull, LogoIcon } from "@nav/Logo";
-import useStyles from "../SearchBars.styles";
+import { LogoFull, LogoIcon } from "@nav/old/Logo";
+import useStyles from "./SearchBars.styles";
 import { userDataState } from "@atoms/userAtoms";
 import { navigateToPage } from "@utils/documentChange";
 

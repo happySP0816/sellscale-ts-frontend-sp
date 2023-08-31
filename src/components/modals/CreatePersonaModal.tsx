@@ -19,7 +19,7 @@ import { useEffect, useRef, useState } from 'react';
 import { login, syncLocalStorage } from '@auth/core';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { LogoFull } from '@nav/Logo';
+import { LogoFull } from '@nav/old/Logo';
 import { API_URL, EMAIL_REGEX } from '@constants/data';
 import { navigateToPage, setPageTitle } from '@utils/documentChange';
 import BasicsSection from '@common/onboarding/BasicsSection';

@@ -103,6 +103,8 @@ export default function App() {
               extraBold: 900,
             },
           },
+          fontFamily: 'Poppins, sans-serif',
+          fontFamilyMonospace: 'source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace',
         }}
         withGlobalStyles
         withNormalizeCSS

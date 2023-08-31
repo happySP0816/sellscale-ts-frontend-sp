@@ -82,7 +82,7 @@ import {
   demosDrawerProspectIdState,
 } from "@atoms/dashboardAtoms";
 import _, { set } from "lodash";
-import { NAV_HEADER_HEIGHT } from "@nav/MainHeader";
+import { NAV_HEADER_HEIGHT } from "@nav/old/MainHeader";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 import EditProspectModal from "@modals/EditProspectModal";

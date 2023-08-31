@@ -45,13 +45,13 @@ import {
   IconTrash,
   IconFilterDollar,
 } from "@tabler/icons-react";
-import { LogoFull } from "@nav/Logo";
+import { LogoFull } from "@nav/old/Logo";
 import { LinksGroup } from "./NavBarLinksGroup";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { navTabState } from "@atoms/navAtoms";
 import { animated, useSpring } from "@react-spring/web";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
-import { ProfileCard } from "@nav/ProfileIcon";
+import { ProfileCard } from "@nav/old/ProfileIcon";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { isLoggedIn, logout } from "@auth/core";
 import { navigateToPage } from "@utils/documentChange";

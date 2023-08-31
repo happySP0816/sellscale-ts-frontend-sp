@@ -9,7 +9,7 @@ import FlexSeparate from "@common/library/FlexSeparate";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import PersonaDetailsTransformers from "@common/persona/details/PersonaDetailsTransformers";
 import { Select, Tabs } from "@mantine/core";
-import PageTitle from "@nav/PageTitle";
+import PageTitle from "@nav/old/PageTitle";
 import {
   IconAffiliate,
   IconClipboardData,

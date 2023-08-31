@@ -1,49 +1,45 @@
-import { Flex, Image } from '@mantine/core';
-import IconImg from '@assets/images/icon.svg';
-import LogoImg from '@assets/images/logo.svg';
+import { Box, Code, Flex, Group, Image, createStyles } from "@mantine/core";
+import LogoImg from "@assets/images/logo-white.svg";
+import { version } from "../../../package.json";
+import { LOGO_HEIGHT, NAV_BAR_TOP_WIDTH } from "@constants/data";
 
-export function LogoIcon(props: { size?: number }) {
+const useStyles = createStyles((theme) => ({
+  version: {
+    backgroundColor: theme.fn.lighten(
+      theme.fn.variant({ variant: "filled", color: "dark" }).background!,
+      0.1
+    ),
+    color: theme.white,
+    fontWeight: 700,
+    fontSize: 6,
+  },
+}));
 
-  return (
-    <Flex
-      wrap="nowrap"
-      onClick={() => {
-        window.location.href = '/';
-      }}
-      py='xs'
-      className="cursor-pointer"
-      sx={{ userSelect: 'none' }}
-    >
-      <Image
-        width={props.size || 30}
-        fit="contain"
-        src={IconImg}
-        alt="SellScale Sight"
-      />
-    </Flex>
-  );
-}
-
-
-export function LogoFull(props: { size?: number }) {
+export default function Logo(props: { size?: number }) {
+  const { classes, theme, cx } = useStyles();
 
   return (
-    <Flex
-      wrap="nowrap"
-      onClick={() => {
-        window.location.href = '/';
-      }}
-      py='xs'
-      className="cursor-pointer"
-      sx={{ userSelect: 'none' }}
-    >
-      <Image
-        height={props.size || 26}
-        sx={{ minWidth: '100px' }}
-        fit="contain"
-        src={LogoImg}
-        alt="SellScale Sight"
-      />
+    <Flex h={LOGO_HEIGHT} justify="center">
+      <Flex
+        gap={5}
+        justify="center"
+        align="center"
+        wrap="nowrap"
+        className="cursor-pointer"
+        sx={{ userSelect: "none" }}
+        onClick={() => {
+          window.location.href = "/";
+        }}
+      >
+        <Image
+          height={props.size || 18}
+          sx={{ minWidth: "60px" }}
+          fit="contain"
+          src={LogoImg}
+          alt="SellScale"
+        />
+        <Code className={classes.version}>v{version}</Code>
+      </Flex>
     </Flex>
   );
 }

@@ -416,7 +416,7 @@ export default function UploadProspectsModal({
             />
 
 <NumberInput
-        label="Default Contract Size"
+        label="Annual Contract Value (ACV)"
         value={personaContractSize}
         parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
         formatter={(value) =>

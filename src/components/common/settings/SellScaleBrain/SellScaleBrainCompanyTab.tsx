@@ -180,7 +180,7 @@ export default function SellScaleBrainCompanyTab() {
           />
 
           <NumberInput
-            label="Default Contract Size"
+            label="Annual Contract Value (ACV)"
             value={contractSize}
             parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
             formatter={(value) =>

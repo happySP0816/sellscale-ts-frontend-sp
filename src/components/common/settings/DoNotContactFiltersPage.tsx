@@ -14,13 +14,13 @@ export default function DoNotContactFiltersPage() {
               value="sdr-dnc"
               icon={<IconLifebuoy size="0.8rem" />}
             >
-              User Do Not Contact Filters
+              SDR Filter
             </Tabs.Tab>
             <Tabs.Tab
               value="company-dnc"
               icon={<IconBuilding size="0.8rem" />}
             >
-              Company Do Not Contact Filters
+              Company-Wide Filter
             </Tabs.Tab>
           </Tabs.List>
 

@@ -224,7 +224,7 @@ export function ProspectConvoMessage(props: {
                   {props.timestamp}
                 </Text>
               </Group>
-              <TextWithNewlines style={{ fontSize: "0.875rem" }}>
+              <TextWithNewlines style={{ fontSize: "0.875rem" }} breakheight='12px'>
                 {finalMessage}
               </TextWithNewlines>
             </Stack>

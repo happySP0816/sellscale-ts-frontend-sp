@@ -5,6 +5,9 @@ import { isLoggedIn } from "@auth/core";
 import PageFrame from "@common/PageFrame";
 import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
 import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
+import EmojiPicker from 'emoji-picker-react';
+
+
 import {
   Stack,
   Group,
@@ -12,6 +15,7 @@ import {
   Button,
   Divider,
   Box,
+  Popover,
   TextInput,
   Select,
   Text,
@@ -62,6 +66,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { PersonaOverview } from "src";
+import { API_URL } from '@constants/data';
 
 type CampaignPersona = {
   id: number;
@@ -74,6 +79,7 @@ type CampaignPersona = {
   li_replied: number;
   active: boolean;
   created_at: string;
+  emoji: string;
 };
 
 export default function PersonaCampaigns() {
@@ -301,10 +307,28 @@ function PersonCampaignCard(props: {
     openedProspectIdState
   );
   const [opened, { toggle }] = useDisclosure(props.persona.active);
+  const [emoji, setEmojiState] = useState<string>(props.persona.emoji || '⬜️');
+
+  const userToken = useRecoilValue(userTokenState);
 
 
   const userData = useRecoilValue(userDataState);
   console.log(userData);
+
+  const setEmoji = (emoji: string) => {
+    setEmojiState(emoji);
+    fetch(`${API_URL}/client/persona/update_emoji`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        persona_id: props.persona.id,
+        emoji: emoji,
+      }),
+    })
+  }
 
   const types: ChannelSection[] = [
     {
@@ -372,9 +396,23 @@ function PersonCampaignCard(props: {
               >
               <IconFilter size="1rem" color={props.persona.active ? 'white' : 'gray'}/>
             </Button>
-            <Button variant="subtle" color={'white'} radius="xl" size="lg" compact>
-              🤖
-            </Button>
+
+            {/* HERE */}
+            <Popover width={200} position="bottom" withArrow shadow="md">
+              <Popover.Target>
+                <Button variant="subtle" color={'white'} radius="xl" size="lg" compact>
+                  {emoji}
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <EmojiPicker 
+                  onEmojiClick={(event, emojiObject) => {
+                    const emoji = event.emoji;
+                    setEmoji(emoji);
+                  }}
+                />
+              </Popover.Dropdown>
+            </Popover>
 
             <Title order={5} c={props.persona.active ? 'white' : 'blue'}>
               {_.truncate(props.persona.name, { length: 40 })}

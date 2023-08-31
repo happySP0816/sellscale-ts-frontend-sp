@@ -268,7 +268,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
     selectedBumpFrameworkState
   );
   const [selectedThread, setSelectedThread] =
-    useRecoilState(selectedEmailThread);
+    useRecoilState(selectedEmailThread); // PLEASE PROTECT THIS AND USE IT
 
   const [openedOutboundChannel, setOpenedOutboundChannel] = useRecoilState(
     currentConvoChannelState
@@ -326,9 +326,11 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
           );
         });
         setEmailThread(sortedThreads[0]);
+        setSelectedThread(sortedThreads[0])
         return sortedThreads;
       } else {
         setEmailThread(undefined);
+        setSelectedThread(undefined)
         return [];
       }
     },
@@ -678,7 +680,10 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
                   color="dark"
                   leftSection={<IconArrowBigLeftFilled size="0.5rem" />}
                   styles={{ root: { textTransform: "initial" } }}
-                  onClick={() => setEmailThread(undefined)}
+                  onClick={() => {
+                    setEmailThread(undefined)
+                    setSelectedThread(undefined)
+                  }}
                 >
                   Back to Threads
                 </Badge>
@@ -792,6 +797,8 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
                         threads={threads || []}
                         onThreadClick={(thread) => {
                           setEmailThread(thread);
+                          setSelectedThread(thread)
+                          console.log('clicked thread', thread)
                         }}
                       />
                     )}
@@ -831,6 +838,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
                 }
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
+                
               />
             </Box>
             <Box

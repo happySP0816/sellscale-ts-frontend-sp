@@ -89,9 +89,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
             }
           }
         },
-        setEmailThread: (emailThread: EmailThread) => {
-          setCurrentConvoEmailThread(emailThread);
-        }
       };
     },
     []
@@ -136,7 +133,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const sendMessage = async () => {
     setMsgLoading(true);
-    
 
     // Delete the auto bump message if it exists
     await deleteAutoBumpMessage(userToken, props.prospectId);
@@ -225,9 +221,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       }
 
       // Get the last message
-      console.log(currentConvoEmailMessages)
       const replyToMessageID = currentConvoEmailMessages[currentConvoEmailMessages.length - 1].nylas_message_id
-      console.log('reply', replyToMessageID)
       const result = await sendEmail(
         userToken,
         props.prospectId,
@@ -309,7 +303,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         <Group spacing={0} position='apart'>
           <Flex wrap='nowrap' align='center'>
             <Text color='white' fz={14} fw={500} pl={15} pt={5}>
-              Message via {openedOutboundChannel === 'LINKEDIN' ? 'LinkedIn' : 'Email'}
+              {openedOutboundChannel === 'LINKEDIN' ? 'Message via LinkedIn' : 'Reply via Email'}
             </Text>
             <Text
               pl={10}

@@ -2,6 +2,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import { createStyles, useMantineTheme, Text, Flex, Badge, Select, Loader, Card } from "@mantine/core";
 import { valueToColor } from "@utils/general";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
+import { last } from 'lodash';
 import { useState, useEffect, forwardRef } from "react";
 import { useRecoilValue } from "recoil";
 import { ProspectShallow } from "src";
@@ -32,22 +33,35 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
   const [prospects, setProspects] = useState<ProspectShallow[]>([]);
   const [selectedProspect, setSelectedProspect] = useState<ProspectShallow>();
   const [loadingProspects, setLoadingProspects] = useState<boolean>(false);
+  const [lastTimeRun, setLastTimeRun] = useState<number>(0);
+  const [searchingProspects, setSearchingProspects] = useState<boolean>(false);
 
-  useEffect(() => {
-    (async () => {
-      setLoadingProspects(true);
-      const result = await getArchetypeProspects(userToken, props.personaId);
+  const searchProspects = async (search: string = ' ') => {
+    if (lastTimeRun > Date.now() - 1000) {
+      console.log('Skipping search');
+      return;
+    }
+    setSearchingProspects(true);
+    setLastTimeRun(Date.now());
+    const result = await getArchetypeProspects(userToken, props.personaId, search);
       if (result.status === 'success') {
-        setProspects((prev) => {
-          const prospects = result.data as ProspectShallow[];
-          return prospects.sort((a, b) => {
+        const prospects = result.data as ProspectShallow[];
+          prospects.sort((a, b) => {
             if (a.icp_fit_score === b.icp_fit_score) {
               return a.full_name.localeCompare(b.full_name);
             }
             return b.icp_fit_score - a.icp_fit_score;
           });
-        });
+
+        setProspects(prospects);
       }
+      setSearchingProspects(false);
+  }
+
+  useEffect(() => {
+    (async () => {
+      setLoadingProspects(true);
+      await searchProspects()
       setLoadingProspects(false);
     })();
   }, []);
@@ -84,7 +98,7 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
       itemComponent={ProspectSelectItem}
       searchable
       clearable
-      nothingFound='No prospects found'
+      nothingFound={searchingProspects ? 'Loading prospects ...' : 'No prospects found'}
       value={selectedProspect ? selectedProspect.id + '' : '-1'}
       data={prospects.map((prospect) => {
         return {
@@ -95,7 +109,13 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
           company: prospect.company,
         };
       })}
-      onChange={(value) => {
+      onInput={
+        (e) => {
+          searchProspects(e.target.value);
+        }
+      }
+      onChange={(value: string) => {
+        searchProspects(value);
         if (!value) {
           setSelectedProspect(undefined);
           props.onChange(undefined);

@@ -23,6 +23,7 @@ import {
   useMantineTheme,
   ScrollArea,
   Tabs,
+  Loader,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import {
@@ -53,6 +54,7 @@ import getPersonas, {
   getPersonasOverview,
 } from "@utils/requests/getPersonas";
 import _ from "lodash";
+import moment from 'moment';
 import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -80,19 +82,24 @@ export default function PersonaCampaigns() {
 
   const [search, setSearch] = useState<string>("");
 
-  const filteredProjects = personas.filter((personas) =>
+  let filteredProjects = personas.filter((personas) =>
     personas.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
 
   useEffect(() => {
     (async () => {
       if (!isLoggedIn()) return;
+      setLoadingPersonas(true);
       const response = await getPersonasCampaignView(userToken);
       const result =
         response.status === "success"
           ? (response.data as CampaignPersona[])
           : [];
+
       setPersonas(result);
+      setLoadingPersonas(false);
 
       const response2 = await getPersonasOverview(userToken);
       const result2 =
@@ -102,6 +109,15 @@ export default function PersonaCampaigns() {
       setProjects(result2);
     })();
   }, []);
+
+  // sort personas by persona.active then persona.created_at in desc order
+  filteredProjects.sort((a, b) => {
+    if (a.active && !b.active) return -1;
+    if (!a.active && b.active) return 1;
+    if (moment(a.created_at).isAfter(moment(b.created_at))) return -1;
+    if (moment(a.created_at).isBefore(moment(b.created_at))) return 1;
+    return 0;
+  });
 
   return (
     <PageFrame>
@@ -218,9 +234,16 @@ export default function PersonaCampaigns() {
                   </Button.Group>
                 </Box>
               </Group>
-              <ScrollArea h={500}>
+              <ScrollArea h={'78vh'}>
                 <Stack>
-                  {filteredProjects.map((persona, index) => (
+                  {
+                    loadingPersonas && (
+                      <Center h={200}>
+                        <Loader />
+                      </Center>
+                    )
+                  }
+                  {!loadingPersonas && filteredProjects.map((persona, index) => (
                     <PersonCampaignCard
                       key={index}
                       persona={persona}
@@ -229,7 +252,7 @@ export default function PersonaCampaigns() {
                       )}
                     />
                   ))}
-                  {filteredProjects.length === 0 && (
+                  {!loadingPersonas && filteredProjects.length === 0 && (
                     <Center h={200}>
                       <Text fs="italic" c="dimmed">
                         No campaigns found.
@@ -282,7 +305,7 @@ function PersonCampaignCard(props: {
     {
       id: 1,
       type: "LinkedIn",
-      active: !!userData?.weekly_li_outbound_target,
+      active: !!userData?.weekly_li_outbound_target && props.persona.active,
       icon: <IconBrandLinkedin size="0.925rem" />,
       sends:
         props.persona.li_sent +
@@ -295,7 +318,7 @@ function PersonCampaignCard(props: {
     {
       id: 2,
       type: "Email",
-      active: !!userData?.weekly_email_outbound_target,
+      active: !!userData?.weekly_email_outbound_target && props.persona.active,
       icon: <IconMail size="0.925rem" />,
       sends:
         props.persona.emails_sent +

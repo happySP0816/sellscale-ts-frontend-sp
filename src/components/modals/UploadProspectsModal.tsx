@@ -117,7 +117,7 @@ export default function UploadProspectsModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          persona_name: selectedPersona,
+          persona_name: createdPersona,
         }),
       }
     )

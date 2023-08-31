@@ -24,7 +24,9 @@ import {
   ScrollArea,
   Tabs,
   Loader,
+  Collapse,
 } from "@mantine/core";
+import { useDisclosure } from '@mantine/hooks';
 import { openContextModal } from "@mantine/modals";
 import {
   IconAdjustments,
@@ -41,11 +43,12 @@ import {
   IconSend,
   IconX,
 } from "@tabler/icons";
-import { IconMessageCheck } from "@tabler/icons-react";
+import { IconArrowDown, IconArrowUp, IconFilter, IconLayoutNavbarCollapse, IconMessageCheck } from "@tabler/icons-react";
 import { navigateToPage } from "@utils/documentChange";
 import {
   convertDateToLocalTime,
   convertDateToShortFormat,
+  convertDateToShortFormatWithoutTime,
   formatToLabel,
 } from "@utils/general";
 import { getSDRGeneralInfo } from "@utils/requests/getClientSDR";
@@ -297,6 +300,8 @@ function PersonCampaignCard(props: {
   const [openedProspectId, setOpenedProspectId] = useRecoilState(
     openedProspectIdState
   );
+  const [opened, { toggle }] = useDisclosure(props.persona.active);
+
 
   const userData = useRecoilValue(userDataState);
   console.log(userData);
@@ -346,67 +351,95 @@ function PersonCampaignCard(props: {
         <Group
           position="apart"
           sx={(theme) => ({
-            backgroundColor: theme.colors.blue[6],
+            backgroundColor: props.persona.active ? theme.colors.blue[6] : 'white',
             borderRadius: "0.5rem 0.5rem 0 0",
+            border: 'solid 1px ' + theme.colors.gray[2],
           })}
           p="xs"
         >
           <Group>
-            <Title order={5} c="gray.0">
+            <Button 
+              sx={{borderRadius: '100px', border: 'solid 1px ' + (props.persona.active ? 'white' : 'gray')}} 
+              variant='outline' 
+              color={props.persona.active ? 'white' : 'gray'}
+              onClick={() => {
+                  if (props.project == undefined) return;
+                    setOpenedProspectId(-1);
+                    setCurrentProject(props.project);
+                    navigateToPage(navigate, `/prioritize`);
+                  }
+                }
+              >
+              <IconFilter size="1rem" color={props.persona.active ? 'white' : 'gray'}/>
+            </Button>
+            <Button variant="subtle" color={'white'} radius="xl" size="lg" compact>
+              🤖
+            </Button>
+
+            <Title order={5} c={props.persona.active ? 'white' : 'blue'}>
               {_.truncate(props.persona.name, { length: 40 })}
             </Title>
+          </Group>
+          <Group>
             <Button
-              w={60}
+              w={100}
               radius="xl"
               size="xs"
+              variant="outline"
               compact
               sx={(theme) => ({
-                backgroundColor: theme.colors.blue[5],
-                //color: theme.colors.blue[2],
+                borderColor: props.persona.active ? 'white' : theme.colors.blue[6],
+                color: props.persona.active ? 'white' : theme.colors.blue[6],
               })}
               onClick={() => {
                 if (props.project == undefined) return;
                 setOpenedProspectId(-1);
                 setCurrentProject(props.project);
-                navigateToPage(navigate, `/persona/settings`);
+                navigateToPage(navigate, `/prioritize`);
               }}
             >
-              Edit
+              Contacts
             </Button>
-          </Group>
-          <Button
-            w={100}
-            radius="xl"
-            size="xs"
-            variant="outline"
-            compact
-            sx={(theme) => ({
-              borderColor: theme.colors.blue[0],
-              color: theme.colors.blue[0],
-            })}
-            onClick={() => {
-              if (props.project == undefined) return;
-              setOpenedProspectId(-1);
-              setCurrentProject(props.project);
-              navigateToPage(navigate, `/prioritize`);
-            }}
-          >
-            Contacts
-          </Button>
+            <Button
+                w={60}
+                radius="xl"
+                size="xs"
+                compact
+                sx={(theme) => ({
+                  backgroundColor: theme.colors.blue[5],
+                  //color: theme.colors.blue[2],
+                })}
+                onClick={() => {
+                  if (props.project == undefined) return;
+                  setOpenedProspectId(-1);
+                  setCurrentProject(props.project);
+                  navigateToPage(navigate, `/persona/settings`);
+                }}
+              >
+                Edit
+              </Button>
+              <Button
+                variant='subtle'
+                onClick={toggle}
+                rightIcon={opened ? (<IconArrowUp size="1rem" color={props.persona.active ? 'white' : 'blue'} />) : <IconArrowDown size="1rem" color={props.persona.active ? 'white' : 'blue'} />}
+              >
+
+              </Button>
+            </Group>
         </Group>
-        <Box>
-          {types.map((section, index) => (
-            <Box key={index}>
-              {index > 0 && <Divider />}
-              <PersonCampaignCardSection section={section} onClick={() => {
-                 if (props.project == undefined) return;
-                 setOpenedProspectId(-1);
-                 setCurrentProject(props.project);
-                 navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
-              }} />
-            </Box>
-          ))}
-        </Box>
+        <Collapse in={opened}>
+            {types.map((section, index) => (
+              <Box key={index}>
+                {index > 0 && <Divider />}
+                <PersonCampaignCardSection section={section} onClick={() => {
+                  if (props.project == undefined) return;
+                  setOpenedProspectId(-1);
+                  setCurrentProject(props.project);
+                  navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
+                }} />
+              </Box>
+            ))}
+        </Collapse>
       </Stack>
     </Paper>
   );
@@ -432,30 +465,24 @@ function PersonCampaignCardSection(props: { section: ChannelSection, onClick?: (
             <Text>{formatToLabel(props.section.type)}</Text>
           </Group>
         </Box>
-        <Box sx={{ flexBasis: "20%" }}>
-          <Center>
-            <Badge color={props.section.active ? "teal" : "red"}>
-              {props.section.active ? "Active" : "Inactive"}
-            </Badge>
-          </Center>
-        </Box>
-        <Box sx={{ flexBasis: "20%" }}>
+
+        <Box sx={{ flexBasis: "30%" }}>
           <Group>
-            <Text fz="xs" span>
-              <IconSend size="0.8rem" /> {props.section.sends}
+            <Text fz="xs" color='gray' w='90px'>
+              <IconSend size="0.8rem" /> Sent: <span style={{color: 'black'}}>{props.section.sends}</span>
             </Text>
-            <Text fz="xs" span>
-              <IconChecks size="0.8rem" /> {props.section.opens}
+            <Text fz="xs" color='gray' w='90px'>
+              <IconChecks size="0.8rem" /> Opens: <span style={{color: 'black'}}>{props.section.opens}</span>
             </Text>
-            <Text fz="xs" span>
-              <IconMessageCheck size="0.8rem" /> {props.section.replies}
+            <Text fz="xs" color='gray' w='90px'>
+              <IconMessageCheck size="0.8rem" /> Replies: <span style={{color: 'black'}}>{props.section.replies}</span>
             </Text>
           </Group>
         </Box>
-        <Box sx={{ flexBasis: "20%" }}>
+        <Box sx={{ flexBasis: "20%", color: 'gray' }}>
           <Text fz="xs" span>
             <IconCalendar size="0.8rem" />{" "}
-            {convertDateToShortFormat(new Date(props.section.date))}
+            {convertDateToShortFormatWithoutTime(new Date(props.section.date))}
           </Text>
         </Box>
         <Box sx={{ flexBasis: "10%" }}>

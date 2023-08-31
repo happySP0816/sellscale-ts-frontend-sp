@@ -21,7 +21,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { faker } from "@faker-js/faker";
 import { useQuery } from "@tanstack/react-query";
 import { chunk, sortBy } from "lodash";
-import { IconPencil, IconTrashX, IconUser } from "@tabler/icons";
+import { IconPencil, IconTrash, IconTrashX, IconUser } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import { closeAllModals, openContextModal, openModal } from "@mantine/modals";
 import { userTokenState } from "@atoms/userAtoms";
@@ -206,7 +206,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCT
                       </Text>
                     </Flex>
                   </Flex>
-                  <Flex miw="24px">
+                  <Flex miw="30px">
                     <Tooltip
                       withArrow
                       withinPortal
@@ -232,7 +232,36 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCT
                             });
                           }}
                         >
-                          <IconPencil color="black" stroke={"1"} />
+                          <IconPencil color={isDisabled ? "gray" : "black"} stroke={"1"} />
+                        </ActionIcon>
+                      </div>
+                    </Tooltip>
+                    <Tooltip
+                      withArrow
+                      withinPortal
+                      label={
+                        isDisabled
+                          ? "CTAs that have been used cannot be deleted. Try disabling instead."
+                          : "Delete CTA"
+                      }
+                    >
+                      <div>
+                        <ActionIcon
+                          size="xs"
+                          variant="transparent"
+                          disabled={isDisabled}
+                          onClick={() => {
+                            deleteCTA(userToken, record.id).then(res => {
+                              showNotification({
+                                title: "Success",
+                                message: "CTA has been deleted",
+                                color: "blue",
+                              });
+                              refetch();
+                            });
+                          }}
+                        >
+                          <IconTrashX color={isDisabled ? "gray" : "black"} stroke={"1"} />
                         </ActionIcon>
                       </div>
                     </Tooltip>
@@ -312,6 +341,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCT
               key: "delete",
               title: `Delete CTA`,
               icon: <IconTrashX size={14} />,
+              disabled: !!(cta.total_count && cta.total_count > 0),
               color: "red",
               onClick: async () => {
                 await deleteCTA(userToken, cta.id);

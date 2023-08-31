@@ -406,7 +406,7 @@ function PersonCampaignCard(props: {
               </Popover.Target>
               <Popover.Dropdown>
                 <EmojiPicker 
-                  onEmojiClick={(event, emojiObject) => {
+                  onEmojiClick={(event: any, _: any) => {
                     const emoji = event.emoji;
                     setEmoji(emoji);
                   }}

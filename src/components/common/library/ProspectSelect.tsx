@@ -110,7 +110,7 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
         };
       })}
       onInput={
-        (e) => {
+        (e: any) => {
           searchProspects(e.target.value);
         }
       }

@@ -21,6 +21,7 @@ import {
   HoverCard,
   Container,
   Accordion,
+  Box,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { openConfirmModal, openContextModal } from '@mantine/modals';
@@ -84,7 +85,7 @@ function BumpBucketView(props: {
   const [showAll, setShowAll] = useState(false);
 
   return (
-    <>
+    <Box w='100%'>
       <Card shadow='sm' padding='sm' withBorder w='100%'>
         {/* Header */}
         <Flex justify='space-between' align='center'>
@@ -235,23 +236,6 @@ function BumpBucketView(props: {
                       </Tooltip>
                     </Flex>
                     <Card.Section>
-                      <Flex align={'center'} justify={'center'} w='100%'>
-                        <Tooltip
-                          label={`Prospect will be snoozed for ${framework.bump_delay_days} days after bump is sent`}
-                          withinPortal
-                        >
-                          <Badge
-                            mt='12px'
-                            size='md'
-                            color={valueToColor(theme, formatToLabel(framework.bump_delay_days + ''))}
-                            variant='filled'
-                          >
-                            {framework.bump_delay_days} day snooze
-                          </Badge>
-                        </Tooltip>
-                      </Flex>
-                    </Card.Section>
-                    <Card.Section>
                       <Divider mt='sm' />
                     </Card.Section>
                   </>
@@ -280,7 +264,32 @@ function BumpBucketView(props: {
           )}
         </Card.Section>
       </Card>
-    </>
+      {props.bumpBucket.frameworks.map((framework, index) => {
+                // Show only the first Bump Framework of not showing all
+                if (index > 0 && !showAll) {
+                  return <></>;
+                }
+                return <Card padding='sm' w='100%' mb='12px' mt='12px'>
+                  <Card.Section px='xs'>
+                    <Flex align={'center'} justify={'center'} w='100%'>
+                      <Tooltip
+                        label={`Prospect will be snoozed for ${framework.bump_delay_days} days after bump is sent`}
+                        withinPortal
+                      >
+                        <Badge
+                          mt='12px'
+                          size='md'
+                          color={valueToColor(theme, formatToLabel(framework.bump_delay_days + ''))}
+                          variant='filled'
+                        >
+                          Snooze for {framework.bump_delay_days} day{framework.bump_delay_days > 1 ? 's' : ''}
+                      </Badge>
+                    </Tooltip>
+                  </Flex>
+                  </Card.Section> 
+              </Card>;
+      })}
+    </Box>
   );
 }
 

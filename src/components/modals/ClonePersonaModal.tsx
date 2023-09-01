@@ -136,6 +136,8 @@ export default function ClonePersonaModal({
               onChange={(event) =>
                 setCloneICPFilters(event.currentTarget.checked)
               }
+              label="ICP Filters"
+            />
           </Stack>
 
           <Box m='sm'>

@@ -157,7 +157,7 @@ export default function SellScaleBrainCompanyTab() {
             mb="sm"
           />
           <MultiSelect
-            label="Tone Attributes"
+            label="(Optional) Tone Attributes"
             description="Select 3-5 tone attributes that describe your company"
             data={toneOptions}
             value={toneAttributes}

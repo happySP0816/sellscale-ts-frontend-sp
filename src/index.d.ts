@@ -220,6 +220,7 @@ export interface CTA {
     status_map: Record<string, number>;
     total_count: number;
   };
+  cta_type: string;
 }
 
 export interface Archetype {

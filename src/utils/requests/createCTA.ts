@@ -4,7 +4,7 @@ import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src";
 import { processResponse } from "./utils";
 
-export default async function createCTA(userToken: string, personaId: number, cta: string, expirationDate?: Date): Promise<MsgResponse> {
+export default async function createCTA(userToken: string, personaId: number, cta: string, expirationDate?: Date, cta_type?: string): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/message_generation/create_cta`,
     {
@@ -17,6 +17,7 @@ export default async function createCTA(userToken: string, personaId: number, ct
         archetype_id: personaId,
         text_value: cta,
         expiration_date: expirationDate?.toISOString(),
+        cta_type: cta_type,
       }),
     }
   );

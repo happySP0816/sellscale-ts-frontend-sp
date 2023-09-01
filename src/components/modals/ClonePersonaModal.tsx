@@ -80,6 +80,7 @@ export default function ClonePersonaModal({
   const [cloneBumpFrameworks, setCloneBumpFrameworks] = useState(true);
   const [cloneVoices, setCloneVoices] = useState(true);
   const [cloneEmailBlocks, setCloneEmailBlocks] = useState(true);
+  const [cloneICPFilters, setCloneICPFilters] = useState(true);
 
   return (
     <Paper
@@ -130,6 +131,11 @@ export default function ClonePersonaModal({
               }
               label="Email Blocks"
             />
+            <Checkbox
+              checked={cloneICPFilters}
+              onChange={(event) =>
+                setCloneICPFilters(event.currentTarget.checked)
+              }
           </Stack>
 
           <Box m='sm'>
@@ -147,6 +153,7 @@ export default function ClonePersonaModal({
                     bumpFrameworks: cloneBumpFrameworks,
                     voices: cloneVoices,
                     emailBlocks: cloneEmailBlocks,
+                    icpFilters: cloneICPFilters,
                   });
                   if(response.status === 'success') {
                     // Success!

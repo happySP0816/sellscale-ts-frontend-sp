@@ -246,7 +246,9 @@ export default function CTAGeneratorModal({
                           const response = await createCTA(
                             userToken,
                             innerProps.personaId,
-                            cta.cta
+                            cta.cta,
+                            undefined,
+                            cta.tag.replace("[", "") + '-based'
                           );
                           queryClient.invalidateQueries({
                             queryKey: [`query-cta-data-${innerProps.personaId}`],

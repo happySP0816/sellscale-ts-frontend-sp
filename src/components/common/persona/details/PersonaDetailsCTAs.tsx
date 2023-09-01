@@ -172,38 +172,63 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCT
                 record.total_count && record.total_count > 0
               );
 
+              const mantineColorOptions = [
+                "gray",
+                "red",
+                "pink",
+                "grape",
+                "violet",
+                "indigo",
+                "blue",
+                "cyan",
+                "teal",
+                "green",
+                "lime",
+                "yellow",
+              ];
+              const deterministicColor = str => mantineColorOptions[Math.abs([...str].reduce((hash, char) => (hash << 5) - hash + char.charCodeAt(0), 0)) % mantineColorOptions.length];
+              const randomColorFromCtaType = deterministicColor(record.cta_type)
+
               return (
                 <Flex direction="row" align="center" justify="space-between">
                   <Flex>
                     <Flex mr="xs">
-                      <CTAGeneratorExample
-                        ctaText={record.text_value}
-                        size="xs"
-                      />
+                      <Group sx={{textAlign: 'center'}}>
+                        <CTAGeneratorExample
+                          ctaText={record.text_value}
+                          size="xs"
+                        />
+                      </Group>
                     </Flex>
                     <Flex>
-                      <Text>
-                        {record.text_value}{" "}
-                        {record.expiration_date ? (
-                          new Date().getTime() >
-                          new Date(record.expiration_date).getTime() ? (
-                            <Text c="red">
-                              (Expired on{" "}
-                              {moment(record.expiration_date).format(
-                                "MM/DD/YYYY"
-                              )}
-                              )
-                            </Text>
+                      <Container>
+                        <Text>
+                          {record.text_value}{" "}
+                          {record.expiration_date ? (
+                            new Date().getTime() >
+                            new Date(record.expiration_date).getTime() ? (
+                              <Text c="red">
+                                (Expired on{" "}
+                                {moment(record.expiration_date).format(
+                                  "MM/DD/YYYY"
+                                )}
+                                )
+                              </Text>
+                            ) : (
+                              <Text c="violet">
+                                (⏰ Expiring{" "}
+                                {moment(record.expiration_date).format("MM/DD/YYYY")})
+                              </Text>
+                            )
                           ) : (
-                            <Text c="violet">
-                              (⏰ Expiring{" "}
-                              {moment(record.expiration_date).format("MM/DD/YYYY")})
-                            </Text>
-                          )
-                        ) : (
-                          ""
-                        )}
-                      </Text>
+                            ""
+                          )}
+                        </Text>
+                        <Badge color={randomColorFromCtaType} variant="light" size='xs' mt='xs' mb='xs'>
+                          {record.cta_type}
+                        </Badge>
+                      </Container>
+                      
                     </Flex>
                   </Flex>
                   <Flex miw="30px">

@@ -47,7 +47,7 @@ import {
   IconSend,
   IconX,
 } from "@tabler/icons";
-import { IconArrowDown, IconArrowUp, IconFilter, IconLayoutNavbarCollapse, IconMessageCheck } from "@tabler/icons-react";
+import { IconArrowDown, IconArrowUp, IconChecklist, IconClipboard, IconFilter, IconLayoutNavbarCollapse, IconMessageCheck, IconRecordMail } from "@tabler/icons-react";
 import { navigateToPage } from "@utils/documentChange";
 import {
   convertDateToLocalTime,
@@ -149,8 +149,9 @@ export default function PersonaCampaigns() {
         </Group>
         <Tabs defaultValue="overview">
           <Tabs.List>
-            <Tabs.Tab value="overview">Overview</Tabs.Tab>
-            <Tabs.Tab value="outreach">Queued for AI Outreach</Tabs.Tab>
+            <Tabs.Tab value="overview" icon={<IconClipboard size='0.8rem' />}>Overview</Tabs.Tab>
+            <Tabs.Tab value="linkedin" icon={<IconBrandLinkedin size='0.8rem' />}>Queued LinkedIns</Tabs.Tab>
+            <Tabs.Tab value="email" icon={<IconMail size='0.8rem' />}>Queued Emails</Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="overview" pt="xs">
@@ -273,9 +274,14 @@ export default function PersonaCampaigns() {
             </Stack>
           </Tabs.Panel>
 
-          <Tabs.Panel value="outreach" pt="xs">
+          <Tabs.Panel value="linkedin" pt="xs">
             <Group position="center" noWrap>
               <LinkedinQueuedMessages all />
+            </Group>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="email" pt="xs">
+            <Group position="center" noWrap>
               <EmailQueuedMessages all />
             </Group>
           </Tabs.Panel>

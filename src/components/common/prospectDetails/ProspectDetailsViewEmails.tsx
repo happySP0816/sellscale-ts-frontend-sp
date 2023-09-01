@@ -37,7 +37,6 @@ import EmailThreadEntry from "@common/persona/emails/EmailThreadEntry";
 import DOMPurify from "isomorphic-dompurify";
 import ConnectEmailCard from "@common/library/ConnectEmailCard";
 import FlexSeparate from "@common/library/FlexSeparate";
-import { generateEmail } from "@utils/requests/generateEmail";
 
 export const openComposeEmailModal = (
   userToken: string,

@@ -1,5 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
-import EmailBlockPreview from "@common/emails/EmailBlockPreview";
+import EmailTemplatePreview from "@common/emails/EmailTemplatePreview";
 import { EmailBlocksDND } from "@common/emails/EmailBlocksDND";
 import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
@@ -51,7 +51,6 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
 
   const [selectedStatus, setSelectedStatus] = useState<string | null>("");
   const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>("");
-  const [template, setTemplate] = useState<string>("");
 
   const [sequence, _setSequence] = useState<string>(props.sequence || '');
   const sequenceRichRaw = useRef<JSONContent | string>(props.sequence || '');
@@ -195,10 +194,11 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
           </Box>
           <Box sx={{ flexBasis: "40%" }}>
             <ScrollArea type="hover">
-              <EmailBlockPreview
+              <EmailTemplatePreview
                 archetypeId={props.archetypeID as number}
-                template={template}
+                template={sequence}
                 selectTemplate={false}
+                emailStatus={props.status || ""}
               />
             </ScrollArea>
           </Box>

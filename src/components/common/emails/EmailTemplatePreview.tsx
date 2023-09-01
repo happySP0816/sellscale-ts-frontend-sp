@@ -2,6 +2,7 @@ import { userTokenState } from '@atoms/userAtoms';
 import {
   ActionIcon,
   Badge,
+  Box,
   Button,
   Card,
   Center,
@@ -19,13 +20,14 @@ import StarterKit from '@tiptap/starter-kit';
 import { IconBrandLinkedin, IconX } from '@tabler/icons';
 import { useEditor } from '@tiptap/react';
 import { valueToColor } from '@utils/general';
-import { generateEmailAutomatic } from '@utils/requests/generateEmail';
 import { getArchetypeProspects } from '@utils/requests/getArchetypeProspects';
 import { forwardRef, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { EmailSequenceStep, ProspectShallow } from 'src';
 import { Markdown } from 'tiptap-markdown';
 import { getEmailSequenceSteps } from '@utils/requests/emailSequencing';
+import { postGenerateFollowupEmail, postGenerateInitialEmail } from '@utils/requests/emailMessageGeneration';
+import { showNotification } from '@mantine/notifications';
 
 
 interface ProspectItemProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -52,7 +54,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function EmailBlockPreview(props: { archetypeId: number, template?: string, selectTemplate?: boolean }) {
+export default function EmailTemplate(props: { archetypeId: number, template?: string, selectTemplate?: boolean, emailStatus: string }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const userToken = useRecoilValue(userTokenState);
@@ -60,7 +62,7 @@ export default function EmailBlockPreview(props: { archetypeId: number, template
   const [selectedProspect, setSelectedProspect] = useState<ProspectShallow>();
 
   const [loading, setLoading] = useState(false);
-  const [previewEmail, setPreviewEmail] = useState<{ subject: string; body: string } | null>(null);
+  const [previewEmail, setPreviewEmail] = useState<{ subject: string | null; body: string } | null>(null);
 
   const [emailSequenceSteps, setemailSequenceSteps] = useState<EmailSequenceStep[]>([]);
   const [selectedSequenceStep, setSelectedSequenceStep] = useState<EmailSequenceStep | undefined>(undefined);
@@ -133,9 +135,9 @@ export default function EmailBlockPreview(props: { archetypeId: number, template
     <>
       <Card withBorder h='fit'>
         <Text fz='lg' fw='bold'>
-          Email Preview - Coming Soon
+          Email Preview
         </Text>
-        <Text fz='sm'>Test your email block configuration on a prospect of your choosing.</Text>
+        <Text fz='sm'>Test your email template on a prospect of your choosing.</Text>
 
         {props.selectTemplate && (
           <>
@@ -232,10 +234,61 @@ export default function EmailBlockPreview(props: { archetypeId: number, template
                   loading={loading}
                   onClick={async () => {
                     setLoading(true);
-                    const response = await generateEmailAutomatic(userToken, selectedProspect.id, props.template || selectedSequenceStep?.template || '');
-                    if (response.status === 'success') {
-                      setPreviewEmail(response.data);
+
+                    let response = null;
+                    console.log('template', props.template)
+                    // Route depending on the status. Either initial (cold) message or a followup
+                    if (props.emailStatus === 'PROSPECTED') {
+                      response = await postGenerateInitialEmail(
+                        userToken,
+                        selectedProspect.id,
+                        selectedSequenceStep?.id as number,
+                        props.template || selectedSequenceStep?.template || null,
+                        null,
+                        null
+                      );
+                      if (response.status === 'success') {
+                        const email_body = response.data.email_body
+                        const subject_line = response.data.subject_line
+                        if (!email_body || !subject_line) {
+                          showNotification({
+                            title: 'Error',
+                            message: 'Something went wrong with generation, please try again.',
+                            icon: <IconX radius='sm' />,
+                          });
+                        }
+
+                        setPreviewEmail({
+                          subject: subject_line.completion,
+                          body: email_body.completion
+                        })
+                      }
+                    } else {
+                      console.log('selectedSequenceStep?.template', selectedSequenceStep?.template)
+                      response = await postGenerateFollowupEmail(
+                        userToken,
+                        selectedProspect.id,
+                        null,
+                        selectedSequenceStep?.id || null,
+                        props.template || selectedSequenceStep?.template || null
+                      );
+                      if (response.status === 'success') {
+                        const email_body = response.data.email_body
+                        if (!email_body) {
+                          showNotification({
+                            title: 'Error',
+                            message: 'Something went wrong with generation, please try again.',
+                            icon: <IconX radius='sm' />,
+                          });
+                        }
+
+                        setPreviewEmail({
+                          subject: null,
+                          body: email_body.completion
+                        })
+                      }
                     }
+
                     setLoading(false);
                   }}
                 >
@@ -243,7 +296,7 @@ export default function EmailBlockPreview(props: { archetypeId: number, template
                 </Button>
                 {
                   previewEmail && (
-                    <ActionIcon ml='xs' size='sm' onClick={() => {setPreviewEmail(null)}}>
+                    <ActionIcon ml='xs' size='sm' onClick={() => { setPreviewEmail(null) }}>
                       <IconX />
                     </ActionIcon>
                   )
@@ -261,7 +314,14 @@ export default function EmailBlockPreview(props: { archetypeId: number, template
 
         {(!loading && previewEmail) && (
           <Card>
-            <TextInput label='Subject' value={previewEmail.subject} readOnly />
+            <Text fz='sm' fw={500}>Subject</Text>
+            <Text
+              variant={previewEmail.subject ? 'gradient' : 'text'}
+              gradient={{ from: 'pink', to: 'purple', deg: 45 }}
+            >
+              {previewEmail.subject || "Not available on followup emails"}
+            </Text>
+
 
             <Text mt='md' fz='sm' fw={500}>Body</Text>
             <RichTextEditor

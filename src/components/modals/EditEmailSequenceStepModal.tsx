@@ -1,5 +1,4 @@
 import { userTokenState } from "@atoms/userAtoms";
-import EmailBlockPreview from "@common/emails/EmailBlockPreview";
 import { EmailBlocksDND } from "@common/emails/EmailBlocksDND";
 import { Button, Divider, Flex, LoadingOverlay, NumberInput, Paper, ScrollArea, Slider, Switch, Text, TextInput, Textarea, Title, Tooltip, em, useMantineTheme } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -196,7 +195,7 @@ export default function EditEmailSequenceStepModal({ context, id, innerProps }: 
 
           <Flex w='50%' mah='80vh'>
             <ScrollArea type='hover'>
-              <EmailBlockPreview archetypeId={innerProps.archetypeID as number} template={template} selectTemplate={false} />
+              {/* <EmailTemplatePreview archetypeId={innerProps.archetypeID as number} template={template} selectTemplate={false} emailStatus="" /> */}
             </ScrollArea>
           </Flex>
 

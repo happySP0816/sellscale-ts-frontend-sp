@@ -286,9 +286,21 @@ export function AiMetaDataBadge(props: {
                       </List>
                     </>
                   ) : (
-                    <Text size='sm' mt='md'>
-                      <span style={{ fontWeight: 550 }}>Call to Action:</span> {props.cta}
-                    </Text>
+                    <>
+                      <Text size='sm' mt='md'>
+                        <span style={{ fontWeight: 550 }}>Call to Action:</span> {props.cta}
+                      </Text>
+                      <Text size='sm' mt='md'>
+                        <span style={{ fontWeight: 550 }}>Notes:</span> 
+                        {props.initialMessageResearchPoints?.map((value) => {
+                          return (
+                            <Text size='xs' mt='xs'>
+                              - {value}
+                            </Text>
+                          )
+                        })}
+                      </Text>
+                    </>
                   )
                 }
               </>

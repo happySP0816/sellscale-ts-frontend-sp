@@ -212,8 +212,6 @@ export default function LinkedInConvoSimulator(props: { personaId: number, seque
   };
 
 
-  let convoHeight = (messages.length || 1) * 150 + 150;
-  if (convoHeight > 800) { convoHeight = 800; }
 
   if (!prospect) {
     return (
@@ -287,11 +285,11 @@ export default function LinkedInConvoSimulator(props: { personaId: number, seque
         </Group>
       </Paper>
 
-      <ScrollArea viewportRef={viewport} my={5} h={convoHeight}>
+      <ScrollArea viewportRef={viewport} my={5} h={'auto'}>
         <LoadingOverlay loader={loaderWithText(loadingMsg)} visible={loading} />
 
         {messages.length === 0 && (
-          <Center h={convoHeight - 100}>
+          <Center h='400px'>
             <Button
               radius='xl'
               size='md'
@@ -313,6 +311,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number, seque
               bump_framework_description: undefined as string | undefined,
               bump_framework_length: undefined as string | undefined,
               account_research_points: undefined as string[] | undefined,
+              notes: undefined as string | undefined,
               cta: undefined as string | undefined,
             };
             if (message.meta_data && message.meta_data.bump_framework_id) {
@@ -322,6 +321,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number, seque
               metadata.bump_framework_length = message.meta_data.bump_framework_length;
               metadata.account_research_points = message.meta_data.account_research_points;
               metadata.cta = message.meta_data.cta;
+              metadata.notes = message.meta_data.notes;
             } else if (message.meta_data && message.meta_data.cta) {
               metadata.bump_framework_id = undefined;
               metadata.bump_framework_title = undefined;
@@ -329,6 +329,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number, seque
               metadata.bump_framework_length = undefined;
               metadata.account_research_points = undefined;
               metadata.cta = message.meta_data.cta;
+              metadata.notes = message.meta_data.notes;
             }
             return (
               <div
@@ -354,6 +355,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number, seque
                   bumpFrameworkDescription={metadata.bump_framework_description}
                   bumpFrameworkLength={metadata.bump_framework_length}
                   accountResearchPoints={metadata.account_research_points}
+                  initialMessageResearchPoints={metadata.notes}
                   cta={metadata.cta}
                   badgeBFTitle
                 />

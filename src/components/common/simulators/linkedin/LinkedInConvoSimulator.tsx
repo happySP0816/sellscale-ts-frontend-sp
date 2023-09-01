@@ -311,7 +311,7 @@ export default function LinkedInConvoSimulator(props: { personaId: number, seque
               bump_framework_description: undefined as string | undefined,
               bump_framework_length: undefined as string | undefined,
               account_research_points: undefined as string[] | undefined,
-              notes: undefined as string | undefined,
+              notes: undefined as string[] | undefined,
               cta: undefined as string | undefined,
             };
             if (message.meta_data && message.meta_data.bump_framework_id) {

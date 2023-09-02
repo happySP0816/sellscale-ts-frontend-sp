@@ -80,7 +80,7 @@ export default function VoiceEditorModal({
     }
   }, []);
 
-  useEffect(() => {
+  const updateActive = (active: boolean) => {
     fetch(
       `${API_URL}/message_generation/stack_ranked_configuration_tool/set_active`,
       {
@@ -91,15 +91,16 @@ export default function VoiceEditorModal({
         },
         body: JSON.stringify({
           configuration_id: innerProps.voiceId,
-          set_active: enabled,
+          set_active: active,
         }),
       }
     ).then((res) => {
       queryClient.invalidateQueries({
         queryKey: [`query-voices`],
       });
+      fetchPromptData();
     })
-  }, [enabled]);
+  }
 
   const fetchPromptData = () => {
     setIsFetching(true);
@@ -271,7 +272,10 @@ export default function VoiceEditorModal({
 
       {!stackRankedConfigurationData?.name?.includes('Baseline') && (
         <Box pt='sm'>
-          <Switch label="Active" checked={enabled} onChange={(event) => setEnabled(event.currentTarget.checked)} />
+          <Switch label="Active" checked={enabled} onChange={(event) => {
+            updateActive(event.currentTarget.checked)
+           }
+          } />
         </Box>
       )}
 

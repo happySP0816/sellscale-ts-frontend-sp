@@ -313,6 +313,7 @@ function PersonCampaignCard(props: {
     openedProspectIdState
   );
   const [opened, { toggle }] = useDisclosure(props.persona.active);
+  const [inactiveChannelsOpened, setInactiveChannelsOpened] = useState(false);
   const [emoji, setEmojiState] = useState<string>(props.persona.emoji || '⬜️');
 
   const userToken = useRecoilValue(userTokenState);
@@ -472,8 +473,10 @@ function PersonCampaignCard(props: {
             </Group>
         </Group>
         <Collapse in={opened}>
-            {types.map((section, index) => (
-              <Box key={index}>
+            {types.map((section, index) => {
+              if (!section.active && props.persona.active) return null;
+
+              return <Box key={index}>
                 {index > 0 && <Divider />}
                 <PersonCampaignCardSection section={section} onClick={() => {
                   if (props.project == undefined) return;
@@ -482,7 +485,41 @@ function PersonCampaignCard(props: {
                   navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
                 }} />
               </Box>
-            ))}
+            })}
+            {
+              props.persona.active && (
+                <>
+                  <Collapse in={inactiveChannelsOpened}>
+                    {types.map((section, index) => {
+                      if (section.active) return null;
+
+                      return <Box key={index}>
+                        {index > 0 && <Divider />}
+                        <PersonCampaignCardSection section={section} onClick={() => {
+                          if (props.project == undefined) return;
+                          setOpenedProspectId(-1);
+                          setCurrentProject(props.project);
+                          navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
+                        }} />
+                      </Box>
+                    })}
+                  </Collapse>
+                  <Divider/>
+                  <Button 
+                    w='100%' 
+                    variant='subtle' 
+                    size='xs' 
+                    color='gray'
+                    onClick={() => setInactiveChannelsOpened(!inactiveChannelsOpened)}
+                    leftIcon={inactiveChannelsOpened ? <IconArrowUp size="0.7rem" /> : <IconArrowDown size="0.7rem" />}
+                  >
+                    {inactiveChannelsOpened ? 'Hide' : 'Show'} {types.filter(x => !x.active).length} Inactive Channel{types.filter(x => !x.active).length > 1 ? 's' : ''}
+                  </Button>
+                
+                </>
+              )
+            }
+            
         </Collapse>
       </Stack>
     </Paper>

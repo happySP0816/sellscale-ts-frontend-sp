@@ -59,6 +59,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
   const userData = useRecoilValue(userDataState);
+  console.log('userData', userData)
 
   const [loadingConnection, setLoadingConnection] = useState(false);
   const [liProfile, setLiProfile] = useState<null | any>(null);
@@ -231,7 +232,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                 </Title>
                 <Flex ml='md'>
                   {
-                    userData.warmup_linkedin_status ? (
+                    userData.warmup_linkedin_complete ? (
                       <Tooltip label="Your LinkedIn account is sending at full capacity!" withArrow withinPortal>
                         <Badge size='lg' color='green'>
                           Fully Warm
@@ -246,6 +247,10 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                     )
                   }
                 </Flex>
+              </Flex>
+              <Flex mt='xs'>
+                <Text fw='bold'>Current LinkedIn volume:</Text>
+                <Text ml='md' fw='bold'>{userData.weekly_li_outbound_target} connections per week</Text>
               </Flex>
               <Text mt='xs'>In order to protect your LinkedIn, our AI follows a set of outbound heuristics specific to your account. This enables us to slowly "warm up" your LinkedIn account before sending full volume outbound.</Text>
               <Text mt='xs'>The following is your "warm up" schedule, if you would like to make adjustments, please contact a SellScale team member:</Text>

@@ -1,8 +1,5 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
-import EmailBlockPreview from "@common/emails/EmailBlockPreview";
-import { EmailBlocksDND } from "@common/emails/EmailBlocksDND";
-import PersonaSelect from "@common/persona/PersonaSplitSelect";
 import {
   Flex,
   Title,
@@ -11,23 +8,18 @@ import {
   LoadingOverlay,
   useMantineTheme,
   Button,
-  Grid,
   Tabs,
   Divider,
   ActionIcon,
   Tooltip,
   Switch,
   Loader,
-  Badge,
   ScrollArea,
   Box,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
-import CreateEmailSequenceStepModal from "@modals/CreateEmailSequenceStepModal.tsx";
-import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
 import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
 import {
   IconCheck,
@@ -37,7 +29,7 @@ import {
   IconSearch,
   IconX,
 } from "@tabler/icons";
-import { IconBrandTelegram, IconMessageUp } from "@tabler/icons-react";
+import { IconMessageUp } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   createEmailSequenceStep,
@@ -750,8 +742,8 @@ export default function EmailSequencingPage(props: {
             </Tabs.List>
 
             <Tabs.Panel value="sequence">
-              <Flex direction="row" mt="md">
-                <Flex w="60%" direction="column">
+              <Flex direction="column" mt="md">
+
                   <Flex direction="column" mb="md">
                     <Title order={3}>Email Sequencing</Title>
                     <Text fz="md" mt="2px">
@@ -902,13 +894,6 @@ export default function EmailSequencingPage(props: {
                       <Loader />
                     </Flex>
                   )}
-                </Flex>
-                <Flex ml="sm">
-                  <EmailBlockPreview
-                    archetypeId={currentProject.id}
-                    selectTemplate
-                  />
-                </Flex>
               </Flex>
             </Tabs.Panel>
 

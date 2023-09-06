@@ -23,6 +23,7 @@ export async function clonePersona(
     bumpFrameworks: boolean;
     voices: boolean;
     emailBlocks: boolean;
+    icpFilters: boolean;
   }
 ): Promise<MsgResponse> {
 
@@ -43,6 +44,7 @@ export async function clonePersona(
         option_bump_frameworks: cloneOptions.bumpFrameworks,
         option_voices: cloneOptions.voices,
         option_email_blocks: cloneOptions.emailBlocks,
+        option_icp_filters: cloneOptions.icpFilters,
       })
     }
   );

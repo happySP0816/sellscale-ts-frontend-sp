@@ -85,6 +85,19 @@ export function percentageToColor(input: number): string {
 }
 
 
+
+/**
+ * Converts a date to a string in the format YYYY-MM-DD, h:mm a
+ * @param date 
+ * @returns - Date in the format YYYY-MM-DD, h:mm a
+ */
+export function convertDateToShortFormatWithoutTime(date: Date) {
+  const year = date.getFullYear();
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const day = ('0' + date.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
+}
+
 /**
  * Converts a date to a string in the format YYYY-MM-DD, h:mm a
  * @param date 

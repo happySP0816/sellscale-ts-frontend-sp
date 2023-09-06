@@ -21,7 +21,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { faker } from "@faker-js/faker";
 import { useQuery } from "@tanstack/react-query";
 import { chunk, sortBy } from "lodash";
-import { IconPencil, IconTrashX, IconUser } from "@tabler/icons";
+import { IconPencil, IconTrash, IconTrashX, IconUser } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import { closeAllModals, openContextModal, openModal } from "@mantine/modals";
 import { userTokenState } from "@atoms/userAtoms";
@@ -173,39 +173,64 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCT
                 record.total_count && record.total_count > 0
               );
 
+              const mantineColorOptions = [
+                "gray",
+                "red",
+                "pink",
+                "grape",
+                "violet",
+                "indigo",
+                "blue",
+                "cyan",
+                "teal",
+                "green",
+                "lime",
+                "yellow",
+              ];
+              const deterministicColor = (str: any) => mantineColorOptions[Math.abs([...str].reduce((hash, char) => (hash << 5) - hash + char.charCodeAt(0), 0)) % mantineColorOptions.length];
+              const randomColorFromCtaType = deterministicColor(record.cta_type || '')
+
               return (
                 <Flex direction="row" align="center" justify="space-between">
                   <Flex>
                     <Flex mr="xs">
-                      <CTAGeneratorExample
-                        ctaText={record.text_value}
-                        size="xs"
-                      />
+                      <Group sx={{textAlign: 'center'}}>
+                        <CTAGeneratorExample
+                          ctaText={record.text_value}
+                          size="xs"
+                        />
+                      </Group>
                     </Flex>
                     <Flex>
-                      <Text>
-                        {record.text_value}{" "}
-                        {record.expiration_date ? (
-                          new Date().getTime() >
-                          new Date(record.expiration_date).getTime() ? (
-                            <Text c="red">
-                              (Expired on{" "}
-                              {convertToStandardDate(record.expiration_date)}
-                              )
-                            </Text>
+                      <Container>
+                        <Text>
+                          {record.text_value}{" "}
+                          {record.expiration_date ? (
+                            new Date().getTime() >
+                            new Date(record.expiration_date).getTime() ? (
+                              <Text c="red">
+                                (Expired on{" "}
+                                {convertToStandardDate(record.expiration_date)}
+                                )
+                              </Text>
+                            ) : (
+                              <Text c="violet">
+                                (⏰ Expiring{" "}
+                                {convertToStandardDate(record.expiration_date)})
+                              </Text>
+                            )
                           ) : (
-                            <Text c="violet">
-                              (⏰ Expiring{" "}
-                              {convertToStandardDate(record.expiration_date)})
-                            </Text>
-                          )
-                        ) : (
-                          ""
-                        )}
-                      </Text>
+                            ""
+                          )}
+                        </Text>
+                        <Badge color={randomColorFromCtaType} variant="light" size='xs' mt='xs' mb='xs'>
+                          {record.cta_type}
+                        </Badge>
+                      </Container>
+                      
                     </Flex>
                   </Flex>
-                  <Flex miw="24px">
+                  <Flex miw="30px">
                     <Tooltip
                       withArrow
                       withinPortal
@@ -231,7 +256,36 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCT
                             });
                           }}
                         >
-                          <IconPencil color="black" stroke={"1"} />
+                          <IconPencil color={isDisabled ? "gray" : "black"} stroke={"1"} />
+                        </ActionIcon>
+                      </div>
+                    </Tooltip>
+                    <Tooltip
+                      withArrow
+                      withinPortal
+                      label={
+                        isDisabled
+                          ? "CTAs that have been used cannot be deleted. Try disabling instead."
+                          : "Delete CTA"
+                      }
+                    >
+                      <div>
+                        <ActionIcon
+                          size="xs"
+                          variant="transparent"
+                          disabled={isDisabled}
+                          onClick={() => {
+                            deleteCTA(userToken, record.id).then(res => {
+                              showNotification({
+                                title: "Success",
+                                message: "CTA has been deleted",
+                                color: "blue",
+                              });
+                              refetch();
+                            });
+                          }}
+                        >
+                          <IconTrashX color={isDisabled ? "gray" : "black"} stroke={"1"} />
                         </ActionIcon>
                       </div>
                     </Tooltip>
@@ -311,6 +365,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCT
               key: "delete",
               title: `Delete CTA`,
               icon: <IconTrashX size={14} />,
+              disabled: !!(cta.total_count && cta.total_count > 0),
               color: "red",
               onClick: async () => {
                 await deleteCTA(userToken, cta.id);

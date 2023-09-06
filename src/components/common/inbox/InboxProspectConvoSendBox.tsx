@@ -20,6 +20,7 @@ import RichTextArea from '@common/library/RichTextArea';
 import TextAreaWithAI from '@common/library/TextAreaWithAI';
 import { JSONContent } from '@tiptap/react';
 import DOMPurify from 'dompurify';
+import { postGenerateFollowupEmail } from '@utils/requests/emailMessageGeneration';
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -89,9 +90,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
             }
           }
         },
-        setEmailThread: (emailThread: EmailThread) => {
-          setCurrentConvoEmailThread(emailThread);
-        }
       };
     },
     []
@@ -136,7 +134,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   const sendMessage = async () => {
     setMsgLoading(true);
-    
 
     // Delete the auto bump message if it exists
     await deleteAutoBumpMessage(userToken, props.prospectId);
@@ -225,9 +222,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       }
 
       // Get the last message
-      console.log(currentConvoEmailMessages)
       const replyToMessageID = currentConvoEmailMessages[currentConvoEmailMessages.length - 1].nylas_message_id
-      console.log('reply', replyToMessageID)
       const result = await sendEmail(
         userToken,
         props.prospectId,
@@ -309,7 +304,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         <Group spacing={0} position='apart'>
           <Flex wrap='nowrap' align='center'>
             <Text color='white' fz={14} fw={500} pl={15} pt={5}>
-              Message via {openedOutboundChannel === 'LINKEDIN' ? 'LinkedIn' : 'Email'}
+              {openedOutboundChannel === 'LINKEDIN' ? 'Message via LinkedIn' : 'Reply via Email'}
             </Text>
             <Text
               pl={10}
@@ -382,7 +377,12 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 variant='outline'
                 color="gray.8"
                 radius={theme.radius.lg}
+                sx={{ '&[data-disabled]': { backgroundColor: 'white', border: '1px solid black', pointerEvents: 'all' } }}
                 size='xs'
+                disabled={
+                  (openedOutboundChannel === 'LINKEDIN' && ( bumpFrameworks === undefined || bumpFrameworks?.length === 0))
+                  || (openedOutboundChannel != 'LINKEDIN' && ( emailSequenceSteps === undefined || emailSequenceSteps?.length === 0))
+                }
                 onClick={async () => {
                   setMsgLoading(true);
                   if (openedOutboundChannel === 'LINKEDIN') {
@@ -402,13 +402,31 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       setMsgLoading(false);
                       return;
                     }
-                    const result = await generateAIEmailReply(userToken, props.prospectId, currentConvoEmailThread.nylas_thread_id, selectedEmailSequenceStep)
+                    const result = await postGenerateFollowupEmail(
+                      userToken,
+                      props.prospectId,
+                      currentConvoEmailThread.nylas_thread_id,
+                      selectedEmailSequenceStep?.id || null,
+                      null,
+                    )
                     // Clean the result
-                    const message = result.message.replaceAll('\n', `<br />`)
+                    const email_body = result.data.email_body
+                    if (!email_body) {
+                      showNotification({
+                        id: 'generate-email-message-error',
+                        title: 'Error',
+                        message: 'Failed to generate message. Please try again.',
+                        color: 'red',
+                        autoClose: false,
+                      });
+                      setMsgLoading(false);
+                      return;
+                    }
+                    const message = email_body.completion
                     messageDraftEmail.current = message
                     setMessageDraft(message)
                     setAiMessage(message);
-                    setAiGenerated(result.aiGenerated);
+                    setAiGenerated(true);
                   }
                   setMsgLoading(false);
                 }}
@@ -420,6 +438,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 placeholder={bumpFrameworks.length > 0 ? "Select Framework" : "No Frameworks"}
                 radius={0}
                 size='xs'
+                disabled={
+                  (openedOutboundChannel === 'LINKEDIN' && ( bumpFrameworks === undefined || bumpFrameworks?.length === 0))
+                  || (openedOutboundChannel != 'LINKEDIN' && ( emailSequenceSteps === undefined || emailSequenceSteps?.length === 0))
+                }
                 data={
                   openedOutboundChannel === 'LINKEDIN' ? (
                     bumpFrameworks.length > 0 ? bumpFrameworks.map((bf: BumpFramework) => {

@@ -212,6 +212,7 @@ export default function LinkedInCTAsStep(props: { persona: PersonaOverview, pers
               key: "delete",
               title: `Delete CTA`,
               icon: <IconTrashX size={14} />,
+              disabled: !!(cta.total_count && cta.total_count > 0),
               color: "red",
               onClick: async () => {
                 await deleteCTA(userToken, cta.id);

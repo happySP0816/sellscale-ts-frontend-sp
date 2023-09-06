@@ -34,3 +34,35 @@ export async function postGenerateInitialEmail(userToken: string, prospectID: nu
   return await processResponse(response, 'data');
 
 }
+
+
+/**
+ * Generates a follow up email message
+ * @param userToken
+ * @param prospectID
+ * @param threadID
+ * @param overrideSequenceID
+ * @param overrideTemplate
+ * @returns - MsgResponse
+ */
+ export async function postGenerateFollowupEmail(userToken: string, prospectID: number, threadID: string | null, overrideSequenceID: number | null, overrideTemplate: string | null): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${API_URL}/message_generation/email/followup_email`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prospect_id: prospectID,
+        thread_id: threadID,
+        override_sequence_id: overrideSequenceID,
+        override_template: overrideTemplate
+      })
+    }
+  );
+  return await processResponse(response, 'data');
+
+ }

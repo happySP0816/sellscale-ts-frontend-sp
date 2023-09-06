@@ -21,7 +21,6 @@ import { patchLIMessage } from "@utils/requests/patchLIMessage";
 import { useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
-import DOMPurify from "dompurify";
 import moment from "moment-timezone";
 import { removeProspectFromContactList } from "@common/prospectDetails/ProspectDetailsRemove";
 import { openConfirmModal } from "@mantine/modals";

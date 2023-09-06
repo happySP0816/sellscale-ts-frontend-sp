@@ -202,6 +202,9 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
           Any company that is an exact match to these names will be
           automatically removed from the SellScale pipeline.
         </Text>
+        <Text size='sm' mt='xs'>
+          Note: Any new prospect that is uploaded in the future will also be checked against these filters and automatically removed if they match.
+        </Text>
         <MultiSelect
           label="Filtered Companies"
           mt="md"

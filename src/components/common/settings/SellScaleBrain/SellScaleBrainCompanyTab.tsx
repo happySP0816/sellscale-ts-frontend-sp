@@ -157,7 +157,7 @@ export default function SellScaleBrainCompanyTab() {
             mb="sm"
           />
           <MultiSelect
-            label="Tone Attributes"
+            label="(Optional) Tone Attributes"
             description="Select 3-5 tone attributes that describe your company"
             data={toneOptions}
             value={toneAttributes}
@@ -180,7 +180,7 @@ export default function SellScaleBrainCompanyTab() {
           />
 
           <NumberInput
-            label="Default Contract Size"
+            label="Annual Contract Value (ACV)"
             value={contractSize}
             parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
             formatter={(value) =>

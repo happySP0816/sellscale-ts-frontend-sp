@@ -117,7 +117,7 @@ export default function UploadProspectsModal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          persona_name: selectedPersona,
+          persona_name: createdPersona,
         }),
       }
     )
@@ -416,7 +416,7 @@ export default function UploadProspectsModal({
             />
 
 <NumberInput
-        label="Default Contract Size"
+        label="Annual Contract Value (ACV)"
         value={personaContractSize}
         parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
         formatter={(value) =>

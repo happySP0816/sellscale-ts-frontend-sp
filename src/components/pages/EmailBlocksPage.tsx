@@ -1,7 +1,6 @@
 import { currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import PageFrame from '@common/PageFrame';
-import EmailBlockPreview from '@common/emails/EmailBlockPreview';
 import { EmailBlocksDND } from '@common/emails/EmailBlocksDND';
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
 import { Button, Card, Flex, LoadingOverlay, Text, Title } from '@mantine/core';
@@ -28,7 +27,7 @@ export default function EmailBlocksPage(props: { personaId?: number }) {
             <EmailBlocksDND archetypeId={personaId} autosave/>
           </Flex>
           <Flex w='50%' direction='column'>
-            <EmailBlockPreview archetypeId={personaId} selectTemplate={false} />
+            {/* <EmailTemplatePreview archetypeId={personaId} selectTemplate={false} /> */}
           </Flex>
         </Flex>
       </Card>

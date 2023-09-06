@@ -187,7 +187,7 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCT
                 "lime",
                 "yellow",
               ];
-              const deterministicColor = (str: any) => mantineColorOptions[Math.abs([...str].reduce((hash, char) => (hash << 5) - hash + char.charCodeAt(0), 0)) % mantineColorOptions.length];
+              const deterministicColor = (str: string) => mantineColorOptions[Math.abs([...str].reduce((hash, char) => (hash << 5) - hash + char.charCodeAt(0), 0)) % mantineColorOptions.length];
               const randomColorFromCtaType = deterministicColor(record.cta_type || '')
 
               return (

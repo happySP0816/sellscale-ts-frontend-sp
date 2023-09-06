@@ -37,6 +37,7 @@ import toggleCTA from "@utils/requests/toggleCTA";
 import { API_URL } from "@constants/data";
 import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
 import moment from "moment";
+import { convertToStandardDate } from "@utils/general";
 
 const PAGE_SIZE = 20;
 
@@ -189,15 +190,13 @@ export default function PersonaDetailsCTAs(props: { personas?: Archetype[], onCT
                           new Date(record.expiration_date).getTime() ? (
                             <Text c="red">
                               (Expired on{" "}
-                              {moment(record.expiration_date).format(
-                                "MM/DD/YYYY"
-                              )}
+                              {convertToStandardDate(record.expiration_date)}
                               )
                             </Text>
                           ) : (
                             <Text c="violet">
                               (⏰ Expiring{" "}
-                              {moment(record.expiration_date).format("MM/DD/YYYY")})
+                              {convertToStandardDate(record.expiration_date)})
                             </Text>
                           )
                         ) : (

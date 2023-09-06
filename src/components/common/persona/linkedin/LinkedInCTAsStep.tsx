@@ -10,6 +10,7 @@ import { showNotification } from '@mantine/notifications';
 import { ArchetypeCreation } from '@modals/CreatePersonaModal';
 import { IconUser, IconPencil, IconTrashX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
+import { convertToStandardDate } from '@utils/general';
 import { deleteCTA } from '@utils/requests/createCTA';
 import toggleCTA from '@utils/requests/toggleCTA';
 import { chunk, sortBy } from 'lodash';
@@ -130,7 +131,7 @@ export default function LinkedInCTAsStep(props: { persona: PersonaOverview, pers
             render: ({ text_value, expiration_date }) => (
               <Text>{text_value} {expiration_date ? 
                 (new Date().getTime() > new Date(expiration_date).getTime() ?
-                  <Text c="red">(Expired on {moment(expiration_date).format('MM/DD/YYYY')})</Text> : <Text c="violet">(⏰ Expiring {moment(expiration_date).format('MM/DD/YYYY')})</Text>
+                  <Text c="red">(Expired on {convertToStandardDate(expiration_date)})</Text> : <Text c="violet">(⏰ Expiring {convertToStandardDate(expiration_date)})</Text>
                 )
               : ''}</Text>
             ),

@@ -124,6 +124,18 @@ export function convertDateToCasualTime(date: Date) {
 
 
 /**
+ * Converts date to standard format (MM/DD/YYYY)
+ */
+export function convertToStandardDate(value: string){
+  try {
+    return moment(value).format("MM/DD/YYYY");
+  } catch (e) {
+    return value;
+  }
+}
+
+
+/**
  * Returns a fitting color for a given value.
  * @param theme
  * @param value

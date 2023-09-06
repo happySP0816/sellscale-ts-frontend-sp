@@ -16,6 +16,9 @@ import {
   Container,
   LoadingOverlay,
   Loader,
+  Flex,
+  Card,
+  Tooltip,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -55,6 +58,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
   const usingFirefox = navigator.userAgent.search("Firefox") >= 0;
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
+  const userData = useRecoilValue(userDataState);
 
   const [loadingConnection, setLoadingConnection] = useState(false);
   const [liProfile, setLiProfile] = useState<null | any>(null);
@@ -84,7 +88,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                 rightSection={
                   <ActionIcon
                     size="xs"
-                    color="blue"
+                    color="white"
                     radius="xl"
                     variant="transparent"
                     onClick={async () => {
@@ -142,77 +146,6 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                 With our browser extension you can sync and automate your
                 LinkedIn account directly with SellScale!
               </Text>
-              {/* 
-          <Stack pt="lg">
-
-            <LinkedInAuthOption
-              num={1}
-              time="~30 seconds"
-              text="Enter LinkedIn credentials"
-              button={
-                <Button
-                  variant="light"
-                  size="xs"
-                  rightIcon={<IconKey size="1rem" />}
-                  onClick={() => {
-                    openContextModal({
-                      modal: 'sendLinkedInCredentials',
-                      title: (<Title order={3}>LinkedIn Credentials</Title>),
-                      innerProps: {},
-                    });
-                  }}
-                >
-                  Enter credentials
-                </Button>
-              }
-            />
-
-            <LinkedInAuthOption
-              num={2}
-              time="~3 minutes"
-              text="Manually paste in Cookie"
-              button={
-                <Button
-                  variant="light"
-                  size="xs"
-                  rightIcon={<IconCookie size="1rem" />}
-                  onClick={() => {
-                    openContextModal({
-                      modal: 'sendLinkedInCookie',
-                      title: (<Title order={3}>Find Your LinkedIn Cookie</Title>),
-                      innerProps: {},
-                    });
-                  }}
-                >
-                  View instructions
-                </Button>
-              }
-            />
-
-            <LinkedInAuthOption
-              num={3}
-              time="~3 seconds"
-              text={`Install ${usingFirefox ? "Firefox" : "Chrome"} Extension`}
-              button={
-                <Button
-                  component="a"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={
-                    usingFirefox
-                      ? "https://addons.mozilla.org/en-US/firefox/addon/sellscale-browser-extension/"
-                      : "https://chrome.google.com/webstore/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa/"
-                  }
-                  variant="light"
-                  size="xs"
-                  rightIcon={<IconCloudDownload size="1rem" />}
-                >
-                  Install Extension
-                </Button>
-              }
-            />
-          </Stack>
-          */}
               <Center>
                 <Button
                   component="a"
@@ -242,53 +175,125 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
               </Center>
             )}
             {data && (
-              <Group noWrap spacing={10} align="flex-start" pt="xs">
-                <Avatar
-                  src={
-                    proxyURL(data.miniProfile.picture["com.linkedin.common.VectorImage"]
-                      .rootUrl +
-                    data.miniProfile.picture["com.linkedin.common.VectorImage"]
-                      .artifacts[2].fileIdentifyingUrlPathSegment)
-                  }
-                  size={94}
-                  radius="md"
-                />
-                <div>
-                  <Title order={3}>
-                    {data.miniProfile.firstName} {data.miniProfile.lastName}
-                  </Title>
+              <Card withBorder shadow="sm">
+                <Group noWrap spacing={10} align="flex-start" pt="xs">
+                  <Avatar
+                    src={
+                      proxyURL(data.miniProfile.picture["com.linkedin.common.VectorImage"]
+                        .rootUrl +
+                        data.miniProfile.picture["com.linkedin.common.VectorImage"]
+                          .artifacts[2].fileIdentifyingUrlPathSegment)
+                    }
+                    size={94}
+                    radius="md"
+                  />
+                  <div>
+                    <Title order={3}>
+                      {data.miniProfile.firstName} {data.miniProfile.lastName}
+                    </Title>
 
-                  <Group noWrap spacing={10} mt={3}>
-                    <IconBriefcase
-                      stroke={1.5}
-                      size={16}
-                      className={classes.icon}
-                    />
-                    <Text size="xs" color="dimmed">
-                      {data.miniProfile.occupation}
-                    </Text>
-                  </Group>
+                    <Group noWrap spacing={10} mt={3}>
+                      <IconBriefcase
+                        stroke={1.5}
+                        size={16}
+                        className={classes.icon}
+                      />
+                      <Text size="xs" color="dimmed">
+                        {data.miniProfile.occupation}
+                      </Text>
+                    </Group>
 
-                  <Group noWrap spacing={10} mt={5}>
-                    <IconSocial
-                      stroke={1.5}
-                      size={16}
-                      className={classes.icon}
-                    />
-                    <Text
-                      size="xs"
-                      color="dimmed"
-                      component="a"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={`https://www.linkedin.com/in/${data.miniProfile.publicIdentifier}`}
-                    >
-                      linkedin.com/in/{data.miniProfile.publicIdentifier}
-                    </Text>
-                  </Group>
-                </div>
-              </Group>
+                    <Group noWrap spacing={10} mt={5}>
+                      <IconSocial
+                        stroke={1.5}
+                        size={16}
+                        className={classes.icon}
+                      />
+                      <Text
+                        size="xs"
+                        color="dimmed"
+                        component="a"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`https://www.linkedin.com/in/${data.miniProfile.publicIdentifier}`}
+                      >
+                        linkedin.com/in/{data.miniProfile.publicIdentifier}
+                      </Text>
+                    </Group>
+                  </div>
+                </Group>
+              </Card>
             )}
+            <Flex mt='lg' direction='column'>
+              <Flex align='center'>
+                <Title order={3}>
+                  Warming Status:
+                </Title>
+                <Flex ml='md'>
+                  {
+                    userData.warmup_linkedin_status ? (
+                      <Tooltip label="Your LinkedIn account is sending at full capacity!" withArrow withinPortal>
+                        <Badge size='lg' color='green'>
+                          Fully Warm
+                        </Badge>
+                      </Tooltip>
+                    ) : (
+                      <Tooltip label='Your LinkedIn account is still being warmed up' withArrow withinPortal>
+                        <Badge size='lg' color='orange'>
+                          Warming Up
+                        </Badge>
+                      </Tooltip>
+                    )
+                  }
+                </Flex>
+              </Flex>
+              <Text mt='xs'>In order to protect your LinkedIn, our AI follows a set of outbound heuristics specific to your account. This enables us to slowly "warm up" your LinkedIn account before sending full volume outbound.</Text>
+              <Text mt='xs'>The following is your "warm up" schedule, if you would like to make adjustments, please contact a SellScale team member:</Text>
+              <Text mt='md'>
+                <ul>
+                  <Flex>
+                    <Text fw='bold' w='150px'>Week 0:</Text>
+                    <Text>
+                      {userData.warmup_linkedin_schedule?.week_0_sla || 5} connections
+                    </Text>
+                  </Flex>
+                </ul>
+                <ul>
+                  <Flex>
+                  <Text fw='bold' w='150px'>Week 1:</Text>
+                    <Text>
+                      {userData.warmup_linkedin_schedule?.week_1_sla || 25} connections
+                    </Text>
+                  </Flex>
+                </ul>
+                <ul>
+                  <Flex>
+                  <Text fw='bold' w='150px'>Week 2:</Text>
+                    <Text>
+                      {userData.warmup_linkedin_schedule?.week_2_sla || 50} connections
+                    </Text>
+                  </Flex>
+                </ul>
+                <ul>
+                  <Flex>
+                  <Text fw='bold' w='150px'>Week 3:</Text>
+                    <Text>
+                      {userData.warmup_linkedin_schedule?.week_3_sla || 75} connections
+                    </Text>
+                  </Flex>
+                </ul>
+                <ul>
+                  <Flex>
+                  <Text fw='bold' w='150px'>Week 4:</Text>
+                    <Text>
+                      {userData.warmup_linkedin_schedule?.week_4_sla || 90} connections
+                    </Text>
+                  </Flex>
+                </ul>
+
+
+              </Text>
+            </Flex>
           </div>
         )}
       </Stack>

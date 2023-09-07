@@ -1,3 +1,4 @@
+// @ts-nocheck
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import CurrentSequences from "@common/persona/CurrentSequences";
 import EmailOutboundProgram from "@common/persona/EmailOutboundProgram";

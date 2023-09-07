@@ -57,7 +57,6 @@ const personaCreationState = atom({
         total_prospects: -1,
       },
       transformer_blocklist: null,
-      vessel_sequence_id: -1,
       uploads: [],
       icp_matching_prompt: '',
       is_unassigned_contact_archetype: false,

@@ -18,5 +18,6 @@
     "jsx": "react-jsx"
   },
   "include": ["src"],
+  "exclude": ["legacy_code"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -8,7 +8,6 @@ import RecActionsSection from "@pages/DashboardPage";
 import RecentActivitySection from "@common/home/RecentActivitySection";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import PersonaDetailsTransformers from "@common/persona/details/PersonaDetailsTransformers";
-import SequenceSection from "@common/sequence/SequenceSection";
 import { Tabs } from "@mantine/core";
 import { IconAdjustments, IconAffiliate, IconClipboardData, IconHistory, IconListDetails, IconMailFast, IconReport, IconWall } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
@@ -53,9 +52,6 @@ export default function EmailPage() {
           <CampaignTable type="EMAIL" />
         </Tabs.Panel>
 
-        {/* <Tabs.Panel value="sequences" pt="xs">
-          <SequenceSection />
-        </Tabs.Panel> */}
         {/* <Tabs.Panel value="personalizations" pt="xs">
           <PersonaDetailsTransformers channel="EMAIL" />
         </Tabs.Panel> */}

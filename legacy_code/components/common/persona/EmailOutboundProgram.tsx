@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { userTokenState } from "@atoms/userAtoms";
 import FlexSeparate from "@common/library/FlexSeparate";
 import {

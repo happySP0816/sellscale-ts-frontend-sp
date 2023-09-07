@@ -35,16 +35,16 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
   const [loadingProspects, setLoadingProspects] = useState<boolean>(false);
   const [lastTimeRun, setLastTimeRun] = useState<number>(0);
   const [searchingProspects, setSearchingProspects] = useState<boolean>(false);
-  const [fetchedProspects, setFetchedProspects] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const searchProspects = async (search: string = ' ') => {
+  const searchProspects = async () => {
     if (lastTimeRun > Date.now() - 1000) {
       console.log('Skipping search');
       return;
     }
     setSearchingProspects(true);
     setLastTimeRun(Date.now());
-    const result = await getArchetypeProspects(userToken, props.personaId, search);
+    const result = await getArchetypeProspects(userToken, props.personaId, searchQuery);
       if (result.status === 'success') {
         const prospects = result.data as ProspectShallow[];
           prospects.sort((a, b) => {
@@ -61,13 +61,10 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
   
 
   useEffect(() => {
-    if (!fetchedProspects) {
-      setLoadingProspects(true);
-      searchProspects().then(res => {
-        setLoadingProspects(false);
-      })
-      setFetchedProspects(true);
-    }
+    setLoadingProspects(true);
+    searchProspects().then(res => {
+      setLoadingProspects(false);
+    })  
   }, []);
 
   const ProspectSelectItem = forwardRef<HTMLDivElement, ProspectItemProps>(
@@ -116,11 +113,11 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
       })}
       onInput={
         (e: any) => {
-          searchProspects(e.target.value);
+          setSearchQuery(e.target.value);
+          searchProspects();
         }
       }
       onChange={(value: string) => {
-        searchProspects(value);
         if (!value) {
           setSelectedProspect(undefined);
           props.onChange(undefined);

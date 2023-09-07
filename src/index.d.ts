@@ -414,6 +414,8 @@ export type SalesNavigatorLaunch = {
   result_available: boolean,
   launch_date: Date,
   name: string,
+  client_archetype_id: number,
+  archetype: string,
 }
 
 export type EmailStore = {

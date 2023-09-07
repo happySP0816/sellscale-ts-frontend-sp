@@ -9,6 +9,7 @@ import {
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import CreatePersona from "@common/persona/CreatePersona";
 import LinkedInURLUpload from "@modals/upload-prospects/LinkedInURLUpload";
+import SalesNavigatorComponent from '@pages/SalesNavigatorPage';
 
 export default function PersonaUploadDrawer(props: {
   personaOverviews: PersonaOverview[] | undefined;
@@ -41,6 +42,7 @@ export default function PersonaUploadDrawer(props: {
         <Tabs.List>
           <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
           <Tabs.Tab value="from-link">Import One Prospect</Tabs.Tab>
+          <Tabs.Tab value="from-sales-nav">Import From Sales Nav</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="from-file" pt="xs">
           <FileDropAndPreview
@@ -51,6 +53,11 @@ export default function PersonaUploadDrawer(props: {
         <Tabs.Panel value="from-link" pt="xs">
           <Flex w='100%' my='md'>
             <LinkedInURLUpload afterUpload={props.afterUpload}/>
+          </Flex>
+        </Tabs.Panel>
+        <Tabs.Panel value="from-sales-nav" pt="xs">
+          <Flex w='100%' my='md'>
+            <SalesNavigatorComponent showPersonaSelect />
           </Flex>
         </Tabs.Panel>
         {/* <Tabs.Panel value="from-crm" pt="xs">

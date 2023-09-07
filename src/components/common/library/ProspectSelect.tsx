@@ -35,6 +35,7 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
   const [loadingProspects, setLoadingProspects] = useState<boolean>(false);
   const [lastTimeRun, setLastTimeRun] = useState<number>(0);
   const [searchingProspects, setSearchingProspects] = useState<boolean>(false);
+  const [fetchedProspects, setFetchedProspects] = useState<boolean>(false);
 
   const searchProspects = async (search: string = ' ') => {
     if (lastTimeRun > Date.now() - 1000) {
@@ -57,13 +58,16 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
       }
       setSearchingProspects(false);
   }
+  
 
   useEffect(() => {
-    (async () => {
+    if (!fetchedProspects) {
       setLoadingProspects(true);
-      await searchProspects()
-      setLoadingProspects(false);
-    })();
+      searchProspects().then(res => {
+        setLoadingProspects(false);
+      })
+      setFetchedProspects(true);
+    }
   }, []);
 
   const ProspectSelectItem = forwardRef<HTMLDivElement, ProspectItemProps>(
@@ -91,6 +95,7 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
   }
   
   return (
+    <>
     <Select
       mt='md'
       label='Select a prospect'
@@ -127,5 +132,6 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
       }}
       withinPortal
     />
+    </>
   );
 }

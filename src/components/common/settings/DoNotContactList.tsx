@@ -39,7 +39,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
 
   // Replace all newlines in pasted text with an escaped newline
   useEffect(() => {
-    addEventListener('paste', (event) => {
+    const modifiedPasteHandler = (event: any) => {
       event.preventDefault(); // Prevent default paste behavior
     
       // @ts-ignore
@@ -52,7 +52,12 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
     
       // Insert the modified content into the editable element
       document.execCommand('insertHTML', false, modifiedText);
-    });
+    }
+    addEventListener('paste', modifiedPasteHandler);
+
+    return () => {
+      removeEventListener('paste', modifiedPasteHandler);
+    }
   }, [])
 
   const getKeywords = async () => {

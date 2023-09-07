@@ -370,6 +370,8 @@ export default function SettingsPage() {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const defaultTab = tabId || "sellScaleBrain"
+  const [currentTab, setCurrentTab] = useState(defaultTab);
 
   useEffect(() => {
     const nylasCode = searchParams.get("code");
@@ -391,7 +393,7 @@ export default function SettingsPage() {
   return (
     <PageFrame>
       <PageTitle title="Settings" />
-      <Tabs defaultValue={tabId || "sellScaleBrain"} orientation="vertical">
+      <Tabs value={currentTab} orientation="vertical" onTabChange={setCurrentTab}>
         <Tabs.List>
           <Tabs.Tab value="sellScaleBrain" icon={<IconBrain size="0.8rem" />}>
             SellScale Brain
@@ -462,7 +464,7 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="doNotContact" pl="xs">
           <Group noWrap>
-            <DoNotContactFiltersPage />
+            {currentTab === 'doNotContact' && <DoNotContactFiltersPage />}
           </Group>
         </Tabs.Panel>
 

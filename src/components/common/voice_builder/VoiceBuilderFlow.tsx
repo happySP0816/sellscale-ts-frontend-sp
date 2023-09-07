@@ -511,15 +511,15 @@ export default function VoiceBuilderFlow(props: {
           look like.
         </Text>
         <Flex direction="row">
-          <Box sx={{ width: "80%" }}>
+          <Container sx={{ width: "80%" }}>
             <ProspectSelect
               onChange={(prospect) => {
                 setSimulationProspectId(prospect?.id);
               }}
               personaId={props.persona.id}
             />
-          </Box>
-          <Box pt="md">
+          </Container>
+          <Container pt="md">
             <Button
               color="grape"
               mt="xl"
@@ -531,7 +531,7 @@ export default function VoiceBuilderFlow(props: {
             >
               Generate
             </Button>
-          </Box>
+          </Container>
         </Flex>
         {generatedSimulationCompletion && (
           <Textarea

@@ -5,9 +5,12 @@ import React from 'react'
 import DoNotContactList from './DoNotContactList'
 
 export default function DoNotContactFiltersPage() {
+  const [selectedTab, setSelectedTab] = React.useState('sdr-dnc')
+
     return (
         <Tabs
-          defaultValue="sdr-dnc"
+          value={selectedTab}
+          onTabChange={(value) => setSelectedTab(value)}
         >
           <Tabs.List>
             <Tabs.Tab
@@ -25,7 +28,7 @@ export default function DoNotContactFiltersPage() {
           </Tabs.List>
 
           <Tabs.Panel value="sdr-dnc" pt="xs">
-           <DoNotContactList forSDR />
+           {selectedTab === 'sdr-dnc' && <DoNotContactList forSDR />}
           </Tabs.Panel>
 
           <Tabs.Panel value="company-dnc" pt="xs">
@@ -34,7 +37,7 @@ export default function DoNotContactFiltersPage() {
                     This is your entire organizations' Do Not Contact list. This will affect other users.
                 </Alert>
             </Card>
-            <DoNotContactList />
+            {selectedTab === 'company-dnc' && <DoNotContactList />}
           </Tabs.Panel>
         </Tabs>
     )

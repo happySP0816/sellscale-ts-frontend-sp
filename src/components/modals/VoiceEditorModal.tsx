@@ -434,15 +434,15 @@ export default function VoiceEditorModal({
           look like.
         </Text>
         <Flex direction="row">
-          <Box sx={{ width: "80%" }}>
+          <Container sx={{ width: "80%" }}>
             <ProspectSelect
               onChange={(prospect) => {
                 setSelectedProspectId(prospect?.id);
               }}
               personaId={innerProps.persona_id}
             />
-          </Box>
-          <Box pt="md">
+          </Container>
+          <Container pt="md">
             <Button
               color="grape"
               mt="xl"
@@ -453,7 +453,7 @@ export default function VoiceEditorModal({
             >
               Generate
             </Button>
-          </Box>
+          </Container>
         </Flex>
 
         {generatedSample && (

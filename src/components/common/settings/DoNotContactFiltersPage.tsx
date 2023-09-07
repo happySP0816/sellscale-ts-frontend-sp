@@ -10,7 +10,7 @@ export default function DoNotContactFiltersPage() {
     return (
         <Tabs
           value={selectedTab}
-          onTabChange={(value) => setSelectedTab(value)}
+          onTabChange={(value: any) => setSelectedTab(value)}
         >
           <Tabs.List>
             <Tabs.Tab

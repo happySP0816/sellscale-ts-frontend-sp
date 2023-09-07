@@ -393,7 +393,7 @@ export default function SettingsPage() {
   return (
     <PageFrame>
       <PageTitle title="Settings" />
-      <Tabs value={currentTab} orientation="vertical" onTabChange={setCurrentTab}>
+      <Tabs value={currentTab} orientation="vertical" onTabChange={(i: any) => setCurrentTab(i)}>
         <Tabs.List>
           <Tabs.Tab value="sellScaleBrain" icon={<IconBrain size="0.8rem" />}>
             SellScale Brain

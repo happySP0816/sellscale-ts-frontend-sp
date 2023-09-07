@@ -7,10 +7,10 @@ import { API_URL } from "@constants/data";
  * @param userToken 
  * @returns - MsgResponse
  */
-export default async function getSalesNavigatorLaunches(userToken: string): Promise<MsgResponse> {
+export default async function getSalesNavigatorLaunches(userToken: string, personaId?: number): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/automation/phantom_buster/sales_navigator/launch`,
+    `${API_URL}/automation/phantom_buster/sales_navigator/launch` + (personaId ? `?client_archetype_id=${personaId}` : ``),
     {
       method: "GET",
       headers: {

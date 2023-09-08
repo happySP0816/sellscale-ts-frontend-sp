@@ -5,7 +5,7 @@ import React from 'react'
 import DoNotContactList from './DoNotContactList'
 
 export default function DoNotContactFiltersPage() {
-  const [selectedTab, setSelectedTab] = React.useState('sdr-dnc')
+  const [selectedTab, setSelectedTab] = React.useState('company-dnc')
 
     return (
         <Tabs
@@ -14,16 +14,16 @@ export default function DoNotContactFiltersPage() {
         >
           <Tabs.List>
             <Tabs.Tab
-              value="sdr-dnc"
-              icon={<IconLifebuoy size="0.8rem" />}
-            >
-              SDR Filter
-            </Tabs.Tab>
-            <Tabs.Tab
               value="company-dnc"
               icon={<IconBuilding size="0.8rem" />}
             >
               Company-Wide Filter
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="sdr-dnc"
+              icon={<IconLifebuoy size="0.8rem" />}
+            >
+              SDR Filter
             </Tabs.Tab>
           </Tabs.List>
 

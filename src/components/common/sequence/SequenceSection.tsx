@@ -24,10 +24,10 @@ import {
   IconPencil,
   IconReload,
 } from "@tabler/icons-react";
-import { proxyURL, valueToColor, nameToInitials } from "@utils/general";
+import { proxyURL, valueToColor, nameToInitials, testDelay } from "@utils/general";
 import getLiProfile from "@utils/requests/getLiProfile";
 import _, { set } from "lodash";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 
 export default function SequenceSection() {
@@ -145,7 +145,7 @@ function IntroMessageSection() {
             REGENERATE
           </Button>
         </Group>
-        <LiExampleInvitation />
+        <LiExampleInvitation message="Once upon a time, in a small village nestled between rolling hills and dense forests, there lived a young girl named Eliza. She was known throughout the village for her boundless curiosity and adventurous spirit. Eliza's favorite place in the world was the forest that bordered her village. She spent her days exploring the woods, discovering hidden streams, and befriending the creatures that called it home." />
         <Group mt='sm' position="apart">
           <Group spacing={5}>
           <Button size='xs'>Edit CTAs</Button>
@@ -158,13 +158,13 @@ function IntroMessageSection() {
   );
 }
 
-function LiExampleInvitation() {
+function LiExampleInvitation(props: { message: string }) {
   const MAX_MESSAGE_SHOW_LENGTH = 75;
 
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const [liSDR, setLiSDR] = useState<any>();
-  const [showFullMessage, setShowFullMessage] = useState(false);
+  const [showFullMessage, setShowFullMessage] = useState(true);
 
   const {hovered: startHovered, ref: startRef} = useHover();
   const {hovered: endHovered, ref: endRef} = useHover();
@@ -178,7 +178,27 @@ function LiExampleInvitation() {
     })();
   }, []);
 
-  console.log(liSDR);
+
+
+  // Animation for typing
+  const [curMessage, setCurMessage] = useState("");
+  const animationPlaying = useRef(false);
+  useEffect(() => {
+    if(animationPlaying.current) return;
+    setCurMessage("");
+    (async () => {
+      animationPlaying.current = true;
+      const orginalMessage = props.message.trim();
+      for(let i = 0; i < orginalMessage.length; i++) {
+        await testDelay(i === orginalMessage.length - 1 ? 300 : 2);
+        setCurMessage((prev) => {
+          return prev+orginalMessage[i];
+        });
+      }
+      animationPlaying.current = false;
+    })();
+  }, [liSDR]);
+
 
   // Get SDR data from LinkedIn 
   const imgURL =
@@ -191,8 +211,7 @@ function LiExampleInvitation() {
   const title = liSDR?.miniProfile.occupation;
 
   // Split message into start and CTA (and handle cut off)
-  let message = `Odio voluptatibus consequatur sed quam dolor ducimus. Ab incidunt consequuntur dolor et. Culpa maxime impedit adipisci ut libero neque est quas. Aut soluta doloremque ipsa et sapiente id. Eum esse excepturi doloremque laborum. Eius eveniet inventore fugit voluptatem. Molestiae dolore est repellat.`;
-  message = message.trim();
+  let message = props.message.trim();
   const sentences = message.split(/(?<=[.!?])\s+/gm);
 
   let endMessage = sentences[sentences.length - 1];
@@ -215,6 +234,22 @@ function LiExampleInvitation() {
   startMessage = startMessage.trim();
   cutEndMessage = cutEndMessage.trim();
   cutStartMessage = cutStartMessage.trim();
+
+  // Trim for animation playing
+  if(animationPlaying.current) {
+    if(curMessage.length > startMessage.length) {
+      endMessage = _.truncate(endMessage, {
+        length: curMessage.length - startMessage.length,
+        omission: '█',
+      });
+    } else {
+      startMessage = _.truncate(startMessage, {
+        length: curMessage.length,
+        omission: '█',
+      });
+      endMessage = '';
+    }
+  }
 
   return (
     <Box
@@ -252,7 +287,7 @@ function LiExampleInvitation() {
                 color="gray"
                 radius="xl"
                 sx={{
-                  cursor: "default",
+                  cursor: "not-allowed",
                 }}
               >
                 Ignore
@@ -262,7 +297,7 @@ function LiExampleInvitation() {
                 variant="outline"
                 radius="xl"
                 sx={{
-                  cursor: "default",
+                  cursor: "not-allowed",
                 }}
               >
                 Accept
@@ -284,25 +319,27 @@ function LiExampleInvitation() {
                 position: "absolute",
                 top: 5,
                 right: 5,
-                cursor: "default",
+                cursor: "not-allowed",
               }}
               radius="xl"
             >
               <IconDots size="1.125rem" />
             </ActionIcon>
             <Box>
-              {showFullMessage ? (
+              {showFullMessage || animationPlaying.current ? (
                 <Text fz="xs">
                   <Text ref={startRef} span
                     sx={{
-                      color: startHovered ? theme.colors.green[8] : undefined,
-                      backgroundColor: startHovered ? theme.colors.green[0] : undefined,
+                      color: startHovered || animationPlaying.current ? theme.colors.green[8] : undefined,
+                      backgroundColor: startHovered || animationPlaying.current ? theme.colors.green[0] : undefined,
+                      cursor: 'pointer',
                     }}
                   >{startMessage}</Text>
                   <Text ref={endRef} ml={5} span
                     sx={{
-                      color: endHovered ? theme.colors.blue[8] : undefined,
-                      backgroundColor: endHovered ? theme.colors.blue[0] : undefined,
+                      color: endHovered || animationPlaying.current ? theme.colors.blue[8] : undefined,
+                      backgroundColor: endHovered || animationPlaying.current ? theme.colors.blue[0] : undefined,
+                      cursor: 'pointer',
                     }}
                   >{endMessage}</Text>
                   <Text
@@ -324,12 +361,14 @@ function LiExampleInvitation() {
                     sx={{
                       color: startHovered ? theme.colors.green[8] : undefined,
                       backgroundColor: startHovered ? theme.colors.green[0] : undefined,
+                      cursor: 'pointer',
                     }}
                   >{cutStartMessage}</Text>
                   <Text ref={endRef} ml={5} span
                     sx={{
                       color: endHovered ? theme.colors.blue[8] : undefined,
                       backgroundColor: endHovered ? theme.colors.blue[0] : undefined,
+                      cursor: 'pointer',
                     }}
                   >{cutEndMessage}</Text>
                   <Text
@@ -353,7 +392,7 @@ function LiExampleInvitation() {
               color="gray"
               radius="xl"
               sx={{
-                cursor: "default",
+                cursor: "not-allowed",
               }}
               ml={-8}
               compact

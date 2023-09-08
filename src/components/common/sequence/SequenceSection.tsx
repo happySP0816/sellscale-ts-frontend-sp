@@ -1,5 +1,5 @@
 import { currentProjectState } from "@atoms/personaAtoms";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import ProspectSelect from "@common/library/ProspectSelect";
 import { API_URL } from "@constants/data";
 import { ex } from "@fullcalendar/core/internal-common";
@@ -132,6 +132,7 @@ function IntroMessageSection() {
   const [prospectId, setProspectId] = useState<number>();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [prospectsLoading, setProspectsLoading] = useState(true);
 
   let { hovered: startHovered, ref: startRef } = useHover();
   let { hovered: endHovered, ref: endRef } = useHover();
@@ -214,6 +215,10 @@ function IntroMessageSection() {
               setProspectId(prospect.id);
             }
           }}
+          onFinishLoading={() => {
+            setProspectsLoading(false);
+          }}
+          autoSelect
         />
       </Group>
       <Box my={5}>
@@ -223,7 +228,7 @@ function IntroMessageSection() {
         </Text>
       </Box>
       <Stack pt={20} spacing={5} sx={{ position: "relative" }}>
-        <LoadingOverlay visible={loading} />
+        <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
         <Group position="apart">
           <Text fz="sm" fw={500} c="dimmed">
             EXAMPLE MESSAGE:
@@ -232,6 +237,15 @@ function IntroMessageSection() {
             size="xs"
             variant="light"
             leftIcon={<IconReload size="1.1rem" />}
+            onClick={() => {
+              if (prospectId) {
+                getIntroMessage(prospectId).then((msg) => {
+                  if (msg) {
+                    setMessage(msg);
+                  }
+                });
+              }
+            }}
           >
             REGENERATE
           </Button>
@@ -296,6 +310,7 @@ function LiExampleInvitation(props: {
 
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
   const [liSDR, setLiSDR] = useState<any>();
   const [showFullMessage, setShowFullMessage] = useState(true);
 
@@ -331,17 +346,17 @@ function LiExampleInvitation(props: {
       }
       animationPlaying.current = false;
     })();
-  }, [liSDR]);
+  }, []);
 
   // Get SDR data from LinkedIn
-  const imgURL =
-    liSDR?.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-    liSDR?.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-      liSDR?.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+  const imgURL = liSDR ? 
+    (liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
+    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
         .length - 1
-    ].fileIdentifyingUrlPathSegment;
-  const name = liSDR?.miniProfile.firstName + " " + liSDR?.miniProfile.lastName;
-  const title = liSDR?.miniProfile.occupation;
+    ].fileIdentifyingUrlPathSegment) : userData.img_url;
+  const name = liSDR ? (liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName) : userData.sdr_name;
+  const title = liSDR ? (liSDR.miniProfile.occupation) : userData.sdr_title;
 
   // Split message into start and CTA (and handle cut off)
   let message = props.message.trim();

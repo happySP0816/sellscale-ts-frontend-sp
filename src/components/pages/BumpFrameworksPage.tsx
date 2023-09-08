@@ -43,6 +43,7 @@ import TextWithNewline from '@common/library/TextWithNewlines';
 import postToggleAutoBump from '@utils/requests/postToggleAutoBump';
 import PersonaDetailsCTAs from '@common/persona/details/PersonaDetailsCTAs';
 import VoicesSection from '@common/voice_builder/VoicesSection';
+import SequenceSection from '@common/sequence/SequenceSection';
 
 
 type BumpFrameworkBuckets = {
@@ -680,7 +681,7 @@ export default function BumpFrameworksPage(props: {
         </Flex>
 
         <Flex direction={'row'}>
-          <Card withBorder w={collapseSimulation ? '85%' : '60%'}>
+          <Box w={'100%'}>
             <Tabs color='blue' variant='outline' defaultValue='sequence' my='lg' orientation='horizontal'>
               <Tabs.List>
                 {/* <Tabs.Tab value='ctas' icon={<IconList size='0.8rem' />}>
@@ -703,135 +704,7 @@ export default function BumpFrameworksPage(props: {
 
               <Tabs.Panel value='sequence' pt='xs'>
                 {!loading ? (
-                  <ScrollArea>
-                    <Flex direction='column' ml='md'>
-                      <Card mb='md' withBorder>
-                        <Card.Section p='md'>
-                          <Flex align='center'>
-                            <Title order={5}>Connection Request</Title>
-                            <Text fz='xs' ml='sm'>
-                              300 Character Linkedin Invite
-                            </Text>
-                          </Flex>
-                        </Card.Section>
-                        <Card.Section mb='md'>
-                          <Divider />
-                        </Card.Section>
-
-                        <Accordion defaultValue="">
-                          <Accordion.Item value="ctas">
-                            <Accordion.Control>
-                              <Flex align='left' >
-                                <Container>
-                                  <IconChecklist size='2rem' />
-                                </Container>
-                                <Container w='80%'>
-                                  <Text fw='600'>Set Call-To-Actions</Text>
-                                  <Text size='xs'>These are the last 120 characters of your LinkedIn connection message.</Text>
-                                  <Badge color={numActiveCTAs == 0 ? 'red' : 'green'} mt='xs'>
-                                    {numActiveCTAs} CTAs active
-                                  </Badge>
-                                </Container>
-                              </Flex>
-                            </Accordion.Control>
-                            <Accordion.Panel>
-                                <PersonaDetailsCTAs onCTAsLoaded={(data) => setNumActiveCTAs(data.filter((x: any) => x.active).length)} />
-                            </Accordion.Panel>
-                          </Accordion.Item>
-
-                          <Accordion.Item value="voices">
-                            <Accordion.Control>
-                              <Flex align='left' >
-                                <Container>
-                                  <IconChartBubble size='2rem' />
-                                </Container>
-                                <Container  w='80%'>
-                                  <Text fw='600'>Voice (optional)</Text>
-                                  <Text size='xs'>Create 4-6 sample messages for the AI to learn from else the AI will use the default voice</Text>
-                                </Container>
-                              </Flex>
-                            </Accordion.Control>
-                            <Accordion.Panel pt='sm'>
-                              <VoicesSection />
-
-                            </Accordion.Panel>
-                          </Accordion.Item>
-                        </Accordion>
-                        
-                      </Card>
-
-                      <Divider label='After prospect accepts invite' labelPosition='center' mt='md' mb='md' />
-
-                      {/* Accepted */}
-                      <BumpBucketView
-                        bumpBucket={bumpBuckets.current?.ACCEPTED}
-                        bucketViewTitle={'LinkedIn DM #1'}
-                        bucketViewDescription={'If no reply from prospect.'}
-                        status={'ACCEPTED'}
-                        dataChannels={dataChannels}
-                        archetypeID={archetypeID}
-                        afterCreate={triggerGetBumpFrameworks}
-                        afterEdit={triggerGetBumpFrameworks}
-                        afterClone={triggerGetBumpFrameworks}
-                      />
-
-                      {/* Bumped (map) */}
-                      {Object.keys(bumpBuckets.current?.BUMPED).map((bumpCount) => {
-                        const bumpCountInt = parseInt(bumpCount);
-                        const bumpBucket = bumpBuckets.current?.BUMPED[bumpCountInt];
-
-                        const bumpToFollowupMap: Record<string, string> = {
-                          '1': '2',
-                          '2': '3',
-                          '3': '4',
-                          '4': '5',
-                          '5': '6',
-                        }
-                        const followupString = bumpToFollowupMap[bumpCount];
-                        if (followupString == undefined) {
-                          return;
-                        }
-                        return (
-                          <Flex mt='md' w='100%'>
-                            <BumpBucketView
-                              bumpBucket={bumpBucket}
-                              bucketViewTitle={`LinkedIn DM #${followupString}`}
-                              bucketViewDescription={`If no reply from prospect.`}
-                              status={'BUMPED'}
-                              dataChannels={dataChannels}
-                              archetypeID={archetypeID}
-                              afterCreate={triggerGetBumpFrameworks}
-                              afterEdit={triggerGetBumpFrameworks}
-                              bumpedCount={bumpCountInt}
-                              afterClone={triggerGetBumpFrameworks}
-                            />
-                          </Flex>
-                        );
-                      })}
-
-                      {/* Add another to sequence */}
-                      {/* <Flex justify='center' align='center' w='100%' direction="column">
-                              <Button variant='outline' mt='md' w='50%' onClick={openSequenceStep} disabled={maximumBumpSoftLock}>
-                                Add another sequence step
-                              </Button>
-                              {maximumBumpSoftLock && (
-                                <Text color='grey' fz='sm'>
-                                  We strongly recommend no more than 4 followups.
-                                </Text>
-                              )}
-                              <CreateBumpFrameworkModal
-                                modalOpened={addNewSequenceStepOpened}
-                                openModal={openSequenceStep}
-                                closeModal={closeSequenceStep}
-                                backFunction={triggerGetBumpFrameworks}
-                                dataChannels={dataChannels}
-                                status={'BUMPED'}
-                                archetypeID={archetypeID}
-                                bumpedCount={Object.keys(bumpBuckets.current?.BUMPED).length + 1}
-                              />
-                            </Flex> */}
-                    </Flex>
-                  </ScrollArea>
+                  <SequenceSection />
                 ) : (
                   <Flex justify='center' mt='xl'>
                     <Loader />
@@ -935,8 +808,8 @@ export default function BumpFrameworksPage(props: {
                 }
               </Tabs.Panel>
             </Tabs>
-          </Card>
-          <Card withBorder ml='xs' w={collapseSimulation ? '15%' : '40%'}>
+          </Box>
+          {/* <Card withBorder ml='xs' w={collapseSimulation ? '15%' : '40%'}>
             {
               !collapseSimulation ?
                 <Button variant='outline' size='xs' color='gray' mb='xs' rightIcon={<IconArrowRight />} onClick={() => { setCollapseSimulator(!collapseSimulation) }}>Hide</Button> :
@@ -959,10 +832,125 @@ export default function BumpFrameworksPage(props: {
               } sequenceSetUpMode={true} />
             </Container>
 
-          </Card>
+          </Card> */}
         </Flex>
 
       </Flex>
     </>
   );
 }
+
+
+/*
+
+
+ <ScrollArea>
+                    <Flex direction='column' ml='md'>
+                      <Card mb='md' withBorder>
+                        <Card.Section p='md'>
+                          <Flex align='center'>
+                            <Title order={5}>Connection Request</Title>
+                            <Text fz='xs' ml='sm'>
+                              300 Character Linkedin Invite
+                            </Text>
+                          </Flex>
+                        </Card.Section>
+                        <Card.Section mb='md'>
+                          <Divider />
+                        </Card.Section>
+
+                        <Accordion defaultValue="">
+                          <Accordion.Item value="ctas">
+                            <Accordion.Control>
+                              <Flex align='left' >
+                                <Container>
+                                  <IconChecklist size='2rem' />
+                                </Container>
+                                <Container w='80%'>
+                                  <Text fw='600'>Set Call-To-Actions</Text>
+                                  <Text size='xs'>These are the last 120 characters of your LinkedIn connection message.</Text>
+                                  <Badge color={numActiveCTAs == 0 ? 'red' : 'green'} mt='xs'>
+                                    {numActiveCTAs} CTAs active
+                                  </Badge>
+                                </Container>
+                              </Flex>
+                            </Accordion.Control>
+                            <Accordion.Panel>
+                                <PersonaDetailsCTAs onCTAsLoaded={(data) => setNumActiveCTAs(data.filter((x: any) => x.active).length)} />
+                            </Accordion.Panel>
+                          </Accordion.Item>
+
+                          <Accordion.Item value="voices">
+                            <Accordion.Control>
+                              <Flex align='left' >
+                                <Container>
+                                  <IconChartBubble size='2rem' />
+                                </Container>
+                                <Container  w='80%'>
+                                  <Text fw='600'>Voice (optional)</Text>
+                                  <Text size='xs'>Create 4-6 sample messages for the AI to learn from else the AI will use the default voice</Text>
+                                </Container>
+                              </Flex>
+                            </Accordion.Control>
+                            <Accordion.Panel pt='sm'>
+                              <VoicesSection />
+
+                            </Accordion.Panel>
+                          </Accordion.Item>
+                        </Accordion>
+                        
+                      </Card>
+
+                      <Divider label='After prospect accepts invite' labelPosition='center' mt='md' mb='md' />
+
+                      
+                      <BumpBucketView
+                        bumpBucket={bumpBuckets.current?.ACCEPTED}
+                        bucketViewTitle={'LinkedIn DM #1'}
+                        bucketViewDescription={'If no reply from prospect.'}
+                        status={'ACCEPTED'}
+                        dataChannels={dataChannels}
+                        archetypeID={archetypeID}
+                        afterCreate={triggerGetBumpFrameworks}
+                        afterEdit={triggerGetBumpFrameworks}
+                        afterClone={triggerGetBumpFrameworks}
+                      />
+
+                      
+                      {Object.keys(bumpBuckets.current?.BUMPED).map((bumpCount) => {
+                        const bumpCountInt = parseInt(bumpCount);
+                        const bumpBucket = bumpBuckets.current?.BUMPED[bumpCountInt];
+
+                        const bumpToFollowupMap: Record<string, string> = {
+                          '1': '2',
+                          '2': '3',
+                          '3': '4',
+                          '4': '5',
+                          '5': '6',
+                        }
+                        const followupString = bumpToFollowupMap[bumpCount];
+                        if (followupString == undefined) {
+                          return;
+                        }
+                        return (
+                          <Flex mt='md' w='100%'>
+                            <BumpBucketView
+                              bumpBucket={bumpBucket}
+                              bucketViewTitle={`LinkedIn DM #${followupString}`}
+                              bucketViewDescription={`If no reply from prospect.`}
+                              status={'BUMPED'}
+                              dataChannels={dataChannels}
+                              archetypeID={archetypeID}
+                              afterCreate={triggerGetBumpFrameworks}
+                              afterEdit={triggerGetBumpFrameworks}
+                              bumpedCount={bumpCountInt}
+                              afterClone={triggerGetBumpFrameworks}
+                            />
+                          </Flex>
+                        );
+                      })}}
+                    </Flex>
+                  </ScrollArea>
+
+
+*/

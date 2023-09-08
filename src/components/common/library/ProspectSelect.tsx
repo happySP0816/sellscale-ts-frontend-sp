@@ -1,5 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { createStyles, useMantineTheme, Text, Flex, Badge, Select, Loader, Card } from "@mantine/core";
+import { createStyles, useMantineTheme, Text, Flex, Badge, Select, Loader, Card, Box, LoadingOverlay } from "@mantine/core";
 import { valueToColor } from "@utils/general";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
 import { last } from 'lodash';
@@ -87,16 +87,13 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
     )
   );
   
-  if (loadingProspects) {
-    return <Card><Loader m='auto 0%' /></Card>;
-  }
-  
   return (
-    <>
+    <Box sx={{ position: 'relative' }}>
+      <LoadingOverlay visible={loadingProspects} loaderProps={{
+        size: 'xs',
+      }} />
     <Select
-      mt='md'
-      label='Select a prospect'
-      placeholder='Pick one'
+      placeholder='Select Prospect'
       itemComponent={ProspectSelectItem}
       searchable
       clearable
@@ -129,6 +126,6 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
       }}
       withinPortal
     />
-    </>
+    </Box>
   );
 }

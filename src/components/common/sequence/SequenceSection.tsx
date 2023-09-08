@@ -2,6 +2,7 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import ProspectSelect from "@common/library/ProspectSelect";
 import { API_URL } from "@constants/data";
+import { ex } from "@fullcalendar/core/internal-common";
 import {
   Group,
   Box,
@@ -16,6 +17,7 @@ import {
   Button,
   Avatar,
   useMantineTheme,
+  LoadingOverlay,
 } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import {
@@ -24,8 +26,18 @@ import {
   IconPencil,
   IconReload,
 } from "@tabler/icons-react";
-import { proxyURL, valueToColor, nameToInitials, testDelay } from "@utils/general";
+import {
+  proxyURL,
+  valueToColor,
+  nameToInitials,
+  testDelay,
+} from "@utils/general";
 import getLiProfile from "@utils/requests/getLiProfile";
+import {
+  createLiConvoSim,
+  generateInitialMessageForLiConvoSim,
+  getLiConvoSim,
+} from "@utils/requests/linkedinConvoSimulation";
 import _, { set } from "lodash";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -114,7 +126,78 @@ export default function SequenceSection() {
 }
 
 function IntroMessageSection() {
+  const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
+
+  const [prospectId, setProspectId] = useState<number>();
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  let { hovered: startHovered, ref: startRef } = useHover();
+  let { hovered: endHovered, ref: endRef } = useHover();
+
+  const openPersonalizationSettings = () => {};
+  const openCTASettings = () => {};
+
+  const getIntroMessage = async (prospectId: number) => {
+    if (!currentProject) return null;
+    setLoading(true);
+    setMessage("");
+
+    let convoResponse = await getLiConvoSim(userToken, undefined, prospectId);
+    if (convoResponse.status !== "success") {
+      // If convo doesn't exist, create it
+      const createResponse = await createLiConvoSim(
+        userToken,
+        currentProject.id,
+        prospectId
+      );
+      if (createResponse.status !== "success") {
+        setLoading(false);
+        return null;
+      }
+      const initMsgResponse = await generateInitialMessageForLiConvoSim(
+        userToken,
+        createResponse.data
+      );
+      if (initMsgResponse.status !== "success") {
+        setLoading(false);
+        return null;
+      }
+      convoResponse = await getLiConvoSim(userToken, createResponse.data);
+    } else if (convoResponse.data.messages.length === 0) {
+      // If convo exists but no messages, generate initial message
+      const initMsgResponse = await generateInitialMessageForLiConvoSim(
+        userToken,
+        convoResponse.data.simulation.id
+      );
+      if (initMsgResponse.status !== "success") {
+        setLoading(false);
+        return null;
+      }
+      convoResponse = await getLiConvoSim(
+        userToken,
+        convoResponse.data.simulation.id
+      );
+    }
+
+    setLoading(false);
+    try {
+      return convoResponse.data.messages[0].message;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // When prospect changes, get the intro message
+  useEffect(() => {
+    if (!prospectId) return;
+    getIntroMessage(prospectId).then((msg) => {
+      if (msg) {
+        setMessage(msg);
+      }
+    });
+  }, [prospectId]);
 
   if (!currentProject) return <></>;
   return (
@@ -124,7 +207,14 @@ function IntroMessageSection() {
           <Title order={3}>Intro Message</Title>
           <Badge color="green">4 CTAs Active</Badge>
         </Group>
-        <ProspectSelect personaId={currentProject.id} onChange={() => {}} />
+        <ProspectSelect
+          personaId={currentProject.id}
+          onChange={(prospect) => {
+            if (prospect) {
+              setProspectId(prospect.id);
+            }
+          }}
+        />
       </Group>
       <Box my={5}>
         <Text fz="xs" c="dimmed">
@@ -132,7 +222,8 @@ function IntroMessageSection() {
           character limit.
         </Text>
       </Box>
-      <Stack pt={20} spacing={5}>
+      <Stack pt={20} spacing={5} sx={{ position: "relative" }}>
+        <LoadingOverlay visible={loading} />
         <Group position="apart">
           <Text fz="sm" fw={500} c="dimmed">
             EXAMPLE MESSAGE:
@@ -145,20 +236,62 @@ function IntroMessageSection() {
             REGENERATE
           </Button>
         </Group>
-        <LiExampleInvitation message="Once upon a time, in a small village nestled between rolling hills and dense forests, there lived a young girl named Eliza. She was known throughout the village for her boundless curiosity and adventurous spirit. Eliza's favorite place in the world was the forest that bordered her village. She spent her days exploring the woods, discovering hidden streams, and befriending the creatures that called it home." />
-        <Group mt='sm' position="apart">
+        <Box
+          sx={{
+            border: "1px dashed #339af0",
+            borderRadius: "0.5rem",
+          }}
+          p="sm"
+          h={250}
+        >
+          {message && (
+            <LiExampleInvitation
+              message={message}
+              startHovered={startHovered ? true : undefined}
+              endHovered={endHovered ? true : undefined}
+              onClickStart={openPersonalizationSettings}
+              onClickEnd={openCTASettings}
+            />
+          )}
+        </Box>
+        <Group mt="sm" position="apart">
           <Group spacing={5}>
-          <Button size='xs'>Edit CTAs</Button>
-          <Button color='green' variant="outline" size='xs'>Edit Personalization Settings</Button>
+            <Box>
+              <Box ref={startRef}>
+                <Button
+                  color="green"
+                  variant="outline"
+                  size="xs"
+                  onClick={openPersonalizationSettings}
+                >
+                  Edit Personalization Settings
+                </Button>
+              </Box>
+            </Box>
+            <Box>
+              <Box ref={endRef}>
+                <Button variant="outline" size="xs" onClick={openCTASettings}>
+                  Edit CTAs
+                </Button>
+              </Box>
+            </Box>
           </Group>
-          <Button radius='xl' size='xs'>Train Your AI</Button>
+          <Button radius="xl" size="xs">
+            Train Your AI
+          </Button>
         </Group>
       </Stack>
     </Stack>
   );
 }
 
-function LiExampleInvitation(props: { message: string }) {
+function LiExampleInvitation(props: {
+  message: string;
+  startHovered?: boolean;
+  endHovered?: boolean;
+  onClickStart?: () => void;
+  onClickEnd?: () => void;
+}) {
   const MAX_MESSAGE_SHOW_LENGTH = 75;
 
   const theme = useMantineTheme();
@@ -166,8 +299,11 @@ function LiExampleInvitation(props: { message: string }) {
   const [liSDR, setLiSDR] = useState<any>();
   const [showFullMessage, setShowFullMessage] = useState(true);
 
-  const {hovered: startHovered, ref: startRef} = useHover();
-  const {hovered: endHovered, ref: endRef} = useHover();
+  let { hovered: _startHovered, ref: startRef } = useHover();
+  let { hovered: _endHovered, ref: endRef } = useHover();
+
+  const startHovered = props.startHovered ?? _startHovered;
+  const endHovered = props.endHovered ?? _endHovered;
 
   useEffect(() => {
     (async () => {
@@ -178,29 +314,26 @@ function LiExampleInvitation(props: { message: string }) {
     })();
   }, []);
 
-
-
   // Animation for typing
   const [curMessage, setCurMessage] = useState("");
   const animationPlaying = useRef(false);
   useEffect(() => {
-    if(animationPlaying.current) return;
+    if (animationPlaying.current) return;
     setCurMessage("");
     (async () => {
       animationPlaying.current = true;
       const orginalMessage = props.message.trim();
-      for(let i = 0; i < orginalMessage.length; i++) {
+      for (let i = 0; i < orginalMessage.length; i++) {
         await testDelay(i === orginalMessage.length - 1 ? 300 : 2);
         setCurMessage((prev) => {
-          return prev+orginalMessage[i];
+          return prev + orginalMessage[i];
         });
       }
       animationPlaying.current = false;
     })();
   }, [liSDR]);
 
-
-  // Get SDR data from LinkedIn 
+  // Get SDR data from LinkedIn
   const imgURL =
     liSDR?.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
     liSDR?.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
@@ -236,156 +369,43 @@ function LiExampleInvitation(props: { message: string }) {
   cutStartMessage = cutStartMessage.trim();
 
   // Trim for animation playing
-  if(animationPlaying.current) {
-    if(curMessage.length > startMessage.length) {
+  if (animationPlaying.current) {
+    if (curMessage.length > startMessage.length) {
       endMessage = _.truncate(endMessage, {
         length: curMessage.length - startMessage.length,
-        omission: '█',
+        omission: "█",
       });
     } else {
       startMessage = _.truncate(startMessage, {
         length: curMessage.length,
-        omission: '█',
+        omission: "█",
       });
-      endMessage = '';
+      endMessage = "";
     }
   }
 
   return (
-    <Box
-      sx={{
-        border: "1px dashed #339af0",
-        borderRadius: "0.5rem",
-      }}
-      p="sm"
-      h={250}
-    >
-      <Group spacing={10} sx={{ alignItems: "flex-start" }} noWrap>
-        <Box w={55}>
-          <Avatar
-            src={proxyURL(imgURL)}
-            alt={`${name}'s Profile Picture`}
-            color={valueToColor(theme, name)}
-            radius="xl"
-            size="lg"
-          >
-            {nameToInitials(name)}
-          </Avatar>
-        </Box>
-        <Stack w="100%">
-          <Group position="apart" noWrap>
-            <Box>
-              <Text fw={550}>{name}</Text>
-              <Text fz="xs" c="dimmed" truncate>
-                {_.truncate(title, { length: 65 })}
-              </Text>
-            </Box>
-            <Group spacing={0}>
-              <Button
-                size="xs"
-                variant="subtle"
-                color="gray"
-                radius="xl"
-                sx={{
-                  cursor: "not-allowed",
-                }}
-              >
-                Ignore
-              </Button>
-              <Button
-                size="xs"
-                variant="outline"
-                radius="xl"
-                sx={{
-                  cursor: "not-allowed",
-                }}
-              >
-                Accept
-              </Button>
-            </Group>
-          </Group>
-          <Box
-            sx={{
-              border: "2px solid #e2e2e2",
-              borderRadius: "0.5rem",
-              position: "relative",
-            }}
-            px="sm"
-            pt="sm"
-            pb={5}
-          >
-            <ActionIcon
-              sx={{
-                position: "absolute",
-                top: 5,
-                right: 5,
-                cursor: "not-allowed",
-              }}
-              radius="xl"
-            >
-              <IconDots size="1.125rem" />
-            </ActionIcon>
-            <Box>
-              {showFullMessage || animationPlaying.current ? (
-                <Text fz="xs">
-                  <Text ref={startRef} span
-                    sx={{
-                      color: startHovered || animationPlaying.current ? theme.colors.green[8] : undefined,
-                      backgroundColor: startHovered || animationPlaying.current ? theme.colors.green[0] : undefined,
-                      cursor: 'pointer',
-                    }}
-                  >{startMessage}</Text>
-                  <Text ref={endRef} ml={5} span
-                    sx={{
-                      color: endHovered || animationPlaying.current ? theme.colors.blue[8] : undefined,
-                      backgroundColor: endHovered || animationPlaying.current ? theme.colors.blue[0] : undefined,
-                      cursor: 'pointer',
-                    }}
-                  >{endMessage}</Text>
-                  <Text
-                    ml={5}
-                    fw={600}
-                    onClick={() => setShowFullMessage(false)}
-                    sx={{
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                    span
-                  >
-                    See less
-                  </Text>
-                </Text>
-              ) : (
-                <Text fz="xs">
-                  <Text ref={startRef} span
-                    sx={{
-                      color: startHovered ? theme.colors.green[8] : undefined,
-                      backgroundColor: startHovered ? theme.colors.green[0] : undefined,
-                      cursor: 'pointer',
-                    }}
-                  >{cutStartMessage}</Text>
-                  <Text ref={endRef} ml={5} span
-                    sx={{
-                      color: endHovered ? theme.colors.blue[8] : undefined,
-                      backgroundColor: endHovered ? theme.colors.blue[0] : undefined,
-                      cursor: 'pointer',
-                    }}
-                  >{cutEndMessage}</Text>
-                  <Text
-                    ml={5}
-                    fw={600}
-                    onClick={() => setShowFullMessage(true)}
-                    sx={{
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                    span
-                  >
-                    See more
-                  </Text>
-                </Text>
-              )}
-            </Box>
+    <Group spacing={10} sx={{ alignItems: "flex-start" }} noWrap>
+      <Box w={55}>
+        <Avatar
+          src={proxyURL(imgURL)}
+          alt={`${name}'s Profile Picture`}
+          color={valueToColor(theme, name)}
+          radius="xl"
+          size="lg"
+        >
+          {nameToInitials(name)}
+        </Avatar>
+      </Box>
+      <Stack w="100%">
+        <Group position="apart" noWrap>
+          <Box>
+            <Text fw={550}>{name}</Text>
+            <Text fz="xs" c="dimmed" truncate>
+              {_.truncate(title, { length: 65 })}
+            </Text>
+          </Box>
+          <Group spacing={0} noWrap>
             <Button
               size="xs"
               variant="subtle"
@@ -394,15 +414,153 @@ function LiExampleInvitation(props: { message: string }) {
               sx={{
                 cursor: "not-allowed",
               }}
-              ml={-8}
-              compact
             >
-              Reply to {liSDR?.miniProfile.firstName}
+              Ignore
             </Button>
+            <Button
+              size="xs"
+              variant="outline"
+              radius="xl"
+              sx={{
+                cursor: "not-allowed",
+              }}
+            >
+              Accept
+            </Button>
+          </Group>
+        </Group>
+        <Box
+          sx={{
+            border: "2px solid #e2e2e2",
+            borderRadius: "0.5rem",
+            position: "relative",
+          }}
+          px="sm"
+          pt="sm"
+          pb={5}
+        >
+          <ActionIcon
+            sx={{
+              position: "absolute",
+              top: 5,
+              right: 5,
+              cursor: "not-allowed",
+            }}
+            radius="xl"
+          >
+            <IconDots size="1.125rem" />
+          </ActionIcon>
+          <Box>
+            {showFullMessage || animationPlaying.current ? (
+              <Text fz="xs">
+                <Text
+                  ref={startRef}
+                  span
+                  sx={{
+                    color:
+                      startHovered || animationPlaying.current
+                        ? theme.colors.green[8]
+                        : undefined,
+                    backgroundColor:
+                      startHovered || animationPlaying.current
+                        ? theme.colors.green[0]
+                        : undefined, //theme.colors.green[0]+"99",
+                    cursor: "pointer",
+                  }}
+                >
+                  {startMessage}
+                </Text>
+                <Text
+                  ref={endRef}
+                  ml={5}
+                  span
+                  sx={{
+                    color:
+                      endHovered || animationPlaying.current
+                        ? theme.colors.blue[8]
+                        : undefined,
+                    backgroundColor:
+                      endHovered || animationPlaying.current
+                        ? theme.colors.blue[0]
+                        : undefined, //theme.colors.blue[0]+"99",
+                    cursor: "pointer",
+                  }}
+                >
+                  {endMessage}
+                </Text>
+                <Text
+                  ml={5}
+                  fw={600}
+                  onClick={() => setShowFullMessage(false)}
+                  sx={{
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                  span
+                >
+                  See less
+                </Text>
+              </Text>
+            ) : (
+              <Text fz="xs">
+                <Text
+                  ref={startRef}
+                  span
+                  sx={{
+                    color: startHovered ? theme.colors.green[8] : undefined,
+                    backgroundColor: startHovered
+                      ? theme.colors.green[0]
+                      : undefined, //theme.colors.green[0]+"99",
+                    cursor: "pointer",
+                  }}
+                >
+                  {cutStartMessage}
+                </Text>
+                <Text
+                  ref={endRef}
+                  ml={5}
+                  span
+                  sx={{
+                    color: endHovered ? theme.colors.blue[8] : undefined,
+                    backgroundColor: endHovered
+                      ? theme.colors.blue[0]
+                      : undefined, //theme.colors.blue[0]+"99",
+                    cursor: "pointer",
+                  }}
+                >
+                  {cutEndMessage}
+                </Text>
+                <Text
+                  ml={5}
+                  fw={600}
+                  onClick={() => setShowFullMessage(true)}
+                  sx={{
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                  span
+                >
+                  See more
+                </Text>
+              </Text>
+            )}
           </Box>
-        </Stack>
-      </Group>
-    </Box>
+          <Button
+            size="xs"
+            variant="subtle"
+            color="gray"
+            radius="xl"
+            sx={{
+              cursor: "not-allowed",
+            }}
+            ml={-8}
+            compact
+          >
+            Reply to {liSDR?.miniProfile.firstName}
+          </Button>
+        </Box>
+      </Stack>
+    </Group>
   );
 }
 

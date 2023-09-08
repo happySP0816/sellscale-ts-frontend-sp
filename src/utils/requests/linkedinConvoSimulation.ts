@@ -25,9 +25,10 @@ export async function createLiConvoSim(
 
 export async function getLiConvoSim(
   userToken: string,
-  simulation_id: number
+  simulation_id?: number,
+  prospect_id?: number,
 ): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/simulation/li_convo?simulation_id=${simulation_id}`, {
+  const response = await fetch(`${API_URL}/simulation/li_convo?${simulation_id ? `simulation_id=${simulation_id}` : `prospect_id=${prospect_id}`}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${userToken}`,

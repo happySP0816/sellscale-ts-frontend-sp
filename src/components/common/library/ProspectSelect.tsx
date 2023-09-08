@@ -95,6 +95,11 @@ export default function ProspectSelect(props: { personaId: number, onChange: (pr
     <Select
       placeholder='Select Prospect'
       itemComponent={ProspectSelectItem}
+      styles={{
+        itemsWrapper: {
+          zIndex: 100,
+        }
+      }}
       searchable
       clearable
       nothingFound={searchingProspects ? 'Loading prospects ...' : 'No prospects found'}

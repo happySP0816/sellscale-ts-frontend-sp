@@ -1,7 +1,8 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 
-import { Modal, Text, Flex, Select, Button, useMantineTheme, Card, Loader, Badge, Tooltip } from "@mantine/core";
+import { Modal, Text, Flex, Select, Button, useMantineTheme, Card, Loader, Badge, Tooltip, Box } from "@mantine/core";
+import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconAlertTriangle, IconCheck, IconX } from "@tabler/icons";
 import { valueToColor } from "@utils/general";
@@ -62,6 +63,30 @@ interface CloneBumpFramework extends Record<string, unknown> {
 }
 
 export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
+
+  useEffect(() => {
+    if (props.modalOpened) {
+      openContextModal({
+        modal: "cloneBumpFramework",
+        title: "Clone Bump Framework",
+        innerProps: {
+          ...props,
+        },
+      });
+    }
+  }, [props.modalOpened]);
+
+  return (
+    <></>
+  );
+
+}
+
+export function CloneBumpFrameworkContextModal({
+  context,
+  id,
+  innerProps,
+}: ContextModalProps<CloneBumpFramework>) {
   const [userToken] = useRecoilState(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
@@ -76,13 +101,13 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
 
     const result = await getBumpFrameworks(
       userToken,
-      [props.status],
+      [innerProps.status],
       [],
       [],
       [],
       false,
       true,
-      props.bumpedCount as number,
+      innerProps.bumpedCount as number,
     )
 
     if (result.status === 'success') {
@@ -107,7 +132,7 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
       return;
     }
 
-    const result = await cloneBumpFramework(userToken, props.archetypeID, selectedBumpFramework.id)
+    const result = await cloneBumpFramework(userToken, innerProps.archetypeID, selectedBumpFramework.id)
     if (result.status === 'success') {
       showNotification({
         title: "Success",
@@ -116,8 +141,8 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
         autoClose: 3000,
         icon: <IconCheck />,
       });
-      props.backFunction();
-      props.closeModal();
+      innerProps.backFunction();
+      innerProps.closeModal();
     } else {
       showNotification({
         title: "Error",
@@ -134,13 +159,13 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
   useEffect(() => {
     triggerGetBumpFrameworkForSelect();
 
-    if (props.status === 'ACCEPTED') {
+    if (innerProps.status === 'ACCEPTED') {
       setColloquialStatus('First / Initial Followup')
-    } else if (props.status === 'BUMPED' && props.bumpedCount === 1) {
+    } else if (innerProps.status === 'BUMPED' && innerProps.bumpedCount === 1) {
       setColloquialStatus('Second Followup')
-    } else if (props.status === 'BUMPED' && props.bumpedCount === 2) {
+    } else if (innerProps.status === 'BUMPED' && innerProps.bumpedCount === 2) {
       setColloquialStatus('Third Followup')
-    } else if (props.status === 'BUMPED' && props.bumpedCount === 3) {
+    } else if (innerProps.status === 'BUMPED' && innerProps.bumpedCount === 3) {
       setColloquialStatus('Fourth Followup')
     } else {
       setColloquialStatus(null)
@@ -148,12 +173,7 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
   }, []);
 
   return (
-    <Modal
-      opened={props.modalOpened}
-      onClose={props.closeModal}
-      title="Clone an existing Framework"
-      size='lg'
-    >
+    <Box>
       {
         colloquialStatus ? (
           <>
@@ -262,6 +282,6 @@ export default function CloneBumpFrameworkModal(props: CloneBumpFramework) {
         )
       }
 
-    </Modal>
+    </Box>
   )
 }

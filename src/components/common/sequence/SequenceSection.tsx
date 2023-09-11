@@ -2,6 +2,8 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import ModalSelector from "@common/library/ModalSelector";
 import ProspectSelect from "@common/library/ProspectSelect";
+import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
+import VoicesSection from "@common/voice_builder/VoicesSection";
 import { API_URL } from "@constants/data";
 import { ex } from "@fullcalendar/core/internal-common";
 import {
@@ -20,14 +22,25 @@ import {
   useMantineTheme,
   LoadingOverlay,
   Tooltip,
+  TextInput,
+  SegmentedControl,
+  Textarea,
+  Switch,
+  NumberInput,
+  Modal,
+  Menu,
 } from "@mantine/core";
-import { useHover } from "@mantine/hooks";
+import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import {
+  IconCheck,
+  IconCopy,
   IconDots,
   IconMessages,
   IconPencil,
+  IconPlus,
   IconReload,
+  IconX,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -36,6 +49,7 @@ import {
   nameToInitials,
   testDelay,
 } from "@utils/general";
+import { generateBumpLiMessage } from "@utils/requests/generateBumpLiMessage";
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
 import getChannels from "@utils/requests/getChannels";
 import getLiProfile from "@utils/requests/getLiProfile";
@@ -44,6 +58,8 @@ import {
   generateInitialMessageForLiConvoSim,
   getLiConvoSim,
 } from "@utils/requests/linkedinConvoSimulation";
+import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
+import { useDebouncedCallback } from "@utils/useDebouncedCallback";
 import _, { set } from "lodash";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -175,7 +191,16 @@ export default function SequenceSection() {
           </Stack>
         </Box>
         <Box sx={{ flexBasis: "65%" }}>
-          <IntroMessageSection />
+          {activeCard === 0 && <IntroMessageSection />}
+          {activeCard === 1 && bf1 && (
+            <FrameworkSection framework={bf1} bumpCount={1} />
+          )}
+          {activeCard === 2 && bf2 && (
+            <FrameworkSection framework={bf2} bumpCount={2} />
+          )}
+          {activeCard === 3 && bf3 && (
+            <FrameworkSection framework={bf3} bumpCount={3} />
+          )}
         </Box>
       </Group>
     </Card>
@@ -212,28 +237,57 @@ function BumpFrameworkSelect(props: {
       title={{
         name: props.title,
         rightSection: (
-          <Button
-            variant="subtle"
-            compact
-            onClick={() => {
-              openContextModal({
-                modal: "createBumpFramework",
-                title: "Create Bump Framework",
-                innerProps: {
-                  modalOpened: true,
-                  openModal: () => {},
-                  closeModal: () => {},
-                  backFunction: () => {},
-                  dataChannels: dataChannels,
-                  status: undefined,
-                  archetypeID: currentProject?.id,
-                  bumpedCount: props.bumpedCount,
-                },
-              });
-            }}
-          >
-            New Template
-          </Button>
+          <Menu shadow="md" width={200} withArrow>
+            <Menu.Target>
+              <Button variant="subtle" compact>
+                New Framework
+              </Button>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                icon={<IconPlus size={14} />}
+                onClick={() => {
+                  openContextModal({
+                    modal: "createBumpFramework",
+                    title: "Create Bump Framework",
+                    innerProps: {
+                      modalOpened: true,
+                      openModal: () => {},
+                      closeModal: () => {},
+                      backFunction: () => {},
+                      dataChannels: dataChannels,
+                      status: undefined,
+                      archetypeID: currentProject?.id,
+                      bumpedCount: props.bumpedCount,
+                    },
+                  });
+                }}
+              >
+                Create New
+              </Menu.Item>
+              <Menu.Item
+                icon={<IconCopy size={14} />}
+                onClick={() => {
+                  openContextModal({
+                    modal: "cloneBumpFramework",
+                    title: "Clone Bump Framework",
+                    innerProps: {
+                      openModal: () => {},
+                      closeModal: () => {},
+                      backFunction: () => {},
+                      status: props.bumpedFrameworks.find((bf) => bf.id === props.activeBumpFrameworkId)?.overall_status,
+                      archetypeID: currentProject?.id,
+                      bumpedCount: props.bumpedCount,
+                      showStatus: true,
+                    },
+                  });
+                }}
+              >
+                Copy from Existing
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
         ),
       }}
       loading={false}
@@ -273,6 +327,13 @@ function IntroMessageSection() {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
+  const [numActiveCTAs, setNumActiveCTAs] = useState(-1);
+  const [openedCTAs, { open: openCTAs, close: closeCTAs }] =
+    useDisclosure(false);
+
+  const [openedVoices, { open: openVoices, close: closeVoices }] =
+    useDisclosure(false);
+
   const [prospectId, setProspectId] = useState<number>();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -282,7 +343,9 @@ function IntroMessageSection() {
   let { hovered: endHovered, ref: endRef } = useHover();
 
   const openPersonalizationSettings = () => {};
-  const openCTASettings = () => {};
+  const openCTASettings = () => {
+    openCTAs();
+  };
 
   const getIntroMessage = async (prospectId: number) => {
     if (!currentProject) return null;
@@ -350,20 +413,10 @@ function IntroMessageSection() {
       <Group position="apart">
         <Group>
           <Title order={3}>Intro Message</Title>
-          <Badge color="green">4 CTAs Active</Badge>
+          {numActiveCTAs !== -1 && (
+            <Badge color="green">{numActiveCTAs} CTAs Active</Badge>
+          )}
         </Group>
-        <ProspectSelect
-          personaId={currentProject.id}
-          onChange={(prospect) => {
-            if (prospect) {
-              setProspectId(prospect.id);
-            }
-          }}
-          onFinishLoading={() => {
-            setProspectsLoading(false);
-          }}
-          autoSelect
-        />
       </Group>
       <Box my={5}>
         <Text fz="xs" c="dimmed">
@@ -377,22 +430,37 @@ function IntroMessageSection() {
           <Text fz="sm" fw={500} c="dimmed">
             EXAMPLE MESSAGE:
           </Text>
-          <Button
-            size="xs"
-            variant="light"
-            leftIcon={<IconReload size="1.1rem" />}
-            onClick={() => {
-              if (prospectId) {
-                getIntroMessage(prospectId).then((msg) => {
-                  if (msg) {
-                    setMessage(msg);
-                  }
-                });
-              }
-            }}
-          >
-            REGENERATE
-          </Button>
+          <Group>
+            <Button
+              size="xs"
+              variant="subtle"
+              compact
+              leftIcon={<IconReload size="0.75rem" />}
+              onClick={() => {
+                if (prospectId) {
+                  getIntroMessage(prospectId).then((msg) => {
+                    if (msg) {
+                      setMessage(msg);
+                    }
+                  });
+                }
+              }}
+            >
+              Regenerate
+            </Button>
+            <ProspectSelect
+              personaId={currentProject.id}
+              onChange={(prospect) => {
+                if (prospect) {
+                  setProspectId(prospect.id);
+                }
+              }}
+              onFinishLoading={() => {
+                setProspectsLoading(false);
+              }}
+              autoSelect
+            />
+          </Group>
         </Group>
         <Box
           sx={{
@@ -421,6 +489,7 @@ function IntroMessageSection() {
                   variant="outline"
                   size="xs"
                   onClick={openPersonalizationSettings}
+                  disabled
                 >
                   Edit Personalization Settings
                 </Button>
@@ -434,11 +503,31 @@ function IntroMessageSection() {
               </Box>
             </Box>
           </Group>
-          <Button radius="xl" size="xs">
+          <Button radius="xl" size="xs" onClick={openVoices}>
             Train Your AI
           </Button>
         </Group>
       </Stack>
+      <Modal
+        opened={openedCTAs}
+        onClose={closeCTAs}
+        title={<Title order={3}>Your Call-to-Actions</Title>}
+        size="xl"
+      >
+        <PersonaDetailsCTAs
+          onCTAsLoaded={(data) =>
+            setNumActiveCTAs(data.filter((x: any) => x.active).length)
+          }
+        />
+      </Modal>
+      <Modal
+        opened={openedVoices}
+        onClose={closeVoices}
+        title={<Title order={3}>Your Voices</Title>}
+        size="xl"
+      >
+        <VoicesSection />
+      </Modal>
     </Stack>
   );
 }
@@ -634,6 +723,7 @@ function LiExampleInvitation(props: {
                         : undefined, //theme.colors.green[0]+"99",
                     cursor: "pointer",
                   }}
+                  onClick={props.onClickStart}
                 >
                   {startMessage}
                 </Text>
@@ -652,6 +742,7 @@ function LiExampleInvitation(props: {
                         : undefined, //theme.colors.blue[0]+"99",
                     cursor: "pointer",
                   }}
+                  onClick={props.onClickEnd}
                 >
                   {endMessage}
                 </Text>
@@ -680,6 +771,7 @@ function LiExampleInvitation(props: {
                       : undefined, //theme.colors.green[0]+"99",
                     cursor: "pointer",
                   }}
+                  onClick={props.onClickStart}
                 >
                   {cutStartMessage}
                 </Text>
@@ -694,6 +786,7 @@ function LiExampleInvitation(props: {
                       : undefined, //theme.colors.blue[0]+"99",
                     cursor: "pointer",
                   }}
+                  onClick={props.onClickEnd}
                 >
                   {cutEndMessage}
                 </Text>
@@ -725,6 +818,134 @@ function LiExampleInvitation(props: {
           >
             Reply to {liSDR?.miniProfile.firstName}
           </Button>
+        </Box>
+      </Stack>
+    </Group>
+  );
+}
+
+function LiExampleMessage(props: {
+  message: string;
+  hovered?: boolean;
+  onClick?: () => void;
+}) {
+  const theme = useMantineTheme();
+  const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
+  const [liSDR, setLiSDR] = useState<any>();
+
+  let { hovered: _hovered, ref } = useHover();
+
+  const hovered = props.hovered ?? _hovered;
+
+  useEffect(() => {
+    (async () => {
+      const result = await getLiProfile(userToken);
+      if (result.status === "success") {
+        setLiSDR(result.data);
+      }
+    })();
+  }, []);
+
+  // Animation for typing
+  const [curMessage, setCurMessage] = useState("");
+  const animationPlaying = useRef(false);
+  useEffect(() => {
+    if (animationPlaying.current) return;
+    setCurMessage("");
+    (async () => {
+      animationPlaying.current = true;
+      const orginalMessage = props.message.trim();
+      for (let i = 0; i < orginalMessage.length; i++) {
+        await testDelay(i === orginalMessage.length - 1 ? 300 : 2);
+        setCurMessage((prev) => {
+          return prev + orginalMessage[i];
+        });
+      }
+      animationPlaying.current = false;
+    })();
+  }, []);
+
+  // Get SDR data from LinkedIn
+  const imgURL = liSDR
+    ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+          .length - 1
+      ].fileIdentifyingUrlPathSegment
+    : userData.img_url;
+  const name = liSDR
+    ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
+    : userData.sdr_name;
+  const title = liSDR ? liSDR.miniProfile.occupation : userData.sdr_title;
+
+  // Format message
+  let message = props.message.trim();
+
+  // Trim for animation playing
+  if (animationPlaying.current) {
+    message = _.truncate(message, {
+      length: curMessage.length,
+      omission: "█",
+    });
+  }
+
+  return (
+    <Group spacing={10} sx={{ alignItems: "flex-start" }} noWrap>
+      <Box w={55}>
+        <Avatar
+          src={proxyURL(imgURL)}
+          alt={`${name}'s Profile Picture`}
+          color={valueToColor(theme, name)}
+          radius="xl"
+          size="lg"
+        >
+          {nameToInitials(name)}
+        </Avatar>
+      </Box>
+      <Stack w="100%" spacing={3}>
+        <Group position="apart" noWrap>
+          <Box>
+            <Text fw={550}>{name}</Text>
+          </Box>
+        </Group>
+        <Box>
+          {animationPlaying.current ? (
+            <Text fz="xs">
+              <Text
+                ref={ref}
+                span
+                sx={{
+                  color:
+                    hovered || animationPlaying.current
+                      ? theme.colors.green[8]
+                      : undefined,
+                  backgroundColor:
+                    hovered || animationPlaying.current
+                      ? theme.colors.green[0]
+                      : undefined, //theme.colors.green[0]+"99",
+                  cursor: "pointer",
+                }}
+              >
+                {message}
+              </Text>
+            </Text>
+          ) : (
+            <Text fz="xs">
+              <Text
+                ref={ref}
+                span
+                sx={{
+                  color: hovered ? theme.colors.green[8] : undefined,
+                  backgroundColor: hovered ? theme.colors.green[0] : undefined, //theme.colors.green[0]+"99",
+                  cursor: "pointer",
+                }}
+                onClick={props.onClick}
+              >
+                {message}
+              </Text>
+            </Text>
+          )}
         </Box>
       </Stack>
     </Group>
@@ -838,5 +1059,242 @@ function FrameworkCard(props: {
         )}
       </Stack>
     </Card>
+  );
+}
+
+function FrameworkSection(props: {
+  framework: BumpFramework;
+  bumpCount: number;
+}) {
+  const theme = useMantineTheme();
+  const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
+
+  const [prospectId, setProspectId] = useState<number>();
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [prospectsLoading, setProspectsLoading] = useState(true);
+
+  let { hovered: hovered, ref: ref } = useHover();
+
+  const [frameworkName, setFrameworkName] = useState(props.framework.title);
+  const [bumpLength, setBumpLength] = useState(props.framework.bump_length);
+  const [delayDays, setDelayDays] = useState(props.framework.bump_delay_days);
+  const [promptInstructions, setPromptInstructions] = useState(
+    props.framework.description
+  );
+  const [useAccountResearch, setUseAccountResearch] = useState(
+    props.framework.use_account_research
+  );
+
+  const saveSettings = useDebouncedCallback(async () => {
+    const result = await patchBumpFramework(
+      userToken,
+      props.framework.id,
+      props.framework.overall_status,
+      frameworkName,
+      promptInstructions,
+      bumpLength,
+      props.bumpCount,
+      delayDays,
+      props.framework.default,
+      useAccountResearch
+    );
+    return result.status === "success";
+  }, 500);
+
+  const openPersonalizationSettings = () => {};
+
+  const getFollowUpMessage = async (prospectId: number) => {
+    if (!currentProject) return null;
+    setLoading(true);
+    setMessage("");
+
+    const result = await generateBumpLiMessage(
+      userToken,
+      prospectId,
+      props.framework.id,
+      props.bumpCount
+    );
+
+    setLoading(false);
+    return result.status === "success" ? result.data.message : null;
+  };
+
+  // When prospect changes, get the bump message
+  useEffect(() => {
+    if (!prospectId) return;
+    getFollowUpMessage(prospectId).then((msg) => {
+      console.log(msg);
+      if (msg) {
+        setMessage(msg);
+      }
+    });
+  }, [prospectId]);
+
+  if (!currentProject) return <></>;
+  return (
+    <Stack ml="xl" spacing={0}>
+      <Group position="apart">
+        <Group>
+          <Title order={3}>
+            Step {props.bumpCount}: {props.framework.title}
+          </Title>
+        </Group>
+      </Group>
+      <Box my={5}>
+        <Text fz="xs" c="dimmed">
+          A follow up message to send to prospects who have not replied to your
+          previous messages.
+        </Text>
+      </Box>
+      <Stack pt={20} spacing={15}>
+        <Box sx={{ position: "relative" }}>
+          <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
+          <Group position="apart" pb="0.3125rem">
+            <Text fz="sm" fw={500} c="dimmed">
+              EXAMPLE MESSAGE:
+            </Text>
+            <Group>
+              <Button
+                size="xs"
+                variant="subtle"
+                compact
+                leftIcon={<IconReload size="0.75rem" />}
+                onClick={() => {
+                  if (prospectId) {
+                    getFollowUpMessage(prospectId).then((msg) => {
+                      if (msg) {
+                        setMessage(msg);
+                      }
+                    });
+                  }
+                }}
+              >
+                Regenerate
+              </Button>
+              <ProspectSelect
+                personaId={currentProject.id}
+                onChange={(prospect) => {
+                  if (prospect) {
+                    setProspectId(prospect.id);
+                  }
+                }}
+                onFinishLoading={() => {
+                  setProspectsLoading(false);
+                }}
+                autoSelect
+              />
+            </Group>
+          </Group>
+          <Box
+            sx={{
+              border: "1px dashed #339af0",
+              borderRadius: "0.5rem",
+            }}
+            p="sm"
+            mih={100}
+          >
+            {message && (
+              <LiExampleMessage
+                message={message}
+                hovered={hovered ? true : undefined}
+                onClick={openPersonalizationSettings}
+              />
+            )}
+          </Box>
+        </Box>
+        <Group grow>
+          <Box>
+            <Text fz="sm" fw={500} c="dimmed">
+              FRAMEWORK NAME:
+            </Text>
+            <TextInput
+              placeholder="Name"
+              variant="filled"
+              value={frameworkName}
+              onChange={(e) => {
+                setFrameworkName(e.currentTarget.value);
+                saveSettings();
+              }}
+            />
+          </Box>
+          <Box>
+            <Text fz="sm" fw={500} c="dimmed">
+              BUMP LENGTH:
+            </Text>
+            <SegmentedControl
+              data={[
+                { label: "Short", value: "SHORT" },
+                { label: "Medium", value: "MEDIUM" },
+                { label: "Long", value: "LONG" },
+              ]}
+              value={bumpLength}
+              onChange={(value) => {
+                setBumpLength(value);
+                saveSettings();
+              }}
+            />
+          </Box>
+          <Box>
+            <Text fz="sm" fw={500} c="dimmed">
+              DELAY DAYS:
+            </Text>
+            <NumberInput
+              placeholder="Days to Wait"
+              variant="filled"
+              value={delayDays}
+              onChange={(value) => {
+                setDelayDays(value || 0);
+                saveSettings();
+              }}
+            />
+          </Box>
+        </Group>
+        <Box>
+          <Text fz="sm" fw={500} c="dimmed">
+            PROMPT INSTRUCTIONS:
+          </Text>
+          <Textarea
+            placeholder="Instructions"
+            minRows={7}
+            variant="filled"
+            value={promptInstructions}
+            onChange={(e) => {
+              setPromptInstructions(e.currentTarget.value);
+              saveSettings();
+            }}
+          />
+        </Box>
+        <Box>
+          <Group position="apart">
+            <Box ref={ref}>
+              <Button
+                color="green"
+                variant="outline"
+                size="xs"
+                onClick={openPersonalizationSettings}
+                disabled
+              >
+                Edit Personalization Settings
+              </Button>
+            </Box>
+            <Box>
+              <Switch
+                checked={useAccountResearch}
+                onChange={(event) => {
+                  setUseAccountResearch(event.currentTarget.checked);
+                  saveSettings();
+                }}
+                color="green"
+                size="sm"
+                label="Use Account Research"
+                labelPosition="left"
+              />
+            </Box>
+          </Group>
+        </Box>
+      </Stack>
+    </Stack>
   );
 }

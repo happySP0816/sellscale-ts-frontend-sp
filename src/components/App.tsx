@@ -43,6 +43,7 @@ import ClonePersonaModal from "@modals/ClonePersonaModal";
 import ConfirmModal from "@modals/ConfirmModal";
 import PatchEmailSubjectLineModal from "@modals/PatchEmailSubjectLineModal";
 import { CreateBumpFrameworkContextModal } from "@modals/CreateBumpFrameworkModal";
+import { CloneBumpFrameworkContextModal } from "@modals/CloneBumpFrameworkModal";
 
 export default function App() {
   // Site light or dark mode
@@ -141,6 +142,7 @@ export default function App() {
               clonePersona: ClonePersonaModal,
               confirm: ConfirmModal,
               createBumpFramework: CreateBumpFrameworkContextModal,
+              cloneBumpFramework: CloneBumpFrameworkContextModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

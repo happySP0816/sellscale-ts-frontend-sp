@@ -143,18 +143,25 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
         />
         <Flex direction='column' align='flex-end'>
 
-
-          <Switch
-            label="Default Framework"
-            labelPosition="left"
-            checked={form.values.default}
-            onChange={(e) => {
-              form.setFieldValue(
-                "default",
-                e.currentTarget.checked
-              );
-            }}
-          />
+          <Tooltip
+            withArrow
+            withinPortal
+            label={innerProps.default ? "You cannot unselect this framework because this is the only default framework." : "This will disable all other enabled frameworks."}>
+            <span>
+              <Switch
+                label="Default Framework"
+                labelPosition="left"
+                disabled={innerProps.default}
+                checked={form.values.default}
+                onChange={(e) => {
+                  form.setFieldValue(
+                    "default",
+                    e.currentTarget.checked
+                  );
+                }}
+              />
+            </span>
+          </Tooltip>
           <Tooltip
             withinPortal
             withArrow

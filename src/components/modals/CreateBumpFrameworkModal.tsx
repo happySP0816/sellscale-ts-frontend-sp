@@ -265,18 +265,27 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           <Flex></Flex>
 
           <Flex direction='column' align='flex-end'>
-            <Switch
-              pt="md"
-              label="Make default"
-              labelPosition="left"
-              checked={form.values.default}
-              onChange={(e) => {
-                form.setFieldValue(
-                  "default",
-                  e.currentTarget.checked
-                );
-              }}
-            />
+            <Tooltip 
+              withinPortal
+              withArrow 
+              label="New frameworks must be default enabled."
+            >
+              <span>
+                <Switch
+                  pt="md"
+                  label="Make default"
+                  labelPosition="left"
+                  disabled={true}
+                  checked={form.values.default}
+                  onChange={(e) => {
+                    form.setFieldValue(
+                      "default",
+                      e.currentTarget.checked
+                    );
+                  }}
+                />
+              </span>
+            </Tooltip>
             <Tooltip
               withinPortal
               withArrow

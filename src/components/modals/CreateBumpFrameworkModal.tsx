@@ -3,6 +3,7 @@ import TextWithNewline from "@common/library/TextWithNewlines";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
 import { Modal, TextInput, Text, Textarea, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, HoverCard, Paper, Tooltip } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons";
 import { createBumpFramework } from "@utils/requests/createBumpFramework";
@@ -31,6 +32,30 @@ interface CreateBumpFramework extends Record<string, unknown> {
 }
 
 export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
+
+  useEffect(() => {
+    if (props.modalOpened) {
+      openContextModal({
+        modal: "createBumpFramework",
+        title: "Create Bump Framework",
+        innerProps: {
+          ...props,
+        },
+      });
+    }
+  }, [props.modalOpened]);
+
+  return (
+    <></>
+  );
+
+}
+
+export function CreateBumpFrameworkContextModal({
+  context,
+  id,
+  innerProps,
+}: ContextModalProps<CreateBumpFramework>) {
   const [userToken] = useRecoilState(userTokenState);
   const theme = useMantineTheme();
 
@@ -42,10 +67,10 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
   const getActiveConvoSubstatusValues = () => {
     const activeConvoStatuses = [];
     const statuses_avilable =
-      props.dataChannels?.data["LINKEDIN"]?.statuses_available;
+        innerProps.dataChannels?.data["LINKEDIN"]?.statuses_available;
     if (statuses_avilable != null) {
       for (const item of statuses_avilable) {
-        const statusLabel = props.dataChannels?.data["LINKEDIN"][item]?.name;
+        const statusLabel = innerProps.dataChannels?.data["LINKEDIN"][item]?.name;
         if (statusLabel.includes("Active Convo")) {
           activeConvoStatuses.push({
             label: statusLabel,
@@ -91,8 +116,8 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
         color: "green",
       });
       form.reset();
-      props.backFunction();
-      props.closeModal();
+      innerProps.backFunction();
+      innerProps.closeModal();
     } else {
       showNotification({
         title: "Error",
@@ -108,9 +133,9 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
     initialValues: {
       title: "",
       description: "",
-      archetypeID: props.archetypeID,
+      archetypeID: innerProps.archetypeID,
       default: true,
-      bumpedCount: props.bumpedCount,
+      bumpedCount: innerProps.bumpedCount,
       bumpDelayDays: 2,
       useAccountResearch: true,
     },
@@ -119,22 +144,19 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
 
   useEffect(() => {
     // Set the statuses to the correct values
-    if (props.status != null) {
-      setSelectedStatus(props.status);
-      if (props.status.includes("ACTIVE_CONVO_")) {
+    if (innerProps.status != null) {
+      setSelectedStatus(innerProps.status);
+      if (innerProps.status.includes("ACTIVE_CONVO_")) {
         setSelectedStatus("ACTIVE_CONVO");
-        setSelectedSubstatus(props.status);
+        setSelectedSubstatus(innerProps.status);
       }
     }
-  }, [props.status])
+  }, [innerProps.status])
 
 
   return (
-    <Modal
-      opened={props.modalOpened}
-      onClose={props.closeModal}
-      title="Create New Framework"
-      size='lg'
+    <Paper
+      withBorder
     >
       <LoadingOverlay visible={loading} />
       <TextInput
@@ -198,17 +220,17 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           defaultValues={[form.values.archetypeID || -1]}
         />
       </Flex>
-      {props.showStatus && (
+      {innerProps.showStatus && (
         <Select
           label="Status"
           description="Which status should use this bump?"
           placeholder="select status..."
-          data={props.dataChannels?.data[
+          data={innerProps.dataChannels?.data[
             "SELLSCALE"
           ]?.statuses_available?.map((status: string) => {
             return {
               label:
-                props.dataChannels?.data["SELLSCALE"][status].name,
+              innerProps.dataChannels?.data["SELLSCALE"][status].name,
               value: status,
             };
           })}
@@ -230,7 +252,7 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           withAsterisk
         />
       )}
-      {(selectedStatus === "BUMPED" && form.values.bumpedCount != null && props.showStatus) && (
+      {(selectedStatus === "BUMPED" && form.values.bumpedCount != null && innerProps.showStatus) && (
         <NumberInput
           mt='md'
           label="Bump Number"
@@ -316,6 +338,6 @@ export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
           Create
         </Button>
       </Flex>
-    </Modal>
+    </Paper>
   )
 }

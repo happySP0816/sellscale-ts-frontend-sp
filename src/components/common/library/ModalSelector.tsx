@@ -17,18 +17,17 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
-import {
-  IconPencil,
-} from "@tabler/icons-react";
+import { IconPencil } from "@tabler/icons-react";
 import _ from "lodash";
 
 export default function ModalSelector(props: {
   selector: {
-    content: React.ReactNode;
+    content?: React.ReactNode;
     buttonProps?: ButtonProps;
     onClick?: () => void;
     onClickChange?: () => void;
-  },
+    override?: React.ReactNode;// This will override the selector button UI to the TSX provided
+  };
   title: {
     name: string;
     rightSection?: React.ReactNode;
@@ -59,24 +58,37 @@ export default function ModalSelector(props: {
 
   return (
     <>
-      <Button.Group>
-        <Button {...props.selector.buttonProps}
-        compact
-          onClick={() => {
-            props.selector.onClick && props.selector.onClick();
-          }}
-        >{props.selector.content}</Button>
-        <Tooltip label={props.title.name} withArrow>
-        <Button
-          {...props.selector.buttonProps}
-          compact
-          onClick={() => {
-            props.selector.onClickChange && props.selector.onClickChange();
-            open();
-          }}
-        >{props.loading ? <Loader size='1.1rem'/> : <IconPencil size='1.1rem' />}</Button>
-        </Tooltip>
-      </Button.Group>
+      {props.selector.override ? (
+        <Box onClick={open}>{props.selector.override}</Box>
+      ) : (
+        <Button.Group>
+          <Button
+            {...props.selector.buttonProps}
+            compact
+            onClick={() => {
+              props.selector.onClick && props.selector.onClick();
+            }}
+          >
+            {props.selector.content}
+          </Button>
+          <Tooltip label={props.title.name} withArrow>
+            <Button
+              {...props.selector.buttonProps}
+              compact
+              onClick={() => {
+                props.selector.onClickChange && props.selector.onClickChange();
+                open();
+              }}
+            >
+              {props.loading ? (
+                <Loader size="1.1rem" />
+              ) : (
+                <IconPencil size="1.1rem" />
+              )}
+            </Button>
+          </Tooltip>
+        </Button.Group>
+      )}
       <Modal
         opened={opened}
         onClose={close}
@@ -103,7 +115,11 @@ export default function ModalSelector(props: {
           <LoadingOverlay visible={props.loading} />
           <Group
             position="apart"
-            sx={{ flexDirection: "column", height: "100%", overflowX: "hidden" }}
+            sx={{
+              flexDirection: "column",
+              height: "100%",
+              overflowX: "hidden",
+            }}
             align="flex-start"
             noWrap
           >
@@ -114,19 +130,15 @@ export default function ModalSelector(props: {
                 >
                   <Center>{props.header.leftSection}</Center>
                 </Box>
+                <Box sx={{}}>{props.header.content}</Box>
                 <Box
-                  sx={{
-                    
-                  }}
+                  sx={{ flexBasis: props.header.rightSection ? "27%" : "0%" }}
                 >
-                  {props.header.content}
-                </Box>
-                <Box sx={{ flexBasis: props.header.rightSection ? "27%" : "0%" }}>
                   <Flex justify="flex-end">{props.header.rightSection}</Flex>
                 </Box>
               </Flex>
             )}
-            <ScrollArea h={ props.footer ? "60vh" : "70vh" }>
+            <ScrollArea h={props.footer ? "60vh" : "70vh"}>
               <Stack py={4} spacing={0}>
                 {props.items.map((item, index) => (
                   <ModalSelectorOption
@@ -150,14 +162,10 @@ export default function ModalSelector(props: {
                 >
                   <Center>{props.footer.leftSection}</Center>
                 </Box>
+                <Box sx={{}}>{props.footer.content}</Box>
                 <Box
-                  sx={{
-                    
-                  }}
+                  sx={{ flexBasis: props.footer.rightSection ? "27%" : "0%" }}
                 >
-                  {props.footer.content}
-                </Box>
-                <Box sx={{ flexBasis: props.footer.rightSection ? "27%" : "0%" }}>
                   <Flex justify="flex-end">{props.footer.rightSection}</Flex>
                 </Box>
               </Flex>

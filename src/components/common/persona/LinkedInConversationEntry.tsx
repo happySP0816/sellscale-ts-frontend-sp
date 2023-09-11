@@ -111,7 +111,7 @@ export function LinkedInConversationEntry({
           {nameToInitials(name)}
         </Avatar>
         <div>
-          <Text size='sm'>{name}</Text>
+          <Text size='sm'>{name.substring(0,30)}{name.length > 30 ? ' . . .': ''}</Text>
           <Text size='xs' color='dimmed'>
             {postedAt}
           </Text>

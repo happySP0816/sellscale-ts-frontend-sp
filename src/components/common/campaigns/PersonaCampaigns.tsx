@@ -343,11 +343,8 @@ function PersonCampaignCard(props: {
       type: "LinkedIn",
       active: !!userData?.weekly_li_outbound_target && props.persona.active,
       icon: <IconBrandLinkedin size="0.925rem" />,
-      sends:
-        props.persona.li_sent +
-        props.persona.li_opened +
-        props.persona.li_replied,
-      opens: props.persona.li_opened + props.persona.li_replied,
+      sends: props.persona.li_sent,
+      opens: props.persona.li_opened,
       replies: props.persona.li_replied,
       date: props.persona.created_at,
     },
@@ -356,11 +353,8 @@ function PersonCampaignCard(props: {
       type: "Email",
       active: !!userData?.weekly_email_outbound_target && props.persona.active,
       icon: <IconMail size="0.925rem" />,
-      sends:
-        props.persona.emails_sent +
-        props.persona.emails_opened +
-        props.persona.emails_replied,
-      opens: props.persona.emails_opened + props.persona.emails_replied,
+      sends:props.persona.emails_sent,
+      opens: props.persona.emails_opened,
       replies: props.persona.emails_replied,
       date: props.persona.created_at,
     },

@@ -198,6 +198,7 @@ export default function PersonaSettingsPage() {
                   personaContractSize={currentProject.contract_size}
                   onUpdate={(data) => {
                     basics.current = data;
+                    console.log(data.personaName)
                   }}
                 />
                 <Button

@@ -268,7 +268,6 @@ export function PersonaBasicForm(props: {
         minRows={1}
         value={personaName}
         onChange={(e) => {
-          console.log(e.currentTarget.value)
           setPersonaName(e.currentTarget.value)
           sendUpdate(
             "personaName",

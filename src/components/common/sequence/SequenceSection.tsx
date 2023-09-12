@@ -125,6 +125,7 @@ export default function SequenceSection() {
         p="xs"
         spacing={0}
         sx={{ alignItems: "flex-start" }}
+        noWrap
       >
         <Box sx={{ flexBasis: "35%" }}>
           <Stack>

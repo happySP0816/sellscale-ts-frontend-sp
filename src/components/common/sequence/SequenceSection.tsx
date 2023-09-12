@@ -240,7 +240,7 @@ export default function SequenceSection() {
             />
           </Stack>
         </Box>
-        <Box sx={{ flexBasis: "60%" }}>
+        <Box sx={{ flexBasis: "65%" }}>
           {activeCard === 0 && <IntroMessageSection />}
           {activeCard === 1 && bf0 && (
             <FrameworkSection framework={bf0} bumpCount={0} />

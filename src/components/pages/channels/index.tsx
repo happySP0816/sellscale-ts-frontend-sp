@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import Hook from "./components/Hook";
 import ChannelTab from "./components/ChannelTab";
 
-const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChannel: (channel: string) => void}) => {
+const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChannel: (channel: string) => void, hideChannels: boolean}) => {
   const [selectedChildChannel, setSelectedChildChannel] = useState(props.selectedChannel);
   const [isEnabledLinkedin, setEnabledLinkedin] = useState(true);
 
@@ -109,53 +109,55 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
 
               <Divider my={"1.5rem"} />
 
-              <Grid gutter={"0"} px={"2rem"}>
-                <Grid.Col span={3} onClick={() => {
-                  props.setSelectedChannel('linkedin')
-                  setSelectedChildChannel('linkedin')
-                }}>
-                  <ChannelTab
-                    type="linkedin"
-                    active={selectedChildChannel === 'linkedin'}
-                    enabled={isEnabledLinkedin}
-                    onToggle={setEnabledLinkedin}
-                  />
-                </Grid.Col>
-                <Grid.Col span={"auto"}>
-                  <Hook
-                    linkedLeft={isEnabledLinkedin}
-                    linkedRight={isActiveEmail && isEnabledEmail}
-                  />
-                </Grid.Col>
-                <Grid.Col span={3} onClick={() => {
-                  props.setSelectedChannel('email')
-                  setSelectedChildChannel('email')
-                }}>
-                  <ChannelTab
-                    type="email"
-                    active={selectedChildChannel === 'email'}
-                    enabled={isEnabledEmail}
-                    onToggle={setEnabledEmail}
-                  />
-                </Grid.Col>
-                <Grid.Col span={"auto"}>
-                  <Hook
-                    linkedLeft={isActiveEmail && isEnabledEmail}
-                    linkedRight={isActiveNurture && isEnabledNurture}
-                  />
-                </Grid.Col>
-                <Grid.Col span={3} onClick={() => {
-                  props.setSelectedChannel('nurture')
-                  setSelectedChildChannel('nurture')
-                }}>
-                  <ChannelTab
-                    type="nurture"
-                    active={selectedChildChannel === 'nurture'}
-                    enabled={isEnabledNurture}
-                    onToggle={setEnabledNurture}
-                  />
-                </Grid.Col>
-              </Grid>
+              {!props.hideChannels &&
+                <Grid gutter={"0"} px={"2rem"}>
+                  <Grid.Col span={3} onClick={() => {
+                    props.setSelectedChannel('linkedin')
+                    setSelectedChildChannel('linkedin')
+                  }}>
+                    <ChannelTab
+                      type="linkedin"
+                      active={selectedChildChannel === 'linkedin'}
+                      enabled={isEnabledLinkedin}
+                      onToggle={setEnabledLinkedin}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={"auto"}>
+                    <Hook
+                      linkedLeft={isEnabledLinkedin}
+                      linkedRight={isActiveEmail && isEnabledEmail}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={3} onClick={() => {
+                    props.setSelectedChannel('email')
+                    setSelectedChildChannel('email')
+                  }}>
+                    <ChannelTab
+                      type="email"
+                      active={selectedChildChannel === 'email'}
+                      enabled={isEnabledEmail}
+                      onToggle={setEnabledEmail}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={"auto"}>
+                    <Hook
+                      linkedLeft={isActiveEmail && isEnabledEmail}
+                      linkedRight={isActiveNurture && isEnabledNurture}
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={3} onClick={() => {
+                    props.setSelectedChannel('nurture')
+                    setSelectedChildChannel('nurture')
+                  }}>
+                    <ChannelTab
+                      type="nurture"
+                      active={selectedChildChannel === 'nurture'}
+                      enabled={isEnabledNurture}
+                      onToggle={setEnabledNurture}
+                    />
+                  </Grid.Col>
+                </Grid>
+              }
             </Flex>
           </Container>
         </Box>

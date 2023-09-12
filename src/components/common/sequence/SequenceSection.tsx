@@ -35,6 +35,7 @@ import {
   Menu,
   Center,
 } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import {
@@ -96,13 +97,25 @@ export default function SequenceSection() {
     (bf) => bf.overall_status === "ACCEPTED" && bf.active && bf.default
   );
   const bf1 = bumpFrameworks.find(
-    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 1 && bf.active && bf.default
+    (bf) =>
+      bf.overall_status === "BUMPED" &&
+      bf.bumped_count === 1 &&
+      bf.active &&
+      bf.default
   );
   const bf2 = bumpFrameworks.find(
-    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 2 && bf.active && bf.default
+    (bf) =>
+      bf.overall_status === "BUMPED" &&
+      bf.bumped_count === 2 &&
+      bf.active &&
+      bf.default
   );
   const bf3 = bumpFrameworks.find(
-    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 3 && bf.active && bf.default
+    (bf) =>
+      bf.overall_status === "BUMPED" &&
+      bf.bumped_count === 3 &&
+      bf.active &&
+      bf.default
   );
 
   return (
@@ -146,13 +159,12 @@ export default function SequenceSection() {
                 title: "Choose Bump Framework for Invite Accepted",
                 bumpedCount: 0,
                 bumpedFrameworks: bumpFrameworks.filter(
-                  (bf) =>
-                    bf.overall_status === "ACCEPTED" 
+                  (bf) => bf.overall_status === "ACCEPTED"
                 ),
                 activeBumpFrameworkId: bf0?.id ?? -1,
               }}
             />
-              
+
             <FrameworkCard
               title="Step 1"
               badgeText="If no reply from prospect."
@@ -508,7 +520,7 @@ function IntroMessageSection() {
           </Box>
         ) : (
           <Box>
-            <Group position="apart">
+            <Group position="apart" pb="0.3125rem">
               <Text fz="sm" fw={500} c="dimmed">
                 EXAMPLE MESSAGE:
               </Text>
@@ -901,7 +913,8 @@ function LiExampleInvitation(props: {
             ml={-8}
             compact
           >
-            Reply to {liSDR?.miniProfile.firstName}
+            Reply to{" "}
+            {liSDR?.miniProfile.firstName || userData.sdr_name.split(" ")[0]}
           </Button>
         </Box>
       </Stack>
@@ -1175,31 +1188,31 @@ function FrameworkSection(props: {
 
   let { hovered: hovered, ref: ref } = useHover();
 
-  const [frameworkName, setFrameworkName] = useState(props.framework.title);
-  const [bumpLength, setBumpLength] = useState(props.framework.bump_length);
-  const [delayDays, setDelayDays] = useState(props.framework.bump_delay_days);
-  const [promptInstructions, setPromptInstructions] = useState(
-    props.framework.description
-  );
-  const [useAccountResearch, setUseAccountResearch] = useState(
-    props.framework.use_account_research
-  );
+  const form = useForm({
+    initialValues: {
+      frameworkName: props.framework.title,
+      bumpLength: props.framework.bump_length,
+      delayDays: props.framework.bump_delay_days,
+      promptInstructions: props.framework.description,
+      useAccountResearch: props.framework.use_account_research,
+    },
+  });
 
-  const saveSettings = useDebouncedCallback(async () => {
+  const saveSettings = async (values: typeof form.values) => {
     const result = await patchBumpFramework(
       userToken,
       props.framework.id,
       props.framework.overall_status,
-      frameworkName,
-      promptInstructions,
-      bumpLength,
+      values.frameworkName,
+      values.promptInstructions,
+      values.bumpLength,
       props.bumpCount,
-      delayDays,
+      values.delayDays,
       props.framework.default,
-      useAccountResearch
+      values.useAccountResearch
     );
     return result.status === "success";
-  }, 500);
+  };
 
   const openPersonalizationSettings = () => {};
 
@@ -1336,96 +1349,83 @@ function FrameworkSection(props: {
             </Box>
           )}
         </Box>
-        <Group grow>
-          <Box>
-            <Text fz="sm" fw={500} c="dimmed">
-              FRAMEWORK NAME:
-            </Text>
-            <TextInput
-              placeholder="Name"
-              variant="filled"
-              value={frameworkName}
-              onChange={(e) => {
-                setFrameworkName(e.currentTarget.value);
-                saveSettings();
-              }}
-            />
-          </Box>
-          <Box>
-            <Text fz="sm" fw={500} c="dimmed">
-              BUMP LENGTH:
-            </Text>
-            <SegmentedControl
-              data={[
-                { label: "Short", value: "SHORT" },
-                { label: "Medium", value: "MEDIUM" },
-                { label: "Long", value: "LONG" },
-              ]}
-              value={bumpLength}
-              onChange={(value) => {
-                setBumpLength(value);
-                saveSettings();
-              }}
-            />
-          </Box>
-          <Box>
-            <Text fz="sm" fw={500} c="dimmed">
-              DELAY DAYS:
-            </Text>
-            <NumberInput
-              placeholder="Days to Wait"
-              variant="filled"
-              value={delayDays}
-              onChange={(value) => {
-                setDelayDays(value || 0);
-                saveSettings();
-              }}
-            />
-          </Box>
-        </Group>
-        <Box>
-          <Text fz="sm" fw={500} c="dimmed">
-            PROMPT INSTRUCTIONS:
-          </Text>
-          <Textarea
-            placeholder="Instructions"
-            minRows={7}
-            variant="filled"
-            value={promptInstructions}
-            onChange={(e) => {
-              setPromptInstructions(e.currentTarget.value);
-              saveSettings();
-            }}
-          />
-        </Box>
-        <Box>
-          <Group position="apart">
-            <Box ref={ref}>
-              <Button
-                color="green"
-                variant="outline"
-                size="xs"
-                onClick={openPersonalizationSettings}
-                disabled
-              >
-                Edit Personalization Settings
-              </Button>
+        <form onSubmit={form.onSubmit((values) => saveSettings(values))}>
+          <Group grow>
+            <Box>
+              <Text fz="sm" fw={500} c="dimmed">
+                FRAMEWORK NAME:
+              </Text>
+              <TextInput
+                placeholder="Name"
+                variant="filled"
+                {...form.getInputProps("frameworkName")}
+              />
             </Box>
             <Box>
-              <Switch
-                checked={useAccountResearch}
-                onChange={(event) => {
-                  setUseAccountResearch(event.currentTarget.checked);
-                  saveSettings();
-                }}
-                color="green"
-                size="sm"
-                label="Use Account Research"
-                labelPosition="left"
+              <Text fz="sm" fw={500} c="dimmed">
+                BUMP LENGTH:
+              </Text>
+              <SegmentedControl
+                data={[
+                  { label: "Short", value: "SHORT" },
+                  { label: "Medium", value: "MEDIUM" },
+                  { label: "Long", value: "LONG" },
+                ]}
+                {...form.getInputProps("bumpLength")}
+              />
+            </Box>
+            <Box>
+              <Text fz="sm" fw={500} c="dimmed">
+                DELAY DAYS:
+              </Text>
+              <NumberInput
+                placeholder="Days to Wait"
+                variant="filled"
+                {...form.getInputProps("delayDays")}
               />
             </Box>
           </Group>
-        </Box>
+          <Box>
+            <Text fz="sm" fw={500} c="dimmed">
+              PROMPT INSTRUCTIONS:
+            </Text>
+            <Textarea
+              placeholder="Instructions"
+              minRows={7}
+              variant="filled"
+              {...form.getInputProps("promptInstructions")}
+            />
+          </Box>
+          <Box>
+            <Group position="apart">
+              <Box ref={ref}>
+                <Button
+                  color="green"
+                  variant="outline"
+                  size="xs"
+                  onClick={openPersonalizationSettings}
+                  disabled
+                >
+                  Edit Personalization Settings
+                </Button>
+              </Box>
+              <Box>
+                <Switch
+                  {...form.getInputProps("useAccountResearch", {
+                    type: "checkbox",
+                  })}
+                  color="green"
+                  size="sm"
+                  label="Use Account Research"
+                  labelPosition="left"
+                />
+              </Box>
+            </Group>
+          </Box>
+          <Group position="right" mt="md">
+          <Button type="submit">Save</Button>
+        </Group>
+        </form>
       </Stack>
     </Stack>
   );

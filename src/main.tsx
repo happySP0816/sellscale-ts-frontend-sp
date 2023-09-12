@@ -56,6 +56,7 @@ import EmailSimulatePage from "@pages/EmailSimulatePage";
 import PipelineSection from "@common/home/PipelineSection";
 import PersonaCampaigns from "@common/campaigns/PersonaCampaigns";
 import AdvancedPage from "@pages/AdvancedPage";
+import ChannelSetupPage from '@pages/ChannelSetupPage';
 
 const queryClient = new QueryClient();
 
@@ -153,6 +154,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/linkedin/simulate",
         element: <RestrictedRoute page={<LinkedinConvoSimulatorPage />} />,
+      },
+      {
+        path: "setup",
+        element: <RestrictedRoute page={<ChannelSetupPage />} />,
       },
       {
         path: "linkedin/:tabId?",

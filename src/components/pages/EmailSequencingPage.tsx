@@ -582,6 +582,7 @@ function EmailSequenceStepView(props: {
 export default function EmailSequencingPage(props: {
   predefinedPersonaId?: number;
   onPopulateSequenceSteps?: (buckets: EmailSequenceStepBuckets) => void;
+  hideTitle?: boolean;
 }) {
   const userToken = useRecoilValue(userTokenState);
 
@@ -718,7 +719,7 @@ export default function EmailSequencingPage(props: {
   return (
     <Flex direction="column">
       <LoadingOverlay visible={loading} />
-      <Title>Email Setup</Title>
+      {!props.hideTitle && <Title>Email Setup</Title>}
 
       <Card mt="md" withBorder>
         <Card.Section px="md">

@@ -92,14 +92,17 @@ export default function SequenceSection() {
     })();
   }, []);
 
+  const bf0 = bumpFrameworks.find(
+    (bf) => bf.overall_status === "ACCEPTED" && bf.active && bf.default
+  );
   const bf1 = bumpFrameworks.find(
-    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 1 && bf.active
+    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 1 && bf.active && bf.default
   );
   const bf2 = bumpFrameworks.find(
-    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 2 && bf.active
+    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 2 && bf.active && bf.default
   );
   const bf3 = bumpFrameworks.find(
-    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 3 && bf.active
+    (bf) => bf.overall_status === "BUMPED" && bf.bumped_count === 3 && bf.active && bf.default
   );
 
   return (
@@ -123,6 +126,34 @@ export default function SequenceSection() {
               ------- After accepting invite -------
             </Text>
             <FrameworkCard
+              title="Invite Accepted"
+              badgeText="If no reply from prospect."
+              bodyTitle={bf0?.title ?? ""}
+              bodyText={bf0?.description ?? ""}
+              footer={
+                <Text fz={14}>
+                  wait for{" "}
+                  <Text fw={550} span>
+                    {bf0?.bump_delay_days ?? -1}
+                  </Text>{" "}
+                  days, then:
+                </Text>
+              }
+              active={activeCard === 1}
+              onClick={() => setActiveCard(1)}
+              canEdit
+              editProps={{
+                title: "Choose Bump Framework for Invite Accepted",
+                bumpedCount: 0,
+                bumpedFrameworks: bumpFrameworks.filter(
+                  (bf) =>
+                    bf.overall_status === "ACCEPTED" 
+                ),
+                activeBumpFrameworkId: bf0?.id ?? -1,
+              }}
+            />
+              
+            <FrameworkCard
               title="Step 1"
               badgeText="If no reply from prospect."
               bodyTitle={bf1?.title ?? ""}
@@ -136,8 +167,8 @@ export default function SequenceSection() {
                   days, then:
                 </Text>
               }
-              active={activeCard === 1}
-              onClick={() => setActiveCard(1)}
+              active={activeCard === 2}
+              onClick={() => setActiveCard(2)}
               canEdit
               editProps={{
                 title: "Choose Bump Framework for Step 1",
@@ -163,8 +194,8 @@ export default function SequenceSection() {
                   days, then:
                 </Text>
               }
-              active={activeCard === 2}
-              onClick={() => setActiveCard(2)}
+              active={activeCard === 3}
+              onClick={() => setActiveCard(3)}
               canEdit
               editProps={{
                 title: "Choose Bump Framework for Step 2",
@@ -181,8 +212,8 @@ export default function SequenceSection() {
               badgeText="If no reply from prospect."
               bodyTitle={bf3?.title ?? ""}
               bodyText={bf3?.description ?? ""}
-              active={activeCard === 3}
-              onClick={() => setActiveCard(3)}
+              active={activeCard === 4}
+              onClick={() => setActiveCard(4)}
               canEdit
               editProps={{
                 title: "Choose Bump Framework for Step 3",
@@ -196,15 +227,18 @@ export default function SequenceSection() {
             />
           </Stack>
         </Box>
-        <Box sx={{ flexBasis: "65%" }}>
+        <Box sx={{ flexBasis: "60%" }}>
           {activeCard === 0 && <IntroMessageSection />}
-          {activeCard === 1 && bf1 && (
+          {activeCard === 1 && bf0 && (
+            <FrameworkSection framework={bf0} bumpCount={0} />
+          )}
+          {activeCard === 2 && bf1 && (
             <FrameworkSection framework={bf1} bumpCount={1} />
           )}
-          {activeCard === 2 && bf2 && (
+          {activeCard === 3 && bf2 && (
             <FrameworkSection framework={bf2} bumpCount={2} />
           )}
-          {activeCard === 3 && bf3 && (
+          {activeCard === 4 && bf3 && (
             <FrameworkSection framework={bf3} bumpCount={3} />
           )}
         </Box>
@@ -1202,7 +1236,7 @@ function FrameworkSection(props: {
       <Group position="apart">
         <Group>
           <Title order={3}>
-            Step {props.bumpCount}: {props.framework.title}
+            Step {props.bumpCount + 1}: {props.framework.title}
           </Title>
         </Group>
       </Group>

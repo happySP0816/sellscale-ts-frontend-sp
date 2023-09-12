@@ -242,21 +242,23 @@ export function PersonaBasicForm(props: {
     return res as MsgResponse;
   };
 
-  const sendUpdate = () => {
-    setTimeout(() => {
-      props.onUpdate({
-        personaName: personaName,
-        personaFitReason: personaFitReason,
-        personaICPMatchingInstructions: personaICPMatchingInstructions,
-        personaContactObjective: personaContactObjective,
-        personaContractSize: personaContractSize,
-      });
-    }, 1);
+  const sendUpdate = (hardcodeKey?: string, hardcodeValue?: any) => {
+    let update: any = {
+      personaName: personaName,
+      personaFitReason: personaFitReason,
+      personaICPMatchingInstructions: personaICPMatchingInstructions,
+      personaContactObjective: personaContactObjective,
+      personaContractSize: personaContractSize,
+    }
+    if (hardcodeKey && hardcodeValue) {
+      update[hardcodeKey] = hardcodeValue
+    }
+    props.onUpdate(update)
   };
 
-  useEffect(() => {
-    sendUpdate();
-  }, []);
+  // useEffect(() => {
+  //   sendUpdate();
+  // }, []);
 
   return (
     <Box>
@@ -266,8 +268,11 @@ export function PersonaBasicForm(props: {
         minRows={1}
         value={personaName}
         onChange={(e) => {
-          setPersonaName(e.currentTarget.value);
-          sendUpdate();
+          setPersonaName(e.currentTarget.value)
+          sendUpdate(
+            "personaName",
+            e.currentTarget.value
+          );
         }}
       />
       {/* <TextAreaWithAI
@@ -285,7 +290,10 @@ export function PersonaBasicForm(props: {
         value={personaFitReason}
         onChange={(e) => {
           setPersonaFitReason(e.currentTarget.value);
-          sendUpdate();
+          sendUpdate(
+            "personaFitReason",
+            e.currentTarget.value
+          );
         }}
         loadingAIGenerate={loadingPersonaFitReason}
         onAIGenerateClicked={async () => {
@@ -319,7 +327,10 @@ export function PersonaBasicForm(props: {
           value={personaICPMatchingInstructions}
           onChange={(e) => {
             setPersonaICPMatchingInstructions(e.currentTarget.value);
-            sendUpdate();
+            sendUpdate(
+              "personaICPMatchingInstructions",
+              e.currentTarget.value
+            );
           }}
         />
       )}
@@ -330,7 +341,10 @@ export function PersonaBasicForm(props: {
         value={personaContactObjective}
         onChange={(e) => {
           setPersonaContactObjective(e.currentTarget.value);
-          sendUpdate();
+          sendUpdate(
+            "personaContactObjective",
+            e.currentTarget.value
+          );
         }}
       />
       <NumberInput
@@ -344,7 +358,10 @@ export function PersonaBasicForm(props: {
         }
         onChange={(value) => {
           setPersonaContractSize(value || 0);
-          sendUpdate();
+          sendUpdate(
+            "personaContractSize",
+            value || 0
+          );
         }}
       />
     </Box>

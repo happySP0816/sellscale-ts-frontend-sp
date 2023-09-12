@@ -41,6 +41,7 @@
     "@mantine/tiptap": "^6.0.10",
     "@nivo/bar": "^0.83.0",
     "@nivo/line": "^0.83.0",
+    "@react-icons/all-files": "^4.1.0",
     "@react-spring/web": "^9.6.1",
     "@sentry/react": "^7.40.0",
     "@sentry/tracing": "^7.40.0",

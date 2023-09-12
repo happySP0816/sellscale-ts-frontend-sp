@@ -28,7 +28,7 @@ import { openConfirmModal, openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
-import { IconAlertTriangle, IconAnalyze, IconArrowLeft, IconArrowLeftBar, IconArrowRight, IconBook, IconBrandPushbullet, IconChartBubble, IconCheck, IconChecklist, IconEdit, IconFolders, IconList, IconMessage, IconPlus, IconPoint, IconRobot, IconSearch, IconTransferIn, IconX } from '@tabler/icons';
+import { IconAlertTriangle, IconAnalyze, IconArrowLeft, IconArrowLeftBar, IconArrowRight, IconBook, IconBrandPushbullet, IconChartBubble, IconCheck, IconChecklist, IconEdit, IconFolders, IconList, IconMessage, IconMessage2, IconPlus, IconPoint, IconRobot, IconSearch, IconTransferIn, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
@@ -693,6 +693,9 @@ export default function BumpFrameworksPage(props: {
                 <Tabs.Tab value='qnolibrary' icon={<IconBook size='0.8rem' />}>
                   Replies
                 </Tabs.Tab>
+                <Tabs.Tab value='simulate' icon={<IconMessage2 size='0.8rem' />}>
+                  Simulate
+                </Tabs.Tab>
                 {/* <Tabs.Tab value='analytics' icon={<IconAnalyze size='0.8rem' />}>
                   Analytics
                 </Tabs.Tab> */}
@@ -710,6 +713,12 @@ export default function BumpFrameworksPage(props: {
                     <Loader />
                   </Flex>
                 )}
+              </Tabs.Panel>
+
+              <Tabs.Panel value='simulate' pt='xs'>
+                <LinkedInConvoSimulator personaId={
+                  archetypeID as number
+                } sequenceSetUpMode={true} />
               </Tabs.Panel>
 
               <Tabs.Panel value='qnolibrary' pt='xs'>

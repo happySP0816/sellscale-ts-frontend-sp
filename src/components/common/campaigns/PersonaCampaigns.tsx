@@ -6,6 +6,7 @@ import PageFrame from "@common/PageFrame";
 import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
 import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
 import EmojiPicker from 'emoji-picker-react';
+import { IconChevronsUp, IconChevronsDown, IconChartDots3, IconList } from '@tabler/icons-react';
 
 
 import {
@@ -22,19 +23,21 @@ import {
   Paper,
   ActionIcon,
   Center,
-  Badge,
+  Tooltip,
   Switch,
   useMantineTheme,
   ScrollArea,
   Tabs,
   Loader,
   Collapse,
+  SegmentedControl,
 } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { openContextModal } from "@mantine/modals";
 import {
   IconAdjustments,
   IconAdjustmentsHorizontal,
+  IconArrowRightBar,
   IconBrandLinkedin,
   IconCalendar,
   IconCheck,
@@ -67,6 +70,9 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { PersonaOverview } from "src";
 import { API_URL } from '@constants/data';
+import ComingSoonCard from '@common/library/ComingSoonCard';
+import CampaignGraph from './campaigngraph';
+import { showNotification } from '@mantine/notifications';
 
 type CampaignPersona = {
   id: number;
@@ -96,6 +102,8 @@ export default function PersonaCampaigns() {
   );
 
   const [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
+
+  const [campaignViewMode, setCampaignViewMode] = useState<'node-view' | 'list-view'>('node-view');
 
   useEffect(() => {
     (async () => {
@@ -231,17 +239,30 @@ export default function PersonaCampaigns() {
                         </Text>
                       </Text>
                     </Button>
-                    <Button
-                      variant="light"
-                      radius="md"
-                      leftIcon={<IconPlus size="1rem" />}
-                      sx={{
-                        border: "0.0625rem solid #cbe5ff;",
-                      }}
-                    >
-                      Add Credits
-                    </Button>
+
+                    <SegmentedControl
+                    value={campaignViewMode}
+                    onChange={(mode: any) => setCampaignViewMode(mode)}
+                    ml='sm'
+                    color='blue'
+                    data={[
+                      { label: (
+                        <Center>
+                          <IconChartDots3 size="1rem" />
+                          <Box ml={10}>Node View</Box>
+                        </Center>
+                      ), value: 'node-view' },
+                      { label:(
+                        <Center>
+                          <IconList size="1rem" />
+                          <Box ml={10}>List View</Box>
+                        </Center>
+                      ), value: 'list-view' },
+                    ]}
+                  />
                   </Button.Group>
+
+                  
                 </Box>
               </Group>
               <ScrollArea h={'78vh'}>
@@ -253,15 +274,30 @@ export default function PersonaCampaigns() {
                       </Center>
                     )
                   }
-                  {!loadingPersonas && filteredProjects.map((persona, index) => (
+                  {!loadingPersonas && filteredProjects.filter((persona) => persona.active).map((persona, index) => (
                     <PersonCampaignCard
                       key={index}
                       persona={persona}
                       project={projects.find(
                         (project) => project.id == persona.id
                       )}
+                      viewMode={campaignViewMode}
                     />
                   ))}
+
+                  {filteredProjects.filter((persona) => !persona.active).length > 0 && <Divider label="Inactive Personas" labelPosition='center' color='gray'/>}
+
+                  {!loadingPersonas && filteredProjects.filter((persona) => !persona.active).map((persona, index) => (
+                    <PersonCampaignCard
+                      key={index}
+                      persona={persona}
+                      project={projects.find(
+                        (project) => project.id == persona.id
+                      )}
+                      viewMode={campaignViewMode}
+                    />
+                  ))}
+
                   {!loadingPersonas && filteredProjects.length === 0 && (
                     <Center h={200}>
                       <Text fs="italic" c="dimmed">
@@ -305,6 +341,7 @@ type ChannelSection = {
 function PersonCampaignCard(props: {
   persona: CampaignPersona;
   project?: PersonaOverview;
+  viewMode: 'node-view' | 'list-view';
 }) {
   const navigate = useNavigate();
   const [currentProject, setCurrentProject] =
@@ -317,6 +354,8 @@ function PersonCampaignCard(props: {
   const [emoji, setEmojiState] = useState<string>(props.persona.emoji || '⬜️');
 
   const userToken = useRecoilValue(userTokenState);
+
+  const [personaActive, setPersonaActive] = useState<boolean>(props.persona.active);
 
 
   const userData = useRecoilValue(userDataState);
@@ -372,9 +411,9 @@ function PersonCampaignCard(props: {
 
   return (
     <Paper radius="md">
-      <Stack spacing={0}>
+      <Stack spacing={0} sx={{opacity: props.persona.active ? 1 : 0.7}}>
         <Group
-          position="apart"
+          // position="apart"
           sx={(theme) => ({
             backgroundColor: props.persona.active ? theme.colors.blue[6] : 'white',
             borderRadius: "0.5rem 0.5rem 0 0",
@@ -382,53 +421,51 @@ function PersonCampaignCard(props: {
           })}
           p="xs"
         >
-          <Group>
-            <Button 
-              sx={{borderRadius: '100px', border: 'solid 1px ' + (props.persona.active ? 'white' : 'gray')}} 
-              variant='outline' 
-              color={props.persona.active ? 'white' : 'gray'}
-              onClick={() => {
-                  if (props.project == undefined) return;
-                    setOpenedProspectId(-1);
-                    setCurrentProject(props.project);
-                    navigateToPage(navigate, `/prioritize`);
-                  }
-                }
-              >
-              <IconFilter size="1rem" color={props.persona.active ? 'white' : 'gray'}/>
-            </Button>
+          <Box sx={{flexDirection: 'row', display: 'flex'}} w='46%'>
+            <Group w='500'>
+              <Popover position="bottom" withArrow shadow="md">
+                <Popover.Target>
+                  <Button variant="outline" color={props.persona.active ? 'blue' : 'gray'} radius="xl" size="lg" compact sx={{backgroundColor: '#ffffff22'}}>
+                    {emoji}
+                  </Button>
+                </Popover.Target>
+                <Popover.Dropdown>
+                  <EmojiPicker 
+                    onEmojiClick={(event: any, _: any) => {
+                      const emoji = event.emoji;
+                      setEmoji(emoji);
+                    }}
+                  />
+                </Popover.Dropdown>
+              </Popover>
 
-            {/* HERE */}
-            <Popover width={200} position="bottom" withArrow shadow="md">
-              <Popover.Target>
-                <Button variant="subtle" color={'white'} radius="xl" size="lg" compact>
-                  {emoji}
-                </Button>
-              </Popover.Target>
-              <Popover.Dropdown>
-                <EmojiPicker 
-                  onEmojiClick={(event: any, _: any) => {
-                    const emoji = event.emoji;
-                    setEmoji(emoji);
-                  }}
-                />
-              </Popover.Dropdown>
-            </Popover>
+              <Title order={5} c={props.persona.active ? 'white' : 'gray'}>
+                {_.truncate(props.persona.name, { length: 48 })}
+              </Title>
+            </Group>
+          </Box>
 
-            <Title order={5} c={props.persona.active ? 'white' : 'blue'}>
-              {_.truncate(props.persona.name, { length: 40 })}
-            </Title>
-          </Group>
-          <Group>
+          <Box w='25%'>
             <Button
-              w={100}
+              variant='subtle'
+              onClick={toggle}
+              sx={{borderRadius: 100, backgroundColor: '#ffffff44'}}
+            >
+              {opened ? (<IconChevronsUp size="1.5rem" color={props.persona.active ? 'white' : 'blue'} />) : <IconChevronsDown size="1.5rem" color={props.persona.active ? 'white' : 'gray'} />}
+
+            </Button>
+          </Box>
+
+          <Group w='200'>
+            <Button
               radius="xl"
               size="xs"
               variant="outline"
               compact
+              color={props.persona.active ? 'white' : 'gray'}
               sx={(theme) => ({
-                borderColor: props.persona.active ? 'white' : theme.colors.blue[6],
-                color: props.persona.active ? 'white' : theme.colors.blue[6],
+                borderColor: props.persona.active ? 'white' : 'gray',
+                color: props.persona.active ? 'white' : 'gray',
               })}
               onClick={() => {
                 if (props.project == undefined) return;
@@ -436,8 +473,9 @@ function PersonCampaignCard(props: {
                 setCurrentProject(props.project);
                 navigateToPage(navigate, `/prioritize`);
               }}
+              leftIcon={<IconFilter size={'0.7rem'}/>}
             >
-              Contacts
+              Filter Contacts
             </Button>
             <Button
                 w={60}
@@ -445,7 +483,7 @@ function PersonCampaignCard(props: {
                 size="xs"
                 compact
                 sx={(theme) => ({
-                  backgroundColor: theme.colors.blue[5],
+                  backgroundColor: props.persona.active ? theme.colors.blue[5] : 'gray',
                   //color: theme.colors.blue[2],
                 })}
                 onClick={() => {
@@ -457,63 +495,97 @@ function PersonCampaignCard(props: {
               >
                 Edit
               </Button>
-              <Button
-                variant='subtle'
-                onClick={toggle}
-                rightIcon={opened ? (<IconArrowUp size="1rem" color={props.persona.active ? 'white' : 'blue'} />) : <IconArrowDown size="1rem" color={props.persona.active ? 'white' : 'blue'} />}
-              >
 
-              </Button>
+            <Tooltip
+                withArrow
+                position="bottom"
+                label={personaActive ? "Click to disable this campaign on settings page" : "Click to enable this campaign on settings page"}>
+              <span>
+                <Switch 
+                  onLabel="Active" 
+                  offLabel="Inactive" 
+                  color='blue' 
+                  sx={{border: 'solid 1px white', borderRadius: '20px', cursor: 'pointer'}} 
+                  checked={personaActive}
+                  onChange={(event) => {
+                    setPersonaActive(event.currentTarget.checked);
+                    
+                    if (props.project == undefined) return;
+
+                    setOpenedProspectId(-1);
+                    setCurrentProject(props.project);
+                    navigateToPage(navigate, `/persona/settings`);
+
+                    showNotification({
+                      title: 'Activate / Deactive Campaign from Settings',
+                      message: 'You can activate & deactivate this persona from the settings page.',
+                      color: 'blue',
+                      icon: <IconAdjustmentsHorizontal size='1rem' />,
+                      autoClose: 3000,
+                    });
+                  }}
+                />
+              </span>
+            </Tooltip>
             </Group>
         </Group>
         <Collapse in={opened}>
-            {types.map((section, index) => {
-              if (!section.active && props.persona.active) return null;
+            {props.viewMode === 'node-view' && <Box>
+              <CampaignGraph sections={types} onChannelClick={(sectionType: string) => {
+                      if (props.project == undefined) return;
+                      setOpenedProspectId(-1);
+                      setCurrentProject(props.project);
+                      navigateToPage(navigate, `/${sectionType}/setup`);
+                    }}/>
+            </Box>}
+            {props.viewMode === 'list-view' && <Box>
+              {types.map((section, index) => {
+                  if (!section.active && props.persona.active) return null;
 
-              return <Box key={index}>
-                {index > 0 && <Divider />}
-                <PersonCampaignCardSection section={section} onClick={() => {
-                  if (props.project == undefined) return;
-                  setOpenedProspectId(-1);
-                  setCurrentProject(props.project);
-                  navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
-                }} />
-              </Box>
-            })}
-            {
-              props.persona.active && (
-                <>
-                  <Collapse in={inactiveChannelsOpened}>
-                    {types.map((section, index) => {
-                      if (section.active) return null;
+                  return <Box key={index}>
+                    {index > 0 && <Divider />}
+                    <PersonCampaignCardSection section={section} onClick={() => {
+                      if (props.project == undefined) return;
+                      setOpenedProspectId(-1);
+                      setCurrentProject(props.project);
+                      navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
+                    }} />
+                  </Box>
+                })}
+                {
+                  props.persona.active && (
+                    <>
+                      <Collapse in={inactiveChannelsOpened}>
+                        {types.map((section, index) => {
+                          if (section.active) return null;
 
-                      return <Box key={index}>
-                        {index > 0 && <Divider />}
-                        <PersonCampaignCardSection section={section} onClick={() => {
-                          if (props.project == undefined) return;
-                          setOpenedProspectId(-1);
-                          setCurrentProject(props.project);
-                          navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
-                        }} />
-                      </Box>
-                    })}
-                  </Collapse>
-                  <Divider/>
-                  <Button 
-                    w='100%' 
-                    variant='subtle' 
-                    size='xs' 
-                    color='gray'
-                    onClick={() => setInactiveChannelsOpened(!inactiveChannelsOpened)}
-                    leftIcon={inactiveChannelsOpened ? <IconArrowUp size="0.7rem" /> : <IconArrowDown size="0.7rem" />}
-                  >
-                    {inactiveChannelsOpened ? 'Hide' : 'Show'} {types.filter(x => !x.active).length} Inactive Channel{types.filter(x => !x.active).length > 1 ? 's' : ''}
-                  </Button>
-                
-                </>
-              )
-            }
-            
+                          return <Box key={index}>
+                            {index > 0 && <Divider />}
+                            <PersonCampaignCardSection section={section} onClick={() => {
+                              if (props.project == undefined) return;
+                              setOpenedProspectId(-1);
+                              setCurrentProject(props.project);
+                              navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
+                            }} />
+                          </Box>
+                        })}
+                      </Collapse>
+                      <Divider/>
+                      <Button 
+                        w='100%' 
+                        variant='subtle' 
+                        size='xs' 
+                        color='gray'
+                        onClick={() => setInactiveChannelsOpened(!inactiveChannelsOpened)}
+                        leftIcon={inactiveChannelsOpened ? <IconArrowUp size="0.7rem" /> : <IconArrowDown size="0.7rem" />}
+                      >
+                        {inactiveChannelsOpened ? 'Hide' : 'Show'} {types.filter(x => !x.active).length} Inactive Channel{types.filter(x => !x.active).length > 1 ? 's' : ''}
+                      </Button>
+                    
+                    </>
+                  )
+                }
+              </Box>}
         </Collapse>
       </Stack>
     </Paper>

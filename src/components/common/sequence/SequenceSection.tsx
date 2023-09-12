@@ -1,10 +1,14 @@
-import { currentProjectState } from "@atoms/personaAtoms";
+import {
+  currentProjectState,
+  uploadDrawerOpenState,
+} from "@atoms/personaAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import ModalSelector from "@common/library/ModalSelector";
 import ProspectSelect from "@common/library/ProspectSelect";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import VoicesSection from "@common/voice_builder/VoicesSection";
 import { API_URL } from "@constants/data";
+import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
 import { ex } from "@fullcalendar/core/internal-common";
 import {
   Group,
@@ -29,6 +33,7 @@ import {
   NumberInput,
   Modal,
   Menu,
+  Center,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
@@ -40,6 +45,7 @@ import {
   IconPencil,
   IconPlus,
   IconReload,
+  IconUpload,
   IconX,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
@@ -62,7 +68,7 @@ import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
 import { useDebouncedCallback } from "@utils/useDebouncedCallback";
 import _, { set } from "lodash";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { BumpFramework } from "src";
 
 export default function SequenceSection() {
@@ -203,6 +209,10 @@ export default function SequenceSection() {
           )}
         </Box>
       </Group>
+      <PersonaUploadDrawer
+        personaOverviews={currentProject ? [currentProject] : []}
+        afterUpload={() => {}}
+      />
     </Card>
   );
 }
@@ -276,7 +286,9 @@ function BumpFrameworkSelect(props: {
                       openModal: () => {},
                       closeModal: () => {},
                       backFunction: () => {},
-                      status: props.bumpedFrameworks.find((bf) => bf.id === props.activeBumpFrameworkId)?.overall_status,
+                      status: props.bumpedFrameworks.find(
+                        (bf) => bf.id === props.activeBumpFrameworkId
+                      )?.overall_status,
                       archetypeID: currentProject?.id,
                       bumpedCount: props.bumpedCount,
                       showStatus: true,
@@ -338,6 +350,11 @@ function IntroMessageSection() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [prospectsLoading, setProspectsLoading] = useState(true);
+
+  const [noProspectsFound, setNoProspectsFound] = useState(false);
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
+    uploadDrawerOpenState
+  );
 
   let { hovered: startHovered, ref: startRef } = useHover();
   let { hovered: endHovered, ref: endRef } = useHover();
@@ -426,60 +443,94 @@ function IntroMessageSection() {
       </Box>
       <Stack pt={20} spacing={5} sx={{ position: "relative" }}>
         <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
-        <Group position="apart">
-          <Text fz="sm" fw={500} c="dimmed">
-            EXAMPLE MESSAGE:
-          </Text>
-          <Group>
-            <Button
-              size="xs"
-              variant="subtle"
-              compact
-              leftIcon={<IconReload size="0.75rem" />}
-              onClick={() => {
-                if (prospectId) {
-                  getIntroMessage(prospectId).then((msg) => {
-                    if (msg) {
-                      setMessage(msg);
+        {noProspectsFound ? (
+          <Box
+            sx={{
+              border: "1px dashed #339af0",
+              borderRadius: "0.5rem",
+            }}
+            p="sm"
+            mih={100}
+          >
+            <Center h={100}>
+              <Stack>
+                <Text ta="center" c="dimmed" fs="italic" fz="sm">
+                  No prospects found!
+                </Text>
+                <Button
+                  variant="filled"
+                  color="teal"
+                  radius="md"
+                  ml="auto"
+                  mr="0"
+                  size="xs"
+                  rightIcon={<IconUpload size={14} />}
+                  onClick={() => setUploadDrawerOpened(true)}
+                >
+                  Upload New Prospects
+                </Button>
+              </Stack>
+            </Center>
+          </Box>
+        ) : (
+          <Box>
+            <Group position="apart">
+              <Text fz="sm" fw={500} c="dimmed">
+                EXAMPLE MESSAGE:
+              </Text>
+              <Group>
+                <Button
+                  size="xs"
+                  variant="subtle"
+                  compact
+                  leftIcon={<IconReload size="0.75rem" />}
+                  onClick={() => {
+                    if (prospectId) {
+                      getIntroMessage(prospectId).then((msg) => {
+                        if (msg) {
+                          setMessage(msg);
+                        }
+                      });
                     }
-                  });
-                }
+                  }}
+                >
+                  Regenerate
+                </Button>
+                <ProspectSelect
+                  personaId={currentProject.id}
+                  onChange={(prospect) => {
+                    if (prospect) {
+                      setProspectId(prospect.id);
+                    }
+                  }}
+                  onFinishLoading={(prospects) => {
+                    setProspectsLoading(false);
+                    if (prospects.length === 0) setNoProspectsFound(true);
+                  }}
+                  autoSelect
+                />
+              </Group>
+            </Group>
+            <Box
+              sx={{
+                border: "1px dashed #339af0",
+                borderRadius: "0.5rem",
               }}
+              p="sm"
+              h={250}
             >
-              Regenerate
-            </Button>
-            <ProspectSelect
-              personaId={currentProject.id}
-              onChange={(prospect) => {
-                if (prospect) {
-                  setProspectId(prospect.id);
-                }
-              }}
-              onFinishLoading={() => {
-                setProspectsLoading(false);
-              }}
-              autoSelect
-            />
-          </Group>
-        </Group>
-        <Box
-          sx={{
-            border: "1px dashed #339af0",
-            borderRadius: "0.5rem",
-          }}
-          p="sm"
-          h={250}
-        >
-          {message && (
-            <LiExampleInvitation
-              message={message}
-              startHovered={startHovered ? true : undefined}
-              endHovered={endHovered ? true : undefined}
-              onClickStart={openPersonalizationSettings}
-              onClickEnd={openCTASettings}
-            />
-          )}
-        </Box>
+              {message && (
+                <LiExampleInvitation
+                  message={message}
+                  startHovered={startHovered ? true : undefined}
+                  endHovered={endHovered ? true : undefined}
+                  onClickStart={openPersonalizationSettings}
+                  onClickEnd={openCTASettings}
+                />
+              )}
+            </Box>
+          </Box>
+        )}
         <Group mt="sm" position="apart">
           <Group spacing={5}>
             <Box>
@@ -970,13 +1021,21 @@ function FrameworkCard(props: {
 }) {
   const { hovered, ref } = useHover();
 
+  const currentProject = useRecoilValue(currentProjectState);
+  const noBumpFramework = props.editProps?.activeBumpFrameworkId === -1;
+
   return (
     <Card
       ref={ref}
       p={0}
       radius="md"
       withBorder
-      onClick={props.onClick}
+      onClick={() => {
+        props.onClick();
+        if (noBumpFramework) {
+          // TODO: Open modal to select bump framework
+        }
+      }}
       sx={(theme) => ({
         cursor: "pointer",
         backgroundColor: props.active
@@ -1075,6 +1134,11 @@ function FrameworkSection(props: {
   const [loading, setLoading] = useState(false);
   const [prospectsLoading, setProspectsLoading] = useState(true);
 
+  const [noProspectsFound, setNoProspectsFound] = useState(false);
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
+    uploadDrawerOpenState
+  );
+
   let { hovered: hovered, ref: ref } = useHover();
 
   const [frameworkName, setFrameworkName] = useState(props.framework.title);
@@ -1151,58 +1215,92 @@ function FrameworkSection(props: {
       <Stack pt={20} spacing={15}>
         <Box sx={{ position: "relative" }}>
           <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
-          <Group position="apart" pb="0.3125rem">
-            <Text fz="sm" fw={500} c="dimmed">
-              EXAMPLE MESSAGE:
-            </Text>
-            <Group>
-              <Button
-                size="xs"
-                variant="subtle"
-                compact
-                leftIcon={<IconReload size="0.75rem" />}
-                onClick={() => {
-                  if (prospectId) {
-                    getFollowUpMessage(prospectId).then((msg) => {
-                      if (msg) {
-                        setMessage(msg);
+          {noProspectsFound ? (
+            <Box
+              sx={{
+                border: "1px dashed #339af0",
+                borderRadius: "0.5rem",
+              }}
+              p="sm"
+              mih={100}
+            >
+              <Center h={100}>
+                <Stack>
+                  <Text ta="center" c="dimmed" fs="italic" fz="sm">
+                    No prospects found!
+                  </Text>
+                  <Button
+                    variant="filled"
+                    color="teal"
+                    radius="md"
+                    ml="auto"
+                    mr="0"
+                    size="xs"
+                    rightIcon={<IconUpload size={14} />}
+                    onClick={() => setUploadDrawerOpened(true)}
+                  >
+                    Upload New Prospects
+                  </Button>
+                </Stack>
+              </Center>
+            </Box>
+          ) : (
+            <Box>
+              <Group position="apart" pb="0.3125rem">
+                <Text fz="sm" fw={500} c="dimmed">
+                  EXAMPLE MESSAGE:
+                </Text>
+                <Group>
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    compact
+                    leftIcon={<IconReload size="0.75rem" />}
+                    onClick={() => {
+                      if (prospectId) {
+                        getFollowUpMessage(prospectId).then((msg) => {
+                          if (msg) {
+                            setMessage(msg);
+                          }
+                        });
                       }
-                    });
-                  }
+                    }}
+                  >
+                    Regenerate
+                  </Button>
+                  <ProspectSelect
+                    personaId={currentProject.id}
+                    onChange={(prospect) => {
+                      if (prospect) {
+                        setProspectId(prospect.id);
+                      }
+                    }}
+                    onFinishLoading={(prospects) => {
+                      setProspectsLoading(false);
+                      if (prospects.length === 0) setNoProspectsFound(true);
+                    }}
+                    autoSelect
+                  />
+                </Group>
+              </Group>
+              <Box
+                sx={{
+                  border: "1px dashed #339af0",
+                  borderRadius: "0.5rem",
                 }}
+                p="sm"
+                mih={100}
               >
-                Regenerate
-              </Button>
-              <ProspectSelect
-                personaId={currentProject.id}
-                onChange={(prospect) => {
-                  if (prospect) {
-                    setProspectId(prospect.id);
-                  }
-                }}
-                onFinishLoading={() => {
-                  setProspectsLoading(false);
-                }}
-                autoSelect
-              />
-            </Group>
-          </Group>
-          <Box
-            sx={{
-              border: "1px dashed #339af0",
-              borderRadius: "0.5rem",
-            }}
-            p="sm"
-            mih={100}
-          >
-            {message && (
-              <LiExampleMessage
-                message={message}
-                hovered={hovered ? true : undefined}
-                onClick={openPersonalizationSettings}
-              />
-            )}
-          </Box>
+                {message && (
+                  <LiExampleMessage
+                    message={message}
+                    hovered={hovered ? true : undefined}
+                    onClick={openPersonalizationSettings}
+                  />
+                )}
+              </Box>
+            </Box>
+          )}
         </Box>
         <Group grow>
           <Box>

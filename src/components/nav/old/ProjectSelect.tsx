@@ -99,13 +99,11 @@ export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => v
 
   return (
     <Button
-      size="sm"
-      className={classes.select}
+      size="xs"
+      variant='outline'
       leftIcon={<IconLayoutSidebar size="1.05rem" stroke={1.5} />}
       rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
-      pr={12}
-      w={250}
-      color='blue'
+      w={'400px'}
       onClick={() => {
         openContextModal({
           modal: "personaSelect",

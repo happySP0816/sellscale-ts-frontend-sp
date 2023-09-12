@@ -13,6 +13,10 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import Hook from "./components/Hook";
 import ChannelTab from "./components/ChannelTab";
+import { useRecoilValue } from 'recoil';
+import { userDataState } from '@atoms/userAtoms';
+import PersonaSelect from '@common/persona/PersonaSplitSelect';
+import { ProjectSelect } from '@nav/old/ProjectSelect';
 
 const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChannel: (channel: string) => void, hideChannels: boolean}) => {
   const [selectedChildChannel, setSelectedChildChannel] = useState(props.selectedChannel);
@@ -23,6 +27,8 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
 
   const [isEnabledNurture, setEnabledNurture] = useState(false);
   const [isActiveNurture, setActiveNurture] = useState(false);
+
+  const userData = useRecoilValue(userDataState);
 
   useEffect(() => {
     setActiveEmail(isEnabledLinkedin);
@@ -55,21 +61,10 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                     >
                       <IconArrowLeft size={"0.875rem"} />
                     </ActionIcon>
-                    <Text fz={"1rem"} span color="gray.6">
-                      Campaigns:
+                    <Text fz={"1rem"} span color="gray.6" mr='xs'>
+                      Campaign:
                     </Text>
-                    <Select
-                      color="blue"
-                      variant="filled"
-                      size="xs"
-                      placeholder="NetSuite Persona"
-                      data={[
-                        { value: "1", label: "NetSuite Persona" },
-                        { value: "2", label: "NetSuite Persona" },
-                        { value: "3", label: "NetSuite Persona" },
-                        { value: "4", label: "NetSuite Persona" },
-                      ]}
-                    />
+                   <ProjectSelect />
                   </Flex>
                 </Grid.Col>
                 <Grid.Col xs={12} md={"auto"}>
@@ -87,16 +82,16 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                       }}
                     >
                       <Text fz={"0.75rem"} color="gray.6">
-                        Prospects per week:{" "}
-                        <Text span color="blue" fw={500}>
-                          50/500
+                        Linkedin:
+                        <Text span color="blue" fw={500} ml='xs'>
+                         {userData.weekly_li_outbound_target}/100
                         </Text>
                       </Text>
                       <Divider orientation="vertical" color="#E9ECEF" />
                       <Text fz={"0.75rem"} color="gray.6">
-                        Used:{" "}
-                        <Text span color="blue" fw={500}>
-                          10%
+                        Email:{" "}
+                        <Text span color="blue" fw={500} ml='xs'>
+                          {userData.weekly_email_outbound_target}/100
                         </Text>
                       </Text>
                     </Flex>

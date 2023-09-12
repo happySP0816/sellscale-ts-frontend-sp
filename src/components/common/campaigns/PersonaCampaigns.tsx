@@ -535,7 +535,7 @@ function PersonCampaignCard(props: {
                       if (props.project == undefined) return;
                       setOpenedProspectId(-1);
                       setCurrentProject(props.project);
-                      navigateToPage(navigate, `/${sectionType}/setup`);
+                      navigateToPage(navigate, `/${sectionType.toLowerCase()}/setup`);
                     }}/>
             </Box>}
             {props.viewMode === 'list-view' && <Box>

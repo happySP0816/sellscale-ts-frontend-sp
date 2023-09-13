@@ -235,7 +235,7 @@ export function ProspectConvoMessage(props: {
   );
 }
 
-export const HEADER_HEIGHT = 102;
+export let HEADER_HEIGHT = 102;
 
 export default function ProspectConvo(props: { prospects: ProspectShallow[], onTabChange?: (tab: string) => void, openConvoBox?: boolean, hideTitle?: boolean }) {
   const theme = useMantineTheme();
@@ -338,6 +338,8 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
     refetchOnWindowFocus: false,
   });
 
+  const INBOX_HEIGHT = props.hideTitle ? '70vh' : INBOX_PAGE_HEIGHT
+
   const { isFetching: isFetchingMessages, refetch } = useQuery({
     queryKey: [
       `query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`,
@@ -431,6 +433,8 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
       (openedOutboundChannel !== "EMAIL" || !!threads),
     refetchOnWindowFocus: false,
   });
+
+  let HEADER_HEIGHT = props.hideTitle ? 40 : 102;
 
   useEffect(() => {
     scrollToBottom();
@@ -532,7 +536,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
         align="left"
         p="sm"
         mt="lg"
-        h={`calc(${INBOX_PAGE_HEIGHT} - 100px)`}
+        h={`calc(${INBOX_HEIGHT} - 100px)`}
       >
         <Skeleton height={50} circle mb="xl" />
         <Skeleton height={8} radius="xl" />
@@ -545,12 +549,11 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
     );
   }
 
-  console.log("GOT HERE")
-
   return (
     <Flex gap={0} direction="column" wrap="nowrap" h={"100%"} bg="white">
       <div style={{ height: HEADER_HEIGHT, position: "relative" }}>
         <></>
+          {!props.hideTitle && 
           <Group position="apart" p={15} h={66} sx={{ flexWrap: "nowrap" }}>
             <div style={{ overflow: "hidden" }}>
               <Title order={3} truncate>
@@ -583,12 +586,12 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
               />
             </Group>
           </Group>
+        }
         
         <Tabs
           variant="outline"
           defaultValue="LINKEDIN"
           radius={theme.radius.md}
-          h={36}
           value={openedOutboundChannel}
           onTabChange={(value) => {
             if (value) {
@@ -638,7 +641,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
       </div>
       <div
         style={{
-          height: `calc((${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)*1.00)`,
+          height: `calc((${INBOX_HEIGHT} - ${HEADER_HEIGHT}px)*1.00)`,
           alignItems: "stretch",
           position: "relative",
         }}
@@ -659,7 +662,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
             </Badge>
           )}
         <ScrollArea
-          h={`calc((${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)*1.00)`}
+          h={`calc((${INBOX_HEIGHT} - ${HEADER_HEIGHT}px)*1.00)`}
           viewportRef={viewport}
           sx={{ position: "relative" }}
         >

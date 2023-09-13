@@ -64,7 +64,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
   const theme = useMantineTheme();
   const tableFilterChannel = useRecoilValue(prospectChannelState);
   const [channelType, setChannelType] = useState<Channel | null>(
-    tableFilterChannel.length > 0 ? tableFilterChannel : null
+    'LINKEDIN'
   );
 
   // This component is only rendered if drawerOpened=true - which isn't helpful for the first render
@@ -89,7 +89,9 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
   const persona_id = useRef(-1);
   const [prospects, setProspects] = useState<ProspectShallow[]>([]);
   const [fetchedProspectId, setFetchedProspectId] = useState(-1);
+  const [fetchedProspect, setFetchedProspect] = useState(false);
   const [fetchingProspect, setFetchingProspect] = useState(false);
+  const [prospect, setProspect] = useState<ProspectShallow | undefined>(undefined);
 
   useEffect(() => {
     if (prospectId !== openedProspectId) {
@@ -130,27 +132,35 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
     refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (fetchedProspectId !== prospectId || !fetchedProspectId) {
-      setFetchingProspect(true);
-      const response = getProspects(
-          userToken,
-          undefined,
-          "SELLSCALE",
-          10000, // TODO: Maybe use pagination method instead
-          ['ACCEPTED', 'BUMPED', 'ACTIVE_CONVO', 'DEMO', 'REMOVED'],
-          'ALL',
-          undefined,
-          true,
-        ).then((res) => {
-          setProspects(res.data)
-        })
-        setFetchedProspectId(prospectId);
-    }
+  if (!fetchedProspect) {
+    console.log("Entering prospectId if statement for prospectId: " + prospectId)
+
+    setFetchingProspect(true);
+    const response = getProspects(
+        userToken,
+        undefined,
+        "SELLSCALE",
+        10000, // TODO: Maybe use pagination method instead
+        ['ACCEPTED', 'BUMPED', 'ACTIVE_CONVO', 'DEMO', 'REMOVED'],
+        'ALL',
+        undefined,
+        true,
+        prospectId
+      ).then((res) => {
+        const prospects = res.data as ProspectShallow[];
+        const prospectTemp: ProspectShallow | undefined = prospects?.find((prospect) => prospect.id === prospectId);
+        console.log(prospectTemp)
+        setProspect(prospectTemp);
+      }).catch((err) => {
+        console.log(err)
+      }).finally(() => {
+        console.log("Setting fetching prospect to false")
+        setFetchingProspect(false);
+      })
+    setFetchedProspect(true)
     setFetchingProspect(false);
-  })
-  const prospect: ProspectShallow | undefined = prospects?.find((prospect) => prospect.id === prospectId);
-  console.log(prospect)
+    setFetchedProspectId(prospectId);
+  }
 
   useEffect(() => {
     if (!data) {
@@ -353,8 +363,11 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                         </Card>
                         : null 
                     }
-                    {prospect?.overall_status !== 'PROSPECTED' &&
+                    {prospect && prospect?.overall_status !== 'PROSPECTED' && prospect?.overall_status !== 'SENT_OUTREACH' &&
                         <Card withBorder mt='xs'>
+                          <Title order={4} mb="xs">
+                            Conversation
+                          </Title>
                           {
                             <InboxProspectConvo 
                               prospects={prospect?.overall_status !== 'PROSPECTED' && prospect?.id ? [prospect] : []} 

@@ -5,7 +5,8 @@ import _ from "lodash";
 import { isWithinLastXDays } from "@utils/general";
 import { prospectStatuses } from "@common/inbox/utils";
 
-export async function getProspects(userToken: string,
+export async function getProspects(
+  userToken: string,
   query?: string,
   channel?: string,
   limit?: number,
@@ -13,6 +14,7 @@ export async function getProspects(userToken: string,
   show_purgatory?: boolean | 'ALL',
   persona_id?: number,
   shallow_data?: boolean,
+  prospect_id?: number,
 ): Promise<MsgResponse> {
 
   const response = await fetch(
@@ -31,6 +33,7 @@ export async function getProspects(userToken: string,
         show_purgatory: show_purgatory,
         persona_id: persona_id,
         shallow_data: shallow_data,
+        prospect_id: prospect_id,
       }),
     }
   );

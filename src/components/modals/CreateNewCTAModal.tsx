@@ -12,9 +12,10 @@ import {
   Card,
   Container,
   Box,
+  Select,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -24,6 +25,7 @@ import { showNotification } from "@mantine/notifications";
 import createCTA from "@utils/requests/createCTA";
 import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
 import { DateInput } from "@mantine/dates";
+import { API_URL } from '@constants/data';
 
 export default function CreateNewCTAModel({
   context,
@@ -36,6 +38,9 @@ export default function CreateNewCTAModel({
   const [error, setError] = useState<string | null>(null);
   const [expirationDate, setExpirationDate] = useState<Date | null>(null);
   const userToken = useRecoilValue(userTokenState);
+  const [fetchedCTATypes, setFetchedCTATypes] = useState(false);
+  const [ctaTypes, setCTATypes]: any = useState([] as any[]);
+  const [ctaType, setCTAType] = useState("manually-added" as string);
 
   const form = useForm({
     initialValues: {
@@ -43,10 +48,41 @@ export default function CreateNewCTAModel({
     },
   });
 
+  const fetchCTATypes = async () => {
+    fetch(`${API_URL}/message_generation/cta_types`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+        },
+        })
+        .then((response) => response.json())
+        .then((data) => {
+          let ctaTypesArray: any = Object.keys(data).map((key) => {
+            return { value: data[key], label: key };
+          })
+
+          setCTATypes(ctaTypesArray);
+        }
+      );
+  }
+
+
+
+  useEffect(() => {
+    fetchCTATypes();
+  }, []);
+
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
-    const result = await createCTA(userToken, innerProps.personaId, values.cta, expirationDate || undefined);
+    const result = await createCTA(
+      userToken, 
+      innerProps.personaId, 
+      values.cta, 
+      expirationDate || undefined,
+      ctaType
+    );
 
     setLoading(false);
 
@@ -147,26 +183,37 @@ export default function CreateNewCTAModel({
           </Flex>
         </Flex>
 
-        <Group my={20}>
-          <Box>
-                <Text fz='sm' fw={500}>
-                  Set CTA Expiration
-                </Text>
-                <Text fz='xs' c="dimmed">
-                  This CTA will automatically deactivate after the date set (optional).
-                </Text>
-          </Box>
-          <Box>
-            <DateInput
-              value={expirationDate}
-              onChange={setExpirationDate}
-              placeholder="Set Expiration Date"
-              clearable
-              maw={400}
-              mx="auto"
+        <Flex direction="row" mt="md">
+          <Group my={20}>
+            <Box>
+              <Text fz='sm' fw={500}>
+                Set CTA Expiration
+              </Text>
+              <Text fz='xs' c="dimmed">
+                This CTA will automatically deactivate after the date set (optional).
+              </Text>
+              <DateInput
+                value={expirationDate}
+                onChange={setExpirationDate}
+                placeholder="Set Expiration Date"
+                clearable
+                maw={400}
+                mx="auto"
+              />
+            </Box>
+          </Group>
+
+          <Group my={20} ml='md'>
+            <Select
+              label="Select CTA Type"
+              description="Select the tag that best describes this CTA. (optional)"
+              placeholder="Select CTA Type"
+              defaultValue={"manually-added"}
+              data={ctaTypes}
+              onChange={(value: string) => {setCTAType(ctaTypes.find((ctaType: any) => ctaType.value === value)?.label);}}
             />
-          </Box>
-        </Group>
+          </Group>
+        </Flex>
 
         {error && (
           <Text color="red" size="sm" mt="sm">

@@ -502,7 +502,7 @@ function IntroMessageSection() {
             <Center h={100}>
               <Stack>
                 <Text ta="center" c="dimmed" fs="italic" fz="sm">
-                  No prospects found!
+                  No prospects found to show example message.
                 </Text>
                 <Button
                   variant="filled"
@@ -1275,7 +1275,7 @@ function FrameworkSection(props: {
               <Center h={100}>
                 <Stack>
                   <Text ta="center" c="dimmed" fs="italic" fz="sm">
-                    No prospects found!
+                    No prospects found to show example message.
                   </Text>
                   <Button
                     variant="filled"

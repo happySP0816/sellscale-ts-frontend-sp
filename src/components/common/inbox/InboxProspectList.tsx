@@ -76,6 +76,7 @@ import {
   currentInboxCountState,
   currentProjectState,
 } from "@atoms/personaAtoms";
+import { ProjectSelect } from '@nav/old/ProjectSelect';
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<"div"> {
   count: number;
@@ -385,6 +386,7 @@ export default function ProspectList(props: {
           position: "relative",
         })}
       >
+        <ProjectSelect />
         <Container pt={20} pb={10} px={20} m={0}>
           <Input
             styles={{

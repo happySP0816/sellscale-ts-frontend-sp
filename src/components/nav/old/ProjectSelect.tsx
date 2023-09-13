@@ -31,6 +31,7 @@ import {
   IconPlus,
   IconStack3,
   IconCircle4Filled,
+  IconX,
 } from "@tabler/icons-react";
 import { navigateToPage } from "@utils/documentChange";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
@@ -57,7 +58,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => void }) {
+export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => void, disableSelectDefaultProject?: boolean }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const navigate = useNavigate();
@@ -75,6 +76,11 @@ export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => v
         response.status === "success"
           ? (response.data as PersonaOverview[])
           : [];
+      
+      if (!props.disableSelectDefaultProject){
+        return
+      }
+
       setProjects(result);
 
       const currentPersonaId = getCurrentPersonaId();
@@ -98,47 +104,62 @@ export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => v
   }, []);
 
   return (
-    <Button
-      size="xs"
-      variant='outline'
-      leftIcon={<IconLayoutSidebar size="1.05rem" stroke={1.5} />}
-      rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
-      w={'400px'}
-      onClick={() => {
-        openContextModal({
-          modal: "personaSelect",
-          title: (
-            <Flex w="100%" pr="6px">
-              <Flex dir="row" justify="space-between" align={"center"} w="100%">
-                <Title order={3}>Your Personas</Title>
-                <Group>
-                  <Button
-                    variant="subtle"
-                    compact
-                    onClick={() => {
-                      openContextModal({
-                        modal: "uploadProspects",
-                        title: <Title order={3}>Create Persona</Title>,
-                        innerProps: { mode: "CREATE-ONLY" },
-                      });
-                    }}
-                  >
-                    New Persona
-                  </Button>
-                </Group>
+    <Flex direction='row'>
+      <Button
+        size="xs"
+        variant='outline'
+        leftIcon={<IconLayoutSidebar size="1.05rem" stroke={1.5} />}
+        rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
+        maw={'400px'}
+        w='85%'
+        ml='xs'
+        mr='xs'
+        mt='xs'
+        onClick={() => {
+          openContextModal({
+            modal: "personaSelect",
+            title: (
+              <Flex w="100%" pr="6px">
+                <Flex dir="row" justify="space-between" align={"center"} w="100%">
+                  <Title order={3}>Your Personas</Title>
+                  <Group>
+                    <Button
+                      variant="subtle"
+                      compact
+                      onClick={() => {
+                        openContextModal({
+                          modal: "uploadProspects",
+                          title: <Title order={3}>Create Persona</Title>,
+                          innerProps: { mode: "CREATE-ONLY" },
+                        });
+                      }}
+                    >
+                      New Persona
+                    </Button>
+                  </Group>
+                </Flex>
               </Flex>
-            </Flex>
-          ),
-          innerProps: {
-            onClick: (persona: PersonaOverview) => {
-              props.onClick && props.onClick(persona);
+            ),
+            innerProps: {
+              onClick: (persona: PersonaOverview) => {
+                props.onClick && props.onClick(persona);
+              },
             },
-          },
-          styles: { title: { width: "100%" } },
-        });
-      }}
-    >
-      {currentProject?.name || "Select Persona"}
-    </Button>
+            styles: { title: { width: "100%" } },
+          });
+        }}
+      >
+        {currentProject?.name || "Select Persona"}
+      </Button>
+
+      <Button color='blue' size='xs' variant='subtle' mt='xs'
+        onClick={
+          () => {
+            setCurrentProject(null);
+          }
+        }>
+        <IconX size='0.8rem' />
+      </Button>
+    </Flex>
   );
 }

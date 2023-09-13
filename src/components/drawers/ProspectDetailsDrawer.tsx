@@ -353,19 +353,18 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                         </Card>
                         : null 
                     }
-
-                    {
-                      prospect?.overall_status !== 'PROSPECTED' && prospect?.id && 
+                    {prospect?.overall_status !== 'PROSPECTED' &&
                         <Card withBorder mt='xs'>
                           {
                             <InboxProspectConvo 
-                              prospects={[prospect]} 
+                              prospects={prospect?.overall_status !== 'PROSPECTED' && prospect?.id ? [prospect] : []} 
                               onTabChange={
                                 (value) => {
                                   setChannelType(value as Channel | null);
                                 }
                               }
                               openConvoBox
+                              hideTitle
                             />
                           }
                         </Card>

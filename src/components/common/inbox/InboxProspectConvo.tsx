@@ -237,7 +237,7 @@ export function ProspectConvoMessage(props: {
 
 export const HEADER_HEIGHT = 102;
 
-export default function ProspectConvo(props: { prospects: ProspectShallow[], onTabChange?: (tab: string) => void, openConvoBox?: boolean}) {
+export default function ProspectConvo(props: { prospects: ProspectShallow[], onTabChange?: (tab: string) => void, openConvoBox?: boolean, hideTitle?: boolean }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
 
@@ -549,38 +549,39 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
     <Flex gap={0} direction="column" wrap="nowrap" h={"100%"} bg="white">
       <div style={{ height: HEADER_HEIGHT, position: "relative" }}>
         <></>
-        <Group position="apart" p={15} h={66} sx={{ flexWrap: "nowrap" }}>
-          <div style={{ overflow: "hidden" }}>
-            <Title order={3} truncate>
-              {data?.details.full_name}
-            </Title>
-            <Text weight={300} fs="italic" size={10} c="dimmed" truncate>
-              {prospect &&
-                new Date(prospect.hidden_until).getTime() >
-                new Date().getTime() ? (
-                <>
-                  Snoozed Until:{" "}
-                  {convertDateToLocalTime(new Date(prospect.hidden_until))}
-                </>
-              ) : (
-                <>Last Updated: {convertDateToCasualTime(new Date())}</>
-              )}
-            </Text>
-          </div>
-          <Group sx={{ flexWrap: "nowrap" }}>
-            <Badge size="lg" color={"blue"}>
-              {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
-            </Badge>
-            <ProspectDetailsOptionsMenu
-              prospectId={openedProspectId}
-              archetypeId={prospect?.archetype_id || -1}
-              aiEnabled={
-                ai_disabled ? undefined : !prospect?.deactivate_ai_engagement
-              }
-              refetch={refetch}
-            />
+          <Group position="apart" p={15} h={66} sx={{ flexWrap: "nowrap" }}>
+            <div style={{ overflow: "hidden" }}>
+              <Title order={3} truncate>
+                {data?.details.full_name}
+              </Title>
+              <Text weight={300} fs="italic" size={10} c="dimmed" truncate>
+                {prospect &&
+                  new Date(prospect.hidden_until).getTime() >
+                  new Date().getTime() ? (
+                  <>
+                    Snoozed Until:{" "}
+                    {convertDateToLocalTime(new Date(prospect.hidden_until))}
+                  </>
+                ) : (
+                  <>Last Updated: {convertDateToCasualTime(new Date())}</>
+                )}
+              </Text>
+            </div>
+            <Group sx={{ flexWrap: "nowrap" }}>
+              <Badge size="lg" color={"blue"}>
+                {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
+              </Badge>
+              <ProspectDetailsOptionsMenu
+                prospectId={openedProspectId}
+                archetypeId={prospect?.archetype_id || -1}
+                aiEnabled={
+                  ai_disabled ? undefined : !prospect?.deactivate_ai_engagement
+                }
+                refetch={refetch}
+              />
+            </Group>
           </Group>
-        </Group>
+        
         <Tabs
           variant="outline"
           defaultValue="LINKEDIN"

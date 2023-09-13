@@ -6,7 +6,7 @@ import PageFrame from "@common/PageFrame";
 import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
 import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
 import EmojiPicker from 'emoji-picker-react';
-import { IconChevronsUp, IconChevronsDown, IconChartDots3, IconList } from '@tabler/icons-react';
+import { IconChevronsUp, IconChevronsDown, IconChartDots3, IconList, IconAlarm, IconAlertCircle } from '@tabler/icons-react';
 
 
 import {
@@ -31,6 +31,7 @@ import {
   Loader,
   Collapse,
   SegmentedControl,
+  Alert,
 } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { openContextModal } from "@mantine/modals";
@@ -273,6 +274,19 @@ export default function PersonaCampaigns() {
                         <Loader />
                       </Center>
                     )
+                  }
+                  {
+                    filteredProjects.filter((persona) => persona.active).length > 1 && 
+                    <Alert
+                      sx={{
+                        borderRadius: 'md',
+                        border: 'solid 1px red',
+                      }}
+                      color='red'
+                      title='Multiple Active Personas'
+                      children='You have multiple active personas. This is not recommended as it will cause your campaigns to compete with each other. We recommend you deactivate all but one persona.'
+                      icon={<IconAlertCircle size='1rem' />}
+                    />
                   }
                   {!loadingPersonas && filteredProjects.filter((persona) => persona.active).map((persona, index) => (
                     <PersonCampaignCard

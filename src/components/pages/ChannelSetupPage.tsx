@@ -9,17 +9,21 @@ import { currentProjectState } from '@atoms/personaAtoms';
 import { useRecoilValue } from 'recoil';
 import { IconArrowUp, IconBulb } from '@tabler/icons-react';
 import NurturePage from './NurturePage';
+import { useLoaderData } from 'react-router-dom';
 
 export default function ChannelSetupPage() {
-  const [selectedChannel, setSelectedChannel] = React.useState('linkedin');
-  const currentProject = useRecoilValue(currentProjectState);
+  const { channelType } = useLoaderData() as {
+    channelType: string;
+  };
 
+  const [selectedChannel, setSelectedChannel] = React.useState(channelType);
+  const currentProject = useRecoilValue(currentProjectState);
 
   return (
     <>
       <ChannelsSetupSelector 
         setSelectedChannel={setSelectedChannel}
-        selectedChannel='linkedin'
+        selectedChannel={selectedChannel}
         hideChannels={!currentProject} />
         
       {currentProject ? 

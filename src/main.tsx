@@ -156,8 +156,11 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<LinkedinConvoSimulatorPage />} />,
       },
       {
-        path: "setup",
+        path: "setup/:channelType?",
         element: <RestrictedRoute page={<ChannelSetupPage />} />,
+        loader: async ({ params }: { params: any }) => {
+          return { channelType: params.channelType };
+        }
       },
       {
         path: "linkedin/:tabId?",

@@ -74,7 +74,7 @@ import ComingSoonCard from '@common/library/ComingSoonCard';
 import CampaignGraph from './campaigngraph';
 import { showNotification } from '@mantine/notifications';
 
-type CampaignPersona = {
+export type CampaignPersona = {
   id: number;
   name: string;
   emails_sent: number;
@@ -535,7 +535,7 @@ function PersonCampaignCard(props: {
                       if (props.project == undefined) return;
                       setOpenedProspectId(-1);
                       setCurrentProject(props.project);
-                      navigateToPage(navigate, `/${sectionType.toLowerCase()}/setup`);
+                      navigateToPage(navigate, `/setup/${sectionType.toLowerCase()}`);
                     }}/>
             </Box>}
             {props.viewMode === 'list-view' && <Box>
@@ -548,7 +548,7 @@ function PersonCampaignCard(props: {
                       if (props.project == undefined) return;
                       setOpenedProspectId(-1);
                       setCurrentProject(props.project);
-                      navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
+                      navigateToPage(navigate, `/setup/${section.type.toLowerCase()}`);
                     }} />
                   </Box>
                 })}
@@ -565,7 +565,7 @@ function PersonCampaignCard(props: {
                               if (props.project == undefined) return;
                               setOpenedProspectId(-1);
                               setCurrentProject(props.project);
-                              navigateToPage(navigate, `/${section.type.toLowerCase()}/setup`);
+                              navigateToPage(navigate, `/setup/${section.type.toLowerCase()}`);
                             }} />
                           </Box>
                         })}

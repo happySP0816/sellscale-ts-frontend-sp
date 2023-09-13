@@ -4,7 +4,7 @@ import { Paper, Flex, Textarea, Text, Button, useMantineTheme, Group, ActionIcon
 import { getHotkeyHandler } from '@mantine/hooks';
 import { hideNotification, showNotification } from '@mantine/notifications';
 import { IconExternalLink, IconWriting, IconSend, IconChevronUp, IconChevronDown, IconSettings, IconArrowsDiagonalMinimize2 } from '@tabler/icons';
-import { IconMessage2Cog, IconSettingsFilled } from '@tabler/icons-react';
+import { IconMessage2Cog, IconSettingsFilled, IconWand } from '@tabler/icons-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { deleteAutoBumpMessage } from '@utils/requests/autoBumpMessage';
 import { sendLinkedInMessage } from '@utils/requests/sendMessage';
@@ -21,6 +21,7 @@ import TextAreaWithAI from '@common/library/TextAreaWithAI';
 import { JSONContent } from '@tiptap/react';
 import DOMPurify from 'dompurify';
 import { postGenerateFollowupEmail } from '@utils/requests/emailMessageGeneration';
+import { API_URL } from '@constants/data';
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -281,6 +282,51 @@ export default forwardRef(function InboxProspectConvoSendBox(
     }, 200), []
   )
 
+  const smartGenerate = async () => {
+    setMsgLoading(true);
+    if (openedOutboundChannel === 'LINKEDIN') {
+      const result = fetch(`${API_URL}/li_conversation/prospect/generate_smart_response`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`,
+        },
+        body: JSON.stringify({
+          prospect_id: props.prospectId,
+        }
+        )
+      }).then(res => res.json()).then(
+        (j) => {
+          const message = j['message']
+
+          setMessageDraft(message);
+          setAiMessage(message);
+          setBumpFramework(j['bump_framework']);
+          setAiGenerated(true);
+
+          showNotification({
+            id: "generate-linkedin-message",
+            title: "Generated message",
+            message: '',
+            color: "green",
+            autoClose: 3000,
+          })
+        }
+      ).catch((e) => {
+        showNotification({
+          id: "generate-linkedin-message-error",
+          title: "Error",
+          message: 'Failed to generate message',
+          color: "red",
+          autoClose: 3000,
+        })
+      }).finally(() => {
+        setMsgLoading(false);
+      })
+    }
+  }
+
+
   return (
     <Paper
       shadow='sm'
@@ -371,7 +417,32 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
         <Flex justify='space-between' align='center' mt='xs'>
           <Group>
-            <Button.Group>
+            {/* only show for linkedin */}
+            { openedOutboundChannel === 'LINKEDIN' && (
+                <Tooltip
+                  withArrow
+                  position='bottom'
+                  label="Smart Generate with AI">
+                  <Button 
+                    color='grape' 
+                    size='xs' 
+                    sx={{borderRadius: '4px'}}
+                    onClick={() => {
+                      showNotification({
+                        id: "generate-linkedin-message",
+                        title: "Generating message ...",
+                        message: '',
+                        color: "blue",
+                        autoClose: 3000,
+                      })
+                      smartGenerate()
+                    }}>
+                    <IconWand size='0.8rem'/>
+                  </Button>
+                </Tooltip>
+              )}
+              <Button.Group>
+              
               <Button
                 leftIcon={<IconWriting size='1rem' />}
                 variant='outline'
@@ -486,6 +557,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   color="gray.8"
                   radius={theme.radius.lg}
                   size='xs'
+                  mr='xs'
                   onClick={() => setOpenBumpFrameworks(true)}
                 >
                   {selectedBumpFramework ? (<IconSettingsFilled size="1.225rem" />) : (<IconSettings size="1.225rem" />)}

@@ -270,7 +270,9 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
   const [selectedThread, setSelectedThread] =
     useRecoilState(selectedEmailThread); // PLEASE PROTECT THIS AND USE IT
 
-  const [openedOutboundChannel, setOpenedOutboundChannel] = useState("LINKEDIN");
+  const [openedOutboundChannel, setOpenedOutboundChannel] = useRecoilState(
+    currentConvoChannelState
+  );
   const [currentConvoLiMessages, setCurrentConvoLiMessages] = useRecoilState(
     currentConvoLiMessageState
   );

@@ -504,18 +504,22 @@ function IntroMessageSection() {
                 <Text ta="center" c="dimmed" fs="italic" fz="sm">
                   No prospects found to show example message.
                 </Text>
-                <Button
-                  variant="filled"
-                  color="teal"
-                  radius="md"
-                  ml="auto"
-                  mr="0"
-                  size="xs"
-                  rightIcon={<IconUpload size={14} />}
-                  onClick={() => setUploadDrawerOpened(true)}
-                >
-                  Upload New Prospects
-                </Button>
+                <Center>
+                  <Box>
+                    <Button
+                      variant="filled"
+                      color="teal"
+                      radius="md"
+                      ml="auto"
+                      mr="0"
+                      size="xs"
+                      rightIcon={<IconUpload size={14} />}
+                      onClick={() => setUploadDrawerOpened(true)}
+                    >
+                      Upload New Prospects
+                    </Button>
+                  </Box>
+                </Center>
               </Stack>
             </Center>
           </Box>
@@ -1277,18 +1281,22 @@ function FrameworkSection(props: {
                   <Text ta="center" c="dimmed" fs="italic" fz="sm">
                     No prospects found to show example message.
                   </Text>
-                  <Button
-                    variant="filled"
-                    color="teal"
-                    radius="md"
-                    ml="auto"
-                    mr="0"
-                    size="xs"
-                    rightIcon={<IconUpload size={14} />}
-                    onClick={() => setUploadDrawerOpened(true)}
-                  >
-                    Upload New Prospects
-                  </Button>
+                  <Center>
+                    <Box>
+                      <Button
+                        variant="filled"
+                        color="teal"
+                        radius="md"
+                        ml="auto"
+                        mr="0"
+                        size="xs"
+                        rightIcon={<IconUpload size={14} />}
+                        onClick={() => setUploadDrawerOpened(true)}
+                      >
+                        Upload New Prospects
+                      </Button>
+                    </Box>
+                  </Center>
                 </Stack>
               </Center>
             </Box>
@@ -1424,8 +1432,8 @@ function FrameworkSection(props: {
             </Group>
           </Box>
           <Group position="right" mt="md">
-          <Button type="submit">Save</Button>
-        </Group>
+            <Button type="submit">Save</Button>
+          </Group>
         </form>
       </Stack>
     </Stack>

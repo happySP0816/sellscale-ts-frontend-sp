@@ -237,7 +237,7 @@ export function ProspectConvoMessage(props: {
 
 export const HEADER_HEIGHT = 102;
 
-export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
+export default function ProspectConvo(props: { prospects: ProspectShallow[], onTabChange?: (tab: string) => void, openConvoBox?: boolean}) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
 
@@ -251,7 +251,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
   const currentProject = useRecoilValue(currentProjectState);
 
   const [hasGeneratedMessage, setHasGeneratedMessage] = useState(false);
-  const [openedConvoBox, setOpenedConvoBox] = useState(false);
+  const [openedConvoBox, setOpenedConvoBox] = useState(props.openConvoBox);
 
   // This is used to fix a bug with the hacky way we're doing message loading now
   const currentMessagesProspectId = useRef(-1);
@@ -270,9 +270,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
   const [selectedThread, setSelectedThread] =
     useRecoilState(selectedEmailThread); // PLEASE PROTECT THIS AND USE IT
 
-  const [openedOutboundChannel, setOpenedOutboundChannel] = useRecoilState(
-    currentConvoChannelState
-  );
+  const [openedOutboundChannel, setOpenedOutboundChannel] = useState("LINKEDIN");
   const [currentConvoLiMessages, setCurrentConvoLiMessages] = useRecoilState(
     currentConvoLiMessageState
   );
@@ -545,9 +543,12 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
     );
   }
 
+  console.log("GOT HERE")
+
   return (
     <Flex gap={0} direction="column" wrap="nowrap" h={"100%"} bg="white">
       <div style={{ height: HEADER_HEIGHT, position: "relative" }}>
+        <></>
         <Group position="apart" p={15} h={66} sx={{ flexWrap: "nowrap" }}>
           <div style={{ overflow: "hidden" }}>
             <Title order={3} truncate>
@@ -604,6 +605,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[] }) {
                 });
               }
             }
+            props.onTabChange && props.onTabChange(value as string);
           }}
         >
           <Tabs.List px={20}>

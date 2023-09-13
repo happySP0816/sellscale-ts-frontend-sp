@@ -18,10 +18,8 @@ import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
 export const PulseWrapper = () => {
   const currentProject = useRecoilValue(currentProjectState);
 
-  if (!currentProject) return null;
-
   const userToken = useRecoilValue(userTokenState);
-  const currentProjectId = currentProject.id;
+  const currentProjectId = currentProject?.id;
   const navigate = useNavigate();
 
   const [uploads, setUploads] = useState<any[]>([]);
@@ -37,7 +35,6 @@ export const PulseWrapper = () => {
   const openUploadProspects = () => {
     setUploadDrawerOpened(true);
   };
-  
 
   return (
     <div>
@@ -62,10 +59,10 @@ export const PulseWrapper = () => {
                 )}
           </Flex>
           </Box>
-        <iframe 
+        {currentProject?.id && <iframe 
             src={`https://sellscale.retool.com/embedded/public/d26f8f26-7d77-4827-b53e-1ae2c0eda0c8#authToken=${userToken}&archetype_id=${currentProjectId}`}
             style={{ width: '100%', height: '1000px', border: 'none' }}
-          />
+          />}
         
       </Box>
       <PersonaUploadDrawer

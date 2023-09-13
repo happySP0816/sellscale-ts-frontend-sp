@@ -415,7 +415,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           </Box>
         )}
 
-        <Flex justify='space-between' align='center' mt='xs'>
+        <Flex justify='space-between' align='center' mt='xs' direction='row'>
           <Group>
             {/* only show for linkedin */}
             { openedOutboundChannel === 'LINKEDIN' && (

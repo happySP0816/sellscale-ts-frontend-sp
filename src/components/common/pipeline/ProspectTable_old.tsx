@@ -171,7 +171,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
   const queryClient = useQueryClient();
 
   const [personas, setPersonas] = useState<PersonaOverview[]>([]);
-  const [personaId, setPersonaId] = useState<number | null>(null);
+  const personaId = props.personaSpecific ?? currentProject?.id ?? null;
 
   const [bumpedCount, setBumpedCount] = useState("all");
 
@@ -186,7 +186,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
     setPage(1);
     setSortStatus(status);
   };
-
+  
   useEffect(() => {
     setPage(1);
   }, [search, statuses, channel]);
@@ -196,6 +196,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
       getSelectorTypeFromStatuses(statuses, data_channels, channel)
     );
   }, [statuses]);
+
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
@@ -415,7 +416,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           />
         </Grid.Col>
         <Grid.Col span={2}>
-          <Select
+          {/* <Select
             data={personas.map((persona) => {
               return {
                 label: persona.name,
@@ -431,7 +432,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
               value ? setPersonaId(+value) : setPersonaId(null)
             }
             className="truncate"
-          />
+          /> */}
         </Grid.Col>
         <Grid.Col span={2}>
           <Switch.Group

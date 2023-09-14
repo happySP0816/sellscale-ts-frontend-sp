@@ -64,7 +64,7 @@ const Process: React.FC = () => {
                   <Box
                     h={"0.25rem"}
                     w={"100%"}
-                    bg={status ? "green" : "gray.3"}
+                    bg={status ? "green" : "red"}
                     sx={{ borderRadius: "0.25rem" }}
                   />
                 )

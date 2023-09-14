@@ -280,12 +280,14 @@ export function AiMetaDataBadge(props: {
                       </Text>
                       <List>
                         {props.initialMessageResearchPoints?.map((point, index) => (
-                          <List.Item key={index} sx={{flexDirection: 'row', display: 'flex'}}>
-                            <Badge size='xs' variant='outline'>
-                                {props.initialMessageResearchPointTypes && 
-                                props.initialMessageResearchPointTypes.length >= index - 1 && 
-                                props.initialMessageResearchPointTypes[index].replaceAll("_", " ")
-                            }</Badge>
+                          <List.Item key={index} sx={{flexDirection: 'row', display: 'flex'}}>   
+                            {
+                              props.initialMessageResearchPointTypes && 
+                                props.initialMessageResearchPointTypes.length >= index - 1 &&  
+                                <Badge size='xs' variant='outline'>
+                                    {props.initialMessageResearchPointTypes[index].replaceAll("_", " ")}
+                                </Badge>
+                            }
                             <Text size='xs'>{point}</Text>
                           </List.Item>
                         ))}

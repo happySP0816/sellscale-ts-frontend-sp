@@ -62,6 +62,7 @@
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.10",
     "chart.js": "^4.3.0",
+    "chartjs-plugin-annotation": "^3.0.1",
     "dayjs": "^1.11.7",
     "emoji-picker-react": "^4.4.12",
     "env-cmd": "^10.1.0",

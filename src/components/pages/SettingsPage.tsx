@@ -1,5 +1,6 @@
 import PageFrame from "@common/PageFrame";
 import {
+  Flex,
   Group,
   LoadingOverlay,
   Tabs,
@@ -15,7 +16,7 @@ import {
 } from "@tabler/icons";
 import PageTitle from "@nav/old/PageTitle";
 import { useQuery } from "@tanstack/react-query";
-import LinkedInConnectedCard from "@common/settings/LinkedInConnectedCard";
+import LinkedInConnectedCard from "@common/settings/LinkedInIntegrationCard";
 import { syncLocalStorage } from "@auth/core";
 import NylasConnectedCard from "@common/settings/NylasConnectedCard";
 import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
@@ -110,7 +111,7 @@ export default function SettingsPage() {
           </Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="linkedinConnection" pl="xs">
+        <Tabs.Panel value="linkedinConnection" pl="xs" w='60%'>
           <LinkedInConnectedCard
             connected={userData ? userData.li_voyager_connected : false}
           />

@@ -19,6 +19,7 @@ import {
   Flex,
   Card,
   Tooltip,
+  Grid,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -40,6 +41,8 @@ import LinkedInAuthOption from "./LinkedInAuthOption";
 import { getBrowserExtensionURL, proxyURL } from "@utils/general";
 import { useEffect, useState } from "react";
 import getLiProfile from "@utils/requests/getLiProfile";
+import Overview from "./LinkedIn/Overview";
+import Information from "./LinkedIn/Information";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -59,7 +62,6 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
   const userData = useRecoilValue(userDataState);
-  console.log('userData', userData)
 
   const [loadingConnection, setLoadingConnection] = useState(false);
   const [liProfile, setLiProfile] = useState<null | any>(null);
@@ -75,8 +77,43 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
   });
 
   return (
-    <Paper withBorder m="xs" p="md" radius="md">
-      <Stack>
+    <Paper withBorder radius="md" w='100%'>
+
+      {
+        props.connected ? (
+          <>
+            <Overview />
+            <Information />
+          </>
+        ) : (
+          <Flex direction='column' p='md'>
+            <Title order={3} mb={"0.25rem"}>
+              LinkedIn Integration
+            </Title>
+            <Text c={"gray.6"} fz={"0.75rem"} mb={"1rem"}>
+              By being connected to LinkedIn, SellScale is able to send connections,
+              read, and respond to your conversations.
+            </Text>
+            <Center>
+              <Button
+                component="a"
+                target="_blank"
+                rel="noopener noreferrer"
+                href={getBrowserExtensionURL(usingFirefox)}
+                my={20}
+                variant="outline"
+                size="md"
+                color="green"
+                rightIcon={<IconCloudDownload size="1rem" />}
+              >
+                Install {usingFirefox ? "Firefox" : "Chrome"} Extension
+              </Button>
+            </Center>
+          </Flex>
+        )
+      }
+
+      {/* <Stack>
         <div>
           <Group>
             <Title order={3}>LinkedIn Integration</Title>
@@ -301,7 +338,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
             </Flex>
           </div>
         )}
-      </Stack>
+      </Stack> */}
     </Paper>
   );
 }

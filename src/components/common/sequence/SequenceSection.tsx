@@ -72,6 +72,7 @@ import {
   getLiConvoSim,
 } from "@utils/requests/linkedinConvoSimulation";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
+import toggleCTA from "@utils/requests/toggleCTA";
 import {
   updateBlocklist,
   updateInitialBlocklist,
@@ -489,9 +490,9 @@ function IntroMessageSection() {
       <Group position="apart">
         <Group>
           <Title order={3}>Intro Message</Title>
-          {ctasItemsCount !== undefined && (
-            <Badge color="teal">{ctasItemsCount} CTAs Active</Badge>
-          )}
+          {/* {ctasItemsCount !== undefined && (
+            <Badge color="blue" fw={500}>{ctasItemsCount} CTAs Active</Badge>
+          )} */}
         </Group>
       </Group>
       <Box my={5}>
@@ -692,12 +693,11 @@ function IntroMessageSection() {
             />
           </Tabs.Panel>
           <Tabs.Panel value="ctas">
-            <PersonaDetailsCTAs
-              onCTAsLoaded={(data) =>
+            <CtaSection
+              onCTAsLoaded={(data) => {
                 setCtasItemsCount(data.filter((x: any) => x.active).length)
-              }
+              }}
             />
-            {/* <CtaSection /> */}
           </Tabs.Panel>
           <Tabs.Panel value="voice">
             <VoicesSection />
@@ -1785,7 +1785,7 @@ export const PersonalizationCard: React.FC<{
   );
 };
 
-const CtaSection = (props: {}) => {
+const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void }) => {
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
 
@@ -1827,10 +1827,11 @@ const CtaSection = (props: {}) => {
           total_count: cta.performance?.total_count,
         };
       });
+      props.onCTAsLoaded(pageData);
       if (!pageData) {
         return [];
       } else {
-        return pageData;
+        return _.sortBy(pageData, ['percentage', 'id']).reverse();
       }
     },
     refetchOnWindowFocus: false,
@@ -1838,7 +1839,8 @@ const CtaSection = (props: {}) => {
   });
 
   return (
-    <Box pt="md">
+    <Box pt="md" sx={{ position: 'relative' }}>
+      <LoadingOverlay visible={isFetching} zIndex={10} />
       {data &&
         data.map((e, index) => (
           <CTAOption
@@ -1849,22 +1851,36 @@ const CtaSection = (props: {}) => {
               checked: e.active,
               tags: [
                 {
-                  label: "ACCEPTANCE:",
+                  label: "Acceptance:",
                   highlight: e.percentage + "%",
                   color: "blue",
-                  variant: "light",
+                  variant: "subtle",
                 },
                 {
-                  label: "PROSPECTS:",
+                  label: "Prospects:",
                   highlight: e.total_responded + "/" + e.total_count,
-                  color: "green",
-                  variant: "light",
+                  color: "indigo",
+                  variant: "subtle",
                 },
               ],
             }}
             key={index}
-            onToggle={(enabled) => {}}
-            onClickEdit={() => {}}
+            onToggle={async (enabled) => {
+              const result = await toggleCTA(userToken, e.id);
+              if (result.status === "success") {
+                await refetch();
+              }
+            }}
+            onClickEdit={() => {
+              openContextModal({
+                modal: "editCTA",
+                title: <Title order={3}>Edit CTA</Title>,
+                innerProps: {
+                  personaId: currentProject?.id,
+                  cta: e,
+                },
+              });
+            }}
           />
         ))}
     </Box>
@@ -1875,7 +1891,7 @@ interface Tag {
   label: string;
   highlight?: string;
   color: string;
-  variant: "light" | "filled";
+  variant: "subtle" | "filled";
 }
 
 interface TabOption {
@@ -1892,22 +1908,13 @@ const CTAOption: React.FC<{
   onClickEdit: () => void;
 }> = ({ data, onToggle, onClickEdit }) => {
   return (
-    <Flex
-      py={"0.5rem"}
-      px={"1rem"}
-      gap={"0.5rem"}
-      sx={{
-        borderWidth: "1px",
-        borderStyle: "solid",
-        borderColor: "#E9ECEF",
-        borderRadius: "4px",
-      }}
-    >
+    <Card shadow="xs" radius={"md"} py={10} mb={5}>
       <Flex direction={"column"} w={"100%"}>
         <Flex gap={"0.5rem"} mb={"0.75rem"} justify={"space-between"}>
           <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>
             {data.tags.map((e) => (
               <Button
+                key={e.label}
                 variant={e.variant}
                 size="xs"
                 color={e.color}
@@ -1916,8 +1923,9 @@ const CTAOption: React.FC<{
                 fz={"0.75rem"}
                 py={"0.125rem"}
                 px={"0.25rem"}
+                fw={"400"}
               >
-                {e.label} {e.highlight && <strong> {e.highlight}</strong>}
+                {e.label}{e.highlight && <strong style={{ paddingLeft: 5 }}> {e.highlight}</strong>}
               </Button>
             ))}
           </Flex>
@@ -1932,6 +1940,7 @@ const CTAOption: React.FC<{
               fz={"0.75rem"}
               py={"0.125rem"}
               px={"0.25rem"}
+              fw={"400"}
               leftIcon={<IconEdit size={"0.75rem"} />}
               onClick={onClickEdit}
             >
@@ -1939,22 +1948,23 @@ const CTAOption: React.FC<{
             </Button>
             <Switch
               checked={data.checked}
-              color={"green"}
+              color={"blue"}
+              size='xs'
               onChange={({ currentTarget: { checked } }) => onToggle(checked)}
             />
           </Flex>
         </Flex>
 
-        <Text fw={"600"} fz={"0.75rem"} color={"gray.9"}>
+        <Text fw={"400"} fz={"0.75rem"} color={"gray.8"}>
           {data.label}
         </Text>
-        <Text
+        {/* <Text
           fw={"500"}
           fz={"0.75rem"}
           color={"gray.5"}
           dangerouslySetInnerHTML={{ __html: data.description }}
-        ></Text>
+        ></Text> */}
       </Flex>
-    </Flex>
+    </Card>
   );
 };

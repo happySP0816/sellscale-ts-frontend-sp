@@ -3,13 +3,14 @@ import {
   uploadDrawerOpenState,
 } from "@atoms/personaAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { logout } from "@auth/core";
 import ModalSelector from "@common/library/ModalSelector";
 import ProspectSelect from "@common/library/ProspectSelect";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import VoicesSection from "@common/voice_builder/VoicesSection";
 import { API_URL } from "@constants/data";
 import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
-import { ex } from "@fullcalendar/core/internal-common";
+import { co, ct, ex } from "@fullcalendar/core/internal-common";
 import {
   Group,
   Box,
@@ -34,14 +35,19 @@ import {
   Modal,
   Menu,
   Center,
+  Tabs,
+  Grid,
+  Checkbox,
+  Flex,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useDisclosure, useHover } from "@mantine/hooks";
+import { useDebouncedValue, useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import {
   IconCheck,
   IconCopy,
   IconDots,
+  IconEdit,
   IconMessages,
   IconPencil,
   IconPlus,
@@ -66,11 +72,15 @@ import {
   getLiConvoSim,
 } from "@utils/requests/linkedinConvoSimulation";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
+import {
+  updateBlocklist,
+  updateInitialBlocklist,
+} from "@utils/requests/updatePersonaBlocklist";
 import { useDebouncedCallback } from "@utils/useDebouncedCallback";
 import _, { set } from "lodash";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { BumpFramework } from "src";
+import { BumpFramework, CTA } from "src";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -136,9 +146,16 @@ export default function SequenceSection() {
               active={activeCard === 0}
               onClick={() => setActiveCard(0)}
             />
-            <Text c="dimmed" ta="center" fz="sm">
-              ------- After accepting invite -------
-            </Text>
+            <Divider
+              variant="dashed"
+              label={
+                <Text c="dimmed" ta="center" fz="sm">
+                  After accepting invite
+                </Text>
+              }
+              labelPosition="center"
+              mx={30}
+            />
             <FrameworkCard
               title="Invite Accepted"
               badgeText="If no reply from prospect."
@@ -386,13 +403,6 @@ function IntroMessageSection() {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
-  const [numActiveCTAs, setNumActiveCTAs] = useState(-1);
-  const [openedCTAs, { open: openCTAs, close: closeCTAs }] =
-    useDisclosure(false);
-
-  const [openedVoices, { open: openVoices, close: closeVoices }] =
-    useDisclosure(false);
-
   const [prospectId, setProspectId] = useState<number>();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -403,13 +413,15 @@ function IntroMessageSection() {
     uploadDrawerOpenState
   );
 
+  const [personalizationItemsCount, setPersonalizationItemsCount] =
+    useState<number>();
+  const [ctasItemsCount, setCtasItemsCount] = useState<number>();
+
   let { hovered: startHovered, ref: startRef } = useHover();
   let { hovered: endHovered, ref: endRef } = useHover();
 
   const openPersonalizationSettings = () => {};
-  const openCTASettings = () => {
-    openCTAs();
-  };
+  const openCTASettings = () => {};
 
   const getIntroMessage = async (prospectId: number) => {
     if (!currentProject) return null;
@@ -477,8 +489,8 @@ function IntroMessageSection() {
       <Group position="apart">
         <Group>
           <Title order={3}>Intro Message</Title>
-          {numActiveCTAs !== -1 && (
-            <Badge color="green">{numActiveCTAs} CTAs Active</Badge>
+          {ctasItemsCount !== undefined && (
+            <Badge color="teal">{ctasItemsCount} CTAs Active</Badge>
           )}
         </Group>
       </Group>
@@ -582,54 +594,116 @@ function IntroMessageSection() {
             </Box>
           </Box>
         )}
-        <Group mt="sm" position="apart">
-          <Group spacing={5}>
-            <Box>
-              <Box ref={startRef}>
-                <Button
-                  color="green"
-                  variant="outline"
-                  size="xs"
-                  onClick={openPersonalizationSettings}
-                  disabled
-                >
-                  Edit Personalization Settings
-                </Button>
-              </Box>
-            </Box>
-            <Box>
-              <Box ref={endRef}>
-                <Button variant="outline" size="xs" onClick={openCTASettings}>
-                  Edit CTAs
-                </Button>
-              </Box>
-            </Box>
-          </Group>
-          <Button radius="xl" size="xs" onClick={openVoices}>
-            Train Your AI
-          </Button>
-        </Group>
+
+        <Tabs
+          pt="sm"
+          variant="pills"
+          keepMounted={true}
+          radius="md"
+          defaultValue="none"
+          allowTabDeactivation
+        >
+          <Tabs.List>
+            <Tabs.Tab
+              value="personalization"
+              color="teal.5"
+              rightSection={
+                <>
+                  {personalizationItemsCount ? (
+                    <Badge
+                      w={16}
+                      h={16}
+                      sx={{ pointerEvents: "none" }}
+                      variant="filled"
+                      size="xs"
+                      p={0}
+                      color="teal.6"
+                    >
+                      {personalizationItemsCount}
+                    </Badge>
+                  ) : (
+                    <></>
+                  )}
+                </>
+              }
+              sx={(theme) => ({
+                "&[data-active]": {
+                  backgroundColor: theme.colors.teal[0] + "!important",
+                  borderRadius: theme.radius.md + "!important",
+                  color: theme.colors.teal[8] + "!important",
+                },
+              })}
+            >
+              Personalization Settings
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="ctas"
+              color="blue.4"
+              rightSection={
+                <>
+                  {ctasItemsCount ? (
+                    <Badge
+                      w={16}
+                      h={16}
+                      sx={{ pointerEvents: "none" }}
+                      variant="filled"
+                      size="xs"
+                      p={0}
+                      color="blue.5"
+                    >
+                      {ctasItemsCount}
+                    </Badge>
+                  ) : (
+                    <></>
+                  )}
+                </>
+              }
+              sx={(theme) => ({
+                "&[data-active]": {
+                  backgroundColor: theme.colors.blue[0] + "!important",
+                  borderRadius: theme.radius.md + "!important",
+                  color: theme.colors.blue[8] + "!important",
+                },
+              })}
+            >
+              Your CTAs
+            </Tabs.Tab>
+            <Tabs.Tab value="voice" ml="auto">
+              Train Your AI
+            </Tabs.Tab>
+          </Tabs.List>
+
+          <Tabs.Panel value="personalization">
+            <PersonalizationSection
+              blocklist={currentProject.transformer_blocklist_initial ?? []}
+              onItemsChange={async (items) => {
+                setPersonalizationItemsCount(
+                  items.filter((x: any) => x.checked).length
+                );
+
+                // Update transformer blocklist
+                const result = await updateInitialBlocklist(
+                  userToken,
+                  currentProject.id,
+                  items.filter((x) => !x.checked).map((x) => x.id)
+                );
+                console.log(result);
+              }}
+            />
+          </Tabs.Panel>
+          <Tabs.Panel value="ctas">
+            <PersonaDetailsCTAs
+              onCTAsLoaded={(data) =>
+                setCtasItemsCount(data.filter((x: any) => x.active).length)
+              }
+            />
+            {/* <CtaSection /> */}
+          </Tabs.Panel>
+          <Tabs.Panel value="voice">
+            <VoicesSection />
+          </Tabs.Panel>
+        </Tabs>
       </Stack>
-      <Modal
-        opened={openedCTAs}
-        onClose={closeCTAs}
-        title={<Title order={3}>Your Call-to-Actions</Title>}
-        size="xl"
-      >
-        <PersonaDetailsCTAs
-          onCTAsLoaded={(data) =>
-            setNumActiveCTAs(data.filter((x: any) => x.active).length)
-          }
-        />
-      </Modal>
-      <Modal
-        opened={openedVoices}
-        onClose={closeVoices}
-        title={<Title order={3}>Your Voices</Title>}
-        size="xl"
-      >
-        <VoicesSection />
-      </Modal>
     </Stack>
   );
 }
@@ -817,12 +891,12 @@ function LiExampleInvitation(props: {
                   sx={{
                     color:
                       startHovered || animationPlaying.current
-                        ? theme.colors.green[8]
+                        ? theme.colors.teal[8]
                         : undefined,
                     backgroundColor:
                       startHovered || animationPlaying.current
-                        ? theme.colors.green[0]
-                        : undefined, //theme.colors.green[0]+"99",
+                        ? theme.colors.teal[0]
+                        : undefined, //theme.colors.teal[0]+"99",
                     cursor: "pointer",
                   }}
                   onClick={props.onClickStart}
@@ -867,10 +941,10 @@ function LiExampleInvitation(props: {
                   ref={startRef}
                   span
                   sx={{
-                    color: startHovered ? theme.colors.green[8] : undefined,
+                    color: startHovered ? theme.colors.teal[8] : undefined,
                     backgroundColor: startHovered
-                      ? theme.colors.green[0]
-                      : undefined, //theme.colors.green[0]+"99",
+                      ? theme.colors.teal[0]
+                      : undefined, //theme.colors.teal[0]+"99",
                     cursor: "pointer",
                   }}
                   onClick={props.onClickStart}
@@ -1021,12 +1095,12 @@ function LiExampleMessage(props: {
                 sx={{
                   color:
                     hovered || animationPlaying.current
-                      ? theme.colors.green[8]
+                      ? theme.colors.teal[8]
                       : undefined,
                   backgroundColor:
                     hovered || animationPlaying.current
-                      ? theme.colors.green[0]
-                      : undefined, //theme.colors.green[0]+"99",
+                      ? theme.colors.teal[0]
+                      : undefined, //theme.colors.teal[0]+"99",
                   cursor: "pointer",
                 }}
               >
@@ -1039,8 +1113,8 @@ function LiExampleMessage(props: {
                 ref={ref}
                 span
                 sx={{
-                  color: hovered ? theme.colors.green[8] : undefined,
-                  backgroundColor: hovered ? theme.colors.green[0] : undefined, //theme.colors.green[0]+"99",
+                  color: hovered ? theme.colors.teal[8] : undefined,
+                  backgroundColor: hovered ? theme.colors.teal[0] : undefined, //theme.colors.teal[0]+"99",
                   cursor: "pointer",
                 }}
                 onClick={props.onClick}
@@ -1191,6 +1265,9 @@ function FrameworkSection(props: {
     uploadDrawerOpenState
   );
 
+  const [personalizationItemsCount, setPersonalizationItemsCount] =
+    useState<number>();
+
   let { hovered: hovered, ref: ref } = useHover();
 
   const form = useForm({
@@ -1202,6 +1279,7 @@ function FrameworkSection(props: {
       useAccountResearch: props.framework.use_account_research,
     },
   });
+  const [debouncedForm] = useDebouncedValue(form.values, 200);
 
   const saveSettings = async (values: typeof form.values) => {
     const result = await patchBumpFramework(
@@ -1218,6 +1296,10 @@ function FrameworkSection(props: {
     );
     return result.status === "success";
   };
+
+  useEffect(() => {
+    saveSettings(debouncedForm);
+  }, [debouncedForm]);
 
   const openPersonalizationSettings = () => {};
 
@@ -1345,7 +1427,7 @@ function FrameworkSection(props: {
                   borderRadius: "0.5rem",
                 }}
                 p="sm"
-                mih={100}
+                mih={150}
               >
                 {message && (
                   <LiExampleMessage
@@ -1405,37 +1487,474 @@ function FrameworkSection(props: {
               {...form.getInputProps("promptInstructions")}
             />
           </Box>
-          <Box>
-            <Group position="apart">
-              <Box ref={ref}>
-                <Button
-                  color="green"
-                  variant="outline"
-                  size="xs"
-                  onClick={openPersonalizationSettings}
-                  disabled
-                >
-                  Edit Personalization Settings
-                </Button>
-              </Box>
-              <Box>
-                <Switch
-                  {...form.getInputProps("useAccountResearch", {
-                    type: "checkbox",
+
+          <Tabs
+            pt="sm"
+            variant="pills"
+            keepMounted={true}
+            radius="md"
+            defaultValue="none"
+            allowTabDeactivation
+            sx={{ position: "relative" }}
+          >
+            <Tabs.List>
+              <Tooltip
+                label="Account Research Required"
+                disabled={form.values.useAccountResearch}
+                openDelay={500}
+                withArrow
+              >
+                <Tabs.Tab
+                  value="personalization"
+                  color="teal.5"
+                  rightSection={
+                    <>
+                      {personalizationItemsCount &&
+                      form.values.useAccountResearch ? (
+                        <Badge
+                          w={16}
+                          h={16}
+                          sx={{ pointerEvents: "none" }}
+                          variant="filled"
+                          size="xs"
+                          p={0}
+                          color="teal.6"
+                        >
+                          {personalizationItemsCount}
+                        </Badge>
+                      ) : (
+                        <></>
+                      )}
+                    </>
+                  }
+                  disabled={!form.values.useAccountResearch}
+                  sx={(theme) => ({
+                    "&[data-active]": {
+                      backgroundColor: theme.colors.teal[0] + "!important",
+                      borderRadius: theme.radius.md + "!important",
+                      color: theme.colors.teal[8] + "!important",
+                    },
                   })}
-                  color="green"
-                  size="sm"
-                  label="Use Account Research"
-                  labelPosition="left"
-                />
-              </Box>
-            </Group>
-          </Box>
-          <Group position="right" mt="md">
-            <Button type="submit">Save</Button>
-          </Group>
+                >
+                  Personalization Settings
+                </Tabs.Tab>
+              </Tooltip>
+            </Tabs.List>
+            <Box sx={{ position: "absolute", top: 20, right: 0 }}>
+              <Switch
+                {...form.getInputProps("useAccountResearch", {
+                  type: "checkbox",
+                })}
+                color="teal"
+                size="sm"
+                label="Use Account Research"
+                labelPosition="left"
+              />
+            </Box>
+
+            <Tabs.Panel value="personalization">
+              <PersonalizationSection
+                blocklist={props.framework.transformer_blocklist}
+                onItemsChange={async (items) => {
+                  setPersonalizationItemsCount(
+                    items.filter((x: any) => x.checked).length
+                  );
+
+                  // Update transformer blocklist
+                  const result = await patchBumpFramework(
+                    userToken,
+                    props.framework.id,
+                    props.framework.overall_status,
+                    props.framework.title,
+                    props.framework.description,
+                    props.framework.bump_length,
+                    props.framework.bumped_count,
+                    props.framework.bump_delay_days,
+                    props.framework.default,
+                    props.framework.use_account_research,
+                    items.filter((x) => !x.checked).map((x) => x.id)
+                  );
+                  console.log(result);
+                }}
+              />
+            </Tabs.Panel>
+          </Tabs>
         </form>
       </Stack>
     </Stack>
   );
 }
+
+const PersonalizationSection = (props: {
+  blocklist: string[];
+  onItemsChange: (items: any[]) => void;
+}) => {
+  const currentProject = useRecoilValue(currentProjectState);
+
+  const [prospectItems, setProspectItems] = useState([
+    {
+      title: "Personal Bio",
+      id: "LINKEDIN_BIO_SUMMARY",
+      checked: !props.blocklist.includes("LINKEDIN_BIO_SUMMARY"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "LINKEDIN_BIO_SUMMARY"
+      ),
+    },
+    {
+      title: "List Of Past Jobs",
+      id: "LIST_OF_PAST_JOBS",
+      checked: !props.blocklist.includes("LIST_OF_PAST_JOBS"),
+      disabled:
+        !!currentProject?.transformer_blocklist?.includes("LIST_OF_PAST_JOBS"),
+    },
+    {
+      title: "Years Of Experience",
+      id: "YEARS_OF_EXPERIENCE",
+      checked: !props.blocklist.includes("YEARS_OF_EXPERIENCE"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "YEARS_OF_EXPERIENCE"
+      ),
+    },
+    {
+      title: "Current Position Description",
+      id: "CURRENT_JOB_DESCRIPTION",
+      checked: !props.blocklist.includes("CURRENT_JOB_DESCRIPTION"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "CURRENT_JOB_DESCRIPTION"
+      ),
+    },
+    {
+      title: "Current Experience",
+      id: "CURRENT_EXPERIENCE_DESCRIPTION",
+      checked: !props.blocklist.includes("CURRENT_EXPERIENCE_DESCRIPTION"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "CURRENT_EXPERIENCE_DESCRIPTION"
+      ),
+    },
+    {
+      title: "Education History",
+      id: "COMMON_EDUCATION",
+      checked: !props.blocklist.includes("COMMON_EDUCATION"),
+      disabled:
+        !!currentProject?.transformer_blocklist?.includes("COMMON_EDUCATION"),
+    },
+    {
+      title: "Recommendations",
+      id: "RECENT_RECOMMENDATIONS",
+      checked: !props.blocklist.includes("RECENT_RECOMMENDATIONS"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "RECENT_RECOMMENDATIONS"
+      ),
+    },
+    {
+      title: "Patents",
+      id: "RECENT_PATENTS",
+      checked: !props.blocklist.includes("RECENT_PATENTS"),
+      disabled:
+        !!currentProject?.transformer_blocklist?.includes("RECENT_PATENTS"),
+    },
+  ]);
+
+  const [companyItems, setCompanyItems] = useState([
+    {
+      title: "Company Description",
+      id: "CURRENT_JOB_DESCRIPTION",
+      checked: !props.blocklist.includes("CURRENT_JOB_DESCRIPTION"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "CURRENT_JOB_DESCRIPTION"
+      ),
+    },
+    {
+      title: "Company Specialites",
+      id: "CURRENT_JOB_SPECIALTIES",
+      checked: !props.blocklist.includes("CURRENT_JOB_SPECIALTIES"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "CURRENT_JOB_SPECIALTIES"
+      ),
+    },
+    {
+      title: "Company News",
+      id: "SERP_NEWS_SUMMARY",
+      checked: !props.blocklist.includes("SERP_NEWS_SUMMARY"),
+      disabled:
+        !!currentProject?.transformer_blocklist?.includes("SERP_NEWS_SUMMARY"),
+    },
+  ]);
+
+  useEffect(() => {
+    props.onItemsChange([...prospectItems, ...companyItems]);
+  }, []);
+
+  interface CheckBox {
+    title: string;
+    checked: boolean;
+    disabled: boolean;
+  }
+
+  function setProfileChecked(item: CheckBox, checked: boolean) {
+    setProspectItems((prev) => {
+      const items = [...prev];
+      items.map((i) => {
+        if (i.title === item.title) {
+          i.checked = checked;
+        }
+        return i;
+      });
+      props.onItemsChange([...items, ...companyItems]);
+      return items;
+    });
+  }
+
+  function setAccountChecked(item: CheckBox, checked: boolean) {
+    setCompanyItems((prev) => {
+      const items = [...prev];
+      items.map((i) => {
+        if (i.title === item.title) {
+          i.checked = checked;
+        }
+        return i;
+      });
+      props.onItemsChange([...prospectItems, ...items]);
+      return items;
+    });
+  }
+
+  return (
+    <Flex direction="column" pt="md">
+      <PersonalizationCard
+        title="Prospect-Based"
+        items={prospectItems}
+        onPressItem={setProfileChecked}
+      />
+
+      <PersonalizationCard
+        title="Company-Based"
+        items={companyItems}
+        onPressItem={setAccountChecked}
+      />
+    </Flex>
+  );
+};
+
+export const PersonalizationCard: React.FC<{
+  title: string;
+  items: { title: string; checked: boolean; disabled: boolean }[];
+  onPressItem: (
+    item: { title: string; checked: boolean; disabled: boolean },
+    checked: boolean
+  ) => void;
+}> = ({ title, items, onPressItem }) => {
+  return (
+    <Card shadow="xs" radius={"md"} mb={"1rem"}>
+      <Card.Section>
+        <Flex
+          align={"center"}
+          justify={"space-between"}
+          bg={"teal.0"}
+          py={"0.5rem"}
+          px={"1rem"}
+          gap={"0.5rem"}
+        >
+          <Text fw={"400"} fz="xs" color={"teal.8"}>
+            {title}
+          </Text>
+        </Flex>
+      </Card.Section>
+      <Grid gutter={"1.5rem"} py={"1rem"}>
+        {items.map((item) => {
+          return (
+            <Grid.Col xs={12} md={6} xl={4} key={item.title}>
+              <Flex align={"center"} gap={"0.25rem"}>
+                <Checkbox
+                  size={"xs"}
+                  label={item.title}
+                  checked={item.checked}
+                  disabled={item.disabled}
+                  onChange={(event) =>
+                    onPressItem(item, event.currentTarget.checked)
+                  }
+                  color="teal"
+                  variant="outline"
+                />
+              </Flex>
+            </Grid.Col>
+          );
+        })}
+      </Grid>
+    </Card>
+  );
+};
+
+const CtaSection = (props: {}) => {
+  const currentProject = useRecoilValue(currentProjectState);
+  const userToken = useRecoilValue(userTokenState);
+
+  const { data, isFetching, refetch } = useQuery({
+    queryKey: [`query-cta-data-${currentProject?.id}`],
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch(
+        `${API_URL}/client/archetype/${currentProject?.id}/get_ctas`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (response.status === 401) {
+        logout();
+      }
+      const res = await response.json();
+      if (!res || !res.ctas) {
+        return [];
+      }
+
+      let pageData = (res.ctas as CTA[]).map((cta) => {
+        let totalResponded = 0;
+        if (cta.performance) {
+          for (const status in cta.performance.status_map) {
+            if (status !== "SENT_OUTREACH" && status !== "NOT_INTERESTED") {
+              totalResponded += cta.performance.status_map[status];
+            }
+          }
+        }
+        return {
+          ...cta,
+          percentage: cta.performance?.total_count
+            ? Math.round((totalResponded / cta.performance.total_count) * 100)
+            : 0,
+          total_responded: totalResponded,
+          total_count: cta.performance?.total_count,
+        };
+      });
+      if (!pageData) {
+        return [];
+      } else {
+        return pageData;
+      }
+    },
+    refetchOnWindowFocus: false,
+    enabled: !!currentProject,
+  });
+
+  return (
+    <Box pt="md">
+      {data &&
+        data.map((e, index) => (
+          <CTAOption
+            data={{
+              id: e.id,
+              label: e.text_value,
+              description: "",
+              checked: e.active,
+              tags: [
+                {
+                  label: "ACCEPTANCE:",
+                  highlight: e.percentage + "%",
+                  color: "blue",
+                  variant: "light",
+                },
+                {
+                  label: "PROSPECTS:",
+                  highlight: e.total_responded + "/" + e.total_count,
+                  color: "green",
+                  variant: "light",
+                },
+              ],
+            }}
+            key={index}
+            onToggle={(enabled) => {}}
+            onClickEdit={() => {}}
+          />
+        ))}
+    </Box>
+  );
+};
+
+interface Tag {
+  label: string;
+  highlight?: string;
+  color: string;
+  variant: "light" | "filled";
+}
+
+interface TabOption {
+  id: number;
+  label: string;
+  description: string;
+  checked: boolean;
+  tags: Tag[];
+}
+
+const CTAOption: React.FC<{
+  data: TabOption;
+  onToggle: (value: boolean) => void;
+  onClickEdit: () => void;
+}> = ({ data, onToggle, onClickEdit }) => {
+  return (
+    <Flex
+      py={"0.5rem"}
+      px={"1rem"}
+      gap={"0.5rem"}
+      sx={{
+        borderWidth: "1px",
+        borderStyle: "solid",
+        borderColor: "#E9ECEF",
+        borderRadius: "4px",
+      }}
+    >
+      <Flex direction={"column"} w={"100%"}>
+        <Flex gap={"0.5rem"} mb={"0.75rem"} justify={"space-between"}>
+          <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>
+            {data.tags.map((e) => (
+              <Button
+                variant={e.variant}
+                size="xs"
+                color={e.color}
+                radius="xl"
+                h="auto"
+                fz={"0.75rem"}
+                py={"0.125rem"}
+                px={"0.25rem"}
+              >
+                {e.label} {e.highlight && <strong> {e.highlight}</strong>}
+              </Button>
+            ))}
+          </Flex>
+
+          <Flex wrap={"wrap"} gap={"1rem"} align={"center"}>
+            <Button
+              variant={"light"}
+              size="xs"
+              color={"blue"}
+              radius="xl"
+              h="auto"
+              fz={"0.75rem"}
+              py={"0.125rem"}
+              px={"0.25rem"}
+              leftIcon={<IconEdit size={"0.75rem"} />}
+              onClick={onClickEdit}
+            >
+              Edit CTA
+            </Button>
+            <Switch
+              checked={data.checked}
+              color={"green"}
+              onChange={({ currentTarget: { checked } }) => onToggle(checked)}
+            />
+          </Flex>
+        </Flex>
+
+        <Text fw={"600"} fz={"0.75rem"} color={"gray.9"}>
+          {data.label}
+        </Text>
+        <Text
+          fw={"500"}
+          fz={"0.75rem"}
+          color={"gray.5"}
+          dangerouslySetInnerHTML={{ __html: data.description }}
+        ></Text>
+      </Flex>
+    </Flex>
+  );
+};

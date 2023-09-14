@@ -14,9 +14,10 @@ import { API_URL } from "@constants/data";
  * @param bumpDelayDays
  * @param setDefault
  * @param setUseAccountResearch
+ * @param blocklist
  * @returns - MsgResponse
  */
-export async function patchBumpFramework(userToken: string, bumpFrameworkID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, bumpDelayDays: number | null, setDefault: boolean, setUseAccountResearch: boolean): Promise<MsgResponse> {
+export async function patchBumpFramework(userToken: string, bumpFrameworkID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, bumpDelayDays: number | null, setDefault: boolean, setUseAccountResearch: boolean, blocklist?: string[]): Promise<MsgResponse> {
 
   const response = await fetch(
     `${API_URL}/bump_framework/bump`,
@@ -36,6 +37,7 @@ export async function patchBumpFramework(userToken: string, bumpFrameworkID: num
         bumped_count: bumpedCount,
         bump_delay_days: bumpDelayDays,
         use_account_research: setUseAccountResearch,
+        blocklist: blocklist,
       })
     }
   );

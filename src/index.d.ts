@@ -257,6 +257,8 @@ export interface PersonaOverview {
   persona_contact_objective: string;
   uploads?: any[];
   contract_size: number;
+  transformer_blocklist?: string[],
+  transformer_blocklist_initial?: string[],
 }
 
 export interface LinkedInMessage {
@@ -374,6 +376,7 @@ export type BumpFramework = {
   account_research?: string[];
   etl_num_times_used?: number;
   etl_num_times_converted?: number;
+  transformer_blocklist: string[];
 };
 
 export type EmailSequenceStep = {

@@ -288,7 +288,7 @@ export function AiMetaDataBadge(props: {
                                     {props.initialMessageResearchPointTypes[index].replaceAll("_", " ")}
                                 </Badge>
                             }
-                            <Text size='xs'>{point}</Text>
+                            <Text size='xs'>- {point}</Text>
                           </List.Item>
                         ))}
                       </List>

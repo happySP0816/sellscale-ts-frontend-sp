@@ -257,7 +257,7 @@ export default function SideNavbar(props: {}) {
               }}
               h={25}
               onClick={() => {
-                navigateToPage(navigate, "/setup");
+                navigateToPage(navigate, "/onboarding");
               }}
             >
               Onboarding {percentage}%

@@ -36,7 +36,7 @@ function metaDataFromPrompt(prompt: string){
   let s_parts = s.split(/\\n/gm);
 
   const cta = s_parts[s_parts.length - 1].substring(1).trim();
-  const research = s.replace(cta, '').trim().split(/\\n/gm).map((s) => s.substring(1).trim()).filter((s) => s.length > 0);
+  const research = s.replace(cta, '').trim().split(/\\n/gm).map((s) =>  s.charAt(0) == '-' ? s.substring(1).trim() : s.substring(0).trim()).filter((s) => s.length > 0);
 
   return {
     research,

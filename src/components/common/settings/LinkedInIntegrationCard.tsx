@@ -20,8 +20,9 @@ import {
   Card,
   Tooltip,
   Grid,
+  Divider,
 } from "@mantine/core";
-import { openContextModal } from "@mantine/modals";
+import { openConfirmModal, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import {
   IconBrandLinkedin,
@@ -84,6 +85,78 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
           <>
             <Overview />
             <Information />
+
+            <Flex direction='column' px='md' pb='md' maw='100%'>
+              <Divider mb='md' />
+              <Card withBorder shadow="sm" w="100%">
+                <Title order={4}>Disconnect LinkedIn</Title>
+
+                <Flex justify="space-between" align="center">
+                  <Flex direction="column" maw="500px">
+                    <Text fw="light" fz="sm" lh="1.2rem" mt="2px">
+                      Disconnecting your LinkedIn will prevent SellScale from sending outbound,
+                      reading messages, and responding to conversations.
+                    </Text>
+                  </Flex>
+                  <Flex>
+                    <Button
+                      color="red"
+                      onClick={() => {
+                        openConfirmModal({
+                          title: (
+                            <Title order={3}>
+                              Disconnect LinkedIn - {userData.sdr_name}
+                            </Title>
+                          ),
+                          children: (
+                            <>
+                              <Text fs="italic">
+                                You will need to reconnect your LinkedIn to continue using SellScale for LinkedIn outbound.
+                              </Text>
+                            </>
+                          ),
+                          labels: {
+                            confirm: "Deactivate",
+                            cancel: "Cancel",
+                          },
+                          cancelProps: { color: "red", variant: "outline" },
+                          confirmProps: { color: "red" },
+                          onCancel: () => { },
+                          onConfirm: async () => {
+                            const result = await clearAuthTokens(userToken);
+                            if (result.status === "success") {
+                              showNotification({
+                                id: "linkedin-disconnect-success",
+                                title: "Success",
+                                message:
+                                  "You have successfully disconnected your LinkedIn account.",
+                                color: "blue",
+                                autoClose: 5000,
+                              });
+                            } else {
+                              showNotification({
+                                id: "linkedin-disconnect-failure",
+                                title: "Failure",
+                                message:
+                                  "There was an error disconnecting your LinkedIn account. Please contact an admin.",
+                                color: "red",
+                                autoClose: false,
+                              });
+                            }
+                            queryClient.invalidateQueries({
+                              queryKey: ["query-get-accounts-connected"],
+                            });
+                          }
+                        },
+                        );
+                      }}
+                    >
+                      Deactivate
+                    </Button>
+                  </Flex>
+                </Flex>
+              </Card>
+            </Flex>
           </>
         ) : (
           <Flex direction='column' p='md'>

@@ -41,11 +41,11 @@ export default function OnboardingModalPage() {
   const [step, setStep] = useState(0);
   const nextStep = async () => {
 
-    if(step === 0) {
-      if(userData.sdr_name !== fullName || userData.sdr_title !== publicTitle) {
+    if (step === 0) {
+      if (userData.sdr_name !== fullName || userData.sdr_title !== publicTitle) {
         const response = await updateClientSDR(userToken, fullName, publicTitle);
-        if(response.status === 'success'){
-          setUserData({...userData, sdr_name: fullName, sdr_title: publicTitle});
+        if (response.status === 'success') {
+          setUserData({ ...userData, sdr_name: fullName, sdr_title: publicTitle });
         }
       }
     }
@@ -62,19 +62,25 @@ export default function OnboardingModalPage() {
   const nextEnabled = (
     step === 0 && fullName && publicTitle
   ) || (
-    step === 1 && true
-  );
+      step === 1 && true
+    );
 
   const complete = async () => {
     const response = await completeClientSDROnboarding(userToken);
-    if(response.status === 'success'){
+    if (response.status === 'success') {
       await syncLocalStorage(userToken, setUserData);
       navigateToPage(navigate, '/');
     }
   };
 
   return (
-    <Modal opened={true} withCloseButton={false} onClose={() => {}} size='xl'>
+    <Modal
+      opened={true}
+      onClose={() => {
+        navigateToPage(navigate, "/");
+      }}
+      size='xl'
+    >
       <Title ta='center' order={2}>
         Setup your Account
       </Title>

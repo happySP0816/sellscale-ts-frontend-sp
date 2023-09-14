@@ -169,6 +169,7 @@ export default function SalesNavigatorComponent(props: {
                       label='Name your Sales Navigator search'
                       description='This name will be used to help you to identify your search in the future.'
                       placeholder="My Sales Navigator Search"
+                      defaultValue={`${currentProject?.name} - ${salesNavigatorForm.values.numberOfContacts} contacts`}
                       ref={launchName}
                       onChange={(event) => { launchName.current!.value = event.currentTarget.value }}
                     />

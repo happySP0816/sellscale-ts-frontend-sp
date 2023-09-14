@@ -161,6 +161,7 @@ export function AiMetaDataBadge(props: {
   initialMessageCTAId?: number;
   initialMessageCTAText?: string;
   initialMessageResearchPoints?: string[];
+  initialMessageResearchPointTypes?: string[];
   initialMessageStackRankedConfigID?: number;
   initialMessageStackRankedConfigName?: string;
   bumpNumberUsed?: number;
@@ -279,8 +280,15 @@ export function AiMetaDataBadge(props: {
                       </Text>
                       <List>
                         {props.initialMessageResearchPoints?.map((point, index) => (
-                          <List.Item key={index}>
-                            <Text size='xs'>{point}</Text>
+                          <List.Item key={index} sx={{flexDirection: 'row', display: 'flex'}}>   
+                            {
+                              props.initialMessageResearchPointTypes && 
+                                props.initialMessageResearchPointTypes.length >= index - 1 &&  
+                                <Badge size='xs' variant='outline'>
+                                    {props.initialMessageResearchPointTypes[index].replaceAll("_", " ")}
+                                </Badge>
+                            }
+                            <Text size='xs'>- {point}</Text>
                           </List.Item>
                         ))}
                       </List>

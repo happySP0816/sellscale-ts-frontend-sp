@@ -26,6 +26,7 @@ export async function createProspectFromLinkedinLink(userToken: string, archetyp
       })
     }
   );
-  return await processResponse(response, 'data');
+  
+  return await processResponse(response, "data");
 
 }

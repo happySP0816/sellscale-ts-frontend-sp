@@ -55,16 +55,18 @@ export default function LinkedInURLUpload(props: LinkedInUrlUploadProps) {
 
       props.afterUpload();
 
-      const prospectResponse = await getProspectByID(userToken, result.data.prospect_id);
+      const prospectResponse = await getProspectByID(userToken, result.data.data.prospect_id);
       if (prospectResponse.status === 'success') {
         setProspectDetails(prospectResponse.data satisfies ProspectDetails);
       }
 
       setLoading(false);
     } else {
+      let message: any = result.message.split("Res: ")[1];
+      message = JSON.parse(message);
       showNotification({
         title: "Error",
-        message: result.message || "Could not upload. Double check profile URL and for duplicate entry.",
+        message: message.message || "Could not upload. Double check profile URL and for duplicate entry.",
         color: "red",
         autoClose: 3000,
       })

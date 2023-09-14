@@ -112,6 +112,7 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
   }
 
   const researchPoints = _.cloneDeep(existingMessage?.meta_data.research_points.map((p: any) => p.value));
+  const researchPointTypes = _.cloneDeep(existingMessage?.meta_data.research_points?.map((p: any) => p.research_point_type));
 
   return (
     <Container>
@@ -159,6 +160,9 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
               initialMessageCTAText={existingMessage.meta_data.cta.text_value || ""}
               initialMessageResearchPoints={
                 researchPoints || []
+              }
+              initialMessageResearchPointTypes={
+                researchPointTypes || []
               }
               initialMessageStackRankedConfigID={undefined}
               initialMessageStackRankedConfigName={'Baseline Linkedin'}

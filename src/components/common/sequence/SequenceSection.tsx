@@ -409,6 +409,7 @@ function IntroMessageSection() {
 
   const [prospectId, setProspectId] = useState<number>();
   const [message, setMessage] = useState("");
+  const [messageMetaData, setMessageMetaData] = useState<any>();
   const [loading, setLoading] = useState(false);
   const [prospectsLoading, setProspectsLoading] = useState(true);
 
@@ -417,20 +418,20 @@ function IntroMessageSection() {
     uploadDrawerOpenState
   );
 
+  const [hoveredCTA, setHoveredCTA] = useState(false);
+
   const [activeTab, setActiveTab] = useState<string | null>('none');
 
   const [personalizationItemsCount, setPersonalizationItemsCount] =
     useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
-  let { hovered: startHovered, ref: startRef } = useHover();
-  let { hovered: endHovered, ref: endRef } = useHover();
-
   const openPersonalizationSettings = () => {
     setActiveTab('personalization');
   };
   const openCTASettings = () => {
     setActiveTab('ctas');
+
   };
 
   const getIntroMessage = async (prospectId: number) => {
@@ -477,6 +478,7 @@ function IntroMessageSection() {
 
     setLoading(false);
     try {
+      setMessageMetaData(convoResponse.data.messages[0].meta_data);
       return convoResponse.data.messages[0].message;
     } catch (e) {
       return null;
@@ -601,10 +603,11 @@ function IntroMessageSection() {
               {message && (
                 <LiExampleInvitation
                   message={message}
-                  startHovered={startHovered ? true : undefined}
-                  endHovered={endHovered ? true : undefined}
+                  // startHovered={startHovered ? true : undefined}
+                  // endHovered={endHovered ? true : undefined}
                   onClickStart={openPersonalizationSettings}
                   onClickEnd={openCTASettings}
+                  onHoveredEnd={(hovered) => setHoveredCTA(hovered)}
                 />
               )}
             </Box>
@@ -713,11 +716,12 @@ function IntroMessageSection() {
               onCTAsLoaded={(data) => {
                 setCtasItemsCount(data.filter((x: any) => x.active).length);
               }}
+              outlineCTA={hoveredCTA ? messageMetaData.cta : undefined}
             />
           </Tabs.Panel>
-          <Tabs.Panel value="voice">
+          {/* <Tabs.Panel value="voice">
             <VoicesSection />
-          </Tabs.Panel>
+          </Tabs.Panel> */}
         </Tabs>
       </Stack>
     </Stack>
@@ -730,8 +734,10 @@ function LiExampleInvitation(props: {
   endHovered?: boolean;
   onClickStart?: () => void;
   onClickEnd?: () => void;
+  onHoveredEnd?: (hovered: boolean) => void;
 }) {
   const MAX_MESSAGE_SHOW_LENGTH = 75;
+  const MIN_CTA_ASSUMED_LENGTH = 80;
 
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -744,6 +750,10 @@ function LiExampleInvitation(props: {
 
   const startHovered = props.startHovered ?? _startHovered;
   const endHovered = props.endHovered ?? _endHovered;
+
+  useEffect(() => {
+    props.onHoveredEnd && props.onHoveredEnd(endHovered);
+  }, [_endHovered]);
 
   useEffect(() => {
     (async () => {
@@ -792,7 +802,7 @@ function LiExampleInvitation(props: {
 
   // If the last sentence is too short, the CTA is probably the last two sentences
   let endMessage = sentences[sentences.length - 1];
-  if (endMessage.length < 50) {
+  if (endMessage.length < MIN_CTA_ASSUMED_LENGTH) {
     endMessage = sentences[sentences.length - 2] + " " + endMessage;
   }
 
@@ -1358,7 +1368,6 @@ function FrameworkSection(props: {
   useEffect(() => {
     if (!prospectId) return;
     getFollowUpMessage(prospectId, true).then((msg) => {
-      console.log(msg);
       if (msg) {
         setMessage(msg);
       }
@@ -1821,7 +1830,7 @@ export const PersonalizationCard: React.FC<{
   );
 };
 
-const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void }) => {
+const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void, outlineCTA?: string }) => {
   const theme = useMantineTheme();
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
@@ -1886,6 +1895,7 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void }) => {
               label: e.text_value,
               description: "",
               checked: e.active,
+              outlined: !!props.outlineCTA && props.outlineCTA === e.text_value,
               tags: [
                 {
                   label: "Acceptance:",
@@ -1968,6 +1978,7 @@ interface TabOption {
   description: string;
   checked: boolean;
   tags: Tag[];
+  outlined?: boolean;
 }
 
 const CTAOption: React.FC<{
@@ -1976,7 +1987,7 @@ const CTAOption: React.FC<{
   onClickEdit: () => void;
 }> = ({ data, onToggle, onClickEdit }) => {
   return (
-    <Card shadow="xs" radius={"md"} py={10} mb={5}>
+    <Card shadow="xs" radius={"md"} py={10} mb={5} sx={(theme) => ({ border: data.outlined ? '1px solid '+theme.colors.blue[4] : '1px solid transparent' })}>
       <Flex direction={"column"} w={"100%"}>
         <Flex gap={"0.5rem"} mb={"0.75rem"} justify={"space-between"}>
           <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>

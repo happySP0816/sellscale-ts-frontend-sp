@@ -1242,6 +1242,7 @@ function FrameworkCard(props: {
             withArrow
             withinPortal
             multiline
+            disabled={props.bodyText.length < 150}
           >
             <Text fz={12} c="dimmed" truncate>
               {_.truncate(props.bodyText, {
@@ -1314,7 +1315,7 @@ function FrameworkSection(props: {
       props.framework.default,
       values.useAccountResearch
     );
-    queryClient.refetchQueries({
+    await queryClient.refetchQueries({
       queryKey: [`query-get-bump-frameworks`],
     });
     return result.status === "success";
@@ -1336,7 +1337,7 @@ function FrameworkSection(props: {
     }
   };
 
-  const getFollowUpMessage = async (prospectId: number) => {
+  const getFollowUpMessage = async (prospectId: number, useCache: boolean) => {
     if (!currentProject) return null;
     setLoading(true);
     setMessage("");
@@ -1345,7 +1346,8 @@ function FrameworkSection(props: {
       userToken,
       prospectId,
       props.framework.id,
-      props.bumpCount
+      props.bumpCount,
+      useCache,
     );
 
     setLoading(false);
@@ -1355,7 +1357,7 @@ function FrameworkSection(props: {
   // When prospect changes, get the bump message
   useEffect(() => {
     if (!prospectId) return;
-    getFollowUpMessage(prospectId).then((msg) => {
+    getFollowUpMessage(prospectId, true).then((msg) => {
       console.log(msg);
       if (msg) {
         setMessage(msg);
@@ -1429,7 +1431,7 @@ function FrameworkSection(props: {
                     leftIcon={<IconReload size="0.75rem" />}
                     onClick={() => {
                       if (prospectId) {
-                        getFollowUpMessage(prospectId).then((msg) => {
+                        getFollowUpMessage(prospectId, false).then((msg) => {
                           if (msg) {
                             setMessage(msg);
                           }

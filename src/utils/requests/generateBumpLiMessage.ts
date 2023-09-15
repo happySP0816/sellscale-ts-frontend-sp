@@ -8,7 +8,7 @@ import { API_URL } from "@constants/data";
  * @param prospectId 
  * @returns - MsgResponse
  */
-export async function generateBumpLiMessage(userToken: string, prospectId: number, bumpFrameworkId: number, bumpCount: number): Promise<MsgResponse> {
+export async function generateBumpLiMessage(userToken: string, prospectId: number, bumpFrameworkId: number, bumpCount: number, useCache: boolean): Promise<MsgResponse> {
 
   const response = await fetch(
     `${API_URL}/message_generation/generate_bump_li_message`,
@@ -21,7 +21,8 @@ export async function generateBumpLiMessage(userToken: string, prospectId: numbe
       body: JSON.stringify({
         prospect_id: prospectId,
         bump_framework_id: bumpFrameworkId,
-        bump_count: bumpCount
+        bump_count: bumpCount,
+        use_cache: useCache,
       })
     }
   );

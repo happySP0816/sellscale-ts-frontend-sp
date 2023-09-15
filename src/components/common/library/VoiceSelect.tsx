@@ -105,8 +105,8 @@ export default function VoiceSelect(props: {
                 modal: "voiceEditor",
                 title: <Title order={3}>Voice Editor</Title>,
                 innerProps: {
-                  persona_id: selectedVoice.archetype_id,
-                  voiceId: selectedVoice.id,
+                  persona_id: selectedVoice?.archetype_id,
+                  voiceId: selectedVoice?.id,
                 },
               });
             } else {

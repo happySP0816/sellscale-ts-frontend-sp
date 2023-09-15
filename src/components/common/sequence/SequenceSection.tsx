@@ -57,7 +57,7 @@ import {
   IconUpload,
   IconX,
 } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   proxyURL,
   valueToColor,
@@ -90,21 +90,22 @@ export default function SequenceSection() {
 
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
-  const [bumpFrameworks, setBumpFrameworks] = useState<BumpFramework[]>([]);
 
-  useEffect(() => {
-    if (!currentProject) return;
-    (async () => {
+  const { data } = useQuery({
+    queryKey: [`query-get-bump-frameworks`],
+    queryFn: async () => {
+      if (!currentProject) return [];
       const result = await getBumpFrameworks(
         userToken,
         [],
         [],
         [currentProject?.id]
       );
-      if (result.status !== "success") return;
-      setBumpFrameworks(result.data.bump_frameworks as BumpFramework[]);
-    })();
-  }, []);
+      if (result.status !== "success") return [];
+      return result.data.bump_frameworks as BumpFramework[];
+    },
+  });
+  const bumpFrameworks = data ?? [];
 
   const bf0 = bumpFrameworks.find(
     (bf) => bf.overall_status === "ACCEPTED" && bf.active && bf.default
@@ -423,7 +424,9 @@ function IntroMessageSection() {
   let { hovered: startHovered, ref: startRef } = useHover();
   let { hovered: endHovered, ref: endRef } = useHover();
 
-  const openPersonalizationSettings = () => {};
+  const openPersonalizationSettings = () => {
+
+  };
   const openCTASettings = () => {};
 
   const getIntroMessage = async (prospectId: number) => {
@@ -1261,6 +1264,7 @@ function FrameworkSection(props: {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
+  const queryClient = useQueryClient();
 
   const [prospectId, setProspectId] = useState<number>();
   const [message, setMessage] = useState("");
@@ -1301,6 +1305,9 @@ function FrameworkSection(props: {
       props.framework.default,
       values.useAccountResearch
     );
+    queryClient.refetchQueries({
+      queryKey: [`query-get-bump-frameworks`],
+    });
     return result.status === "success";
   };
 

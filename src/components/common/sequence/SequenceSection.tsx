@@ -1896,6 +1896,31 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void }) => {
             }}
           />
         ))}
+        
+        <Button sx={{
+          position: 'absolute',
+          top: -25,
+          right: 5,
+        }}
+              variant={"filled"}
+              size="sm"
+              compact
+              color={"blue"}
+              radius="xl"
+              fw={"500"}
+              leftIcon={<IconPlus size={"0.75rem"} />}
+              onClick={() => {
+                openContextModal({
+                  modal: "createNewCTA",
+                  title: <Title order={3}>Create CTA</Title>,
+                  innerProps: {
+                    personaId: currentProject?.id,
+                  },
+                });
+              }}
+            >
+              Add CTA
+        </Button>
     </Box>
   );
 };

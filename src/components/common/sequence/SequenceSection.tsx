@@ -43,7 +43,7 @@ import {
   MantineColor,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useDebouncedValue, useDisclosure, useHover } from "@mantine/hooks";
+import { useDebouncedValue, useDisclosure, useHover, usePrevious } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import {
   IconCheck,
@@ -417,6 +417,8 @@ function IntroMessageSection() {
     uploadDrawerOpenState
   );
 
+  const [activeTab, setActiveTab] = useState<string | null>('none');
+
   const [personalizationItemsCount, setPersonalizationItemsCount] =
     useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
@@ -425,9 +427,11 @@ function IntroMessageSection() {
   let { hovered: endHovered, ref: endRef } = useHover();
 
   const openPersonalizationSettings = () => {
-
+    setActiveTab('personalization');
   };
-  const openCTASettings = () => {};
+  const openCTASettings = () => {
+    setActiveTab('ctas');
+  };
 
   const getIntroMessage = async (prospectId: number) => {
     if (!currentProject) return null;
@@ -608,6 +612,8 @@ function IntroMessageSection() {
         )}
 
         <Tabs
+          value={activeTab}
+          onTabChange={setActiveTab}
           pt="sm"
           variant="pills"
           keepMounted={true}
@@ -1276,6 +1282,8 @@ function FrameworkSection(props: {
     uploadDrawerOpenState
   );
 
+  const [activeTab, setActiveTab] = useState<string | null>('none');
+
   const [personalizationItemsCount, setPersonalizationItemsCount] =
     useState<number>();
 
@@ -1291,6 +1299,7 @@ function FrameworkSection(props: {
     },
   });
   const [debouncedForm] = useDebouncedValue(form.values, 200);
+  const prevDebouncedForm = usePrevious(debouncedForm);
 
   const saveSettings = async (values: typeof form.values) => {
     const result = await patchBumpFramework(
@@ -1313,9 +1322,19 @@ function FrameworkSection(props: {
 
   useEffect(() => {
     saveSettings(debouncedForm);
+    if(debouncedForm.useAccountResearch && !prevDebouncedForm?.useAccountResearch) {
+      //setActiveTab('personalization');
+    }
+    if(!debouncedForm.useAccountResearch && activeTab === 'personalization') {
+      setActiveTab('none');
+    }
   }, [debouncedForm]);
 
-  const openPersonalizationSettings = () => {};
+  const openPersonalizationSettings = () => {
+    if(form.values.useAccountResearch) {
+      setActiveTab('personalization');
+    }
+  };
 
   const getFollowUpMessage = async (prospectId: number) => {
     if (!currentProject) return null;
@@ -1503,11 +1522,12 @@ function FrameworkSection(props: {
           </Box>
 
           <Tabs
+            value={activeTab}
+            onTabChange={setActiveTab}
             pt="sm"
             variant="pills"
             keepMounted={true}
             radius="md"
-            defaultValue="none"
             allowTabDeactivation
             sx={{ position: "relative" }}
           >

@@ -15,6 +15,7 @@ import {
   Avatar,
   Button,
   Group,
+  Menu,
 } from "@mantine/core";
 import { valueToColor } from "@utils/general";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
@@ -26,7 +27,12 @@ import {
   ICPFitPillOnly,
   icpFitToColor,
 } from "@common/pipeline/ICPFitAndReason";
-import { IconPencil, IconSearch } from "@tabler/icons-react";
+import {
+  IconCopy,
+  IconPencil,
+  IconPlus,
+  IconSearch,
+} from "@tabler/icons-react";
 import { useDebouncedState } from "@mantine/hooks";
 import _ from "lodash";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
@@ -104,15 +110,32 @@ export default function VoiceSelect(props: {
                 },
               });
             } else {
-              // Open selector
-              return true;
+              openContextModal({
+                modal: "voiceBuilder",
+                title: <Title order={3}>Voice Builder</Title>,
+                innerProps: {},
+              });
             }
           },
           onClickChange: () => {},
         }}
         title={{
           name: "Select Voice",
-          rightSection: undefined,
+          rightSection: (
+            <Button
+              variant="subtle"
+              compact
+              onClick={() => {
+                openContextModal({
+                  modal: "voiceBuilder",
+                  title: <Title order={3}>Voice Builder</Title>,
+                  innerProps: {},
+                });
+              }}
+            >
+              New Voice
+            </Button>
+          ),
         }}
         size={600}
         loading={isFetching}

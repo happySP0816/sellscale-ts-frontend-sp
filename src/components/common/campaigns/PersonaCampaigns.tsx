@@ -180,7 +180,7 @@ export default function PersonaCampaigns() {
                     value={search}
                     onChange={(event) => setSearch(event.currentTarget.value)}
                   />
-                  <Select
+                  {/* <Select
                     radius="md"
                     placeholder="Sort by"
                     data={[]}
@@ -206,7 +206,7 @@ export default function PersonaCampaigns() {
                     }
                   >
                     <Text fw={400}>Filters</Text>
-                  </Button>
+                  </Button> */}
                 </Group>
                 <Box>
                   <Button.Group>
@@ -241,7 +241,7 @@ export default function PersonaCampaigns() {
                       </Text>
                     </Button>
 
-                    <SegmentedControl
+                    {/* <SegmentedControl
                     value={campaignViewMode}
                     onChange={(mode: any) => setCampaignViewMode(mode)}
                     ml='sm'
@@ -260,7 +260,7 @@ export default function PersonaCampaigns() {
                         </Center>
                       ), value: 'list-view' },
                     ]}
-                  />
+                  /> */}
                   </Button.Group>
 
                   
@@ -425,7 +425,7 @@ function PersonCampaignCard(props: {
 
   return (
     <Paper radius="md">
-      <Stack spacing={0} sx={{opacity: props.persona.active ? 1 : 0.7}}>
+      <Stack spacing={0} sx={{opacity: props.persona.active ? 1 : 0.6}}>
         <Group
           // position="apart"
           sx={(theme) => ({
@@ -433,7 +433,9 @@ function PersonCampaignCard(props: {
             borderRadius: "0.5rem 0.5rem 0 0",
             border: 'solid 1px ' + theme.colors.gray[2],
           })}
-          p="xs"
+          p={props.persona.active ? "xs" : '4px'}
+          pl='xs'
+          pr='xs'
         >
           <Box sx={{flexDirection: 'row', display: 'flex'}} w='46%'>
             <Group w='500'>

@@ -498,15 +498,8 @@ function IntroMessageSection() {
         </Group>
         <VoiceSelect
           personaId={currentProject.id}
-          onChange={(prospect) => {
-            if (prospect) {
-              setProspectId(prospect.id);
-            }
-          }}
-          onFinishLoading={(prospects) => {
-            setProspectsLoading(false);
-            if (prospects.length === 0) setNoProspectsFound(true);
-          }}
+          onChange={(voice) => {}}
+          onFinishLoading={(voices) => {}}
           autoSelect
         />
       </Group>

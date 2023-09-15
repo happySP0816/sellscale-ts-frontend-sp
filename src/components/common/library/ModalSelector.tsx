@@ -24,7 +24,7 @@ export default function ModalSelector(props: {
   selector: {
     content?: React.ReactNode;
     buttonProps?: ButtonProps;
-    onClick?: () => void;
+    onClick?: () => void | boolean;
     onClickChange?: () => void;
     override?: React.ReactNode;// This will override the selector button UI to the TSX provided
   };
@@ -66,7 +66,12 @@ export default function ModalSelector(props: {
             {...props.selector.buttonProps}
             compact
             onClick={() => {
-              props.selector.onClick && props.selector.onClick();
+              if (props.selector.onClick) {
+                const result = props.selector.onClick();
+                if(result === true){
+                  open();
+                }
+              }
             }}
           >
             {props.selector.content}

@@ -6,6 +6,7 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { logout } from "@auth/core";
 import ModalSelector from "@common/library/ModalSelector";
 import ProspectSelect from "@common/library/ProspectSelect";
+import VoiceSelect from "@common/library/VoiceSelect";
 import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import VoicesSection from "@common/voice_builder/VoicesSection";
 import { API_URL } from "@constants/data";
@@ -494,6 +495,19 @@ function IntroMessageSection() {
             <Badge color="blue" fw={500}>{ctasItemsCount} CTAs Active</Badge>
           )} */}
         </Group>
+        <VoiceSelect
+          personaId={currentProject.id}
+          onChange={(prospect) => {
+            if (prospect) {
+              setProspectId(prospect.id);
+            }
+          }}
+          onFinishLoading={(prospects) => {
+            setProspectsLoading(false);
+            if (prospects.length === 0) setNoProspectsFound(true);
+          }}
+          autoSelect
+        />
       </Group>
       <Box my={5}>
         <Text fz="xs" c="dimmed">
@@ -669,9 +683,9 @@ function IntroMessageSection() {
             >
               Your CTAs
             </Tabs.Tab>
-            <Tabs.Tab value="voice" ml="auto">
+            {/* <Tabs.Tab value="voice" ml="auto">
               Train Your AI
-            </Tabs.Tab>
+            </Tabs.Tab> */}
           </Tabs.List>
 
           <Tabs.Panel value="personalization">
@@ -688,14 +702,13 @@ function IntroMessageSection() {
                   currentProject.id,
                   items.filter((x) => !x.checked).map((x) => x.id)
                 );
-                console.log(result);
               }}
             />
           </Tabs.Panel>
           <Tabs.Panel value="ctas">
             <CtaSection
               onCTAsLoaded={(data) => {
-                setCtasItemsCount(data.filter((x: any) => x.active).length)
+                setCtasItemsCount(data.filter((x: any) => x.active).length);
               }}
             />
           </Tabs.Panel>
@@ -1831,7 +1844,7 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void }) => {
       if (!pageData) {
         return [];
       } else {
-        return _.sortBy(pageData, ['percentage', 'id']).reverse();
+        return _.sortBy(pageData, ["percentage", "id"]).reverse();
       }
     },
     refetchOnWindowFocus: false,
@@ -1839,7 +1852,7 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void }) => {
   });
 
   return (
-    <Box pt="md" sx={{ position: 'relative' }}>
+    <Box pt="md" sx={{ position: "relative" }}>
       <LoadingOverlay visible={isFetching} zIndex={10} />
       {data &&
         data.map((e, index) => (
@@ -1925,7 +1938,10 @@ const CTAOption: React.FC<{
                 px={"0.25rem"}
                 fw={"400"}
               >
-                {e.label}{e.highlight && <strong style={{ paddingLeft: 5 }}> {e.highlight}</strong>}
+                {e.label}
+                {e.highlight && (
+                  <strong style={{ paddingLeft: 5 }}> {e.highlight}</strong>
+                )}
               </Button>
             ))}
           </Flex>
@@ -1949,7 +1965,7 @@ const CTAOption: React.FC<{
             <Switch
               checked={data.checked}
               color={"blue"}
-              size='xs'
+              size="xs"
               onChange={({ currentTarget: { checked } }) => onToggle(checked)}
             />
           </Flex>

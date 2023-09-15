@@ -227,6 +227,9 @@ export default function ProspectSelect(props: {
             if (selectedProspect) {
               setProspectDrawerOpened(true);
               setProspectDrawerId(selectedProspect.id);
+            } else {
+              // Open selector
+              return true;
             }
           },
           onClickChange: () => {},

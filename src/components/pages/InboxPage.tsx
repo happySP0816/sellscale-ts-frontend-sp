@@ -9,7 +9,6 @@ import InboxProspectList from "@common/inbox/InboxProspectList";
 import { populateInboxNotifs } from "@common/inbox/utils";
 import { API_URL } from "@constants/data";
 import { Button, Card, Container, Flex, Grid, Loader, Text, Title } from "@mantine/core";
-import { NAV_HEADER_HEIGHT } from "@nav/old/MainHeader";
 import { useQuery } from "@tanstack/react-query";
 import { setPageTitle } from "@utils/documentChange";
 import { getProspects } from "@utils/requests/getProspects";

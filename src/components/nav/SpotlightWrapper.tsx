@@ -181,7 +181,7 @@ export default function SpotlightWrapper({
       )}
       actionComponent={CustomAction}
       searchIcon={<IconSearch size={18} />}
-      searchPlaceholder={"Search..."}
+      searchPlaceholder={"Search everywhere..."}
       searchInputProps={{ autoComplete: "off" }}
       shortcut={["mod + K"]}
       limit={30}

@@ -6,10 +6,10 @@ import DemoFeedbackChart from "@common/charts/DemoFeedbackChart";
 import { PullProspectEmailsCardPage } from "@common/credits/PullProspectEmailsCardPage";
 import PersonaFilters from "@common/persona/PersonaFilters";
 import CleanContactsPage from "./CleanContactsPage";
-import { ProjectSelect } from "@nav/old/ProjectSelect";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { useRecoilState } from "recoil";
 import { PersonaOverview } from "src";
+import { ProjectSelect } from "@common/library/ProjectSelect";
 
 export default function AdvancedPage(props: {}) {
   const [_, setCurrentProject] = useRecoilState(currentProjectState);

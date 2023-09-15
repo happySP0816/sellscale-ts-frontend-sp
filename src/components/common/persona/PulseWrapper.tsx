@@ -5,7 +5,6 @@ import { Box, Button, Flex, Stack, Tabs } from "@mantine/core";
 import { IconMessageCircle, IconRobot, IconRuler, IconSettings } from "@tabler/icons";
 import PulseBarChart from "@common/charts/PulseBarChart";
 import { userTokenState } from '@atoms/userAtoms';
-import { ProjectSelect } from '@nav/old/ProjectSelect';
 import { navigateToPage } from '@utils/documentChange';
 import { useNavigate } from 'react-router-dom';
 import { IconUpload } from '@tabler/icons-react';
@@ -14,6 +13,7 @@ import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from '@ato
 import { useState } from 'react';
 import { getAllUploads } from '@utils/requests/getPersonas';
 import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
+import { ProjectSelect } from "@common/library/ProjectSelect";
 
 export const PulseWrapper = () => {
   const currentProject = useRecoilValue(currentProjectState);

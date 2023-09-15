@@ -70,13 +70,12 @@ import {
 } from "@utils/general";
 import loaderWithText from "@common/library/loaderWithText";
 import { icpFitToIcon } from "@common/pipeline/ICPFitAndReason";
-import { NAV_HEADER_HEIGHT } from "@nav/old/MainHeader";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import {
   currentInboxCountState,
   currentProjectState,
 } from "@atoms/personaAtoms";
-import { ProjectSelect } from '@nav/old/ProjectSelect';
+import { ProjectSelect } from "@common/library/ProjectSelect";
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<"div"> {
   count: number;

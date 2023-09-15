@@ -22,7 +22,7 @@ import {
 } from "@mantine/core";
 import { useForceUpdate, useMediaQuery } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
-import PageTitle from "@nav/old/PageTitle";
+import PageTitle from "@nav/PageTitle";
 import { IconCornerRightUp, IconUserPlus } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import getPersonas, {

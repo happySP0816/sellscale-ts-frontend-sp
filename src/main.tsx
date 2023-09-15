@@ -7,16 +7,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   createBrowserRouter,
   createRoutesFromChildren,
-  json,
   matchRoutes,
   RouterProvider,
   useLocation,
   useNavigationType,
 } from "react-router-dom";
 import ErrorPage from "./components/pages/ErrorPage";
-import HomePage from "./components/pages/old/HomePage";
 import PersonaPage from "./components/pages/PersonaPage";
-import PipelinePage from "./components/pages/old/PipelinePage";
 import MissingPage from "./components/pages/MissingPage";
 import { RecoilRoot } from "recoil";
 import AuthPage from "@pages/AuthPage";
@@ -30,7 +27,6 @@ import EmailPage from "@pages/EmailPage";
 import OnboardingModalPage from "@pages/OnboardingModalPage";
 import AuthCalendlyPage from "@pages/AuthCalendlyPage";
 import SetupPage from "@pages/SetupPage";
-import DashboardSection from "@pages/DashboardPage";
 import InboxPage from "@pages/InboxPage";
 import AllContactsSection from "@common/home/AllContactsSection";
 import { Box } from "@mantine/core";
@@ -41,14 +37,11 @@ import ContactsPage from "@pages/ContactsPage";
 import ToolsPage from "@pages/ToolsPage";
 import SetupPersonaCard from "@common/persona/SetupPersonaCard";
 import PersonaBrain from '@common/persona/PersonaBrain';
-import Pulse from '@common/persona/Pulse';
 import { PulseWrapper } from '@common/persona/PulseWrapper';
 import { LinkedinConvoSimulatorPage } from '@common/simulators/linkedin/LinkedinConvoSimulatorPage';
-import PullProspectEmailsCard from '@common/credits/PullProspectEmailsCard';
 import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
 import EmailBlocksPage from '@pages/EmailBlocksPage';
 import FindContactsPage from "@pages/FindContactsPage";
-import PersonaSplit from '@common/persona/PersonaSplit';
 import { PersonaSplitPage } from '@common/persona/PersonaSplitPage';
 import CleanContactsPage from "@pages/CleanContactsPage";
 import PersonaSettingsPage from "@pages/PersonaSettingsPage";

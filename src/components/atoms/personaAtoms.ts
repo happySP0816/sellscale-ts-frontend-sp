@@ -1,5 +1,4 @@
 import { saveCurrentPersonaId } from "@auth/core";
-import { ArchetypeCreation } from "@modals/CreatePersonaModal";
 import { atom, selector } from "recoil";
 import { PersonaOverview } from "src";
 
@@ -41,41 +40,40 @@ const currentInboxCountState = atom({
 
 
 // NOT USED
-const personaCreationState = atom({
-  key: "persona-creation-data",
-  default: {
-    persona: {
-      active: true,
-      archetype: '',
-      client_id: -1,
-      client_sdr_id: -1,
-      disable_ai_after_prospect_engaged: false,
-      filters: null,
-      id: -1,
-      performance: {
-        status_map: {},
-        total_prospects: -1,
-      },
-      transformer_blocklist: null,
-      uploads: [],
-      icp_matching_prompt: '',
-      is_unassigned_contact_archetype: false,
-      ctas: [],
+// const personaCreationState = atom({
+//   key: "persona-creation-data",
+//   default: {
+//     persona: {
+//       active: true,
+//       archetype: '',
+//       client_id: -1,
+//       client_sdr_id: -1,
+//       disable_ai_after_prospect_engaged: false,
+//       filters: null,
+//       id: -1,
+//       performance: {
+//         status_map: {},
+//         total_prospects: -1,
+//       },
+//       transformer_blocklist: null,
+//       uploads: [],
+//       icp_matching_prompt: '',
+//       is_unassigned_contact_archetype: false,
+//       ctas: [],
   
-      fitReason: '',
-      contactObjective: '',
-      fileJSON: [],
-      contract_size: 0,
-    } as ArchetypeCreation,
-    step: 0,
-  },
-});
+//       fitReason: '',
+//       contactObjective: '',
+//       fileJSON: [],
+//       contract_size: 0,
+//     } as ArchetypeCreation,
+//     step: 0,
+//   },
+// });
 
 
 export {
   uploadDrawerOpenState,
   detailsDrawerOpenState,
-  personaCreationState,
   currentProjectState,
   currentInboxCountState,
 };

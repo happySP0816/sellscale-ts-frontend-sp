@@ -7,7 +7,6 @@ import { API_URL } from '@constants/data';
 import { Text, Tabs, Box, Button, Flex, Select, Switch, Title } from '@mantine/core';
 import { openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { ArchetypeCreation } from '@modals/CreatePersonaModal';
 import { IconUser, IconPencil, IconTrashX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { convertToStandardDate } from '@utils/general';

@@ -1,7 +1,6 @@
 import { Stack, Container } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { SCREEN_SIZES } from "../../constants/data";
-import { NAV_HEADER_HEIGHT } from "@nav/old/MainHeader";
 
 export default function PageFrame({ children }: { children: React.ReactNode }) {
 

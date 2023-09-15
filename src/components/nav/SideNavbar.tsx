@@ -1,95 +1,43 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 import {
   createStyles,
-  Navbar,
   Group,
-  Code,
   getStylesRef,
   rem,
-  ScrollArea,
-  Flex,
   Button,
-  useMantineTheme,
   Box,
   Text,
-  SelectItem,
   Tooltip,
   Stack,
   Divider,
   Center,
 } from "@mantine/core";
 import {
-  IconSwitchHorizontal,
-  IconLogout,
-  IconHome,
-  IconBrandLinkedin,
-  IconMail,
-  IconActivity,
-  IconAddressBook,
-  IconAffiliate,
-  IconSearch,
-  IconCheckbox,
-  IconClipboardData,
-  IconHistory,
-  IconVocabulary,
-  IconListDetails,
-  IconMailFast,
-  IconReport,
   IconUsers,
-  IconSpeakerphone,
   IconSettings,
-  IconAdjustments,
-  IconCalendarEvent,
-  IconFileDescription,
-  IconWall,
   IconInbox,
-  IconTools,
-  IconFilter,
-  IconFileLambda,
-  IconTrash,
-  IconFilterDollar,
   IconTargetArrow,
   IconChartHistogram,
   IconBell,
-  IconSettings2,
-  IconLifebuoy,
   IconMap,
   IconBooks,
+  IconSearch,
 } from "@tabler/icons-react";
-import { LogoFull } from "@nav/old/Logo";
-import { LinksGroup } from "./old/NavBarLinksGroup";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { navTabState } from "@atoms/navAtoms";
-import { animated, useSpring } from "@react-spring/web";
+import { useRecoilValue } from "recoil";
 import { NAV_BAR_SIDE_WIDTH } from "@constants/data";
-import ProfileIcon from "@nav/old/ProfileIcon";
+import ProfileIcon from "@nav/ProfileIcon";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { isLoggedIn, logout } from "@auth/core";
+import { isLoggedIn } from "@auth/core";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getOnboardingCompletionReport } from "@utils/requests/getOnboardingCompletionReport";
-import { hexToHexWithAlpha } from "@utils/general";
-import getPersonas from "@utils/requests/getPersonas";
-import { Archetype } from "src";
-import { ProjectSelect } from "./old/ProjectSelect";
-import {
-  currentInboxCountState,
-  currentProjectState,
-} from "@atoms/personaAtoms";
-import {
-  IconAt,
-  IconBrain,
-  IconMessage,
-  IconMilitaryRank,
-  IconSeeding,
-  IconTimelineEventPlus,
-} from "@tabler/icons";
-import PersonaCardMini from "@common/persona/PersonaCardMini";
-import Logo from "./Logo";
 import { useHover } from "@mantine/hooks";
 import _ from "lodash";
 import { openContextModal } from "@mantine/modals";
+import { LogoFull } from "./Logo";
+import { SearchBar } from "../../../legacy_code/old/SearchBar";
+import { openSpotlight } from "@mantine/spotlight";
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -214,7 +162,7 @@ export default function SideNavbar(props: {}) {
       w={NAV_BAR_SIDE_WIDTH}
     >
       <Stack w={"100%"} spacing={0}>
-        <Logo />
+        <LogoFull />
         <Divider color="dark.4" />
         <Box m="md">
           <SideNavbarItem
@@ -266,19 +214,24 @@ export default function SideNavbar(props: {}) {
 
           <Divider color="dark.4" mt="lg" mb="sm" />
           <SideNavbarItem
+            icon={<IconSearch size="1.0rem" />}
+            label="Search"
+            onClick={openSpotlight}
+          />
+          {/* <SideNavbarItem
             icon={<IconBell size="1.0rem" />}
             label="Notifications"
             tabKey={["notifications", "all/recent-activity"]}
+          /> */}
+          <SideNavbarItem
+            icon={<IconBooks size="1.0rem" />}
+            label="Advanced"
+            tabKey="advanced"
           />
           <SideNavbarItem
             icon={<IconSettings size="1.0rem" />}
             label="Settings"
             tabKey="settings"
-          />
-          <SideNavbarItem
-            icon={<IconBooks size="1.0rem" />}
-            label="Advanced"
-            tabKey="advanced"
           />
         </Box>
         <Box>
@@ -293,7 +246,7 @@ export default function SideNavbar(props: {}) {
 function SideNavbarItem(props: {
   icon: ReactNode;
   label: string;
-  tabKey: string | string[];
+  tabKey?: string | string[];
   onClick?: () => void;
 }) {
   const navigate = useNavigate();
@@ -317,10 +270,12 @@ function SideNavbarItem(props: {
       })}
       onClick={() => {
         props.onClick && props.onClick();
-        navigateToPage(
-          navigate,
-          "/" + (Array.isArray(props.tabKey) ? props.tabKey[0] : props.tabKey)
-        );
+        if(props.tabKey) {
+          navigateToPage(
+            navigate,
+            "/" + (Array.isArray(props.tabKey) ? props.tabKey[0] : props.tabKey)
+          );
+        }
       }}
     >
       <Group spacing={7} px={10} py={7} noWrap>

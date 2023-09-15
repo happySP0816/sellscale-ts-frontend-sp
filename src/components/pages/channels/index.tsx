@@ -15,9 +15,7 @@ import Hook from "./components/Hook";
 import ChannelTab from "./components/ChannelTab";
 import { useRecoilValue } from 'recoil';
 import { userDataState } from '@atoms/userAtoms';
-import PersonaSelect from '@common/persona/PersonaSplitSelect';
-import { ProjectSelect } from '@nav/old/ProjectSelect';
-import { useLoaderData } from 'react-router-dom';
+import { ProjectSelect } from "@common/library/ProjectSelect";
 
 const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChannel: (channel: string) => void, hideChannels: boolean}) => {
   const [selectedChildChannel, setSelectedChildChannel] = useState(props.selectedChannel);

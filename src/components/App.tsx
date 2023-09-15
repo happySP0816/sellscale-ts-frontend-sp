@@ -30,7 +30,6 @@ import CopyCTAsModal from "@modals/CopyCTAsModal";
 import EditCTAModal from "@modals/EditCTAModal";
 import DemoFeedbackDetailsModal from "@modals/DemoFeedbackDetailsModal";
 import VoiceBuilderModal from "@modals/VoiceBuilderModal";
-import CreatePersonaModal from "@modals/CreatePersonaModal";
 import EditBumpFrameworkModal from "@modals/EditBumpFrameworkModal";
 import EditEmailSequenceStepModal from "@modals/EditEmailSequenceStepModal";
 import VoiceEditorModal from "@modals/VoiceEditorModal";
@@ -131,7 +130,6 @@ export default function App() {
               clientProduct: ClientProductModal,
               voiceBuilder: VoiceBuilderModal,
               demoFeedbackDetails: DemoFeedbackDetailsModal,
-              createPersona: CreatePersonaModal,
               editBumpFramework: EditBumpFrameworkModal,
               editEmailSequenceStepModal: EditEmailSequenceStepModal,
               voiceEditor: VoiceEditorModal,

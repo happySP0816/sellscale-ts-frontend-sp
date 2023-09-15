@@ -1,15 +1,5 @@
-import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { logout } from '@auth/core';
-import ComingSoonCard from '@common/library/ComingSoonCard';
-import TextAreaWithAI from '@common/library/TextAreaWithAI';
-import { API_URL } from '@constants/data';
+import { userDataState } from '@atoms/userAtoms';
 import {
-  TextInput,
-  Tabs,
-  Box,
-  Button,
-  Flex,
-  Select,
   Text,
   Title,
   Accordion,
@@ -19,18 +9,9 @@ import {
   Group,
   Badge,
 } from '@mantine/core';
-import { openContextModal } from '@mantine/modals';
-import { showNotification } from '@mantine/notifications';
-import { ArchetypeCreation } from '@modals/CreatePersonaModal';
-import { IconUser, IconPencil, IconTrashX } from '@tabler/icons';
-import { useQuery } from '@tanstack/react-query';
-import { deleteCTA } from '@utils/requests/createCTA';
-import toggleCTA from '@utils/requests/toggleCTA';
-import { chunk, sortBy } from 'lodash';
-import { DataTableSortStatus, DataTable } from 'mantine-datatable';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { CTA, Archetype, PersonaOverview } from 'src';
+import { PersonaOverview } from 'src';
 import LinkedInCTAsStep from './linkedin/LinkedInCTAsStep';
 import LinkedInVoiceBuilderStep from './linkedin/LinkedInVoiceBuilderStep';
 import BumpFrameworksPage from '@pages/BumpFrameworksPage';

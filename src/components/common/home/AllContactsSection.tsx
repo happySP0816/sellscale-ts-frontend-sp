@@ -38,7 +38,7 @@ import {
 } from "@atoms/uploadAtoms";
 import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
 import { navigateToPage } from "@utils/documentChange";
-import { ProjectSelect } from "@nav/old/ProjectSelect";
+import { ProjectSelect } from "@common/library/ProjectSelect";
 
 function getPipelineSelectorData(data: any) {
   return new Map()

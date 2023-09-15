@@ -61,7 +61,7 @@ import { getOnboardingCompletionReport } from "@utils/requests/getOnboardingComp
 import { hexToHexWithAlpha } from "@utils/general";
 import getPersonas from "@utils/requests/getPersonas";
 import { Archetype } from "src";
-import { ProjectSelect } from './ProjectSelect';
+import { ProjectSelect } from '../../src/components/common/library/ProjectSelect';
 import { currentInboxCountState, currentProjectState } from '@atoms/personaAtoms';
 import { IconAt, IconBrain, IconMessage, IconMilitaryRank, IconSeeding, IconTimelineEventPlus } from '@tabler/icons';
 import PersonaCardMini from '@common/persona/PersonaCardMini';

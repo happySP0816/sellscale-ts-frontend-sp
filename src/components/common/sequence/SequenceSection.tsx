@@ -144,8 +144,8 @@ export default function SequenceSection() {
         <Box sx={{ flexBasis: "35%" }}>
           <Stack>
             <FrameworkCard
-              title="Invite Request"
-              bodyTitle="Intro Message"
+              title="Connection Request"
+              bodyTitle="Invite Message"
               bodyText="Say hello and introduce myself as a sales rep"
               active={activeCard === 0}
               onClick={() => setActiveCard(0)}
@@ -161,7 +161,7 @@ export default function SequenceSection() {
               mx={30}
             />
             <FrameworkCard
-              title="Invite Accepted"
+              title="Follow-Up 1"
               badgeText="If no reply from prospect."
               bodyTitle={bf0?.title ?? ""}
               bodyText={bf0?.description ?? ""}
@@ -178,7 +178,7 @@ export default function SequenceSection() {
               onClick={() => setActiveCard(1)}
               canEdit
               editProps={{
-                title: "Choose Bump Framework for Invite Accepted",
+                title: "Choose Bump Framework for Follow-Up 1",
                 bumpedCount: 0,
                 bumpedFrameworks: bumpFrameworks.filter(
                   (bf) => bf.overall_status === "ACCEPTED"
@@ -188,7 +188,7 @@ export default function SequenceSection() {
             />
 
             <FrameworkCard
-              title="Step 1"
+              title="Follow-Up 2"
               badgeText="If no reply from prospect."
               bodyTitle={bf1?.title ?? ""}
               bodyText={bf1?.description ?? ""}
@@ -205,7 +205,7 @@ export default function SequenceSection() {
               onClick={() => setActiveCard(2)}
               canEdit
               editProps={{
-                title: "Choose Bump Framework for Step 1",
+                title: "Choose Bump Framework for Follow-Up 2",
                 bumpedCount: 1,
                 bumpedFrameworks: bumpFrameworks.filter(
                   (bf) =>
@@ -215,7 +215,7 @@ export default function SequenceSection() {
               }}
             />
             <FrameworkCard
-              title="Step 2"
+              title="Follow-Up 3"
               badgeText="If no reply from prospect."
               bodyTitle={bf2?.title ?? ""}
               bodyText={bf2?.description ?? ""}
@@ -232,7 +232,7 @@ export default function SequenceSection() {
               onClick={() => setActiveCard(3)}
               canEdit
               editProps={{
-                title: "Choose Bump Framework for Step 2",
+                title: "Choose Bump Framework for Follow-Up 3",
                 bumpedCount: 2,
                 bumpedFrameworks: bumpFrameworks.filter(
                   (bf) =>
@@ -242,7 +242,7 @@ export default function SequenceSection() {
               }}
             />
             <FrameworkCard
-              title="Step 3"
+              title="Follow-Up 4"
               badgeText="If no reply from prospect."
               bodyTitle={bf3?.title ?? ""}
               bodyText={bf3?.description ?? ""}
@@ -250,7 +250,7 @@ export default function SequenceSection() {
               onClick={() => setActiveCard(4)}
               canEdit
               editProps={{
-                title: "Choose Bump Framework for Step 3",
+                title: "Choose Bump Framework for Follow-Up 4",
                 bumpedCount: 3,
                 bumpedFrameworks: bumpFrameworks.filter(
                   (bf) =>
@@ -500,7 +500,7 @@ function IntroMessageSection() {
     <Stack ml="xl" spacing={0}>
       <Group position="apart">
         <Group>
-          <Title order={3}>Intro Message</Title>
+          <Title order={3}>Invite Message</Title>
           {/* {ctasItemsCount !== undefined && (
             <Badge color="blue" fw={500}>{ctasItemsCount} CTAs Active</Badge>
           )} */}
@@ -557,7 +557,7 @@ function IntroMessageSection() {
           <Box>
             <Group position="apart" pb="0.3125rem">
               <Text fz="sm" fw={500} c="dimmed">
-                EXAMPLE MESSAGE:
+                EXAMPLE INVITE MESSAGE:
               </Text>
               <Group>
                 <Button
@@ -1380,7 +1380,7 @@ function FrameworkSection(props: {
       <Group position="apart">
         <Group>
           <Title order={3}>
-            Step {props.bumpCount + 1}: {props.framework.title}
+            Follow-Up {props.bumpCount + 1}: {props.framework.title}
           </Title>
         </Group>
       </Group>
@@ -1430,7 +1430,7 @@ function FrameworkSection(props: {
             <Box>
               <Group position="apart" pb="0.3125rem">
                 <Text fz="sm" fw={500} c="dimmed">
-                  EXAMPLE MESSAGE:
+                  EXAMPLE FOLLOW-UP MESSAGE:
                 </Text>
                 <Group>
                   <Button

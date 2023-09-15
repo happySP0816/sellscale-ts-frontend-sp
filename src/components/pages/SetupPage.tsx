@@ -86,7 +86,7 @@ export default function SetupPage() {
 
         <Accordion.Item className={classes.item} value='persona'>
           <Accordion.Control>
-            <Title order={3}>2. Create Your First Persona</Title>
+            <Title order={3}>2. Create Your First Campaign</Title>
             <Text fs="italic" c="dimmed" fz="sm">Tell your AI who to target</Text>
           </Accordion.Control>
           <Accordion.Panel>
@@ -154,9 +154,9 @@ function PersonaOnboarding(props: { data: any }) {
     <OnboardingTable
       data={[
         {
-          title: 'Create Personas',
-          description: 'Create your persona',
-          link: '/personas',
+          title: 'Create Campaigns',
+          description: 'Create your campaign',
+          link: '/campaigns',
           searchParams: new URLSearchParams({ create: 'true' }),
           complete: props.data.persona.create_personas,
         },
@@ -184,20 +184,20 @@ function MessageGenerationOnboarding(props: { data: any }) {
         {
           title: 'Create Linkedin CTAs',
           description: 'Customize which CTAs the AI uses to outbound',
-          link: '/linkedin/ctas',
+          link: '/setup/linkedin',
           complete: props.data.msg_gen.create_linkedin_ctas,
         },
         {
           title: 'Voice Builder',
           description: 'Customize the AI voice for outbound',
-          link: '/linkedin/voices',
+          link: '/setup/linkedin',
           searchParams: new URLSearchParams({ create: 'true' }),
           complete: props.data.msg_gen.voice_builder,
         },
         {
           title: 'Setup LinkedIn',
           description: 'Customize how the AI responds on LinkedIn',
-          link: '/linkedin/setup',
+          link: '/setup/linkedin',
           complete: props.data.msg_gen.bump_framework_linkedin,
         },
         {

@@ -26,7 +26,7 @@ import LinkedInPage from "@pages/LinkedInPage";
 import EmailPage from "@pages/EmailPage";
 import OnboardingModalPage from "@pages/OnboardingModalPage";
 import AuthCalendlyPage from "@pages/AuthCalendlyPage";
-import SetupPage from "@pages/SetupPage";
+import SetupPage, { OnboardingTable } from "@pages/SetupPage";
 import InboxPage from "@pages/InboxPage";
 import AllContactsSection from "@common/home/AllContactsSection";
 import { Box } from "@mantine/core";
@@ -217,7 +217,7 @@ const router = sentryCreateBrowserRouter([
       },
       {
         path: "onboarding",
-        element: <RestrictedRoute page={<OnboardingModalPage />} />,
+        element: <RestrictedRoute page={<SetupPage />} />,
       },
       {
         path: "setup",

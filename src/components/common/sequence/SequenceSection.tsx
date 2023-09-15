@@ -40,6 +40,7 @@ import {
   Grid,
   Checkbox,
   Flex,
+  MantineColor,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDebouncedValue, useDisclosure, useHover } from "@mantine/hooks";
@@ -1799,6 +1800,7 @@ export const PersonalizationCard: React.FC<{
 };
 
 const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void }) => {
+  const theme = useMantineTheme();
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
 
@@ -1875,6 +1877,12 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void }) => {
                   color: "indigo",
                   variant: "subtle",
                 },
+                {
+                  label: e.cta_type,
+                  highlight: '',
+                  color: valueToColor(theme, e.cta_type),
+                  variant: "light",
+                },
               ],
             }}
             key={index}
@@ -1928,8 +1936,8 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void }) => {
 interface Tag {
   label: string;
   highlight?: string;
-  color: string;
-  variant: "subtle" | "filled";
+  color: MantineColor;
+  variant: "subtle" | "filled" | 'light';
 }
 
 interface TabOption {

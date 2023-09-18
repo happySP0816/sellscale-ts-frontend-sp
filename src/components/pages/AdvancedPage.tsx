@@ -28,8 +28,8 @@ export default function AdvancedPage(props: {}) {
           </Tabs.Tab>
           <Tabs.Tab value="demo-feedback">Demo Feedback Repo</Tabs.Tab>
           <Tabs.Tab value="email-scraper">Email Scraper</Tabs.Tab>
-          <Tabs.Tab value="filters">Filters</Tabs.Tab>
-          <Tabs.Tab value="clean-contacts">Clean Contacts</Tabs.Tab>
+          {/* <Tabs.Tab value="filters">Filters</Tabs.Tab> */}
+          {/* <Tabs.Tab value="clean-contacts">Clean Contacts</Tabs.Tab> */}
         </Tabs.List>
 
         <Tabs.Panel value="find-contacts" pl="xs">

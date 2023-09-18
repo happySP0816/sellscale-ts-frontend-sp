@@ -2,24 +2,32 @@ import {
   ActionIcon,
   Box,
   Button,
+  Card,
   Container,
   Divider,
   Flex,
   Grid,
   Select,
   Text,
+  Title,
 } from "@mantine/core";
-import { IconArrowLeft } from "@tabler/icons-react";
+import { IconArrowLeft, IconBrain, IconFilter, IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import Hook from "./components/Hook";
 import ChannelTab from "./components/ChannelTab";
 import { useRecoilValue } from 'recoil';
 import { userDataState } from '@atoms/userAtoms';
 import { ProjectSelect } from "@common/library/ProjectSelect";
+import { currentProjectState } from '@atoms/personaAtoms';
+import { useNavigate } from 'react-router-dom';
+import { navigateToPage } from '@utils/documentChange';
 
 const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChannel: (channel: string) => void, hideChannels: boolean}) => {
   const [selectedChildChannel, setSelectedChildChannel] = useState(props.selectedChannel);
   const [isEnabledLinkedin, setEnabledLinkedin] = useState(true);
+
+  const currentProject = useRecoilValue(currentProjectState);
+  const navigate = useNavigate();
 
   const [isEnabledEmail, setEnabledEmail] = useState(false);
   const [isActiveEmail, setActiveEmail] = useState(false);
@@ -37,6 +45,40 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
     setActiveNurture(isEnabledEmail && isActiveEmail);
   }, [isEnabledEmail, isActiveEmail]);
 
+  const brainFilled = currentProject?.name && currentProject?.persona_contact_objective && currentProject?.persona_fit_reason && currentProject?.contract_size
+  let brainPercentFilled = 0
+  let brainAttributes = [
+    currentProject?.name,
+    currentProject?.persona_contact_objective,
+    currentProject?.persona_fit_reason,
+    currentProject?.contract_size
+  ]
+  brainAttributes.forEach((attribute) => {
+    if(attribute) {
+      brainPercentFilled += 1
+    }
+  }
+  )
+  brainPercentFilled = brainPercentFilled / 4 * 100
+
+  const needMoreProspects = currentProject?.num_unused_li_prospects && currentProject?.num_unused_li_prospects < 200
+
+  let avgIcpScoreLabel = ''
+  if (currentProject?.avg_icp_fit_score) {
+    if (currentProject?.avg_icp_fit_score < 1) {
+      avgIcpScoreLabel = 'Very Low'
+    } else if (currentProject?.avg_icp_fit_score < 2) {
+      avgIcpScoreLabel = 'Low'
+    } else if (currentProject?.avg_icp_fit_score < 3) {
+      avgIcpScoreLabel = 'Medium'
+    } else if (currentProject?.avg_icp_fit_score < 4) {
+      avgIcpScoreLabel = 'High'
+    } else if (currentProject?.avg_icp_fit_score < 5) {
+      avgIcpScoreLabel = 'Very High'
+    }
+  }
+  const avgIcpScoreIsBad = currentProject?.avg_icp_fit_score && currentProject?.avg_icp_fit_score < 2
+  
   return (
     <>
         <Box>
@@ -47,7 +89,7 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
             <Flex bg={"gray.0"} direction={"column"} pt={"2rem"} w={"100%"}>
               <Grid >
                 <Grid.Col xs={12} md={"auto"}>
-                  <Flex align={"center"} gap={"0.5rem"}>
+                  <Flex align={"center"} gap={"0.5rem"} mb='xs'>
                     <ActionIcon
                       variant="outline"
                       color="blue"
@@ -57,51 +99,80 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                       onClickCapture={() => {
                         history.back();
                       }}
+                      mt='xs'
                     >
                       <IconArrowLeft size={"0.875rem"} />
                     </ActionIcon>
-                    <Text fz={"1rem"} span color="gray.6" mr='xs'>
+                    <Text fz={"1rem"} span color="gray.6" mt='8px'>
                       Campaign:
                     </Text>
-                   <ProjectSelect />
+                    <ProjectSelect />
                   </Flex>
                 </Grid.Col>
-                <Grid.Col xs={12} md={"auto"}>
-                  <Flex align={"center"} justify={{ md: "end" }} gap={"0.5rem"}>
-                    <Flex
-                      px={"1rem"}
-                      align={"center"}
-                      gap={"0.5rem"}
-                      mih={"2rem"}
-                      sx={{
-                        borderWidth: "1px",
-                        borderStyle: "solid",
-                        borderColor: "#E9ECEF",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      <Text fz={"0.75rem"} color="gray.6">
-                        Linkedin:
-                        <Text span color="blue" fw={500} ml='xs'>
-                         {userData.weekly_li_outbound_target}/100
+                {currentProject?.id && <Card withBorder w='100%' mb='lg'>
+                  <Flex direction='row'>
+                    <Card withBorder  w='35%' mr='5%'>
+                      <Box>
+                        <Title order={2} style={{marginBottom: 0}}>
+                          {currentProject?.emoji} {currentProject?.name}
+                        </Title>
+                        <Text size='xs' mt='md'>
+                          <b>Objective:</b> {currentProject?.persona_contact_objective}
                         </Text>
-                      </Text>
-                      <Divider orientation="vertical" color="#E9ECEF" />
-                      <Text fz={"0.75rem"} color="gray.6">
-                        Email:{" "}
-                        <Text span color="blue" fw={500} ml='xs'>
-                          {userData.weekly_email_outbound_target}/100
+                      </Box>
+                    </Card>
+                    <Card withBorder w='20%' mr='xs' sx={{textAlign: 'center'}}>
+                        <Title order={6} style={{marginBottom: 0}}>
+                          Setup {brainPercentFilled}% Filled
+                        </Title>
+                        <Text sx={{fontSize: '10px'}} h='40px'>
+                          {brainFilled ? 'You are ready to go!' : 'You need to complete the setup so the AI can properly conduct outreach.'}
                         </Text>
+                        <Button size='xs' leftIcon={<IconBrain size='0.8rem'/>} mt='xs' color={brainFilled ? 'green' : 'red'} onClick={
+                          () => {
+                            navigateToPage(navigate, '/persona/settings');
+                          }
+                        }>
+                          Go to Setup
+                        </Button>
+                    </Card>
+                    <Card withBorder w='20%' mr='xs'sx={{textAlign: 'center'}}>
+                      <Title order={6} style={{marginBottom: 0}}>
+                        Contacts: {currentProject?.num_unused_li_prospects} left
+                      </Title>
+                      <Text sx={{fontSize: '10px'}} h='40px'>
+                        {
+                          needMoreProspects ? 'You need to add more contacts to this campaign.' : 'You have enough contacts to continue this campaign. Add more to extend.'
+                        }
                       </Text>
-                    </Flex>
-                    <Button color="blue" size="xs" onClick={() => {}}>
-                      Add More Prospects
-                    </Button>
+                      <Button size='xs' leftIcon={<IconPlus size='0.8rem'/>} mt='xs' color={needMoreProspects ? 'red' : 'green'} onClick={
+                        () => {
+                          navigateToPage(navigate, '/contacts');
+                        }
+                      }>
+                        Add Contacts
+                      </Button>
+                    </Card>
+                    <Card withBorder w='20%' mr='xs'sx={{textAlign: 'center'}}>
+                      <Title order={6} style={{marginBottom: 0}}>
+                        ICP Fit: {avgIcpScoreLabel} ({Math.round(currentProject?.avg_icp_fit_score * 100) / 100})
+                      </Title>
+                      <Text sx={{fontSize: '10px'}} h='40px'>
+                        {
+                          avgIcpScoreIsBad ? 'Your ICP fit score is low. You should adjust your ICP to improve your results.' : 'Your ICP fit score is above average. You can optionally adjust your ICP settings.'
+                        }
+                      </Text>
+                      <Button size='xs' leftIcon={<IconFilter size='0.8rem'/>} mt='xs' color={avgIcpScoreIsBad ? 'red' : 'green'} onClick={
+                        () => {
+                          navigateToPage(navigate, '/prioritize')
+                        }
+                      }>
+                        Adjust Filters
+                      </Button>
+                    </Card>
                   </Flex>
-                </Grid.Col>
+                </Card>}
               </Grid>
-
-              <Divider my={"1.5rem"} />
 
               {!props.hideChannels &&
                 <Grid gutter={"0"} px={"2rem"}>

@@ -26,7 +26,8 @@ export default function ModalSelector(props: {
     buttonProps?: ButtonProps;
     onClick?: () => void | boolean;
     onClickChange?: () => void;
-    override?: React.ReactNode;// This will override the selector button UI to the TSX provided
+    noChange?: boolean;
+    override?: React.ReactNode; // This will override the selector button UI to the TSX provided
   };
   title: {
     name: string;
@@ -68,7 +69,7 @@ export default function ModalSelector(props: {
             onClick={() => {
               if (props.selector.onClick) {
                 const result = props.selector.onClick();
-                if(result === true){
+                if (result === true) {
                   open();
                 }
               }
@@ -76,22 +77,25 @@ export default function ModalSelector(props: {
           >
             {props.selector.content}
           </Button>
-          <Tooltip label={props.title.name} withArrow>
-            <Button
-              {...props.selector.buttonProps}
-              compact
-              onClick={() => {
-                props.selector.onClickChange && props.selector.onClickChange();
-                open();
-              }}
-            >
-              {props.loading ? (
-                <Loader size="1.1rem" />
-              ) : (
-                <IconPencil size="1.1rem" />
-              )}
-            </Button>
-          </Tooltip>
+          {props.selector.noChange ? null : (
+            <Tooltip label={props.title.name} withArrow>
+              <Button
+                {...props.selector.buttonProps}
+                compact
+                onClick={() => {
+                  props.selector.onClickChange &&
+                    props.selector.onClickChange();
+                  open();
+                }}
+              >
+                {props.loading ? (
+                  <Loader size="1.1rem" />
+                ) : (
+                  <IconPencil size="1.1rem" />
+                )}
+              </Button>
+            </Tooltip>
+          )}
         </Button.Group>
       )}
       <Modal

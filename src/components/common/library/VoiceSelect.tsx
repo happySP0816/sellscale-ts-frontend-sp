@@ -78,13 +78,18 @@ export default function VoiceSelect(props: {
         (a: any, b: any) => b.priority - a.priority
       ) ?? []) as any[];
       props.onFinishLoading && props.onFinishLoading(voices);
+      if (props.autoSelect) {
+        const voice = voices.find((v) => v.active && v.archetype_id);
+        if (voice) {
+          setSelectedVoice(voice);
+          props.onChange(voice);
+        }
+      }
       return voices;
     },
     refetchOnWindowFocus: false,
   });
   const voices = data ?? [];
-
-  console.log(voices);
 
   return (
     <>
@@ -92,7 +97,7 @@ export default function VoiceSelect(props: {
         selector={{
           content: (
             <Text>
-              {selectedVoice ? `Using ${selectedVoice.name}` : "Train Tone"}
+              {selectedVoice ? `Using ${_.truncate(selectedVoice.name)}` : "Start Campaign"}
             </Text>
           ),
           buttonProps: {
@@ -112,12 +117,12 @@ export default function VoiceSelect(props: {
             } else {
               openContextModal({
                 modal: "voiceBuilder",
-                title: <Title order={3}>Voice Builder</Title>,
+                title: <Title order={3}>Finalize Campaign Voice</Title>,
                 innerProps: {},
               });
             }
           },
-          onClickChange: () => {},
+          noChange: !selectedVoice,
         }}
         title={{
           name: "Select Voice",

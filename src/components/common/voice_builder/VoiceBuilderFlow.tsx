@@ -66,6 +66,7 @@ import { showNotification } from "@mantine/notifications";
 import { API_URL } from "@constants/data";
 import TextAlign from "@tiptap/extension-text-align";
 import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
+import { logout } from "@auth/core";
 
 const ItemComponent = (props: { id: number; defaultValue: string }) => {
   const [message, setMessage] = useState<string>(props.defaultValue);
@@ -111,13 +112,20 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
     return <></>;
   }
 
-  const researchPoints = _.cloneDeep(existingMessage?.meta_data.research_points.map((p: any) => p.value));
-  const researchPointTypes = _.cloneDeep(existingMessage?.meta_data.research_points?.map((p: any) => p.research_point_type));
+  const researchPoints = _.cloneDeep(
+    existingMessage?.meta_data.research_points.map((p: any) => p.value)
+  );
+  const researchPointTypes = _.cloneDeep(
+    existingMessage?.meta_data.research_points?.map(
+      (p: any) => p.research_point_type
+    )
+  );
 
   return (
     <Container>
       <Group noWrap spacing={0}>
-        <div style={{ flexGrow: 1 }}>
+        <Box style={{ flexGrow: 1 }}>
+          <Group spacing={8} noWrap>
           <Anchor
             component="button"
             type="button"
@@ -130,10 +138,12 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
           >
             {existingMessage?.prospect?.full_name || "Example Prospect"}
           </Anchor>
-          <Button
+          <ActionIcon
             variant="subtle"
-            leftIcon={<IconBrandLinkedin />}
-            size="xs"
+            color='blue'
+            radius='xl'
+            size='sm'
+            aria-label="LinkedIn"
             onClick={() => {
               if (existingMessage?.prospect) {
                 window.open(
@@ -142,7 +152,9 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
                 );
               }
             }}
-          />
+          >
+            <IconBrandLinkedin size="1.0rem" />
+          </ActionIcon>
           {existingMessage && (
             <AiMetaDataBadge
               location={{ position: "relative", top: -5 }}
@@ -152,23 +164,21 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
               bumpFrameworkLength={""}
               bumpNumberConverted={undefined}
               bumpNumberUsed={undefined}
-              accountResearchPoints={
-                researchPoints || []
-              }
+              accountResearchPoints={researchPoints || []}
               initialMessageId={-1}
               initialMessageCTAId={existingMessage.meta_data.cta.id || 0}
-              initialMessageCTAText={existingMessage.meta_data.cta.text_value || ""}
-              initialMessageResearchPoints={
-                researchPoints || []
+              initialMessageCTAText={
+                existingMessage.meta_data.cta.text_value || ""
               }
-              initialMessageResearchPointTypes={
-                researchPointTypes || []
-              }
+              initialMessageResearchPoints={researchPoints || []}
+              initialMessageResearchPointTypes={researchPointTypes || []}
               initialMessageStackRankedConfigID={undefined}
-              initialMessageStackRankedConfigName={'Baseline Linkedin'}
+              initialMessageStackRankedConfigName={"Baseline Linkedin"}
               cta={existingMessage.meta_data.cta.text_value || ""}
+              useInfoIcon
             />
           )}
+          </Group>
           <Container
             m={0}
             p={0}
@@ -218,7 +228,7 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
           >
             {message.length} / 300
           </Text>
-        </div>
+        </Box>
         <div style={{ flexGrow: 0 }}>
           <Tooltip label="Edit" position="left" openDelay={500} withArrow>
             <ActionIcon
@@ -254,6 +264,8 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
 export default function VoiceBuilderFlow(props: {
   persona: PersonaOverview;
   voiceBuilderOnboardingId: number;
+  createCampaign?: boolean;
+  onComplete?: () => void;
 }) {
   const [voiceBuilderMessages, setVoiceBuilderMessages] = useRecoilState(
     voiceBuilderMessagesState
@@ -361,8 +373,53 @@ export default function VoiceBuilderFlow(props: {
       userToken,
       props.voiceBuilderOnboardingId
     );
+
+    if(props.createCampaign) {
+      // Also create the first campaign
+
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+
+      const ctaIds = [];
+      const prospectIds = [];
+      for(const message of currentMessages) {
+        if (message.value) {
+          if(message.meta_data?.cta && message.meta_data.cta.active){
+            ctaIds.push(message.meta_data.cta.id);
+          }
+          if(message.prospect) {
+            prospectIds.push(message.prospect.id);
+          }
+        }
+      }
+
+      const response = await fetch(
+        `${API_URL}/campaigns/`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prospect_ids: prospectIds,
+            num_prospects: prospectIds.length,
+            campaign_type: 'LINKEDIN',
+            client_archetype_id: props.persona.id,
+            campaign_start_date: new Date().toISOString(),
+            campaign_end_date: nextWeek.toISOString(),
+            ctas: ctaIds,
+            priority_rating: 0,
+          }),
+        }
+      );
+      if(response.status === 401){ logout() }
+      const res = await response.json();
+      console.log(res);
+    }
+
     if (response.status === "success") {
-      window.location.href = `/linkedin/voices`;
+      props.onComplete?.();
     }
   };
 

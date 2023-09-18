@@ -96,6 +96,11 @@ export default function VoiceBuilderModal({
         <VoiceBuilderFlow
           persona={currentProject}
           voiceBuilderOnboardingId={voiceBuilderOnboardingId}
+          createCampaign
+          onComplete={() => {
+            queryClient.refetchQueries(["query-voices"]);
+            context.closeModal(id);
+          }}
         />
       )}
       {!canBuildVoice && voiceBuilderOnboardingId !== -1 && (

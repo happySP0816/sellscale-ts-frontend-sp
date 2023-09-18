@@ -435,7 +435,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
           /> */}
         </Grid.Col>
         <Grid.Col span={2}>
-          <Switch.Group
+          {/* <Switch.Group
             label={
               showPurgatory
                 ? "Show prospects that need contacting"
@@ -448,7 +448,7 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
             <Group>
               <Switch value="purgatory" />
             </Group>
-          </Switch.Group>
+          </Switch.Group> */}
         </Grid.Col>
       </Grid>
 

@@ -103,7 +103,7 @@ const CampaignSequenceDAG: React.FC<{
               Send:
             </Text>
             <Text fw={"600"} fz={"0.6rem"} color="gray.8">
-              {numbers[0] ?? 0}
+              {hovered ? numbers[0] ?? 0 : Math.round(numbers[0] / (numbers[0] + 0.0001) * 100) +  '%'}
             </Text>
           </Flex>
 
@@ -113,7 +113,7 @@ const CampaignSequenceDAG: React.FC<{
               Opens:
             </Text>
             <Text fw={"600"} fz={"0.6rem"} color="gray.8">
-              {numbers[1] ?? 0}
+              {hovered ? numbers[1] ?? 0 : Math.round(numbers[1] / (numbers[0] + 0.0001) * 100) +  '%'}
             </Text>
           </Flex>
 
@@ -123,7 +123,7 @@ const CampaignSequenceDAG: React.FC<{
               Replies:
             </Text>
             <Text fw={"600"} fz={"0.6rem"} color="gray.8">
-              {numbers[2] ?? 0}
+              {hovered ? numbers[2] ?? 0 : Math.round(numbers[2] / (numbers[0] + 0.0001) * 100) +  '%'}
             </Text>
           </Flex>
         </Flex>

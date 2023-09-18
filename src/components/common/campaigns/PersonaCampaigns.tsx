@@ -33,7 +33,7 @@ import {
   SegmentedControl,
   Alert,
 } from "@mantine/core";
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useHover } from '@mantine/hooks';
 import { openContextModal } from "@mantine/modals";
 import {
   IconAdjustments,
@@ -366,6 +366,7 @@ function PersonCampaignCard(props: {
   const [opened, { toggle }] = useDisclosure(props.persona.active);
   const [inactiveChannelsOpened, setInactiveChannelsOpened] = useState(false);
   const [emoji, setEmojiState] = useState<string>(props.persona.emoji || '⬜️');
+  const { hovered, ref } = useHover();
 
   const userToken = useRecoilValue(userTokenState);
 
@@ -424,8 +425,8 @@ function PersonCampaignCard(props: {
   ];
 
   return (
-    <Paper radius="md">
-      <Stack spacing={0} sx={{opacity: props.persona.active ? 1 : 0.6}}>
+    <Paper radius="md" ref={ref}>
+      <Stack spacing={0} sx={{opacity: props.persona.active || hovered ? 1 : 0.6, cursor: 'pointer'}} >
         <Group
           // position="apart"
           sx={(theme) => ({

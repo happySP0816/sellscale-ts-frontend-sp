@@ -259,6 +259,8 @@ export interface PersonaOverview {
   contract_size: number;
   transformer_blocklist?: string[],
   transformer_blocklist_initial?: string[],
+  emoji: string;
+  avg_icp_fit_score: number;
 }
 
 export interface LinkedInMessage {

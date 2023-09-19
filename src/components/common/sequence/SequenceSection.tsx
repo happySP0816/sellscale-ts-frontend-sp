@@ -41,10 +41,11 @@ import {
   Checkbox,
   Flex,
   MantineColor,
+  Select,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDebouncedValue, useDisclosure, useHover, usePrevious } from "@mantine/hooks";
-import { openContextModal } from "@mantine/modals";
+import { openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconCheck,
   IconCopy,
@@ -1484,6 +1485,43 @@ function FrameworkSection(props: {
             </Box>
           )}
         </Box>
+        <Select
+          label="Pick a framework"
+          placeholder="Pick value"
+          data={[
+            { value: 'short-introduction', label: 'Short - Introduction' },
+            { value: 'pain-points-opener', label: 'Medium - Pain Points Opener' },
+            { value: 'funny-joke', label: 'Long - Funny Industry Related Joke' },
+            { value: 'connect-role', label: 'Short - Connect to Role' },
+            { value: 'relationship-builder', label: 'Medium - Relationship Builder' },
+            { value: 'casual-inquiry', label: 'Short - Casual Inquiry' },
+          ]}
+          onChange={(value: any) => {
+            const frameworks: any = {
+                'short-introduction': 'Name: Introduction\nLength: Short\nDelay: 1 Day\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. I’m reaching out because I noticed you’re a {{role}} at {{company_name}}. I’m curious, what’s your role like at {{company_name}}?',
+                'pain-points-opener': 'Name: Pain Points Opener\nLength: Medium\nDelay: 2 Days\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. I’m reaching out because I noticed you’re a {{role}} at {{company_name}}. I’m curious, what’s your role like at {{company_name}}? I’m asking because I’ve been working with other {{role}}s at {{company_name}} and they’ve been telling me about some of the challenges they’re facing. I’m curious, what are some of the challenges you’re facing?',
+                'funny-joke': 'Name: Funny Industry Related Joke\nLength: Long\nDelay: 3 Days\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. Why did the {{role}} bring a ladder to work? To reach new heights in productivity!',
+                'connect-role': 'Name: Connect to Role\nLength: Short\nDelay: 1 Day\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. How does your role as a {{role}} influence your daily workflow?',
+                'relationship-builder': 'Name: Relationship Builder\nLength: Medium\nDelay: 2 Days\nDescription: Hi {{first_name}}, it’s {{sdr_name}} from {{company_name}}. I noticed you’re a {{role}} and have been in the industry for quite a while. I’d love to hear your journey!',
+                'casual-inquiry': 'Name: Casual Inquiry\nLength: Short\nDelay: 1 Day\nDescription: Hey {{first_name}}, {{sdr_name}} here from {{company_name}}. How’s your week going?',
+            }
+
+            openConfirmModal({
+                title: "Override Framework?",
+                children: (
+                  <Text>
+                    Are you sure you want to override the current framework with this one?
+                  </Text>
+                ),
+                labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                onCancel: () => { },
+                onConfirm: () => { 
+                  form.setFieldValue('promptInstructions', frameworks[value].split("Description: ")[1]) 
+                }
+              })
+            
+          }}  
+        />
         <form onSubmit={form.onSubmit((values) => saveSettings(values))}>
           <Group grow>
             <Box>

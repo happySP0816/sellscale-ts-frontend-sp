@@ -7,11 +7,12 @@ import {
   Divider,
   Flex,
   Grid,
-  Select,
+  Tooltip,
   Text,
   Title,
+  Badge,
 } from "@mantine/core";
-import { IconArrowLeft, IconBrain, IconFilter, IconPlus } from "@tabler/icons-react";
+import { IconArrowLeft, IconBrain, IconBrandGmail, IconBrandLinkedin, IconFilter, IconMail, IconPencil, IconPlant, IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import Hook from "./components/Hook";
 import ChannelTab from "./components/ChannelTab";
@@ -78,6 +79,13 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
     }
   }
   const avgIcpScoreIsBad = currentProject?.avg_icp_fit_score && currentProject?.avg_icp_fit_score < 2
+
+  let ChannelIcon = () => <IconBrandLinkedin style={{ width: 20, height: 20, marginTop: 9 }} />
+  if (selectedChildChannel === 'email') {
+    ChannelIcon = () => <IconMail style={{ width: 20, height: 20, marginTop: 9 }} />
+  } else if (selectedChildChannel === 'nurture') {
+    ChannelIcon = () => <IconPlant style={{ width: 20, height: 20, marginTop: 9 }} />
+  }
   
   return (
     <>
@@ -104,15 +112,39 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                       <IconArrowLeft size={"0.875rem"} />
                     </ActionIcon>
                     <Text fz={"1rem"} span color="gray.6" mt='8px'>
+                      Go back to Campaigns
+                    </Text>
+                    {/* <Text fz={"1rem"} span color="gray.6" mt='8px'>
                       Campaign:
                     </Text>
-                    <ProjectSelect />
+                    <ProjectSelect /> */}
                   </Flex>
                 </Grid.Col>
                 {currentProject?.id && <Card withBorder w='100%' mb='lg'>
                   <Flex direction='row'>
                     <Card withBorder  w='35%' mr='5%'>
                       <Box>
+                        <Tooltip
+                          label='Click to edit campaign name or objective'
+                          position={'bottom'}
+                          >
+                          <Button size='xs'  mt='xs' color={'gray'} variant='subtle' 
+                            sx={{
+                              position: 'absolute',
+                              right: '8px',
+                              bottom: '8px'
+                            }}
+                            onClick={
+                              () => {
+                                navigateToPage(navigate, '/persona/settings');
+                              }
+                            }>
+                            <IconPencil size={'0.9rem'}/>
+                          </Button>
+                        </Tooltip>
+                        <Badge size='xl' mb='xs' leftSection={<ChannelIcon />}>
+                          {props.selectedChannel}
+                        </Badge>
                         <Title order={2} style={{marginBottom: 0}}>
                           {currentProject?.emoji} {currentProject?.name}
                         </Title>

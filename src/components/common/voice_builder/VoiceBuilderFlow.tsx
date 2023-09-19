@@ -374,7 +374,7 @@ export default function VoiceBuilderFlow(props: {
       props.voiceBuilderOnboardingId
     );
 
-    const configId = response.data.config_id;
+    const configId = response.data.id;
 
     if(props.createCampaign) {
       // Also create and send the first campaign

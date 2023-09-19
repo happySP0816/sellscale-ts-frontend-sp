@@ -374,7 +374,6 @@ function PersonCampaignCard(props: {
 
 
   const userData = useRecoilValue(userDataState);
-  console.log(userData);
 
   const setEmoji = (emoji: string) => {
     setEmojiState(emoji);

@@ -805,7 +805,6 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
                         onThreadClick={(thread) => {
                           setEmailThread(thread);
                           setSelectedThread(thread)
-                          console.log('clicked thread', thread)
                         }}
                       />
                     )}

@@ -172,12 +172,12 @@ export default function SequenceSection() {
             />
             <Flex w='100%' justify='space-between' p='md'>
               <Divider
-                w='70%'
+                w='50%'
                 variant="dashed"
                 label={
                   <>
                     <Text c="dimmed" ta="center" fz="sm">
-                      After accepting invite
+                      Accepted Invite
                     </Text>
                   </>
                 }
@@ -194,7 +194,7 @@ export default function SequenceSection() {
                   variant="dot"
                   color={replyRate > 0.5 ? "green" : "red"}
                 >
-                  {replyRate.toFixed(1)}%
+                  Replied: {replyRate.toFixed(1)}%
                 </Badge>
               </Tooltip>
             </Flex>
@@ -1276,7 +1276,7 @@ function FrameworkCard(props: {
           </Group>
           {props.conversion !== undefined && (
             <Tooltip
-              label={props.conversion > 9.0 ? 'Your acceptance rates are above industry standards (9%). Congrats!' : 'Your acceptance rates are below industry standards (9%). Consider changing your CTAs'}
+              label={props.conversion > 9.0 ? 'Your open rates are above industry standards (9%). Congrats!' : 'Your open rates are below industry standards (9%). Consider changing your CTAs'}
               withArrow
               withinPortal
             >
@@ -1284,7 +1284,7 @@ function FrameworkCard(props: {
                 variant='dot'
                 color={props.conversion > 9.0 ? 'green' : 'red'}
               >
-                {Math.trunc(props.conversion)}%
+                Opened: {Math.trunc(props.conversion)}%
               </Badge>
             </Tooltip>
           )}

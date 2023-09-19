@@ -168,12 +168,12 @@ export default function SideNavbar(props: {}) {
           <SideNavbarItem
             icon={<IconInbox size="1.0rem" />}
             label="Inbox"
-            tabKey={["inbox", ""]}
+            tabKey={["inbox"]}
           />
           <SideNavbarItem
             icon={<IconTargetArrow size="1.0rem" />}
             label="Campaigns"
-            tabKey={["campaigns", "all/campaigns"]}
+            tabKey={["campaigns", "all/campaigns", ""]}
           />
           <SideNavbarItem
             icon={<IconUsers size="1.0rem" />}

@@ -42,11 +42,14 @@ import {
   Flex,
   MantineColor,
   Select,
+  Collapse,
+  Container,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDebouncedValue, useDisclosure, useHover, usePrevious } from "@mantine/hooks";
 import { openConfirmModal, openContextModal } from "@mantine/modals";
 import {
+  IconBrain,
   IconCheck,
   IconCopy,
   IconDots,
@@ -55,6 +58,7 @@ import {
   IconPencil,
   IconPlus,
   IconReload,
+  IconTools,
   IconUpload,
   IconX,
 } from "@tabler/icons-react";
@@ -86,6 +90,8 @@ import _, { set } from "lodash";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { BumpFramework, CTA } from "src";
+import { BUMP_FRAMEWORK_OPTIONS } from './framework_constants';
+import TextWithNewline from '@common/library/TextWithNewlines';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1348,6 +1354,10 @@ function FrameworkSection(props: {
     uploadDrawerOpenState
   );
 
+  const [humanReadableContext, setHumanReadableContext] = useState<string[]>([]);
+  const [contextQuestion, setContextQuestion] = useState<string | null>(null);
+  const [opened, { toggle }] = useDisclosure(false);
+
   const [activeTab, setActiveTab] = useState<string | null>('none');
 
   const [personalizationItemsCount, setPersonalizationItemsCount] =
@@ -1362,6 +1372,7 @@ function FrameworkSection(props: {
       delayDays: props.framework.bump_delay_days,
       promptInstructions: props.framework.description,
       useAccountResearch: props.framework.use_account_research,
+      additionalContext: props.framework.additional_context
     },
   });
   const [debouncedForm] = useDebouncedValue(form.values, 200);
@@ -1378,7 +1389,8 @@ function FrameworkSection(props: {
       props.bumpCount,
       values.delayDays,
       props.framework.default,
-      values.useAccountResearch
+      values.useAccountResearch,
+      contextQuestion + "\n" + values.additionalContext
     );
     await queryClient.refetchQueries({
       queryKey: [`query-get-bump-frameworks`],
@@ -1539,183 +1551,236 @@ function FrameworkSection(props: {
             </Box>
           )}
         </Box>
-        <Select
-          label="Pick a framework"
-          placeholder="Pick value"
-          data={[
-            { value: 'short-introduction', label: 'Short - Introduction' },
-            { value: 'pain-points-opener', label: 'Medium - Pain Points Opener' },
-            { value: 'funny-joke', label: 'Long - Funny Industry Related Joke' },
-            { value: 'connect-role', label: 'Short - Connect to Role' },
-            { value: 'relationship-builder', label: 'Medium - Relationship Builder' },
-            { value: 'casual-inquiry', label: 'Short - Casual Inquiry' },
-          ]}
-          onChange={(value: any) => {
-            const frameworks: any = {
-              'short-introduction': 'Name: Introduction\nLength: Short\nDelay: 1 Day\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. I’m reaching out because I noticed you’re a {{role}} at {{company_name}}. I’m curious, what’s your role like at {{company_name}}?',
-              'pain-points-opener': 'Name: Pain Points Opener\nLength: Medium\nDelay: 2 Days\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. I’m reaching out because I noticed you’re a {{role}} at {{company_name}}. I’m curious, what’s your role like at {{company_name}}? I’m asking because I’ve been working with other {{role}}s at {{company_name}} and they’ve been telling me about some of the challenges they’re facing. I’m curious, what are some of the challenges you’re facing?',
-              'funny-joke': 'Name: Funny Industry Related Joke\nLength: Long\nDelay: 3 Days\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. Why did the {{role}} bring a ladder to work? To reach new heights in productivity!',
-              'connect-role': 'Name: Connect to Role\nLength: Short\nDelay: 1 Day\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. How does your role as a {{role}} influence your daily workflow?',
-              'relationship-builder': 'Name: Relationship Builder\nLength: Medium\nDelay: 2 Days\nDescription: Hi {{first_name}}, it’s {{sdr_name}} from {{company_name}}. I noticed you’re a {{role}} and have been in the industry for quite a while. I’d love to hear your journey!',
-              'casual-inquiry': 'Name: Casual Inquiry\nLength: Short\nDelay: 1 Day\nDescription: Hey {{first_name}}, {{sdr_name}} here from {{company_name}}. How’s your week going?',
-            }
+        <Card shadow="sm" padding="lg" radius="md" withBorder sx={{border: 'solid 2px #75b6c9 !important;'}}>
+          <Card.Section sx={{flexDirection: 'row', display: 'flex', borderBottom: 'solid 2px #75b6c9 !important;'}} p='xs' withBorder>
+            <Box ml='xs' mt='4px' sx={{flexDirection: 'row', display: 'flex'}}>
+              <IconBrain color='black' size='1.5rem'/>
+              <Text color='black' ml='xs'>
+                Select Bump Framework
+              </Text>
+            </Box>
+              <Select
+                  withinPortal
+                  ml='auto'
+                  mr='xs'
+                  w='50%'
+                  placeholder="Pick framework"
+                  clearable
+                  data={[
+                    { value: 'role-have-to-do-with', label: 'Does your role have to do with?'},
+                    { value: 'short-introduction', label: 'Short introduction'}, 
+                  ]}
+                  onChange={(value: any) => {
+                    const framework = BUMP_FRAMEWORK_OPTIONS[value]
+                    if (!framework) {
+                      form.setFieldValue(
+                        'additionalContext', ""
+                      )
+                      setContextQuestion(null)
+                      return
+                    }
+                    
+                    const name = framework.name
+                    const raw_prompt = framework.raw_prompt
+                    const human_readable_prompt = framework.human_readable_prompt
+                    const context_question = framework.context_question
+                    const length = framework.length
 
-            openConfirmModal({
-              title: "Override Framework?",
-              children: (
-                <Text>
-                  Are you sure you want to override the current framework with this one?
-                </Text>
-              ),
-              labels: { confirm: 'Confirm', cancel: 'Cancel' },
-              onCancel: () => { },
-              onConfirm: () => {
-                form.setFieldValue('promptInstructions', frameworks[value].split("Description: ")[1])
-              }
-            })
+                    setHumanReadableContext(human_readable_prompt)
 
-          }}
-        />
-        <form onSubmit={form.onSubmit((values) => saveSettings(values))}>
-          <Group grow>
-            <Box>
-              <Text fz="sm" fw={500} c="dimmed">
-                FRAMEWORK NAME:
-              </Text>
-              <TextInput
-                placeholder="Name"
-                variant="filled"
-                {...form.getInputProps("frameworkName")}
-              />
-            </Box>
-            <Box>
-              <Text fz="sm" fw={500} c="dimmed">
-                BUMP LENGTH:
-              </Text>
-              <SegmentedControl
-                data={[
-                  { label: "Short", value: "SHORT" },
-                  { label: "Medium", value: "MEDIUM" },
-                  { label: "Long", value: "LONG" },
-                ]}
-                {...form.getInputProps("bumpLength")}
-              />
-            </Box>
-            <Box>
-              <Text fz="sm" fw={500} c="dimmed">
-                DELAY DAYS:
-              </Text>
-              <NumberInput
-                placeholder="Days to Wait"
-                variant="filled"
-                {...form.getInputProps("delayDays")}
-              />
-            </Box>
+                    if (context_question) {
+                      setContextQuestion(context_question)
+                    }
+                    
+                    openConfirmModal({
+                      title: "Override Framework?",
+                      children: (
+                        <Text>
+                          Are you sure you want to override the current framework with this one?
+                        </Text>
+                      ),
+                      labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                      onCancel: () => { },
+                      onConfirm: () => {
+                        form.setFieldValue('promptInstructions', raw_prompt)
+                        form.setFieldValue('frameworkName', name)
+                        form.setFieldValue('bumpLength', length)
+                        form.setFieldValue('additionalContext', context_question)
+                      }
+                    })
+
+                  }}
+                />
+          </Card.Section>
+
+          <Group  mt="md" mb="xs">
+            {humanReadableContext}
           </Group>
-          <Box>
-            <Text fz="sm" fw={500} c="dimmed">
-              PROMPT INSTRUCTIONS:
-            </Text>
-            <Textarea
-              placeholder="Instructions"
-              minRows={7}
-              variant="filled"
-              {...form.getInputProps("promptInstructions")}
-            />
-          </Box>
+        </Card>
+        
+       
+        <form onSubmit={form.onSubmit((values) => saveSettings(values))}>
 
-          <Tabs
-            value={activeTab}
-            onTabChange={setActiveTab}
-            pt="sm"
-            variant="pills"
-            keepMounted={true}
-            radius="md"
-            allowTabDeactivation
-            sx={{ position: "relative" }}
-          >
-            <Tabs.List>
-              <Tooltip
-                label="Account Research Required"
-                disabled={form.values.useAccountResearch}
-                openDelay={500}
-                withArrow
-              >
-                <Tabs.Tab
-                  value="personalization"
-                  color="teal.5"
-                  rightSection={
-                    <>
-                      {personalizationItemsCount &&
-                        form.values.useAccountResearch ? (
-                        <Badge
-                          w={16}
-                          h={16}
-                          sx={{ pointerEvents: "none" }}
-                          variant="filled"
-                          size="xs"
-                          p={0}
-                          color="teal.6"
-                        >
-                          {personalizationItemsCount}
-                        </Badge>
-                      ) : (
-                        <></>
-                      )}
-                    </>
-                  }
-                  disabled={!form.values.useAccountResearch}
-                  sx={(theme) => ({
-                    "&[data-active]": {
-                      backgroundColor: theme.colors.teal[0] + "!important",
-                      borderRadius: theme.radius.md + "!important",
-                      color: theme.colors.teal[8] + "!important",
-                    },
-                  })}
+        
+
+        <Box mb='xs'>
+            {contextQuestion && <Textarea 
+            label="PROVIDE ADDITIONAL CONTEXT"
+            {...form.getInputProps("additionalContext")}
+          />}
+        </Box>
+        Props: {JSON.stringify(form.getInputProps("additionalContext"))}
+        <Box maw={'100%'} mx="auto">
+          <Collapse in={opened}>
+              <Card withBorder mb='xs'>
+              <Group grow>
+                <Box>
+                  <Text fz="sm" fw={500} c="dimmed">
+                    FRAMEWORK NAME:
+                  </Text>
+                  <TextInput
+                    placeholder="Name"
+                    variant="filled"
+                    {...form.getInputProps("frameworkName")}
+                  />
+                </Box>
+                <Box>
+                  <Text fz="sm" fw={500} c="dimmed">
+                    BUMP LENGTH:
+                  </Text>
+                  <SegmentedControl
+                    data={[
+                      { label: "Short", value: "SHORT" },
+                      { label: "Medium", value: "MEDIUM" },
+                      { label: "Long", value: "LONG" },
+                    ]}
+                    {...form.getInputProps("bumpLength")}
+                  />
+                </Box>
+                <Box>
+                  <Text fz="sm" fw={500} c="dimmed">
+                    DELAY DAYS:
+                  </Text>
+                  <NumberInput
+                    placeholder="Days to Wait"
+                    variant="filled"
+                    {...form.getInputProps("delayDays")}
+                  />
+                </Box>
+              </Group>
+              <Box mt='xs'>
+                <Text fz="sm" fw={500} c="dimmed">
+                  RAW PROMPT INSTRUCTIONS:
+                </Text>
+                <Textarea
+                  placeholder="Instructions"
+                  minRows={7}
+                  variant="filled"
+                  {...form.getInputProps("promptInstructions")}
+                />
+              </Box>
+              <Tabs
+              value={activeTab}
+              onTabChange={setActiveTab}
+              pt="sm"
+              variant="pills"
+              keepMounted={true}
+              radius="md"
+              allowTabDeactivation
+              sx={{ position: "relative" }}
+            >
+              <Tabs.List>
+                <Tooltip
+                  label="Account Research Required"
+                  disabled={form.values.useAccountResearch}
+                  openDelay={500}
+                  withArrow
                 >
-                  Personalization Settings
-                </Tabs.Tab>
-              </Tooltip>
-            </Tabs.List>
-            <Box sx={{ position: "absolute", top: 20, right: 0 }}>
-              <Switch
-                {...form.getInputProps("useAccountResearch", {
-                  type: "checkbox",
-                })}
-                color="teal"
-                size="sm"
-                label="Use Account Research"
-                labelPosition="left"
-              />
-            </Box>
+                  <Tabs.Tab
+                    value="personalization"
+                    color="teal.5"
+                    rightSection={
+                      <>
+                        {personalizationItemsCount &&
+                          form.values.useAccountResearch ? (
+                          <Badge
+                            w={16}
+                            h={16}
+                            sx={{ pointerEvents: "none" }}
+                            variant="filled"
+                            size="xs"
+                            p={0}
+                            color="teal.6"
+                          >
+                            {personalizationItemsCount}
+                          </Badge>
+                        ) : (
+                          <></>
+                        )}
+                      </>
+                    }
+                    disabled={!form.values.useAccountResearch}
+                    sx={(theme) => ({
+                      "&[data-active]": {
+                        backgroundColor: theme.colors.teal[0] + "!important",
+                        borderRadius: theme.radius.md + "!important",
+                        color: theme.colors.teal[8] + "!important",
+                      },
+                    })}
+                  >
+                    Personalization Settings
+                  </Tabs.Tab>
+                </Tooltip>
+              </Tabs.List>
+              <Box sx={{ position: "absolute", top: 20, right: 0 }}>
+                <Switch
+                  {...form.getInputProps("useAccountResearch", {
+                    type: "checkbox",
+                  })}
+                  color="teal"
+                  size="sm"
+                  label="Use Account Research"
+                  labelPosition="left"
+                />
+              </Box>
 
-            <Tabs.Panel value="personalization">
-              <PersonalizationSection
-                blocklist={props.framework.transformer_blocklist}
-                onItemsChange={async (items) => {
-                  setPersonalizationItemsCount(
-                    items.filter((x: any) => x.checked).length
-                  );
+              <Tabs.Panel value="personalization">
+                <PersonalizationSection
+                  blocklist={props.framework.transformer_blocklist}
+                  onItemsChange={async (items) => {
+                    setPersonalizationItemsCount(
+                      items.filter((x: any) => x.checked).length
+                    );
 
-                  // Update transformer blocklist
-                  const result = await patchBumpFramework(
-                    userToken,
-                    props.framework.id,
-                    props.framework.overall_status,
-                    props.framework.title,
-                    props.framework.description,
-                    props.framework.bump_length,
-                    props.framework.bumped_count,
-                    props.framework.bump_delay_days,
-                    props.framework.default,
-                    props.framework.use_account_research,
-                    items.filter((x) => !x.checked).map((x) => x.id)
-                  );
-                  console.log(result);
-                }}
-              />
-            </Tabs.Panel>
-          </Tabs>
+                    // Update transformer blocklist
+                    const result = await patchBumpFramework(
+                      userToken,
+                      props.framework.id,
+                      props.framework.overall_status,
+                      props.framework.title,
+                      props.framework.description,
+                      props.framework.bump_length,
+                      props.framework.bumped_count,
+                      props.framework.bump_delay_days,
+                      props.framework.default,
+                      props.framework.use_account_research,
+                      items.filter((x) => !x.checked).map((x) => x.id)
+                    );
+                    console.log(result);
+                  }}
+                />
+              </Tabs.Panel>
+            </Tabs>
+            </Card>
+          </Collapse>
+          <Group justify="center" mb={5}>
+            <Button onClick={toggle} w='100%' color='black' variant='outline' leftIcon={<IconTools size={'0.8rem'} />}>
+              {opened ? 'Hide' : 'Show'} Advanced Settings
+            </Button>
+          </Group>
+        </Box>
+
+          
         </form>
       </Stack>
     </Stack>

@@ -116,7 +116,7 @@ export default function PersonaCampaigns() {
   })
   const [currentLinkedInSLA, setCurrentLinkedInSLA] = useState<number>(0);
 
-  const [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
+  let [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
 
   const [campaignViewMode, setCampaignViewMode] = useState<'node-view' | 'list-view'>('node-view');
 

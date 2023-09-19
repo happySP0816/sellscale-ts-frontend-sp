@@ -66,6 +66,7 @@ import {
   testDelay,
 } from "@utils/general";
 import { generateBumpLiMessage } from "@utils/requests/generateBumpLiMessage";
+import { getArchetypeConversion } from "@utils/requests/getArchetypeConversion";
 import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
 import getChannels from "@utils/requests/getChannels";
 import getLiProfile from "@utils/requests/getLiProfile";
@@ -91,6 +92,23 @@ export default function SequenceSection() {
 
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
+
+  const [conversionRate, setConversionRate] = useState(0)
+  const [replyRate, setReplyRate] = useState(0)
+
+  const triggerGetArchetypeConversion = async () => {
+    if (!currentProject) return;
+
+    const result = await getArchetypeConversion(userToken, currentProject.id);
+    const data = result.data
+
+    setConversionRate((data.li_opened / data.li_sent) * 100)
+    setReplyRate((data.li_replied / data.li_sent) * 100)
+  }
+
+  useEffect(() => {
+    triggerGetArchetypeConversion()
+  }, [])
 
   const { data } = useQuery({
     queryKey: [`query-get-bump-frameworks`],
@@ -147,25 +165,44 @@ export default function SequenceSection() {
             <FrameworkCard
               title="Connection Request"
               bodyTitle="Invite Message"
-              bodyText="Say hello and introduce myself as a sales rep"
+              // bodyText="Say hello and introduce myself as a sales rep"
               active={activeCard === 0}
+              conversion={conversionRate}
               onClick={() => setActiveCard(0)}
             />
-            <Divider
-              variant="dashed"
-              label={
-                <Text c="dimmed" ta="center" fz="sm">
-                  After accepting invite
-                </Text>
-              }
-              labelPosition="center"
-              mx={30}
-            />
+            <Flex w='100%' justify='space-between' p='md'>
+              <Divider
+                w='70%'
+                variant="dashed"
+                label={
+                  <>
+                    <Text c="dimmed" ta="center" fz="sm">
+                      After accepting invite
+                    </Text>
+                  </>
+                }
+                labelPosition="center"
+                mx={10}
+              />
+              <Tooltip
+                label={replyRate > 0.5 ? 'Your reply rates are above industry standards (0.5%). Congrats!' : 'Your reply rates are below industry standards (0.5%). Consider changing your bumps'}
+                withinPortal
+                withArrow
+              >
+                <Badge
+                  ml='4px'
+                  variant="dot"
+                  color={replyRate > 0.5 ? "green" : "red"}
+                >
+                  {replyRate.toFixed(1)}%
+                </Badge>
+              </Tooltip>
+            </Flex>
             <FrameworkCard
               title="Follow-Up 1"
-              badgeText="If no reply from prospect."
+              // badgeText="If no reply from prospect."
               bodyTitle={bf0?.title ?? ""}
-              bodyText={bf0?.description ?? ""}
+              // bodyText={bf0?.description ?? ""}
               footer={
                 <Text fz={14}>
                   wait for{" "}
@@ -190,9 +227,9 @@ export default function SequenceSection() {
 
             <FrameworkCard
               title="Follow-Up 2"
-              badgeText="If no reply from prospect."
+              // badgeText="If no reply from prospect."
               bodyTitle={bf1?.title ?? ""}
-              bodyText={bf1?.description ?? ""}
+              // bodyText={bf1?.description ?? ""}
               footer={
                 <Text fz={14}>
                   wait for{" "}
@@ -217,9 +254,9 @@ export default function SequenceSection() {
             />
             <FrameworkCard
               title="Follow-Up 3"
-              badgeText="If no reply from prospect."
+              // badgeText="If no reply from prospect."
               bodyTitle={bf2?.title ?? ""}
-              bodyText={bf2?.description ?? ""}
+              // bodyText={bf2?.description ?? ""}
               footer={
                 <Text fz={14}>
                   wait for{" "}
@@ -244,9 +281,9 @@ export default function SequenceSection() {
             />
             <FrameworkCard
               title="Follow-Up 4"
-              badgeText="If no reply from prospect."
+              // badgeText="If no reply from prospect."
               bodyTitle={bf3?.title ?? ""}
-              bodyText={bf3?.description ?? ""}
+              // bodyText={bf3?.description ?? ""}
               active={activeCard === 4}
               onClick={() => setActiveCard(4)}
               canEdit
@@ -280,7 +317,7 @@ export default function SequenceSection() {
       </Group>
       <PersonaUploadDrawer
         personaOverviews={currentProject ? [currentProject] : []}
-        afterUpload={() => {}}
+        afterUpload={() => { }}
       />
     </Card>
   );
@@ -332,9 +369,9 @@ function BumpFrameworkSelect(props: {
                     title: "Create Bump Framework",
                     innerProps: {
                       modalOpened: true,
-                      openModal: () => {},
-                      closeModal: () => {},
-                      backFunction: () => {},
+                      openModal: () => { },
+                      closeModal: () => { },
+                      backFunction: () => { },
                       dataChannels: dataChannels,
                       status: undefined,
                       archetypeID: currentProject?.id,
@@ -352,9 +389,9 @@ function BumpFrameworkSelect(props: {
                     modal: "cloneBumpFramework",
                     title: "Clone Bump Framework",
                     innerProps: {
-                      openModal: () => {},
-                      closeModal: () => {},
-                      backFunction: () => {},
+                      openModal: () => { },
+                      closeModal: () => { },
+                      backFunction: () => { },
                       status: props.bumpedFrameworks.find(
                         (bf) => bf.id === props.activeBumpFrameworkId
                       )?.overall_status,
@@ -375,7 +412,7 @@ function BumpFrameworkSelect(props: {
       items={props.bumpedFrameworks.map((bf) => ({
         id: bf.id,
         name: bf.title,
-        onClick: () => {},
+        onClick: () => { },
         leftSection: (
           <Badge
             size="sm"
@@ -508,8 +545,8 @@ function IntroMessageSection() {
         </Group>
         <VoiceSelect
           personaId={currentProject.id}
-          onChange={(voice) => {}}
-          onFinishLoading={(voices) => {}}
+          onChange={(voice) => { }}
+          onFinishLoading={(voices) => { }}
           autoSelect
         />
       </Group>
@@ -787,10 +824,10 @@ function LiExampleInvitation(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1073,10 +1110,10 @@ function LiExampleMessage(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1160,8 +1197,9 @@ function FrameworkCard(props: {
   active: boolean;
   title: string;
   bodyTitle: string;
-  bodyText: string;
+  bodyText?: string;
   footer?: ReactNode;
+  conversion?: number;
   badgeText?: string;
   onClick: () => void;
   canEdit?: boolean;
@@ -1193,17 +1231,17 @@ function FrameworkCard(props: {
         cursor: "pointer",
         backgroundColor: props.active
           ? theme.fn.lighten(
-              theme.fn.variant({ variant: "filled", color: "blue" })
-                .background!,
-              0.95
-            )
+            theme.fn.variant({ variant: "filled", color: "blue" })
+              .background!,
+            0.95
+          )
           : hovered
-          ? theme.fn.lighten(
+            ? theme.fn.lighten(
               theme.fn.variant({ variant: "filled", color: "blue" })
                 .background!,
               0.99
             )
-          : undefined,
+            : undefined,
         borderColor:
           props.active || hovered
             ? theme.colors.blue[5] + "!important"
@@ -1236,6 +1274,20 @@ function FrameworkCard(props: {
               </Badge>
             )}
           </Group>
+          {props.conversion !== undefined && (
+            <Tooltip
+              label={props.conversion > 9.0 ? 'Your acceptance rates are above industry standards (9%). Congrats!' : 'Your acceptance rates are below industry standards (9%). Consider changing your CTAs'}
+              withArrow
+              withinPortal
+            >
+              <Badge
+                variant='dot'
+                color={props.conversion > 9.0 ? 'green' : 'red'}
+              >
+                {Math.trunc(props.conversion)}%
+              </Badge>
+            </Tooltip>
+          )}
           {props.canEdit && props.editProps && (
             <BumpFrameworkSelect {...props.editProps} />
           )}
@@ -1245,22 +1297,24 @@ function FrameworkCard(props: {
           <Title order={4} fw={600}>
             {props.bodyTitle}
           </Title>
-          <Tooltip
-            label={props.bodyText}
-            maw={500}
-            openDelay={500}
-            position="bottom"
-            withArrow
-            withinPortal
-            multiline
-            disabled={props.bodyText.length < 150}
-          >
-            <Text fz={12} c="dimmed" truncate>
-              {_.truncate(props.bodyText, {
-                length: 50,
-              })}
-            </Text>
-          </Tooltip>
+          {props.bodyText && (
+            <Tooltip
+              label={props.bodyText}
+              maw={500}
+              openDelay={500}
+              position="bottom"
+              withArrow
+              withinPortal
+              multiline
+              disabled={props.bodyText.length < 150}
+            >
+              <Text fz={12} c="dimmed" truncate>
+                {_.truncate(props.bodyText, {
+                  length: 50,
+                })}
+              </Text>
+            </Tooltip>
+          )}
         </Box>
         {props.footer && (
           <>
@@ -1334,16 +1388,16 @@ function FrameworkSection(props: {
 
   useEffect(() => {
     saveSettings(debouncedForm);
-    if(debouncedForm.useAccountResearch && !prevDebouncedForm?.useAccountResearch) {
+    if (debouncedForm.useAccountResearch && !prevDebouncedForm?.useAccountResearch) {
       //setActiveTab('personalization');
     }
-    if(!debouncedForm.useAccountResearch && activeTab === 'personalization') {
+    if (!debouncedForm.useAccountResearch && activeTab === 'personalization') {
       setActiveTab('none');
     }
   }, [debouncedForm]);
 
   const openPersonalizationSettings = () => {
-    if(form.values.useAccountResearch) {
+    if (form.values.useAccountResearch) {
       setActiveTab('personalization');
     }
   };
@@ -1498,29 +1552,29 @@ function FrameworkSection(props: {
           ]}
           onChange={(value: any) => {
             const frameworks: any = {
-                'short-introduction': 'Name: Introduction\nLength: Short\nDelay: 1 Day\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. I’m reaching out because I noticed you’re a {{role}} at {{company_name}}. I’m curious, what’s your role like at {{company_name}}?',
-                'pain-points-opener': 'Name: Pain Points Opener\nLength: Medium\nDelay: 2 Days\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. I’m reaching out because I noticed you’re a {{role}} at {{company_name}}. I’m curious, what’s your role like at {{company_name}}? I’m asking because I’ve been working with other {{role}}s at {{company_name}} and they’ve been telling me about some of the challenges they’re facing. I’m curious, what are some of the challenges you’re facing?',
-                'funny-joke': 'Name: Funny Industry Related Joke\nLength: Long\nDelay: 3 Days\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. Why did the {{role}} bring a ladder to work? To reach new heights in productivity!',
-                'connect-role': 'Name: Connect to Role\nLength: Short\nDelay: 1 Day\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. How does your role as a {{role}} influence your daily workflow?',
-                'relationship-builder': 'Name: Relationship Builder\nLength: Medium\nDelay: 2 Days\nDescription: Hi {{first_name}}, it’s {{sdr_name}} from {{company_name}}. I noticed you’re a {{role}} and have been in the industry for quite a while. I’d love to hear your journey!',
-                'casual-inquiry': 'Name: Casual Inquiry\nLength: Short\nDelay: 1 Day\nDescription: Hey {{first_name}}, {{sdr_name}} here from {{company_name}}. How’s your week going?',
+              'short-introduction': 'Name: Introduction\nLength: Short\nDelay: 1 Day\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. I’m reaching out because I noticed you’re a {{role}} at {{company_name}}. I’m curious, what’s your role like at {{company_name}}?',
+              'pain-points-opener': 'Name: Pain Points Opener\nLength: Medium\nDelay: 2 Days\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. I’m reaching out because I noticed you’re a {{role}} at {{company_name}}. I’m curious, what’s your role like at {{company_name}}? I’m asking because I’ve been working with other {{role}}s at {{company_name}} and they’ve been telling me about some of the challenges they’re facing. I’m curious, what are some of the challenges you’re facing?',
+              'funny-joke': 'Name: Funny Industry Related Joke\nLength: Long\nDelay: 3 Days\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. Why did the {{role}} bring a ladder to work? To reach new heights in productivity!',
+              'connect-role': 'Name: Connect to Role\nLength: Short\nDelay: 1 Day\nDescription: Hi {{first_name}}, I’m {{sdr_name}} from {{company_name}}. How does your role as a {{role}} influence your daily workflow?',
+              'relationship-builder': 'Name: Relationship Builder\nLength: Medium\nDelay: 2 Days\nDescription: Hi {{first_name}}, it’s {{sdr_name}} from {{company_name}}. I noticed you’re a {{role}} and have been in the industry for quite a while. I’d love to hear your journey!',
+              'casual-inquiry': 'Name: Casual Inquiry\nLength: Short\nDelay: 1 Day\nDescription: Hey {{first_name}}, {{sdr_name}} here from {{company_name}}. How’s your week going?',
             }
 
             openConfirmModal({
-                title: "Override Framework?",
-                children: (
-                  <Text>
-                    Are you sure you want to override the current framework with this one?
-                  </Text>
-                ),
-                labels: { confirm: 'Confirm', cancel: 'Cancel' },
-                onCancel: () => { },
-                onConfirm: () => { 
-                  form.setFieldValue('promptInstructions', frameworks[value].split("Description: ")[1]) 
-                }
-              })
-            
-          }}  
+              title: "Override Framework?",
+              children: (
+                <Text>
+                  Are you sure you want to override the current framework with this one?
+                </Text>
+              ),
+              labels: { confirm: 'Confirm', cancel: 'Cancel' },
+              onCancel: () => { },
+              onConfirm: () => {
+                form.setFieldValue('promptInstructions', frameworks[value].split("Description: ")[1])
+              }
+            })
+
+          }}
         />
         <form onSubmit={form.onSubmit((values) => saveSettings(values))}>
           <Group grow>
@@ -1593,7 +1647,7 @@ function FrameworkSection(props: {
                   rightSection={
                     <>
                       {personalizationItemsCount &&
-                      form.values.useAccountResearch ? (
+                        form.values.useAccountResearch ? (
                         <Badge
                           w={16}
                           h={16}
@@ -1974,31 +2028,31 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void, outlineCTA?: s
             }}
           />
         ))}
-        
-        <Button sx={{
-          position: 'absolute',
-          top: -25,
-          right: 5,
+
+      <Button sx={{
+        position: 'absolute',
+        top: -25,
+        right: 5,
+      }}
+        variant={"filled"}
+        size="sm"
+        compact
+        color={"blue"}
+        radius="xl"
+        fw={"500"}
+        leftIcon={<IconPlus size={"0.75rem"} />}
+        onClick={() => {
+          openContextModal({
+            modal: "createNewCTA",
+            title: <Title order={3}>Create CTA</Title>,
+            innerProps: {
+              personaId: currentProject?.id,
+            },
+          });
         }}
-              variant={"filled"}
-              size="sm"
-              compact
-              color={"blue"}
-              radius="xl"
-              fw={"500"}
-              leftIcon={<IconPlus size={"0.75rem"} />}
-              onClick={() => {
-                openContextModal({
-                  modal: "createNewCTA",
-                  title: <Title order={3}>Create CTA</Title>,
-                  innerProps: {
-                    personaId: currentProject?.id,
-                  },
-                });
-              }}
-            >
-              Add CTA
-        </Button>
+      >
+        Add CTA
+      </Button>
     </Box>
   );
 };
@@ -2025,7 +2079,7 @@ const CTAOption: React.FC<{
   onClickEdit: () => void;
 }> = ({ data, onToggle, onClickEdit }) => {
   return (
-    <Card shadow="xs" radius={"md"} py={10} mb={5} sx={(theme) => ({ border: data.outlined ? '1px solid '+theme.colors.blue[4] : '1px solid transparent' })}>
+    <Card shadow="xs" radius={"md"} py={10} mb={5} sx={(theme) => ({ border: data.outlined ? '1px solid ' + theme.colors.blue[4] : '1px solid transparent' })}>
       <Flex direction={"column"} w={"100%"}>
         <Flex gap={"0.5rem"} mb={"0.75rem"} justify={"space-between"}>
           <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>

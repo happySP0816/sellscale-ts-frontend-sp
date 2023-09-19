@@ -104,7 +104,7 @@ const router = sentryCreateBrowserRouter([
     children: [
       {
         path: "",
-        element: <RestrictedRoute page={<InboxPage />} />,
+        element: <RestrictedRoute page={<PersonaCampaigns />} />,
         loader: async ({ params }: { params: any }) => {
           return { prospectId: "" };
         },

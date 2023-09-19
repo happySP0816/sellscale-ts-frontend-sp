@@ -35,9 +35,12 @@ import SlackbotSection from "@common/slack/SlackbotSection";
 import MessageAutomation from "@common/settings/MessageAutomation";
 import SlackWebhookSection from "@common/slack/SlackWebhookSection";
 import DoNotContactFiltersPage from '@common/settings/DoNotContactFiltersPage';
+import { setPageTitle } from "@utils/documentChange";
 
 
 export default function SettingsPage() {
+  setPageTitle("Settings");
+
   const { tabId } = useLoaderData() as { tabId: string };
 
   const userToken = useRecoilValue(userTokenState);

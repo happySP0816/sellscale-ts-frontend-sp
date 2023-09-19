@@ -113,6 +113,7 @@ export default function ModalSelector(props: {
         }
         styles={{ title: { width: "100%" } }}
         size={props.size}
+        zIndex={1000}
       >
         <Paper
           p={0}

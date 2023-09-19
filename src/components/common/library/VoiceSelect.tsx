@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   createStyles,
   useMantineTheme,
@@ -54,8 +54,11 @@ export default function VoiceSelect(props: {
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
   const currentProject = useRecoilValue(currentProjectState);
   const [selectedVoice, setSelectedVoice] = useState<any>();
+
+  console.log(userData);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-voices`],
@@ -97,7 +100,7 @@ export default function VoiceSelect(props: {
         selector={{
           content: (
             <Text>
-              {selectedVoice ? `Using ${_.truncate(selectedVoice.name)}` : "Start Campaign"}
+              {selectedVoice ? `Using ${_.truncate(userData.sdr_name.split(" ")[0])}'s Voice` : "Start Campaign"}
             </Text>
           ),
           buttonProps: {

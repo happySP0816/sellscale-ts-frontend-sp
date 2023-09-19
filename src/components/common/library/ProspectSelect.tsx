@@ -233,6 +233,7 @@ export default function ProspectSelect(props: {
             }
           },
           onClickChange: () => {},
+          noChange: !selectedProspect,
         }}
         title={{
           name: "Select Prospect",

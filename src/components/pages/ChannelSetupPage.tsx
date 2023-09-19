@@ -24,7 +24,7 @@ export default function ChannelSetupPage() {
       <ChannelsSetupSelector 
         setSelectedChannel={setSelectedChannel}
         selectedChannel={selectedChannel}
-        hideChannels={!currentProject} />
+        hideChannels={true} />
         
       {currentProject ? 
         <Card ml='lg' mr='lg' mb='lg'>

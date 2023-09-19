@@ -149,14 +149,30 @@ export default function SequenceSection() {
               bodyTitle="Invite Message"
               bodyText="Say hello and introduce myself as a sales rep"
               active={activeCard === 0}
+              conversion={32}
               onClick={() => setActiveCard(0)}
             />
             <Divider
               variant="dashed"
               label={
-                <Text c="dimmed" ta="center" fz="sm">
-                  After accepting invite
-                </Text>
+                <>
+                  <Text c="dimmed" ta="center" fz="sm">
+                    After accepting invite
+                  </Text>
+                  <Tooltip
+                    label="Your reply rate is higher than industry standards!"
+                    withinPortal
+                    withArrow
+                  >
+                    <Badge
+                      ml='4px'
+                      variant="dot"
+                      color="green"
+                    >
+                      12%
+                    </Badge>
+                  </Tooltip>
+                </>
               }
               labelPosition="center"
               mx={30}
@@ -280,7 +296,7 @@ export default function SequenceSection() {
       </Group>
       <PersonaUploadDrawer
         personaOverviews={currentProject ? [currentProject] : []}
-        afterUpload={() => {}}
+        afterUpload={() => { }}
       />
     </Card>
   );
@@ -332,9 +348,9 @@ function BumpFrameworkSelect(props: {
                     title: "Create Bump Framework",
                     innerProps: {
                       modalOpened: true,
-                      openModal: () => {},
-                      closeModal: () => {},
-                      backFunction: () => {},
+                      openModal: () => { },
+                      closeModal: () => { },
+                      backFunction: () => { },
                       dataChannels: dataChannels,
                       status: undefined,
                       archetypeID: currentProject?.id,
@@ -352,9 +368,9 @@ function BumpFrameworkSelect(props: {
                     modal: "cloneBumpFramework",
                     title: "Clone Bump Framework",
                     innerProps: {
-                      openModal: () => {},
-                      closeModal: () => {},
-                      backFunction: () => {},
+                      openModal: () => { },
+                      closeModal: () => { },
+                      backFunction: () => { },
                       status: props.bumpedFrameworks.find(
                         (bf) => bf.id === props.activeBumpFrameworkId
                       )?.overall_status,
@@ -375,7 +391,7 @@ function BumpFrameworkSelect(props: {
       items={props.bumpedFrameworks.map((bf) => ({
         id: bf.id,
         name: bf.title,
-        onClick: () => {},
+        onClick: () => { },
         leftSection: (
           <Badge
             size="sm"
@@ -508,8 +524,8 @@ function IntroMessageSection() {
         </Group>
         <VoiceSelect
           personaId={currentProject.id}
-          onChange={(voice) => {}}
-          onFinishLoading={(voices) => {}}
+          onChange={(voice) => { }}
+          onFinishLoading={(voices) => { }}
           autoSelect
         />
       </Group>
@@ -787,10 +803,10 @@ function LiExampleInvitation(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1073,10 +1089,10 @@ function LiExampleMessage(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1162,6 +1178,7 @@ function FrameworkCard(props: {
   bodyTitle: string;
   bodyText: string;
   footer?: ReactNode;
+  conversion?: number;
   badgeText?: string;
   onClick: () => void;
   canEdit?: boolean;
@@ -1193,17 +1210,17 @@ function FrameworkCard(props: {
         cursor: "pointer",
         backgroundColor: props.active
           ? theme.fn.lighten(
-              theme.fn.variant({ variant: "filled", color: "blue" })
-                .background!,
-              0.95
-            )
+            theme.fn.variant({ variant: "filled", color: "blue" })
+              .background!,
+            0.95
+          )
           : hovered
-          ? theme.fn.lighten(
+            ? theme.fn.lighten(
               theme.fn.variant({ variant: "filled", color: "blue" })
                 .background!,
               0.99
             )
-          : undefined,
+            : undefined,
         borderColor:
           props.active || hovered
             ? theme.colors.blue[5] + "!important"
@@ -1236,6 +1253,19 @@ function FrameworkCard(props: {
               </Badge>
             )}
           </Group>
+          {props.conversion !== undefined && (
+            <Tooltip
+              label='Woohoo! Your conversion rate is higher than industry standard!'
+              withArrow
+              withinPortal
+            >
+              <Badge
+                color={'green'}
+              >
+                {props.conversion}%
+              </Badge>
+            </Tooltip>
+          )}
           {props.canEdit && props.editProps && (
             <BumpFrameworkSelect {...props.editProps} />
           )}
@@ -1334,16 +1364,16 @@ function FrameworkSection(props: {
 
   useEffect(() => {
     saveSettings(debouncedForm);
-    if(debouncedForm.useAccountResearch && !prevDebouncedForm?.useAccountResearch) {
+    if (debouncedForm.useAccountResearch && !prevDebouncedForm?.useAccountResearch) {
       //setActiveTab('personalization');
     }
-    if(!debouncedForm.useAccountResearch && activeTab === 'personalization') {
+    if (!debouncedForm.useAccountResearch && activeTab === 'personalization') {
       setActiveTab('none');
     }
   }, [debouncedForm]);
 
   const openPersonalizationSettings = () => {
-    if(form.values.useAccountResearch) {
+    if (form.values.useAccountResearch) {
       setActiveTab('personalization');
     }
   };
@@ -1593,7 +1623,7 @@ function FrameworkSection(props: {
                   rightSection={
                     <>
                       {personalizationItemsCount &&
-                      form.values.useAccountResearch ? (
+                        form.values.useAccountResearch ? (
                         <Badge
                           w={16}
                           h={16}
@@ -1974,31 +2004,31 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void, outlineCTA?: s
             }}
           />
         ))}
-        
-        <Button sx={{
-          position: 'absolute',
-          top: -25,
-          right: 5,
+
+      <Button sx={{
+        position: 'absolute',
+        top: -25,
+        right: 5,
+      }}
+        variant={"filled"}
+        size="sm"
+        compact
+        color={"blue"}
+        radius="xl"
+        fw={"500"}
+        leftIcon={<IconPlus size={"0.75rem"} />}
+        onClick={() => {
+          openContextModal({
+            modal: "createNewCTA",
+            title: <Title order={3}>Create CTA</Title>,
+            innerProps: {
+              personaId: currentProject?.id,
+            },
+          });
         }}
-              variant={"filled"}
-              size="sm"
-              compact
-              color={"blue"}
-              radius="xl"
-              fw={"500"}
-              leftIcon={<IconPlus size={"0.75rem"} />}
-              onClick={() => {
-                openContextModal({
-                  modal: "createNewCTA",
-                  title: <Title order={3}>Create CTA</Title>,
-                  innerProps: {
-                    personaId: currentProject?.id,
-                  },
-                });
-              }}
-            >
-              Add CTA
-        </Button>
+      >
+        Add CTA
+      </Button>
     </Box>
   );
 };
@@ -2025,7 +2055,7 @@ const CTAOption: React.FC<{
   onClickEdit: () => void;
 }> = ({ data, onToggle, onClickEdit }) => {
   return (
-    <Card shadow="xs" radius={"md"} py={10} mb={5} sx={(theme) => ({ border: data.outlined ? '1px solid '+theme.colors.blue[4] : '1px solid transparent' })}>
+    <Card shadow="xs" radius={"md"} py={10} mb={5} sx={(theme) => ({ border: data.outlined ? '1px solid ' + theme.colors.blue[4] : '1px solid transparent' })}>
       <Flex direction={"column"} w={"100%"}>
         <Flex gap={"0.5rem"} mb={"0.75rem"} justify={"space-between"}>
           <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>

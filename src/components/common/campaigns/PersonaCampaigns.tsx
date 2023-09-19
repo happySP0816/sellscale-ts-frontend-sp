@@ -97,7 +97,6 @@ export default function PersonaCampaigns() {
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
-  console.log('data', userData)
 
   const [projects, setProjects] = useState<PersonaOverview[]>([]);
   const [personas, setPersonas] = useState<CampaignPersona[]>([]);

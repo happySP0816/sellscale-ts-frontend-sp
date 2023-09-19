@@ -58,8 +58,6 @@ export default function VoiceSelect(props: {
   const currentProject = useRecoilValue(currentProjectState);
   const [selectedVoice, setSelectedVoice] = useState<any>();
 
-  console.log(userData);
-
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-voices`],
     queryFn: async () => {

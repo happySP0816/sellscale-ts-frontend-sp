@@ -21,15 +21,22 @@ import {
   Tooltip,
   Grid,
   Divider,
+  Kbd,
+  List,
+  ThemeIcon,
 } from "@mantine/core";
 import { openConfirmModal, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import {
   IconBrandLinkedin,
   IconBriefcase,
+  IconCheck,
+  IconCircleCheck,
+  IconCircleNumber2,
   IconCloudDownload,
   IconCookie,
   IconKey,
+  IconNumber2,
   IconPassword,
   IconRefreshDot,
   IconSocial,
@@ -44,6 +51,8 @@ import { useEffect, useState } from "react";
 import getLiProfile from "@utils/requests/getLiProfile";
 import Overview from "./LinkedIn/Overview";
 import Information from "./LinkedIn/Information";
+import { useOs } from "@mantine/hooks";
+import { IconSquareRoundedCheckFilled, IconSquareRoundedNumber2Filled, IconSquareRoundedNumber3Filled } from "@tabler/icons-react";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -64,6 +73,16 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
   const queryClient = useQueryClient();
   const userData = useRecoilValue(userDataState);
 
+  const os = useOs();
+
+  const { data: extensionInstalled } = useQuery({
+    queryKey: [`query-check-extension-installed`],
+    queryFn: async () => {
+      return document.getElementsByClassName("extension-container").length > 0;
+    },
+    refetchInterval: 500,
+  });
+
   const [loadingConnection, setLoadingConnection] = useState(false);
   const [liProfile, setLiProfile] = useState<null | any>(null);
 
@@ -78,113 +97,173 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
   });
 
   return (
-    <Paper withBorder radius="md" w='100%'>
+    <Paper withBorder radius="md" w="100%">
+      {props.connected ? (
+        <>
+          <Overview />
+          <Information />
 
-      {
-        props.connected ? (
-          <>
-            <Overview />
-            <Information />
+          <Flex direction="column" px="md" pb="md" maw="100%">
+            <Divider mb="md" />
+            <Card withBorder shadow="sm" w="100%">
+              <Title order={4}>Disconnect LinkedIn</Title>
 
-            <Flex direction='column' px='md' pb='md' maw='100%'>
-              <Divider mb='md' />
-              <Card withBorder shadow="sm" w="100%">
-                <Title order={4}>Disconnect LinkedIn</Title>
-
-                <Flex justify="space-between" align="center">
-                  <Flex direction="column" maw="500px">
-                    <Text fw="light" fz="sm" lh="1.2rem" mt="2px">
-                      Disconnecting your LinkedIn will prevent SellScale from sending outbound,
-                      reading messages, and responding to conversations.
-                    </Text>
-                  </Flex>
-                  <Flex>
-                    <Button
-                      color="red"
-                      onClick={() => {
-                        openConfirmModal({
-                          title: (
-                            <Title order={3}>
-                              Disconnect LinkedIn - {userData.sdr_name}
-                            </Title>
-                          ),
-                          children: (
-                            <>
-                              <Text fs="italic">
-                                You will need to reconnect your LinkedIn to continue using SellScale for LinkedIn outbound.
-                              </Text>
-                            </>
-                          ),
-                          labels: {
-                            confirm: "Deactivate",
-                            cancel: "Cancel",
-                          },
-                          cancelProps: { color: "red", variant: "outline" },
-                          confirmProps: { color: "red" },
-                          onCancel: () => { },
-                          onConfirm: async () => {
-                            const result = await clearAuthTokens(userToken);
-                            if (result.status === "success") {
-                              showNotification({
-                                id: "linkedin-disconnect-success",
-                                title: "Success",
-                                message:
-                                  "You have successfully disconnected your LinkedIn account.",
-                                color: "blue",
-                                autoClose: 5000,
-                              });
-                            } else {
-                              showNotification({
-                                id: "linkedin-disconnect-failure",
-                                title: "Failure",
-                                message:
-                                  "There was an error disconnecting your LinkedIn account. Please contact an admin.",
-                                color: "red",
-                                autoClose: false,
-                              });
-                            }
-                            queryClient.invalidateQueries({
-                              queryKey: ["query-get-accounts-connected"],
+              <Flex justify="space-between" align="center">
+                <Flex direction="column" maw="500px">
+                  <Text fw="light" fz="sm" lh="1.2rem" mt="2px">
+                    Disconnecting your LinkedIn will prevent SellScale from
+                    sending outbound, reading messages, and responding to
+                    conversations.
+                  </Text>
+                </Flex>
+                <Flex>
+                  <Button
+                    color="red"
+                    onClick={() => {
+                      openConfirmModal({
+                        title: (
+                          <Title order={3}>
+                            Disconnect LinkedIn - {userData.sdr_name}
+                          </Title>
+                        ),
+                        children: (
+                          <>
+                            <Text fs="italic">
+                              You will need to reconnect your LinkedIn to
+                              continue using SellScale for LinkedIn outbound.
+                            </Text>
+                          </>
+                        ),
+                        labels: {
+                          confirm: "Deactivate",
+                          cancel: "Cancel",
+                        },
+                        cancelProps: { color: "red", variant: "outline" },
+                        confirmProps: { color: "red" },
+                        onCancel: () => {},
+                        onConfirm: async () => {
+                          const result = await clearAuthTokens(userToken);
+                          if (result.status === "success") {
+                            showNotification({
+                              id: "linkedin-disconnect-success",
+                              title: "Success",
+                              message:
+                                "You have successfully disconnected your LinkedIn account.",
+                              color: "blue",
+                              autoClose: 5000,
+                            });
+                          } else {
+                            showNotification({
+                              id: "linkedin-disconnect-failure",
+                              title: "Failure",
+                              message:
+                                "There was an error disconnecting your LinkedIn account. Please contact an admin.",
+                              color: "red",
+                              autoClose: false,
                             });
                           }
+                          queryClient.invalidateQueries({
+                            queryKey: ["query-get-accounts-connected"],
+                          });
                         },
-                        );
-                      }}
-                    >
-                      Deactivate
-                    </Button>
-                  </Flex>
+                      });
+                    }}
+                  >
+                    Deactivate
+                  </Button>
                 </Flex>
-              </Card>
-            </Flex>
-          </>
-        ) : (
-          <Flex direction='column' p='md'>
-            <Title order={3} mb={"0.25rem"}>
-              LinkedIn Integration
-            </Title>
-            <Text c={"gray.6"} fz={"0.75rem"} mb={"1rem"}>
-              By being connected to LinkedIn, SellScale is able to send connections,
-              read, and respond to your conversations.
-            </Text>
+              </Flex>
+            </Card>
+          </Flex>
+        </>
+      ) : (
+        <Flex direction="column" p="md">
+          <Title order={3} mb={"0.25rem"}>
+            LinkedIn Integration
+          </Title>
+          <Text c={"gray.6"} fz={"0.75rem"} mb={"1rem"}>
+            By being connected to LinkedIn, SellScale is able to send
+            connections, read, and respond to your conversations.
+          </Text>
+
+          {extensionInstalled ? (
+            <Center>
+              <Stack maw={390}>
+                <Center>
+                  <Button
+                    mb={10}
+                    variant="light"
+                    size="md"
+                    color="blue"
+                    radius="md"
+                    disabled
+                    rightIcon={<IconCheck size="1rem" />}
+                  >
+                    Installed {usingFirefox ? "Firefox" : "Chrome"} Extension
+                  </Button>
+                </Center>
+
+                <List spacing="xs" size="sm" center>
+                  <List.Item
+                    icon={
+                      <ThemeIcon color="teal" size={24} radius="xl">
+                        <IconSquareRoundedCheckFilled size="1rem" />
+                      </ThemeIcon>
+                    }
+                  >
+                    <Text fz="sm" td="line-through">
+                      Install the SellScale browser extension.
+                    </Text>
+                  </List.Item>
+                  <List.Item
+                    icon={
+                      <ThemeIcon color="cyan" size={24} radius="xl">
+                        <IconSquareRoundedNumber2Filled size="1rem" />
+                      </ThemeIcon>
+                    }
+                  >
+                    <Text fz="sm">
+                      Open the extension popup by either using the Chrome extensions dropdown or with the hotkey:{" "}
+                      <Kbd>
+                        {os === "undetermined" || os === "macos" ? "⌘" : "Ctrl"}
+                      </Kbd>{" "}
+                      + <Kbd>Shift</Kbd> + <Kbd>S</Kbd>.
+                    </Text>
+                  </List.Item>
+                  <List.Item
+                    icon={
+                      <ThemeIcon color="blue" size={24} radius="xl">
+                        <IconSquareRoundedNumber3Filled size="1rem" />
+                      </ThemeIcon>
+                    }
+                  >
+                    <Text fz="sm">
+                      In the popup, click the "Connect LinkedIn" button.
+                    </Text>
+                  </List.Item>
+                </List>
+              </Stack>
+            </Center>
+          ) : (
             <Center>
               <Button
                 component="a"
                 target="_blank"
                 rel="noopener noreferrer"
                 href={getBrowserExtensionURL(usingFirefox)}
-                my={20}
-                variant="outline"
+                mb={10}
+                variant="light"
                 size="md"
-                color="green"
+                color="blue"
+                radius="md"
                 rightIcon={<IconCloudDownload size="1rem" />}
               >
                 Install {usingFirefox ? "Firefox" : "Chrome"} Extension
               </Button>
             </Center>
-          </Flex>
-        )
-      }
+          )}
+        </Flex>
+      )}
 
       {/* <Stack>
         <div>

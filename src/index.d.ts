@@ -379,6 +379,7 @@ export type BumpFramework = {
   etl_num_times_used?: number;
   etl_num_times_converted?: number;
   transformer_blocklist: string[];
+  additional_context: string;
 };
 
 export type EmailSequenceStep = {

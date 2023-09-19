@@ -146,9 +146,11 @@ export default function PersonaCampaigns() {
       setCampaignAnalyticData(analytics);
 
       // Get LinkedIn SLA
-      for (const schedule of userData.sla_schedules) {
-        if (schedule.is_current_week) {
-          setCurrentLinkedInSLA(schedule.linkedin_volume);
+      if (userData.sla_schedules) {
+        for (const schedule of userData.sla_schedules) {
+          if (schedule.is_current_week) {
+            setCurrentLinkedInSLA(schedule.linkedin_volume);
+          }
         }
       }
 
@@ -166,13 +168,13 @@ export default function PersonaCampaigns() {
   }, []);
 
   // sort personas by persona.active then persona.created_at in desc order
-  filteredProjects.sort((a, b) => {
-    if (a.active && !b.active) return -1;
-    if (!a.active && b.active) return 1;
-    if (moment(a.created_at).isAfter(moment(b.created_at))) return -1;
-    if (moment(a.created_at).isBefore(moment(b.created_at))) return 1;
-    return 0;
-  });
+  // filteredProjects.sort((a, b) => {
+  //   if (a.active && !b.active) return -1;
+  //   if (!a.active && b.active) return 1;
+  //   if (moment(a.created_at).isAfter(moment(b.created_at))) return -1;
+  //   if (moment(a.created_at).isBefore(moment(b.created_at))) return 1;
+  //   return 0;
+  // });
 
   return (
     <PageFrame>

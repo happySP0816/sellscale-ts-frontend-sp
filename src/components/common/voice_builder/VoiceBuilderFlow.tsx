@@ -374,27 +374,16 @@ export default function VoiceBuilderFlow(props: {
       props.voiceBuilderOnboardingId
     );
 
+    const configId = response.data.config_id;
+
     if(props.createCampaign) {
-      // Also create the first campaign
+      // Also create and send the first campaign
 
       const nextWeek = new Date();
       nextWeek.setDate(nextWeek.getDate() + 7);
 
-      const ctaIds = [];
-      const prospectIds = [];
-      for(const message of currentMessages) {
-        if (message.value) {
-          if(message.meta_data?.cta && message.meta_data.cta.active){
-            ctaIds.push(message.meta_data.cta.id);
-          }
-          if(message.prospect) {
-            prospectIds.push(message.prospect.id);
-          }
-        }
-      }
-
       const response = await fetch(
-        `${API_URL}/campaigns/`,
+        `${API_URL}/campaigns/instant`,
         {
           method: "POST",
           headers: {
@@ -402,14 +391,19 @@ export default function VoiceBuilderFlow(props: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            prospect_ids: prospectIds,
-            num_prospects: prospectIds.length,
             campaign_type: 'LINKEDIN',
             client_archetype_id: props.persona.id,
             campaign_start_date: new Date().toISOString(),
             campaign_end_date: nextWeek.toISOString(),
-            ctas: ctaIds,
-            priority_rating: 0,
+            priority_rating: 10,
+            config_id: configId,
+            messages: currentMessages.map((message) => {
+              return {
+                prospect_id: message.prospect?.id,
+                message: message.value,
+                cta_id: message.meta_data?.cta?.id,
+              };
+            }),
           }),
         }
       );

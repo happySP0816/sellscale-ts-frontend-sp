@@ -136,7 +136,7 @@ const AnalyticChartBar: React.FC<{
   };
 
 export const CampaignAnalyticChart: React.FC<{ data: CampaignAnalyticsData }> = ({ data }) => (
-  <Grid gutter={"0"} h={"auto"}>
+  <Grid h={"auto"} w='100%'>
     <Grid.Col
       span={3}
       sx={{
@@ -151,7 +151,7 @@ export const CampaignAnalyticChart: React.FC<{ data: CampaignAnalyticsData }> = 
         // updatePercent="+6%"
         color="grape"
         chartColor="#dc7ef1"
-        description="Sent Outreach"
+        description="Sent"
         value={data.sentOutreach + ''}
         chartValue={data.sentOutreach}
         maxValue={data.sentOutreach * 1.1}
@@ -171,7 +171,7 @@ export const CampaignAnalyticChart: React.FC<{ data: CampaignAnalyticsData }> = 
         // updatePercent="+6%"
         color="blue"
         chartColor={blue}
-        description="Accepted / Opened"
+        description="Opened"
         value={data.accepted + ''}
         chartValue={data.accepted}
         maxValue={data.sentOutreach * 1.1}
@@ -191,7 +191,7 @@ export const CampaignAnalyticChart: React.FC<{ data: CampaignAnalyticsData }> = 
         // updatePercent="+6%"
         color="green"
         chartColor={green}
-        description="Active Conversation"
+        description="Replied"
         value={data.activeConvos + ''}
         chartValue={data.activeConvos}
         maxValue={data.sentOutreach * 1.1}
@@ -204,7 +204,7 @@ export const CampaignAnalyticChart: React.FC<{ data: CampaignAnalyticsData }> = 
         // updatePercent="+4%"
         color="orange"
         chartColor="#dd7643"
-        description="Demo Scheduled"
+        description="Demo"
         value={data.demos + ''}
         chartValue={data.demos}
         maxValue={data.sentOutreach * 1.1}

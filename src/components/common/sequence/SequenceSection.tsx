@@ -771,8 +771,8 @@ function IntroMessageSection() {
               {message && (
                 <LiExampleInvitation
                   message={message}
-                  // startHovered={startHovered ? true : undefined}
-                  // endHovered={endHovered ? true : undefined}
+                  startHovered={activeTab === 'personalization' ? true : undefined}
+                  endHovered={activeTab === 'ctas' ? true : undefined}
                   onClickStart={openPersonalizationSettings}
                   onClickEnd={openCTASettings}
                   onHoveredEnd={(hovered) => setHoveredCTA(hovered)}
@@ -1684,7 +1684,7 @@ function FrameworkSection(props: {
                 {message && (
                   <LiExampleMessage
                     message={message}
-                    hovered={hovered ? true : undefined}
+                    hovered={hovered || activeTab === 'personalization' ? true : undefined}
                     onClick={openPersonalizationSettings}
                   />
                 )}
@@ -2074,6 +2074,25 @@ const PersonalizationSection = (props: {
     },
   });
 
+  const allItems = prospectItems.map((x) => {
+    return {
+      ...x,
+      type: 'PROSPECT',
+      accepted: getAcceptanceRate(x.id),
+    }
+  }).concat(companyItems.map((x) => {
+    return {
+      ...x,
+      type: 'COMPANY',
+      accepted: getAcceptanceRate(x.id),
+    }
+  })).sort((a, b) => {
+    if (a.accepted === null && b.accepted === null) return 0;
+    if (a.accepted === null) return 1;
+    if (b.accepted === null) return -1;
+    return b.accepted - a.accepted;
+  });
+
   function getAcceptanceRate(itemId: string) {
     if (!data) return null;
     for (const d of data) {
@@ -2120,24 +2139,14 @@ const PersonalizationSection = (props: {
     <Flex direction="column" pt="md">
       <Card shadow="xs" radius={"md"} mb={"1rem"}>
         <Flex direction={"column"} gap={"0.5rem"}>
-          {prospectItems.map((item) => (
+          {allItems.map((item) => (
             <ProcessBar
               id={item.id}
               title={item.title}
-              percent={getAcceptanceRate(item.id) || 0}
+              percent={item.accepted || 0}
               checked={item.checked}
-              onPressItem={setProfileChecked}
-              color="teal"
-            />
-          ))}
-          {companyItems.map((item) => (
-            <ProcessBar
-              id={item.id}
-              title={item.title}
-              percent={getAcceptanceRate(item.id) || 0}
-              checked={item.checked}
-              onPressItem={setCompanyChecked}
-              color="grape"
+              onPressItem={item.type === 'PROSPECT' ? setProfileChecked : setCompanyChecked}
+              color={item.type === 'PROSPECT' ? 'teal' : 'grape'}
             />
           ))}
         </Flex>
@@ -2191,6 +2200,7 @@ const ProcessBar: React.FC<{
         <Flex sx={{ flex: 1 }}>
           <Divider w={"100%"} color={"#E9ECEF"} />
         </Flex>
+        <Tooltip label='Acceptance Rate' withArrow>
         <Button
           variant={"light"}
           fw={700}
@@ -2204,6 +2214,7 @@ const ProcessBar: React.FC<{
         >
           {percent}%
         </Button>
+        </Tooltip>
       </Flex>
       <Flex direction={"column"} sx={{ flex: 6 }}>
         <Progress value={percent} color={color} size={"lg"} radius="xl" />

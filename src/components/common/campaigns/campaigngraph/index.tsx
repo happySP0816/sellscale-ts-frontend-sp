@@ -58,8 +58,6 @@ const CampaignGraph = (props: {sections: any, onChannelClick: (sectionType: stri
   const [isEnabledNurture, setEnabledNurture] = useState(nurtureSection[0]?.sends > 0);
   const [isActiveNurture, setActiveNurture] = useState(nurtureSection[0]?.sends > 0);
 
-  console.log(props.sections)
-
   useEffect(() => {
     setActiveEmail(isEnabledLinkedin);
   }, [isEnabledLinkedin]);

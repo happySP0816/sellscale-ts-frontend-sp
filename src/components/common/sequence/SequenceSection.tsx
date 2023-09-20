@@ -1354,8 +1354,12 @@ function FrameworkSection(props: {
     uploadDrawerOpenState
   );
 
-  const [humanReadableContext, setHumanReadableContext] = useState<string[]>([]);
-  const [contextQuestion, setContextQuestion] = useState<string | null>(null);
+  const [humanReadableContext, setHumanReadableContext] = useState<string | undefined>(
+    props.framework.bump_framework_human_readable_prompt
+  );
+  const [contextQuestion, setContextQuestion] = useState(
+    props.framework.bump_framework_human_readable_prompt
+  );
   const [opened, { toggle }] = useDisclosure(false);
 
   const [activeTab, setActiveTab] = useState<string | null>('none');
@@ -1372,7 +1376,9 @@ function FrameworkSection(props: {
       delayDays: props.framework.bump_delay_days,
       promptInstructions: props.framework.description,
       useAccountResearch: props.framework.use_account_research,
-      additionalContext: props.framework.additional_context
+      additionalContext: props.framework.additional_context,
+      bumpFrameworkTemplateName: props.framework.bump_framework_template_name,
+      bumpFrameworkHumanReadablePrompt: props.framework.bump_framework_human_readable_prompt,
     },
   });
   const [debouncedForm] = useDebouncedValue(form.values, 200);
@@ -1390,7 +1396,10 @@ function FrameworkSection(props: {
       values.delayDays,
       props.framework.default,
       values.useAccountResearch,
-      contextQuestion + "\n" + values.additionalContext
+      props.framework.transformer_blocklist,
+      values.additionalContext,
+      values.bumpFrameworkTemplateName,
+      values.bumpFrameworkHumanReadablePrompt,
     );
     await queryClient.refetchQueries({
       queryKey: [`query-get-bump-frameworks`],
@@ -1566,17 +1575,30 @@ function FrameworkSection(props: {
                   w='50%'
                   placeholder="Pick framework"
                   clearable
-                  data={[
+                  defaultValue={
+                    props.framework.bump_framework_template_name || null
+                  }
+                  data={
+                  [
                     { value: 'role-have-to-do-with', label: 'Does your role have to do with?'},
                     { value: 'short-introduction', label: 'Short introduction'}, 
-                  ]}
+                  ].concat([
+                    { value: "Manual Framework", label: "Manual Framework"},
+                  ])}
                   onChange={(value: any) => {
                     const framework = BUMP_FRAMEWORK_OPTIONS[value]
                     if (!framework) {
                       form.setFieldValue(
-                        'additionalContext', ""
+                        "bumpFrameworkTemplateName", ''
                       )
-                      setContextQuestion(null)
+                      form.setFieldValue(
+                        "bumpFrameworkHumanReadablePrompt", ''
+                      )
+                      form.setFieldValue(
+                        "additionalContext", ''
+                      )
+                      setContextQuestion('')
+                      saveSettings(form.values)
                       return
                     }
                     
@@ -1585,6 +1607,13 @@ function FrameworkSection(props: {
                     const human_readable_prompt = framework.human_readable_prompt
                     const context_question = framework.context_question
                     const length = framework.length
+
+                    form.setFieldValue(
+                      "bumpFrameworkTemplateName", value
+                    )
+                    form.setFieldValue(
+                      "bumpFrameworkHumanReadablePrompt", human_readable_prompt
+                    )
 
                     setHumanReadableContext(human_readable_prompt)
 
@@ -1613,9 +1642,9 @@ function FrameworkSection(props: {
                 />
           </Card.Section>
 
-          <Group  mt="md" mb="xs">
-            {humanReadableContext}
-          </Group>
+          {props.framework.bump_framework_human_readable_prompt && <Group  mt="md" mb="xs">
+            {props.framework.bump_framework_human_readable_prompt}
+          </Group>}
         </Card>
         
        
@@ -1624,12 +1653,11 @@ function FrameworkSection(props: {
         
 
         <Box mb='xs'>
-            {contextQuestion && <Textarea 
+            {props.framework.additional_context && <Textarea 
             label="PROVIDE ADDITIONAL CONTEXT"
             {...form.getInputProps("additionalContext")}
           />}
         </Box>
-        Props: {JSON.stringify(form.getInputProps("additionalContext"))}
         <Box maw={'100%'} mx="auto">
           <Collapse in={opened}>
               <Card withBorder mb='xs'>
@@ -1764,16 +1792,18 @@ function FrameworkSection(props: {
                       props.framework.bump_delay_days,
                       props.framework.default,
                       props.framework.use_account_research,
-                      items.filter((x) => !x.checked).map((x) => x.id)
+                      items.filter((x) => !x.checked).map((x) => x.id),
+                      props.framework.additional_context,
+                      props.framework.bump_framework_template_name,
+                      props.framework.bump_framework_human_readable_prompt,
                     );
-                    console.log(result);
                   }}
                 />
               </Tabs.Panel>
             </Tabs>
             </Card>
           </Collapse>
-          <Group justify="center" mb={5}>
+          <Group mb={5}>
             <Button onClick={toggle} w='100%' color='black' variant='outline' leftIcon={<IconTools size={'0.8rem'} />}>
               {opened ? 'Hide' : 'Show'} Advanced Settings
             </Button>

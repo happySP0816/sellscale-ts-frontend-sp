@@ -2358,7 +2358,7 @@ const CtaSection = (props: {
       if (!pageData) {
         return [];
       } else {
-        return _.sortBy(pageData, ["percentage", "id"]).reverse();
+        return _.sortBy(pageData, ["active", "percentage", "id"]).reverse();
       }
     },
     refetchOnWindowFocus: false,

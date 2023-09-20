@@ -37,67 +37,6 @@ ChartJS.register(
   annotationPlugin,
 );
 
-const options: ChartOptions<"bar"> = {
-  scales: {
-    xAxis: {
-      border: {
-        display: true,
-      },
-      grid: {
-        color: "transparent",
-      },
-    },
-    yAxis: {
-      grid: {
-        tickBorderDash: [2],
-        color: "#88888830",
-      },
-      border: {
-        display: false,
-        dash: [2],
-      },
-      display: true,
-      ticks: {
-        padding: 10,
-        color: "#888888",
-        font: {
-          weight: "300",
-        },
-      },
-      beginAtZero: true,
-      grace: "5%",
-    },
-  },
-  plugins: {
-    legend: {
-      display: false,
-    },
-    title: {
-      display: false,
-    },
-    tooltip: {
-      displayColors: false,
-    },
-    annotation: {
-      annotations: {
-        line1: {
-          borderDash: [10],
-          label: {
-            content: 'Warmup Complete',
-            backgroundColor: 'rgb(255, 99, 132)',
-            display: true,
-          },
-          type: 'line',
-          yMin: 90,
-          yMax: 90,
-          borderColor: 'rgb(255, 99, 132)',
-          borderWidth: 2,
-        }
-      }
-    }
-  },
-};
-
 const data = {
   labels: [
     "Nov 01",
@@ -122,8 +61,70 @@ const data = {
 };
 
 export const WarmUp: React.FC = () => {
-  const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+
+  const options: ChartOptions<"bar"> = {
+    scales: {
+      xAxis: {
+        border: {
+          display: true,
+        },
+        grid: {
+          color: "transparent",
+        },
+      },
+      yAxis: {
+        grid: {
+          tickBorderDash: [2],
+          color: "#88888830",
+        },
+        border: {
+          display: false,
+          dash: [2],
+        },
+        display: true,
+        ticks: {
+          padding: 10,
+          color: "#888888",
+          font: {
+            weight: "300",
+          },
+        },
+        beginAtZero: true,
+        grace: "5%",
+      },
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: false,
+      },
+      tooltip: {
+        displayColors: false,
+      },
+      annotation: {
+        annotations: {
+          line1: {
+            borderDash: [10],
+            label: {
+              content: 'Warmup Complete',
+              backgroundColor: 'rgb(255, 99, 132)',
+              display: true,
+            },
+            type: 'line',
+            yMin: userData.weekly_li_outbound_target,
+            yMax: userData.weekly_li_outbound_target,
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 2,
+          }
+        }
+      }
+    },
+  };
+
+  const userToken = useRecoilValue(userTokenState);
 
   const [loading, setLoading] = useState(false)
   const [slaScheduleData, setSLAScheduleData] = useState<any>()
@@ -174,7 +175,7 @@ export const WarmUp: React.FC = () => {
             // See if the Start Date is this current week
             if (startDate <= new Date() && endDate >= new Date()) {
               // See if warmup is complete
-              if (schedule.linkedin_volume >= 90) {
+              if (schedule.linkedin_volume >= userData.weekly_li_outbound_target) {
                 return "rgb(99,215,104)"
               }
               return "rgb(242, 169, 59)"
@@ -183,7 +184,7 @@ export const WarmUp: React.FC = () => {
             // See if the Start Date is a future week
             if (startDate > new Date()) {
               // See if warmup is complete
-              if (schedule.linkedin_volume >= 90) {
+              if (schedule.linkedin_volume >= userData.weekly_li_outbound_target) {
                 return "rgb(99,215,104, 0.5)"
               }
 
@@ -193,7 +194,7 @@ export const WarmUp: React.FC = () => {
             // See if the Start Date is a past week
             if (endDate < new Date()) {
               // See if warmup is complete
-              if (schedule.linkedin_volume >= 90) {
+              if (schedule.linkedin_volume >= userData.weekly_li_outbound_target) {
                 return "rgb(99,215,104, 0.5)"
               }
 

@@ -26,6 +26,7 @@ import {
   Card,
   Box,
   useMantineTheme,
+  FocusTrap,
 } from "@mantine/core";
 import { Archetype, PersonaOverview, Prospect } from "src";
 import {
@@ -126,58 +127,58 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
       <Group noWrap spacing={0}>
         <Box style={{ flexGrow: 1 }}>
           <Group spacing={8} noWrap>
-          <Anchor
-            component="button"
-            type="button"
-            onClick={() => {
-              if (existingMessage?.prospect) {
-                setProspectId(existingMessage.prospect.id);
-                setProspectOpened(true);
-              }
-            }}
-          >
-            {existingMessage?.prospect?.full_name || "Example Prospect"}
-          </Anchor>
-          <ActionIcon
-            variant="subtle"
-            color='blue'
-            radius='xl'
-            size='sm'
-            aria-label="LinkedIn"
-            onClick={() => {
-              if (existingMessage?.prospect) {
-                window.open(
-                  "https://www." + existingMessage.prospect.linkedin_url,
-                  "_blank"
-                );
-              }
-            }}
-          >
-            <IconBrandLinkedin size="1.0rem" />
-          </ActionIcon>
-          {existingMessage && (
-            <AiMetaDataBadge
-              location={{ position: "relative", top: -5 }}
-              bumpFrameworkId={0}
-              bumpFrameworkTitle={""}
-              bumpFrameworkDescription={""}
-              bumpFrameworkLength={""}
-              bumpNumberConverted={undefined}
-              bumpNumberUsed={undefined}
-              accountResearchPoints={researchPoints || []}
-              initialMessageId={-1}
-              initialMessageCTAId={existingMessage.meta_data.cta.id || 0}
-              initialMessageCTAText={
-                existingMessage.meta_data.cta.text_value || ""
-              }
-              initialMessageResearchPoints={researchPoints || []}
-              initialMessageResearchPointTypes={researchPointTypes || []}
-              initialMessageStackRankedConfigID={undefined}
-              initialMessageStackRankedConfigName={"Baseline Linkedin"}
-              cta={existingMessage.meta_data.cta.text_value || ""}
-              useInfoIcon
-            />
-          )}
+            <Anchor
+              component="button"
+              type="button"
+              onClick={() => {
+                if (existingMessage?.prospect) {
+                  setProspectId(existingMessage.prospect.id);
+                  setProspectOpened(true);
+                }
+              }}
+            >
+              {existingMessage?.prospect?.full_name || "Example Prospect"}
+            </Anchor>
+            <ActionIcon
+              variant="subtle"
+              color="blue"
+              radius="xl"
+              size="sm"
+              aria-label="LinkedIn"
+              onClick={() => {
+                if (existingMessage?.prospect) {
+                  window.open(
+                    "https://www." + existingMessage.prospect.linkedin_url,
+                    "_blank"
+                  );
+                }
+              }}
+            >
+              <IconBrandLinkedin size="1.0rem" />
+            </ActionIcon>
+            {existingMessage && (
+              <AiMetaDataBadge
+                location={{ position: "relative", top: -5 }}
+                bumpFrameworkId={0}
+                bumpFrameworkTitle={""}
+                bumpFrameworkDescription={""}
+                bumpFrameworkLength={""}
+                bumpNumberConverted={undefined}
+                bumpNumberUsed={undefined}
+                accountResearchPoints={researchPoints || []}
+                initialMessageId={-1}
+                initialMessageCTAId={existingMessage.meta_data.cta.id || 0}
+                initialMessageCTAText={
+                  existingMessage.meta_data.cta.text_value || ""
+                }
+                initialMessageResearchPoints={researchPoints || []}
+                initialMessageResearchPointTypes={researchPointTypes || []}
+                initialMessageStackRankedConfigID={undefined}
+                initialMessageStackRankedConfigName={"Baseline Linkedin"}
+                cta={existingMessage.meta_data.cta.text_value || ""}
+                useInfoIcon
+              />
+            )}
           </Group>
           <Container
             m={0}
@@ -190,33 +191,55 @@ const ItemComponent = (props: { id: number; defaultValue: string }) => {
             }}
           >
             {editing ? (
-              <Textarea
-                size="xs"
-                autosize
-                variant="unstyled"
-                onChange={(e) => {
-                  setMessage(e.currentTarget.value);
-                }}
-                value={message}
-                onKeyDown={getHotkeyHandler([
-                  [
-                    "Enter", //mod+Enter
-                    () => {
-                      setEditing(false);
-                      saveMessages();
+              <FocusTrap active>
+                <Textarea
+                  size="xs"
+                  autosize
+                  variant="unstyled"
+                  onChange={(e) => {
+                    setMessage(e.currentTarget.value);
+                  }}
+                  value={message}
+                  onKeyDown={getHotkeyHandler([
+                    [
+                      "Enter", //mod+Enter
+                      () => {
+                        setEditing(false);
+                        saveMessages();
+                      },
+                    ],
+                    [
+                      "mod+Enter",
+                      () => {
+                        setEditing(false);
+                        saveMessages();
+                      },
+                    ],
+                  ])}
+                  onBlur={(e) => {
+                    setEditing(false);
+                    saveMessages();
+                  }}
+                  styles={{
+                    input: {
+                      padding: "0!important",
+                      paddingTop: "0!important",
+                      paddingBottom: "0!important",
                     },
-                  ],
-                ])}
-                styles={{
-                  input: {
-                    padding: "0!important",
-                    paddingTop: "0!important",
-                    paddingBottom: "0!important",
-                  },
-                }}
-              />
+                  }}
+                />
+              </FocusTrap>
             ) : (
-              <Text size="xs" color="dimmed">
+              <Text
+                size="xs"
+                color="dimmed"
+                onClick={(e) => {
+                  setTimeout(() => {
+                    setEditing(true);
+                    saveMessages();
+                  }, 1);
+                }}
+              >
                 {message}
               </Text>
             )}
@@ -376,38 +399,37 @@ export default function VoiceBuilderFlow(props: {
 
     const configId = response.data.id;
 
-    if(props.createCampaign) {
+    if (props.createCampaign) {
       // Also create and send the first campaign
 
       const nextWeek = new Date();
       nextWeek.setDate(nextWeek.getDate() + 7);
 
-      const response = await fetch(
-        `${API_URL}/campaigns/instant`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            campaign_type: 'LINKEDIN',
-            client_archetype_id: props.persona.id,
-            campaign_start_date: new Date().toISOString(),
-            campaign_end_date: nextWeek.toISOString(),
-            priority_rating: 10,
-            config_id: configId,
-            messages: currentMessages.map((message) => {
-              return {
-                prospect_id: message.prospect?.id,
-                message: message.value,
-                cta_id: message.meta_data?.cta?.id,
-              };
-            }),
+      const response = await fetch(`${API_URL}/campaigns/instant`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          campaign_type: "LINKEDIN",
+          client_archetype_id: props.persona.id,
+          campaign_start_date: new Date().toISOString(),
+          campaign_end_date: nextWeek.toISOString(),
+          priority_rating: 10,
+          config_id: configId,
+          messages: currentMessages.map((message) => {
+            return {
+              prospect_id: message.prospect?.id,
+              message: message.value,
+              cta_id: message.meta_data?.cta?.id,
+            };
           }),
-        }
-      );
-      if(response.status === 401){ logout() }
+        }),
+      });
+      if (response.status === 401) {
+        logout();
+      }
       const res = await response.json();
       console.log(res);
     }

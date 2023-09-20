@@ -5,10 +5,8 @@ import {
   Flex,
   Stack,
   Text,
-  Indicator,
   useMantineTheme,
   Paper,
-  Spoiler,
   ScrollArea,
   Select,
   Group,
@@ -16,13 +14,10 @@ import {
   Divider,
   Textarea,
   Tabs,
-  Popover,
   Button,
   Box,
   UnstyledButton,
-  rem,
   Card,
-  Loader,
   Skeleton,
   ActionIcon,
   Modal,
@@ -31,15 +26,8 @@ import {
   IconBriefcase,
   IconBuildingStore,
   IconBrandLinkedin,
-  IconMail,
   IconMap2,
-  IconMessageCircle,
-  IconPhoto,
-  IconSettings,
-  IconInfoCircle,
-  IconUserSearch,
   IconWriting,
-  IconX,
   IconCalendarEvent,
   IconTrash,
   IconExternalLink,
@@ -55,26 +43,13 @@ import { useRecoilValue, useRecoilState } from "recoil";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { getProspectByID } from "@utils/requests/getProspectByID";
 import { prospectStatuses } from "./utils";
-import {
-  Channel,
-  DemoFeedback,
-  Prospect,
-  ProspectDetails,
-  ProspectShallow,
-} from "src";
-import ProspectDetailsResearch, {
-  ProspectDetailsResearchTabs,
-} from "@common/prospectDetails/ProspectDetailsResearch";
+import { Channel, DemoFeedback, ProspectDetails, ProspectShallow } from "src";
+import { ProspectDetailsResearchTabs } from "@common/prospectDetails/ProspectDetailsResearch";
 import { updateProspectNote } from "@utils/requests/prospectNotes";
 import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChangeStatus";
-import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
-import ICPFitPill, {
-  ICPFitContents,
-  icpFitToIcon,
-} from "@common/pipeline/ICPFitAndReason";
+import ICPFitPill from "@common/pipeline/ICPFitAndReason";
 import { useDisclosure, useHover } from "@mantine/hooks";
-import postRunICPClassification from "@utils/requests/postRunICPClassification";
-import { DatePicker, DateTimePicker } from "@mantine/dates";
+import { DatePicker } from "@mantine/dates";
 import ProspectDemoDateSelector from "@common/prospectDetails/ProspectDemoDateSelector";
 import DemoFeedbackDrawer from "@drawers/DemoFeedbackDrawer";
 import {
@@ -86,7 +61,7 @@ import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 import EditProspectModal from "@modals/EditProspectModal";
 import { proxyURL } from "@utils/general";
-import { IconAlarm, IconDeviceFloppy, IconHomeHeart, IconSeeding } from "@tabler/icons";
+import { IconAlarm, IconHomeHeart, IconSeeding } from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import getDemoFeedback from "@utils/requests/getDemoFeedback";
 import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
@@ -313,11 +288,12 @@ export default function ProjectDetails(props: {
 
             {data?.data.location && (
               <Group noWrap spacing={10} mt={5}>
-                <IconHomeHeart stroke={1.5} size={16} className={classes.icon} />
-                <Text
-                  size="xs"
-                  color="dimmed"
-                >
+                <IconHomeHeart
+                  stroke={1.5}
+                  size={16}
+                  className={classes.icon}
+                />
+                <Text size="xs" color="dimmed">
                   {data.data.location}
                 </Text>
               </Group>
@@ -350,10 +326,7 @@ export default function ProjectDetails(props: {
                   size={16}
                   className={classes.icon}
                 />
-                <Text
-                  size="xs"
-                  color="dimmed"
-                >
+                <Text size="xs" color="dimmed">
                   {data.data.company_hq}
                 </Text>
               </Group>
@@ -380,7 +353,10 @@ export default function ProjectDetails(props: {
             )}
 
             {data?.email.email && (
-              <EmailStoreView email={data.email.email} emailStore={data.data.email_store} />
+              <EmailStoreView
+                email={data.email.email}
+                emailStore={data.data.email_store}
+              />
               // <Group noWrap spacing={10} mt={5}>
               //   <IconMail stroke={1.5} size={18} className={classes.icon} />
               //   <Text
@@ -469,7 +445,9 @@ export default function ProjectDetails(props: {
                     />
                     <StatusBlockButton
                       title="Nurture"
-                      icon={<IconSeeding color={theme.colors.green[6]} size={24} />}
+                      icon={
+                        <IconSeeding color={theme.colors.green[6]} size={24} />
+                      }
                       onClick={async () => {
                         await changeStatus("NOT_INTERESTED");
                       }}
@@ -509,11 +487,16 @@ export default function ProjectDetails(props: {
                         setDemosDrawerOpened(true);
                       }}
                     >
-                      {(demoFeedbacks && demoFeedbacks.length > 0) ? 'Add' : 'Give'} Demo Feedback
+                      {demoFeedbacks && demoFeedbacks.length > 0
+                        ? "Add"
+                        : "Give"}{" "}
+                      Demo Feedback
                     </Button>
                     {(!demoFeedbacks || demoFeedbacks.length === 0) && (
                       <Box mx={10} mb={10} mt={10}>
-                        <ProspectDemoDateSelector prospectId={openedProspectId} />
+                        <ProspectDemoDateSelector
+                          prospectId={openedProspectId}
+                        />
                       </Box>
                     )}
                     <DemoFeedbackDrawer refetch={refetch} />
@@ -592,11 +575,11 @@ export default function ProjectDetails(props: {
             >
               <Tabs.List>
                 <Tabs.Tab value="history" icon={<IconWriting size="0.8rem" />}>
-                  History
+                  AI History
                 </Tabs.Tab>
-                <Tabs.Tab value="notes" icon={<IconWriting size="0.8rem" />}>
+                {/* <Tabs.Tab value="notes" icon={<IconWriting size="0.8rem" />}>
                   Notes
-                </Tabs.Tab>
+                </Tabs.Tab> */}
               </Tabs.List>
 
               <Tabs.Panel

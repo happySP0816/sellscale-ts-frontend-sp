@@ -157,6 +157,11 @@ export default function SelectBumpInstruction(props: PropsType) {
         messages. The default bump framework is used, but you can manage all
         bump frameworks.
       </Text>
+      <Button
+        color='green'
+        >
+        Save
+      </Button>
       <Grid>
         <Grid.Col span={8}>
           <Select

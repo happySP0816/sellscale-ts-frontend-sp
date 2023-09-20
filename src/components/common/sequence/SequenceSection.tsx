@@ -98,6 +98,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { BumpFramework, CTA } from "src";
 import { BUMP_FRAMEWORK_OPTIONS } from "./framework_constants";
 import TextWithNewline from "@common/library/TextWithNewlines";
+import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1971,6 +1972,9 @@ const PersonalizationSection = (props: {
   onItemsChange: (items: any[]) => void;
 }) => {
   const currentProject = useRecoilValue(currentProjectState);
+  const userToken = useRecoilValue(userTokenState);
+
+  const [acceptanceRates, setAcceptanceRates] = useState<any>();
 
   const [prospectItems, setProspectItems] = useState([
     {
@@ -2062,21 +2066,33 @@ const PersonalizationSection = (props: {
     },
   ]);
 
+  const { data, isFetching } = useQuery({
+    queryKey: [`query-get-acceptance-rates`],
+    queryFn: async () => {
+      const result = await getAcceptanceRates(userToken);
+      return result.status === "success" ? result.data : undefined;
+    },
+  });
+
+  function getAcceptanceRate(itemId: string) {
+    if (!data) return null;
+    for (const d of data) {
+      if (d.research_point_type === itemId) {
+        return Math.round(d["avg. acceptance %"]*100) as number;
+      }
+    }
+    return null;
+  }
+
   useEffect(() => {
     props.onItemsChange([...prospectItems, ...companyItems]);
   }, []);
 
-  interface CheckBox {
-    title: string;
-    checked: boolean;
-    disabled: boolean;
-  }
-
-  function setProfileChecked(item: CheckBox, checked: boolean) {
+  function setProfileChecked(itemId: string, checked: boolean) {
     setProspectItems((prev) => {
       const items = [...prev];
       items.map((i) => {
-        if (i.title === item.title) {
+        if (i.id === itemId) {
           i.checked = checked;
         }
         return i;
@@ -2086,11 +2102,11 @@ const PersonalizationSection = (props: {
     });
   }
 
-  function setAccountChecked(item: CheckBox, checked: boolean) {
+  function setCompanyChecked(itemId: string, checked: boolean) {
     setCompanyItems((prev) => {
       const items = [...prev];
       items.map((i) => {
-        if (i.title === item.title) {
+        if (i.id === itemId) {
           i.checked = checked;
         }
         return i;
@@ -2104,14 +2120,30 @@ const PersonalizationSection = (props: {
     <Flex direction="column" pt="md">
       <Card shadow="xs" radius={"md"} mb={"1rem"}>
         <Flex direction={"column"} gap={"0.5rem"}>
-          <ProcessBar title="Linkedin Bio" percent={58} />
-          <ProcessBar title="Years of experience" percent={48} />
-          <ProcessBar title="Current Experience" percent={32} />
-          <ProcessBar title="LinkedIn Bio" percent={26} color="grape" />
+          {prospectItems.map((item) => (
+            <ProcessBar
+              id={item.id}
+              title={item.title}
+              percent={getAcceptanceRate(item.id) || 0}
+              checked={item.checked}
+              onPressItem={setProfileChecked}
+              color="teal"
+            />
+          ))}
+          {companyItems.map((item) => (
+            <ProcessBar
+              id={item.id}
+              title={item.title}
+              percent={getAcceptanceRate(item.id) || 0}
+              checked={item.checked}
+              onPressItem={setCompanyChecked}
+              color="grape"
+            />
+          ))}
         </Flex>
       </Card>
 
-      <PersonalizationCard
+      {/* <PersonalizationCard
         title="Prospect-Based"
         items={prospectItems}
         onPressItem={setProfileChecked}
@@ -2122,20 +2154,40 @@ const PersonalizationSection = (props: {
         items={companyItems}
         onPressItem={setAccountChecked}
         isPurple
-      />
+      /> */}
     </Flex>
   );
 };
 
 const ProcessBar: React.FC<{
+  id: string;
   title: string;
+  disabled?: boolean;
   percent: number;
+  checked?: boolean;
   color?: string;
-}> = ({ title, percent, color = "green" }) => {
+  onPressItem: (itemId: string, checked: boolean) => void;
+}> = ({
+  id,
+  title,
+  percent,
+  color = "green",
+  disabled,
+  checked,
+  onPressItem,
+}) => {
   return (
     <Flex align={"center"} gap={"0.5rem"}>
       <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
-        <Text fz={"0.75rem"}>{title}</Text>
+        <Checkbox
+          size={"sm"}
+          label={title}
+          checked={checked}
+          disabled={disabled}
+          onChange={(event) => onPressItem(id, event.currentTarget.checked)}
+          color={color}
+          variant="outline"
+        />
         <Flex sx={{ flex: 1 }}>
           <Divider w={"100%"} color={"#E9ECEF"} />
         </Flex>
@@ -2175,7 +2227,7 @@ export const PersonalizationCard: React.FC<{
         <Flex
           align={"center"}
           justify={"space-between"}
-          bg={`${isPurple ? 'grape' : 'teal'}.0`}
+          bg={`${isPurple ? "grape" : "teal"}.0`}
           py={"0.5rem"}
           px={"1rem"}
           gap={"0.5rem"}
@@ -2198,7 +2250,7 @@ export const PersonalizationCard: React.FC<{
                   onChange={(event) =>
                     onPressItem(item, event.currentTarget.checked)
                   }
-                  color={`${isPurple ? 'grape' : 'teal'}`}
+                  color={`${isPurple ? "grape" : "teal"}`}
                   variant="outline"
                 />
               </Flex>

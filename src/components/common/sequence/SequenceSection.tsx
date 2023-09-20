@@ -99,6 +99,7 @@ import { BumpFramework, CTA } from "src";
 import { BUMP_FRAMEWORK_OPTIONS } from "./framework_constants";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
+import { showNotification } from '@mantine/notifications';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1476,6 +1477,7 @@ function FrameworkSection(props: {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [prospectsLoading, setProspectsLoading] = useState(true);
+  const [changed, setChanged] = useState(false);
 
   const [noProspectsFound, setNoProspectsFound] = useState(false);
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
@@ -1533,21 +1535,22 @@ function FrameworkSection(props: {
     await queryClient.refetchQueries({
       queryKey: [`query-get-bump-frameworks`],
     });
+    setChanged(false);
     return result.status === "success";
   };
 
-  useEffect(() => {
-    saveSettings(debouncedForm);
-    if (
-      debouncedForm.useAccountResearch &&
-      !prevDebouncedForm?.useAccountResearch
-    ) {
-      //setActiveTab('personalization');
-    }
-    if (!debouncedForm.useAccountResearch && activeTab === "personalization") {
-      setActiveTab("none");
-    }
-  }, [debouncedForm]);
+  // useEffect(() => {
+  //   saveSettings(debouncedForm);
+  //   if (
+  //     debouncedForm.useAccountResearch &&
+  //     !prevDebouncedForm?.useAccountResearch
+  //   ) {
+  //     //setActiveTab('personalization');
+  //   }
+  //   if (!debouncedForm.useAccountResearch && activeTab === "personalization") {
+  //     setActiveTab("none");
+  //   }
+  // }, [debouncedForm]);
 
   const openPersonalizationSettings = () => {
     if (form.values.useAccountResearch) {
@@ -1692,6 +1695,16 @@ function FrameworkSection(props: {
             </Box>
           )}
         </Box>
+
+        <Button color='green' w='200px' ml='auto' disabled={!changed} onClick={() => {
+          saveSettings(debouncedForm)
+          showNotification({
+            message: "Settings Saved",
+            color: "green",
+          });
+        }}>
+          Save Settings
+        </Button>
         <Card
           shadow="sm"
           padding="lg"
@@ -1744,7 +1757,6 @@ function FrameworkSection(props: {
                   form.setFieldValue("bumpFrameworkHumanReadablePrompt", "");
                   form.setFieldValue("additionalContext", "");
                   setContextQuestion("");
-                  saveSettings(form.values);
                   return;
                 }
 
@@ -1794,7 +1806,7 @@ function FrameworkSection(props: {
           )}
         </Card>
 
-        <form onSubmit={form.onSubmit((values) => saveSettings(values))}>
+        <form onChange={() => {setChanged(true)}}>
           <Box mb="xs">
             {props.framework.additional_context && (
               <Textarea

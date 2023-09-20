@@ -1,5 +1,8 @@
 import { API_URL } from "@constants/data";
+import { getPersonasOverview } from "@utils/requests/getPersonas";
+import { set } from "lodash";
 import { SetterOrUpdater } from "recoil";
+import { PersonaOverview } from "src";
 
 export function isLoggedIn(){
   return !!(localStorage.getItem('user-token')
@@ -95,4 +98,17 @@ export function saveCurrentPersonaId(personaId: string){
 
 export function getCurrentPersonaId(){
   return localStorage.getItem('opened-persona-id');
+}
+
+export async function setFreshCurrentProject(userToken: string, projectId: number, setCurrentProject: SetterOrUpdater<any>) {
+
+  const response = await getPersonasOverview(userToken);
+  const result =
+        response.status === "success"
+          ? (response.data as PersonaOverview[])
+          : [];
+
+  const project = result.find((p) => p.id === projectId);
+  setCurrentProject(project);
+
 }

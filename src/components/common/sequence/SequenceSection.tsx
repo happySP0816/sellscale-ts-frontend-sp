@@ -3,7 +3,7 @@ import {
   uploadDrawerOpenState,
 } from "@atoms/personaAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { logout } from "@auth/core";
+import { logout, setFreshCurrentProject } from "@auth/core";
 import ModalSelector from "@common/library/ModalSelector";
 import ProspectSelect from "@common/library/ProspectSelect";
 import VoiceSelect from "@common/library/VoiceSelect";
@@ -575,7 +575,8 @@ function BumpFrameworkSelect(props: {
 
 function IntroMessageSection() {
   const userToken = useRecoilValue(userTokenState);
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const queryClient = useQueryClient();
 
   const [prospectId, setProspectId] = useState<number>();
   const [message, setMessage] = useState("");
@@ -879,6 +880,8 @@ function IntroMessageSection() {
                   currentProject.id,
                   items.filter((x) => !x.checked).map((x) => x.id)
                 );
+
+                await setFreshCurrentProject(userToken, currentProject.id, setCurrentProject);
               }}
             />
           </Tabs.Panel>
@@ -1971,6 +1974,10 @@ function FrameworkSection(props: {
                           props.framework.bump_framework_template_name,
                           props.framework.bump_framework_human_readable_prompt
                         );
+
+                        await queryClient.refetchQueries({
+                          queryKey: [`query-get-bump-frameworks`],
+                        });
                       }}
                     />
                   </Tabs.Panel>

@@ -1722,13 +1722,11 @@ function FrameworkSection(props: {
           padding="lg"
           radius="md"
           withBorder
-          sx={{ border: "solid 2px #75b6c9 !important;" }}
         >
           <Card.Section
             sx={{
               flexDirection: "row",
               display: "flex",
-              borderBottom: "solid 2px #75b6c9 !important;",
             }}
             p="xs"
             withBorder
@@ -1738,9 +1736,9 @@ function FrameworkSection(props: {
               mt="4px"
               sx={{ flexDirection: "row", display: "flex" }}
             >
-              <IconBrain color="black" size="1.5rem" />
-              <Text color="black" ml="xs">
-                Select Bump Framework
+              <IconBrain size="1.5rem" color='#33ccff' />
+              <Text color="black" ml="xs" fw='500'>
+                Select Bump Template
               </Text>
             </Box>
             <Select
@@ -1748,7 +1746,7 @@ function FrameworkSection(props: {
               ml="auto"
               mr="xs"
               w="50%"
-              placeholder="Pick framework"
+              placeholder="Pick template"
               clearable
               defaultValue={
                 props.framework.bump_framework_template_name || null
@@ -1759,6 +1757,7 @@ function FrameworkSection(props: {
                   label: "Does your role have to do with?",
                 },
                 { value: "short-introduction", label: "Short introduction" },
+                { value: "pain-points-opener", label: "Pain points opener" },
               ].concat([
                 { value: "Manual Framework", label: "Manual Framework" },
               ])}
@@ -1790,30 +1789,18 @@ function FrameworkSection(props: {
                   setContextQuestion(context_question);
                 }
 
-                openConfirmModal({
-                  title: "Override Framework?",
-                  children: (
-                    <Text>
-                      Are you sure you want to override the current framework
-                      with this one?
-                    </Text>
-                  ),
-                  labels: { confirm: "Confirm", cancel: "Cancel" },
-                  onCancel: () => {},
-                  onConfirm: () => {
-                    form.setFieldValue("promptInstructions", raw_prompt);
-                    form.setFieldValue("frameworkName", name);
-                    form.setFieldValue("bumpLength", length);
-                    form.setFieldValue("additionalContext", context_question);
-                  },
-                });
+                form.setFieldValue("promptInstructions", raw_prompt);
+                form.setFieldValue("frameworkName", name);
+                form.setFieldValue("bumpLength", length);
+                form.setFieldValue("additionalContext", context_question);
+                setChanged(true);
               }}
             />
           </Card.Section>
 
-          {props.framework.bump_framework_human_readable_prompt && (
+          {form.values.bumpFrameworkHumanReadablePrompt && (
             <Group mt="md" mb="xs">
-              {props.framework.bump_framework_human_readable_prompt}
+              {form.values.bumpFrameworkHumanReadablePrompt}
             </Group>
           )}
         </Card>
@@ -1824,8 +1811,9 @@ function FrameworkSection(props: {
           }}
         >
           <Box mb="xs">
-            {props.framework.additional_context && (
+            {form.values.additionalContext && (
               <Textarea
+                minRows={7}
                 label="PROVIDE ADDITIONAL CONTEXT"
                 {...form.getInputProps("additionalContext")}
               />

@@ -99,7 +99,7 @@ import { BumpFramework, CTA } from "src";
 import { BUMP_FRAMEWORK_OPTIONS } from "./framework_constants";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
-import { showNotification } from '@mantine/notifications';
+import { showNotification } from "@mantine/notifications";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -772,8 +772,10 @@ function IntroMessageSection() {
               {message && (
                 <LiExampleInvitation
                   message={message}
-                  startHovered={activeTab === 'personalization' ? true : undefined}
-                  endHovered={activeTab === 'ctas' ? true : undefined}
+                  startHovered={
+                    activeTab === "personalization" ? true : undefined
+                  }
+                  endHovered={activeTab === "ctas" ? true : undefined}
                   onClickStart={openPersonalizationSettings}
                   onClickEnd={openCTASettings}
                   onHoveredEnd={(hovered) => setHoveredCTA(hovered)}
@@ -1687,7 +1689,11 @@ function FrameworkSection(props: {
                 {message && (
                   <LiExampleMessage
                     message={message}
-                    hovered={hovered || activeTab === 'personalization' ? true : undefined}
+                    hovered={
+                      hovered || activeTab === "personalization"
+                        ? true
+                        : undefined
+                    }
                     onClick={openPersonalizationSettings}
                   />
                 )}
@@ -1696,13 +1702,19 @@ function FrameworkSection(props: {
           )}
         </Box>
 
-        <Button color='green' w='200px' ml='auto' disabled={!changed} onClick={() => {
-          saveSettings(debouncedForm)
-          showNotification({
-            message: "Settings Saved",
-            color: "green",
-          });
-        }}>
+        <Button
+          color="green"
+          w="200px"
+          ml="auto"
+          disabled={!changed}
+          onClick={() => {
+            saveSettings(debouncedForm);
+            showNotification({
+              message: "Settings Saved",
+              color: "green",
+            });
+          }}
+        >
           Save Settings
         </Button>
         <Card
@@ -1806,7 +1818,11 @@ function FrameworkSection(props: {
           )}
         </Card>
 
-        <form onChange={() => {setChanged(true)}}>
+        <form
+          onChange={() => {
+            setChanged(true);
+          }}
+        >
           <Box mb="xs">
             {props.framework.additional_context && (
               <Textarea
@@ -2086,30 +2102,35 @@ const PersonalizationSection = (props: {
     },
   });
 
-  const allItems = prospectItems.map((x) => {
-    return {
-      ...x,
-      type: 'PROSPECT',
-      accepted: getAcceptanceRate(x.id),
-    }
-  }).concat(companyItems.map((x) => {
-    return {
-      ...x,
-      type: 'COMPANY',
-      accepted: getAcceptanceRate(x.id),
-    }
-  })).sort((a, b) => {
-    if (a.accepted === null && b.accepted === null) return 0;
-    if (a.accepted === null) return 1;
-    if (b.accepted === null) return -1;
-    return b.accepted - a.accepted;
-  });
+  const allItems = prospectItems
+    .map((x) => {
+      return {
+        ...x,
+        type: "PROSPECT",
+        accepted: getAcceptanceRate(x.id),
+      };
+    })
+    .concat(
+      companyItems.map((x) => {
+        return {
+          ...x,
+          type: "COMPANY",
+          accepted: getAcceptanceRate(x.id),
+        };
+      })
+    )
+    .sort((a, b) => {
+      if (a.accepted === null && b.accepted === null) return 0;
+      if (a.accepted === null) return 1;
+      if (b.accepted === null) return -1;
+      return b.accepted - a.accepted;
+    });
 
   function getAcceptanceRate(itemId: string) {
     if (!data) return null;
     for (const d of data) {
       if (d.research_point_type === itemId) {
-        return Math.round(d["avg. acceptance %"]*100) as number;
+        return Math.round(d["avg. acceptance %"] * 100) as number;
       }
     }
     return null;
@@ -2157,8 +2178,10 @@ const PersonalizationSection = (props: {
               title={item.title}
               percent={item.accepted || 0}
               checked={item.checked}
-              onPressItem={item.type === 'PROSPECT' ? setProfileChecked : setCompanyChecked}
-              color={item.type === 'PROSPECT' ? 'teal' : 'grape'}
+              onPressItem={
+                item.type === "PROSPECT" ? setProfileChecked : setCompanyChecked
+              }
+              color={item.type === "PROSPECT" ? "teal" : "grape"}
             />
           ))}
         </Flex>
@@ -2212,20 +2235,20 @@ const ProcessBar: React.FC<{
         <Flex sx={{ flex: 1 }}>
           <Divider w={"100%"} color={"#E9ECEF"} />
         </Flex>
-        <Tooltip label='Acceptance Rate' withArrow>
-        <Button
-          variant={"light"}
-          fw={700}
-          size="xs"
-          color={color}
-          radius="xl"
-          h="auto"
-          fz={"0.625rem"}
-          py={"0.125rem"}
-          px={"0.25rem"}
-        >
-          {percent}%
-        </Button>
+        <Tooltip label="Acceptance Rate" withArrow>
+          <Button
+            variant={"light"}
+            fw={700}
+            size="xs"
+            color={color}
+            radius="xl"
+            h="auto"
+            fz={"0.625rem"}
+            py={"0.125rem"}
+            px={"0.25rem"}
+          >
+            {percent}%
+          </Button>
         </Tooltip>
       </Flex>
       <Flex direction={"column"} sx={{ flex: 6 }}>
@@ -2360,13 +2383,15 @@ const CtaSection = (props: {
                   highlight: e.percentage + "%",
                   color: "blue",
                   variant: "subtle",
+                  hovered:
+                    "Prospects: " + e.total_responded + "/" + e.total_count,
                 },
-                {
-                  label: "Prospects:",
-                  highlight: e.total_responded + "/" + e.total_count,
-                  color: "indigo",
-                  variant: "subtle",
-                },
+                // {
+                //   label: "Prospects:",
+                //   highlight: e.total_responded + "/" + e.total_count,
+                //   color: "indigo",
+                //   variant: "subtle",
+                // },
                 {
                   label: e.cta_type,
                   highlight: "",
@@ -2428,6 +2453,7 @@ interface Tag {
   label: string;
   highlight?: string;
   color: MantineColor;
+  hovered?: string;
   variant: "subtle" | "filled" | "light";
 }
 
@@ -2461,23 +2487,25 @@ const CTAOption: React.FC<{
         <Flex gap={"0.5rem"} mb={"0.75rem"} justify={"space-between"}>
           <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>
             {data.tags.map((e) => (
-              <Button
-                key={e.label}
-                variant={e.variant}
-                size="xs"
-                color={e.color}
-                radius="xl"
-                h="auto"
-                fz={"0.75rem"}
-                py={"0.125rem"}
-                px={"0.25rem"}
-                fw={"400"}
-              >
-                {e.label}
-                {e.highlight && (
-                  <strong style={{ paddingLeft: 5 }}> {e.highlight}</strong>
-                )}
-              </Button>
+              <Tooltip disabled={!e.hovered} label={e.hovered} withArrow withinPortal>
+                <Button
+                  key={e.label}
+                  variant={e.variant}
+                  size="xs"
+                  color={e.color}
+                  radius="xl"
+                  h="auto"
+                  fz={"0.75rem"}
+                  py={"0.125rem"}
+                  px={"0.25rem"}
+                  fw={"400"}
+                >
+                  {e.label}
+                  {e.highlight && (
+                    <strong style={{ paddingLeft: 5 }}> {e.highlight}</strong>
+                  )}
+                </Button>
+              </Tooltip>
             ))}
           </Flex>
 

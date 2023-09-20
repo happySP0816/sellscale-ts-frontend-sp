@@ -44,9 +44,15 @@ import {
   Select,
   Collapse,
   Container,
+  Progress,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useDebouncedValue, useDisclosure, useHover, usePrevious } from "@mantine/hooks";
+import {
+  useDebouncedValue,
+  useDisclosure,
+  useHover,
+  usePrevious,
+} from "@mantine/hooks";
 import { openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
@@ -90,8 +96,8 @@ import _, { set } from "lodash";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { BumpFramework, CTA } from "src";
-import { BUMP_FRAMEWORK_OPTIONS } from './framework_constants';
-import TextWithNewline from '@common/library/TextWithNewlines';
+import { BUMP_FRAMEWORK_OPTIONS } from "./framework_constants";
+import TextWithNewline from "@common/library/TextWithNewlines";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -99,24 +105,25 @@ export default function SequenceSection() {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
-  const [conversionRate, setConversionRate] = useState(0)
-  const [replyRate, setReplyRate] = useState(0)
+  const [conversionRate, setConversionRate] = useState(0);
+  const [replyRate, setReplyRate] = useState(0);
 
   const triggerGetArchetypeConversion = async () => {
     if (!currentProject) return;
 
     const result = await getArchetypeConversion(userToken, currentProject.id);
-    const data = result.data
+    const data = result.data;
 
-    setConversionRate((data.li_opened / data.li_sent) * 100)
-    setReplyRate((data.li_replied / data.li_sent) * 100)
-  }
+    setConversionRate((data.li_opened / data.li_sent) * 100);
+    setReplyRate((data.li_replied / data.li_sent) * 100);
+    console.log(data);
+  };
 
   useEffect(() => {
-    triggerGetArchetypeConversion()
-  }, [])
+    triggerGetArchetypeConversion();
+  }, []);
 
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: [`query-get-bump-frameworks`],
     queryFn: async () => {
       if (!currentProject) return [];
@@ -156,6 +163,26 @@ export default function SequenceSection() {
       bf.active &&
       bf.default
   );
+  const bf0Delay = useRef(bf0?.bump_delay_days ?? 2);
+  const bf1Delay = useRef(bf1?.bump_delay_days ?? 2);
+  const bf2Delay = useRef(bf2?.bump_delay_days ?? 2);
+
+  let bf0Conversion =
+    bf0 && bf0?.etl_num_times_converted && bf0?.etl_num_times_used
+      ? (bf0.etl_num_times_converted / bf0.etl_num_times_used) * 100
+      : undefined;
+  let bf1Conversion =
+    bf1 && bf1?.etl_num_times_converted && bf1?.etl_num_times_used
+      ? (bf1.etl_num_times_converted / bf1.etl_num_times_used) * 100
+      : undefined;
+  let bf2Conversion =
+    bf2 && bf2?.etl_num_times_converted && bf2?.etl_num_times_used
+      ? (bf2.etl_num_times_converted / bf2.etl_num_times_used) * 100
+      : undefined;
+  let bf3Conversion =
+    bf3 && bf3?.etl_num_times_converted && bf3?.etl_num_times_used
+      ? (bf3.etl_num_times_converted / bf3.etl_num_times_used) * 100
+      : undefined;
 
   return (
     <Card padding="lg" radius="md" withBorder>
@@ -176,47 +203,84 @@ export default function SequenceSection() {
               conversion={conversionRate}
               onClick={() => setActiveCard(0)}
             />
-            <Flex w='100%' justify='space-between' p='md'>
-              <Divider
-                w='50%'
-                variant="dashed"
-                label={
-                  <>
-                    <Text c="dimmed" ta="center" fz="sm">
-                      Accepted Invite
-                    </Text>
-                  </>
-                }
-                labelPosition="center"
-                mx={10}
-              />
-              <Tooltip
-                label={replyRate > 0.5 ? 'Your reply rates are above industry standards (0.5%). Congrats!' : 'Your reply rates are below industry standards (0.5%). Consider changing your bumps'}
-                withinPortal
-                withArrow
-              >
-                <Badge
-                  ml='4px'
-                  variant="dot"
-                  color={replyRate > 0.5 ? "green" : "red"}
+            <Divider
+              variant="dashed"
+              label={
+                <>
+                  <Text c="dimmed" ta="center" fz="sm">
+                    Accepted Invite
+                  </Text>
+                </>
+              }
+              labelPosition="center"
+              mx={50}
+            />
+            <Divider
+              variant="solid"
+              label={
+                <Tooltip
+                  label={
+                    replyRate > 0.5
+                      ? "Your reply rates are above industry standards (0.5%). Congrats!"
+                      : "Your reply rates are below industry standards (0.5%). Consider changing your bumps"
+                  }
+                  withinPortal
+                  withArrow
                 >
-                  Replied: {replyRate.toFixed(1)}%
-                </Badge>
-              </Tooltip>
-            </Flex>
+                  <Badge
+                    ml="4px"
+                    variant="dot"
+                    color={replyRate > 0.5 ? "green" : "red"}
+                  >
+                    Replied: {replyRate.toFixed(1)}%
+                  </Badge>
+                </Tooltip>
+              }
+              labelPosition="center"
+              mx={10}
+            />
             <FrameworkCard
               title="Follow-Up 1"
-              // badgeText="If no reply from prospect."
+              badgeText={
+                bf0Conversion ? `Reply ${bf0Conversion.toFixed(0)}%` : undefined
+              }
               bodyTitle={bf0?.title ?? ""}
               // bodyText={bf0?.description ?? ""}
               footer={
-                <Text fz={14}>
-                  wait for{" "}
-                  <Text fw={550} span>
-                    {bf0?.bump_delay_days ?? -1}
-                  </Text>{" "}
-                  days, then:
-                </Text>
+                <Center>
+                  <Group spacing={2}>
+                    <Text fz={14}>wait for</Text>
+                    <NumberInput
+                      defaultValue={bf0Delay.current}
+                      placeholder="# Days"
+                      variant="filled"
+                      hideControls
+                      min={1}
+                      max={99}
+                      w={bf0Delay.current > 9 ? 50 : 30}
+                      size="xs"
+                      onChange={async (value) => {
+                        if (!bf0) return;
+                        bf0Delay.current = value || 2;
+                        const result = await patchBumpFramework(
+                          userToken,
+                          bf0.id,
+                          bf0.overall_status,
+                          bf0.title,
+                          bf0.description,
+                          bf0.bump_length,
+                          bf0.bumped_count,
+                          bf0Delay.current,
+                          bf0.default,
+                          bf0.use_account_research,
+                          bf0.transformer_blocklist
+                        );
+                        if (result.status === "success") refetch();
+                      }}
+                    />
+                    <Text fz={14}>days, then:</Text>
+                  </Group>
+                </Center>
               }
               active={activeCard === 1}
               onClick={() => setActiveCard(1)}
@@ -233,17 +297,46 @@ export default function SequenceSection() {
 
             <FrameworkCard
               title="Follow-Up 2"
-              // badgeText="If no reply from prospect."
+              badgeText={
+                bf1Conversion ? `Reply ${bf1Conversion.toFixed(0)}%` : undefined
+              }
               bodyTitle={bf1?.title ?? ""}
               // bodyText={bf1?.description ?? ""}
               footer={
-                <Text fz={14}>
-                  wait for{" "}
-                  <Text fw={550} span>
-                    {bf1?.bump_delay_days ?? -1}
-                  </Text>{" "}
-                  days, then:
-                </Text>
+                <Center>
+                  <Group spacing={2}>
+                    <Text fz={14}>wait for</Text>
+                    <NumberInput
+                      defaultValue={bf1Delay.current}
+                      placeholder="# Days"
+                      variant="filled"
+                      hideControls
+                      min={1}
+                      max={99}
+                      w={bf1Delay.current > 9 ? 50 : 30}
+                      size="xs"
+                      onChange={async (value) => {
+                        if (!bf1) return;
+                        bf1Delay.current = value || 2;
+                        const result = await patchBumpFramework(
+                          userToken,
+                          bf1.id,
+                          bf1.overall_status,
+                          bf1.title,
+                          bf1.description,
+                          bf1.bump_length,
+                          bf1.bumped_count,
+                          bf1Delay.current,
+                          bf1.default,
+                          bf1.use_account_research,
+                          bf1.transformer_blocklist
+                        );
+                        if (result.status === "success") refetch();
+                      }}
+                    />
+                    <Text fz={14}>days, then:</Text>
+                  </Group>
+                </Center>
               }
               active={activeCard === 2}
               onClick={() => setActiveCard(2)}
@@ -260,17 +353,46 @@ export default function SequenceSection() {
             />
             <FrameworkCard
               title="Follow-Up 3"
-              // badgeText="If no reply from prospect."
+              badgeText={
+                bf2Conversion ? `Reply ${bf2Conversion.toFixed(0)}%` : undefined
+              }
               bodyTitle={bf2?.title ?? ""}
               // bodyText={bf2?.description ?? ""}
               footer={
-                <Text fz={14}>
-                  wait for{" "}
-                  <Text fw={550} span>
-                    {bf2?.bump_delay_days ?? -1}
-                  </Text>{" "}
-                  days, then:
-                </Text>
+                <Center>
+                  <Group spacing={2}>
+                    <Text fz={14}>wait for</Text>
+                    <NumberInput
+                      defaultValue={bf2Delay.current}
+                      placeholder="# Days"
+                      variant="filled"
+                      hideControls
+                      min={2}
+                      max={99}
+                      w={bf2Delay.current > 9 ? 50 : 30}
+                      size="xs"
+                      onChange={async (value) => {
+                        if (!bf2) return;
+                        bf2Delay.current = value || 2;
+                        const result = await patchBumpFramework(
+                          userToken,
+                          bf2.id,
+                          bf2.overall_status,
+                          bf2.title,
+                          bf2.description,
+                          bf2.bump_length,
+                          bf2.bumped_count,
+                          bf2Delay.current,
+                          bf2.default,
+                          bf2.use_account_research,
+                          bf2.transformer_blocklist
+                        );
+                        if (result.status === "success") refetch();
+                      }}
+                    />
+                    <Text fz={14}>days, then:</Text>
+                  </Group>
+                </Center>
               }
               active={activeCard === 3}
               onClick={() => setActiveCard(3)}
@@ -287,7 +409,9 @@ export default function SequenceSection() {
             />
             <FrameworkCard
               title="Follow-Up 4"
-              // badgeText="If no reply from prospect."
+              badgeText={
+                bf3Conversion ? `Reply ${bf3Conversion.toFixed(0)}%` : undefined
+              }
               bodyTitle={bf3?.title ?? ""}
               // bodyText={bf3?.description ?? ""}
               active={activeCard === 4}
@@ -323,7 +447,7 @@ export default function SequenceSection() {
       </Group>
       <PersonaUploadDrawer
         personaOverviews={currentProject ? [currentProject] : []}
-        afterUpload={() => { }}
+        afterUpload={() => {}}
       />
     </Card>
   );
@@ -375,9 +499,9 @@ function BumpFrameworkSelect(props: {
                     title: "Create Bump Framework",
                     innerProps: {
                       modalOpened: true,
-                      openModal: () => { },
-                      closeModal: () => { },
-                      backFunction: () => { },
+                      openModal: () => {},
+                      closeModal: () => {},
+                      backFunction: () => {},
                       dataChannels: dataChannels,
                       status: undefined,
                       archetypeID: currentProject?.id,
@@ -395,9 +519,9 @@ function BumpFrameworkSelect(props: {
                     modal: "cloneBumpFramework",
                     title: "Clone Bump Framework",
                     innerProps: {
-                      openModal: () => { },
-                      closeModal: () => { },
-                      backFunction: () => { },
+                      openModal: () => {},
+                      closeModal: () => {},
+                      backFunction: () => {},
                       status: props.bumpedFrameworks.find(
                         (bf) => bf.id === props.activeBumpFrameworkId
                       )?.overall_status,
@@ -418,7 +542,7 @@ function BumpFrameworkSelect(props: {
       items={props.bumpedFrameworks.map((bf) => ({
         id: bf.id,
         name: bf.title,
-        onClick: () => { },
+        onClick: () => {},
         leftSection: (
           <Badge
             size="sm"
@@ -464,18 +588,17 @@ function IntroMessageSection() {
 
   const [hoveredCTA, setHoveredCTA] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<string | null>('none');
+  const [activeTab, setActiveTab] = useState<string | null>("none");
 
   const [personalizationItemsCount, setPersonalizationItemsCount] =
     useState<number>();
   const [ctasItemsCount, setCtasItemsCount] = useState<number>();
 
   const openPersonalizationSettings = () => {
-    setActiveTab('personalization');
+    setActiveTab("personalization");
   };
   const openCTASettings = () => {
-    setActiveTab('ctas');
-
+    setActiveTab("ctas");
   };
 
   const getIntroMessage = async (prospectId: number) => {
@@ -551,8 +674,8 @@ function IntroMessageSection() {
         </Group>
         <VoiceSelect
           personaId={currentProject.id}
-          onChange={(voice) => { }}
-          onFinishLoading={(voices) => { }}
+          onChange={(voice) => {}}
+          onFinishLoading={(voices) => {}}
           autoSelect
         />
       </Group>
@@ -830,10 +953,10 @@ function LiExampleInvitation(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-        .length - 1
-    ].fileIdentifyingUrlPathSegment
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+          .length - 1
+      ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1116,10 +1239,10 @@ function LiExampleMessage(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-        .length - 1
-    ].fileIdentifyingUrlPathSegment
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+          .length - 1
+      ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1237,17 +1360,17 @@ function FrameworkCard(props: {
         cursor: "pointer",
         backgroundColor: props.active
           ? theme.fn.lighten(
-            theme.fn.variant({ variant: "filled", color: "blue" })
-              .background!,
-            0.95
-          )
+              theme.fn.variant({ variant: "filled", color: "blue" })
+                .background!,
+              0.95
+            )
           : hovered
-            ? theme.fn.lighten(
+          ? theme.fn.lighten(
               theme.fn.variant({ variant: "filled", color: "blue" })
                 .background!,
               0.99
             )
-            : undefined,
+          : undefined,
         borderColor:
           props.active || hovered
             ? theme.colors.blue[5] + "!important"
@@ -1282,13 +1405,17 @@ function FrameworkCard(props: {
           </Group>
           {props.conversion !== undefined && (
             <Tooltip
-              label={props.conversion > 9.0 ? 'Your open rates are above industry standards (9%). Congrats!' : 'Your open rates are below industry standards (9%). Consider changing your CTAs'}
+              label={
+                props.conversion > 9.0
+                  ? "Your open rates are above industry standards (9%). Congrats!"
+                  : "Your open rates are below industry standards (9%). Consider changing your CTAs"
+              }
               withArrow
               withinPortal
             >
               <Badge
-                variant='dot'
-                color={props.conversion > 9.0 ? 'green' : 'red'}
+                variant="dot"
+                color={props.conversion > 9.0 ? "green" : "red"}
               >
                 Opened: {Math.trunc(props.conversion)}%
               </Badge>
@@ -1354,15 +1481,15 @@ function FrameworkSection(props: {
     uploadDrawerOpenState
   );
 
-  const [humanReadableContext, setHumanReadableContext] = useState<string | undefined>(
-    props.framework.bump_framework_human_readable_prompt
-  );
+  const [humanReadableContext, setHumanReadableContext] = useState<
+    string | undefined
+  >(props.framework.bump_framework_human_readable_prompt);
   const [contextQuestion, setContextQuestion] = useState(
     props.framework.bump_framework_human_readable_prompt
   );
   const [opened, { toggle }] = useDisclosure(false);
 
-  const [activeTab, setActiveTab] = useState<string | null>('none');
+  const [activeTab, setActiveTab] = useState<string | null>("none");
 
   const [personalizationItemsCount, setPersonalizationItemsCount] =
     useState<number>();
@@ -1378,7 +1505,8 @@ function FrameworkSection(props: {
       useAccountResearch: props.framework.use_account_research,
       additionalContext: props.framework.additional_context,
       bumpFrameworkTemplateName: props.framework.bump_framework_template_name,
-      bumpFrameworkHumanReadablePrompt: props.framework.bump_framework_human_readable_prompt,
+      bumpFrameworkHumanReadablePrompt:
+        props.framework.bump_framework_human_readable_prompt,
     },
   });
   const [debouncedForm] = useDebouncedValue(form.values, 200);
@@ -1399,7 +1527,7 @@ function FrameworkSection(props: {
       props.framework.transformer_blocklist,
       values.additionalContext,
       values.bumpFrameworkTemplateName,
-      values.bumpFrameworkHumanReadablePrompt,
+      values.bumpFrameworkHumanReadablePrompt
     );
     await queryClient.refetchQueries({
       queryKey: [`query-get-bump-frameworks`],
@@ -1409,17 +1537,20 @@ function FrameworkSection(props: {
 
   useEffect(() => {
     saveSettings(debouncedForm);
-    if (debouncedForm.useAccountResearch && !prevDebouncedForm?.useAccountResearch) {
+    if (
+      debouncedForm.useAccountResearch &&
+      !prevDebouncedForm?.useAccountResearch
+    ) {
       //setActiveTab('personalization');
     }
-    if (!debouncedForm.useAccountResearch && activeTab === 'personalization') {
-      setActiveTab('none');
+    if (!debouncedForm.useAccountResearch && activeTab === "personalization") {
+      setActiveTab("none");
     }
   }, [debouncedForm]);
 
   const openPersonalizationSettings = () => {
     if (form.values.useAccountResearch) {
-      setActiveTab('personalization');
+      setActiveTab("personalization");
     }
   };
 
@@ -1433,7 +1564,7 @@ function FrameworkSection(props: {
       prospectId,
       props.framework.id,
       props.bumpCount,
-      useCache,
+      useCache
     );
 
     setLoading(false);
@@ -1560,257 +1691,275 @@ function FrameworkSection(props: {
             </Box>
           )}
         </Box>
-        <Card shadow="sm" padding="lg" radius="md" withBorder sx={{border: 'solid 2px #75b6c9 !important;'}}>
-          <Card.Section sx={{flexDirection: 'row', display: 'flex', borderBottom: 'solid 2px #75b6c9 !important;'}} p='xs' withBorder>
-            <Box ml='xs' mt='4px' sx={{flexDirection: 'row', display: 'flex'}}>
-              <IconBrain color='black' size='1.5rem'/>
-              <Text color='black' ml='xs'>
+        <Card
+          shadow="sm"
+          padding="lg"
+          radius="md"
+          withBorder
+          sx={{ border: "solid 2px #75b6c9 !important;" }}
+        >
+          <Card.Section
+            sx={{
+              flexDirection: "row",
+              display: "flex",
+              borderBottom: "solid 2px #75b6c9 !important;",
+            }}
+            p="xs"
+            withBorder
+          >
+            <Box
+              ml="xs"
+              mt="4px"
+              sx={{ flexDirection: "row", display: "flex" }}
+            >
+              <IconBrain color="black" size="1.5rem" />
+              <Text color="black" ml="xs">
                 Select Bump Framework
               </Text>
             </Box>
-              <Select
-                  withinPortal
-                  ml='auto'
-                  mr='xs'
-                  w='50%'
-                  placeholder="Pick framework"
-                  clearable
-                  defaultValue={
-                    props.framework.bump_framework_template_name || null
-                  }
-                  data={
-                  [
-                    { value: 'role-have-to-do-with', label: 'Does your role have to do with?'},
-                    { value: 'short-introduction', label: 'Short introduction'}, 
-                  ].concat([
-                    { value: "Manual Framework", label: "Manual Framework"},
-                  ])}
-                  onChange={(value: any) => {
-                    const framework = BUMP_FRAMEWORK_OPTIONS[value]
-                    if (!framework) {
-                      form.setFieldValue(
-                        "bumpFrameworkTemplateName", ''
-                      )
-                      form.setFieldValue(
-                        "bumpFrameworkHumanReadablePrompt", ''
-                      )
-                      form.setFieldValue(
-                        "additionalContext", ''
-                      )
-                      setContextQuestion('')
-                      saveSettings(form.values)
-                      return
-                    }
-                    
-                    const name = framework.name
-                    const raw_prompt = framework.raw_prompt
-                    const human_readable_prompt = framework.human_readable_prompt
-                    const context_question = framework.context_question
-                    const length = framework.length
+            <Select
+              withinPortal
+              ml="auto"
+              mr="xs"
+              w="50%"
+              placeholder="Pick framework"
+              clearable
+              defaultValue={
+                props.framework.bump_framework_template_name || null
+              }
+              data={[
+                {
+                  value: "role-have-to-do-with",
+                  label: "Does your role have to do with?",
+                },
+                { value: "short-introduction", label: "Short introduction" },
+              ].concat([
+                { value: "Manual Framework", label: "Manual Framework" },
+              ])}
+              onChange={(value: any) => {
+                const framework = BUMP_FRAMEWORK_OPTIONS[value];
+                if (!framework) {
+                  form.setFieldValue("bumpFrameworkTemplateName", "");
+                  form.setFieldValue("bumpFrameworkHumanReadablePrompt", "");
+                  form.setFieldValue("additionalContext", "");
+                  setContextQuestion("");
+                  saveSettings(form.values);
+                  return;
+                }
 
-                    form.setFieldValue(
-                      "bumpFrameworkTemplateName", value
-                    )
-                    form.setFieldValue(
-                      "bumpFrameworkHumanReadablePrompt", human_readable_prompt
-                    )
+                const name = framework.name;
+                const raw_prompt = framework.raw_prompt;
+                const human_readable_prompt = framework.human_readable_prompt;
+                const context_question = framework.context_question;
+                const length = framework.length;
 
-                    setHumanReadableContext(human_readable_prompt)
+                form.setFieldValue("bumpFrameworkTemplateName", value);
+                form.setFieldValue(
+                  "bumpFrameworkHumanReadablePrompt",
+                  human_readable_prompt
+                );
 
-                    if (context_question) {
-                      setContextQuestion(context_question)
-                    }
-                    
-                    openConfirmModal({
-                      title: "Override Framework?",
-                      children: (
-                        <Text>
-                          Are you sure you want to override the current framework with this one?
-                        </Text>
-                      ),
-                      labels: { confirm: 'Confirm', cancel: 'Cancel' },
-                      onCancel: () => { },
-                      onConfirm: () => {
-                        form.setFieldValue('promptInstructions', raw_prompt)
-                        form.setFieldValue('frameworkName', name)
-                        form.setFieldValue('bumpLength', length)
-                        form.setFieldValue('additionalContext', context_question)
-                      }
-                    })
+                setHumanReadableContext(human_readable_prompt);
 
-                  }}
-                />
+                if (context_question) {
+                  setContextQuestion(context_question);
+                }
+
+                openConfirmModal({
+                  title: "Override Framework?",
+                  children: (
+                    <Text>
+                      Are you sure you want to override the current framework
+                      with this one?
+                    </Text>
+                  ),
+                  labels: { confirm: "Confirm", cancel: "Cancel" },
+                  onCancel: () => {},
+                  onConfirm: () => {
+                    form.setFieldValue("promptInstructions", raw_prompt);
+                    form.setFieldValue("frameworkName", name);
+                    form.setFieldValue("bumpLength", length);
+                    form.setFieldValue("additionalContext", context_question);
+                  },
+                });
+              }}
+            />
           </Card.Section>
 
-          {props.framework.bump_framework_human_readable_prompt && <Group  mt="md" mb="xs">
-            {props.framework.bump_framework_human_readable_prompt}
-          </Group>}
+          {props.framework.bump_framework_human_readable_prompt && (
+            <Group mt="md" mb="xs">
+              {props.framework.bump_framework_human_readable_prompt}
+            </Group>
+          )}
         </Card>
-        
-       
+
         <form onSubmit={form.onSubmit((values) => saveSettings(values))}>
-
-        
-
-        <Box mb='xs'>
-            {props.framework.additional_context && <Textarea 
-            label="PROVIDE ADDITIONAL CONTEXT"
-            {...form.getInputProps("additionalContext")}
-          />}
-        </Box>
-        <Box maw={'100%'} mx="auto">
-          <Collapse in={opened}>
-              <Card withBorder mb='xs'>
-              <Group grow>
-                <Box>
+          <Box mb="xs">
+            {props.framework.additional_context && (
+              <Textarea
+                label="PROVIDE ADDITIONAL CONTEXT"
+                {...form.getInputProps("additionalContext")}
+              />
+            )}
+          </Box>
+          <Box maw={"100%"} mx="auto">
+            <Collapse in={opened}>
+              <Card withBorder mb="xs">
+                <Group grow>
+                  <Box>
+                    <Text fz="sm" fw={500} c="dimmed">
+                      FRAMEWORK NAME:
+                    </Text>
+                    <TextInput
+                      placeholder="Name"
+                      variant="filled"
+                      {...form.getInputProps("frameworkName")}
+                    />
+                  </Box>
+                  <Box>
+                    <Text fz="sm" fw={500} c="dimmed">
+                      BUMP LENGTH:
+                    </Text>
+                    <SegmentedControl
+                      data={[
+                        { label: "Short", value: "SHORT" },
+                        { label: "Medium", value: "MEDIUM" },
+                        { label: "Long", value: "LONG" },
+                      ]}
+                      {...form.getInputProps("bumpLength")}
+                    />
+                  </Box>
+                  <Box>
+                    <Text fz="sm" fw={500} c="dimmed">
+                      DELAY DAYS:
+                    </Text>
+                    <NumberInput
+                      placeholder="Days to Wait"
+                      variant="filled"
+                      {...form.getInputProps("delayDays")}
+                    />
+                  </Box>
+                </Group>
+                <Box mt="xs">
                   <Text fz="sm" fw={500} c="dimmed">
-                    FRAMEWORK NAME:
+                    RAW PROMPT INSTRUCTIONS:
                   </Text>
-                  <TextInput
-                    placeholder="Name"
+                  <Textarea
+                    placeholder="Instructions"
+                    minRows={7}
                     variant="filled"
-                    {...form.getInputProps("frameworkName")}
+                    {...form.getInputProps("promptInstructions")}
                   />
                 </Box>
-                <Box>
-                  <Text fz="sm" fw={500} c="dimmed">
-                    BUMP LENGTH:
-                  </Text>
-                  <SegmentedControl
-                    data={[
-                      { label: "Short", value: "SHORT" },
-                      { label: "Medium", value: "MEDIUM" },
-                      { label: "Long", value: "LONG" },
-                    ]}
-                    {...form.getInputProps("bumpLength")}
-                  />
-                </Box>
-                <Box>
-                  <Text fz="sm" fw={500} c="dimmed">
-                    DELAY DAYS:
-                  </Text>
-                  <NumberInput
-                    placeholder="Days to Wait"
-                    variant="filled"
-                    {...form.getInputProps("delayDays")}
-                  />
-                </Box>
-              </Group>
-              <Box mt='xs'>
-                <Text fz="sm" fw={500} c="dimmed">
-                  RAW PROMPT INSTRUCTIONS:
-                </Text>
-                <Textarea
-                  placeholder="Instructions"
-                  minRows={7}
-                  variant="filled"
-                  {...form.getInputProps("promptInstructions")}
-                />
-              </Box>
-              <Tabs
-              value={activeTab}
-              onTabChange={setActiveTab}
-              pt="sm"
-              variant="pills"
-              keepMounted={true}
-              radius="md"
-              allowTabDeactivation
-              sx={{ position: "relative" }}
-            >
-              <Tabs.List>
-                <Tooltip
-                  label="Account Research Required"
-                  disabled={form.values.useAccountResearch}
-                  openDelay={500}
-                  withArrow
+                <Tabs
+                  value={activeTab}
+                  onTabChange={setActiveTab}
+                  pt="sm"
+                  variant="pills"
+                  keepMounted={true}
+                  radius="md"
+                  allowTabDeactivation
+                  sx={{ position: "relative" }}
                 >
-                  <Tabs.Tab
-                    value="personalization"
-                    color="teal.5"
-                    rightSection={
-                      <>
-                        {personalizationItemsCount &&
-                          form.values.useAccountResearch ? (
-                          <Badge
-                            w={16}
-                            h={16}
-                            sx={{ pointerEvents: "none" }}
-                            variant="filled"
-                            size="xs"
-                            p={0}
-                            color="teal.6"
-                          >
-                            {personalizationItemsCount}
-                          </Badge>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    }
-                    disabled={!form.values.useAccountResearch}
-                    sx={(theme) => ({
-                      "&[data-active]": {
-                        backgroundColor: theme.colors.teal[0] + "!important",
-                        borderRadius: theme.radius.md + "!important",
-                        color: theme.colors.teal[8] + "!important",
-                      },
-                    })}
-                  >
-                    Personalization Settings
-                  </Tabs.Tab>
-                </Tooltip>
-              </Tabs.List>
-              <Box sx={{ position: "absolute", top: 20, right: 0 }}>
-                <Switch
-                  {...form.getInputProps("useAccountResearch", {
-                    type: "checkbox",
-                  })}
-                  color="teal"
-                  size="sm"
-                  label="Use Account Research"
-                  labelPosition="left"
-                />
-              </Box>
+                  <Tabs.List>
+                    <Tooltip
+                      label="Account Research Required"
+                      disabled={form.values.useAccountResearch}
+                      openDelay={500}
+                      withArrow
+                    >
+                      <Tabs.Tab
+                        value="personalization"
+                        color="teal.5"
+                        rightSection={
+                          <>
+                            {personalizationItemsCount &&
+                            form.values.useAccountResearch ? (
+                              <Badge
+                                w={16}
+                                h={16}
+                                sx={{ pointerEvents: "none" }}
+                                variant="filled"
+                                size="xs"
+                                p={0}
+                                color="teal.6"
+                              >
+                                {personalizationItemsCount}
+                              </Badge>
+                            ) : (
+                              <></>
+                            )}
+                          </>
+                        }
+                        disabled={!form.values.useAccountResearch}
+                        sx={(theme) => ({
+                          "&[data-active]": {
+                            backgroundColor:
+                              theme.colors.teal[0] + "!important",
+                            borderRadius: theme.radius.md + "!important",
+                            color: theme.colors.teal[8] + "!important",
+                          },
+                        })}
+                      >
+                        Personalization Settings
+                      </Tabs.Tab>
+                    </Tooltip>
+                  </Tabs.List>
+                  <Box sx={{ position: "absolute", top: 20, right: 0 }}>
+                    <Switch
+                      {...form.getInputProps("useAccountResearch", {
+                        type: "checkbox",
+                      })}
+                      color="teal"
+                      size="sm"
+                      label="Use Account Research"
+                      labelPosition="left"
+                    />
+                  </Box>
 
-              <Tabs.Panel value="personalization">
-                <PersonalizationSection
-                  blocklist={props.framework.transformer_blocklist}
-                  onItemsChange={async (items) => {
-                    setPersonalizationItemsCount(
-                      items.filter((x: any) => x.checked).length
-                    );
+                  <Tabs.Panel value="personalization">
+                    <PersonalizationSection
+                      blocklist={props.framework.transformer_blocklist}
+                      onItemsChange={async (items) => {
+                        setPersonalizationItemsCount(
+                          items.filter((x: any) => x.checked).length
+                        );
 
-                    // Update transformer blocklist
-                    const result = await patchBumpFramework(
-                      userToken,
-                      props.framework.id,
-                      props.framework.overall_status,
-                      props.framework.title,
-                      props.framework.description,
-                      props.framework.bump_length,
-                      props.framework.bumped_count,
-                      props.framework.bump_delay_days,
-                      props.framework.default,
-                      props.framework.use_account_research,
-                      items.filter((x) => !x.checked).map((x) => x.id),
-                      props.framework.additional_context,
-                      props.framework.bump_framework_template_name,
-                      props.framework.bump_framework_human_readable_prompt,
-                    );
-                  }}
-                />
-              </Tabs.Panel>
-            </Tabs>
-            </Card>
-          </Collapse>
-          <Group mb={5}>
-            <Button onClick={toggle} w='100%' color='black' variant='outline' leftIcon={<IconTools size={'0.8rem'} />}>
-              {opened ? 'Hide' : 'Show'} Advanced Settings
-            </Button>
-          </Group>
-        </Box>
-
-          
+                        // Update transformer blocklist
+                        const result = await patchBumpFramework(
+                          userToken,
+                          props.framework.id,
+                          props.framework.overall_status,
+                          props.framework.title,
+                          props.framework.description,
+                          props.framework.bump_length,
+                          props.framework.bumped_count,
+                          props.framework.bump_delay_days,
+                          props.framework.default,
+                          props.framework.use_account_research,
+                          items.filter((x) => !x.checked).map((x) => x.id),
+                          props.framework.additional_context,
+                          props.framework.bump_framework_template_name,
+                          props.framework.bump_framework_human_readable_prompt
+                        );
+                      }}
+                    />
+                  </Tabs.Panel>
+                </Tabs>
+              </Card>
+            </Collapse>
+            <Group mb={5}>
+              <Button
+                onClick={toggle}
+                w="100%"
+                color="black"
+                variant="outline"
+                leftIcon={<IconTools size={"0.8rem"} />}
+              >
+                {opened ? "Hide" : "Show"} Advanced Settings
+              </Button>
+            </Group>
+          </Box>
         </form>
       </Stack>
     </Stack>
@@ -1953,6 +2102,15 @@ const PersonalizationSection = (props: {
 
   return (
     <Flex direction="column" pt="md">
+      <Card shadow="xs" radius={"md"} mb={"1rem"}>
+        <Flex direction={"column"} gap={"0.5rem"}>
+          <ProcessBar title="Linkedin Bio" percent={58} />
+          <ProcessBar title="Years of experience" percent={48} />
+          <ProcessBar title="Current Experience" percent={32} />
+          <ProcessBar title="LinkedIn Bio" percent={26} color="grape" />
+        </Flex>
+      </Card>
+
       <PersonalizationCard
         title="Prospect-Based"
         items={prospectItems}
@@ -1963,31 +2121,66 @@ const PersonalizationSection = (props: {
         title="Company-Based"
         items={companyItems}
         onPressItem={setAccountChecked}
+        isPurple
       />
+    </Flex>
+  );
+};
+
+const ProcessBar: React.FC<{
+  title: string;
+  percent: number;
+  color?: string;
+}> = ({ title, percent, color = "green" }) => {
+  return (
+    <Flex align={"center"} gap={"0.5rem"}>
+      <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
+        <Text fz={"0.75rem"}>{title}</Text>
+        <Flex sx={{ flex: 1 }}>
+          <Divider w={"100%"} color={"#E9ECEF"} />
+        </Flex>
+        <Button
+          variant={"light"}
+          fw={700}
+          size="xs"
+          color={color}
+          radius="xl"
+          h="auto"
+          fz={"0.625rem"}
+          py={"0.125rem"}
+          px={"0.25rem"}
+        >
+          {percent}%
+        </Button>
+      </Flex>
+      <Flex direction={"column"} sx={{ flex: 6 }}>
+        <Progress value={percent} color={color} size={"lg"} radius="xl" />
+      </Flex>
     </Flex>
   );
 };
 
 export const PersonalizationCard: React.FC<{
   title: string;
+  isPurple?: boolean;
   items: { title: string; checked: boolean; disabled: boolean }[];
   onPressItem: (
     item: { title: string; checked: boolean; disabled: boolean },
     checked: boolean
   ) => void;
-}> = ({ title, items, onPressItem }) => {
+}> = ({ title, isPurple, items, onPressItem }) => {
   return (
     <Card shadow="xs" radius={"md"} mb={"1rem"}>
       <Card.Section>
         <Flex
           align={"center"}
           justify={"space-between"}
-          bg={"teal.0"}
+          bg={`${isPurple ? 'grape' : 'teal'}.0`}
           py={"0.5rem"}
           px={"1rem"}
           gap={"0.5rem"}
         >
-          <Text fw={"400"} fz="xs" color={"teal.8"}>
+          <Text fw={"400"} fz="xs" color={"${isPurple ? 'grape' : 'teal'}.8"}>
             {title}
           </Text>
         </Flex>
@@ -2005,7 +2198,7 @@ export const PersonalizationCard: React.FC<{
                   onChange={(event) =>
                     onPressItem(item, event.currentTarget.checked)
                   }
-                  color="teal"
+                  color={`${isPurple ? 'grape' : 'teal'}`}
                   variant="outline"
                 />
               </Flex>
@@ -2017,7 +2210,10 @@ export const PersonalizationCard: React.FC<{
   );
 };
 
-const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void, outlineCTA?: string }) => {
+const CtaSection = (props: {
+  onCTAsLoaded: (ctas: CTA[]) => void;
+  outlineCTA?: string;
+}) => {
   const theme = useMantineTheme();
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
@@ -2098,7 +2294,7 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void, outlineCTA?: s
                 },
                 {
                   label: e.cta_type,
-                  highlight: '',
+                  highlight: "",
                   color: valueToColor(theme, e.cta_type),
                   variant: "light",
                 },
@@ -2124,11 +2320,12 @@ const CtaSection = (props: { onCTAsLoaded: (ctas: CTA[]) => void, outlineCTA?: s
           />
         ))}
 
-      <Button sx={{
-        position: 'absolute',
-        top: -25,
-        right: 5,
-      }}
+      <Button
+        sx={{
+          position: "absolute",
+          top: -25,
+          right: 5,
+        }}
         variant={"filled"}
         size="sm"
         compact
@@ -2156,7 +2353,7 @@ interface Tag {
   label: string;
   highlight?: string;
   color: MantineColor;
-  variant: "subtle" | "filled" | 'light';
+  variant: "subtle" | "filled" | "light";
 }
 
 interface TabOption {
@@ -2174,7 +2371,17 @@ const CTAOption: React.FC<{
   onClickEdit: () => void;
 }> = ({ data, onToggle, onClickEdit }) => {
   return (
-    <Card shadow="xs" radius={"md"} py={10} mb={5} sx={(theme) => ({ border: data.outlined ? '1px solid ' + theme.colors.blue[4] : '1px solid transparent' })}>
+    <Card
+      shadow="xs"
+      radius={"md"}
+      py={10}
+      mb={5}
+      sx={(theme) => ({
+        border: data.outlined
+          ? "1px solid " + theme.colors.blue[4]
+          : "1px solid transparent",
+      })}
+    >
       <Flex direction={"column"} w={"100%"}>
         <Flex gap={"0.5rem"} mb={"0.75rem"} justify={"space-between"}>
           <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>

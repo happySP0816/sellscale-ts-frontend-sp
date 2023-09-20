@@ -5,9 +5,17 @@ import { isLoggedIn } from "@auth/core";
 import PageFrame from "@common/PageFrame";
 import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
 import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
-import EmojiPicker from 'emoji-picker-react';
-import { IconChevronsUp, IconChevronsDown, IconChartDots3, IconList, IconAlarm, IconAlertCircle, IconRobot, IconMessage } from '@tabler/icons-react';
-
+import EmojiPicker from "emoji-picker-react";
+import {
+  IconChevronsUp,
+  IconChevronsDown,
+  IconChartDots3,
+  IconList,
+  IconAlarm,
+  IconAlertCircle,
+  IconRobot,
+  IconMessage,
+} from "@tabler/icons-react";
 
 import {
   Stack,
@@ -35,7 +43,7 @@ import {
   Flex,
   Card,
 } from "@mantine/core";
-import { useDisclosure, useHover } from '@mantine/hooks';
+import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
 import {
   IconAdjustments,
@@ -53,7 +61,16 @@ import {
   IconSend,
   IconX,
 } from "@tabler/icons";
-import { IconArrowDown, IconArrowUp, IconChecklist, IconClipboard, IconFilter, IconLayoutNavbarCollapse, IconMessageCheck, IconRecordMail } from "@tabler/icons-react";
+import {
+  IconArrowDown,
+  IconArrowUp,
+  IconChecklist,
+  IconClipboard,
+  IconFilter,
+  IconLayoutNavbarCollapse,
+  IconMessageCheck,
+  IconRecordMail,
+} from "@tabler/icons-react";
 import { navigateToPage } from "@utils/documentChange";
 import {
   convertDateToLocalTime,
@@ -63,20 +80,24 @@ import {
 } from "@utils/general";
 import { getSDRGeneralInfo } from "@utils/requests/getClientSDR";
 import getPersonas, {
+  getPersonasActivity,
   getPersonasCampaignView,
   getPersonasOverview,
 } from "@utils/requests/getPersonas";
 import _, { set } from "lodash";
-import moment from 'moment';
+import moment from "moment";
 import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { PersonaOverview } from "src";
-import { API_URL } from '@constants/data';
-import ComingSoonCard from '@common/library/ComingSoonCard';
-import CampaignGraph from './campaigngraph';
-import { showNotification } from '@mantine/notifications';
-import { CampaignAnalyticChart, CampaignAnalyticsData } from "./CampaignAnalytics";
+import { API_URL } from "@constants/data";
+import ComingSoonCard from "@common/library/ComingSoonCard";
+import CampaignGraph from "./campaigngraph";
+import { showNotification } from "@mantine/notifications";
+import { CampaignAnalyticsData } from "./CampaignAnalytics";
+// import { CampaignAnalyticChart } from "./CampaignAnalyticsV2";
+import OverallPipeline from "./OverallPipeline";
+import { TodayActivityData } from "./OverallPipeline/TodayActivity";
 
 export type CampaignPersona = {
   id: number;
@@ -107,22 +128,33 @@ export default function PersonaCampaigns() {
     personas.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const [campaignAnalyticData, setCampaignAnalyticData] = useState<CampaignAnalyticsData>({
-    sentOutreach: 0,
-    accepted: 0,
-    activeConvos: 0,
-    demos: 0,
-  })
+  const [campaignAnalyticData, setCampaignAnalyticData] =
+    useState<CampaignAnalyticsData>({
+      sentOutreach: 0,
+      accepted: 0,
+      activeConvos: 0,
+      demos: 0,
+    });
+  const [aiActivityData, setAiActivityData] = useState<TodayActivityData>({
+    totalActivity: 0,
+    newOutreach: 0,
+    newBumps: 0,
+    newReplies: 0,
+  });
   const [currentLinkedInSLA, setCurrentLinkedInSLA] = useState<number>(0);
 
   let [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
 
-  const [campaignViewMode, setCampaignViewMode] = useState<'node-view' | 'list-view'>('node-view');
+  const [campaignViewMode, setCampaignViewMode] = useState<
+    "node-view" | "list-view"
+  >("node-view");
 
   useEffect(() => {
     (async () => {
       if (!isLoggedIn()) return;
       setLoadingPersonas(true);
+
+      // Get Personas Campaign View
       const response = await getPersonasCampaignView(userToken);
       const result =
         response.status === "success"
@@ -131,16 +163,16 @@ export default function PersonaCampaigns() {
 
       // Aggregate campaign analytics
       let analytics = {
-        "sentOutreach": 0,
-        "accepted": 0,
-        "activeConvos": 0,
-        "demos": 0,
-      }
+        sentOutreach: 0,
+        accepted: 0,
+        activeConvos: 0,
+        demos: 0,
+      };
       for (const campaign of response.data) {
-        analytics.sentOutreach += campaign.li_sent
-        analytics.accepted += campaign.li_opened
-        analytics.activeConvos += campaign.li_replied
-        analytics.demos += campaign.li_demo
+        analytics.sentOutreach += campaign.li_sent;
+        analytics.accepted += campaign.li_opened;
+        analytics.activeConvos += campaign.li_replied;
+        analytics.demos += campaign.li_demo;
       }
       setCampaignAnalyticData(analytics);
 
@@ -157,12 +189,30 @@ export default function PersonaCampaigns() {
       setPersonas(result);
       setLoadingPersonas(false);
 
+      // Get Personas Overview
       const response2 = await getPersonasOverview(userToken);
       const result2 =
         response2.status === "success"
           ? (response2.data as PersonaOverview[])
           : [];
       setProjects(result2);
+
+      // Get AI Activity
+      const response3 = await getPersonasActivity(userToken);
+      const result3 = response3.status === "success" ? response3.data : [];
+      if (result3.activities && result3.activities.length > 0) {
+        const newOutreach = result3.activities[0].messages_sent;
+        const newBumps = result3.activities[0].bumps_sent;
+        const newReplies = result3.activities[0].replies_sent;
+        const totalActivity = newOutreach + newBumps + newReplies;
+        const activity_data = {
+          totalActivity: totalActivity,
+          newOutreach: newOutreach,
+          newBumps: newBumps,
+          newReplies: newReplies,
+        }
+        setAiActivityData(activity_data)
+      }
     })();
   }, []);
 
@@ -196,34 +246,27 @@ export default function PersonaCampaigns() {
         </Group>
         <Tabs defaultValue="overview">
           <Tabs.List>
-            <Tabs.Tab value="overview" icon={<IconClipboard size='0.8rem' />}>Overview</Tabs.Tab>
-            <Tabs.Tab value="linkedin" icon={<IconBrandLinkedin size='0.8rem' />}>Queued LinkedIns</Tabs.Tab>
-            <Tabs.Tab value="email" icon={<IconMail size='0.8rem' />}>Queued Emails</Tabs.Tab>
+            <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />}>
+              Overview
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="linkedin"
+              icon={<IconBrandLinkedin size="0.8rem" />}
+            >
+              Queued LinkedIns
+            </Tabs.Tab>
+            <Tabs.Tab value="email" icon={<IconMail size="0.8rem" />}>
+              Queued Emails
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="overview" pt="xs">
             <Stack>
-              <Flex direction='row'>
-                <Flex w='70%'>
-                  <CampaignAnalyticChart data={campaignAnalyticData} />
-                </Flex>
-                <Flex w='30%'>
-                  <Card withBorder ml='md' w='100%'>
-                    <Title order={5}>Today's Activity</Title>
-                    <Flex direction='row' align='center' mt='md'>
-                      <IconSend size='1.1rem' />
-                      <Text ml='6px'>Invitations / Messages Sent: 32</Text>
-                    </Flex>
-                    <Flex direction='row' align='center' mt='md'>
-                      <IconMessage size='1.1rem' />
-                      <Text ml='6px'>Bumps Sent: 64</Text>
-                    </Flex>
-                    <Flex direction='row' align='center' mt='md'>
-                      <IconRobot size='1.1rem' />
-                      <Text ml='6px'>AI Replies: 3</Text>
-                    </Flex>
-                  </Card>
-                </Flex>
+              <Flex direction="row">
+                <OverallPipeline
+                  campaignData={campaignAnalyticData}
+                  aiActivityData={aiActivityData}
+                />
               </Flex>
               <Group position="apart">
                 <Group>
@@ -269,34 +312,36 @@ export default function PersonaCampaigns() {
                   </Button> */}
                 </Group>
 
-                {userData?.warmup_linkedin_complete ?
-                  (
+                {userData?.warmup_linkedin_complete ? (
+                  <Button
+                    variant="filled"
+                    radius="md"
+                    onClick={() => {
+                      navigateToPage(navigate, `/settings/linkedinConnection`);
+                    }}
+                  >
+                    {`LinkedIn Send Rate (per week): ${currentLinkedInSLA}`}
+                  </Button>
+                ) : (
+                  <Tooltip
+                    label="Your LinkedIn account is in a warmup phase. Explore more."
+                    withArrow
+                    withinPortal
+                  >
                     <Button
-                      variant='filled'
-                      radius='md'
+                      variant="outline"
+                      radius="md"
                       onClick={() => {
-                        navigateToPage(navigate, `/settings/linkedinConnection`);
+                        navigateToPage(
+                          navigate,
+                          `/settings/linkedinConnection`
+                        );
                       }}
                     >
-                      {`LinkedIn Send Rate (per week): ${currentLinkedInSLA}`}
+                      {`LinkedIn Warming Up (per week): ${currentLinkedInSLA}`}
                     </Button>
-                  ) : (
-                    <Tooltip
-                      label="Your LinkedIn account is in a warmup phase. Explore more."
-                      withArrow
-                      withinPortal
-                    >
-                      <Button
-                        variant='outline'
-                        radius='md'
-                        onClick={() => {
-                          navigateToPage(navigate, `/settings/linkedinConnection`);
-                        }}
-                      >
-                        {`LinkedIn Warming Up (per week): ${currentLinkedInSLA}`}
-                      </Button>
-                    </Tooltip>
-                  )}
+                  </Tooltip>
+                )}
 
                 {/* <Box>
                   <Button.Group>
@@ -356,51 +401,62 @@ export default function PersonaCampaigns() {
 
                 </Box> */}
               </Group>
-              <ScrollArea h={'78vh'}>
+              <ScrollArea h={"78vh"}>
                 <Stack>
-                  {
-                    loadingPersonas && (
-                      <Center h={200}>
-                        <Loader />
-                      </Center>
-                    )
-                  }
-                  {
-                    filteredProjects.filter((persona) => persona.active).length > 1 &&
-                    <Alert
-                      sx={{
-                        borderRadius: 'md',
-                        border: 'solid 1px red',
-                      }}
-                      color='red'
-                      title='Multiple Active Personas'
-                      children='You have multiple active personas. This is not recommended as it will cause your campaigns to compete with each other. We recommend you deactivate all but one persona.'
-                      icon={<IconAlertCircle size='1rem' />}
-                    />
-                  }
-                  {!loadingPersonas && filteredProjects.filter((persona) => persona.active).map((persona, index) => (
-                    <PersonCampaignCard
-                      key={index}
-                      persona={persona}
-                      project={projects.find(
-                        (project) => project.id == persona.id
-                      )}
-                      viewMode={campaignViewMode}
-                    />
-                  ))}
+                  {loadingPersonas && (
+                    <Center h={200}>
+                      <Loader />
+                    </Center>
+                  )}
+                  {filteredProjects.filter((persona) => persona.active).length >
+                    1 && (
+                      <Alert
+                        sx={{
+                          borderRadius: "md",
+                          border: "solid 1px red",
+                        }}
+                        color="red"
+                        title="Multiple Active Personas"
+                        children="You have multiple active personas. This is not recommended as it will cause your campaigns to compete with each other. We recommend you deactivate all but one persona."
+                        icon={<IconAlertCircle size="1rem" />}
+                      />
+                    )}
+                  {!loadingPersonas &&
+                    filteredProjects
+                      .filter((persona) => persona.active)
+                      .map((persona, index) => (
+                        <PersonCampaignCard
+                          key={index}
+                          persona={persona}
+                          project={projects.find(
+                            (project) => project.id == persona.id
+                          )}
+                          viewMode={campaignViewMode}
+                        />
+                      ))}
 
-                  {filteredProjects.filter((persona) => !persona.active).length > 0 && <Divider label="Inactive Personas" labelPosition='center' color='gray' />}
+                  {filteredProjects.filter((persona) => !persona.active)
+                    .length > 0 && (
+                      <Divider
+                        label="Inactive Personas"
+                        labelPosition="center"
+                        color="gray"
+                      />
+                    )}
 
-                  {!loadingPersonas && filteredProjects.filter((persona) => !persona.active).map((persona, index) => (
-                    <PersonCampaignCard
-                      key={index}
-                      persona={persona}
-                      project={projects.find(
-                        (project) => project.id == persona.id
-                      )}
-                      viewMode={campaignViewMode}
-                    />
-                  ))}
+                  {!loadingPersonas &&
+                    filteredProjects
+                      .filter((persona) => !persona.active)
+                      .map((persona, index) => (
+                        <PersonCampaignCard
+                          key={index}
+                          persona={persona}
+                          project={projects.find(
+                            (project) => project.id == persona.id
+                          )}
+                          viewMode={campaignViewMode}
+                        />
+                      ))}
 
                   {!loadingPersonas && filteredProjects.length === 0 && (
                     <Center h={200}>
@@ -445,7 +501,7 @@ type ChannelSection = {
 function PersonCampaignCard(props: {
   persona: CampaignPersona;
   project?: PersonaOverview;
-  viewMode: 'node-view' | 'list-view';
+  viewMode: "node-view" | "list-view";
 }) {
   const navigate = useNavigate();
   const [currentProject, setCurrentProject] =
@@ -455,13 +511,14 @@ function PersonCampaignCard(props: {
   );
   const [opened, { toggle }] = useDisclosure(props.persona.active);
   const [inactiveChannelsOpened, setInactiveChannelsOpened] = useState(false);
-  const [emoji, setEmojiState] = useState<string>(props.persona.emoji || '⬜️');
+  const [emoji, setEmojiState] = useState<string>(props.persona.emoji || "⬜️");
   const { hovered, ref } = useHover();
 
   const userToken = useRecoilValue(userTokenState);
 
-  const [personaActive, setPersonaActive] = useState<boolean>(props.persona.active);
-
+  const [personaActive, setPersonaActive] = useState<boolean>(
+    props.persona.active
+  );
 
   const userData = useRecoilValue(userDataState);
 
@@ -477,8 +534,8 @@ function PersonCampaignCard(props: {
         persona_id: props.persona.id,
         emoji: emoji,
       }),
-    })
-  }
+    });
+  };
 
   const types: ChannelSection[] = [
     {
@@ -515,23 +572,38 @@ function PersonCampaignCard(props: {
 
   return (
     <Paper radius="md" ref={ref}>
-      <Stack spacing={0} sx={{ opacity: props.persona.active || hovered ? 1 : 0.6, cursor: 'pointer' }} >
+      <Stack
+        spacing={0}
+        sx={{
+          opacity: props.persona.active || hovered ? 1 : 0.6,
+          cursor: "pointer",
+        }}
+      >
         <Group
           // position="apart"
           sx={(theme) => ({
-            backgroundColor: props.persona.active ? theme.colors.blue[6] : 'white',
+            backgroundColor: props.persona.active
+              ? theme.colors.blue[6]
+              : "white",
             borderRadius: "0.5rem 0.5rem 0 0",
-            border: 'solid 1px ' + theme.colors.gray[2],
+            border: "solid 1px " + theme.colors.gray[2],
           })}
-          p={props.persona.active ? "xs" : '4px'}
-          pl='xs'
-          pr='xs'
+          p={props.persona.active ? "xs" : "4px"}
+          pl="xs"
+          pr="xs"
         >
-          <Box sx={{ flexDirection: 'row', display: 'flex' }} w='46%'>
-            <Group w='500'>
+          <Box sx={{ flexDirection: "row", display: "flex" }} w="46%">
+            <Group w="500">
               <Popover position="bottom" withArrow shadow="md">
                 <Popover.Target>
-                  <Button variant="outline" color={props.persona.active ? 'blue' : 'gray'} radius="xl" size="lg" compact sx={{ backgroundColor: '#ffffff22' }}>
+                  <Button
+                    variant="outline"
+                    color={props.persona.active ? "blue" : "gray"}
+                    radius="xl"
+                    size="lg"
+                    compact
+                    sx={{ backgroundColor: "#ffffff22" }}
+                  >
                     {emoji}
                   </Button>
                 </Popover.Target>
@@ -545,33 +617,42 @@ function PersonCampaignCard(props: {
                 </Popover.Dropdown>
               </Popover>
 
-              <Title order={5} c={props.persona.active ? 'white' : 'gray'}>
+              <Title order={5} c={props.persona.active ? "white" : "gray"}>
                 {_.truncate(props.persona.name, { length: 48 })}
               </Title>
             </Group>
           </Box>
 
-          <Box w='25%'>
+          <Box w="25%">
             <Button
-              variant='subtle'
+              variant="subtle"
               onClick={toggle}
-              sx={{ borderRadius: 100, backgroundColor: '#ffffff44' }}
+              sx={{ borderRadius: 100, backgroundColor: "#ffffff44" }}
             >
-              {opened ? (<IconChevronsUp size="1.5rem" color={props.persona.active ? 'white' : 'blue'} />) : <IconChevronsDown size="1.5rem" color={props.persona.active ? 'white' : 'gray'} />}
-
+              {opened ? (
+                <IconChevronsUp
+                  size="1.5rem"
+                  color={props.persona.active ? "white" : "blue"}
+                />
+              ) : (
+                <IconChevronsDown
+                  size="1.5rem"
+                  color={props.persona.active ? "white" : "gray"}
+                />
+              )}
             </Button>
           </Box>
 
-          <Group w='200'>
+          <Group w="200">
             <Button
               radius="xl"
               size="xs"
               variant="outline"
               compact
-              color={props.persona.active ? 'white' : 'gray'}
+              color={props.persona.active ? "white" : "gray"}
               sx={(theme) => ({
-                borderColor: props.persona.active ? 'white' : 'gray',
-                color: props.persona.active ? 'white' : 'gray',
+                borderColor: props.persona.active ? "white" : "gray",
+                color: props.persona.active ? "white" : "gray",
               })}
               onClick={() => {
                 if (props.project == undefined) return;
@@ -579,7 +660,7 @@ function PersonCampaignCard(props: {
                 setCurrentProject(props.project);
                 navigateToPage(navigate, `/prioritize`);
               }}
-              leftIcon={<IconFilter size={'0.7rem'} />}
+              leftIcon={<IconFilter size={"0.7rem"} />}
             >
               Filter Contacts
             </Button>
@@ -589,7 +670,9 @@ function PersonCampaignCard(props: {
               size="xs"
               compact
               sx={(theme) => ({
-                backgroundColor: props.persona.active ? theme.colors.blue[5] : 'gray',
+                backgroundColor: props.persona.active
+                  ? theme.colors.blue[5]
+                  : "gray",
                 //color: theme.colors.blue[2],
               })}
               onClick={() => {
@@ -605,13 +688,22 @@ function PersonCampaignCard(props: {
             <Tooltip
               withArrow
               position="bottom"
-              label={personaActive ? "Click to disable this campaign on settings page" : "Click to enable this campaign on settings page"}>
+              label={
+                personaActive
+                  ? "Click to disable this campaign on settings page"
+                  : "Click to enable this campaign on settings page"
+              }
+            >
               <span>
                 <Switch
                   onLabel="Active"
                   offLabel="Inactive"
-                  color='blue'
-                  sx={{ border: 'solid 1px white', borderRadius: '20px', cursor: 'pointer' }}
+                  color="blue"
+                  sx={{
+                    border: "solid 1px white",
+                    borderRadius: "20px",
+                    cursor: "pointer",
+                  }}
                   checked={personaActive}
                   onChange={(event) => {
                     setPersonaActive(event.currentTarget.checked);
@@ -623,10 +715,11 @@ function PersonCampaignCard(props: {
                     navigateToPage(navigate, `/persona/settings`);
 
                     showNotification({
-                      title: 'Activate / Deactive Campaign from Settings',
-                      message: 'You can activate & deactivate this persona from the settings page.',
-                      color: 'blue',
-                      icon: <IconAdjustmentsHorizontal size='1rem' />,
+                      title: "Activate / Deactive Campaign from Settings",
+                      message:
+                        "You can activate & deactivate this persona from the settings page.",
+                      color: "blue",
+                      icon: <IconAdjustmentsHorizontal size="1rem" />,
                       autoClose: 3000,
                     });
                   }}
@@ -636,75 +729,114 @@ function PersonCampaignCard(props: {
           </Group>
         </Group>
         <Collapse in={opened}>
-          {props.viewMode === 'node-view' && <Box>
-            <CampaignGraph sections={types} onChannelClick={(sectionType: string) => {
-              if (props.project == undefined) return;
-              setOpenedProspectId(-1);
-              setCurrentProject(props.project);
-              navigateToPage(navigate, `/setup/${sectionType.toLowerCase()}`);
-            }} />
-          </Box>}
-          {props.viewMode === 'list-view' && <Box>
-            {types.map((section, index) => {
-              if (!section.active && props.persona.active) return null;
-
-              return <Box key={index}>
-                {index > 0 && <Divider />}
-                <PersonCampaignCardSection section={section} onClick={() => {
+          {props.viewMode === "node-view" && (
+            <Box>
+              <CampaignGraph
+                sections={types}
+                onChannelClick={(sectionType: string) => {
                   if (props.project == undefined) return;
                   setOpenedProspectId(-1);
                   setCurrentProject(props.project);
-                  navigateToPage(navigate, `/setup/${section.type.toLowerCase()}`);
-                }} />
-              </Box>
-            })}
-            {
-              props.persona.active && (
+                  navigateToPage(
+                    navigate,
+                    `/setup/${sectionType.toLowerCase()}`
+                  );
+                }}
+              />
+            </Box>
+          )}
+          {props.viewMode === "list-view" && (
+            <Box>
+              {types.map((section, index) => {
+                if (!section.active && props.persona.active) return null;
+
+                return (
+                  <Box key={index}>
+                    {index > 0 && <Divider />}
+                    <PersonCampaignCardSection
+                      section={section}
+                      onClick={() => {
+                        if (props.project == undefined) return;
+                        setOpenedProspectId(-1);
+                        setCurrentProject(props.project);
+                        navigateToPage(
+                          navigate,
+                          `/setup/${section.type.toLowerCase()}`
+                        );
+                      }}
+                    />
+                  </Box>
+                );
+              })}
+              {props.persona.active && (
                 <>
                   <Collapse in={inactiveChannelsOpened}>
                     {types.map((section, index) => {
                       if (section.active) return null;
 
-                      return <Box key={index}>
-                        {index > 0 && <Divider />}
-                        <PersonCampaignCardSection section={section} onClick={() => {
-                          if (props.project == undefined) return;
-                          setOpenedProspectId(-1);
-                          setCurrentProject(props.project);
-                          navigateToPage(navigate, `/setup/${section.type.toLowerCase()}`);
-                        }} />
-                      </Box>
+                      return (
+                        <Box key={index}>
+                          {index > 0 && <Divider />}
+                          <PersonCampaignCardSection
+                            section={section}
+                            onClick={() => {
+                              if (props.project == undefined) return;
+                              setOpenedProspectId(-1);
+                              setCurrentProject(props.project);
+                              navigateToPage(
+                                navigate,
+                                `/setup/${section.type.toLowerCase()}`
+                              );
+                            }}
+                          />
+                        </Box>
+                      );
                     })}
                   </Collapse>
                   <Divider />
                   <Button
-                    w='100%'
-                    variant='subtle'
-                    size='xs'
-                    color='gray'
-                    onClick={() => setInactiveChannelsOpened(!inactiveChannelsOpened)}
-                    leftIcon={inactiveChannelsOpened ? <IconArrowUp size="0.7rem" /> : <IconArrowDown size="0.7rem" />}
+                    w="100%"
+                    variant="subtle"
+                    size="xs"
+                    color="gray"
+                    onClick={() =>
+                      setInactiveChannelsOpened(!inactiveChannelsOpened)
+                    }
+                    leftIcon={
+                      inactiveChannelsOpened ? (
+                        <IconArrowUp size="0.7rem" />
+                      ) : (
+                        <IconArrowDown size="0.7rem" />
+                      )
+                    }
                   >
-                    {inactiveChannelsOpened ? 'Hide' : 'Show'} {types.filter(x => !x.active).length} Inactive Channel{types.filter(x => !x.active).length > 1 ? 's' : ''}
+                    {inactiveChannelsOpened ? "Hide" : "Show"}{" "}
+                    {types.filter((x) => !x.active).length} Inactive Channel
+                    {types.filter((x) => !x.active).length > 1 ? "s" : ""}
                   </Button>
-
                 </>
-              )
-            }
-          </Box>}
+              )}
+            </Box>
+          )}
         </Collapse>
       </Stack>
     </Paper>
   );
 }
 
-function PersonCampaignCardSection(props: { section: ChannelSection, onClick?: () => void }) {
+function PersonCampaignCardSection(props: {
+  section: ChannelSection;
+  onClick?: () => void;
+}) {
   const theme = useMantineTheme();
   const [checked, setChecked] = useState(props.section.active);
 
   return (
     <>
-      <Group position="apart" p="xs" spacing={0}
+      <Group
+        position="apart"
+        p="xs"
+        spacing={0}
         onClick={props.onClick}
         sx={{
           cursor: "pointer",
@@ -721,18 +853,21 @@ function PersonCampaignCardSection(props: { section: ChannelSection, onClick?: (
 
         <Box sx={{ flexBasis: "30%" }}>
           <Group>
-            <Text fz="xs" color='gray' w='90px'>
-              <IconSend size="0.8rem" /> Sent: <span style={{ color: 'black' }}>{props.section.sends}</span>
+            <Text fz="xs" color="gray" w="90px">
+              <IconSend size="0.8rem" /> Sent:{" "}
+              <span style={{ color: "black" }}>{props.section.sends}</span>
             </Text>
-            <Text fz="xs" color='gray' w='90px'>
-              <IconChecks size="0.8rem" /> Opens: <span style={{ color: 'black' }}>{props.section.opens}</span>
+            <Text fz="xs" color="gray" w="90px">
+              <IconChecks size="0.8rem" /> Opens:{" "}
+              <span style={{ color: "black" }}>{props.section.opens}</span>
             </Text>
-            <Text fz="xs" color='gray' w='90px'>
-              <IconMessageCheck size="0.8rem" /> Replies: <span style={{ color: 'black' }}>{props.section.replies}</span>
+            <Text fz="xs" color="gray" w="90px">
+              <IconMessageCheck size="0.8rem" /> Replies:{" "}
+              <span style={{ color: "black" }}>{props.section.replies}</span>
             </Text>
           </Group>
         </Box>
-        <Box sx={{ flexBasis: "20%", color: 'gray' }}>
+        <Box sx={{ flexBasis: "20%", color: "gray" }}>
           <Text fz="xs" span>
             <IconCalendar size="0.8rem" />{" "}
             {convertDateToShortFormatWithoutTime(new Date(props.section.date))}

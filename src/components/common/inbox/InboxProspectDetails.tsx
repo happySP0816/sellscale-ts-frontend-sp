@@ -419,8 +419,8 @@ export default function ProjectDetails(props: {
                 <Center>
                   <Group
                     mb="xs"
-                    mx="xs"
-                    sx={{ justifyContent: "space-evenly" }}
+                    mx="xl"
+                    sx={{ justifyContent: "center" }}
                   >
                     <StatusBlockButton
                       title="Snooze"

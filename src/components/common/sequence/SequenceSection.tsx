@@ -181,27 +181,27 @@ export default function SequenceSection() {
   const bf1Delay = useRef(bf1?.bump_delay_days ?? 2);
   const bf2Delay = useRef(bf2?.bump_delay_days ?? 2);
 
-  // TODO: What we should actually use
-  // let bf0Conversion =
-  //   bf0 && bf0?.etl_num_times_converted && bf0?.etl_num_times_used
-  //     ? (bf0.etl_num_times_converted / bf0.etl_num_times_used) * 100
-  //     : undefined;
-  // let bf1Conversion =
-  //   bf1 && bf1?.etl_num_times_converted && bf1?.etl_num_times_used
-  //     ? (bf1.etl_num_times_converted / bf1.etl_num_times_used) * 100
-  //     : undefined;
-  // let bf2Conversion =
-  //   bf2 && bf2?.etl_num_times_converted && bf2?.etl_num_times_used
-  //     ? (bf2.etl_num_times_converted / bf2.etl_num_times_used) * 100
-  //     : undefined;
-  // let bf3Conversion =
-  //   bf3 && bf3?.etl_num_times_converted && bf3?.etl_num_times_used
-  //     ? (bf3.etl_num_times_converted / bf3.etl_num_times_used) * 100
-  //     : undefined;
-  const bf0Conversion = replyRate * 0.5;
-  const bf1Conversion = replyRate * 0.3;
-  const bf2Conversion = replyRate * 0.2;
-  const bf3Conversion = replyRate * 0.1;
+  let bf0Conversion =
+    bf0 && bf0?.etl_num_times_converted && bf0?.etl_num_times_used
+      ? (bf0.etl_num_times_converted / bf0.etl_num_times_used) * 100
+      : undefined;
+  let bf1Conversion =
+    bf1 && bf1?.etl_num_times_converted && bf1?.etl_num_times_used
+      ? (bf1.etl_num_times_converted / bf1.etl_num_times_used) * 100
+      : undefined;
+  let bf2Conversion =
+    bf2 && bf2?.etl_num_times_converted && bf2?.etl_num_times_used
+      ? (bf2.etl_num_times_converted / bf2.etl_num_times_used) * 100
+      : undefined;
+  let bf3Conversion =
+    bf3 && bf3?.etl_num_times_converted && bf3?.etl_num_times_used
+      ? (bf3.etl_num_times_converted / bf3.etl_num_times_used) * 100
+      : undefined;
+  // const bf0Conversion = replyRate * 0.5;
+  // const bf1Conversion = replyRate * 0.3;
+  // const bf2Conversion = replyRate * 0.2;
+  // const bf3Conversion = replyRate * 0.1;
+
   const closeModal = () => {
     setIsModalBlockerVisible(false);
     if (blocker && blocker.reset) {
@@ -333,6 +333,11 @@ export default function SequenceSection() {
                     ? `Reply ${bf0Conversion.toFixed(0)}%`
                     : undefined
                 }
+                badgeHoverText={
+                  bf0 && bf0Conversion
+                    ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
+                    : undefined
+                }
                 bodyTitle={bf0?.title ?? ""}
                 // bodyText={bf0?.description ?? ""}
                 footer={
@@ -389,6 +394,11 @@ export default function SequenceSection() {
                 badgeText={
                   bf1Conversion
                     ? `Reply ${bf1Conversion.toFixed(0)}%`
+                    : undefined
+                }
+                badgeHoverText={
+                  bf1 && bf1Conversion
+                    ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
                     : undefined
                 }
                 bodyTitle={bf1?.title ?? ""}
@@ -449,6 +459,11 @@ export default function SequenceSection() {
                     ? `Reply ${bf2Conversion.toFixed(0)}%`
                     : undefined
                 }
+                badgeHoverText={
+                  bf2 && bf2Conversion
+                    ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
+                    : undefined
+                }
                 bodyTitle={bf2?.title ?? ""}
                 // bodyText={bf2?.description ?? ""}
                 footer={
@@ -505,6 +520,11 @@ export default function SequenceSection() {
                 badgeText={
                   bf3Conversion
                     ? `Reply ${bf3Conversion.toFixed(0)}%`
+                    : undefined
+                }
+                badgeHoverText={
+                  bf3 && bf3Conversion
+                    ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
                     : undefined
                 }
                 bodyTitle={bf3?.title ?? ""}
@@ -1452,6 +1472,7 @@ function FrameworkCard(props: {
   footer?: ReactNode;
   conversion?: number;
   badgeText?: string;
+  badgeHoverText?: string;
   onClick: () => void;
   canEdit?: boolean;
   editProps?: {
@@ -1516,10 +1537,11 @@ function FrameworkCard(props: {
             </Text>
             {props.badgeText && (
               <Tooltip
-                label="Estimated rate"
-                openDelay={500}
+                label={props.badgeHoverText}
+                openDelay={100}
                 withArrow
                 withinPortal
+                disabled={!props.badgeHoverText}
               >
                 <Badge
                   color="gray"

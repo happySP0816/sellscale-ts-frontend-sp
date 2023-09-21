@@ -13,8 +13,9 @@ import {
   Tabs,
   Container,
   Switch,
+  Tooltip,
 } from "@mantine/core";
-import { ContextModalProps } from "@mantine/modals";
+import { ContextModalProps, openConfirmModal } from "@mantine/modals";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -25,7 +26,7 @@ import { logout } from "@auth/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { showNotification } from "@mantine/notifications";
 import { setDatasets } from "react-chartjs-2/dist/utils";
-import { IconAlertCircle, IconBrandOnedrive, IconChartTreemap, IconTool } from '@tabler/icons';
+import { IconAlertCircle, IconBrandOnedrive, IconChartTreemap, IconTool, IconTrash } from '@tabler/icons';
 import { IconChartBubble } from '@tabler/icons-react';
 import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
 
@@ -212,6 +213,43 @@ export default function VoiceEditorModal({
       });
   };
 
+  const deleteStackRankedSample = (
+    promptToDelete: string,
+    completionToDelete: string,
+    stackRankedConfigurationId: number
+  ) => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", "Bearer " + userToken);
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      "prompt_to_delete": promptToDelete,
+      "completion_to_delete": completionToDelete,
+      "stack_ranked_configuration_id": stackRankedConfigurationId
+    });
+
+    var requestOptions = {
+      method: 'DELETE',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow'
+    };
+
+    fetch(`${API_URL}/message_generation/stack_ranked_config/delete_sample`, requestOptions)
+      .then(response => response.text())
+      .then(result => console.log(result))
+      .catch(error => console.log('error', error))
+      .finally(() => {
+        fetchPromptData();
+        showNotification({
+          title: "Sample Deleted",
+          message: "The sample was deleted successfully",
+          color: "green",
+          autoClose: 5000,
+        });
+      })
+  }
+
   const saveStackRankedConfigurationData = () => {
     setSavingPrompt(true);
 
@@ -247,8 +285,8 @@ export default function VoiceEditorModal({
         setSavingPrompt(false);
         setStackRankedConfigurationDataChanged(false)
         showNotification({
-          title: "Configuration updated",
-          message: "The configuration was updated successfully",
+          title: "Voice Saved",
+          message: "Your updated voice was saved successfully",
           color: "green",
           autoClose: 5000,
         });
@@ -384,7 +422,7 @@ export default function VoiceEditorModal({
                       const meta_data = metaDataFromPrompt(stackRankedConfigurationData[promptKey]);
 
                       return (
-                        <Box>
+                        <Box w='100%'>
                           <AiMetaDataBadge
                             location={{ position: "relative", top: 35, left: 70 }}
                             bumpFrameworkId={0}
@@ -406,6 +444,42 @@ export default function VoiceEditorModal({
                             initialMessageStackRankedConfigName={'Baseline Linkedin'}
                             cta={meta_data.cta || ''}
                           />
+                          <Tooltip
+                            label="Remove this sample from voice."
+                          >
+                            <Button 
+                              size='xs'
+                              variant='subtle'
+                              sx={{
+                                position: 'relative',
+                                top: 38,
+                                left: 70,
+                              }}
+                              onClick={
+                                () => {
+                                  openConfirmModal({
+                                    title: "Delete this sample?",
+                                    children: (
+                                      <Text>
+                                        Are you sure you want to delete this sample? This will remove it from the voice and it will no longer be used to generate messages.
+                                      </Text>
+                                    ),
+                                    labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                                    onCancel: () => { },
+                                    onConfirm: () => { 
+                                        deleteStackRankedSample(
+                                          promptKey,
+                                          completionKey,
+                                          stackRankedConfigurationData.id
+                                        ) 
+                                     },
+                                  })
+                                }
+                              }
+                            >
+                              <IconTrash size='0.8rem' />
+                            </Button>
+                          </Tooltip>
                           <Textarea
                             w='100%'
                             icon={<IconChartTreemap size="0.8rem" />}

@@ -890,6 +890,7 @@ function IntroMessageSection() {
                     if (prospects.length === 0) setNoProspectsFound(true);
                   }}
                   autoSelect
+                  includeDrawer
                 />
               </Group>
             </Group>
@@ -1854,6 +1855,7 @@ function FrameworkSection(props: {
                         if (prospects.length === 0) setNoProspectsFound(true);
                       }}
                       autoSelect
+                      includeDrawer
                     />
                   </Group>
                 </Group>

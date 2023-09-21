@@ -21,7 +21,7 @@ export default function MessageAutomation() {
   const [messageSendOption, setMessageSendOption] = useState(userData.disable_ai_on_message_send);
   const [opened, { open, close }] = useDisclosure(false);
 
-  const [blacklistWords, setBlacklistWords] = useState(userData.blacklisted_words); // ['howdy', 'hello', 'hi']
+  const [blacklistWords, setBlacklistWords] = useState(userData.blacklisted_words || []); // ['howdy', 'hello', 'hi']
   const [newBlacklistWord, setNewBlacklistWord] = useState('');
   const [saveDisabled, setSaveDisabled] = useState(true);
 

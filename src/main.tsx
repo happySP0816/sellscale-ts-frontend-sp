@@ -36,28 +36,27 @@ import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
 import ContactsPage from "@pages/ContactsPage";
 import ToolsPage from "@pages/ToolsPage";
 import SetupPersonaCard from "@common/persona/SetupPersonaCard";
-import PersonaBrain from '@common/persona/PersonaBrain';
-import { PulseWrapper } from '@common/persona/PulseWrapper';
-import { LinkedinConvoSimulatorPage } from '@common/simulators/linkedin/LinkedinConvoSimulatorPage';
-import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
-import EmailBlocksPage from '@pages/EmailBlocksPage';
+import PersonaBrain from "@common/persona/PersonaBrain";
+import { PulseWrapper } from "@common/persona/PulseWrapper";
+import { LinkedinConvoSimulatorPage } from "@common/simulators/linkedin/LinkedinConvoSimulatorPage";
+import { PullProspectEmailsCardPage } from "@common/credits/PullProspectEmailsCardPage";
+import EmailBlocksPage from "@pages/EmailBlocksPage";
 import FindContactsPage from "@pages/FindContactsPage";
-import { PersonaSplitPage } from '@common/persona/PersonaSplitPage';
+import { PersonaSplitPage } from "@common/persona/PersonaSplitPage";
 import CleanContactsPage from "@pages/CleanContactsPage";
 import PersonaSettingsPage from "@pages/PersonaSettingsPage";
 import EmailSimulatePage from "@pages/EmailSimulatePage";
 import PipelineSection from "@common/home/PipelineSection";
 import PersonaCampaigns from "@common/campaigns/PersonaCampaigns";
 import AdvancedPage from "@pages/AdvancedPage";
-import ChannelSetupPage from '@pages/ChannelSetupPage';
+import ChannelSetupPage from "@pages/ChannelSetupPage";
 
 const queryClient = new QueryClient();
 
 // Set Sentry up and wrap the router
 if (import.meta.env.PROD) {
   Sentry.init({
-    dsn:
-      "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
+    dsn: "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
     integrations: [
       new BrowserTracing({
         routingInstrumentation: Sentry.reactRouterV6Instrumentation(
@@ -75,9 +74,8 @@ if (import.meta.env.PROD) {
     tracesSampleRate: 1.0,
   });
 }
-const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(
-  createBrowserRouter
-);
+const sentryCreateBrowserRouter =
+  Sentry.wrapCreateBrowserRouter(createBrowserRouter);
 
 // Fixes cache issues on refresh
 (async () => {
@@ -127,11 +125,11 @@ const router = sentryCreateBrowserRouter([
       },
       {
         path: "contacts/find",
-        element: <RestrictedRoute page={<FindContactsPage />} />
+        element: <RestrictedRoute page={<FindContactsPage />} />,
       },
       {
         path: "tools/contacts-clean",
-        element: <RestrictedRoute page={<CleanContactsPage />} />
+        element: <RestrictedRoute page={<CleanContactsPage />} />,
       },
       {
         path: "persona/settings",
@@ -153,7 +151,7 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<ChannelSetupPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { channelType: params.channelType };
-        }
+        },
       },
       {
         path: "linkedin/:tabId?",
@@ -242,53 +240,133 @@ const router = sentryCreateBrowserRouter([
 
       {
         path: "all/inboxes",
-        element: <RestrictedRoute page={<InboxPage all/>} />,
+        element: <RestrictedRoute page={<InboxPage all />} />,
       },
       {
         path: "all/contacts/:prospectId?",
-        element: <RestrictedRoute page={<Box p='md'><AllContactsSection all /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <AllContactsSection all />
+              </Box>
+            }
+          />
+        ),
         loader: async ({ params }: { params: any }) => {
           return { prospectId: params.prospectId };
         },
       },
       {
         path: "contacts/:prospectId?",
-        element: <RestrictedRoute page={<Box p='md'><AllContactsSection all /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <AllContactsSection all />
+              </Box>
+            }
+          />
+        ),
         loader: async ({ params }: { params: any }) => {
           return { prospectId: params.prospectId };
         },
       },
       {
         path: "all/recent-activity",
-        element: <RestrictedRoute page={<Box p='md'><RecentActivitySection all /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <RecentActivitySection all />
+              </Box>
+            }
+          />
+        ),
       },
       {
         path: "notifications",
-        element: <RestrictedRoute page={<Box p='md'><RecentActivitySection all /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <RecentActivitySection all />
+              </Box>
+            }
+          />
+        ),
       },
       {
         path: "all/pipeline",
-        element: <RestrictedRoute page={<Box p='md'><PipelineSection /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <PipelineSection />
+              </Box>
+            }
+          />
+        ),
       },
       {
         path: "analytics",
-        element: <RestrictedRoute page={<Box p='md'><PipelineSection /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <PipelineSection />
+              </Box>
+            }
+          />
+        ),
       },
       {
         path: "all/email-messages",
-        element: <RestrictedRoute page={<Box p='md'><EmailQueuedMessages all /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <EmailQueuedMessages all />
+              </Box>
+            }
+          />
+        ),
       },
       {
         path: "all/campaigns",
-        element: <RestrictedRoute page={<Box p='md'><PersonaCampaigns /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <PersonaCampaigns />
+              </Box>
+            }
+          />
+        ),
       },
       {
         path: "campaigns",
-        element: <RestrictedRoute page={<Box p='md'><PersonaCampaigns /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <PersonaCampaigns />
+              </Box>
+            }
+          />
+        ),
       },
       {
         path: "all/linkedin-messages",
-        element: <RestrictedRoute page={<Box p='md'><LinkedinQueuedMessages all /></Box>} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
+                <LinkedinQueuedMessages all />
+              </Box>
+            }
+          />
+        ),
       },
       {
         path: "/split/contacts",

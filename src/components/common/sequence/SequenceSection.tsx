@@ -1911,9 +1911,14 @@ function FrameworkSection(props: {
                   { value: "short-introduction", label: "Short introduction" },
                   { value: "pain-points-opener", label: "Pain points opener" },
                 ].concat([
-                  { value: "Manual Framework", label: "Manual Framework" },
+                  { value: "make-your-own", label: "🛠 Make your own" },
                 ])}
                 onChange={(value: any) => {
+                  if (value === "make-your-own") {
+                    toggle();
+                    return;
+                  }
+
                   const framework = BUMP_FRAMEWORK_OPTIONS[value];
                   if (!framework) {
                     form.setFieldValue("bumpFrameworkTemplateName", "");
@@ -1962,6 +1967,17 @@ function FrameworkSection(props: {
               setChanged(true);
             }}
           >
+             <Box mb='xs'>
+                <Text fz="sm" fw={500} c="dimmed">
+                  FRAMEWORK NAME:
+                </Text>
+                <TextInput
+                  placeholder="Name"
+                  variant="filled"
+                  {...form.getInputProps("frameworkName")}
+                />
+              </Box>
+              
             <Box mb="xs">
               {form.values.additionalContext && (
                 <Box w="100%">
@@ -1985,19 +2001,10 @@ function FrameworkSection(props: {
               )}
             </Box>
             <Box maw={"100%"} mx="auto">
+
               <Collapse in={opened}>
                 <Card withBorder mb="xs">
                   <Group grow>
-                    <Box>
-                      <Text fz="sm" fw={500} c="dimmed">
-                        FRAMEWORK NAME:
-                      </Text>
-                      <TextInput
-                        placeholder="Name"
-                        variant="filled"
-                        {...form.getInputProps("frameworkName")}
-                      />
-                    </Box>
                     <Box>
                       <Text fz="sm" fw={500} c="dimmed">
                         BUMP LENGTH:

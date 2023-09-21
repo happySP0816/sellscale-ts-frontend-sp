@@ -228,7 +228,7 @@ export default function VoiceEditorModal({
       "stack_ranked_configuration_id": stackRankedConfigurationId
     });
 
-    var requestOptions = {
+    var requestOptions: any = {
       method: 'DELETE',
       headers: myHeaders,
       body: raw,

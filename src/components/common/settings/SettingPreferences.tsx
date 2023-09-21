@@ -13,7 +13,7 @@ import {
   Divider,
 } from "@mantine/core";
 import { IconSun, IconMoon } from "@tabler/icons-react";
-import { updateConversionPercentages } from "@utils/requests/updateClientSDR";
+import { updatePipelinePercentages } from "@utils/requests/updateClientSDR";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
@@ -42,7 +42,7 @@ export default function SettingPreferences() {
   const [contractSize, setContractSize] = useState(userData.client.contract_size || 0);
 
   useEffect(() => {
-    updateConversionPercentages(
+    updatePipelinePercentages(
       userToken,
       activeConvoPercentage,
       schedulingPercentage,

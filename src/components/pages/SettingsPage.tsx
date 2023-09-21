@@ -13,6 +13,7 @@ import {
   IconBrandSlack,
   IconCalendar,
   IconInbox,
+  IconTrophy,
 } from "@tabler/icons";
 import PageTitle from "@nav/PageTitle";
 import { useQuery } from "@tanstack/react-query";
@@ -36,6 +37,7 @@ import MessageAutomation from "@common/settings/MessageAutomation";
 import SlackWebhookSection from "@common/slack/SlackWebhookSection";
 import DoNotContactFiltersPage from '@common/settings/DoNotContactFiltersPage';
 import { setPageTitle } from "@utils/documentChange";
+import SettingsConversion from "@common/settings/SettingsConversion";
 
 
 export default function SettingsPage() {
@@ -77,7 +79,7 @@ export default function SettingsPage() {
             SellScale Brain
           </Tabs.Tab>
           <Tabs.Tab
-            value="preferences"
+            value="pipeline"
             icon={<IconAdjustmentsFilled size="0.8rem" />}
           >
             Pipeline
@@ -112,6 +114,9 @@ export default function SettingsPage() {
           <Tabs.Tab value="slackbot" icon={<IconBrandSlack size="0.8rem" />}>
             Slack Connection
           </Tabs.Tab>
+          <Tabs.Tab value="conversion" icon={<IconTrophy size="0.8rem" />}>
+            Conversion
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="linkedinConnection" pl="xs" w='60%'>
@@ -140,8 +145,12 @@ export default function SettingsPage() {
           <SellScaleBrain />
         </Tabs.Panel>
 
-        <Tabs.Panel value="preferences" pl="xs">
+        <Tabs.Panel value="pipeline" pl="xs">
           <SettingPreferences />
+        </Tabs.Panel>
+
+        <Tabs.Panel value='conversion' pl="xs">
+          <SettingsConversion />
         </Tabs.Panel>
 
         <Tabs.Panel value="slackbot" pl="xs">

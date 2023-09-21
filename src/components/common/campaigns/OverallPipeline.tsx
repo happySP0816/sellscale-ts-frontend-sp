@@ -10,7 +10,7 @@ import {
   ThemeIcon,
   em,
 } from "@mantine/core";
-import { IconCheck, IconExternalLink } from "@tabler/icons";
+import { IconCheck, IconExternalLink, IconPencil } from "@tabler/icons";
 import {
   IconBrandTelegram,
   IconMessageCheck,
@@ -21,6 +21,10 @@ import {
 import { FC, useMemo } from "react";
 import TodayActivity, { TodayActivityData } from "./OverallPipeline/TodayActivity";
 import { useMediaQuery } from "@mantine/hooks";
+import { userDataState } from "@atoms/userAtoms";
+import { useRecoilValue } from "recoil";
+import { navigateToPage } from "@utils/documentChange";
+import { useNavigate } from "react-router-dom";
 
 const blue = "#228be6";
 const green = "#40c057";
@@ -75,11 +79,15 @@ const todayActivityData = [
   },
 ];
 const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData: TodayActivityData }> = ({ campaignData, aiActivityData }) => {
+  const userData = useRecoilValue(userDataState)
+  const navigate = useNavigate();
+
   const values = useMemo(
     () => [
       {
         title: "Sent Outreach",
-        goalPct: 100,
+        goalPct: userData.conversion_sent_pct || 100,
+        goalPctEditable: false,
         value: campaignData.sentOutreach,
         link: "",
         percentage: 100,
@@ -87,7 +95,8 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
       },
       {
         title: "Opens",
-        goalPct: 9,
+        goalPct: userData.conversion_open_pct || 9,
+        goalPctEditable: true,
         value: campaignData.accepted,
         link: "",
         color: blue,
@@ -97,19 +106,21 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
       },
       {
         title: "Replies",
-        goalPct: 0.5,
+        goalPct: userData.conversion_reply_pct || 0.5,
+        goalPctEditable: true,
         value: campaignData.activeConvos,
         link: "",
         color: green,
         percentage: !campaignData.sentOutreach
           ? 0
           : parseFloat(
-              ((campaignData.activeConvos / campaignData.sentOutreach) * 100).toFixed(0)
-            ),
+            ((campaignData.activeConvos / campaignData.sentOutreach) * 100).toFixed(0)
+          ),
       },
       {
         title: "Demos",
-        goalPct: 0.1,
+        goalPct: userData.conversion_demo_pct || 0.1,
+        goalPctEditable: true,
         value: campaignData.demos,
         link: "",
         percentage: !campaignData.sentOutreach
@@ -118,7 +129,7 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
         color: orange,
       },
     ],
-    [campaignData]
+    [campaignData, userData]
   );
   const isMobile = useMediaQuery(`(max-width: ${em(1200)})`);
 
@@ -212,7 +223,7 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
                         </Text>
                       </Box>
                       <Flex align={"center"}>
-                        
+
                         {i.percentage >= (i.goalPct || 0) ? (
                           <ThemeIcon color={green} size="0.75rem" radius="xl">
                             <IconCheck size="1rem" />
@@ -234,6 +245,19 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
                         </Text>
                       </Box>
                       <Flex align={"center"}>
+                        {
+                          i.goalPctEditable && (
+                            <ActionIcon
+                              size='sm'
+                              variant='transparent'
+                              onClick={() => {
+                                navigateToPage(navigate, "/settings/conversion");
+                              }}
+                            >
+                              <IconPencil size={"0.75rem"} />
+                            </ActionIcon>
+                          )
+                        }
                         <Text fw={700} color="gray.6" size={"0.75rem"}>
                           {i.goalPct}%&nbsp;
                         </Text>

@@ -31,6 +31,32 @@ export async function updateClientSDR(
 
 export async function updateConversionPercentages(
   userToken: string,
+  open_pct: number,
+  reply_pct: number,
+  demo_pct: number,
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/client/sdr/conversions`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        "conversion_sent_pct": 100,
+        "conversion_open_pct": open_pct,
+        "conversion_reply_pct": reply_pct,
+        "conversion_demo_pct": demo_pct,
+      }),
+    }
+  );
+  return await processResponse(response);
+}
+
+
+export async function updatePipelinePercentages(
+  userToken: string,
   active_convo: number,
   scheduling: number,
   demo_set: number,

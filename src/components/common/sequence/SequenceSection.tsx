@@ -100,6 +100,7 @@ import { BUMP_FRAMEWORK_OPTIONS } from "./framework_constants";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
 import { showNotification } from "@mantine/notifications";
+import { IconRobot } from '@tabler/icons';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1519,6 +1520,7 @@ function FrameworkSection(props: {
   });
   const [debouncedForm] = useDebouncedValue(form.values, 200);
   const prevDebouncedForm = usePrevious(debouncedForm);
+  const [aiGenerating, setAiGenerating] = useState(false);
 
   const saveSettings = async (values: typeof form.values) => {
     const result = await patchBumpFramework(
@@ -1579,6 +1581,29 @@ function FrameworkSection(props: {
     setLoading(false);
     return result.status === "success" ? result.data.message : null;
   };
+
+  const autoCompleteWithBrain = () => {
+    setAiGenerating(true);
+    fetch(`${API_URL}/ml/fill_prompt_from_brain`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+          },
+          body: JSON.stringify({
+            prompt: form.values.additionalContext,
+            archetype_id: currentProject?.id || -1
+          })
+      })
+      .then(response => response.json())
+      .then(data => {
+        form.setFieldValue('additionalContext', data.data);
+        setChanged(true);
+      }).finally(() => {
+        setAiGenerating(false);
+      })
+  }
 
   // When prospect changes, get the bump message
   useEffect(() => {
@@ -1815,11 +1840,24 @@ function FrameworkSection(props: {
         >
           <Box mb="xs">
             {form.values.additionalContext && (
-              <Textarea
-                minRows={7}
-                label="PROVIDE ADDITIONAL CONTEXT"
-                {...form.getInputProps("additionalContext")}
-              />
+              <Box w='100%'>
+                <Textarea
+                  minRows={7}
+                  label="PROVIDE ADDITIONAL CONTEXT"
+                  {...form.getInputProps("additionalContext")}
+                />
+                <Button
+                  color='grape'
+                  size='xs'
+                  mt='xs'
+                  ml='auto'
+                  leftIcon={<IconRobot size='0.8rem'/>}
+                  onClick={() => autoCompleteWithBrain()}
+                  loading={aiGenerating}
+                  >
+                  AI Complete Context
+                </Button>
+              </Box>
             )}
           </Box>
           <Box maw={"100%"} mx="auto">

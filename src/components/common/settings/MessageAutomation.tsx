@@ -4,7 +4,7 @@ import { Box, Modal, Stack, Switch, Title, Text, Button, Center, Card, Notificat
 import { useDisclosure } from "@mantine/hooks";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconAlertTriangle, IconCheck, IconX } from "@tabler/icons";
+import { IconAlertTriangle, IconCheck, IconPlus, IconX } from "@tabler/icons";
 import patchSDRBlacklist from "@utils/requests/postPatchBlacklist";
 import postToggleAutoBump from "@utils/requests/postToggleAutoBump";
 import { updateClientSDR } from "@utils/requests/updateClientSDR";
@@ -23,6 +23,11 @@ export default function MessageAutomation() {
 
   const [blacklistWords, setBlacklistWords] = useState(userData.blacklisted_words); // ['howdy', 'hello', 'hi']
   const [newBlacklistWord, setNewBlacklistWord] = useState('');
+  const [saveDisabled, setSaveDisabled] = useState(true);
+
+  useEffect(() => {
+    setSaveDisabled(JSON.stringify(blacklistWords) === JSON.stringify(userData.blacklisted_words));
+  }, [blacklistWords])
 
   useEffect(() => {
     (async () => {
@@ -76,6 +81,8 @@ export default function MessageAutomation() {
         color: 'green',
         icon: <IconCheck size='1rem' />,
       })
+      setUserData({ ...userData, blacklisted_words: blacklistWords })
+      setSaveDisabled(true);
     } else {
       showNotification({
         title: 'Error',
@@ -193,6 +200,20 @@ export default function MessageAutomation() {
                   setNewBlacklistWord('');
                 }
               }}
+              rightSection={
+                <ActionIcon
+                  p='4px'
+                  variant='transparent'
+                  color='blue'
+                  disabled={newBlacklistWord.length === 0}
+                  onClick={() => {
+                    setBlacklistWords([...blacklistWords, newBlacklistWord]);
+                    setNewBlacklistWord('');
+                  }}
+                >
+                  <IconPlus size={'.75 rem'} />
+                </ActionIcon>
+              }
             />
 
             <Flex mt='md'>
@@ -231,7 +252,10 @@ export default function MessageAutomation() {
               }
             </Flex>
             <Flex mt='sm' justify={'flex-end'}>
-              <Button onClick={triggerUpdateBlacklistWords}>
+              <Button
+                onClick={triggerUpdateBlacklistWords}
+                disabled={saveDisabled}
+              >
                 Save
               </Button>
             </Flex>

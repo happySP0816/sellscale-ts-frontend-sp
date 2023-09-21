@@ -39,7 +39,6 @@ const TodayActivity: FC<{ aiActivityData: TodayActivityData }> = ({ aiActivityDa
     ],
     [aiActivityData]
   )
-  console.log('aiActivityData', aiActivityData)
 
   return (
     <>

@@ -169,22 +169,27 @@ export default function SequenceSection() {
   const bf1Delay = useRef(bf1?.bump_delay_days ?? 2);
   const bf2Delay = useRef(bf2?.bump_delay_days ?? 2);
 
-  let bf0Conversion =
-    bf0 && bf0?.etl_num_times_converted && bf0?.etl_num_times_used
-      ? (bf0.etl_num_times_converted / bf0.etl_num_times_used) * 100
-      : undefined;
-  let bf1Conversion =
-    bf1 && bf1?.etl_num_times_converted && bf1?.etl_num_times_used
-      ? (bf1.etl_num_times_converted / bf1.etl_num_times_used) * 100
-      : undefined;
-  let bf2Conversion =
-    bf2 && bf2?.etl_num_times_converted && bf2?.etl_num_times_used
-      ? (bf2.etl_num_times_converted / bf2.etl_num_times_used) * 100
-      : undefined;
-  let bf3Conversion =
-    bf3 && bf3?.etl_num_times_converted && bf3?.etl_num_times_used
-      ? (bf3.etl_num_times_converted / bf3.etl_num_times_used) * 100
-      : undefined;
+  // TODO: What we should actually use
+  // let bf0Conversion =
+  //   bf0 && bf0?.etl_num_times_converted && bf0?.etl_num_times_used
+  //     ? (bf0.etl_num_times_converted / bf0.etl_num_times_used) * 100
+  //     : undefined;
+  // let bf1Conversion =
+  //   bf1 && bf1?.etl_num_times_converted && bf1?.etl_num_times_used
+  //     ? (bf1.etl_num_times_converted / bf1.etl_num_times_used) * 100
+  //     : undefined;
+  // let bf2Conversion =
+  //   bf2 && bf2?.etl_num_times_converted && bf2?.etl_num_times_used
+  //     ? (bf2.etl_num_times_converted / bf2.etl_num_times_used) * 100
+  //     : undefined;
+  // let bf3Conversion =
+  //   bf3 && bf3?.etl_num_times_converted && bf3?.etl_num_times_used
+  //     ? (bf3.etl_num_times_converted / bf3.etl_num_times_used) * 100
+  //     : undefined;
+  const bf0Conversion = replyRate*0.5;
+  const bf1Conversion = replyRate*0.3;
+  const bf2Conversion = replyRate*0.2;
+  const bf3Conversion = replyRate*0.1;
 
   return (
     <Card padding="lg" radius="md" withBorder>
@@ -1400,6 +1405,7 @@ function FrameworkCard(props: {
               {props.title}
             </Text>
             {props.badgeText && (
+              <Tooltip label="Estimated rate" openDelay={500} withArrow withinPortal>
               <Badge
                 color="gray"
                 size="sm"
@@ -1408,6 +1414,7 @@ function FrameworkCard(props: {
               >
                 {props.badgeText}
               </Badge>
+              </Tooltip>
             )}
           </Group>
           {props.conversion !== undefined && (

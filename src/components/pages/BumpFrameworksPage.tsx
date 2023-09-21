@@ -614,7 +614,7 @@ export default function BumpFrameworksPage(props: {
   return (
     <>
       <Flex direction='column'>
-        <LoadingOverlay visible={loading} />
+        {/* <LoadingOverlay visible={loading} /> */}
         {!props.hideTitle && <Flex justify='space-between'>
           <Title mb='xs'>LinkedIn Setup</Title>
         </Flex>}

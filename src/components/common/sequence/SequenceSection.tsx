@@ -2211,19 +2211,11 @@ const PersonalizationSection = (props: {
         !!currentProject?.transformer_blocklist?.includes("LIST_OF_PAST_JOBS"),
     },
     {
-      title: "Years Of Experience",
+      title: "Years of Experience",
       id: "YEARS_OF_EXPERIENCE",
       checked: !props.blocklist.includes("YEARS_OF_EXPERIENCE"),
       disabled: !!currentProject?.transformer_blocklist?.includes(
         "YEARS_OF_EXPERIENCE"
-      ),
-    },
-    {
-      title: "Current Position Description",
-      id: "CURRENT_JOB_DESCRIPTION",
-      checked: !props.blocklist.includes("CURRENT_JOB_DESCRIPTION"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "CURRENT_JOB_DESCRIPTION"
       ),
     },
     {
@@ -2256,6 +2248,20 @@ const PersonalizationSection = (props: {
       disabled:
         !!currentProject?.transformer_blocklist?.includes("RECENT_PATENTS"),
     },
+    {
+      title: "Years at Current Job",
+      id: "YEARS_OF_EXPERIENCE_AT_CURRENT_JOB",
+      checked: !props.blocklist.includes("YEARS_OF_EXPERIENCE_AT_CURRENT_JOB"),
+      disabled:
+        !!currentProject?.transformer_blocklist?.includes("YEARS_OF_EXPERIENCE_AT_CURRENT_JOB"),
+    },
+    {
+      title: "Custom Data Points",
+      id: "CUSTOM",
+      checked: !props.blocklist.includes("CUSTOM"),
+      disabled:
+        !!currentProject?.transformer_blocklist?.includes("CUSTOM"),
+    },
   ]);
 
   const [companyItems, setCompanyItems] = useState([
@@ -2276,11 +2282,25 @@ const PersonalizationSection = (props: {
       ),
     },
     {
-      title: "Company News",
+      title: "General Company News",
       id: "SERP_NEWS_SUMMARY",
       checked: !props.blocklist.includes("SERP_NEWS_SUMMARY"),
       disabled:
         !!currentProject?.transformer_blocklist?.includes("SERP_NEWS_SUMMARY"),
+    },
+    {
+      title: "Negative Company News",
+      id: "SERP_NEWS_SUMMARY_NEGATIVE",
+      checked: !props.blocklist.includes("SERP_NEWS_SUMMARY_NEGATIVE"),
+      disabled:
+        !!currentProject?.transformer_blocklist?.includes("SERP_NEWS_SUMMARY_NEGATIVE"),
+    },
+    {
+      title: "Website Info",
+      id: "GENERAL_WEBSITE_TRANSFORMER",
+      checked: !props.blocklist.includes("GENERAL_WEBSITE_TRANSFORMER"),
+      disabled:
+        !!currentProject?.transformer_blocklist?.includes("GENERAL_WEBSITE_TRANSFORMER"),
     },
   ]);
 

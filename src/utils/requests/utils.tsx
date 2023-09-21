@@ -91,7 +91,7 @@ async function getResponseJSON(
               onClick={() => {
                 window.location.href = "/settings/linkedinConnection";
               }}
-            >Reconnect</Button>
+            >Go to Reconnect</Button>
           </Group>
         ),
         message: `Looks like your LinkedIn account has been disconnected. Please reconnect.`,

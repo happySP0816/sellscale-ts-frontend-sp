@@ -409,7 +409,7 @@ export default function VoiceEditorModal({
                           <Textarea
                             w='100%'
                             icon={<IconChartTreemap size="0.8rem" />}
-                            minRows={8}
+                            minRows={5}
                             mt="sm"
                             size='xs'
                             label={`Sample ${index + 1}`}
@@ -425,6 +425,11 @@ export default function VoiceEditorModal({
                             }}
                             error={stackRankedConfigurationData[completionKey].length > 300 ? "Completion is too long. Please shorten it to 300 characters or less." : null}
                           />
+                          <Text size='xs' mt='xs' align='right' color={
+                            stackRankedConfigurationData[completionKey].length > 300 ? 'red' : 'gray'
+                          }>
+                            {stackRankedConfigurationData[completionKey]?.length} / 300
+                          </Text>
                         </Box>
                       )
                   })

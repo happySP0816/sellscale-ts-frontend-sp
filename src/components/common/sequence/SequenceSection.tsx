@@ -100,13 +100,14 @@ import { BUMP_FRAMEWORK_OPTIONS } from "./framework_constants";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
 import { showNotification } from "@mantine/notifications";
-import { IconRobot } from "@tabler/icons";
+import { IconRobot, IconSettings, IconTrash } from "@tabler/icons";
 import {
   useLocation,
   unstable_usePrompt,
   useNavigate,
   unstable_useBlocker,
 } from "react-router-dom";
+import { deleteCTA } from "@utils/requests/createCTA";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -2575,6 +2576,15 @@ const CtaSection = (props: {
                 },
               });
             }}
+            onClickDelete={async () => {
+              await deleteCTA(userToken, e.id);
+              showNotification({
+                title: "Success",
+                message: "CTA has been deleted",
+                color: "blue",
+              });
+              refetch();
+            }}
           />
         ))}
 
@@ -2628,7 +2638,8 @@ const CTAOption: React.FC<{
   data: TabOption;
   onToggle: (value: boolean) => void;
   onClickEdit: () => void;
-}> = ({ data, onToggle, onClickEdit }) => {
+  onClickDelete: () => void;
+}> = ({ data, onToggle, onClickEdit, onClickDelete }) => {
   return (
     <Card
       shadow="xs"
@@ -2673,21 +2684,25 @@ const CTAOption: React.FC<{
           </Flex>
 
           <Flex wrap={"wrap"} gap={"1rem"} align={"center"}>
-            <Button
-              variant={"light"}
-              size="xs"
-              color={"blue"}
-              radius="xl"
-              h="auto"
-              fz={"0.75rem"}
-              py={"0.125rem"}
-              px={"0.25rem"}
-              fw={"400"}
-              leftIcon={<IconEdit size={"0.75rem"} />}
-              onClick={onClickEdit}
-            >
-              Edit CTA
-            </Button>
+            <Menu shadow="md" width={200} withinPortal withArrow>
+              <Menu.Target>
+                <ActionIcon radius="xl" size="sm">
+                  <IconPencil size="1.0rem" />
+                </ActionIcon>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Item icon={<IconEdit size={14} />} onClick={onClickEdit}>
+                  Edit
+                </Menu.Item>
+                <Menu.Item
+                  icon={<IconTrash size={14} />}
+                  onClick={onClickDelete}
+                >
+                  Delete
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
             <Switch
               checked={data.checked}
               color={"blue"}

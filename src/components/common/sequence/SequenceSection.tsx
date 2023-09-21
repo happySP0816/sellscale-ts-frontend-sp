@@ -2393,7 +2393,7 @@ const ProcessBar: React.FC<{
         <Flex sx={{ flex: 1 }}>
           <Divider w={"100%"} color={"#E9ECEF"} />
         </Flex>
-        <Tooltip label="Acceptance Rate" withArrow>
+        <Tooltip label="Historical Acceptance Rate" withArrow>
           <Button
             variant={"light"}
             fw={700}

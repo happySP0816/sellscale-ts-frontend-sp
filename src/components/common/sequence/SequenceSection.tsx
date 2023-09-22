@@ -1943,7 +1943,6 @@ function FrameworkSection(props: {
                   w="100%"
                   placeholder="Select different template"
                   clearable
-                  defaultValue={""}
                   data={[
                     {
                       value: "role-have-to-do-with",
@@ -1959,10 +1958,17 @@ function FrameworkSection(props: {
                     },
                   ].concat([
                     { value: "make-your-own", label: "🛠 Make your own" },
-                    { value: "", label: "None" },
                   ])}
                   onChange={(value: any) => {
                     if (value === "make-your-own") {
+                      form.setFieldValue("bumpFrameworkTemplateName", "");
+                      form.setFieldValue("bumpFrameworkHumanReadablePrompt", "Describe your custom framework here...");
+                      form.setFieldValue("additionalContext", "");
+                      form.setFieldValue("promptInstructions", "");
+                      setContextQuestion("");
+
+                      setChanged(true);
+
                       toggle();
                       return;
                     }
@@ -2024,6 +2030,7 @@ function FrameworkSection(props: {
               </ActionIcon>
               {descriptionEditState ? (
                 <Textarea
+                  label="Human Readable Description"
                   {...form.getInputProps("bumpFrameworkHumanReadablePrompt")}
                   onChange={(e) => {
                     form.setFieldValue(

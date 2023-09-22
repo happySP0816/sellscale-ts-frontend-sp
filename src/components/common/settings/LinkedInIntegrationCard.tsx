@@ -186,7 +186,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
             connections, read, and respond to your conversations.
           </Text>
 
-          {extensionInstalled ? (
+          {extensionInstalled || true ? (
             <Center>
               <Stack maw={390}>
                 <Center>

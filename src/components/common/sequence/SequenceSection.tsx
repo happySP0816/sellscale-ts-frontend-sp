@@ -324,9 +324,9 @@ export default function SequenceSection() {
                     <Badge
                       ml="4px"
                       variant="dot"
-                      color={replyRate > 0.5 ? "green" : "red"}
+                      color={isNaN(replyRate) ? 'grey' : (replyRate > 0.5 ? "green" : "red")}
                     >
-                      Replied: {replyRate.toFixed(1)}%
+                      Replied: {!isNaN(replyRate) ? replyRate.toFixed(1)+'%' : 'TBD'}
                     </Badge>
                   </Tooltip>
                 }
@@ -335,15 +335,11 @@ export default function SequenceSection() {
               />
               <FrameworkCard
                 title="Follow-Up 1"
-                badgeText={
-                  bf0Conversion
-                    ? `Reply ${bf0Conversion.toFixed(0)}%`
-                    : undefined
-                }
+                badgeText={`Reply ${bf0Conversion ? bf0Conversion.toFixed(0)+'%' : 'TBD'}`}
                 badgeHoverText={
                   bf0 && bf0Conversion
                     ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                    : undefined
+                    : 'Not enough data'
                 }
                 bodyTitle={bf0?.title ?? ""}
                 // bodyText={bf0?.description ?? ""}
@@ -398,15 +394,11 @@ export default function SequenceSection() {
 
               <FrameworkCard
                 title="Follow-Up 2"
-                badgeText={
-                  bf1Conversion
-                    ? `Reply ${bf1Conversion.toFixed(0)}%`
-                    : undefined
-                }
+                badgeText={`Reply ${bf1Conversion ? bf1Conversion.toFixed(0)+'%' : 'TBD'}`}
                 badgeHoverText={
                   bf1 && bf1Conversion
                     ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                    : undefined
+                    : 'Not enough data'
                 }
                 bodyTitle={bf1?.title ?? ""}
                 // bodyText={bf1?.description ?? ""}
@@ -461,15 +453,11 @@ export default function SequenceSection() {
               />
               <FrameworkCard
                 title="Follow-Up 3"
-                badgeText={
-                  bf2Conversion
-                    ? `Reply ${bf2Conversion.toFixed(0)}%`
-                    : undefined
-                }
+                badgeText={`Reply ${bf2Conversion ? bf2Conversion.toFixed(0)+'%' : 'TBD'}`}
                 badgeHoverText={
                   bf2 && bf2Conversion
                     ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                    : undefined
+                    : 'Not enough data'
                 }
                 bodyTitle={bf2?.title ?? ""}
                 // bodyText={bf2?.description ?? ""}
@@ -524,15 +512,11 @@ export default function SequenceSection() {
               />
               <FrameworkCard
                 title="Follow-Up 4"
-                badgeText={
-                  bf3Conversion
-                    ? `Reply ${bf3Conversion.toFixed(0)}%`
-                    : undefined
-                }
+                badgeText={`Reply ${bf3Conversion ? bf3Conversion.toFixed(0)+'%' : 'TBD'}`}
                 badgeHoverText={
                   bf3 && bf3Conversion
                     ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                    : undefined
+                    : 'Not enough data'
                 }
                 bodyTitle={bf3?.title ?? ""}
                 // bodyText={bf3?.description ?? ""}
@@ -1576,9 +1560,9 @@ function FrameworkCard(props: {
             >
               <Badge
                 variant="dot"
-                color={props.conversion > 9.0 ? "green" : "red"}
+                color={isNaN(props.conversion) ? 'grey' : (props.conversion > 9.0 ? "green" : "red")}
               >
-                Opened: {Math.trunc(props.conversion)}%
+                Opened: {!isNaN(props.conversion) ? Math.trunc(props.conversion)+'%' : 'TBD'}
               </Badge>
             </Tooltip>
           )}

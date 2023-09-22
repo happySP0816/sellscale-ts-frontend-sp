@@ -1,6 +1,6 @@
 import { logout } from "@auth/core";
 import { API_URL } from "@constants/data";
-import { showNotification } from "@mantine/notifications";
+import { hideNotification, showNotification } from "@mantine/notifications";
 import { hashString } from "@utils/general";
 import { MsgResponse } from "src";
 import { ActionIcon, Button, Group, Text } from "@mantine/core";
@@ -82,8 +82,9 @@ async function getResponseJSON(
     res.message.toLowerCase() === "invalid linkedin cookies"
   ) {
     if (showNotif) {
+      hideNotification("inactive-linkedin");
       showNotification({
-        id: key + "-invalid-li-cookies",
+        id: "inactive-linkedin",
         title: (
           <Group>
             <Text fz='md'>LinkedIn Disconnected</Text>

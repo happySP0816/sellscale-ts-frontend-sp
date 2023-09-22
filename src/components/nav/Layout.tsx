@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AppShell,
   Navbar,
@@ -8,6 +8,8 @@ import {
   Container,
   Text,
   Box,
+  Button,
+  Group,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { NAV_BAR_SIDE_WIDTH, NAV_BAR_TOP_WIDTH, SCREEN_SIZES } from "@constants/data";
@@ -17,6 +19,8 @@ import { userDataState } from "@atoms/userAtoms";
 import { version } from '../../../package.json';
 import SideNavbar from "./SideNavbar";
 import { currentProjectState } from "@atoms/personaAtoms";
+import { showNotification } from "@mantine/notifications";
+import { IconPlugConnected } from "@tabler/icons";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
@@ -33,6 +37,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const isMobileView = smScreenOrLess;
 
   const [navOpened, setNavOpened] = useState(false);
+
+  useEffect(() => {
+    if(userData && userData.li_voyager_connected === false) {
+      showNotification({
+        id: "inactive-linkedin",
+        title: (
+          <Group>
+            <Text fz='md'>LinkedIn Not Connected</Text>
+            <Button leftIcon={<IconPlugConnected size='0.9rem' />} variant="light" color="red" size="xs" radius="xl" compact
+              onClick={() => {
+                window.location.href = "/settings/linkedinConnection";
+              }}
+            >Go to Connect</Button>
+          </Group>
+        ),
+        message: `Looks like your LinkedIn account isn't connect. Please connect.`,
+        color: "red",
+        autoClose: false,
+      });
+    }
+  }, [userData]);
+
 
   return (
     <AppShell

@@ -26,10 +26,10 @@ const useStyles = createStyles((theme) => ({
       theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[2]
     }`,
     padding: `5px 0px`,
-    width: '100%',
+    width: "100%",
     backgroundColor:
       theme.colorScheme === "dark" ? theme.colors.dark[5] : theme.white,
-    marginBottom: theme.spacing.sm,
+    marginBottom: "1rem",
   },
 
   itemDragging: {
@@ -55,14 +55,17 @@ export default function DndColumns(props: {
   >;
   wrapInPaper?: boolean;
   listHeight?: number;
-  onColumnChange?: (startColId: string, endColId: string, itemId: string) => void;
+  onColumnChange?: (
+    startColId: string,
+    endColId: string,
+    itemId: string
+  ) => void;
 }) {
   const { classes, cx } = useStyles();
 
   const [columns, setColumns] = useState(props.initialColumns);
 
   const onDragEnd = ({ source, destination }: DropResult) => {
-
     // Make sure we have a valid destination
     if (destination === undefined || destination === null) return null;
 
@@ -136,7 +139,12 @@ export default function DndColumns(props: {
       }));
 
       // Call the onColumnChange callback
-      props.onColumnChange && props.onColumnChange(newStartCol.id, newEndCol.id, start.data[source.index].id)
+      props.onColumnChange &&
+        props.onColumnChange(
+          newStartCol.id,
+          newEndCol.id,
+          start.data[source.index].id
+        );
 
       return null;
     }
@@ -152,10 +160,14 @@ export default function DndColumns(props: {
     }[];
   }) => {
     return (
-      <ScrollArea h={props.listHeight || 400}>
+      <ScrollArea h={props.listHeight || 400} mt={"0.5rem"}>
         <Droppable droppableId={col.id} direction="vertical">
           {(provided) => (
-            <div style={{ minHeight: 200 }} {...provided.droppableProps} ref={provided.innerRef}>
+            <div
+              style={{ minHeight: 200 }}
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
               {col.data.map((d, index) => (
                 <Draggable key={d.id} index={index} draggableId={d.id}>
                   {(provided, snapshot) => (
@@ -186,13 +198,13 @@ export default function DndColumns(props: {
         {Object.values(columns).map((col) => (
           <Box key={col.id}>
             {props.wrapInPaper ? (
-              <Paper p={8} h='100%' withBorder>
+              <Paper p={8} h="100%" withBorder>
                 {col.header}
                 {renderDroppable(col)}
                 {col.footer}
               </Paper>
             ) : (
-              <Box h='100%'>
+              <Box h="100%">
                 {col.header}
                 {renderDroppable(col)}
                 {col.footer}

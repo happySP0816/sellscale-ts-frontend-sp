@@ -1,3 +1,4 @@
+import { currentProjectState } from "@atoms/personaAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
 import FlexSeparate from "@common/library/FlexSeparate";
@@ -43,8 +44,6 @@ import { Archetype, PersonaOverview } from "src";
 
 interface CTAGeneratorProps extends Record<string, unknown> {
   personaId: number;
-  personaName: string;
-  personas?: Archetype[];
 }
 
 const useStyles = createStyles((theme) => ({
@@ -76,6 +75,7 @@ export default function CTAGeneratorModal({
   const { classes } = useStyles();
 
   const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
   const userData = useRecoilValue(userDataState);
   const queryClient = useQueryClient();
 
@@ -87,7 +87,7 @@ export default function CTAGeneratorModal({
   const surveyForm = useForm({
     initialValues: {
       company: userData?.client?.company ?? "",
-      persona: innerProps.personaName,
+      persona: currentProject?.name ?? "",
       proposition: "",
     },
   });
@@ -144,9 +144,7 @@ export default function CTAGeneratorModal({
               label="Which persona?"
               placeholder="ex. VP of Sales, Head of HR"
               data={
-                innerProps.personas // @ts-ignore
-                  ? innerProps.personas.map((p) => ({ value: p.name || p.archetype }))
-                  : []
+                currentProject ? [currentProject.name] : []
               }
               classNames={classes}
               {...surveyForm.getInputProps("persona")}

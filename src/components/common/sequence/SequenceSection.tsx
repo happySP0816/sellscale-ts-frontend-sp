@@ -45,6 +45,7 @@ import {
   Collapse,
   Container,
   Progress,
+  ThemeIcon,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
@@ -100,7 +101,13 @@ import { BUMP_FRAMEWORK_OPTIONS } from "./framework_constants";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
 import { showNotification } from "@mantine/notifications";
-import { IconRobot, IconSettings, IconTrash } from "@tabler/icons";
+import {
+  IconArrowRight,
+  IconChevronRight,
+  IconRobot,
+  IconSettings,
+  IconTrash,
+} from "@tabler/icons";
 import {
   useLocation,
   unstable_usePrompt,
@@ -1646,7 +1653,7 @@ function FrameworkSection(props: {
   const [opened, { toggle }] = useDisclosure(false);
 
   const [activeTab, setActiveTab] = useState<string | null>("none");
-
+  const [descriptionEditState, setDescriptionEditState] = useState(false);
   const [personalizationItemsCount, setPersonalizationItemsCount] =
     useState<number>();
 
@@ -1667,6 +1674,10 @@ function FrameworkSection(props: {
   });
   const [debouncedForm] = useDebouncedValue(form.values, 200);
   const prevDebouncedForm = usePrevious(debouncedForm);
+  const [
+    moreAdditionInformationOpened,
+    { toggle: moreAdditionInformationToggle },
+  ] = useDisclosure(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   useEffect(() => {
     props.setIsDataChanged(changed);
@@ -1904,95 +1915,12 @@ function FrameworkSection(props: {
               sx={{
                 flexDirection: "row",
                 display: "flex",
+                gap: "1rem",
               }}
               p="xs"
               withBorder
             >
-              <Box
-                ml="xs"
-                mt="4px"
-                sx={{ flexDirection: "row", display: "flex" }}
-              >
-                <IconBrain size="1.5rem" color="#33ccff" />
-                <Text color="black" ml="xs" fw="500">
-                  Select Bump Template
-                </Text>
-              </Box>
-              <Select
-                withinPortal
-                ml="auto"
-                mr="xs"
-                w="50%"
-                placeholder="Pick template"
-                clearable
-                defaultValue={
-                  props.framework.bump_framework_template_name || null
-                }
-                data={[
-                  {
-                    value: "role-have-to-do-with",
-                    label: "Does your role have to do with?",
-                  },
-                  { value: "short-introduction", label: "Short introduction" },
-                  { value: "pain-points-opener", label: "Pain points opener" },
-                ].concat([
-                  { value: "make-your-own", label: "🛠 Make your own" },
-                ])}
-                onChange={(value: any) => {
-                  if (value === "make-your-own") {
-                    toggle();
-                    return;
-                  }
-
-                  const framework = BUMP_FRAMEWORK_OPTIONS[value];
-                  if (!framework) {
-                    form.setFieldValue("bumpFrameworkTemplateName", "");
-                    form.setFieldValue("bumpFrameworkHumanReadablePrompt", "");
-                    form.setFieldValue("additionalContext", "");
-                    setContextQuestion("");
-                    return;
-                  }
-
-                  const name = framework.name;
-                  const raw_prompt = framework.raw_prompt;
-                  const human_readable_prompt = framework.human_readable_prompt;
-                  const context_question = framework.context_question;
-                  const length = framework.length;
-
-                  form.setFieldValue("bumpFrameworkTemplateName", value);
-                  form.setFieldValue(
-                    "bumpFrameworkHumanReadablePrompt",
-                    human_readable_prompt
-                  );
-
-                  setHumanReadableContext(human_readable_prompt);
-
-                  if (context_question) {
-                    setContextQuestion(context_question);
-                  }
-
-                  form.setFieldValue("promptInstructions", raw_prompt);
-                  form.setFieldValue("frameworkName", name);
-                  form.setFieldValue("bumpLength", length);
-                  form.setFieldValue("additionalContext", context_question);
-                  setChanged(true);
-                }}
-              />
-            </Card.Section>
-
-            {form.values.bumpFrameworkHumanReadablePrompt && (
-              <Group mt="md" mb="xs">
-                {form.values.bumpFrameworkHumanReadablePrompt}
-              </Group>
-            )}
-          </Card>
-
-          <form
-            onChange={() => {
-              setChanged(true);
-            }}
-          >
-             <Box mb='xs'>
+              <Box ml="xs" mt="4px" w="50%">
                 <Text fz="sm" fw={500} c="dimmed">
                   FRAMEWORK NAME:
                 </Text>
@@ -2000,39 +1928,184 @@ function FrameworkSection(props: {
                   placeholder="Name"
                   variant="filled"
                   {...form.getInputProps("frameworkName")}
+                  onChange={(e) => {
+                    form.setFieldValue("frameworkName", e.target.value);
+                    setChanged(true);
+                  }}
                 />
               </Box>
-              
-            <Box mb="xs">
-              {form.values.additionalContext && (
-                <Box w="100%">
-                  <Textarea
-                    minRows={7}
-                    label="PROVIDE ADDITIONAL CONTEXT"
-                    {...form.getInputProps("additionalContext")}
-                  />
-                  <Button
-                    color="grape"
-                    size="xs"
-                    mt="xs"
-                    ml="auto"
-                    leftIcon={<IconRobot size="0.8rem" />}
-                    onClick={() => autoCompleteWithBrain()}
-                    loading={aiGenerating}
-                  >
-                    AI Complete Context
-                  </Button>
-                </Box>
+
+              <Flex align={"end"} w={"50%"}>
+                <Select
+                  withinPortal
+                  ml="auto"
+                  mr="xs"
+                  w="100%"
+                  placeholder="Select different template"
+                  clearable
+                  defaultValue={""}
+                  data={[
+                    {
+                      value: "role-have-to-do-with",
+                      label: "Does your role have to do with?",
+                    },
+                    {
+                      value: "short-introduction",
+                      label: "Short introduction",
+                    },
+                    {
+                      value: "pain-points-opener",
+                      label: "Pain points opener",
+                    },
+                  ].concat([
+                    { value: "make-your-own", label: "🛠 Make your own" },
+                    { value: "", label: "None" },
+                  ])}
+                  onChange={(value: any) => {
+                    if (value === "make-your-own") {
+                      toggle();
+                      return;
+                    }
+
+                    const framework = BUMP_FRAMEWORK_OPTIONS[value];
+                    if (!framework) {
+                      form.setFieldValue("bumpFrameworkTemplateName", "");
+                      form.setFieldValue(
+                        "bumpFrameworkHumanReadablePrompt",
+                        ""
+                      );
+                      form.setFieldValue("additionalContext", "");
+                      setContextQuestion("");
+                      return;
+                    }
+
+                    const name = framework.name;
+                    const raw_prompt = framework.raw_prompt;
+                    const human_readable_prompt =
+                      framework.human_readable_prompt;
+                    const context_question = framework.context_question;
+                    const length = framework.length;
+
+                    form.setFieldValue("bumpFrameworkTemplateName", value);
+                    form.setFieldValue(
+                      "bumpFrameworkHumanReadablePrompt",
+                      human_readable_prompt
+                    );
+
+                    setHumanReadableContext(human_readable_prompt);
+
+                    if (context_question) {
+                      setContextQuestion(context_question);
+                    }
+
+                    form.setFieldValue("promptInstructions", raw_prompt);
+                    form.setFieldValue("frameworkName", name);
+                    form.setFieldValue("bumpLength", length);
+                    form.setFieldValue("additionalContext", context_question);
+                    setChanged(true);
+                  }}
+                />
+              </Flex>
+            </Card.Section>
+
+            <Box
+              pt={"xs"}
+              pb={descriptionEditState ? "xs" : "md"}
+              pos={"relative"}
+            >
+              <ActionIcon
+                pos={"absolute"}
+                right={0}
+                top={"xs"}
+                sx={{ zIndex: 10 }}
+                onClick={() => setDescriptionEditState((p) => !p)}
+              >
+                <IconPencil />
+              </ActionIcon>
+              {descriptionEditState ? (
+                <Textarea
+                  {...form.getInputProps("bumpFrameworkHumanReadablePrompt")}
+                  onChange={(e) => {
+                    form.setFieldValue(
+                      "bumpFrameworkHumanReadablePrompt",
+                      e.target.value
+                    );
+                    setChanged(true);
+                  }}
+                />
+              ) : (
+                <Group>{form.values.bumpFrameworkHumanReadablePrompt}</Group>
               )}
             </Box>
-            <Box maw={"100%"} mx="auto">
+          </Card>
 
-              <Collapse in={opened}>
+          <form
+            onChange={() => {
+              setChanged(true);
+            }}
+          >
+            {form.values.additionalContext && (
+              <Box mb="xs">
+                <Group>
+                  <Button
+                    onClick={moreAdditionInformationToggle}
+                    variant="white"
+                    color="gray.6"
+                    m={0}
+                    p={0}
+                    fs={"1.25rem"}
+                  >
+                    <IconChevronRight
+                      style={{
+                        transform: moreAdditionInformationOpened
+                          ? "rotate(90deg)"
+                          : "",
+                      }}
+                    />
+                    More Info requested ⚠️
+                  </Button>
+                </Group>
+                <Collapse in={moreAdditionInformationOpened}>
+                  <Box w="100%">
+                    <Textarea
+                      minRows={7}
+                      label="Make your answer better by providing additional text"
+                      {...form.getInputProps("additionalContext")}
+                    />
+                    <Button
+                      color="grape"
+                      size="xs"
+                      mt="xs"
+                      ml="auto"
+                      leftIcon={<IconRobot size="0.8rem" />}
+                      onClick={() => autoCompleteWithBrain()}
+                      loading={aiGenerating}
+                    >
+                      AI Complete Context
+                    </Button>
+                  </Box>
+                </Collapse>
+              </Box>
+            )}
+
+            <Box maw={"100%"} mx="auto">
+              <Group>
+                <Button
+                  onClick={toggle}
+                  w="100%"
+                  color="black"
+                  variant="outline"
+                  leftIcon={<IconTools size={"0.8rem"} />}
+                >
+                  {opened ? "Edit Framework" : "Show Advanced Settings"}
+                </Button>
+              </Group>
+              <Collapse in={opened} mt={"xs"}>
                 <Card withBorder mb="xs">
                   <Group grow>
                     <Box>
                       <Text fz="sm" fw={500} c="dimmed">
-                        BUMP LENGTH:
+                        MESSAGE LENGTH:
                       </Text>
                       <SegmentedControl
                         data={[
@@ -2166,17 +2239,6 @@ function FrameworkSection(props: {
                   </Tabs>
                 </Card>
               </Collapse>
-              <Group mb={5}>
-                <Button
-                  onClick={toggle}
-                  w="100%"
-                  color="black"
-                  variant="outline"
-                  leftIcon={<IconTools size={"0.8rem"} />}
-                >
-                  {opened ? "Hide" : "Show"} Advanced Settings
-                </Button>
-              </Group>
             </Box>
           </form>
         </Stack>
@@ -2252,15 +2314,15 @@ const PersonalizationSection = (props: {
       title: "Years at Current Job",
       id: "YEARS_OF_EXPERIENCE_AT_CURRENT_JOB",
       checked: !props.blocklist.includes("YEARS_OF_EXPERIENCE_AT_CURRENT_JOB"),
-      disabled:
-        !!currentProject?.transformer_blocklist?.includes("YEARS_OF_EXPERIENCE_AT_CURRENT_JOB"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "YEARS_OF_EXPERIENCE_AT_CURRENT_JOB"
+      ),
     },
     {
       title: "Custom Data Points",
       id: "CUSTOM",
       checked: !props.blocklist.includes("CUSTOM"),
-      disabled:
-        !!currentProject?.transformer_blocklist?.includes("CUSTOM"),
+      disabled: !!currentProject?.transformer_blocklist?.includes("CUSTOM"),
     },
   ]);
 
@@ -2292,15 +2354,17 @@ const PersonalizationSection = (props: {
       title: "Negative Company News",
       id: "SERP_NEWS_SUMMARY_NEGATIVE",
       checked: !props.blocklist.includes("SERP_NEWS_SUMMARY_NEGATIVE"),
-      disabled:
-        !!currentProject?.transformer_blocklist?.includes("SERP_NEWS_SUMMARY_NEGATIVE"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "SERP_NEWS_SUMMARY_NEGATIVE"
+      ),
     },
     {
       title: "Website Info",
       id: "GENERAL_WEBSITE_TRANSFORMER",
       checked: !props.blocklist.includes("GENERAL_WEBSITE_TRANSFORMER"),
-      disabled:
-        !!currentProject?.transformer_blocklist?.includes("GENERAL_WEBSITE_TRANSFORMER"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "GENERAL_WEBSITE_TRANSFORMER"
+      ),
     },
   ]);
 

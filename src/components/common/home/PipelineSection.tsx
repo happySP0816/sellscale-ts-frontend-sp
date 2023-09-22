@@ -1,8 +1,3 @@
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import listPlugin from "@fullcalendar/list";
-import { useEffect, useState } from "react";
-import { getProspectEvents } from "@utils/requests/prospectEvents";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
@@ -10,49 +5,24 @@ import {
   Stack,
   Title,
   Text,
-  useMantineTheme,
   Indicator,
   Paper,
-  Grid,
   SimpleGrid,
-  Divider,
   Center,
-  createStyles,
-  rem,
-  Flex,
-  Group,
-  Avatar,
-  ActionIcon,
-  Button,
   LoadingOverlay,
+  Divider,
 } from "@mantine/core";
-import {
-  convertDateToCasualTime,
-  getFavIconFromURL,
-  nameToInitials,
-  proxyURL,
-  valueToColor,
-} from "@utils/general";
-import { navigateToPage } from "@utils/documentChange";
-import { useNavigate } from "react-router-dom";
-import {
-  prospectDrawerIdState,
-  prospectDrawerOpenState,
-} from "@atoms/prospectAtoms";
+import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import moment from "moment";
-import { useListState } from "@mantine/hooks";
-import { Prospect } from "src";
 import { useQuery } from "@tanstack/react-query";
-import { getProspectsForICP } from "@utils/requests/getProspectsForICP";
-import { currentProjectState } from "@atoms/personaAtoms";
 import DndColumns from "@common/library/DndColumns";
 import { getProspectsForIncomePipeline } from "@utils/requests/getProspectsForIncomePipeline";
-import { companyImageCacheState } from "@atoms/cacheAtoms";
 import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChangeStatus";
 import _ from "lodash";
 import { pipelineProspectsState } from "@atoms/pipelineAtoms";
-import { IconArrowRight, IconBrandLinkedin, IconWorld } from "@tabler/icons";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
+import { PipelineColumnHeader } from "./PipelineColumnHeader";
+import { PipelineProspect } from "./PipelineProspect";
 
 export type ProspectPipeline = {
   id: string;
@@ -70,7 +40,10 @@ export type ProspectPipeline = {
   category: string;
 };
 
-const getProspectList = (prospects: ProspectPipeline[], category: string) => {
+export const getProspectList = (
+  prospects: ProspectPipeline[],
+  category: string
+) => {
   return prospects
     .filter((d) => d.category === category)
     .sort((a, b) => {
@@ -160,11 +133,15 @@ export default function PipelineSection() {
       (acc, prospect) => acc + parseInt(prospect.contract_size),
       0
     ) * closedDemoPercentage;
-
+  const notInterested_size =
+    getProspectList(data || [], "not_interested").reduce(
+      (acc, prospect) => acc + parseInt(prospect.contract_size),
+      0
+    ) * closedDemoPercentage;
   return (
     <>
       <LoadingOverlay visible={isFetching} />
-      <Stack>
+      <Stack sx={{ overflowX: "auto" }}>
         <Box>
           <Title>Pipeline</Title>
           <Text pl={15}>
@@ -176,223 +153,280 @@ export default function PipelineSection() {
             {moment(new Date()).format("MMMM D, YYYY")}
           </Text>
         </Box>
-        <Box>
+        <Box miw={"1200px"}>
           <Text fz="xs" fw={700} c="dimmed">
             AI Generated Pipeline
           </Text>
-          <Box>
+          <Box mt={"0.5rem"}>
             <SimpleGrid cols={5}>
               <PipelineArrow
                 label={`💬 $${Math.floor(activeConvo_size).toLocaleString()}`}
+                bg="grape"
               />
               <PipelineArrow
                 label={`📆 $${Math.floor(scheduling_size).toLocaleString()}`}
+                bg="indigo"
               />
               <PipelineArrow
                 label={`🎯 $${Math.floor(demoSet_size).toLocaleString()}`}
+                bg="blue"
               />
               <PipelineArrow
                 label={`🎉 $${Math.floor(demoWon_size).toLocaleString()}`}
+                bg="green"
+              />{" "}
+              <PipelineArrow
+                label={`❌ $${Math.floor(notInterested_size).toLocaleString()}`}
+                bg="orange"
                 ending
               />
               <Box></Box>
             </SimpleGrid>
           </Box>
         </Box>
-        {data && (
-          <DndColumns
-            wrapInPaper
-            initialColumns={{
-              active_convo: {
-                id: "active_convo",
-                header: (
-                  <PipelineColumnHeader
-                    title="Active Conversation"
-                    category={"active_convo"}
-                    conversion={activeConvoPercentage}
-                  />
-                ),
-                data: getProspectList(data, "active_convo").map((prospect) => ({
-                  id: prospect.id,
-                  content: (
-                    <PipelineProspect key={prospect.id} prospect={prospect} />
+        <Box miw={"1000px"} h='100%'>
+          {data && (
+            <DndColumns
+              initialColumns={{
+                active_convo: {
+                  id: "active_convo",
+                  header: (
+                    <Box>
+                      <PipelineColumnHeader
+                        bg="grape"
+                        title="Active Conversation"
+                        category={"active_convo"}
+                        total={getProspectList(data, "active_convo").length}
+                        conversion={activeConvoPercentage}
+                      />
+                      <Divider mt='xs' mb='xs' />
+                    </Box>
                   ),
-                })),
-              },
-              scheduling: {
-                id: "scheduling",
-                header: (
-                  <PipelineColumnHeader
-                    title="Scheduling"
-                    category={"scheduling"}
-                    conversion={schedulingPercentage}
-                  />
-                ),
-                data: getProspectList(data, "scheduling").map((prospect) => ({
-                  id: prospect.id,
-                  content: (
-                    <PipelineProspect key={prospect.id} prospect={prospect} />
+                  data: getProspectList(data, "active_convo").map(
+                    (prospect) => ({
+                      id: prospect.id,
+                      content: (
+                        <PipelineProspect
+                          key={prospect.id}
+                          prospect={prospect}
+                          bg="grape"
+                        />
+                      ),
+                    })
                   ),
-                })),
-              },
-              demo_set: {
-                id: "demo_set",
-                header: (
-                  <PipelineColumnHeader
-                    title="Demo Set"
-                    category={"demo_set"}
-                    conversion={demoSetPercentage}
-                  />
-                ),
-                data: getProspectList(data, "demo_set").map((prospect) => ({
-                  id: prospect.id,
-                  content: (
-                    <PipelineProspect key={prospect.id} prospect={prospect} />
+                },
+                scheduling: {
+                  id: "scheduling",
+                  header: (
+                    <Box>
+                      <PipelineColumnHeader
+                        total={getProspectList(data, "scheduling").length}
+                        bg="indigo"
+                        title="Scheduling"
+                        category={"scheduling"}
+                        conversion={schedulingPercentage}
+                      />
+
+                        <Divider mt='xs' mb='xs' />
+                    </Box>
                   ),
-                })),
-              },
-              demo_won: {
-                id: "demo_won",
-                header: (
-                  <PipelineColumnHeader
-                    title="Closed Won"
-                    category={"demo_won"}
-                    conversion={closedDemoPercentage}
-                  />
-                ),
-                data: getProspectList(data, "demo_won").map((prospect) => ({
-                  id: prospect.id,
-                  content: (
-                    <PipelineProspect key={prospect.id} prospect={prospect} />
-                  ),
-                })),
-              },
-              not_interested: {
-                id: "not_interested",
-                header: (
-                  <PipelineColumnHeader
-                    title="Not Interested now"
-                    category={"not_interested"}
-                    conversion={notInterestedPercentage}
-                  />
-                ),
-                data: getProspectList(data, "not_interested").map(
-                  (prospect) => ({
+                  data: getProspectList(data, "scheduling").map((prospect) => ({
                     id: prospect.id,
                     content: (
-                      <PipelineProspect key={prospect.id} prospect={prospect} />
+                      <PipelineProspect
+                        key={prospect.id}
+                        prospect={prospect}
+                        bg="indigo"
+                      />
                     ),
-                  })
-                ),
-              },
-            }}
-            onColumnChange={async (start, end, prospectId) => {
-              // Update prospect category
-              setData((prev) => {
-                if (!prev) return prev;
-                const newData = prev.map((prospect) => {
-                  if (prospect.id == prospectId) {
-                    return {
-                      ...prospect,
-                      category: end,
-                    };
-                  }
-                  return prospect;
+                  })),
+                },
+                demo_set: {
+                  id: "demo_set",
+                  header: (
+                    <Box>
+                      <PipelineColumnHeader
+                        title="Demo Set"
+                        category={"demo_set"}
+                        total={getProspectList(data, "demo_set").length}
+                        conversion={demoSetPercentage}
+                        bg="blue"
+                      />
+                      <Divider mt='xs' mb='xs' />
+                    </Box>
+                  ),
+                  data: getProspectList(data, "demo_set").map((prospect) => ({
+                    id: prospect.id,
+                    content: (
+                      <PipelineProspect
+                        key={prospect.id}
+                        prospect={prospect}
+                        bg="blue"
+                      />
+                    ),
+                  })),
+                },
+                demo_won: {
+                  id: "demo_won",
+                  header: (
+                    <Box>
+                      <PipelineColumnHeader
+                        total={getProspectList(data, "demo_won").length}
+                        title="Closed Won"
+                        category={"demo_won"}
+                        conversion={closedDemoPercentage}
+                        bg="green"
+                      />
+                      <Divider mt='xs' mb='xs' />
+                    </Box>
+                  ),
+                  data: getProspectList(data, "demo_won").map((prospect) => ({
+                    id: prospect.id,
+                    content: (
+                      <PipelineProspect
+                        key={prospect.id}
+                        prospect={prospect}
+                        bg="green"
+                      />
+                    ),
+                  })),
+                },
+                not_interested: {
+                  id: "not_interested",
+                  header: (
+                    <Box>
+                      <PipelineColumnHeader
+                        total={getProspectList(data, "not_interested").length}
+                        title="Not Interested Now"
+                        category={"not_interested"}
+                        conversion={notInterestedPercentage}
+                        bg="orange"
+                      />
+                      <Divider mt='xs' mb='xs' />
+                    </Box>
+                  ),
+                  data: getProspectList(data, "not_interested").map(
+                    (prospect) => ({
+                      id: prospect.id,
+                      content: (
+                        <PipelineProspect
+                          key={prospect.id}
+                          prospect={prospect}
+                          bg="orange"
+                        />
+                      ),
+                    })
+                  ),
+                },
+              }}
+              onColumnChange={async (start, end, prospectId) => {
+                // Update prospect category
+                setData((prev) => {
+                  if (!prev) return prev;
+                  const newData = prev.map((prospect) => {
+                    if (prospect.id == prospectId) {
+                      return {
+                        ...prospect,
+                        category: end,
+                      };
+                    }
+                    return prospect;
+                  });
+                  return newData;
                 });
-                return newData;
-              });
 
-              if (end === "active_convo") {
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "LINKEDIN",
-                  "ACTIVE_CONVO",
-                  true,
-                  true
-                );
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "EMAIL",
-                  "ACTIVE_CONVO",
-                  true,
-                  true
-                );
-              } else if (end === "scheduling") {
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "LINKEDIN",
-                  "ACTIVE_CONVO_SCHEDULING",
-                  true,
-                  true
-                );
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "EMAIL",
-                  "SCHEDULING",
-                  true,
-                  true
-                );
-              } else if (end === "demo_set") {
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "LINKEDIN",
-                  "DEMO_SET",
-                  true,
-                  true
-                );
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "EMAIL",
-                  "DEMO_SET",
-                  true,
-                  true
-                );
-              } else if (end === "demo_won") {
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "LINKEDIN",
-                  "DEMO_WON",
-                  true,
-                  true
-                );
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "EMAIL",
-                  "DEMO_WON",
-                  true,
-                  true
-                );
-              } else if (end === "not_interested") {
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "LINKEDIN",
-                  "NOT_INTERESTED",
-                  true,
-                  true
-                );
-                await updateChannelStatus(
-                  +prospectId,
-                  userToken,
-                  "EMAIL",
-                  "NOT_INTERESTED",
-                  true,
-                  true
-                );
-              }
+                if (end === "active_convo") {
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "LINKEDIN",
+                    "ACTIVE_CONVO",
+                    true,
+                    true
+                  );
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "EMAIL",
+                    "ACTIVE_CONVO",
+                    true,
+                    true
+                  );
+                } else if (end === "scheduling") {
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "LINKEDIN",
+                    "ACTIVE_CONVO_SCHEDULING",
+                    true,
+                    true
+                  );
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "EMAIL",
+                    "SCHEDULING",
+                    true,
+                    true
+                  );
+                } else if (end === "demo_set") {
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "LINKEDIN",
+                    "DEMO_SET",
+                    true,
+                    true
+                  );
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "EMAIL",
+                    "DEMO_SET",
+                    true,
+                    true
+                  );
+                } else if (end === "demo_won") {
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "LINKEDIN",
+                    "DEMO_WON",
+                    true,
+                    true
+                  );
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "EMAIL",
+                    "DEMO_WON",
+                    true,
+                    true
+                  );
+                } else if (end === "not_interested") {
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "LINKEDIN",
+                    "NOT_INTERESTED",
+                    true,
+                    true
+                  );
+                  await updateChannelStatus(
+                    +prospectId,
+                    userToken,
+                    "EMAIL",
+                    "NOT_INTERESTED",
+                    true,
+                    true
+                  );
+                }
 
-              //refetch();
-            }}
-          />
-        )}
+                //refetch();
+              }}
+            />
+          )}
+        </Box>
       </Stack>
       {prospectDrawerOpened && <ProspectDetailsDrawer />}
     </>
@@ -403,240 +437,53 @@ function PipelineArrow(props: {
   label: string;
   ending?: boolean;
   height?: number;
+  bg?: string;
 }) {
-  let height = props.height || 40;
-  let arrowHeight = Math.sqrt((height * height) / 2);
-  let extensionWidth = 10;
+  const height = props.height || 40;
+  const arrowHeight = Math.sqrt((height * height) / 2);
+  const extensionWidth = 10;
 
   return (
     <Box sx={{ position: "relative" }}>
-      <Paper radius={0} h={height} withBorder>
+      <Paper radius={0} h={height} bg={props.bg}>
         <Center h={height}>
-          <Title order={5}>{props.label}</Title>
+          <Title order={5} color="white">
+            {props.label}
+          </Title>
         </Center>
       </Paper>
 
       {!props.ending && (
         <>
-          <Paper
-            radius={0}
+          <Box
             h={height}
             w={extensionWidth}
-            withBorder
+            bg={props.bg}
             sx={{
-              borderWidth: "1px 0px 1px 0!important",
               position: "absolute",
-              right: -(extensionWidth - 1),
+              right: -(extensionWidth - 3),
               top: 0,
+              bottom: 0,
               zIndex: 10,
             }}
-          ></Paper>
+          />
 
-          <Paper
+          <Box
             h={arrowHeight}
             w={arrowHeight}
-            radius={0}
-            withBorder
+            bg={props.bg}
             sx={{
-              borderWidth: "1px 1px 0 0!important",
+              borderTop: "5px solid #fff",
+              borderRight: "5px solid #fff",
               position: "absolute",
-              right: -(arrowHeight / 2 + extensionWidth - 1),
+              right: -(arrowHeight / 2 + extensionWidth),
               top: (height - arrowHeight) / 2,
               transform: "rotate(45deg)",
               zIndex: 10,
             }}
-          ></Paper>
+          />
         </>
       )}
     </Box>
-  );
-}
-
-function PipelineColumnHeader(props: {
-  title: string;
-  category: string;
-  conversion: number;
-}) {
-  const prospects = useRecoilValue(pipelineProspectsState);
-
-  const rawContractSize = getProspectList(
-    prospects || [],
-    props.category
-  ).reduce((acc, prospect) => acc + parseInt(prospect.contract_size), 0);
-
-  return (
-    <Box>
-      <Title order={6}>{props.title}</Title>
-      <Text fz="xs" c="dimmed">
-        Raw: ${rawContractSize.toLocaleString()} | Conversion:{" "}
-        {props.conversion*100}%
-      </Text>
-      <Text fz="xs" fw={700} c="pink.7">
-        Predicted Total: $
-        {Math.floor(rawContractSize * props.conversion).toLocaleString()}
-      </Text>
-      <Divider my={5} />
-    </Box>
-  );
-}
-
-function PipelineProspect(props: { prospect: ProspectPipeline }) {
-  const theme = useMantineTheme();
-
-  const [_opened, setOpened] = useRecoilState(prospectDrawerOpenState);
-  const [_prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
-
-  const [companyImageCache, setCompanyImageCache] = useRecoilState(
-    companyImageCacheState
-  );
-  const getCompanyImage = async () => {
-    const url = companyImageCache.get(props.prospect.company_name);
-    if (url) {
-      return url;
-    }
-
-    const foundUrl = await getFavIconFromURL(props.prospect.company_url);
-    if (foundUrl) {
-      setCompanyImageCache(
-        companyImageCache.set(props.prospect.company_name, foundUrl)
-      );
-    }
-    return foundUrl;
-  };
-  const [companyIcon, setCompanyIcon] = useState<string | null>(null);
-  useEffect(() => {
-    getCompanyImage().then((data) => {
-      setCompanyIcon(data);
-    });
-  }, []);
-
-  return (
-    <Group
-      spacing={0}
-      w="100%"
-      px={5}
-      position="apart"
-      align="flex-start"
-      noWrap
-      sx={{ position: "relative" }}
-    >
-      <Box sx={{ flexBasis: "66%" }}>
-        <Group
-          position="apart"
-          align="flex-start"
-          sx={{ flexDirection: "column" }}
-        >
-          <Group spacing={10} align="flex-start" noWrap>
-            <Indicator
-              inline
-              size={16}
-              offset={8}
-              position="bottom-end"
-              label={
-                <Avatar
-                  src={proxyURL(props.prospect.img_url)}
-                  alt={props.prospect.full_name}
-                  color={valueToColor(theme, props.prospect.full_name)}
-                  radius="xl"
-                  size={20}
-                >
-                  {nameToInitials(props.prospect.full_name)}
-                </Avatar>
-              }
-              styles={{
-                indicator: {
-                  backgroundColor: "#00000000", // transparent
-                  zIndex: 1,
-                },
-              }}
-            >
-              <Avatar
-                src={companyIcon}
-                alt={props.prospect.company_name}
-                color={valueToColor(theme, props.prospect.company_name)}
-                radius="xl"
-              >
-                {nameToInitials(props.prospect.company_name)}
-              </Avatar>
-            </Indicator>
-            <Stack spacing={0}>
-              <Text fz="sm" fw={700} h={16} truncate>
-                {_.truncate(props.prospect.company_name, { length: 16 })}
-              </Text>
-              <Text fz={10} h={13} truncate>
-                {_.truncate(props.prospect.full_name, { length: 22 })}
-              </Text>
-              <Text fz={8} fw={400} fs="italic">
-                {_.truncate(props.prospect.title, { length: 50 })}
-              </Text>
-            </Stack>
-          </Group>
-          <Box sx={{ position: "absolute", left: 5, bottom: 0 }}>
-            <Button
-              variant="subtle"
-              color="pink"
-              size="xs"
-              onClick={() => {
-                setProspectId(+props.prospect.id);
-                setOpened(true);
-              }}
-              rightIcon={<IconArrowRight size="1rem" />}
-            >
-              Open Prospect
-            </Button>
-          </Box>
-        </Group>
-      </Box>
-      <Box sx={{ flexBasis: "34%" }}>
-        <Stack spacing={8}>
-          <Box>
-            <Text fz={8} fw={700} c="dimmed" tt="uppercase" ta="right">
-              Last Updated:
-            </Text>
-            <Text fz={10} h={13} ta="right" truncate>
-              {convertDateToCasualTime(
-                new Date(props.prospect.last_updated + " UTC")
-              )}
-            </Text>
-          </Box>
-          <Box>
-            <Text fz={8} fw={700} c="dimmed" tt="uppercase" ta="right">
-              Est Deal Value:
-            </Text>
-            <Text fz={10} h={13} ta="right">
-              ${parseInt(props.prospect.contract_size).toLocaleString()}
-            </Text>
-          </Box>
-          <Group spacing={5} position="right" noWrap>
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              onClick={() => {
-                const company_url = !props.prospect.company_url.startsWith(
-                  "http"
-                )
-                  ? "https://" + props.prospect.company_url
-                  : props.prospect.company_url;
-                window.open(company_url, "_blank");
-              }}
-            >
-              <IconWorld size="1rem" />
-            </ActionIcon>
-            <ActionIcon
-              variant="subtle"
-              size="sm"
-              onClick={() => {
-                const li_url = !props.prospect.li_url.startsWith("http")
-                  ? "https://" + props.prospect.li_url
-                  : props.prospect.li_url;
-                window.open(li_url, "_blank");
-              }}
-            >
-              <IconBrandLinkedin size="1rem" />
-            </ActionIcon>
-          </Group>
-        </Stack>
-      </Box>
-    </Group>
   );
 }

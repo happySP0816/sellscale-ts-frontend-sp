@@ -301,7 +301,7 @@ const router = sentryCreateBrowserRouter([
         element: (
           <RestrictedRoute
             page={
-              <Box p="md">
+              <Box p="md" bg={"white"}>
                 <PipelineSection />
               </Box>
             }
@@ -313,7 +313,7 @@ const router = sentryCreateBrowserRouter([
         element: (
           <RestrictedRoute
             page={
-              <Box p="md">
+              <Box p="md" bg={"white"}>
                 <PipelineSection />
               </Box>
             }

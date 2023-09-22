@@ -113,47 +113,40 @@ export function PipelineProspect(props: {
                 </Avatar>
               </Indicator>
             </Box>
-            <Flex
-              gap={"0.25rem"}
-              direction={"column"}
-              justify={"center"}
-              wrap={"wrap"}
-            >
-              <Flex w={"100%"} wrap={"nowrap"}>
-                <Text fz={"1rem"} fw={700}>
-                  {_.truncate(props.prospect.company_name, { length: 16 })}:
-                </Text>
-                <Text fz={"1rem"} fw={700} color="gray.6">
-                  &nbsp;
-                  {_.truncate(props.prospect.full_name, {
-                    length: 8,
-                    separator: ".",
-                    omission: ".",
-                  })}
-                </Text>
-              </Flex>
-              <Text fz={"0.75rem"} fw={700} fs="italic" color="gray.6">
+            <Box>
+              
+              <Text size='xs' fw={700}>
+                {_.truncate(props.prospect.company_name, { length: 27 })}
+              </Text>
+              <Text size='sm' fw={700} color="gray.6">
+                {_.truncate(props.prospect.full_name, {
+                  length: 20,
+                  separator: ".",
+                  omission: ".",
+                })}
+              </Text>
+              <Text size='xs' fw={400} color="gray.6">
                 {_.truncate(props.prospect.title, { length: 50 })}
               </Text>
-            </Flex>
+            </Box>
           </Flex>
           <Divider my={"1rem"} w={"100%"} color="gray.4" sx={{ flex: 1 }} />
           <Flex direction={"column"} gap={"0.25rem"}>
             <Flex justify={"space-between"}>
-              <Text fz={"0.75rem"} fw={600} color="gray.6">
+              <Text fw={600} color="gray.6" size='xs'>
                 Last Updated:
               </Text>
-              <Text fz={"0.75rem"} fw={700} color="gray.7">
+              <Text size='xs' fw={700} color="gray.7">
                 {convertDateToCasualTime(
                   new Date(props.prospect.last_updated + " UTC")
                 )}
               </Text>
             </Flex>
             <Flex justify={"space-between"}>
-              <Text fz={"0.75rem"} fw={600} color="gray.6">
+              <Text size='xs' fw={600} color="gray.6">
                 Est Deal Value
               </Text>
-              <Text fz={"0.75rem"} fw={700} color="green">
+              <Text size='xs' fw={700} color="green">
                 ${parseInt(props.prospect.contract_size).toLocaleString()}
               </Text>
             </Flex>

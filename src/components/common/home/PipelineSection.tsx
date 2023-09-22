@@ -10,6 +10,7 @@ import {
   SimpleGrid,
   Center,
   LoadingOverlay,
+  Divider,
 } from "@mantine/core";
 import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import moment from "moment";
@@ -152,7 +153,7 @@ export default function PipelineSection() {
             {moment(new Date()).format("MMMM D, YYYY")}
           </Text>
         </Box>
-        <Box miw={"1000px"}>
+        <Box miw={"1200px"}>
           <Text fz="xs" fw={700} c="dimmed">
             AI Generated Pipeline
           </Text>
@@ -183,20 +184,23 @@ export default function PipelineSection() {
             </SimpleGrid>
           </Box>
         </Box>
-        <Box miw={"1000px"}>
+        <Box miw={"1000px"} h='100%'>
           {data && (
             <DndColumns
               initialColumns={{
                 active_convo: {
                   id: "active_convo",
                   header: (
-                    <PipelineColumnHeader
-                      bg="grape"
-                      title="Active Conversation"
-                      category={"active_convo"}
-                      total={getProspectList(data, "active_convo").length}
-                      conversion={activeConvoPercentage}
-                    />
+                    <Box>
+                      <PipelineColumnHeader
+                        bg="grape"
+                        title="Active Conversation"
+                        category={"active_convo"}
+                        total={getProspectList(data, "active_convo").length}
+                        conversion={activeConvoPercentage}
+                      />
+                      <Divider mt='xs' mb='xs' />
+                    </Box>
                   ),
                   data: getProspectList(data, "active_convo").map(
                     (prospect) => ({
@@ -214,13 +218,17 @@ export default function PipelineSection() {
                 scheduling: {
                   id: "scheduling",
                   header: (
-                    <PipelineColumnHeader
-                      total={getProspectList(data, "scheduling").length}
-                      bg="indigo"
-                      title="Scheduling"
-                      category={"scheduling"}
-                      conversion={schedulingPercentage}
-                    />
+                    <Box>
+                      <PipelineColumnHeader
+                        total={getProspectList(data, "scheduling").length}
+                        bg="indigo"
+                        title="Scheduling"
+                        category={"scheduling"}
+                        conversion={schedulingPercentage}
+                      />
+
+                        <Divider mt='xs' mb='xs' />
+                    </Box>
                   ),
                   data: getProspectList(data, "scheduling").map((prospect) => ({
                     id: prospect.id,
@@ -236,13 +244,16 @@ export default function PipelineSection() {
                 demo_set: {
                   id: "demo_set",
                   header: (
-                    <PipelineColumnHeader
-                      title="Demo Set"
-                      category={"demo_set"}
-                      total={getProspectList(data, "demo_set").length}
-                      conversion={demoSetPercentage}
-                      bg="blue"
-                    />
+                    <Box>
+                      <PipelineColumnHeader
+                        title="Demo Set"
+                        category={"demo_set"}
+                        total={getProspectList(data, "demo_set").length}
+                        conversion={demoSetPercentage}
+                        bg="blue"
+                      />
+                      <Divider mt='xs' mb='xs' />
+                    </Box>
                   ),
                   data: getProspectList(data, "demo_set").map((prospect) => ({
                     id: prospect.id,
@@ -258,13 +269,16 @@ export default function PipelineSection() {
                 demo_won: {
                   id: "demo_won",
                   header: (
-                    <PipelineColumnHeader
-                      total={getProspectList(data, "demo_won").length}
-                      title="Closed Won"
-                      category={"demo_won"}
-                      conversion={closedDemoPercentage}
-                      bg="green"
-                    />
+                    <Box>
+                      <PipelineColumnHeader
+                        total={getProspectList(data, "demo_won").length}
+                        title="Closed Won"
+                        category={"demo_won"}
+                        conversion={closedDemoPercentage}
+                        bg="green"
+                      />
+                      <Divider mt='xs' mb='xs' />
+                    </Box>
                   ),
                   data: getProspectList(data, "demo_won").map((prospect) => ({
                     id: prospect.id,
@@ -280,13 +294,16 @@ export default function PipelineSection() {
                 not_interested: {
                   id: "not_interested",
                   header: (
-                    <PipelineColumnHeader
-                      total={getProspectList(data, "not_interested").length}
-                      title="Not Interested now"
-                      category={"not_interested"}
-                      conversion={notInterestedPercentage}
-                      bg="orange"
-                    />
+                    <Box>
+                      <PipelineColumnHeader
+                        total={getProspectList(data, "not_interested").length}
+                        title="Not Interested Now"
+                        category={"not_interested"}
+                        conversion={notInterestedPercentage}
+                        bg="orange"
+                      />
+                      <Divider mt='xs' mb='xs' />
+                    </Box>
                   ),
                   data: getProspectList(data, "not_interested").map(
                     (prospect) => ({

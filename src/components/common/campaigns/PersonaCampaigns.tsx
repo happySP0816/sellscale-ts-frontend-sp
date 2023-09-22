@@ -230,19 +230,6 @@ export default function PersonaCampaigns() {
       <Stack>
         <Group position="apart">
           <Title order={2}>Campaigns</Title>
-          <Button
-            radius="md"
-            leftIcon={<IconPlus size="1rem" />}
-            onClick={() => {
-              openContextModal({
-                modal: "uploadProspects",
-                title: <Title order={3}>Create Campaign</Title>,
-                innerProps: { mode: "CREATE-ONLY" },
-              });
-            }}
-          >
-            Create New Campaign
-          </Button>
         </Group>
         <Tabs defaultValue="overview">
           <Tabs.List>
@@ -270,7 +257,20 @@ export default function PersonaCampaigns() {
               </Flex>
               <Group position="apart">
                 <Group>
-                  <TextInput
+                   <Button
+                    radius="md"
+                    leftIcon={<IconPlus size="1rem" />}
+                    onClick={() => {
+                      openContextModal({
+                        modal: "uploadProspects",
+                        title: <Title order={3}>Create Campaign</Title>,
+                        innerProps: { mode: "CREATE-ONLY" },
+                      });
+                    }}
+                  >
+                    Create New Campaign
+                  </Button>
+                  {/* <TextInput
                     radius="md"
                     placeholder="Search"
                     rightSection={<IconSearch color="#767e85" size="1.0rem" />}
@@ -282,7 +282,7 @@ export default function PersonaCampaigns() {
                     }}
                     value={search}
                     onChange={(event) => setSearch(event.currentTarget.value)}
-                  />
+                  /> */}
                   {/* <Select
                     radius="md"
                     placeholder="Sort by"

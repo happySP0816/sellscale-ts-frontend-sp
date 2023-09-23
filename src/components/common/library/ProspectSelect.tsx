@@ -199,7 +199,7 @@ export default function ProspectSelect(props: {
         const foundProspect = resultProspects.find(
             (prospect) => prospect.id === props.selectedProspect
           )
-        if (props.selectedProspect) {
+        if (props.selectedProspect && props.selectedProspect !== -1) {
           setSelectedProspect(foundProspect);
           props.onChange(foundProspect);
         } else {

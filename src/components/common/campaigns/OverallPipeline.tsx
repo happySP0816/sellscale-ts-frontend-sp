@@ -218,7 +218,7 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
                   >
                     <Flex w={"100%"} justify={"space-between"}>
                       <Box>
-                        <Text color="gray.6" fw={500} size={"0.75rem"}>
+                        <Text color="gray.7" fw={500} size={"0.75rem"}>
                           Current %
                         </Text>
                       </Box>
@@ -240,7 +240,7 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
                     </Flex>
                     <Flex w={"100%"} justify={"space-between"}>
                       <Box>
-                        <Text color="gray.6" fw={500} size={"0.75rem"}>
+                        <Text color="gray.7" fw={500} size={"0.75rem"}>
                           Goal %
                         </Text>
                       </Box>

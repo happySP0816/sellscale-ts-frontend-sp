@@ -6,6 +6,7 @@ import {
   Box,
   NumberInput,
   Flex,
+  Button,
 } from "@mantine/core";
 import { updateConversionPercentages } from "@utils/requests/updateClientSDR";
 import { useEffect, useState } from "react";
@@ -27,15 +28,18 @@ export default function SettingPreferences() {
     userData.conversion_demo_pct || 0.1
   );
 
-  useEffect(() => {
-    updateConversionPercentages(
+  const update = async () => {
+    const response = await updateConversionPercentages(
       userToken,
       openPercentage,
       replyPercentage,
       demoPercentage,
-    ).then((response) => {
-      syncLocalStorage(userToken, setUserData);
-    });
+    );
+    await syncLocalStorage(userToken, setUserData);
+  }
+
+  useEffect(() => {
+    update();
   }, [
     openPercentage,
     replyPercentage,
@@ -52,34 +56,37 @@ export default function SettingPreferences() {
           </Flex>
           <Flex w='100%' direction='row' justify={'space-between'} mt='lg'>
             <NumberInput
-              label="Opens"
+              label="% Opens"
               value={openPercentage}
               onChange={(value) => setOpenPercentage(value || 0)}
-              precision={1}
+              precision={2}
               min={0}
               step={0.1}
               max={100}
             />
             <NumberInput
-              label="Replies"
+              label="% Replies"
               value={replyPercentage}
               onChange={(value) => setReplyPercentage(value || 0)}
-              precision={1}
+              precision={2}
               min={0}
               step={0.1}
               max={100}
             />
             <NumberInput
-              label="Demos"
+              label="% Demos"
               value={demoPercentage}
               onChange={(value) => setDemoPercentage(value || 0)}
-              precision={1}
+              precision={2}
               min={0}
               step={0.1}
               max={100}
             />
           </Flex>
         </Flex>
+        <Button
+          onClick={update}
+        >Save</Button>
       </Group>
     </Box>
   );

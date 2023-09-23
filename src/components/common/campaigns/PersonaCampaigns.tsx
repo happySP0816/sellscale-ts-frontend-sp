@@ -176,12 +176,12 @@ export default function PersonaCampaigns() {
       }
       setCampaignAnalyticData(analytics);
 
-      console.log(userData);
-
       // Get LinkedIn SLA
+      console.log("SWAG1")
+      console.log(userData)
       if (userData.sla_schedules) {
         for (const schedule of userData.sla_schedules) {
-          if (schedule.is_current_week) {
+          if (moment(schedule.start_date) < moment() && moment() <= moment(schedule.start_date).add(7, 'days')) {
             setCurrentLinkedInSLA(schedule.linkedin_volume);
           }
         }

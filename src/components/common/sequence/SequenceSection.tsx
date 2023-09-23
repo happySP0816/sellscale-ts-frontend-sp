@@ -296,8 +296,29 @@ export default function SequenceSection() {
                 active={activeCard === 0}
                 conversion={conversionRate}
                 onClick={() => onSetActiveCard(0)}
+                footer={
+                  <Tooltip label="Not customizable yet">
+                    <Center sx={{cursor: 'pointer'}}>
+                      <Group spacing={2}>
+                        <Text fz={14}>wait for</Text>
+                        <NumberInput
+                          placeholder="# Days"
+                          variant="filled"
+                          hideControls
+                          min={1}
+                          max={99}
+                          w={30}
+                          size="xs"
+                          disabled
+                          defaultValue={0}
+                        />
+                        <Text fz={14}>days, then:</Text>
+                      </Group>
+                    </Center>
+                  </Tooltip>
+                }
               />
-              <Divider
+              {/* <Divider
                 variant="dashed"
                 label={
                   <>
@@ -308,7 +329,7 @@ export default function SequenceSection() {
                 }
                 labelPosition="center"
                 mx={50}
-              />
+              /> */}
               <Divider
                 variant="solid"
                 label={
@@ -352,6 +373,8 @@ export default function SequenceSection() {
                         placeholder="# Days"
                         variant="filled"
                         hideControls
+                        sx={{border: 'solid 1px #777; border-radius: 4px;'}}
+                        m={3}
                         min={1}
                         max={99}
                         w={bf0Delay.current > 9 ? 50 : 30}
@@ -411,6 +434,8 @@ export default function SequenceSection() {
                         placeholder="# Days"
                         variant="filled"
                         hideControls
+                        sx={{border: 'solid 1px #777; border-radius: 4px;'}}
+                        m={3}
                         min={1}
                         max={99}
                         w={bf1Delay.current > 9 ? 50 : 30}
@@ -470,6 +495,8 @@ export default function SequenceSection() {
                         placeholder="# Days"
                         variant="filled"
                         hideControls
+                        sx={{border: 'solid 1px #777; border-radius: 4px;'}}
+                        m={3}
                         min={2}
                         max={99}
                         w={bf2Delay.current > 9 ? 50 : 30}

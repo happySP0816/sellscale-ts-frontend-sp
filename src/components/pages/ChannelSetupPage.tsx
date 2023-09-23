@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import BumpFrameworksPage from './BumpFrameworksPage';
 
 import { Alert, Box, Card, Text } from '@mantine/core';
@@ -6,18 +6,32 @@ import ChannelsSetupSelector from './channels';
 import ComingSoonCard from '@common/library/ComingSoonCard';
 import EmailSequencingPage from './EmailSequencingPage';
 import { currentProjectState } from '@atoms/personaAtoms';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { IconArrowUp, IconBulb } from '@tabler/icons-react';
 import NurturePage from './NurturePage';
 import { useLoaderData } from 'react-router-dom';
+import { getCurrentPersonaId, getFreshCurrentProject } from '@auth/core';
+import { userTokenState } from '@atoms/userAtoms';
 
 export default function ChannelSetupPage() {
   const { channelType } = useLoaderData() as {
     channelType: string;
   };
 
+  const userToken = useRecoilValue(userTokenState);
   const [selectedChannel, setSelectedChannel] = React.useState(channelType);
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+
+  useEffect(() => {
+    (async () => {
+      const currentPersonaId = getCurrentPersonaId();
+      console.log('got here', currentProject, currentPersonaId)
+      if (!currentProject && currentPersonaId) {
+        const project = await getFreshCurrentProject(userToken, +currentPersonaId);
+        setCurrentProject(project)
+      }
+    })();
+  }, []);
 
   return (
     <>

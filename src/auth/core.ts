@@ -100,7 +100,7 @@ export function getCurrentPersonaId(){
   return localStorage.getItem('opened-persona-id');
 }
 
-export async function setFreshCurrentProject(userToken: string, projectId: number, setCurrentProject: SetterOrUpdater<any>) {
+export async function getFreshCurrentProject(userToken: string, projectId: number) {
 
   const response = await getPersonasOverview(userToken);
   const result =
@@ -109,6 +109,6 @@ export async function setFreshCurrentProject(userToken: string, projectId: numbe
           : [];
 
   const project = result.find((p) => p.id === projectId);
-  setCurrentProject(project);
+  return project || null;
 
 }

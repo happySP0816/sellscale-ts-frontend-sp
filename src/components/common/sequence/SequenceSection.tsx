@@ -3,7 +3,7 @@ import {
   uploadDrawerOpenState,
 } from "@atoms/personaAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { logout, setFreshCurrentProject } from "@auth/core";
+import { logout, getFreshCurrentProject } from "@auth/core";
 import ModalSelector from "@common/library/ModalSelector";
 import ProspectSelect from "@common/library/ProspectSelect";
 import VoiceSelect from "@common/library/VoiceSelect";
@@ -1004,11 +1004,9 @@ function IntroMessageSection() {
                   items.filter((x) => !x.checked).map((x) => x.id)
                 );
 
-                await setFreshCurrentProject(
+                setCurrentProject(await getFreshCurrentProject(
                   userToken,
-                  currentProject.id,
-                  setCurrentProject
-                );
+                  currentProject.id));
               }}
             />
           </Tabs.Panel>

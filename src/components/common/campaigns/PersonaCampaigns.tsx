@@ -176,6 +176,8 @@ export default function PersonaCampaigns() {
       }
       setCampaignAnalyticData(analytics);
 
+      console.log(userData);
+
       // Get LinkedIn SLA
       if (userData.sla_schedules) {
         for (const schedule of userData.sla_schedules) {

@@ -38,7 +38,7 @@ const ICPFilters = () => {
           onClose={close}
           withCloseButton={false}
           size={"15rem"}
-          overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
+          overlayProps={{ blur: 4 }}
         >
           <Box h={"100vh"} pos={"relative"} m={"-1rem"}>
             <Sidebar />

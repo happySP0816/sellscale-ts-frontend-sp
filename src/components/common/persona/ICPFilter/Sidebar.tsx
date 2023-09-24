@@ -5,7 +5,7 @@ import { SidebarHeader } from "./SidebarHeader";
 
 const Sidebar = () => {
   return (
-    <Flex direction={"column"} mah={"100vh"} w={"15rem"}>
+    <Flex direction={"column"} h={"100vh"} w={"15rem"}>
       <SidebarHeader />
 
       <ScrollArea>

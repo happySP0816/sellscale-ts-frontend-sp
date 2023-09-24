@@ -36,7 +36,6 @@ const ICPFilters = () => {
         <Drawer
           opened={opened}
           onClose={close}
-          h={"100vh"}
           withCloseButton={false}
           size={"15rem"}
           overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}

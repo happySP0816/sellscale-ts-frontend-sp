@@ -523,10 +523,10 @@ export default function UploadProspectsModal({
             </Container>
           )}
 
-        <Tabs defaultValue="from-file" px="xs" color="teal">
+        <Tabs defaultValue="from-empty" px="xs" color="teal">
           <Tabs.List>
-            <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
             <Tabs.Tab value="from-empty">Upload Prospects Later</Tabs.Tab>
+            <Tabs.Tab value="from-file">Import from File</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="from-file" pt="xs">
             <FileDropAndPreview

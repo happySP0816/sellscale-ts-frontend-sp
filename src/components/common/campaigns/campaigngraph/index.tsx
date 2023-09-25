@@ -78,13 +78,16 @@ const CampaignGraph = (props: {sections: any, onChannelClick: (sectionType: stri
             numbers={[linkedinSection[0]?.sends, linkedinSection[0]?.opens, linkedinSection[0]?.replies,]}
           />
         </Grid.Col>
-        <Grid.Col xs={12} md={1.5}>
+        <Grid.Col xs={12} md={1.5} sx={{
+          transform: isEnabledLinkedin ? '' : 'scale(0.7)', 
+          opacity: isEnabledEmail ? 1 : 0
+        }}>
           <Hook
             linkedLeft={isEnabledLinkedin}
             linkedRight={isActiveEmail && isEnabledEmail}
           />
         </Grid.Col>
-        <Grid.Col xs={12} md={3} onClick={() => props.onChannelClick('email')} sx={{cursor: 'pointer'}}>
+        <Grid.Col xs={12} md={3} onClick={() => props.onChannelClick('email')} sx={{cursor: 'pointer', transform: isEnabledEmail ? '' : 'scale(0.7)'}}>
           <CampaignSequenceDAG
             type="email"
             active={isEnabledEmail}
@@ -93,13 +96,16 @@ const CampaignGraph = (props: {sections: any, onChannelClick: (sectionType: stri
             numbers={[emailSection[0]?.sends, emailSection[0]?.opens, emailSection[0]?.replies,]}
           />
         </Grid.Col>
-        <Grid.Col xs={12} md={1.5}>
+        <Grid.Col xs={12} md={1.5} sx={{
+          transform: isEnabledEmail ? '' : 'scale(0.7)', 
+          opacity: isEnabledNurture ? 1 : 0,
+        }}>
           <Hook
             linkedLeft={isActiveEmail && isEnabledEmail}
             linkedRight={isActiveNurture && isEnabledNurture}
           />
         </Grid.Col>
-        <Grid.Col xs={12} md={3} onClick={() => {}} sx={{cursor: 'not-allowed'}}>
+        <Grid.Col xs={12} md={3} onClick={() => {}} sx={{cursor: 'not-allowed', transform: isEnabledNurture ? '' : 'scale(0.7)'}}>
           <CampaignSequenceDAG
             type="nurture"
             active={isEnabledNurture}

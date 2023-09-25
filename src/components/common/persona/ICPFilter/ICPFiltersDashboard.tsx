@@ -224,6 +224,11 @@ const tabFilters = [
     value: "very_low",
     count: 150,
   },
+  {
+    label: "Unscored",
+    value: "unscored",
+    count: 150,
+  },
 ];
 
 const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({

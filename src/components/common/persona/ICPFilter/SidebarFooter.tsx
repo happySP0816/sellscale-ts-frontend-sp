@@ -1,7 +1,9 @@
 import { IconArrowNarrowRight, IconBookmark } from "@tabler/icons-react";
-import { Box, useMantineTheme, Button, Title } from "@mantine/core";
-
-export function SidebarFooter() {
+import { Box, useMantineTheme, Button, Title, Text } from "@mantine/core";
+type Props = {
+  isTesting: boolean;
+};
+export function SidebarFooter({ isTesting }: Props) {
   const theme = useMantineTheme();
 
   return (
@@ -10,12 +12,30 @@ export function SidebarFooter() {
         padding: theme.spacing.sm,
         boxShadow: "0px 0px 10px 0px rgba(0, 0, 0, 0.15)",
         display: "flex",
-
+        marginTop: "auto",
         flexDirection: "column",
       }}
     >
-      <Button rightIcon={<IconArrowNarrowRight size={24} />} fullWidth>
-        Start Filtering
+      <Box>
+        {isTesting ? (
+          <Text color="red" fz={"0.75rem"} fw={700}>
+            Test Mode: Note that you are currently in test mode and only running
+            scoring on 50 prospects.
+          </Text>
+        ) : (
+          <Text color="red" fz={"0.75rem"} fw={700}>
+            Warning: You are about to run on all prospects and this may take a
+            while. Run on a sample of 50 prospects to see results faster.
+          </Text>
+        )}
+      </Box>
+      <Button
+        rightIcon={isTesting ? null : <IconArrowNarrowRight size={24} />}
+        mt={"0.5rem"}
+        fullWidth
+        color={isTesting ? "blue" : "red"}
+      >
+        {isTesting ? "Filter test sample" : "Start Filtering"}
       </Button>
 
       <Box

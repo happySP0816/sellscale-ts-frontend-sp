@@ -37,11 +37,17 @@ export const STARTING_INSTRUCTIONS = `Follow instructions to generate a short in
 export const MSG_GEN_AMOUNT = 6;
 export const MAX_EDITING_PHASES = 3;
 
-export default function VoiceBuilderModal({
-  context,
-  id,
-  innerProps,
-}: ContextModalProps<{ }>) {
+
+
+
+import { Modal, ActionIcon } from "@mantine/core";
+import { IconX } from "@tabler/icons-react";
+
+const VoiceBuilderModal: React.FC<{
+  opened: boolean;
+  close: () => void;
+}> = ({ opened, close }) => {
+
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -77,16 +83,45 @@ export default function VoiceBuilderModal({
     currentProject &&
     voiceBuilderOnboardingId !== -1;
     // && currentProject.ctas.length >= 2
-    
+
+  const borderGray = "#E9ECEF";
+  const blue = "#228be6";
 
   return (
-    <Paper
-      p={0}
-      style={{
-        position: "relative",
-      }}
-    >
-      <LoadingOverlay visible={loading} />
+    <Modal.Root opened={opened} onClose={close} fullScreen closeOnClickOutside>
+      <Modal.Overlay blur={3} color="gray.2" opacity={0.5} />
+      <Modal.Content sx={{ borderRadius: "8px", overflow: "hidden" }}>
+        <Modal.Header
+          md-px={"1.5rem"}
+          px={"1rem"}
+          sx={{
+            background: blue,
+            display: "flex",
+          }}
+          h={"3.5rem"}
+        >
+          <Modal.Title
+            fz={"1rem"}
+            fw={600}
+            sx={{
+              color: "#FFFFFF",
+            }}
+          >
+            Train your Voice
+          </Modal.Title>
+          <ActionIcon
+            variant="outline"
+            size={"sm"}
+            onClick={close}
+            sx={{ borderColor: borderGray, borderRadius: 999 }}
+          >
+            <IconX color="#FFFFFF" />
+          </ActionIcon>
+        </Modal.Header>
+
+        <Modal.Body p={0}>
+
+        <LoadingOverlay visible={loading} />
       {loading && (
         <Skeleton height={500}>
         </Skeleton>
@@ -99,7 +134,7 @@ export default function VoiceBuilderModal({
           createCampaign
           onComplete={() => {
             queryClient.refetchQueries(["query-voices"]);
-            context.closeModal(id);
+            close();
           }}
         />
       )}
@@ -108,6 +143,11 @@ export default function VoiceBuilderModal({
           This persona needs at least 3 CTA in order to build a voice for it.
         </Text>
       )}
-    </Paper>
+
+        </Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
   );
-}
+};
+
+export default VoiceBuilderModal;

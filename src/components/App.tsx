@@ -128,7 +128,6 @@ export default function App() {
               manageBumpFramework: ManageBumpFramework,
               patchEmailSubjectLine: PatchEmailSubjectLineModal,
               clientProduct: ClientProductModal,
-              voiceBuilder: VoiceBuilderModal,
               demoFeedbackDetails: DemoFeedbackDetailsModal,
               editBumpFramework: EditBumpFrameworkModal,
               editEmailSequenceStepModal: EditEmailSequenceStepModal,

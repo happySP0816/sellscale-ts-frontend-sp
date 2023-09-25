@@ -27,6 +27,7 @@ import {
   Box,
   useMantineTheme,
   FocusTrap,
+  Stack,
 } from "@mantine/core";
 import { Archetype, PersonaOverview, Prospect } from "src";
 import {
@@ -48,7 +49,7 @@ import {
   MSG_GEN_AMOUNT,
   STARTING_INSTRUCTIONS,
 } from "@modals/VoiceBuilderModal";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   createVoice,
   deleteSample,
@@ -68,6 +69,8 @@ import { API_URL } from "@constants/data";
 import TextAlign from "@tiptap/extension-text-align";
 import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
 import { logout } from "@auth/core";
+import TrainYourAi from "./TrainYourAi";
+import { openConfirmModal } from "@mantine/modals";
 
 const ItemComponent = (props: { id: number; defaultValue: string }) => {
   const [message, setMessage] = useState<string>(props.defaultValue);
@@ -294,6 +297,8 @@ export default function VoiceBuilderFlow(props: {
     voiceBuilderMessagesState
   );
 
+  const userData = useRecoilValue(userDataState);
+
   const theme = useMantineTheme();
   const [simulationProspectId, setSimulationProspectId]: any = useState(-1);
   const userToken = useRecoilValue(userTokenState);
@@ -307,7 +312,8 @@ export default function VoiceBuilderFlow(props: {
   }, []);
 
   const [editingPhase, setEditingPhase] = useState(1);
-  const [loadingMsgGen, setLoadingMsgGen] = useState(false);
+  const [loadingMsgGen, setLoadingMsgGen] = useState(true);
+  const [loadingComplete, setLoadingComplete] = useState(false);
   const [loadingSimulationSample, setLoadingSample] = useState(false);
   const [generatedSimulationCompletion, setGeneratedSimulationCompletion] =
     useState("");
@@ -373,13 +379,21 @@ export default function VoiceBuilderFlow(props: {
           };
         });
       });
+
+      // If we didn't get samples, try again
+      if (response.data.length === 0) {
+        await generateMessages();
+      }
     }
 
-    setLoadingMsgGen(false);
+    if (response?.data?.length > 0) {
+      setLoadingMsgGen(false);
+    }
   };
 
   // Finalize voice building and create voice
   const completeVoice = async () => {
+    setLoadingComplete(true);
     // Clone so we don't have to deal with async global state changes bs
     const currentMessages = _.cloneDeep(voiceBuilderMessages);
 
@@ -434,6 +448,7 @@ export default function VoiceBuilderFlow(props: {
       console.log(res);
     }
 
+    setLoadingComplete(false);
     if (response.status === "success") {
       props.onComplete?.();
     }
@@ -497,19 +512,52 @@ export default function VoiceBuilderFlow(props: {
       });
   };
 
+  const openCompleteModal = () =>
+    openConfirmModal({
+      title: (
+        <Title order={2} ta="center">
+          Congrats!
+        </Title>
+      ),
+      children: (
+        <Stack>
+          <Box>
+            <Text size="lg" ta="center">You've edited your voice:</Text>
+            <Text size="lg" fw={700} ta="center">"{userData.sdr_name.split(" ")[0]}'s Voice"</Text>
+          </Box>
+          <Box>
+            <Text size="lg" ta="center">
+              The AI will study your samples to mimick your voice.
+            </Text>
+          </Box>
+          <Box>
+            <Text size="lg" ta="center">Come back to this module any time to edit.</Text>
+          </Box>
+        </Stack>
+      ),
+      labels: { confirm: "Create", cancel: "Cancel" },
+      onConfirm: async () => {
+        await completeVoice();
+      },
+      onCancel: () => {},
+    });
+
+  // if(voiceBuilderMessages.length === 0) {
+  //   return <Text>No messages found.</Text>
+  // }
+
   return (
     <>
-      <div style={{ position: "relative" }}>
-        <Text pt={15} px={2} fz="sm" fw={400}>
-          Please edit these messages to your liking or click to discard. Once
-          you’re satisfied, click to continue.
-        </Text>
-        <ScrollArea style={{ position: "relative", height: 410 }}>
-          <Container>
-            <Divider my="sm" />
-          </Container>
+      {loadingMsgGen && (
+        <div style={{ position: "relative" }}>
+          <ScrollArea style={{ position: "relative", height: 410 }}>
+            <Container>
+              <Text pt={15} px={2} fz="sm" fw={400}>
+                We'll have you edit 5 sample messages to your style.
+              </Text>
+              <Divider my="sm" />
+            </Container>
 
-          {loadingMsgGen && (
             <Container w="100%">
               {<Loader mx="auto" variant="dots" />}
               <Text color="blue">Generating messages ...</Text>
@@ -522,62 +570,75 @@ export default function VoiceBuilderFlow(props: {
               {count > 9 && <Text color="blue">Almost there ...</Text>}
               {count > 15 && <Text color="blue">Making final touches ...</Text>}
             </Container>
-          )}
-          {!loadingMsgGen &&
+            {/* {!loadingMsgGen &&
             voiceBuilderMessages.map((item) => (
               <ItemComponent
                 key={item.id}
                 id={item.id}
                 defaultValue={item.value}
               />
-            ))}
-        </ScrollArea>
-      </div>
+            ))} */}
+          </ScrollArea>
+        </div>
+      )}
 
-      <Textarea
+      <LoadingOverlay visible={loadingComplete} overlayBlur={2} />
+
+      {!loadingMsgGen && (
+        <TrainYourAi
+          messages={voiceBuilderMessages.filter((msg) => msg.value)}
+          onComplete={async () => {
+            openCompleteModal();
+          }}
+        />
+      )}
+
+      {/* <Textarea
         placeholder={`- Please adjust titles to be less formal (i.e. lowercase, acronyms).\n- Avoid using the word 'impressive'.\n- Maintain a friendly & professional tone`}
         label="Special Instructions"
         description="Please provide any special instructions for the voice builder. This includes tone, formatting instructions, emojis vs no emojis, etc."
         minRows={3}
         onChange={(e) => setInstructions(e.currentTarget.value)}
-      />
-      <Center mt={10}>
-        <Button
-          radius="xl"
-          size="md"
-          m="auto"
-          compact
-          color="grape"
-          leftIcon={<IconRefresh />}
-          variant="light"
-          disabled={loadingMsgGen}
-          onClick={async () => {
-            setCount(0);
-            await generateMessages();
-            setEditingPhase(editingPhase + 1);
-          }}
-        >
-          Generate New Samples
-        </Button>
+      /> */}
+      {/* {!loadingMsgGen && (
+        <Center mt={10}>
+          <Button
+            radius="xl"
+            size="md"
+            m="auto"
+            compact
+            color="grape"
+            leftIcon={<IconRefresh />}
+            variant="light"
+            disabled={loadingMsgGen}
+            onClick={async () => {
+              setCount(0);
+              await generateMessages();
+              setEditingPhase(editingPhase + 1);
+            }}
+          >
+            Generate New Samples
+          </Button>
 
-        <Button
-          radius="xl"
-          size="md"
-          m="auto"
-          color="green"
-          compact
-          leftIcon={<IconCheck />}
-          variant="light"
-          disabled={loadingMsgGen || voiceBuilderMessages.length < 4}
-          onClick={async () => {
-            setCount(0);
-            await completeVoice();
-          }}
-        >
-          Looks Good! Create Voice with {voiceBuilderMessages.length} Samples
-        </Button>
-      </Center>
-
+          <Button
+            radius="xl"
+            size="md"
+            m="auto"
+            color="green"
+            compact
+            leftIcon={<IconCheck />}
+            variant="light"
+            disabled={loadingMsgGen || voiceBuilderMessages.length < 4}
+            onClick={async () => {
+              setCount(0);
+              await completeVoice();
+            }}
+          >
+            Looks Good! Create Voice with {voiceBuilderMessages.length} Samples
+          </Button>
+        </Center>
+      )} */}
+      {/* 
       <Divider my="sm" />
 
       <Card mt="md" p="md" withBorder>
@@ -624,7 +685,7 @@ export default function VoiceBuilderFlow(props: {
             }
           />
         )}
-      </Card>
+      </Card> */}
     </>
   );
 }

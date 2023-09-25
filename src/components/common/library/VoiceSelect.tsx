@@ -45,6 +45,7 @@ import { API_URL } from "@constants/data";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { useQuery } from "@tanstack/react-query";
 import { openContextModal } from "@mantine/modals";
+import VoiceBuilderModal from "@modals/VoiceBuilderModal";
 
 export default function VoiceSelect(props: {
   personaId: number;
@@ -57,6 +58,8 @@ export default function VoiceSelect(props: {
   const userData = useRecoilValue(userDataState);
   const currentProject = useRecoilValue(currentProjectState);
   const [selectedVoice, setSelectedVoice] = useState<any>();
+
+  const [voiceBuilderOpen, setVoiceBuilderOpen] = useState(false);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-voices`],
@@ -98,7 +101,7 @@ export default function VoiceSelect(props: {
         selector={{
           content: (
             <Text>
-              {selectedVoice ? `Using ${_.truncate(userData.sdr_name.split(" ")[0])}'s Voice` : "Start Campaign"}
+              {selectedVoice ? `Using ${_.truncate(userData.sdr_name.split(" ")[0])}'s Voice` : "Train Voice"}
             </Text>
           ),
           buttonProps: {
@@ -116,11 +119,7 @@ export default function VoiceSelect(props: {
                 },
               });
             } else {
-              openContextModal({
-                modal: "voiceBuilder",
-                title: <Title order={3}>Finalize Campaign Voice</Title>,
-                innerProps: {},
-              });
+              setVoiceBuilderOpen(true);
             }
           },
           noChange: !selectedVoice,
@@ -132,11 +131,7 @@ export default function VoiceSelect(props: {
               variant="subtle"
               compact
               onClick={() => {
-                openContextModal({
-                  modal: "voiceBuilder",
-                  title: <Title order={3}>Voice Builder</Title>,
-                  innerProps: {},
-                });
+                setVoiceBuilderOpen(true);
               }}
             >
               New Voice
@@ -221,6 +216,12 @@ export default function VoiceSelect(props: {
             },
           };
         })}
+      />
+      <VoiceBuilderModal
+        opened={voiceBuilderOpen}
+        close={() => {
+          setVoiceBuilderOpen(false);
+        }}
       />
     </>
   );

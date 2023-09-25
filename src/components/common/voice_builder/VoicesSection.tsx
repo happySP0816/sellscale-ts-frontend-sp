@@ -18,10 +18,11 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
+import VoiceBuilderModal from '@modals/VoiceBuilderModal';
 import { IconPencil } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
 import { valueToColor } from "@utils/general";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useRecoilState, useRecoilValue } from "recoil";
 import { Archetype } from "src";
@@ -31,6 +32,8 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
   const [searchParams] = useSearchParams();
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
+
+  const [voiceBuilderOpen, setVoiceBuilderOpen] = useState(false);
 
   const prospectDrawerOpened = useRecoilValue(prospectDrawerOpenState);
 
@@ -58,11 +61,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
   useEffect(() => {
     const create = searchParams.get('create');
     if(create){
-      openContextModal({
-        modal: "voiceBuilder",
-        title: <Title order={3}>Voice Builder</Title>,
-        innerProps: { },
-      });
+      setVoiceBuilderOpen(true);
     }
   }, []);
 
@@ -72,11 +71,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
         <Button
           size="md"
           onClick={() => {
-            openContextModal({
-              modal: "voiceBuilder",
-              title: <Title order={3}>Voice Builder</Title>,
-              innerProps: { },
-            });
+            setVoiceBuilderOpen(true);
           }}
         >
           Add New Voice
@@ -162,6 +157,12 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
         </Table>
       </ScrollArea>
       {prospectDrawerOpened && <ProspectDetailsDrawer zIndex={1000} />}
+      <VoiceBuilderModal
+        opened={voiceBuilderOpen}
+        close={() => {
+          setVoiceBuilderOpen(false);
+        }}
+      />
     </>
   );
 }

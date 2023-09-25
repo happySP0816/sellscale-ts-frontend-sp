@@ -156,7 +156,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
           </tbody>
         </Table>
       </ScrollArea>
-      {prospectDrawerOpened && <ProspectDetailsDrawer zIndex={1000} />}
+      {prospectDrawerOpened && <ProspectDetailsDrawer zIndex={10000} />}
       <VoiceBuilderModal
         opened={voiceBuilderOpen}
         close={() => {

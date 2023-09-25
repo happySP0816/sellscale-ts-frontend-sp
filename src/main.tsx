@@ -50,6 +50,7 @@ import PipelineSection from "@common/home/PipelineSection";
 import PersonaCampaigns from "@common/campaigns/PersonaCampaigns";
 import AdvancedPage from "@pages/AdvancedPage";
 import ChannelSetupPage from "@pages/ChannelSetupPage";
+import PulseTabSelector from "@common/persona/PulseTabSelector";
 
 const queryClient = new QueryClient();
 
@@ -121,7 +122,15 @@ const router = sentryCreateBrowserRouter([
       },
       {
         path: "prioritize",
-        element: <RestrictedRoute page={<PulseWrapper />} />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box bg={"white"}>
+                <PulseTabSelector />
+              </Box>
+            }
+          />
+        ),
       },
       {
         path: "contacts/find",

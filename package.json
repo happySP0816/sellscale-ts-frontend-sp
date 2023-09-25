@@ -69,6 +69,7 @@
     "fuzzball": "^2.1.2",
     "isomorphic-dompurify": "^1.2.0",
     "lodash": "^4.17.21",
+    "mantine-data-grid": "^0.2.3",
     "mantine-datatable": "^2.4.17",
     "mantine-react-table": "^0.9.5",
     "moment": "^2.29.4",

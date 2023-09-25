@@ -196,10 +196,13 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                     size="md"
                     color="blue"
                     radius="md"
-                    disabled
-                    rightIcon={<IconCheck size="1rem" />}
+                    rightIcon={extensionInstalled ? <IconCheck size="1rem" /> : ''}
+                    onClick={() => {
+                      window.open('https://chrome.google.com/webstore/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa', '_blank')
+                      }
+                    }
                   >
-                    Installed {usingFirefox ? "Firefox" : "Chrome"} Extension
+                    {extensionInstalled ? 'Installed' : 'Install'} {usingFirefox ? "Firefox" : "Chrome"} Extension
                   </Button>
                 </Center>
 
@@ -211,7 +214,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                       </ThemeIcon>
                     }
                   >
-                    <Text fz="sm" td="line-through">
+                    <Text fz="sm" td={extensionInstalled ? "line-through" : ''}>
                       Install the SellScale browser extension.
                     </Text>
                   </List.Item>
@@ -223,7 +226,7 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
                     }
                   >
                     <Text fz="sm">
-                      Open the extension popup by either using the Chrome extensions dropdown or with the hotkey:{" "}
+                      Open the extension popup by either using the Chrome extensions dropdown (via the puzzle piece icon 🧩 in the top right) or with the hotkey:{" "}
                       <Kbd>
                         {os === "undetermined" || os === "macos" ? "⌘" : "Ctrl"}
                       </Kbd>{" "}

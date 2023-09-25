@@ -158,6 +158,8 @@ export default function SequenceSection() {
   const [isDataChanged, setIsDataChanged] = useState(false);
   const [isModalBlockerVisible, setIsModalBlockerVisible] = useState(false);
   const [nextActiveCardIndex, setNextActiveCardIndex] = useState(0);
+  const [prospectId, setProspectId] = useState<number>(-1);
+
   let blocker = unstable_useBlocker(isDataChanged);
 
   const bf0 = bumpFrameworks.find(
@@ -563,12 +565,17 @@ export default function SequenceSection() {
             </Stack>
           </Box>
           <Box sx={{ flexBasis: "65%" }}>
-            {activeCard === 0 && <IntroMessageSection />}
+            {activeCard === 0 && <IntroMessageSection 
+              prospectId={prospectId}
+              setProspectId={setProspectId}
+            />}
             {activeCard === 1 && bf0 && (
               <FrameworkSection
                 framework={bf0}
                 bumpCount={0}
                 setIsDataChanged={setIsDataChanged}
+                prospectId={prospectId}
+                setProspectId={setProspectId}
               />
             )}
             {activeCard === 2 && bf1 && (
@@ -576,6 +583,8 @@ export default function SequenceSection() {
                 framework={bf1}
                 bumpCount={1}
                 setIsDataChanged={setIsDataChanged}
+                prospectId={prospectId}
+                setProspectId={setProspectId}
               />
             )}
             {activeCard === 3 && bf2 && (
@@ -583,6 +592,8 @@ export default function SequenceSection() {
                 framework={bf2}
                 bumpCount={2}
                 setIsDataChanged={setIsDataChanged}
+                prospectId={prospectId}
+                setProspectId={setProspectId}
               />
             )}
             {activeCard === 4 && bf3 && (
@@ -590,6 +601,8 @@ export default function SequenceSection() {
                 framework={bf3}
                 bumpCount={3}
                 setIsDataChanged={setIsDataChanged}
+                prospectId={prospectId}
+                setProspectId={setProspectId}
               />
             )}
           </Box>
@@ -721,13 +734,19 @@ function BumpFrameworkSelect(props: {
   );
 }
 
-function IntroMessageSection() {
+function IntroMessageSection(props: {
+  prospectId: number,
+  setProspectId: (prospectId: number) => void,
+}) {
   const userToken = useRecoilValue(userTokenState);
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
   const queryClient = useQueryClient();
 
-  const [prospectId, setProspectId] = useState<number>();
+  const prospectId = props.prospectId;
+  const setProspectId = props.setProspectId;
+
+  // const [prospectId, setProspectId] = useState<number>();
   const [message, setMessage] = useState("");
   const [messageMetaData, setMessageMetaData] = useState<any>();
   const [loading, setLoading] = useState(false);
@@ -907,6 +926,7 @@ function IntroMessageSection() {
                     setProspectsLoading(false);
                     if (prospects.length === 0) setNoProspectsFound(true);
                   }}
+                  selectedProspect={prospectId}
                   autoSelect
                   includeDrawer
                 />
@@ -1636,13 +1656,18 @@ function FrameworkSection(props: {
   framework: BumpFramework;
   bumpCount: number;
   setIsDataChanged: (val: boolean) => void;
+  prospectId: number,
+  setProspectId: (prospectId: number) => void,
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const queryClient = useQueryClient();
 
-  const [prospectId, setProspectId] = useState<number>();
+  const prospectId = props.prospectId;
+  const setProspectId = props.setProspectId;
+
+  // const [prospectId, setProspectId] = useState<number>();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [prospectsLoading, setProspectsLoading] = useState(true);
@@ -1874,6 +1899,7 @@ function FrameworkSection(props: {
                         setProspectsLoading(false);
                         if (prospects.length === 0) setNoProspectsFound(true);
                       }}
+                      selectedProspect={prospectId}
                       autoSelect
                       includeDrawer
                     />

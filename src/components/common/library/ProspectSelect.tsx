@@ -160,6 +160,7 @@ export default function ProspectSelect(props: {
   autoSelect?: boolean;
   includeDrawer?: boolean;
   onFinishLoading?: (prospects: ProspectShallow[]) => void;
+  selectedProspect?: number;
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -195,8 +196,16 @@ export default function ProspectSelect(props: {
       });
 
       if (props.autoSelect && !selectedProspect) {
-        setSelectedProspect(_.last(resultProspects));
-        props.onChange(_.last(resultProspects));
+        const foundProspect = resultProspects.find(
+            (prospect) => prospect.id === props.selectedProspect
+          )
+        if (props.selectedProspect && props.selectedProspect !== -1) {
+          setSelectedProspect(foundProspect);
+          props.onChange(foundProspect);
+        } else {
+          setSelectedProspect(_.last(resultProspects));
+          props.onChange(_.last(resultProspects));
+        }
       }
 
       setProspects(resultProspects);
@@ -277,7 +286,7 @@ export default function ProspectSelect(props: {
           ),
         }}
       />
-      {props.includeDrawer && prospectDrawerOpened && <ProspectDetailsDrawer />}
+      {props.includeDrawer && prospectDrawerOpened && <ProspectDetailsDrawer zIndex={10000} />}
     </>
   );
 }

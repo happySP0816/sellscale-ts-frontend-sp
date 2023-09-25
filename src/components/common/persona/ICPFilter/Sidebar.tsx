@@ -2,19 +2,18 @@ import { Flex, ScrollArea, Box } from "@mantine/core";
 import Filters from "./Filters";
 import { SidebarFooter } from "./SidebarFooter";
 import { SidebarHeader } from "./SidebarHeader";
+import { FC } from "react";
 
-const Sidebar = () => {
+const Sidebar: FC<{ isTesting: boolean }> = ({ isTesting }) => {
   return (
-    <Flex direction={"column"} h={"100vh"} w={"15rem"}>
+    <Flex direction={"column"} h={"100%"} w={"15rem"}>
       <SidebarHeader />
 
       <ScrollArea>
-        <Box p="md">
-          <Filters />
-        </Box>
+        <Filters isTesting={isTesting} />
       </ScrollArea>
 
-      <SidebarFooter />
+      <SidebarFooter isTesting={isTesting} />
     </Flex>
   );
 };

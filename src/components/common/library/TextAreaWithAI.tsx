@@ -91,7 +91,7 @@ export default function TextAreaWithAI(props: PropsType) {
   };
 
   return (
-    <Box mt="sm" sx={{ position: "relative" }} ref={ref}>
+    <Box mt="sm" sx={{ position: "relative" }} ref={ref} w='100%'>
       <LoadingOverlay visible={props.loadingAIGenerate || false} />
       {/* AI Writing Popup */}
       <Popover

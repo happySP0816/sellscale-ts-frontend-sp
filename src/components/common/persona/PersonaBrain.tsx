@@ -262,62 +262,58 @@ export function PersonaBasicForm(props: {
 
   return (
     <Box>
-      <TextAreaWithAI
-        label="Descriptive Persona Name"
-        description='Give a short name to this persona. For example, "Sales Manager" or "Marketing Director". The AI will use this name when generating messages and splitting prospects.'
-        minRows={1}
-        value={personaName}
-        onChange={(e) => {
-          setPersonaName(e.currentTarget.value)
-          sendUpdate(
-            "personaName",
-            e.currentTarget.value
-          );
-        }}
-      />
-      {/* <TextAreaWithAI
-          label="Persona Profile"
-          description="Generated profile of this persona"
-          minRows={4}
-          value={''}
+      <Flex w='100%' mb='sm'>
+        <TextAreaWithAI
+          label="Descriptive Persona Name"
+          description='Give a short name to this persona. For example, "Sales Manager" or "Marketing Director". The AI will use this name when generating messages and splitting prospects.'
+          minRows={1}
+          value={personaName}
           onChange={(e) => {
+            setPersonaName(e.currentTarget.value)
+            sendUpdate(
+              "personaName",
+              e.currentTarget.value
+            );
           }}
-        /> */}
-      <TextAreaWithAI
-        label="Why do they buy your product?"
-        description="Explain why this persona is a good fit for your product or service. This will be used by the AI to generate emails and messages."
-        minRows={4}
-        value={personaFitReason}
-        onChange={(e) => {
-          setPersonaFitReason(e.currentTarget.value);
-          sendUpdate(
-            "personaFitReason",
-            e.currentTarget.value
-          );
-        }}
-        loadingAIGenerate={loadingPersonaFitReason}
-        onAIGenerateClicked={async () => {
-          await displayNotification(
-            "generate-persona-buy-reason",
-            generatePersonaBuyReason,
-            {
-              title: "Generating persona buying reason...",
-              message: "This may take a few seconds.",
-              color: "teal",
-            },
-            {
-              title: "Persona buying reason generated!",
-              message: "Your persona buying reason has been generated.",
-              color: "teal",
-            },
-            {
-              title: "Failed to generate persona buying reason",
-              message: "Please try again or contact SellScale team.",
-              color: "red",
-            }
-          );
-        }}
-      />
+        />
+      </Flex>
+      <Flex w='100%' mb='sm'>
+        <TextAreaWithAI
+          label="Why do they buy your product?"
+          description="Explain why this persona is a good fit for your product or service. This will be used by the AI to generate emails and messages."
+          minRows={8}
+          value={personaFitReason}
+          onChange={(e) => {
+            setPersonaFitReason(e.currentTarget.value);
+            sendUpdate(
+              "personaFitReason",
+              e.currentTarget.value
+            );
+          }}
+          loadingAIGenerate={loadingPersonaFitReason}
+          onAIGenerateClicked={async () => {
+            await displayNotification(
+              "generate-persona-buy-reason",
+              generatePersonaBuyReason,
+              {
+                title: "Generating persona buying reason...",
+                message: "This may take a few seconds.",
+                color: "teal",
+              },
+              {
+                title: "Persona buying reason generated!",
+                message: "Your persona buying reason has been generated.",
+                color: "teal",
+              },
+              {
+                title: "Failed to generate persona buying reason",
+                message: "Please try again or contact SellScale team.",
+                color: "red",
+              }
+            );
+          }}
+        />
+      </Flex>
       {/* TODO(AAKASH) delete component below if no use by July 20, 2023 */}
       {false && (
         <TextAreaWithAI
@@ -334,19 +330,22 @@ export function PersonaBasicForm(props: {
           }}
         />
       )}
-      <TextAreaWithAI
-        label="Persona contact objective"
-        description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral. The AI will use this information to generate messages."
-        minRows={4}
-        value={personaContactObjective}
-        onChange={(e) => {
-          setPersonaContactObjective(e.currentTarget.value);
-          sendUpdate(
-            "personaContactObjective",
-            e.currentTarget.value
-          );
-        }}
-      />
+      <Flex w='100%' mb='md'>
+        <TextAreaWithAI
+          label="Persona contact objective"
+          description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral. The AI will use this information to generate messages."
+          minRows={4}
+          value={personaContactObjective}
+          onChange={(e) => {
+            setPersonaContactObjective(e.currentTarget.value);
+            sendUpdate(
+              "personaContactObjective",
+              e.currentTarget.value
+            );
+          }}
+        />
+      </Flex>
+      <Flex mb='md'>
       <NumberInput
         label="Annual Contract Value (ACV)"
         value={personaContractSize}
@@ -364,6 +363,7 @@ export function PersonaBasicForm(props: {
           );
         }}
       />
+      </Flex>
     </Box>
   );
 }

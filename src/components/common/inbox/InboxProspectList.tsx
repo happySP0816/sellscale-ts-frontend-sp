@@ -342,7 +342,6 @@ export default function ProspectList(props: {
       prospects = prospects.filter((p) => p.latest_msg_from_sdr);
     }
   }
-
   // Recommended Filter
   if (segmentedSection === "RECOMMENDED") {
     if (!nurturingMode) {

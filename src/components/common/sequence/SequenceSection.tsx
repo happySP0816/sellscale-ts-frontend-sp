@@ -115,6 +115,7 @@ import {
   unstable_useBlocker,
 } from "react-router-dom";
 import { deleteCTA } from "@utils/requests/createCTA";
+import { patchArchetypeDelayDays } from "@utils/requests/patchArchetypeDelayDays";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -299,25 +300,40 @@ export default function SequenceSection() {
                 conversion={conversionRate}
                 onClick={() => onSetActiveCard(0)}
                 footer={
-                  <Tooltip label="Not customizable yet">
-                    <Center sx={{cursor: 'pointer'}}>
-                      <Group spacing={2}>
-                        <Text fz={14}>wait for</Text>
-                        <NumberInput
-                          placeholder="# Days"
-                          variant="filled"
-                          hideControls
-                          min={1}
-                          max={99}
-                          w={30}
-                          size="xs"
-                          disabled
-                          defaultValue={0}
-                        />
-                        <Text fz={14}>days, then:</Text>
-                      </Group>
-                    </Center>
-                  </Tooltip>
+                  <Center sx={{ cursor: 'pointer' }}>
+                    <Group spacing={2}>
+                      <Text fz={14}>wait for</Text>
+                      <NumberInput
+                        placeholder="# Days"
+                        variant="filled"
+                        hideControls
+                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                        m={3}
+                        min={0}
+                        max={99}
+                        w={bf0Delay.current > 9 ? 50 : 32}
+                        size="xs"
+                        defaultValue={0}
+                        onChange={async (value) => {
+                          if (!currentProject) {
+                            showNotification({
+                              title: "Error",
+                              message: "No campaign selected",
+                              color: "red",
+                            })
+                            return;
+                          }
+                          const result = await patchArchetypeDelayDays(
+                            userToken,
+                            currentProject.id,
+                            value || 0
+                          )
+                          if (result.status === "success") refetch();
+                        }}
+                      />
+                      <Text fz={14}>days, then:</Text>
+                    </Group>
+                  </Center>
                 }
               />
               {/* <Divider
@@ -349,7 +365,7 @@ export default function SequenceSection() {
                       variant="dot"
                       color={isNaN(replyRate) ? 'grey' : (replyRate > 0.5 ? "green" : "red")}
                     >
-                      Replied: {!isNaN(replyRate) ? replyRate.toFixed(1)+'%' : 'TBD'}
+                      Replied: {!isNaN(replyRate) ? replyRate.toFixed(1) + '%' : 'TBD'}
                     </Badge>
                   </Tooltip>
                 }
@@ -358,7 +374,7 @@ export default function SequenceSection() {
               />
               <FrameworkCard
                 title="Follow-Up 1"
-                badgeText={`Reply ${bf0Conversion ? bf0Conversion.toFixed(0)+'%' : 'TBD'}`}
+                badgeText={`Reply ${bf0Conversion ? bf0Conversion.toFixed(0) + '%' : 'TBD'}`}
                 badgeHoverText={
                   bf0 && bf0Conversion
                     ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
@@ -375,7 +391,7 @@ export default function SequenceSection() {
                         placeholder="# Days"
                         variant="filled"
                         hideControls
-                        sx={{border: 'solid 1px #777; border-radius: 4px;'}}
+                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
                         m={3}
                         min={1}
                         max={99}
@@ -419,7 +435,7 @@ export default function SequenceSection() {
 
               <FrameworkCard
                 title="Follow-Up 2"
-                badgeText={`Reply ${bf1Conversion ? bf1Conversion.toFixed(0)+'%' : 'TBD'}`}
+                badgeText={`Reply ${bf1Conversion ? bf1Conversion.toFixed(0) + '%' : 'TBD'}`}
                 badgeHoverText={
                   bf1 && bf1Conversion
                     ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
@@ -436,7 +452,7 @@ export default function SequenceSection() {
                         placeholder="# Days"
                         variant="filled"
                         hideControls
-                        sx={{border: 'solid 1px #777; border-radius: 4px;'}}
+                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
                         m={3}
                         min={1}
                         max={99}
@@ -480,7 +496,7 @@ export default function SequenceSection() {
               />
               <FrameworkCard
                 title="Follow-Up 3"
-                badgeText={`Reply ${bf2Conversion ? bf2Conversion.toFixed(0)+'%' : 'TBD'}`}
+                badgeText={`Reply ${bf2Conversion ? bf2Conversion.toFixed(0) + '%' : 'TBD'}`}
                 badgeHoverText={
                   bf2 && bf2Conversion
                     ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
@@ -497,7 +513,7 @@ export default function SequenceSection() {
                         placeholder="# Days"
                         variant="filled"
                         hideControls
-                        sx={{border: 'solid 1px #777; border-radius: 4px;'}}
+                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
                         m={3}
                         min={2}
                         max={99}
@@ -541,7 +557,7 @@ export default function SequenceSection() {
               />
               <FrameworkCard
                 title="Follow-Up 4"
-                badgeText={`Reply ${bf3Conversion ? bf3Conversion.toFixed(0)+'%' : 'TBD'}`}
+                badgeText={`Reply ${bf3Conversion ? bf3Conversion.toFixed(0) + '%' : 'TBD'}`}
                 badgeHoverText={
                   bf3 && bf3Conversion
                     ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
@@ -565,7 +581,7 @@ export default function SequenceSection() {
             </Stack>
           </Box>
           <Box sx={{ flexBasis: "65%" }}>
-            {activeCard === 0 && <IntroMessageSection 
+            {activeCard === 0 && <IntroMessageSection
               prospectId={prospectId}
               setProspectId={setProspectId}
             />}
@@ -609,7 +625,7 @@ export default function SequenceSection() {
         </Group>
         <PersonaUploadDrawer
           personaOverviews={currentProject ? [currentProject] : []}
-          afterUpload={() => {}}
+          afterUpload={() => { }}
         />
       </Card>
     </>
@@ -662,9 +678,9 @@ function BumpFrameworkSelect(props: {
                     title: "Create Bump Framework",
                     innerProps: {
                       modalOpened: true,
-                      openModal: () => {},
-                      closeModal: () => {},
-                      backFunction: () => {},
+                      openModal: () => { },
+                      closeModal: () => { },
+                      backFunction: () => { },
                       dataChannels: dataChannels,
                       status: undefined,
                       archetypeID: currentProject?.id,
@@ -682,9 +698,9 @@ function BumpFrameworkSelect(props: {
                     modal: "cloneBumpFramework",
                     title: "Clone Bump Framework",
                     innerProps: {
-                      openModal: () => {},
-                      closeModal: () => {},
-                      backFunction: () => {},
+                      openModal: () => { },
+                      closeModal: () => { },
+                      backFunction: () => { },
                       status: props.bumpedFrameworks.find(
                         (bf) => bf.id === props.activeBumpFrameworkId
                       )?.overall_status,
@@ -705,7 +721,7 @@ function BumpFrameworkSelect(props: {
       items={props.bumpedFrameworks.map((bf) => ({
         id: bf.id,
         name: bf.title,
-        onClick: () => {},
+        onClick: () => { },
         leftSection: (
           <Badge
             size="sm"
@@ -845,8 +861,8 @@ function IntroMessageSection(props: {
         </Group>
         <VoiceSelect
           personaId={currentProject.id}
-          onChange={(voice) => {}}
-          onFinishLoading={(voices) => {}}
+          onChange={(voice) => { }}
+          onFinishLoading={(voices) => { }}
           autoSelect
         />
       </Group>
@@ -1132,10 +1148,10 @@ function LiExampleInvitation(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1418,10 +1434,10 @@ function LiExampleMessage(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1540,17 +1556,17 @@ function FrameworkCard(props: {
         cursor: "pointer",
         backgroundColor: props.active
           ? theme.fn.lighten(
-              theme.fn.variant({ variant: "filled", color: "blue" })
-                .background!,
-              0.95
-            )
+            theme.fn.variant({ variant: "filled", color: "blue" })
+              .background!,
+            0.95
+          )
           : hovered
-          ? theme.fn.lighten(
+            ? theme.fn.lighten(
               theme.fn.variant({ variant: "filled", color: "blue" })
                 .background!,
               0.99
             )
-          : undefined,
+            : undefined,
         borderColor:
           props.active || hovered
             ? theme.colors.blue[5] + "!important"
@@ -1607,7 +1623,7 @@ function FrameworkCard(props: {
                 variant="dot"
                 color={isNaN(props.conversion) ? 'grey' : (props.conversion > 9.0 ? "green" : "red")}
               >
-                Opened: {!isNaN(props.conversion) ? Math.trunc(props.conversion)+'%' : 'TBD'}
+                Opened: {!isNaN(props.conversion) ? Math.trunc(props.conversion) + '%' : 'TBD'}
               </Badge>
             </Tooltip>
           )}
@@ -2203,7 +2219,7 @@ function FrameworkSection(props: {
                           rightSection={
                             <>
                               {personalizationItemsCount &&
-                              form.values.useAccountResearch ? (
+                                form.values.useAccountResearch ? (
                                 <Badge
                                   w={16}
                                   h={16}
@@ -2536,43 +2552,43 @@ const ProcessBar: React.FC<{
   checked,
   onPressItem,
 }) => {
-  return (
-    <Flex align={"center"} gap={"0.5rem"}>
-      <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
-        <Checkbox
-          size={"sm"}
-          label={title}
-          checked={checked}
-          disabled={disabled}
-          onChange={(event) => onPressItem(id, event.currentTarget.checked)}
-          color={color}
-          variant="outline"
-        />
-        <Flex sx={{ flex: 1 }}>
-          <Divider w={"100%"} color={"#E9ECEF"} />
-        </Flex>
-        <Tooltip label="Historical Acceptance Rate" withArrow>
-          <Button
-            variant={"light"}
-            fw={700}
-            size="xs"
+    return (
+      <Flex align={"center"} gap={"0.5rem"}>
+        <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
+          <Checkbox
+            size={"sm"}
+            label={title}
+            checked={checked}
+            disabled={disabled}
+            onChange={(event) => onPressItem(id, event.currentTarget.checked)}
             color={color}
-            radius="xl"
-            h="auto"
-            fz={"0.625rem"}
-            py={"0.125rem"}
-            px={"0.25rem"}
-          >
-            {percent}%
-          </Button>
-        </Tooltip>
+            variant="outline"
+          />
+          <Flex sx={{ flex: 1 }}>
+            <Divider w={"100%"} color={"#E9ECEF"} />
+          </Flex>
+          <Tooltip label="Historical Acceptance Rate" withArrow>
+            <Button
+              variant={"light"}
+              fw={700}
+              size="xs"
+              color={color}
+              radius="xl"
+              h="auto"
+              fz={"0.625rem"}
+              py={"0.125rem"}
+              px={"0.25rem"}
+            >
+              {percent}%
+            </Button>
+          </Tooltip>
+        </Flex>
+        <Flex direction={"column"} sx={{ flex: 6 }}>
+          <Progress value={percent} color={color} size={"lg"} radius="xl" />
+        </Flex>
       </Flex>
-      <Flex direction={"column"} sx={{ flex: 6 }}>
-        <Progress value={percent} color={color} size={"lg"} radius="xl" />
-      </Flex>
-    </Flex>
-  );
-};
+    );
+  };
 
 export const PersonalizationCard: React.FC<{
   title: string;

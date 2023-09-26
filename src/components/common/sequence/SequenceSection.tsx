@@ -300,14 +300,14 @@ export default function SequenceSection() {
                 conversion={conversionRate}
                 onClick={() => onSetActiveCard(0)}
                 footer={
-                  <Center sx={{ cursor: 'pointer' }}>
+                  <Center sx={{ cursor: "pointer" }}>
                     <Group spacing={2}>
                       <Text fz={14}>wait for</Text>
                       <NumberInput
                         placeholder="# Days"
                         variant="filled"
                         hideControls
-                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                        sx={{ border: "solid 1px #777; border-radius: 4px;" }}
                         m={3}
                         min={0}
                         max={99}
@@ -320,14 +320,14 @@ export default function SequenceSection() {
                               title: "Error",
                               message: "No campaign selected",
                               color: "red",
-                            })
+                            });
                             return;
                           }
                           const result = await patchArchetypeDelayDays(
                             userToken,
                             currentProject.id,
                             value || 0
-                          )
+                          );
                           if (result.status === "success") refetch();
                         }}
                       />
@@ -363,9 +363,16 @@ export default function SequenceSection() {
                     <Badge
                       ml="4px"
                       variant="dot"
-                      color={isNaN(replyRate) ? 'grey' : (replyRate > 0.5 ? "green" : "red")}
+                      color={
+                        isNaN(replyRate)
+                          ? "grey"
+                          : replyRate > 0.5
+                          ? "green"
+                          : "red"
+                      }
                     >
-                      Replied: {!isNaN(replyRate) ? replyRate.toFixed(1) + '%' : 'TBD'}
+                      Replied:{" "}
+                      {!isNaN(replyRate) ? replyRate.toFixed(1) + "%" : "TBD"}
                     </Badge>
                   </Tooltip>
                 }
@@ -374,11 +381,13 @@ export default function SequenceSection() {
               />
               <FrameworkCard
                 title="Follow-Up 1"
-                badgeText={`Reply ${bf0Conversion ? bf0Conversion.toFixed(0) + '%' : 'TBD'}`}
+                badgeText={`Reply ${
+                  bf0Conversion ? bf0Conversion.toFixed(0) + "%" : "TBD"
+                }`}
                 badgeHoverText={
                   bf0 && bf0Conversion
                     ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                    : 'Not enough data'
+                    : "Not enough data"
                 }
                 bodyTitle={bf0?.title ?? ""}
                 // bodyText={bf0?.description ?? ""}
@@ -391,7 +400,7 @@ export default function SequenceSection() {
                         placeholder="# Days"
                         variant="filled"
                         hideControls
-                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                        sx={{ border: "solid 1px #777; border-radius: 4px;" }}
                         m={3}
                         min={1}
                         max={99}
@@ -435,11 +444,13 @@ export default function SequenceSection() {
 
               <FrameworkCard
                 title="Follow-Up 2"
-                badgeText={`Reply ${bf1Conversion ? bf1Conversion.toFixed(0) + '%' : 'TBD'}`}
+                badgeText={`Reply ${
+                  bf1Conversion ? bf1Conversion.toFixed(0) + "%" : "TBD"
+                }`}
                 badgeHoverText={
                   bf1 && bf1Conversion
                     ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                    : 'Not enough data'
+                    : "Not enough data"
                 }
                 bodyTitle={bf1?.title ?? ""}
                 // bodyText={bf1?.description ?? ""}
@@ -452,7 +463,7 @@ export default function SequenceSection() {
                         placeholder="# Days"
                         variant="filled"
                         hideControls
-                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                        sx={{ border: "solid 1px #777; border-radius: 4px;" }}
                         m={3}
                         min={1}
                         max={99}
@@ -496,11 +507,13 @@ export default function SequenceSection() {
               />
               <FrameworkCard
                 title="Follow-Up 3"
-                badgeText={`Reply ${bf2Conversion ? bf2Conversion.toFixed(0) + '%' : 'TBD'}`}
+                badgeText={`Reply ${
+                  bf2Conversion ? bf2Conversion.toFixed(0) + "%" : "TBD"
+                }`}
                 badgeHoverText={
                   bf2 && bf2Conversion
                     ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                    : 'Not enough data'
+                    : "Not enough data"
                 }
                 bodyTitle={bf2?.title ?? ""}
                 // bodyText={bf2?.description ?? ""}
@@ -513,7 +526,7 @@ export default function SequenceSection() {
                         placeholder="# Days"
                         variant="filled"
                         hideControls
-                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                        sx={{ border: "solid 1px #777; border-radius: 4px;" }}
                         m={3}
                         min={2}
                         max={99}
@@ -557,11 +570,13 @@ export default function SequenceSection() {
               />
               <FrameworkCard
                 title="Follow-Up 4"
-                badgeText={`Reply ${bf3Conversion ? bf3Conversion.toFixed(0) + '%' : 'TBD'}`}
+                badgeText={`Reply ${
+                  bf3Conversion ? bf3Conversion.toFixed(0) + "%" : "TBD"
+                }`}
                 badgeHoverText={
                   bf3 && bf3Conversion
                     ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                    : 'Not enough data'
+                    : "Not enough data"
                 }
                 bodyTitle={bf3?.title ?? ""}
                 // bodyText={bf3?.description ?? ""}
@@ -581,10 +596,12 @@ export default function SequenceSection() {
             </Stack>
           </Box>
           <Box sx={{ flexBasis: "65%" }}>
-            {activeCard === 0 && <IntroMessageSection
-              prospectId={prospectId}
-              setProspectId={setProspectId}
-            />}
+            {activeCard === 0 && (
+              <IntroMessageSection
+                prospectId={prospectId}
+                setProspectId={setProspectId}
+              />
+            )}
             {activeCard === 1 && bf0 && (
               <FrameworkSection
                 framework={bf0}
@@ -625,7 +642,7 @@ export default function SequenceSection() {
         </Group>
         <PersonaUploadDrawer
           personaOverviews={currentProject ? [currentProject] : []}
-          afterUpload={() => { }}
+          afterUpload={() => {}}
         />
       </Card>
     </>
@@ -678,9 +695,9 @@ function BumpFrameworkSelect(props: {
                     title: "Create Bump Framework",
                     innerProps: {
                       modalOpened: true,
-                      openModal: () => { },
-                      closeModal: () => { },
-                      backFunction: () => { },
+                      openModal: () => {},
+                      closeModal: () => {},
+                      backFunction: () => {},
                       dataChannels: dataChannels,
                       status: undefined,
                       archetypeID: currentProject?.id,
@@ -698,9 +715,9 @@ function BumpFrameworkSelect(props: {
                     modal: "cloneBumpFramework",
                     title: "Clone Bump Framework",
                     innerProps: {
-                      openModal: () => { },
-                      closeModal: () => { },
-                      backFunction: () => { },
+                      openModal: () => {},
+                      closeModal: () => {},
+                      backFunction: () => {},
                       status: props.bumpedFrameworks.find(
                         (bf) => bf.id === props.activeBumpFrameworkId
                       )?.overall_status,
@@ -721,7 +738,7 @@ function BumpFrameworkSelect(props: {
       items={props.bumpedFrameworks.map((bf) => ({
         id: bf.id,
         name: bf.title,
-        onClick: () => { },
+        onClick: () => {},
         leftSection: (
           <Badge
             size="sm"
@@ -751,8 +768,8 @@ function BumpFrameworkSelect(props: {
 }
 
 function IntroMessageSection(props: {
-  prospectId: number,
-  setProspectId: (prospectId: number) => void,
+  prospectId: number;
+  setProspectId: (prospectId: number) => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
   const [currentProject, setCurrentProject] =
@@ -861,8 +878,8 @@ function IntroMessageSection(props: {
         </Group>
         <VoiceSelect
           personaId={currentProject.id}
-          onChange={(voice) => { }}
-          onFinishLoading={(voices) => { }}
+          onChange={(voice) => {}}
+          onFinishLoading={(voices) => {}}
           autoSelect
         />
       </Group>
@@ -1067,9 +1084,9 @@ function IntroMessageSection(props: {
                   items.filter((x) => !x.checked).map((x) => x.id)
                 );
 
-                setCurrentProject(await getFreshCurrentProject(
-                  userToken,
-                  currentProject.id));
+                setCurrentProject(
+                  await getFreshCurrentProject(userToken, currentProject.id)
+                );
               }}
             />
           </Tabs.Panel>
@@ -1148,10 +1165,10 @@ function LiExampleInvitation(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-        .length - 1
-    ].fileIdentifyingUrlPathSegment
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+          .length - 1
+      ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1434,10 +1451,10 @@ function LiExampleMessage(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-    liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
-        .length - 1
-    ].fileIdentifyingUrlPathSegment
+      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+          .length - 1
+      ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
@@ -1556,17 +1573,17 @@ function FrameworkCard(props: {
         cursor: "pointer",
         backgroundColor: props.active
           ? theme.fn.lighten(
-            theme.fn.variant({ variant: "filled", color: "blue" })
-              .background!,
-            0.95
-          )
+              theme.fn.variant({ variant: "filled", color: "blue" })
+                .background!,
+              0.95
+            )
           : hovered
-            ? theme.fn.lighten(
+          ? theme.fn.lighten(
               theme.fn.variant({ variant: "filled", color: "blue" })
                 .background!,
               0.99
             )
-            : undefined,
+          : undefined,
         borderColor:
           props.active || hovered
             ? theme.colors.blue[5] + "!important"
@@ -1621,9 +1638,18 @@ function FrameworkCard(props: {
             >
               <Badge
                 variant="dot"
-                color={isNaN(props.conversion) ? 'grey' : (props.conversion > 9.0 ? "green" : "red")}
+                color={
+                  isNaN(props.conversion)
+                    ? "grey"
+                    : props.conversion > 9.0
+                    ? "green"
+                    : "red"
+                }
               >
-                Opened: {!isNaN(props.conversion) ? Math.trunc(props.conversion) + '%' : 'TBD'}
+                Opened:{" "}
+                {!isNaN(props.conversion)
+                  ? Math.trunc(props.conversion) + "%"
+                  : "TBD"}
               </Badge>
             </Tooltip>
           )}
@@ -1672,8 +1698,8 @@ function FrameworkSection(props: {
   framework: BumpFramework;
   bumpCount: number;
   setIsDataChanged: (val: boolean) => void;
-  prospectId: number,
-  setProspectId: (prospectId: number) => void,
+  prospectId: number;
+  setProspectId: (prospectId: number) => void;
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -2013,7 +2039,10 @@ function FrameworkSection(props: {
                   onChange={(value: any) => {
                     if (value === "make-your-own") {
                       form.setFieldValue("bumpFrameworkTemplateName", "");
-                      form.setFieldValue("bumpFrameworkHumanReadablePrompt", "Describe your custom framework here...");
+                      form.setFieldValue(
+                        "bumpFrameworkHumanReadablePrompt",
+                        "Describe your custom framework here..."
+                      );
                       form.setFieldValue("additionalContext", "");
                       form.setFieldValue("promptInstructions", "");
                       setContextQuestion("");
@@ -2219,7 +2248,7 @@ function FrameworkSection(props: {
                           rightSection={
                             <>
                               {personalizationItemsCount &&
-                                form.values.useAccountResearch ? (
+                              form.values.useAccountResearch ? (
                                 <Badge
                                   w={16}
                                   h={16}
@@ -2552,43 +2581,43 @@ const ProcessBar: React.FC<{
   checked,
   onPressItem,
 }) => {
-    return (
-      <Flex align={"center"} gap={"0.5rem"}>
-        <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
-          <Checkbox
-            size={"sm"}
-            label={title}
-            checked={checked}
-            disabled={disabled}
-            onChange={(event) => onPressItem(id, event.currentTarget.checked)}
+  return (
+    <Flex align={"center"} gap={"0.5rem"}>
+      <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
+        <Checkbox
+          size={"sm"}
+          label={title}
+          checked={checked}
+          disabled={disabled}
+          onChange={(event) => onPressItem(id, event.currentTarget.checked)}
+          color={color}
+          variant="outline"
+        />
+        <Flex sx={{ flex: 1 }}>
+          <Divider w={"100%"} color={"#E9ECEF"} />
+        </Flex>
+        <Tooltip label="Historical Acceptance Rate" withArrow>
+          <Button
+            variant={"light"}
+            fw={700}
+            size="xs"
             color={color}
-            variant="outline"
-          />
-          <Flex sx={{ flex: 1 }}>
-            <Divider w={"100%"} color={"#E9ECEF"} />
-          </Flex>
-          <Tooltip label="Historical Acceptance Rate" withArrow>
-            <Button
-              variant={"light"}
-              fw={700}
-              size="xs"
-              color={color}
-              radius="xl"
-              h="auto"
-              fz={"0.625rem"}
-              py={"0.125rem"}
-              px={"0.25rem"}
-            >
-              {percent}%
-            </Button>
-          </Tooltip>
-        </Flex>
-        <Flex direction={"column"} sx={{ flex: 6 }}>
-          <Progress value={percent} color={color} size={"lg"} radius="xl" />
-        </Flex>
+            radius="xl"
+            h="auto"
+            fz={"0.625rem"}
+            py={"0.125rem"}
+            px={"0.25rem"}
+          >
+            {percent}%
+          </Button>
+        </Tooltip>
       </Flex>
-    );
-  };
+      <Flex direction={"column"} sx={{ flex: 6 }}>
+        <Progress value={percent} color={color} size={"lg"} radius="xl" />
+      </Flex>
+    </Flex>
+  );
+};
 
 export const PersonalizationCard: React.FC<{
   title: string;
@@ -2750,12 +2779,14 @@ const CtaSection = (props: {
               });
             }}
             onClickDelete={async () => {
-              await deleteCTA(userToken, e.id);
-              showNotification({
-                title: "Success",
-                message: "CTA has been deleted",
-                color: "blue",
-              });
+              const response = await deleteCTA(userToken, e.id);
+              if(response.status === "success"){
+                showNotification({
+                  title: "Success",
+                  message: "CTA has been deleted",
+                  color: "blue",
+                });
+              }
               refetch();
             }}
           />
@@ -2857,7 +2888,7 @@ const CTAOption: React.FC<{
           </Flex>
 
           <Flex wrap={"wrap"} gap={"1rem"} align={"center"}>
-            <Menu shadow="md" width={200} withinPortal withArrow>
+            {/* <Menu shadow="md" width={200} withinPortal withArrow>
               <Menu.Target>
                 <ActionIcon radius="xl" size="sm">
                   <IconPencil size="1.0rem" />
@@ -2875,7 +2906,13 @@ const CTAOption: React.FC<{
                   Delete
                 </Menu.Item>
               </Menu.Dropdown>
-            </Menu>
+            </Menu> */}
+            <ActionIcon radius="xl" size="sm" onClick={onClickEdit}>
+              <IconPencil size="1.0rem" />
+            </ActionIcon>
+            <ActionIcon radius="xl" size="sm" onClick={onClickDelete}>
+              <IconTrash size="1.0rem" />
+            </ActionIcon>
             <Switch
               checked={data.checked}
               color={"blue"}

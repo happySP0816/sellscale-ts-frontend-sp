@@ -242,26 +242,30 @@ const Content = (props: {
         </Flex>
 
         <Flex gap={"0.5rem"} mt={"2rem"}>
-          <Button variant="outline" sx={{ flex: 1 }} disabled>
-            <Text weight={700}>Auto Edit Using AI</Text>
-          </Button>
-          <Button
-            variant={editing ? "filled" : "outline"}
-            sx={{ flex: 1 }}
-            onClick={() => {
-              setEditing(true);
-            }}
-          >
-            <Text weight={700}>Edit message</Text>
-          </Button>
+          <Tooltip label="Coming soon!">
+            <Button variant="outline" sx={{ flex: 1 }} disabled>
+              <Text weight={700}>Auto Edit Using AI</Text>
+            </Button>
+            <Button
+              variant={editing ? "filled" : "outline"}
+              sx={{ flex: 1 }}
+              onClick={() => {
+                setEditing(true);
+              }}
+            >
+              <Text weight={700}>Edit message</Text>
+            </Button>
+          </Tooltip>
         </Flex>
       </Box>
-      <Button w={"100%"} variant="light" size="md" disabled>
-        <IconRotate width={16} />
-        <Text weight={700} ml={"0.25rem"}>
-          Regenerate message
-        </Text>
-      </Button>
+      <Tooltip label="Coming soon!">
+        <Button w={"100%"} variant="light" size="md" disabled>
+          <IconRotate width={16} />
+          <Text weight={700} ml={"0.25rem"}>
+            Regenerate message
+          </Text>
+        </Button>
+      </Tooltip>
 
       <Flex mt={"1.5rem"} gap={"0.5rem"} justify={"center"}>
         <Button

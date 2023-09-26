@@ -3,6 +3,7 @@ import {
   Avatar,
   Badge,
   Box,
+  Button,
   Checkbox,
   Container,
   Divider,
@@ -262,9 +263,8 @@ export default function ProspectList(props: {
           latest_msg:
             is_last_message_from_sdr || nurturingMode
               ? `You: ${last_message_from_sdr || "..."}`
-              : `${p.first_name}: ${
-                  last_message_from_prospect || "No message found"
-                }`,
+              : `${p.first_name}: ${last_message_from_prospect || "No message found"
+              }`,
           latest_msg_time: convertDateToCasualTime(
             new Date(last_message_timestamp || -1)
           ),
@@ -289,12 +289,12 @@ export default function ProspectList(props: {
             filterSelectOptions,
             (o) => o.value === a.linkedin_status
           ) -
-            _.findIndex(
-              filterSelectOptions,
-              (o) => o.value === b.linkedin_status
-            ) ||
+          _.findIndex(
+            filterSelectOptions,
+            (o) => o.value === b.linkedin_status
+          ) ||
           (!b.latest_msg_from_sdr && b.new_msg_count ? 1 : 0) -
-            (!a.latest_msg_from_sdr && a.new_msg_count ? 1 : 0) ||
+          (!a.latest_msg_from_sdr && a.new_msg_count ? 1 : 0) ||
           b.icp_fit - a.icp_fit ||
           removeExtraCharacters(a.name).localeCompare(
             removeExtraCharacters(b.name)
@@ -401,6 +401,25 @@ export default function ProspectList(props: {
             placeholder="Search..."
           />
         </Container>
+
+        <Flex w='100%' justify={'space-between'} px='2px'>
+          <Tooltip label={"Coming soon"} withArrow withinPortal>
+            <div>
+              <Button disabled>Replies</Button>
+            </div>
+          </Tooltip>
+          <Tooltip label={"Coming soon"} withArrow withinPortal>
+            <div>
+              <Button disabled>Snoozed</Button>
+            </div>
+          </Tooltip>
+          <Tooltip label={"Coming soon"} withArrow withinPortal>
+            <div>
+              <Button disabled>AI Queued</Button>
+            </div>
+          </Tooltip>
+        </Flex>
+
         <Group
           spacing={0}
           pt={0}
@@ -475,7 +494,7 @@ export default function ProspectList(props: {
             variant="transparent"
             color={
               _.isEqual(filtersState, defaultInboxProspectListFilterState) ||
-              !filtersState
+                !filtersState
                 ? "gray.6"
                 : "blue.6"
             }
@@ -538,16 +557,16 @@ export default function ProspectList(props: {
                         {filterSelectValue === "ALL" &&
                           (!prospects[i - 1] ||
                             prospect.linkedin_status !==
-                              prospects[i - 1].linkedin_status) && (
+                            prospects[i - 1].linkedin_status) && (
                             <div
                               style={{
                                 backgroundColor:
                                   prospect.linkedin_status ===
-                                  "ACTIVE_CONVO_REVIVAL"
+                                    "ACTIVE_CONVO_REVIVAL"
                                     ? "#2c8c91"
                                     : prospect.in_purgatory
-                                    ? "#858585"
-                                    : "#25262b",
+                                      ? "#858585"
+                                      : "#25262b",
                                 padding: "4px",
                                 position: "relative",
                               }}

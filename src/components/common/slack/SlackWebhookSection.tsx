@@ -103,6 +103,15 @@ export default function SlackbotSection() {
         )}
       </Flex>
 
+      <Text color='gray' size='xs'>
+        Access Slack Webhooks by{" "}
+          <a 
+            href='https://api.slack.com/apps/A046N8QCQUA/incoming-webhooks?success=1'
+            target='_blank'>
+            visiting this link.
+          </a>
+      </Text>
+
     </Paper>
   );
 }

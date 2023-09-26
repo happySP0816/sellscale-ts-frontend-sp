@@ -214,17 +214,9 @@ export default function SalesNavigatorComponent(props: {
                   <Title order={5}>
                     {launch.name || `Scrape #${launches.length - index}`} 
                   </Title>
-                  <Text ml='sm' fz='xs'>
+                  <Text ml='sm' fz='xs' mr='xs'>
                     {date}
                   </Text>
-                  <Badge
-                    color={badgeColor}
-                    size='sm'
-                    ml='md'
-                    variant='outline'
-                  >
-                    {launch.status}
-                  </Badge>
                 </Flex>
                 {
                   launch.status === "SUCCESS" ?
@@ -239,9 +231,21 @@ export default function SalesNavigatorComponent(props: {
                     </Tooltip>
                 }
               </Flex>
-              <Text>
-                {launch.scrape_count} contacts
-              </Text>
+              <Flex>
+                <Text>
+                  {launch.scrape_count} contacts
+                </Text>
+
+                <Badge
+                  color={badgeColor}
+                  size='sm'
+                  ml='md'
+                  variant='outline'
+                  mt='4px'
+                >
+                  {launch.status}
+                </Badge>
+              </Flex>
               <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">View Original Filters</Anchor>
             </Card>
           )

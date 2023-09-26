@@ -1,6 +1,5 @@
 import { Button, Flex, Text } from "@mantine/core";
 
-import { blue } from "../../../colors";
 import { IconCircleXFilled } from "@tabler/icons-react";
 import { FC } from "react";
 
@@ -11,6 +10,8 @@ const Notification: FC<{
   if (!show) {
     return null;
   }
+
+  const blue = "#228be6";
 
   return (
     <Flex

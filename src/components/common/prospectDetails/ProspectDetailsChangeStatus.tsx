@@ -15,6 +15,7 @@ import {
   LoadingOverlay,
   Select,
   ScrollArea,
+  Modal,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import {
@@ -37,6 +38,7 @@ import {
   IconBrandLinkedin,
   IconMessageDots,
   IconSeeding,
+  IconAlarm,
 } from "@tabler/icons";
 import { startCase } from "lodash";
 import displayNotification from "@utils/notificationFlow";
@@ -48,11 +50,16 @@ import { Channel, DemoFeedback, ProspectDetails } from "src";
 import { getChannelStatusOptions } from "@utils/requests/getChannels";
 import { API_URL } from "@constants/data";
 import ProspectDemoDateSelector from "./ProspectDemoDateSelector";
-import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
-import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
+import {
+  demosDrawerOpenState,
+  demosDrawerProspectIdState,
+} from "@atoms/dashboardAtoms";
+import DemoFeedbackDrawer from "@drawers/DemoFeedbackDrawer";
 import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
 import { getProspectByID } from "@utils/requests/getProspectByID";
 import getDemoFeedback from "@utils/requests/getDemoFeedback";
+import { DatePicker } from "@mantine/dates";
+import { snoozeProspect } from "@utils/requests/snoozeProspect";
 
 const linkedinStatusOptions = [
   {
@@ -258,7 +265,7 @@ export async function updateChannelStatus(
   channelType: Channel,
   newStatus: string,
   override: boolean = false,
-  quietly: boolean = false,
+  quietly: boolean = false
 ) {
   return await fetch(`${API_URL}/prospect/${prospectId}`, {
     method: "PATCH",
@@ -316,11 +323,12 @@ export default function ProspectDetailsChangeStatus(
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
 
+  const [openedSnoozeModal, setOpenedSnoozeModal] = useState(false);
+
   const items = [];
 
-  const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(
-    demosDrawerOpenState
-  );
+  const [demosDrawerOpened, setDemosDrawerOpened] =
+    useRecoilState(demosDrawerOpenState);
   const [drawerProspectId, setDrawerProspectId] = useRecoilState(
     demosDrawerProspectIdState
   );
@@ -329,7 +337,9 @@ export default function ProspectDetailsChangeStatus(
     queryKey: [`query-get-dashboard-prospect-${props.prospectId}`],
     queryFn: async () => {
       const response = await getProspectByID(userToken, props.prospectId);
-      return response.status === "success" ? response.data as ProspectDetails : undefined;
+      return response.status === "success"
+        ? (response.data as ProspectDetails)
+        : undefined;
     },
     enabled: props.prospectId !== -1,
   });
@@ -338,14 +348,16 @@ export default function ProspectDetailsChangeStatus(
     queryKey: [`query-get-prospect-demo-feedback-${props.prospectId}`],
     queryFn: async () => {
       const response = await getDemoFeedback(userToken, props.prospectId);
-      return response.status === "success" ? response.data as DemoFeedback[] : undefined;
+      return response.status === "success"
+        ? (response.data as DemoFeedback[])
+        : undefined;
     },
     enabled: props.prospectId !== -1,
   });
 
   useEffect(() => {
-    refreshDemoFeedback()
-  }, [prospectData])
+    refreshDemoFeedback();
+  }, [prospectData]);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [
@@ -408,6 +420,23 @@ export default function ProspectDetailsChangeStatus(
       </UnstyledButton>
     );
   }
+  items.push(
+    <UnstyledButton
+      key={"snooze"}
+      className={classes.item}
+      onClick={async () => {
+        setOpenedSnoozeModal(true);
+      }}
+      sx={{
+        border: "solid 1px #333",
+      }}
+    >
+      <IconAlarm color={theme.colors.yellow[6]} size={32} />
+      <Text size="xs" mt={7}>
+        Snooze
+      </Text>
+    </UnstyledButton>
+  );
 
   const changeStatus = async (status: { title: string; status: string }) => {
     await displayNotification(
@@ -471,52 +500,60 @@ export default function ProspectDetailsChangeStatus(
           {formatToLabel(props.channelData.currentStatus)}
         </Badge>
       </Group>
-      <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${splitName(props.prospectName).first
-        }'s ${formatToLabel(props.channelData.value)} status.`}</Text>
+      <Text mb="xs" fz="sm" c="dimmed">{`Adjust ${
+        splitName(props.prospectName).first
+      }'s ${formatToLabel(props.channelData.value)} status.`}</Text>
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
-      {
-        !props.channelData.currentStatus?.includes('DEMO') ?
-          <SimpleGrid cols={3} mt="md">
-            {items}
-          </SimpleGrid> :
-          <>
-            {demoFeedbacks && demoFeedbacks.length > 0 && prospectData && (
-              <ScrollArea h='250px'>
-                {demoFeedbacks?.map((feedback, index) => {
-                  return (
-                    <div
+      {!props.channelData.currentStatus?.includes("DEMO") ? (
+        <SimpleGrid cols={3} mt="md">
+          {items}
+        </SimpleGrid>
+      ) : (
+        <>
+          {demoFeedbacks && demoFeedbacks.length > 0 && prospectData && (
+            <ScrollArea h="250px">
+              {demoFeedbacks?.map((feedback, index) => {
+                return (
+                  <div style={{ marginBottom: 10 }}>
+                    <DemoFeedbackCard
+                      prospect={prospectData.data}
+                      index={index + 1}
+                      demoFeedback={feedback}
+                      refreshDemoFeedback={refreshDemoFeedback}
+                    />
+                  </div>
+                );
+              })}
+            </ScrollArea>
+          )}
 
-                      style={{ marginBottom: 10 }}
-                    >
-                      <DemoFeedbackCard prospect={prospectData.data} index={index + 1} demoFeedback={feedback} refreshDemoFeedback={refreshDemoFeedback} />
-                    </div>
-                  )
-                })}
-              </ScrollArea>
-            )}
+          <Button
+            variant="light"
+            radius="md"
+            fullWidth
+            onClick={() => {
+              setDrawerProspectId(props.prospectId);
+              setDemosDrawerOpened(true);
+            }}
+          >
+            {demoFeedbacks && demoFeedbacks.length > 0 ? "Add" : "Give"} Demo
+            Feedback
+          </Button>
+        </>
+      )}
 
-            <Button
-              variant="light"
-              radius="md"
-              fullWidth
-              onClick={() => {
-                setDrawerProspectId(props.prospectId);
-                setDemosDrawerOpened(true);
-              }}
-            >
-              {(demoFeedbacks && demoFeedbacks.length > 0) ? 'Add' : 'Give'} Demo Feedback
-            </Button>
-          </>
-      }
-
-      <DemoFeedbackDrawer refetch={refetch} onSubmit={() => {
-        queryClient.refetchQueries({
-          queryKey: [`query-prospect-details-${props.prospectId}`],
-        });
-      }} />
+      <DemoFeedbackDrawer
+        refetch={refetch}
+        onSubmit={() => {
+          queryClient.refetchQueries({
+            queryKey: [`query-prospect-details-${props.prospectId}`],
+          });
+        }}
+      />
 
       {props.channelData.currentStatus &&
-        props.channelData.currentStatus.includes("DEMO") && !demoFeedbacks && (
+        props.channelData.currentStatus.includes("DEMO") &&
+        !demoFeedbacks && (
           <ProspectDemoDateSelector prospectId={props.prospectId} />
         )}
       {props.channelData.currentStatus?.startsWith("ACTIVE_CONVO") && (
@@ -553,6 +590,66 @@ export default function ProspectDetailsChangeStatus(
         />
       )}
 
+      <Modal
+        opened={openedSnoozeModal}
+        onClose={() => setOpenedSnoozeModal(false)}
+        title="Snooze Prospect"
+      >
+        <Center>
+          <DatePicker
+            minDate={new Date()}
+            onChange={async (date) => {
+              if (!date) {
+                return;
+              }
+              let timeDiff = date.getTime() - new Date().getTime();
+              let daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+              await displayNotification(
+                "snooze-prospect",
+                async () => {
+                  let result = await snoozeProspect(
+                    userToken,
+                    props.prospectId,
+                    daysDiff
+                  );
+                  return result;
+                },
+                {
+                  title: `Snoozing prospect for ${daysDiff} days...`,
+                  message: `Working with servers...`,
+                  color: "teal",
+                },
+                {
+                  title: `Snoozed!`,
+                  message: `Your prospect has been snoozed from outreach for ${daysDiff} days.`,
+                  color: "teal",
+                },
+                {
+                  title: `Error while snoozing your prospect.`,
+                  message: `Please try again later.`,
+                  color: "red",
+                }
+              );
+              setOpenedSnoozeModal(false);
+              
+              // This will make the queries rerun and update the UI
+              queryClient.invalidateQueries({
+                queryKey: [`query-prospect-details-${props.prospectId}`],
+              });
+              queryClient.invalidateQueries({
+                queryKey: ["query-pipeline-prospects-all"],
+              });
+              queryClient.invalidateQueries({
+                queryKey: ["query-pipeline-details"],
+              });
+              queryClient.invalidateQueries({
+                queryKey: ["query-get-channels-prospects"],
+              });
+              refetch();
+            }}
+          />
+        </Center>
+      </Modal>
     </Card>
   );
 }

@@ -55,6 +55,7 @@ const TrainYourAi = (props: {
   ];
 
   const [approvedSet, setApprovedSet] = useState<Set<number>>(new Set());
+  const percentComplete = ((approvedSet.size + 1) / props.messages.length) * 100;
 
   return (
     <Flex>
@@ -156,7 +157,7 @@ const TrainYourAi = (props: {
         >
           <Progress
             color="blue"
-            value={((approvedSet.size + 1) / props.messages.length) * 100}
+            value={percentComplete}
           />
         </Box>
 

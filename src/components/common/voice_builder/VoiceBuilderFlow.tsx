@@ -432,7 +432,7 @@ export default function VoiceBuilderFlow(props: {
           campaign_end_date: nextWeek.toISOString(),
           priority_rating: 10,
           config_id: configId,
-          messages: currentMessages.map((message) => {
+          messages: currentMessages.filter(m => m.value.trim()).map((message) => {
             return {
               prospect_id: message.prospect?.id,
               message: message.value,

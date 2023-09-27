@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { useLoaderData } from 'react-router-dom';
+import { PersonaOverview } from 'src';
+import { getPersonasOverview } from '@utils/requests/getPersonas';
 
 const PulseTabSelector = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -22,10 +24,24 @@ const PulseTabSelector = () => {
   useEffect(() => {
     (async () => {
       const currentPersonaId = archetypeId ? archetypeId : getCurrentPersonaId();
+      const response = await getPersonasOverview(userToken);
+      const result =
+            response.status === "success"
+              ? (response.data as PersonaOverview[])
+              : [];
+
       if (!currentProject && currentPersonaId) {
         const project = await getFreshCurrentProject(
           userToken,
           +currentPersonaId
+        );
+        setCurrentProject(project);
+      }
+
+      if (!currentProject && result.length > 0) {
+        const project = await getFreshCurrentProject(
+          userToken,
+          result[0].id
         );
         setCurrentProject(project);
       }

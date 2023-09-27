@@ -72,8 +72,8 @@ const CampaignGraph = (props: {sections: any, onChannelClick: (sectionType: stri
         <Grid.Col xs={12} md={3} onClick={() => props.onChannelClick('linkedin')} sx={{cursor: 'pointer'}}>
           <CampaignSequenceDAG
             type="linkedin"
-            active={isEnabledLinkedin}
-            enabled={isEnabledLinkedin}
+            active={isEnabledLinkedin || true} // TODO: Remove || true if we want to disable the LinkedIn section
+            enabled={isEnabledLinkedin || true} // TODO: Remove || true if we want to disable the LinkedIn section 
             // onToggle={setEnabledLinkedin}
             numbers={[linkedinSection[0]?.sends, linkedinSection[0]?.opens, linkedinSection[0]?.replies,]}
           />

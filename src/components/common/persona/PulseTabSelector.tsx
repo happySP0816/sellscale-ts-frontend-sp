@@ -13,40 +13,9 @@ import { getPersonasOverview } from '@utils/requests/getPersonas';
 const PulseTabSelector = () => {
   const userToken = useRecoilValue(userTokenState);
 
-  const { archetypeId } = useLoaderData() as {
-    archetypeId: number;
-  };
-
-  // Select the last used project
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
-
-  useEffect(() => {
-    (async () => {
-      const currentPersonaId = archetypeId ? archetypeId : getCurrentPersonaId();
-      const response = await getPersonasOverview(userToken);
-      const result =
-            response.status === "success"
-              ? (response.data as PersonaOverview[])
-              : [];
-
-      if (!currentProject && currentPersonaId) {
-        const project = await getFreshCurrentProject(
-          userToken,
-          +currentPersonaId
-        );
-        setCurrentProject(project);
-      }
-
-      if (!currentProject && result.length > 0) {
-        const project = await getFreshCurrentProject(
-          userToken,
-          result[0].id
-        );
-        setCurrentProject(project);
-      }
-    })();
-  }, []);
+  // const { archetypeId } = useLoaderData() as {
+  //   archetypeId: number;
+  // };
 
   return (
     <Tabs defaultValue="old_view">

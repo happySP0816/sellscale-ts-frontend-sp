@@ -26,3 +26,10 @@ export function removeLastPathSegment() {
   let newUrl = urlParts.join('/');
   window.history.pushState({ path: newUrl }, '', newUrl);
 }
+
+export function removeQueryParam(paramToRemove: string) {
+  const urlObject = new URL(window.location.href);
+  const searchParams = urlObject.searchParams;
+  searchParams.delete(paramToRemove);
+  window.history.pushState({ path: urlObject.href }, '', urlObject.href);
+}

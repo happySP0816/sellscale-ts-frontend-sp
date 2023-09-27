@@ -8,7 +8,7 @@ import {
 import Layout from "./nav/Layout";
 import { Outlet, useSearchParams } from "react-router-dom";
 import { ModalsProvider } from "@mantine/modals";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { navLoadingState } from "@atoms/navAtoms";
 import SpotlightWrapper from "@nav/SpotlightWrapper";
 import UploadProspectsModal from "@modals/UploadProspectsModal";
@@ -17,7 +17,7 @@ import InstructionsLinkedInCookieModal from "@modals/InstructionsLinkedInCookieM
 import CreateNewCTAModal from "@modals/CreateNewCTAModal";
 import ViewEmailModal from "@modals/ViewEmailModal";
 import { useEffect, useState } from "react";
-import { userDataState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import SequenceWriterModal from "@modals/SequenceWriterModal";
 import CTAGeneratorModal from "@modals/CTAGeneratorModal";
 import ManagePulsePrompt from "@modals/ManagePulsePromptModal";
@@ -43,6 +43,11 @@ import ConfirmModal from "@modals/ConfirmModal";
 import PatchEmailSubjectLineModal from "@modals/PatchEmailSubjectLineModal";
 import { CreateBumpFrameworkContextModal } from "@modals/CreateBumpFrameworkModal";
 import { CloneBumpFrameworkContextModal } from "@modals/CloneBumpFrameworkModal";
+import { currentProjectState } from "@atoms/personaAtoms";
+import { getFreshCurrentProject, getCurrentPersonaId } from "@auth/core";
+import { removeQueryParam } from "@utils/documentChange";
+import { getPersonasOverview } from "@utils/requests/getPersonas";
+import { PersonaOverview } from "src";
 
 export default function App() {
   // Site light or dark mode
@@ -88,16 +93,43 @@ export default function App() {
 
   const loading = useRecoilValue(navLoadingState);
 
-
+  // Select the last used project
+  const userToken = useRecoilValue(userTokenState);
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   // Set persona query param
   const [searchParams] = useSearchParams();
   useEffect(() => {
-    const persona_id = searchParams.get('campaign_id');
-    if (persona_id) {
-      
-    }
+    (async () => {
+      const persona_id = searchParams.get("campaign_id");
+      if (persona_id) {
+        // Set to query param persona
+        const project = await getFreshCurrentProject(userToken, +persona_id);
+        setCurrentProject(project);
+        removeQueryParam("campaign_id");
+      } else {
+        // Set to last used persona
+        const currentPersonaId = getCurrentPersonaId();
+        if (!currentProject && currentPersonaId) {
+          const project = await getFreshCurrentProject(
+            userToken,
+            +currentPersonaId
+          );
+          setCurrentProject(project);
+        } else {
+          // Set to first persona
+          const response = await getPersonasOverview(userToken);
+          const result =
+                response.status === "success"
+                  ? (response.data as PersonaOverview[])
+                  : [];
+          if (result.length > 0){
+            setCurrentProject(result[0]);
+          }
+        }
+      }
+    })();
   }, []);
-
 
   return (
     <ColorSchemeProvider
@@ -115,8 +147,9 @@ export default function App() {
               extraBold: 900,
             },
           },
-          fontFamily: 'Poppins, sans-serif',
-          fontFamilyMonospace: 'source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace',
+          fontFamily: "Poppins, sans-serif",
+          fontFamilyMonospace:
+            "source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace",
         }}
         withGlobalStyles
         withNormalizeCSS

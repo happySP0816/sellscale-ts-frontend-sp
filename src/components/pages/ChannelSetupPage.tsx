@@ -20,18 +20,7 @@ export default function ChannelSetupPage() {
 
   const userToken = useRecoilValue(userTokenState);
   const [selectedChannel, setSelectedChannel] = React.useState(channelType);
-
-  // Select the last used project
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
-  useEffect(() => {
-    (async () => {
-      const currentPersonaId = getCurrentPersonaId();
-      if (!currentProject && currentPersonaId) {
-        const project = await getFreshCurrentProject(userToken, +currentPersonaId);
-        setCurrentProject(project)
-      }
-    })();
-  }, []);
+  const currentProject = useRecoilValue(currentProjectState);
 
   return (
     <>

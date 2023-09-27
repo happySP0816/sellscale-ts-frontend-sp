@@ -122,7 +122,7 @@ export default function VoiceSelect(props: {
               setVoiceBuilderOpen(true);
             }
           },
-          noChange: !selectedVoice,
+          noChange: true //!selectedVoice,
         }}
         title={{
           name: "Select Voice",

@@ -37,70 +37,50 @@ import GridTabs from "./GridTabs";
 import WithdrawInvitesModal from "./modals/WithdrawInvitesModal";
 import { SCREEN_SIZES } from "@constants/data";
 import PersonaSelect from "../PersonaSplitSelect";
-import { ProjectSelect } from '@common/library/ProjectSelect';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { currentProjectState, uploadDrawerOpenState } from '@atoms/personaAtoms';
-import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
-
-const filters = [
-  {
-    color: "#3B85EF",
-    name: "Very High",
-  },
-  {
-    color: "#009512",
-    name: "High",
-  },
-  {
-    color: "#EFBA50",
-    name: "Medium",
-  },
-  {
-    color: "#EB8231",
-    name: "Low",
-  },
-  {
-    color: "#E5564E",
-    name: "Very Low",
-  },
-  {
-    color: "#84818A",
-    name: "Unscored",
-  },
-];
+import { getProspectsForICP } from "@utils/requests/getProspects";
+import { userTokenState } from "@atoms/userAtoms";
+import { useRecoilValue } from "recoil";
+import { currentProjectState } from "@atoms/personaAtoms";
+import { showNotification } from "@mantine/notifications";
 
 const filterDashboard = [
   {
+    label: "Very High",
     color: "#3B85EF",
     bgColor: "rgba(59, 133, 239, 0.05)",
     percent: "10%",
     value: 125,
   },
   {
+    label: "High",
     color: "#009512",
     bgColor: "rgba(0, 149, 18, 0.05)",
     percent: "22%",
     value: 889,
   },
   {
+    label: "Medium",
     color: "#EFBA50",
     percent: "18%",
     bgColor: "rgba(239, 186, 80, 0.05)",
     value: 642,
   },
   {
+    label: "Low",
     color: "#EB8231",
     percent: "20%",
     bgColor: "rgba(235, 130, 49, 0.05)",
     value: 1221,
   },
   {
+    label: "Very Low",
     color: "#E5564E",
     percent: "25%",
     bgColor: "rgba(229, 86, 78, 0.05)",
     value: 1566,
   },
   {
+    label: "Unscored",
     color: "#84818A",
     bgColor: "rgba(132, 129, 138, 0.05)",
     percent: "5%",
@@ -111,100 +91,12 @@ const filterDashboard = [
 const demoData = [
   {
     id: 1,
-    name: "Aakanksha Mitra",
-    status: "Replied",
+    full_name: "Aakanksha Mitra",
     title: "Staff Software Engineer",
     company: "Airbnb",
-    channel_type: "linkedin",
-    channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
-    icp_score: "Very High",
+    linkedin_url: "https://www.linkedin.com/in/ronaldnolasco/",
+    icp_fit_score: "Very High",
     icp_fit_reason: "Random Reason",
-    value: 5000,
-  },
-  {
-    id: 2,
-    name: "Ronald Nolasco",
-    status: "Outreached",
-    title: "Staff Software Engineer",
-    company: "Airbnb",
-    channel_type: "linkedin",
-    channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
-    icp_score: "Unscored",
-    icp_fit_reason: "Random Reason",
-    value: 5000,
-  },
-  {
-    id: 3,
-    name: "Aakanksha Mitra",
-    status: "Prospected",
-    title: "Staff Software Engineer",
-    company: "Airbnb",
-    channel_type: "linkedin",
-    channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
-    icp_score: "High",
-    icp_fit_reason: "Random Reason",
-    value: 5000,
-  },
-  {
-    id: 4,
-    name: "Aakanksha Mitra",
-    status: "Replied",
-    title: "Staff Software Engineer",
-    company: "Airbnb",
-    channel_type: "linkedin",
-    channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
-    icp_score: "Very High",
-
-    icp_fit_reason: "Random Reason",
-    value: 5000,
-  },
-  {
-    id: 5,
-    name: "Aakanksha Mitra",
-    status: "Replied",
-    title: "Staff Software Engineer",
-    company: "Airbnb",
-    channel_type: "email",
-    channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
-    icp_score: "Very Low",
-    icp_fit_reason: "Random Reason",
-    value: 5000,
-  },
-  {
-    id: 6,
-    name: "Aakanksha Mitra",
-    status: "Replied",
-    title: "Staff Software Engineer",
-    company: "Airbnb",
-    channel_type: "linkedin",
-    channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
-    icp_score: "High",
-    icp_fit_reason: "Random Reason",
-    value: 5000,
-  },
-  {
-    id: 7,
-    name: "Aakanksha Mitra",
-    status: "Replied",
-    title: "Staff Software Engineer",
-    company: "Airbnb",
-    channel_type: "linkedin",
-    channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
-    icp_score: "Low",
-    icp_fit_reason: "Random Reason",
-    value: 5000,
-  },
-  {
-    id: 8,
-    name: "Aakanksha Mitra",
-    status: "Prospected",
-    title: "Staff Software Engineer",
-    company: "Airbnb",
-    channel_type: "email",
-    channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
-    icp_score: "Medium",
-    icp_fit_reason: "Random Reason",
-    value: 5000,
   },
 ];
 
@@ -246,9 +138,13 @@ const tabFilters = [
   },
 ];
 
-const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
+const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = ({
+  isTesting,
   openFilter,
 }) => {
+  const userToken = useRecoilValue(userTokenState)
+  const currentProject = useRecoilValue(currentProjectState)
+
   const initialFilters = [
     {
       id: "status",
@@ -263,7 +159,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
       value: "",
     },
     {
-      id: "icp_score",
+      id: "icp_fit_score",
       value: "",
     },
   ];
@@ -283,18 +179,17 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
     value: string;
     count: number;
   }>(tabFilters[0]);
+
   const [invitedOnLinkedIn, setInvitedOnLinkedIn] = useState(false);
   const [selectedRows, setSelectedRows] = useState<DataGridRowSelectionState>(
     {}
   );
+
+  const [prospectData, setProspectData] = useState<any[]>([])
+
   const [opened, { open, close }] = useDisclosure(false);
   const [columnFilters, setColumnFilters] =
     useState<DataGridFiltersState>(initialFilters);
-  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
-  const openUploadProspects = () => {
-    setUploadDrawerOpened(true);
-  };
-  const currentProject = useRecoilValue(currentProjectState);
 
   const withdrawInvites = () => {
     open();
@@ -333,6 +228,36 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalSearch, channel, status, selectedTab]);
 
+  const triggerGetProspects = async () => {
+    if (!currentProject?.id) {
+      showNotification({
+        title: "Error",
+        message: "No project selected",
+        color: "red",
+      })
+      return
+    }
+
+    const result = await getProspectsForICP(
+      userToken,
+      currentProject?.id,
+      isTesting,
+    )
+
+    // Get prospects
+    const prospects = result.data.prospects
+    console.log('prospects', prospects)
+
+    setProspectData(prospects)
+
+  }
+
+  useEffect(() => {
+    if (!currentProject?.id) return
+
+    triggerGetProspects()
+  }, [currentProject?.id, isTesting])
+
   return (
     <Box
       sx={(theme) => ({
@@ -350,8 +275,18 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
         }}
       >
         <Box style={{ display: "flex", alignItems: "center" }}>
+          <Title size={"24px"} color={theme.colors.gray[6]}>
+            Persona:
+          </Title>
           <Box ml={"0.5rem"}>
-            <ProjectSelect extraBig />
+            <PersonaSelect
+              disabled={false}
+              onChange={(archetypes) => {
+                console.log(archetypes);
+              }}
+              label={""}
+              description={""}
+            />
           </Box>
           <Title
             size={"24px"}
@@ -360,15 +295,10 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
           ></Title>
         </Box>
         <Flex gap={"1rem"} align={"center"}>
-          <Button.Group color='gray'>
-            <Button variant="default" sx={{color: 'gray !important'}}>
-              <span style={{marginLeft: '6px', color: theme.colors.blue[5]}}>{currentProject?.num_unused_li_prospects}{" "}/{" "}{currentProject?.num_prospects}</span>
-            </Button>
-            <Button variant="default" sx={{color: 'gray !important'}}>
-              Left: <span style={{marginLeft: '6px', color: theme.colors.blue[5]}}>{currentProject ? Math.round(currentProject?.num_unused_li_prospects / (currentProject?.num_prospects + 0.0001) * 100)  + '% ': '-%'}</span>
-            </Button>
-          </Button.Group>
-          <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>Add Prospects</Button>
+          <Badge color="blue" ml={"0.5rem"}>
+            1245/2000 | Left: 75%
+          </Badge>
+          <Button leftIcon={<IconPlus />}>Add Prospects</Button>
           {smScreenOrLess && <Button onClick={openFilter}>Open filter</Button>}
         </Flex>
       </Box>
@@ -390,7 +320,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
               gap: "1rem",
             }}
           >
-            {filters.map((filter, index) => (
+            {filterDashboard.map((filter, index) => (
               <Box style={{ display: "flex", gap: "0.4rem" }} key={index}>
                 <Box
                   style={{
@@ -401,7 +331,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
                   }}
                 />
                 <Title size={"10px"} fw={400} color={theme.colors.gray[6]}>
-                  {filter.name}
+                  {filter.label}
                 </Title>
               </Box>
             ))}
@@ -435,7 +365,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
                   {filter.percent}
                 </Title>
                 <Title size={"20px"} fw={500}>
-                  {filter.value}%
+                  {filter.value}
                 </Title>
                 <Title size={"14px"} fw={500} color="gray.6">
                   Prospects
@@ -511,7 +441,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
                   const newSelectedRows = { ...selectedRows };
 
                   demoData
-                    .filter((x) => x.channel_type === "linkedin")
+                    .filter((x) => x)
                     .forEach((row) => {
                       newSelectedRows[row.id - 1] = true;
                     });
@@ -551,23 +481,24 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
         />
       </Paper>
       <DataGrid
-        data={demoData}
+        data={prospectData}
         highlightOnHover
         withPagination
         withSorting
         withRowSelection
         columns={[
           {
-            accessorKey: "icp_score",
+            accessorKey: "icp_fit_score",
             header: "ICP SCORE",
             cell: (cell) => (
-              <Badge
-                color={getICPScoreBadgeColor(
-                  cell.getValue<string>()?.toLowerCase()
-                )}
-              >
-                {cell.getValue<string>()?.toUpperCase()}
-              </Badge>
+              "test"
+              // <Badge
+              //   color={getICPScoreBadgeColor(
+              //     cell.getValue<string>()?.toLowerCase()
+              //   )}
+              // >
+              //   {cell.getValue<string>()?.toUpperCase()}
+              // </Badge>
             ),
           },
           {
@@ -582,9 +513,8 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
             accessorKey: "icp_fit_reason",
             header: "ICP FIT REASON",
           },
-
           {
-            accessorKey: "channel_type",
+            accessorKey: "linkedin_url",
             header: "LINKEDIN URL",
             cell: (cell) => (
               <Anchor
@@ -594,7 +524,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
                   gap: "0.5rem",
                 }}
                 target="_blank"
-                href={cell.row.original.channel_url}
+                href={cell.row.original.linkedin_url}
                 color={theme.colors.blue[6]}
                 fw={600}
               >
@@ -627,7 +557,6 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
         close={close}
         count={getSelectedRowCount}
       />
-      <PersonaUploadDrawer personaOverviews={currentProject ? [currentProject] : []} afterUpload={() => { }} />
     </Box>
   );
 };

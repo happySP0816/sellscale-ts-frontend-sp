@@ -15,6 +15,7 @@ export async function getProspects(
   persona_id?: number,
   shallow_data?: boolean,
   prospect_id?: number,
+  icp_fit_score?: number,
 ): Promise<MsgResponse> {
 
   const response = await fetch(
@@ -38,10 +39,37 @@ export async function getProspects(
     }
   );
 
-  const result = await processResponse(response, 'prospects');
+  const result = await processResponse(response);
   //const prospects = result.status === 'success' ? result.data as Prospect[] : [];
 
   return result;
 
 }
 
+
+export async function getProspectsForICP(
+  userToken: string,
+  client_archetype_id: number,
+  get_sample: boolean,
+): Promise<MsgResponse> {
+  
+    const response = await fetch(
+      `${API_URL}/prospect/get_prospect_for_icp`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_archetype_id: client_archetype_id,
+          get_sample: get_sample,
+        }),
+      }
+    );
+  
+    const result = await processResponse(response, "data");
+  
+    return result;
+  
+}

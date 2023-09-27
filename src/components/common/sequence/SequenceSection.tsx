@@ -58,6 +58,7 @@ import { openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
   IconCheck,
+  IconCircle2Filled,
   IconCopy,
   IconDots,
   IconEdit,
@@ -104,6 +105,7 @@ import { showNotification } from "@mantine/notifications";
 import {
   IconArrowRight,
   IconChevronRight,
+  IconCircle,
   IconRobot,
   IconSettings,
   IconTrash,
@@ -1028,9 +1030,10 @@ function IntroMessageSection(props: {
                   borderRadius: theme.radius.md + "!important",
                   color: theme.colors.teal[8] + "!important",
                 },
+                border: 'solid 1px ' + theme.colors.teal[5] + "!important"
               })}
             >
-              Personalization Settings
+              Edit Personalization
             </Tabs.Tab>
             <Tabs.Tab
               value="ctas"
@@ -1060,9 +1063,10 @@ function IntroMessageSection(props: {
                   borderRadius: theme.radius.md + "!important",
                   color: theme.colors.blue[8] + "!important",
                 },
+                border: 'solid 1px ' + theme.colors.blue[4] + "!important"
               })}
             >
-              Your CTAs
+              Edit CTAs
             </Tabs.Tab>
             {/* <Tabs.Tab value="voice" ml="auto">
               Train Your AI
@@ -1276,17 +1280,6 @@ function LiExampleInvitation(props: {
           pt="sm"
           pb={5}
         >
-          <ActionIcon
-            sx={{
-              position: "absolute",
-              top: 5,
-              right: 5,
-              cursor: "not-allowed",
-            }}
-            radius="xl"
-          >
-            <IconDots size="1.125rem" />
-          </ActionIcon>
           <Box>
             {showFullMessage || animationPlaying.current ? (
               <Text fz="xs">
@@ -2533,7 +2526,16 @@ const PersonalizationSection = (props: {
 
   return (
     <Flex direction="column" pt="md">
-      <Card shadow="xs" radius={"md"} mb={"1rem"}>
+      <Card shadow="md" radius={"md"} mb={"1rem"}>
+        <Box sx={{textAlign: 'right'}} ml='auto' pb='sm'>
+          <Badge leftSection={<IconCircle size='0.7rem'/>} color='grape' size='xs'>
+            Account Data
+          </Badge>
+          <br />
+          <Badge leftSection={<IconCircle size='0.7rem'/>} color='green' mt='xs' size='xs'>
+            Contact Data
+          </Badge>
+        </Box>
         <Flex direction={"column"} gap={"0.5rem"}>
           {allItems.map((item) => (
             <ProcessBar

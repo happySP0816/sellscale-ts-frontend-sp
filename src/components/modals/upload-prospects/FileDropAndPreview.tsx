@@ -48,6 +48,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { QueryCache } from "@tanstack/react-query";
+import { MaxHeap } from "@datastructures-js/heap";
 
 const MAX_FILE_SIZE_MB = 2;
 const PREVIEW_FIRST_N_ROWS = 5;
@@ -66,10 +67,27 @@ const PROSPECT_DB_COLUMNS = [
   "twitter_url",
 ];
 
+function findBestPreviewRows(fileJSON: any[], previewAmount: number) {
+
+  // Sort the file rows by the number of columns they have
+  const mostColumns = new MaxHeap((row: any) => Object.keys(row).length);
+  fileJSON.forEach((row) => mostColumns.insert(row));
+
+  // Get the top N rows with the most columns
+  const bestRows = [];
+  for (let i = 0; i < previewAmount; i++) {
+    const row = mostColumns.pop();
+    if(row) {
+      bestRows.push(row);
+    }
+  }
+  return bestRows;
+}
+
 function getDefaultColumnMappings(fileJSON: any[]) {
   const map = new Map<string, string>();
   if (fileJSON.length === 0) return map;
-  Object.keys(fileJSON[0])
+  Object.keys(findBestPreviewRows(fileJSON, 1)[0] || {})
     .filter((key) => key !== "id")
     .forEach((key) => {
       const convertedKey = convertColumn(key);
@@ -87,7 +105,7 @@ function determineColumns(
   fileJSON: any[]
 ) {
   if (fileJSON.length === 0) return [];
-  return Object.keys(fileJSON[0])
+  return Object.keys(findBestPreviewRows(fileJSON, 1)[0] || {})
     .filter((key) => key !== "id")
     .map((key) => {
       return {
@@ -349,7 +367,9 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
           multiple={false}
           maxSize={MAX_FILE_SIZE_MB * 1024 ** 2}
           onDrop={async (files: any) => {
+            console.log(files)
             const result = await convertFileToJSON(files[0]);
+            console.log(result)
             if (result instanceof DOMException) {
               showNotification({
                 id: "file-upload-error",
@@ -450,7 +470,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
               setColumnMappings,
               fileJSON
             )}
-            records={fileJSON.slice(0, PREVIEW_FIRST_N_ROWS)}
+            records={findBestPreviewRows(fileJSON, PREVIEW_FIRST_N_ROWS)}
           />
           <Center pt={20}>
             <HoverCard

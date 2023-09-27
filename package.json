@@ -23,6 +23,7 @@
     "testEnvironment": "jsdom"
   },
   "dependencies": {
+    "@datastructures-js/heap": "^4.3.2",
     "@emotion/react": "^11.11.0",
     "@fullcalendar/core": "^6.1.8",
     "@fullcalendar/daygrid": "^6.1.8",

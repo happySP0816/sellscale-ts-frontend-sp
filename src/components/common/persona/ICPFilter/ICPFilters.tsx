@@ -83,6 +83,7 @@ const ICPFilters = () => {
           />
         </Box>
         <ICPFiltersDashboard
+          isTesting={isTesting}
           openFilter={() => {
             openSideBar();
             open();

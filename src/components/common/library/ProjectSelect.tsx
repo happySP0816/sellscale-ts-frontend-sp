@@ -58,7 +58,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => void, disableSelectDefaultProject?: boolean }) {
+export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => void, disableSelectDefaultProject?: boolean, extraBig?: boolean }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const navigate = useNavigate();
@@ -106,7 +106,6 @@ export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => v
   return (
     <Flex direction='row'>
       <Button
-        size="xs"
         variant='outline'
         leftIcon={<IconLayoutSidebar size="1.05rem" stroke={1.5} />}
         rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
@@ -115,6 +114,8 @@ export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => v
         ml='xs'
         mr='xs'
         mt='xs'
+        fz={props.extraBig ? '20px' : 'xs'}
+        size={props.extraBig ? 'lg' : 'xs'}
         onClick={() => {
           openContextModal({
             modal: "personaSelect",

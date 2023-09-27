@@ -35,6 +35,7 @@ import {
 import GridTabs from "./GridTabs";
 import WithdrawInvitesModal from "./modals/WithdrawInvitesModal";
 import { SCREEN_SIZES } from "@constants/data";
+import PersonaSelect from "../PersonaSplitSelect";
 
 const filters = [
   {
@@ -342,18 +343,26 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
           <Title size={"24px"} color={theme.colors.gray[6]}>
             Persona:
           </Title>
+          <Box ml={"0.5rem"}>
+            <PersonaSelect
+              disabled={false}
+              onChange={(archetypes) => {
+                console.log(archetypes);
+              }}
+              label={""}
+              description={""}
+            />
+          </Box>
           <Title
             size={"24px"}
             ml={5}
             style={{ display: "flex", alignItems: "center" }}
-          >
-            Senior Engineering Hiring
-            <Badge color="blue" ml={"0.5rem"}>
-              1245/2000 | Left: 75%
-            </Badge>
-          </Title>
+          ></Title>
         </Box>
-        <Flex gap={"1rem"}>
+        <Flex gap={"1rem"} align={"center"}>
+          <Badge color="blue" ml={"0.5rem"}>
+            1245/2000 | Left: 75%
+          </Badge>
           <Button leftIcon={<IconPlus />}>Add Prospects</Button>
           {smScreenOrLess && <Button onClick={openFilter}>Open filter</Button>}
         </Flex>
@@ -397,7 +406,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
           mt={"1rem"}
           sx={{
             display: "flex",
-            gap: "1rem",
+            gap: "1.25rem",
             justifyContent: "space-between",
           }}
         >
@@ -412,16 +421,19 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
                 sx={{
                   backgroundColor: filter.bgColor,
                   color: filter.color,
-                  border: `1px solid ${filter.color}`,
+                  border: `1px solid #E9ECEF`,
                 }}
                 p="md"
                 radius="7px"
               >
                 <Title size={"10px"} fw={600}>
-                  Prospects: {filter.percent}
+                  {filter.percent}
                 </Title>
                 <Title size={"20px"} fw={500}>
                   {filter.value}%
+                </Title>
+                <Title size={"14px"} fw={500} color="gray.6">
+                  Prospects
                 </Title>
               </Paper>
               <Progress
@@ -430,6 +442,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
                 color={filter.color}
                 radius={"11px"}
                 size={"lg"}
+                label="100%"
               />
             </Box>
           ))}
@@ -440,8 +453,9 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
         <Box
           style={{
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
             alignItems: "center",
+            gap: "1rem",
           }}
         >
           <Box
@@ -454,7 +468,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
             }}
           >
             <Input
-              placeholder="Search"
+              placeholder="Search Contacts"
               onChange={(event) => setGlobalSearch(event.currentTarget.value)}
               rightSection={
                 <IconSearch size={18} color={theme.colors.gray[6]} />
@@ -525,7 +539,11 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
             onConfirm={withdrawInvites}
           />
         )}
-        <GridTabs selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+        <GridTabs
+          selectedTab={selectedTab}
+          setSelectedTab={setSelectedTab}
+          selectedRows={selectedRows}
+        />
       </Paper>
       <DataGrid
         data={demoData}

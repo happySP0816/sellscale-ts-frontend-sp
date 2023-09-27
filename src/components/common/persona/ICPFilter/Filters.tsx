@@ -7,6 +7,7 @@ import {
   Tabs,
   Button,
   Flex,
+  Progress,
 } from "@mantine/core";
 import CustomSelect from "./CustomSelect";
 import { IconBuildingCommunity, IconPhoto, IconUser } from "@tabler/icons";
@@ -22,18 +23,14 @@ function Filters({ isTesting }: Props) {
   return (
     <Tabs defaultValue="personal">
       <Tabs.List>
-        <Tabs.Tab value="personal" icon={<IconUser size={14} />}>
-          Person
-        </Tabs.Tab>
-        <Tabs.Tab value="company" icon={<IconBuildingCommunity size={14} />}>
-          Company
-        </Tabs.Tab>
+        <Tabs.Tab value="personal">Person</Tabs.Tab>
+        <Tabs.Tab value="company">Company</Tabs.Tab>
       </Tabs.List>
 
       <Tabs.Panel value="personal">
         <Box
           style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
-          p="md"
+          py="md"
         >
           <CustomSelect
             data={data}
@@ -115,12 +112,14 @@ function Filters({ isTesting }: Props) {
             placeholder="Select options"
             setData={setData}
           />
+
+          <Progress />
         </Box>
       </Tabs.Panel>
       <Tabs.Panel value="company">
         <Box
           style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
-          p="md"
+          py="md"
         >
           <CustomSelect
             data={data}

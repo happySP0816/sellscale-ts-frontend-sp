@@ -24,7 +24,9 @@ const useStyles = createStyles((theme) => ({
 
 const ICPFilters = () => {
   const { classes, theme, cx } = useStyles();
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { open, close, toggle }] = useDisclosure(false);
+  const [sideBarVisible, { toggle: toggleSideBar, open: openSideBar }] =
+    useDisclosure(true);
   const [isTesting, setIsTesting] = useState(false);
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.LG})`,
@@ -43,11 +45,22 @@ const ICPFilters = () => {
           overlayProps={{ blur: 4 }}
         >
           <Box h={"100vh"} pos={"relative"} m={"-1rem"}>
-            <Sidebar isTesting={isTesting} />
+            <Sidebar
+              isTesting={isTesting}
+              sideBarVisible={sideBarVisible}
+              toggleSideBar={() => {
+                toggleSideBar();
+                toggle();
+              }}
+            />
           </Box>
         </Drawer>
       ) : (
-        <Sidebar isTesting={isTesting} />
+        <Sidebar
+          isTesting={isTesting}
+          sideBarVisible={sideBarVisible}
+          toggleSideBar={toggleSideBar}
+        />
       )}
 
       <Box
@@ -69,7 +82,12 @@ const ICPFilters = () => {
             label="(Test Mode) View sample of 50 prospects"
           />
         </Box>
-        <ICPFiltersDashboard openFilter={open} />
+        <ICPFiltersDashboard
+          openFilter={() => {
+            openSideBar();
+            open();
+          }}
+        />
       </Box>
     </Flex>
   );

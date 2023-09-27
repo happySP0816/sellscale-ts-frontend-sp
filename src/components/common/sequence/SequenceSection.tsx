@@ -793,6 +793,8 @@ function IntroMessageSection(props: {
   const [hoveredCTA, setHoveredCTA] = useState(false);
 
   const [activeTab, setActiveTab] = useState<string | null>("none");
+  const { hovered: hoveredPersonSettingsBtn, ref: refPersonSettingsBtn } = useHover<HTMLButtonElement>();
+  const { hovered: hoveredYourCTAsBtn, ref: refYourCTAsBtn } = useHover<HTMLButtonElement>();
 
   const [personalizationItemsCount, setPersonalizationItemsCount] =
     useState<number>();
@@ -977,9 +979,9 @@ function IntroMessageSection(props: {
                 <LiExampleInvitation
                   message={message}
                   startHovered={
-                    activeTab === "personalization" ? true : undefined
+                    activeTab === "personalization" || hoveredPersonSettingsBtn ? true : undefined
                   }
-                  endHovered={activeTab === "ctas" ? true : undefined}
+                  endHovered={activeTab === "ctas" || hoveredYourCTAsBtn ? true : undefined}
                   onClickStart={openPersonalizationSettings}
                   onClickEnd={openCTASettings}
                   onHoveredEnd={(hovered) => setHoveredCTA(hovered)}
@@ -1001,6 +1003,7 @@ function IntroMessageSection(props: {
         >
           <Tabs.List>
             <Tabs.Tab
+              ref={refPersonSettingsBtn}
               value="personalization"
               color="teal.5"
               rightSection={
@@ -1033,6 +1036,7 @@ function IntroMessageSection(props: {
               Personalization Settings
             </Tabs.Tab>
             <Tabs.Tab
+              ref={refYourCTAsBtn}
               value="ctas"
               color="blue.4"
               rightSection={

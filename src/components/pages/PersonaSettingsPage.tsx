@@ -45,7 +45,8 @@ export default function PersonaSettingsPage() {
       <Container p="sm">
         <LoadingOverlay visible={loading} />
         <PageTitle title={`${currentProject.name} - Settings`} />
-        <Tabs defaultValue="general" orientation="vertical">
+        <br />
+        <Tabs defaultValue="general" orientation="vertical" variant='pills'>
           <Tabs.List>
             <Tabs.Tab value="general" icon={<IconSettings size="0.8rem" />}>
               Persona Info

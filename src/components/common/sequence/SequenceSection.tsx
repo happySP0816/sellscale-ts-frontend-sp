@@ -58,6 +58,7 @@ import { openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
   IconCheck,
+  IconCircle2Filled,
   IconCopy,
   IconDots,
   IconEdit,
@@ -104,6 +105,7 @@ import { showNotification } from "@mantine/notifications";
 import {
   IconArrowRight,
   IconChevronRight,
+  IconCircle,
   IconRobot,
   IconSettings,
   IconTrash,
@@ -1031,9 +1033,10 @@ function IntroMessageSection(props: {
                   borderRadius: theme.radius.md + "!important",
                   color: theme.colors.teal[8] + "!important",
                 },
+                border: 'solid 1px ' + theme.colors.teal[5] + "!important"
               })}
             >
-              Personalization Settings
+              Edit Personalization
             </Tabs.Tab>
             <Tabs.Tab
               ref={refYourCTAsBtn}
@@ -1064,9 +1067,10 @@ function IntroMessageSection(props: {
                   borderRadius: theme.radius.md + "!important",
                   color: theme.colors.blue[8] + "!important",
                 },
+                border: 'solid 1px ' + theme.colors.blue[4] + "!important"
               })}
             >
-              Your CTAs
+              Edit CTAs
             </Tabs.Tab>
             {/* <Tabs.Tab value="voice" ml="auto">
               Train Your AI
@@ -1280,17 +1284,6 @@ function LiExampleInvitation(props: {
           pt="sm"
           pb={5}
         >
-          <ActionIcon
-            sx={{
-              position: "absolute",
-              top: 5,
-              right: 5,
-              cursor: "not-allowed",
-            }}
-            radius="xl"
-          >
-            <IconDots size="1.125rem" />
-          </ActionIcon>
           <Box>
             {showFullMessage || animationPlaying.current ? (
               <Text fz="xs">
@@ -1609,33 +1602,15 @@ function FrameworkCard(props: {
             <Text fw={500} sx={{ whiteSpace: "nowrap" }}>
               {props.title}
             </Text>
-            {props.badgeText && (
-              <Tooltip
-                label={props.badgeHoverText}
-                openDelay={100}
-                withArrow
-                withinPortal
-                disabled={!props.badgeHoverText}
-              >
-                <Badge
-                  color="gray"
-                  size="sm"
-                  ml={10}
-                  styles={{
-                    root: { textTransform: "initial", fontWeight: 500 },
-                  }}
-                >
-                  {props.badgeText}
-                </Badge>
-              </Tooltip>
-            )}
           </Group>
           {props.conversion !== undefined && (
             <Tooltip
               label={
                 props.conversion > 9.0
                   ? "Your open rates are above industry standards (9%). Congrats!"
-                  : "Your open rates are below industry standards (9%). Consider changing your CTAs"
+                  : props.conversion <= 9.0 && props.conversion > 0.0
+                  ? "Your open rates are below industry standards (9%). Try changing your message." + props.conversion
+                  : "Not enough data"
               }
               withArrow
               withinPortal
@@ -1657,6 +1632,26 @@ function FrameworkCard(props: {
               </Badge>
             </Tooltip>
           )}
+          {props.badgeText && (
+              <Tooltip
+                label={props.badgeHoverText}
+                openDelay={100}
+                withArrow
+                withinPortal
+                disabled={!props.badgeHoverText}
+              >
+                <Badge
+                  ml='auto'
+                  color="gray"
+                  size="sm"
+                  styles={{
+                    root: { textTransform: "initial", fontWeight: 500 },
+                  }}
+                >
+                  {props.badgeText}
+                </Badge>
+              </Tooltip>
+            )}
           {props.canEdit && props.editProps && (
             <BumpFrameworkSelect {...props.editProps} />
           )}
@@ -2535,7 +2530,16 @@ const PersonalizationSection = (props: {
 
   return (
     <Flex direction="column" pt="md">
-      <Card shadow="xs" radius={"md"} mb={"1rem"}>
+      <Card shadow="md" radius={"md"} mb={"1rem"}>
+        <Box sx={{textAlign: 'right'}} ml='auto' pb='sm'>
+          <Badge leftSection={<IconCircle size='0.7rem'/>} color='grape' size='xs'>
+            Account Data
+          </Badge>
+          <br />
+          <Badge leftSection={<IconCircle size='0.7rem'/>} color='green' mt='xs' size='xs'>
+            Contact Data
+          </Badge>
+        </Box>
         <Flex direction={"column"} gap={"0.5rem"}>
           {allItems.map((item) => (
             <ProcessBar

@@ -121,7 +121,7 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<PersonaBrain />} />,
       },
       {
-        path: "prioritize",
+        path: "prioritize/:archetypeId?",
         element: (
           <RestrictedRoute
             page={
@@ -131,6 +131,9 @@ const router = sentryCreateBrowserRouter([
             }
           />
         ),
+        loader: async ({ params }: { params: any }) => {
+          return { archetypeId: params.archetypeId };
+        },
       },
       {
         path: "contacts/find",

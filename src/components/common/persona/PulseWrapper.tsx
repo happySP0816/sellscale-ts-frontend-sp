@@ -42,7 +42,7 @@ export const PulseWrapper = () => {
         <Box>
           <Flex direction={'row'} mb='xs'>
             <ProjectSelect onClick={(persona) => {
-              navigateToPage(navigate, `/prioritize`);
+              navigateToPage(navigate, `/prioritize` + (persona ? `/${persona.id}` : ''));
             }} />
             {currentProject?.id && (
                   <Button

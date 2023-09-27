@@ -184,7 +184,7 @@ export default function AllContactsSection(props: { all?: boolean }) {
       <Group position="apart" mt="sm">
         <Box>
           <ProjectSelect onClick={(persona) => {
-            navigateToPage(navigate, `/prioritize`);
+            navigateToPage(navigate, `/prioritize` + (persona ? `/${persona.id}` : ''));
           }} />
         </Box>
         <Box>

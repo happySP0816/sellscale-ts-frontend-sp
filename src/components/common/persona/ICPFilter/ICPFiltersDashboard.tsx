@@ -112,6 +112,7 @@ const demoData = [
     channel_type: "linkedin",
     channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
     icp_score: "Very High",
+    icp_fit_reason: "Random Reason",
     value: 5000,
   },
   {
@@ -123,6 +124,7 @@ const demoData = [
     channel_type: "linkedin",
     channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
     icp_score: "Unscored",
+    icp_fit_reason: "Random Reason",
     value: 5000,
   },
   {
@@ -134,6 +136,7 @@ const demoData = [
     channel_type: "linkedin",
     channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
     icp_score: "High",
+    icp_fit_reason: "Random Reason",
     value: 5000,
   },
   {
@@ -145,6 +148,8 @@ const demoData = [
     channel_type: "linkedin",
     channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
     icp_score: "Very High",
+
+    icp_fit_reason: "Random Reason",
     value: 5000,
   },
   {
@@ -156,6 +161,7 @@ const demoData = [
     channel_type: "email",
     channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
     icp_score: "Very Low",
+    icp_fit_reason: "Random Reason",
     value: 5000,
   },
   {
@@ -167,6 +173,7 @@ const demoData = [
     channel_type: "linkedin",
     channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
     icp_score: "High",
+    icp_fit_reason: "Random Reason",
     value: 5000,
   },
   {
@@ -178,6 +185,7 @@ const demoData = [
     channel_type: "linkedin",
     channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
     icp_score: "Low",
+    icp_fit_reason: "Random Reason",
     value: 5000,
   },
   {
@@ -189,6 +197,7 @@ const demoData = [
     channel_type: "email",
     channel_url: "https://www.linkedin.com/in/ronaldnolasco/",
     icp_score: "Medium",
+    icp_fit_reason: "Random Reason",
     value: 5000,
   },
 ];
@@ -331,7 +340,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
       >
         <Box style={{ display: "flex", alignItems: "center" }}>
           <Title size={"24px"} color={theme.colors.gray[6]}>
-            Contacts:
+            Persona:
           </Title>
           <Title
             size={"24px"}
@@ -339,8 +348,8 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
             style={{ display: "flex", alignItems: "center" }}
           >
             Senior Engineering Hiring
-            <Badge color="green" ml={"0.5rem"}>
-              1245
+            <Badge color="blue" ml={"0.5rem"}>
+              1245/2000 | Left: 75%
             </Badge>
           </Title>
         </Box>
@@ -358,7 +367,7 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
       >
         <Box style={{ display: "flex", justifyContent: "space-between" }}>
           <Title size={"21px"} fw={600}>
-            ICP Score Distribution:
+            Average ICP Fit Score:
           </Title>
           <Box
             style={{
@@ -403,15 +412,16 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
                 sx={{
                   backgroundColor: filter.bgColor,
                   color: filter.color,
+                  border: `1px solid ${filter.color}`,
                 }}
                 p="md"
                 radius="7px"
               >
                 <Title size={"10px"} fw={600}>
-                  {filter.percent}
+                  Prospects: {filter.percent}
                 </Title>
                 <Title size={"20px"} fw={500}>
-                  {filter.value}
+                  {filter.value}%
                 </Title>
               </Paper>
               <Progress
@@ -426,93 +436,74 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
         </Box>
       </Paper>
 
-      <Box
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <Box>
         <Box
-          mt="1rem"
-          mb="1rem"
           style={{
             display: "flex",
-            gap: "1rem",
+            justifyContent: "space-between",
             alignItems: "center",
           }}
         >
-          <Input
-            placeholder="Search"
-            onChange={(event) => setGlobalSearch(event.currentTarget.value)}
-            rightSection={<IconSearch size={18} color={theme.colors.gray[6]} />}
-          />
-
-          <Select
-            placeholder="Channel"
-            data={["linkedin"]}
-            clearable
-            onChange={setChannel}
-          />
-          <Select
-            placeholder="Status"
-            data={["Replied", "Outreached", "Prospected"]}
-            clearable
-            onChange={setStatus}
-          />
-          <Button
-            variant="subtle"
-            color="gray"
-            rightIcon={
-              <IconAdjustmentsHorizontal
-                color={theme.colors.gray[6]}
-                size={18}
-              />
-            }
+          <Box
+            mt="1rem"
+            mb="1rem"
+            style={{
+              display: "flex",
+              gap: "1rem",
+              alignItems: "center",
+            }}
           >
-            More Filters
-          </Button>
-        </Box>
-
-        <Box
-          style={{
-            padding: "0.5rem",
-            border: "1px solid #E0E0E0",
-            borderRadius: "8px",
-            backgroundColor: invitedOnLinkedIn ? "rgba(231, 245, 255, 1)" : "",
-          }}
-        >
-          <Switch
-            color="blue"
-            label="Invited on LinkedIn"
-            labelPosition="left"
-            styles={{
-              label: {
-                color: invitedOnLinkedIn
-                  ? theme.colors.blue[6]
-                  : theme.colors.gray[6],
-                fontWeight: 600,
-              },
-            }}
-            checked={invitedOnLinkedIn}
-            onChange={(event) => {
-              setInvitedOnLinkedIn(event.currentTarget.checked);
-              if (event.currentTarget.checked) {
-                // Select all rows
-                const newSelectedRows = { ...selectedRows };
-
-                demoData
-                  .filter((x) => x.channel_type === "linkedin")
-                  .forEach((row) => {
-                    newSelectedRows[row.id - 1] = true;
-                  });
-
-                setSelectedRows(newSelectedRows);
-              } else {
-                setSelectedRows({});
+            <Input
+              placeholder="Search"
+              onChange={(event) => setGlobalSearch(event.currentTarget.value)}
+              rightSection={
+                <IconSearch size={18} color={theme.colors.gray[6]} />
               }
+            />
+          </Box>
+
+          <Box
+            style={{
+              padding: "0.5rem",
+              border: "1px solid #E0E0E0",
+              borderRadius: "8px",
+              backgroundColor: invitedOnLinkedIn
+                ? "rgba(231, 245, 255, 1)"
+                : "",
             }}
-          />
+          >
+            <Switch
+              color="blue"
+              label="Invited on LinkedIn"
+              labelPosition="left"
+              styles={{
+                label: {
+                  color: invitedOnLinkedIn
+                    ? theme.colors.blue[6]
+                    : theme.colors.gray[6],
+                  fontWeight: 600,
+                },
+              }}
+              checked={invitedOnLinkedIn}
+              onChange={(event) => {
+                setInvitedOnLinkedIn(event.currentTarget.checked);
+                if (event.currentTarget.checked) {
+                  // Select all rows
+                  const newSelectedRows = { ...selectedRows };
+
+                  demoData
+                    .filter((x) => x.channel_type === "linkedin")
+                    .forEach((row) => {
+                      newSelectedRows[row.id - 1] = true;
+                    });
+
+                  setSelectedRows(newSelectedRows);
+                } else {
+                  setSelectedRows({});
+                }
+              }}
+            />
+          </Box>
         </Box>
       </Box>
 
@@ -544,16 +535,13 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
         withRowSelection
         columns={[
           {
-            accessorKey: "name",
-            header: "NAME",
-          },
-          {
-            accessorKey: "status",
-            header: "STATUS",
+            accessorKey: "icp_score",
+            header: "ICP SCORE",
             cell: (cell) => (
               <Badge
-                variant="filled"
-                color={getStatusBadgeColor(cell.getValue<string>())}
+                color={getICPScoreBadgeColor(
+                  cell.getValue<string>()?.toLowerCase()
+                )}
               >
                 {cell.getValue<string>()?.toUpperCase()}
               </Badge>
@@ -568,8 +556,13 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
             header: "COMPANY",
           },
           {
+            accessorKey: "icp_fit_reason",
+            header: "ICP FIT REASON",
+          },
+
+          {
             accessorKey: "channel_type",
-            header: "CHANNEL",
+            header: "LINKEDIN URL",
             cell: (cell) => (
               <Anchor
                 style={{
@@ -585,28 +578,6 @@ const ICPFiltersDashboard: FC<{ openFilter: () => void }> = ({
                 {getChannelType(cell.getValue<string>())}
                 <IconExternalLink size={16} />
               </Anchor>
-            ),
-          },
-          {
-            accessorKey: "icp_score",
-            header: "ICP SCORE",
-            cell: (cell) => (
-              <Badge
-                color={getICPScoreBadgeColor(
-                  cell.getValue<string>()?.toLowerCase()
-                )}
-              >
-                {cell.getValue<string>()?.toUpperCase()}
-              </Badge>
-            ),
-          },
-          {
-            accessorKey: "value",
-            header: "VALUE",
-            cell: (cell) => (
-              <Title size={"14px"} fw={500}>
-                US$ {cell.getValue<number>()}K
-              </Title>
             ),
           },
         ]}

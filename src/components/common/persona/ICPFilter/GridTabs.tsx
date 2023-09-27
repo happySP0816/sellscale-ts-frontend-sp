@@ -106,9 +106,6 @@ const GridTabs = ({ selectedTab, setSelectedTab }: IGridTabsProps) => {
       </Box>
 
       <Flex justify={"space-between"} align={"center"} gap={"0.5rem"}>
-        <Button leftIcon={<IconRefresh size={14} />} size="sm">
-          Refresh
-        </Button>
         <Button color="red" leftIcon={<IconTrash size={14} />} size="sm">
           Remove 0 prospects
         </Button>

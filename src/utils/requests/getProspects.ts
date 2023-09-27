@@ -39,7 +39,7 @@ export async function getProspects(
     }
   );
 
-  const result = await processResponse(response);
+  const result = await processResponse(response, 'prospects');
   //const prospects = result.status === 'success' ? result.data as Prospect[] : [];
 
   return result;

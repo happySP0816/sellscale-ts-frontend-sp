@@ -3,7 +3,7 @@ import { IconChevronDown } from "@tabler/icons-react";
 import { useState } from "react";
 
 interface ICustomSelect {
-  data: { value: string; label: string }[];
+  data: string[];
   label?: string;
   placeholder?: string;
   includeCurrent?: boolean;
@@ -12,16 +12,21 @@ interface ICustomSelect {
   color?: "green" | "red";
   setData: React.Dispatch<
     React.SetStateAction<
-      {
-        value: string;
-        label: string;
-      }[]
+      string[]
+    >
+  >;
+  value: string[];
+  setValue: React.Dispatch<
+    React.SetStateAction<
+      string[]
     >
   >;
 }
 
 const CustomSelect = ({
   data,
+  value,
+  setValue,
   label = "",
   placeholder = "Select",
   includeCurrent = false,
@@ -38,6 +43,8 @@ const CustomSelect = ({
     <>
       <MultiSelect
         data={data}
+        value={value}
+        onChange={(value) => setValue(value)}
         label={
           label ? (
             <Box
@@ -80,7 +87,7 @@ const CustomSelect = ({
         getCreateLabel={(query) => `+ Create ${query}`}
         onCreate={(query) => {
           const item = { value: query, label: query };
-          setData((current) => [...current, item]);
+          setData((current) => [...current, query]);
           return item;
         }}
         styles={{
@@ -107,6 +114,8 @@ const CustomSelect = ({
           />
           {isIncludeSelected && (
             <CustomSelect
+              value={value}
+              setValue={setValue}
               data={data}
               placeholder="e.g data analyst"
               setData={setData}
@@ -126,6 +135,8 @@ const CustomSelect = ({
           />
           {isExcludeSelected && (
             <CustomSelect
+              value={value}
+              setValue={setValue}
               data={data}
               placeholder="e.g data analyst"
               setData={setData}

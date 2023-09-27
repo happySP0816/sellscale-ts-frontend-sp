@@ -5,6 +5,7 @@ import {
   Box,
   Flex,
   Group,
+  Progress,
   ScrollArea,
   Tabs,
   Text,
@@ -53,9 +54,7 @@ const TrainYourAi = (props: {
     // },
   ];
 
-  console.log(props.messages[selectedItem ?? 0])
-  console.log(props.messages)
-  console.log(selectedItem)
+  const [approvedSet, setApprovedSet] = useState<Set<number>>(new Set());
 
   return (
     <Flex>
@@ -131,7 +130,7 @@ const TrainYourAi = (props: {
                       top={"1rem"}
                       w={"0.5rem"}
                       h={"0.5rem"}
-                      bg={"green"}
+                      bg={approvedSet.has(item.id) ? "blue" : "red"}
                       mb={"auto"}
                       ml={"auto"}
                       sx={{
@@ -145,6 +144,21 @@ const TrainYourAi = (props: {
           ))}
         </Tabs>
 
+        <Box
+                  sx={{
+                    position: "absolute",
+                    top: 10,
+                    right: 10,
+                    zIndex: 10000000,
+                    width: 220,
+                  }}
+        >
+        <Progress
+          color="blue"
+          value={((approvedSet.size+1) / props.messages.length) * 100}
+        />
+        </Box>
+
         <Flex
           pos={"absolute"}
           bottom={0}
@@ -156,7 +170,7 @@ const TrainYourAi = (props: {
           px={"1rem"}
         >
           <Text fz={"0.75rem"} color="gray.6" weight={700}>
-            {props.messages.length - 1} Results
+            {props.messages.length} Results
           </Text>
 
           <Flex align={"center"} gap={"0.25rem"}>
@@ -176,6 +190,11 @@ const TrainYourAi = (props: {
             setSelectedItem((prev) => {
               if (prev === null) return null;
               return prev + 1;
+            });
+            setApprovedSet((prev) => {
+              const newSet = new Set(prev);
+              newSet.add(props.messages[selectedItem ?? 0].id);
+              return newSet;
             });
           }}
           onComplete={props.onComplete}

@@ -101,13 +101,15 @@ const VoiceBuilderModal: React.FC<{
           h={"3.5rem"}
         >
           <Modal.Title
-            fz={"1rem"}
+            fz={"1.2rem"}
             fw={600}
             sx={{
               color: "#FFFFFF",
             }}
+            w='50vw'
+            ta='center'
           >
-            Train your Voice
+            Train your voice module
           </Modal.Title>
           <ActionIcon
             variant="outline"

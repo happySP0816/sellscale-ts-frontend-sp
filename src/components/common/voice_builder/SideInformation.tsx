@@ -30,7 +30,7 @@ const SideInformation = (props: { message: TrainMessage }) => {
     {
       content: props.message.prospect?.title,
       icon: <IconBriefcase width={18} stroke="gray.6" />,
-      disable: false,
+      disable: true,
     },
     {
       content: props.message.prospect?.location,
@@ -41,6 +41,7 @@ const SideInformation = (props: { message: TrainMessage }) => {
       content: props.message.prospect?.company,
       icon: <IconBuildingStore width={18} stroke="gray.6" />,
       link: props.message.prospect?.company_url,
+      disable: true,
     },
     {
       content: props.message.prospect?.company_hq,
@@ -55,8 +56,6 @@ const SideInformation = (props: { message: TrainMessage }) => {
     },
   ];
 
-  console.log(props.message.meta_data);
-
   return (
     <ScrollArea
       sx={{
@@ -64,8 +63,8 @@ const SideInformation = (props: { message: TrainMessage }) => {
         height: `calc(100vh - 3.5rem)`,
       }}
     >
-      <Box px={"1rem"} py={"1.5rem"}>
-        <Box bg={"blue.0"} px={"1.5rem"} py={"0.5rem"} w={"100%"}>
+      <Box px={"1rem"} py={"0.5rem"}>
+        <Box px={"1.5rem"} py={"0.5rem"} w={"100%"}>
           <Flex align={"center"}>
             <Avatar
               radius="xl"
@@ -88,8 +87,7 @@ const SideInformation = (props: { message: TrainMessage }) => {
 
         <Flex
           direction={"column"}
-          gap={"0.5rem"}
-          mt={"2rem"}
+          gap={"0.0rem"}
           sx={{ border: `1px solid ${borderGray}`, borderRadius: 12 }}
           p={"1rem"}
           pl={"1.5rem"}
@@ -132,8 +130,7 @@ const SideInformation = (props: { message: TrainMessage }) => {
           borderTop: `1px solid ${borderGray}`,
           borderBottom: `1px solid ${borderGray}`,
         }}
-        py={"1.5rem"}
-        px={"1rem"}
+        p={'1rem'}
       >
         <Flex justify={"space-between"}>
           <Text weight={700}>CTA Used</Text>
@@ -161,8 +158,7 @@ const SideInformation = (props: { message: TrainMessage }) => {
         sx={{
           borderTop: `1px solid ${borderGray}`,
         }}
-        py={"1.5rem"}
-        px={"1rem"}
+        p={'1rem'}
       >
         <Flex justify={"space-between"}>
           <Text weight={700}>Research Used</Text>

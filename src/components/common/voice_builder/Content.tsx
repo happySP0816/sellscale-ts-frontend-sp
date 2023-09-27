@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Avatar,
   Badge,
   Box,
@@ -11,13 +12,14 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { IconRotate, IconX, IconChecks } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TrainMessage } from "./TrainYourAi";
 import { proxyURL } from "@utils/general";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState } from "@atoms/userAtoms";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { voiceBuilderMessagesState } from "@atoms/voiceAtoms";
+import { IconTrash } from "@tabler/icons";
 
 const Content = (props: {
   messageId: number;
@@ -43,6 +45,7 @@ const Content = (props: {
     setMessage(trainMessage.value.trim());
   }, [trainMessage]);
 
+  const oldMessage = useRef("");
   const [message, setMessage] = useState(trainMessage.value.trim());
 
   const saveMessages = (newMessage?: string) => {
@@ -117,13 +120,15 @@ const Content = (props: {
         mt={"1rem"}
       >
         <Flex>
-          <Avatar
-            opacity={showTooltip ? "0.2" : "1"}
-            radius="xl"
-            src={proxyURL(imgURL)}
-          />
+          <Box>
+            <Avatar
+              opacity={showTooltip ? "0.2" : "1"}
+              radius="xl"
+              src={proxyURL(imgURL)}
+            />
+          </Box>
 
-          <Box ml={"1rem"}>
+          <Box sx={{ flex: 1 }}>
             <Flex justify={"space-between"}>
               <Box opacity={showTooltip ? "0.2" : "1"}>
                 <Text weight={700}>{name}</Text>
@@ -148,31 +153,15 @@ const Content = (props: {
                 border: `1px solid ${borderGray}`,
                 overflow: "auto",
                 borderRadius: 12,
+                position: "relative",
               }}
               p={"1rem"}
               mt={"1rem"}
             >
-              <Tooltip
-                label="Personalization"
-                color="green"
-                opened={showTooltip}
-              >
-                <Text
-                  sx={(theme) => ({
-                    color: theme.colors.teal[8],
-                    backgroundColor: theme.colors.teal[0],
-                  })}
-                  onMouseEnter={() => setShowTooltip(true)}
-                  onMouseLeave={() => setShowTooltip(false)}
-                >
-                  {startMessage}
-                </Text>
-              </Tooltip>
-              <ScrollArea h={"19vh"}>
-                {editing ? (
+              {editing ? (
+                <Box>
                   <FocusTrap active>
                     <Textarea
-                      mt={"1rem"}
                       size="md"
                       autosize
                       variant="unstyled"
@@ -189,10 +178,10 @@ const Content = (props: {
                           },
                         ],
                       ])}
-                      onBlur={() => {
-                        setEditing(false);
-                        saveMessages();
-                      }}
+                      // onBlur={() => {
+                      //   setEditing(false);
+                      //   saveMessages();
+                      // }}
                       styles={{
                         input: {
                           padding: "0!important",
@@ -202,27 +191,57 @@ const Content = (props: {
                       }}
                     />
                   </FocusTrap>
-                ) : (
-                  <Text mt={"1rem"} opacity={showTooltip ? "0.2" : "1"}>
-                    {message}
-                  </Text>
-                )}
-              </ScrollArea>
-              <Box>
-                <Tooltip label="CTA" color="blue" opened={showTooltip}>
                   <Text
-                    sx={(theme) => ({
-                      color: theme.colors.blue[8],
-                      backgroundColor: theme.colors.blue[0],
-                    })}
-                    onMouseEnter={() => setShowTooltip(true)}
-                    onMouseLeave={() => setShowTooltip(false)}
-                    mt="md"
+                  fz='xs'
+                  c='dimmed'
+                  sx={{
+                    position: "absolute",
+                    right: 5,
+                    bottom: 5,
+                  }}>{message.length}/300</Text>
+                </Box>
+              ) : (
+                <Text>
+                  <Tooltip
+                    label="Personalization"
+                    color="green"
+                    opened={showTooltip}
+                    disabled
                   >
-                    {endMessage}
-                  </Text>
-                </Tooltip>
-
+                    <Text
+                      sx={(theme) => ({
+                        color: theme.colors.teal[8],
+                        backgroundColor: theme.colors.teal[0],
+                      })}
+                      onMouseEnter={() => setShowTooltip(true)}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      span
+                    >
+                      {startMessage}
+                    </Text>
+                  </Tooltip>
+                  <Tooltip
+                    label="CTA"
+                    color="blue"
+                    opened={showTooltip}
+                    disabled
+                  >
+                    <Text
+                      sx={(theme) => ({
+                        color: theme.colors.blue[8],
+                        backgroundColor: theme.colors.blue[0],
+                      })}
+                      onMouseEnter={() => setShowTooltip(true)}
+                      onMouseLeave={() => setShowTooltip(false)}
+                      ml={5}
+                      span
+                    >
+                      {endMessage}
+                    </Text>
+                  </Tooltip>
+                </Text>
+              )}
+              {/* <Box>
                 <Button
                   variant="outline"
                   sx={{ border: 0 }}
@@ -232,35 +251,60 @@ const Content = (props: {
                     See less
                   </Text>
                 </Button>
-              </Box>
+              </Box> */}
 
-              <Button mt={"1rem"} color="gray" compact>
+              {/* <Button mt={"1rem"} color="gray" compact>
                 Reply to {userData.sdr_name.split(" ")[0]}
-              </Button>
+              </Button> */}
             </Box>
           </Box>
         </Flex>
 
-        <Flex gap={"0.5rem"} mt={"2rem"}>
-          <Tooltip label="Coming soon!" withArrow>
-            <Box>
-              <Button variant="outline" sx={{ flex: 1 }} disabled>
-                <Text weight={700}>Auto Edit Using AI</Text>
-              </Button>
-            </Box>
-          </Tooltip>
-          <Button
-            variant={editing ? "filled" : "outline"}
-            sx={{ flex: 1 }}
-            onClick={() => {
-              setEditing(true);
-            }}
-          >
-            <Text weight={700}>Edit message</Text>
-          </Button>
-        </Flex>
+        {editing ? (
+          <Flex gap={"0.5rem"} mt={"2rem"}>
+            <Button
+              sx={{ flex: 1 }}
+              onClick={() => {
+                setEditing(false);
+                saveMessages();
+              }}
+            >
+              <Text weight={700}>Save</Text>
+            </Button>
+            <Button
+              variant="default"
+              sx={{ flex: 1 }}
+              onClick={() => {
+                setMessage(oldMessage.current);
+                setEditing(false);
+              }}
+            >
+              <Text weight={700}>Cancel</Text>
+            </Button>
+          </Flex>
+        ) : (
+          <Flex gap={"0.5rem"} mt={"2rem"}>
+            {/* <Tooltip label="Coming soon!" withArrow>
+                <Box>
+                  <Button variant="outline" sx={{ flex: 1 }} disabled>
+                    <Text weight={700}>Auto Edit Using AI</Text>
+                  </Button>
+                </Box>
+              </Tooltip> */}
+            <Button
+              variant={"outline"}
+              sx={{ flex: 1 }}
+              onClick={() => {
+                setEditing(true);
+                oldMessage.current = message;
+              }}
+            >
+              <Text weight={700}>Edit message</Text>
+            </Button>
+          </Flex>
+        )}
       </Box>
-      <Tooltip label="Coming soon!" withArrow>
+      {/* <Tooltip label="Coming soon!" withArrow>
         <Box>
           <Button w={"100%"} variant="light" size="md" disabled>
             <IconRotate width={16} />
@@ -269,10 +313,23 @@ const Content = (props: {
             </Text>
           </Button>
         </Box>
-      </Tooltip>
+      </Tooltip> */}
 
       <Flex mt={"1.5rem"} gap={"0.5rem"} justify={"center"}>
-        <Button
+        <Tooltip label="Remove Prospect" withArrow>
+          <ActionIcon
+            m={5}
+            mr={20}
+            radius={"xl"}
+            onClick={() => {
+              setEditing(false);
+              saveMessages("");
+            }}
+          >
+            <IconTrash size="1.0rem" />
+          </ActionIcon>
+        </Tooltip>
+        {/* <Button
           color="red"
           sx={{ borderRadius: 999 }}
           px={"3rem"}
@@ -285,7 +342,7 @@ const Content = (props: {
           <Text span ml={"0.25rem"}>
             Remove prospect
           </Text>
-        </Button>
+        </Button> */}
         {!props.complete ? (
           <Button
             color="green"

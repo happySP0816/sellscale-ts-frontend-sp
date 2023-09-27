@@ -25,7 +25,7 @@ export type TrainMessage = {
   value: string;
   prospect: Prospect | null;
   meta_data: any;
-}
+};
 
 const TrainYourAi = (props: {
   messages: TrainMessage[];
@@ -120,7 +120,9 @@ const TrainYourAi = (props: {
                         <Text size={"0.75rem"} color="gray.6" weight={600}>
                           ICP Score:
                         </Text>
-                        <ICPFitPillOnly icp_fit_score={item.prospect?.icp_fit_score ?? -1} />
+                        <ICPFitPillOnly
+                          icp_fit_score={item.prospect?.icp_fit_score ?? -1}
+                        />
                       </Group>
                     </Flex>
 
@@ -145,18 +147,17 @@ const TrainYourAi = (props: {
         </Tabs>
 
         <Box
-                  sx={{
-                    position: "absolute",
-                    top: 10,
-                    right: 10,
-                    zIndex: 10000000,
-                    width: 220,
-                  }}
+          sx={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            width: 220,
+          }}
         >
-        <Progress
-          color="blue"
-          value={((approvedSet.size+1) / props.messages.length) * 100}
-        />
+          <Progress
+            color="blue"
+            value={((approvedSet.size + 1) / props.messages.length) * 100}
+          />
         </Box>
 
         <Flex
@@ -186,19 +187,21 @@ const TrainYourAi = (props: {
 
       <Flex sx={{ overflowX: "auto" }}>
         <Box h={"calc(100vh - 3.5rem)"} miw={600} sx={{ flex: 2 }}>
-          <Content messageId={props.messages[selectedItem ?? 0].id} onNext={() => {
-            setSelectedItem((prev) => {
-              if (prev === null) return null;
-              return prev + 1;
-            });
-            setApprovedSet((prev) => {
-              const newSet = new Set(prev);
-              newSet.add(props.messages[selectedItem ?? 0].id);
-              return newSet;
-            });
-          }}
-          onComplete={props.onComplete}
-          complete={selectedItem! >= props.messages.length - 1}
+          <Content
+            messageId={props.messages[selectedItem ?? 0].id}
+            onNext={() => {
+              setSelectedItem((prev) => {
+                if (prev === null) return null;
+                return prev + 1;
+              });
+              setApprovedSet((prev) => {
+                const newSet = new Set(prev);
+                newSet.add(props.messages[selectedItem ?? 0].id);
+                return newSet;
+              });
+            }}
+            onComplete={props.onComplete}
+            complete={selectedItem! >= props.messages.length - 1}
           />
         </Box>
         <Box h={"calc(100vh - 3.5rem)"} miw={300} sx={{ flex: 1 }}>

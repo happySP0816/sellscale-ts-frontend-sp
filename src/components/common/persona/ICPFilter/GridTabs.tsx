@@ -2,6 +2,7 @@ import { Badge, Box, Button, Flex } from "@mantine/core";
 import { getICPScoreBadgeColor, getICPScoreColor } from "../../../../utils/icp";
 import { IconTrash } from "@tabler/icons-react";
 import { IconRefresh } from "@tabler/icons";
+import { DataGridRowSelectionState } from "mantine-data-grid";
 
 const tabFilters = [
   {
@@ -52,9 +53,14 @@ interface IGridTabsProps {
     value: string;
     count: number;
   }) => void;
+  selectedRows: DataGridRowSelectionState;
 }
 
-const GridTabs = ({ selectedTab, setSelectedTab }: IGridTabsProps) => {
+const GridTabs = ({
+  selectedTab,
+  setSelectedTab,
+  selectedRows,
+}: IGridTabsProps) => {
   return (
     <Flex justify={"space-between"} align={"center"} w={"100%"}>
       <Box>
@@ -106,11 +112,8 @@ const GridTabs = ({ selectedTab, setSelectedTab }: IGridTabsProps) => {
       </Box>
 
       <Flex justify={"space-between"} align={"center"} gap={"0.5rem"}>
-        <Button leftIcon={<IconRefresh size={14} />} size="sm">
-          Refresh
-        </Button>
         <Button color="red" leftIcon={<IconTrash size={14} />} size="sm">
-          Remove 0 prospects
+          Remove {Object.keys(selectedRows).length} prospects
         </Button>
       </Flex>
     </Flex>

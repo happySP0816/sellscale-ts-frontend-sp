@@ -196,7 +196,7 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                       </Text>
                       <Button size='xs' leftIcon={<IconFilter size='0.8rem'/>} mt='xs' color={avgIcpScoreIsBad ? 'red' : 'green'} onClick={
                         () => {
-                          navigateToPage(navigate, '/prioritize')
+                          navigateToPage(navigate, '/prioritize' + (currentProject ? `/${currentProject.id}` : ''));
                         }
                       }>
                         Adjust Filters

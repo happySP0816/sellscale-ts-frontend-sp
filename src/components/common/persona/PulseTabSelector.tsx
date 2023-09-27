@@ -6,16 +6,22 @@ import { getCurrentPersonaId, getFreshCurrentProject } from "@auth/core";
 import { useEffect } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
+import { useLoaderData } from 'react-router-dom';
 
 const PulseTabSelector = () => {
   const userToken = useRecoilValue(userTokenState);
 
+  const { archetypeId } = useLoaderData() as {
+    archetypeId: number;
+  };
+
   // Select the last used project
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
+
   useEffect(() => {
     (async () => {
-      const currentPersonaId = getCurrentPersonaId();
+      const currentPersonaId = archetypeId ? archetypeId : getCurrentPersonaId();
       if (!currentProject && currentPersonaId) {
         const project = await getFreshCurrentProject(
           userToken,

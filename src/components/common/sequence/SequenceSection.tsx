@@ -1605,33 +1605,15 @@ function FrameworkCard(props: {
             <Text fw={500} sx={{ whiteSpace: "nowrap" }}>
               {props.title}
             </Text>
-            {props.badgeText && (
-              <Tooltip
-                label={props.badgeHoverText}
-                openDelay={100}
-                withArrow
-                withinPortal
-                disabled={!props.badgeHoverText}
-              >
-                <Badge
-                  color="gray"
-                  size="sm"
-                  ml={10}
-                  styles={{
-                    root: { textTransform: "initial", fontWeight: 500 },
-                  }}
-                >
-                  {props.badgeText}
-                </Badge>
-              </Tooltip>
-            )}
           </Group>
           {props.conversion !== undefined && (
             <Tooltip
               label={
                 props.conversion > 9.0
                   ? "Your open rates are above industry standards (9%). Congrats!"
-                  : "Your open rates are below industry standards (9%). Consider changing your CTAs"
+                  : props.conversion <= 9.0 && props.conversion > 0.0
+                  ? "Your open rates are below industry standards (9%). Try changing your message." + props.conversion
+                  : "Not enough data"
               }
               withArrow
               withinPortal
@@ -1653,6 +1635,26 @@ function FrameworkCard(props: {
               </Badge>
             </Tooltip>
           )}
+          {props.badgeText && (
+              <Tooltip
+                label={props.badgeHoverText}
+                openDelay={100}
+                withArrow
+                withinPortal
+                disabled={!props.badgeHoverText}
+              >
+                <Badge
+                  ml='auto'
+                  color="gray"
+                  size="sm"
+                  styles={{
+                    root: { textTransform: "initial", fontWeight: 500 },
+                  }}
+                >
+                  {props.badgeText}
+                </Badge>
+              </Tooltip>
+            )}
           {props.canEdit && props.editProps && (
             <BumpFrameworkSelect {...props.editProps} />
           )}

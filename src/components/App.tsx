@@ -6,7 +6,7 @@ import {
 } from "@mantine/core";
 
 import Layout from "./nav/Layout";
-import { Outlet } from "react-router-dom";
+import { Outlet, useSearchParams } from "react-router-dom";
 import { ModalsProvider } from "@mantine/modals";
 import { useRecoilValue } from "recoil";
 import { navLoadingState } from "@atoms/navAtoms";
@@ -87,6 +87,17 @@ export default function App() {
   }, [userData]);
 
   const loading = useRecoilValue(navLoadingState);
+
+
+  // Set persona query param
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const persona_id = searchParams.get('campaign_id');
+    if (persona_id) {
+      
+    }
+  }, []);
+
 
   return (
     <ColorSchemeProvider

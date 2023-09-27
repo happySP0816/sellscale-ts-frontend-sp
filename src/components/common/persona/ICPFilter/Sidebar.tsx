@@ -28,7 +28,7 @@ const Sidebar: FC<{
       {sideBarVisible && (
         <>
           <ScrollArea px={"md"}>
-            <Filters isTesting={isTesting} />
+            <Filters isTesting={isTesting} selectOptions={[]} />
           </ScrollArea>
 
           <SidebarFooter isTesting={isTesting} />

@@ -39,9 +39,11 @@ import { SCREEN_SIZES } from "@constants/data";
 import PersonaSelect from "../PersonaSplitSelect";
 import { getProspectsForICP } from "@utils/requests/getProspects";
 import { userTokenState } from "@atoms/userAtoms";
-import { useRecoilValue } from "recoil";
-import { currentProjectState } from "@atoms/personaAtoms";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { currentProjectState, uploadDrawerOpenState } from "@atoms/personaAtoms";
 import { showNotification } from "@mantine/notifications";
+import { ProjectSelect } from '@common/library/ProjectSelect';
+import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
 
 const filterDashboard = [
   {
@@ -184,6 +186,10 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
   const [selectedRows, setSelectedRows] = useState<DataGridRowSelectionState>(
     {}
   );
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
+  const openUploadProspects = () => {
+    setUploadDrawerOpened(true);
+  };
 
   const [prospectData, setProspectData] = useState<any[]>([])
 
@@ -275,18 +281,8 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
         }}
       >
         <Box style={{ display: "flex", alignItems: "center" }}>
-          <Title size={"24px"} color={theme.colors.gray[6]}>
-            Persona:
-          </Title>
           <Box ml={"0.5rem"}>
-            <PersonaSelect
-              disabled={false}
-              onChange={(archetypes) => {
-                console.log(archetypes);
-              }}
-              label={""}
-              description={""}
-            />
+            <ProjectSelect extraBig />
           </Box>
           <Title
             size={"24px"}
@@ -295,10 +291,15 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
           ></Title>
         </Box>
         <Flex gap={"1rem"} align={"center"}>
-          <Badge color="blue" ml={"0.5rem"}>
-            1245/2000 | Left: 75%
-          </Badge>
-          <Button leftIcon={<IconPlus />}>Add Prospects</Button>
+          <Button.Group color='gray'>
+            <Button variant="default" sx={{color: 'gray !important'}}>
+              <span style={{marginLeft: '6px', color: theme.colors.blue[5]}}>{currentProject?.num_unused_li_prospects}{" "}/{" "}{currentProject?.num_prospects}</span>
+            </Button>
+            <Button variant="default" sx={{color: 'gray !important'}}>
+              Left: <span style={{marginLeft: '6px', color: theme.colors.blue[5]}}>{currentProject ? Math.round(currentProject?.num_unused_li_prospects / (currentProject?.num_prospects + 0.0001) * 100)  + '% ': '-%'}</span>
+            </Button>
+          </Button.Group>
+          <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>Add Prospects</Button>
           {smScreenOrLess && <Button onClick={openFilter}>Open filter</Button>}
         </Flex>
       </Box>
@@ -557,6 +558,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
         close={close}
         count={getSelectedRowCount}
       />
+      <PersonaUploadDrawer personaOverviews={currentProject ? [currentProject] : []} afterUpload={() => { }} />
     </Box>
   );
 };

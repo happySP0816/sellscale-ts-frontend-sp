@@ -50,7 +50,7 @@ export default function InboxPage(props: { all?: boolean }) {
         true,
       );
       setQueryComplete(true);
-      return response.status === 'success' ? response.data as ProspectShallow[] : [];
+      return response.status === 'success' ? response.data.prospects as ProspectShallow[] : [];
     },
     refetchOnWindowFocus: false,
   });

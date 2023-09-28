@@ -193,11 +193,11 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
 
   const triggerGetProspects = async () => {
     if (!currentProject?.id) {
-      showNotification({
-        title: "Error",
-        message: "No project selected",
-        color: "red",
-      })
+      // showNotification({
+      //   title: "Error",
+      //   message: "No project selected",
+      //   color: "red",
+      // })
       return
     }
 

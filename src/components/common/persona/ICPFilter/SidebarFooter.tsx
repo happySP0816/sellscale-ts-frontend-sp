@@ -3,14 +3,15 @@ import { Box, useMantineTheme, Button, Title, Text } from "@mantine/core";
 import { useRecoilValue } from "recoil";
 import { filterRuleSetState } from "@atoms/icpFilterAtoms";
 import { useState } from "react";
-import { updateICPRuleSet } from "@utils/requests/icpScoring";
+import { runScoringICP, updateICPRuleSet } from "@utils/requests/icpScoring";
 import { userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
-type Props = {
-  isTesting: boolean;
-};
-export function SidebarFooter({ isTesting }: Props) {
+import { ProspectICP } from "src";
+import { useQueryClient } from "@tanstack/react-query";
+
+export function SidebarFooter(props: { isTesting: boolean, prospects: ProspectICP[] }) {
   const theme = useMantineTheme();
+  const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
@@ -28,7 +29,7 @@ export function SidebarFooter({ isTesting }: Props) {
       }}
     >
       <Box>
-        {isTesting ? (
+        {props.isTesting ? (
           <Text color="red" fz={"0.75rem"} fw={700}>
             Test Mode: Note that you are currently in test mode and only running
             scoring on 50 prospects.
@@ -41,11 +42,11 @@ export function SidebarFooter({ isTesting }: Props) {
         )}
       </Box>
       <Button
-        rightIcon={isTesting ? null : <IconArrowNarrowRight size={24} />}
+        rightIcon={props.isTesting ? null : <IconArrowNarrowRight size={24} />}
         mt={"0.5rem"}
         fullWidth
         loading={loading}
-        color={isTesting ? "blue" : "red"}
+        color={props.isTesting ? "blue" : "red"}
         onClick={async () => {
           if(!currentProject) return;
           setLoading(true);
@@ -74,11 +75,17 @@ export function SidebarFooter({ isTesting }: Props) {
             globalRuleSetData.included_company_generalized_keywords,
             globalRuleSetData.excluded_company_generalized_keywords
           );
-          console.log(response);
+
+          await runScoringICP(userToken, currentProject.id, props.isTesting ? props.prospects.map((prospect) => prospect.id) : undefined);
+
+          queryClient.refetchQueries({
+            queryKey: [`query-get-icp-prospects`],
+          });
+
           setLoading(false);
         }}
       >
-        {isTesting ? "Filter test sample" : "Start Filtering"}
+        {props.isTesting ? "Filter test sample" : "Start Filtering"}
       </Button>
 
       <Box

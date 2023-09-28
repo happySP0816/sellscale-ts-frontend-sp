@@ -140,6 +140,17 @@ export interface ProspectShallow {
   contract_size: number;
 };
 
+export interface ProspectICP {
+  company: string,
+  full_name: string,
+  icp_fit_reason: string,
+  icp_fit_score: number,
+  id: number,
+  industry: string,
+  linkedin_url: string,
+  title: string,
+}
+
 export interface ProspectDetails {
   details: {
     id: number;

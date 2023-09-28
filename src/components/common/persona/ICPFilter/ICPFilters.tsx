@@ -12,6 +12,7 @@ import Sidebar from "./Sidebar";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { SCREEN_SIZES } from "@constants/data";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -24,6 +25,9 @@ const useStyles = createStyles((theme) => ({
 
 const ICPFilters = () => {
   const { classes, theme, cx } = useStyles();
+
+  const queryClient = useQueryClient();
+
   const [opened, { open, close, toggle }] = useDisclosure(false);
   const [sideBarVisible, { toggle: toggleSideBar, open: openSideBar }] =
     useDisclosure(true);
@@ -78,7 +82,12 @@ const ICPFilters = () => {
         >
           <Switch
             checked={isTesting}
-            onChange={(event) => setIsTesting(event.currentTarget.checked)}
+            onChange={(event) => {
+              setIsTesting(event.currentTarget.checked);
+              queryClient.refetchQueries({
+                queryKey: [`query-get-icp-prospects`],
+              });
+            }}
             label="(Test Mode) View sample of 50 prospects"
           />
         </Box>

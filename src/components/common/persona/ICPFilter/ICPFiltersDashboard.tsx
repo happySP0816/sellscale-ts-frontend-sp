@@ -44,7 +44,8 @@ import { currentProjectState, uploadDrawerOpenState } from "@atoms/personaAtoms"
 import { showNotification } from "@mantine/notifications";
 import { ProjectSelect } from '@common/library/ProjectSelect';
 import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
-
+import { ProspectICP } from "src";
+import { useQuery } from "@tanstack/react-query";
 
 const demoData = [
   {
@@ -147,16 +148,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
     setUploadDrawerOpened(true);
   };
 
-  const [prospectData, setProspectData] = useState<{
-    "company": string,
-    "full_name": string,
-    "icp_fit_reason": string,
-    "icp_fit_score": number,
-    "id": number,
-    "industry": string,
-    "linkedin_url": string,
-    "title": string,
-  }[]>([])
+  const [prospectData, setProspectData] = useState<ProspectICP[]>([])
   const [icpDashboard, setIcpDashboard] = useState<any[]>([])
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -218,7 +210,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
     )
 
     // Get prospects
-    const prospects = result.data.prospects
+    const prospects = result.data.prospects as ProspectICP[];
 
     // Calculate numbers and percentages
     let icp_analytics = {
@@ -294,11 +286,14 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
     console.log('prospects', prospects)
   }
 
-  useEffect(() => {
-    if (!currentProject?.id) return
-
-    triggerGetProspects()
-  }, [currentProject?.id, isTesting])
+  useQuery({
+    queryKey: [`query-get-icp-prospects`],
+    queryFn: async () => {
+      if (!currentProject?.id) return null;
+      await triggerGetProspects();
+      return null;
+    },
+  });
 
   return (
     <Box

@@ -112,7 +112,7 @@ export async function runScoringICP(
 ): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/icp_scoring/get_ruleset?client_archetype_id=${client_archetype_id}`,
+    `${API_URL}/icp_scoring/run_on_prospects`,
     {
       method: "POST",
       headers: {

@@ -36,7 +36,6 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
   if(response.status === 'error'){
     return [];
   }
-  console.log(response.data);
 
   return response.data.map((prospect: Prospect) => {
     return {

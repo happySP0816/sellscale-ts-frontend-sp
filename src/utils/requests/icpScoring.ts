@@ -96,3 +96,35 @@ export async function updateICPRuleSet(
   return await processResponse(response);
 
 }
+
+
+/**
+ * Runs the ICP Scoring
+ * @param userToken
+ * @param client_archetype_id
+ * @param prospects
+ * @returns - MsgResponse
+ */
+export async function runScoringICP(
+  userToken: string,
+  client_archetype_id: number,
+  prospects?: number[],
+): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${API_URL}/icp_scoring/get_ruleset?client_archetype_id=${client_archetype_id}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_archetype_id: client_archetype_id,
+        prospect_ids: prospects ?? null,
+      }),
+    }
+  );
+  return await processResponse(response);
+
+}

@@ -15,32 +15,46 @@ export const PersonaMessaging = () => {
           <Textarea
             mb='sm'
             label="Example outbound copy"
-            disabled
+            contentEditable={false}
+            autosize
+            minRows={2}
+            maxRows={11}
             value={userData?.client?.example_outbound_copy}
           />
           <Textarea
             mb='sm'
             label="Links to case studies"
-            disabled
+            contentEditable={false}
+            autosize
+            minRows={2}
+            maxRows={4}
             value={userData?.case_study}
           />
           <TextInput
             mb='sm'
             label="Exciting, existing clients to reference"
-            disabled
+            contentEditable={false}
+            autosize
+            minRows={2}
+            maxRows={3}
             value={userData?.client?.existing_clients}
           />
           <TextInput
             mb='sm'
             label="Impressive facts about your service"
-            disabled
+            contentEditable={false}
+            autosize
+            minRows={2}
+            maxRows={3}
             value={userData?.client?.impressive_facts}
           />
           <Textarea
             mb='sm'
-            autosize
             label="Messaging tone"
-            disabled
+            contentEditable={false}
+            autosize
+            minRows={2}
+            maxRows={3}
             value={userData?.client?.tone_attributes?.join('\n')}
           />
 

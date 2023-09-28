@@ -14,7 +14,7 @@ const Sidebar: FC<{
     <Flex
       direction={"column"}
       h={"100%"}
-      w={sideBarVisible ? "15rem" : "4rem"}
+      w={sideBarVisible ? "20rem" : "4rem"}
       style={{
         transition: "width",
         transitionDuration: "150ms",

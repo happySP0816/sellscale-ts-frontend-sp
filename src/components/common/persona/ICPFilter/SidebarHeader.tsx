@@ -103,19 +103,19 @@ export function SidebarHeader({
         </Group>
       </Box>
       <Flex direction={"column"} gap={"0.5rem"} mt={"0.5rem"} sx={{
-        borderBottom: 'solid 1px #CCC', paddingBottom: '16px'
+        borderBottom: 'solid 1px #CCC', paddingBottom: '16px', display: sideBarVisible ? 'flex' : 'none'
       }}>
         <Flex px={"md"} align={"center"} gap={"0.5rem"}>
-          <Input
+          {/* <Input
             onChange={(e) => setValue(e.target.value)}
             placeholder="Search"
-          />
+          /> */}
 
-          <Tooltip label="OK">
+          {/* <Tooltip label="OK">
             <ActionIcon size={"sm"}>
               <IconInfoCircle />
             </ActionIcon>
-          </Tooltip>
+          </Tooltip> */}
         </Flex>
 
         <Flex px={"md"} align={"center"} gap={"0.5rem"}>
@@ -180,16 +180,17 @@ export function SidebarHeader({
           <Tooltip label="(Test Mode) View sample of 50 prospects">
             <SwitchWrapper>
               <Box sx={{textAlign: 'center', justifyContent: 'center'}}>
-                <Text fz='9px'>Test Sample ℹ️</Text>
+                <Text fz='9px'>Test Sample</Text>
                 <Flex>
                   <Switch
-                    ml='lg'
+                    ml='md'
                     mt='xs'
                     size='xs'
                     onChange={(event) => {
                       setIsTesting(event.currentTarget.checked);
                     }}
                   />
+                  <Text size='xs' ml='6px' mt='10px'> ℹ️</Text>
                 </Flex>
               </Box>
             </SwitchWrapper>

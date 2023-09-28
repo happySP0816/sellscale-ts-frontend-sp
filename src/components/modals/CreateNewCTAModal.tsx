@@ -112,10 +112,23 @@ export default function CreateNewCTAModel({
   };
 
   const calculateCTAError = () => {
-    const ctaText = form.getInputProps("cta").value;
+    const ctaText = form.getInputProps("cta").value.toLowerCase();
+    
 
     if (ctaText.length > 120) {
       return "CTA must be less than 120 characters.";
+    }
+
+    if (
+      ctaText.includes("{") && 
+      (!ctaText.includes("{{name}}") && !ctaText.includes("{{company}}") && !ctaText.includes("{{industry}}"))
+    ) {
+      return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
+    } else if (
+      ctaText.includes("[") && 
+      (!ctaText.includes("[[name]]") && !ctaText.includes("[[company]]") && !ctaText.includes("[[industry]]"))
+    ) {
+      return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
     }
 
     let collection = []
@@ -132,23 +145,23 @@ export default function CreateNewCTAModel({
       if (i != -1) {
         // Make sure it is not at the beginning or end
         if (i == 0 || i == (collection.length - 1)) {
-          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
         }
 
         // Make sure there is a '}' on the right
         if (collection[i + 1] != '}') {
-          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
         }
 
         // Find the opening brackets
         const j = collection.lastIndexOf('{', i)
         if (j == -1 || j == 0 || j == (collection.length - 1)) {
-          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
         }
 
         // Make sure the opening brackets are dual
         if (collection[j - 1] != '{') {
-          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
         }
 
         // Remove the brackets from the collection
@@ -162,23 +175,23 @@ export default function CreateNewCTAModel({
       if (j != -1) {
         // Make sure it is not at the beginning or end
         if (j == 0 || j == (collection.length - 1)) {
-          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
         }
 
         // Make sure there is a ']' on the right
         if (collection[j + 1] != ']') {
-          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
         }
 
         // Find the opening brackets
         const i = collection.lastIndexOf('[', j)
         if (i == -1 || i == 0 || i == (collection.length - 1)) {
-          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
         }
 
         // Make sure the opening brackets are dual
         if (collection[i - 1] != '[') {
-          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
         }
 
         // Remove the brackets from the collection
@@ -188,7 +201,7 @@ export default function CreateNewCTAModel({
       }
 
       if (!popped) {
-        return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+        return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
       }
     }
 

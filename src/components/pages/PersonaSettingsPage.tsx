@@ -1,5 +1,6 @@
 import { currentProjectState } from "@atoms/personaAtoms";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { syncLocalStorage } from '@auth/core';
 import PageFrame from "@common/PageFrame";
 import { PersonaBasicForm } from "@common/persona/PersonaBrain";
 import { PersonaCompanyInfo } from "@common/persona/settings/PersonaCompanyInfo";
@@ -26,7 +27,7 @@ import PageTitle from "@nav/PageTitle";
 import { IconBrain, IconBuilding, IconMessage, IconSettings, IconUser } from "@tabler/icons";
 import { activatePersona } from "@utils/requests/postPersonaActivation";
 import { deactivatePersona } from "@utils/requests/postPersonaDeactivation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 export default function PersonaSettingsPage() {
@@ -35,6 +36,17 @@ export default function PersonaSettingsPage() {
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
   const [loading, setLoading] = useState(false);
+
+  const [fetchedData, setFetchedData] = useState(false);
+    const [userData, setUserData] = useRecoilState(userDataState);
+
+
+  useEffect(() => {
+    if (!fetchedData) {
+      syncLocalStorage(userToken, setUserData);
+      setFetchedData(true);
+    }
+  })
 
   if (currentProject == null) {
     return null;

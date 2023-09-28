@@ -317,7 +317,7 @@ export default function CreateNewCTAModel({
               ml="auto"
               mr="auto"
               size="md"
-              disabled={form.getInputProps("cta").value.length > 120}
+              disabled={form.getInputProps("cta").value.length > 120 || calculateCTAError() != null}
             >
               Create new CTA
             </Button>

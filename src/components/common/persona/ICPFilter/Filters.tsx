@@ -15,7 +15,7 @@ import { IconBuildingCommunity, IconPhoto, IconUser } from "@tabler/icons";
 import { useForm } from "@mantine/form";
 import { set } from "lodash";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { filterRuleSetState } from "@atoms/icpFilterAtoms";
+import { filterProspectsState, filterRuleSetState } from "@atoms/icpFilterAtoms";
 import { getICPRuleSet } from "@utils/requests/icpScoring";
 import { userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
@@ -25,6 +25,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [globalRuleSetData, setGlobalRuleSetData] = useRecoilState(filterRuleSetState);
+  const icpProspects = useRecoilValue(filterProspectsState);
 
   const [included_individual_title_keywords, setIncludedIndividualTitleKeywords] = useState<string[]>([]);
   const [excluded_individual_title_keywords, setExcludedIndividualTitleKeywords] = useState<string[]>([]);
@@ -154,36 +155,36 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
           style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
           py="md"
         >
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={included_individual_title_keywords}
             label="Titles (Included)"
             placeholder="Select options"
             setValue={setIncludedIndividualTitleKeywords}
-            data={included_individual_title_keywords}
+            data={included_individual_title_keywords.concat([...new Set(icpProspects.map(x => x.title ? x.title : ''))])}
             setData={setIncludedIndividualTitleKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={excluded_individual_title_keywords}
             label="Titles (Excluded)"
             placeholder="Select options"
             setValue={setExcludedIndividualTitleKeywords}
-            data={excluded_individual_title_keywords}
+            data={excluded_individual_title_keywords.concat([...new Set(icpProspects.map(x => x.title ? x.title : ''))])}
             setData={setExcludedIndividualTitleKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={included_individual_industry_keywords}
             label="Industry Keywords (Included)"
             placeholder="Select options"
             setValue={setIncludedIndividualIndustryKeywords}
-            data={included_individual_industry_keywords}
+            data={included_individual_industry_keywords.concat([...new Set(icpProspects.map(x => x.industry))])}
             setData={setIncludedIndividualIndustryKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={excluded_individual_industry_keywords}
             label="Industry Keywords (Excluded)"
             placeholder="Select options"
             setValue={setExcludedIndividualIndustryKeywords}
-            data={excluded_individual_industry_keywords}
+            data={excluded_individual_industry_keywords.concat([...new Set(icpProspects.map(x => x.industry))])}
             setData={setExcludedIndividualIndustryKeywords}
           />
           <Flex direction="column">
@@ -216,7 +217,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
               Max
             </Button>
           </Flex>
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={included_individual_skills_keywords}
             label="Skills Keywords (Included)"
             placeholder="Select options"
@@ -224,7 +225,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             data={included_individual_skills_keywords}
             setData={setIncludedIndividualSkillsKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={excluded_individual_skills_keywords}
             label="Skills Keywords (Excluded)"
             placeholder="Select options"
@@ -232,23 +233,23 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             data={excluded_individual_skills_keywords}
             setData={setExcludedIndividualSkillsKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={included_individual_locations_keywords}
             label="Location Keywords (Included)"
             placeholder="Select options"
             setValue={setIncludedIndividualLocationsKeywords}
-            data={included_individual_locations_keywords}
+            data={included_individual_locations_keywords.concat(['United States'])}
             setData={setIncludedIndividualLocationsKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={excluded_individual_locations_keywords}
             label="Location Keywords (Excluded)"
             placeholder="Select options"
             setValue={setExcludedIndividualLocationsKeywords}
-            data={excluded_individual_locations_keywords}
+            data={excluded_individual_locations_keywords.concat(['United States'])}
             setData={setExcludedIndividualLocationsKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={included_individual_generalized_keywords}
             label="Bio & Jobs Description (Included)"
             placeholder="Select options"
@@ -256,7 +257,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             data={included_individual_generalized_keywords}
             setData={setIncludedIndividualGeneralizedKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={excluded_individual_generalized_keywords}
             label="Bio & Jobs Description (Excluded)"
             placeholder="Select options"
@@ -273,36 +274,36 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
           style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
           py="md"
         >
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={included_company_name_keywords}
             label="Companies Keywords (Included)"
             placeholder="Select options"
             setValue={setIncludedCompanyNameKeywords}
-            data={included_company_name_keywords}
+            data={included_company_name_keywords.concat([...new Set(icpProspects.map(x => x.company))])}
             setData={setIncludedCompanyNameKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={excluded_company_name_keywords}
             label="Companies Keywords (Excluded)"
             placeholder="Select options"
             setValue={setExcludedCompanyNameKeywords}
-            data={excluded_company_name_keywords}
+            data={excluded_company_name_keywords.concat([...new Set(icpProspects.map(x => x.company))])}
             setData={setExcludedCompanyNameKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={included_company_locations_keywords}
             label="Location Keywords (Included)"
             placeholder="Select options"
             setValue={setIncludedCompanyLocationsKeywords}
-            data={included_company_locations_keywords}
+            data={included_company_locations_keywords.concat(['United States'])}
             setData={setIncludedCompanyLocationsKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={excluded_company_locations_keywords}
             label="Location Keywords (Excluded)"
             placeholder="Select options"
             setValue={setExcludedCompanyLocationsKeywords}
-            data={excluded_company_locations_keywords}
+            data={excluded_company_locations_keywords.concat(['United States'])}
             setData={setExcludedCompanyLocationsKeywords}
           />
           <Flex direction="column">
@@ -335,23 +336,23 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
               Max
             </Button>
           </Flex>
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={included_company_industries_keywords}
             label="Industries Keywords (Included)"
             placeholder="Select options"
             setValue={setIncludedCompanyIndustriesKeywords}
-            data={included_company_industries_keywords}
+            data={included_company_industries_keywords.concat([... new Set(icpProspects.map(x => x.industry))])}
             setData={setIncludedCompanyIndustriesKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={excluded_company_industries_keywords}
             label="Industries Keywords (Excluded)"
             placeholder="Select options"
             setValue={setExcludedCompanyIndustriesKeywords}
-            data={excluded_company_industries_keywords}
+            data={excluded_company_industries_keywords.concat([...new Set(icpProspects.map(x => x.industry))])}
             setData={setExcludedCompanyIndustriesKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={included_company_generalized_keywords}
             label="Company Description (Included)"
             placeholder="Select options"
@@ -359,7 +360,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             data={included_company_generalized_keywords}
             setData={setIncludedCompanyGeneralizedKeywords}
           />
-          <CustomSelect
+          <CustomSelect maxWidth='16rem'
             value={excluded_company_generalized_keywords}
             label="Company Description (Excluded)"
             placeholder="Select options"

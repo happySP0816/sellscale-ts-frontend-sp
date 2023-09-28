@@ -96,7 +96,7 @@ const GridTabs = ({
         w={"100%"}
         style={{ flexWrap: "wrap" }}
       >
-        {tabFilters.map((tab) => (
+        {tabFilters.map((tab: any) => (
           <Button
             key={tab.value}
             variant="subtle"

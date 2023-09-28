@@ -34,18 +34,12 @@ export const PersonaMessaging = () => {
             mb='sm'
             label="Exciting, existing clients to reference"
             contentEditable={false}
-            autosize
-            minRows={2}
-            maxRows={3}
             value={userData?.client?.existing_clients}
           />
           <TextInput
             mb='sm'
             label="Impressive facts about your service"
             contentEditable={false}
-            autosize
-            minRows={2}
-            maxRows={3}
             value={userData?.client?.impressive_facts}
           />
           <Textarea

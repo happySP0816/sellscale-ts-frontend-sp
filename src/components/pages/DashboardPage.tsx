@@ -436,7 +436,6 @@ export default function DashboardSection() {
           <DemoFeedbackSeeAllDrawer prospects={all_prospectsDemo} />
         </>
       )}
-      {prospectDrawerOpened && <ProspectDetailsDrawer />}
     </PageFrame>
   );
 }

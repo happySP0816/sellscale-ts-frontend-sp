@@ -44,10 +44,12 @@ import PatchEmailSubjectLineModal from "@modals/PatchEmailSubjectLineModal";
 import { CreateBumpFrameworkContextModal } from "@modals/CreateBumpFrameworkModal";
 import { CloneBumpFrameworkContextModal } from "@modals/CloneBumpFrameworkModal";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { getFreshCurrentProject, getCurrentPersonaId } from "@auth/core";
+import { getFreshCurrentProject, getCurrentPersonaId, isLoggedIn } from "@auth/core";
 import { removeQueryParam } from "@utils/documentChange";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { PersonaOverview } from "src";
+import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
+import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 
 export default function App() {
   // Site light or dark mode
@@ -93,6 +95,9 @@ export default function App() {
 
   const loading = useRecoilValue(navLoadingState);
 
+  const [drawerProspectId, setDrawerProspectId] = useRecoilState(prospectDrawerIdState);
+  const [drawerOpened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
+
   // Select the last used project
   const userToken = useRecoilValue(userTokenState);
   const [currentProject, setCurrentProject] =
@@ -101,6 +106,17 @@ export default function App() {
   const [searchParams] = useSearchParams();
   useEffect(() => {
     (async () => {
+      if (!isLoggedIn()) {return;}
+
+      // If there is a prospect query param, open the prospect drawer
+      const prospect_id = searchParams.get("prospect_id");
+      if (prospect_id) {
+        setDrawerProspectId(+prospect_id);
+        setDrawerOpened(true);
+        removeQueryParam("prospect_id");
+      }
+
+      // If there is a persona query param, set the current project to that
       const persona_id = searchParams.get("campaign_id");
       if (persona_id) {
         // Set to query param persona
@@ -196,6 +212,7 @@ export default function App() {
               {/* Outlet is where react-router will render child routes */}
               <Outlet />
             </Layout>
+            {isLoggedIn() && <ProspectDetailsDrawer />}
           </ModalsProvider>
         </SpotlightWrapper>
       </MantineProvider>

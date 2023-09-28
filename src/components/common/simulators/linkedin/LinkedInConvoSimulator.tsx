@@ -243,7 +243,6 @@ export default function LinkedInConvoSimulator(props: { personaId: number, seque
 
   return (
     <>
-      {prospectDrawerOpened && <ProspectDetailsDrawer />}
       <Paper withBorder p='lg' radius='md' shadow='md' mb='lg'>
         <Group position='apart' mb='xs'>
           <Text fz='xl' fw={500}>

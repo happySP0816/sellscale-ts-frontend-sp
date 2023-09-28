@@ -36,6 +36,7 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
   if(response.status === 'error'){
     return [];
   }
+  console.log(response.data);
 
   return response.data.map((prospect: Prospect) => {
     return {
@@ -43,7 +44,12 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       description: prospect.title,
       keywords: prospect.company,
       group: 'Prospects',
-      onTrigger: () => navigateToPage(navigate, `/all/contacts/${prospect.id}`),
+      onTrigger: () => {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+        params.set('prospect_id', prospect.id+'');
+        navigateToPage(navigate, url.pathname, params);
+      },
       icon: (
         <Avatar
           src={proxyURL(prospect.img_url)}

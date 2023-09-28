@@ -428,7 +428,6 @@ export default function PipelineSection() {
           )}
         </Box>
       </Stack>
-      {prospectDrawerOpened && <ProspectDetailsDrawer />}
     </>
   );
 }

@@ -286,7 +286,6 @@ export default function ProspectSelect(props: {
           ),
         }}
       />
-      {props.includeDrawer && prospectDrawerOpened && <ProspectDetailsDrawer zIndex={10000} />}
     </>
   );
 }

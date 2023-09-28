@@ -292,7 +292,6 @@ export default function PulseBarChart(props: {}) {
           </Paper>
         ))}
       </Group>
-      {prospectDrawerOpened && <ProspectDetailsDrawer />}
     </Box>
   );
 }

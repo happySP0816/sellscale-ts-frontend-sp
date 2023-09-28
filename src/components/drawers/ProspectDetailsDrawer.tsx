@@ -67,17 +67,9 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
     'LINKEDIN'
   );
 
-  // This component is only rendered if drawerOpened=true - which isn't helpful for the first render
-  // So we use actuallyOpened to control when the drawer opens and delay it by 100ms (for the animation to play)
   const [drawerOpened, setDrawerOpened] = useRecoilState(
     prospectDrawerOpenState
   );
-  const [actuallyOpened, setActuallyOpened] = useState(false);
-  useEffect(() => {
-    setTimeout(() => {
-      setActuallyOpened(drawerOpened);
-    }, 100);
-  }, []);
 
   const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
   const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
@@ -175,11 +167,11 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
 
   return (
     <Drawer
-      opened={actuallyOpened}
+      opened={drawerOpened}
+      keepMounted={false}
       onClose={() => {
         setDrawerOpened(false);
         setProspectId(-1);
-        //removeLastPathSegment();
       }}
       title={
         <FlexSeparate>

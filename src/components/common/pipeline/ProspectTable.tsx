@@ -405,7 +405,6 @@ export default function ProspectTable({
         })}
       />
 
-      {opened && <ProspectDetailsDrawer />}
     </Box>
   );
 }

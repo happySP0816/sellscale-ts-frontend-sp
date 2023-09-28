@@ -660,7 +660,7 @@ function PersonCampaignCard(props: {
                 if (props.project == undefined) return;
                 setOpenedProspectId(-1);
                 setCurrentProject(props.project);
-                navigateToPage(navigate, `/prioritize` + `/${props.persona.id}`);
+                navigateToPage(navigate, `/prioritize`);
               }}
               leftIcon={<IconFilter size={"0.7rem"} />}
             >

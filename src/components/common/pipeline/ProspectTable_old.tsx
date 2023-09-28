@@ -651,7 +651,6 @@ export default function ProspectTable_old(props: { personaSpecific?: number }) {
         isRecordSelectable={(record) => selectedRecords.length < 100 || selectedRecords.includes(record)}
       />
 
-      {opened && <ProspectDetailsDrawer />}
     </Box>
   );
 }

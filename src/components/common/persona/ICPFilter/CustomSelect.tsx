@@ -10,6 +10,7 @@ interface ICustomSelect {
   allowInclude?: boolean;
   allowExclude?: boolean;
   color?: "green" | "red";
+  maxWidth?: string;
   setData: React.Dispatch<
     React.SetStateAction<
       string[]
@@ -33,6 +34,7 @@ const CustomSelect = ({
   allowInclude = false,
   allowExclude = false,
   color = "green",
+  maxWidth = "100%",
   setData,
 }: ICustomSelect) => {
   const [searchValue, onSearchChange] = useState("");
@@ -77,6 +79,7 @@ const CustomSelect = ({
         }
         placeholder={placeholder}
         searchable
+        maw={maxWidth}
         searchValue={searchValue}
         onSearchChange={onSearchChange}
         rightSection={<IconChevronDown size="1rem" />}

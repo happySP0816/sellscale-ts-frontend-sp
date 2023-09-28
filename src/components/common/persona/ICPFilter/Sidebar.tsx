@@ -33,8 +33,6 @@ const Sidebar: FC<{
           <ScrollArea px={"md"}>
             <Filters isTesting={isTesting} selectOptions={[]} />
           </ScrollArea>
-
-          <SidebarFooter isTesting={isTesting} />
         </>
       )}
     </Flex>

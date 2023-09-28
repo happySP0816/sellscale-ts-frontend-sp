@@ -11,9 +11,15 @@ import {
   Tooltip,
   Button,
   Switch,
+  Text,
 } from "@mantine/core";
-import { IconChevronLeft, IconInfoCircle } from "@tabler/icons";
+import { IconArrowNarrowLeft, IconArrowNarrowRight, IconChevronLeft, IconInfoCircle } from "@tabler/icons";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRecoilValue } from 'recoil';
+import { currentProjectState } from '@atoms/personaAtoms';
+import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms';
+import { runScoringICP, updateICPRuleSet } from '@utils/requests/icpScoring';
+import { userTokenState } from '@atoms/userAtoms';
 
 type Props = {
   sideBarVisible: boolean;
@@ -37,6 +43,12 @@ export function SidebarHeader({
 }: Props) {
   const [value, setValue] = useState("");
   const queryClient = useQueryClient();
+  const userToken = useRecoilValue(userTokenState);
+
+  const [loading, setLoading] = useState(false);
+  const currentProject = useRecoilValue(currentProjectState);
+  const globalRuleSetData = useRecoilValue(filterRuleSetState);
+  const icpProspects = useRecoilValue(filterProspectsState);
 
   return (
     <>
@@ -90,7 +102,9 @@ export function SidebarHeader({
           </Box>
         </Group>
       </Box>
-      <Flex direction={"column"} gap={"0.5rem"} mt={"0.5rem"}>
+      <Flex direction={"column"} gap={"0.5rem"} mt={"0.5rem"} sx={{
+        borderBottom: 'solid 1px #CCC', paddingBottom: '16px'
+      }}>
         <Flex px={"md"} align={"center"} gap={"0.5rem"}>
           <Input
             onChange={(e) => setValue(e.target.value)}
@@ -105,16 +119,79 @@ export function SidebarHeader({
         </Flex>
 
         <Flex px={"md"} align={"center"} gap={"0.5rem"}>
-          <Button disabled={!value} style={{ flex: 1 }}>
-            run scoring
+          <Button
+            rightIcon={isTesting ? null : <IconArrowNarrowRight size={24} />}
+            size='xs'
+            mt={"0.5rem"}
+            fullWidth
+            loading={loading}
+            color={isTesting ? "blue" : "red"}
+            onClick={async () => {
+              if (!currentProject) return;
+              setLoading(true);
+              console.log("updating rule set");
+              const response = await updateICPRuleSet(
+                userToken,
+                currentProject.id,
+                globalRuleSetData.included_individual_title_keywords,
+                globalRuleSetData.excluded_individual_title_keywords,
+                globalRuleSetData.included_individual_industry_keywords,
+                globalRuleSetData.individual_years_of_experience_start,
+                globalRuleSetData.individual_years_of_experience_end,
+                globalRuleSetData.included_individual_skills_keywords,
+                globalRuleSetData.excluded_individual_skills_keywords,
+                globalRuleSetData.included_individual_locations_keywords,
+                globalRuleSetData.excluded_individual_locations_keywords,
+                globalRuleSetData.included_individual_generalized_keywords,
+                globalRuleSetData.excluded_individual_generalized_keywords,
+                globalRuleSetData.included_company_name_keywords,
+                globalRuleSetData.excluded_company_name_keywords,
+                globalRuleSetData.included_company_locations_keywords,
+                globalRuleSetData.excluded_company_locations_keywords,
+                globalRuleSetData.company_size_start,
+                globalRuleSetData.company_size_end,
+                globalRuleSetData.included_company_industries_keywords,
+                globalRuleSetData.excluded_company_industries_keywords,
+                globalRuleSetData.included_company_generalized_keywords,
+                globalRuleSetData.excluded_company_generalized_keywords
+              );
+              console.log("response", response);
+              console.log("running scoring");
+
+              await runScoringICP(
+                userToken,
+                currentProject.id,
+                isTesting
+                  ? icpProspects.map((prospect) => prospect.id)
+                  : undefined
+              );
+              console.log("refetching queries");
+
+              queryClient.refetchQueries({
+                queryKey: [`query-get-icp-prospects`],
+              });
+              console.log("done");
+
+              setLoading(false);
+            }}
+          >
+            {isTesting ? "Filter test sample" : "Start Filtering"}
           </Button>
           <Tooltip label="(Test Mode) View sample of 50 prospects">
             <SwitchWrapper>
-              <Switch
-                onChange={(event) => {
-                  setIsTesting(event.currentTarget.checked);
-                }}
-              />
+              <Box sx={{textAlign: 'center', justifyContent: 'center'}}>
+                <Text fz='9px'>Test Sample ℹ️</Text>
+                <Flex>
+                  <Switch
+                    ml='lg'
+                    mt='xs'
+                    size='xs'
+                    onChange={(event) => {
+                      setIsTesting(event.currentTarget.checked);
+                    }}
+                  />
+                </Flex>
+              </Box>
             </SwitchWrapper>
           </Tooltip>
         </Flex>

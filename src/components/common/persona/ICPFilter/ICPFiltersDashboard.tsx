@@ -45,50 +45,6 @@ import { showNotification } from "@mantine/notifications";
 import { ProjectSelect } from '@common/library/ProjectSelect';
 import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
 
-const filterDashboard = [
-  {
-    label: "Very High",
-    color: "#3B85EF",
-    bgColor: "rgba(59, 133, 239, 0.05)",
-    percent: "10%",
-    value: 125,
-  },
-  {
-    label: "High",
-    color: "#009512",
-    bgColor: "rgba(0, 149, 18, 0.05)",
-    percent: "22%",
-    value: 889,
-  },
-  {
-    label: "Medium",
-    color: "#EFBA50",
-    percent: "18%",
-    bgColor: "rgba(239, 186, 80, 0.05)",
-    value: 642,
-  },
-  {
-    label: "Low",
-    color: "#EB8231",
-    percent: "20%",
-    bgColor: "rgba(235, 130, 49, 0.05)",
-    value: 1221,
-  },
-  {
-    label: "Very Low",
-    color: "#E5564E",
-    percent: "25%",
-    bgColor: "rgba(229, 86, 78, 0.05)",
-    value: 1566,
-  },
-  {
-    label: "Unscored",
-    color: "#84818A",
-    bgColor: "rgba(132, 129, 138, 0.05)",
-    percent: "5%",
-    value: 55,
-  },
-];
 
 const demoData = [
   {
@@ -162,7 +118,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
     },
     {
       id: "icp_fit_score",
-      value: "",
+      value: 0,
     },
   ];
   const smScreenOrLess = useMediaQuery(
@@ -191,7 +147,17 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
     setUploadDrawerOpened(true);
   };
 
-  const [prospectData, setProspectData] = useState<any[]>([])
+  const [prospectData, setProspectData] = useState<{
+    "company": string,
+    "full_name": string,
+    "icp_fit_reason": string,
+    "icp_fit_score": number,
+    "id": number,
+    "industry": string,
+    "linkedin_url": string,
+    "title": string,
+  }[]>([])
+  const [icpDashboard, setIcpDashboard] = useState<any[]>([])
 
   const [opened, { open, close }] = useDisclosure(false);
   const [columnFilters, setColumnFilters] =
@@ -225,11 +191,12 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
     }
 
     if (selectedTab) {
-      newFilters[3].value =
-        selectedTab.value === "all" ? "" : selectedTab.label;
+      // console.log('selectedTab', selectedTab)
+      newFilters[3].value = selectedTab.value;
     }
 
     setColumnFilters(newFilters);
+    console.log('filter', newFilters)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalSearch, channel, status, selectedTab]);
@@ -252,10 +219,79 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
 
     // Get prospects
     const prospects = result.data.prospects
-    console.log('prospects', prospects)
 
+    // Calculate numbers and percentages
+    let icp_analytics = {
+      "-1": 0,
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "Total": 0,
+    }
+    for (const prospect of prospects) {
+      let icp_fit_score = (prospect.icp_fit_score >= -1 && prospect.icp_fit_score <= 4) ? prospect.icp_fit_score : -1
+      // @ts-ignore
+      icp_analytics[icp_fit_score + ''] += 1
+      icp_analytics["Total"] += 1
+    }
+
+    // Set ICP Dashboard
+    setIcpDashboard([
+      {
+        label: "Very High",
+        color: "#3B85EF",
+        bgColor: "rgba(59, 133, 239, 0.05)",
+        percent: icp_analytics["4"] / icp_analytics["Total"] * 100,
+        value: icp_analytics["4"] + "",
+        widthModifier: 10
+      },
+      {
+        label: "High",
+        color: "#009512",
+        bgColor: "rgba(0, 149, 18, 0.05)",
+        percent: icp_analytics["3"] / icp_analytics["Total"] * 100,
+        value: icp_analytics["3"] + "",
+        widthModifier: 5
+      },
+      {
+        label: "Medium",
+        color: "#EFBA50",
+        percent: icp_analytics["2"] / icp_analytics["Total"] * 100,
+        bgColor: "rgba(239, 186, 80, 0.05)",
+        value: icp_analytics["2"] + "",
+        widthModifier: 0
+      },
+      {
+        label: "Low",
+        color: "#EB8231",
+        percent: icp_analytics["1"] / icp_analytics["Total"] * 100,
+        bgColor: "rgba(235, 130, 49, 0.05)",
+        value: icp_analytics["1"] + "",
+        widthModifier: 0
+      },
+      {
+        label: "Very Low",
+        color: "#E5564E",
+        percent: icp_analytics["0"] / icp_analytics["Total"] * 100,
+        bgColor: "rgba(229, 86, 78, 0.05)",
+        value: icp_analytics["0"] + "",
+        widthModifier: -5
+      },
+      {
+        label: "Unscored",
+        color: "#84818A",
+        bgColor: "rgba(132, 129, 138, 0.05)",
+        percent: icp_analytics["-1"] / icp_analytics["Total"] * 100,
+        value: icp_analytics["-1"] + "",
+        widthModifier: -10
+      },
+    ])
+
+    // Set prospect data
     setProspectData(prospects)
-
+    console.log('prospects', prospects)
   }
 
   useEffect(() => {
@@ -292,11 +328,11 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
         </Box>
         <Flex gap={"1rem"} align={"center"}>
           <Button.Group color='gray'>
-            <Button variant="default" sx={{color: 'gray !important'}}>
-              <span style={{marginLeft: '6px', color: theme.colors.blue[5]}}>{currentProject?.num_unused_li_prospects}{" "}/{" "}{currentProject?.num_prospects}</span>
+            <Button variant="default" sx={{ color: 'gray !important' }}>
+              <span style={{ marginLeft: '6px', color: theme.colors.blue[5] }}>{currentProject?.num_unused_li_prospects}{" "}/{" "}{currentProject?.num_prospects}</span>
             </Button>
-            <Button variant="default" sx={{color: 'gray !important'}}>
-              Left: <span style={{marginLeft: '6px', color: theme.colors.blue[5]}}>{currentProject ? Math.round(currentProject?.num_unused_li_prospects / (currentProject?.num_prospects + 0.0001) * 100)  + '% ': '-%'}</span>
+            <Button variant="default" sx={{ color: 'gray !important' }}>
+              Left: <span style={{ marginLeft: '6px', color: theme.colors.blue[5] }}>{currentProject ? Math.round(currentProject?.num_unused_li_prospects / (currentProject?.num_prospects + 0.0001) * 100) + '% ' : '-%'}</span>
             </Button>
           </Button.Group>
           <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>Add Prospects</Button>
@@ -321,18 +357,18 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
               gap: "1rem",
             }}
           >
-            {filterDashboard.map((filter, index) => (
+            {icpDashboard.map((icp, index) => (
               <Box style={{ display: "flex", gap: "0.4rem" }} key={index}>
                 <Box
                   style={{
                     width: "1rem",
                     height: "1rem",
                     borderRadius: "50%",
-                    backgroundColor: filter.color,
+                    backgroundColor: icp.color,
                   }}
                 />
                 <Title size={"10px"} fw={400} color={theme.colors.gray[6]}>
-                  {filter.label}
+                  {icp.label}
                 </Title>
               </Box>
             ))}
@@ -346,42 +382,49 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
             justifyContent: "space-between",
           }}
         >
-          {filterDashboard.map((filter, index) => (
-            <Box
-              key={`filter-${index}`}
-              style={{
-                width: filter.percent,
-              }}
-            >
-              <Paper
-                sx={{
-                  backgroundColor: filter.bgColor,
-                  color: filter.color,
-                  border: `1px solid #E9ECEF`,
+          {icpDashboard.map((icp, index) => {
+
+            
+
+            return (
+              <Box
+                key={`filter-${index}`}
+                style={{
+                  width: (16 + icp.widthModifier) + '%',
                 }}
-                p="md"
-                radius="7px"
               >
-                <Title size={"10px"} fw={600}>
-                  {filter.percent}
-                </Title>
-                <Title size={"20px"} fw={500}>
-                  {filter.value}
-                </Title>
-                <Title size={"14px"} fw={500} color="gray.6">
-                  Prospects
-                </Title>
-              </Paper>
-              <Progress
-                value={100}
-                mt={"0.5rem"}
-                color={filter.color}
-                radius={"11px"}
-                size={"lg"}
-                label="100%"
-              />
-            </Box>
-          ))}
+                <Paper
+                  sx={{
+                    backgroundColor: icp.bgColor,
+                    color: icp.color,
+                    border: `1px solid #E9ECEF`,
+                    overflow: 'hidden'
+                  }}
+                  p="md"
+                  radius="7px"
+
+                >
+                  <Title size={"10px"} fw={600}>
+                    {icp.percent.toFixed(1)}%
+                  </Title>
+                  <Title size={"20px"} fw={500}>
+                    {icp.value}
+                  </Title>
+                  <Title fw={500} color="gray.6" fz='12px'>
+                    Contacts
+                  </Title>
+                </Paper>
+                <Progress
+                  value={100}
+                  mt={"0.5rem"}
+                  color={icp.color}
+                  radius={"11px"}
+                  size={"lg"}
+                  label="100%"
+                />
+              </Box>
+            )
+          })}
         </Box>
       </Paper>
 
@@ -491,16 +534,40 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
           {
             accessorKey: "icp_fit_score",
             header: "ICP SCORE",
-            cell: (cell) => (
-              "test"
-              // <Badge
-              //   color={getICPScoreBadgeColor(
-              //     cell.getValue<string>()?.toLowerCase()
-              //   )}
-              // >
-              //   {cell.getValue<string>()?.toUpperCase()}
-              // </Badge>
-            ),
+            cell: (cell) => {
+              const score = cell.cell.getValue<number>()
+              let readable_score = ""
+              switch (score) {
+                case -1:
+                  readable_score = "Unscored"
+                  break;
+                case 0:
+                  readable_score = "Very Low"
+                  break;
+                case 1:
+                  readable_score = "Low"
+                  break;
+                case 2:
+                  readable_score = "Medium"
+                  break;
+                case 3:
+                  readable_score = "High"
+                  break;
+                case 4:
+                  readable_score = "Very High"
+                  break;
+                default:
+                  readable_score = "Unknown"
+                  break;
+              }
+
+              return (
+                <Badge
+                >
+                  {readable_score}
+                </Badge>
+              )
+            }
           },
           {
             accessorKey: "title",

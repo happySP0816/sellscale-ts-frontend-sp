@@ -18,6 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 type Props = {
   sideBarVisible: boolean;
   toggleSideBar: () => void;
+  isTesting: boolean;
   setIsTesting: (val: boolean) => void;
 };
 
@@ -31,6 +32,7 @@ const SwitchWrapper = forwardRef<HTMLDivElement, { children: React.ReactNode }>(
 export function SidebarHeader({
   toggleSideBar,
   sideBarVisible,
+  isTesting,
   setIsTesting,
 }: Props) {
   const [value, setValue] = useState("");
@@ -109,12 +111,8 @@ export function SidebarHeader({
           <Tooltip label="(Test Mode) View sample of 50 prospects">
             <SwitchWrapper>
               <Switch
-                defaultChecked
                 onChange={(event) => {
                   setIsTesting(event.currentTarget.checked);
-                  queryClient.refetchQueries({
-                    queryKey: [`query-get-icp-prospects`],
-                  });
                 }}
               />
             </SwitchWrapper>

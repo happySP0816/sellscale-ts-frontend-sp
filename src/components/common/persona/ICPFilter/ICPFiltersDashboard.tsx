@@ -10,8 +10,11 @@ import {
   Progress,
   Switch,
   Text,
+  Tooltip,
   Title,
   useMantineTheme,
+  HoverCard,
+  Group,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
@@ -48,6 +51,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { openConfirmModal } from "@mantine/modals";
 import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
 import { filterProspectsState } from "@atoms/icpFilterAtoms";
+import { IconX } from '@tabler/icons';
 
 const demoData = [
   {
@@ -153,11 +157,17 @@ const ICPFiltersDashboard: FC<{
 
   useEffect(() => {
     let newFilters: DataGridFiltersState = [];
-    console.log(globalSearch);
     if (globalSearch) {
       newFilters = [
         {
           id: "title",
+          value: {
+            op: "in",
+            value: globalSearch,
+          },
+        },
+        {
+          id: "full_name",
           value: {
             op: "in",
             value: globalSearch,
@@ -673,29 +683,71 @@ const ICPFiltersDashboard: FC<{
             filterFn: stringFilterFn,
             header: "ICP FIT REASON",
             cell: (cell) => {
-              const values = cell.cell.getValue<string>()?.split(",");
+              const values = cell.cell?.getValue<string>()?.split(") (").map(
+                x => x.replaceAll(")", "").replaceAll("(", "")
+              )
 
               return (
                 <Flex gap={"0.25rem"} align={"center"}>
                   {values?.map((v) => (
                     <Flex key={v} gap={"0.25rem"} align={"center"}>
-                      {"("}
-                      <Flex
-                        justify={"center"}
-                        align={"center"}
-                        style={{ borderRadius: "4px" }}
-                        bg={"green"}
-                        p={"0.25rem"}
-                        w={"1rem"}
-                        h={"1rem"}
-                      >
-                        <IconCheck color="white" />
-                      </Flex>
-
-                      <Text>{v}</Text>
-                      {")"}
+                      <Tooltip
+                        label={v}
+                        >
+                        <Flex
+                          justify={"center"}
+                          align={"center"}
+                          style={{ borderRadius: "4px" }}
+                          bg={v.includes("✅") ? 'green' : v.includes('❌') ? 'red' : 'yellow'}
+                          p={"0.25rem"}
+                          w={"1rem"}
+                          h={"1rem"}
+                          sx={{cursor: 'pointer'}}
+                        >
+                          {
+                            v.includes("✅") ? <IconCheck color="white" /> : v.includes('❌') ? <IconX color="white" /> : <IconPlus color="white" />
+                          }
+                        </Flex>
+                      </Tooltip>
+                      {/* {v} */}
                     </Flex>
                   ))}
+                    <HoverCard width={280} shadow="md">
+                      <HoverCard.Target>
+                        <Badge
+                          color='green' ml='xs' variant='outline' size='xs' sx={{cursor: 'pointer'}}>
+                            Show Details
+                        </Badge>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown w='280' p='0'>
+                        {values?.map((v, i) => (
+                            <>
+                              <Flex key={v} gap={"0.25rem"} align={"center"} mb='8px' mt='8px'>
+                                <Tooltip
+                                  label={v}
+                                  >
+                                  <Flex
+                                    ml='md'
+                                    mr='md'
+                                    justify={"center"}
+                                    align={"center"}
+                                    style={{ borderRadius: "4px" }}
+                                    bg={v.includes("✅") ? 'green' : v.includes('❌') ? 'red' : 'yellow'}
+                                    p={"0.25rem"}
+                                    w={"1rem"}
+                                    h={"1rem"}
+                                    sx={{cursor: 'pointer'}}
+                                  >
+                                    <IconCheck color="white" />
+                                  </Flex>
+                                </Tooltip>
+                                <Text size='xs'>{v.substring(2)}</Text>
+                              </Flex>
+                              {i !== values.length - 1 && <Divider />}
+                            </>
+                          ))}
+                      </HoverCard.Dropdown>
+                    </HoverCard>
                 </Flex>
               );
             },
@@ -712,10 +764,11 @@ const ICPFiltersDashboard: FC<{
                   gap: "0.5rem",
                 }}
                 target="_blank"
-                href={cell.row.original.linkedin_url}
+                href={'https://' + cell.row.original.linkedin_url}
                 color={theme.colors.blue[6]}
                 fw={600}
               >
+                {cell.row.original.full_name}'s {" "}
                 {getChannelType(cell.getValue<string>())}
                 <IconExternalLink size={16} />
               </Anchor>

@@ -54,16 +54,16 @@ export default function CreateNewCTAModel({
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${userToken}`,
-        },
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        let ctaTypesArray: any = Object.keys(data).map((key) => {
+          return { value: data[key], label: key };
         })
-        .then((response) => response.json())
-        .then((data) => {
-          let ctaTypesArray: any = Object.keys(data).map((key) => {
-            return { value: data[key], label: key };
-          })
 
-          setCTATypes(ctaTypesArray);
-        }
+        setCTATypes(ctaTypesArray);
+      }
       );
   }
 
@@ -77,9 +77,9 @@ export default function CreateNewCTAModel({
     setLoading(true);
 
     const result = await createCTA(
-      userToken, 
-      innerProps.personaId, 
-      values.cta, 
+      userToken,
+      innerProps.personaId,
+      values.cta,
       expirationDate || undefined,
       ctaType
     );
@@ -109,6 +109,90 @@ export default function CreateNewCTAModel({
     }
 
     context.closeModal(id);
+  };
+
+  const calculateCTAError = () => {
+    const ctaText = form.getInputProps("cta").value;
+
+    if (ctaText.length > 120) {
+      return "CTA must be less than 120 characters.";
+    }
+
+    let collection = []
+    for (let char of ctaText) {
+      if (char == '{' || char == '[' || char == '}' || char == ']') {
+        collection.push(char)
+      }
+    }
+
+    while (collection.length > 0) {
+      // Find first occurence of closing bracket
+      let popped = false
+      const i = collection.indexOf('}')
+      if (i != -1) {
+        // Make sure it is not at the beginning or end
+        if (i == 0 || i == (collection.length - 1)) {
+          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+        }
+
+        // Make sure there is a '}' on the right
+        if (collection[i + 1] != '}') {
+          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+        }
+
+        // Find the opening brackets
+        const j = collection.lastIndexOf('{', i)
+        if (j == -1 || j == 0 || j == (collection.length - 1)) {
+          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+        }
+
+        // Make sure the opening brackets are dual
+        if (collection[j - 1] != '{') {
+          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+        }
+
+        // Remove the brackets from the collection
+        collection.splice(i, 2)
+        collection.splice(j - 1, 2)
+        popped = true
+      }
+
+      // Find first occurence of closing bracket
+      const j = collection.indexOf(']')
+      if (j != -1) {
+        // Make sure it is not at the beginning or end
+        if (j == 0 || j == (collection.length - 1)) {
+          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+        }
+
+        // Make sure there is a ']' on the right
+        if (collection[j + 1] != ']') {
+          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+        }
+
+        // Find the opening brackets
+        const i = collection.lastIndexOf('[', j)
+        if (i == -1 || i == 0 || i == (collection.length - 1)) {
+          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+        }
+
+        // Make sure the opening brackets are dual
+        if (collection[i - 1] != '[') {
+          return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+        }
+
+        // Remove the brackets from the collection
+        collection.splice(j, 2)
+        collection.splice(i - 1, 2)
+        popped = true
+      }
+
+      if (!popped) {
+        return "Dynamic fields - please format with {{FIELD}}. Fields include Name, Company, Industry"
+      }
+    }
+
+    return null
   };
 
   return (
@@ -163,6 +247,7 @@ export default function CreateNewCTAModel({
                 minRows={2}
                 autosize
                 {...form.getInputProps("cta")}
+                error={calculateCTAError()}
               />
               <Text
                 size="xs"
@@ -209,7 +294,7 @@ export default function CreateNewCTAModel({
               placeholder="Select CTA Type"
               defaultValue={"manually-added"}
               data={ctaTypes}
-              onChange={(value: string) => {setCTAType(ctaTypes.find((ctaType: any) => ctaType.value === value)?.label);}}
+              onChange={(value: string) => { setCTAType(ctaTypes.find((ctaType: any) => ctaType.value === value)?.label); }}
             />
           </Group>
         </Flex>

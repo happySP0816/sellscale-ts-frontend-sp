@@ -386,10 +386,12 @@ export default function SequenceSection() {
                 badgeText={`Reply ${
                   bf0Conversion ? bf0Conversion.toFixed(0) + "%" : "TBD"
                 }`}
+                timesUsed={bf0?.etl_num_times_used ?? 0}
+                timesConverted={bf0?.etl_num_times_converted ?? 0}
                 badgeHoverText={
                   bf0 && bf0Conversion
                     ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                    : "Not enough data"
+                    : "Not enough data, " + (bf0?.etl_num_times_used || 0) + " / " + (bf0?.etl_num_times_converted || 0)
                 }
                 bodyTitle={bf0?.title ?? ""}
                 // bodyText={bf0?.description ?? ""}
@@ -449,10 +451,12 @@ export default function SequenceSection() {
                 badgeText={`Reply ${
                   bf1Conversion ? bf1Conversion.toFixed(0) + "%" : "TBD"
                 }`}
+                timesUsed={bf1?.etl_num_times_used ?? 0}
+                timesConverted={bf1?.etl_num_times_converted ?? 0}
                 badgeHoverText={
                   bf1 && bf1Conversion
                     ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                    : "Not enough data"
+                    : "Not enough data, " + (bf1?.etl_num_times_used || 0 ) + " / " + (bf1?.etl_num_times_converted || 0)
                 }
                 bodyTitle={bf1?.title ?? ""}
                 // bodyText={bf1?.description ?? ""}
@@ -512,10 +516,12 @@ export default function SequenceSection() {
                 badgeText={`Reply ${
                   bf2Conversion ? bf2Conversion.toFixed(0) + "%" : "TBD"
                 }`}
+                timesUsed={bf2?.etl_num_times_used ?? 0}
+                timesConverted={bf2?.etl_num_times_converted ?? 0}
                 badgeHoverText={
                   bf2 && bf2Conversion
                     ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                    : "Not enough data"
+                    : "Not enough data, " + (bf2?.etl_num_times_used || 0) + " / " + (bf2?.etl_num_times_converted || 0)
                 }
                 bodyTitle={bf2?.title ?? ""}
                 // bodyText={bf2?.description ?? ""}
@@ -575,10 +581,12 @@ export default function SequenceSection() {
                 badgeText={`Reply ${
                   bf3Conversion ? bf3Conversion.toFixed(0) + "%" : "TBD"
                 }`}
+                timesUsed={bf3?.etl_num_times_used ?? 0}
+                timesConverted={bf3?.etl_num_times_converted ?? 0}
                 badgeHoverText={
                   bf3 && bf3Conversion
                     ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                    : "Not enough data"
+                    : "Not enough data, " + (bf3?.etl_num_times_used || 0) + " / " + (bf3?.etl_num_times_converted || 0)
                 }
                 bodyTitle={bf3?.title ?? ""}
                 // bodyText={bf3?.description ?? ""}
@@ -1538,6 +1546,8 @@ function FrameworkCard(props: {
   bodyText?: string;
   footer?: ReactNode;
   conversion?: number;
+  timesUsed?: number;
+  timesConverted?: number;
   badgeText?: string;
   badgeHoverText?: string;
   onClick: () => void;
@@ -1610,7 +1620,7 @@ function FrameworkCard(props: {
                   ? "Your open rates are above industry standards (9%). Congrats!"
                   : props.conversion <= 9.0 && props.conversion > 0.0
                   ? "Your open rates are below industry standards (9%). Try changing your message." + props.conversion
-                  : "Not enough data"
+                  : "Not enough data, " + props.timesUsed + " / " + props.timesConverted + " prospects have been bumped."
               }
               withArrow
               withinPortal

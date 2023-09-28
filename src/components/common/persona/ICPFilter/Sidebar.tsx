@@ -24,6 +24,7 @@ const Sidebar: FC<{
       <SidebarHeader
         sideBarVisible={sideBarVisible}
         toggleSideBar={toggleSideBar}
+        isTesting={isTesting}
         setIsTesting={setIsTesting}
       />
 

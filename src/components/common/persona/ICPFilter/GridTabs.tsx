@@ -1,52 +1,9 @@
-import { Badge, Box, Button, Flex, Text } from "@mantine/core";
-import { getICPScoreBadgeColor, getICPScoreColor } from "../../../../utils/icp";
-import { IconTrash } from "@tabler/icons-react";
-import { IconRefresh } from "@tabler/icons";
-import { DataGridRowSelectionState } from "mantine-data-grid";
-import { openConfirmModal } from "@mantine/modals";
-import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
-import { userTokenState } from "@atoms/userAtoms";
-import { useRecoilValue } from "recoil";
-import { currentProjectState } from "@atoms/personaAtoms";
-import { showNotification } from "@mantine/notifications";
-
-const tabFilters = [
-  {
-    label: "All",
-    value: "all",
-    count: 150,
-  },
-  {
-    label: "Very High",
-    value: "4",
-    count: 150,
-  },
-  {
-    label: "High",
-    value: "3",
-    count: 150,
-  },
-  {
-    label: "Medium",
-    value: "2",
-    count: 150,
-  },
-  {
-    label: "Low",
-    value: "1",
-    count: 150,
-  },
-  {
-    label: "Very Low",
-    value: "0",
-    count: 150,
-  },
-  {
-    label: "Unscored",
-    value: "-1",
-    count: 150,
-  },
-];
+import { Box, Button, Flex, Text, useMantineTheme } from "@mantine/core";
+import {
+  getICPScoreColor,
+  getStatusMessageBadgeColor,
+} from "../../../../utils/icp";
+import { useMemo } from "react";
 
 interface IGridTabsProps {
   selectedTab: {
@@ -59,70 +16,86 @@ interface IGridTabsProps {
     value: string;
     count: number;
   }) => void;
-  selectedRows: DataGridRowSelectionState;
-  data: {
-    "company": string,
-    "full_name": string,
-    "icp_fit_reason": string,
-    "icp_fit_score": number,
-    "id": number,
-    "industry": string,
-    "linkedin_url": string,
-    "title": string,
+  icpDashboard: {
+    label: string;
+    color: string;
+    bgColor: string;
+    percent: number;
+    value: string;
+    widthModifier: number;
   }[];
-  refresh: () => void;
 }
 
 const GridTabs = ({
   selectedTab,
   setSelectedTab,
-  selectedRows,
-  data,
-  refresh,
+  icpDashboard,
 }: IGridTabsProps) => {
-  const userToken = useRecoilValue(userTokenState);
-  const currentProject = useRecoilValue(currentProjectState);
+  const theme = useMantineTheme();
+  const tabFilters = useMemo(() => {
+    return [
+      {
+        label: "All",
+        value: "all",
+        count: icpDashboard.reduce((prev, current) => {
+          return prev + Number(current.value);
+        }, 0),
+      },
+      {
+        label: "Very High",
+        value: "4",
+        count: icpDashboard.find((c) => c.label === "Very High")?.value || "0",
+      },
+      {
+        label: "High",
+        value: "3",
+        count: icpDashboard.find((c) => c.label === "High")?.value || "0",
+      },
+      {
+        label: "Medium",
+        value: "2",
+        count: icpDashboard.find((c) => c.label === "Medium")?.value || "0",
+      },
+      {
+        label: "Low",
+        value: "1",
+        count: icpDashboard.find((c) => c.label === "Low")?.value || "0",
+      },
+      {
+        label: "Very Low",
+        value: "0",
+        count: icpDashboard.find((c) => c.label === "Very Low")?.value || "0",
+      },
+      {
+        label: "Unscored",
+        value: "-1",
+        count: icpDashboard.find((c) => c.label === "Unscored")?.value || "0",
+      },
+    ];
+  }, []);
 
-  const triggerMoveToUnassigned = async () => {
+  const generateBackgroundBudge = (value: string) => {
+    const COLORS: { [key: string]: string } = {
+      all: theme.colors.gray[4],
+      "very high": theme.colors.green[1],
+      high: theme.colors.blue[1],
+      medium: theme.colors.yellow[1],
+      low: theme.colors.red[1],
+      "very low": theme.colors.red[1],
+      unscored: theme.colors.gray[1],
+    };
 
-    if (currentProject === null) {return;}
-
-    const prospects = data.filter((_, index) => {
-      return selectedRows[index] === true;
-    })
-    const prospectIDs = prospects.map((prospect) => {
-      return prospect.id;
-    })
-
-    const response = await moveToUnassigned(
-      userToken,
-      currentProject.id,
-      prospectIDs
-    );
-    if (response.status === "success") {
-      showNotification({
-        id: "prospect-removed",
-        title: "Prospects removed",
-        message: "These prospects has been moved to your Unassigned Contacts list.",
-        color: "green",
-        autoClose: 3000,
-      });
-    } else {
-      showNotification({
-        id: "prospect-removed",
-        title: "Prospects removal failed",
-        message: "These prospects could not be removed. Please try again, or contact support.",
-        color: "red",
-        autoClose: false,
-      })
-    }
-
-    refresh();
-  }
-
+    return COLORS[value?.toLowerCase()];
+  };
   return (
     <Flex justify={"space-between"} align={"center"} w={"100%"}>
-      <Box>
+      <Flex
+        gap={"0.5rem"}
+        justify={"start"}
+        align={"center"}
+        w={"100%"}
+        style={{ flexWrap: "wrap" }}
+      >
         {tabFilters.map((tab) => (
           <Button
             key={tab.value}
@@ -132,18 +105,15 @@ const GridTabs = ({
               padding: "0.5rem 1rem",
               backgroundColor:
                 selectedTab.value === tab.value
-                  ? getICPScoreColor(tab.label)
-                  : "transparent",
+                  ? getStatusMessageBadgeColor(tab.label).filled
+                  : getStatusMessageBadgeColor(tab.label).light,
               borderRight: "1px solid #E0E0E0",
               color:
                 selectedTab.value === tab.value
                   ? "#fff"
                   : getICPScoreColor(tab.label),
               fontWeight: 600,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              borderTopLeftRadius: selectedTab.value === tab.value ? "8px" : 0,
-              borderTopRightRadius: selectedTab.value === tab.value ? "8px" : 0,
+              border: `1px solid ${generateBackgroundBudge(tab.label)}`,
             }}
           >
             <Box
@@ -154,47 +124,32 @@ const GridTabs = ({
               }}
             >
               {tab.label}
-              <Badge
-                size="sm"
-                color={
-                  tab.value === "all"
-                    ? "dark"
-                    : getICPScoreBadgeColor(tab.label)
+
+              <Box
+                bg={
+                  selectedTab.value === tab.value
+                    ? tab.value === "all"
+                      ? "#84818A"
+                      : getStatusMessageBadgeColor(tab.label).filled
+                    : generateBackgroundBudge(tab.label)
                 }
-                variant={tab.value === "all" ? "filled" : "light"}
+                px={"0.5rem"}
+                style={{ borderRadius: 99 }}
               >
-                {tab.count}
-              </Badge>
+                <Text
+                  size={"0.75rem"}
+                  color={
+                    selectedTab.value === tab.value || tab.value === "all"
+                      ? "#fff"
+                      : getStatusMessageBadgeColor(tab.label).filled
+                  }
+                >
+                  {tab.count}
+                </Text>
+              </Box>
             </Box>
           </Button>
         ))}
-      </Box>
-
-      <Flex justify={"space-between"} align={"center"} gap={"0.5rem"}>
-        <Button
-          color="red"
-          leftIcon={<IconTrash size={14} />}
-          size="sm"
-          onClick={() => {
-            openConfirmModal({
-              title: "Remove these prospects?",
-              children: (
-                <Text>
-                  Are you sure you want to remove these {Object.keys(selectedRows).length} prospects? This will move them into your Unassigned Contacts list.
-                </Text>
-              ),
-              labels: {
-                confirm: 'Remove',
-                cancel: 'Cancel'
-              },
-              confirmProps: { color: "red" },
-              onCancel: () => { },
-              onConfirm: () => { triggerMoveToUnassigned() },
-            })
-          }}
-        >
-          Remove {Object.keys(selectedRows).length} prospects
-        </Button>
       </Flex>
     </Flex>
   );

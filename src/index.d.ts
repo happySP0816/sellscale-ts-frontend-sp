@@ -138,17 +138,17 @@ export interface ProspectShallow {
   in_icp_sample: boolean | null;
   icp_fit_score_override: number | null;
   contract_size: number;
-};
+}
 
 export interface ProspectICP {
-  company: string,
-  full_name: string,
-  icp_fit_reason: string,
-  icp_fit_score: number,
-  id: number,
-  industry: string,
-  linkedin_url: string,
-  title: string,
+  company: string;
+  full_name: string;
+  icp_fit_reason: string;
+  icp_fit_score: number;
+  id: number;
+  industry: string;
+  linkedin_url: string;
+  title: string;
 }
 
 export interface ProspectDetails {
@@ -171,17 +171,17 @@ export interface ProspectDetails {
     persona: string;
     persona_id: number;
     demo_date: string;
-  },
-  data: Prospect,
+  };
+  data: Prospect;
   li: {
     li_conversation_url: string;
     li_conversation_thread: string;
     li_profile: string;
-  },
+  };
   email: {
     email: string;
     email_status: string;
-  },
+  };
   company: {
     logo: string;
     name: string;
@@ -191,9 +191,9 @@ export interface ProspectDetails {
     description: string;
     url: string;
     employee_count: string;
-  },
-  referrals: { id: number, full_name: string }[],
-  referred: { id: number, full_name: string }[],
+  };
+  referrals: { id: number; full_name: string }[];
+  referred: { id: number; full_name: string }[];
 }
 
 export interface DemoFeedback {
@@ -268,8 +268,8 @@ export interface PersonaOverview {
   persona_contact_objective: string;
   uploads?: any[];
   contract_size: number;
-  transformer_blocklist?: string[],
-  transformer_blocklist_initial?: string[],
+  transformer_blocklist?: string[];
+  transformer_blocklist_initial?: string[];
   emoji: string;
   avg_icp_fit_score: number;
 }
@@ -292,7 +292,7 @@ export interface LinkedInMessage {
   bump_framework_title: string;
   bump_framework_description: string;
   bump_framework_length: string;
-  account_research_points: string[],
+  account_research_points: string[];
   initial_message_id: number;
   initial_message_cta_id: number;
   initial_message_cta_text: string;
@@ -309,7 +309,7 @@ export interface EmailThread {
   last_message_received_timestamp: string;
   last_message_sent_timestamp: string;
   last_message_timestamp: string;
-  nylas_data_raw: {},
+  nylas_data_raw: {};
   nylas_message_ids: string[];
   nylas_thread_id: string;
   participants: {
@@ -333,7 +333,7 @@ export interface EmailMessage {
   client_sdr_id: number;
   date_received: string;
   email_conversation_thread_id: number;
-  files: any[]
+  files: any[];
   from_prospect: boolean;
   from_sdr: boolean;
   id: number;
@@ -405,8 +405,7 @@ export type EmailSequenceStep = {
   default: boolean;
   bumped_count: number | null;
   // TODO: MISSING A LOT OF FIELDS
-}
-
+};
 
 export type SubjectLineTemplate = {
   id: number;
@@ -418,23 +417,22 @@ export type SubjectLineTemplate = {
   times_used: number;
   times_accepted: number;
   sellscale_generated: boolean;
-}
-
+};
 
 export type SalesNavigatorLaunch = {
-  id: number,
-  sales_navigator_config_id: number,
-  client_sdr_id: number,
-  sales_navigator_url: string,
-  scrape_count: number,
-  status: string,
-  pb_container_id: string,
-  result_available: boolean,
-  launch_date: Date,
-  name: string,
-  client_archetype_id: number,
-  archetype: string,
-}
+  id: number;
+  sales_navigator_config_id: number;
+  client_sdr_id: number;
+  sales_navigator_url: string;
+  scrape_count: number;
+  status: string;
+  pb_container_id: string;
+  result_available: boolean;
+  launch_date: Date;
+  name: string;
+  client_archetype_id: number;
+  archetype: string;
+};
 
 export type EmailStore = {
   id: number;
@@ -454,4 +452,4 @@ export type EmailStore = {
   hunter_accept_all: boolean;
   hunter_block: boolean;
   hunter_sources: {}[];
-}
+};

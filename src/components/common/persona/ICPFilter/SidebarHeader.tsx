@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { forwardRef, useState } from "react";
 import {
   Group,
   Box,
@@ -9,24 +9,33 @@ import {
   Flex,
   useMantineTheme,
   Tooltip,
-  ThemeIcon,
   Button,
   Switch,
 } from "@mantine/core";
-import {
-  IconChevronLeft,
-  IconInfoCircle,
-  IconInfoSquare,
-  IconSearch,
-} from "@tabler/icons";
+import { IconChevronLeft, IconInfoCircle } from "@tabler/icons";
+import { useQueryClient } from "@tanstack/react-query";
+
 type Props = {
   sideBarVisible: boolean;
   toggleSideBar: () => void;
+  setIsTesting: (val: boolean) => void;
 };
-export function SidebarHeader({ toggleSideBar, sideBarVisible }: Props) {
-  const [showGeneralSearchBar, setShowGeneralSearchBar] = useState(false);
+
+const SwitchWrapper = forwardRef<HTMLDivElement, { children: React.ReactNode }>(
+  (props, ref) => (
+    <div ref={ref} {...props}>
+      {props.children}
+    </div>
+  )
+);
+export function SidebarHeader({
+  toggleSideBar,
+  sideBarVisible,
+  setIsTesting,
+}: Props) {
   const [value, setValue] = useState("");
-  const theme = useMantineTheme();
+  const queryClient = useQueryClient();
+
   return (
     <>
       <Box
@@ -97,7 +106,19 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible }: Props) {
           <Button disabled={!value} style={{ flex: 1 }}>
             run scoring
           </Button>
-          <Switch defaultChecked />
+          <Tooltip label="(Test Mode) View sample of 50 prospects">
+            <SwitchWrapper>
+              <Switch
+                defaultChecked
+                onChange={(event) => {
+                  setIsTesting(event.currentTarget.checked);
+                  queryClient.refetchQueries({
+                    queryKey: [`query-get-icp-prospects`],
+                  });
+                }}
+              />
+            </SwitchWrapper>
+          </Tooltip>
         </Flex>
       </Flex>
     </>

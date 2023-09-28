@@ -49,8 +49,9 @@ export function SidebarFooter(props: { isTesting: boolean }) {
         loading={loading}
         color={props.isTesting ? "blue" : "red"}
         onClick={async () => {
-          if(!currentProject) return;
+          if (!currentProject) return;
           setLoading(true);
+          console.log("updating rule set");
           const response = await updateICPRuleSet(
             userToken,
             currentProject.id,
@@ -76,42 +77,28 @@ export function SidebarFooter(props: { isTesting: boolean }) {
             globalRuleSetData.included_company_generalized_keywords,
             globalRuleSetData.excluded_company_generalized_keywords
           );
+          console.log("response", response);
+          console.log("running scoring");
 
-          await runScoringICP(userToken, currentProject.id, props.isTesting ? icpProspects.map((prospect) => prospect.id) : undefined);
+          await runScoringICP(
+            userToken,
+            currentProject.id,
+            props.isTesting
+              ? icpProspects.map((prospect) => prospect.id)
+              : undefined
+          );
+          console.log("refetching queries");
 
           queryClient.refetchQueries({
             queryKey: [`query-get-icp-prospects`],
           });
+          console.log("done");
 
           setLoading(false);
         }}
       >
         {props.isTesting ? "Filter test sample" : "Start Filtering"}
       </Button>
-
-      <Box
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginTop: "0.5rem",
-        }}
-      >
-        <Box
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.3rem",
-            color: theme.colors.gray[6],
-          }}
-        >
-          <IconBookmark size={16} />
-          <Title size={"12px"}>Saved filters</Title>
-        </Box>
-        <Button variant="light" size="xs">
-          Save search
-        </Button>
-      </Box>
     </Box>
   );
 }

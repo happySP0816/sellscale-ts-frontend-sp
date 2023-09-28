@@ -12,23 +12,23 @@ const getICPScoreBadgeColor = (value: string) => {
   // Very High, High, Medium, Low, Very Low, Unscored
   const COLORS: { [key: string]: string } = {
     all: "black",
-    "very high": "blue",
-    high: "green",
+    "very high": "green",
+    high: "blue",
     medium: "yellow",
     low: "red",
     "very low": "red",
     unscored: "gray",
   };
 
-  return COLORS[value?.toLowerCase()] || "blue";
+  return COLORS[value?.toLowerCase()];
 };
 
 const getICPScoreColor = (value: string) => {
   // Very High, High, Medium, Low, Very Low, Unscored
   const COLORS: { [key: string]: string } = {
     all: "black",
-    "very high": "#3B85EF",
-    high: "#009512",
+    "very high": "#009512",
+    high: "#3B85EF",
     medium: "#EFBA50",
     low: "#EB8231",
     "very low": "#E5564E",
@@ -47,9 +47,12 @@ const getChannelType = (value: string) => {
   return TYPES[value?.toLowerCase()] || "LinkedIn";
 };
 const getStatusMessageBadgeColor = (value: string) => {
-  const COLORS: { [key: string]: { filled: string; light: string } } = {
-    "very high": { filled: "#3B85EF", light: "#e7f5ff" },
-    high: { filled: "#009512", light: "#ebfbee" },
+  const COLORS: {
+    [key: string]: { filled: string; light: string };
+  } = {
+    all: { filled: "#000", light: "#f1f3f5" },
+    "very high": { filled: "#009512", light: "#ebfbee" },
+    high: { filled: "#3B85EF", light: "#e7f5ff" },
     medium: { filled: "#EFBA50", light: "#fff3bf" },
     low: { filled: "#EB8231", light: "#ffe8cc" },
     "very low": { filled: "#E5564E", light: "#ffe3e3" },

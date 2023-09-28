@@ -149,11 +149,15 @@ const router = sentryCreateBrowserRouter([
       },
       {
         path: "contacts/view/:prospectId?",
-        element: <RestrictedRoute page={
-          <Box bg={"white"}>
-            <PulseTabSelector />
-          </Box>
-        } />,
+        element: (
+          <RestrictedRoute
+            page={
+              <Box bg={"white"}>
+                <PulseTabSelector />
+              </Box>
+            }
+          />
+        ),
         loader: async ({ params }: { params: any }) => {
           return { prospectId: params.prospectId };
         },

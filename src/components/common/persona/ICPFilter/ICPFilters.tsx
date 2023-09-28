@@ -56,6 +56,7 @@ const ICPFilters = () => {
                 toggleSideBar();
                 toggle();
               }}
+              setIsTesting={setIsTesting}
             />
           </Box>
         </Drawer>
@@ -64,6 +65,7 @@ const ICPFilters = () => {
           isTesting={isTesting}
           sideBarVisible={sideBarVisible}
           toggleSideBar={toggleSideBar}
+          setIsTesting={setIsTesting}
         />
       )}
 
@@ -72,25 +74,6 @@ const ICPFilters = () => {
           smScreenOrLess ? "calc(100vw - 10rem)" : "calc(100vw - 10rem - 15rem)"
         }
       >
-        <Box
-          sx={(theme) => ({
-            paddingLeft: theme.spacing.lg,
-            paddingRight: theme.spacing.lg,
-            paddingTop: theme.spacing.sm,
-            width: "100%",
-          })}
-        >
-          <Switch
-            checked={isTesting}
-            onChange={(event) => {
-              setIsTesting(event.currentTarget.checked);
-              queryClient.refetchQueries({
-                queryKey: [`query-get-icp-prospects`],
-              });
-            }}
-            label="(Test Mode) View sample of 50 prospects"
-          />
-        </Box>
         <ICPFiltersDashboard
           isTesting={isTesting}
           openFilter={() => {

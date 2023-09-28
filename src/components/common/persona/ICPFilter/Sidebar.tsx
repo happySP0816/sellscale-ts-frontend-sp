@@ -8,7 +8,8 @@ const Sidebar: FC<{
   isTesting: boolean;
   sideBarVisible: boolean;
   toggleSideBar: () => void;
-}> = ({ isTesting, sideBarVisible, toggleSideBar }) => {
+  setIsTesting: (val: boolean) => void;
+}> = ({ isTesting, sideBarVisible, toggleSideBar, setIsTesting }) => {
   return (
     <Flex
       direction={"column"}
@@ -23,6 +24,7 @@ const Sidebar: FC<{
       <SidebarHeader
         sideBarVisible={sideBarVisible}
         toggleSideBar={toggleSideBar}
+        setIsTesting={setIsTesting}
       />
 
       {sideBarVisible && (

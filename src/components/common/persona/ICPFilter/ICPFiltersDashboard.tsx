@@ -8,7 +8,6 @@ import {
   Input,
   Paper,
   Progress,
-  Select,
   Switch,
   Text,
   Title,
@@ -16,36 +15,38 @@ import {
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
-  IconAdjustmentsHorizontal,
+  IconCheck,
   IconExternalLink,
   IconPlus,
   IconSearch,
+  IconTrash,
 } from "@tabler/icons-react";
 import {
   DataGrid,
   DataGridFiltersState,
   DataGridRowSelectionState,
+  stringFilterFn,
 } from "mantine-data-grid";
 import { FC, useEffect, useMemo, useState } from "react";
 import WithdrawInvitesControl from "./WithdrawInvitesControl";
-import {
-  getChannelType,
-  getICPScoreBadgeColor,
-  getStatusBadgeColor,
-} from "../../../../utils/icp";
+import { getChannelType } from "../../../../utils/icp";
 import GridTabs from "./GridTabs";
 import WithdrawInvitesModal from "./modals/WithdrawInvitesModal";
 import { SCREEN_SIZES } from "@constants/data";
-import PersonaSelect from "../PersonaSplitSelect";
 import { getProspectsForICP } from "@utils/requests/getProspects";
 import { userTokenState } from "@atoms/userAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { currentProjectState, uploadDrawerOpenState } from "@atoms/personaAtoms";
+import {
+  currentProjectState,
+  uploadDrawerOpenState,
+} from "@atoms/personaAtoms";
 import { showNotification } from "@mantine/notifications";
-import { ProjectSelect } from '@common/library/ProjectSelect';
-import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
+import { ProjectSelect } from "@common/library/ProjectSelect";
+import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
 import { ProspectICP } from "src";
 import { useQuery } from "@tanstack/react-query";
+import { openConfirmModal } from "@mantine/modals";
+import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
 import { filterProspectsState } from "@atoms/icpFilterAtoms";
 
 const demoData = [
@@ -64,66 +65,48 @@ const tabFilters = [
   {
     label: "All",
     value: "all",
-    count: 150,
+    count: 0,
   },
   {
     label: "Very High",
     value: "very_high",
-    count: 150,
+    count: 0,
   },
   {
     label: "High",
     value: "high",
-    count: 150,
+    count: 0,
   },
   {
     label: "Medium",
     value: "medium",
-    count: 150,
+    count: 0,
   },
   {
     label: "Low",
     value: "low",
-    count: 150,
+    count: 0,
   },
   {
     label: "Very Low",
     value: "very_low",
-    count: 150,
+    count: 0,
   },
   {
     label: "Unscored",
     value: "unscored",
-    count: 150,
+    count: 0,
   },
 ];
 
-const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = ({
-  isTesting,
-  openFilter,
-}) => {
-  const userToken = useRecoilValue(userTokenState)
-  const currentProject = useRecoilValue(currentProjectState)
+const ICPFiltersDashboard: FC<{
+  isTesting: boolean;
+  openFilter: () => void;
+}> = ({ isTesting, openFilter }) => {
+  const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
   const [icpProspects, setIcpProspects] = useRecoilState(filterProspectsState);
 
-  const initialFilters = [
-    {
-      id: "status",
-      value: "",
-    },
-    {
-      id: "name",
-      value: "",
-    },
-    {
-      id: "channel_type",
-      value: "",
-    },
-    {
-      id: "icp_fit_score",
-      value: 0,
-    },
-  ];
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.LG})`,
     false,
@@ -133,8 +116,6 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
   );
   const theme = useMantineTheme();
   const [globalSearch, setGlobalSearch] = useState("");
-  const [channel, setChannel] = useState<string | null>("");
-  const [status, setStatus] = useState<string | null>("");
   const [selectedTab, setSelectedTab] = useState<{
     label: string;
     value: string;
@@ -145,7 +126,9 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
   const [selectedRows, setSelectedRows] = useState<DataGridRowSelectionState>(
     {}
   );
-  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(
+    uploadDrawerOpenState
+  );
   const openUploadProspects = () => {
     setUploadDrawerOpened(true);
   };
@@ -153,8 +136,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
   const [icpDashboard, setIcpDashboard] = useState<any[]>([])
 
   const [opened, { open, close }] = useDisclosure(false);
-  const [columnFilters, setColumnFilters] =
-    useState<DataGridFiltersState>(initialFilters);
+  const [columnFilters, setColumnFilters] = useState<DataGridFiltersState>([]);
 
   const withdrawInvites = () => {
     open();
@@ -169,37 +151,50 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
   }, [selectedRows]);
 
   useEffect(() => {
-    const newFilters = [...initialFilters];
-
-    if (status) {
-      newFilters[0].value = status;
-    }
-
+    let newFilters: DataGridFiltersState = [];
+    console.log(globalSearch);
     if (globalSearch) {
-      newFilters[1].value = globalSearch;
+      newFilters = [
+        {
+          id: "title",
+          value: {
+            op: "in",
+            value: globalSearch,
+          },
+        },
+      ];
     }
 
-    if (channel) {
-      newFilters[2].value = channel;
+    if (selectedTab && selectedTab.value !== "all") {
+      newFilters = [
+        ...newFilters,
+        {
+          id: "icp_fit_score",
+          value: {
+            op: "eq",
+            value: selectedTab.value,
+          },
+        },
+      ];
     }
-
-    if (selectedTab) {
-      newFilters[3].value = selectedTab.value;
-    }
-
+    console.log(newFilters);
     setColumnFilters(newFilters);
+  }, [selectedTab, globalSearch]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [globalSearch, channel, status, selectedTab]);
+  useEffect(
+    () => {
+      triggerGetProspects();
+    }
+  , [isTesting])
 
   const triggerGetProspects = async () => {
     if (!currentProject?.id) {
-      // showNotification({
-      //   title: "Error",
-      //   message: "No project selected",
-      //   color: "red",
-      // })
-      return
+      showNotification({
+        title: "Error",
+        message: "No project selected",
+        color: "red",
+      });
+      return;
     }
 
     const result = await getProspectsForICP(
@@ -207,7 +202,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
       currentProject?.id,
       isTesting,
       invitedOnLinkedIn
-    )
+    );
 
     // Get prospects
     const prospects = result.data.prospects as ProspectICP[];
@@ -220,13 +215,16 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
       "2": 0,
       "3": 0,
       "4": 0,
-      "Total": 0,
-    }
+      Total: 0,
+    };
     for (const prospect of prospects) {
-      let icp_fit_score = (prospect.icp_fit_score >= -1 && prospect.icp_fit_score <= 4) ? prospect.icp_fit_score : -1
+      let icp_fit_score =
+        prospect.icp_fit_score >= -1 && prospect.icp_fit_score <= 4
+          ? prospect.icp_fit_score
+          : -1;
       // @ts-ignore
-      icp_analytics[icp_fit_score + ''] += 1
-      icp_analytics["Total"] += 1
+      icp_analytics[icp_fit_score + ""] += 1;
+      icp_analytics["Total"] += 1;
     }
 
     // Set ICP Dashboard
@@ -235,55 +233,95 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
         label: "Very High",
         color: "#3B85EF",
         bgColor: "rgba(59, 133, 239, 0.05)",
-        percent: icp_analytics["4"] / icp_analytics["Total"] * 100,
+        percent: (icp_analytics["4"] / icp_analytics["Total"]) * 100,
         value: icp_analytics["4"] + "",
-        widthModifier: 10
+        widthModifier: 10,
       },
       {
         label: "High",
         color: "#009512",
         bgColor: "rgba(0, 149, 18, 0.05)",
-        percent: icp_analytics["3"] / icp_analytics["Total"] * 100,
+        percent: (icp_analytics["3"] / icp_analytics["Total"]) * 100,
         value: icp_analytics["3"] + "",
-        widthModifier: 5
+        widthModifier: 5,
       },
       {
         label: "Medium",
         color: "#EFBA50",
-        percent: icp_analytics["2"] / icp_analytics["Total"] * 100,
+        percent: (icp_analytics["2"] / icp_analytics["Total"]) * 100,
         bgColor: "rgba(239, 186, 80, 0.05)",
         value: icp_analytics["2"] + "",
-        widthModifier: 0
+        widthModifier: 0,
       },
       {
         label: "Low",
         color: "#EB8231",
-        percent: icp_analytics["1"] / icp_analytics["Total"] * 100,
+        percent: (icp_analytics["1"] / icp_analytics["Total"]) * 100,
         bgColor: "rgba(235, 130, 49, 0.05)",
         value: icp_analytics["1"] + "",
-        widthModifier: 0
+        widthModifier: 0,
       },
       {
         label: "Very Low",
         color: "#E5564E",
-        percent: icp_analytics["0"] / icp_analytics["Total"] * 100,
+        percent: (icp_analytics["0"] / icp_analytics["Total"]) * 100,
         bgColor: "rgba(229, 86, 78, 0.05)",
         value: icp_analytics["0"] + "",
-        widthModifier: -5
+        widthModifier: -5,
       },
       {
         label: "Unscored",
         color: "#84818A",
         bgColor: "rgba(132, 129, 138, 0.05)",
-        percent: icp_analytics["-1"] / icp_analytics["Total"] * 100,
+        percent: (icp_analytics["-1"] / icp_analytics["Total"]) * 100,
         value: icp_analytics["-1"] + "",
-        widthModifier: -10
+        widthModifier: -10,
       },
-    ])
+    ]);
 
     // Set prospect data
     setIcpProspects(prospects);
-  }
+  };
+
+  const triggerMoveToUnassigned = async () => {
+    if (currentProject === null) {
+      return;
+    }
+
+    const prospects = icpProspects.filter((_, index) => {
+      return selectedRows[index] === true;
+    });
+    const prospectIDs = prospects.map((prospect) => {
+      return prospect.id;
+    });
+
+    const response = await moveToUnassigned(
+      userToken,
+      currentProject.id,
+      prospectIDs
+    );
+    if (response.status === "success") {
+      showNotification({
+        id: "prospect-removed",
+        title: "Prospects removed",
+        message:
+          "These prospects has been moved to your Unassigned Contacts list.",
+        color: "green",
+        autoClose: 3000,
+      });
+    } else {
+      showNotification({
+        id: "prospect-removed",
+        title: "Prospects removal failed",
+        message:
+          "These prospects could not be removed. Please try again, or contact support.",
+        color: "red",
+        autoClose: false,
+      });
+    }
+
+    triggerGetProspects();
+  };
 
   useQuery({
     queryKey: [`query-get-icp-prospects`],
@@ -314,22 +352,31 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
           <Box ml={"0.5rem"}>
             <ProjectSelect extraBig />
           </Box>
-          <Title
-            size={"24px"}
-            ml={5}
-            style={{ display: "flex", alignItems: "center" }}
-          ></Title>
         </Box>
         <Flex gap={"1rem"} align={"center"}>
-          <Button.Group color='gray'>
-            <Button variant="default" sx={{ color: 'gray !important' }}>
-              <span style={{ marginLeft: '6px', color: theme.colors.blue[5] }}>{currentProject?.num_unused_li_prospects}{" "}/{" "}{currentProject?.num_prospects}</span>
+          <Button.Group color="gray">
+            <Button variant="default" sx={{ color: "gray !important" }}>
+              <span style={{ marginLeft: "6px", color: theme.colors.blue[5] }}>
+                {currentProject?.num_unused_li_prospects} /{" "}
+                {currentProject?.num_prospects}
+              </span>
             </Button>
-            <Button variant="default" sx={{ color: 'gray !important' }}>
-              Left: <span style={{ marginLeft: '6px', color: theme.colors.blue[5] }}>{currentProject ? Math.round(currentProject?.num_unused_li_prospects / (currentProject?.num_prospects + 0.0001) * 100) + '% ' : '-%'}</span>
+            <Button variant="default" sx={{ color: "gray !important" }}>
+              Left:{" "}
+              <span style={{ marginLeft: "6px", color: theme.colors.blue[5] }}>
+                {currentProject
+                  ? Math.round(
+                      (currentProject?.num_unused_li_prospects /
+                        (currentProject?.num_prospects + 0.0001)) *
+                        100
+                    ) + "% "
+                  : "-%"}
+              </span>
             </Button>
           </Button.Group>
-          <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>Add Prospects</Button>
+          <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>
+            Add Prospects
+          </Button>
           {smScreenOrLess && <Button onClick={openFilter}>Open filter</Button>}
         </Flex>
       </Box>
@@ -377,14 +424,11 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
           }}
         >
           {icpDashboard.map((icp, index) => {
-
-            
-
             return (
               <Box
                 key={`filter-${index}`}
                 style={{
-                  width: (16 + icp.widthModifier) + '%',
+                  width: 16 + icp.widthModifier + "%",
                 }}
               >
                 <Paper
@@ -392,11 +436,10 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
                     backgroundColor: icp.bgColor,
                     color: icp.color,
                     border: `1px solid #E9ECEF`,
-                    overflow: 'hidden'
+                    overflow: "hidden",
                   }}
                   p="md"
                   radius="7px"
-
                 >
                   <Title size={"10px"} fw={600}>
                     {icp.percent.toFixed(1)}%
@@ -404,7 +447,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
                   <Title size={"20px"} fw={500}>
                     {icp.value}
                   </Title>
-                  <Title fw={500} color="gray.6" fz='12px'>
+                  <Title fw={500} color="gray.6" fz="12px">
                     Contacts
                   </Title>
                 </Paper>
@@ -417,12 +460,47 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
                   label="100%"
                 />
               </Box>
-            )
+            );
           })}
         </Box>
       </Paper>
 
-      <Box>
+      <Box
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "1rem",
+        }}
+      >
+        <Button
+          color="red"
+          leftIcon={<IconTrash size={14} />}
+          size="sm"
+          onClick={() => {
+            openConfirmModal({
+              title: "Remove these prospects?",
+              children: (
+                <Text>
+                  Are you sure you want to remove these{" "}
+                  {Object.keys(selectedRows).length} prospects? This will move
+                  them into your Unassigned Contacts list.
+                </Text>
+              ),
+              labels: {
+                confirm: "Remove",
+                cancel: "Cancel",
+              },
+              confirmProps: { color: "red" },
+              onCancel: () => {},
+              onConfirm: () => {
+                triggerMoveToUnassigned();
+              },
+            });
+          }}
+        >
+          Remove {Object.keys(selectedRows).length} prospects
+        </Button>
         <Box
           style={{
             display: "flex",
@@ -515,71 +593,102 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
         <GridTabs
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
-          selectedRows={selectedRows}
-          data={icpProspects}
-          refresh={triggerGetProspects}
+          icpDashboard={icpDashboard}
         />
       </Paper>
+
       <DataGrid
         data={icpProspects}
         highlightOnHover
         withPagination
         withSorting
         withRowSelection
+        withColumnResizing
+        onFilter={(arg) => {
+          console.log(arg);
+        }}
         columns={[
           {
             accessorKey: "icp_fit_score",
             header: "ICP SCORE",
             cell: (cell) => {
-              const score = cell.cell.getValue<number>()
-              let readable_score = ""
+              const score = cell.cell.getValue<number>();
+              let readable_score = "";
+
               switch (score) {
                 case -1:
-                  readable_score = "Unscored"
+                  readable_score = "Unscored";
                   break;
                 case 0:
-                  readable_score = "Very Low"
+                  readable_score = "Very Low";
                   break;
                 case 1:
-                  readable_score = "Low"
+                  readable_score = "Low";
                   break;
                 case 2:
-                  readable_score = "Medium"
+                  readable_score = "Medium";
                   break;
                 case 3:
-                  readable_score = "High"
+                  readable_score = "High";
                   break;
                 case 4:
-                  readable_score = "Very High"
+                  readable_score = "Very High";
                   break;
                 default:
-                  readable_score = "Unknown"
+                  readable_score = "Unknown";
                   break;
               }
 
-              return (
-                <Badge
-                >
-                  {readable_score}
-                </Badge>
-              )
-            }
+              return <Badge>{readable_score}</Badge>;
+            },
+            filterFn: stringFilterFn,
           },
           {
             accessorKey: "title",
             header: "TITLE",
+            filterFn: stringFilterFn,
           },
           {
             accessorKey: "company",
+            filterFn: stringFilterFn,
             header: "COMPANY",
           },
           {
             accessorKey: "icp_fit_reason",
+            filterFn: stringFilterFn,
             header: "ICP FIT REASON",
+            cell: (cell) => {
+              const values = cell.cell.getValue<string>().split(",");
+
+              return (
+                <Flex gap={"0.25rem"} align={"center"}>
+                  {values.map((v) => (
+                    <Flex key={v} gap={"0.25rem"} align={"center"}>
+                      {"("}
+                      <Flex
+                        justify={"center"}
+                        align={"center"}
+                        style={{ borderRadius: "4px" }}
+                        bg={"green"}
+                        p={"0.25rem"}
+                        w={"1rem"}
+                        h={"1rem"}
+                      >
+                        <IconCheck color="white" />
+                      </Flex>
+
+                      <Text>{v}</Text>
+                      {")"}
+                    </Flex>
+                  ))}
+                </Flex>
+              );
+            },
           },
           {
             accessorKey: "linkedin_url",
             header: "LINKEDIN URL",
+            filterFn: stringFilterFn,
             cell: (cell) => (
               <Anchor
                 style={{
@@ -624,7 +733,11 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
         data={icpProspects}
         refresh={triggerGetProspects}
       />
-      <PersonaUploadDrawer personaOverviews={currentProject ? [currentProject] : []} afterUpload={() => { }} />
+
+      <PersonaUploadDrawer
+        personaOverviews={currentProject ? [currentProject] : []}
+        afterUpload={() => {}}
+      />
     </Box>
   );
 };

@@ -20,6 +20,7 @@ import { currentProjectState } from '@atoms/personaAtoms';
 import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms';
 import { runScoringICP, updateICPRuleSet } from '@utils/requests/icpScoring';
 import { userTokenState } from '@atoms/userAtoms';
+import { showNotification } from '@mantine/notifications';
 
 type Props = {
   sideBarVisible: boolean;
@@ -130,6 +131,13 @@ export function SidebarHeader({
               if (!currentProject) return;
               setLoading(true);
               console.log("updating rule set");
+
+              showNotification({
+                title: "Filtering prospects...",
+                message: "Applying filters to prospects",
+                color: "blue",
+              });
+
               const response = await updateICPRuleSet(
                 userToken,
                 currentProject.id,
@@ -173,6 +181,20 @@ export function SidebarHeader({
               console.log("done");
 
               setLoading(false);
+
+              if (isTesting) {
+                showNotification({
+                  title: "Test sample has been scored!",
+                  message: "The test sample has been filtered",
+                  color: "green",
+                });
+              } else { 
+                showNotification({
+                  title: "Prospects are being scored...",
+                  message: "This may take a few minutes. Please check back and refresh page..",
+                  color: "blue",
+                });
+              }
             }}
           >
             {isTesting ? "Filter test sample" : "Start Filtering"}

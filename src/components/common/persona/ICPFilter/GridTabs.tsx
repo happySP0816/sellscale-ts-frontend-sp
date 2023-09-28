@@ -3,7 +3,7 @@ import {
   getICPScoreColor,
   getStatusMessageBadgeColor,
 } from "../../../../utils/icp";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface IGridTabsProps {
   selectedTab: {
@@ -32,7 +32,7 @@ const GridTabs = ({
   icpDashboard,
 }: IGridTabsProps) => {
   const theme = useMantineTheme();
-  const tabFilters = useMemo(() => {
+  const computeTabFilters = () => {
     return [
       {
         label: "All",
@@ -71,8 +71,13 @@ const GridTabs = ({
         value: "-1",
         count: icpDashboard.find((c) => c.label === "Unscored")?.value || "0",
       },
-    ];
-  }, []);
+    ]
+  }
+  const [tabFilters, setTabFilters] = useState(computeTabFilters());
+
+  useEffect(() => {
+    setTabFilters(computeTabFilters())
+  }, [icpDashboard])
 
   const generateBackgroundBudge = (value: string) => {
     const COLORS: { [key: string]: string } = {

@@ -191,12 +191,10 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
     }
 
     if (selectedTab) {
-      // console.log('selectedTab', selectedTab)
       newFilters[3].value = selectedTab.value;
     }
 
     setColumnFilters(newFilters);
-    console.log('filter', newFilters)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalSearch, channel, status, selectedTab]);
@@ -291,7 +289,6 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
 
     // Set prospect data
     setProspectData(prospects)
-    console.log('prospects', prospects)
   }
 
   useEffect(() => {
@@ -522,6 +519,8 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
           selectedRows={selectedRows}
+          data={prospectData}
+          refresh={triggerGetProspects}
         />
       </Paper>
       <DataGrid

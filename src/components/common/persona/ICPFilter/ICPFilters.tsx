@@ -30,7 +30,7 @@ const ICPFilters = () => {
 
   const [opened, { open, close, toggle }] = useDisclosure(false);
   const [sideBarVisible, { toggle: toggleSideBar, open: openSideBar }] =
-    useDisclosure(true);
+    useDisclosure(false);
   const [isTesting, setIsTesting] = useState(false);
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.LG})`,
@@ -45,7 +45,7 @@ const ICPFilters = () => {
           opened={opened}
           onClose={close}
           withCloseButton={false}
-          size={"15rem"}
+          size={"20rem"}
           overlayProps={{ blur: 4 }}
         >
           <Box h={"100vh"} pos={"relative"} m={"-1rem"}>
@@ -71,10 +71,11 @@ const ICPFilters = () => {
 
       <Box
         w={
-          smScreenOrLess ? "calc(100vw - 10rem)" : "calc(100vw - 10rem - 15rem)"
+          '100%'
         }
       >
         <ICPFiltersDashboard
+          setIsTesting={setIsTesting}
           isTesting={isTesting}
           openFilter={() => {
             openSideBar();

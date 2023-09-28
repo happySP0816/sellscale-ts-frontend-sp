@@ -44,7 +44,7 @@ import { showNotification } from "@mantine/notifications";
 import { ProjectSelect } from "@common/library/ProjectSelect";
 import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
 import { ProspectICP } from "src";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { openConfirmModal } from "@mantine/modals";
 import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
 import { filterProspectsState } from "@atoms/icpFilterAtoms";
@@ -100,6 +100,7 @@ const tabFilters = [
 ];
 
 const ICPFiltersDashboard: FC<{
+  setIsTesting: (val: boolean) => void;
   isTesting: boolean;
   openFilter: () => void;
 }> = ({ isTesting, openFilter }) => {
@@ -134,7 +135,7 @@ const ICPFiltersDashboard: FC<{
   };
 
   const [icpDashboard, setIcpDashboard] = useState<any[]>([]);
-
+  const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
   const [columnFilters, setColumnFilters] = useState<DataGridFiltersState>([]);
 
@@ -342,7 +343,17 @@ const ICPFiltersDashboard: FC<{
       >
         <Box style={{ display: "flex", alignItems: "center" }}>
           <Box ml={"0.5rem"}>
-            <ProjectSelect extraBig />
+            <ProjectSelect 
+              extraBig 
+              onClick={
+                () => {
+                  queryClient.refetchQueries({
+                    queryKey: [`query-get-icp-prospects`],
+                  });
+                  refetch();
+                }
+              }
+            />
           </Box>
         </Box>
         <Flex gap={"1rem"} align={"center"}>
@@ -350,7 +361,8 @@ const ICPFiltersDashboard: FC<{
             <Button variant="default" sx={{ color: "gray !important" }}>
               <span style={{ marginLeft: "6px", color: theme.colors.blue[5] }}>
                 {currentProject?.num_unused_li_prospects} /{" "}
-                {currentProject?.num_prospects}
+                {currentProject?.num_prospects}{" "}
+                remaining
               </span>
             </Button>
             <Button variant="default" sx={{ color: "gray !important" }}>
@@ -609,32 +621,40 @@ const ICPFiltersDashboard: FC<{
             cell: (cell) => {
               const score = cell.cell.getValue<number>();
               let readable_score = "";
+              let color = "";
 
               switch (score) {
                 case -1:
                   readable_score = "Unscored";
+                  color = 'gray'
                   break;
                 case 0:
                   readable_score = "Very Low";
+                  color = 'red'
                   break;
                 case 1:
                   readable_score = "Low";
+                  color = 'orange'
                   break;
                 case 2:
                   readable_score = "Medium";
+                  color = 'yellow'
                   break;
                 case 3:
                   readable_score = "High";
+                  color = 'blue'
                   break;
                 case 4:
                   readable_score = "Very High";
+                  color = 'green'
                   break;
                 default:
                   readable_score = "Unknown";
+                  color = 'gray'
                   break;
               }
 
-              return <Badge>{readable_score}</Badge>;
+              return <Badge color={color}>{readable_score}</Badge>;
             },
             filterFn: stringFilterFn,
           },
@@ -653,11 +673,11 @@ const ICPFiltersDashboard: FC<{
             filterFn: stringFilterFn,
             header: "ICP FIT REASON",
             cell: (cell) => {
-              const values = cell.cell.getValue<string>().split(",");
+              const values = cell.cell.getValue<string>()?.split(",");
 
               return (
                 <Flex gap={"0.25rem"} align={"center"}>
-                  {values.map((v) => (
+                  {values?.map((v) => (
                     <Flex key={v} gap={"0.25rem"} align={"center"}>
                       {"("}
                       <Flex

@@ -189,11 +189,11 @@ const ICPFiltersDashboard: FC<{
 
   const triggerGetProspects = async () => {
     if (!currentProject?.id) {
-      showNotification({
-        title: "Error",
-        message: "No project selected",
-        color: "red",
-      });
+      // showNotification({
+      //   title: "Error",
+      //   message: "No project selected",
+      //   color: "red",
+      // });
       return;
     }
 

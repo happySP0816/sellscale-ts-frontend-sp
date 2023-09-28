@@ -1,7 +1,7 @@
 import { IconArrowNarrowRight, IconBookmark } from "@tabler/icons-react";
 import { Box, useMantineTheme, Button, Title, Text } from "@mantine/core";
 import { useRecoilValue } from "recoil";
-import { filterRuleSetState } from "@atoms/icpFilterAtoms";
+import { filterProspectsState, filterRuleSetState } from "@atoms/icpFilterAtoms";
 import { useState } from "react";
 import { runScoringICP, updateICPRuleSet } from "@utils/requests/icpScoring";
 import { userTokenState } from "@atoms/userAtoms";
@@ -9,7 +9,7 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { ProspectICP } from "src";
 import { useQueryClient } from "@tanstack/react-query";
 
-export function SidebarFooter(props: { isTesting: boolean, prospects: ProspectICP[] }) {
+export function SidebarFooter(props: { isTesting: boolean }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
@@ -17,6 +17,7 @@ export function SidebarFooter(props: { isTesting: boolean, prospects: ProspectIC
 
   const [loading, setLoading] = useState(false);
   const globalRuleSetData = useRecoilValue(filterRuleSetState);
+  const icpProspects = useRecoilValue(filterProspectsState);
 
   return (
     <Box
@@ -76,7 +77,7 @@ export function SidebarFooter(props: { isTesting: boolean, prospects: ProspectIC
             globalRuleSetData.excluded_company_generalized_keywords
           );
 
-          await runScoringICP(userToken, currentProject.id, props.isTesting ? props.prospects.map((prospect) => prospect.id) : undefined);
+          await runScoringICP(userToken, currentProject.id, props.isTesting ? icpProspects.map((prospect) => prospect.id) : undefined);
 
           queryClient.refetchQueries({
             queryKey: [`query-get-icp-prospects`],

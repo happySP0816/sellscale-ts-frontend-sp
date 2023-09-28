@@ -46,6 +46,7 @@ import { ProjectSelect } from '@common/library/ProjectSelect';
 import PersonaUploadDrawer from '@drawers/PersonaUploadDrawer';
 import { ProspectICP } from "src";
 import { useQuery } from "@tanstack/react-query";
+import { filterProspectsState } from "@atoms/icpFilterAtoms";
 
 const demoData = [
   {
@@ -103,6 +104,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
 }) => {
   const userToken = useRecoilValue(userTokenState)
   const currentProject = useRecoilValue(currentProjectState)
+  const [icpProspects, setIcpProspects] = useRecoilState(filterProspectsState);
 
   const initialFilters = [
     {
@@ -148,7 +150,6 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
     setUploadDrawerOpened(true);
   };
 
-  const [prospectData, setProspectData] = useState<ProspectICP[]>([])
   const [icpDashboard, setIcpDashboard] = useState<any[]>([])
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -281,7 +282,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
     ])
 
     // Set prospect data
-    setProspectData(prospects)
+    setIcpProspects(prospects);
   }
 
   useQuery({
@@ -515,12 +516,12 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
           selectedRows={selectedRows}
-          data={prospectData}
+          data={icpProspects}
           refresh={triggerGetProspects}
         />
       </Paper>
       <DataGrid
-        data={prospectData}
+        data={icpProspects}
         highlightOnHover
         withPagination
         withSorting
@@ -620,7 +621,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
         close={close}
         count={getSelectedRowCount}
         selectedRows={selectedRows}
-        data={prospectData}
+        data={icpProspects}
         refresh={triggerGetProspects}
       />
       <PersonaUploadDrawer personaOverviews={currentProject ? [currentProject] : []} afterUpload={() => { }} />

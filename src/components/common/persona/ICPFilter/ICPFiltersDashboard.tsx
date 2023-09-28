@@ -205,6 +205,7 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
       userToken,
       currentProject?.id,
       isTesting,
+      invitedOnLinkedIn
     )
 
     // Get prospects
@@ -618,6 +619,9 @@ const ICPFiltersDashboard: FC<{ isTesting: boolean, openFilter: () => void }> = 
         opened={opened}
         close={close}
         count={getSelectedRowCount}
+        selectedRows={selectedRows}
+        data={prospectData}
+        refresh={triggerGetProspects}
       />
       <PersonaUploadDrawer personaOverviews={currentProject ? [currentProject] : []} afterUpload={() => { }} />
     </Box>

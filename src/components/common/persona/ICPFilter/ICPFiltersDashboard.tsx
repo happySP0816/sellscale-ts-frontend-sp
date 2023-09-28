@@ -133,7 +133,7 @@ const ICPFiltersDashboard: FC<{
     setUploadDrawerOpened(true);
   };
 
-  const [icpDashboard, setIcpDashboard] = useState<any[]>([])
+  const [icpDashboard, setIcpDashboard] = useState<any[]>([]);
 
   const [opened, { open, close }] = useDisclosure(false);
   const [columnFilters, setColumnFilters] = useState<DataGridFiltersState>([]);
@@ -181,108 +181,6 @@ const ICPFiltersDashboard: FC<{
     setColumnFilters(newFilters);
   }, [selectedTab, globalSearch]);
 
-  useEffect(
-    () => {
-      triggerGetProspects();
-    }
-  , [isTesting])
-
-  const triggerGetProspects = async () => {
-    if (!currentProject?.id) {
-      // showNotification({
-      //   title: "Error",
-      //   message: "No project selected",
-      //   color: "red",
-      // });
-      return;
-    }
-
-    const result = await getProspectsForICP(
-      userToken,
-      currentProject?.id,
-      isTesting,
-      invitedOnLinkedIn
-    );
-
-    // Get prospects
-    const prospects = result.data.prospects as ProspectICP[];
-
-    // Calculate numbers and percentages
-    let icp_analytics = {
-      "-1": 0,
-      "0": 0,
-      "1": 0,
-      "2": 0,
-      "3": 0,
-      "4": 0,
-      Total: 0,
-    };
-    for (const prospect of prospects) {
-      let icp_fit_score =
-        prospect.icp_fit_score >= -1 && prospect.icp_fit_score <= 4
-          ? prospect.icp_fit_score
-          : -1;
-      // @ts-ignore
-      icp_analytics[icp_fit_score + ""] += 1;
-      icp_analytics["Total"] += 1;
-    }
-
-    // Set ICP Dashboard
-    setIcpDashboard([
-      {
-        label: "Very High",
-        color: "#3B85EF",
-        bgColor: "rgba(59, 133, 239, 0.05)",
-        percent: (icp_analytics["4"] / icp_analytics["Total"]) * 100,
-        value: icp_analytics["4"] + "",
-        widthModifier: 10,
-      },
-      {
-        label: "High",
-        color: "#009512",
-        bgColor: "rgba(0, 149, 18, 0.05)",
-        percent: (icp_analytics["3"] / icp_analytics["Total"]) * 100,
-        value: icp_analytics["3"] + "",
-        widthModifier: 5,
-      },
-      {
-        label: "Medium",
-        color: "#EFBA50",
-        percent: (icp_analytics["2"] / icp_analytics["Total"]) * 100,
-        bgColor: "rgba(239, 186, 80, 0.05)",
-        value: icp_analytics["2"] + "",
-        widthModifier: 0,
-      },
-      {
-        label: "Low",
-        color: "#EB8231",
-        percent: (icp_analytics["1"] / icp_analytics["Total"]) * 100,
-        bgColor: "rgba(235, 130, 49, 0.05)",
-        value: icp_analytics["1"] + "",
-        widthModifier: 0,
-      },
-      {
-        label: "Very Low",
-        color: "#E5564E",
-        percent: (icp_analytics["0"] / icp_analytics["Total"]) * 100,
-        bgColor: "rgba(229, 86, 78, 0.05)",
-        value: icp_analytics["0"] + "",
-        widthModifier: -5,
-      },
-      {
-        label: "Unscored",
-        color: "#84818A",
-        bgColor: "rgba(132, 129, 138, 0.05)",
-        percent: (icp_analytics["-1"] / icp_analytics["Total"]) * 100,
-        value: icp_analytics["-1"] + "",
-        widthModifier: -10,
-      },
-    ]);
-
-    // Set prospect data
-    setIcpProspects(prospects);
-  };
-
   const triggerMoveToUnassigned = async () => {
     if (currentProject === null) {
       return;
@@ -320,16 +218,104 @@ const ICPFiltersDashboard: FC<{
       });
     }
 
-    triggerGetProspects();
+    refetch();
   };
 
-  useQuery({
-    queryKey: [`query-get-icp-prospects`],
-    queryFn: async () => {
-      if (!currentProject?.id) return null;
-      await triggerGetProspects();
-      return null;
+  const { isFetching, refetch } = useQuery({
+    queryKey: [`query-get-icp-prospects`, { isTesting }],
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { isTesting }] = queryKey;
+
+      const result = await getProspectsForICP(
+        userToken,
+        currentProject!.id,
+        isTesting,
+        invitedOnLinkedIn
+      );
+
+      // Get prospects
+      const prospects = result.data.prospects as ProspectICP[];
+
+      // Calculate numbers and percentages
+      let icp_analytics = {
+        "-1": 0,
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        Total: 0,
+      };
+      for (const prospect of prospects) {
+        let icp_fit_score =
+          prospect.icp_fit_score >= -1 && prospect.icp_fit_score <= 4
+            ? prospect.icp_fit_score
+            : -1;
+        // @ts-ignore
+        icp_analytics[icp_fit_score + ""] += 1;
+        icp_analytics["Total"] += 1;
+      }
+
+      // Set ICP Dashboard
+      setIcpDashboard([
+        {
+          label: "Very High",
+          color: "#3B85EF",
+          bgColor: "rgba(59, 133, 239, 0.05)",
+          percent: (icp_analytics["4"] / icp_analytics["Total"]) * 100,
+          value: icp_analytics["4"] + "",
+          widthModifier: 10,
+        },
+        {
+          label: "High",
+          color: "#009512",
+          bgColor: "rgba(0, 149, 18, 0.05)",
+          percent: (icp_analytics["3"] / icp_analytics["Total"]) * 100,
+          value: icp_analytics["3"] + "",
+          widthModifier: 5,
+        },
+        {
+          label: "Medium",
+          color: "#EFBA50",
+          percent: (icp_analytics["2"] / icp_analytics["Total"]) * 100,
+          bgColor: "rgba(239, 186, 80, 0.05)",
+          value: icp_analytics["2"] + "",
+          widthModifier: 0,
+        },
+        {
+          label: "Low",
+          color: "#EB8231",
+          percent: (icp_analytics["1"] / icp_analytics["Total"]) * 100,
+          bgColor: "rgba(235, 130, 49, 0.05)",
+          value: icp_analytics["1"] + "",
+          widthModifier: 0,
+        },
+        {
+          label: "Very Low",
+          color: "#E5564E",
+          percent: (icp_analytics["0"] / icp_analytics["Total"]) * 100,
+          bgColor: "rgba(229, 86, 78, 0.05)",
+          value: icp_analytics["0"] + "",
+          widthModifier: -5,
+        },
+        {
+          label: "Unscored",
+          color: "#84818A",
+          bgColor: "rgba(132, 129, 138, 0.05)",
+          percent: (icp_analytics["-1"] / icp_analytics["Total"]) * 100,
+          value: icp_analytics["-1"] + "",
+          widthModifier: -10,
+        },
+      ]);
+
+      // Set prospect data
+      setIcpProspects(prospects);
+
+      return prospects;
     },
+    enabled: !!currentProject,
   });
 
   return (
@@ -731,7 +717,7 @@ const ICPFiltersDashboard: FC<{
         count={getSelectedRowCount}
         selectedRows={selectedRows}
         data={icpProspects}
-        refresh={triggerGetProspects}
+        refresh={refetch}
       />
 
       <PersonaUploadDrawer

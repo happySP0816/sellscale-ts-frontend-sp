@@ -262,51 +262,57 @@ const ICPFiltersDashboard: FC<{
       setIcpDashboard([
         {
           label: "Very High",
-          color: "#3B85EF",
-          bgColor: "rgba(59, 133, 239, 0.05)",
+          color: "#009512",
+          badgeColor: 'green',
+          bgColor: "rgba(0, 149, 18, 0.05)",
           percent: (icp_analytics["4"] / icp_analytics["Total"]) * 100,
           value: icp_analytics["4"] + "",
-          widthModifier: 10,
+          gridWidthOf20: icp_analytics["4"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["4"] / icp_analytics["Total"]) * 20
         },
         {
           label: "High",
-          color: "#009512",
-          bgColor: "rgba(0, 149, 18, 0.05)",
+          color: "#3B85EF",
+          badgeColor: 'blue',
+          bgColor: "rgba(59, 133, 239, 0.05)",
           percent: (icp_analytics["3"] / icp_analytics["Total"]) * 100,
           value: icp_analytics["3"] + "",
-          widthModifier: 5,
+          gridWidthOf20: icp_analytics["3"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["3"] / icp_analytics["Total"]) * 20
         },
         {
           label: "Medium",
           color: "#EFBA50",
+          badgeColor: 'yellow',
           percent: (icp_analytics["2"] / icp_analytics["Total"]) * 100,
           bgColor: "rgba(239, 186, 80, 0.05)",
           value: icp_analytics["2"] + "",
-          widthModifier: 0,
+          gridWidthOf20: icp_analytics["2"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["2"] / icp_analytics["Total"]) * 20
         },
         {
           label: "Low",
           color: "#EB8231",
+          badgeColor: 'orange',
           percent: (icp_analytics["1"] / icp_analytics["Total"]) * 100,
           bgColor: "rgba(235, 130, 49, 0.05)",
           value: icp_analytics["1"] + "",
-          widthModifier: 0,
+          gridWidthOf20: icp_analytics["1"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["1"] / icp_analytics["Total"]) * 20
         },
         {
           label: "Very Low",
           color: "#E5564E",
+          badgeColor: 'red',
           percent: (icp_analytics["0"] / icp_analytics["Total"]) * 100,
           bgColor: "rgba(229, 86, 78, 0.05)",
           value: icp_analytics["0"] + "",
-          widthModifier: -5,
+          gridWidthOf20: icp_analytics["0"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["0"] / icp_analytics["Total"]) * 20
         },
         {
           label: "Unscored",
           color: "#84818A",
+          badgeColor: 'gray',
           bgColor: "rgba(132, 129, 138, 0.05)",
           percent: (icp_analytics["-1"] / icp_analytics["Total"]) * 100,
           value: icp_analytics["-1"] + "",
-          widthModifier: -10,
+          gridWidthOf20: icp_analytics["-1"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["-1"] / icp_analytics["Total"]) * 20
         },
       ]);
 
@@ -414,7 +420,7 @@ const ICPFiltersDashboard: FC<{
               <Box
                 key={`filter-${index}`}
                 style={{
-                  width: 16 + icp.widthModifier + "%",
+                  width: Math.floor(icp.gridWidthOf20 / 20 * 100) + '%'
                 }}
               >
                 <Paper
@@ -427,12 +433,15 @@ const ICPFiltersDashboard: FC<{
                   p="md"
                   radius="7px"
                 >
-                  <Title size={"10px"} fw={600}>
-                    {icp.percent.toFixed(1)}%
-                  </Title>
-                  <Title size={"20px"} fw={500}>
-                    {icp.value}
-                  </Title>
+                  <Text fz='10px' fw='bold'>{icp.label}</Text>
+                  <Flex>
+                    <Title size={"20px"} fw={500}>
+                      {icp.value}
+                    </Title>
+                    <Badge color={icp.badgeColor} size='xs' mt='4px' ml='4px' variant='filled'>
+                      {icp.percent.toFixed(1)}%
+                    </Badge>
+                  </Flex>
                   <Title fw={500} color="gray.6" fz="12px">
                     Contacts
                   </Title>
@@ -443,7 +452,7 @@ const ICPFiltersDashboard: FC<{
                   color={icp.color}
                   radius={"11px"}
                   size={"lg"}
-                  label="100%"
+                  label={icp.percent.toFixed(1) + '%'}
                 />
               </Box>
             );

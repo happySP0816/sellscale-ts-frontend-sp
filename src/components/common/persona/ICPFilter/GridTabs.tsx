@@ -12,32 +12,32 @@ const tabFilters = [
   },
   {
     label: "Very High",
-    value: "very_high",
+    value: "4",
     count: 150,
   },
   {
     label: "High",
-    value: "high",
+    value: "3",
     count: 150,
   },
   {
     label: "Medium",
-    value: "medium",
+    value: "2",
     count: 150,
   },
   {
     label: "Low",
-    value: "low",
+    value: "1",
     count: 150,
   },
   {
     label: "Very Low",
-    value: "very_low",
+    value: "0",
     count: 150,
   },
   {
     label: "Unscored",
-    value: "unscored",
+    value: "-1",
     count: 150,
   },
 ];

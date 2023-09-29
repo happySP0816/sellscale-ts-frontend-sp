@@ -25,6 +25,7 @@ import { deleteSample, updateSample } from "@utils/requests/voiceBuilder";
 const Content = (props: {
   messageId: number;
   onNext: () => void;
+  onDelete: () => void;
   onComplete: () => void;
   complete: boolean;
 }) => {
@@ -334,6 +335,7 @@ const Content = (props: {
             onClick={() => {
               setEditing(false);
               saveMessages("");
+              props.onDelete();
             }}
           >
             <IconTrash size="1.0rem" />

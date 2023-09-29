@@ -12,7 +12,7 @@ import {
   rem,
 } from "@mantine/core";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IconArchive, IconRotate } from "@tabler/icons-react";
 import Content from "./Content";
 import SideInformation from "./SideInformation";
@@ -54,7 +54,7 @@ const TrainYourAi = (props: {
     // },
   ];
 
-  console.log(props.messages);
+  const currentMessage = props.messages[selectedItem ?? 0] ?? props.messages[0];
 
   const [approvedSet, setApprovedSet] = useState<Set<number>>(new Set());
   const percentComplete = ((approvedSet.size + 1) / props.messages.length) * 100;
@@ -191,7 +191,7 @@ const TrainYourAi = (props: {
       <Flex sx={{ overflowX: "auto" }}>
         <Box h={"calc(100vh - 3.5rem)"} miw={600} sx={{ flex: 2 }}>
           <Content
-            messageId={props.messages[selectedItem ?? 0].id}
+            messageId={currentMessage.id}
             onNext={() => {
               setSelectedItem((prev) => {
                 if (prev === null) return null;
@@ -199,16 +199,19 @@ const TrainYourAi = (props: {
               });
               setApprovedSet((prev) => {
                 const newSet = new Set(prev);
-                newSet.add(props.messages[selectedItem ?? 0].id);
+                newSet.add(currentMessage.id);
                 return newSet;
               });
+            }}
+            onDelete={() => {
+              setSelectedItem(0);
             }}
             onComplete={props.onComplete}
             complete={selectedItem! >= props.messages.length - 1}
           />
         </Box>
         <Box h={"calc(100vh - 3.5rem)"} miw={300} sx={{ flex: 1 }}>
-          <SideInformation message={props.messages[selectedItem ?? 0]} />
+          <SideInformation message={currentMessage} />
         </Box>
       </Flex>
     </Flex>

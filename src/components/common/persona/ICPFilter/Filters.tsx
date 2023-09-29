@@ -143,6 +143,10 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
     excluded_company_generalized_keywords,
   ]);
 
+  const titleOptions = [...new Set(icpProspects.map(x => x.title ? x.title : ''))].filter(x => x)
+  const industryOptions = [...new Set(icpProspects.map(x => x.industry))].filter(x => x)
+  const companyOptions = [...new Set(icpProspects.map(x => x.company))].filter(x => x)
+
   return (
     <Tabs defaultValue="personal">
       <Tabs.List>
@@ -160,7 +164,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             label="Titles (Included)"
             placeholder="Select options"
             setValue={setIncludedIndividualTitleKeywords}
-            data={included_individual_title_keywords.concat([...new Set(icpProspects.map(x => x.title ? x.title : ''))])}
+            data={included_individual_title_keywords.concat(titleOptions)}
             setData={setIncludedIndividualTitleKeywords}
           />
           <CustomSelect maxWidth='16rem'
@@ -168,7 +172,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             label="Titles (Excluded)"
             placeholder="Select options"
             setValue={setExcludedIndividualTitleKeywords}
-            data={excluded_individual_title_keywords.concat([...new Set(icpProspects.map(x => x.title ? x.title : ''))])}
+            data={excluded_individual_title_keywords.concat(titleOptions)}
             setData={setExcludedIndividualTitleKeywords}
           />
           <CustomSelect maxWidth='16rem'
@@ -176,7 +180,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             label="Industry Keywords (Included)"
             placeholder="Select options"
             setValue={setIncludedIndividualIndustryKeywords}
-            data={included_individual_industry_keywords.concat([...new Set(icpProspects.map(x => x.industry))])}
+            data={included_individual_industry_keywords.concat(industryOptions)}
             setData={setIncludedIndividualIndustryKeywords}
           />
           <CustomSelect maxWidth='16rem'
@@ -184,7 +188,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             label="Industry Keywords (Excluded)"
             placeholder="Select options"
             setValue={setExcludedIndividualIndustryKeywords}
-            data={excluded_individual_industry_keywords.concat([...new Set(icpProspects.map(x => x.industry))])}
+            data={excluded_individual_industry_keywords.concat(industryOptions)}
             setData={setExcludedIndividualIndustryKeywords}
           />
           <Flex direction="column">
@@ -279,7 +283,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             label="Companies Keywords (Included)"
             placeholder="Select options"
             setValue={setIncludedCompanyNameKeywords}
-            data={included_company_name_keywords.concat([...new Set(icpProspects.map(x => x.company))])}
+            data={included_company_name_keywords.concat(companyOptions)}
             setData={setIncludedCompanyNameKeywords}
           />
           <CustomSelect maxWidth='16rem'
@@ -287,7 +291,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             label="Companies Keywords (Excluded)"
             placeholder="Select options"
             setValue={setExcludedCompanyNameKeywords}
-            data={excluded_company_name_keywords.concat([...new Set(icpProspects.map(x => x.company))])}
+            data={excluded_company_name_keywords.concat(companyOptions)}
             setData={setExcludedCompanyNameKeywords}
           />
           <CustomSelect maxWidth='16rem'
@@ -341,7 +345,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             label="Industries Keywords (Included)"
             placeholder="Select options"
             setValue={setIncludedCompanyIndustriesKeywords}
-            data={included_company_industries_keywords.concat([... new Set(icpProspects.map(x => x.industry))])}
+            data={included_company_industries_keywords.concat(industryOptions)}
             setData={setIncludedCompanyIndustriesKeywords}
           />
           <CustomSelect maxWidth='16rem'
@@ -349,7 +353,7 @@ function Filters(props: { isTesting: boolean, selectOptions: { value: string, la
             label="Industries Keywords (Excluded)"
             placeholder="Select options"
             setValue={setExcludedCompanyIndustriesKeywords}
-            data={excluded_company_industries_keywords.concat([...new Set(icpProspects.map(x => x.industry))])}
+            data={excluded_company_industries_keywords.concat(industryOptions)}
             setData={setExcludedCompanyIndustriesKeywords}
           />
           <CustomSelect maxWidth='16rem'

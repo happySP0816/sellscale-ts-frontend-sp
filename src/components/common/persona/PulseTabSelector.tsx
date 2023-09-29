@@ -18,10 +18,10 @@ const PulseTabSelector = () => {
   // };
 
   return (
-    <Tabs defaultValue="old_view">
+    <Tabs defaultValue="new_view">
       <Tabs.List>
-        <Tabs.Tab value="old_view">Old View</Tabs.Tab>
         <Tabs.Tab value="new_view">New View</Tabs.Tab>
+        <Tabs.Tab value="old_view">Old View</Tabs.Tab>
       </Tabs.List>
 
       <Tabs.Panel value="old_view">

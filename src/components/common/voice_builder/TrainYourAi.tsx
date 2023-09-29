@@ -191,7 +191,7 @@ const TrainYourAi = (props: {
       <Flex sx={{ overflowX: "auto" }}>
         <Box h={"calc(100vh - 3.5rem)"} miw={600} sx={{ flex: 2 }}>
           <Content
-            messageId={props.messages[selectedItem ?? 0].id}
+            messageId={props.messages[selectedItem ?? 0]?.id}
             onNext={() => {
               setSelectedItem((prev) => {
                 if (prev === null) return null;

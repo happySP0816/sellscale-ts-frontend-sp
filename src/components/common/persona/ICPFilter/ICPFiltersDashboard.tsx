@@ -46,7 +46,7 @@ import {
 import { showNotification } from "@mantine/notifications";
 import { ProjectSelect } from "@common/library/ProjectSelect";
 import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
-import { ProspectICP } from "src";
+import { PersonaOverview, ProspectICP } from "src";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { openConfirmModal } from "@mantine/modals";
 import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
@@ -55,6 +55,8 @@ import {
   filterRuleSetState,
 } from "@atoms/icpFilterAtoms";
 import { IconX } from "@tabler/icons";
+import { navigateToPage } from '@utils/documentChange';
+import { useNavigate } from 'react-router-dom';
 
 const demoData = [
   {
@@ -114,6 +116,7 @@ const ICPFiltersDashboard: FC<{
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [icpProspects, setIcpProspects] = useRecoilState(filterProspectsState);
+  const navigate = useNavigate();
 
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.LG})`,
@@ -425,11 +428,12 @@ const ICPFiltersDashboard: FC<{
           <Box ml={"0.5rem"}>
             <ProjectSelect
               extraBig
-              onClick={() => {
-                queryClient.refetchQueries({
-                  queryKey: [`query-get-icp-prospects`],
-                });
-                refetch();
+              onClick={(persona?: PersonaOverview) => {
+                // queryClient.refetchQueries({
+                //   queryKey: [`query-get-icp-prospects`],
+                // });
+                // refetch();
+                navigateToPage(navigate, `/prioritize/${persona?.id}`);
               }}
             />
           </Box>

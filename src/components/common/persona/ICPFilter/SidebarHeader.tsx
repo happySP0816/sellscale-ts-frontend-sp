@@ -239,7 +239,12 @@ export function SidebarHeader({
           </Tooltip>
         </Flex>
 
-        <Progress />
+        <Flex mt='md'>
+          <Text fz='10px' w='25%' ml='md' fw='bold'>Scoring...</Text>
+          <Text fz='10px' w='50%' align='center'>20 mins remaining</Text>
+          <Text fz='10px' w='25%' align='right' mr='md' fw='bold'>75%</Text>
+        </Flex>
+        <Progress ml='md' mr='md' value={75} />
       </Flex>
     </>
   );

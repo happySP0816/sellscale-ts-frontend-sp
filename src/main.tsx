@@ -282,8 +282,8 @@ const router = sentryCreateBrowserRouter([
         element: (
           <RestrictedRoute
             page={
-              <Box p="md">
-                <AllContactsSection all />
+              <Box bg={"white"}>
+                <PulseTabSelector />
               </Box>
             }
           />

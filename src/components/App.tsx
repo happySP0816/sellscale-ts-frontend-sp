@@ -6,7 +6,7 @@ import {
 } from "@mantine/core";
 
 import Layout from "./nav/Layout";
-import { Outlet, useSearchParams } from "react-router-dom";
+import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { ModalsProvider } from "@mantine/modals";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { navLoadingState } from "@atoms/navAtoms";
@@ -73,6 +73,7 @@ export default function App() {
   };
 
   const userData = useRecoilValue(userDataState);
+  const location = useLocation();
 
   // Fill in Crisp widget w/ info
   useEffect(() => {
@@ -145,7 +146,7 @@ export default function App() {
         }
       }
     })();
-  }, []);
+  }, [location]);
 
   return (
     <ColorSchemeProvider

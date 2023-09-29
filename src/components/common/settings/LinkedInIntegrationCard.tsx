@@ -73,6 +73,8 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
   const queryClient = useQueryClient();
   const userData = useRecoilValue(userDataState);
 
+  console.log(userData);
+
   const os = useOs();
 
   const { data: extensionInstalled } = useQuery({

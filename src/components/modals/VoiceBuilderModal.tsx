@@ -160,6 +160,7 @@ const VoiceBuilderModal: React.FC<{
   useEffect(() => {
     if(!opened) {
       setCount(0);
+      setVoiceBuilderMessages([]);
     }
   }, [opened]);
 
@@ -325,8 +326,6 @@ const VoiceBuilderModal: React.FC<{
   const borderGray = "#E9ECEF";
   const blue = "#228be6";
 
-  console.log(voiceBuilderMessages);
-
   return (
     <Modal.Root opened={opened} onClose={close} fullScreen closeOnClickOutside>
       <Modal.Overlay blur={3} color="gray.2" opacity={0.5} />
@@ -413,12 +412,16 @@ const VoiceBuilderModal: React.FC<{
               </ScrollArea>
             </div>
           ) : (
-            <TrainYourAi
-              messages={voiceBuilderMessages.filter((msg) => msg.value)}
-              onComplete={async () => {
-                openCompleteModal();
-              }}
-            />
+            <>
+              {voiceBuilderMessages.length > 0 && (
+                <TrainYourAi
+                  messages={voiceBuilderMessages.filter((msg) => msg.value)}
+                  onComplete={async () => {
+                    openCompleteModal();
+                  }}
+                />
+              )}
+            </>
           )}
         </Modal.Body>
       </Modal.Content>

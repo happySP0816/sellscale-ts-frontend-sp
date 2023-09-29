@@ -347,7 +347,7 @@ const VoiceBuilderModal: React.FC<{
           </Modal.Title>
           <Group>
             <Button variant="light" color="white" radius="xl" compact leftIcon={<IconRefresh size='1rem' />}
-              loading={isFetching || loading}
+              loading={(isFetching || loading) && voiceBuilderMessages.length > 0}
               onClick={() => {
                 generateMessages(voiceBuilderOnboardingId);
               }}

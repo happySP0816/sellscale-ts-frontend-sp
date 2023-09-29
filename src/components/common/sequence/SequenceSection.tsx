@@ -2541,15 +2541,20 @@ const PersonalizationSection = (props: {
   return (
     <Flex direction="column" pt="md">
       <Card shadow="md" radius={"md"} mb={"1rem"}>
-        <Box sx={{textAlign: 'right'}} ml='auto' pb='sm'>
-          <Badge leftSection={<IconCircle size='0.7rem'/>} color='grape' size='xs'>
-            Account Data
-          </Badge>
-          <br />
-          <Badge leftSection={<IconCircle size='0.7rem'/>} color='green' mt='xs' size='xs'>
-            Contact Data
-          </Badge>
-        </Box>
+        <Group position="apart">
+          <Box>
+            <Title fw={300} order={4}>Acceptance Rate by Personalization</Title>
+          </Box>
+          <Box sx={{textAlign: 'right'}} ml='auto' pb='sm'>
+            <Badge leftSection={<IconCircle size='0.7rem'/>} color='grape' size='xs'>
+              Account Data
+            </Badge>
+            <br />
+            <Badge leftSection={<IconCircle size='0.7rem'/>} color='green' mt='xs' size='xs'>
+              Contact Data
+            </Badge>
+          </Box>
+        </Group>
         <Flex direction={"column"} gap={"0.5rem"}>
           {allItems.map((item) => (
             <ProcessBar
@@ -2604,7 +2609,7 @@ const ProcessBar: React.FC<{
       <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
         <Checkbox
           size={"sm"}
-          label={title}
+          label={<Text fw={300}>{title}</Text>}
           checked={checked}
           disabled={disabled}
           onChange={(event) => onPressItem(id, event.currentTarget.checked)}

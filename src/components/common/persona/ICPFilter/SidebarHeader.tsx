@@ -12,15 +12,24 @@ import {
   Button,
   Switch,
   Text,
+  Progress,
 } from "@mantine/core";
-import { IconArrowNarrowLeft, IconArrowNarrowRight, IconChevronLeft, IconInfoCircle } from "@tabler/icons";
+import {
+  IconArrowNarrowLeft,
+  IconArrowNarrowRight,
+  IconChevronLeft,
+  IconInfoCircle,
+} from "@tabler/icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRecoilValue } from 'recoil';
-import { currentProjectState } from '@atoms/personaAtoms';
-import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms';
-import { runScoringICP, updateICPRuleSet } from '@utils/requests/icpScoring';
-import { userTokenState } from '@atoms/userAtoms';
-import { showNotification } from '@mantine/notifications';
+import { useRecoilValue } from "recoil";
+import { currentProjectState } from "@atoms/personaAtoms";
+import {
+  filterProspectsState,
+  filterRuleSetState,
+} from "@atoms/icpFilterAtoms";
+import { runScoringICP, updateICPRuleSet } from "@utils/requests/icpScoring";
+import { userTokenState } from "@atoms/userAtoms";
+import { showNotification } from "@mantine/notifications";
 
 type Props = {
   sideBarVisible: boolean;
@@ -103,9 +112,16 @@ export function SidebarHeader({
           </Box>
         </Group>
       </Box>
-      <Flex direction={"column"} gap={"0.5rem"} mt={"0.5rem"} sx={{
-        borderBottom: 'solid 1px #CCC', paddingBottom: '16px', display: sideBarVisible ? 'flex' : 'none'
-      }}>
+      <Flex
+        direction={"column"}
+        gap={"0.5rem"}
+        mt={"0.5rem"}
+        sx={{
+          borderBottom: "solid 1px #CCC",
+          paddingBottom: "16px",
+          display: sideBarVisible ? "flex" : "none",
+        }}
+      >
         <Flex px={"md"} align={"center"} gap={"0.5rem"}>
           {/* <Input
             onChange={(e) => setValue(e.target.value)}
@@ -122,7 +138,7 @@ export function SidebarHeader({
         <Flex px={"md"} align={"center"} gap={"0.5rem"}>
           <Button
             rightIcon={isTesting ? null : <IconArrowNarrowRight size={24} />}
-            size='xs'
+            size="xs"
             mt={"0.5rem"}
             fullWidth
             loading={loading}
@@ -188,10 +204,11 @@ export function SidebarHeader({
                   message: "The test sample has been filtered",
                   color: "green",
                 });
-              } else { 
+              } else {
                 showNotification({
                   title: "Prospects are being scored...",
-                  message: "This may take a few minutes. Please check back and refresh page..",
+                  message:
+                    "This may take a few minutes. Please check back and refresh page..",
                   color: "blue",
                 });
               }
@@ -201,23 +218,33 @@ export function SidebarHeader({
           </Button>
           <Tooltip label="(Test Mode) View sample of 50 prospects">
             <SwitchWrapper>
-              <Box sx={{textAlign: 'center', justifyContent: 'center'}}>
-                <Text fz='9px'>Test Sample</Text>
+              <Box sx={{ textAlign: "center", justifyContent: "center" }}>
+                <Text fz="9px">Test Sample</Text>
                 <Flex>
                   <Switch
-                    ml='md'
-                    mt='xs'
-                    size='xs'
+                    ml="md"
+                    mt="xs"
+                    size="xs"
                     onChange={(event) => {
                       setIsTesting(event.currentTarget.checked);
                     }}
                   />
-                  <Text size='xs' ml='6px' mt='10px'> ℹ️</Text>
+                  <Text size="xs" ml="6px" mt="10px">
+                    {" "}
+                    ℹ️
+                  </Text>
                 </Flex>
               </Box>
             </SwitchWrapper>
           </Tooltip>
         </Flex>
+
+        <Flex mt='md'>
+          <Text fz='10px' w='25%' ml='md' fw='bold'>Scoring...</Text>
+          <Text fz='10px' w='50%' align='center'>20 mins remaining</Text>
+          <Text fz='10px' w='25%' align='right' mr='md' fw='bold'>75%</Text>
+        </Flex>
+        <Progress ml='md' mr='md' value={75} />
       </Flex>
     </>
   );

@@ -17,7 +17,7 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "src/components/nav/Logo.tsx", "legacy_code/old/SearchBar.tsx"],
+  "include": ["src"],
   "exclude": ["legacy_code"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

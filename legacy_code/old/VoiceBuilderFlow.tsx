@@ -69,7 +69,7 @@ import { API_URL } from "@constants/data";
 import TextAlign from "@tiptap/extension-text-align";
 import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
 import { logout } from "@auth/core";
-import TrainYourAi from "./TrainYourAi";
+import TrainYourAi from "../../src/components/common/voice_builder/TrainYourAi";
 import { openConfirmModal } from "@mantine/modals";
 
 const ItemComponent = (props: { id: number; defaultValue: string }) => {
@@ -291,6 +291,7 @@ export default function VoiceBuilderFlow(props: {
   persona: PersonaOverview;
   voiceBuilderOnboardingId: number;
   createCampaign?: boolean;
+  loading: boolean;
   onComplete?: () => void;
 }) {
   const [voiceBuilderMessages, setVoiceBuilderMessages] = useRecoilState(
@@ -303,16 +304,8 @@ export default function VoiceBuilderFlow(props: {
   const [simulationProspectId, setSimulationProspectId]: any = useState(-1);
   const userToken = useRecoilValue(userTokenState);
 
-  // Set global state to loaded messages
-  useEffect(() => {
-    setVoiceBuilderMessages([]);
-    (async () => {
-      await generateMessages();
-    })();
-  }, []);
-
   const [editingPhase, setEditingPhase] = useState(1);
-  const [loadingMsgGen, setLoadingMsgGen] = useState(true);
+  const [loadingMsgGen, setLoadingMsgGen] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
   const [loadingSimulationSample, setLoadingSample] = useState(false);
   const [generatedSimulationCompletion, setGeneratedSimulationCompletion] =
@@ -320,139 +313,32 @@ export default function VoiceBuilderFlow(props: {
   const [instructions, setInstructions] = useDebouncedState("", 200);
   const [count, setCount] = useState(0);
 
-  const canCreate = editingPhase >= MAX_EDITING_PHASES;
-
   useEffect(() => {
-    (async () => {
-      const response = await updateOnboardingInstructions(
-        userToken,
-        props.voiceBuilderOnboardingId,
-        `${STARTING_INSTRUCTIONS}\n${instructions.trim()}`
-      );
-    })();
+    setLoadingMsgGen(props.loading);
 
-    const interval = setInterval(() => {
-      setCount(count + 1);
-    }, 1000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [instructions, count, setCount]);
-
-  // Generate sample messages
-  const generateMessages = async () => {
-    setLoadingMsgGen(true);
-    // Clone so we don't have to deal with async global state changes bs
-    const currentMessages = _.cloneDeep(voiceBuilderMessages);
-
-    // Delete all samples that are empty
-    for (const message of currentMessages) {
-      if (message.value === "") {
-        await deleteSample(userToken, message.id);
-      } else {
-        await updateSample(userToken, message.id, message.value);
-      }
+    if(!props.loading && !loadingMsgGen && voiceBuilderMessages.length === 0){
+      generateMessages();
     }
+  }, [props.loading])
 
-    // Generate new samples
-    const response = await generateSamples(
-      userToken,
-      props.voiceBuilderOnboardingId,
-      MSG_GEN_AMOUNT
-    );
+  // useEffect(() => {
+  //   (async () => {
+  //     const response = await updateOnboardingInstructions(
+  //       userToken,
+  //       props.voiceBuilderOnboardingId,
+  //       `${STARTING_INSTRUCTIONS}\n${instructions.trim()}`
+  //     );
+  //   })();
 
-    // Delete all old samples
-    for (const message of currentMessages) {
-      // We don't need to wait for this, just needs to happen before the next generateMessages call
-      deleteSample(userToken, message.id);
-    }
+  //   const interval = setInterval(() => {
+  //     setCount(count + 1);
+  //   }, 1000);
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  // }, [instructions, count, setCount]);
 
-    if (response.status === "success") {
-      // Replace global state with only new samples
-      setVoiceBuilderMessages((prev) => {
-        return response.data.map((item: any) => {
-          return {
-            id: item.id,
-            value: item.sample_completion,
-            prospect: item.prospect,
-            meta_data: item.meta_data,
-          };
-        });
-      });
 
-      // If we didn't get samples, try again
-      if (response.data.length === 0) {
-        await generateMessages();
-      }
-    }
-
-    if (response?.data?.length > 0) {
-      setLoadingMsgGen(false);
-    }
-  };
-
-  // Finalize voice building and create voice
-  const completeVoice = async () => {
-    setLoadingComplete(true);
-    // Clone so we don't have to deal with async global state changes bs
-    const currentMessages = _.cloneDeep(voiceBuilderMessages);
-
-    // Delete all samples that are empty
-    for (const message of currentMessages) {
-      if (message.value === "") {
-        await deleteSample(userToken, message.id);
-      } else {
-        await updateSample(userToken, message.id, message.value);
-      }
-    }
-
-    const response = await createVoice(
-      userToken,
-      props.voiceBuilderOnboardingId
-    );
-
-    const configId = response.data.id;
-
-    if (props.createCampaign) {
-      // Also create and send the first campaign
-
-      const nextWeek = new Date();
-      nextWeek.setDate(nextWeek.getDate() + 7);
-
-      const response = await fetch(`${API_URL}/campaigns/instant`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          campaign_type: "LINKEDIN",
-          client_archetype_id: props.persona.id,
-          campaign_start_date: new Date().toISOString(),
-          campaign_end_date: nextWeek.toISOString(),
-          priority_rating: 10,
-          config_id: configId,
-          messages: currentMessages.filter(m => m.value.trim()).map((message) => {
-            return {
-              prospect_id: message.prospect?.id,
-              message: message.value,
-              cta_id: message.meta_data?.cta?.id,
-            };
-          }),
-        }),
-      });
-      if (response.status === 401) {
-        logout();
-      }
-      const res = await response.json();
-      console.log(res);
-    }
-
-    setLoadingComplete(false);
-    if (response.status === "success") {
-      props.onComplete?.();
-    }
-  };
 
   const generateSample = () => {
     // console log instructions and messages
@@ -512,35 +398,7 @@ export default function VoiceBuilderFlow(props: {
       });
   };
 
-  const openCompleteModal = () =>
-    openConfirmModal({
-      title: (
-        <Title order={2} ta="center">
-          Congrats!
-        </Title>
-      ),
-      children: (
-        <Stack>
-          <Box>
-            <Text size="lg" ta="center">You've edited your voice:</Text>
-            <Text size="lg" fw={700} ta="center">"{userData.sdr_name.split(" ")[0]}'s Voice"</Text>
-          </Box>
-          <Box>
-            <Text size="lg" ta="center">
-              The AI will study your samples to mimick your voice.
-            </Text>
-          </Box>
-          <Box>
-            <Text size="lg" ta="center">Come back to this module any time to edit.</Text>
-          </Box>
-        </Stack>
-      ),
-      labels: { confirm: "Create", cancel: "Cancel" },
-      onConfirm: async () => {
-        await completeVoice();
-      },
-      onCancel: () => {},
-    });
+  
 
   // if(voiceBuilderMessages.length === 0) {
   //   return <Text>No messages found.</Text>
@@ -548,50 +406,11 @@ export default function VoiceBuilderFlow(props: {
 
   return (
     <>
-      {loadingMsgGen && (
-        <div style={{ position: "relative" }}>
-          <ScrollArea style={{ position: "relative", height: 410 }}>
-            <Container>
-              <Text pt={15} px={2} fz="sm" fw={400}>
-                We'll have you edit 5 sample messages to your style.
-              </Text>
-              <Divider my="sm" />
-            </Container>
 
-            <Container w="100%">
-              {<Loader mx="auto" variant="dots" />}
-              <Text color="blue">Generating messages ...</Text>
-              {count > 2 && <Text color="blue">Researching prospects ...</Text>}
-              {count > 3 && <Text color="blue">Writing sample copy ...</Text>}
-              {count > 5 && (
-                <Text color="blue">Applying previous edits ...</Text>
-              )}
-              {count > 7 && <Text color="blue">Finalizing messages ...</Text>}
-              {count > 9 && <Text color="blue">Almost there ...</Text>}
-              {count > 15 && <Text color="blue">Making final touches ...</Text>}
-            </Container>
-            {/* {!loadingMsgGen &&
-            voiceBuilderMessages.map((item) => (
-              <ItemComponent
-                key={item.id}
-                id={item.id}
-                defaultValue={item.value}
-              />
-            ))} */}
-          </ScrollArea>
-        </div>
-      )}
 
       <LoadingOverlay visible={loadingComplete} overlayBlur={2} />
 
-      {!loadingMsgGen && (
-        <TrainYourAi
-          messages={voiceBuilderMessages.filter((msg) => msg.value)}
-          onComplete={async () => {
-            openCompleteModal();
-          }}
-        />
-      )}
+      
 
       {/* <Textarea
         placeholder={`- Please adjust titles to be less formal (i.e. lowercase, acronyms).\n- Avoid using the word 'impressive'.\n- Maintain a friendly & professional tone`}

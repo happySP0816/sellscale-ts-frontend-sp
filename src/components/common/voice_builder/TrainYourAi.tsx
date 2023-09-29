@@ -54,6 +54,8 @@ const TrainYourAi = (props: {
     // },
   ];
 
+  console.log(props.messages);
+
   const [approvedSet, setApprovedSet] = useState<Set<number>>(new Set());
   const percentComplete = ((approvedSet.size + 1) / props.messages.length) * 100;
 

@@ -16,10 +16,11 @@ import { useEffect, useRef, useState } from "react";
 import { TrainMessage } from "./TrainYourAi";
 import { proxyURL } from "@utils/general";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { userDataState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { voiceBuilderMessagesState } from "@atoms/voiceAtoms";
 import { IconTrash } from "@tabler/icons";
+import { deleteSample, updateSample } from "@utils/requests/voiceBuilder";
 
 const Content = (props: {
   messageId: number;
@@ -32,6 +33,7 @@ const Content = (props: {
   const MIN_CTA_ASSUMED_LENGTH = 80;
 
   const userData = useRecoilValue(userDataState);
+  const userToken = useRecoilValue(userTokenState);
 
   const [editing, setEditing] = useState(false);
   const [voiceBuilderMessages, setVoiceBuilderMessages] = useRecoilState(
@@ -69,6 +71,14 @@ const Content = (props: {
       );
       if (newMessage !== undefined) {
         setMessage(newMessage);
+      }
+
+      // Update the db
+      const msg = (newMessage !== undefined) ? newMessage : message;
+      if (msg) {
+        updateSample(userToken, props.messageId, msg);
+      } else {
+        deleteSample(userToken, props.messageId);
       }
     }
   };

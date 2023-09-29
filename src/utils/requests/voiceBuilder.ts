@@ -151,3 +151,19 @@ export async function createVoice(userToken: string, voice_builder_onboarding_id
   return await processResponse(response);
 
 }
+
+
+export async function getVoiceOnboardings(userToken: string, client_archetype_id: number): Promise<MsgResponse> {
+  
+  const response = await fetch(
+    `${API_URL}/voice_builder/onboardings?client_archetype_id=${client_archetype_id}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response, 'data');
+
+}

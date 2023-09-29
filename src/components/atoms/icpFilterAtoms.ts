@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { Prospect, ProspectICP } from "src";
+import { ProspectICP } from "src";
 
 const filterRuleSetState = atom({
   key: "icp-filter-rule-set",
@@ -10,7 +10,4 @@ const filterProspectsState = atom({
   default: [] as ProspectICP[],
 });
 
-export {
-  filterRuleSetState,
-  filterProspectsState,
-};
+export { filterRuleSetState, filterProspectsState };

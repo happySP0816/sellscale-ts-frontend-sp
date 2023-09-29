@@ -391,7 +391,7 @@ export default function SequenceSection() {
                 badgeHoverText={
                   bf0 && bf0Conversion
                     ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                    : "Not enough data, " + (bf0?.etl_num_times_used || 0) + " / " + (bf0?.etl_num_times_converted || 0)
+                    : "Not enough data, " + (bf0?.etl_num_times_converted || 0) + " / " + (bf0?.etl_num_times_used || 0)
                 }
                 bodyTitle={bf0?.title ?? ""}
                 // bodyText={bf0?.description ?? ""}
@@ -456,7 +456,7 @@ export default function SequenceSection() {
                 badgeHoverText={
                   bf1 && bf1Conversion
                     ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                    : "Not enough data, " + (bf1?.etl_num_times_used || 0 ) + " / " + (bf1?.etl_num_times_converted || 0)
+                    : "Not enough data, " + (bf1?.etl_num_times_converted || 0 ) + " / " + (bf1?.etl_num_times_used || 0)
                 }
                 bodyTitle={bf1?.title ?? ""}
                 // bodyText={bf1?.description ?? ""}
@@ -521,7 +521,7 @@ export default function SequenceSection() {
                 badgeHoverText={
                   bf2 && bf2Conversion
                     ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                    : "Not enough data, " + (bf2?.etl_num_times_used || 0) + " / " + (bf2?.etl_num_times_converted || 0)
+                    : "Not enough data, " + (bf2?.etl_num_times_converted || 0) + " / " + (bf2?.etl_num_times_used || 0)
                 }
                 bodyTitle={bf2?.title ?? ""}
                 // bodyText={bf2?.description ?? ""}
@@ -586,7 +586,7 @@ export default function SequenceSection() {
                 badgeHoverText={
                   bf3 && bf3Conversion
                     ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                    : "Not enough data, " + (bf3?.etl_num_times_used || 0) + " / " + (bf3?.etl_num_times_converted || 0)
+                    : "Not enough data, " + (bf3?.etl_num_times_converted || 0) + " / " + (bf3?.etl_num_times_used || 0)
                 }
                 bodyTitle={bf3?.title ?? ""}
                 // bodyText={bf3?.description ?? ""}
@@ -1619,8 +1619,8 @@ function FrameworkCard(props: {
                 props.conversion > 9.0
                   ? "Your open rates are above industry standards (9%). Congrats!"
                   : props.conversion <= 9.0 && props.conversion > 0.0
-                  ? "Your open rates are below industry standards (9%). Try changing your message." + props.conversion
-                  : "Not enough data, " + props.timesUsed + " / " + props.timesConverted + " prospects have been bumped."
+                  ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " + (Math.round(props.conversion * 10) / 10) + "%."
+                  : "Not enough data, " + props.timesConverted + " / " + props.timesUsed + " prospects have been bumped."
               }
               withArrow
               withinPortal

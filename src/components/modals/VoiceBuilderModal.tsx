@@ -377,7 +377,7 @@ const VoiceBuilderModal: React.FC<{
               <ScrollArea style={{ position: "relative", height: 410 }}>
                 <Container>
                   <Text pt={15} px={2} fz="sm" fw={400}>
-                    We'll have you edit 5 sample messages to your style.
+                    We'll have you edit {MSG_GEN_AMOUNT} sample messages to your style.
                   </Text>
                   <Divider my="sm" />
                 </Container>

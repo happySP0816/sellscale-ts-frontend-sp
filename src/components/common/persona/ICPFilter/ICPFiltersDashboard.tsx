@@ -50,8 +50,11 @@ import { ProspectICP } from "src";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { openConfirmModal } from "@mantine/modals";
 import { moveToUnassigned } from "@utils/requests/moveToUnassigned";
-import { filterProspectsState } from "@atoms/icpFilterAtoms";
-import { IconX } from '@tabler/icons';
+import {
+  filterProspectsState,
+  filterRuleSetState,
+} from "@atoms/icpFilterAtoms";
+import { IconX } from "@tabler/icons";
 
 const demoData = [
   {
@@ -154,6 +157,7 @@ const ICPFiltersDashboard: FC<{
   const getSelectedRowCount = useMemo(() => {
     return Object.keys(selectedRows).length;
   }, [selectedRows]);
+  const globalRuleSetData = useRecoilValue(filterRuleSetState);
 
   useEffect(() => {
     let newFilters: DataGridFiltersState = [];
@@ -188,7 +192,7 @@ const ICPFiltersDashboard: FC<{
         },
       ];
     }
-    console.log(newFilters);
+
     setColumnFilters(newFilters);
   }, [selectedTab, globalSearch]);
 
@@ -274,56 +278,74 @@ const ICPFiltersDashboard: FC<{
         {
           label: "Very High",
           color: "#009512",
-          badgeColor: 'green',
+          badgeColor: "green",
           bgColor: "rgba(0, 149, 18, 0.05)",
           percent: (icp_analytics["4"] / icp_analytics["Total"]) * 100,
           value: icp_analytics["4"] + "",
-          gridWidthOf20: icp_analytics["4"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["4"] / icp_analytics["Total"]) * 20
+          gridWidthOf20:
+            icp_analytics["4"] / icp_analytics["Total"] < 0.1
+              ? 2
+              : (icp_analytics["4"] / icp_analytics["Total"]) * 20,
         },
         {
           label: "High",
           color: "#3B85EF",
-          badgeColor: 'blue',
+          badgeColor: "blue",
           bgColor: "rgba(59, 133, 239, 0.05)",
           percent: (icp_analytics["3"] / icp_analytics["Total"]) * 100,
           value: icp_analytics["3"] + "",
-          gridWidthOf20: icp_analytics["3"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["3"] / icp_analytics["Total"]) * 20
+          gridWidthOf20:
+            icp_analytics["3"] / icp_analytics["Total"] < 0.1
+              ? 2
+              : (icp_analytics["3"] / icp_analytics["Total"]) * 20,
         },
         {
           label: "Medium",
           color: "#EFBA50",
-          badgeColor: 'yellow',
+          badgeColor: "yellow",
           percent: (icp_analytics["2"] / icp_analytics["Total"]) * 100,
           bgColor: "rgba(239, 186, 80, 0.05)",
           value: icp_analytics["2"] + "",
-          gridWidthOf20: icp_analytics["2"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["2"] / icp_analytics["Total"]) * 20
+          gridWidthOf20:
+            icp_analytics["2"] / icp_analytics["Total"] < 0.1
+              ? 2
+              : (icp_analytics["2"] / icp_analytics["Total"]) * 20,
         },
         {
           label: "Low",
           color: "#EB8231",
-          badgeColor: 'orange',
+          badgeColor: "orange",
           percent: (icp_analytics["1"] / icp_analytics["Total"]) * 100,
           bgColor: "rgba(235, 130, 49, 0.05)",
           value: icp_analytics["1"] + "",
-          gridWidthOf20: icp_analytics["1"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["1"] / icp_analytics["Total"]) * 20
+          gridWidthOf20:
+            icp_analytics["1"] / icp_analytics["Total"] < 0.1
+              ? 2
+              : (icp_analytics["1"] / icp_analytics["Total"]) * 20,
         },
         {
           label: "Very Low",
           color: "#E5564E",
-          badgeColor: 'red',
+          badgeColor: "red",
           percent: (icp_analytics["0"] / icp_analytics["Total"]) * 100,
           bgColor: "rgba(229, 86, 78, 0.05)",
           value: icp_analytics["0"] + "",
-          gridWidthOf20: icp_analytics["0"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["0"] / icp_analytics["Total"]) * 20
+          gridWidthOf20:
+            icp_analytics["0"] / icp_analytics["Total"] < 0.1
+              ? 2
+              : (icp_analytics["0"] / icp_analytics["Total"]) * 20,
         },
         {
           label: "Unscored",
           color: "#84818A",
-          badgeColor: 'gray',
+          badgeColor: "gray",
           bgColor: "rgba(132, 129, 138, 0.05)",
           percent: (icp_analytics["-1"] / icp_analytics["Total"]) * 100,
           value: icp_analytics["-1"] + "",
-          gridWidthOf20: icp_analytics["-1"] / icp_analytics["Total"] < 0.1 ? 2 : (icp_analytics["-1"] / icp_analytics["Total"]) * 20
+          gridWidthOf20:
+            icp_analytics["-1"] / icp_analytics["Total"] < 0.1
+              ? 2
+              : (icp_analytics["-1"] / icp_analytics["Total"]) * 20,
         },
       ]);
 
@@ -334,6 +356,54 @@ const ICPFiltersDashboard: FC<{
     },
     enabled: !!currentProject,
   });
+  const displayProspects = useMemo(() => {
+    let filteredProspects = icpProspects;
+    console.log(globalRuleSetData);
+    if (
+      globalRuleSetData.included_individual_title_keywords &&
+      globalRuleSetData.included_individual_title_keywords.length > 0
+    ) {
+      filteredProspects = filteredProspects.filter((f) =>
+        (
+          globalRuleSetData.included_individual_title_keywords as string[]
+        ).includes(f.title)
+      );
+    }
+    if (
+      globalRuleSetData.excluded_individual_title_keywords &&
+      globalRuleSetData.excluded_individual_title_keywords.length > 0
+    ) {
+      filteredProspects = filteredProspects.filter(
+        (f) =>
+          !(
+            globalRuleSetData.excluded_individual_title_keywords as string[]
+          ).includes(f.title)
+      );
+    }
+
+    if (
+      globalRuleSetData.included_company_name_keywords &&
+      globalRuleSetData.included_company_name_keywords.length > 0
+    ) {
+      filteredProspects = filteredProspects.filter((f) =>
+        (globalRuleSetData.included_company_name_keywords as string[]).includes(
+          f.company
+        )
+      );
+    }
+    if (
+      globalRuleSetData.excluded_company_name_keywords &&
+      globalRuleSetData.excluded_company_name_keywords.length > 0
+    ) {
+      filteredProspects = filteredProspects.filter(
+        (f) =>
+          !(
+            globalRuleSetData.excluded_company_name_keywords as string[]
+          ).includes(f.company)
+      );
+    }
+    return filteredProspects;
+  }, [globalRuleSetData, icpProspects]);
 
   return (
     <Box
@@ -353,16 +423,14 @@ const ICPFiltersDashboard: FC<{
       >
         <Box style={{ display: "flex", alignItems: "center" }}>
           <Box ml={"0.5rem"}>
-            <ProjectSelect 
-              extraBig 
-              onClick={
-                () => {
-                  queryClient.refetchQueries({
-                    queryKey: [`query-get-icp-prospects`],
-                  });
-                  refetch();
-                }
-              }
+            <ProjectSelect
+              extraBig
+              onClick={() => {
+                queryClient.refetchQueries({
+                  queryKey: [`query-get-icp-prospects`],
+                });
+                refetch();
+              }}
             />
           </Box>
         </Box>
@@ -371,8 +439,7 @@ const ICPFiltersDashboard: FC<{
             <Button variant="default" sx={{ color: "gray !important" }}>
               <span style={{ marginLeft: "6px", color: theme.colors.blue[5] }}>
                 {currentProject?.num_unused_li_prospects} /{" "}
-                {currentProject?.num_prospects}{" "}
-                remaining
+                {currentProject?.num_prospects} remaining
               </span>
             </Button>
             <Button variant="default" sx={{ color: "gray !important" }}>
@@ -442,7 +509,7 @@ const ICPFiltersDashboard: FC<{
               <Box
                 key={`filter-${index}`}
                 style={{
-                  width: Math.floor(icp.gridWidthOf20 / 20 * 100) + '%'
+                  width: Math.floor((icp.gridWidthOf20 / 20) * 100) + "%",
                 }}
               >
                 <Paper
@@ -455,12 +522,20 @@ const ICPFiltersDashboard: FC<{
                   p="md"
                   radius="7px"
                 >
-                  <Text fz='10px' fw='bold'>{icp.label}</Text>
+                  <Text fz="10px" fw="bold">
+                    {icp.label}
+                  </Text>
                   <Flex>
                     <Title size={"20px"} fw={500}>
                       {icp.value}
                     </Title>
-                    <Badge color={icp.badgeColor} size='xs' mt='4px' ml='4px' variant='filled'>
+                    <Badge
+                      color={icp.badgeColor}
+                      size="xs"
+                      mt="4px"
+                      ml="4px"
+                      variant="filled"
+                    >
                       {icp.percent.toFixed(1)}%
                     </Badge>
                   </Flex>
@@ -474,7 +549,7 @@ const ICPFiltersDashboard: FC<{
                   color={icp.color}
                   radius={"11px"}
                   size={"lg"}
-                  label={icp.percent.toFixed(1) + '%'}
+                  label={icp.percent.toFixed(1) + "%"}
                 />
               </Box>
             );
@@ -615,15 +690,12 @@ const ICPFiltersDashboard: FC<{
       </Paper>
 
       <DataGrid
-        data={icpProspects}
+        data={displayProspects}
         highlightOnHover
         withPagination
         withSorting
         withRowSelection
         withColumnResizing
-        onFilter={(arg) => {
-          console.log(arg);
-        }}
         columns={[
           {
             accessorKey: "icp_fit_score",
@@ -636,31 +708,31 @@ const ICPFiltersDashboard: FC<{
               switch (score) {
                 case -1:
                   readable_score = "Unscored";
-                  color = 'gray'
+                  color = "gray";
                   break;
                 case 0:
                   readable_score = "Very Low";
-                  color = 'red'
+                  color = "red";
                   break;
                 case 1:
                   readable_score = "Low";
-                  color = 'orange'
+                  color = "orange";
                   break;
                 case 2:
                   readable_score = "Medium";
-                  color = 'yellow'
+                  color = "yellow";
                   break;
                 case 3:
                   readable_score = "High";
-                  color = 'blue'
+                  color = "blue";
                   break;
                 case 4:
                   readable_score = "Very High";
-                  color = 'green'
+                  color = "green";
                   break;
                 default:
                   readable_score = "Unknown";
-                  color = 'gray'
+                  color = "gray";
                   break;
               }
 
@@ -683,71 +755,95 @@ const ICPFiltersDashboard: FC<{
             filterFn: stringFilterFn,
             header: "ICP FIT REASON",
             cell: (cell) => {
-              const values = cell.cell?.getValue<string>()?.split(") (").map(
-                x => x.replaceAll(")", "").replaceAll("(", "")
-              )
+              const values = cell.cell
+                ?.getValue<string>()
+                ?.split(") (")
+                .map((x) => x.replaceAll(")", "").replaceAll("(", ""));
 
               return (
                 <Flex gap={"0.25rem"} align={"center"}>
                   {values?.map((v) => (
                     <Flex key={v} gap={"0.25rem"} align={"center"}>
-                      <Tooltip
-                        label={v}
-                        >
+                      <Tooltip label={v}>
                         <Flex
                           justify={"center"}
                           align={"center"}
                           style={{ borderRadius: "4px" }}
-                          bg={v.includes("✅") ? 'green' : v.includes('❌') ? 'red' : 'yellow'}
+                          bg={
+                            v.includes("✅")
+                              ? "green"
+                              : v.includes("❌")
+                              ? "red"
+                              : "yellow"
+                          }
                           p={"0.25rem"}
                           w={"1rem"}
                           h={"1rem"}
-                          sx={{cursor: 'pointer'}}
+                          sx={{ cursor: "pointer" }}
                         >
-                          {
-                            v.includes("✅") ? <IconCheck color="white" /> : v.includes('❌') ? <IconX color="white" /> : <IconPlus color="white" />
-                          }
+                          {v.includes("✅") ? (
+                            <IconCheck color="white" />
+                          ) : v.includes("❌") ? (
+                            <IconX color="white" />
+                          ) : (
+                            <IconPlus color="white" />
+                          )}
                         </Flex>
                       </Tooltip>
                       {/* {v} */}
                     </Flex>
                   ))}
-                    <HoverCard width={280} shadow="md">
-                      <HoverCard.Target>
-                        <Badge
-                          color='green' ml='xs' variant='outline' size='xs' sx={{cursor: 'pointer'}}>
-                            Show Details
-                        </Badge>
-                      </HoverCard.Target>
-                      <HoverCard.Dropdown w='280' p='0'>
-                        {values?.map((v, i) => (
-                            <>
-                              <Flex key={v} gap={"0.25rem"} align={"center"} mb='8px' mt='8px'>
-                                <Tooltip
-                                  label={v}
-                                  >
-                                  <Flex
-                                    ml='md'
-                                    mr='md'
-                                    justify={"center"}
-                                    align={"center"}
-                                    style={{ borderRadius: "4px" }}
-                                    bg={v.includes("✅") ? 'green' : v.includes('❌') ? 'red' : 'yellow'}
-                                    p={"0.25rem"}
-                                    w={"1rem"}
-                                    h={"1rem"}
-                                    sx={{cursor: 'pointer'}}
-                                  >
-                                    <IconCheck color="white" />
-                                  </Flex>
-                                </Tooltip>
-                                <Text size='xs'>{v.substring(2)}</Text>
+                  <HoverCard width={280} shadow="md">
+                    <HoverCard.Target>
+                      <Badge
+                        color="green"
+                        ml="xs"
+                        variant="outline"
+                        size="xs"
+                        sx={{ cursor: "pointer" }}
+                      >
+                        Show Details
+                      </Badge>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown w="280" p="0">
+                      {values?.map((v, i) => (
+                        <>
+                          <Flex
+                            key={v}
+                            gap={"0.25rem"}
+                            align={"center"}
+                            mb="8px"
+                            mt="8px"
+                          >
+                            <Tooltip label={v}>
+                              <Flex
+                                ml="md"
+                                mr="md"
+                                justify={"center"}
+                                align={"center"}
+                                style={{ borderRadius: "4px" }}
+                                bg={
+                                  v.includes("✅")
+                                    ? "green"
+                                    : v.includes("❌")
+                                    ? "red"
+                                    : "yellow"
+                                }
+                                p={"0.25rem"}
+                                w={"1rem"}
+                                h={"1rem"}
+                                sx={{ cursor: "pointer" }}
+                              >
+                                <IconCheck color="white" />
                               </Flex>
-                              {i !== values.length - 1 && <Divider />}
-                            </>
-                          ))}
-                      </HoverCard.Dropdown>
-                    </HoverCard>
+                            </Tooltip>
+                            <Text size="xs">{v.substring(2)}</Text>
+                          </Flex>
+                          {i !== values.length - 1 && <Divider />}
+                        </>
+                      ))}
+                    </HoverCard.Dropdown>
+                  </HoverCard>
                 </Flex>
               );
             },
@@ -764,11 +860,11 @@ const ICPFiltersDashboard: FC<{
                   gap: "0.5rem",
                 }}
                 target="_blank"
-                href={'https://' + cell.row.original.linkedin_url}
+                href={"https://" + cell.row.original.linkedin_url}
                 color={theme.colors.blue[6]}
                 fw={600}
               >
-                {cell.row.original.full_name}'s {" "}
+                {cell.row.original.full_name}'s{" "}
                 {getChannelType(cell.getValue<string>())}
                 <IconExternalLink size={16} />
               </Anchor>

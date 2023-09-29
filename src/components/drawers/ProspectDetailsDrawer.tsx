@@ -85,11 +85,11 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
   const [fetchingProspect, setFetchingProspect] = useState(false);
   const [prospect, setProspect] = useState<ProspectShallow | undefined>(undefined);
 
-  useEffect(() => {
-    if (prospectId !== openedProspectId) {
-      setOpenedProspectId(prospectId);
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (prospectId !== openedProspectId) {
+  //     setOpenedProspectId(prospectId);
+  //   }
+  // }, []);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospect-details-${prospectId}`],

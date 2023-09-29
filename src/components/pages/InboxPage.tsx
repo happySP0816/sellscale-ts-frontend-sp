@@ -1,4 +1,4 @@
-import { nurturingModeState } from "@atoms/inboxAtoms";
+import { nurturingModeState, openedProspectIdState } from "@atoms/inboxAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { prospectShowPurgatoryState } from "@atoms/prospectAtoms";
 import { userTokenState, userDataState } from "@atoms/userAtoms";

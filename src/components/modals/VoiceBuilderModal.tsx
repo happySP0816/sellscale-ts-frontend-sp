@@ -158,6 +158,12 @@ const VoiceBuilderModal: React.FC<{
   });
 
   useEffect(() => {
+    if(!opened) {
+      setCount(0);
+    }
+  }, [opened]);
+
+  useEffect(() => {
     if (loading) {
       interval.start();
     } else {

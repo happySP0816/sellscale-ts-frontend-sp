@@ -56,9 +56,11 @@ export default function InboxPage(props: { all?: boolean }) {
   });
   const prospects = data ?? [];
 
-  if (!queryComplete) return <Card w='250px' h='250px' m='10% auto' withBorder>
-    <Loader m='88px 88px' />
-  </Card>;
+  if (!queryComplete) return (
+    <Card w='250px' h='250px' m='10% auto' withBorder>
+      <Loader m='88px 88px' />
+    </Card>
+  );
 
   return (
     <Grid columns={100} gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: 'hidden' }}>

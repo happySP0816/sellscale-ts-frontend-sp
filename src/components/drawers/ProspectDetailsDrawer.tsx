@@ -89,7 +89,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
     if (prospectId !== openedProspectId) {
       setOpenedProspectId(prospectId);
     }
-  })
+  }, []);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospect-details-${prospectId}`],

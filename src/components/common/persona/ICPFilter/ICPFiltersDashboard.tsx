@@ -164,24 +164,17 @@ const ICPFiltersDashboard: FC<{
 
   useEffect(() => {
     let newFilters: DataGridFiltersState = [];
-    if (globalSearch) {
-      newFilters = [
-        {
-          id: "title",
-          value: {
-            op: "in",
-            value: globalSearch,
-          },
-        },
-        {
-          id: "full_name",
-          value: {
-            op: "in",
-            value: globalSearch,
-          },
-        },
-      ];
-    }
+    // if (globalSearch) {
+    //   newFilters = [
+    //     {
+    //       id: "title",
+    //       value: {
+    //         op: "in",
+    //         value: globalSearch,
+    //       },
+    //     },
+    //   ];
+    // }
 
     if (selectedTab && selectedTab.value !== "all") {
       newFilters = [
@@ -361,52 +354,17 @@ const ICPFiltersDashboard: FC<{
   });
   const displayProspects = useMemo(() => {
     let filteredProspects = icpProspects;
-    console.log(globalRuleSetData);
-    if (
-      globalRuleSetData.included_individual_title_keywords &&
-      globalRuleSetData.included_individual_title_keywords.length > 0
-    ) {
-      filteredProspects = filteredProspects.filter((f) =>
-        (
-          globalRuleSetData.included_individual_title_keywords as string[]
-        ).includes(f.title)
-      );
-    }
-    if (
-      globalRuleSetData.excluded_individual_title_keywords &&
-      globalRuleSetData.excluded_individual_title_keywords.length > 0
-    ) {
-      filteredProspects = filteredProspects.filter(
-        (f) =>
-          !(
-            globalRuleSetData.excluded_individual_title_keywords as string[]
-          ).includes(f.title)
-      );
-    }
 
-    if (
-      globalRuleSetData.included_company_name_keywords &&
-      globalRuleSetData.included_company_name_keywords.length > 0
-    ) {
-      filteredProspects = filteredProspects.filter((f) =>
-        (globalRuleSetData.included_company_name_keywords as string[]).includes(
-          f.company
-        )
+    filteredProspects = filteredProspects.filter((prospect) => {
+      return (
+        prospect.full_name.includes(globalSearch) ||
+        prospect.title.includes(globalSearch) ||
+        prospect.company.includes(globalSearch)
       );
-    }
-    if (
-      globalRuleSetData.excluded_company_name_keywords &&
-      globalRuleSetData.excluded_company_name_keywords.length > 0
-    ) {
-      filteredProspects = filteredProspects.filter(
-        (f) =>
-          !(
-            globalRuleSetData.excluded_company_name_keywords as string[]
-          ).includes(f.company)
-      );
-    }
+    });
+
     return filteredProspects;
-  }, [globalRuleSetData, icpProspects]);
+  }, [globalSearch, icpProspects]);
 
   return (
     <Box
@@ -693,6 +651,7 @@ const ICPFiltersDashboard: FC<{
         />
       </Paper>
 
+      <Text>{displayProspects.length}</Text>
       <DataGrid
         data={displayProspects}
         highlightOnHover

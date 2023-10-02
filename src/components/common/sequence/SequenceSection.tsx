@@ -46,6 +46,7 @@ import {
   Container,
   Progress,
   ThemeIcon,
+  Alert,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
@@ -104,6 +105,7 @@ import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
 import { showNotification } from "@mantine/notifications";
 import {
   IconArrowRight,
+  IconBulb,
   IconChevronRight,
   IconCircle,
   IconRobot,
@@ -2070,6 +2072,10 @@ function FrameworkSection(props: {
                       value: "pain-points-opener",
                       label: "Pain points opener",
                     },
+                    {
+                      value: "any-other-person",
+                      label: "Any other person?"
+                    }
                   ].concat([
                     { value: "make-your-own", label: "🛠 Make your own" },
                   ])}
@@ -2106,7 +2112,6 @@ function FrameworkSection(props: {
                     const raw_prompt = framework.raw_prompt;
                     const human_readable_prompt =
                       framework.human_readable_prompt;
-                    const context_question = framework.context_question;
                     const length = framework.length;
 
                     form.setFieldValue("bumpFrameworkTemplateName", value);
@@ -2117,14 +2122,9 @@ function FrameworkSection(props: {
 
                     setHumanReadableContext(human_readable_prompt);
 
-                    if (context_question) {
-                      setContextQuestion(context_question);
-                    }
-
                     form.setFieldValue("promptInstructions", raw_prompt);
                     form.setFieldValue("frameworkName", name);
                     form.setFieldValue("bumpLength", length);
-                    form.setFieldValue("additionalContext", context_question);
                     setChanged(true);
                   }}
                 />
@@ -2163,12 +2163,17 @@ function FrameworkSection(props: {
             </Box>
           </Card>
 
+          {form.values.promptInstructions.includes("Answer:") && <Alert icon={<IconBulb size="1rem" />} variant="outline" onClick={toggle} sx={{cursor: 'pointer'}}>
+            <Text color='blue' fz='12px'>Note: This framework requires you fill out additional context in the prompt. Please press 'Advanced Settings'</Text>
+          </Alert>}
+
           <form
             onChange={() => {
               setChanged(true);
             }}
           >
-            {form.values.additionalContext && (
+            {/* todo(Aakash) - remove this START */}
+            {/* {false && form.values.additionalContext && (
               <Box mb="xs">
                 <Group>
                   <Button
@@ -2210,7 +2215,8 @@ function FrameworkSection(props: {
                   </Box>
                 </Collapse>
               </Box>
-            )}
+            )} */}
+            {/* todo(Aakash) - remove this END */}
 
             <Box maw={"100%"} mx="auto">
               <Group>
@@ -2221,7 +2227,7 @@ function FrameworkSection(props: {
                   variant="outline"
                   leftIcon={<IconTools size={"0.8rem"} />}
                 >
-                  {opened ? "Edit Framework" : "Show Advanced Settings"}
+                  {opened ? "Hide Advanced Settings" : "Show Advanced Settings"}
                 </Button>
               </Group>
               <Collapse in={opened} mt={"xs"}>

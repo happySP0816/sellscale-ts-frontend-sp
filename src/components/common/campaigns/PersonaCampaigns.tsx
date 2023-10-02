@@ -743,7 +743,10 @@ function PersonCampaignCard(props: {
                   setCurrentProject(props.project);
                   navigateToPage(
                     navigate,
-                    `/setup/${sectionType.toLowerCase()}`
+                    `/setup/${sectionType.toLowerCase()}`,
+                    new URLSearchParams(
+                      `?campaign_id=${props.persona.id}`
+                    )
                   );
                 }}
               />
@@ -765,7 +768,10 @@ function PersonCampaignCard(props: {
                         setCurrentProject(props.project);
                         navigateToPage(
                           navigate,
-                          `/setup/${section.type.toLowerCase()}`
+                          `/setup/${section.type.toLowerCase()}`,
+                          new URLSearchParams(
+                            `?campaign_id=${props.persona.id}`
+                          )
                         );
                       }}
                     />
@@ -789,7 +795,10 @@ function PersonCampaignCard(props: {
                               setCurrentProject(props.project);
                               navigateToPage(
                                 navigate,
-                                `/setup/${section.type.toLowerCase()}`
+                                `/setup/${section.type.toLowerCase()}`,
+                                new URLSearchParams(
+                                  `?campaign_id=${props.persona.id}`
+                                )
                               );
                             }}
                           />

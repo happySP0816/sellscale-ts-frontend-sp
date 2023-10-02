@@ -366,9 +366,14 @@ const ICPFiltersDashboard: FC<{
     return filteredProspects;
   }, [globalSearch, icpProspects]);
 
-  const averageICPFitScore = icpProspects.map(x => x.icp_fit_score).reduce((a,b) => a+b) / icpProspects.length
+  let averageICPFitScore = 0
   let averageICPFitLabel = ""
   let averageICPFitColor = ""
+  if (icpProspects.length > 0) {
+    averageICPFitScore = icpProspects.map(x => x.icp_fit_score).reduce((a,b) => a+b) / icpProspects.length
+    averageICPFitLabel = ""
+    averageICPFitColor = ""
+  }
   if (averageICPFitScore < 0.5) {
     averageICPFitLabel = "Very Low"
     averageICPFitColor = "red"
@@ -686,6 +691,7 @@ const ICPFiltersDashboard: FC<{
           {
             accessorKey: "icp_fit_score",
             header: "ICP SCORE",
+            maxSize: 140,
             cell: (cell) => {
               const score = cell.cell.getValue<number>();
               let readable_score = "";
@@ -865,7 +871,19 @@ const ICPFiltersDashboard: FC<{
           rowSelection: selectedRows,
         }}
         w={"100%"}
-        onRowSelectionChange={setSelectedRows}
+        onRowSelectionChange={(rows) => {
+          if (Object.keys(rows).length > 10) {
+            setSelectedRows(
+              Object.keys(rows)
+                .slice(0, 10)
+                .reduce((obj: any, key: any) => {
+                  obj[key] = rows[key];
+                  return obj;
+                }, {})
+            );
+          }
+          setSelectedRows(rows)
+        }}
         styles={(theme) => ({
           thead: {
             backgroundColor: theme.colors.gray[0],

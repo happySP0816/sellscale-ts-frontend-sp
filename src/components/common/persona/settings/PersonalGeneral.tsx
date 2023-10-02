@@ -53,10 +53,9 @@ export const PersonaGeneral = () => {
   };
 
   const triggerBasicPersonaDeactivation = async () => {
-    setLoading(true);
 
     if (currentProject == null) {
-      setLoading(false);
+      alert("No current project");
       return;
     }
 
@@ -75,15 +74,11 @@ export const PersonaGeneral = () => {
         color: "red",
       });
     }
-
-    setLoading(false);
   };
 
   const triggerHardPersonaDeactivation = async () => {
-    setLoading(true);
-
     if (currentProject == null) {
-      setLoading(false);
+      alert("No current project");
       return;
     }
 
@@ -102,8 +97,6 @@ export const PersonaGeneral = () => {
         color: "red",
       });
     }
-
-    setLoading(false);
   };
 
 

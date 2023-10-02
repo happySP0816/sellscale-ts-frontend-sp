@@ -56,6 +56,8 @@ const SideInformation = (props: { message: TrainMessage }) => {
     },
   ];
 
+  console.log(information, props.message.prospect)
+
   return (
     <ScrollArea
       sx={{
@@ -106,7 +108,11 @@ const SideInformation = (props: { message: TrainMessage }) => {
                 </Text>
 
                 {info.link && (
-                  <ActionIcon>
+                  <ActionIcon
+                    component="a"
+                    href={info.link.substring(0, 4) === "http" ? info.link : `https://${info.link}`}
+                    target="_blank"
+                  >
                     <IconExternalLink width={14} />
                   </ActionIcon>
                 )}
@@ -134,12 +140,12 @@ const SideInformation = (props: { message: TrainMessage }) => {
       >
         <Flex justify={"space-between"}>
           <Text weight={700}>CTA Used</Text>
-          <Button variant="light" compact>
+          {/* <Button variant="light" compact>
             <IconBrandLinkedin width={12} />
             <Text weight={700} ml={".25rem"}>
               Linkedin
             </Text>
-          </Button>
+          </Button> */}
         </Flex>
 
         <Box

@@ -46,6 +46,7 @@ import {
   Container,
   Progress,
   ThemeIcon,
+  Alert,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
@@ -104,6 +105,7 @@ import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
 import { showNotification } from "@mantine/notifications";
 import {
   IconArrowRight,
+  IconBulb,
   IconChevronRight,
   IconCircle,
   IconRobot,
@@ -229,6 +231,21 @@ export default function SequenceSection() {
       setActiveCard(cardNumber);
     }
   };
+
+  const bumpConversionColor = (bf: BumpFramework | undefined, conversion: number | undefined) => {
+    return bf && 
+      conversion && 
+      bf?.etl_num_times_used && 
+      conversion > 5 && 
+      bf?.etl_num_times_used > 10 
+        ? "green" : 
+          !bf?.etl_num_times_used || 
+          (bf?.etl_num_times_used && 
+          bf?.etl_num_times_used < 10)
+          ? "gray" 
+          : "red"
+  }
+
   return (
     <>
       <Modal.Root
@@ -386,6 +403,9 @@ export default function SequenceSection() {
                 badgeText={`Reply ${
                   bf0Conversion ? bf0Conversion.toFixed(0) + "%" : "TBD"
                 }`}
+                badgeColor={
+                  bumpConversionColor(bf0, bf0Conversion)
+                }
                 timesUsed={bf0?.etl_num_times_used ?? 0}
                 timesConverted={bf0?.etl_num_times_converted ?? 0}
                 badgeHoverText={
@@ -458,6 +478,9 @@ export default function SequenceSection() {
                     ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
                     : "Not enough data, " + (bf1?.etl_num_times_converted || 0 ) + " / " + (bf1?.etl_num_times_used || 0)
                 }
+                badgeColor={
+                  bumpConversionColor(bf1, bf1Conversion)
+                }
                 bodyTitle={bf1?.title ?? ""}
                 // bodyText={bf1?.description ?? ""}
                 footer={
@@ -518,6 +541,9 @@ export default function SequenceSection() {
                 }`}
                 timesUsed={bf2?.etl_num_times_used ?? 0}
                 timesConverted={bf2?.etl_num_times_converted ?? 0}
+                badgeColor={
+                  bumpConversionColor(bf2, bf2Conversion)
+                }
                 badgeHoverText={
                   bf2 && bf2Conversion
                     ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
@@ -581,6 +607,9 @@ export default function SequenceSection() {
                 badgeText={`Reply ${
                   bf3Conversion ? bf3Conversion.toFixed(0) + "%" : "TBD"
                 }`}
+                badgeColor={
+                  bumpConversionColor(bf3, bf3Conversion)
+                }
                 timesUsed={bf3?.etl_num_times_used ?? 0}
                 timesConverted={bf3?.etl_num_times_converted ?? 0}
                 badgeHoverText={
@@ -1558,6 +1587,7 @@ function FrameworkCard(props: {
     bumpedFrameworks: BumpFramework[];
     activeBumpFrameworkId: number;
   };
+  badgeColor?: string;
 }) {
   const { hovered, ref } = useHover();
 
@@ -1652,7 +1682,7 @@ function FrameworkCard(props: {
               >
                 <Badge
                   ml='auto'
-                  color="gray"
+                  color={props.badgeColor || 'gray'}
                   size="sm"
                   styles={{
                     root: { textTransform: "initial", fontWeight: 500 },
@@ -2042,6 +2072,10 @@ function FrameworkSection(props: {
                       value: "pain-points-opener",
                       label: "Pain points opener",
                     },
+                    {
+                      value: "any-other-person",
+                      label: "Any other person?"
+                    }
                   ].concat([
                     { value: "make-your-own", label: "🛠 Make your own" },
                   ])}
@@ -2078,7 +2112,6 @@ function FrameworkSection(props: {
                     const raw_prompt = framework.raw_prompt;
                     const human_readable_prompt =
                       framework.human_readable_prompt;
-                    const context_question = framework.context_question;
                     const length = framework.length;
 
                     form.setFieldValue("bumpFrameworkTemplateName", value);
@@ -2089,14 +2122,9 @@ function FrameworkSection(props: {
 
                     setHumanReadableContext(human_readable_prompt);
 
-                    if (context_question) {
-                      setContextQuestion(context_question);
-                    }
-
                     form.setFieldValue("promptInstructions", raw_prompt);
                     form.setFieldValue("frameworkName", name);
                     form.setFieldValue("bumpLength", length);
-                    form.setFieldValue("additionalContext", context_question);
                     setChanged(true);
                   }}
                 />
@@ -2135,12 +2163,17 @@ function FrameworkSection(props: {
             </Box>
           </Card>
 
+          {form.values.promptInstructions.includes("Answer:") && <Alert icon={<IconBulb size="1rem" />} variant="outline" onClick={toggle} sx={{cursor: 'pointer'}}>
+            <Text color='blue' fz='12px'>Note: This framework requires you fill out additional context in the prompt. Please press 'Advanced Settings'</Text>
+          </Alert>}
+
           <form
             onChange={() => {
               setChanged(true);
             }}
           >
-            {form.values.additionalContext && (
+            {/* todo(Aakash) - remove this START */}
+            {/* {false && form.values.additionalContext && (
               <Box mb="xs">
                 <Group>
                   <Button
@@ -2182,7 +2215,8 @@ function FrameworkSection(props: {
                   </Box>
                 </Collapse>
               </Box>
-            )}
+            )} */}
+            {/* todo(Aakash) - remove this END */}
 
             <Box maw={"100%"} mx="auto">
               <Group>
@@ -2193,7 +2227,7 @@ function FrameworkSection(props: {
                   variant="outline"
                   leftIcon={<IconTools size={"0.8rem"} />}
                 >
-                  {opened ? "Edit Framework" : "Show Advanced Settings"}
+                  {opened ? "Hide Advanced Settings" : "Show Advanced Settings"}
                 </Button>
               </Group>
               <Collapse in={opened} mt={"xs"}>

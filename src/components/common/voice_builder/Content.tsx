@@ -161,7 +161,7 @@ const Content = (props: {
 
             <Box
               sx={{
-                border: `1px solid ${borderGray}`,
+                border: `1px solid ${message.length > 300 ? 'red' : borderGray}`,
                 overflow: "auto",
                 borderRadius: 12,
                 position: "relative",
@@ -200,16 +200,20 @@ const Content = (props: {
                           paddingBottom: "0!important",
                         },
                       }}
+                      error={message.length > 300 ? true : null}
                     />
                   </FocusTrap>
                   <Text
-                  fz='xs'
-                  c='dimmed'
-                  sx={{
-                    position: "absolute",
-                    right: 5,
-                    bottom: 5,
-                  }}>{message.length}/300</Text>
+                    fz='xs'
+                    c={message.length > 300 ? 'red' : 'dimmed'}
+                    sx={{
+                      position: "absolute",
+                      right: 5,
+                      bottom: 5,
+                    }}
+                  >
+                    {message.length}/300
+                  </Text>
                 </Box>
               ) : (
                 <Text>
@@ -275,6 +279,7 @@ const Content = (props: {
           <Flex gap={"0.5rem"} mt={"2rem"}>
             <Button
               sx={{ flex: 1 }}
+              disabled={message.length > 300}
               onClick={() => {
                 setEditing(false);
                 saveMessages();

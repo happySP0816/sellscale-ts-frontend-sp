@@ -625,7 +625,7 @@ function PersonCampaignCard(props: {
             </Group>
           </Box>
 
-          <Box w="25%">
+          <Box w="20%">
             <Button
               variant="subtle"
               onClick={toggle}
@@ -645,7 +645,7 @@ function PersonCampaignCard(props: {
             </Button>
           </Box>
 
-          <Group w="200">
+          <Group w="250">
             <Button
               radius="xl"
               size="xs"
@@ -697,24 +697,24 @@ function PersonCampaignCard(props: {
               }
             >
               <span>
-                <Switch
-                  onLabel="Active"
-                  offLabel="Inactive"
-                  color="blue"
+                <Button
+                  color={personaActive ? "blue" : "gray"}
                   sx={{
                     border: "solid 1px white",
-                    borderRadius: "20px",
                     cursor: "pointer",
                   }}
-                  checked={personaActive}
-                  onChange={(event) => {
-                    setPersonaActive(event.currentTarget.checked);
-
+                  rightIcon={props.persona.active ? <IconCheck size="0.7rem" /> : <IconX size="0.7rem" />}
+                  size='xs'
+                  onClick={() => {
                     if (props.project == undefined) return;
 
                     setOpenedProspectId(-1);
                     setCurrentProject(props.project);
-                    navigateToPage(navigate, `/persona/settings`);
+                    navigateToPage(navigate, `/persona/settings`,
+                      new URLSearchParams(
+                        `?campaign_id=${props.persona.id}`
+                      )
+                    );
 
                     showNotification({
                       title: "Activate / Deactive Campaign from Settings",
@@ -725,7 +725,9 @@ function PersonCampaignCard(props: {
                       autoClose: 3000,
                     });
                   }}
-                />
+                >
+                  {personaActive ? "Active" : "Inactive"}
+                </Button>
               </span>
             </Tooltip>
           </Group>
@@ -741,7 +743,10 @@ function PersonCampaignCard(props: {
                   setCurrentProject(props.project);
                   navigateToPage(
                     navigate,
-                    `/setup/${sectionType.toLowerCase()}`
+                    `/setup/${sectionType.toLowerCase()}`,
+                    new URLSearchParams(
+                      `?campaign_id=${props.persona.id}`
+                    )
                   );
                 }}
               />
@@ -763,7 +768,10 @@ function PersonCampaignCard(props: {
                         setCurrentProject(props.project);
                         navigateToPage(
                           navigate,
-                          `/setup/${section.type.toLowerCase()}`
+                          `/setup/${section.type.toLowerCase()}`,
+                          new URLSearchParams(
+                            `?campaign_id=${props.persona.id}`
+                          )
                         );
                       }}
                     />
@@ -787,7 +795,10 @@ function PersonCampaignCard(props: {
                               setCurrentProject(props.project);
                               navigateToPage(
                                 navigate,
-                                `/setup/${section.type.toLowerCase()}`
+                                `/setup/${section.type.toLowerCase()}`,
+                                new URLSearchParams(
+                                  `?campaign_id=${props.persona.id}`
+                                )
                               );
                             }}
                           />

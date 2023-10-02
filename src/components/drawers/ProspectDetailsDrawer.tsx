@@ -79,10 +79,6 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
     prospectDrawerStatusesState
   );
   const persona_id = useRef(-1);
-  const [prospects, setProspects] = useState<ProspectShallow[]>([]);
-  const [fetchedProspectId, setFetchedProspectId] = useState(-1);
-  const [fetchedProspect, setFetchedProspect] = useState(false);
-  const [fetchingProspect, setFetchingProspect] = useState(false);
   const [prospect, setProspect] = useState<ProspectShallow | undefined>(undefined);
 
   // useEffect(() => {
@@ -124,35 +120,27 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
     refetchOnWindowFocus: false,
   });
 
-  if (!fetchedProspect) {
-    console.log("Entering prospectId if statement for prospectId: " + prospectId)
-
-    setFetchingProspect(true);
+  useEffect(() => {
     const response = getProspects(
-        userToken,
-        undefined,
-        "SELLSCALE",
-        10000, // TODO: Maybe use pagination method instead
-        ['ACCEPTED', 'BUMPED', 'ACTIVE_CONVO', 'DEMO', 'REMOVED'],
-        'ALL',
-        undefined,
-        true,
-        prospectId
-      ).then((res) => {
-        const prospects = res.data as ProspectShallow[];
-        const prospectTemp: ProspectShallow | undefined = prospects?.find((prospect) => prospect.id === prospectId);
-        console.log(prospectTemp)
-        setProspect(prospectTemp);
-      }).catch((err) => {
-        console.log(err)
-      }).finally(() => {
-        console.log("Setting fetching prospect to false")
-        setFetchingProspect(false);
-      })
-    setFetchedProspect(true)
-    setFetchingProspect(false);
-    setFetchedProspectId(prospectId);
-  }
+      userToken,
+      undefined,
+      "SELLSCALE",
+      10000, // TODO: Maybe use pagination method instead
+      ['ACCEPTED', 'BUMPED', 'ACTIVE_CONVO', 'DEMO', 'REMOVED'],
+      'ALL',
+      undefined,
+      true,
+      prospectId
+    ).then((res) => {
+      const prospects = res.data as ProspectShallow[];
+      const prospectTemp: ProspectShallow | undefined = prospects?.find((prospect) => prospect.id === prospectId);
+      setProspect(prospectTemp);
+      setOpenedProspectId(prospectTemp?.id ?? -1);
+    }).catch((err) => {
+      console.log(err)
+    });
+  }, [drawerOpened]);
+
 
   useEffect(() => {
     if (!data) {
@@ -349,12 +337,12 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                       }
                     )}
 
-                    {fetchingProspect ? 
+                    {/* {fetchingProspect ? 
                         <Card withBorder mt='xs'>
                           <Loader />
                         </Card>
                         : null 
-                    }
+                    } */}
                     {prospect && prospect?.overall_status !== 'PROSPECTED' && prospect?.overall_status !== 'SENT_OUTREACH' &&
                         <Card withBorder mt='xs'>
                           <Title order={4} mb="xs">

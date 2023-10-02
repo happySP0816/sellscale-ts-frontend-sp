@@ -26,6 +26,11 @@ export const PersonaGeneral = () => {
   }>();
 
   const triggerActivatePersona = async () => {
+    if (currentProject == null) {
+      alert("No current project");
+      return;
+    }
+    
     const result = await activatePersona(userToken, currentProject?.id);
     if (result.status === "success") {
       showNotification({

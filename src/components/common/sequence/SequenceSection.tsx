@@ -229,6 +229,21 @@ export default function SequenceSection() {
       setActiveCard(cardNumber);
     }
   };
+
+  const bumpConversionColor = (bf: BumpFramework | undefined, conversion: number | undefined) => {
+    return bf && 
+      conversion && 
+      bf?.etl_num_times_used && 
+      conversion > 5 && 
+      bf?.etl_num_times_used > 10 
+        ? "green" : 
+          !bf?.etl_num_times_used || 
+          (bf?.etl_num_times_used && 
+          bf?.etl_num_times_used < 10)
+          ? "gray" 
+          : "red"
+  }
+
   return (
     <>
       <Modal.Root
@@ -386,6 +401,9 @@ export default function SequenceSection() {
                 badgeText={`Reply ${
                   bf0Conversion ? bf0Conversion.toFixed(0) + "%" : "TBD"
                 }`}
+                badgeColor={
+                  bumpConversionColor(bf0, bf0Conversion)
+                }
                 timesUsed={bf0?.etl_num_times_used ?? 0}
                 timesConverted={bf0?.etl_num_times_converted ?? 0}
                 badgeHoverText={
@@ -458,6 +476,9 @@ export default function SequenceSection() {
                     ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
                     : "Not enough data, " + (bf1?.etl_num_times_converted || 0 ) + " / " + (bf1?.etl_num_times_used || 0)
                 }
+                badgeColor={
+                  bumpConversionColor(bf1, bf1Conversion)
+                }
                 bodyTitle={bf1?.title ?? ""}
                 // bodyText={bf1?.description ?? ""}
                 footer={
@@ -518,6 +539,9 @@ export default function SequenceSection() {
                 }`}
                 timesUsed={bf2?.etl_num_times_used ?? 0}
                 timesConverted={bf2?.etl_num_times_converted ?? 0}
+                badgeColor={
+                  bumpConversionColor(bf2, bf2Conversion)
+                }
                 badgeHoverText={
                   bf2 && bf2Conversion
                     ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
@@ -581,6 +605,9 @@ export default function SequenceSection() {
                 badgeText={`Reply ${
                   bf3Conversion ? bf3Conversion.toFixed(0) + "%" : "TBD"
                 }`}
+                badgeColor={
+                  bumpConversionColor(bf3, bf3Conversion)
+                }
                 timesUsed={bf3?.etl_num_times_used ?? 0}
                 timesConverted={bf3?.etl_num_times_converted ?? 0}
                 badgeHoverText={
@@ -1558,6 +1585,7 @@ function FrameworkCard(props: {
     bumpedFrameworks: BumpFramework[];
     activeBumpFrameworkId: number;
   };
+  badgeColor?: string;
 }) {
   const { hovered, ref } = useHover();
 
@@ -1652,7 +1680,7 @@ function FrameworkCard(props: {
               >
                 <Badge
                   ml='auto'
-                  color="gray"
+                  color={props.badgeColor || 'gray'}
                   size="sm"
                   styles={{
                     root: { textTransform: "initial", fontWeight: 500 },

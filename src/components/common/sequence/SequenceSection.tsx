@@ -99,7 +99,6 @@ import _, { set } from "lodash";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { BumpFramework, CTA } from "src";
-import { BUMP_FRAMEWORK_OPTIONS } from "./framework_constants";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
 import { showNotification } from "@mantine/notifications";
@@ -1858,6 +1857,40 @@ function FrameworkSection(props: {
     return result.status === "success" ? result.data.message : null;
   };
 
+  const [BUMP_FRAMEWORK_OPTIONS, setBUMP_FRAMEWORK_OPTIONS] = useState<any>({});
+
+  const getBumpFrameworkTemplates = async () => {
+    fetch(`${API_URL}/bump_framework/bump_framework_templates`, {
+      method: "GET",
+    })
+      .then((res) => {
+        const data = res.json()
+        console.log(data)
+        return data
+      })
+      .then((j) => {
+        let options: any = {}
+        const data = j['bump_framework_templates']
+        console.log(data)
+        data.forEach((template: any) => {
+          options[template.tag] = {
+            "name": template.name,
+            "raw_prompt": template.raw_prompt,
+            "human_readable_prompt": template.human_readable_prompt,
+            "length": template.length
+          }
+        });
+        console.log(options)
+
+        setBUMP_FRAMEWORK_OPTIONS(options)
+      });
+  }
+  
+  useEffect(() => {
+    getBumpFrameworkTemplates();
+    console.log("getBumpFrameworkTemplates")
+  }, []);
+
   const autoCompleteWithBrain = () => {
     setAiGenerating(true);
     fetch(`${API_URL}/ml/fill_prompt_from_brain`, {
@@ -2058,25 +2091,13 @@ function FrameworkSection(props: {
                   mr="xs"
                   w="100%"
                   placeholder="Select different template"
+                  searchable
                   clearable
-                  data={[
-                    {
-                      value: "role-have-to-do-with",
-                      label: "Does your role have to do with?",
-                    },
-                    {
-                      value: "short-introduction",
-                      label: "Short introduction",
-                    },
-                    {
-                      value: "pain-points-opener",
-                      label: "Pain points opener",
-                    },
-                    {
-                      value: "any-other-person",
-                      label: "Any other person?"
-                    }
-                  ].concat([
+                  data={Object.keys(BUMP_FRAMEWORK_OPTIONS).map((key: any) => {
+                    return {
+                    'value': key,
+                    'label': BUMP_FRAMEWORK_OPTIONS[key].name
+                  }}).concat([
                     { value: "make-your-own", label: "🛠 Make your own" },
                   ])}
                   onChange={(value: any) => {

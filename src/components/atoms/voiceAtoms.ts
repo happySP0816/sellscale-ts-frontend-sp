@@ -3,7 +3,7 @@ import { Prospect } from "src";
 
 const voiceBuilderMessagesState = atom({
   key: "voice-builder-messages",
-  default: [] as { id: number, value: string, prospect: Prospect | null, meta_data: any }[],
+  default: [] as { id: number, value: string, prospect: Prospect | null, meta_data: any, problems: any, highlighted_words: any }[],
 });
 
 export {

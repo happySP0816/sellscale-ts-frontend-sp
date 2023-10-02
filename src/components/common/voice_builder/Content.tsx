@@ -4,9 +4,14 @@ import {
   Badge,
   Box,
   Button,
+  Card,
+  Divider,
   Flex,
   FocusTrap,
+  Loader,
+  LoadingOverlay,
   ScrollArea,
+  Stack,
   Text,
   Textarea,
   Tooltip,
@@ -27,6 +32,7 @@ const Content = (props: {
   onNext: () => void;
   onDelete: () => void;
   onComplete: () => void;
+  refreshMessages: () => void;
   complete: boolean;
 }) => {
   const borderGray = "#E9ECEF";
@@ -50,8 +56,10 @@ const Content = (props: {
 
   const oldMessage = useRef("");
   const [message, setMessage] = useState(trainMessage.value.trim());
+  const [AILoading, setAILoading] = useState(false);
 
-  const saveMessages = (newMessage?: string) => {
+  const saveMessages = async (newMessage?: string) => {
+    setAILoading(true);
     const oldMessage = voiceBuilderMessages.find(
       (item) => item.id === props.messageId
     );
@@ -65,6 +73,8 @@ const Content = (props: {
               value: newMessage !== undefined ? newMessage : message,
               prospect: item.prospect,
               meta_data: item.meta_data,
+              problems: [],
+              highlighted_words: [],
             };
           }
           return item;
@@ -81,6 +91,11 @@ const Content = (props: {
       } else {
         deleteSample(userToken, props.messageId);
       }
+
+      // Refresh the messages
+      await props.refreshMessages();
+      setAILoading(false);
+      console.log('loaded')
     }
   };
 
@@ -99,6 +114,7 @@ const Content = (props: {
   let startMessage = message.replace(endMessage, "").trim();
 
   const [showTooltip, setShowTooltip] = useState(false);
+
   return (
     <Box px={"1.5rem"} py={"1.5rem"} h={"100%"}>
       <Flex w={"100%"} justify={"space-between"} align={"center"}>
@@ -362,6 +378,7 @@ const Content = (props: {
         </Button> */}
         {!props.complete ? (
           <Button
+            disabled={message.length > 300 || AILoading || editing}
             color="green"
             sx={{ borderRadius: 999 }}
             px={"3rem"}
@@ -394,6 +411,62 @@ const Content = (props: {
           </Button>
         )}
       </Flex>
+
+
+      {AILoading && (
+        <>
+          <Flex w='100%' justify='center' mt='xl' mb='2px'>
+            <Loader size={30} color='purple' />
+          </Flex>
+          <Flex w='100%' justify='center'>
+            <Text size='xs'>AI reviewing message for errors...</Text>
+          </Flex>
+        </>
+      )}
+      {
+        trainMessage.problems && trainMessage.problems.length > 0 && (
+          <Flex mt={"1.5rem"} w='100%'>
+
+            <Card
+              w='100%'
+              radius='md'
+              withBorder
+              sx={{ border: 'solid 1px rgb(202, 72, 63) !important' }}
+            >
+              <Card.Section
+                px='xs'
+                py='4px'
+                sx={{
+                  background: 'rgb(202, 72, 63)'
+                }}
+              >
+                <Text weight={500} fz={16} color='white'>
+                  AI Suggestions
+                </Text>
+              </Card.Section>
+              <Card.Section
+                px='xs'
+              >
+                <Flex direction='column'>
+                  {
+                    trainMessage.problems.map((problem: any, index: any) => {
+                      return (
+                        <>
+                          {index > 0 && <Divider />}
+                          <Text weight={500} fz={16} my='8px'>
+                            {index + 1}. {problem}
+                          </Text>
+                        </>
+                      )
+                    })
+                  }
+
+                </Flex>
+              </Card.Section>
+            </Card>
+          </Flex>
+        )
+      }
     </Box>
   );
 };

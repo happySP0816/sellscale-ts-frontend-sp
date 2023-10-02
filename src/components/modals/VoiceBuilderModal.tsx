@@ -112,10 +112,11 @@ const VoiceBuilderModal: React.FC<{
                   value: item.sample_completion,
                   prospect: item.prospect,
                   meta_data: item.meta_data,
+                  problems: item.sample_problems,
+                  highlighted_words: item.highlighted_words
                 };
               })
             );
-            console.log("setting to old", onboardings[0].id);
             return true;
           }
         }
@@ -134,10 +135,8 @@ const VoiceBuilderModal: React.FC<{
       currentProject.id
     );
     if (response.status === "success") {
-      console.log(response.data);
       setVoiceBuilderOnboardingId(response.data.id);
       await generateMessages(response.data.id);
-      console.log("setting to new", response.data.id);
       return true;
     }
     return false;
@@ -209,6 +208,8 @@ const VoiceBuilderModal: React.FC<{
             value: item.sample_completion,
             prospect: item.prospect,
             meta_data: item.meta_data,
+            problems: item.sample_problems,
+            highlighted_words: item.highlighted_words
           };
         })
       );
@@ -277,7 +278,6 @@ const VoiceBuilderModal: React.FC<{
         logout();
       }
       const res = await response.json();
-      console.log(res);
     }
 
     setLoadingOverlay(false);
@@ -419,6 +419,7 @@ const VoiceBuilderModal: React.FC<{
                   onComplete={async () => {
                     openCompleteModal();
                   }}
+                  refreshMessages={setLatestVoiceOnboarding}
                 />
               )}
             </>

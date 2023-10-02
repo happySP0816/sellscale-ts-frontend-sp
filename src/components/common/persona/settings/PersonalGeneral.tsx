@@ -26,14 +26,7 @@ export const PersonaGeneral = () => {
   }>();
 
   const triggerActivatePersona = async () => {
-    setLoading(true);
-
-    if (currentProject == null) {
-      setLoading(false);
-      return;
-    }
-
-    const result = await activatePersona(userToken, currentProject.id);
+    const result = await activatePersona(userToken, currentProject?.id);
     if (result.status === "success") {
       showNotification({
         title: "Persona Activated",
@@ -48,15 +41,12 @@ export const PersonaGeneral = () => {
         color: "red",
       });
     }
-
-    setLoading(false);
   };
 
   const triggerBasicPersonaDeactivation = async () => {
-    setLoading(true);
 
     if (currentProject == null) {
-      setLoading(false);
+      alert("No current project");
       return;
     }
 
@@ -75,15 +65,11 @@ export const PersonaGeneral = () => {
         color: "red",
       });
     }
-
-    setLoading(false);
   };
 
   const triggerHardPersonaDeactivation = async () => {
-    setLoading(true);
-
     if (currentProject == null) {
-      setLoading(false);
+      alert("No current project");
       return;
     }
 
@@ -102,8 +88,6 @@ export const PersonaGeneral = () => {
         color: "red",
       });
     }
-
-    setLoading(false);
   };
 
 

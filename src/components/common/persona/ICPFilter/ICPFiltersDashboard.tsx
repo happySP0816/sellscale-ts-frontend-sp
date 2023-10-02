@@ -366,6 +366,26 @@ const ICPFiltersDashboard: FC<{
     return filteredProspects;
   }, [globalSearch, icpProspects]);
 
+  const averageICPFitScore = icpProspects.map(x => x.icp_fit_score).reduce((a,b) => a+b) / icpProspects.length
+  let averageICPFitLabel = ""
+  let averageICPFitColor = ""
+  if (averageICPFitScore < 0.5) {
+    averageICPFitLabel = "Very Low"
+    averageICPFitColor = "red"
+  } else if (averageICPFitScore < 1.5) {
+    averageICPFitLabel = "Low"
+    averageICPFitColor = "orange"
+  } else if (averageICPFitScore < 2.5) {
+    averageICPFitLabel = "Medium"
+    averageICPFitColor = "yellow"
+  } else if (averageICPFitScore < 3.5) {
+    averageICPFitLabel = "High"
+    averageICPFitColor = "blue"
+  } else {
+    averageICPFitLabel = "Very High"
+    averageICPFitColor = "green"
+  }
+
   return (
     <Box
       sx={(theme) => ({
@@ -399,22 +419,20 @@ const ICPFiltersDashboard: FC<{
         <Flex gap={"1rem"} align={"center"}>
           <Button.Group color="gray">
             <Button variant="default" sx={{ color: "gray !important" }}>
-              <span style={{ marginLeft: "6px", color: theme.colors.blue[5] }}>
+              <span style={{ marginLeft: "6px", color: theme.colors.blue[5], marginRight: '4px' }}>
                 {currentProject?.num_unused_li_prospects} /{" "}
-                {currentProject?.num_prospects} remaining
+                {currentProject?.num_prospects}
               </span>
-            </Button>
-            <Button variant="default" sx={{ color: "gray !important" }}>
-              Left:{" "}
-              <span style={{ marginLeft: "6px", color: theme.colors.blue[5] }}>
+              {" "}remaining{" "}(
+              <span style={{ marginLeft: "0px", color: theme.colors.blue[5] }}>
                 {currentProject
                   ? Math.round(
                       (currentProject?.num_unused_li_prospects /
                         (currentProject?.num_prospects + 0.0001)) *
                         100
-                    ) + "% "
-                  : "-%"}
-              </span>
+                    ) + "% Left"
+                  : "-% Left"}
+              </span>)
             </Button>
           </Button.Group>
           <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>
@@ -431,10 +449,16 @@ const ICPFiltersDashboard: FC<{
         style={{ backgroundColor: "#FFF" }}
       >
         <Box style={{ display: "flex", justifyContent: "space-between" }}>
-          <Title size={"21px"} fw={600}>
-            Average ICP Fit Score:
-          </Title>
-          <Box
+          <Flex>
+            <Title size={"21px"} fw={600}>
+              Average ICP Fit Score:
+            </Title>
+            <Badge color={averageICPFitColor} size="lg" variant="outline" ml='8px'>
+              {averageICPFitLabel} ({averageICPFitScore.toFixed(2)})
+            </Badge>
+          </Flex>
+          {/* Legend */}
+          {/* <Box
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -456,7 +480,7 @@ const ICPFiltersDashboard: FC<{
                 </Title>
               </Box>
             ))}
-          </Box>
+          </Box> */}
         </Box>
         <Box
           mt={"1rem"}
@@ -491,7 +515,7 @@ const ICPFiltersDashboard: FC<{
                     <Title size={"20px"} fw={500}>
                       {icp.value}
                     </Title>
-                    <Badge
+                    {/* <Badge
                       color={icp.badgeColor}
                       size="xs"
                       mt="4px"
@@ -499,7 +523,7 @@ const ICPFiltersDashboard: FC<{
                       variant="filled"
                     >
                       {icp.percent.toFixed(1)}%
-                    </Badge>
+                    </Badge> */}
                   </Flex>
                   <Title fw={500} color="gray.6" fz="12px">
                     Contacts
@@ -510,7 +534,7 @@ const ICPFiltersDashboard: FC<{
                   mt={"0.5rem"}
                   color={icp.color}
                   radius={"11px"}
-                  size={"lg"}
+                  size={"xl"}
                   label={icp.percent.toFixed(1) + "%"}
                 />
               </Box>
@@ -651,7 +675,6 @@ const ICPFiltersDashboard: FC<{
         />
       </Paper>
 
-      <Text>{displayProspects.length}</Text>
       <DataGrid
         data={displayProspects}
         highlightOnHover

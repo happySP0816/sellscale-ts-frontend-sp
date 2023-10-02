@@ -625,7 +625,7 @@ function PersonCampaignCard(props: {
             </Group>
           </Box>
 
-          <Box w="25%">
+          <Box w="20%">
             <Button
               variant="subtle"
               onClick={toggle}
@@ -645,7 +645,7 @@ function PersonCampaignCard(props: {
             </Button>
           </Box>
 
-          <Group w="200">
+          <Group w="250">
             <Button
               radius="xl"
               size="xs"
@@ -701,9 +701,9 @@ function PersonCampaignCard(props: {
                   color={personaActive ? "blue" : "gray"}
                   sx={{
                     border: "solid 1px white",
-                    borderRadius: "20px",
                     cursor: "pointer",
                   }}
+                  rightIcon={props.persona.active ? <IconCheck size="0.7rem" /> : <IconX size="0.7rem" />}
                   size='xs'
                   onClick={() => {
                     if (props.project == undefined) return;

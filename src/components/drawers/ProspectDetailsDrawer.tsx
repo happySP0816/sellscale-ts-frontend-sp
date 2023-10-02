@@ -343,14 +343,14 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                         </Card>
                         : null 
                     } */}
-                    {prospect && prospect?.overall_status !== 'PROSPECTED' && prospect?.overall_status !== 'SENT_OUTREACH' &&
+                    {prospect && prospect.overall_status !== 'PROSPECTED' && prospect.overall_status !== 'SENT_OUTREACH' &&
                         <Card withBorder mt='xs'>
                           <Title order={4} mb="xs">
                             Conversation
                           </Title>
                           {
                             <InboxProspectConvo 
-                              prospects={prospect?.overall_status !== 'PROSPECTED' && prospect?.id ? [prospect] : []} 
+                              prospects={[prospect]} 
                               onTabChange={
                                 (value) => {
                                   setChannelType(value as Channel | null);

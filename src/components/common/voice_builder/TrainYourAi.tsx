@@ -30,6 +30,7 @@ export type TrainMessage = {
 const TrainYourAi = (props: {
   messages: TrainMessage[];
   onComplete: () => void;
+  refreshMessages: () => void;
 }) => {
   const [selectedItem, setSelectedItem] = useState<number | null>(0);
 
@@ -207,6 +208,7 @@ const TrainYourAi = (props: {
               setSelectedItem(0);
             }}
             onComplete={props.onComplete}
+            refreshMessages={props.refreshMessages}
             complete={selectedItem! >= props.messages.length - 1}
           />
         </Box>

@@ -56,8 +56,6 @@ const SideInformation = (props: { message: TrainMessage }) => {
     },
   ];
 
-  console.log(information, props.message.prospect)
-
   return (
     <ScrollArea
       sx={{

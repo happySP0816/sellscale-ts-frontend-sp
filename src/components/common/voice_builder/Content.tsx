@@ -64,25 +64,25 @@ const Content = (props: {
       (item) => item.id === props.messageId
     );
     if (oldMessage) {
-      // Update global state list and set new local state message
-      setVoiceBuilderMessages(
-        voiceBuilderMessages.map((item) => {
-          if (item.id === oldMessage.id) {
-            return {
-              id: item.id,
-              value: newMessage !== undefined ? newMessage : message,
-              prospect: item.prospect,
-              meta_data: item.meta_data,
-              problems: [],
-              highlighted_words: [],
-            };
-          }
-          return item;
-        })
-      );
-      if (newMessage !== undefined) {
-        setMessage(newMessage);
-      }
+      // // Update global state list and set new local state message
+      // setVoiceBuilderMessages(
+      //   voiceBuilderMessages.map((item) => {
+      //     if (item.id === oldMessage.id) {
+      //       return {
+      //         id: item.id,
+      //         value: newMessage !== undefined ? newMessage : message,
+      //         prospect: item.prospect,
+      //         meta_data: item.meta_data,
+      //         problems: [],
+      //         highlighted_words: [],
+      //       };
+      //     }
+      //     return item;
+      //   })
+      // );
+      // if (newMessage !== undefined) {
+      //   setMessage(newMessage);
+      // }
 
       // Update the db
       const msg = (newMessage !== undefined) ? newMessage : message;

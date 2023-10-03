@@ -97,6 +97,16 @@ export default function ClonePersonaModal({
           personaICPMatchingInstructions={innerProps.persona.icp_matching_prompt}
           personaContactObjective={innerProps.persona.persona_contact_objective}
           personaContractSize={innerProps.persona.contract_size}
+          personaCTAFrameworkCompany={innerProps.persona.cta_framework_company}
+          personaCTAFrameworkPersona={innerProps.persona.cta_framework_persona}
+          personaCTAFrameworkAction={innerProps.persona.cta_framework_action}
+          personaUseCases={innerProps.persona.use_cases}
+          personaFilters={innerProps.persona.filters}
+          personaLookalikeProfile1={innerProps.persona.lookalike_profile_1}
+          personaLookalikeProfile2={innerProps.persona.lookalike_profile_2}
+          personaLookalikeProfile3={innerProps.persona.lookalike_profile_3}
+          personaLookalikeProfile4={innerProps.persona.lookalike_profile_4}
+          personaLookalikeProfile5={innerProps.persona.lookalike_profile_5}
           onUpdate={(data) => {
             basics.current = data;
           }}

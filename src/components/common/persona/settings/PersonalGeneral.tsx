@@ -23,6 +23,16 @@ export const PersonaGeneral = () => {
     personaICPMatchingInstructions: string;
     personaContactObjective: string;
     personaContractSize: number;
+    personaCTAFrameworkCompany: string;
+    personaCTAFrameworkPersona: string;
+    personaCTAFrameworkAction: string;
+    personaUseCases: string;
+    personaFilters: string;
+    personaLookalikeProfile1: string;
+    personaLookalikeProfile2: string;
+    personaLookalikeProfile3: string;
+    personaLookalikeProfile4: string;
+    personaLookalikeProfile5: string;
   }>();
 
   const triggerActivatePersona = async () => {
@@ -159,6 +169,32 @@ export const PersonaGeneral = () => {
             currentProject.persona_contact_objective
           }
           personaContractSize={currentProject.contract_size}
+          personaCTAFrameworkCompany={
+            currentProject.cta_framework_company
+          }
+          personaCTAFrameworkPersona={
+            currentProject.cta_framework_persona
+          }
+          personaCTAFrameworkAction={
+            currentProject.cta_framework_action
+          }
+          personaUseCases={currentProject.use_cases}
+          personaFilters={currentProject.filters}
+          personaLookalikeProfile1={
+            currentProject.lookalike_profile_1
+          }
+          personaLookalikeProfile2={
+            currentProject.lookalike_profile_2
+          }
+          personaLookalikeProfile3={
+            currentProject.lookalike_profile_3
+          }
+          personaLookalikeProfile4={
+            currentProject.lookalike_profile_4
+          }
+          personaLookalikeProfile5={
+            currentProject.lookalike_profile_5
+          }
           onUpdate={(data) => {
             basics.current = data;
             console.log(data.personaName)
@@ -182,6 +218,16 @@ export const PersonaGeneral = () => {
                     updated_persona_icp_matching_prompt: basics.current?.personaICPMatchingInstructions,
                     updated_persona_contact_objective: basics.current?.personaContactObjective,
                     updated_persona_contract_size: basics.current?.personaContractSize,
+                    updated_cta_framework_company: basics.current?.personaCTAFrameworkCompany,
+                    updated_cta_framework_persona: basics.current?.personaCTAFrameworkPersona,
+                    updated_cta_framework_action: basics.current?.personaCTAFrameworkAction,
+                    updated_use_cases: basics.current?.personaUseCases,
+                    updated_filters: basics.current?.personaFilters,
+                    updated_lookalike_profile_1: basics.current?.personaLookalikeProfile1,
+                    updated_lookalike_profile_2: basics.current?.personaLookalikeProfile2,
+                    updated_lookalike_profile_3: basics.current?.personaLookalikeProfile3,
+                    updated_lookalike_profile_4: basics.current?.personaLookalikeProfile4,
+                    updated_lookalike_profile_5: basics.current?.personaLookalikeProfile5,
                   }),
                 }
               );

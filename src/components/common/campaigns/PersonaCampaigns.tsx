@@ -681,7 +681,7 @@ function PersonCampaignCard(props: {
                 if (props.project == undefined) return;
                 setOpenedProspectId(-1);
                 setCurrentProject(props.project);
-                navigateToPage(navigate, `/persona/settings`);
+                window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
               }}
             >
               Edit

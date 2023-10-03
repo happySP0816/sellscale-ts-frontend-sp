@@ -7,6 +7,7 @@ import {
   LoadingOverlay,
   NumberInput,
   Text,
+  TextInput,
   Title,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
@@ -34,6 +35,23 @@ export default function PersonaBrain(props: PropsType) {
     useState("");
   const [personaContactObjective, setPersonaContactObjective] = useState("");
   const [personaContractSize, setPersonaContractSize] = useState(0);
+  const [personaCTAFrameworkCompany, setPersonaCTAFrameworkCompany] = useState(
+    ""
+  );
+  const [personaCTAFrameworkPersona, setPersonaCTAFrameworkPersona] = useState(
+    ""
+  );
+  const [personaCTAFrameworkAction, setPersonaCTAFrameworkAction] = useState(
+    ""
+  );
+  const [personaUseCases, setPersonaUseCases] = useState("");
+  const [personaFilters, setPersonaFilters] = useState("");
+  const [personaLookalikeProfile1, setPersonaLookalikeProfile1] = useState("");
+  const [personaLookalikeProfile2, setPersonaLookalikeProfile2] = useState("");
+  const [personaLookalikeProfile3, setPersonaLookalikeProfile3] = useState("");
+  const [personaLookalikeProfile4, setPersonaLookalikeProfile4] = useState("");
+  const [personaLookalikeProfile5, setPersonaLookalikeProfile5] = useState("");
+
   const [needsSave, setNeedsSave] = useState(false);
 
   const currentProject = useRecoilValue(currentProjectState);
@@ -55,6 +73,17 @@ export default function PersonaBrain(props: PropsType) {
         setPersonaFitReason(persona.persona_fit_reason);
         setPersonaICPMatchingInstructions(persona.icp_matching_prompt);
         setPersonaContactObjective(persona.persona_contact_objective);
+        setPersonaContractSize(persona.contract_size);
+        setPersonaCTAFrameworkCompany(persona.cta_framework_company);
+        setPersonaCTAFrameworkPersona(persona.cta_framework_persona);
+        setPersonaCTAFrameworkAction(persona.cta_framework_action);
+        setPersonaUseCases(persona.use_cases);
+        setPersonaFilters(persona.filters);
+        setPersonaLookalikeProfile1(persona.lookalike_profile_1);
+        setPersonaLookalikeProfile2(persona.lookalike_profile_2);
+        setPersonaLookalikeProfile3(persona.lookalike_profile_3);
+        setPersonaLookalikeProfile4(persona.lookalike_profile_4);
+        setPersonaLookalikeProfile5(persona.lookalike_profile_5);
 
         setFetchedPersona(true);
       })
@@ -80,6 +109,17 @@ export default function PersonaBrain(props: PropsType) {
           updated_persona_fit_reason: personaFitReason,
           updated_persona_icp_matching_prompt: personaICPMatchingInstructions,
           updated_persona_contact_objective: personaContactObjective,
+          updated_persona_contract_size: personaContractSize,
+          updated_cta_framework_company: personaCTAFrameworkCompany,
+          updated_cta_framework_persona: personaCTAFrameworkPersona,
+          updated_cta_framework_action: personaCTAFrameworkAction,
+          updated_use_cases: personaUseCases,
+          updated_filters: personaFilters,
+          updated_lookalike_profile_1: personaLookalikeProfile1,
+          updated_lookalike_profile_2: personaLookalikeProfile2,
+          updated_lookalike_profile_3: personaLookalikeProfile3,
+          updated_lookalike_profile_4: personaLookalikeProfile4,
+          updated_lookalike_profile_5: personaLookalikeProfile5,
         }),
       }
     )
@@ -128,6 +168,16 @@ export default function PersonaBrain(props: PropsType) {
               personaICPMatchingInstructions={personaICPMatchingInstructions}
               personaContactObjective={personaContactObjective}
               personaContractSize={personaContractSize}
+              personaCTAFrameworkCompany={personaCTAFrameworkCompany}
+              personaCTAFrameworkPersona={personaCTAFrameworkPersona}
+              personaCTAFrameworkAction={personaCTAFrameworkAction}
+              personaUseCases={personaUseCases}
+              personaFilters={personaFilters}
+              personaLookalikeProfile1={personaLookalikeProfile1}
+              personaLookalikeProfile2={personaLookalikeProfile2}
+              personaLookalikeProfile3={personaLookalikeProfile3}
+              personaLookalikeProfile4={personaLookalikeProfile4}
+              personaLookalikeProfile5={personaLookalikeProfile5}
               onUpdate={(data) => {
                 setPersonaName(data.personaName);
                 setPersonaFitReason(data.personaFitReason);
@@ -172,12 +222,32 @@ export function PersonaBasicForm(props: {
   personaICPMatchingInstructions: string;
   personaContactObjective: string;
   personaContractSize: number;
+  personaCTAFrameworkCompany: string;
+  personaCTAFrameworkPersona: string;
+  personaCTAFrameworkAction: string;
+  personaUseCases: string;
+  personaFilters: string;
+  personaLookalikeProfile1: string;
+  personaLookalikeProfile2: string;
+  personaLookalikeProfile3: string;
+  personaLookalikeProfile4: string;
+  personaLookalikeProfile5: string;
   onUpdate: (data: {
     personaName: string;
     personaFitReason: string;
     personaICPMatchingInstructions: string;
     personaContactObjective: string;
     personaContractSize: number;
+    personaCTAFrameworkCompany: string;
+    personaCTAFrameworkPersona: string;
+    personaCTAFrameworkAction: string;
+    personaUseCases: string;
+    personaFilters: string;
+    personaLookalikeProfile1: string;
+    personaLookalikeProfile2: string;
+    personaLookalikeProfile3: string;
+    personaLookalikeProfile4: string;
+    personaLookalikeProfile5: string;
   }) => void;
 }) {
   const [userToken] = useRecoilState(userTokenState);
@@ -195,6 +265,33 @@ export function PersonaBasicForm(props: {
   const [personaContractSize, setPersonaContractSize] = useState(
     props.personaContractSize
   );
+  const [personaCTAFrameworkCompany, setPersonaCTAFrameworkCompany] = useState(
+    props.personaCTAFrameworkCompany
+  );
+  const [personaCTAFrameworkPersona, setPersonaCTAFrameworkPersona] = useState(
+    props.personaCTAFrameworkPersona
+  );
+  const [personaCTAFrameworkAction, setPersonaCTAFrameworkAction] = useState( 
+    props.personaCTAFrameworkAction
+  );
+  const [personaUseCases, setPersonaUseCases] = useState(props.personaUseCases);
+  const [personaFilters, setPersonaFilters] = useState(props.personaFilters);
+  const [personaLookalikeProfile1, setPersonaLookalikeProfile1] = useState(
+    props.personaLookalikeProfile1
+  );
+  const [personaLookalikeProfile2, setPersonaLookalikeProfile2] = useState(
+    props.personaLookalikeProfile2
+  );
+  const [personaLookalikeProfile3, setPersonaLookalikeProfile3] = useState(
+    props.personaLookalikeProfile3
+  );
+  const [personaLookalikeProfile4, setPersonaLookalikeProfile4] = useState(
+    props.personaLookalikeProfile4
+  );
+  const [personaLookalikeProfile5, setPersonaLookalikeProfile5] = useState(
+    props.personaLookalikeProfile5
+  );
+
 
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaFitReason(true);
@@ -249,6 +346,16 @@ export function PersonaBasicForm(props: {
       personaICPMatchingInstructions: personaICPMatchingInstructions,
       personaContactObjective: personaContactObjective,
       personaContractSize: personaContractSize,
+      personaCTAFrameworkCompany: personaCTAFrameworkCompany,
+      personaCTAFrameworkPersona: personaCTAFrameworkPersona,
+      personaCTAFrameworkAction: personaCTAFrameworkAction,
+      personaUseCases: personaUseCases,
+      personaFilters: personaFilters,
+      personaLookalikeProfile1: personaLookalikeProfile1,
+      personaLookalikeProfile2: personaLookalikeProfile2,
+      personaLookalikeProfile3: personaLookalikeProfile3,
+      personaLookalikeProfile4: personaLookalikeProfile4,
+      personaLookalikeProfile5: personaLookalikeProfile5,
     }
     if (hardcodeKey && hardcodeValue) {
       update[hardcodeKey] = hardcodeValue
@@ -345,7 +452,142 @@ export function PersonaBasicForm(props: {
           }}
         />
       </Flex>
-      <Flex mb='md'>
+      <Text fw='500' size='sm' mb='xs'>Fill in this one sentence framework exactly</Text>
+      <Flex w='100%' mb='md'>
+        <TextInput
+          placeholder="Company"
+          value={personaCTAFrameworkCompany}
+          onChange={(e) => {
+            setPersonaCTAFrameworkCompany(e.currentTarget.value);
+            sendUpdate(
+              "personaCTAFrameworkCompany",
+              e.currentTarget.value
+            );
+          }}
+          />
+        <Text mt='4px' ml='xs' mr='xs' >helps</Text>
+        <TextInput
+          placeholder="Persona"
+          value={personaCTAFrameworkPersona}
+          onChange={(e) => {
+            setPersonaCTAFrameworkPersona(e.currentTarget.value);
+            sendUpdate(
+              "personaCTAFrameworkPersona",
+              e.currentTarget.value
+            );
+          }}
+          />
+        <Text mt='4px' mr='xs' ml='xs'>with</Text>
+        <TextInput
+          placeholder="Action"
+          value={personaCTAFrameworkAction}
+          onChange={(e) => {
+            setPersonaCTAFrameworkAction(e.currentTarget.value);
+            sendUpdate(
+              "personaCTAFrameworkAction",
+              e.currentTarget.value
+            );
+          }}
+          />
+        
+      </Flex>
+      <Flex w='100%' mb='md'>
+        <TextAreaWithAI
+          label="Use Cases"
+          description="List use cases this persona cares about."
+          placeholder='- Use Case 1: Connect to your HRIS software ...'
+          minRows={3}
+          value={personaUseCases}
+          onChange={(e) => {
+            setPersonaUseCases(e.currentTarget.value);
+            sendUpdate(
+              "personaUseCases",
+              e.currentTarget.value
+            );
+          }}
+        />
+      </Flex>
+       <Flex w='100%' mb='md'>
+        <TextAreaWithAI
+          label="Persona Filters"
+          description="(e.g., seniority, titles, company type, company size, industries)"
+          placeholder='Seniority: ex. Executive, Directors, VPs \ Titles/profile keywords: ex. Chief Revenue, Account Executive, Business Development \ Company Type: ex. Technology \ Company Size: ex. 200 - 1000 employees \ Industries: ex. Internet, IT'
+          minRows={3}
+          value={personaFilters}
+          onChange={(e) => {
+            setPersonaFilters(e.currentTarget.value);
+            sendUpdate(
+              "personaFilters",
+              e.currentTarget.value
+            );
+          }}
+        />
+      </Flex>
+
+      <Text fw='500' size='sm' >Lookalike LinkedIn Profiles</Text>
+      <Text size='sm' mb='xs' fz='sm'>Paste in at least 3 who you haven't contacted.</Text>
+      <TextInput
+        placeholder='Lookalike Profile #1'
+        value={personaLookalikeProfile1}
+        mt='xs'
+        onChange={(e) => {
+          setPersonaLookalikeProfile1(e.currentTarget.value);
+          sendUpdate(
+            "personaLookalikeProfile1",
+            e.currentTarget.value
+          );
+        }}
+      />
+      <TextInput
+        placeholder='Lookalike Profile #2'
+        value={personaLookalikeProfile2}
+        mt='xs'
+        onChange={(e) => {
+          setPersonaLookalikeProfile2(e.currentTarget.value);
+          sendUpdate(
+            "personaLookalikeProfile2",
+            e.currentTarget.value
+          );
+        }}
+      />
+      <TextInput
+        placeholder='Lookalike Profile #3'
+        value={personaLookalikeProfile3}
+        mt='xs'
+        onChange={(e) => {
+          setPersonaLookalikeProfile3(e.currentTarget.value);
+          sendUpdate(
+            "personaLookalikeProfile3",
+            e.currentTarget.value
+          );
+        }}
+      />
+      <TextInput
+        placeholder='Lookalike Profile #4'
+        value={personaLookalikeProfile4}
+        mt='xs'
+        onChange={(e) => {
+          setPersonaLookalikeProfile4(e.currentTarget.value);
+          sendUpdate(
+            "personaLookalikeProfile4",
+            e.currentTarget.value
+          );
+        }}
+      />
+      <TextInput
+        placeholder='Lookalike Profile #5'
+        value={personaLookalikeProfile5}
+        mt='xs'
+        onChange={(e) => {
+          setPersonaLookalikeProfile5(e.currentTarget.value);
+          sendUpdate(
+            "personaLookalikeProfile5",
+            e.currentTarget.value
+          );
+        }}
+      />
+
+      <Flex mb='md' mt='sm'>
       <NumberInput
         label="Annual Contract Value (ACV)"
         value={personaContractSize}

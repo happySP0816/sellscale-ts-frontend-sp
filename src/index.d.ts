@@ -272,6 +272,7 @@ export interface PersonaOverview {
   transformer_blocklist_initial?: string[];
   emoji: string;
   avg_icp_fit_score: number;
+  li_bump_amount: number;
 }
 
 export interface LinkedInMessage {

@@ -107,6 +107,7 @@ import {
   IconBulb,
   IconChevronRight,
   IconCircle,
+  IconCircleMinus,
   IconRobot,
   IconSettings,
   IconTrash,
@@ -119,12 +120,16 @@ import {
 } from "react-router-dom";
 import { deleteCTA } from "@utils/requests/createCTA";
 import { patchArchetypeDelayDays } from "@utils/requests/patchArchetypeDelayDays";
+import { patchArchetypeBumpAmount } from "@utils/requests/patchArchetypeBumpAmount";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
 
   const userToken = useRecoilValue(userTokenState);
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
+
+  const [loading, setLoading] = useState(false);
 
   const [conversionRate, setConversionRate] = useState(0);
   const [replyRate, setReplyRate] = useState(0);
@@ -215,11 +220,30 @@ export default function SequenceSection() {
   // const bf2Conversion = replyRate * 0.2;
   // const bf3Conversion = replyRate * 0.1;
 
+  const bump_amount = currentProject?.li_bump_amount ?? 3;
+  console.log(bump_amount)
+
   const closeModal = () => {
     setIsModalBlockerVisible(false);
     if (blocker && blocker.reset) {
       blocker.reset();
     }
+  };
+
+  const updateBumpAmount = async (bumpAmount: number) => {
+    if (!currentProject) return;
+    setLoading(true);
+    const response = await patchArchetypeBumpAmount(
+      userToken,
+      currentProject.id,
+      bumpAmount
+    );
+    if (response.status === "success") {
+      setCurrentProject(
+        await getFreshCurrentProject(userToken, currentProject.id)
+      );
+    }
+    setLoading(false);
   };
 
   const onSetActiveCard = (cardNumber: number) => {
@@ -231,18 +255,24 @@ export default function SequenceSection() {
     }
   };
 
-  const bumpConversionColor = (bf: BumpFramework | undefined, conversion: number | undefined) => {
-    return bf && 
-      conversion && 
-      bf?.etl_num_times_used && 
-      conversion > 5 && 
-      bf?.etl_num_times_used > 10 
-        ? "green" : 
-          !bf?.etl_num_times_used || 
-          (bf?.etl_num_times_used && 
-          bf?.etl_num_times_used < 10)
-          ? "gray" 
-          : "red"
+  const bumpConversionColor = (
+    bf: BumpFramework | undefined,
+    conversion: number | undefined
+  ) => {
+    return bf &&
+      conversion &&
+      bf?.etl_num_times_used &&
+      conversion > 5 &&
+      bf?.etl_num_times_used > 10
+      ? "green"
+      : !bf?.etl_num_times_used ||
+        (bf?.etl_num_times_used && bf?.etl_num_times_used < 10)
+      ? "gray"
+      : "red";
+  };
+
+  if (!currentProject) {
+    return null;
   }
 
   return (
@@ -308,7 +338,8 @@ export default function SequenceSection() {
           sx={{ alignItems: "flex-start" }}
           noWrap
         >
-          <Box sx={{ flexBasis: "35%" }}>
+          <Box sx={{ flexBasis: "35%", position: 'relative' }}>
+          <LoadingOverlay visible={loading} />
             <Stack>
               <FrameworkCard
                 title="Connection Request"
@@ -397,240 +428,275 @@ export default function SequenceSection() {
                 labelPosition="center"
                 mx={10}
               />
-              <FrameworkCard
-                title="Follow-Up 1"
-                badgeText={`Reply ${
-                  bf0Conversion ? bf0Conversion.toFixed(0) + "%" : "TBD"
-                }`}
-                badgeColor={
-                  bumpConversionColor(bf0, bf0Conversion)
-                }
-                timesUsed={bf0?.etl_num_times_used ?? 0}
-                timesConverted={bf0?.etl_num_times_converted ?? 0}
-                badgeHoverText={
-                  bf0 && bf0Conversion
-                    ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                    : "Not enough data, " + (bf0?.etl_num_times_converted || 0) + " / " + (bf0?.etl_num_times_used || 0)
-                }
-                bodyTitle={bf0?.title ?? ""}
-                // bodyText={bf0?.description ?? ""}
-                footer={
-                  <Center>
-                    <Group spacing={2}>
-                      <Text fz={14}>wait for</Text>
-                      <NumberInput
-                        defaultValue={bf0Delay.current}
-                        placeholder="# Days"
-                        variant="filled"
-                        hideControls
-                        sx={{ border: "solid 1px #777; border-radius: 4px;" }}
-                        m={3}
-                        min={1}
-                        max={99}
-                        w={bf0Delay.current > 9 ? 50 : 30}
-                        size="xs"
-                        onChange={async (value) => {
-                          if (!bf0) return;
-                          bf0Delay.current = value || 2;
-                          const result = await patchBumpFramework(
-                            userToken,
-                            bf0.id,
-                            bf0.overall_status,
-                            bf0.title,
-                            bf0.description,
-                            bf0.bump_length,
-                            bf0.bumped_count,
-                            bf0Delay.current,
-                            bf0.default,
-                            bf0.use_account_research,
-                            bf0.transformer_blocklist
-                          );
-                          if (result.status === "success") refetch();
-                        }}
-                      />
-                      <Text fz={14}>days, then:</Text>
-                    </Group>
-                  </Center>
-                }
-                active={activeCard === 1}
-                onClick={() => onSetActiveCard(1)}
-                canEdit
-                editProps={{
-                  title: "Choose Bump Framework for Follow-Up 1",
-                  bumpedCount: 0,
-                  bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) => bf.overall_status === "ACCEPTED"
-                  ),
-                  activeBumpFrameworkId: bf0?.id ?? -1,
-                }}
-              />
+              {bump_amount >= 1 && (
+                <FrameworkCard
+                  title="Follow-Up 1"
+                  badgeText={`Reply ${
+                    bf0Conversion ? bf0Conversion.toFixed(0) + "%" : "TBD"
+                  }`}
+                  badgeColor={bumpConversionColor(bf0, bf0Conversion)}
+                  timesUsed={bf0?.etl_num_times_used ?? 0}
+                  timesConverted={bf0?.etl_num_times_converted ?? 0}
+                  badgeHoverText={
+                    bf0 && bf0Conversion
+                      ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
+                      : "Not enough data, " +
+                        (bf0?.etl_num_times_converted || 0) +
+                        " / " +
+                        (bf0?.etl_num_times_used || 0)
+                  }
+                  bodyTitle={bf0?.title ?? ""}
+                  // bodyText={bf0?.description ?? ""}
+                  footer={
+                    <Center>
+                      <Group spacing={2}>
+                        <Text fz={14}>wait for</Text>
+                        <NumberInput
+                          defaultValue={bf0Delay.current}
+                          placeholder="# Days"
+                          variant="filled"
+                          hideControls
+                          sx={{ border: "solid 1px #777; border-radius: 4px;" }}
+                          m={3}
+                          min={1}
+                          max={99}
+                          w={bf0Delay.current > 9 ? 50 : 30}
+                          size="xs"
+                          onChange={async (value) => {
+                            if (!bf0) return;
+                            bf0Delay.current = value || 2;
+                            const result = await patchBumpFramework(
+                              userToken,
+                              bf0.id,
+                              bf0.overall_status,
+                              bf0.title,
+                              bf0.description,
+                              bf0.bump_length,
+                              bf0.bumped_count,
+                              bf0Delay.current,
+                              bf0.default,
+                              bf0.use_account_research,
+                              bf0.transformer_blocklist
+                            );
+                            if (result.status === "success") refetch();
+                          }}
+                        />
+                        <Text fz={14}>days, then:</Text>
+                      </Group>
+                    </Center>
+                  }
+                  active={activeCard === 1}
+                  onClick={() => onSetActiveCard(1)}
+                  canEdit
+                  editProps={{
+                    title: "Choose Bump Framework for Follow-Up 1",
+                    bumpedCount: 0,
+                    bumpedFrameworks: bumpFrameworks.filter(
+                      (bf) => bf.overall_status === "ACCEPTED"
+                    ),
+                    activeBumpFrameworkId: bf0?.id ?? -1,
+                  }}
+                />
+              )}
 
-              <FrameworkCard
-                title="Follow-Up 2"
-                badgeText={`Reply ${
-                  bf1Conversion ? bf1Conversion.toFixed(0) + "%" : "TBD"
-                }`}
-                timesUsed={bf1?.etl_num_times_used ?? 0}
-                timesConverted={bf1?.etl_num_times_converted ?? 0}
-                badgeHoverText={
-                  bf1 && bf1Conversion
-                    ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                    : "Not enough data, " + (bf1?.etl_num_times_converted || 0 ) + " / " + (bf1?.etl_num_times_used || 0)
-                }
-                badgeColor={
-                  bumpConversionColor(bf1, bf1Conversion)
-                }
-                bodyTitle={bf1?.title ?? ""}
-                // bodyText={bf1?.description ?? ""}
-                footer={
-                  <Center>
-                    <Group spacing={2}>
-                      <Text fz={14}>wait for</Text>
-                      <NumberInput
-                        defaultValue={bf1Delay.current}
-                        placeholder="# Days"
-                        variant="filled"
-                        hideControls
-                        sx={{ border: "solid 1px #777; border-radius: 4px;" }}
-                        m={3}
-                        min={1}
-                        max={99}
-                        w={bf1Delay.current > 9 ? 50 : 30}
-                        size="xs"
-                        onChange={async (value) => {
-                          if (!bf1) return;
-                          bf1Delay.current = value || 2;
-                          const result = await patchBumpFramework(
-                            userToken,
-                            bf1.id,
-                            bf1.overall_status,
-                            bf1.title,
-                            bf1.description,
-                            bf1.bump_length,
-                            bf1.bumped_count,
-                            bf1Delay.current,
-                            bf1.default,
-                            bf1.use_account_research,
-                            bf1.transformer_blocklist
-                          );
-                          if (result.status === "success") refetch();
-                        }}
-                      />
-                      <Text fz={14}>days, then:</Text>
-                    </Group>
-                  </Center>
-                }
-                active={activeCard === 2}
-                onClick={() => onSetActiveCard(2)}
-                canEdit
-                editProps={{
-                  title: "Choose Bump Framework for Follow-Up 2",
-                  bumpedCount: 1,
-                  bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) =>
-                      bf.overall_status === "BUMPED" && bf.bumped_count === 1
-                  ),
-                  activeBumpFrameworkId: bf1?.id ?? -1,
-                }}
-              />
-              <FrameworkCard
-                title="Follow-Up 3"
-                badgeText={`Reply ${
-                  bf2Conversion ? bf2Conversion.toFixed(0) + "%" : "TBD"
-                }`}
-                timesUsed={bf2?.etl_num_times_used ?? 0}
-                timesConverted={bf2?.etl_num_times_converted ?? 0}
-                badgeColor={
-                  bumpConversionColor(bf2, bf2Conversion)
-                }
-                badgeHoverText={
-                  bf2 && bf2Conversion
-                    ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                    : "Not enough data, " + (bf2?.etl_num_times_converted || 0) + " / " + (bf2?.etl_num_times_used || 0)
-                }
-                bodyTitle={bf2?.title ?? ""}
-                // bodyText={bf2?.description ?? ""}
-                footer={
-                  <Center>
-                    <Group spacing={2}>
-                      <Text fz={14}>wait for</Text>
-                      <NumberInput
-                        defaultValue={bf2Delay.current}
-                        placeholder="# Days"
-                        variant="filled"
-                        hideControls
-                        sx={{ border: "solid 1px #777; border-radius: 4px;" }}
-                        m={3}
-                        min={2}
-                        max={99}
-                        w={bf2Delay.current > 9 ? 50 : 30}
-                        size="xs"
-                        onChange={async (value) => {
-                          if (!bf2) return;
-                          bf2Delay.current = value || 2;
-                          const result = await patchBumpFramework(
-                            userToken,
-                            bf2.id,
-                            bf2.overall_status,
-                            bf2.title,
-                            bf2.description,
-                            bf2.bump_length,
-                            bf2.bumped_count,
-                            bf2Delay.current,
-                            bf2.default,
-                            bf2.use_account_research,
-                            bf2.transformer_blocklist
-                          );
-                          if (result.status === "success") refetch();
-                        }}
-                      />
-                      <Text fz={14}>days, then:</Text>
-                    </Group>
-                  </Center>
-                }
-                active={activeCard === 3}
-                onClick={() => onSetActiveCard(3)}
-                canEdit
-                editProps={{
-                  title: "Choose Bump Framework for Follow-Up 3",
-                  bumpedCount: 2,
-                  bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) =>
-                      bf.overall_status === "BUMPED" && bf.bumped_count === 2
-                  ),
-                  activeBumpFrameworkId: bf2?.id ?? -1,
-                }}
-              />
-              <FrameworkCard
-                title="Follow-Up 4"
-                badgeText={`Reply ${
-                  bf3Conversion ? bf3Conversion.toFixed(0) + "%" : "TBD"
-                }`}
-                badgeColor={
-                  bumpConversionColor(bf3, bf3Conversion)
-                }
-                timesUsed={bf3?.etl_num_times_used ?? 0}
-                timesConverted={bf3?.etl_num_times_converted ?? 0}
-                badgeHoverText={
-                  bf3 && bf3Conversion
-                    ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                    : "Not enough data, " + (bf3?.etl_num_times_converted || 0) + " / " + (bf3?.etl_num_times_used || 0)
-                }
-                bodyTitle={bf3?.title ?? ""}
-                // bodyText={bf3?.description ?? ""}
-                active={activeCard === 4}
-                onClick={() => onSetActiveCard(4)}
-                canEdit
-                editProps={{
-                  title: "Choose Bump Framework for Follow-Up 4",
-                  bumpedCount: 3,
-                  bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) =>
-                      bf.overall_status === "BUMPED" && bf.bumped_count === 3
-                  ),
-                  activeBumpFrameworkId: bf3?.id ?? -1,
-                }}
-              />
+              {bump_amount >= 2 && (
+                <FrameworkCard
+                  title="Follow-Up 2"
+                  badgeText={`Reply ${
+                    bf1Conversion ? bf1Conversion.toFixed(0) + "%" : "TBD"
+                  }`}
+                  timesUsed={bf1?.etl_num_times_used ?? 0}
+                  timesConverted={bf1?.etl_num_times_converted ?? 0}
+                  badgeHoverText={
+                    bf1 && bf1Conversion
+                      ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
+                      : "Not enough data, " +
+                        (bf1?.etl_num_times_converted || 0) +
+                        " / " +
+                        (bf1?.etl_num_times_used || 0)
+                  }
+                  badgeColor={bumpConversionColor(bf1, bf1Conversion)}
+                  bodyTitle={bf1?.title ?? ""}
+                  // bodyText={bf1?.description ?? ""}
+                  footer={
+                    <Center>
+                      <Group spacing={2}>
+                        <Text fz={14}>wait for</Text>
+                        <NumberInput
+                          defaultValue={bf1Delay.current}
+                          placeholder="# Days"
+                          variant="filled"
+                          hideControls
+                          sx={{ border: "solid 1px #777; border-radius: 4px;" }}
+                          m={3}
+                          min={1}
+                          max={99}
+                          w={bf1Delay.current > 9 ? 50 : 30}
+                          size="xs"
+                          onChange={async (value) => {
+                            if (!bf1) return;
+                            bf1Delay.current = value || 2;
+                            const result = await patchBumpFramework(
+                              userToken,
+                              bf1.id,
+                              bf1.overall_status,
+                              bf1.title,
+                              bf1.description,
+                              bf1.bump_length,
+                              bf1.bumped_count,
+                              bf1Delay.current,
+                              bf1.default,
+                              bf1.use_account_research,
+                              bf1.transformer_blocklist
+                            );
+                            if (result.status === "success") refetch();
+                          }}
+                        />
+                        <Text fz={14}>days, then:</Text>
+                      </Group>
+                    </Center>
+                  }
+                  active={activeCard === 2}
+                  onClick={() => onSetActiveCard(2)}
+                  canEdit
+                  editProps={{
+                    title: "Choose Bump Framework for Follow-Up 2",
+                    bumpedCount: 1,
+                    bumpedFrameworks: bumpFrameworks.filter(
+                      (bf) =>
+                        bf.overall_status === "BUMPED" && bf.bumped_count === 1
+                    ),
+                    activeBumpFrameworkId: bf1?.id ?? -1,
+                  }}
+                  canRemove={bump_amount === 2}
+                  onRemove={() => updateBumpAmount(1)}
+                />
+              )}
+
+              {bump_amount >= 3 && (
+                <FrameworkCard
+                  title="Follow-Up 3"
+                  badgeText={`Reply ${
+                    bf2Conversion ? bf2Conversion.toFixed(0) + "%" : "TBD"
+                  }`}
+                  timesUsed={bf2?.etl_num_times_used ?? 0}
+                  timesConverted={bf2?.etl_num_times_converted ?? 0}
+                  badgeColor={bumpConversionColor(bf2, bf2Conversion)}
+                  badgeHoverText={
+                    bf2 && bf2Conversion
+                      ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
+                      : "Not enough data, " +
+                        (bf2?.etl_num_times_converted || 0) +
+                        " / " +
+                        (bf2?.etl_num_times_used || 0)
+                  }
+                  bodyTitle={bf2?.title ?? ""}
+                  // bodyText={bf2?.description ?? ""}
+                  footer={
+                    <Center>
+                      <Group spacing={2}>
+                        <Text fz={14}>wait for</Text>
+                        <NumberInput
+                          defaultValue={bf2Delay.current}
+                          placeholder="# Days"
+                          variant="filled"
+                          hideControls
+                          sx={{ border: "solid 1px #777; border-radius: 4px;" }}
+                          m={3}
+                          min={2}
+                          max={99}
+                          w={bf2Delay.current > 9 ? 50 : 30}
+                          size="xs"
+                          onChange={async (value) => {
+                            if (!bf2) return;
+                            bf2Delay.current = value || 2;
+                            const result = await patchBumpFramework(
+                              userToken,
+                              bf2.id,
+                              bf2.overall_status,
+                              bf2.title,
+                              bf2.description,
+                              bf2.bump_length,
+                              bf2.bumped_count,
+                              bf2Delay.current,
+                              bf2.default,
+                              bf2.use_account_research,
+                              bf2.transformer_blocklist
+                            );
+                            if (result.status === "success") refetch();
+                          }}
+                        />
+                        <Text fz={14}>days, then:</Text>
+                      </Group>
+                    </Center>
+                  }
+                  active={activeCard === 3}
+                  onClick={() => onSetActiveCard(3)}
+                  canEdit
+                  editProps={{
+                    title: "Choose Bump Framework for Follow-Up 3",
+                    bumpedCount: 2,
+                    bumpedFrameworks: bumpFrameworks.filter(
+                      (bf) =>
+                        bf.overall_status === "BUMPED" && bf.bumped_count === 2
+                    ),
+                    activeBumpFrameworkId: bf2?.id ?? -1,
+                  }}
+                  canRemove={bump_amount === 3}
+                  onRemove={() => updateBumpAmount(2)}
+                />
+              )}
+
+              {bump_amount >= 4 && (
+                <FrameworkCard
+                  title="Follow-Up 4"
+                  badgeText={`Reply ${
+                    bf3Conversion ? bf3Conversion.toFixed(0) + "%" : "TBD"
+                  }`}
+                  badgeColor={bumpConversionColor(bf3, bf3Conversion)}
+                  timesUsed={bf3?.etl_num_times_used ?? 0}
+                  timesConverted={bf3?.etl_num_times_converted ?? 0}
+                  badgeHoverText={
+                    bf3 && bf3Conversion
+                      ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
+                      : "Not enough data, " +
+                        (bf3?.etl_num_times_converted || 0) +
+                        " / " +
+                        (bf3?.etl_num_times_used || 0)
+                  }
+                  bodyTitle={bf3?.title ?? ""}
+                  // bodyText={bf3?.description ?? ""}
+                  active={activeCard === 4}
+                  onClick={() => onSetActiveCard(4)}
+                  canEdit
+                  editProps={{
+                    title: "Choose Bump Framework for Follow-Up 4",
+                    bumpedCount: 3,
+                    bumpedFrameworks: bumpFrameworks.filter(
+                      (bf) =>
+                        bf.overall_status === "BUMPED" && bf.bumped_count === 3
+                    ),
+                    activeBumpFrameworkId: bf3?.id ?? -1,
+                  }}
+                  canRemove={bump_amount === 4}
+                  onRemove={() => updateBumpAmount(3)}
+                />
+              )}
+
+              {bump_amount < 4 && (
+                <Center>
+                  <Stack spacing={5}><Text ta="center" fw={200} c='dimmed' fz='xl'>|</Text>
+                  <Button
+                    variant="subtle"
+                    radius="md"
+                    compact
+                    onClick={() => updateBumpAmount(bump_amount + 1)}
+                  >
+                    Add Step
+                  </Button>
+                  </Stack>
+                </Center>
+              )}
             </Stack>
           </Box>
           <Box sx={{ flexBasis: "65%" }}>
@@ -709,9 +775,11 @@ function BumpFrameworkSelect(props: {
     <ModalSelector
       selector={{
         override: (
-          <ActionIcon radius="xl">
-            <IconPencil size="1.1rem" />
-          </ActionIcon>
+          <Tooltip label="Edit" withinPortal>
+            <ActionIcon radius="xl">
+              <IconPencil size="1.1rem" />
+            </ActionIcon>
+          </Tooltip>
         ),
       }}
       title={{
@@ -831,8 +899,10 @@ function IntroMessageSection(props: {
   const [hoveredCTA, setHoveredCTA] = useState(false);
 
   const [activeTab, setActiveTab] = useState<string | null>("none");
-  const { hovered: hoveredPersonSettingsBtn, ref: refPersonSettingsBtn } = useHover<HTMLButtonElement>();
-  const { hovered: hoveredYourCTAsBtn, ref: refYourCTAsBtn } = useHover<HTMLButtonElement>();
+  const { hovered: hoveredPersonSettingsBtn, ref: refPersonSettingsBtn } =
+    useHover<HTMLButtonElement>();
+  const { hovered: hoveredYourCTAsBtn, ref: refYourCTAsBtn } =
+    useHover<HTMLButtonElement>();
 
   const [personalizationItemsCount, setPersonalizationItemsCount] =
     useState<number>();
@@ -1017,9 +1087,15 @@ function IntroMessageSection(props: {
                 <LiExampleInvitation
                   message={message}
                   startHovered={
-                    activeTab === "personalization" || hoveredPersonSettingsBtn ? true : undefined
+                    activeTab === "personalization" || hoveredPersonSettingsBtn
+                      ? true
+                      : undefined
                   }
-                  endHovered={activeTab === "ctas" || hoveredYourCTAsBtn ? true : undefined}
+                  endHovered={
+                    activeTab === "ctas" || hoveredYourCTAsBtn
+                      ? true
+                      : undefined
+                  }
                   onClickStart={openPersonalizationSettings}
                   onClickEnd={openCTASettings}
                   onHoveredEnd={(hovered) => setHoveredCTA(hovered)}
@@ -1069,7 +1145,7 @@ function IntroMessageSection(props: {
                   borderRadius: theme.radius.md + "!important",
                   color: theme.colors.teal[8] + "!important",
                 },
-                border: 'solid 1px ' + theme.colors.teal[5] + "!important"
+                border: "solid 1px " + theme.colors.teal[5] + "!important",
               })}
             >
               Edit Personalization
@@ -1103,7 +1179,7 @@ function IntroMessageSection(props: {
                   borderRadius: theme.radius.md + "!important",
                   color: theme.colors.blue[8] + "!important",
                 },
-                border: 'solid 1px ' + theme.colors.blue[4] + "!important"
+                border: "solid 1px " + theme.colors.blue[4] + "!important",
               })}
             >
               Edit CTAs
@@ -1586,6 +1662,8 @@ function FrameworkCard(props: {
     bumpedFrameworks: BumpFramework[];
     activeBumpFrameworkId: number;
   };
+  canRemove?: boolean;
+  onRemove?: () => void;
   badgeColor?: string;
 }) {
   const { hovered, ref } = useHover();
@@ -1648,8 +1726,14 @@ function FrameworkCard(props: {
                 props.conversion > 9.0
                   ? "Your open rates are above industry standards (9%). Congrats!"
                   : props.conversion <= 9.0 && props.conversion > 0.0
-                  ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " + (Math.round(props.conversion * 10) / 10) + "%."
-                  : "Not enough data, " + props.timesConverted + " / " + props.timesUsed + " prospects have been bumped."
+                  ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
+                    Math.round(props.conversion * 10) / 10 +
+                    "%."
+                  : "Not enough data, " +
+                    props.timesConverted +
+                    " / " +
+                    props.timesUsed +
+                    " prospects have been bumped."
               }
               withArrow
               withinPortal
@@ -1672,28 +1756,41 @@ function FrameworkCard(props: {
             </Tooltip>
           )}
           {props.badgeText && (
-              <Tooltip
-                label={props.badgeHoverText}
-                openDelay={100}
-                withArrow
-                withinPortal
-                disabled={!props.badgeHoverText}
+            <Tooltip
+              label={props.badgeHoverText}
+              openDelay={100}
+              withArrow
+              withinPortal
+              disabled={!props.badgeHoverText}
+            >
+              <Badge
+                ml="auto"
+                color={props.badgeColor || "gray"}
+                size="sm"
+                styles={{
+                  root: { textTransform: "initial", fontWeight: 500 },
+                }}
               >
-                <Badge
-                  ml='auto'
-                  color={props.badgeColor || 'gray'}
-                  size="sm"
-                  styles={{
-                    root: { textTransform: "initial", fontWeight: 500 },
-                  }}
-                >
-                  {props.badgeText}
-                </Badge>
+                {props.badgeText}
+              </Badge>
+            </Tooltip>
+          )}
+          <Group spacing={3}>
+            {props.canEdit && props.editProps && (
+              <BumpFrameworkSelect {...props.editProps} />
+            )}
+            {props.canRemove && props.onRemove && (
+              <Tooltip label="Remove" withinPortal>
+                <ActionIcon radius="xl" onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  props.onRemove!();
+                }}>
+                  <IconCircleMinus size="1.2rem" />
+                </ActionIcon>
               </Tooltip>
             )}
-          {props.canEdit && props.editProps && (
-            <BumpFrameworkSelect {...props.editProps} />
-          )}
+          </Group>
         </Group>
         <Divider />
         <Box px={20} py={10}>
@@ -1864,31 +1961,31 @@ function FrameworkSection(props: {
       method: "GET",
     })
       .then((res) => {
-        const data = res.json()
-        console.log(data)
-        return data
+        const data = res.json();
+        console.log(data);
+        return data;
       })
       .then((j) => {
-        let options: any = {}
-        const data = j['bump_framework_templates']
-        console.log(data)
+        let options: any = {};
+        const data = j["bump_framework_templates"];
+        console.log(data);
         data.forEach((template: any) => {
           options[template.tag] = {
-            "name": template.name,
-            "raw_prompt": template.raw_prompt,
-            "human_readable_prompt": template.human_readable_prompt,
-            "length": template.length
-          }
+            name: template.name,
+            raw_prompt: template.raw_prompt,
+            human_readable_prompt: template.human_readable_prompt,
+            length: template.length,
+          };
         });
-        console.log(options)
+        console.log(options);
 
-        setBUMP_FRAMEWORK_OPTIONS(options)
+        setBUMP_FRAMEWORK_OPTIONS(options);
       });
-  }
-  
+  };
+
   useEffect(() => {
     getBumpFrameworkTemplates();
-    console.log("getBumpFrameworkTemplates")
+    console.log("getBumpFrameworkTemplates");
   }, []);
 
   const autoCompleteWithBrain = () => {
@@ -2093,13 +2190,16 @@ function FrameworkSection(props: {
                   placeholder="Select different template"
                   searchable
                   clearable
-                  data={Object.keys(BUMP_FRAMEWORK_OPTIONS).map((key: any) => {
-                    return {
-                    'value': key,
-                    'label': BUMP_FRAMEWORK_OPTIONS[key].name
-                  }}).concat([
-                    { value: "make-your-own", label: "🛠 Make your own" },
-                  ])}
+                  data={Object.keys(BUMP_FRAMEWORK_OPTIONS)
+                    .map((key: any) => {
+                      return {
+                        value: key,
+                        label: BUMP_FRAMEWORK_OPTIONS[key].name,
+                      };
+                    })
+                    .concat([
+                      { value: "make-your-own", label: "🛠 Make your own" },
+                    ])}
                   onChange={(value: any) => {
                     if (value === "make-your-own") {
                       form.setFieldValue("bumpFrameworkTemplateName", "");
@@ -2184,9 +2284,19 @@ function FrameworkSection(props: {
             </Box>
           </Card>
 
-          {form.values.promptInstructions.includes("Answer:") && <Alert icon={<IconBulb size="1rem" />} variant="outline" onClick={toggle} sx={{cursor: 'pointer'}}>
-            <Text color='blue' fz='12px'>Note: This framework requires you fill out additional context in the prompt. Please press 'Advanced Settings'</Text>
-          </Alert>}
+          {form.values.promptInstructions.includes("Answer:") && (
+            <Alert
+              icon={<IconBulb size="1rem" />}
+              variant="outline"
+              onClick={toggle}
+              sx={{ cursor: "pointer" }}
+            >
+              <Text color="blue" fz="12px">
+                Note: This framework requires you fill out additional context in
+                the prompt. Please press 'Advanced Settings'
+              </Text>
+            </Alert>
+          )}
 
           <form
             onChange={() => {
@@ -2598,14 +2708,25 @@ const PersonalizationSection = (props: {
       <Card shadow="md" radius={"md"} mb={"1rem"}>
         <Group position="apart">
           <Box>
-            <Title fw={300} order={4}>Acceptance Rate by Personalization</Title>
+            <Title fw={300} order={4}>
+              Acceptance Rate by Personalization
+            </Title>
           </Box>
-          <Box sx={{textAlign: 'right'}} ml='auto' pb='sm'>
-            <Badge leftSection={<IconCircle size='0.7rem'/>} color='grape' size='xs'>
+          <Box sx={{ textAlign: "right" }} ml="auto" pb="sm">
+            <Badge
+              leftSection={<IconCircle size="0.7rem" />}
+              color="grape"
+              size="xs"
+            >
               Account Data
             </Badge>
             <br />
-            <Badge leftSection={<IconCircle size='0.7rem'/>} color='green' mt='xs' size='xs'>
+            <Badge
+              leftSection={<IconCircle size="0.7rem" />}
+              color="green"
+              mt="xs"
+              size="xs"
+            >
               Contact Data
             </Badge>
           </Box>
@@ -2858,7 +2979,7 @@ const CtaSection = (props: {
             }}
             onClickDelete={async () => {
               const response = await deleteCTA(userToken, e.id);
-              if(response.status === "success"){
+              if (response.status === "success") {
                 showNotification({
                   title: "Success",
                   message: "CTA has been deleted",

@@ -51,6 +51,8 @@ const ItemComponent: TransferListItemComponent = ({ data, selected }: TransferLi
               id: item.id,
               prospect: null,
               meta_data: null,
+              highlighted_words: null,
+              problems: null,
             };
           }
           return item;
@@ -210,8 +212,8 @@ export default function VoiceBuilderFlow(props: { persona: Archetype; voiceBuild
             mt={10}
             value={[sampleMessages, savedMessages]}
             onChange={(value) => {
-              let messages = value[0].map((item) => ({ id: +item.value, value: item.label, prospect: null, meta_data: null }));
-              messages = messages.concat(value[1].map((item) => ({ id: +item.value, value: item.label, prospect: null, meta_data: null })));
+              let messages = value[0].map((item) => ({ id: +item.value, value: item.label, prospect: null, meta_data: null, highlighted_words: null, problems: null }));
+              messages = messages.concat(value[1].map((item) => ({ id: +item.value, value: item.label, prospect: null, meta_data: null, highlighted_words: null, problems: null })));
               setVoiceBuilderMessages(messages);
             }}
             titles={['Samples', 'Saved Messages']}

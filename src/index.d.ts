@@ -232,6 +232,7 @@ export interface CTA {
     total_count: number;
   };
   cta_type: string;
+  auto_mark_as_scheduling_on_acceptance: boolean;
 }
 
 export interface Archetype {

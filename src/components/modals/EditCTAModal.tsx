@@ -11,6 +11,7 @@ import {
   LoadingOverlay,
   Card,
   Box,
+  Switch,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useState } from "react";
@@ -34,6 +35,7 @@ export default function EditCTAModal({
   const [error, setError] = useState<string | null>(null);
   const userToken = useRecoilValue(userTokenState);
   const [expirationDate, setExpirationDate] = useState<Date | null>(innerProps.cta.expiration_date ? new Date(innerProps.cta.expiration_date) : null);
+  const [markAsScheduling, setMarkAsScheduling] = useState(innerProps.cta.auto_mark_as_scheduling_on_acceptance);
 
   const form = useForm({
     initialValues: {
@@ -44,7 +46,7 @@ export default function EditCTAModal({
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
-    const result = await updateCTA(userToken, innerProps.cta.id, values.cta, expirationDate || undefined);
+    const result = await updateCTA(userToken, innerProps.cta.id, values.cta, expirationDate || undefined, markAsScheduling);
 
     setLoading(false);
 
@@ -123,6 +125,14 @@ export default function EditCTAModal({
             />
           </Box>
         </Group>
+
+        <Switch
+          label='If accepted, mark prospect as "scheduling"'
+          defaultChecked={markAsScheduling}
+          mb='md'
+          onChange={() => { 
+            setMarkAsScheduling(!markAsScheduling); 
+        }}/>
 
         {error && (
           <Text color="red" size="sm" mt="sm">

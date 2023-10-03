@@ -4,7 +4,7 @@ import { showNotification } from "@mantine/notifications";
 import { MsgResponse } from "src";
 import { processResponse } from "./utils";
 
-export default async function createCTA(userToken: string, personaId: number, cta: string, expirationDate?: Date, cta_type?: string): Promise<MsgResponse> {
+export default async function createCTA(userToken: string, personaId: number, cta: string, expirationDate?: Date, cta_type?: string, markAsScheduling?: boolean): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/message_generation/create_cta`,
     {
@@ -18,6 +18,7 @@ export default async function createCTA(userToken: string, personaId: number, ct
         text_value: cta,
         expiration_date: expirationDate?.toISOString(),
         cta_type: cta_type,
+        auto_mark_as_scheduling_on_acceptance: markAsScheduling,
       }),
     }
   );
@@ -57,7 +58,8 @@ export async function updateCTA(
   userToken: string,
   cta_id: number,
   text_value: string,
-  expirationDate?: Date
+  expirationDate?: Date,
+  markAsScheduling?: boolean,
 ): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/message_generation/cta`,
@@ -71,6 +73,7 @@ export async function updateCTA(
         "cta_id": cta_id,
         "text_value": text_value,
         expiration_date: expirationDate?.toISOString(),
+        auto_mark_as_scheduling_on_acceptance: markAsScheduling,
       }),
     }
   );

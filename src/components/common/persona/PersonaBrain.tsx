@@ -6,6 +6,7 @@ import {
   Flex,
   LoadingOverlay,
   NumberInput,
+  Progress,
   Text,
   TextInput,
   Title,
@@ -363,12 +364,26 @@ export function PersonaBasicForm(props: {
     props.onUpdate(update)
   };
 
-  // useEffect(() => {
-  //   sendUpdate();
-  // }, []);
+  const fields = [
+    personaName, personaFitReason, personaContactObjective, personaContractSize, personaCTAFrameworkCompany, personaCTAFrameworkPersona, personaCTAFrameworkAction, personaUseCases, personaFilters, personaLookalikeProfile1, personaLookalikeProfile2, personaLookalikeProfile3, personaLookalikeProfile4, personaLookalikeProfile5
+  ]
+  const numFields = fields.length
+  const numFilled = fields.filter(f => f).length
+  const percentFilled = Math.round(numFilled / numFields * 100)
 
   return (
     <Box>
+      <Flex>
+        <Text size='sm' fw='500'>
+          Persona Brain Completion
+        </Text>
+
+        <Text ml='auto' size='sm' fw='500'>
+          {percentFilled}% ({numFilled}/{numFields})
+        </Text>
+      </Flex>
+      <Progress color={percentFilled > 100 ? 'green' : 'blue'} size="xl" value={percentFilled} striped />
+
       <Flex w='100%' mb='sm'>
         <TextAreaWithAI
           label="Descriptive Persona Name"

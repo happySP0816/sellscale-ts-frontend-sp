@@ -13,6 +13,7 @@ import {
   Container,
   Box,
   Select,
+  Switch,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useState } from "react";
@@ -41,6 +42,7 @@ export default function CreateNewCTAModel({
   const [fetchedCTATypes, setFetchedCTATypes] = useState(false);
   const [ctaTypes, setCTATypes]: any = useState([] as any[]);
   const [ctaType, setCTAType] = useState("manually-added" as string);
+  const [markAsScheduling, setMarkAsScheduling] = useState(false as boolean);
 
   const form = useForm({
     initialValues: {
@@ -81,7 +83,8 @@ export default function CreateNewCTAModel({
       innerProps.personaId,
       values.cta,
       expirationDate || undefined,
-      ctaType
+      ctaType,
+      markAsScheduling
     );
 
     setLoading(false);
@@ -311,6 +314,14 @@ export default function CreateNewCTAModel({
             />
           </Group>
         </Flex>
+
+         <Switch
+            label='If accepted, mark prospect as "scheduling"'
+            defaultChecked={markAsScheduling}
+            mb='md'
+            onChange={() => { 
+              setMarkAsScheduling(!markAsScheduling); 
+          }}/>
 
         {error && (
           <Text color="red" size="sm" mt="sm">

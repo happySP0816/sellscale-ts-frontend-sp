@@ -273,6 +273,16 @@ export interface PersonaOverview {
   emoji: string;
   avg_icp_fit_score: number;
   li_bump_amount: number;
+  cta_framework_company: string;
+  cta_framework_persona: string;
+  cta_framework_action: string;
+  use_cases: string;
+  filters: string;
+  lookalike_profile_1: string;
+  lookalike_profile_2: string;
+  lookalike_profile_3: string;
+  lookalike_profile_4: string;
+  lookalike_profile_5: string;
 }
 
 export interface LinkedInMessage {

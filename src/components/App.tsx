@@ -9,7 +9,7 @@ import Layout from "./nav/Layout";
 import { Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { ModalsProvider } from "@mantine/modals";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { navLoadingState } from "@atoms/navAtoms";
+import { navConfettiState, navLoadingState } from "@atoms/navAtoms";
 import SpotlightWrapper from "@nav/SpotlightWrapper";
 import UploadProspectsModal from "@modals/UploadProspectsModal";
 import SendLinkedInCredentialsModal from "@modals/SendLinkedInCredentialsModal";
@@ -50,6 +50,8 @@ import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { PersonaOverview } from "src";
 import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
 import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
+import { useViewportSize } from "@mantine/hooks";
+import Confetti from 'react-confetti';
 
 export default function App() {
   // Site light or dark mode
@@ -95,6 +97,9 @@ export default function App() {
   }, [userData]);
 
   const loading = useRecoilValue(navLoadingState);
+  const [confetti, setConfetti] = useRecoilState(navConfettiState);
+  
+  const { height, width } = useViewportSize();
 
   const [drawerProspectId, setDrawerProspectId] = useRecoilState(prospectDrawerIdState);
   const [drawerOpened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
@@ -213,6 +218,14 @@ export default function App() {
               {/* Outlet is where react-router will render child routes */}
               <Outlet />
             </Layout>
+            <Confetti
+              width={width}
+              height={height}
+              run={!!confetti}
+              recycle={false}
+              numberOfPieces={confetti ?? 0}
+              onConfettiComplete={() => setConfetti(null)}
+            />
             {isLoggedIn() && <ProspectDetailsDrawer />}
           </ModalsProvider>
         </SpotlightWrapper>

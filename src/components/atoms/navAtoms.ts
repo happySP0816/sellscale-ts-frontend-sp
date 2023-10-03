@@ -10,7 +10,13 @@ const navLoadingState = atom({
   default: false,
 });
 
+const navConfettiState = atom({
+  key: "nav-confetti",
+  default: null as number | null,
+});
+
 export {
   navTabState,
   navLoadingState,
+  navConfettiState,
 };

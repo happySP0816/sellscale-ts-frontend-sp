@@ -21,7 +21,7 @@ import {
   IconInfoCircle,
 } from "@tabler/icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { currentProjectState } from "@atoms/personaAtoms";
 import {
   filterProspectsState,
@@ -31,6 +31,7 @@ import { runScoringICP, updateICPRuleSet } from "@utils/requests/icpScoring";
 import { userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
 import { getICPScoringJobs } from "@utils/requests/getICPScoringJobs";
+import { navConfettiState } from "@atoms/navAtoms";
 
 type Props = {
   sideBarVisible: boolean;
@@ -55,6 +56,7 @@ export function SidebarHeader({
   const [value, setValue] = useState("");
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
+  const [_confetti, dropConfetti] = useRecoilState(navConfettiState);
 
   const [loading, setLoading] = useState(false);
   const currentProject = useRecoilValue(currentProjectState);
@@ -275,7 +277,9 @@ export function SidebarHeader({
                 });
               }
 
-              triggerGetScoringJobs();
+              triggerGetScoringJobs().then(() => {
+                dropConfetti(300);
+              });
             }}
           >
             {isTesting ? "Filter test sample" : "Start Filtering"}

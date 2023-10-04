@@ -56,7 +56,8 @@ export default function PersonaSettingsPage() {
     <PageFrame>
       <Container p="sm">
         <LoadingOverlay visible={loading} />
-        <PageTitle title={`${currentProject.name} - Settings`} />
+        <Title order={4} align='center'>AI Brain Form</Title>
+        <Title order={1} align='center'>{currentProject.emoji} {currentProject.name}</Title>
         <br />
         <Tabs defaultValue="general" orientation="vertical" variant='pills'>
           <Tabs.List>

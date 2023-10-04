@@ -2875,6 +2875,9 @@ const CtaSection = (props: {
   const theme = useMantineTheme();
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
+  const [ctaActiveStatusesToShow, setCtaActiveStatusesToShow] = useState<
+    boolean[]
+  >([true]);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-cta-data-${currentProject?.id}`],
@@ -2928,68 +2931,78 @@ const CtaSection = (props: {
   return (
     <Box pt="md" sx={{ position: "relative" }}>
       <LoadingOverlay visible={isFetching} zIndex={10} />
-      {data &&
-        data.map((e, index) => (
-          <CTAOption
-            data={{
-              id: e.id,
-              label: e.text_value,
-              description: "",
-              checked: e.active,
-              outlined: !!props.outlineCTA && props.outlineCTA === e.text_value,
-              tags: [
-                {
-                  label: "Acceptance:",
-                  highlight: e.percentage + "%",
-                  color: "blue",
-                  variant: "subtle",
-                  hovered:
-                    "Prospects: " + e.total_responded + "/" + e.total_count,
-                },
-                // {
-                //   label: "Prospects:",
-                //   highlight: e.total_responded + "/" + e.total_count,
-                //   color: "indigo",
-                //   variant: "subtle",
-                // },
-                {
-                  label: e.cta_type,
-                  highlight: "",
-                  color: valueToColor(theme, e.cta_type),
-                  variant: "light",
-                },
-              ],
-            }}
-            key={index}
-            onToggle={async (enabled) => {
-              const result = await toggleCTA(userToken, e.id);
-              if (result.status === "success") {
-                await refetch();
-              }
-            }}
-            onClickEdit={() => {
-              openContextModal({
-                modal: "editCTA",
-                title: <Title order={3}>Edit CTA</Title>,
-                innerProps: {
-                  personaId: currentProject?.id,
-                  cta: e,
-                },
-              });
-            }}
-            onClickDelete={async () => {
-              const response = await deleteCTA(userToken, e.id);
-              if (response.status === "success") {
-                showNotification({
-                  title: "Success",
-                  message: "CTA has been deleted",
-                  color: "blue",
-                });
-              }
-              refetch();
-            }}
-          />
-        ))}
+      {/* Active CTAs Only */}
+      
+      {ctaActiveStatusesToShow.map((ctaActive) => {
+          return data &&
+            data.filter(e => e.active == ctaActive).map((e, index) => (
+              <CTAOption
+                data={{
+                  id: e.id,
+                  label: e.text_value,
+                  description: "",
+                  checked: e.active,
+                  outlined: !!props.outlineCTA && props.outlineCTA === e.text_value,
+                  tags: [
+                    {
+                      label: "Acceptance:",
+                      highlight: e.percentage + "%",
+                      color: "blue",
+                      variant: "subtle",
+                      hovered:
+                        "Prospects: " + e.total_responded + "/" + e.total_count,
+                    },
+                    {
+                      label: e.cta_type,
+                      highlight: "",
+                      color: valueToColor(theme, e.cta_type),
+                      variant: "light",
+                    },
+                  ],
+                }}
+                key={index}
+                onToggle={async (enabled) => {
+                  const result = await toggleCTA(userToken, e.id);
+                  if (result.status === "success") {
+                    await refetch();
+                  }
+                }}
+                onClickEdit={() => {
+                  openContextModal({
+                    modal: "editCTA",
+                    title: <Title order={3}>Edit CTA</Title>,
+                    innerProps: {
+                      personaId: currentProject?.id,
+                      cta: e,
+                    },
+                  });
+                }}
+                onClickDelete={async () => {
+                  const response = await deleteCTA(userToken, e.id);
+                  if (response.status === "success") {
+                    showNotification({
+                      title: "Success",
+                      message: "CTA has been deleted",
+                      color: "blue",
+                    });
+                  }
+                  refetch();
+                }}
+              />
+            ))
+        })
+      }
+      <Button variant='outline' w='100%' mt='xs' size='xs' onClick={() => {
+        if (ctaActiveStatusesToShow.length > 1) {
+          setCtaActiveStatusesToShow([true]);
+        } else {
+          setCtaActiveStatusesToShow([true, false]);
+        }
+      }}>
+        {
+          ctaActiveStatusesToShow.length > 1 ? "Hide Inactive CTAs" : "Show " + data?.filter(e => !e.active).length + " Inactive CTAs"
+        }
+      </Button>
 
       <Button
         sx={{

@@ -215,8 +215,10 @@ function BumpBucketView(props: {
                         <ActionIcon
                           onClick={() => {
                             openContextModal({
-                              modal: 'editBumpFramework',
-                              title: <Title order={3}>Edit: {framework.title}</Title>,
+                              modal: "editBumpFramework",
+                              title: (
+                                <Title order={3}>Edit: {framework.title}</Title>
+                              ),
                               innerProps: {
                                 bumpFrameworkID: framework.id,
                                 overallStatus: framework.overall_status,
@@ -227,8 +229,10 @@ function BumpBucketView(props: {
                                 onSave: props.afterEdit,
                                 bumpedCount: framework.bumped_count,
                                 bumpDelayDays: framework.bump_delay_days,
-                                useAccountResearch: framework.use_account_research,
-                                transformerBlocklist: props.bumpFramework.transformer_blocklist,
+                                useAccountResearch:
+                                  framework.use_account_research,
+                                transformerBlocklist:
+                                  framework.transformer_blocklist,
                               },
                             });
                           }}

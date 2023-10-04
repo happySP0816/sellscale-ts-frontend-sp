@@ -38,7 +38,7 @@ export const PulseWrapper = () => {
 
   return (
     <div>
-      <Box m='md'>
+      <Box p='lg'>
         <Box>
           <Flex direction={'row'} mb='xs'>
             <ProjectSelect onClick={(persona) => {

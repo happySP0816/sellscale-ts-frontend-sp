@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import {
   createStyles,
   Group,
@@ -38,6 +38,7 @@ import { openContextModal } from "@mantine/modals";
 import { LogoFull } from "./Logo";
 import { SearchBar } from "../../../legacy_code/old/SearchBar";
 import { openSpotlight } from "@mantine/spotlight";
+import { getPreOnboardingData } from '@pages/PreOnboarding';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -130,6 +131,8 @@ export default function SideNavbar(props: {}) {
   const { classes, cx } = useStyles();
   const userToken = useRecoilValue(userTokenState);
   const navigate = useNavigate();
+  const [fetchedPreOnboardingData, setFetchedPreOnboardingData] = useState(false);
+  const [preOnboardingData, setPreOnboardingData]= useState({});
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-sdr-onboarding-completion-report`],
@@ -139,6 +142,18 @@ export default function SideNavbar(props: {}) {
     },
     enabled: isLoggedIn(),
   });
+
+  useEffect(() => {
+    if (!fetchedPreOnboardingData) {
+      getPreOnboardingData(
+        userToken,
+        (data: any) => {
+          setPreOnboardingData(data);
+        }
+      );
+      setFetchedPreOnboardingData(true);
+    }
+  }, [])
 
   // Get percentage from completed steps in report
   let stepsCount = 0;
@@ -150,7 +165,10 @@ export default function SideNavbar(props: {}) {
       .filter((item: any) => item).length;
   }
   stepsCount -= 1; // TEMP: Remove the 4 coming soon steps that are always false
-  const percentage = Math.round((completedStepsCount / stepsCount) * 100);
+  // const percentage = Math.round((completedStepsCount / stepsCount) * 100); // old percentage
+
+  const NUM_MANDATORY_FIELDS_IN_ONBOARDING = 27;
+  const percentage = Math.min(100, Math.round((Object.keys(preOnboardingData).length / NUM_MANDATORY_FIELDS_IN_ONBOARDING) * 100))
 
   return (
     <Group

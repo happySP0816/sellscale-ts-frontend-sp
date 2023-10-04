@@ -8,8 +8,9 @@ import {
   Divider,
   Box,
   Text,
-  Center,
+  Tooltip,
   NumberInput,
+  Flex,
 } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import {
@@ -18,7 +19,6 @@ import {
   IconRecycle,
   IconTrash,
 } from "@tabler/icons";
-import { Tooltip, Title } from "chart.js";
 import _ from "lodash";
 import { ReactNode } from "react";
 import { useRecoilValue } from "recoil";
@@ -33,12 +33,10 @@ export default function EmailSequenceStepCard(props: {
   title: string;
   templateTitle: string;
   content?: string;
-  dataChannels?: MsgResponse | undefined;
-  afterCreate: () => void;
-  afterEdit: () => void;
-  bumpedCount?: number;
   onClick?: () => void;
-  footer?: ReactNode;
+  includeFooter?: boolean;
+  dataChannels?: MsgResponse | undefined;
+  bumpedCount?: number;
 }) {
   const { hovered, ref } = useHover();
 
@@ -77,7 +75,7 @@ export default function EmailSequenceStepCard(props: {
       })}
     >
       <Stack spacing={0}>
-        <Group position="apart" px={15} py={20} noWrap>
+        <Group position="apart" px={15} py={10} noWrap>
           <Group spacing={0} noWrap w={"100%"} display="flex">
             <ActionIcon
               variant="transparent"
@@ -112,11 +110,35 @@ export default function EmailSequenceStepCard(props: {
             {props.content}
           </Text>
         </Box>
-        {props.footer && (
+        {props.includeFooter && (
           <>
             <Divider />
             <Box px={20} py={10}>
-              {props.footer}
+              <Flex align='center' justify={'center'}>
+                <Text fz={14} fw={500}>
+                  Wait for
+                </Text>
+                <Tooltip label='Coming Soon' withinPortal withArrow>
+                  <div>
+                    <NumberInput
+                      mx='xs'
+                      w='32px'
+                      placeholder="# Days"
+                      variant="filled"
+                      hideControls
+                      sx={{ border: "solid 1px #777; border-radius: 4px;" }}
+                      size="xs"
+                      min={2}
+                      max={99}
+                      value={3}
+                      disabled
+                    />
+                  </div>
+                </Tooltip>
+                <Text fz={14} fw={500}>
+                  days, then:
+                </Text>
+              </Flex>
             </Box>
           </>
         )}

@@ -53,7 +53,7 @@ export default function CreateEmailSubjectLineModal(props: CreateEmailSubjectLin
     <Modal
       opened={props.modalOpened}
       onClose={props.closeModal}
-      title="Create New Email Subject Line"
+      title="New Email Subject Line"
       size='md'
       centered
       overlayProps={{
@@ -65,18 +65,13 @@ export default function CreateEmailSubjectLineModal(props: CreateEmailSubjectLin
       <LoadingOverlay visible={loading} />
       <TextInput
         label="Subject Line"
-        description="Put AI instructions in [[double brackets]]"
-        placeholder="Hey [[First Name]], can I get your thoughts on this?"
+        description="AI will do it's best to smartfill in any prompts (denoted with double brackets e.g., [[First name]])"
+        placeholder="ex. [[First name]] - Supercharge your outbound?"
         value={subjectLine}
         onChange={(event) => setSubjectLine(event.currentTarget.value)}
         required
       />
-      <Card mt='md'>
-        <Flex justify={'center'}>
-          Preview Coming Soon
-        </Flex>
-      </Card>
-      <Flex justify={'center'}>
+      <Flex justify={'center'} mt='xl'>
         <Button
           color='teal'
           disabled={subjectLine.length === 0}

@@ -59,9 +59,10 @@ export async function getEmailSubjectLineTemplates(userToken: string, archetypeI
  * @param userToken 
  * @param emailSubjectLineID
  * @param subjectLine
+ * @param active
  * @returns - MsgResponse
  */
-export async function patchEmailSubjectLineTemplate(userToken: string, emailSubjectLineID: number, subjectLine: string): Promise<MsgResponse> {
+export async function patchEmailSubjectLineTemplate(userToken: string, emailSubjectLineID: number, subjectLine: string, active: boolean): Promise<MsgResponse> {
 
   const response = await fetch(
     `${API_URL}/email_sequence/subject_line`,
@@ -74,6 +75,7 @@ export async function patchEmailSubjectLineTemplate(userToken: string, emailSubj
       body: JSON.stringify({
         email_subject_line_template_id: emailSubjectLineID,
         subject_line: subjectLine,
+        active: active,
       })
     }
   );

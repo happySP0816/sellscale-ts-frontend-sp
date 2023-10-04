@@ -620,7 +620,6 @@ export default function EmailSequencingPage(props: {
   const [subjectLineTemplates, setSubjectLineTemplates] = useState<SubjectLineTemplate[]>([])
 
   const triggerGetEmailSubjectLineTemplates = async () => {
-
     const result = await getEmailSubjectLineTemplates(
       userToken,
       currentProject?.id as number,
@@ -637,7 +636,8 @@ export default function EmailSequencingPage(props: {
     const templates = result.data
       .subject_line_templates as SubjectLineTemplate[];
 
-    setSubjectLineTemplates(templates);
+    setSubjectLineTemplates(templates);    
+    return 
   };
 
   const sequenceBuckets = useRef<EmailSequenceStepBuckets>({
@@ -655,6 +655,7 @@ export default function EmailSequencingPage(props: {
       templates: [],
     },
   } as EmailSequenceStepBuckets);
+  const [sequenceBucketsState, setSequenceBucketsState] = useState<EmailSequenceStepBuckets>(sequenceBuckets.current)
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -742,6 +743,7 @@ export default function EmailSequencingPage(props: {
       }
     }
     sequenceBuckets.current = newsequenceBuckets;
+    setSequenceBucketsState(newsequenceBuckets)
 
     // BumpFrameworks have been updated, submit event to parent
     if (props.onPopulateSequenceSteps) {
@@ -757,6 +759,7 @@ export default function EmailSequencingPage(props: {
 
   useEffect(() => {
     triggerGetEmailSubjectLineTemplates();
+    triggerGetEmailSequenceSteps();
   }, []);
 
   return (
@@ -991,15 +994,19 @@ export default function EmailSequencingPage(props: {
             </Tabs.Panel>{" "}
             <Tabs.Panel value="new_ui_setup">
               <NewUIEmailSequencing
+                userToken={userToken}
+                archetypeID={archetypeID}
+                templateBuckets={sequenceBucketsState}
+                subjectLines={subjectLineTemplates}
+                refetch={async () => {
+                  await triggerGetEmailSequenceSteps();
+                  await triggerGetEmailSubjectLineTemplates();
+                }}
+
                 loading={loading}
                 addNewSequenceStepOpened={addNewSequenceStepOpened}
-                templateBuckets={sequenceBuckets}
-                subjectLines={subjectLineTemplates}
-                archetypeID={archetypeID}
-                triggerGetEmailSequenceSteps={triggerGetEmailSequenceSteps}
                 closeSequenceStep={closeSequenceStep}
                 openSequenceStep={openSequenceStep}
-                userToken={userToken}
               />
             </Tabs.Panel>
           </Tabs>

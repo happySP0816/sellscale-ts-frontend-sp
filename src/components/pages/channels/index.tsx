@@ -114,7 +114,7 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                       onClick={close}
                       sx={{ borderRadius: 999 }}
                       onClickCapture={() => {
-                        history.back();
+                        navigateToPage(navigate, '/campaigns');
                       }}
                       mt='xs'
                     >

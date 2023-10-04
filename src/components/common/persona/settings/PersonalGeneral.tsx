@@ -1,6 +1,6 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
-import { Card, Flex, Title, Text, Tooltip, Badge, Button } from "@mantine/core";
+import { Card, Flex, Title, Text, Tooltip, Badge, Button, Divider, Box } from "@mantine/core";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { activatePersona } from "@utils/requests/postPersonaActivation";
@@ -110,96 +110,52 @@ export const PersonaGeneral = () => {
 
   return (
     <>
-      {/* Top Level */}
-      <Card withBorder w="100%" mb="sm">
-        <Title order={4} mb='4px'>Persona Info</Title>
-        <Flex justify="space-between" align="center">
-          <Flex direction="column" maw="500px">
-            <Flex>
-              <Text>
-                Persona Name: <b>{currentProject.name}</b>
-              </Text>
-            </Flex>
-            <Flex align="center">
-              <Text>Persona Status:</Text>
-              <Tooltip
-                withArrow
-                withinPortal
-                label={
-                  currentProject.active
-                    ? "Your persona is active and is creating and sending messages."
-                    : "Your persona is inactive and is not creating or sending messages."
-                }
-              >
-                <Badge
-                  size="sm"
-                  variant="filled"
-                  color={currentProject.active ? "green" : "red"}
-                  ml="6px"
-                >
-                  {currentProject.active ? "Active" : "Inactive"}
-                </Badge>
-              </Tooltip>
-            </Flex>
-          </Flex>
-          <Flex>
-            <Button
-              color="green"
-              disabled={currentProject.active}
-              onClick={() => {
-                triggerActivatePersona();
-              }}
-            >
-              Activate
-            </Button>
-          </Flex>
-        </Flex>
-      </Card>
-
       {/* Customization */}
       <Card withBorder w="100%" mb="sm">
         {/* <Title order={4}>Customization</Title> */}
-        <PersonaBasicForm
-          personaName={currentProject.name}
-          personaFitReason={currentProject.persona_fit_reason}
-          personaICPMatchingInstructions={
-            currentProject.icp_matching_prompt
-          }
-          personaContactObjective={
-            currentProject.persona_contact_objective
-          }
-          personaContractSize={currentProject.contract_size}
-          personaCTAFrameworkCompany={
-            currentProject.cta_framework_company
-          }
-          personaCTAFrameworkPersona={
-            currentProject.cta_framework_persona
-          }
-          personaCTAFrameworkAction={
-            currentProject.cta_framework_action
-          }
-          personaUseCases={currentProject.use_cases}
-          personaFilters={currentProject.filters}
-          personaLookalikeProfile1={
-            currentProject.lookalike_profile_1
-          }
-          personaLookalikeProfile2={
-            currentProject.lookalike_profile_2
-          }
-          personaLookalikeProfile3={
-            currentProject.lookalike_profile_3
-          }
-          personaLookalikeProfile4={
-            currentProject.lookalike_profile_4
-          }
-          personaLookalikeProfile5={
-            currentProject.lookalike_profile_5
-          }
-          onUpdate={(data) => {
-            basics.current = data;
-            console.log(data.personaName)
-          }}
-        />
+        {/* <Box sx={{maxHeight: '650px', overflowY: 'scroll'}}> */}
+          <PersonaBasicForm
+            personaName={currentProject.name}
+            personaFitReason={currentProject.persona_fit_reason}
+            personaICPMatchingInstructions={
+              currentProject.icp_matching_prompt
+            }
+            personaContactObjective={
+              currentProject.persona_contact_objective
+            }
+            personaContractSize={currentProject.contract_size}
+            personaCTAFrameworkCompany={
+              currentProject.cta_framework_company
+            }
+            personaCTAFrameworkPersona={
+              currentProject.cta_framework_persona
+            }
+            personaCTAFrameworkAction={
+              currentProject.cta_framework_action
+            }
+            personaUseCases={currentProject.use_cases}
+            personaFilters={currentProject.filters}
+            personaLookalikeProfile1={
+              currentProject.lookalike_profile_1
+            }
+            personaLookalikeProfile2={
+              currentProject.lookalike_profile_2
+            }
+            personaLookalikeProfile3={
+              currentProject.lookalike_profile_3
+            }
+            personaLookalikeProfile4={
+              currentProject.lookalike_profile_4
+            }
+            personaLookalikeProfile5={
+              currentProject.lookalike_profile_5
+            }
+            onUpdate={(data) => {
+              basics.current = data;
+              console.log(data.personaName)
+            }}
+          />
+        {/* </Box> */}
         <Flex justify='flex-end'>
           <Button
             mt="xs"
@@ -245,27 +201,52 @@ export const PersonaGeneral = () => {
         </Flex>
       </Card>
 
+      <Divider mt='lg' mb='lg' />
+
+
       {/* Danger Zone */}
-      <Card withBorder shadow="sm" w="100%">
-        <Title order={4}>Danger Zone</Title>
-        <Card
-          mt="sm"
-          withBorder
-          radius="sm"
-          style={{ border: "1px solid #FAA0A0" }}
-        >
+      <Card withBorder shadow="sm" w="100%" sx={{backgroundColor: '#f8f9fa'}}>
+        <Title order={4}>Persona Toggle</Title>
+        <Text size='xs'>This section is recommended for SellScale internal use only.</Text>
+        <Card mt='sm' withBorder radius='sm' style={{border: '1px solid gray;', backgroundColor: '#f8f9fa'}}>
           <Flex justify="space-between" align="center">
             <Flex direction="column" maw="500px">
-              <Title order={5}>Deactivate Persona</Title>
-              <Text fw="light" fz="sm" lh="1.2rem" mt="2px">
-                Deactivating your persona will stop any further
-                campaigns and messages. You can reactivate at any time.
-              </Text>
+              <Flex align="center">
+                <Text>Status:</Text>
+                <Tooltip
+                  withArrow
+                  withinPortal
+                  label={
+                    currentProject.active
+                      ? "Your persona is active and is creating and sending messages."
+                      : "Your persona is inactive and is not creating or sending messages."
+                  }
+                >
+                  <Badge
+                    size="sm"
+                    variant="filled"
+                    color={currentProject.active ? "green" : "red"}
+                    ml="6px"
+                  >
+                    {currentProject.active ? "Active" : "Inactive"}
+                  </Badge>
+                </Tooltip>
+              </Flex>
             </Flex>
             <Flex>
               <Button
+                color="green"
+                disabled={currentProject.active}
+                onClick={() => {
+                  triggerActivatePersona();
+                }}
+              >
+                Activate
+              </Button>
+              <Button
                 color="red"
                 disabled={!currentProject.active}
+                ml='xs'
                 onClick={() => {
                   openConfirmModal({
                     title: (

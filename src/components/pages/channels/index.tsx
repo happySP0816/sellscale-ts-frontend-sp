@@ -46,13 +46,22 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
     setActiveNurture(isEnabledEmail && isActiveEmail);
   }, [isEnabledEmail, isActiveEmail]);
 
-  const brainFilled = currentProject?.name && currentProject?.persona_contact_objective && currentProject?.persona_fit_reason && currentProject?.contract_size
+  const brainFilled = currentProject?.name && currentProject?.persona_contact_objective && currentProject?.persona_fit_reason && currentProject?.contract_size && currentProject?.cta_framework_company && currentProject?.cta_framework_persona && currentProject?.cta_framework_action && currentProject?.use_cases && currentProject?.filters && currentProject?.lookalike_profile_1 && currentProject?.lookalike_profile_2 && currentProject?.lookalike_profile_3 && currentProject?.lookalike_profile_4 && currentProject?.lookalike_profile_5
   let brainPercentFilled = 0
   let brainAttributes = [
     currentProject?.name,
     currentProject?.persona_contact_objective,
     currentProject?.persona_fit_reason,
-    currentProject?.contract_size
+    currentProject?.contract_size,
+    currentProject?.cta_framework_company,
+    currentProject?.cta_framework_persona,
+    currentProject?.cta_framework_action,
+    currentProject?.use_cases,
+    currentProject?.filters,
+    currentProject?.lookalike_profile_1,
+    currentProject?.lookalike_profile_2,
+    currentProject?.lookalike_profile_3,
+    currentProject?.lookalike_profile_4,
   ]
   brainAttributes.forEach((attribute) => {
     if(attribute) {
@@ -60,7 +69,7 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
     }
   }
   )
-  brainPercentFilled = brainPercentFilled / 4 * 100
+  brainPercentFilled = Math.round(brainPercentFilled / 13 * 100)
 
   const needMoreProspects = currentProject?.num_unused_li_prospects && currentProject?.num_unused_li_prospects < 200
 

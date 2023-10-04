@@ -276,7 +276,7 @@ export function PersonaBasicForm(props: {
     props.personaCTAFrameworkAction
   );
   const [personaUseCases, setPersonaUseCases] = useState(props.personaUseCases);
-  const [personaFilters, setPersonaFilters] = useState(props.personaFilters);
+  const [personaFilters, setPersonaFilters] = useState(props.personaFilters || "Seniority: ex. Executive, Directors, VPs \nTitles/profile keywords: ex. Chief Revenue, Account Executive, Business Development \nCompany Type: ex. Technology \nCompany Size: ex. 200 - 1000 employees \nIndustries: ex. Internet, IT");
   const [personaLookalikeProfile1, setPersonaLookalikeProfile1] = useState(
     props.personaLookalikeProfile1
   );
@@ -288,9 +288,6 @@ export function PersonaBasicForm(props: {
   );
   const [personaLookalikeProfile4, setPersonaLookalikeProfile4] = useState(
     props.personaLookalikeProfile4
-  );
-  const [personaLookalikeProfile5, setPersonaLookalikeProfile5] = useState(
-    props.personaLookalikeProfile5
   );
 
 
@@ -356,7 +353,6 @@ export function PersonaBasicForm(props: {
       personaLookalikeProfile2: personaLookalikeProfile2,
       personaLookalikeProfile3: personaLookalikeProfile3,
       personaLookalikeProfile4: personaLookalikeProfile4,
-      personaLookalikeProfile5: personaLookalikeProfile5,
     }
     if (hardcodeKey && hardcodeValue) {
       update[hardcodeKey] = hardcodeValue
@@ -365,7 +361,7 @@ export function PersonaBasicForm(props: {
   };
 
   const fields = [
-    personaName, personaFitReason, personaContactObjective, personaContractSize, personaCTAFrameworkCompany, personaCTAFrameworkPersona, personaCTAFrameworkAction, personaUseCases, personaFilters, personaLookalikeProfile1, personaLookalikeProfile2, personaLookalikeProfile3, personaLookalikeProfile4, personaLookalikeProfile5
+    personaName, personaFitReason, personaContactObjective, personaContractSize, personaCTAFrameworkCompany, personaCTAFrameworkPersona, personaCTAFrameworkAction, personaUseCases, personaFilters, personaLookalikeProfile1, personaLookalikeProfile2, personaLookalikeProfile3, personaLookalikeProfile4
   ]
   const numFields = fields.length
   const numFilled = fields.filter(f => f).length
@@ -373,254 +369,245 @@ export function PersonaBasicForm(props: {
 
   return (
     <Box>
-      <Flex>
-        <Text size='sm' fw='500'>
-          Persona Brain Completion
-        </Text>
+      <Box w='50%' ml='auto' mb='md'>
+        <Flex>
+          <Text size='sm' fw='500'>
+            Persona Brain Completion
+          </Text>
 
-        <Text ml='auto' size='sm' fw='500'>
-          {percentFilled}% ({numFilled}/{numFields})
-        </Text>
-      </Flex>
-      <Progress color={percentFilled > 100 ? 'green' : 'blue'} size="xl" value={percentFilled} striped />
-
-      <Flex w='100%' mb='sm'>
-        <TextAreaWithAI
-          label="Descriptive Persona Name"
-          description='Give a short name to this persona. For example, "Sales Manager" or "Marketing Director". The AI will use this name when generating messages and splitting prospects.'
-          minRows={1}
-          value={personaName}
-          onChange={(e) => {
-            setPersonaName(e.currentTarget.value)
-            sendUpdate(
-              "personaName",
-              e.currentTarget.value
-            );
-          }}
-        />
-      </Flex>
-      <Flex w='100%' mb='sm'>
-        <TextAreaWithAI
-          label="Why do they buy your product?"
-          description="Explain why this persona is a good fit for your product or service. This will be used by the AI to generate emails and messages."
-          minRows={8}
-          value={personaFitReason}
-          onChange={(e) => {
-            setPersonaFitReason(e.currentTarget.value);
-            sendUpdate(
-              "personaFitReason",
-              e.currentTarget.value
-            );
-          }}
-          loadingAIGenerate={loadingPersonaFitReason}
-          onAIGenerateClicked={async () => {
-            await displayNotification(
-              "generate-persona-buy-reason",
-              generatePersonaBuyReason,
-              {
-                title: "Generating persona buying reason...",
-                message: "This may take a few seconds.",
-                color: "teal",
-              },
-              {
-                title: "Persona buying reason generated!",
-                message: "Your persona buying reason has been generated.",
-                color: "teal",
-              },
-              {
-                title: "Failed to generate persona buying reason",
-                message: "Please try again or contact SellScale team.",
-                color: "red",
-              }
-            );
-          }}
-        />
-      </Flex>
-      {/* TODO(AAKASH) delete component below if no use by July 20, 2023 */}
-      {false && (
-        <TextAreaWithAI
-          label="Rich Persona Description"
-          description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc. Note that the AI will use this information to rank your prospects."
-          minRows={4}
-          value={personaICPMatchingInstructions}
-          onChange={(e) => {
-            setPersonaICPMatchingInstructions(e.currentTarget.value);
-            sendUpdate(
-              "personaICPMatchingInstructions",
-              e.currentTarget.value
-            );
-          }}
-        />
-      )}
-      <Flex w='100%' mb='md'>
-        <TextAreaWithAI
-          label="Persona contact objective"
-          description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral. The AI will use this information to generate messages."
-          minRows={4}
-          value={personaContactObjective}
-          onChange={(e) => {
-            setPersonaContactObjective(e.currentTarget.value);
-            sendUpdate(
-              "personaContactObjective",
-              e.currentTarget.value
-            );
-          }}
-        />
-      </Flex>
-      <Text fw='500' size='sm' mb='xs'>Fill in this one sentence framework exactly</Text>
-      <Flex w='100%' mb='md'>
-        <TextInput
-          placeholder="Company"
-          value={personaCTAFrameworkCompany}
-          onChange={(e) => {
-            setPersonaCTAFrameworkCompany(e.currentTarget.value);
-            sendUpdate(
-              "personaCTAFrameworkCompany",
-              e.currentTarget.value
-            );
-          }}
+          <Text ml='auto' size='sm' fw='500'>
+            {percentFilled}% ({numFilled}/{numFields})
+          </Text>
+        </Flex>
+        <Progress color={percentFilled > 100 ? 'green' : 'blue'} size="xl" value={percentFilled} striped />
+      </Box>
+      <Box sx={{maxHeight: '650px', overflowY: 'scroll', border: 'solid 1px #eee', padding: '16px'}}>
+        <Flex w='100%' mb='sm'>
+          <TextAreaWithAI
+            label="Descriptive Persona Name"
+            description='Give a short name to this persona. For example, "Sales Manager" or "Marketing Director". The AI will use this name when generating messages and splitting prospects.'
+            minRows={1}
+            value={personaName}
+            onChange={(e) => {
+              setPersonaName(e.currentTarget.value)
+              sendUpdate(
+                "personaName",
+                e.currentTarget.value
+              );
+            }}
           />
-        <Text mt='4px' ml='xs' mr='xs' >helps</Text>
-        <TextInput
-          placeholder="Persona"
-          value={personaCTAFrameworkPersona}
-          onChange={(e) => {
-            setPersonaCTAFrameworkPersona(e.currentTarget.value);
-            sendUpdate(
-              "personaCTAFrameworkPersona",
-              e.currentTarget.value
-            );
-          }}
+        </Flex>
+        <Flex w='100%' mb='sm'>
+          <TextAreaWithAI
+            label="Why do they buy your product?"
+            description="Explain why this persona is a good fit for your product or service. This will be used by the AI to generate emails and messages."
+            minRows={8}
+            value={personaFitReason}
+            onChange={(e) => {
+              setPersonaFitReason(e.currentTarget.value);
+              sendUpdate(
+                "personaFitReason",
+                e.currentTarget.value
+              );
+            }}
+            loadingAIGenerate={loadingPersonaFitReason}
+            onAIGenerateClicked={async () => {
+              await displayNotification(
+                "generate-persona-buy-reason",
+                generatePersonaBuyReason,
+                {
+                  title: "Generating persona buying reason...",
+                  message: "This may take a few seconds.",
+                  color: "teal",
+                },
+                {
+                  title: "Persona buying reason generated!",
+                  message: "Your persona buying reason has been generated.",
+                  color: "teal",
+                },
+                {
+                  title: "Failed to generate persona buying reason",
+                  message: "Please try again or contact SellScale team.",
+                  color: "red",
+                }
+              );
+            }}
           />
-        <Text mt='4px' mr='xs' ml='xs'>with</Text>
-        <TextInput
-          placeholder="Action"
-          value={personaCTAFrameworkAction}
-          onChange={(e) => {
-            setPersonaCTAFrameworkAction(e.currentTarget.value);
-            sendUpdate(
-              "personaCTAFrameworkAction",
-              e.currentTarget.value
-            );
-          }}
+        </Flex>
+        {/* TODO(AAKASH) delete component below if no use by July 20, 2023 */}
+        {false && (
+          <TextAreaWithAI
+            label="Rich Persona Description"
+            description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc. Note that the AI will use this information to rank your prospects."
+            minRows={4}
+            value={personaICPMatchingInstructions}
+            onChange={(e) => {
+              setPersonaICPMatchingInstructions(e.currentTarget.value);
+              sendUpdate(
+                "personaICPMatchingInstructions",
+                e.currentTarget.value
+              );
+            }}
           />
-        
-      </Flex>
-      <Flex w='100%' mb='md'>
-        <TextAreaWithAI
-          label="Use Cases"
-          description="List use cases this persona cares about."
-          placeholder='- Use Case 1: Connect to your HRIS software ...'
-          minRows={3}
-          value={personaUseCases}
+        )}
+        <Flex w='100%' mb='md'>
+          <TextAreaWithAI
+            label="Persona contact objective"
+            description="Explain what you want to achieve when contacting this persona. For example, you may want to schedule a demo, or you may want to get a referral. The AI will use this information to generate messages."
+            minRows={4}
+            value={personaContactObjective}
+            onChange={(e) => {
+              setPersonaContactObjective(e.currentTarget.value);
+              sendUpdate(
+                "personaContactObjective",
+                e.currentTarget.value
+              );
+            }}
+          />
+        </Flex>
+        <Text fw='500' size='sm' mb='xs'>Fill in this one sentence framework exactly</Text>
+        <Flex w='100%' mb='md'>
+          <TextInput
+            placeholder="Company"
+            value={personaCTAFrameworkCompany}
+            onChange={(e) => {
+              setPersonaCTAFrameworkCompany(e.currentTarget.value);
+              sendUpdate(
+                "personaCTAFrameworkCompany",
+                e.currentTarget.value
+              );
+            }}
+            />
+          <Text mt='4px' ml='xs' mr='xs' >helps</Text>
+          <TextInput
+            placeholder="Persona"
+            value={personaCTAFrameworkPersona}
+            onChange={(e) => {
+              setPersonaCTAFrameworkPersona(e.currentTarget.value);
+              sendUpdate(
+                "personaCTAFrameworkPersona",
+                e.currentTarget.value
+              );
+            }}
+            />
+          <Text mt='4px' mr='xs' ml='xs'>with</Text>
+          <TextInput
+            placeholder="Action"
+            value={personaCTAFrameworkAction}
+            onChange={(e) => {
+              setPersonaCTAFrameworkAction(e.currentTarget.value);
+              sendUpdate(
+                "personaCTAFrameworkAction",
+                e.currentTarget.value
+              );
+            }}
+            />
+          
+        </Flex>
+        <Flex w='100%' mb='md'>
+          <TextAreaWithAI
+            label="Use Cases"
+            description="List use cases this persona cares about."
+            placeholder='- Use Case 1: Connect to your HRIS software ...'
+            minRows={3}
+            value={personaUseCases}
+            onChange={(e) => {
+              setPersonaUseCases(e.currentTarget.value);
+              sendUpdate(
+                "personaUseCases",
+                e.currentTarget.value
+              );
+            }}
+          />
+        </Flex>
+        <Flex w='100%' mb='md'>
+          <TextAreaWithAI
+            label="Persona Filters"
+            description="(e.g., seniority, titles, company type, company size, industries)"
+            placeholder='Seniority: ex. Executive, Directors, VPs \ Titles/profile keywords: ex. Chief Revenue, Account Executive, Business Development \ Company Type: ex. Technology \ Company Size: ex. 200 - 1000 employees \ Industries: ex. Internet, IT'
+            minRows={5}
+            value={personaFilters}
+            onChange={(e) => {
+              setPersonaFilters(e.currentTarget.value);
+              sendUpdate(
+                "personaFilters",
+                e.currentTarget.value
+              );
+            }}
+          />
+        </Flex>
+
+        <Text fw='500' size='sm' >Lookalike LinkedIn Profiles</Text>
+        <Text size='sm' mb='xs' fz='sm'>Paste in at least 3 who you haven't contacted.</Text>
+        <TextInput
+          placeholder='Lookalike Profile #1'
+          value={personaLookalikeProfile1}
+          mt='xs'
           onChange={(e) => {
-            setPersonaUseCases(e.currentTarget.value);
+            setPersonaLookalikeProfile1(e.currentTarget.value);
             sendUpdate(
-              "personaUseCases",
+              "personaLookalikeProfile1",
               e.currentTarget.value
             );
           }}
         />
-      </Flex>
-       <Flex w='100%' mb='md'>
-        <TextAreaWithAI
-          label="Persona Filters"
-          description="(e.g., seniority, titles, company type, company size, industries)"
-          placeholder='Seniority: ex. Executive, Directors, VPs \ Titles/profile keywords: ex. Chief Revenue, Account Executive, Business Development \ Company Type: ex. Technology \ Company Size: ex. 200 - 1000 employees \ Industries: ex. Internet, IT'
-          minRows={3}
-          value={personaFilters}
+        <TextInput
+          placeholder='Lookalike Profile #2'
+          value={personaLookalikeProfile2}
+          mt='xs'
           onChange={(e) => {
-            setPersonaFilters(e.currentTarget.value);
+            setPersonaLookalikeProfile2(e.currentTarget.value);
             sendUpdate(
-              "personaFilters",
+              "personaLookalikeProfile2",
               e.currentTarget.value
             );
           }}
         />
-      </Flex>
+        <TextInput
+          placeholder='Lookalike Profile #3'
+          value={personaLookalikeProfile3}
+          mt='xs'
+          onChange={(e) => {
+            setPersonaLookalikeProfile3(e.currentTarget.value);
+            sendUpdate(
+              "personaLookalikeProfile3",
+              e.currentTarget.value
+            );
+          }}
+        />
+        <TextInput
+          placeholder='Lookalike Profile #4'
+          value={personaLookalikeProfile4}
+          mt='xs'
+          onChange={(e) => {
+            setPersonaLookalikeProfile4(e.currentTarget.value);
+            sendUpdate(
+              "personaLookalikeProfile4",
+              e.currentTarget.value
+            );
+          }}
+        />
 
-      <Text fw='500' size='sm' >Lookalike LinkedIn Profiles</Text>
-      <Text size='sm' mb='xs' fz='sm'>Paste in at least 3 who you haven't contacted.</Text>
-      <TextInput
-        placeholder='Lookalike Profile #1'
-        value={personaLookalikeProfile1}
-        mt='xs'
-        onChange={(e) => {
-          setPersonaLookalikeProfile1(e.currentTarget.value);
-          sendUpdate(
-            "personaLookalikeProfile1",
-            e.currentTarget.value
-          );
-        }}
-      />
-      <TextInput
-        placeholder='Lookalike Profile #2'
-        value={personaLookalikeProfile2}
-        mt='xs'
-        onChange={(e) => {
-          setPersonaLookalikeProfile2(e.currentTarget.value);
-          sendUpdate(
-            "personaLookalikeProfile2",
-            e.currentTarget.value
-          );
-        }}
-      />
-      <TextInput
-        placeholder='Lookalike Profile #3'
-        value={personaLookalikeProfile3}
-        mt='xs'
-        onChange={(e) => {
-          setPersonaLookalikeProfile3(e.currentTarget.value);
-          sendUpdate(
-            "personaLookalikeProfile3",
-            e.currentTarget.value
-          );
-        }}
-      />
-      <TextInput
-        placeholder='Lookalike Profile #4'
-        value={personaLookalikeProfile4}
-        mt='xs'
-        onChange={(e) => {
-          setPersonaLookalikeProfile4(e.currentTarget.value);
-          sendUpdate(
-            "personaLookalikeProfile4",
-            e.currentTarget.value
-          );
-        }}
-      />
-      <TextInput
-        placeholder='Lookalike Profile #5'
-        value={personaLookalikeProfile5}
-        mt='xs'
-        onChange={(e) => {
-          setPersonaLookalikeProfile5(e.currentTarget.value);
-          sendUpdate(
-            "personaLookalikeProfile5",
-            e.currentTarget.value
-          );
-        }}
-      />
-
-      <Flex mb='md' mt='sm'>
-      <NumberInput
-        label="Annual Contract Value (ACV)"
-        value={personaContractSize}
-        parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-        formatter={(value) =>
-          !Number.isNaN(parseFloat(value))
-            ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-            : "$ "
-        }
-        onChange={(value) => {
-          setPersonaContractSize(value || 0);
-          sendUpdate(
-            "personaContractSize",
-            value || 0
-          );
-        }}
-      />
-      </Flex>
+        <Flex mb='md' mt='sm'>
+        {/* <NumberInput
+          label="Annual Contract Value (ACV)"
+          value={personaContractSize}
+          parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+          formatter={(value) =>
+            !Number.isNaN(parseFloat(value))
+              ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+              : "$ "
+          }
+          onChange={(value) => {
+            setPersonaContractSize(value || 0);
+            sendUpdate(
+              "personaContractSize",
+              value || 0
+            );
+          }}
+        /> */}
+        </Flex>
+      </Box>
     </Box>
   );
 }

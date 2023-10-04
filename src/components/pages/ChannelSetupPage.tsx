@@ -14,8 +14,9 @@ import { getCurrentPersonaId, getFreshCurrentProject } from '@auth/core';
 import { userTokenState } from '@atoms/userAtoms';
 
 export default function ChannelSetupPage() {
-  const { channelType } = useLoaderData() as {
+  const { channelType, tabId } = useLoaderData() as {
     channelType: string;
+    tabId: string;
   };
 
   const userToken = useRecoilValue(userTokenState);
@@ -37,7 +38,7 @@ export default function ChannelSetupPage() {
             mb='lg'
             withBorder
           >
-            {selectedChannel === 'linkedin' && <BumpFrameworksPage hideTitle />}
+            {selectedChannel === 'linkedin' && <BumpFrameworksPage hideTitle defaultTab={tabId} />}
             {selectedChannel === 'email' && <EmailSequencingPage hideTitle />}
             {selectedChannel === 'nurture' && (
               <Card>

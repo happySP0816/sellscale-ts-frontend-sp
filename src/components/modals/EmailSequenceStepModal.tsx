@@ -118,7 +118,6 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
       onClose={props.closeModal}
       title={`${props.type === "CREATE" ? "Create New" : "Edit"} Sequence Step`}
       size="75rem"
-      mih="75vh"
       scrollAreaComponent={ScrollArea.Autosize}
     >
       <LoadingOverlay visible={loading} />

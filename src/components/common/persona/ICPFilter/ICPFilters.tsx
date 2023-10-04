@@ -28,10 +28,10 @@ const ICPFilters = () => {
 
   const queryClient = useQueryClient();
 
-  const [opened, { open, close, toggle }] = useDisclosure(false);
   const [sideBarVisible, { toggle: toggleSideBar, open: openSideBar }] =
     useDisclosure(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [opened, { open, close, toggle }] = useDisclosure(false);
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.LG})`,
     false,
@@ -69,11 +69,7 @@ const ICPFilters = () => {
         />
       )}
 
-      <Box
-        w={
-          '100%'
-        }
-      >
+      <Box w={"100%"}>
         <ICPFiltersDashboard
           setIsTesting={setIsTesting}
           isTesting={isTesting}

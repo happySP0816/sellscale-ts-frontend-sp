@@ -16,6 +16,10 @@ import {
   Loader,
   ScrollArea,
   Box,
+  Grid,
+  Center,
+  Group,
+  NumberInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
@@ -42,6 +46,9 @@ import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { EmailSequenceStep, MsgResponse, SubjectLineTemplate } from "src";
 import DOMPurify from "dompurify";
+import EmailSequenceStepCard from "./EmailSequencing/EmailSequenceStepCard";
+import DetailEmailSequencing from "./EmailSequencing/DetailEmailSequencing";
+import NewUIEmailSequencing from "./EmailSequencing/NewUIEmailSequencing";
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -75,36 +82,21 @@ function EmailInitialOutboundView(props: {
   afterEdit: () => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
-  const [randomSubjectLineTemplate, setRandomSubjectLineTemplate] = useState<SubjectLineTemplate>();
 
-  const triggerGetEmailSubjectLineTemplates = async () => {
-    const result = await getEmailSubjectLineTemplates(userToken, props.archetypeID as number, false);
-    if (result.status != 'success') {
-      showNotification({
-        title: 'Error',
-        message: result.message,
-        color: 'red',
-      })
-    }
-
-    const templates = result.data.subject_line_templates as SubjectLineTemplate[];
-    if (templates.length === 0) {
-      setRandomSubjectLineTemplate(undefined);
-      return;
-    }
-    const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
-    setRandomSubjectLineTemplate(randomTemplate);
-  }
-
-  useEffect(() => {
-    triggerGetEmailSubjectLineTemplates();
-  }, []);
+  const [subjectLineTemplates, setSubjectLineTemplates] = useState<SubjectLineTemplate[]>();
 
   const [showAll, setShowAll] = useState(false);
-  const [editSequenceStepModalOpened, { open: openEdit, close: closeEdit }] = useDisclosure();
-  const [createSequenceStepModalOpened, { open: openCreate, close: closeCreate }] = useDisclosure();
+  const [editSequenceStepModalOpened, { open: openEdit, close: closeEdit }] =
+    useDisclosure();
+  const [
+    createSequenceStepModalOpened,
+    { open: openCreate, close: closeCreate },
+  ] = useDisclosure();
 
-  const [manageSubjectLineOpened, { open: openManageSubject, close: closeManageSubject }] = useDisclosure();
+  const [
+    manageSubjectLineOpened,
+    { open: openManageSubject, close: closeManageSubject },
+  ] = useDisclosure();
 
   const [editModalData, setEditModalData] = useState<{
     title: string;
@@ -125,10 +117,8 @@ function EmailInitialOutboundView(props: {
           </Flex>
           <Flex>
             <Tooltip label={"Create a template"} withArrow withinPortal>
-              <ActionIcon
-                onClick={openCreate}
-              >
-                <IconPlus size={'1rem'} />
+              <ActionIcon onClick={openCreate}>
+                <IconPlus size={"1rem"} />
               </ActionIcon>
             </Tooltip>
             <EmailSequenceStepModal
@@ -140,7 +130,13 @@ function EmailInitialOutboundView(props: {
               status={"PROSPECTED"}
               archetypeID={props.archetypeID || -1}
               bumpedCount={0}
-              onFinish={async (title, sequence, isDefault, status, substatus) => {
+              onFinish={async (
+                title,
+                sequence,
+                isDefault,
+                status,
+                substatus
+              ) => {
                 const result = await createEmailSequenceStep(
                   userToken,
                   props.archetypeID || -1,
@@ -160,92 +156,111 @@ function EmailInitialOutboundView(props: {
           <Divider mt="sm" />
           <Flex px="md" direction="column">
             {/* Subject Line */}
-            <Flex direction='row' mt='sm' mb='6px' align='center' justify='space-between'>
+            <Flex
+              direction="row"
+              mt="sm"
+              mb="6px"
+              align="center"
+              justify="space-between"
+            >
               <Flex>
                 <Title order={5}>Subject Line: </Title>
                 <Text
-                  ml='12px'
-                  mr='4px'
+                  ml="12px"
+                  mr="4px"
                   variant="gradient"
-                  gradient={{ from: 'pink', to: 'purple', deg: 45 }}
-
+                  gradient={{ from: "pink", to: "purple", deg: 45 }}
                 >
-                  {randomSubjectLineTemplate ? randomSubjectLineTemplate?.subject_line.slice(0, 40) + "..." : "Add a Subject Line!"}
+                  {/* {randomSubjectLineTemplate
+                    ? randomSubjectLineTemplate?.subject_line.slice(0, 40) +
+                      "..."
+                    : "Add a Subject Line!"} */}
                 </Text>
               </Flex>
               <Flex>
-                <Tooltip label="Edit or create a subject line" withinPortal withArrow>
+                <Tooltip
+                  label="Edit or create a subject line"
+                  withinPortal
+                  withArrow
+                >
                   <ActionIcon
-                    size='xs'
+                    size="xs"
                     variant="transparent"
                     onClick={openManageSubject}
                   >
-                    <IconEdit size={'1rem'} />
+                    <IconEdit size={"1rem"} />
                   </ActionIcon>
                 </Tooltip>
               </Flex>
-              <ManageEmailSubjectLineTemplatesModal
+              {/* <ManageEmailSubjectLineTemplatesModal
                 modalOpened={manageSubjectLineOpened}
                 openModal={openManageSubject}
                 closeModal={closeManageSubject}
                 backFunction={triggerGetEmailSubjectLineTemplates}
                 archetypeID={props.archetypeID}
-              />
+              /> */}
             </Flex>
 
-            <Divider mt='6px' />
+            <Divider mt="6px" />
 
-            {props.initialOutboundBucket?.templates?.length === 0 &&
-              (
-                <Flex my='sm' justify={'space-between'} align='center'>
-                  <Card withBorder w='100%' mr='xs'>
-                    <Flex justify={'center'}>
-                      Add an email body template above
-                    </Flex>
-                  </Card>
-                </Flex>
-              )
-            }
+            {props.initialOutboundBucket?.templates?.length === 0 && (
+              <Flex my="sm" justify={"space-between"} align="center">
+                <Card withBorder w="100%" mr="xs">
+                  <Flex justify={"center"}>
+                    Add an email body template above
+                  </Flex>
+                </Card>
+              </Flex>
+            )}
 
             {/* Body */}
             {props.initialOutboundBucket?.templates?.map((template, index) => {
               if (index > 0 && !showAll) {
-                return (
-                  <></>
-                );
+                return <></>;
               }
 
               return (
                 <>
-                  <Flex align='center' mt='8px'>
+                  <Flex align="center" mt="8px">
                     <Title order={5}>Body:</Title>
                     <Text
-                      ml='12px'
-                      mr='4px'
+                      ml="12px"
+                      mr="4px"
                       variant="gradient"
-                      gradient={{ from: 'purple', to: 'pink', deg: 45 }}
+                      gradient={{ from: "purple", to: "pink", deg: 45 }}
                     >
                       {template.title}
                     </Text>
                   </Flex>
-                  <Flex direction="row" mb="md" align='center' justify='space-between'>
+                  <Flex
+                    direction="row"
+                    mb="md"
+                    align="center"
+                    justify="space-between"
+                  >
                     <Box
                       sx={() => ({
-                        border: '1px solid #E0E0E0',
-                        borderRadius: '8px',
-                        backgroundColor: '#F5F5F5',
+                        border: "1px solid #E0E0E0",
+                        borderRadius: "8px",
+                        backgroundColor: "#F5F5F5",
                       })}
-                      px='md'
-                      mt='sm'
+                      px="md"
+                      mt="sm"
                     >
                       <Text fz="sm">
-                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.template) }} />
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(template.template),
+                          }}
+                        />
                       </Text>
                     </Box>
                     <Tooltip label="Edit Body" withinPortal>
-                      <ActionIcon onClick={() => {
-                        openEdit()
-                      }}>
+                      <ActionIcon
+                        onClick={() => {
+                          openEdit();
+                        }}
+                      >
                         <IconEdit size="1rem" />
                       </ActionIcon>
                     </Tooltip>
@@ -275,7 +290,7 @@ function EmailInitialOutboundView(props: {
                           title,
                           sequence,
                           template.bumped_count,
-                          isDefault,
+                          isDefault
                         );
                         return result.status === "success";
                       }}
@@ -382,7 +397,7 @@ function EmailSequenceStepView(props: {
         {/* Sequence Steps */}
         <Card.Section px="xs">
           {props.sequenceBucket &&
-            Object.keys(props.sequenceBucket).length === 0 ? (
+          Object.keys(props.sequenceBucket).length === 0 ? (
             // No Sequence Steps
             <Text>Please create a Sequence Step using the + button above.</Text>
           ) : (
@@ -437,24 +452,25 @@ function EmailSequenceStepView(props: {
 
                           <Box
                             sx={() => ({
-                              border: '1px solid #E0E0E0',
-                              borderRadius: '8px',
-                              backgroundColor: '#F5F5F5',
+                              border: "1px solid #E0E0E0",
+                              borderRadius: "8px",
+                              backgroundColor: "#F5F5F5",
                             })}
-                            px='md'
-                            mt='sm'
+                            px="md"
+                            mt="sm"
                           >
                             <Text fz="sm">
-                              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.template) }} />
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html: DOMPurify.sanitize(template.template),
+                                }}
+                              />
                             </Text>
                           </Box>
-
                         </Flex>
                       </Flex>
                       <Tooltip label="Edit Template" withinPortal>
-                        <ActionIcon
-                          onClick={openEdit}
-                        >
+                        <ActionIcon onClick={openEdit}>
                           <IconEdit size="1.25rem" />
                         </ActionIcon>
                       </Tooltip>
@@ -485,7 +501,7 @@ function EmailSequenceStepView(props: {
                           title,
                           sequence,
                           template.bumped_count || 0,
-                          isDefault,
+                          isDefault
                         );
                         return result.status === "success";
                       }}
@@ -596,6 +612,33 @@ export default function EmailSequencingPage(props: {
   ] = useDisclosure();
   // const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
   //   useDisclosure();
+
+  if (currentProject === undefined || currentProject === null) {
+    return <></>;
+  }
+
+  const [subjectLineTemplates, setSubjectLineTemplates] = useState<SubjectLineTemplate[]>([])
+
+  const triggerGetEmailSubjectLineTemplates = async () => {
+
+    const result = await getEmailSubjectLineTemplates(
+      userToken,
+      currentProject?.id as number,
+      false
+    );
+    if (result.status != "success") {
+      showNotification({
+        title: "Error",
+        message: result.message,
+        color: "red",
+      });
+    }
+
+    const templates = result.data
+      .subject_line_templates as SubjectLineTemplate[];
+
+    setSubjectLineTemplates(templates);
+  };
 
   const sequenceBuckets = useRef<EmailSequenceStepBuckets>({
     PROSPECTED: {
@@ -712,9 +755,9 @@ export default function EmailSequencingPage(props: {
     triggerGetEmailSequenceSteps();
   }, [archetypeID]);
 
-  if (currentProject === undefined || currentProject === null) {
-    return <></>;
-  }
+  useEffect(() => {
+    triggerGetEmailSubjectLineTemplates();
+  }, []);
 
   return (
     <Flex direction="column">
@@ -740,164 +783,169 @@ export default function EmailSequencingPage(props: {
               >
                 Conversation
               </Tabs.Tab>
+              <Tabs.Tab
+                value="new_ui_setup"
+                icon={<IconMessages size="0.8rem" />}
+              >
+                New Email Setup UI
+              </Tabs.Tab>
             </Tabs.List>
-
             <Tabs.Panel value="sequence">
               <Flex direction="column" mt="md">
+                <Flex direction="column" mb="md">
+                  <Title order={3}>Email Sequencing</Title>
+                  <Text fz="md" mt="2px">
+                    Configure your first email and followup emails using Email
+                    Sequencing Templates. Default templates are always
+                    prioritized.
+                  </Text>
+                </Flex>
 
-                  <Flex direction="column" mb="md">
-                    <Title order={3}>Email Sequencing</Title>
-                    <Text fz="md" mt="2px">
-                      Configure your first email and followup emails using Email
-                      Sequencing Templates. Default templates are always
-                      prioritized.
-                    </Text>
-                  </Flex>
+                {/* First Message */}
+                <EmailInitialOutboundView
+                  initialOutboundBucket={sequenceBuckets.current?.PROSPECTED}
+                  archetypeID={archetypeID}
+                  afterCreate={triggerGetEmailSequenceSteps}
+                  afterEdit={triggerGetEmailSequenceSteps}
+                />
 
-                  {/* First Message */}
-                  <EmailInitialOutboundView
-                    initialOutboundBucket={sequenceBuckets.current?.PROSPECTED}
-                    archetypeID={archetypeID}
-                    afterCreate={triggerGetEmailSequenceSteps}
-                    afterEdit={triggerGetEmailSequenceSteps}
-                  />
+                <Divider
+                  label="After sending your hyperpersonalized cold email"
+                  labelPosition="center"
+                  mt="xl"
+                  mb="xl"
+                />
 
-                  <Divider
-                    label="After sending your hyperpersonalized cold email"
-                    labelPosition="center"
-                    mt="xl"
-                    mb="xl"
-                  />
+                {/* Sequence Steps */}
+                {!loading && archetypeID ? (
+                  <ScrollArea w="100%">
+                    <Flex direction="column">
+                      {/* Accepted */}
+                      <EmailSequenceStepView
+                        sequenceBucket={sequenceBuckets.current?.ACCEPTED}
+                        sequenceStepTitle={"Email 2"}
+                        sequenceStepDescription={
+                          "Prospects who have not received any followup."
+                        }
+                        status={"ACCEPTED"}
+                        dataChannels={dataChannels}
+                        archetypeID={archetypeID}
+                        afterCreate={triggerGetEmailSequenceSteps}
+                        afterEdit={triggerGetEmailSequenceSteps}
+                      />
 
-                  {/* Sequence Steps */}
-                  {!loading && archetypeID ? (
-                    <ScrollArea w="100%">
-                      <Flex direction="column">
-                        {/* Accepted */}
-                        <EmailSequenceStepView
-                          sequenceBucket={sequenceBuckets.current?.ACCEPTED}
-                          sequenceStepTitle={"Email 2"}
-                          sequenceStepDescription={
-                            "Prospects who have not received any followup."
+                      {/* Bumped (map) */}
+                      {Object.keys(sequenceBuckets.current?.BUMPED).map(
+                        (bumpCount) => {
+                          const bumpCountInt = parseInt(bumpCount);
+                          const sequenceBucket =
+                            sequenceBuckets.current?.BUMPED[bumpCountInt];
+
+                          const bumpToFollowupMap: Record<string, string> = {
+                            "1": "Second",
+                            "2": "Third",
+                            "3": "Fourth",
+                            "4": "Fifth",
+                            "5": "Sixth",
+                            "6": "Seventh",
+                            "7": "Eighth",
+                            "8": "Ninth",
+                            "9": "Tenth",
+                          };
+                          const followupString = bumpToFollowupMap[bumpCount];
+                          if (followupString == undefined) {
+                            return;
                           }
-                          status={"ACCEPTED"}
+
+                          if (bumpCount === "0" || !sequenceBucket) {
+                            return;
+                          }
+                          return (
+                            <Flex mt="md" w="100%">
+                              <EmailSequenceStepView
+                                sequenceBucket={sequenceBucket}
+                                sequenceStepTitle={`Email ${bumpCountInt + 2}`}
+                                sequenceStepDescription={`This is followup #${
+                                  bumpCountInt + 1
+                                }`}
+                                status={"BUMPED"}
+                                dataChannels={dataChannels}
+                                archetypeID={archetypeID}
+                                afterCreate={triggerGetEmailSequenceSteps}
+                                afterEdit={triggerGetEmailSequenceSteps}
+                                bumpedCount={bumpCountInt}
+                              />
+                            </Flex>
+                          );
+                        }
+                      )}
+
+                      {/* Add another to sequence */}
+                      <Flex justify="center">
+                        <Button
+                          variant="outline"
+                          mt="md"
+                          w="50%"
+                          onClick={openSequenceStep}
+                          disabled={
+                            Object.keys(sequenceBuckets.current?.BUMPED)
+                              .length > 10
+                          }
+                        >
+                          Add another sequence step
+                        </Button>
+                        <EmailSequenceStepModal
+                          modalOpened={addNewSequenceStepOpened}
+                          openModal={openSequenceStep}
+                          closeModal={closeSequenceStep}
+                          type={"CREATE"}
+                          backFunction={triggerGetEmailSequenceSteps}
                           dataChannels={dataChannels}
+                          status={"BUMPED"}
+                          showStatus={false}
                           archetypeID={archetypeID}
-                          afterCreate={triggerGetEmailSequenceSteps}
-                          afterEdit={triggerGetEmailSequenceSteps}
-                        />
-
-                        {/* Bumped (map) */}
-                        {Object.keys(sequenceBuckets.current?.BUMPED).map(
-                          (bumpCount) => {
-                            const bumpCountInt = parseInt(bumpCount);
-                            const sequenceBucket =
-                              sequenceBuckets.current?.BUMPED[bumpCountInt];
-
-                            const bumpToFollowupMap: Record<string, string> = {
-                              "1": "Second",
-                              "2": "Third",
-                              "3": "Fourth",
-                              "4": "Fifth",
-                              "5": "Sixth",
-                              "6": "Seventh",
-                              "7": "Eighth",
-                              "8": "Ninth",
-                              "9": "Tenth",
-                            };
-                            const followupString = bumpToFollowupMap[bumpCount];
-                            if (followupString == undefined) {
-                              return;
-                            }
-
-                            if (bumpCount === "0" || !sequenceBucket) {
-                              return;
-                            }
-                            return (
-                              <Flex mt="md" w="100%">
-                                <EmailSequenceStepView
-                                  sequenceBucket={sequenceBucket}
-                                  sequenceStepTitle={`Email ${bumpCountInt + 2}`}
-                                  sequenceStepDescription={`This is followup #${bumpCountInt + 1}`}
-                                  status={"BUMPED"}
-                                  dataChannels={dataChannels}
-                                  archetypeID={archetypeID}
-                                  afterCreate={triggerGetEmailSequenceSteps}
-                                  afterEdit={triggerGetEmailSequenceSteps}
-                                  bumpedCount={bumpCountInt}
-                                />
-                              </Flex>
-                            );
+                          bumpedCount={
+                            Object.keys(sequenceBuckets.current?.BUMPED)
+                              .length + 1
                           }
-                        )}
-
-                        {/* Add another to sequence */}
-                        <Flex justify="center">
-                          <Button
-                            variant="outline"
-                            mt="md"
-                            w="50%"
-                            onClick={openSequenceStep}
-                            disabled={
-                              Object.keys(sequenceBuckets.current?.BUMPED)
-                                .length > 10
-                            }
-                          >
-                            Add another sequence step
-                          </Button>
-                          <EmailSequenceStepModal
-                            modalOpened={addNewSequenceStepOpened}
-                            openModal={openSequenceStep}
-                            closeModal={closeSequenceStep}
-                            type={"CREATE"}
-                            backFunction={triggerGetEmailSequenceSteps}
-                            dataChannels={dataChannels}
-                            status={"BUMPED"}
-                            showStatus={false}
-                            archetypeID={archetypeID}
-                            bumpedCount={
-                              Object.keys(sequenceBuckets.current?.BUMPED)
-                                .length + 1
-                            }
-                            onFinish={async (
+                          onFinish={async (
+                            title,
+                            sequence,
+                            isDefault,
+                            status,
+                            substatus
+                          ) => {
+                            const result = await createEmailSequenceStep(
+                              userToken,
+                              archetypeID,
+                              status ?? "",
                               title,
                               sequence,
+                              Object.keys(sequenceBuckets.current?.BUMPED)
+                                .length + 1,
                               isDefault,
-                              status,
                               substatus
-                            ) => {
-                              const result = await createEmailSequenceStep(
-                                userToken,
-                                archetypeID,
-                                status ?? "",
-                                title,
-                                sequence,
-                                Object.keys(sequenceBuckets.current?.BUMPED)
-                                  .length + 1,
-                                isDefault,
-                                substatus
-                              );
-                              return result.status === "success";
-                            }}
-                          />
-                          {Object.keys(sequenceBuckets.current?.BUMPED).length >
-                            10 && (
-                              <Text color="red" mt="md" mb="md">
-                                You have reached the maximum number of sequence
-                                steps.
-                              </Text>
-                            )}
-                        </Flex>
+                            );
+                            return result.status === "success";
+                          }}
+                        />
+                        {Object.keys(sequenceBuckets.current?.BUMPED).length >
+                          10 && (
+                          <Text color="red" mt="md" mb="md">
+                            You have reached the maximum number of sequence
+                            steps.
+                          </Text>
+                        )}
                       </Flex>
-                    </ScrollArea>
-                  ) : (
-                    <Flex justify="center">
-                      <Loader />
                     </Flex>
-                  )}
+                  </ScrollArea>
+                ) : (
+                  <Flex justify="center">
+                    <Loader />
+                  </Flex>
+                )}
               </Flex>
             </Tabs.Panel>
-
             <Tabs.Panel value="qnolibrary">
               <Card withBorder shadow="xs" mt="md">
                 <Flex w="100%" align="center" justify="center">
@@ -940,6 +988,19 @@ export default function EmailSequencingPage(props: {
                 <Loader />
               </Flex>
             )} */}
+            </Tabs.Panel>{" "}
+            <Tabs.Panel value="new_ui_setup">
+              <NewUIEmailSequencing
+                loading={loading}
+                addNewSequenceStepOpened={addNewSequenceStepOpened}
+                templateBuckets={sequenceBuckets}
+                subjectLines={subjectLineTemplates}
+                archetypeID={archetypeID}
+                triggerGetEmailSequenceSteps={triggerGetEmailSequenceSteps}
+                closeSequenceStep={closeSequenceStep}
+                openSequenceStep={openSequenceStep}
+                userToken={userToken}
+              />
             </Tabs.Panel>
           </Tabs>
         </Card.Section>

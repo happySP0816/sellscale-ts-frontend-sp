@@ -230,6 +230,7 @@ const ICPFiltersDashboard: FC<{
     }
 
     refetch();
+    setSelectedRows({});
   };
 
   const { isFetching, refetch } = useQuery({

@@ -277,8 +277,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const checkFuzz = useCallback(
     debounce((message, aiMessage) => {
       const ratio = fuzzratio(message, aiMessage);
-      ratio > 50 && setAiGenerated(true);
-      ratio <= 50 && setAiGenerated(false);
+      ratio > 5 && setAiGenerated(true);
+      ratio <= 5 && setAiGenerated(false);
     }, 200), []
   )
 

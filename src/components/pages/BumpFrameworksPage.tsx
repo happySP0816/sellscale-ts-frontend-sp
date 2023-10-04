@@ -350,6 +350,11 @@ function QuestionObjectionLibraryCard(props: {
         <Card.Section>
           <Divider my='xs' />
         </Card.Section>
+
+        
+        <Text fz='xs'>
+          For convos with status labeled:
+        </Text>
         <Badge color={valueToColor(theme, splitted_substatus || "ACTIVE_CONVO")}>{splitted_substatus || "ACTIVE_CONVO"}</Badge>
       </Card>
     </>
@@ -735,9 +740,12 @@ export default function BumpFrameworksPage(props: {
               <Tabs.Panel value='replies' pt='xs'>
                 {!loading ? (
                   <Flex direction='column' ml='xs'>
-                    <Flex align='center' w='100%' justify='center'>
-                      <Button variant='outline' mb='md' w='50%' onClick={openQuestionObjection}>
-                        Add another reply
+                    <Flex w='100%'>
+                      <Text mt='xs'>
+                        Automate your replies by editing the response frameworks below.
+                      </Text>
+                      <Button variant='outline' w='30%' mb='md' ml='auto' onClick={openQuestionObjection}>
+                        Add another reply framework
                       </Button>
                     </Flex>
 

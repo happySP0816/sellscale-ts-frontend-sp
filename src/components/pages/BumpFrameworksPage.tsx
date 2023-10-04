@@ -460,6 +460,7 @@ export default function BumpFrameworksPage(props: {
   predefinedPersonaId?: number;
   onPopulateBumpFrameworks?: (buckets: BumpFrameworkBuckets) => void;
   hideTitle?: boolean;
+  defaultTab?: string;
 }) {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
@@ -623,7 +624,7 @@ export default function BumpFrameworksPage(props: {
 
         <Flex direction={'row'}>
           <Box w={'100%'}>
-            <Tabs keepMounted={false} color='blue' variant='outline' defaultValue='sequence' my='lg' orientation='horizontal'>
+            <Tabs keepMounted={false} color='blue' variant='outline' defaultValue={props.defaultTab || 'sequence'} my='lg' orientation='horizontal'>
               <Tabs.List>
                 {/* <Tabs.Tab value='ctas' icon={<IconList size='0.8rem' />}>
                   CTAs
@@ -631,7 +632,7 @@ export default function BumpFrameworksPage(props: {
                 <Tabs.Tab value='sequence' icon={<IconList size='0.8rem' />}>
                   Sequence
                 </Tabs.Tab>
-                <Tabs.Tab value='qnolibrary' icon={<IconBook size='0.8rem' />}>
+                <Tabs.Tab value='replies' icon={<IconBook size='0.8rem' />}>
                   Replies
                 </Tabs.Tab>
                 <Tabs.Tab value='simulate' icon={<IconMessage2 size='0.8rem' />}>
@@ -727,7 +728,7 @@ export default function BumpFrameworksPage(props: {
                 } sequenceSetUpMode={true} />
               </Tabs.Panel>
 
-              <Tabs.Panel value='qnolibrary' pt='xs'>
+              <Tabs.Panel value='replies' pt='xs'>
                 {!loading ? (
                   <Flex direction='column' ml='xs'>
                     <Flex align='center' w='100%' justify='center'>

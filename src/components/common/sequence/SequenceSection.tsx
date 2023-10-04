@@ -2508,7 +2508,7 @@ function FrameworkSection(props: {
   );
 }
 
-const PersonalizationSection = (props: {
+export const PersonalizationSection = (props: {
   blocklist: string[];
   onItemsChange: (items: any[]) => void;
 }) => {

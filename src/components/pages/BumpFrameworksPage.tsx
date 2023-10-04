@@ -228,6 +228,7 @@ function BumpBucketView(props: {
                                 bumpedCount: framework.bumped_count,
                                 bumpDelayDays: framework.bump_delay_days,
                                 useAccountResearch: framework.use_account_research,
+                                transformerBlocklist: props.bumpFramework.transformer_blocklist,
                               },
                             });
                           }}
@@ -325,6 +326,7 @@ function QuestionObjectionLibraryCard(props: {
                     bumpedCount: props.bumpFramework.bumped_count,
                     bumpDelayDays: props.bumpFramework.bump_delay_days,
                     useAccountResearch: props.bumpFramework.use_account_research,
+                    transformerBlocklist: props.bumpFramework.transformer_blocklist,
                   },
                 });
               }}

@@ -1,5 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import TextWithNewline from "@common/library/TextWithNewlines";
+import { PersonalizationSection } from "@common/sequence/SequenceSection";
 import { Button, Card, Flex, HoverCard, LoadingOverlay, NumberInput, Paper, Slider, Switch, Text, TextInput, Textarea, Tooltip, useMantineTheme } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { ContextModalProps } from "@mantine/modals";
@@ -26,6 +27,7 @@ interface EditBumpFramework extends Record<string, unknown> {
   bumpedCount?: number;
   useAccountResearch: boolean;
   bumpDelayDays: number;
+  transformerBlocklist?: string[];
 }
 
 export default function EditBumpFrameworkModal({ context, id, innerProps }: ContextModalProps<EditBumpFramework>) {
@@ -44,6 +46,7 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
       bumpDelayDays: innerProps.bumpDelayDays,
       default: innerProps.default,
       useAccountResearch: innerProps.useAccountResearch,
+      transformerBlocklist: innerProps.transformerBlocklist,
     },
   });
 
@@ -298,6 +301,30 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
           </Flex>
         </Flex>
       </Flex>
+
+      {form.values.useAccountResearch && (
+        <PersonalizationSection
+          blocklist={form.values.transformerBlocklist ?? []}
+          onItemsChange={async (items) => {
+
+            // Update transformer blocklist
+            const result = await patchBumpFramework(
+              userToken,
+              innerProps.bumpFrameworkID,
+              innerProps.overallStatus,
+              form.values.title,
+              form.values.description,
+              bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
+                ?.api_label as string,
+              form.values.bumpedCount,
+              form.values.bumpDelayDays,
+              form.values.default,
+              form.values.useAccountResearch,
+              items.filter((x) => !x.checked).map((x) => x.id),
+            );
+          }}
+        />
+      )}
     </Paper>
   )
 }

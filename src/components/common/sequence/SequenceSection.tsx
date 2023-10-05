@@ -2960,6 +2960,7 @@ const CtaSection = (props: {
                     },
                   ],
                 }}
+                autoMarkScheduling={e.auto_mark_as_scheduling_on_acceptance}
                 key={index}
                 onToggle={async (enabled) => {
                   const result = await toggleCTA(userToken, e.id);
@@ -3055,7 +3056,8 @@ const CTAOption: React.FC<{
   onToggle: (value: boolean) => void;
   onClickEdit: () => void;
   onClickDelete: () => void;
-}> = ({ data, onToggle, onClickEdit, onClickDelete }) => {
+  autoMarkScheduling?: boolean;
+}> = ({ data, onToggle, onClickEdit, onClickDelete, autoMarkScheduling }) => {
   return (
     <Card
       shadow="xs"
@@ -3097,6 +3099,11 @@ const CTAOption: React.FC<{
                 </Button>
               </Tooltip>
             ))}
+            {autoMarkScheduling && <Tooltip label="Accepted invite will automatically classify prospect as 'scheduling'" withArrow>
+              <Text sx={{cursor: 'pointer'}} size='sm'>
+                🛎
+              </Text>
+            </Tooltip>}
           </Flex>
 
           <Flex wrap={"wrap"} gap={"1rem"} align={"center"}>

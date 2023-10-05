@@ -255,10 +255,16 @@ export function SidebarHeader({
               );
               console.log("refetching queries");
 
-              queryClient.refetchQueries({
-                queryKey: [`query-get-icp-prospects`],
-              });
-              console.log("done");
+              setTimeout(() => {
+                queryClient.refetchQueries({
+                  queryKey: [`query-get-icp-prospects`],
+                });
+                showNotification({
+                  title: "Updating prospects...",
+                  message: "",
+                  color: "blue",
+                });
+              }, 5000);
 
               setLoading(false);
 

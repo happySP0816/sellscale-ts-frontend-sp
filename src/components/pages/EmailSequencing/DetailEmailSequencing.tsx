@@ -1,6 +1,7 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
+import ProspectSelect from "@common/library/ProspectSelect";
 import { SCREEN_SIZES } from "@constants/data";
 import {
   Badge,
@@ -19,6 +20,7 @@ import {
   LoadingOverlay,
   Title,
   Accordion,
+  Loader,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
@@ -26,6 +28,7 @@ import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
 import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
 import { IconCheck, IconDatabase, IconEdit, IconPencil, IconPlus, IconReload, IconRobot, IconTrash, IconWritingSign, IconX } from "@tabler/icons";
 import { JSONContent } from "@tiptap/react";
+import { postGenerateFollowupEmail, postGenerateInitialEmail } from "@utils/requests/emailMessageGeneration";
 import { createEmailSequenceStep, patchSequenceStep } from "@utils/requests/emailSequencing";
 import { patchEmailSubjectLineTemplate } from "@utils/requests/emailSubjectLines";
 import DOMPurify from "dompurify";
@@ -52,15 +55,109 @@ const DetailEmailSequencing: FC<{
       false,
       { getInitialValueInEffect: true }
     );
+    const userToken = useRecoilValue(userTokenState);
     const currentProject = useRecoilValue(currentProjectState);
     if (!currentProject) return (<></>)
+
+    // Page Title
+    const [pageTitle, setPageTitle] = React.useState<string>("Email Sequencing");
 
     // Create Subject Line
     const [createSubjectLineOpened, { open: openCreateSubject, close: closeCreateSubject }] = useDisclosure();
 
+    // Active vs Inactive Body Templates
     const [activeTemplate, setActiveTemplate] = React.useState<EmailSequenceStep>();
     const [inactiveTemplates, setInactiveTemplates] = React.useState<EmailSequenceStep[]>([]);
 
+    // Preview Email (Generation)
+    const [prospectID, setProspectID] = React.useState<number>(0);
+    const [previewEmailSubject, setPreviewEmailSubject] = React.useState<string>('Random Subject Line');
+    const [previewEmailBody, setPreviewEmailBody] = React.useState<string>('Random Email Body');
+    const [previewEmailSubjectLoading, setPreviewEmailSubjectLoading] = React.useState<boolean>(false);
+    const [previewEmailBodyLoading, setPreviewEmailBodyLoading] = React.useState<boolean>(false);
+
+    // Trigger Generate Initial Email
+    const triggerPostGenerateInitialEmail = async () => {
+      if (!prospectID || !subjectLines || subjectLines.length === 0 || currentTab !== "PROSPECTED") { return; }
+
+      setPreviewEmailBodyLoading(true);
+      setPreviewEmailSubjectLoading(true);
+
+      const response = await postGenerateInitialEmail(
+        userToken,
+        prospectID,
+        activeTemplate?.id as number,
+        null,
+        subjectLines.filter((subjectLine: SubjectLineTemplate) => subjectLine.active)[0]?.id as number,
+        null
+      )
+      if (response.status === 'success') {
+        const email_body = response.data.email_body
+        const subject_line = response.data.subject_line
+        if (!email_body || !subject_line) {
+          showNotification({
+            title: 'Error',
+            message: 'Something went wrong with generation, please try again.',
+            icon: <IconX radius='sm' />,
+          });
+        }
+
+        setPreviewEmailSubject(subject_line.completion)
+        setPreviewEmailBody(email_body.completion)
+      }
+
+      setPreviewEmailBodyLoading(false);
+      setPreviewEmailSubjectLoading(false);
+    }
+
+    // Trigger Generate Followup Email
+    const triggerPostGenerateFollowupEmail = async () => {
+      if (!prospectID || currentTab === "PROSPECTED") { return; }
+
+      console.log(activeTemplate)
+
+      setPreviewEmailBodyLoading(true);
+
+      const response = await postGenerateFollowupEmail(
+        userToken,
+        prospectID,
+        null,
+        activeTemplate?.id as number,
+        null,
+      )
+      if (response.status === 'success') {
+        const email_body = response.data.email_body
+        if (!email_body) {
+          showNotification({
+            title: 'Error',
+            message: 'Something went wrong with generation, please try again.',
+            icon: <IconX radius='sm' />,
+          });
+        }
+        setPreviewEmailBody(email_body.completion)
+      }
+
+      setPreviewEmailBodyLoading(false);
+    }
+
+    // Trigger Generation Router
+    const triggerGenerateEmail = () => {
+      setPreviewEmailSubject('Random Subject Line');
+      setPreviewEmailBody('Random Email Body');
+
+      if (currentTab === "PROSPECTED") {
+        triggerPostGenerateInitialEmail();
+      } else {
+        triggerPostGenerateFollowupEmail();
+      }
+    }
+
+    // Trigger Generation
+    useEffect(() => {
+      triggerGenerateEmail();
+    }, [prospectID, activeTemplate, subjectLines])
+
+    // Set Active / Inactive Templates
     useEffect(() => {
       // Get active template, everything else goes into inactive
       const activeTemplate = templates.filter((template: EmailSequenceStep) => template.active)[0];
@@ -70,12 +167,32 @@ const DetailEmailSequencing: FC<{
       setInactiveTemplates(inactiveTemplates);
     }, [templates])
 
+    useEffect(() => {
+      if (currentTab === "PROSPECTED") {
+        setPageTitle("Initial Email");
+      } else if (currentTab === "ACCEPTED") {
+        setPageTitle("First Follow Up Email");
+      } else if (currentTab.includes("BUMPED-")) {
+        const bumpCount = currentTab.split("-")[1];
+        const bumpToFollowupMap: Record<string, string> = {
+          "1": "Second",
+          "2": "Third",
+          "3": "Fourth",
+          "4": "Fifth",
+          "5": "Sixth",
+          "6": "Seventh",
+          "7": "Eighth",
+        };
+        setPageTitle(`${bumpToFollowupMap[bumpCount]} Follow Up Email`);
+      }
+    }, [currentTab])
+
     return (
       <Box mt="md">
         <Flex align={"center"} justify={"space-between"}>
           <Flex align={"center"}>
             <Text fw={700} size={"xl"}>
-              Set First Message
+              Set {pageTitle}
             </Text>
           </Flex>
           {lgScreenOrLess && <Button onClick={toggleDrawer}>Open toggle</Button>}
@@ -83,14 +200,44 @@ const DetailEmailSequencing: FC<{
 
         <Box mt={"sm"}>
           <Text color="gray.6" size={"sm"} fw={600}>
-            Configure your email sequencing
+            Select an email and a body.
           </Text>
         </Box>
 
         <Box mt={"md"}>
-          <Text color="gray.8" size={"md"} fw={700}>
-            EXAMPLE EMAIL
-          </Text>
+          <Flex align='center' justify='space-between'>
+            <Flex>
+              <Text color="gray.8" size={"md"} fw={700}>
+                EXAMPLE EMAIL
+              </Text>
+            </Flex>
+            <Flex align='center'>
+              <Button
+                mr='sm'
+                size="sm"
+                variant="subtle"
+                compact
+                leftIcon={<IconReload size="0.75rem" />}
+                onClick={triggerGenerateEmail}
+              >
+                Regenerate
+              </Button>
+              <ProspectSelect
+                personaId={currentProject.id}
+                onChange={(prospect) => {
+                  if (prospect) {
+                    setProspectID(prospect.id);
+                  }
+                }}
+                // onFinishLoading={() => {}}
+                autoSelect
+                includeDrawer
+              />
+            </Flex>
+          </Flex>
+
+
+
           <Box
             mt="sm"
             px={"sm"}
@@ -101,43 +248,66 @@ const DetailEmailSequencing: FC<{
             })}
             pos={"relative"}
           >
-            <Button
-              variant="light"
-              pos={"absolute"}
-              style={{ right: 20, top: 20 }}
-              leftIcon={<IconReload></IconReload>}
-            >
-              REGENERATE
-            </Button>
+
+            {
+              currentTab === "PROSPECTED" && (
+                <Flex mb={"md"}>
+                  <Flex w={80} mr='sm'>
+                    <Text color="gray.6" fw={500}>
+                      Subject:
+                    </Text>
+                  </Flex>
+                  <Flex>
+                    {
+                      previewEmailSubjectLoading ? (
+                        <Flex align='center'>
+                          <Loader mr='sm' size={20} color='purple' />
+                          <Text color='purple'>
+                            AI generating subject line...
+                          </Text>
+                        </Flex>) : (
+                        <Text color="gray.8" fw={500}>
+                          {previewEmailSubject}
+                        </Text>
+                      )
+                    }
+                  </Flex>
+                </Flex>
+              )
+            }
             <Flex>
-              <Box w={80}>
+              <Flex w={60} mr='md'>
                 <Text color="gray.6" fw={500}>
-                  Subject:
-                </Text>
-              </Box>
-              <Box>
-                <Text color="gray.8" fw={500} pr={200}>
-                  {subjectLines && subjectLines.filter((subjectLine: SubjectLineTemplate) => subjectLine.active)[0]?.subject_line}
-                </Text>
-              </Box>
-            </Flex>
-            <Flex mt={"md"}>
-              <Box w={80}>
-                <Text color="gray.6" fw={500} pr={200}>
                   Body:
                 </Text>
-              </Box>
-              <Flex direction={"column"} gap={"0.5rem"}>
-                <Text color="gray.8" fw={500}>
-                  Hi Richard
-                </Text>
-                <Text color="gray.8" fw={500}>
-                  In working with other industry, on of the key issuse they're
-                  struggling with is key issue.
-                </Text>
-                <Text color="gray.8" fw={500}>
-                  All the best,
-                </Text>
+              </Flex>
+              <Flex>
+                {
+                  previewEmailBodyLoading ? (
+                    <Flex align='center'>
+                      <Loader mr='sm' size={20} color='purple' />
+                      <Text color='purple'>
+                        AI generating email body...
+                      </Text>
+                    </Flex>
+                  ) : (
+                    <Box
+                      sx={() => ({
+                        // border: "1px solid #E0E0E0",
+                        // borderRadius: "8px",
+                        // backgroundColor: "#F5F5F5",
+                      })}
+                    >
+                      <Text color="gray.8" fw={500}>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(previewEmailBody),
+                          }}
+                        />
+                      </Text>
+                    </Box>
+                  )
+                }
               </Flex>
             </Flex>
           </Box>

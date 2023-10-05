@@ -760,9 +760,9 @@ export default function ProspectList(props: {
                   </div>
                 );
               })}
-              {prospects.length === 0 && (
+              {displayProspects.length === 0 && (
                 <Text mt={20} fz="sm" ta="center" c="dimmed" fs="italic">
-                  No active conversations found.
+                  No conversations found.
                 </Text>
               )}
 

@@ -33,7 +33,7 @@ export default function PatchEmailSubjectLineModal({
   const triggerPatchEmailSubjectLineTemplate = async () => {
     setLoading(true);
 
-    const result = await patchEmailSubjectLineTemplate(userToken, innerProps.subjectLine.id as number, subjectLine);
+    const result = await patchEmailSubjectLineTemplate(userToken, innerProps.subjectLine.id as number, subjectLine, true);
     if (result.status != 'success') {
       showNotification({
         title: 'Error',

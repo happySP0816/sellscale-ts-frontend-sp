@@ -105,8 +105,12 @@ const VoiceBuilderModal: React.FC<{
         );
         if (detailsResponse.status === "success") {
           if (detailsResponse.data.sample_info.length > 0) {
+            // Sort the samples by id
+            let details = detailsResponse.data.sample_info.sort((a: any, b: any) => {
+              return a.id - b.id;
+            });
             setVoiceBuilderMessages(
-              detailsResponse.data.sample_info.map((item: any) => {
+              details.map((item: any) => {
                 return {
                   id: item.id,
                   value: item.sample_completion,
@@ -200,9 +204,13 @@ const VoiceBuilderModal: React.FC<{
     );
 
     if (response.status === "success") {
+      // Sort the samples by id
+      let details = response.data.sort((a: any, b: any) => {
+        return a.id - b.id;
+      });
       // Replace global state with only new samples
       setVoiceBuilderMessages(
-        response.data.map((item: any) => {
+        details.map((item: any) => {
           return {
             id: item.id,
             value: item.sample_completion,

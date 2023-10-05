@@ -74,7 +74,7 @@ const TrainYourAi = (props: {
         <Tabs defaultValue={tabs[0].key} w={"25vw"} miw={300}>
           <Tabs.List sx={{ borderWidth: "1px" }} h={"3rem"}>
             {tabs.map((tab) => (
-              <Tabs.Tab value={tab.key} h={"3rem"}>
+              <Tabs.Tab value={tab.key} key={tab.key} h={"3rem"}>
                 <Flex gap={"0.25rem"} align={"center"}>
                   <Text fz={".75rem"}>{tab.name}</Text>
                   <Badge

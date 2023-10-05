@@ -58,13 +58,16 @@ const Content = (props: {
   const [message, setMessage] = useState(trainMessage.value.trim());
   const [AILoading, setAILoading] = useState(false);
 
-  const saveMessages = async (newMessage?: string) => {
-    setAILoading(true);
+  const saveMessages = async (newMessage?: string, showAIEditing?: boolean) => {
+    if (showAIEditing) {
+      setAILoading(true);
+    }
+    
     const oldMessage = voiceBuilderMessages.find(
       (item) => item.id === props.messageId
     );
     if (oldMessage) {
-      // // Update global state list and set new local state message
+      // Update global state list and set new local state message
       // setVoiceBuilderMessages(
       //   voiceBuilderMessages.map((item) => {
       //     if (item.id === oldMessage.id) {
@@ -201,7 +204,7 @@ const Content = (props: {
                           "mod+Enter",
                           () => {
                             setEditing(false);
-                            saveMessages();
+                            saveMessages(undefined, true);
                           },
                         ],
                       ])}
@@ -298,7 +301,7 @@ const Content = (props: {
               disabled={message.length > 300}
               onClick={() => {
                 setEditing(false);
-                saveMessages();
+                saveMessages(undefined, true);
               }}
             >
               <Text weight={700}>Save</Text>

@@ -129,10 +129,19 @@ export default function EmailQueuedMessageItem(props: MessageItemProps) {
         </Flex>
       </Flex>
       <Box pos="relative">
-        <Title order={5} px={10} py={5}>
-          {props.subject}
-        </Title>
-        <Textarea value={props.body} autosize readOnly></Textarea>
+        <Card withBorder>
+          <Text size='xs' color='gray'>
+            SUBJECT:
+          </Text>
+          <Title order={5}>
+            {props.subject}
+          </Title>
+        </Card>
+        {/* <Textarea value={props.body} autosize readOnly></Textarea> */}
+        <Card withBorder mt='xs'>
+          <Text size='xs' color='gray'>BODY:</Text>
+          <Text size='sm' dangerouslySetInnerHTML={{ __html: props.body }} />
+        </Card>
       </Box>
     </Card>
   );

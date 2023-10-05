@@ -440,7 +440,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf0 && bf0Conversion
                       ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                      : "Not enough data, " +
+                      : (bf0 && bf0.etl_num_times_used && bf0.etl_num_times_used < 20 ? "Not enough data, " : '') +
                         (bf0?.etl_num_times_converted || 0) +
                         " / " +
                         (bf0?.etl_num_times_used || 0)
@@ -510,7 +510,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf1 && bf1Conversion
                       ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                      : "Not enough data, " +
+                      : (bf1 && bf1.etl_num_times_used && bf1.etl_num_times_used < 20 ? "Not enough data, " : "") +
                         (bf1?.etl_num_times_converted || 0) +
                         " / " +
                         (bf1?.etl_num_times_used || 0)
@@ -585,7 +585,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf2 && bf2Conversion
                       ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                      : "Not enough data, " +
+                      : (bf2 && bf2.etl_num_times_used && bf2.etl_num_times_used < 20 ? "Not enough data, " : "") +
                         (bf2?.etl_num_times_converted || 0) +
                         " / " +
                         (bf2?.etl_num_times_used || 0)
@@ -659,7 +659,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf3 && bf3Conversion
                       ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                      : "Not enough data, " +
+                      : (bf3 && bf3.etl_num_times_used && bf3.etl_num_times_used < 20 ? "Not enough data, " : "") +
                         (bf3?.etl_num_times_converted || 0) +
                         " / " +
                         (bf3?.etl_num_times_used || 0)
@@ -1729,7 +1729,7 @@ function FrameworkCard(props: {
                   ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
                     Math.round(props.conversion * 10) / 10 +
                     "%."
-                  : "Not enough data, " +
+                  : (props.timesUsed && props.timesUsed < 20 ? "Not enough data, " : "") +
                     props.timesConverted +
                     " / " +
                     props.timesUsed +

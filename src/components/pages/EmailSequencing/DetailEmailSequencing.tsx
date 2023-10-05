@@ -25,6 +25,7 @@ import {
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
+import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
 import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
 import { IconCheck, IconDatabase, IconEdit, IconPencil, IconPlus, IconReload, IconRobot, IconTrash, IconWritingSign, IconX } from "@tabler/icons";
 import { JSONContent } from "@tiptap/react";
@@ -62,8 +63,9 @@ const DetailEmailSequencing: FC<{
     // Page Title
     const [pageTitle, setPageTitle] = React.useState<string>("Email Sequencing");
 
-    // Create Subject Line
+    // Create Subject Line / Email Template
     const [createSubjectLineOpened, { open: openCreateSubject, close: closeCreateSubject }] = useDisclosure();
+    const [createEmailTemplateOpened, { open: openCreateEmailTemplate, close: closeCreateEmailTemplate }] = useDisclosure();
 
     // Active vs Inactive Body Templates
     const [activeTemplate, setActiveTemplate] = React.useState<EmailSequenceStep>();
@@ -370,9 +372,49 @@ const DetailEmailSequencing: FC<{
             )
           }
 
-
           <Tabs.Panel value="body">
             <Box mt={"md"}>
+              <Flex justify='flex-end' mb='md'>
+                <Button
+                  variant='light'
+                  leftIcon={<IconPlus size='.90rem' />}
+                  radius={"sm"}
+                  onClick={openCreateEmailTemplate}
+                >
+                  Add Email Template
+                </Button>
+                <EmailSequenceStepModal
+                  modalOpened={createEmailTemplateOpened}
+                  openModal={openCreateEmailTemplate}
+                  closeModal={closeCreateEmailTemplate}
+                  type={"CREATE"}
+                  backFunction={() => {
+                    refetch()
+                  }}
+                  status={currentTab.includes("BUMPED-") ? "BUMPED" : currentTab}
+                  archetypeID={currentProject.id}
+                  bumpedCount={currentTab.includes("BUMPED-") ? parseInt(currentTab.split("-")[1]) : null}
+                  onFinish={async (
+                    title: any,
+                    sequence: any,
+                    isDefault: any,
+                    status: any,
+                    substatus: any
+                  ) => {
+                    const result = await createEmailSequenceStep(
+                      userToken,
+                      currentProject.id,
+                      status ?? "",
+                      title,
+                      sequence,
+                      currentTab.includes("BUMPED-") ? parseInt(currentTab.split("-")[1]) : null,
+                      isDefault,
+                      substatus
+                    );
+                    return result.status === "success";
+                  }}
+                />
+              </Flex>
 
               {/* ACTIVE TEMPLATE */}
               {activeTemplate && (

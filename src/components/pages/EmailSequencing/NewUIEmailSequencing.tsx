@@ -170,7 +170,6 @@ const Sidebar: React.FC<{
               closeModal={closeSequenceStep}
               type={"CREATE"}
               backFunction={refetch}
-              dataChannels={dataChannels}
               status={"BUMPED"}
               showStatus={false}
               archetypeID={archetypeID}

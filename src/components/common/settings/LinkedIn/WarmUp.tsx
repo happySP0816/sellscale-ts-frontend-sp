@@ -151,7 +151,13 @@ export const WarmUp: React.FC = () => {
       setLoading(false)
       return
     }
-    const resultData = result.data?.schedules?.reverse()
+    let resultData = result.data?.schedules?.reverse()
+
+    // Sort the resultData by week number (ascending)
+    resultData.sort((a: any, b: any) => {
+      return a.week - b.week
+    })
+
     const data = {
       labels: resultData.map((schedule: any) => {
         const startDate = new Date(schedule.start_date)

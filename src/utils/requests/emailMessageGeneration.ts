@@ -10,13 +10,23 @@ import { API_URL } from "@constants/data";
  * @param testTemplate
  * @param subjectLineTemplateID
  * @param subjectLineTemplateString
+ * @param controller - AbortController
  * @returns - MsgResponse
  */
-export async function postGenerateInitialEmail(userToken: string, prospectID: number, templateID: number, testTemplate: string | null, subjectLineTemplateID: number | null, subjectLineTemplateString: string | null): Promise<MsgResponse> {
+export async function postGenerateInitialEmail(
+  userToken: string,
+  prospectID: number,
+  templateID: number,
+  testTemplate: string | null,
+  subjectLineTemplateID: number | null,
+  subjectLineTemplateString: string | null,
+  controller?: AbortController | null
+): Promise<MsgResponse> {
 
   const response = await fetch(
     `${API_URL}/message_generation/email/initial_email`,
     {
+      signal: controller?.signal,
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,
@@ -43,13 +53,22 @@ export async function postGenerateInitialEmail(userToken: string, prospectID: nu
  * @param threadID
  * @param overrideSequenceID
  * @param overrideTemplate
+ * @param controller - AbortController
  * @returns - MsgResponse
  */
- export async function postGenerateFollowupEmail(userToken: string, prospectID: number, threadID: string | null, overrideSequenceID: number | null, overrideTemplate: string | null): Promise<MsgResponse> {
+export async function postGenerateFollowupEmail(
+  userToken: string,
+  prospectID: number,
+  threadID: string | null,
+  overrideSequenceID: number | null,
+  overrideTemplate: string | null,
+  controller?: AbortController | null
+): Promise<MsgResponse> {
 
   const response = await fetch(
     `${API_URL}/message_generation/email/followup_email`,
     {
+      signal: controller?.signal,
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,
@@ -65,4 +84,4 @@ export async function postGenerateInitialEmail(userToken: string, prospectID: nu
   );
   return await processResponse(response, 'data');
 
- }
+}

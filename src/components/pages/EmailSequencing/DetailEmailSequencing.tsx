@@ -38,6 +38,10 @@ import { useRecoilValue } from "recoil";
 import { EmailSequenceStep, SubjectLineTemplate } from "src";
 
 
+let initialEmailGenerationController = new AbortController();
+let followupEmailGenerationController = new AbortController();
+
+
 const DetailEmailSequencing: FC<{
   toggleDrawer: () => void,
   currentTab: string,
@@ -75,77 +79,96 @@ const DetailEmailSequencing: FC<{
     const [prospectID, setProspectID] = React.useState<number>(0);
     const [previewEmailSubject, setPreviewEmailSubject] = React.useState<string>('Random Subject Line');
     const [previewEmailBody, setPreviewEmailBody] = React.useState<string>('Random Email Body');
-    const [previewEmailSubjectLoading, setPreviewEmailSubjectLoading] = React.useState<boolean>(false);
-    const [previewEmailBodyLoading, setPreviewEmailBodyLoading] = React.useState<boolean>(false);
+    const [initialEmailLoading, setInitialEmailLoading] = React.useState<boolean>(false);
+    const [followupEmailLoading, setFollowupEmailLoading] = React.useState<boolean>(false);
 
     // Trigger Generate Initial Email
     const triggerPostGenerateInitialEmail = async () => {
       if (!prospectID || !subjectLines || subjectLines.length === 0 || currentTab !== "PROSPECTED") { return; }
 
-      setPreviewEmailBodyLoading(true);
-      setPreviewEmailSubjectLoading(true);
+      setInitialEmailLoading(true);
 
-      const response = await postGenerateInitialEmail(
-        userToken,
-        prospectID,
-        activeTemplate?.id as number,
-        null,
-        subjectLines.filter((subjectLine: SubjectLineTemplate) => subjectLine.active)[0]?.id as number,
-        null
-      )
-      if (response.status === 'success') {
-        const email_body = response.data.email_body
-        const subject_line = response.data.subject_line
-        if (!email_body || !subject_line) {
-          showNotification({
-            title: 'Error',
-            message: 'Something went wrong with generation, please try again.',
-            icon: <IconX radius='sm' />,
-          });
+      try {
+        const response = await postGenerateInitialEmail(
+          userToken,
+          prospectID,
+          activeTemplate?.id as number,
+          null,
+          subjectLines.filter((subjectLine: SubjectLineTemplate) => subjectLine.active)[0]?.id as number,
+          null,
+          initialEmailGenerationController
+        )
+        if (response.status === 'success') {
+          const email_body = response.data.email_body
+          const subject_line = response.data.subject_line
+          if (!email_body || !subject_line) {
+            showNotification({
+              title: 'Error',
+              message: 'Something went wrong with generation, please try again.',
+              icon: <IconX radius='sm' />,
+            });
+          }
+
+          setPreviewEmailSubject(subject_line.completion)
+          setPreviewEmailBody(email_body.completion)
         }
 
-        setPreviewEmailSubject(subject_line.completion)
-        setPreviewEmailBody(email_body.completion)
+        setInitialEmailLoading(false);
+      } catch (error) {  // Must have been aborted. No action needed
+        if (currentTab !== "PROSPECTED") {
+          setInitialEmailLoading(false);
+        }
+        console.log('Generation aborted')
       }
 
-      setPreviewEmailBodyLoading(false);
-      setPreviewEmailSubjectLoading(false);
     }
 
     // Trigger Generate Followup Email
     const triggerPostGenerateFollowupEmail = async () => {
       if (!prospectID || currentTab === "PROSPECTED") { return; }
 
-      console.log(activeTemplate)
+      setFollowupEmailLoading(true);
 
-      setPreviewEmailBodyLoading(true);
-
-      const response = await postGenerateFollowupEmail(
-        userToken,
-        prospectID,
-        null,
-        activeTemplate?.id as number,
-        null,
-      )
-      if (response.status === 'success') {
-        const email_body = response.data.email_body
-        if (!email_body) {
-          showNotification({
-            title: 'Error',
-            message: 'Something went wrong with generation, please try again.',
-            icon: <IconX radius='sm' />,
-          });
+      try {
+        const response = await postGenerateFollowupEmail(
+          userToken,
+          prospectID,
+          null,
+          activeTemplate?.id as number,
+          null,
+          followupEmailGenerationController
+        )
+        if (response.status === 'success') {
+          const email_body = response.data.email_body
+          if (!email_body) {
+            showNotification({
+              title: 'Error',
+              message: 'Something went wrong with generation, please try again.',
+              icon: <IconX radius='sm' />,
+            });
+          }
+          setPreviewEmailBody(email_body.completion)
         }
-        setPreviewEmailBody(email_body.completion)
+
+        setFollowupEmailLoading(false);
+      } catch (error) {  // Must have been aborted. No action needed
+        if (currentTab !== "PROSPECTED") {
+          setFollowupEmailLoading(false);
+        }
+        console.log('Generation aborted')
       }
 
-      setPreviewEmailBodyLoading(false);
     }
 
     // Trigger Generation Router
     const triggerGenerateEmail = () => {
       setPreviewEmailSubject('Random Subject Line');
       setPreviewEmailBody('Random Email Body');
+      followupEmailGenerationController.abort("Creating a new generation request");
+      initialEmailGenerationController.abort("Creating a new generation request");
+
+      followupEmailGenerationController = new AbortController();
+      initialEmailGenerationController = new AbortController();
 
       if (currentTab === "PROSPECTED") {
         triggerPostGenerateInitialEmail();
@@ -261,7 +284,7 @@ const DetailEmailSequencing: FC<{
                   </Flex>
                   <Flex>
                     {
-                      previewEmailSubjectLoading ? (
+                      initialEmailLoading ? (
                         <Flex align='center'>
                           <Loader mr='sm' size={20} color='purple' />
                           <Text color='purple'>
@@ -285,7 +308,7 @@ const DetailEmailSequencing: FC<{
               </Flex>
               <Flex>
                 {
-                  previewEmailBodyLoading ? (
+                  initialEmailLoading || followupEmailLoading ? (
                     <Flex align='center'>
                       <Loader mr='sm' size={20} color='purple' />
                       <Text color='purple'>

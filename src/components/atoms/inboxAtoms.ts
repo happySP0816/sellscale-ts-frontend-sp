@@ -31,6 +31,11 @@ const nurturingModeState = atom({
   default: false,
 });
 
+const mainTabState = atom({
+  key: "inbox-main-tab",
+  default: 'inbox',
+});
+
 const selectedBumpFrameworkState = atom({
   key: "inbox-selected-bump-framework",
   default: undefined as BumpFramework | undefined,
@@ -82,4 +87,5 @@ export {
   selectedEmailSequenceStepState,
   allEmailSequenceStepsState,
   selectedEmailThread,
+  mainTabState,
 };

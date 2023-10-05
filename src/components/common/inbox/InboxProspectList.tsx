@@ -19,6 +19,7 @@ import {
   SegmentedControl,
   Select,
   Stack,
+  Tabs,
   Text,
   ThemeIcon,
   Title,
@@ -35,6 +36,8 @@ import {
   IconStarFilled,
   IconInfoCircle,
   IconClock,
+  IconStar,
+  IconBellOff,
 } from "@tabler/icons-react";
 import _ from "lodash";
 import { useQuery } from "@tanstack/react-query";
@@ -42,6 +45,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import {
   fetchingProspectIdState,
+  mainTabState,
   nurturingModeState,
   openedProspectIdState,
   openedProspectLoadingState,
@@ -215,6 +219,9 @@ export default function ProspectList(props: {
       channel: "SELLSCALE",
     });
 
+  const [mainTab, setMainTab] = useRecoilState(mainTabState);
+  const [sectionTab, setSectionTab] = useState<string | null>("active");
+
   // Sort out uninitiated prospects and temp fill in unknown data
   let prospects =
     props.prospects
@@ -263,8 +270,9 @@ export default function ProspectList(props: {
           latest_msg:
             is_last_message_from_sdr || nurturingMode
               ? `You: ${last_message_from_sdr || "..."}`
-              : `${p.first_name}: ${last_message_from_prospect || "No message found"
-              }`,
+              : `${p.first_name}: ${
+                  last_message_from_prospect || "No message found"
+                }`,
           latest_msg_time: convertDateToCasualTime(
             new Date(last_message_timestamp || -1)
           ),
@@ -289,12 +297,12 @@ export default function ProspectList(props: {
             filterSelectOptions,
             (o) => o.value === a.linkedin_status
           ) -
-          _.findIndex(
-            filterSelectOptions,
-            (o) => o.value === b.linkedin_status
-          ) ||
+            _.findIndex(
+              filterSelectOptions,
+              (o) => o.value === b.linkedin_status
+            ) ||
           (!b.latest_msg_from_sdr && b.new_msg_count ? 1 : 0) -
-          (!a.latest_msg_from_sdr && a.new_msg_count ? 1 : 0) ||
+            (!a.latest_msg_from_sdr && a.new_msg_count ? 1 : 0) ||
           b.icp_fit - a.icp_fit ||
           removeExtraCharacters(a.name).localeCompare(
             removeExtraCharacters(b.name)
@@ -368,7 +376,13 @@ export default function ProspectList(props: {
     }
   }, [segmentedSection]);
 
-  setCurrentInboxCount(prospects.filter((p) => !p.in_purgatory).length);
+  const activeProspects = prospects.filter((p) => !p.in_purgatory);
+  const snoozedProspects = prospects.filter((p) => p.in_purgatory);
+
+  const displayProspects =
+    sectionTab === "snoozed" ? snoozedProspects : activeProspects;
+
+  setCurrentInboxCount(displayProspects.length);
 
   return (
     <div>
@@ -385,42 +399,146 @@ export default function ProspectList(props: {
         })}
       >
         <ProjectSelect />
-        <Container pt={20} pb={10} px={20} m={0}>
-          <Input
-            styles={{
-              input: {
-                borderColor: searchFilter.trim()
-                  ? theme.colors.blue[theme.fn.primaryShade()]
-                  : undefined,
-              },
-            }}
-            icon={<IconSearch size="1.0rem" />}
-            value={searchFilter}
-            onChange={(event) => setSearchFilter(event.currentTarget.value)}
-            radius={theme.radius.lg}
-            placeholder="Search..."
-          />
-        </Container>
 
-        <Flex w='100%' justify={'space-between'} px='2px'>
-          <Tooltip label={"Coming soon"} withArrow withinPortal>
-            <div>
-              <Button disabled>Replies</Button>
-            </div>
-          </Tooltip>
-          <Tooltip label={"Coming soon"} withArrow withinPortal>
-            <div>
-              <Button disabled>Snoozed</Button>
-            </div>
-          </Tooltip>
-          <Tooltip label={"Coming soon"} withArrow withinPortal>
-            <div>
-              <Button disabled>AI Queued</Button>
-            </div>
-          </Tooltip>
-        </Flex>
+        <Tabs value={mainTab} onTabChange={(value) => setMainTab(value as string)}>
+          <Tabs.List grow>
+            <Tabs.Tab
+              value="inbox"
+              rightSection={
+                <Badge
+                  w={16}
+                  h={16}
+                  sx={{ pointerEvents: "none" }}
+                  variant="filled"
+                  size="xs"
+                  p={0}
+                >
+                  {prospects.length}
+                </Badge>
+              }
+            >
+              Inbox
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="sent"
+              rightSection={
+                <Badge
+                  w={16}
+                  h={16}
+                  sx={{ pointerEvents: "none" }}
+                  variant="filled"
+                  size="xs"
+                  p={0}
+                >
+                  ?
+                </Badge>
+              }
+              disabled
+            >
+              Sent
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="queued"
+              // rightSection={
+              //   <Badge
+              //     w={16}
+              //     h={16}
+              //     sx={{ pointerEvents: "none" }}
+              //     variant="filled"
+              //     size="xs"
+              //     p={0}
+              //   >
+              //     X
+              //   </Badge>
+              // }
+            >
+              Queued
+            </Tabs.Tab>
+          </Tabs.List>
+        </Tabs>
 
-        <Group
+        {mainTab !== "queued" && (
+          <>
+            <Group pt={20} pb={10} px={20} m={0} noWrap>
+              <Input
+                sx={{ flex: 1 }}
+                styles={{
+                  input: {
+                    borderColor: searchFilter.trim()
+                      ? theme.colors.blue[theme.fn.primaryShade()]
+                      : undefined,
+                  },
+                }}
+                icon={<IconSearch size="1.0rem" />}
+                value={searchFilter}
+                onChange={(event) => setSearchFilter(event.currentTarget.value)}
+                radius={theme.radius.lg}
+                placeholder="Search..."
+              />
+              <ActionIcon
+                variant="transparent"
+                color={
+                  _.isEqual(
+                    filtersState,
+                    defaultInboxProspectListFilterState
+                  ) || !filtersState
+                    ? "gray.6"
+                    : "blue.6"
+                }
+                onClick={() => setFilterModalOpen(true)}
+              >
+                <IconAdjustmentsFilled size="1.125rem" />
+              </ActionIcon>
+            </Group>
+
+            <Tabs
+              value={sectionTab}
+              onTabChange={setSectionTab}
+              variant="pills"
+              radius="xl"
+              pb={5}
+            >
+              <Tabs.List grow>
+                <Tabs.Tab
+                  value="active"
+                  icon={<IconStar size="1rem" />}
+                  rightSection={
+                    <Badge
+                      w={16}
+                      h={16}
+                      sx={{ pointerEvents: "none" }}
+                      variant="filled"
+                      size="xs"
+                      p={0}
+                    >
+                      {activeProspects.length}
+                    </Badge>
+                  }
+                >
+                  Active
+                </Tabs.Tab>
+                <Tabs.Tab
+                  value="snoozed"
+                  icon={<IconBellOff size="1rem" />}
+                  rightSection={
+                    <Badge
+                      w={16}
+                      h={16}
+                      sx={{ pointerEvents: "none" }}
+                      variant="filled"
+                      size="xs"
+                      p={0}
+                    >
+                      {snoozedProspects.length}
+                    </Badge>
+                  }
+                >
+                  Snoozed
+                </Tabs.Tab>
+              </Tabs.List>
+            </Tabs>
+
+            {/* <Group
           spacing={0}
           pt={0}
           pb={5}
@@ -489,84 +607,64 @@ export default function ProspectList(props: {
               },
             ]}
           />
-
-          <ActionIcon
-            variant="transparent"
-            color={
-              _.isEqual(filtersState, defaultInboxProspectListFilterState) ||
-                !filtersState
-                ? "gray.6"
-                : "blue.6"
-            }
-            onClick={() => setFilterModalOpen(true)}
-          >
-            <IconAdjustmentsFilled size="1.125rem" />
-          </ActionIcon>
-        </Group>
-        <Divider />
-        <ScrollArea
-          h={`calc(${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)`}
-          sx={{ overflowX: "hidden" }}
-        >
-          {[false, true].map((in_purgatory_section, i) => {
-            return (
-              <div key={i}>
-                {in_purgatory_section && (
-                  <Container pt="24px" pb="24px">
-                    <Divider
-                      ta="center"
-                      fz={7}
-                      fw={500}
-                      color="gray"
-                      labelPosition="center"
-                      label={
-                        prospects.filter((p) => p.in_purgatory).length +
-                        " Prospect" +
-                        (prospects.filter((p) => p.in_purgatory).length > 1
-                          ? "s"
-                          : "") +
-                        " Snoozed"
-                      }
-                    />
-                    <Text
-                      color="blue"
-                      align="center"
-                      fw={600}
-                      fz={12}
-                      sx={{ cursor: "pointer" }}
-                      onClick={() =>
-                        setShowPurgatorySection(!showPurgatorySection)
-                      }
-                    >
-                      {showPurgatorySection ? "View" : "Hide"} Prospect
-                      {prospects.filter((p) => p.in_purgatory).length > 1
-                        ? "s"
-                        : ""}
-                    </Text>
-                  </Container>
-                )}
-                {((in_purgatory_section && !showPurgatorySection) ||
-                  !in_purgatory_section) &&
-                  prospects
-                    .filter(
-                      (prospect) =>
-                        prospect.in_purgatory == in_purgatory_section
-                    )
-                    .map((prospect, i: number) => (
+        </Group> */}
+            <Divider />
+            <ScrollArea
+              h={`calc(${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)`}
+              sx={{ overflowX: "hidden" }}
+            >
+              {[false].map((in_purgatory_section, i) => {
+                return (
+                  <div key={i}>
+                    {in_purgatory_section && (
+                      <Container pt="24px" pb="24px">
+                        <Divider
+                          ta="center"
+                          fz={7}
+                          fw={500}
+                          color="gray"
+                          labelPosition="center"
+                          label={
+                            prospects.filter((p) => p.in_purgatory).length +
+                            " Prospect" +
+                            (prospects.filter((p) => p.in_purgatory).length > 1
+                              ? "s"
+                              : "") +
+                            " Snoozed"
+                          }
+                        />
+                        <Text
+                          color="blue"
+                          align="center"
+                          fw={600}
+                          fz={12}
+                          sx={{ cursor: "pointer" }}
+                          onClick={() =>
+                            setShowPurgatorySection(!showPurgatorySection)
+                          }
+                        >
+                          {showPurgatorySection ? "View" : "Hide"} Prospect
+                          {prospects.filter((p) => p.in_purgatory).length > 1
+                            ? "s"
+                            : ""}
+                        </Text>
+                      </Container>
+                    )}
+                    {displayProspects.map((prospect, i: number) => (
                       <div key={i}>
                         {filterSelectValue === "ALL" &&
                           (!prospects[i - 1] ||
                             prospect.linkedin_status !==
-                            prospects[i - 1].linkedin_status) && (
+                              prospects[i - 1].linkedin_status) && (
                             <div
                               style={{
                                 backgroundColor:
                                   prospect.linkedin_status ===
-                                    "ACTIVE_CONVO_REVIVAL"
+                                  "ACTIVE_CONVO_REVIVAL"
                                     ? "#2c8c91"
                                     : prospect.in_purgatory
-                                      ? "#858585"
-                                      : "#25262b",
+                                    ? "#858585"
+                                    : "#25262b",
                                 padding: "4px",
                                 position: "relative",
                               }}
@@ -637,14 +735,20 @@ export default function ProspectList(props: {
                           </Container>
                           {prospect.in_purgatory && (
                             <Tooltip
-                              label={`Snoozed until ${convertDateToLocalTime(new Date(prospect.purgatory_until))}`}
+                              label={`Snoozed until ${convertDateToLocalTime(
+                                new Date(prospect.purgatory_until)
+                              )}`}
                               withArrow
                               withinPortal
                             >
                               <ActionIcon
                                 variant="subtle"
-                                radius='xl'
-                                sx={{ position: 'absolute', right: 10, top: 30 }}
+                                radius="xl"
+                                sx={{
+                                  position: "absolute",
+                                  right: 10,
+                                  top: 30,
+                                }}
                               >
                                 <IconClock size="1.125rem" />
                               </ActionIcon>
@@ -653,21 +757,21 @@ export default function ProspectList(props: {
                         </Box>
                       </div>
                     ))}
-              </div>
-            );
-          })}
-          {prospects.length === 0 && (
-            <Text mt={20} fz="sm" ta="center" c="dimmed" fs="italic">
-              No active conversations found.
-            </Text>
-          )}
+                  </div>
+                );
+              })}
+              {prospects.length === 0 && (
+                <Text mt={20} fz="sm" ta="center" c="dimmed" fs="italic">
+                  No active conversations found.
+                </Text>
+              )}
 
-          <Box h="50px"></Box>
-        </ScrollArea>
-        <Text
+              <Box h="50px"></Box>
+            </ScrollArea>
+            {/* <Text
           sx={{
             position: "absolute",
-            top: HEADER_HEIGHT,
+            top: 80,
             right: 5,
             zIndex: 100,
           }}
@@ -676,7 +780,9 @@ export default function ProspectList(props: {
           c="dimmed"
         >
           {prospects.length} convos
-        </Text>
+        </Text> */}
+          </>
+        )}
       </Stack>
 
       <InboxProspectListFilter

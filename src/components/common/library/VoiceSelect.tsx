@@ -95,13 +95,34 @@ export default function VoiceSelect(props: {
   });
   const voices = data ?? [];
 
+  const updateActive = (voiceId: number, active: boolean) => {
+    fetch(
+      `${API_URL}/message_generation/stack_ranked_configuration_tool/set_active`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          configuration_id: voiceId,
+          set_active: active,
+        }),
+      }
+    ).then((res) => {
+      refetch();
+    });
+  };
+
   return (
     <>
       <ModalSelector
         selector={{
           content: (
             <Text>
-              {selectedVoice ? `Using ${_.truncate(userData.sdr_name.split(" ")[0])}'s Voice` : "Train Voice"}
+              {selectedVoice
+                ? `Using ${_.truncate(userData.sdr_name.split(" ")[0])}'s Voice`
+                : "Train Voice"}
             </Text>
           ),
           buttonProps: {
@@ -147,7 +168,7 @@ export default function VoiceSelect(props: {
             name: voice.full_name,
             content: (
               <tr key={voice.name}>
-                <td>
+                {/* <td>
                   <Avatar
                     size={40}
                     color={valueToColor(theme, voices.indexOf(voice) + 1 + "")}
@@ -155,12 +176,14 @@ export default function VoiceSelect(props: {
                   >
                     #{voices.indexOf(voice) + 1}
                   </Avatar>
-                </td>
+                </td> */}
                 <td>
                   <Group spacing="sm">
                     <div>
                       <Text fz="sm" fw={500}>
-                        {voice.name}
+                        {voice.id +
+                          " - " +
+                          (voice.created_at ?? "Unknown Date")}
                       </Text>
                       <Text fz="xs" c="dimmed"></Text>
                     </div>
@@ -188,7 +211,7 @@ export default function VoiceSelect(props: {
             ),
             rightSection: (
               <Group noWrap>
-                <Box>
+                {/* <Box>
                   <Badge
                     color={
                       voice.generated_message_type == "LINKEDIN"
@@ -198,15 +221,18 @@ export default function VoiceSelect(props: {
                   >
                     {voice.generated_message_type}
                   </Badge>
-                </Box>
+                </Box> */}
                 <Box>
-                  {voice.active ? (
-                    <Badge fullWidth color="green">
-                      Active
-                    </Badge>
-                  ) : (
-                    <Badge color="gray">Disabled</Badge>
-                  )}
+                  <Select
+                    value={voice.active ? "active" : "disabled"}
+                    onChange={(value) => {
+                      updateActive(voice.id, value === "active" ? true : false);
+                    }}
+                    data={[
+                      { value: "active", label: "Active" },
+                      { value: "disabled", label: "Disabled" },
+                    ]}
+                  />
                 </Box>
               </Group>
             ),

@@ -215,7 +215,7 @@ const ICPFiltersDashboard: FC<{
         showNotification({
           id: "prospect-removed",
           title: "Prospects removed",
-          message: `${prospectIDs.length} prospects have been removed from your list`,
+          message: `${prospectIDs.length} prospects has been removed from your list`,
           color: "green",
           autoClose: 3000,
         });

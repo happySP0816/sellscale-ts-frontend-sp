@@ -764,13 +764,19 @@ const ICPFiltersDashboard: FC<{
           {
             accessorKey: "title",
             header: "TITLE",
-            size: Math.min(500, window.innerWidth / 2),
+            size: Math.min(340, window.innerWidth / 2),
             filterFn: stringFilterFn,
+            cell: (cell) => {
+              return <Text size='xs'>{cell.cell?.getValue<string>()}</Text>
+            }
           },
           {
             accessorKey: "company",
             filterFn: stringFilterFn,
             header: "COMPANY",
+            cell: (cell) => {
+              return <Text size='xs'>{cell.cell?.getValue<string>()}</Text>
+            }
           },
           {
             accessorKey: "icp_fit_reason",
@@ -804,11 +810,11 @@ const ICPFiltersDashboard: FC<{
                           sx={{ cursor: "pointer" }}
                         >
                           {v.includes("✅") ? (
-                            <IconCheck color="white" />
+                            <IconCheck color="white" size='0.5rem' />
                           ) : v.includes("❌") ? (
-                            <IconX color="white" />
+                            <IconX color="white" size='0.5rem' />
                           ) : (
-                            <IconPlus color="white" />
+                            <IconPlus color="white" size='0.5rem' />
                           )}
                         </Flex>
                       </Tooltip>
@@ -885,10 +891,12 @@ const ICPFiltersDashboard: FC<{
                 href={"https://" + cell.row.original.linkedin_url}
                 color={theme.colors.blue[6]}
                 fw={600}
+                size='xs'
               >
-                {cell.row.original.full_name}'s{" "}
-                {getChannelType(cell.getValue<string>())}
                 <IconExternalLink size={16} />
+                {cell.row.original.full_name.substring(0,20)}{cell.row.original.full_name.length > 20 ? '...' : ''}'s{" "}
+                {getChannelType(cell.getValue<string>())}
+                
               </Anchor>
             ),
           },

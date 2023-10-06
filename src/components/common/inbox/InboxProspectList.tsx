@@ -3,45 +3,34 @@ import {
   Avatar,
   Badge,
   Box,
-  Button,
-  Checkbox,
   Container,
   Divider,
   Flex,
-  Grid,
   Group,
   Indicator,
   Input,
   Loader,
   LoadingOverlay,
-  Modal,
   ScrollArea,
-  SegmentedControl,
-  Select,
   Stack,
   Tabs,
   Text,
   ThemeIcon,
   Title,
   Tooltip,
+  rem,
   useMantineTheme,
 } from "@mantine/core";
 import {
   IconSearch,
   IconAdjustmentsFilled,
-  IconCircle4Filled,
-  IconCircle1Filled,
-  IconCircle2Filled,
-  IconCircle3Filled,
-  IconStarFilled,
   IconInfoCircle,
   IconClock,
   IconStar,
   IconBellOff,
 } from "@tabler/icons-react";
 import _ from "lodash";
-import { useQuery } from "@tanstack/react-query";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import {
   fetchingProspectIdState,
@@ -51,7 +40,7 @@ import {
   openedProspectLoadingState,
   tempHiddenProspectsState,
 } from "@atoms/inboxAtoms";
-import { Prospect, ProspectShallow } from "src";
+import { ProspectShallow } from "src";
 import { forwardRef, useEffect, useState } from "react";
 import { HEADER_HEIGHT } from "./InboxProspectConvo";
 import {
@@ -67,8 +56,6 @@ import InboxProspectListFilter, {
 import {
   convertDateToCasualTime,
   convertDateToLocalTime,
-  convertDateToShortFormat,
-  isWithinLastXDays,
   proxyURL,
   removeExtraCharacters,
   removeHTML,
@@ -81,6 +68,7 @@ import {
   currentProjectState,
 } from "@atoms/personaAtoms";
 import { ProjectSelect } from "@common/library/ProjectSelect";
+import { IconChevronUp } from "@tabler/icons";
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<"div"> {
   count: number;
@@ -122,11 +110,14 @@ export function ProspectConvoCard(props: {
       <Flex
         p={10}
         wrap="nowrap"
-        sx={{
+        sx={(theme) => ({
           overflow: "hidden",
           cursor: "pointer",
-          backgroundColor: props.opened ? "white" : "initial",
-        }}
+          backgroundColor: "white",
+          borderRight: props.opened
+            ? `2px solid ${theme.colors.blue[theme.fn.primaryShade()]}`
+            : `2px solid ${theme.white}`,
+        })}
       >
         <div style={{ flex: 0 }}>
           <Indicator
@@ -187,7 +178,8 @@ export default function ProspectList(props: {
     openedProspectIdState
   );
   const [showPurgatorySection, setShowPurgatorySection] = useState(true);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
   const [currentInboxCount, setCurrentInboxCount] = useRecoilState(
     currentInboxCountState
   );
@@ -404,18 +396,31 @@ export default function ProspectList(props: {
       >
         <ProjectSelect allOnNone />
 
-        <Tabs value={mainTab} onTabChange={(value) => setMainTab(value as string)}>
+        <Tabs
+          value={mainTab}
+          onTabChange={(value) => setMainTab(value as string)}
+          styles={(theme) => ({
+            tab: {
+              ...theme.fn.focusStyles(),
+              fontWeight: 600,
+              color: theme.colors.gray[5],
+              "&[data-active]": {
+                color: theme.colors.blue[theme.fn.primaryShade()],
+              },
+              paddingTop: rem(16),
+              paddingBottom: rem(16),
+            },
+          })}
+        >
           <Tabs.List grow>
             <Tabs.Tab
               value="inbox"
               rightSection={
                 <Badge
-                  w={16}
-                  h={16}
                   sx={{ pointerEvents: "none" }}
                   variant="filled"
                   size="xs"
-                  p={0}
+                  color={mainTab === "inbox" ? "blue" : "gray"}
                 >
                   {prospects.length}
                 </Badge>
@@ -427,17 +432,14 @@ export default function ProspectList(props: {
               value="sent"
               rightSection={
                 <Badge
-                  w={16}
-                  h={16}
                   sx={{ pointerEvents: "none" }}
                   variant="filled"
                   size="xs"
-                  p={0}
+                  color={mainTab === "sent" ? "blue" : "gray"}
                 >
                   ?
                 </Badge>
               }
-              disabled
             >
               Sent
             </Tabs.Tab>
@@ -468,15 +470,21 @@ export default function ProspectList(props: {
                 sx={{ flex: 1 }}
                 styles={{
                   input: {
-                    borderColor: searchFilter.trim()
-                      ? theme.colors.blue[theme.fn.primaryShade()]
-                      : undefined,
+                    backgroundColor: theme.colors.gray[2],
+                    border: `1px solid ${theme.colors.gray[2]}`,
+                    "&:focus-within": {
+                      borderColor: theme.colors.gray[4],
+                    },
+                    "&::placeholder": {
+                      color: theme.colors.gray[6],
+                      fontWeight: 500,
+                    },
                   },
                 }}
                 icon={<IconSearch size="1.0rem" />}
                 value={searchFilter}
                 onChange={(event) => setSearchFilter(event.currentTarget.value)}
-                radius={theme.radius.lg}
+                radius={theme.radius.md}
                 placeholder="Search..."
               />
               <ActionIcon
@@ -498,9 +506,55 @@ export default function ProspectList(props: {
             <Tabs
               value={sectionTab}
               onTabChange={setSectionTab}
-              variant="pills"
               radius="xl"
-              pb={5}
+              unstyled
+              px={20}
+              py={10}
+              styles={(theme) => ({
+                tabRightSection: {
+                  marginLeft: rem(4),
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                },
+                tab: {
+                  ...theme.fn.focusStyles(),
+                  backgroundColor: theme.white,
+                  color: theme.colors.gray[5],
+                  border: `${rem(1)} solid ${theme.colors.gray[4]}`,
+                  padding: `${rem(6)} ${theme.spacing.xs}`,
+                  cursor: "pointer",
+                  fontSize: theme.fontSizes.sm,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flex: 1,
+                  fontWeight: 600,
+                  borderRadius: 999,
+                  "&:disabled": {
+                    opacity: 0.5,
+                    cursor: "not-allowed",
+                  },
+
+                  "&[data-active]": {
+                    backgroundColor: theme.colors.blue[1],
+                    borderColor: theme.colors.blue[theme.fn.primaryShade()],
+                    color: theme.colors.blue[theme.fn.primaryShade()],
+                  },
+                },
+
+                tabIcon: {
+                  marginRight: rem(4),
+                  display: "flex",
+                  alignItems: "center",
+                },
+
+                tabsList: {
+                  display: "flex",
+                  width: "100%",
+                  gap: rem(12),
+                },
+              })}
             >
               <Tabs.List grow>
                 <Tabs.Tab
@@ -508,12 +562,10 @@ export default function ProspectList(props: {
                   icon={<IconStar size="1rem" />}
                   rightSection={
                     <Badge
-                      w={16}
-                      h={16}
+                      size="sm"
+                      color={sectionTab === "active" ? "blue" : "gray"}
                       sx={{ pointerEvents: "none" }}
                       variant="filled"
-                      size="xs"
-                      p={0}
                     >
                       {activeProspects.length}
                     </Badge>
@@ -526,16 +578,15 @@ export default function ProspectList(props: {
                   icon={<IconBellOff size="1rem" />}
                   rightSection={
                     <Badge
-                      w={16}
-                      h={16}
+                      color={sectionTab === "snoozed" ? "blue" : "gray"}
                       sx={{ pointerEvents: "none" }}
                       variant="filled"
-                      size="xs"
-                      p={0}
+                      size="sm"
                     >
                       {snoozedProspects.length}
                     </Badge>
                   }
+                  disabled
                 >
                   Snoozed
                 </Tabs.Tab>
@@ -594,7 +645,7 @@ export default function ProspectList(props: {
                       input: {
                         color:
                           filterSelectValue !== filterSelectOptions[0].value
-                            ? theme.colors.blue[7]
+                            ? theme.colors.blue[theme.fn.primaryShade()]
                             : theme.colors.gray[7],
                         fontSize: 11,
                         fontWeight: 600,
@@ -612,7 +663,25 @@ export default function ProspectList(props: {
             ]}
           />
         </Group> */}
-            <Divider />
+
+            <Flex
+              bg="blue.1"
+              py={"sm"}
+              px={"md"}
+              align={"center"}
+              justify={"space-between"}
+            >
+              <Flex align={"center"} gap={"0.5rem"}>
+                <Text color="blue" fw={700} fz={"sm"}>
+                  Scheduling
+                </Text>
+                <Badge>03</Badge>
+              </Flex>
+              <ThemeIcon variant="light" size={"sm"} radius={"lg"}>
+                <IconChevronUp />
+              </ThemeIcon>
+            </Flex>
+            {/* <Divider /> */}
             <ScrollArea
               h={`calc(${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)`}
               sx={{ overflowX: "hidden" }}
@@ -722,7 +791,6 @@ export default function ProspectList(props: {
                                 setOpenedProspectId(prospect.id);
                               }
                             }}
-                            opacity={prospect.in_purgatory ? 0.5 : 1}
                           >
                             <ProspectConvoCard
                               id={prospect.id}

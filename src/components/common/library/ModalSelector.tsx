@@ -148,7 +148,7 @@ export default function ModalSelector(props: {
                 </Box>
               </Flex>
             )}
-            <ScrollArea h={props.footer ? "60vh" : "70vh"}>
+            <ScrollArea h={props.footer ? "60vh" : "70vh"}  w='100%'>
               <Stack py={4} spacing={0}>
                 {props.items.map((item, index) => (
                   <ModalSelectorOption
@@ -221,7 +221,7 @@ function ModalSelectorOption(props: {
           >
             {props.content}
           </Box>
-          <Box sx={{ flexBasis: props.rightSection ? "27%" : "0%" }}>
+          <Box sx={{ flexBasis: props.rightSection ? "27%" : "0%" }} ml='auto' mr='md'>
             <Flex justify="flex-end">{props.rightSection}</Flex>
           </Box>
         </Flex>

@@ -8,7 +8,7 @@ import { IconMessage2Cog, IconSettingsFilled, IconWand } from '@tabler/icons-rea
 import { useQueryClient } from '@tanstack/react-query';
 import { deleteAutoBumpMessage } from '@utils/requests/autoBumpMessage';
 import { sendLinkedInMessage } from '@utils/requests/sendMessage';
-import _, { debounce, get } from 'lodash';
+import _, { debounce, get, set } from 'lodash';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { BumpFramework, EmailSequenceStep, EmailThread, LinkedInMessage, Prospect } from 'src';
@@ -277,8 +277,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const checkFuzz = useCallback(
     debounce((message, aiMessage) => {
       const ratio = fuzzratio(message, aiMessage);
-      ratio > 5 && setAiGenerated(true);
-      ratio <= 5 && setAiGenerated(false);
+      // ratio > 5 && setAiGenerated(true);
+      // ratio <= 5 && setAiGenerated(false);
+      setAiGenerated(true)
     }, 200), []
   )
 

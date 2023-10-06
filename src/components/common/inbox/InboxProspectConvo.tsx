@@ -234,7 +234,7 @@ export function ProspectConvoMessage(props: {
   );
 }
 
-export let HEADER_HEIGHT = 102;
+export let HEADER_HEIGHT = 190;
 
 export default function ProspectConvo(props: { prospects: ProspectShallow[], onTabChange?: (tab: string) => void, openConvoBox?: boolean, hideTitle?: boolean }) {
   const theme = useMantineTheme();

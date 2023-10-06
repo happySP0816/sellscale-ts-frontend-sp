@@ -32,12 +32,11 @@ import {
 import DoNotContactList from "@common/settings/DoNotContactList";
 import SellScaleBrain from "@common/settings/SellScaleBrain";
 import SettingPreferences from "@common/settings/SettingPreferences";
-import SlackbotSection from "@common/slack/SlackbotSection";
 import MessageAutomation from "@common/settings/MessageAutomation";
-import SlackWebhookSection from "@common/slack/SlackWebhookSection";
 import DoNotContactFiltersPage from '@common/settings/DoNotContactFiltersPage';
 import { setPageTitle } from "@utils/documentChange";
 import SettingsConversion from "@common/settings/SettingsConversion";
+import SlackSettings from "@common/slack/SlackSettings";
 
 
 export default function SettingsPage() {
@@ -154,8 +153,7 @@ export default function SettingsPage() {
         </Tabs.Panel>
 
         <Tabs.Panel value="slackbot" pl="xs">
-          <SlackbotSection />
-          <SlackWebhookSection />
+          <SlackSettings />
         </Tabs.Panel>
 
         <Tabs.Panel value="message-automation" pl="xs">

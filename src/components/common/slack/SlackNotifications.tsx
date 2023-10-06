@@ -15,14 +15,17 @@ export default function SlackNotifications() {
             />
             <Checkbox
               label="Replied Notifications"
+              defaultChecked
               disabled
             />
             <Checkbox
               label="Demo Set Notifications"
+              defaultChecked
               disabled
             />
             <Checkbox
               label="AI Responses Notifications"
+              defaultChecked
               disabled
             />
           </Stack>
@@ -37,14 +40,17 @@ export default function SlackNotifications() {
             />
             <Checkbox
               label="Replied Notifications"
+              defaultChecked
               disabled
             />
             <Checkbox
               label="Demo Set Notifications"
+              defaultChecked
               disabled
             />
             <Checkbox
               label="AI Responses Notifications"
+              defaultChecked
               disabled
             />
           </Stack>

@@ -2900,21 +2900,14 @@ const CtaSection = (props: {
       }
 
       let pageData = (res.ctas as CTA[]).map((cta) => {
-        let totalResponded = 0;
-        if (cta.performance) {
-          for (const status in cta.performance.status_map) {
-            if (status !== "SENT_OUTREACH" && status !== "NOT_INTERESTED") {
-              totalResponded += cta.performance.status_map[status];
-            }
-          }
-        }
+
         return {
           ...cta,
           percentage: cta.performance?.total_count
-            ? Math.round((totalResponded / cta.performance.total_count) * 100)
+            ? Math.round((cta.performance?.num_converted / cta.performance?.num_sent) * 100)
             : 0,
-          total_responded: totalResponded,
-          total_count: cta.performance?.total_count,
+          total_responded: cta.performance?.num_converted,
+          total_count: cta.performance?.num_sent,
         };
       });
       props.onCTAsLoaded(pageData);

@@ -63,7 +63,6 @@ export function SidebarHeader({
   const globalRuleSetData = useRecoilValue(filterRuleSetState);
   const icpProspects = useRecoilValue(filterProspectsState);
 
-
   const TRIGGER_REFRESH_INTERVAL = 10000; // 10000 ms = 10 seconds
   const TIME_PER_PROSPECT = 0.5; // 0.5 seconds
   const [icpScoringJobs, setIcpScoringJobs] = useState<any[]>([]);
@@ -71,27 +70,36 @@ export function SidebarHeader({
   const [scoringTimeRemaining, setScoringTimeRemaining] = useState<number>(0);
   const [scoringProgress, setScoringProgress] = useState<number>(0);
 
-
   const triggerGetScoringJobs = async () => {
     if (!userToken || !currentProject?.id) return;
 
     const result = await getICPScoringJobs(userToken, currentProject?.id);
-    console.log('result', result)
+    console.log("result", result);
 
-    const jobs = result?.data?.icp_runs
-    setIcpScoringJobs(jobs)
+    const jobs = result?.data?.icp_runs;
+    setIcpScoringJobs(jobs);
 
-    if (jobs.length > 0 && (jobs[0].run_status === 'IN_PROGRESS' || jobs[0].run_status === 'PENDING') ) {
-      setCurrentScoringJob(jobs[0])
+    if (
+      jobs.length > 0 &&
+      (jobs[0].run_status === "IN_PROGRESS" || jobs[0].run_status === "PENDING")
+    ) {
+      setCurrentScoringJob(jobs[0]);
       return;
     }
 
-    setCurrentScoringJob(null)
-  }
+    setCurrentScoringJob(null);
+    
+    setTimeout(() => {
+      queryClient.refetchQueries({
+        queryKey: [`query-get-icp-prospects`],
+      });
+      dropConfetti(300);
+    }, 1);
+  };
 
   useEffect(() => {
     triggerGetScoringJobs();
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (currentScoringJob) {
@@ -102,38 +110,41 @@ export function SidebarHeader({
       // Calculate the progress using heuristic every 5 seconds
       const progressInterval = setInterval(() => {
         const numProspects = currentScoringJob.prospect_ids?.length;
-        const estimatedSeconds = TIME_PER_PROSPECT * numProspects
-        const estimatedMinutes = Math.ceil(estimatedSeconds / 60)
+        const estimatedSeconds = TIME_PER_PROSPECT * numProspects;
+        const estimatedMinutes = Math.ceil(estimatedSeconds / 60);
 
         const now = new Date().getUTCMilliseconds();
-        const startedAt = new Date(currentScoringJob.updated_at).getUTCMilliseconds();
+        const startedAt = new Date(
+          currentScoringJob.updated_at
+        ).getUTCMilliseconds();
         let timeElapsedMinutes = Math.ceil((now - startedAt) / 1000 / 60);
         if (timeElapsedMinutes > estimatedMinutes) {
           timeElapsedMinutes = estimatedMinutes - 1;
         }
         const timeRemaining = estimatedMinutes - timeElapsedMinutes;
-        let progress = (1 - (timeRemaining / estimatedMinutes)) * 100;
-        progress = Math.floor(Math.min(progress, 99)) 
-        setScoringTimeRemaining(timeRemaining)
-        setScoringProgress(progress)
+        let progress = (1 - timeRemaining / estimatedMinutes) * 100;
+        progress = Math.floor(Math.min(progress, 99));
+        setScoringTimeRemaining(timeRemaining);
+        setScoringProgress(progress);
       }, 2000);
 
       return () => {
-        clearInterval(interval)
-        clearInterval(progressInterval)
+        clearInterval(interval);
+        clearInterval(progressInterval);
       };
     }
-  }, [currentScoringJob])
+  }, [currentScoringJob]);
 
   return (
     <>
       <Box
         sx={(theme) => ({
           padding: theme.spacing.sm,
-          borderBottom: `${rem(1)} solid ${theme.colorScheme === "dark"
-            ? theme.colors.dark[4]
-            : theme.colors.gray[2]
-            }`,
+          borderBottom: `${rem(1)} solid ${
+            theme.colorScheme === "dark"
+              ? theme.colors.dark[4]
+              : theme.colors.gray[2]
+          }`,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -255,17 +266,6 @@ export function SidebarHeader({
               );
               console.log("refetching queries");
 
-              setTimeout(() => {
-                queryClient.refetchQueries({
-                  queryKey: [`query-get-icp-prospects`],
-                });
-                showNotification({
-                  title: "Updating prospects...",
-                  message: "",
-                  color: "blue",
-                });
-              }, 5000);
-
               setLoading(false);
 
               if (isTesting) {
@@ -284,7 +284,12 @@ export function SidebarHeader({
               }
 
               triggerGetScoringJobs().then(() => {
-                dropConfetti(300);
+                if (isTesting) {
+                  queryClient.refetchQueries({
+                    queryKey: [`query-get-icp-prospects`],
+                  });
+                  dropConfetti(300);
+                }
               });
             }}
           >
@@ -315,23 +320,32 @@ export function SidebarHeader({
 
         {currentScoringJob ? (
           <>
-            <Flex mt='md' justify='space-evenly'>
-              <Text fz='10px' w='25%' ml='md' fw='bold'>Scoring...</Text>
-              <Text fz='10px' w='50%' align='center'>{scoringTimeRemaining} mins remaining</Text>
-              <Text fz='10px' w='25%' align='right' mr='md' fw='bold'>{scoringProgress}%</Text>
+            <Flex mt="md" justify="space-evenly">
+              <Text fz="10px" w="25%" ml="md" fw="bold">
+                Scoring...
+              </Text>
+              <Text fz="10px" w="50%" align="center">
+                {scoringTimeRemaining} mins remaining
+              </Text>
+              <Text fz="10px" w="25%" align="right" mr="md" fw="bold">
+                {scoringProgress}%
+              </Text>
             </Flex>
-            <Progress ml='md' mr='md' value={scoringProgress} />
+            <Progress ml="md" mr="md" value={scoringProgress} />
           </>
         ) : (
           <>
-            <Flex mt='md' justify='space-between'>
-              <Text fz='10px' w='25%' ml='md' fw='bold'>Complete</Text>
-              <Text fz='10px' w='25%' align='right' mr='md' fw='bold'>100%</Text>
+            <Flex mt="md" justify="space-between">
+              <Text fz="10px" w="25%" ml="md" fw="bold">
+                Complete
+              </Text>
+              <Text fz="10px" w="25%" align="right" mr="md" fw="bold">
+                100%
+              </Text>
             </Flex>
-            <Progress ml='md' mr='md' value={100} />
+            <Progress ml="md" mr="md" value={100} />
           </>
         )}
-
       </Flex>
     </>
   );

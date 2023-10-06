@@ -178,8 +178,7 @@ export default function ProspectList(props: {
     openedProspectIdState
   );
   const [showPurgatorySection, setShowPurgatorySection] = useState(true);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const [currentInboxCount, setCurrentInboxCount] = useRecoilState(
     currentInboxCountState
   );

@@ -58,7 +58,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => void, disableSelectDefaultProject?: boolean, extraBig?: boolean }) {
+export function ProjectSelect(props: { allOnNone?: boolean, onClick?: (persona: PersonaOverview) => void, disableSelectDefaultProject?: boolean, extraBig?: boolean }) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const navigate = useNavigate();
@@ -150,7 +150,7 @@ export function ProjectSelect(props: { onClick?: (persona: PersonaOverview) => v
           });
         }}
       >
-        {currentProject?.name || "Select Persona"}
+        {currentProject?.name || (props.allOnNone ? "All Personas" : "Select Persona")}
       </Button>
 
       <Button color='blue' size='xs' variant='subtle' mt='xs'

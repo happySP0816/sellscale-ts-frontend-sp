@@ -187,7 +187,7 @@ export default function ProspectList(props: {
     openedProspectIdState
   );
   const [showPurgatorySection, setShowPurgatorySection] = useState(true);
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const [currentInboxCount, setCurrentInboxCount] = useRecoilState(
     currentInboxCountState
   );
@@ -221,6 +221,10 @@ export default function ProspectList(props: {
 
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
   const [sectionTab, setSectionTab] = useState<string | null>("active");
+
+  useEffect(() => {
+    setCurrentProject(null);
+  }, []);
 
   // Sort out uninitiated prospects and temp fill in unknown data
   let prospects =
@@ -398,7 +402,7 @@ export default function ProspectList(props: {
           position: "relative",
         })}
       >
-        <ProjectSelect />
+        <ProjectSelect allOnNone />
 
         <Tabs value={mainTab} onTabChange={(value) => setMainTab(value as string)}>
           <Tabs.List grow>

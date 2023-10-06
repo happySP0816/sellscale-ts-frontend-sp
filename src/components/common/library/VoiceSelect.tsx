@@ -16,6 +16,7 @@ import {
   Button,
   Group,
   Menu,
+  Switch,
 } from "@mantine/core";
 import { valueToColor } from "@utils/general";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
@@ -95,8 +96,8 @@ export default function VoiceSelect(props: {
   });
   const voices = data ?? [];
 
-  const updateActive = (voiceId: number, active: boolean) => {
-    fetch(
+  const updateActive = async (voiceId: number, active: boolean) => {
+    return await fetch(
       `${API_URL}/message_generation/stack_ranked_configuration_tool/set_active`,
       {
         method: "POST",
@@ -109,9 +110,7 @@ export default function VoiceSelect(props: {
           set_active: active,
         }),
       }
-    ).then((res) => {
-      refetch();
-    });
+    );
   };
 
   return (
@@ -181,11 +180,14 @@ export default function VoiceSelect(props: {
                   <Group spacing="sm">
                     <div>
                       <Text fz="sm" fw={500}>
-                        {voice.id +
-                          " - " +
-                          (voice.created_at ?? "Unknown Date")}
+                        {`${voice.name} (#${voice.id})`}
                       </Text>
-                      <Text fz="xs" c="dimmed"></Text>
+                      <Text fz="xs" c="dimmed">
+                        {new Date(voice.created_at).toLocaleDateString(
+                          "en-US",
+                          { year: "numeric", month: "long", day: "numeric" }
+                        ) ?? "Unknown Date"}
+                      </Text>
                     </div>
                   </Group>
                 </td>
@@ -223,15 +225,20 @@ export default function VoiceSelect(props: {
                   </Badge>
                 </Box> */}
                 <Box>
-                  <Select
-                    value={voice.active ? "active" : "disabled"}
-                    onChange={(value) => {
-                      updateActive(voice.id, value === "active" ? true : false);
+                  <Switch
+                    onLabel="ON"
+                    offLabel="OFF"
+                    checked={voice.active}
+                    onChange={async (event) => {
+                      for(let v of voices) {
+                        if(v.active){
+                          await updateActive(v.id, false);
+                        }
+                      }
+
+                      await updateActive(voice.id, !voice.active);
+                      refetch();
                     }}
-                    data={[
-                      { value: "active", label: "Active" },
-                      { value: "disabled", label: "Disabled" },
-                    ]}
                   />
                 </Box>
               </Group>

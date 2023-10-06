@@ -306,14 +306,14 @@ export default function ProspectList(props: {
       ) ?? [];
 
   // Filter by search
-  if (searchFilter.trim()) {
-    prospects = prospects.filter((p) => {
-      return (
-        p.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        p.title.toLowerCase().includes(searchFilter.toLowerCase())
-      );
-    });
-  }
+  // if (searchFilter.trim()) {
+  //   prospects = prospects.filter((p) => {
+  //     return (
+  //       p.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+  //       p.title.toLowerCase().includes(searchFilter.toLowerCase())
+  //     );
+  //   });
+  // }
   // Filter by status
   if (filterSelectValue !== "ALL") {
     prospects = prospects.filter((p) => {
@@ -428,21 +428,24 @@ export default function ProspectList(props: {
             >
               Inbox
             </Tabs.Tab>
-            <Tabs.Tab
-              value="sent"
-              rightSection={
-                <Badge
-                  sx={{ pointerEvents: "none" }}
-                  variant="filled"
-                  size="xs"
-                  color={mainTab === "sent" ? "blue" : "gray"}
-                >
-                  ?
-                </Badge>
-              }
-            >
-              Sent
-            </Tabs.Tab>
+             <Tooltip label='Coming soon!' position='bottom'>
+              <Tabs.Tab
+                value="sent"
+                disabled
+                rightSection={
+                  <Badge
+                    sx={{ pointerEvents: "none" }}
+                    variant="filled"
+                    size="xs"
+                    color={mainTab === "sent" ? "blue" : "gray"}
+                  >
+                    ?
+                  </Badge>
+                }
+              >
+                Sent
+              </Tabs.Tab>
+             </Tooltip>
             <Tabs.Tab
               value="queued"
               // rightSection={
@@ -586,7 +589,6 @@ export default function ProspectList(props: {
                       {snoozedProspects.length}
                     </Badge>
                   }
-                  disabled
                 >
                   Snoozed
                 </Tabs.Tab>
@@ -664,23 +666,7 @@ export default function ProspectList(props: {
           />
         </Group> */}
 
-            <Flex
-              bg="blue.1"
-              py={"sm"}
-              px={"md"}
-              align={"center"}
-              justify={"space-between"}
-            >
-              <Flex align={"center"} gap={"0.5rem"}>
-                <Text color="blue" fw={700} fz={"sm"}>
-                  Scheduling
-                </Text>
-                <Badge>03</Badge>
-              </Flex>
-              <ThemeIcon variant="light" size={"sm"} radius={"lg"}>
-                <IconChevronUp />
-              </ThemeIcon>
-            </Flex>
+           
             {/* <Divider /> */}
             <ScrollArea
               h={`calc(${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)`}
@@ -726,62 +712,35 @@ export default function ProspectList(props: {
                     {displayProspects.map((prospect, i: number) => (
                       <div key={i}>
                         {filterSelectValue === "ALL" &&
-                          (!prospects[i - 1] ||
+                          (!prospects[i + 1] ||
                             prospect.linkedin_status !==
-                              prospects[i - 1].linkedin_status) && (
-                            <div
-                              style={{
-                                backgroundColor:
-                                  prospect.linkedin_status ===
-                                  "ACTIVE_CONVO_REVIVAL"
-                                    ? "#2c8c91"
-                                    : prospect.in_purgatory
-                                    ? "#858585"
-                                    : "#25262b",
-                                padding: "4px",
-                                position: "relative",
-                              }}
+                              prospects[i + 1].linkedin_status) && (
+                                 
+                            <Box
+                              bg="blue.1"
+                              py={"sm"}
+                              px={"md"}
+                              color='blue'
                             >
-                              <Text color="white" ta="center" fz={11} fw={700}>
-                                {labelizeConvoSubstatus(
-                                  prospect.linkedin_status
-                                )}
-                              </Text>
-                              <Text color="white" ta="center" fz={9} fw={300}>
-                                {
-                                  prospects.filter(
-                                    (p) =>
-                                      p.linkedin_status ===
-                                      prospect.linkedin_status
-                                  ).length
-                                }{" "}
-                                prospect(s)
-                              </Text>
-                              <Box
-                                sx={{ position: "absolute", right: 5, top: 2 }}
-                              >
-                                <Tooltip
-                                  label={
-                                    <Text ta="center">
-                                      {
-                                        getStatusDetails(
-                                          prospect.linkedin_status
-                                        )?.description
-                                      }
-                                    </Text>
+                              <Flex w='100%'>
+                                <Text color="blue" ta="center" fz={14} fw={700}>
+                                  {labelizeConvoSubstatus(
+                                    prospect.linkedin_status
+                                  )}
+                                </Text>
+                                <Badge color="blue" size='xs' ml='xs' mt='2px'>
+                                  {
+                                    prospects.filter(
+                                      (p) =>
+                                        p.linkedin_status ===
+                                        prospect.linkedin_status
+                                    ).length
                                   }
-                                  position="bottom"
-                                  withArrow
-                                  withinPortal
-                                  multiline
-                                  width={260}
-                                >
-                                  <IconInfoCircle color="#fff" size="0.9rem" />
-                                </Tooltip>
-                              </Box>
-                            </div>
+                                </Badge>
+                               </Flex>
+                            </Box>
                           )}
-                        <Box sx={{ position: "relative" }}>
+                        <Box sx={{ position: "relative", display: prospect.name.toLowerCase().includes(searchFilter.toLowerCase()) ? 'visible' : 'none' }}>
                           <Container
                             p={0}
                             m={0}

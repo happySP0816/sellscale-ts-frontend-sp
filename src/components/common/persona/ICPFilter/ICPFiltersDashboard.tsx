@@ -55,8 +55,8 @@ import {
   filterRuleSetState,
 } from "@atoms/icpFilterAtoms";
 import { IconX } from "@tabler/icons";
-import { navigateToPage } from '@utils/documentChange';
-import { useNavigate } from 'react-router-dom';
+import { navigateToPage } from "@utils/documentChange";
+import { useNavigate } from "react-router-dom";
 
 const demoData = [
   {
@@ -117,7 +117,7 @@ const ICPFiltersDashboard: FC<{
   const currentProject = useRecoilValue(currentProjectState);
   const [icpProspects, setIcpProspects] = useRecoilState(filterProspectsState);
   const navigate = useNavigate();
-
+  const [removeProspectsLoading, setRemoveProspectsLoading] = useState(false);
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.LG})`,
     false,
@@ -193,6 +193,7 @@ const ICPFiltersDashboard: FC<{
   }, [selectedTab, globalSearch]);
 
   const triggerMoveToUnassigned = async () => {
+    setRemoveProspectsLoading(true);
     if (currentProject === null) {
       return;
     }
@@ -204,21 +205,34 @@ const ICPFiltersDashboard: FC<{
       return prospect.id;
     });
 
-    const response = await moveToUnassigned(
-      userToken,
-      currentProject.id,
-      prospectIDs
-    );
-    if (response.status === "success") {
-      showNotification({
-        id: "prospect-removed",
-        title: "Prospects removed",
-        message:
-          "These prospects has been moved to your Unassigned Contacts list.",
-        color: "green",
-        autoClose: 3000,
-      });
-    } else {
+    try {
+      const response = await moveToUnassigned(
+        userToken,
+        currentProject.id,
+        prospectIDs
+      );
+      if (response.status === "success") {
+        showNotification({
+          id: "prospect-removed",
+          title: "Prospects removed",
+          message: `${prospectIDs.length} prospects have been removed from your list`,
+          color: "green",
+          autoClose: 3000,
+        });
+      } else {
+        showNotification({
+          id: "prospect-removed",
+          title: "Prospects removal failed",
+          message:
+            "These prospects could not be removed. Please try again, or contact support.",
+          color: "red",
+          autoClose: false,
+        });
+      }
+
+      refetch();
+      setSelectedRows({});
+    } catch (error) {
       showNotification({
         id: "prospect-removed",
         title: "Prospects removal failed",
@@ -227,10 +241,9 @@ const ICPFiltersDashboard: FC<{
         color: "red",
         autoClose: false,
       });
+    } finally {
+      setRemoveProspectsLoading(false);
     }
-
-    refetch();
-    setSelectedRows({});
   };
 
   const { isFetching, refetch } = useQuery({
@@ -367,29 +380,31 @@ const ICPFiltersDashboard: FC<{
     return filteredProspects;
   }, [globalSearch, icpProspects]);
 
-  let averageICPFitScore = 0
-  let averageICPFitLabel = ""
-  let averageICPFitColor = ""
+  let averageICPFitScore = 0;
+  let averageICPFitLabel = "";
+  let averageICPFitColor = "";
   if (icpProspects.length > 0) {
-    averageICPFitScore = icpProspects.map(x => x.icp_fit_score).reduce((a,b) => a+b) / icpProspects.length
-    averageICPFitLabel = ""
-    averageICPFitColor = ""
+    averageICPFitScore =
+      icpProspects.map((x) => x.icp_fit_score).reduce((a, b) => a + b) /
+      icpProspects.length;
+    averageICPFitLabel = "";
+    averageICPFitColor = "";
   }
   if (averageICPFitScore < 0.5) {
-    averageICPFitLabel = "Very Low"
-    averageICPFitColor = "red"
+    averageICPFitLabel = "Very Low";
+    averageICPFitColor = "red";
   } else if (averageICPFitScore < 1.5) {
-    averageICPFitLabel = "Low"
-    averageICPFitColor = "orange"
+    averageICPFitLabel = "Low";
+    averageICPFitColor = "orange";
   } else if (averageICPFitScore < 2.5) {
-    averageICPFitLabel = "Medium"
-    averageICPFitColor = "yellow"
+    averageICPFitLabel = "Medium";
+    averageICPFitColor = "yellow";
   } else if (averageICPFitScore < 3.5) {
-    averageICPFitLabel = "High"
-    averageICPFitColor = "blue"
+    averageICPFitLabel = "High";
+    averageICPFitColor = "blue";
   } else {
-    averageICPFitLabel = "Very High"
-    averageICPFitColor = "green"
+    averageICPFitLabel = "Very High";
+    averageICPFitColor = "green";
   }
 
   return (
@@ -425,11 +440,17 @@ const ICPFiltersDashboard: FC<{
         <Flex gap={"1rem"} align={"center"}>
           <Button.Group color="gray">
             <Button variant="default" sx={{ color: "gray !important" }}>
-              <span style={{ marginLeft: "6px", color: theme.colors.blue[5], marginRight: '4px' }}>
+              <span
+                style={{
+                  marginLeft: "6px",
+                  color: theme.colors.blue[5],
+                  marginRight: "4px",
+                }}
+              >
                 {currentProject?.num_unused_li_prospects} /{" "}
                 {currentProject?.num_prospects}
-              </span>
-              {" "}remaining{" "}(
+              </span>{" "}
+              remaining (
               <span style={{ marginLeft: "0px", color: theme.colors.blue[5] }}>
                 {currentProject
                   ? Math.round(
@@ -438,7 +459,8 @@ const ICPFiltersDashboard: FC<{
                         100
                     ) + "% Left"
                   : "-% Left"}
-              </span>)
+              </span>
+              )
             </Button>
           </Button.Group>
           <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>
@@ -459,7 +481,12 @@ const ICPFiltersDashboard: FC<{
             <Title size={"21px"} fw={600}>
               Average ICP Fit Score:
             </Title>
-            <Badge color={averageICPFitColor} size="lg" variant="outline" ml='8px'>
+            <Badge
+              color={averageICPFitColor}
+              size="lg"
+              variant="outline"
+              ml="8px"
+            >
               {averageICPFitLabel} ({averageICPFitScore.toFixed(2)})
             </Badge>
           </Flex>
@@ -561,6 +588,7 @@ const ICPFiltersDashboard: FC<{
           color="red"
           leftIcon={<IconTrash size={14} />}
           size="sm"
+          loading={removeProspectsLoading}
           onClick={() => {
             openConfirmModal({
               title: "Remove these prospects?",
@@ -736,6 +764,7 @@ const ICPFiltersDashboard: FC<{
           {
             accessorKey: "title",
             header: "TITLE",
+            size: Math.min(500, window.innerWidth / 2),
             filterFn: stringFilterFn,
           },
           {
@@ -883,7 +912,7 @@ const ICPFiltersDashboard: FC<{
                 }, {})
             );
           }
-          setSelectedRows(rows)
+          setSelectedRows(rows);
         }}
         styles={(theme) => ({
           thead: {

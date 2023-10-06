@@ -44,11 +44,10 @@ const MultiEmails: FC<{ data: NylasData }> = ({ data }) => {
   return (
     <>
       <Paper withBorder m="xs" p="md" radius="md">
-        <Title order={3}>{data?.name}'s Email</Title>
+        <Title order={3}>{data?.name}'s Email (Coming Soon ⚠️)</Title>
 
         <Text fz="sm" pt="xs">
-          If you receive emails from anyone, besides these addresses, they will
-          be marked as 'replied'
+          If a thread receives a reply from an email that is not listed below, that prospect will be marked as 'replied'.
         </Text>
 
         <Stack mt={"xs"}>

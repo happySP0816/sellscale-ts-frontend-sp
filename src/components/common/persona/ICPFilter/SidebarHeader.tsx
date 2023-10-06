@@ -20,7 +20,7 @@ import {
   IconChevronLeft,
   IconInfoCircle,
 } from "@tabler/icons";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { currentProjectState } from "@atoms/personaAtoms";
 import {
@@ -64,7 +64,7 @@ export function SidebarHeader({
   const icpProspects = useRecoilValue(filterProspectsState);
 
   const TRIGGER_REFRESH_INTERVAL = 10000; // 10000 ms = 10 seconds
-  const TIME_PER_PROSPECT = 0.5; // 0.5 seconds
+  const TIME_PER_PROSPECT = 0.1; // 0.1 seconds
   const [icpScoringJobs, setIcpScoringJobs] = useState<any[]>([]);
   const [currentScoringJob, setCurrentScoringJob] = useState<any>(null);
   const [scoringTimeRemaining, setScoringTimeRemaining] = useState<number>(0);
@@ -84,15 +84,13 @@ export function SidebarHeader({
       (jobs[0].run_status === "IN_PROGRESS" || jobs[0].run_status === "PENDING")
     ) {
       setCurrentScoringJob(jobs[0]);
-      return;
+      return jobs[0];
     }
 
     setCurrentScoringJob(null);
     queryClient.refetchQueries({
       queryKey: [`query-get-icp-prospects`],
     });
-
-    console.log("dropping confetti")
 
     setTimeout(() => {
       dropConfetti(300);
@@ -103,39 +101,31 @@ export function SidebarHeader({
     triggerGetScoringJobs();
   }, []);
 
-  useEffect(() => {
-    if (currentScoringJob) {
-      // Get the job every 10 seconds
-      const interval = setInterval(() => {
-        triggerGetScoringJobs();
-      }, TRIGGER_REFRESH_INTERVAL);
-      // Calculate the progress using heuristic every 5 seconds
-      const progressInterval = setInterval(() => {
-        const numProspects = currentScoringJob.prospect_ids?.length;
+  useQuery({
+    queryKey: [`query-check-scoring-job-status`],
+    queryFn: async () => {
+      const job = await triggerGetScoringJobs();
+      if (job) {
+        const numProspects = job.prospect_ids?.length;
         const estimatedSeconds = TIME_PER_PROSPECT * numProspects;
-        const estimatedMinutes = Math.ceil(estimatedSeconds / 60);
 
-        const now = new Date().getUTCMilliseconds();
-        const startedAt = new Date(
-          currentScoringJob.updated_at
-        ).getUTCMilliseconds();
-        let timeElapsedMinutes = Math.ceil((now - startedAt) / 1000 / 60);
-        if (timeElapsedMinutes > estimatedMinutes) {
-          timeElapsedMinutes = estimatedMinutes - 1;
-        }
-        const timeRemaining = estimatedMinutes - timeElapsedMinutes;
-        let progress = (1 - timeRemaining / estimatedMinutes) * 100;
-        progress = Math.floor(Math.min(progress, 99));
+        const now = new Date().getTime();
+        const startedAt = new Date(job.created_at).getTime();
+        let timeElapsedSeconds = (now - startedAt) / 1000;
+
+        const timeRemaining = Math.ceil(
+          (estimatedSeconds - timeElapsedSeconds) / 60
+        );
         setScoringTimeRemaining(timeRemaining);
-        setScoringProgress(progress);
-      }, 2000);
 
-      return () => {
-        clearInterval(interval);
-        clearInterval(progressInterval);
-      };
-    }
-  }, [currentScoringJob]);
+        let progress = 100 - ((estimatedSeconds - timeElapsedSeconds) / estimatedSeconds) * 100;
+        setScoringProgress(Math.floor(Math.min(progress, 99)));
+      }
+      return job ?? null;
+    },
+    enabled: currentScoringJob !== null,
+    refetchInterval: TRIGGER_REFRESH_INTERVAL,
+  });
 
   return (
     <>

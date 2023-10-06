@@ -47,6 +47,7 @@ import {
   Progress,
   ThemeIcon,
   Alert,
+  Loader,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
@@ -495,6 +496,7 @@ export default function SequenceSection() {
                       (bf) => bf.overall_status === "ACCEPTED"
                     ),
                     activeBumpFrameworkId: bf0?.id ?? -1,
+                    overallStatus: "ACCEPTED",
                   }}
                 />
               )}
@@ -567,6 +569,7 @@ export default function SequenceSection() {
                         bf.overall_status === "BUMPED" && bf.bumped_count === 1
                     ),
                     activeBumpFrameworkId: bf1?.id ?? -1,
+                    overallStatus: "BUMPED",
                   }}
                   canRemove={bump_amount === 2}
                   onRemove={() => updateBumpAmount(1)}
@@ -641,6 +644,7 @@ export default function SequenceSection() {
                         bf.overall_status === "BUMPED" && bf.bumped_count === 2
                     ),
                     activeBumpFrameworkId: bf2?.id ?? -1,
+                    overallStatus: "BUMPED",
                   }}
                   canRemove={bump_amount === 3}
                   onRemove={() => updateBumpAmount(2)}
@@ -677,6 +681,7 @@ export default function SequenceSection() {
                         bf.overall_status === "BUMPED" && bf.bumped_count === 3
                     ),
                     activeBumpFrameworkId: bf3?.id ?? -1,
+                    overallStatus: "BUMPED",
                   }}
                   canRemove={bump_amount === 4}
                   onRemove={() => updateBumpAmount(3)}
@@ -758,10 +763,14 @@ function BumpFrameworkSelect(props: {
   bumpedCount: number;
   bumpedFrameworks: BumpFramework[];
   activeBumpFrameworkId: number;
+  overallStatus: string;
 }) {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const theme = useMantineTheme();
+  const queryClient = useQueryClient();
+
+  const [loading, setLoading] = useState(false);
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -805,7 +814,7 @@ function BumpFrameworkSelect(props: {
                       closeModal: () => {},
                       backFunction: () => {},
                       dataChannels: dataChannels,
-                      status: undefined,
+                      status: props.overallStatus,
                       archetypeID: currentProject?.id,
                       bumpedCount: props.bumpedCount,
                     },
@@ -865,7 +874,44 @@ function BumpFrameworkSelect(props: {
             </Text>
           </Box>
         ),
-        rightSection: <></>,
+        rightSection: (
+          <Box ml='auto'>
+            <Switch checked={bf.default} onChange={(checked) => {
+              setLoading(true);
+              const result = patchBumpFramework(
+                  userToken,
+                  bf.id,
+                  bf.overall_status,
+                  bf.title,
+                  bf.description,
+                  bf.bump_length,
+                  bf.bumped_count,
+                  bf.bump_delay_days,
+                  !bf.default,
+                  bf.use_account_research,
+                  bf.transformer_blocklist
+                ).then(
+                  () => {
+                    showNotification({
+                      title: "Success",
+                      message: "Bump Framework enabled",
+                      color: "green",
+                    });
+                  }
+                ).finally(() => {
+                  (async () => {
+                    await queryClient.refetchQueries({
+                      queryKey: [`query-get-bump-frameworks`],
+                    });
+                    setLoading(false);
+                  })()
+                });
+            }} />
+            {
+              loading && <Loader size='xs' mt='xs'/>
+            }
+          </Box>
+        )
       }))}
       size={800}
       activeItemId={props.activeBumpFrameworkId}
@@ -1661,6 +1707,7 @@ function FrameworkCard(props: {
     bumpedCount: number;
     bumpedFrameworks: BumpFramework[];
     activeBumpFrameworkId: number;
+    overallStatus: string;
   };
   canRemove?: boolean;
   onRemove?: () => void;
@@ -1777,7 +1824,7 @@ function FrameworkCard(props: {
           )}
           <Group spacing={3}>
             {props.canEdit && props.editProps && (
-              <BumpFrameworkSelect {...props.editProps} />
+              <BumpFrameworkSelect {...props.editProps}  />
             )}
             {props.canRemove && props.onRemove && (
               <Tooltip label="Remove" withinPortal>

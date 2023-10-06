@@ -223,6 +223,7 @@ export function CreateBumpFrameworkContextModal({
       {innerProps.showStatus && (
         <Select
           label="Status"
+          w='100%'
           description="Which status should use this bump?"
           placeholder="select status..."
           data={innerProps.dataChannels?.data[

@@ -2605,6 +2605,14 @@ export const PersonalizationSection = (props: {
       ),
     },
     {
+      title: "Company Industry",
+      id: "CURRENT_JOB_INDUSTRY",
+      checked: !props.blocklist.includes("CURRENT_JOB_INDUSTRY"),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        "CURRENT_JOB_INDUSTRY"
+      ),
+    },
+    {
       title: "General Company News",
       id: "SERP_NEWS_SUMMARY",
       checked: !props.blocklist.includes("SERP_NEWS_SUMMARY"),

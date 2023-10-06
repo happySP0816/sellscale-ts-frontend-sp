@@ -230,6 +230,8 @@ export interface CTA {
   performance?: {
     status_map: Record<string, number>;
     total_count: number;
+    num_sent: number;
+    num_converted: number;
   };
   cta_type: string;
   auto_mark_as_scheduling_on_acceptance: boolean;

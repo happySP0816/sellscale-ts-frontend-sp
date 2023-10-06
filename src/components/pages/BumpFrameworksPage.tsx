@@ -28,7 +28,7 @@ import { openConfirmModal, openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
-import { IconAlertTriangle, IconAnalyze, IconArrowLeft, IconArrowLeftBar, IconArrowRight, IconBook, IconBrandPushbullet, IconChartBubble, IconCheck, IconChecklist, IconEdit, IconFolders, IconList, IconMessage, IconMessage2, IconPlus, IconPoint, IconRobot, IconSearch, IconTransferIn, IconX } from '@tabler/icons';
+import { IconAlertTriangle, IconAnalyze, IconArrowLeft, IconArrowLeftBar, IconArrowRight, IconBook, IconBrandPushbullet, IconChartBubble, IconCheck, IconChecklist, IconEdit, IconFolders, IconList, IconMessage, IconMessage2, IconPlus, IconPoint, IconRobot, IconSearch, IconTool, IconTransferIn, IconWashMachine, IconX } from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
@@ -44,6 +44,7 @@ import postToggleAutoBump from '@utils/requests/postToggleAutoBump';
 import PersonaDetailsCTAs from '@common/persona/details/PersonaDetailsCTAs';
 import VoicesSection from '@common/voice_builder/VoicesSection';
 import SequenceSection from '@common/sequence/SequenceSection';
+import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
 
 
 type BumpFrameworkBuckets = {
@@ -644,82 +645,16 @@ export default function BumpFrameworksPage(props: {
                 <Tabs.Tab value='replies' icon={<IconBook size='0.8rem' />}>
                   Replies
                 </Tabs.Tab>
-                <Tabs.Tab value='simulate' icon={<IconMessage2 size='0.8rem' />}>
-                  Simulate
+                <Tabs.Tab value='settings' icon={<IconWashMachine size='0.8rem' />}>
+                  Settings
                 </Tabs.Tab>
-                <Switch label="AutoBump" onLabel="ON" offLabel="OFF"
-                    size='xs'
-                    mt='xs'
-                    ml='auto'
-                    styles={{
-                      labelWrapper: {
-                        cursor: 'pointer',
-                      },
-                      label: {
-                        cursor: 'pointer',
-                      },
-                      track: {
-                        cursor: 'pointer',
-                      }
-                    }}
-                    checked={userData.auto_bump}
-                    onChange={(e) => {
-                      let status = userData.auto_bump
-                      let old_status
-                      if (status == true) {
-                        status = "Disable"
-                        old_status = "enable"
-                      } else {
-                        status = "Enable"
-                        old_status = "disable"
-                      }
-                      openConfirmModal({
-                        title: (
-                          <Flex direction='row' align='center' justify='space-between'>
-                            <Title order={3}>
-                              AutoBump
-                            </Title>
-                            <Badge
-                              color={userData.auto_bump ? 'green' : 'red'}
-                              variant='filled'
-                              ml='sm'
-                            >
-                              {userData.auto_bump ? 'Enabled' : 'Disabled'}
-                            </Badge>
-                          </Flex>
-                        ),
-                        children: (
-                          <>
-                            <Text fz='sm'>
-                              AutoBump is SellScale AI's system for automatically sending follow-up messages to prospects. AutoBumps are sent when a prospect does not respond to a message, and are sent at random times between 9am and 5pm in your timezone on workdays.
-                            </Text>
-                            <Card mt='sm' mb='md' withBorder shadow='sm'>
-                              <Text fw='bold'>
-                                Please test your bump frameworks before enabling AutoBump. AutoBump will always use your default bump framework, so make sure it is working as expected.
-                              </Text>
-                            </Card>
-
-                            <Text mt='md' fz='sm'>
-                              AutoBumps using personalized bump frameworks see a significant increase in response rates.
-                            </Text>
-                          </>
-                        ),
-                        labels: { confirm: status, cancel: 'Cancel' },
-                        cancelProps: { color: "gray" },
-                        confirmProps: { color: userData.auto_bump ? 'red' : 'pink' },
-                        onCancel: () => { },
-                        onConfirm: () => { triggerToggleAutoBump() }
-                      })
-                    }}
-                  />
+                <Tooltip label='Run advanced simulation'>
+                  <Tabs.Tab value='simulate' ml='auto' icon={<IconTool size='0.8rem' />} />
+                </Tooltip>
                 {/* <Tabs.Tab value='analytics' icon={<IconAnalyze size='0.8rem' />}>
                   Analytics
                 </Tabs.Tab> */}
               </Tabs.List>
-
-              {/* <Tabs.Panel value='ctas' pt='xs'>
-                <PersonaDetailsCTAs />
-              </Tabs.Panel> */}
 
               <Tabs.Panel value='sequence' pt='xs'>
                 {!loading ? (
@@ -729,6 +664,84 @@ export default function BumpFrameworksPage(props: {
                     <Loader />
                   </Flex>
                 )}
+              </Tabs.Panel>
+
+              <Tabs.Panel value='settings' pt='xs'>
+                <Container maw='800px' ml='auto' mr='auto'>
+                  <LinkedInConnectedCard
+                    connected={userData ? userData.li_voyager_connected : false}
+                  />
+                  {/* Auto bump component */}
+                  <Card withBorder mt='xs' radius={'md'}>
+                    <Title order={4}>Autobump</Title>
+                    <Text size='xs' color='gray'>By enabling AutoBump, SellScale will automatically send follow-up messages to prospects who do not respond to your initial message.</Text>
+                    <Switch label="AutoBump" onLabel="ON" offLabel="OFF"
+                        size='xs'
+                        mt='xs'
+                        
+                        styles={{
+                          labelWrapper: {
+                            cursor: 'pointer',
+                          },
+                          label: {
+                            cursor: 'pointer',
+                          },
+                          track: {
+                            cursor: 'pointer',
+                          }
+                        }}
+                        checked={userData.auto_bump}
+                        onChange={(e) => {
+                          let status = userData.auto_bump
+                          let old_status
+                          if (status == true) {
+                            status = "Disable"
+                            old_status = "enable"
+                          } else {
+                            status = "Enable"
+                            old_status = "disable"
+                          }
+                          openConfirmModal({
+                            title: (
+                              <Flex direction='row' align='center' justify='space-between'>
+                                <Title order={3}>
+                                  AutoBump
+                                </Title>
+                                <Badge
+                                  color={userData.auto_bump ? 'green' : 'red'}
+                                  variant='filled'
+                                  ml='sm'
+                                >
+                                  {userData.auto_bump ? 'Enabled' : 'Disabled'}
+                                </Badge>
+                              </Flex>
+                            ),
+                            children: (
+                              <>
+                                <Text fz='sm'>
+                                  AutoBump is SellScale AI's system for automatically sending follow-up messages to prospects. AutoBumps are sent when a prospect does not respond to a message, and are sent at random times between 9am and 5pm in your timezone on workdays.
+                                </Text>
+                                <Card mt='sm' mb='md' withBorder shadow='sm'>
+                                  <Text fw='bold'>
+                                    Please test your bump frameworks before enabling AutoBump. AutoBump will always use your default bump framework, so make sure it is working as expected.
+                                  </Text>
+                                </Card>
+
+                                <Text mt='md' fz='sm'>
+                                  AutoBumps using personalized bump frameworks see a significant increase in response rates.
+                                </Text>
+                              </>
+                            ),
+                            labels: { confirm: status, cancel: 'Cancel' },
+                            cancelProps: { color: "gray" },
+                            confirmProps: { color: userData.auto_bump ? 'red' : 'pink' },
+                            onCancel: () => { },
+                            onConfirm: () => { triggerToggleAutoBump() }
+                          })
+                        }}
+                      />
+                  </Card>
+                </Container>
               </Tabs.Panel>
 
               <Tabs.Panel value='simulate' pt='xs'>

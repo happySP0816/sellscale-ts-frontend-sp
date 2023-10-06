@@ -88,13 +88,15 @@ export function SidebarHeader({
     }
 
     setCurrentScoringJob(null);
-    
+    queryClient.refetchQueries({
+      queryKey: [`query-get-icp-prospects`],
+    });
+
+    console.log("dropping confetti")
+
     setTimeout(() => {
-      queryClient.refetchQueries({
-        queryKey: [`query-get-icp-prospects`],
-      });
       dropConfetti(300);
-    }, 1);
+    }, 1000);
   };
 
   useEffect(() => {

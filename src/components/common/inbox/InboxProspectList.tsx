@@ -666,7 +666,6 @@ export default function ProspectList(props: {
           />
         </Group> */}
 
-           
             {/* <Divider /> */}
             <ScrollArea
               h={`calc(${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)`}

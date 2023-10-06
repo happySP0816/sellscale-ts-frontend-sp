@@ -1,5 +1,5 @@
 import { currentProjectState } from "@atoms/personaAtoms";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   Flex,
   Title,
@@ -31,6 +31,7 @@ import {
   IconMessages,
   IconPlus,
   IconSearch,
+  IconWashMachine,
   IconX,
 } from "@tabler/icons";
 import { IconMessageUp } from "@tabler/icons-react";
@@ -49,6 +50,7 @@ import DOMPurify from "dompurify";
 import EmailSequenceStepCard from "./EmailSequencing/EmailSequenceStepCard";
 import DetailEmailSequencing from "./EmailSequencing/DetailEmailSequencing";
 import NewUIEmailSequencing from "./EmailSequencing/NewUIEmailSequencing";
+import NylasConnectedCard from '@common/settings/NylasConnectedCard';
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -606,6 +608,8 @@ export default function EmailSequencingPage(props: {
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
   const archetypeID = currentProject?.id || -1;
+  const [userData, setUserData] = useRecoilState(userDataState);
+
   const [
     addNewSequenceStepOpened,
     { open: openSequenceStep, close: closeSequenceStep },
@@ -772,12 +776,12 @@ export default function EmailSequencingPage(props: {
           <Tabs
             color="blue"
             variant="outline"
-            defaultValue="sequence"
+            defaultValue="new_ui_setup"
             my="lg"
             orientation="horizontal"
           >
             <Tabs.List>
-              <Tabs.Tab value="sequence" icon={<IconMessageUp size="0.8rem" />}>
+              {/* <Tabs.Tab value="sequence" icon={<IconMessageUp size="0.8rem" />}>
                 Sequence
               </Tabs.Tab>
               <Tabs.Tab
@@ -785,14 +789,27 @@ export default function EmailSequencingPage(props: {
                 icon={<IconMessages size="0.8rem" />}
               >
                 Conversation
-              </Tabs.Tab>
+              </Tabs.Tab> */}
               <Tabs.Tab
                 value="new_ui_setup"
                 icon={<IconMessages size="0.8rem" />}
               >
-                New Email Setup UI
+                Email Sequence
+              </Tabs.Tab>
+              <Tabs.Tab
+                value="email_settings"
+                icon={<IconWashMachine size="0.8rem" />}
+              >
+                Settings
               </Tabs.Tab>
             </Tabs.List>
+            <Tabs.Panel value="email_settings">
+              <Box maw='800px'>
+                <NylasConnectedCard
+                    connected={userData ? userData.nylas_connected : false}
+                  />
+              </Box>
+            </Tabs.Panel>
             <Tabs.Panel value="sequence">
               <Flex direction="column" mt="md">
                 <Flex direction="column" mb="md">

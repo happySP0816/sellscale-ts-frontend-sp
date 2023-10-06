@@ -710,9 +710,9 @@ export default function ProspectList(props: {
                     {displayProspects.map((prospect, i: number) => (
                       <div key={i}>
                         {filterSelectValue === "ALL" &&
-                          (!prospects[i + 1] ||
+                          (!prospects[i - 1] ||
                             prospect.linkedin_status !==
-                              prospects[i + 1].linkedin_status) && (
+                              prospects[i - 1].linkedin_status) && (
                                  
                             <Box
                               bg="blue.1"
@@ -732,6 +732,10 @@ export default function ProspectList(props: {
                                       (p) =>
                                         p.linkedin_status ===
                                         prospect.linkedin_status
+                                        && (
+                                          // if snoozed, check hidden until other wise not
+                                          sectionTab == 'snoozed' ? p.in_purgatory : !p.in_purgatory
+                                        )
                                     ).length
                                   }
                                 </Badge>

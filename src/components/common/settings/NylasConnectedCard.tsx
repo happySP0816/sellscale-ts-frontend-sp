@@ -51,6 +51,7 @@ import getNylasClientID from "@utils/requests/getNylasClientID";
 import { clearNylasTokens } from "@utils/requests/clearNylasTokens";
 import getNylasAccountDetails from "@utils/requests/getNylasAccountDetails";
 import MultiEmails from "./MultiEmails/MultiEmails";
+import ScheduleSetting from "./ScheduleSetting/ScheduleSetting";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -282,7 +283,8 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
         </Stack>
       </Paper>
 
-      <MultiEmails data={data}></MultiEmails>
+      <MultiEmails data={data} />
+      <ScheduleSetting />
     </>
   );
 }

@@ -138,14 +138,14 @@ export default function App() {
             +currentPersonaId
           );
           setCurrentProject(project);
-        } else {
+        } else if (!currentPersonaId) {
           // Set to first persona
           const response = await getPersonasOverview(userToken);
           const result =
-                response.status === "success"
-                  ? (response.data as PersonaOverview[])
-                  : [];
-          if (result.length > 0){
+            response.status === "success"
+              ? (response.data as PersonaOverview[])
+              : [];
+          if (result.length > 0) {
             setCurrentProject(result[0]);
           }
         }

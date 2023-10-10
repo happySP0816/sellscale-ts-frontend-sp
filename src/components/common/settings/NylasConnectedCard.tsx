@@ -51,6 +51,7 @@ import getNylasClientID from "@utils/requests/getNylasClientID";
 import { clearNylasTokens } from "@utils/requests/clearNylasTokens";
 import getNylasAccountDetails from "@utils/requests/getNylasAccountDetails";
 import MultiEmails from "./MultiEmails/MultiEmails";
+import { modals } from "@mantine/modals";
 import ScheduleSetting from "./ScheduleSetting/ScheduleSetting";
 
 const useStyles = createStyles((theme) => ({
@@ -91,6 +92,44 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
     },
   });
 
+  const disconnectNylas = async () => {
+    const result = await clearNylasTokens(userToken);
+    if (result.status === "success") {
+      showNotification({
+        id: "nylas-disconnect-success",
+        title: "Success",
+        message: "You have successfully disconnected your email.",
+        color: "blue",
+        autoClose: 5000,
+      });
+    } else {
+      showNotification({
+        id: "nylas-disconnect-failure",
+        title: "Failure",
+        message:
+          "There was an error disconnecting your email. Please contact an admin.",
+        color: "red",
+        autoClose: false,
+      });
+    }
+    queryClient.invalidateQueries({
+      queryKey: ["query-get-accounts-connected"],
+    });
+  };
+
+  const openConfirmDisconnectModal = () =>
+    modals.openConfirmModal({
+      title: "Are you sure you want to disconnect your email?",
+      children: (
+        <Text size="sm">
+          You will no longer be able to send emails or view your email history.
+        </Text>
+      ),
+      labels: { confirm: "Confirm", cancel: "Cancel" },
+      onCancel: () => {},
+      onConfirm: () => disconnectNylas(),
+    });
+
   return (
     <>
       <Paper withBorder m="xs" p="md" radius="md">
@@ -110,31 +149,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                       color="blue"
                       radius="xl"
                       variant="transparent"
-                      onClick={async () => {
-                        const result = await clearNylasTokens(userToken);
-                        if (result.status === "success") {
-                          showNotification({
-                            id: "nylas-disconnect-success",
-                            title: "Success",
-                            message:
-                              "You have successfully disconnected your email.",
-                            color: "blue",
-                            autoClose: 5000,
-                          });
-                        } else {
-                          showNotification({
-                            id: "nylas-disconnect-failure",
-                            title: "Failure",
-                            message:
-                              "There was an error disconnecting your email. Please contact an admin.",
-                            color: "red",
-                            autoClose: false,
-                          });
-                        }
-                        queryClient.invalidateQueries({
-                          queryKey: ["query-get-accounts-connected"],
-                        });
-                      }}
+                      onClick={async () => openConfirmDisconnectModal()}
                     >
                       <IconX size={15} color="white" />
                     </ActionIcon>

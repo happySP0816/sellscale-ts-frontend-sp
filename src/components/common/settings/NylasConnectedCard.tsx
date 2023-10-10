@@ -283,7 +283,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
         </Stack>
       </Paper>
 
-      <MultiEmails data={data} />
+      <MultiEmails />
       <ScheduleSetting />
     </>
   );

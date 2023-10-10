@@ -9,71 +9,113 @@ import {
   Modal,
   TextInput,
   Select,
+  Tooltip,
 } from "@mantine/core";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { NylasData } from "./MutlEmails.types";
 import { IconPlus } from "@tabler/icons";
 import { useDisclosure } from "@mantine/hooks";
+import { useRecoilState } from "recoil";
+import { userDataState } from "@atoms/userAtoms";
 
-const MultiEmails: FC<{ data: NylasData }> = ({ data }) => {
+
+interface EmailBankItem {
+  active: boolean;
+  email_address: string;
+  email_type: "ANCHOR" | "SELLSCALE" | "ALIAS";
+  id: number;
+  nylas_account_id: string;
+  nylas_active: boolean;
+  nylas_auth_code: string;
+}
+
+
+const MultiEmails = () => {
   const [opened, { open, toggle, close }] = useDisclosure(false);
   const [emailInput, setEmailInput] = useState("");
-  const [emails, setEmails] = useState([
-    { email: "random@test.com", type: "Anchor Email" },
-    { email: "random@test.com", type: "SellScale Email" },
-  ]);
+  const [emails, setEmails] = useState<EmailBankItem[]>([]);
+
+  const [userData, setUserData] = useRecoilState(userDataState);
 
   const [selectItem, setSelectItem] = useState<null | string>(null);
-  const onOpenModal = () => {
-    setEmailInput("");
-    open();
-  };
-  const onAddEmail = () => {
-    setEmailInput("");
-    setSelectItem(null);
-    setEmails((oldEmails) => [
-      ...oldEmails,
-      {
-        email: emailInput,
-        type: selectItem || "Anchor Email",
-      },
-    ]);
+  // const onOpenModal = () => {
+  //   setEmailInput("");
+  //   open();
+  // };
+  // const onAddEmail = () => {
+  //   setEmailInput("");
+  //   setSelectItem(null);
+  //   setEmails((oldEmails) => [
+  //     ...oldEmails,
+  //     {
+  //       email: emailInput,
+  //       type: selectItem || "Anchor Email",
+  //     },
+  //   ]);
 
-    close();
-  };
+  //   close();
+  // };
+
+  useEffect(() => {
+    if (userData.emails) {
+      setEmails(userData.emails)
+    }
+  }, [])
+
   return (
     <>
       <Paper withBorder m="xs" p="md" radius="md">
-        <Title order={3}>{data?.name}'s Email (Coming Soon ⚠️)</Title>
+        <Title order={3}>{userData?.sdr_name}'s Email</Title>
 
         <Text fz="sm" pt="xs">
           If a thread receives a reply from an email that is not listed below, that prospect will be marked as 'replied'.
         </Text>
 
         <Stack mt={"xs"}>
-          {emails.map((email, idx) => (
-            <Card
-              withBorder
-              key={idx}
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <Title order={4}>{email.email}</Title>
-              <Badge
-                color={email.type === "Anchor Email" ? "blue" : "orange"}
-                size="lg"
-              >
-                {email.type}
-              </Badge>
-            </Card>
-          ))}
+          {emails && emails.map((email, idx) => {
+            let toolTipLabel = ""
+            let badgeColor = "green"
+            if (email.email_type === "ANCHOR") {
+              toolTipLabel = "Your anchor email is the primary email attached to your SellScale account."
+            } else if (email.email_type === "SELLSCALE") {
+              toolTipLabel = "SellScale emails are emails managed by SellScale. We use these emails to send emails on your behalf."
+              badgeColor = "grape"
+            } else if (email.email_type === "ALIAS") {
+              toolTipLabel = "Your alias emails are other emails you may use."
+              badgeColor = "blue"
+            }
 
-          <Button leftIcon={<IconPlus />} onClick={onOpenModal}>
-            add more
+            return (
+              <Card
+                withBorder
+                key={idx}
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
+                <Title order={4}>{email.email_address}</Title>
+                <Tooltip
+                  withArrow
+                  withinPortal
+                  label={toolTipLabel}
+                >
+                  <Badge
+                    color={badgeColor}
+                    size="lg"
+                  >
+                    {email.email_type}
+                  </Badge>
+                </Tooltip>
+              </Card>
+            )
+          }
+          )}
+
+          <Button leftIcon={<IconPlus />} onClick={() => {}} disabled>
+            Add more - Coming Soon
           </Button>
         </Stack>
       </Paper>
 
-      <Modal opened={opened} onClose={close} title="Add Email">
+      {/* <Modal opened={opened} onClose={close} title="Add Email">
         <Stack>
           <TextInput
             type="email"
@@ -93,7 +135,7 @@ const MultiEmails: FC<{ data: NylasData }> = ({ data }) => {
           />
           <Button onClick={() => onAddEmail()}>Save</Button>
         </Stack>
-      </Modal>
+      </Modal> */}
     </>
   );
 };

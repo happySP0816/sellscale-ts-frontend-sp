@@ -12,9 +12,10 @@ import {
   Card,
   Box,
   Switch,
+  Select,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
@@ -23,6 +24,7 @@ import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import createCTA, { updateCTA } from "@utils/requests/createCTA";
 import { DateInput } from "@mantine/dates";
+import { API_URL } from '@constants/data';
 
 export default function EditCTAModal({
   context,
@@ -37,6 +39,34 @@ export default function EditCTAModal({
   const [expirationDate, setExpirationDate] = useState<Date | null>(innerProps.cta.expiration_date ? new Date(innerProps.cta.expiration_date) : null);
   const [markAsScheduling, setMarkAsScheduling] = useState(innerProps.cta.auto_mark_as_scheduling_on_acceptance);
 
+  const [ctaTypes, setCTATypes]: any = useState([] as any[]);
+  const [ctaType, setCTAType] = useState(innerProps.cta.cta_type);
+  console.log(ctaType);
+
+  const fetchCTATypes = async () => {
+    fetch(`${API_URL}/message_generation/cta_types`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((d) => {
+        const data = d['data']
+        let ctaTypesArray: any = Object.keys(data).map((key) => {
+          return { value: data[key], label: data[key] };
+        })
+
+        setCTATypes(ctaTypesArray);
+      }
+      );
+  }
+  
+  useEffect(() => {
+    fetchCTATypes();
+  }, []);
+
   const form = useForm({
     initialValues: {
       cta: innerProps.cta.text_value,
@@ -46,7 +76,7 @@ export default function EditCTAModal({
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
-    const result = await updateCTA(userToken, innerProps.cta.id, values.cta, expirationDate || undefined, markAsScheduling);
+    const result = await updateCTA(userToken, innerProps.cta.id, values.cta, expirationDate || undefined, markAsScheduling, ctaType);
 
     setLoading(false);
 
@@ -126,13 +156,35 @@ export default function EditCTAModal({
           </Box>
         </Group>
 
-        <Switch
-          label='If accepted, mark prospect as "scheduling"'
-          defaultChecked={markAsScheduling}
-          mb='md'
-          onChange={() => { 
-            setMarkAsScheduling(!markAsScheduling); 
-        }}/>
+        <Flex mb='md'>
+          <Switch
+            mt='md'
+            label='If accepted, mark prospect as "scheduling"'
+            defaultChecked={markAsScheduling}
+            mb='md'
+            onChange={() => { 
+              setMarkAsScheduling(!markAsScheduling); 
+          }}/>
+
+          <Select
+            ml='md'
+            label="Select CTA Type"
+            searchable
+            creatable
+            description="Select the tag that best describes this CTA. (optional)"
+            placeholder="Select CTA Type"
+            defaultValue={ctaType}
+            onCreate={(query: any) => {
+              const item: any = { value: query, label: query };
+              setCTATypes([...ctaTypes, item]);
+              setCTAType(query);
+              return item;
+            }}
+            getCreateLabel={(query) => `+ Add a CTA type for ${query}`}
+            data={ctaTypes}
+            onChange={(value: string) => { setCTAType(ctaTypes.find((ctaType: any) => ctaType.value === value)?.label); }}
+          />
+        </Flex>
 
         {error && (
           <Text color="red" size="sm" mt="sm">

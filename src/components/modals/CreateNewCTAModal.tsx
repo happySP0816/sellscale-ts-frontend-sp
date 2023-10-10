@@ -39,7 +39,6 @@ export default function CreateNewCTAModel({
   const [error, setError] = useState<string | null>(null);
   const [expirationDate, setExpirationDate] = useState<Date | null>(null);
   const userToken = useRecoilValue(userTokenState);
-  const [fetchedCTATypes, setFetchedCTATypes] = useState(false);
   const [ctaTypes, setCTATypes]: any = useState([] as any[]);
   const [ctaType, setCTAType] = useState("manually-added" as string);
   const [markAsScheduling, setMarkAsScheduling] = useState(false as boolean);
@@ -59,17 +58,16 @@ export default function CreateNewCTAModel({
       },
     })
       .then((response) => response.json())
-      .then((data) => {
+      .then((d) => {
+        const data = d['data']
         let ctaTypesArray: any = Object.keys(data).map((key) => {
-          return { value: data[key], label: key };
+          return { value: data[key], label: data[key] };
         })
 
         setCTATypes(ctaTypesArray);
       }
       );
   }
-
-
 
   useEffect(() => {
     fetchCTATypes();
@@ -308,7 +306,9 @@ export default function CreateNewCTAModel({
               label="Select CTA Type"
               description="Select the tag that best describes this CTA. (optional)"
               placeholder="Select CTA Type"
-              defaultValue={"manually-added"}
+              defaultValue={ctaType}
+              searchable
+              creatable
               data={ctaTypes}
               onChange={(value: string) => { setCTAType(ctaTypes.find((ctaType: any) => ctaType.value === value)?.label); }}
             />

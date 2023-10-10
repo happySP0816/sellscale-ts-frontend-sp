@@ -60,6 +60,7 @@ export async function updateCTA(
   text_value: string,
   expirationDate?: Date,
   markAsScheduling?: boolean,
+  cta_type?: string,
 ): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/message_generation/cta`,
@@ -74,6 +75,7 @@ export async function updateCTA(
         "text_value": text_value,
         expiration_date: expirationDate?.toISOString(),
         auto_mark_as_scheduling_on_acceptance: markAsScheduling,
+        cta_type: cta_type,
       }),
     }
   );

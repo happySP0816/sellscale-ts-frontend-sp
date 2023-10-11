@@ -105,7 +105,7 @@ const linkedinStatusOptions = [
     status: "DEMO_WON",
   },
   {
-    title: "Nurture",
+    title: "Not Interested",
     icon: IconSeeding,
     color: "green",
     status: "NOT_INTERESTED",
@@ -117,7 +117,7 @@ const linkedinStatusOptions = [
     status: "DEMO_LOSS",
   },
   {
-    title: "Remove",
+    title: "Not Qualified",
     icon: IconTrash,
     color: "red",
     status: "NOT_QUALIFIED",
@@ -198,7 +198,7 @@ const emailStatusOptions = [
     status: "DEMO_LOST",
   },
   {
-    title: "Nurture",
+    title: "Not Interested",
     icon: IconSeeding,
     color: "green",
     status: "NOT_INTERESTED",

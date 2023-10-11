@@ -444,7 +444,7 @@ export default function ProjectDetails(props: {
                       }}
                     />
                     <StatusBlockButton
-                      title="Nurture"
+                      title="Not Interested"
                       icon={
                         <IconSeeding color={theme.colors.green[6]} size={24} />
                       }
@@ -453,7 +453,7 @@ export default function ProjectDetails(props: {
                       }}
                     />
                     <StatusBlockButton
-                      title="Remove"
+                      title="Not Qualified"
                       icon={<IconTrash color={theme.colors.red[6]} size={24} />}
                       onClick={async () => {
                         await changeStatus("NOT_QUALIFIED");

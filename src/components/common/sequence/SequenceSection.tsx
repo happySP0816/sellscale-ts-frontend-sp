@@ -272,6 +272,13 @@ export default function SequenceSection() {
       : "red";
   };
 
+  const getReplyPillText = (
+    bf: BumpFramework | undefined,
+    bfConversion: number | undefined
+  ) => {
+    return bf && bf.etl_num_times_used && bf.etl_num_times_used >= 10 ? (bfConversion ? bfConversion?.toFixed(0) : 0) + "%" : 'TBD'
+  }
+
   if (!currentProject) {
     return null;
   }
@@ -433,7 +440,7 @@ export default function SequenceSection() {
                 <FrameworkCard
                   title="Follow-Up 1"
                   badgeText={`Reply ${
-                    bf0Conversion ? bf0Conversion.toFixed(0) + "%" : "TBD"
+                    getReplyPillText(bf0, bf0Conversion)
                   }`}
                   badgeColor={bumpConversionColor(bf0, bf0Conversion)}
                   timesUsed={bf0?.etl_num_times_used ?? 0}
@@ -441,7 +448,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf0 && bf0Conversion
                       ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                      : (bf0 && bf0.etl_num_times_used && bf0.etl_num_times_used < 20 ? "Not enough data, " : '') +
+                      : (bf0 && bf0.etl_num_times_used && bf0.etl_num_times_used < 10 ? "Not enough data, " : '') +
                         (bf0?.etl_num_times_converted || 0) +
                         " / " +
                         (bf0?.etl_num_times_used || 0)
@@ -505,14 +512,14 @@ export default function SequenceSection() {
                 <FrameworkCard
                   title="Follow-Up 2"
                   badgeText={`Reply ${
-                    bf1Conversion ? bf1Conversion.toFixed(0) + "%" : "TBD"
+                    getReplyPillText(bf1, bf1Conversion)
                   }`}
                   timesUsed={bf1?.etl_num_times_used ?? 0}
                   timesConverted={bf1?.etl_num_times_converted ?? 0}
                   badgeHoverText={
                     bf1 && bf1Conversion
                       ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                      : (bf1 && bf1.etl_num_times_used && bf1.etl_num_times_used < 20 ? "Not enough data, " : "") +
+                      : (bf1 && bf1.etl_num_times_used && bf1.etl_num_times_used < 10 ? "Not enough data, " : "") +
                         (bf1?.etl_num_times_converted || 0) +
                         " / " +
                         (bf1?.etl_num_times_used || 0)
@@ -580,7 +587,7 @@ export default function SequenceSection() {
                 <FrameworkCard
                   title="Follow-Up 3"
                   badgeText={`Reply ${
-                    bf2Conversion ? bf2Conversion.toFixed(0) + "%" : "TBD"
+                    getReplyPillText(bf2, bf2Conversion)
                   }`}
                   timesUsed={bf2?.etl_num_times_used ?? 0}
                   timesConverted={bf2?.etl_num_times_converted ?? 0}
@@ -588,7 +595,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf2 && bf2Conversion
                       ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                      : (bf2 && bf2.etl_num_times_used && bf2.etl_num_times_used < 20 ? "Not enough data, " : "") +
+                      : (bf2 && bf2.etl_num_times_used && bf2.etl_num_times_used < 10 ? "Not enough data, " : "") +
                         (bf2?.etl_num_times_converted || 0) +
                         " / " +
                         (bf2?.etl_num_times_used || 0)
@@ -655,7 +662,7 @@ export default function SequenceSection() {
                 <FrameworkCard
                   title="Follow-Up 4"
                   badgeText={`Reply ${
-                    bf3Conversion ? bf3Conversion.toFixed(0) + "%" : "TBD"
+                    getReplyPillText(bf3, bf3Conversion)
                   }`}
                   badgeColor={bumpConversionColor(bf3, bf3Conversion)}
                   timesUsed={bf3?.etl_num_times_used ?? 0}
@@ -663,7 +670,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf3 && bf3Conversion
                       ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                      : (bf3 && bf3.etl_num_times_used && bf3.etl_num_times_used < 20 ? "Not enough data, " : "") +
+                      : (bf3 && bf3.etl_num_times_used && bf3.etl_num_times_used < 10 ? "Not enough data, " : "") +
                         (bf3?.etl_num_times_converted || 0) +
                         " / " +
                         (bf3?.etl_num_times_used || 0)
@@ -1776,7 +1783,7 @@ function FrameworkCard(props: {
                   ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
                     Math.round(props.conversion * 10) / 10 +
                     "%."
-                  : (props.timesUsed && props.timesUsed < 20 ? "Not enough data, " : "") +
+                  : (props.timesUsed && props.timesUsed < 10 ? "Not enough data, " : "") +
                     props.timesConverted +
                     " / " +
                     props.timesUsed +

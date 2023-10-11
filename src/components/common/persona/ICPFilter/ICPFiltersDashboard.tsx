@@ -716,6 +716,7 @@ const ICPFiltersDashboard: FC<{
         withSorting
         withRowSelection
         withColumnResizing
+        sx={{cursor: 'pointer'}}
         columns={[
           {
             accessorKey: "icp_fit_score",
@@ -764,7 +765,7 @@ const ICPFiltersDashboard: FC<{
           {
             accessorKey: "title",
             header: "TITLE",
-            size: Math.min(340, window.innerWidth / 2),
+            size: Math.min(300, window.innerWidth / 3),
             filterFn: stringFilterFn,
             cell: (cell) => {
               return <Text size='xs'>{cell.cell?.getValue<string>()}</Text>
@@ -773,6 +774,7 @@ const ICPFiltersDashboard: FC<{
           {
             accessorKey: "company",
             filterFn: stringFilterFn,
+            size: Math.min(100, window.innerWidth / 6),
             header: "COMPANY",
             cell: (cell) => {
               return <Text size='xs'>{cell.cell?.getValue<string>()}</Text>

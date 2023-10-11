@@ -86,7 +86,7 @@ const AnalyticPage = () => {
                 }}
               >
                 <Box p={"lg"}>
-                  <Title order={2}>Overall Performance</Title>
+                  <Title order={2}>Overall Performance - Coming soon ⚠️</Title>
                   <Text color="gray.6" size={"sm"} fw={700} mt={"xs"}>
                     Random text
                   </Text>
@@ -114,7 +114,7 @@ const AnalyticPage = () => {
             my="lg"
             label={
               <Text fw={700} size={"lg"}>
-                Cumulatative Growth
+                Cumulatative Growth - Coming soon ⚠️
               </Text>
             }
             labelPosition="center"

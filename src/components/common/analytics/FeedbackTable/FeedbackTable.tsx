@@ -102,7 +102,7 @@ const FeedbackTable = () => {
   return (
     <Paper py={"md"}>
       <Box>
-        <Title order={2}>Feedback needed</Title>
+        <Title order={2}>Feedback Needed - Coming soon ⚠️</Title>
 
         <Text color="gray.6" size={"sm"} fw={700} mt={"xs"}>
           Random text

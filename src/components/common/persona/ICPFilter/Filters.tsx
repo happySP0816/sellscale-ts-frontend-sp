@@ -10,6 +10,7 @@ import {
   Progress,
   NumberInput,
   Center,
+  Text,
 } from "@mantine/core";
 import CustomSelect from "./CustomSelect";
 import { IconBuildingCommunity, IconPhoto, IconUser } from "@tabler/icons";
@@ -24,6 +25,8 @@ import { getICPRuleSet } from "@utils/requests/icpScoring";
 import { userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getFiltersAutofill } from "@utils/requests/getFiltersAutofill";
+import { openConfirmModal } from '@mantine/modals';
+import { showNotification } from '@mantine/notifications';
 
 function Filters(props: {
   isTesting: boolean;
@@ -529,19 +532,40 @@ function Filters(props: {
           variant="light"
           loading={loading}
           onClick={async () => {
-            if (!currentProject) return;
-            setLoading(true);
-            const response = await getFiltersAutofill(
-              userToken,
-              currentProject.id
-            );
-            const results = response.data;
-            console.log(results);
-            setIncludedIndividualTitleKeywords(results.job_titles);
-            setIncludedIndividualIndustryKeywords(results.industries);
-            setCompanySizeStart(results.yoe.min);
-            setCompanySizeEnd(results.yoe.max);
-            setLoading(false);
+            openConfirmModal({
+                title: "Override existing filters?",
+                children: (
+                  <Text>
+                    Are you sure you want to override existing filters? This
+                    action cannot be undone.
+                  </Text>
+                ),
+                labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                onCancel: () => { },
+                onConfirm: () => { 
+                  (async () => {
+                    if (!currentProject) return;
+                    setLoading(true);
+                    const response = await getFiltersAutofill(
+                      userToken,
+                      currentProject.id
+                    );
+                    const results = response.data;
+                    console.log(results);
+                    setIncludedIndividualTitleKeywords(results.job_titles);
+                    setIncludedIndividualIndustryKeywords(results.industries);
+                    setCompanySizeStart(results.yoe.min);
+                    setCompanySizeEnd(results.yoe.max);
+                    setLoading(false);
+
+                    showNotification({
+                      title: 'Filters autofilled',
+                      message: 'Filters have been autofilled based on your prospects',
+                    })
+                  })()
+                },
+              })
+            
           }}
         >
           AI Autofill

@@ -51,7 +51,8 @@ import PersonaCampaigns from "@common/campaigns/PersonaCampaigns";
 import AdvancedPage from "@pages/AdvancedPage";
 import ChannelSetupPage from "@pages/ChannelSetupPage";
 import PulseTabSelector from "@common/persona/PulseTabSelector";
-import PersonaOnboarding from '@pages/PreOnboarding';
+import PersonaOnboarding from "@pages/PreOnboarding";
+import AnalyticPage from "@pages/AnalyticPage";
 
 const queryClient = new QueryClient();
 
@@ -334,8 +335,8 @@ const router = sentryCreateBrowserRouter([
         element: (
           <RestrictedRoute
             page={
-              <Box p="md" bg={"white"}>
-                <PipelineSection />
+              <Box p="md" bg={"gray.1"}>
+                <AnalyticPage />
               </Box>
             }
           />

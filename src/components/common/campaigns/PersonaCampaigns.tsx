@@ -562,7 +562,7 @@ function PersonCampaignCard(props: {
     },
     {
       id: 3,
-      type: "Nurture",
+      type: "Not Interested",
       active: false,
       icon: <IconSeeding size="0.925rem" />,
       sends: 0,

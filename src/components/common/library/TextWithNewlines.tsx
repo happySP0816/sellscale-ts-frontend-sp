@@ -6,7 +6,7 @@ export default function TextWithNewline(props: { children: React.ReactNode, styl
       className={props.className}
       style={props.style}
       dangerouslySetInnerHTML={{
-        __html: DOMPurify.sanitize((props.children as string).replaceAll('\n', `<br style="display: block; content: ' '; margin: ${props.breakheight || 0} 0 "/>`)),
+        __html: DOMPurify.sanitize((props.children as string)?.replaceAll('\n', `<br style="display: block; content: ' '; margin: ${props.breakheight || 0} 0 "/>`)),
       }}
     />
   );

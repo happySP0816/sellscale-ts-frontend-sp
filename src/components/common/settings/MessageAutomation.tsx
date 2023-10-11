@@ -182,7 +182,7 @@ export default function MessageAutomation() {
 
           <Card withBorder shadow='md'>
             <Title order={4}>
-              Blacklist Words
+              Blacklisted Words
             </Title>
             <Text mt='sm' lh='1.5rem'>
               Our AI will not send any messages that contain words that are in your blacklist. This is useful for preventing the AI from sending messages that may not fit your speaking style. Case-insensitive (capitalizations don't matter).

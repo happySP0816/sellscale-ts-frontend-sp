@@ -539,8 +539,8 @@ function Filters(props: {
             console.log(results);
             setIncludedIndividualTitleKeywords(results.job_titles);
             setIncludedIndividualIndustryKeywords(results.industries);
-            setIndividualYearsOfExperienceStart(results.yoe.min);
-            setIndividualYearsOfExperienceEnd(results.yoe.max);
+            setCompanySizeStart(results.yoe.min);
+            setCompanySizeEnd(results.yoe.max);
             setLoading(false);
           }}
         >

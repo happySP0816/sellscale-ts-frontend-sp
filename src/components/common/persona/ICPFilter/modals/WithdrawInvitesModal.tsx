@@ -4,7 +4,9 @@ import { Box, Button, Divider, Modal, Text, Title } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { IconCircleX } from "@tabler/icons-react";
 import { withdrawInvitations } from "@utils/requests/withdrawInvitations";
+import { on } from 'events';
 import { DataGridRowSelectionState } from "mantine-data-grid";
+import React from 'react';
 import { useRecoilValue } from "recoil";
 
 interface IWithdrawInvitesModalProps {
@@ -23,6 +25,7 @@ interface IWithdrawInvitesModalProps {
     "title": string,
   }[];
   refresh: () => void;
+  onWithdrawInvites: () => void;
 }
 
 const WithdrawInvitesModal = ({
@@ -32,10 +35,14 @@ const WithdrawInvitesModal = ({
   selectedRows,
   data,
   refresh,
+  onWithdrawInvites,
 }: IWithdrawInvitesModalProps) => {
   const userToken = useRecoilValue(userTokenState);
+  const [loading, setLoading] = React.useState(false);
   
   const triggerWithdrawInvites = async () => {
+
+    setLoading(true);
 
     const prospects = data.filter((_, index) => {
       return selectedRows[index] === true;
@@ -49,10 +56,13 @@ const WithdrawInvitesModal = ({
       prospectIDs
     )
 
+    const num_invites = prospectIDs.length;
+
     if (response.status === "success") {
+      onWithdrawInvites();
       showNotification({
         title: "Invitations Withdrawn",
-        message: "Invitations are being withdrawn, please allow up to a day for this to complete.",
+        message: `${num_invites} Invitations are being withdrawn, please allow up to a day for this to complete.`,
         color: "green",
       })
       refresh();
@@ -64,6 +74,8 @@ const WithdrawInvitesModal = ({
         color: "red",
       })
     }
+
+    setLoading(false);
 
     return;
   }
@@ -109,10 +121,10 @@ const WithdrawInvitesModal = ({
           p={"1rem"}
           sx={{ display: "flex", justifyContent: "center", gap: "0.5rem" }}
         >
-          <Button color="gray" variant="outline" fullWidth onClick={close}>
+          <Button color="gray" variant="outline" fullWidth onClick={close} disabled={loading}>
             Cancel
           </Button>
-          <Button fullWidth color="red" onClick={triggerWithdrawInvites}>
+          <Button fullWidth color="red" onClick={triggerWithdrawInvites} disabled={loading}>
             Withdraw
           </Button>
         </Box>

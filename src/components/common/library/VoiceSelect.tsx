@@ -120,7 +120,9 @@ export default function VoiceSelect(props: {
           content: (
             <Text>
               {selectedVoice
-                ? `Using ${_.truncate(userData.sdr_name.split(" ")[0])}'s Voice`
+                ? `Using ${_.truncate(
+                    userData.sdr_name.trim().split(" ")[0]
+                  )}'s Voice`
                 : "Train Voice"}
             </Text>
           ),
@@ -194,7 +196,7 @@ export default function VoiceSelect(props: {
                 {/* <td>
                     <Button
                       color="grape"
-                      rightIcon={<IconPencil size="0.9rem" />}
+                      rightIcon={<IconEdit size="0.9rem" />}
                       onClick={() => {
                         openContextModal({
                           modal: "voiceEditor",
@@ -230,8 +232,8 @@ export default function VoiceSelect(props: {
                     offLabel="OFF"
                     checked={voice.active}
                     onChange={async (event) => {
-                      for(let v of voices) {
-                        if(v.active){
+                      for (let v of voices) {
+                        if (v.active) {
                           await updateActive(v.id, false);
                         }
                       }

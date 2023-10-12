@@ -56,7 +56,7 @@ import {
   useHover,
   usePrevious,
 } from "@mantine/hooks";
-import { openConfirmModal, openContextModal } from "@mantine/modals";
+import { modals, openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
   IconCheck,
@@ -68,6 +68,7 @@ import {
   IconPencil,
   IconPlus,
   IconReload,
+  IconTablePlus,
   IconTools,
   IconUpload,
   IconX,
@@ -105,6 +106,7 @@ import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
 import { showNotification } from "@mantine/notifications";
 import {
   IconArrowRight,
+  IconArrowsExchange,
   IconBulb,
   IconChevronRight,
   IconCircle,
@@ -222,7 +224,7 @@ export default function SequenceSection() {
   // const bf3Conversion = replyRate * 0.1;
 
   const bump_amount = currentProject?.li_bump_amount ?? 3;
-  console.log(bump_amount)
+  console.log(bump_amount);
 
   const closeModal = () => {
     setIsModalBlockerVisible(false);
@@ -276,8 +278,10 @@ export default function SequenceSection() {
     bf: BumpFramework | undefined,
     bfConversion: number | undefined
   ) => {
-    return bf && bf.etl_num_times_used && bf.etl_num_times_used >= 10 ? (bfConversion ? bfConversion?.toFixed(0) : 0) + "%" : 'TBD'
-  }
+    return bf && bf.etl_num_times_used && bf.etl_num_times_used >= 10
+      ? (bfConversion ? bfConversion?.toFixed(0) : 0) + "%"
+      : "TBD";
+  };
 
   if (!currentProject) {
     return null;
@@ -346,8 +350,8 @@ export default function SequenceSection() {
           sx={{ alignItems: "flex-start" }}
           noWrap
         >
-          <Box sx={{ flexBasis: "35%", position: 'relative' }}>
-          <LoadingOverlay visible={loading} />
+          <Box sx={{ flexBasis: "35%", position: "relative" }}>
+            <LoadingOverlay visible={loading} />
             <Stack>
               <FrameworkCard
                 title="Connection Request"
@@ -439,16 +443,18 @@ export default function SequenceSection() {
               {bump_amount >= 1 && (
                 <FrameworkCard
                   title="Follow-Up 1"
-                  badgeText={`Reply ${
-                    getReplyPillText(bf0, bf0Conversion)
-                  }`}
+                  badgeText={`Reply ${getReplyPillText(bf0, bf0Conversion)}`}
                   badgeColor={bumpConversionColor(bf0, bf0Conversion)}
                   timesUsed={bf0?.etl_num_times_used ?? 0}
                   timesConverted={bf0?.etl_num_times_converted ?? 0}
                   badgeHoverText={
                     bf0 && bf0Conversion
                       ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                      : (bf0 && bf0.etl_num_times_used && bf0.etl_num_times_used < 10 ? "Not enough data, " : '') +
+                      : (bf0 &&
+                        bf0.etl_num_times_used &&
+                        bf0.etl_num_times_used < 10
+                          ? "Not enough data, "
+                          : "") +
                         (bf0?.etl_num_times_converted || 0) +
                         " / " +
                         (bf0?.etl_num_times_used || 0)
@@ -511,15 +517,17 @@ export default function SequenceSection() {
               {bump_amount >= 2 && (
                 <FrameworkCard
                   title="Follow-Up 2"
-                  badgeText={`Reply ${
-                    getReplyPillText(bf1, bf1Conversion)
-                  }`}
+                  badgeText={`Reply ${getReplyPillText(bf1, bf1Conversion)}`}
                   timesUsed={bf1?.etl_num_times_used ?? 0}
                   timesConverted={bf1?.etl_num_times_converted ?? 0}
                   badgeHoverText={
                     bf1 && bf1Conversion
                       ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                      : (bf1 && bf1.etl_num_times_used && bf1.etl_num_times_used < 10 ? "Not enough data, " : "") +
+                      : (bf1 &&
+                        bf1.etl_num_times_used &&
+                        bf1.etl_num_times_used < 10
+                          ? "Not enough data, "
+                          : "") +
                         (bf1?.etl_num_times_converted || 0) +
                         " / " +
                         (bf1?.etl_num_times_used || 0)
@@ -586,16 +594,18 @@ export default function SequenceSection() {
               {bump_amount >= 3 && (
                 <FrameworkCard
                   title="Follow-Up 3"
-                  badgeText={`Reply ${
-                    getReplyPillText(bf2, bf2Conversion)
-                  }`}
+                  badgeText={`Reply ${getReplyPillText(bf2, bf2Conversion)}`}
                   timesUsed={bf2?.etl_num_times_used ?? 0}
                   timesConverted={bf2?.etl_num_times_converted ?? 0}
                   badgeColor={bumpConversionColor(bf2, bf2Conversion)}
                   badgeHoverText={
                     bf2 && bf2Conversion
                       ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                      : (bf2 && bf2.etl_num_times_used && bf2.etl_num_times_used < 10 ? "Not enough data, " : "") +
+                      : (bf2 &&
+                        bf2.etl_num_times_used &&
+                        bf2.etl_num_times_used < 10
+                          ? "Not enough data, "
+                          : "") +
                         (bf2?.etl_num_times_converted || 0) +
                         " / " +
                         (bf2?.etl_num_times_used || 0)
@@ -661,16 +671,18 @@ export default function SequenceSection() {
               {bump_amount >= 4 && (
                 <FrameworkCard
                   title="Follow-Up 4"
-                  badgeText={`Reply ${
-                    getReplyPillText(bf3, bf3Conversion)
-                  }`}
+                  badgeText={`Reply ${getReplyPillText(bf3, bf3Conversion)}`}
                   badgeColor={bumpConversionColor(bf3, bf3Conversion)}
                   timesUsed={bf3?.etl_num_times_used ?? 0}
                   timesConverted={bf3?.etl_num_times_converted ?? 0}
                   badgeHoverText={
                     bf3 && bf3Conversion
                       ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                      : (bf3 && bf3.etl_num_times_used && bf3.etl_num_times_used < 10 ? "Not enough data, " : "") +
+                      : (bf3 &&
+                        bf3.etl_num_times_used &&
+                        bf3.etl_num_times_used < 10
+                          ? "Not enough data, "
+                          : "") +
                         (bf3?.etl_num_times_converted || 0) +
                         " / " +
                         (bf3?.etl_num_times_used || 0)
@@ -697,15 +709,18 @@ export default function SequenceSection() {
 
               {bump_amount < 4 && (
                 <Center>
-                  <Stack spacing={5}><Text ta="center" fw={200} c='dimmed' fz='xl'>|</Text>
-                  <Button
-                    variant="subtle"
-                    radius="md"
-                    compact
-                    onClick={() => updateBumpAmount(bump_amount + 1)}
-                  >
-                    Add Step
-                  </Button>
+                  <Stack spacing={5}>
+                    <Text ta="center" fw={200} c="dimmed" fz="xl">
+                      |
+                    </Text>
+                    <Button
+                      variant="subtle"
+                      radius="md"
+                      compact
+                      onClick={() => updateBumpAmount(bump_amount + 1)}
+                    >
+                      Add Step
+                    </Button>
                   </Stack>
                 </Center>
               )}
@@ -787,13 +802,43 @@ function BumpFrameworkSelect(props: {
     refetchOnWindowFocus: false,
   });
 
+  const { data: frameworkTemplates } = useQuery({
+    queryKey: [`query-get-bump-framework-templates`],
+    queryFn: async () => {
+      
+      const res = await fetch(`${API_URL}/bump_framework/bump_framework_templates`, {
+        method: "GET",
+      });
+      const result = await res.json();
+
+      const data = result.bump_framework_templates as {
+        name: string;
+        raw_prompt: string;
+        human_readable_prompt: string;
+        length: string;
+        tag: string;
+      }[];
+      return data.map((template) => {
+        return {
+          name: template.name,
+          prompt: template.human_readable_prompt,
+          length: template.length,
+          tag: template.tag,
+        };
+      });
+
+    },
+    refetchOnWindowFocus: false,
+  });
+
   return (
     <ModalSelector
+      zIndex={100}
       selector={{
         override: (
-          <Tooltip label="Edit" withinPortal>
+          <Tooltip label="Change" withinPortal>
             <ActionIcon radius="xl">
-              <IconPencil size="1.1rem" />
+              <IconEdit size="1.1rem" />
             </ActionIcon>
           </Tooltip>
         ),
@@ -801,9 +846,9 @@ function BumpFrameworkSelect(props: {
       title={{
         name: props.title,
         rightSection: (
-          <Menu shadow="md" width={200} withArrow>
+          <Menu shadow="md" width={220} withArrow>
             <Menu.Target>
-              <Button variant="subtle" compact>
+              <Button variant="filled" radius="xl">
                 New Framework
               </Button>
             </Menu.Target>
@@ -818,7 +863,12 @@ function BumpFrameworkSelect(props: {
                     innerProps: {
                       modalOpened: true,
                       openModal: () => {},
-                      closeModal: () => {},
+                      closeModal: () => {
+                        queryClient.refetchQueries({
+                          queryKey: [`query-get-bump-frameworks`],
+                        });
+                        modals.closeAll();
+                      },
                       backFunction: () => {},
                       dataChannels: dataChannels,
                       status: props.overallStatus,
@@ -829,6 +879,62 @@ function BumpFrameworkSelect(props: {
                 }}
               >
                 Create New
+              </Menu.Item>
+              <Menu.Item icon={<IconTablePlus size={14} />} closeMenuOnClick={false}>
+                <ModalSelector
+                  selector={{
+                    override: <>Create from Template</>,
+                  }}
+                  title={{
+                    name: "Choose a Template",
+                    rightSection: undefined,
+                  }}
+                  size={600}
+                  loading={false}
+                  zIndex={200}
+                  items={
+                    frameworkTemplates?.map((template, index) => {
+                      return {
+                        id: index,
+                        name: template.name,
+                        content: (
+                          <Box>
+                            <Text>{template.name}</Text>
+                          </Box>
+                        ),
+                        onClick: () => {
+                          openContextModal({
+                            modal: "createBumpFramework",
+                            title: "Create Bump Framework",
+                            innerProps: {
+                              modalOpened: true,
+                              openModal: () => {},
+                              closeModal: () => {
+                                queryClient.refetchQueries({
+                                  queryKey: [`query-get-bump-frameworks`],
+                                });
+                                modals.closeAll();
+                              },
+                              backFunction: () => {},
+                              dataChannels: dataChannels,
+                              status: props.overallStatus,
+                              archetypeID: currentProject?.id,
+                              bumpedCount: props.bumpedCount,
+                              initialValues: {
+                                title: template.name,
+                                description: template.prompt,
+                                default: true,
+                                bumpDelayDays: 2,
+                                useAccountResearch: true,
+                                bumpLength: template.length,
+                              }
+                            },
+                          });
+                        },
+                      };
+                    }) ?? []
+                  }
+                />
               </Menu.Item>
               <Menu.Item
                 icon={<IconCopy size={14} />}
@@ -882,10 +988,12 @@ function BumpFrameworkSelect(props: {
           </Box>
         ),
         rightSection: (
-          <Box ml='auto'>
-            <Switch checked={bf.default} onChange={(checked) => {
-              setLoading(true);
-              const result = patchBumpFramework(
+          <Box ml="auto">
+            <Switch
+              checked={bf.default}
+              onChange={(checked) => {
+                setLoading(true);
+                const result = patchBumpFramework(
                   userToken,
                   bf.id,
                   bf.overall_status,
@@ -897,28 +1005,27 @@ function BumpFrameworkSelect(props: {
                   !bf.default,
                   bf.use_account_research,
                   bf.transformer_blocklist
-                ).then(
-                  () => {
+                )
+                  .then(() => {
                     showNotification({
                       title: "Success",
                       message: "Bump Framework enabled",
                       color: "green",
                     });
-                  }
-                ).finally(() => {
-                  (async () => {
-                    await queryClient.refetchQueries({
-                      queryKey: [`query-get-bump-frameworks`],
-                    });
-                    setLoading(false);
-                  })()
-                });
-            }} />
-            {
-              loading && <Loader size='xs' mt='xs'/>
-            }
+                  })
+                  .finally(() => {
+                    (async () => {
+                      await queryClient.refetchQueries({
+                        queryKey: [`query-get-bump-frameworks`],
+                      });
+                      setLoading(false);
+                    })();
+                  });
+              }}
+            />
+            {loading && <Loader size="xs" mt="xs" />}
           </Box>
-        )
+        ),
       }))}
       size={800}
       activeItemId={props.activeBumpFrameworkId}
@@ -1560,7 +1667,7 @@ function LiExampleInvitation(props: {
             compact
           >
             Reply to{" "}
-            {liSDR?.miniProfile.firstName || userData.sdr_name.split(" ")[0]}
+            {liSDR?.miniProfile.firstName || userData.sdr_name.trim().split(" ")[0]}
           </Button>
         </Box>
       </Stack>
@@ -1783,7 +1890,9 @@ function FrameworkCard(props: {
                   ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
                     Math.round(props.conversion * 10) / 10 +
                     "%."
-                  : (props.timesUsed && props.timesUsed < 10 ? "Not enough data, " : "") +
+                  : (props.timesUsed && props.timesUsed < 10
+                      ? "Not enough data, "
+                      : "") +
                     props.timesConverted +
                     " / " +
                     props.timesUsed +
@@ -1831,15 +1940,18 @@ function FrameworkCard(props: {
           )}
           <Group spacing={3}>
             {props.canEdit && props.editProps && (
-              <BumpFrameworkSelect {...props.editProps}  />
+              <BumpFrameworkSelect {...props.editProps} />
             )}
             {props.canRemove && props.onRemove && (
               <Tooltip label="Remove" withinPortal>
-                <ActionIcon radius="xl" onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  props.onRemove!();
-                }}>
+                <ActionIcon
+                  radius="xl"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    props.onRemove!();
+                  }}
+                >
                   <IconCircleMinus size="1.2rem" />
                 </ActionIcon>
               </Tooltip>
@@ -2008,40 +2120,6 @@ function FrameworkSection(props: {
     return result.status === "success" ? result.data.message : null;
   };
 
-  const [BUMP_FRAMEWORK_OPTIONS, setBUMP_FRAMEWORK_OPTIONS] = useState<any>({});
-
-  const getBumpFrameworkTemplates = async () => {
-    fetch(`${API_URL}/bump_framework/bump_framework_templates`, {
-      method: "GET",
-    })
-      .then((res) => {
-        const data = res.json();
-        console.log(data);
-        return data;
-      })
-      .then((j) => {
-        let options: any = {};
-        const data = j["bump_framework_templates"];
-        console.log(data);
-        data.forEach((template: any) => {
-          options[template.tag] = {
-            name: template.name,
-            raw_prompt: template.raw_prompt,
-            human_readable_prompt: template.human_readable_prompt,
-            length: template.length,
-          };
-        });
-        console.log(options);
-
-        setBUMP_FRAMEWORK_OPTIONS(options);
-      });
-  };
-
-  useEffect(() => {
-    getBumpFrameworkTemplates();
-    console.log("getBumpFrameworkTemplates");
-  }, []);
-
   const autoCompleteWithBrain = () => {
     setAiGenerating(true);
     fetch(`${API_URL}/ml/fill_prompt_from_brain`, {
@@ -2194,22 +2272,45 @@ function FrameworkSection(props: {
             )}
           </Box>
 
-          <Button
-            color="green"
-            w="200px"
-            ml="auto"
-            disabled={!changed}
-            onClick={() => {
-              saveSettings(debouncedForm);
-              showNotification({
-                message: "Settings Saved",
-                color: "green",
-              });
-              props.setIsDataChanged(false);
+          <Group
+            position="right"
+            sx={{
+              visibility: changed ? "visible" : "hidden",
             }}
           >
-            Save Settings
-          </Button>
+            <Center>
+              <Button
+                variant="default"
+                w="200px"
+                ml="auto"
+                disabled={!changed}
+                onClick={() => {
+                  form.reset();
+                  setChanged(false);
+                }}
+              >
+                Cancel
+              </Button>
+            </Center>
+            <Center>
+              <Button
+                color="green"
+                w="200px"
+                ml="auto"
+                disabled={!changed}
+                onClick={() => {
+                  saveSettings(debouncedForm);
+                  showNotification({
+                    message: "Settings Saved",
+                    color: "green",
+                  });
+                  props.setIsDataChanged(false);
+                }}
+              >
+                Save Settings
+              </Button>
+            </Center>
+          </Group>
           <Card shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section
               sx={{
@@ -2235,7 +2336,7 @@ function FrameworkSection(props: {
                 />
               </Box>
 
-              <Flex align={"end"} w={"50%"}>
+              {/* <Flex align={"end"} w={"50%"}>
                 <Select
                   withinPortal
                   ml="auto"
@@ -2303,7 +2404,7 @@ function FrameworkSection(props: {
                     setChanged(true);
                   }}
                 />
-              </Flex>
+              </Flex> */}
             </Card.Section>
 
             <Box
@@ -2318,7 +2419,7 @@ function FrameworkSection(props: {
                 sx={{ zIndex: 10 }}
                 onClick={() => setDescriptionEditState((p) => !p)}
               >
-                <IconPencil />
+                <IconEdit />
               </ActionIcon>
               {descriptionEditState ? (
                 <Textarea
@@ -2962,11 +3063,13 @@ const CtaSection = (props: {
       }
 
       let pageData = (res.ctas as CTA[]).map((cta) => {
-
         return {
           ...cta,
           percentage: cta.performance?.total_count
-            ? Math.round((cta.performance?.num_converted / cta.performance?.num_sent) * 100)
+            ? Math.round(
+                (cta.performance?.num_converted / cta.performance?.num_sent) *
+                  100
+              )
             : 0,
           total_responded: cta.performance?.num_converted,
           total_count: cta.performance?.num_sent,
@@ -2987,17 +3090,21 @@ const CtaSection = (props: {
     <Box pt="md" sx={{ position: "relative" }}>
       <LoadingOverlay visible={isFetching} zIndex={10} />
       {/* Active CTAs Only */}
-      
+
       {ctaActiveStatusesToShow.map((ctaActive) => {
-          return data &&
-            data.filter(e => e.active == ctaActive).map((e, index) => (
+        return (
+          data &&
+          data
+            .filter((e) => e.active == ctaActive)
+            .map((e, index) => (
               <CTAOption
                 data={{
                   id: e.id,
                   label: e.text_value,
                   description: "",
                   checked: e.active,
-                  outlined: !!props.outlineCTA && props.outlineCTA === e.text_value,
+                  outlined:
+                    !!props.outlineCTA && props.outlineCTA === e.text_value,
                   tags: [
                     {
                       label: "Acceptance:",
@@ -3046,18 +3153,24 @@ const CtaSection = (props: {
                 }}
               />
             ))
-        })
-      }
-      <Button variant='outline' w='100%' mt='xs' size='xs' onClick={() => {
-        if (ctaActiveStatusesToShow.length > 1) {
-          setCtaActiveStatusesToShow([true]);
-        } else {
-          setCtaActiveStatusesToShow([true, false]);
-        }
-      }}>
-        {
-          ctaActiveStatusesToShow.length > 1 ? "Hide Inactive CTAs" : "Show " + data?.filter(e => !e.active).length + " Inactive CTAs"
-        }
+        );
+      })}
+      <Button
+        variant="outline"
+        w="100%"
+        mt="xs"
+        size="xs"
+        onClick={() => {
+          if (ctaActiveStatusesToShow.length > 1) {
+            setCtaActiveStatusesToShow([true]);
+          } else {
+            setCtaActiveStatusesToShow([true, false]);
+          }
+        }}
+      >
+        {ctaActiveStatusesToShow.length > 1
+          ? "Hide Inactive CTAs"
+          : "Show " + data?.filter((e) => !e.active).length + " Inactive CTAs"}
       </Button>
 
       <Button
@@ -3154,18 +3267,23 @@ const CTAOption: React.FC<{
                 </Button>
               </Tooltip>
             ))}
-            {autoMarkScheduling && <Tooltip label="Accepted invite will automatically classify prospect as 'scheduling'" withArrow>
-              <Text sx={{cursor: 'pointer'}} size='sm'>
-                🛎
-              </Text>
-            </Tooltip>}
+            {autoMarkScheduling && (
+              <Tooltip
+                label="Accepted invite will automatically classify prospect as 'scheduling'"
+                withArrow
+              >
+                <Text sx={{ cursor: "pointer" }} size="sm">
+                  🛎
+                </Text>
+              </Tooltip>
+            )}
           </Flex>
 
           <Flex wrap={"wrap"} gap={"1rem"} align={"center"}>
             {/* <Menu shadow="md" width={200} withinPortal withArrow>
               <Menu.Target>
                 <ActionIcon radius="xl" size="sm">
-                  <IconPencil size="1.0rem" />
+                  <IconEdit size="1.0rem" />
                 </ActionIcon>
               </Menu.Target>
 
@@ -3182,7 +3300,7 @@ const CTAOption: React.FC<{
               </Menu.Dropdown>
             </Menu> */}
             <ActionIcon radius="xl" size="sm" onClick={onClickEdit}>
-              <IconPencil size="1.0rem" />
+              <IconEdit size="1.0rem" />
             </ActionIcon>
             <ActionIcon radius="xl" size="sm" onClick={onClickDelete}>
               <IconTrash size="1.0rem" />

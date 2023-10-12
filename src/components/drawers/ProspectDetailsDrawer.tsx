@@ -47,7 +47,7 @@ import ProspectDetailsViewEmails, {
 import { API_URL } from "@constants/data";
 import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove";
 import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsResearch";
-import { IconDots, IconPencil } from "@tabler/icons";
+import { IconDots, IconEdit, IconPencil } from "@tabler/icons";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
 import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
@@ -200,16 +200,18 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
         title: {
           width: "100%",
           marginRight: 0,
-          color: theme.colorScheme === "dark" ? undefined : theme.colors.gray[2],
+          color:
+            theme.colorScheme === "dark" ? undefined : theme.colors.gray[2],
         },
         header: {
-          backgroundColor: theme.colorScheme === "dark" ? undefined : theme.colors.dark[8],
+          backgroundColor:
+            theme.colorScheme === "dark" ? undefined : theme.colors.dark[8],
           paddingTop: 12,
           paddingBottom: 12,
         },
         body: {
           marginTop: 10,
-        }
+        },
       })}
       zIndex={props.zIndex}
     >
@@ -217,11 +219,13 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
       {data?.main.prospect_info && !isFetching && (
         <>
           <div style={{ position: "relative" }}>
-            <Flex w='100%' mt='md'>
+            <Flex w="100%" mt="md">
               <ProspectDetailsSummary
                 fullName={data.main.prospect_info.details.full_name}
                 prospectID={data.main.prospect_info.details.id}
-                aiEnabled={!data.main.prospect_info.details.ai_responses_disabled}
+                aiEnabled={
+                  !data.main.prospect_info.details.ai_responses_disabled
+                }
                 refetch={refetch}
                 title={data.main.prospect_info.details.title}
                 email={data.main.prospect_info.email.email}
@@ -243,7 +247,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                 <Button
                   size="xs"
                   variant="light"
-                  leftIcon={<IconPencil size="1rem" />}
+                  leftIcon={<IconEdit size="1rem" />}
                   disabled={!userData.nylas_connected}
                   onClick={() => {
                     openComposeEmailModal(
@@ -270,18 +274,23 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
               </Center>
             )}
             {data.main.prospect_info.referrals.length > 0 && (
-              <ProspectReferralCard prospects={data.main.prospect_info.referrals} />
+              <ProspectReferralCard
+                prospects={data.main.prospect_info.referrals}
+              />
             )}
-            <Flex direction='row'>
+            <Flex direction="row">
               {data.main.prospect_info.referred.length > 0 && (
-                <ProspectReferralCard prospects={data.main.prospect_info.referred} referredBy />
+                <ProspectReferralCard
+                  prospects={data.main.prospect_info.referred}
+                  referredBy
+                />
               )}
             </Flex>
           </div>
 
           <ScrollArea
             style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
-            mt='sm'
+            mt="sm"
           >
             {data?.channelTypes.length > 0 &&
               prospectDrawerStatuses.overall !== "PROSPECTED" && (
@@ -309,31 +318,37 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                     {data?.channelTypes.map(
                       (channel: { label: string; value: Channel }) => {
                         if (channel.value !== channelType) {
-                          return null
+                          return null;
                         }
-                        return <>
-                          <ProspectDetailsChangeStatus
-                            prospectId={data.main.prospect_info.details.id}
-                            prospectName={
-                              data.main.prospect_info.details.full_name
-                            }
-                            prospectDemoDate={
-                              data.main.prospect_info.details.demo_date
-                            }
-                            channelData={{
-                              data: data.channels[channel.value],
-                              value: channel.value,
-                              currentStatus:
-                                channel.value === "LINKEDIN"
-                                  ? prospectDrawerStatuses.linkedin
-                                  : prospectDrawerStatuses.email,
-                            }}
-                          />
+                        return (
+                          <>
+                            <ProspectDetailsChangeStatus
+                              prospectId={data.main.prospect_info.details.id}
+                              prospectName={
+                                data.main.prospect_info.details.full_name
+                              }
+                              prospectDemoDate={
+                                data.main.prospect_info.details.demo_date
+                              }
+                              channelData={{
+                                data: data.channels[channel.value],
+                                value: channel.value,
+                                currentStatus:
+                                  channel.value === "LINKEDIN"
+                                    ? prospectDrawerStatuses.linkedin
+                                    : prospectDrawerStatuses.email,
+                              }}
+                            />
 
-                          {userData.scheduling_link && prospectDrawerStatuses.linkedin === 'ACTIVE_CONVO_SCHEDULING' && (
-                            <ProspectDetailsCalendarLink calendarLink={userData.scheduling_link} />
-                          )}
-                        </>
+                            {userData.scheduling_link &&
+                              prospectDrawerStatuses.linkedin ===
+                                "ACTIVE_CONVO_SCHEDULING" && (
+                                <ProspectDetailsCalendarLink
+                                  calendarLink={userData.scheduling_link}
+                                />
+                              )}
+                          </>
+                        );
                       }
                     )}
 
@@ -343,44 +358,51 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                         </Card>
                         : null 
                     } */}
-                    {prospect && prospect.overall_status !== 'PROSPECTED' && prospect.overall_status !== 'SENT_OUTREACH' &&
-                        <Card withBorder mt='xs'>
+                    {prospect &&
+                      prospect.overall_status !== "PROSPECTED" &&
+                      prospect.overall_status !== "SENT_OUTREACH" && (
+                        <Card withBorder mt="xs">
                           <Title order={4} mb="xs">
                             Conversation
                           </Title>
                           {
-                            <InboxProspectConvo 
-                              prospects={[prospect]} 
-                              onTabChange={
-                                (value) => {
-                                  setChannelType(value as Channel | null);
-                                }
-                              }
+                            <InboxProspectConvo
+                              prospects={[prospect]}
+                              onTabChange={(value) => {
+                                setChannelType(value as Channel | null);
+                              }}
                               openConvoBox
                               hideTitle
                             />
                           }
                         </Card>
-                    }
+                      )}
 
                     {data?.channelTypes.map(
                       (channel: { label: string; value: Channel }) => (
                         <>
-
                           {channel.value === "LINKEDIN" && (
-
-                            <Card shadow="sm" p="lg" radius="md" mt="md" withBorder>
+                            <Card
+                              shadow="sm"
+                              p="lg"
+                              radius="md"
+                              mt="md"
+                              withBorder
+                            >
                               <Title order={4}>Prospect History</Title>
                               <ScrollArea h={500}>
-                              <ProspectDetailsHistory prospectId={data.main.prospect_info.details.id} forceRefresh={false}/>
+                                <ProspectDetailsHistory
+                                  prospectId={
+                                    data.main.prospect_info.details.id
+                                  }
+                                  forceRefresh={false}
+                                />
                               </ScrollArea>
                             </Card>
-
                           )}
                         </>
                       )
                     )}
-                   
                   </Tabs>
                   <Divider mb="sm" size="sm" />
                 </>

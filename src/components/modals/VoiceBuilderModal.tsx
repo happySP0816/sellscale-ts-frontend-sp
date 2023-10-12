@@ -309,7 +309,7 @@ const VoiceBuilderModal: React.FC<{
               You've edited your voice:
             </Text>
             <Text size="lg" fw={700} ta="center">
-              "{userData.sdr_name.split(" ")[0]}'s Voice"
+              "{userData.sdr_name.trim().split(" ")[0]}'s Voice"
             </Text>
           </Box>
           <Box>

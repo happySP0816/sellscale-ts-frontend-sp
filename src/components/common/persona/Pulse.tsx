@@ -30,6 +30,7 @@ import { openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
   IconBrandLinkedin,
+  IconEdit,
   IconPencil,
   IconPhoto,
   IconTestPipe,
@@ -334,16 +335,14 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
             defaultValue={currentICPPrompt}
             placeholder="No prompt? Send SellScale a prompt request through here."
             label="Describe your ideal customer profile (ICP)"
-            description={
-              ""
-            }
+            description={""}
             minRows={4}
             autosize
             disabled
           />
           <Button
             mt="xs"
-            rightIcon={<IconPencil size="1rem" />}
+            rightIcon={<IconEdit size="1rem" />}
             variant="outline"
             radius="lg"
             color="teal"

@@ -29,6 +29,14 @@ interface CreateBumpFramework extends Record<string, unknown> {
   status?: string;
   showStatus?: boolean;
   bumpedCount?: number | null;
+  initialValues?: {
+    title: string;
+    description: string;
+    default: boolean;
+    bumpDelayDays: number;
+    useAccountResearch: boolean;
+    bumpLength: string;
+  };
 }
 
 export default function CreateBumpFrameworkModal(props: CreateBumpFramework) {
@@ -59,7 +67,10 @@ export function CreateBumpFrameworkContextModal({
   const [userToken] = useRecoilState(userTokenState);
   const theme = useMantineTheme();
 
-  const [bumpLengthValue, setBumpLengthValue] = useState(50);
+  const initBumpLengthAsValue = bumpFrameworkLengthMarks.find((mark) => mark.api_label === innerProps.initialValues?.bumpLength)?.value;
+  const [bumpLengthValue, setBumpLengthValue] = useState(
+    initBumpLengthAsValue ?? 50
+  );
   const [selectedStatus, setSelectedStatus] = useState<string | null>('');
   const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -131,13 +142,13 @@ export function CreateBumpFrameworkContextModal({
 
   const form = useForm({
     initialValues: {
-      title: "",
-      description: "",
+      title: innerProps.initialValues?.title ?? "",
+      description: innerProps.initialValues?.description ?? "",
       archetypeID: innerProps.archetypeID,
-      default: true,
+      default: innerProps.initialValues?.default ?? true,
       bumpedCount: innerProps.bumpedCount,
-      bumpDelayDays: 2,
-      useAccountResearch: true,
+      bumpDelayDays: innerProps.initialValues?.bumpDelayDays ?? 2,
+      useAccountResearch: innerProps.initialValues?.useAccountResearch ?? true,
     },
   });
 

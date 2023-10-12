@@ -10,7 +10,7 @@ import {
   ThemeIcon,
   em,
 } from "@mantine/core";
-import { IconCheck, IconExternalLink, IconPencil } from "@tabler/icons";
+import { IconCheck, IconEdit, IconExternalLink, IconPencil } from "@tabler/icons";
 import {
   IconBrandTelegram,
   IconMessageCheck,
@@ -254,7 +254,7 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
                                 navigateToPage(navigate, "/settings/conversion");
                               }}
                             >
-                              <IconPencil size={"0.75rem"} />
+                              <IconEdit size={"0.75rem"} />
                             </ActionIcon>
                           )
                         }

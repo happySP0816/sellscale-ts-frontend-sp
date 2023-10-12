@@ -180,7 +180,9 @@ const Content = (props: {
 
             <Box
               sx={{
-                border: `1px solid ${message.length > 300 ? 'red' : borderGray}`,
+                border: `1px solid ${
+                  message.length > 300 ? "red" : borderGray
+                }`,
                 overflow: "auto",
                 borderRadius: 12,
                 position: "relative",
@@ -223,8 +225,8 @@ const Content = (props: {
                     />
                   </FocusTrap>
                   <Text
-                    fz='xs'
-                    c={message.length > 300 ? 'red' : 'dimmed'}
+                    fz="xs"
+                    c={message.length > 300 ? "red" : "dimmed"}
                     sx={{
                       position: "absolute",
                       right: 5,
@@ -288,7 +290,7 @@ const Content = (props: {
               </Box> */}
 
               {/* <Button mt={"1rem"} color="gray" compact>
-                Reply to {userData.sdr_name.split(" ")[0]}
+                Reply to {userData.sdr_name.trim().split(" ")[0]}
               </Button> */}
             </Box>
           </Box>
@@ -415,61 +417,52 @@ const Content = (props: {
         )}
       </Flex>
 
-
       {AILoading && (
         <>
-          <Flex w='100%' justify='center' mt='xl' mb='2px'>
-            <Loader size={30} color='purple' />
+          <Flex w="100%" justify="center" mt="xl" mb="2px">
+            <Loader size={30} color="purple" />
           </Flex>
-          <Flex w='100%' justify='center'>
-            <Text size='xs'>AI reviewing message for errors...</Text>
+          <Flex w="100%" justify="center">
+            <Text size="xs">AI reviewing message for errors...</Text>
           </Flex>
         </>
       )}
-      {
-        trainMessage.problems && trainMessage.problems.length > 0 && (
-          <Flex mt={"1.5rem"} w='100%'>
-
-            <Card
-              w='100%'
-              radius='md'
-              withBorder
-              sx={{ border: 'solid 1px rgb(202, 72, 63) !important' }}
+      {trainMessage.problems && trainMessage.problems.length > 0 && (
+        <Flex mt={"1.5rem"} w="100%">
+          <Card
+            w="100%"
+            radius="md"
+            withBorder
+            sx={{ border: "solid 1px rgb(202, 72, 63) !important" }}
+          >
+            <Card.Section
+              px="xs"
+              py="4px"
+              sx={{
+                background: "rgb(202, 72, 63)",
+              }}
             >
-              <Card.Section
-                px='xs'
-                py='4px'
-                sx={{
-                  background: 'rgb(202, 72, 63)'
-                }}
-              >
-                <Text weight={500} fz={16} color='white'>
-                  AI Suggestions
-                </Text>
-              </Card.Section>
-              <Card.Section
-                px='xs'
-              >
-                <Flex direction='column'>
-                  {
-                    trainMessage.problems.map((problem: any, index: any) => {
-                      return (
-                        <>
-                          {index > 0 && <Divider />}
-                          <Text weight={500} fz={16} my='8px'>
-                            {index + 1}. {problem}
-                          </Text>
-                        </>
-                      )
-                    })
-                  }
-
-                </Flex>
-              </Card.Section>
-            </Card>
-          </Flex>
-        )
-      }
+              <Text weight={500} fz={16} color="white">
+                AI Suggestions
+              </Text>
+            </Card.Section>
+            <Card.Section px="xs">
+              <Flex direction="column">
+                {trainMessage.problems.map((problem: any, index: any) => {
+                  return (
+                    <>
+                      {index > 0 && <Divider />}
+                      <Text weight={500} fz={16} my="8px">
+                        {index + 1}. {problem}
+                      </Text>
+                    </>
+                  );
+                })}
+              </Flex>
+            </Card.Section>
+          </Card>
+        </Flex>
+      )}
     </Box>
   );
 };

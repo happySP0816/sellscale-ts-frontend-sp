@@ -49,6 +49,7 @@ import {
   IconArrowBigLeftFilled,
   IconPencilPlus,
   IconPencil,
+  IconEdit,
 } from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -926,7 +927,7 @@ function EmailThreadsSection(props: {
               );
             }}
           >
-            <IconPencil size="1.125rem" />
+            <IconEdit size="1.125rem" />
           </ActionIcon>
         </Tooltip>
       </Group>

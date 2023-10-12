@@ -188,7 +188,7 @@ const Message = () => {
       >
         <Tabs.List px={"md"}>
           <Title mr="auto" order={3}>
-            CTA Effectiveness
+            CTA Effectiveness - Coming Soon ⚠️
           </Title>
           <Tabs.Tab
             value="first"
@@ -229,7 +229,7 @@ const Message = () => {
                 Top Active CTAs Across Users:
               </Text>
               <Text fw={700} color="blue" size={"sm"}>
-                &nbsp; Vasti
+                &nbsp; ---
               </Text>
             </Flex>
             <Flex>

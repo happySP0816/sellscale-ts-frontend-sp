@@ -39,7 +39,7 @@ const Volume = () => {
   ];
   return (
     <Paper mt={"lg"} p={"lg"} radius={"lg"}>
-      <Title order={2}>Message Volume</Title>
+      <Title order={2}>Message Volume - Coming Soon ⚠️</Title>
       <Text color="gray.6" size={"sm"} fw={600}>
         You can control volume, to an extend, by adjusting Linkedin/Email volume
         & adjusting bump framework toggles

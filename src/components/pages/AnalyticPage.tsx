@@ -47,9 +47,8 @@ const AnalyticPage = () => {
         <Tabs.List>
           <Tabs.Tab value="overall_pipeline">Overall Pipeline</Tabs.Tab>
           <Tabs.Tab value="prospect_fit">Prospect Fit</Tabs.Tab>
-          <Tabs.Tab value="volume">volume</Tabs.Tab>
+          <Tabs.Tab value="volume">Volume</Tabs.Tab>
           <Tabs.Tab value="message">Message</Tabs.Tab>
-          <Tabs.Tab value="sdr_action_items">SDR Action Items</Tabs.Tab>
 
           <Flex
             gap={"0.5rem"}
@@ -129,6 +128,10 @@ const AnalyticPage = () => {
               <CumulativeGrowthChart />
             </Flex>
           </Paper>
+
+          <Paper mt={"lg"} p={"lg"} radius={"lg"}>
+            <PipelineSection />
+          </Paper>
         </Tabs.Panel>
 
         <Tabs.Panel value="volume">
@@ -144,9 +147,7 @@ const AnalyticPage = () => {
           <Message />
         </Tabs.Panel>
       </Tabs>
-      <Paper mt={"lg"} p={"lg"} radius={"lg"}>
-        <PipelineSection />
-      </Paper>
+      
     </div>
   );
 };

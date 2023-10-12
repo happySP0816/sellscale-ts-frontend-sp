@@ -3,6 +3,7 @@ import CumulativeGrowthChart from "@common/analytics/CumulativeGrowth/Cumulative
 import FeedbackTable from "@common/analytics/FeedbackTable/FeedbackTable";
 import { OverallPerformanceChart } from "@common/analytics/OverallPerformanceChart";
 import OverallPerformanceProgress from "@common/analytics/OverallPerformanceProgress/OverallPerformanceProgress";
+import Volume from "@common/analytics/Volume";
 import PipelineSection from "@common/home/PipelineSection";
 import {
   Box,
@@ -128,6 +129,9 @@ const AnalyticPage = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="prospect_fit">Prospect Fit</Tabs.Panel>
+        <Tabs.Panel value="volume">
+          <Volume />
+        </Tabs.Panel>
 
         <Tabs.Panel value="sdr_action_items">sdr_action_items</Tabs.Panel>
       </Tabs>

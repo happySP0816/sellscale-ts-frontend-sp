@@ -247,11 +247,11 @@ const ICPFiltersDashboard: FC<{
   };
 
   const { isFetching, refetch } = useQuery({
-    queryKey: [`query-get-icp-prospects`, { isTesting }],
+    queryKey: [`query-get-icp-prospects`, { isTesting, invitedOnLinkedIn }],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { isTesting }] = queryKey;
+      const [_key, { isTesting, invitedOnLinkedIn }] = queryKey;
 
       const result = await getProspectsForICP(
         userToken,

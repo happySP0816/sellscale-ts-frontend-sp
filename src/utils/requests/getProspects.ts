@@ -50,27 +50,22 @@ export async function getProspectsForICP(
   userToken: string,
   client_archetype_id: number,
   get_sample: boolean,
-  get_withdrawable: boolean,
+  invited_on_linkedin: boolean
 ): Promise<MsgResponse> {
-  
-    const response = await fetch(
-      `${API_URL}/prospect/get_prospect_for_icp`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          client_archetype_id: client_archetype_id,
-          get_sample: get_sample,
-          get_withdrawable: get_withdrawable,
-        }),
-      }
-    );
-  
-    const result = await processResponse(response, "data");
-  
-    return result;
-  
+  const response = await fetch(`${API_URL}/prospect/get_prospect_for_icp`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      client_archetype_id: client_archetype_id,
+      get_sample: get_sample,
+      invited_on_linkedin: invited_on_linkedin,
+    }),
+  });
+
+  const result = await processResponse(response, "data");
+
+  return result;
 }

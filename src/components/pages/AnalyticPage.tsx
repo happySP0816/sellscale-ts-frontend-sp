@@ -4,6 +4,7 @@ import FeedbackTable from "@common/analytics/FeedbackTable/FeedbackTable";
 import { OverallPerformanceChart } from "@common/analytics/OverallPerformanceChart";
 import OverallPerformanceProgress from "@common/analytics/OverallPerformanceProgress/OverallPerformanceProgress";
 import Volume from "@common/analytics/Volume";
+import ProspectFit from "@common/analytics/ProspectFit";
 import PipelineSection from "@common/home/PipelineSection";
 import {
   Box,
@@ -128,9 +129,12 @@ const AnalyticPage = () => {
           </Paper>
         </Tabs.Panel>
 
-        <Tabs.Panel value="prospect_fit">Prospect Fit</Tabs.Panel>
         <Tabs.Panel value="volume">
           <Volume />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="prospect_fit">
+          <ProspectFit />
         </Tabs.Panel>
 
         <Tabs.Panel value="sdr_action_items">sdr_action_items</Tabs.Panel>

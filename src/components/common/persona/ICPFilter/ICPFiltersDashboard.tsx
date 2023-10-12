@@ -664,20 +664,7 @@ const ICPFiltersDashboard: FC<{
               checked={invitedOnLinkedIn}
               onChange={(event) => {
                 setInvitedOnLinkedIn(event.currentTarget.checked);
-                if (event.currentTarget.checked) {
-                  // Select all rows
-                  const newSelectedRows = { ...selectedRows };
-
-                  demoData
-                    .filter((x) => x)
-                    .forEach((row) => {
-                      newSelectedRows[row.id - 1] = true;
-                    });
-
-                  setSelectedRows(newSelectedRows);
-                } else {
-                  setSelectedRows({});
-                }
+                setSelectedRows({});
               }}
             />
           </Box>
@@ -940,6 +927,9 @@ const ICPFiltersDashboard: FC<{
         selectedRows={selectedRows}
         data={icpProspects}
         refresh={refetch}
+        onWithdrawInvites={() => {
+          setSelectedRows({});
+        }}
       />
 
       <PersonaUploadDrawer

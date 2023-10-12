@@ -1,6 +1,7 @@
 import Cards from "@common/analytics/CumulativeGrowth/Cards";
 import CumulativeGrowthChart from "@common/analytics/CumulativeGrowth/CumulativeGrowthChart";
 import FeedbackTable from "@common/analytics/FeedbackTable/FeedbackTable";
+import Message from "@common/analytics/Message";
 import { OverallPerformanceChart } from "@common/analytics/OverallPerformanceChart";
 import OverallPerformanceProgress from "@common/analytics/OverallPerformanceProgress/OverallPerformanceProgress";
 import Volume from "@common/analytics/Volume";
@@ -47,6 +48,7 @@ const AnalyticPage = () => {
           <Tabs.Tab value="overall_pipeline">Overall Pipeline</Tabs.Tab>
           <Tabs.Tab value="prospect_fit">Prospect Fit</Tabs.Tab>
           <Tabs.Tab value="volume">volume</Tabs.Tab>
+          <Tabs.Tab value="message">Message</Tabs.Tab>
           <Tabs.Tab value="sdr_action_items">SDR Action Items</Tabs.Tab>
 
           <Flex
@@ -138,6 +140,9 @@ const AnalyticPage = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="sdr_action_items">sdr_action_items</Tabs.Panel>
+        <Tabs.Panel value="message">
+          <Message />
+        </Tabs.Panel>
       </Tabs>
       <Paper mt={"lg"} p={"lg"} radius={"lg"}>
         <PipelineSection />

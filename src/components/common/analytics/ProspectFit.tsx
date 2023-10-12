@@ -56,7 +56,7 @@ const ProspectFit = () => {
   ]);
   return (
     <Paper mt={"lg"} p={"lg"} radius={"lg"}>
-      <Title order={2}>Prospect Fit</Title>
+      <Title order={2}>Prospect Fit - Coming Soon ⚠️</Title>
       <Text color="gray.6" size={"sm"} fw={600}>
         You can control a users ICP Fit by uploading different contacts,
         changing personas, adjusting ICP prompt, and more

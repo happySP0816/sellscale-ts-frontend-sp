@@ -24,12 +24,14 @@ interface IGridTabsProps {
     value: string;
     widthModifier: number;
   }[];
+  numProspects: number;
 }
 
 const GridTabs = ({
   selectedTab,
   setSelectedTab,
   icpDashboard,
+  numProspects,
 }: IGridTabsProps) => {
   const theme = useMantineTheme();
   const computeTabFilters = () => {
@@ -37,9 +39,7 @@ const GridTabs = ({
       {
         label: "All",
         value: "all",
-        count: icpDashboard.reduce((prev, current) => {
-          return prev + Number(current.value);
-        }, 0),
+        count: numProspects,
       },
       {
         label: "Very High",

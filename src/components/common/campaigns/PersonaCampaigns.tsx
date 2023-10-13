@@ -177,8 +177,6 @@ export default function PersonaCampaigns() {
       setCampaignAnalyticData(analytics);
 
       // Get LinkedIn SLA
-      console.log("SWAG1")
-      console.log(userData)
       if (userData.sla_schedules) {
         for (const schedule of userData.sla_schedules) {
           if (moment(schedule.start_date) < moment() && moment() <= moment(schedule.start_date).add(7, 'days')) {

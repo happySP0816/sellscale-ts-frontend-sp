@@ -821,7 +821,8 @@ function BumpFrameworkSelect(props: {
       return data.map((template) => {
         return {
           name: template.name,
-          prompt: template.human_readable_prompt,
+          prompt: template.raw_prompt,
+          human_readable_prompt: template.human_readable_prompt,
           length: template.length,
           tag: template.tag,
         };
@@ -927,6 +928,7 @@ function BumpFrameworkSelect(props: {
                                 bumpDelayDays: 2,
                                 useAccountResearch: true,
                                 bumpLength: template.length,
+                                human_readable_prompt: template.human_readable_prompt
                               }
                             },
                           });

@@ -17,7 +17,7 @@ import { API_URL } from "@constants/data";
  * @param setUseAccountResearch
  * @returns - MsgResponse
  */
-export async function createBumpFramework(userToken: string, archetypID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, bumpDelayDays: number, setDefault: boolean, substatus: string | null = "", setUseAccountResearch: boolean, human_readable_prompt: string): Promise<MsgResponse> {
+export async function createBumpFramework(userToken: string, archetypID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, bumpDelayDays: number, setDefault: boolean, substatus: string | null = "", setUseAccountResearch: boolean, human_readable_prompt?: string): Promise<MsgResponse> {
   if (!substatus) {
     substatus = "";
   }

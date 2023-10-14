@@ -159,6 +159,7 @@ export default function ManageBumpFramework({
       form.values.default,
       innerProps.linkedinStatus.includes("ACTIVE_CONVO_") ? innerProps.linkedinStatus : null,
       form.values.useAccountResearch,
+      "Insert a description here"
     );
 
     if (result.status === "success") {

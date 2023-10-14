@@ -37,7 +37,7 @@ const ScheduleSetting = () => {
     if (!userData) return
 
     // Calculate timezone
-    const time_zone = userData?.emails[0]?.send_schedule?.time_zone
+    const time_zone = userData?.emails && userData?.emails[0]?.send_schedule?.time_zone
     if (time_zone) {
       for (let i = 0; i < timezones.length; i++) {
         if (timezones[i].utc.includes(time_zone)) {
@@ -48,7 +48,7 @@ const ScheduleSetting = () => {
     }
 
     // Calculate selected days
-    setSelectedDays(userData?.emails[0]?.send_schedule?.days.map(String))
+    setSelectedDays(userData?.emails && userData?.emails[0]?.send_schedule?.days.map(String))
   }, [userData])
 
   const triggerPatchSendSchedule = async () => {
@@ -147,7 +147,7 @@ const ScheduleSetting = () => {
               marginBottom: rem(16),
             },
           }}
-          value={selectedDays}
+          value={selectedDays || []}
           onChange={(value) => {
             setSelectedDays(value);
           }}
@@ -214,7 +214,7 @@ const ScheduleSetting = () => {
                   },
                 })}
                 ref={fromTime}
-                defaultValue={userData?.emails[0]?.send_schedule?.start_time}
+                defaultValue={userData?.emails && userData?.emails[0]?.send_schedule?.start_time}
               />
               <Divider w={10} size={"lg"} mb={15} />
               <TimeInput
@@ -227,7 +227,7 @@ const ScheduleSetting = () => {
                   },
                 })}
                 ref={toTime}
-                defaultValue={userData?.emails[0]?.send_schedule?.end_time}
+                defaultValue={userData?.emails && userData?.emails[0]?.send_schedule?.end_time}
               />
             </Flex>
           </Grid.Col>

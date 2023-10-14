@@ -371,11 +371,16 @@ export default function ProspectList(props: {
     }
   }, [segmentedSection]);
 
-  const activeProspects = prospects.filter((p) => !p.in_purgatory);
+  const activeProspects = prospects.filter((p) => !p.in_purgatory).filter(p => p.overall_status !== 'DEMO')
   const snoozedProspects = prospects.filter((p) => p.in_purgatory);
+  const demoProspects = prospects.filter((p) => p.overall_status === 'DEMO')
 
-  const displayProspects =
-    sectionTab === "snoozed" ? snoozedProspects : activeProspects;
+  let displayProspects = activeProspects
+  if (sectionTab === 'snoozed') {
+    displayProspects = snoozedProspects
+  } else if (sectionTab === 'demos') {
+    displayProspects = demoProspects
+  }
 
   setCurrentInboxCount(displayProspects.length);
 
@@ -397,7 +402,10 @@ export default function ProspectList(props: {
 
         <Tabs
           value={mainTab}
-          onTabChange={(value) => setMainTab(value as string)}
+          onTabChange={(value) => {
+            setMainTab(value as string)
+            setSectionTab(value as string)
+          }}
           styles={(theme) => ({
             tab: {
               ...theme.fn.focusStyles(),
@@ -421,47 +429,49 @@ export default function ProspectList(props: {
                   size="xs"
                   color={mainTab === "inbox" ? "blue" : "gray"}
                 >
-                  {prospects.length}
+                  {activeProspects.length}
                 </Badge>
               }
             >
               Inbox
             </Tabs.Tab>
-             <Tooltip label='Coming soon!' position='bottom'>
-              <Tabs.Tab
-                value="sent"
-                disabled
-                rightSection={
-                  <Badge
-                    sx={{ pointerEvents: "none" }}
-                    variant="filled"
-                    size="xs"
-                    color={mainTab === "sent" ? "blue" : "gray"}
-                  >
-                    ?
-                  </Badge>
-                }
-              >
-                Sent
-              </Tabs.Tab>
-             </Tooltip>
             <Tabs.Tab
+            value="snoozed"
+            rightSection={
+              <Badge
+                sx={{ pointerEvents: "none" }}
+                variant="filled"
+                size="xs"
+                color={mainTab === "inbox" ? "blue" : "gray"}
+              >
+                {snoozedProspects.length}
+              </Badge>
+            }
+          >
+            Snoozed
+          </Tabs.Tab>
+          <Tabs.Tab
+              value="demos"
+              rightSection={
+                <Badge
+                  w={16}
+                  h={16}
+                  sx={{ pointerEvents: "none" }}
+                  variant="filled"
+                  size="xs"
+                  p={0}
+                >
+                  {demoProspects.length}
+                </Badge>
+              }
+            >
+              Demos
+            </Tabs.Tab>
+            {/* <Tabs.Tab
               value="queued"
-              // rightSection={
-              //   <Badge
-              //     w={16}
-              //     h={16}
-              //     sx={{ pointerEvents: "none" }}
-              //     variant="filled"
-              //     size="xs"
-              //     p={0}
-              //   >
-              //     X
-              //   </Badge>
-              // }
             >
               Queued
-            </Tabs.Tab>
+            </Tabs.Tab> */}
           </Tabs.List>
         </Tabs>
 
@@ -505,167 +515,6 @@ export default function ProspectList(props: {
               </ActionIcon>
             </Group>
 
-            <Tabs
-              value={sectionTab}
-              onTabChange={setSectionTab}
-              radius="xl"
-              unstyled
-              px={20}
-              py={10}
-              styles={(theme) => ({
-                tabRightSection: {
-                  marginLeft: rem(4),
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                },
-                tab: {
-                  ...theme.fn.focusStyles(),
-                  backgroundColor: theme.white,
-                  color: theme.colors.gray[5],
-                  border: `${rem(1)} solid ${theme.colors.gray[4]}`,
-                  padding: `${rem(6)} ${theme.spacing.xs}`,
-                  cursor: "pointer",
-                  fontSize: theme.fontSizes.sm,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flex: 1,
-                  fontWeight: 600,
-                  borderRadius: 999,
-                  "&:disabled": {
-                    opacity: 0.5,
-                    cursor: "not-allowed",
-                  },
-
-                  "&[data-active]": {
-                    backgroundColor: theme.colors.blue[1],
-                    borderColor: theme.colors.blue[theme.fn.primaryShade()],
-                    color: theme.colors.blue[theme.fn.primaryShade()],
-                  },
-                },
-
-                tabIcon: {
-                  marginRight: rem(4),
-                  display: "flex",
-                  alignItems: "center",
-                },
-
-                tabsList: {
-                  display: "flex",
-                  width: "100%",
-                  gap: rem(12),
-                },
-              })}
-            >
-              <Tabs.List grow>
-                <Tabs.Tab
-                  value="active"
-                  icon={<IconStar size="1rem" />}
-                  rightSection={
-                    <Badge
-                      size="sm"
-                      color={sectionTab === "active" ? "blue" : "gray"}
-                      sx={{ pointerEvents: "none" }}
-                      variant="filled"
-                    >
-                      {activeProspects.length}
-                    </Badge>
-                  }
-                >
-                  Active
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="snoozed"
-                  icon={<IconBellOff size="1rem" />}
-                  rightSection={
-                    <Badge
-                      color={sectionTab === "snoozed" ? "blue" : "gray"}
-                      sx={{ pointerEvents: "none" }}
-                      variant="filled"
-                      size="sm"
-                    >
-                      {snoozedProspects.length}
-                    </Badge>
-                  }
-                >
-                  Snoozed
-                </Tabs.Tab>
-              </Tabs.List>
-            </Tabs>
-
-            {/* <Group
-          spacing={0}
-          pt={0}
-          pb={5}
-          px={20}
-          m={0}
-          position="apart"
-          sx={{ flexWrap: "nowrap" }}
-        >
-          <SegmentedControl
-            size="xs"
-            value={segmentedSection}
-            onChange={setSegmentedSection}
-            styles={{
-              label: {
-                padding: "0.1875rem 0.1rem",
-              },
-            }}
-            data={[
-              // { label: (
-              //   <Text mx={10} my={5}>Recommended</Text>
-              // ), value: 'RECOMMENDED' },
-              {
-                label: (
-                  <Select
-                    data={filterSelectOptions.map((o) => {
-                      let count = o.count;
-                      if (o.value !== "ALL") {
-                        count = props.prospects.filter(
-                          (p) => p.linkedin_status === o.value
-                        ).length;
-                      }
-                      return {
-                        ...o,
-                        count,
-                      };
-                    })}
-                    withinPortal
-                    variant="unstyled"
-                    size="xs"
-                    itemComponent={StatusSelectItem}
-                    value={filterSelectValue}
-                    onClick={(e) => setSegmentedSection("SELECT")}
-                    onChange={(value) => {
-                      if (value) {
-                        setFilterSelectValue(value);
-                      }
-                    }}
-                    styles={(theme) => ({
-                      input: {
-                        color:
-                          filterSelectValue !== filterSelectOptions[0].value
-                            ? theme.colors.blue[theme.fn.primaryShade()]
-                            : theme.colors.gray[7],
-                        fontSize: 11,
-                        fontWeight: 600,
-                        maxWidth: 130,
-                        paddingLeft: 10,
-                      },
-                      wrapper: {
-                        width: 130,
-                      },
-                    })}
-                  />
-                ),
-                value: "SELECT",
-              },
-            ]}
-          />
-        </Group> */}
-
-            {/* <Divider /> */}
             <ScrollArea
               h={`calc(${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)`}
               sx={{ overflowX: "hidden" }}
@@ -710,9 +559,9 @@ export default function ProspectList(props: {
                     {displayProspects.map((prospect, i: number) => (
                       <div key={i}>
                         {filterSelectValue === "ALL" &&
-                          (!prospects[i - 1] ||
-                            prospect.linkedin_status !==
-                              prospects[i - 1].linkedin_status) && (
+                          (!displayProspects[i - 1] ||
+                            (prospect.linkedin_status !==
+                              displayProspects[i - 1].linkedin_status)) && (
                                  
                             <Box
                               bg="blue.1"

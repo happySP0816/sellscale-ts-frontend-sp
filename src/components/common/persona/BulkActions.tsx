@@ -100,7 +100,7 @@ const MovePersonaAction = ({ selectedProspects, backFunc, mx }: MovePersonaActio
 
   // Only allow Prospects that are in PROSPECTED state to be moved
   useEffect(() => {
-    const filteredProspects = selectedProspects.filter(x => x.status === 'PROSPECTED')
+    const filteredProspects = selectedProspects //.filter(x => x.status === 'PROSPECTED')
     setMovableProspects(filteredProspects)
     setPage(1)
     setShownRecords(filteredProspects.slice(0, 10))
@@ -113,7 +113,7 @@ const MovePersonaAction = ({ selectedProspects, backFunc, mx }: MovePersonaActio
 
   // On mount, calculate the initial shown records
   useEffect(() => {
-    const filteredProspects = selectedProspects.filter(x => x.status === 'PROSPECTED')
+    const filteredProspects = selectedProspects //.filter(x => x.status === 'PROSPECTED')
     setMovableProspects(filteredProspects)
     setPage(1)
     setShownRecords(filteredProspects.slice(0, 10))
@@ -130,17 +130,8 @@ const MovePersonaAction = ({ selectedProspects, backFunc, mx }: MovePersonaActio
         title='Move Persona'
         size='xl'
       >
-        <Text>You can move your selected Prospects into a different Persona. Note that
-          <b> only Prospects that are
-            <Badge color={valueToColor(theme, 'PROSPECTED')} variant='outline' mx='4px' size='sm'>Prospected</Badge>
-          </b>
-          can be moved.
+        <Text>You can move your selected Prospects into a different Persona.
         </Text>
-        <Text mt='xs'>Prospects not in
-          <Badge color={valueToColor(theme, 'PROSPECTED')} variant='outline' mx='4px' size='sm'>Prospected</Badge>
-          have been ommitted for this action.
-        </Text>
-
         <Flex mt='md' mb='lg'>
           <PersonaSelect
             disabled={movableProspects.length === 0}

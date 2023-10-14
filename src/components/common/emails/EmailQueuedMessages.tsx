@@ -1,5 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { Badge, Flex, LoadingOverlay, Text, TextInput } from "@mantine/core";
+import { Badge, Box, Button, Flex, HoverCard, LoadingOverlay, Text, TextInput } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import EmailQueuedMessageItem from "./EmailQueuedMessageItem";
@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { DataTable } from "mantine-datatable";
 import { Prospect } from "src";
 import { IconSearch } from "@tabler/icons";
+import DOMPurify from "dompurify";
 
 export default function EmailQueuedMessages(props: { all?: boolean }) {
   const userToken = useRecoilValue(userTokenState);
@@ -40,7 +41,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
       );
 
       let messages = response.status === 'success' ? response.data.schedule : [];
-      
+
       // Sort the messages on date scheduled
       messages = messages.sort((a: any, b: any) => {
         return new Date(a.date_scheduled).getTime() - new Date(b.date_scheduled).getTime();
@@ -108,7 +109,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
           {
             accessor: "",
             title: "Email Type",
-            render: ( data ) => {
+            render: (data) => {
               // Determine the type
               let type = data.email_type;
               if (type === 'INITIAL_EMAIL') {
@@ -135,6 +136,86 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
                 // <Text>
                 //   {subject_line_template.subject_line}
                 // </Text>
+              )
+            }
+          },
+          {
+            accessor: "",
+            title: "Preview",
+            render: (data) => {
+              let subject_line = data.subject_line;
+              let body = data.body;
+              const disabled = subject_line == null && body == null;
+
+              return (
+                <HoverCard
+                  width={disabled ? 400 : 600}
+                  shadow="md"
+                  withinPortal
+                  withArrow
+                >
+                  <HoverCard.Target>
+                    {
+                      disabled ? (
+                        <Text>
+                          Not Available
+                        </Text>
+                      ) : (
+                        <Button
+                          variant='outline'
+                          size='xs'
+                          disabled={disabled}
+                        >
+                          See Preview
+                        </Button>
+                      )
+                    }
+                  </HoverCard.Target>
+                  <HoverCard.Dropdown>
+                    {
+                      disabled ? (
+                        <Text size="sm">
+                          Preview not available yet! Messages generate 24 hours before sending.
+                        </Text>
+                      ) : (
+                        <>
+                          <Text size="sm">
+                            Subject Line:
+                          </Text>
+                          <Box
+                            sx={() => ({
+                              border: '1px solid #E0E0E0',
+                              borderRadius: '8px',
+                              backgroundColor: '#F5F5F5',
+                            })}
+                            p='xs'
+                            my='xs'
+                          >
+                            <Text fz='sm'>
+                              {subject_line.completion}
+                            </Text>
+                          </Box>
+                          <Text size="sm">
+                            Body:
+                          </Text>
+                          <Box
+                            sx={() => ({
+                              border: '1px solid #E0E0E0',
+                              borderRadius: '8px',
+                              backgroundColor: '#F5F5F5',
+                            })}
+                            px='md'
+                            mt='sm'
+                          >
+                            <Text fz="sm">
+                              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(body.completion) }} />
+                            </Text>
+                          </Box>
+                        </>
+                      )
+                    }
+                  </HoverCard.Dropdown>
+                </HoverCard>
               )
             }
           }

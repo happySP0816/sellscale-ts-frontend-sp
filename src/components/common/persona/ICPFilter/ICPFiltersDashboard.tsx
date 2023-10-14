@@ -15,6 +15,7 @@ import {
   useMantineTheme,
   HoverCard,
   Group,
+  Container,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
@@ -57,6 +58,7 @@ import {
 import { IconX } from "@tabler/icons";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
+import BulkActions from '../BulkActions';
 
 const demoData = [
   {
@@ -613,6 +615,25 @@ const ICPFiltersDashboard: FC<{
         >
           Remove {Object.keys(selectedRows).length} prospects
         </Button>
+        {currentProject?.is_unassigned_contact_archetype && <Container mt='xs'>
+          <BulkActions 
+            selectedProspects={Object.keys(selectedRows).map(key => {
+              return icpProspects[parseInt(key)];
+            })}
+            backFunc={() => {
+              setSelectedRows({});
+              queryClient.refetchQueries({
+                queryKey: [`query-get-icp-prospects`],
+              });
+              showNotification({
+                title: 'Success',
+                message: `${Object.keys(selectedRows).length} prospects has been moved from Unassigned Contacts to the new persona.`,
+                color: 'green',
+                autoClose: 5000,
+              })
+            }}
+          />
+        </Container>}
         <Box
           style={{
             display: "flex",
@@ -693,6 +714,7 @@ const ICPFiltersDashboard: FC<{
           selectedTab={selectedTab}
           setSelectedTab={setSelectedTab}
           icpDashboard={icpDashboard}
+          numProspects={icpProspects.length}
         />
       </Paper>
 

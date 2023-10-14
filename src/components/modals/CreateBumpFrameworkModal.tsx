@@ -1,11 +1,12 @@
 import { userTokenState } from "@atoms/userAtoms";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
-import { Modal, TextInput, Text, Textarea, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, HoverCard, Paper, Tooltip } from "@mantine/core";
+import { Modal, TextInput, Text, Textarea, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, HoverCard, Paper, Tooltip, Group, Box, Collapse } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useDisclosure } from '@mantine/hooks';
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconCheck, IconX } from "@tabler/icons";
+import { IconCheck, IconWashMachine, IconX } from "@tabler/icons";
 import { createBumpFramework } from "@utils/requests/createBumpFramework";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
@@ -32,6 +33,7 @@ interface CreateBumpFramework extends Record<string, unknown> {
   initialValues?: {
     title: string;
     description: string;
+    human_readable_prompt: string;
     default: boolean;
     bumpDelayDays: number;
     useAccountResearch: boolean;
@@ -75,6 +77,8 @@ export function CreateBumpFrameworkContextModal({
   const [selectedSubstatus, setSelectedSubstatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const [opened, { toggle }] = useDisclosure(false);
+
   const getActiveConvoSubstatusValues = () => {
     const activeConvoStatuses = [];
     const statuses_avilable =
@@ -117,7 +121,8 @@ export function CreateBumpFrameworkContextModal({
       form.values.bumpDelayDays,
       form.values.default,
       selectedSubstatus,
-      form.values.useAccountResearch
+      form.values.useAccountResearch,
+      form.values.human_readable_prompt
     );
 
     if (result.status === "success") {
@@ -144,11 +149,12 @@ export function CreateBumpFrameworkContextModal({
     initialValues: {
       title: innerProps.initialValues?.title ?? "",
       description: innerProps.initialValues?.description ?? "",
+      human_readable_prompt: innerProps.initialValues?.human_readable_prompt ?? "",
       archetypeID: innerProps.archetypeID,
       default: innerProps.initialValues?.default ?? true,
       bumpedCount: innerProps.bumpedCount,
       bumpDelayDays: innerProps.initialValues?.bumpDelayDays ?? 2,
-      useAccountResearch: innerProps.initialValues?.useAccountResearch ?? true,
+      useAccountResearch: innerProps.initialValues?.useAccountResearch ?? false,
     },
   });
 
@@ -166,9 +172,7 @@ export function CreateBumpFrameworkContextModal({
 
 
   return (
-    <Paper
-      withBorder
-    >
+    <Paper>
       <LoadingOverlay visible={loading} />
       <TextInput
         label={selectedStatus?.includes("ACTIVE_CONVO") ? 'Prospect reply' : "Template nickname"}
@@ -186,10 +190,30 @@ export function CreateBumpFrameworkContextModal({
         autosize
         {...form.getInputProps("description")}
       />
-      <Text fz="sm" mt="md">
-        Bump Length
-      </Text>
-      <Flex
+
+      <Box mx="auto">
+        <Group mb={5}>
+          <Button onClick={toggle} leftIcon={<IconWashMachine size="0.8rem"/>} variant='outline' color='gray' mt='xs' w='100%'>
+            {opened ? "Hide" : "Show"} Advanced Settings
+            </Button>
+        </Group>
+
+        <Collapse in={opened}>
+          <Textarea
+              mt="md"
+              label="Label"
+              description="This is the label that will be shown to succinctly explain this framework"
+              placeholder={
+                "This is a description of this framework."
+              }
+              withAsterisk
+              autosize
+              {...form.getInputProps("human_readable_prompt")}
+            />
+          <Text fz="sm" mt="md">
+            Bump Length
+          </Text>
+          <Flex
         align="center"
         justify={'center'}
       >
@@ -218,8 +242,10 @@ export function CreateBumpFrameworkContextModal({
           </HoverCard.Dropdown>
         </HoverCard>
       </Flex>
+         
+      
 
-      <Flex wrap="wrap" mt="xs" w="100%">
+      {/* <Flex wrap="wrap" mt="xs" w="100%">
         <PersonaSelect
           disabled={false}
           onChange={(archetypes) =>
@@ -230,7 +256,8 @@ export function CreateBumpFrameworkContextModal({
           description="Select the personas this framework applies to."
           defaultValues={[form.values.archetypeID || -1]}
         />
-      </Flex>
+      </Flex> */}
+
       {innerProps.showStatus && (
         <Select
           label="Status"
@@ -264,6 +291,9 @@ export function CreateBumpFrameworkContextModal({
           withAsterisk
         />
       )}
+
+
+   
       {(selectedStatus === "BUMPED" && form.values.bumpedCount != null && innerProps.showStatus) && (
         <NumberInput
           mt='md'
@@ -278,8 +308,7 @@ export function CreateBumpFrameworkContextModal({
           withAsterisk
         />
       )}
-      <Flex w="100%" justify="flex-end" direction={'column'}>
-        <Flex justify='space-between' align='center'>
+      <Flex justify='space-between' align='center'>
           {
             (selectedStatus === "BUMPED" || selectedStatus === "ACCEPTED") &&  (
               <NumberInput
@@ -342,6 +371,11 @@ export function CreateBumpFrameworkContextModal({
             </Tooltip>
           </Flex>
         </Flex>
+        </Collapse>
+      </Box>
+      
+      <Flex w="100%" justify="flex-end" direction={'column'}>
+        
 
         <Button
           mt="md"
@@ -355,8 +389,9 @@ export function CreateBumpFrameworkContextModal({
           onClick={() => {
             triggerCreateBumpFramework();
           }}
+          size='lg'
         >
-          Create
+          Create Framework
         </Button>
       </Flex>
 

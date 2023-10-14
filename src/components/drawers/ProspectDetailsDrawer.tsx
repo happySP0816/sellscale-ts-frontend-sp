@@ -410,29 +410,13 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
             <ProspectDetailsResearch
               prospectId={data.main.prospect_info.details.id}
             />
-            <ProspectDetailsNotes
+
+            {/* Prospect Notes: Todo(Aakash) uncomment if needed */}
+            {/* <ProspectDetailsNotes
               currentStatus={prospectDrawerStatuses.overall}
               prospectId={data.main.prospect_info.details.id}
-            />
-            {
-              // <ProspectDetailsRemove
-              //   prospectId={data.main.prospect_info.details.id}
-              //   prospectStatus={prospectDrawerStatuses.overall}
-              // />
-              //
-              // data.main.prospect_info.company.name && (
-              // <ProspectDetailsCompany
-              //   logo={data.main.prospect_info.company.logo}
-              //   company_name={data.main.prospect_info.company.name}
-              //   location={data.main.prospect_info.company.location}
-              //   description={data.main.prospect_info.company.description}
-              //   employee_count={data.main.prospect_info.company.employee_count}
-              //   tagline={data.main.prospect_info.company.tagline}
-              //   tags={data.main.prospect_info.company.tags}
-              //   website_url={data.main.prospect_info.company.url}
-              // />
-              // )
-            }
+            /> */}
+            
           </ScrollArea>
         </>
       )}

@@ -901,10 +901,10 @@ function BumpFrameworkSelect(props: {
                     frameworkTemplates?.filter((f) => {
                       return (
                         props.overallStatus === "ACCEPTED" &&
-                        f.overall_statuses.includes("ACCEPTED")
+                        f.overall_statuses?.includes("ACCEPTED")
                       ) || (
                         props.overallStatus === "BUMPED" &&
-                        f.overall_statuses.includes("BUMPED") && 
+                        f.overall_statuses?.includes("BUMPED") && 
                         f.bumped_counts.includes(props.bumpedCount)
                       ) || (
                         props.overallStatus == null

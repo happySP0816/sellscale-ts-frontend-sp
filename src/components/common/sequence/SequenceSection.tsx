@@ -907,7 +907,7 @@ function BumpFrameworkSelect(props: {
                         f.overall_statuses?.includes("BUMPED") && 
                         f.bumped_counts.includes(props.bumpedCount)
                       ) || (
-                        props.overallStatus == null
+                        !f.overall_statuses
                       )
                     }).map((template, index) => {
                       return {

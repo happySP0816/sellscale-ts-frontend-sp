@@ -1,5 +1,15 @@
-import { Box, Button, Divider, Container, Flex, Text } from "@mantine/core";
-import { IconShare2 } from "@tabler/icons-react";
+import {
+  Box,
+  Button,
+  Divider,
+  Container,
+  Flex,
+  Text,
+  Title,
+  ThemeIcon,
+  ActionIcon,
+} from "@mantine/core";
+import { IconCheck, IconExternalLink, IconShare2 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { WarmUp } from "./WarmUp";
 import { PersonalizationCard } from "./PersonalizationCard";
@@ -7,6 +17,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import getSDRLinkedinHealth from "@utils/requests/getSDRLinkedinHealth";
 import { showNotification } from "@mantine/notifications";
+import { IconX } from "@tabler/icons";
 
 interface CheckBox {
   title: string;
@@ -21,8 +32,8 @@ const Process: React.FC = () => {
   const [linkedInHealthCritera, setLinkedInHealthCritera] = useState<any>([]);
 
   const triggerGetLinkedinHealth = async () => {
-    const result = await getSDRLinkedinHealth(userToken)
-    if (result.status !== 'success') {
+    const result = await getSDRLinkedinHealth(userToken);
+    if (result.status !== "success") {
       showNotification({
         title: "Error",
         message: result.message,
@@ -30,84 +41,76 @@ const Process: React.FC = () => {
       });
     }
 
-    const data = result.data
-    setUserData({ ...userData, li_health: data.health })
+    const data = result.data;
+    setUserData({ ...userData, li_health: data.health });
 
-    setLinkedInHealthCritera(data.details)
-    console.log('result', result)
-  }
+    setLinkedInHealthCritera(data.details);
+    console.log("result", result);
+  };
 
   useEffect(() => {
-    triggerGetLinkedinHealth()
-  }, [])
+    triggerGetLinkedinHealth();
+  }, []);
 
   return (
     <>
-      {
-        linkedInHealthCritera && (
-          <Flex direction={"column"} maw='100%'>
-            <Flex align={"center"} mb={"0.5rem"} gap={"0.5rem"}>
-              <Text fw={"500"} fz={"1rem"}>
-                LinkedIn Profile Success Criteria
-              </Text>
-              {/* <Button variant="light" size="xs" color="red" radius="xl">
+      {linkedInHealthCritera && (
+        <Flex direction={"column"} maw="100%">
+          <Flex align={"center"} mb={"0.5rem"} gap={"0.5rem"}>
+            <Title order={3}>LinkedIn Profile Success Criteria</Title>
+            {/* <Button variant="light" size="xs" color="red" radius="xl">
           4 Issues Detected
         </Button> */}
-            </Flex>
-            <Text c={"gray.6"} fz={"0.75rem"} mb={"1rem"}>
-              Completing these steps will improve your LinkedIn Profile health and increase your chances of success through SellScale.
-            </Text>
-            <Flex align={"center"} mb={"1rem"} gap={"0.25rem"}>
-              {linkedInHealthCritera.map((criteria: any) => {
-                const status = criteria.status
-                return (
-                  <Box
-                    h={"0.25rem"}
-                    w={"100%"}
-                    bg={status ? "green" : "red"}
-                    sx={{ borderRadius: "0.25rem" }}
-                  />
-                )
-              }
-              )}
-            </Flex>
-            {/* <Text c={"gray.6"} fz={"0.75rem"} mb={"0.5rem"}>
+          </Flex>
+          <Text c={"gray.6"} mb={"1rem"} fw={500}>
+            Completing these steps will improve your LinkedIn Profile health and
+            increase your chances of success through SellScale.
+          </Text>
+          {/* <Flex align={"center"} mb={"1rem"} gap={"0.25rem"}>
+            {linkedInHealthCritera.map((criteria: any) => {
+              const status = criteria.status;
+              return (
+                <Box
+                  h={"0.25rem"}
+                  w={"100%"}
+                  bg={status ? "green" : "red"}
+                  sx={{ borderRadius: "0.25rem" }}
+                />
+              );
+            })}
+          </Flex> */}
+          {/* <Text c={"gray.6"} fz={"0.75rem"} mb={"0.5rem"}>
         4 remaining to complete
       </Text> */}
-            <Flex
-              gap={"0.5rem"}
-              wrap="nowrap"
-              mb={"1.5rem"}
-              sx={{ overflowX: "auto" }}
-              pb={"0.5rem"}
-            >
-              {linkedInHealthCritera.map((critera: any) => {
-                const status = critera.status
-                const message = critera.message
-                const criteria_name = critera.criteria
+          <Flex gap={"0.5rem"} mb={"1.5rem"} direction="column" pb={"0.5rem"}>
+            {linkedInHealthCritera.map((critera: any) => {
+              const status = critera.status;
+              const message = critera.message;
+              const criteria_name = critera.criteria;
+              return (
+                <Flex align={"center"}>
+                  {status ? (
+                    <ThemeIcon color="green" size="1.25rem" radius="xl">
+                      <IconCheck size="1rem" />
+                    </ThemeIcon>
+                  ) : (
+                    <ThemeIcon color="gray" size="1.25rem" radius="xl">
+                      <IconX size="1rem" />
+                    </ThemeIcon>
+                  )}
 
-                return (
-                  <Button
-                    h={"auto"}
-                    p={"1rem"}
-                    variant="light"
-                    color={status ? "green" : "red"}
-                    size="xs"
-                    sx={{ borderColor: status ? "green" : "red" }}
-                  >
-                    <Box>
-                      <Text>{criteria_name}</Text>
-                      <Text c={"gray.6"} fz={"0.75rem"}>
-                        {message}
-                      </Text>
-                    </Box>
-                  </Button>
-                )}
-              )}
-            </Flex>
+                  <Text ml={"0.25rem"} fw={400} size={"lg"}>
+                    {criteria_name}
+                  </Text>
+                  <ActionIcon color="blue">
+                    <IconExternalLink size="1.25rem" />
+                  </ActionIcon>
+                </Flex>
+              );
+            })}
           </Flex>
-        )
-      }
+        </Flex>
+      )}
     </>
   );
 };
@@ -228,14 +231,14 @@ const Information = () => {
   }, [isEnabledCompanyBase]);
 
   return (
-    <Flex direction='column' p='md' maw='100%'>
-      <Flex maw='100%'>
+    <Flex direction="column" p="md" maw="100%">
+      <Flex maw="100%">
         <Process />
       </Flex>
 
       <Divider my="sm" />
 
-      <Flex maw='100%'>
+      <Flex maw="100%">
         <WarmUp />
       </Flex>
 
@@ -257,7 +260,8 @@ const Information = () => {
           </Button> */}
         </Flex>
         <Text c={"gray.6"} fz={"0.75rem"} mb={"1rem"}>
-          Globally set personalization settings. Tell us which personalizations you want, and which ones you dont.
+          Globally set personalization settings. Tell us which personalizations
+          you want, and which ones you dont.
         </Text>
 
         <PersonalizationCard

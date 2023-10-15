@@ -806,7 +806,7 @@ function BumpFrameworkSelect(props: {
     queryKey: [`query-get-bump-framework-templates`],
     queryFn: async () => {
       
-      const res = await fetch(`${API_URL}/bump_framework/bump_framework_templates`, {
+      const res = await fetch(`${API_URL}/bump_framework/bump_framework_templates?bumped_count=${props.bumpedCount}&overall_status=${props.overallStatus}`, {
         method: "GET",
       });
       const result = await res.json();
@@ -817,6 +817,8 @@ function BumpFrameworkSelect(props: {
         human_readable_prompt: string;
         length: string;
         tag: string;
+        bumped_counts: number[];
+        overall_statuses: string[];
       }[];
       return data.map((template) => {
         return {
@@ -825,6 +827,8 @@ function BumpFrameworkSelect(props: {
           human_readable_prompt: template.human_readable_prompt,
           length: template.length,
           tag: template.tag,
+          bumped_counts: template.bumped_counts,
+          overall_statuses: template.overall_statuses,
         };
       });
 
@@ -894,7 +898,18 @@ function BumpFrameworkSelect(props: {
                   loading={false}
                   zIndex={200}
                   items={
-                    frameworkTemplates?.map((template, index) => {
+                    frameworkTemplates?.filter((f) => {
+                      return (
+                        props.overallStatus === "ACCEPTED" &&
+                        f.overall_statuses?.includes("ACCEPTED")
+                      ) || (
+                        props.overallStatus === "BUMPED" &&
+                        f.overall_statuses?.includes("BUMPED") && 
+                        f.bumped_counts.includes(props.bumpedCount)
+                      ) || (
+                        !f.overall_statuses
+                      )
+                    }).map((template, index) => {
                       return {
                         id: index,
                         name: template.name,

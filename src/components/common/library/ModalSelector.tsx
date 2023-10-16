@@ -12,13 +12,17 @@ import {
   Paper,
   ScrollArea,
   Stack,
+  Text,
+  TextInput,
   Title,
   Tooltip,
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
+import { IconSearch } from '@tabler/icons';
 import { IconEdit, IconPencil } from "@tabler/icons-react";
 import _ from "lodash";
+import { useState } from 'react';
 
 export default function ModalSelector(props: {
   selector: {
@@ -33,6 +37,7 @@ export default function ModalSelector(props: {
     name: string;
     rightSection?: React.ReactNode;
   };
+  showSearchbar?: boolean;
   activeItemId?: number;
   loading: boolean;
   size?: number;
@@ -57,6 +62,11 @@ export default function ModalSelector(props: {
   };
 }) {
   const [opened, { open, close }] = useDisclosure(false);
+
+  const [search, setSearch] = useState('');
+  const filteredItems = props.items.filter((item) => {
+    return item.name.toLowerCase().includes(search.toLowerCase());
+  })
 
   return (
     <>
@@ -149,9 +159,19 @@ export default function ModalSelector(props: {
                 </Box>
               </Flex>
             )}
+            {
+              props.showSearchbar && 
+              <TextInput 
+                placeholder="Search" 
+                onChange={(e) => setSearch(e.currentTarget.value)}
+                icon={<IconSearch size='0.9rem' />} 
+                w='100%'
+                autoFocus
+              />
+            }
             <ScrollArea h={props.footer ? "60vh" : "70vh"} w="100%">
               <Stack py={4} spacing={0}>
-                {props.items.map((item, index) => (
+                {filteredItems.map((item, index) => (
                   <ModalSelectorOption
                     key={index}
                     active={item.id === props.activeItemId ? true : undefined}

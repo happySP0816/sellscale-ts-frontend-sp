@@ -4,9 +4,10 @@ import PersonaSelect from "@common/persona/PersonaSplitSelect";
 import { Modal, TextInput, Text, Textarea, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, HoverCard, Paper, Tooltip, Group, Box, Collapse } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from '@mantine/hooks';
-import { ContextModalProps, openContextModal } from "@mantine/modals";
+import { ContextModalProps, closeAllModals, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconCheck, IconWashMachine, IconX } from "@tabler/icons";
+import { useQueryClient } from '@tanstack/react-query';
 import { createBumpFramework } from "@utils/requests/createBumpFramework";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
@@ -68,6 +69,7 @@ export function CreateBumpFrameworkContextModal({
 }: ContextModalProps<CreateBumpFramework>) {
   const [userToken] = useRecoilState(userTokenState);
   const theme = useMantineTheme();
+  const queryClient = useQueryClient();
 
   const initBumpLengthAsValue = bumpFrameworkLengthMarks.find((mark) => mark.api_label === innerProps.initialValues?.bumpLength)?.value;
   const [bumpLengthValue, setBumpLengthValue] = useState(
@@ -141,6 +143,10 @@ export function CreateBumpFrameworkContextModal({
         color: "red",
       });
     }
+    
+    queryClient.refetchQueries({
+      queryKey: [`query-get-bump-frameworks`],
+    });
 
     setLoading(false);
   };
@@ -201,7 +207,8 @@ export function CreateBumpFrameworkContextModal({
         <Collapse in={opened}>
           <Textarea
               mt="md"
-              label="Label"
+              label="Goal"
+              minRows={3}
               description="This is the label that will be shown to succinctly explain this framework"
               placeholder={
                 "This is a description of this framework."

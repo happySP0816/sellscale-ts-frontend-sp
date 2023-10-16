@@ -407,6 +407,7 @@ export type BumpFramework = {
   additional_context?: string;
   bump_framework_template_name?: string;
   bump_framework_human_readable_prompt?: string;
+  human_feedback?: string;
 };
 
 export type EmailSequenceStep = {

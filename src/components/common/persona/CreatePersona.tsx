@@ -46,11 +46,11 @@ export default function CreatePersona(props: PropsType) {
 
   return (
     <Card>
-      <Title order={5}>Upload Prospects Later</Title>
+      {/* <Title order={5}>Upload Prospects Later</Title>
       <Text size="sm">
         Create a persona without any prospects added. You can add prospects
         later.
-      </Text>
+      </Text> */}
       <Button
         disabled={
           !props.createPersona?.name ||
@@ -61,7 +61,6 @@ export default function CreatePersona(props: PropsType) {
         }
         onClick={() => createPersonaHandler()}
         loading={creatingPersona}
-        mt="md"
       >
         Create Persona
       </Button>

@@ -48,6 +48,7 @@ import {
   ThemeIcon,
   Alert,
   Loader,
+  Image,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
@@ -56,6 +57,7 @@ import {
   useHover,
   usePrevious,
 } from "@mantine/hooks";
+import sellScaleLogo from './assets/logo.jpg'
 import { modals, openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
@@ -113,6 +115,8 @@ import {
   IconCircleMinus,
   IconRobot,
   IconSettings,
+  IconSwitch,
+  IconTool,
   IconTrash,
 } from "@tabler/icons";
 import {
@@ -218,10 +222,6 @@ export default function SequenceSection() {
     bf3 && bf3?.etl_num_times_converted && bf3?.etl_num_times_used
       ? (bf3.etl_num_times_converted / bf3.etl_num_times_used) * 100
       : undefined;
-  // const bf0Conversion = replyRate * 0.5;
-  // const bf1Conversion = replyRate * 0.3;
-  // const bf2Conversion = replyRate * 0.2;
-  // const bf3Conversion = replyRate * 0.1;
 
   const bump_amount = currentProject?.li_bump_amount ?? 3;
   console.log(bump_amount);
@@ -836,126 +836,26 @@ function BumpFrameworkSelect(props: {
     refetchOnWindowFocus: false,
   });
 
-  return (
-    <ModalSelector
-      zIndex={100}
-      selector={{
-        override: (
-          <Tooltip label="Change" withinPortal>
-            <ActionIcon radius="xl">
-              <IconEdit size="1.1rem" />
-            </ActionIcon>
-          </Tooltip>
-        ),
-      }}
-      title={{
-        name: props.title,
-        rightSection: (
-          <Menu shadow="md" width={220} withArrow>
-            <Menu.Target>
-              <Button variant="filled" radius="xl">
-                New Framework
-              </Button>
-            </Menu.Target>
+  
 
-            <Menu.Dropdown>
-              <Menu.Item
-                icon={<IconPlus size={14} />}
-                onClick={() => {
-                  openContextModal({
-                    modal: "createBumpFramework",
-                    title: "Create Bump Framework",
-                    innerProps: {
-                      modalOpened: true,
-                      openModal: () => {},
-                      closeModal: () => {
-                        queryClient.refetchQueries({
-                          queryKey: [`query-get-bump-frameworks`],
-                        });
-                        modals.closeAll();
-                      },
-                      backFunction: () => {},
-                      dataChannels: dataChannels,
-                      status: props.overallStatus,
-                      archetypeID: currentProject?.id,
-                      bumpedCount: props.bumpedCount,
-                    },
-                  });
-                }}
-              >
-                Create New
-              </Menu.Item>
-              <Menu.Item icon={<IconTablePlus size={14} />} closeMenuOnClick={false}>
-                <ModalSelector
-                  selector={{
-                    override: <>Create from Template</>,
-                  }}
-                  title={{
-                    name: "Choose a Template",
-                    rightSection: undefined,
-                  }}
-                  size={600}
-                  loading={false}
-                  zIndex={200}
-                  items={
-                    frameworkTemplates?.filter((f) => {
-                      return (
-                        props.overallStatus === "ACCEPTED" &&
-                        f.overall_statuses?.includes("ACCEPTED")
-                      ) || (
-                        props.overallStatus === "BUMPED" &&
-                        f.overall_statuses?.includes("BUMPED") && 
-                        f.bumped_counts.includes(props.bumpedCount)
-                      ) || (
-                        !f.overall_statuses
-                      )
-                    }).map((template, index) => {
-                      return {
-                        id: index,
-                        name: template.name,
-                        content: (
-                          <Box>
-                            <Text>{template.name}</Text>
-                          </Box>
-                        ),
-                        onClick: () => {
-                          openContextModal({
-                            modal: "createBumpFramework",
-                            title: "Create Bump Framework",
-                            innerProps: {
-                              modalOpened: true,
-                              openModal: () => {},
-                              closeModal: () => {
-                                queryClient.refetchQueries({
-                                  queryKey: [`query-get-bump-frameworks`],
-                                });
-                                modals.closeAll();
-                              },
-                              backFunction: () => {},
-                              dataChannels: dataChannels,
-                              status: props.overallStatus,
-                              archetypeID: currentProject?.id,
-                              bumpedCount: props.bumpedCount,
-                              initialValues: {
-                                title: template.name,
-                                description: template.prompt,
-                                default: true,
-                                bumpDelayDays: 2,
-                                useAccountResearch: true,
-                                bumpLength: template.length,
-                                human_readable_prompt: template.human_readable_prompt
-                              }
-                            },
-                          });
-                        },
-                      };
-                    }) ?? []
-                  }
-                />
-              </Menu.Item>
-              <Menu.Item
-                icon={<IconCopy size={14} />}
-                onClick={() => {
+  return (
+    <>
+      {/* Switch framework */}
+      <ModalSelector
+        zIndex={100}
+        selector={{
+          override: (
+            <Tooltip label="Change Framework" withinPortal>
+              <ActionIcon radius="xl">
+                <IconSwitch size="1.1rem" />
+              </ActionIcon>
+            </Tooltip>
+          ),
+        }}
+        title={{
+          name: props.title,
+          rightSection: (
+              <Button variant="outline" radius="md" size='xs' onClick={() => {
                   openContextModal({
                     modal: "cloneBumpFramework",
                     title: "Clone Bump Framework",
@@ -971,82 +871,187 @@ function BumpFrameworkSelect(props: {
                       showStatus: true,
                     },
                   });
-                }}
-              >
-                Copy from Existing
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        ),
-      }}
-      loading={false}
-      items={props.bumpedFrameworks.map((bf) => ({
-        id: bf.id,
-        name: bf.title,
-        onClick: () => {},
-        leftSection: (
-          <Badge
-            size="sm"
-            variant="filled"
-            color={valueToColor(theme, bf.bump_length)}
-            ml="6px"
-          >
-            {bf.bump_length}
-          </Badge>
-        ),
-        content: (
-          <Box>
-            <Text fz="sm" fw={500}>
-              {bf.title}
-            </Text>
-            <Text fz="xs" c="dimmed">
-              {bf.description}
-            </Text>
-          </Box>
-        ),
-        rightSection: (
-          <Box ml="auto">
-            <Switch
-              checked={bf.default}
-              onChange={(checked) => {
-                setLoading(true);
-                const result = patchBumpFramework(
-                  userToken,
-                  bf.id,
-                  bf.overall_status,
-                  bf.title,
-                  bf.description,
-                  bf.bump_length,
-                  bf.bumped_count,
-                  bf.bump_delay_days,
-                  !bf.default,
-                  bf.use_account_research,
-                  bf.transformer_blocklist
-                )
-                  .then(() => {
-                    showNotification({
-                      title: "Success",
-                      message: "Bump Framework enabled",
-                      color: "green",
+                }}>
+                Clone Framework
+              </Button>
+          ),
+        }}
+        loading={false}
+        items={props.bumpedFrameworks.map((bf) => ({
+          id: bf.id,
+          name: bf.title,
+          onClick: () => {},
+          leftSection: (
+            <Badge
+              size="sm"
+              variant="filled"
+              color={valueToColor(theme, bf.bump_length)}
+              ml="6px"
+            >
+              {bf.bump_length}
+            </Badge>
+          ),
+          content: (
+            <Box>
+              <Text fz="sm" fw={500}>
+                {bf.title}
+              </Text>
+              <Text fz="xs" c="dimmed">
+                {bf.description}
+              </Text>
+            </Box>
+          ),
+          rightSection: (
+            <Box ml="auto">
+              <Switch
+                checked={bf.default}
+                onChange={(checked) => {
+                  setLoading(true);
+                  const result = patchBumpFramework(
+                    userToken,
+                    bf.id,
+                    bf.overall_status,
+                    bf.title,
+                    bf.description,
+                    bf.bump_length,
+                    bf.bumped_count,
+                    bf.bump_delay_days,
+                    !bf.default,
+                    bf.use_account_research,
+                    bf.transformer_blocklist
+                  )
+                    .then(() => {
+                      showNotification({
+                        title: "Success",
+                        message: "Bump Framework enabled",
+                        color: "green",
+                      });
+                    })
+                    .finally(() => {
+                      (async () => {
+                        await queryClient.refetchQueries({
+                          queryKey: [`query-get-bump-frameworks`],
+                        });
+                        setLoading(false);
+                      })();
                     });
-                  })
-                  .finally(() => {
-                    (async () => {
-                      await queryClient.refetchQueries({
+                }}
+              />
+              {loading && <Loader size="xs" mt="xs" />}
+            </Box>
+          ),
+        }))}
+        size={800}
+        activeItemId={props.activeBumpFrameworkId}
+      />
+      {/* Create New Framework */}
+      <ModalSelector
+        selector={{
+          override: <Tooltip label="Create New Framework" withinPortal>
+              <ActionIcon radius="xl">
+                <IconPlus size="1.1rem" />
+              </ActionIcon>
+            </Tooltip>,
+        }}
+        title={{
+          name: "Choose a Template",
+          rightSection: (
+              <Button variant="outline" radius="md" size='xs' 
+                leftIcon={<IconTool size="1rem" />}
+                onClick={() => {
+                    openContextModal({
+                      modal: "createBumpFramework",
+                      title: "Make your own framework",
+                      innerProps: {
+                        modalOpened: true,
+                        openModal: () => {},
+                        closeModal: () => {
+                          queryClient.refetchQueries({
+                            queryKey: [`query-get-bump-frameworks`],
+                          });
+                          modals.closeAll();
+                        },
+                        backFunction: () => {},
+                        dataChannels: dataChannels,
+                        status: props.overallStatus,
+                        archetypeID: currentProject?.id,
+                        bumpedCount: props.bumpedCount,
+                        initialValues: {
+                          title: "",
+                          description: "",
+                          default: false,
+                          bumpDelayDays: 2,
+                          useAccountResearch: true,
+                          bumpLength: "1 week",
+                          human_readable_prompt: ""
+                        }
+                      },
+                    });
+                  }}>
+                Make a Custom Framework
+              </Button>
+          ),
+        }}
+        showSearchbar
+        size={600}
+        loading={false}
+        zIndex={200}
+        items={
+          frameworkTemplates?.filter((f) => {
+            return (
+              props.overallStatus === "ACCEPTED" &&
+              f.overall_statuses?.includes("ACCEPTED")
+            ) || (
+              props.overallStatus === "BUMPED" &&
+              f.overall_statuses?.includes("BUMPED") && 
+              f.bumped_counts.includes(props.bumpedCount)
+            ) || (
+              !f.overall_statuses
+            )
+          }).map((template, index) => {
+            return {
+              id: index,
+              name: template.name,
+              content: (
+                <Box>
+                  <Text>{template.name}</Text>
+                </Box>
+              ),
+              onClick: () => {
+                openContextModal({
+                  modal: "createBumpFramework",
+                  title: "Create Bump Framework",
+                  innerProps: {
+                    modalOpened: true,
+                    openModal: () => {},
+                    closeModal: () => {
+                      queryClient.refetchQueries({
                         queryKey: [`query-get-bump-frameworks`],
                       });
-                      setLoading(false);
-                    })();
-                  });
-              }}
-            />
-            {loading && <Loader size="xs" mt="xs" />}
-          </Box>
-        ),
-      }))}
-      size={800}
-      activeItemId={props.activeBumpFrameworkId}
-    />
+                      modals.closeAll();
+                    },
+                    backFunction: () => {},
+                    dataChannels: dataChannels,
+                    status: props.overallStatus,
+                    archetypeID: currentProject?.id,
+                    bumpedCount: props.bumpedCount,
+                    initialValues: {
+                      title: template.name,
+                      description: template.prompt,
+                      default: true,
+                      bumpDelayDays: 2,
+                      useAccountResearch: true,
+                      bumpLength: template.length,
+                      human_readable_prompt: template.human_readable_prompt
+                    }
+                  },
+                });
+              },
+            };
+          }) ?? []
+        }
+      />
+    </>
   );
 }
 
@@ -1696,6 +1701,7 @@ function LiExampleMessage(props: {
   message: string;
   hovered?: boolean;
   onClick?: () => void;
+  onAnimatonComplete?: () => void;
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -1731,6 +1737,7 @@ function LiExampleMessage(props: {
         });
       }
       animationPlaying.current = false;
+      props.onAnimatonComplete && props.onAnimatonComplete();
     })();
   }, []);
 
@@ -2050,6 +2057,13 @@ function FrameworkSection(props: {
   const [descriptionEditState, setDescriptionEditState] = useState(false);
   const [personalizationItemsCount, setPersonalizationItemsCount] =
     useState<number>();
+  const [personalizationItemIds, setPersonalizationItemIds] = useState(
+    props.framework.transformer_blocklist
+  );
+  const [showUserFeedback, setShowUserFeedback] = useState(props.framework.human_feedback !== null);
+  const [feedbackChanged, setFeedbackChanged] = useState(false);
+
+  const [initialFrameworkId, setInitialFrameworkId] = useState<number>(props.framework.id);
 
   let { hovered: hovered, ref: ref } = useHover();
 
@@ -2064,8 +2078,29 @@ function FrameworkSection(props: {
       bumpFrameworkTemplateName: props.framework.bump_framework_template_name,
       bumpFrameworkHumanReadablePrompt:
         props.framework.bump_framework_human_readable_prompt,
+      humanFeedback: props.framework.human_feedback,
     },
   });
+
+  useEffect(() => {
+    if (initialFrameworkId !== props.framework.id) {
+      setInitialFrameworkId(props.framework.id);
+      form.setValues({
+        frameworkName: props.framework.title,
+        bumpLength: props.framework.bump_length,
+        delayDays: props.framework.bump_delay_days,
+        promptInstructions: props.framework.description,
+        useAccountResearch: props.framework.use_account_research,
+        additionalContext: props.framework.additional_context,
+        bumpFrameworkTemplateName: props.framework.bump_framework_template_name,
+        bumpFrameworkHumanReadablePrompt:
+          props.framework.bump_framework_human_readable_prompt,
+        humanFeedback: props.framework.human_feedback,
+      })
+    }
+  }, [props.framework.id])
+
+  
   const [debouncedForm] = useDebouncedValue(form.values, 200);
   const prevDebouncedForm = usePrevious(debouncedForm);
   const [
@@ -2073,10 +2108,12 @@ function FrameworkSection(props: {
     { toggle: moreAdditionInformationToggle },
   ] = useDisclosure(false);
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [savingSettings, setSavingSettings] = useState(false);
   useEffect(() => {
     props.setIsDataChanged(changed);
   }, [changed]);
   const saveSettings = async (values: typeof form.values) => {
+    setSavingSettings(true);
     const result = await patchBumpFramework(
       userToken,
       props.framework.id,
@@ -2088,31 +2125,27 @@ function FrameworkSection(props: {
       values.delayDays,
       props.framework.default,
       values.useAccountResearch,
-      props.framework.transformer_blocklist,
+      personalizationItemIds,
       values.additionalContext,
       values.bumpFrameworkTemplateName,
-      values.bumpFrameworkHumanReadablePrompt
+      values.bumpFrameworkHumanReadablePrompt,
+      values.humanFeedback
     );
     await queryClient.refetchQueries({
       queryKey: [`query-get-bump-frameworks`],
     });
+
+    showNotification({
+        title: "Settings Saved ✅",
+        message: "Hit Regenerate to see your new message.",
+        color: "green",
+      });
+
+    setSavingSettings(false);
     setChanged(false);
 
     return result.status === "success";
   };
-
-  // useEffect(() => {
-  //   saveSettings(debouncedForm);
-  //   if (
-  //     debouncedForm.useAccountResearch &&
-  //     !prevDebouncedForm?.useAccountResearch
-  //   ) {
-  //     //setActiveTab('personalization');
-  //   }
-  //   if (!debouncedForm.useAccountResearch && activeTab === "personalization") {
-  //     setActiveTab("none");
-  //   }
-  // }, [debouncedForm]);
 
   const openPersonalizationSettings = () => {
     if (form.values.useAccountResearch) {
@@ -2124,6 +2157,8 @@ function FrameworkSection(props: {
     if (!currentProject) return null;
     setLoading(true);
     setMessage("");
+
+    setShowUserFeedback(false);
 
     const result = await generateBumpLiMessage(
       userToken,
@@ -2169,6 +2204,12 @@ function FrameworkSection(props: {
       }
     });
   }, [prospectId]);
+
+  const onAnimatonComplete = () => {
+    setTimeout(() => {
+      setShowUserFeedback(true);
+    }, 2000)
+  }
 
   if (!currentProject) return <></>;
 
@@ -2282,6 +2323,7 @@ function FrameworkSection(props: {
                           : undefined
                       }
                       onClick={openPersonalizationSettings}
+                      onAnimatonComplete={onAnimatonComplete}
                     />
                   )}
                 </Box>
@@ -2289,17 +2331,15 @@ function FrameworkSection(props: {
             )}
           </Box>
 
-          <Group
+          {changed && <Group
             position="right"
-            sx={{
-              visibility: changed ? "visible" : "hidden",
-            }}
           >
             <Center>
               <Button
                 variant="default"
                 w="200px"
                 ml="auto"
+                loading={savingSettings}
                 disabled={!changed}
                 onClick={() => {
                   form.reset();
@@ -2314,20 +2354,22 @@ function FrameworkSection(props: {
                 color="green"
                 w="200px"
                 ml="auto"
+                loading={savingSettings}
                 disabled={!changed}
                 onClick={() => {
-                  saveSettings(debouncedForm);
                   showNotification({
-                    message: "Settings Saved",
-                    color: "green",
-                  });
+                    title: "Saving Settings...",
+                    message: "This may take a few seconds.",
+                    color: "blue",
+                  })
+                  saveSettings(debouncedForm);
                   props.setIsDataChanged(false);
                 }}
               >
                 Save Settings
               </Button>
             </Center>
-          </Group>
+          </Group>}
           <Card shadow="sm" padding="lg" radius="md" withBorder>
             <Card.Section
               sx={{
@@ -2426,13 +2468,13 @@ function FrameworkSection(props: {
 
             <Box
               pt={"xs"}
-              pb={descriptionEditState ? "xs" : "md"}
               pos={"relative"}
             >
               <ActionIcon
                 pos={"absolute"}
                 right={0}
                 top={"xs"}
+                size='1.3rem'
                 sx={{ zIndex: 10 }}
                 onClick={() => setDescriptionEditState((p) => !p)}
               >
@@ -2451,7 +2493,7 @@ function FrameworkSection(props: {
                   }}
                 />
               ) : (
-                <Group>{form.values.bumpFrameworkHumanReadablePrompt}</Group>
+                <Text size='sm' w='90%'><span style={{fontWeight: 'bold'}}>Goal:</span> {form.values.bumpFrameworkHumanReadablePrompt}</Text>
               )}
             </Box>
           </Card>
@@ -2521,13 +2563,34 @@ function FrameworkSection(props: {
             )} */}
             {/* todo(Aakash) - remove this END */}
 
+            {
+              (showUserFeedback) && (
+                <Card  mb='16px'>
+                  <Card.Section sx={{backgroundColor: '#26241d', flexDirection: 'row', display: 'flex'}} p='sm'>
+                    <Image src={sellScaleLogo} width={30} height={30} mr='sm'/>
+                    <Text color='white' mt='4px'>
+                      Feel free to give me feedback on improving the message
+                    </Text>
+                  </Card.Section>
+                  <Card.Section sx={{border: 'solid 2px #26241d !important'}} p='8px'>
+                    <Textarea 
+                      minRows={5}
+                      placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                      {...form.getInputProps("humanFeedback")}
+                      />
+                  </Card.Section>
+                </Card>
+              )
+            }
+
             <Box maw={"100%"} mx="auto">
               <Group>
                 <Button
                   onClick={toggle}
                   w="100%"
-                  color="black"
-                  variant="outline"
+                  size='xs'
+                  color="gray"
+                  variant="subtle"
                   leftIcon={<IconTools size={"0.8rem"} />}
                 >
                   {opened ? "Hide Advanced Settings" : "Show Advanced Settings"}
@@ -2641,31 +2704,11 @@ function FrameworkSection(props: {
                       <PersonalizationSection
                         blocklist={props.framework.transformer_blocklist}
                         onItemsChange={async (items) => {
-                          setPersonalizationItemsCount(
-                            items.filter((x: any) => x.checked).length
-                          );
-
-                          // Update transformer blocklist
-                          const result = await patchBumpFramework(
-                            userToken,
-                            props.framework.id,
-                            props.framework.overall_status,
-                            props.framework.title,
-                            props.framework.description,
-                            props.framework.bump_length,
-                            props.framework.bumped_count,
-                            props.framework.bump_delay_days,
-                            props.framework.default,
-                            props.framework.use_account_research,
-                            items.filter((x) => !x.checked).map((x) => x.id),
-                            props.framework.additional_context,
-                            props.framework.bump_framework_template_name,
-                            props.framework.bump_framework_human_readable_prompt
-                          );
-
-                          await queryClient.refetchQueries({
-                            queryKey: [`query-get-bump-frameworks`],
-                          });
+                          setPersonalizationItemsCount(items.filter(x => x.checked).length);
+                          setPersonalizationItemIds(items.filter((x) => !x.checked).map(x => x.id));
+                        }}
+                        onChanged={() => {
+                          setChanged(true);
                         }}
                       />
                     </Tabs.Panel>
@@ -2683,6 +2726,7 @@ function FrameworkSection(props: {
 export const PersonalizationSection = (props: {
   blocklist: string[];
   onItemsChange: (items: any[]) => void;
+  onChanged?: () => void;
 }) => {
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
@@ -2852,8 +2896,34 @@ export const PersonalizationSection = (props: {
   }
 
   useEffect(() => {
-    props.onItemsChange([...prospectItems, ...companyItems]);
+    const allItems = [...prospectItems, ...companyItems]
+    props.onItemsChange(allItems);
   }, []);
+
+  const markAll = (newLabel: boolean) => {
+    setProspectItems((prev) => {
+      const items = [...prev];
+      items.map((i) => {
+        i.checked = newLabel;
+        return i;
+      });
+      return items;
+    });
+
+    setCompanyItems((prev) => {
+      const items = [...prev];
+      items.map((i) => {
+        i.checked = newLabel;
+        return i;
+      });
+      return items;
+    });
+
+    setTimeout(() => {
+      props.onItemsChange([...prospectItems, ...companyItems])
+      props.onChanged && props.onChanged();
+    }, 1000);
+  }
 
   function setProfileChecked(itemId: string, checked: boolean) {
     setProspectItems((prev) => {
@@ -2864,7 +2934,8 @@ export const PersonalizationSection = (props: {
         }
         return i;
       });
-      props.onItemsChange([...items, ...companyItems]);
+      props.onItemsChange([...prospectItems, ...companyItems])
+      props.onChanged && props.onChanged();
       return items;
     });
   }
@@ -2878,7 +2949,8 @@ export const PersonalizationSection = (props: {
         }
         return i;
       });
-      props.onItemsChange([...prospectItems, ...items]);
+      props.onItemsChange([...prospectItems, ...companyItems])
+      props.onChanged && props.onChanged();
       return items;
     });
   }
@@ -2911,6 +2983,12 @@ export const PersonalizationSection = (props: {
             </Badge>
           </Box>
         </Group>
+        <Checkbox
+          checked={allItems.every((x) => x.checked)}
+          label={"Select All Frameworks"}
+          mb='md'
+          onClick={(event) => markAll(event.currentTarget.checked)}
+        />
         <Flex direction={"column"} gap={"0.5rem"}>
           {allItems.map((item) => (
             <ProcessBar
@@ -2926,19 +3004,6 @@ export const PersonalizationSection = (props: {
           ))}
         </Flex>
       </Card>
-
-      {/* <PersonalizationCard
-        title="Prospect-Based"
-        items={prospectItems}
-        onPressItem={setProfileChecked}
-      />
-
-      <PersonalizationCard
-        title="Company-Based"
-        items={companyItems}
-        onPressItem={setAccountChecked}
-        isPurple
-      /> */}
     </Flex>
   );
 };

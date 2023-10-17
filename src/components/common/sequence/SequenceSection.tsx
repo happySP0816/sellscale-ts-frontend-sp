@@ -2276,10 +2276,11 @@ function FrameworkSection(props: {
               </Box>
             </Card.Section>
 
-            <Card.Section mt='xs'>
+            <Card.Section mt='xs' w='100%'>
               <Flex direction='row'>
                 {descriptionEditState ? (
                   <Textarea
+                    w='100%'
                     fz='xs'
                     {...form.getInputProps("bumpFrameworkHumanReadablePrompt")}
                     onChange={(e) => {

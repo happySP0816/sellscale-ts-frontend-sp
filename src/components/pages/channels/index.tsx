@@ -129,7 +129,7 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                     <ProjectSelect /> */}
                   </Flex>
                 </Grid.Col>
-                {currentProject?.id && <Card withBorder w='100%' mb='lg'>
+                {currentProject?.id && <Box w='100%' mb='md' pl='xl' pr='xl'>
                   <Flex direction='row'>
                     <Card withBorder  w='35%' mr='5%'>
                       <Box>
@@ -151,15 +151,15 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                             <IconPencil size={'0.9rem'}/>
                           </Button>
                         </Tooltip>
-                        <Badge size='xl' mb='xs' leftSection={<ChannelIcon />}>
+                        <Badge size='lg' mb='xs' leftSection={<ChannelIcon />}>
                           {props.selectedChannel}
                         </Badge>
                         <Title order={2} style={{marginBottom: 0}}>
                           {currentProject?.emoji} {currentProject?.name}
                         </Title>
-                        <Text size='xs' mt='md'>
+                        {/* <Text size='xs' mt='md'>
                           <b>Objective:</b> {currentProject?.persona_contact_objective}
-                        </Text>
+                        </Text> */}
                       </Box>
                     </Card>
                     <Card withBorder w='20%' mr='xs' sx={{textAlign: 'center'}}>
@@ -212,7 +212,7 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                       </Button>
                     </Card>
                   </Flex>
-                </Card>}
+                </Box>}
               </Grid>
 
               {!props.hideChannels &&

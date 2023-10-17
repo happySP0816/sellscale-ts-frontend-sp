@@ -877,7 +877,11 @@ function BumpFrameworkSelect(props: {
           ),
         }}
         loading={false}
-        items={props.bumpedFrameworks.map((bf) => ({
+        items={props.bumpedFrameworks.sort((a, b) => {
+          if (a.default) return -1;
+          if (b.default) return 1;
+          return 0;
+        }).map((bf) => ({
           id: bf.id,
           name: bf.title,
           onClick: () => {},
@@ -2112,6 +2116,7 @@ function FrameworkSection(props: {
   useEffect(() => {
     props.setIsDataChanged(changed);
   }, [changed]);
+  const [titleInEditingMode, setTitleInEditingMode] = useState(false);
   const saveSettings = async (values: typeof form.values) => {
     setSavingSettings(true);
     const result = await patchBumpFramework(
@@ -2208,7 +2213,7 @@ function FrameworkSection(props: {
   const onAnimatonComplete = () => {
     setTimeout(() => {
       setShowUserFeedback(true);
-    }, 2000)
+    }, 500)
   }
 
   if (!currentProject) return <></>;
@@ -2218,17 +2223,89 @@ function FrameworkSection(props: {
       <Stack ml="xl" spacing={0}>
         <Group position="apart">
           <Group>
-            <Title order={3}>
-              Follow-Up {props.bumpCount + 1}: {props.framework.title}
-            </Title>
+            
           </Group>
         </Group>
-        <Box my={5}>
-          <Text fz="xs" c="dimmed">
-            A follow up message to send to prospects who have not replied to
-            your previous messages.
-          </Text>
-        </Box>
+        <Card padding="lg" radius="md">
+            <Card.Section
+              sx={{
+                flexDirection: "row",
+                display: "flex",
+                gap: "1rem",
+              }}
+              w='100%'
+            >
+              <Box mt="4px" w='100%' sx={{}}>
+                <Title order={5} color='gray' mr='xs' fw='400'>
+                  Follow-Up {props.bumpCount + 1}:
+                </Title> 
+                
+                <Flex direction='row'>
+                  {!titleInEditingMode ? 
+                      <Title order={3} onClick={() => setTitleInEditingMode((p) => !p)}>
+                        <span style={{color: 'black', cursor: 'pointer'}}>
+                          {form.values.frameworkName}
+                        </span>
+                      </Title> 
+                      : 
+                      (
+                        <TextInput
+                          w='75%'
+                          placeholder="Name"
+                          variant="filled"
+                          {...form.getInputProps("frameworkName")}
+                          onChange={(e) => {
+                            form.setFieldValue("frameworkName", e.target.value);
+                            setChanged(true);
+                          }}
+                        />
+                      )
+                  }
+                  <ActionIcon
+                    ml='8px'
+                    mt='8px'
+                    size='1rem'
+                    sx={{ zIndex: 10, opacity: 0.7 }}
+                    onClick={() => setTitleInEditingMode((p) => !p)}
+                  >
+                    <IconEdit />
+                  </ActionIcon>
+              </Flex>
+
+               
+              </Box>
+            </Card.Section>
+
+            <Card.Section mt='xs'>
+              <Flex direction='row'>
+                {descriptionEditState ? (
+                  <Textarea
+                    fz='xs'
+                    {...form.getInputProps("bumpFrameworkHumanReadablePrompt")}
+                    onChange={(e) => {
+                      form.setFieldValue(
+                        "bumpFrameworkHumanReadablePrompt",
+                        e.target.value
+                      );
+                      setChanged(true);
+                    }}
+                  />
+                ) : (
+                  <Text fz="xs" c="dimmed" sx={{cursor: 'pointer'}} onClick={() => setDescriptionEditState((p) => !p)}>
+                    <span style={{fontWeight: 'bold'}}>Goal:</span> {form.values.bumpFrameworkHumanReadablePrompt}
+                  </Text>
+                )}
+                <ActionIcon
+                  size='1rem'
+                  ml='8px'
+                  sx={{ zIndex: 10, opacity: 0.7 }}
+                  onClick={() => setDescriptionEditState((p) => !p)}
+                >
+                  <IconEdit />
+                </ActionIcon>
+              </Flex>
+            </Card.Section>
+          </Card>
         <Stack pt={20} spacing={15}>
           <Box sx={{ position: "relative" }}>
             <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
@@ -2268,8 +2345,8 @@ function FrameworkSection(props: {
             ) : (
               <Box>
                 <Group position="apart" pb="0.3125rem">
-                  <Text fz="sm" fw={500} c="dimmed">
-                    EXAMPLE FOLLOW-UP MESSAGE:
+                  <Text fz="xs" fw={500} c="dimmed" sx={{opacity: 0.8}}>
+                    EXAMPLE GENERATION:
                   </Text>
                   <Group>
                     <Button
@@ -2364,139 +2441,17 @@ function FrameworkSection(props: {
                   })
                   saveSettings(debouncedForm);
                   props.setIsDataChanged(false);
+
+                  // close advanced settings
+                  if (opened) {
+                    toggle();
+                  }
                 }}
               >
                 Save Settings
               </Button>
             </Center>
           </Group>}
-          <Card shadow="sm" padding="lg" radius="md" withBorder>
-            <Card.Section
-              sx={{
-                flexDirection: "row",
-                display: "flex",
-                gap: "1rem",
-              }}
-              p="xs"
-              withBorder
-            >
-              <Box ml="xs" mt="4px" w="50%">
-                <Text fz="sm" fw={500} c="dimmed">
-                  FRAMEWORK NAME:
-                </Text>
-                <TextInput
-                  placeholder="Name"
-                  variant="filled"
-                  {...form.getInputProps("frameworkName")}
-                  onChange={(e) => {
-                    form.setFieldValue("frameworkName", e.target.value);
-                    setChanged(true);
-                  }}
-                />
-              </Box>
-
-              {/* <Flex align={"end"} w={"50%"}>
-                <Select
-                  withinPortal
-                  ml="auto"
-                  mr="xs"
-                  w="100%"
-                  placeholder="Select different template"
-                  searchable
-                  clearable
-                  data={Object.keys(BUMP_FRAMEWORK_OPTIONS)
-                    .map((key: any) => {
-                      return {
-                        value: key,
-                        label: BUMP_FRAMEWORK_OPTIONS[key].name,
-                      };
-                    })
-                    .concat([
-                      { value: "make-your-own", label: "🛠 Make your own" },
-                    ])}
-                  onChange={(value: any) => {
-                    if (value === "make-your-own") {
-                      form.setFieldValue("bumpFrameworkTemplateName", "");
-                      form.setFieldValue(
-                        "bumpFrameworkHumanReadablePrompt",
-                        "Describe your custom framework here..."
-                      );
-                      form.setFieldValue("additionalContext", "");
-                      form.setFieldValue("promptInstructions", "");
-                      setContextQuestion("");
-
-                      setChanged(true);
-
-                      toggle();
-                      return;
-                    }
-
-                    const framework = BUMP_FRAMEWORK_OPTIONS[value];
-                    if (!framework) {
-                      form.setFieldValue("bumpFrameworkTemplateName", "");
-                      form.setFieldValue(
-                        "bumpFrameworkHumanReadablePrompt",
-                        ""
-                      );
-                      form.setFieldValue("additionalContext", "");
-                      setContextQuestion("");
-                      return;
-                    }
-
-                    const name = framework.name;
-                    const raw_prompt = framework.raw_prompt;
-                    const human_readable_prompt =
-                      framework.human_readable_prompt;
-                    const length = framework.length;
-
-                    form.setFieldValue("bumpFrameworkTemplateName", value);
-                    form.setFieldValue(
-                      "bumpFrameworkHumanReadablePrompt",
-                      human_readable_prompt
-                    );
-
-                    setHumanReadableContext(human_readable_prompt);
-
-                    form.setFieldValue("promptInstructions", raw_prompt);
-                    form.setFieldValue("frameworkName", name);
-                    form.setFieldValue("bumpLength", length);
-                    setChanged(true);
-                  }}
-                />
-              </Flex> */}
-            </Card.Section>
-
-            <Box
-              pt={"xs"}
-              pos={"relative"}
-            >
-              <ActionIcon
-                pos={"absolute"}
-                right={0}
-                top={"xs"}
-                size='1.3rem'
-                sx={{ zIndex: 10 }}
-                onClick={() => setDescriptionEditState((p) => !p)}
-              >
-                <IconEdit />
-              </ActionIcon>
-              {descriptionEditState ? (
-                <Textarea
-                  label="Human Readable Description"
-                  {...form.getInputProps("bumpFrameworkHumanReadablePrompt")}
-                  onChange={(e) => {
-                    form.setFieldValue(
-                      "bumpFrameworkHumanReadablePrompt",
-                      e.target.value
-                    );
-                    setChanged(true);
-                  }}
-                />
-              ) : (
-                <Text size='sm' w='90%'><span style={{fontWeight: 'bold'}}>Goal:</span> {form.values.bumpFrameworkHumanReadablePrompt}</Text>
-              )}
-            </Box>
-          </Card>
 
           {form.values.promptInstructions.includes("Answer:") && (
             <Alert

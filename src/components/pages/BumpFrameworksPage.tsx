@@ -634,7 +634,7 @@ export default function BumpFrameworksPage(props: {
 
         <Flex direction={'row'}>
           <Box w={'100%'}>
-            <Tabs keepMounted={false} color='blue' variant='outline' defaultValue={props.defaultTab || 'sequence'} my='lg' orientation='horizontal'>
+            <Tabs keepMounted={false} color='blue' variant='outline' defaultValue={props.defaultTab || 'sequence'} orientation='horizontal'>
               <Tabs.List>
                 {/* <Tabs.Tab value='ctas' icon={<IconList size='0.8rem' />}>
                   CTAs

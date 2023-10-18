@@ -468,3 +468,67 @@ export type EmailStore = {
   hunter_block: boolean;
   hunter_sources: {}[];
 };
+
+export interface Individual {
+  id: number;
+  full_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  title: string | null;
+  bio: string | null;
+  linkedin_url: string | null;
+  instagram_url: string | null;
+  facebook_url: string | null;
+  twitter_url: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  li_public_id: string | null;
+  li_urn_id: string | null;
+  img_url: string | null;
+  img_expire: number;
+  industry: string | null;
+  company: Company | null;
+  followers: {
+    linkedin: number | null;
+    instagram: number | null;
+    facebook: number | null;
+    twitter: number | null;
+  };
+  birth_date: string | null; // Assuming it's a date string
+  location: Record<string, any> | null;
+  language: {
+    country: string | null;
+    locale: string | null;
+  };
+  skills: string[] | null;
+  websites: Array<Record<string, any>> | null;
+  education: {
+    recent_school: string | null;
+    recent_degree: string | null;
+    recent_field: string | null;
+    recent_start_date: string | null; // Assuming it's a date string
+    recent_end_date: string | null; // Assuming it's a date string
+    history: Array<Record<string, any>> | null;
+  };
+  patents: Array<Record<string, any>> | null;
+  awards: Array<Record<string, any>> | null;
+  certifications: Array<Record<string, any>> | null;
+  organizations: Array<Record<string, any>> | null;
+  projects: Array<Record<string, any>> | null;
+  publications: Array<Record<string, any>> | null;
+  courses: Array<Record<string, any>> | null;
+  test_scores: Array<Record<string, any>> | null;
+  work: {
+    recent_title: string | null;
+    recent_company: string | null;
+    recent_start_date: string | null; // Assuming it's a date string
+    recent_end_date: string | null; // Assuming it's a date string
+    recent_description: string | null;
+    recent_location: Record<string, any> | null;
+    history: Array<Record<string, any>> | null;
+  };
+  volunteer: Array<Record<string, any>> | null;
+  similar_profiles: Array<Record<string, any>> | null;
+}
+

@@ -31,7 +31,7 @@ const Sidebar: FC<{
       {sideBarVisible && (
         <>
           <ScrollArea px={"md"}>
-            <Filters isTesting={isTesting} selectOptions={[]} />
+            <Filters isTesting={isTesting} selectOptions={[]} autofill />
           </ScrollArea>
         </>
       )}

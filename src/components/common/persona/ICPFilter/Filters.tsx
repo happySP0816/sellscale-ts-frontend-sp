@@ -31,6 +31,7 @@ import { showNotification } from "@mantine/notifications";
 function Filters(props: {
   isTesting: boolean;
   selectOptions: { value: string; label: string }[];
+  autofill: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
@@ -253,272 +254,236 @@ function Filters(props: {
 
   return (
     <>
-      <Tabs defaultValue="personal">
+      <Tabs defaultValue='personal'>
         <Tabs.List>
-          <Tabs.Tab value="personal">Person</Tabs.Tab>
-          <Tabs.Tab value="company">Company</Tabs.Tab>
+          <Tabs.Tab value='personal'>Person</Tabs.Tab>
+          <Tabs.Tab value='company'>Company</Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="personal">
-          <Box
-            style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
-            py="md"
-          >
+        <Tabs.Panel value='personal'>
+          <Box style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }} py='md'>
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={included_individual_title_keywords}
-              label="Titles (Included)"
-              placeholder="Select options"
+              label='Titles (Included)'
+              placeholder='Select options'
               setValue={setIncludedIndividualTitleKeywords}
               data={included_individual_title_keywords.concat(titleOptions)}
               setData={setIncludedIndividualTitleKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={excluded_individual_title_keywords}
-              label="Titles (Excluded)"
-              placeholder="Select options"
+              label='Titles (Excluded)'
+              placeholder='Select options'
               setValue={setExcludedIndividualTitleKeywords}
               data={excluded_individual_title_keywords.concat(titleOptions)}
               setData={setExcludedIndividualTitleKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={included_individual_industry_keywords}
-              label="Industry Keywords (Included)"
-              placeholder="Select options"
+              label='Industry Keywords (Included)'
+              placeholder='Select options'
               setValue={setIncludedIndividualIndustryKeywords}
-              data={included_individual_industry_keywords.concat(
-                industryOptions
-              )}
+              data={included_individual_industry_keywords.concat(industryOptions)}
               setData={setIncludedIndividualIndustryKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={excluded_individual_industry_keywords}
-              label="Industry Keywords (Excluded)"
-              placeholder="Select options"
+              label='Industry Keywords (Excluded)'
+              placeholder='Select options'
               setValue={setExcludedIndividualIndustryKeywords}
-              data={excluded_individual_industry_keywords.concat(
-                industryOptions
-              )}
+              data={excluded_individual_industry_keywords.concat(industryOptions)}
               setData={setExcludedIndividualIndustryKeywords}
             />
-            <Flex direction="column">
-              <Title size={"14px"} fw={"500"}>
+            <Flex direction='column'>
+              <Title size={'14px'} fw={'500'}>
                 Years of Experience
               </Title>
               <Box
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "1rem",
-                  alignItems: "center",
-                  marginTop: "0.2rem",
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  alignItems: 'center',
+                  marginTop: '0.2rem',
                 }}
               >
                 <NumberInput
                   value={individual_years_of_experience_start}
-                  placeholder="Min"
+                  placeholder='Min'
                   hideControls
-                  onChange={(value) =>
-                    setIndividualYearsOfExperienceStart(value || 0)
-                  }
+                  onChange={(value) => setIndividualYearsOfExperienceStart(value || 0)}
                 />
                 <NumberInput
                   value={individual_years_of_experience_end}
-                  placeholder="Max"
+                  placeholder='Max'
                   hideControls
-                  onChange={(value) =>
-                    setIndividualYearsOfExperienceEnd(value || 0)
-                  }
+                  onChange={(value) => setIndividualYearsOfExperienceEnd(value || 0)}
                 />
               </Box>
-              <Button
-                mt={"0.5rem"}
-                size="sm"
-                ml={"auto"}
-                onClick={() => setIndividualYearsOfExperienceEnd(100)}
-              >
+              <Button mt={'0.5rem'} size='sm' ml={'auto'} onClick={() => setIndividualYearsOfExperienceEnd(100)}>
                 Max
               </Button>
             </Flex>
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={included_individual_skills_keywords}
-              label="Skills Keywords (Included)"
-              placeholder="Select options"
+              label='Skills Keywords (Included)'
+              placeholder='Select options'
               setValue={setIncludedIndividualSkillsKeywords}
               data={included_individual_skills_keywords}
               setData={setIncludedIndividualSkillsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={excluded_individual_skills_keywords}
-              label="Skills Keywords (Excluded)"
-              placeholder="Select options"
+              label='Skills Keywords (Excluded)'
+              placeholder='Select options'
               setValue={setExcludedIndividualSkillsKeywords}
               data={excluded_individual_skills_keywords}
               setData={setExcludedIndividualSkillsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={included_individual_locations_keywords}
-              label="Location Keywords (Included)"
-              placeholder="Select options"
+              label='Location Keywords (Included)'
+              placeholder='Select options'
               setValue={setIncludedIndividualLocationsKeywords}
-              data={included_individual_locations_keywords.concat([
-                "United States",
-              ])}
+              data={included_individual_locations_keywords.concat(['United States'])}
               setData={setIncludedIndividualLocationsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={excluded_individual_locations_keywords}
-              label="Location Keywords (Excluded)"
-              placeholder="Select options"
+              label='Location Keywords (Excluded)'
+              placeholder='Select options'
               setValue={setExcludedIndividualLocationsKeywords}
-              data={excluded_individual_locations_keywords.concat([
-                "United States",
-              ])}
+              data={excluded_individual_locations_keywords.concat(['United States'])}
               setData={setExcludedIndividualLocationsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={included_individual_generalized_keywords}
-              label="Bio & Jobs Description (Included)"
-              placeholder="Select options"
+              label='Bio & Jobs Description (Included)'
+              placeholder='Select options'
               setValue={setIncludedIndividualGeneralizedKeywords}
               data={included_individual_generalized_keywords}
               setData={setIncludedIndividualGeneralizedKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={excluded_individual_generalized_keywords}
-              label="Bio & Jobs Description (Excluded)"
-              placeholder="Select options"
+              label='Bio & Jobs Description (Excluded)'
+              placeholder='Select options'
               setValue={setExcludedIndividualGeneralizedKeywords}
               data={excluded_individual_generalized_keywords}
               setData={setExcludedIndividualGeneralizedKeywords}
             />
           </Box>
         </Tabs.Panel>
-        <Tabs.Panel value="company">
-          <Box
-            style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
-            py="md"
-          >
+        <Tabs.Panel value='company'>
+          <Box style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }} py='md'>
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={included_company_name_keywords}
-              label="Companies Keywords (Included)"
-              placeholder="Select options"
+              label='Companies Keywords (Included)'
+              placeholder='Select options'
               setValue={setIncludedCompanyNameKeywords}
               data={included_company_name_keywords.concat(companyOptions)}
               setData={setIncludedCompanyNameKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={excluded_company_name_keywords}
-              label="Companies Keywords (Excluded)"
-              placeholder="Select options"
+              label='Companies Keywords (Excluded)'
+              placeholder='Select options'
               setValue={setExcludedCompanyNameKeywords}
               data={excluded_company_name_keywords.concat(companyOptions)}
               setData={setExcludedCompanyNameKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={included_company_locations_keywords}
-              label="Location Keywords (Included)"
-              placeholder="Select options"
+              label='Location Keywords (Included)'
+              placeholder='Select options'
               setValue={setIncludedCompanyLocationsKeywords}
-              data={included_company_locations_keywords.concat([
-                "United States",
-              ])}
+              data={included_company_locations_keywords.concat(['United States'])}
               setData={setIncludedCompanyLocationsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={excluded_company_locations_keywords}
-              label="Location Keywords (Excluded)"
-              placeholder="Select options"
+              label='Location Keywords (Excluded)'
+              placeholder='Select options'
               setValue={setExcludedCompanyLocationsKeywords}
-              data={excluded_company_locations_keywords.concat([
-                "United States",
-              ])}
+              data={excluded_company_locations_keywords.concat(['United States'])}
               setData={setExcludedCompanyLocationsKeywords}
             />
-            <Flex direction="column">
-              <Title size={"14px"} fw={"500"}>
+            <Flex direction='column'>
+              <Title size={'14px'} fw={'500'}>
                 Employee Count
               </Title>
               <Box
                 style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "1rem",
-                  alignItems: "center",
-                  marginTop: "0.2rem",
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  alignItems: 'center',
+                  marginTop: '0.2rem',
                 }}
               >
                 <NumberInput
                   value={company_size_start}
-                  placeholder="Min"
+                  placeholder='Min'
                   hideControls
                   onChange={(value) => setCompanySizeStart(value || 0)}
                 />
                 <NumberInput
                   value={company_size_end}
-                  placeholder="Max"
+                  placeholder='Max'
                   hideControls
                   onChange={(value) => setCompanySizeEnd(value || 0)}
                 />
               </Box>
-              <Button
-                mt={"0.5rem"}
-                size="sm"
-                ml={"auto"}
-                onClick={() => setCompanySizeEnd(100_000)}
-              >
+              <Button mt={'0.5rem'} size='sm' ml={'auto'} onClick={() => setCompanySizeEnd(100_000)}>
                 Max
               </Button>
             </Flex>
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={included_company_industries_keywords}
-              label="Industries Keywords (Included)"
-              placeholder="Select options"
+              label='Industries Keywords (Included)'
+              placeholder='Select options'
               setValue={setIncludedCompanyIndustriesKeywords}
-              data={included_company_industries_keywords.concat(
-                industryOptions
-              )}
+              data={included_company_industries_keywords.concat(industryOptions)}
               setData={setIncludedCompanyIndustriesKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={excluded_company_industries_keywords}
-              label="Industries Keywords (Excluded)"
-              placeholder="Select options"
+              label='Industries Keywords (Excluded)'
+              placeholder='Select options'
               setValue={setExcludedCompanyIndustriesKeywords}
-              data={excluded_company_industries_keywords.concat(
-                industryOptions
-              )}
+              data={excluded_company_industries_keywords.concat(industryOptions)}
               setData={setExcludedCompanyIndustriesKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={included_company_generalized_keywords}
-              label="Company Description (Included)"
-              placeholder="Select options"
+              label='Company Description (Included)'
+              placeholder='Select options'
               setValue={setIncludedCompanyGeneralizedKeywords}
               data={included_company_generalized_keywords}
               setData={setIncludedCompanyGeneralizedKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth='16rem'
               value={excluded_company_generalized_keywords}
-              label="Company Description (Excluded)"
-              placeholder="Select options"
+              label='Company Description (Excluded)'
+              placeholder='Select options'
               setValue={setExcludedCompanyGeneralizedKeywords}
               data={excluded_company_generalized_keywords}
               setData={setExcludedCompanyGeneralizedKeywords}
@@ -526,50 +491,45 @@ function Filters(props: {
           </Box>
         </Tabs.Panel>
       </Tabs>
-      <Center pb="sm">
-        <Button
-          variant="light"
-          loading={loading}
-          onClick={async () => {
-            openConfirmModal({
-              title: "Override existing filters?",
-              children: (
-                <Text>
-                  Are you sure you want to override existing filters? This
-                  action cannot be undone.
-                </Text>
-              ),
-              labels: { confirm: "Confirm", cancel: "Cancel" },
-              onCancel: () => {},
-              onConfirm: () => {
-                (async () => {
-                  if (!currentProject) return;
-                  setLoading(true);
-                  const response = await getFiltersAutofill(
-                    userToken,
-                    currentProject.id
-                  );
-                  const results = response.data;
-                  console.log(results);
-                  setIncludedIndividualTitleKeywords(results.job_titles);
-                  setIncludedIndividualIndustryKeywords(results.industries);
-                  setCompanySizeStart(results.yoe.min);
-                  setCompanySizeEnd(results.yoe.max);
-                  setLoading(false);
+      {props.autofill && (
+        <Center pb='sm'>
+          <Button
+            variant='light'
+            loading={loading}
+            onClick={async () => {
+              openConfirmModal({
+                title: 'Override existing filters?',
+                children: (
+                  <Text>Are you sure you want to override existing filters? This action cannot be undone.</Text>
+                ),
+                labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                onCancel: () => {},
+                onConfirm: () => {
+                  (async () => {
+                    if (!currentProject) return;
+                    setLoading(true);
+                    const response = await getFiltersAutofill(userToken, currentProject.id);
+                    const results = response.data;
+                    console.log(results);
+                    setIncludedIndividualTitleKeywords(results.job_titles);
+                    setIncludedIndividualIndustryKeywords(results.industries);
+                    setCompanySizeStart(results.yoe.min);
+                    setCompanySizeEnd(results.yoe.max);
+                    setLoading(false);
 
-                  showNotification({
-                    title: "Filters autofilled",
-                    message:
-                      "Filters have been autofilled based on your prospects",
-                  });
-                })();
-              },
-            });
-          }}
-        >
-          AI Autofill
-        </Button>
-      </Center>
+                    showNotification({
+                      title: 'Filters autofilled',
+                      message: 'Filters have been autofilled based on your prospects',
+                    });
+                  })();
+                },
+              });
+            }}
+          >
+            AI Autofill
+          </Button>
+        </Center>
+      )}
     </>
   );
 }

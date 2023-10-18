@@ -758,6 +758,42 @@ const EmailBodyItem: React.FC<{
   const [sequence, _setSequence] = React.useState<string>(template.template || '');
   const sequenceRichRaw = React.useRef<JSONContent | string>(template.template || '');
 
+  const [title, setTitle] = React.useState<string>(template.title || '')
+  const [editingTitle, setEditingTitle] = React.useState<boolean>(false)
+
+  const triggerPatchEmailBodyTemplateTitle = async () => {
+    setLoading(true)
+
+    const result = await patchSequenceStep(
+      userToken,
+      template.id,
+      template.overall_status,
+      title,
+      template.template,
+      template.bumped_count,
+      template.default
+    );
+    if (result.status != 'success') {
+      showNotification({
+        title: 'Error',
+        message: result.message,
+        color: 'red',
+      })
+      setLoading(false);
+      return;
+    } else {
+      showNotification({
+        title: 'Success',
+        message: 'Successfully updated email title',
+        color: 'green',
+      })
+
+      await refetch();
+    }
+
+    setLoading(false);
+  }
+
   const triggerPatchEmailBodyTemplate = async () => {
     setLoading(true)
 
@@ -855,9 +891,60 @@ const EmailBodyItem: React.FC<{
           ) : (
             <Flex mb='sm' direction='row' w='100%' justify={'space-between'}>
               <Flex align='center'>
-                <Title order={4}>
-                  {template.title}
-                </Title>
+                {
+                  editingTitle ? ( // Editing title
+                    <>
+                      <TextInput
+                        w={200}
+                        placeholder="Untitled Email Template"
+                        value={title}
+                        onChange={(event) => {
+                          setTitle(event.currentTarget.value)
+                        }}
+                      />
+                      <Flex justify={'flex-end'}>
+                        <Button
+                          mx='sm'
+                          color='red'
+                          onClick={() => {
+                            setTitle(template.title || '');
+                            setEditingTitle(false);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          color='green'
+                          onClick={() => {
+                            triggerPatchEmailBodyTemplateTitle();
+                            setEditingTitle(false);
+                          }}
+                        >
+                          Save
+                        </Button>
+                      </Flex>
+                    </>
+
+                  ) : ( // Not editing title
+                    <>
+                      {template.title ? (
+                        <Title order={4} onClick={() => {setEditingTitle(true)}}>
+                          {template.title}
+                        </Title>
+                      ) : (
+                        <Title order={4} color='gray.5' onClick={() => {setEditingTitle(true)}}>
+                          Untitled Email Template
+                        </Title>
+                      )}
+                      <ActionIcon
+                        variant='transparent'
+                        onClick={() => { setEditingTitle(!editingTitle) }}
+                      >
+                        <IconPencil size={'0.9rem'} />
+                      </ActionIcon>
+                    </>
+                  )
+                }
               </Flex>
               <Flex align='center'>
                 <Tooltip label='Coming Soon' withArrow withinPortal>

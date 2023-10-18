@@ -419,6 +419,7 @@ export type EmailSequenceStep = {
   active: boolean;
   default: boolean;
   bumped_count: number | null;
+  sequence_delay_days: number | null;
   // TODO: MISSING A LOT OF FIELDS
 };
 

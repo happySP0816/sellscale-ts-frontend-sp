@@ -47,7 +47,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { EmailSequenceStep, MsgResponse, SubjectLineTemplate } from "src";
 import DOMPurify from "dompurify";
-import EmailSequenceStepCard from "./EmailSequencing/EmailSequenceStepCard";
 import DetailEmailSequencing from "./EmailSequencing/DetailEmailSequencing";
 import NewUIEmailSequencing from "./EmailSequencing/NewUIEmailSequencing";
 import NylasConnectedCard from '@common/settings/NylasConnectedCard';

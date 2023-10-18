@@ -1,4 +1,4 @@
-import { currentProjectState } from "@atoms/personaAtoms";
+import { userTokenState } from "@atoms/userAtoms";
 import {
   Card,
   Stack,
@@ -11,18 +11,19 @@ import {
   Tooltip,
   NumberInput,
   Flex,
+  LoadingOverlay,
 } from "@mantine/core";
-import { useHover } from "@mantine/hooks";
+import { useHover, useTimeout } from "@mantine/hooks";
+import { showNotification } from "@mantine/notifications";
 import {
   IconMessages,
-  IconCircleMinus,
-  IconRecycle,
   IconTrash,
 } from "@tabler/icons";
+import { patchSequenceStep } from "@utils/requests/emailSequencing";
 import _ from "lodash";
-import { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { BumpFramework, EmailSequenceStep, MsgResponse } from "src";
+import { EmailSequenceStep, MsgResponse } from "src";
 
 export default function EmailSequenceStepCard(props: {
   active: boolean;
@@ -37,8 +38,59 @@ export default function EmailSequenceStepCard(props: {
   includeFooter?: boolean;
   dataChannels?: MsgResponse | undefined;
   bumpedCount?: number;
+  refetch?: () => void;
 }) {
+  const userToken = useRecoilValue(userTokenState);
   const { hovered, ref } = useHover();
+
+  const [defaultSequenceStep, setDefaultSequenceStep] = useState<EmailSequenceStep>()
+  const [loading, setLoading] = useState<boolean>(false)
+  const delayDaysRef = useRef(3)
+
+  const triggerPatchEmailDelayDays = async (delayDays: number) => {
+    if (delayDays < 1 || !defaultSequenceStep) return
+
+    setLoading(true)
+    
+    const result = await patchSequenceStep(
+      userToken,
+      defaultSequenceStep.id,
+      defaultSequenceStep.overall_status,
+      defaultSequenceStep.title,
+      defaultSequenceStep.template,
+      defaultSequenceStep.bumped_count,
+      true,
+      delayDays
+    )
+    if (result.status != 'success') {
+      showNotification({
+        title: "Error",
+        message: result.message,
+        color: "red",
+      })
+    } else {
+      showNotification({
+        title: "Success",
+        message: "Email delay days updated",
+        color: "green",
+      })
+      if (props.refetch) {
+        props.refetch()
+      }
+    }
+
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    // Get the default sequence step
+    if (props.sequenceBucket?.templates) {
+      const defaultSequenceStep = _.find(props.sequenceBucket?.templates, { default: true })
+      setDefaultSequenceStep(defaultSequenceStep)
+      delayDaysRef.current = defaultSequenceStep?.sequence_delay_days || 3
+    }
+
+  }, [props.sequenceBucket, props.active])
 
   return (
     <Card
@@ -74,6 +126,7 @@ export default function EmailSequenceStepCard(props: {
         borderWidth: "4px",
       })}
     >
+      <LoadingOverlay visible={loading} />
       <Stack spacing={0}>
         <Group position="apart" px={15} py={10} noWrap>
           <Group spacing={0} noWrap w={"100%"} display="flex">
@@ -104,7 +157,7 @@ export default function EmailSequenceStepCard(props: {
         <Divider />
         <Box px={20} py={10}>
           <Text fw={700} size="xl">
-            {props.templateTitle}
+            {defaultSequenceStep?.title || props.templateTitle}
           </Text>
           <Text size={"sm"} fw={500} color="gray.5">
             {props.content}
@@ -115,26 +168,49 @@ export default function EmailSequenceStepCard(props: {
             <Divider />
             <Box px={20} py={10}>
               <Flex align='center' justify={'center'}>
+
                 <Text fz={14} fw={500}>
                   Wait for
                 </Text>
-                <Tooltip label='Coming Soon' withinPortal withArrow>
-                  <div>
+                {
+                  defaultSequenceStep ? (
                     <NumberInput
                       mx='xs'
                       w='32px'
-                      placeholder="# Days"
                       variant="filled"
                       hideControls
                       sx={{ border: "solid 1px #777; border-radius: 4px;" }}
                       size="xs"
-                      min={2}
-                      max={99}
-                      value={3}
-                      disabled
+                      min={1}
+                      defaultValue={delayDaysRef.current}
+                      onChange={(e) => {
+                        delayDaysRef.current = Number(e)
+                        triggerPatchEmailDelayDays(Number(e))
+                      }}
                     />
-                  </div>
-                </Tooltip>
+                  ) : (
+                    <Tooltip
+                      label={"Please activate a template to set a wait time"}
+                      withinPortal
+                      withArrow
+                    >
+                      <div>
+                        <NumberInput
+                          mx='xs'
+                          w='32px'
+                          variant="filled"
+                          hideControls
+                          sx={{ border: "solid 1px #777; border-radius: 4px;" }}
+                          size="xs"
+                          min={2}
+                          max={99}
+                          value={3}
+                          disabled
+                        />
+                      </div>
+                    </Tooltip>
+                  )
+                }
                 <Text fz={14} fw={500}>
                   days, then:
                 </Text>

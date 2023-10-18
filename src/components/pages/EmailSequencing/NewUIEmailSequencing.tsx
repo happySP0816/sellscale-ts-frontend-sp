@@ -81,17 +81,20 @@ const Sidebar: React.FC<{
           setTemplates(templateBuckets?.PROSPECTED.templates)
           setActiveTab("PROSPECTED")
         }}
+        sequenceBucket={templateBuckets?.PROSPECTED}
+        includeFooter
+        refetch={refetch}
       />
 
-      <Divider
+      {/* <Divider
         label="After opening email"
         labelPosition="center"
         mt="xl"
         mb="xl"
-      />
+      /> */}
 
       {!loading ? (
-        <Flex direction="column" gap={"0.5rem"} maw='100%'>
+        <Flex direction="column" gap={"0.5rem"} maw='100%' mt='xl'>
           {/* Accepted */}
           <EmailSequenceStepCard
             active={activeTab == "ACCEPTED"}
@@ -104,6 +107,7 @@ const Sidebar: React.FC<{
               setActiveTab("ACCEPTED")
             }}
             includeFooter
+            refetch={refetch}
           />
 
           {/* Bumped (map) */}
@@ -137,13 +141,14 @@ const Sidebar: React.FC<{
                     setActiveTab("BUMPED-" + bumpCount)
                     setTemplates(sequenceBucket.templates)
                   }}
-                  active={false}
+                  active={activeTab === "BUMPED-" + bumpCount}
                   sequenceBucket={sequenceBucket}
                   title={`${followupString} Email`}
                   templateTitle={`Prospects who have not responded to ${bumpCount} followups.`}
                   dataChannels={dataChannels}
                   bumpedCount={bumpCountInt}
                   includeFooter
+                  refetch={refetch}
                 />
               </Flex>
             );

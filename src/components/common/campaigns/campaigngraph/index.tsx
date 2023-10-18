@@ -119,20 +119,24 @@ const CampaignGraph = (props: {
         <Paper p='md' sx={{ flex: 1 }} withBorder>
           <Title order={4}>Outreach</Title>
           <Group noWrap>
-            <CampaignSequenceDAG
-              type='linkedin'
-              active={isEnabledLinkedin || true} // TODO: Remove || true if we want to disable the LinkedIn section
-              enabled={isEnabledLinkedin || true} // TODO: Remove || true if we want to disable the LinkedIn section
-              // onToggle={setEnabledLinkedin}
-              numbers={[linkedinSection[0]?.sends, linkedinSection[0]?.opens, linkedinSection[0]?.replies]}
-            />
-            <CampaignSequenceDAG
-              type='email'
-              active={isEnabledEmail}
-              enabled={isEnabledEmail}
-              // onToggle={setEnabledEmail}
-              numbers={[emailSection[0]?.sends, emailSection[0]?.opens, emailSection[0]?.replies]}
-            />
+            <Box onClick={() => props.onChannelClick('linkedin')}>
+              <CampaignSequenceDAG
+                type='linkedin'
+                active={isEnabledLinkedin || true} // TODO: Remove || true if we want to disable the LinkedIn section
+                enabled={isEnabledLinkedin || true} // TODO: Remove || true if we want to disable the LinkedIn section
+                // onToggle={setEnabledLinkedin}
+                numbers={[linkedinSection[0]?.sends, linkedinSection[0]?.opens, linkedinSection[0]?.replies]}
+              />
+            </Box>
+            <Box onClick={() => props.onChannelClick('email')}>
+              <CampaignSequenceDAG
+                type='email'
+                active={isEnabledEmail}
+                enabled={isEnabledEmail}
+                // onToggle={setEnabledEmail}
+                numbers={[emailSection[0]?.sends, emailSection[0]?.opens, emailSection[0]?.replies]}
+              />
+            </Box>
           </Group>
         </Paper>
         {/* 

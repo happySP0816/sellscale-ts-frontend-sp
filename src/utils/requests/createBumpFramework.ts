@@ -17,7 +17,7 @@ import { API_URL } from "@constants/data";
  * @param setUseAccountResearch
  * @returns - MsgResponse
  */
-export async function createBumpFramework(userToken: string, archetypID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, bumpDelayDays: number, setDefault: boolean, substatus: string | null = "", setUseAccountResearch: boolean, human_readable_prompt?: string): Promise<MsgResponse> {
+export async function createBumpFramework(userToken: string, archetypID: number, overallStatus: string, title: string, description: string, length: string, bumpedCount: number | null, bumpDelayDays: number, setDefault: boolean, substatus: string | null = "", setUseAccountResearch: boolean, human_readable_prompt?: string, transformer_blocklist?: string[]): Promise<MsgResponse> {
   if (!substatus) {
     substatus = "";
   }
@@ -41,7 +41,8 @@ export async function createBumpFramework(userToken: string, archetypID: number,
         bump_delay_days: bumpDelayDays,
         substatus: substatus,
         use_account_research: setUseAccountResearch,
-        human_readable_prompt: human_readable_prompt
+        human_readable_prompt: human_readable_prompt,
+        transformer_blocklist: transformer_blocklist
       })
     }
   );

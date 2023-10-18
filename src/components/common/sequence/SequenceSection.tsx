@@ -819,6 +819,7 @@ function BumpFrameworkSelect(props: {
         tag: string;
         bumped_counts: number[];
         overall_statuses: string[];
+        transformer_blocklist: string[];
       }[];
       return data.map((template) => {
         return {
@@ -829,6 +830,7 @@ function BumpFrameworkSelect(props: {
           tag: template.tag,
           bumped_counts: template.bumped_counts,
           overall_statuses: template.overall_statuses,
+          transformer_blocklist: template.transformer_blocklist
         };
       });
 
@@ -1046,7 +1048,8 @@ function BumpFrameworkSelect(props: {
                       bumpDelayDays: 2,
                       useAccountResearch: true,
                       bumpLength: template.length,
-                      human_readable_prompt: template.human_readable_prompt
+                      human_readable_prompt: template.human_readable_prompt,
+                      transformerBlocklist: template.transformer_blocklist
                     }
                   },
                 });
@@ -2101,6 +2104,7 @@ function FrameworkSection(props: {
           props.framework.bump_framework_human_readable_prompt,
         humanFeedback: props.framework.human_feedback,
       })
+      setPersonalizationItemIds(props.framework.transformer_blocklist);
     }
   }, [props.framework.id])
 

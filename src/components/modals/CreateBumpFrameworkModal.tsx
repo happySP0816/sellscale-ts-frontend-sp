@@ -1,6 +1,7 @@
 import { userTokenState } from "@atoms/userAtoms";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import PersonaSelect from "@common/persona/PersonaSplitSelect";
+import { PersonalizationSection } from '@common/sequence/SequenceSection';
 import { Modal, TextInput, Text, Textarea, Slider, Flex, Select, Switch, Button, useMantineTheme, LoadingOverlay, NumberInput, HoverCard, Paper, Tooltip, Group, Box, Collapse } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from '@mantine/hooks';
@@ -39,6 +40,7 @@ interface CreateBumpFramework extends Record<string, unknown> {
     bumpDelayDays: number;
     useAccountResearch: boolean;
     bumpLength: string;
+    transformerBlocklist?: string[];
   };
 }
 
@@ -124,7 +126,8 @@ export function CreateBumpFrameworkContextModal({
       form.values.default,
       selectedSubstatus,
       form.values.useAccountResearch,
-      form.values.human_readable_prompt
+      form.values.human_readable_prompt,
+      form.values.transformerBlocklist
     );
 
     if (result.status === "success") {
@@ -161,6 +164,7 @@ export function CreateBumpFrameworkContextModal({
       bumpedCount: innerProps.bumpedCount,
       bumpDelayDays: innerProps.initialValues?.bumpDelayDays ?? 2,
       useAccountResearch: innerProps.initialValues?.useAccountResearch ?? false,
+      transformerBlocklist: innerProps.initialValues?.transformerBlocklist ?? []
     },
   });
 
@@ -249,8 +253,6 @@ export function CreateBumpFrameworkContextModal({
           </HoverCard.Dropdown>
         </HoverCard>
       </Flex>
-         
-      
 
       {/* <Flex wrap="wrap" mt="xs" w="100%">
         <PersonaSelect
@@ -378,9 +380,22 @@ export function CreateBumpFrameworkContextModal({
             </Tooltip>
           </Flex>
         </Flex>
+        {form.values.useAccountResearch && (
+          <PersonalizationSection
+            blocklist={form.values.transformerBlocklist ?? []}
+            onItemsChange={async (items) => {
+              form.setFieldValue("transformerBlocklist", 
+                items.filter((x) => !x.checked).map(x => x.id)
+              );
+            }}
+            onChanged={() => {}}
+          />
+        )}
+        
         </Collapse>
       </Box>
-      
+
+     
       <Flex w="100%" justify="flex-end" direction={'column'}>
         
 

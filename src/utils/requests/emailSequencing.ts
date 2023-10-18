@@ -89,7 +89,7 @@ export async function patchSequenceStep(
     template: string,
     bumpedCount: number | null,
     setDefault: boolean,
-    delayDays: number | null
+    delayDays?: number | null
   ): Promise<MsgResponse> {
 
   const response = await fetch(

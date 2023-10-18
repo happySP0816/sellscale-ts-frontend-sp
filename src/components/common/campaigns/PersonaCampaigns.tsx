@@ -571,38 +571,36 @@ function PersonCampaignCard(props: {
   ];
 
   return (
-    <Paper radius="md" ref={ref}>
+    <Paper radius='md' ref={ref}>
       <Stack
         spacing={0}
         sx={{
           opacity: props.persona.active || hovered ? 1 : 0.6,
-          cursor: "pointer",
+          cursor: 'pointer',
         }}
       >
         <Group
           // position="apart"
           sx={(theme) => ({
-            backgroundColor: props.persona.active
-              ? theme.colors.blue[6]
-              : "white",
-            borderRadius: "0.5rem 0.5rem 0 0",
-            border: "solid 1px " + theme.colors.gray[2],
+            backgroundColor: props.persona.active ? theme.colors.blue[6] : 'white',
+            borderRadius: '0.5rem 0.5rem 0 0',
+            border: 'solid 1px ' + theme.colors.gray[2],
           })}
-          p={props.persona.active ? "xs" : "4px"}
-          pl="xs"
-          pr="xs"
+          p={props.persona.active ? 'xs' : '4px'}
+          pl='xs'
+          pr='xs'
         >
-          <Box sx={{ flexDirection: "row", display: "flex" }} w="46%">
-            <Group w="500">
-              <Popover position="bottom" withArrow shadow="md">
+          <Box sx={{ flexDirection: 'row', display: 'flex' }} w='46%'>
+            <Group w='500'>
+              <Popover position='bottom' withArrow shadow='md'>
                 <Popover.Target>
                   <Button
-                    variant="outline"
-                    color={props.persona.active ? "blue" : "gray"}
-                    radius="xl"
-                    size="lg"
+                    variant='outline'
+                    color={props.persona.active ? 'blue' : 'gray'}
+                    radius='xl'
+                    size='lg'
                     compact
-                    sx={{ backgroundColor: "#ffffff22" }}
+                    sx={{ backgroundColor: '#ffffff22' }}
                   >
                     {emoji}
                   </Button>
@@ -617,62 +615,30 @@ function PersonCampaignCard(props: {
                 </Popover.Dropdown>
               </Popover>
 
-              <Title order={5} c={props.persona.active ? "white" : "gray"}>
+              <Title order={5} c={props.persona.active ? 'white' : 'gray'}>
                 {_.truncate(props.persona.name, { length: 48 })}
               </Title>
             </Group>
           </Box>
 
-          <Box w="20%">
-            <Button
-              variant="subtle"
-              onClick={toggle}
-              sx={{ borderRadius: 100, backgroundColor: "#ffffff44" }}
-            >
+          <Box w='20%'>
+            <Button variant='subtle' onClick={toggle} sx={{ borderRadius: 100, backgroundColor: '#ffffff44' }}>
               {opened ? (
-                <IconChevronsUp
-                  size="1.5rem"
-                  color={props.persona.active ? "white" : "blue"}
-                />
+                <IconChevronsUp size='1.5rem' color={props.persona.active ? 'white' : 'blue'} />
               ) : (
-                <IconChevronsDown
-                  size="1.5rem"
-                  color={props.persona.active ? "white" : "gray"}
-                />
+                <IconChevronsDown size='1.5rem' color={props.persona.active ? 'white' : 'gray'} />
               )}
             </Button>
           </Box>
 
-          <Group w="250">
-            <Button
-              radius="xl"
-              size="xs"
-              variant="outline"
-              compact
-              color={props.persona.active ? "white" : "gray"}
-              sx={(theme) => ({
-                borderColor: props.persona.active ? "white" : "gray",
-                color: props.persona.active ? "white" : "gray",
-              })}
-              onClick={() => {
-                if (props.project == undefined) return;
-                setOpenedProspectId(-1);
-                setCurrentProject(props.project);
-                navigateToPage(navigate, `/prioritize/${props.persona.id}`);
-              }}
-              leftIcon={<IconFilter size={"0.7rem"} />}
-            >
-              Filter Contacts
-            </Button>
+          <Group>
             <Button
               w={60}
-              radius="xl"
-              size="xs"
+              radius='xl'
+              size='xs'
               compact
               sx={(theme) => ({
-                backgroundColor: props.persona.active
-                  ? theme.colors.blue[5]
-                  : "gray",
+                backgroundColor: props.persona.active ? theme.colors.blue[5] : 'gray',
                 //color: theme.colors.blue[2],
               })}
               onClick={() => {
@@ -687,53 +653,54 @@ function PersonCampaignCard(props: {
 
             <Tooltip
               withArrow
-              position="bottom"
+              position='bottom'
               label={
                 personaActive
-                  ? "Click to disable this campaign on settings page"
-                  : "Click to enable this campaign on settings page"
+                  ? 'Click to disable this campaign on settings page'
+                  : 'Click to enable this campaign on settings page'
               }
             >
               <span>
                 <Button
-                  color={personaActive ? "blue" : "gray"}
+                  color={personaActive ? 'blue' : 'gray'}
                   sx={{
-                    border: "solid 1px white",
-                    cursor: "pointer",
+                    border: 'solid 1px white',
+                    cursor: 'pointer',
                   }}
-                  rightIcon={props.persona.active ? <IconCheck size="0.7rem" /> : <IconX size="0.7rem" />}
+                  rightIcon={props.persona.active ? <IconCheck size='0.7rem' /> : <IconX size='0.7rem' />}
                   size='xs'
                   onClick={() => {
                     if (props.project == undefined) return;
 
                     setOpenedProspectId(-1);
                     setCurrentProject(props.project);
-                    navigateToPage(navigate, `/persona/settings`,
-                      new URLSearchParams(
-                        `?campaign_id=${props.persona.id}`
-                      )
+                    navigateToPage(
+                      navigate,
+                      `/persona/settings`,
+                      new URLSearchParams(`?campaign_id=${props.persona.id}`)
                     );
 
                     showNotification({
-                      title: "Activate / Deactive Campaign from Settings",
-                      message:
-                        "You can activate & deactivate this persona from the settings page.",
-                      color: "blue",
-                      icon: <IconAdjustmentsHorizontal size="1rem" />,
+                      title: 'Activate / Deactive Campaign from Settings',
+                      message: 'You can activate & deactivate this persona from the settings page.',
+                      color: 'blue',
+                      icon: <IconAdjustmentsHorizontal size='1rem' />,
                       autoClose: 3000,
                     });
                   }}
                 >
-                  {personaActive ? "Active" : "Inactive"}
+                  {personaActive ? 'Active' : 'Inactive'}
                 </Button>
               </span>
             </Tooltip>
           </Group>
         </Group>
         <Collapse in={opened}>
-          {props.viewMode === "node-view" && (
+          {props.viewMode === 'node-view' && (
             <Box>
               <CampaignGraph
+                personaId={props.persona.id}
+                unusedProspects={(props.project?.num_unused_email_prospects ?? 0) + (props.project?.num_unused_li_prospects ?? 0)}
                 sections={types}
                 onChannelClick={(sectionType: string) => {
                   if (props.project == undefined) return;
@@ -742,15 +709,13 @@ function PersonCampaignCard(props: {
                   navigateToPage(
                     navigate,
                     `/setup/${sectionType.toLowerCase()}`,
-                    new URLSearchParams(
-                      `?campaign_id=${props.persona.id}`
-                    )
+                    new URLSearchParams(`?campaign_id=${props.persona.id}`)
                   );
                 }}
               />
             </Box>
           )}
-          {props.viewMode === "list-view" && (
+          {props.viewMode === 'list-view' && (
             <Box>
               {types.map((section, index) => {
                 if (!section.active && props.persona.active) return null;
@@ -767,9 +732,7 @@ function PersonCampaignCard(props: {
                         navigateToPage(
                           navigate,
                           `/setup/${section.type.toLowerCase()}`,
-                          new URLSearchParams(
-                            `?campaign_id=${props.persona.id}`
-                          )
+                          new URLSearchParams(`?campaign_id=${props.persona.id}`)
                         );
                       }}
                     />
@@ -794,9 +757,7 @@ function PersonCampaignCard(props: {
                               navigateToPage(
                                 navigate,
                                 `/setup/${section.type.toLowerCase()}`,
-                                new URLSearchParams(
-                                  `?campaign_id=${props.persona.id}`
-                                )
+                                new URLSearchParams(`?campaign_id=${props.persona.id}`)
                               );
                             }}
                           />
@@ -806,24 +767,15 @@ function PersonCampaignCard(props: {
                   </Collapse>
                   <Divider />
                   <Button
-                    w="100%"
-                    variant="subtle"
-                    size="xs"
-                    color="gray"
-                    onClick={() =>
-                      setInactiveChannelsOpened(!inactiveChannelsOpened)
-                    }
-                    leftIcon={
-                      inactiveChannelsOpened ? (
-                        <IconArrowUp size="0.7rem" />
-                      ) : (
-                        <IconArrowDown size="0.7rem" />
-                      )
-                    }
+                    w='100%'
+                    variant='subtle'
+                    size='xs'
+                    color='gray'
+                    onClick={() => setInactiveChannelsOpened(!inactiveChannelsOpened)}
+                    leftIcon={inactiveChannelsOpened ? <IconArrowUp size='0.7rem' /> : <IconArrowDown size='0.7rem' />}
                   >
-                    {inactiveChannelsOpened ? "Hide" : "Show"}{" "}
-                    {types.filter((x) => !x.active).length} Inactive Channel
-                    {types.filter((x) => !x.active).length > 1 ? "s" : ""}
+                    {inactiveChannelsOpened ? 'Hide' : 'Show'} {types.filter((x) => !x.active).length} Inactive Channel
+                    {types.filter((x) => !x.active).length > 1 ? 's' : ''}
                   </Button>
                 </>
               )}

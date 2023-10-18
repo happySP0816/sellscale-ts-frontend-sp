@@ -51,7 +51,7 @@ const IndividualsDashboard: FC<{
   const currentProject = useRecoilValue(currentProjectState);
   const [icpProspects, setIcpProspects] = useRecoilState(filterProspectsState);
   const navigate = useNavigate();
-  const [removeProspectsLoading, setRemoveProspectsLoading] = useState(false);
+  const [convertLoading, setConvertLoading] = useState(false);
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.LG})`, false, {
     getInitialValueInEffect: true,
   });
@@ -91,7 +91,12 @@ const IndividualsDashboard: FC<{
       );
       if (response.status === 'success') {
         setTotalFound(response.data.total);
-        return response.data.results as Individual[];
+        return response.data.results.map((i: Individual) => {
+          return {
+            ...i,
+            company_name: i?.company?.name ?? '',
+          };
+        }) as Individual[];
       }
       return [];
     },
@@ -170,7 +175,7 @@ const IndividualsDashboard: FC<{
           <Filters isTesting={false} selectOptions={[]} autofill={false} />
         </ScrollArea>
       </Box>
-      <Box>
+      <Box sx={{ flex: 1 }}>
         <Box
           style={{
             display: 'flex',
@@ -196,19 +201,24 @@ const IndividualsDashboard: FC<{
           </Box>
           <Flex gap={'1rem'} align={'center'}>
             {selectedRows.length > 0 && (
-              <Button onClick={async () => {
-                const response = await convertIndividualsToProspects(userToken, currentProject!.id, selectedRows);
-                if(response.status === 'success') {
-                  showNotification({
-                    title: 'Success',
-                    message: 'Successfully converted prospects to ICP prospects',
-                    color: 'green',
-                  });
-                  setSelectedRows([]);
-                  refetch();
-                }
-              }}>
-                Import Contacts to Campaign
+              <Button
+                loading={convertLoading}
+                onClick={async () => {
+                  setConvertLoading(true);
+                  const response = await convertIndividualsToProspects(userToken, currentProject!.id, selectedRows);
+                  if (response.status === 'success') {
+                    showNotification({
+                      title: 'Success',
+                      message: `Added contacts to campaign`,
+                      color: 'green',
+                    });
+                    setSelectedRows([]);
+                    refetch();
+                  }
+                  setConvertLoading(false);
+                }}
+              >
+                Import {selectedRows.length} Contacts to Campaign
               </Button>
             )}
           </Flex>

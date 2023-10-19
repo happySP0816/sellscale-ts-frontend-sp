@@ -1,4 +1,4 @@
-import { Button, ActionIcon, Text, Flex, Group, Title } from "@mantine/core";
+import { Button, ActionIcon, Text, Flex, Group, Title, Card } from "@mantine/core";
 import { CTAGeneratorSuggestedModal } from "@modals/CTAGeneratorSuggestedModal";
 import { IconPencil, IconPlus, IconQuestionMark, IconX } from "@tabler/icons";
 import { useState } from "react";
@@ -7,14 +7,14 @@ const CTAGenerator = () => {
   const [isOpenCTAGeneratorModal, setOpenCTAGeneratorModal] = useState(false);
 
   return (
-    <>
+    <Card withBorder mb='xs'>
       <Flex direction={"column"}>
-        <Group>
-          <Title color="blue.5" order={3}>
-            CTA Generator.
+        <Group mb='xs'>
+          <Title color="blue.5" order={4}>
+            CTA Generator
           </Title>
           <ActionIcon
-            size="sm"
+            size="18px"
             radius={999}
             color="yellow"
             variant="outline"
@@ -22,6 +22,10 @@ const CTAGenerator = () => {
           >
             <IconQuestionMark />
           </ActionIcon>
+
+          <Title color='black' order={4}>
+            - Coming Soon ⚠️
+          </Title>
         </Group>
 
         <Flex
@@ -33,7 +37,6 @@ const CTAGenerator = () => {
             borderRadius: "0.5rem",
           }}
           p="sm"
-          my={"1rem"}
           gap={"0.5rem"}
         >
           <Button
@@ -95,7 +98,7 @@ const CTAGenerator = () => {
           setOpenCTAGeneratorModal(false);
         }}
       />
-    </>
+    </Card>
   );
 };
 

@@ -1049,8 +1049,6 @@ function IntroMessageSection(props: {
   if (!currentProject) return <></>;
   return (
     <Stack ml="xl" spacing={0}>
-      <CTAGenerator />
-
       <Group position="apart">
         <Group>
           <Title order={3}>Invite Message</Title>

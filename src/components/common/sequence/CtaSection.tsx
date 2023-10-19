@@ -242,7 +242,7 @@ export const CtaSection = (props: {
               color={"green"}
               radius="xl"
               fw={"700"}
-              leftIcon={<IconPlus />}
+              leftIcon={<IconPlus size='1rem' />}
               onClick={() => {
                 openContextModal({
                   modal: "createNewCTA",

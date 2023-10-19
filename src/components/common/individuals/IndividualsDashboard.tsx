@@ -44,6 +44,8 @@ import getIndividuals from '@utils/requests/getIndividuals';
 import _ from 'lodash';
 import { convertIndividualsToProspects } from '@utils/requests/convertIndividualsToProspects';
 
+const PAGE_SIZE = 100;
+
 const IndividualsDashboard: FC<{
   openFilter: () => void;
 }> = ({ openFilter }) => {
@@ -67,7 +69,10 @@ const IndividualsDashboard: FC<{
   };
 
   // Cant find a type for this unfortunately
-  const [pagination, setPagination] = useState<any>();
+  const [pagination, setPagination] = useState<{ pageSize: number; pageIndex: number }>({
+    pageSize: PAGE_SIZE,
+    pageIndex: 0,
+  });
 
   const [icpDashboard, setIcpDashboard] = useState<any[]>([]);
   const queryClient = useQueryClient();
@@ -86,7 +91,7 @@ const IndividualsDashboard: FC<{
       const response = await getIndividuals(
         userToken,
         currentProject!.id,
-        pagination.pageSize,
+        pagination.pageSize+1,
         pagination.pageIndex * pagination.pageSize
       );
       if (response.status === 'success') {
@@ -190,11 +195,8 @@ const IndividualsDashboard: FC<{
               <ProjectSelect
                 extraBig
                 onClick={(persona?: PersonaOverview) => {
-                  // queryClient.refetchQueries({
-                  //   queryKey: [`query-get-icp-prospects`],
-                  // });
-                  // refetch();
-                  navigateToPage(navigate, `/prioritize/${persona?.id}`);
+                  refetch();
+                  navigateToPage(navigate, `/contacts/find`);
                 }}
               />
             </Box>
@@ -209,7 +211,7 @@ const IndividualsDashboard: FC<{
                   if (response.status === 'success') {
                     showNotification({
                       title: 'Success',
-                      message: `Added contacts to campaign`,
+                      message: `Currently importing prospects. This may take a few minutes...`,
                       color: 'green',
                     });
                     setSelectedRows([]);
@@ -232,6 +234,7 @@ const IndividualsDashboard: FC<{
           height={480}
           withPagination
           paginationMode='compact'
+          pageSizes={[PAGE_SIZE.toString()]}
           withRowSelection
           withColumnResizing
           sx={{ cursor: 'pointer' }}
@@ -299,7 +302,7 @@ const IndividualsDashboard: FC<{
             let resultRows = new Set(selectedRows);
             if (!data) return;
 
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < PAGE_SIZE; i++) {
               const id = data[i]?.id;
               if (!id) continue;
               if (rows[i] === true) {

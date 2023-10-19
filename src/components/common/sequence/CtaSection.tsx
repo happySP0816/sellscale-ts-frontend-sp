@@ -14,6 +14,7 @@ import {
   ScrollArea,
   Divider,
   ThemeIcon,
+  Tooltip
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import { IconPlus } from "@tabler/icons-react";
@@ -27,7 +28,7 @@ import { CTA } from "src";
 import { showNotification } from "@mantine/notifications";
 import { deleteCTA } from "@utils/requests/createCTA";
 import { CTAOption } from "./CTAOption";
-import { IconChevronDown, IconChevronsUp } from "@tabler/icons";
+import { IconChevronDown, IconChevronUp, IconChevronsUp, IconQuestionCircle } from "@tabler/icons";
 
 export const CtaSection = (props: {
   onCTAsLoaded: (ctas: CTA[]) => void;
@@ -107,13 +108,9 @@ export const CtaSection = (props: {
           <Text color="white" fw={600} size={"md"}>
             CTA Settings
           </Text>
-
-          <ThemeIcon>
-            <IconChevronsUp />
-          </ThemeIcon>
         </Flex>
         <Box px={"lg"}>
-          <ScrollArea h={"30vh"}>
+          <ScrollArea>
             <Stack spacing="lg" pt={20} pr="lg">
               {ctaActiveStatusesToShow.map((ctaActive) => {
                 return (
@@ -221,7 +218,13 @@ export const CtaSection = (props: {
                   </Text>
                 </Box>
                 <ThemeIcon variant="light" color="gray" radius="lg">
-                  <IconChevronDown size={12} />
+                  {
+                    ctaActiveStatusesToShow.length > 1 ? (
+                      <IconChevronUp />
+                    ) : (
+                      <IconChevronDown />
+                    )
+                  }
                 </ThemeIcon>
               </>
             }

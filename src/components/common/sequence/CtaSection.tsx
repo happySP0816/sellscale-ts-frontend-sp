@@ -29,6 +29,7 @@ import { showNotification } from "@mantine/notifications";
 import { deleteCTA } from "@utils/requests/createCTA";
 import { CTAOption } from "./CTAOption";
 import { IconChevronDown, IconChevronUp, IconChevronsUp, IconQuestionCircle } from "@tabler/icons";
+import CTAGenerator from './CTAGenerator';
 
 export const CtaSection = (props: {
   onCTAsLoaded: (ctas: CTA[]) => void;
@@ -88,6 +89,8 @@ export const CtaSection = (props: {
   return (
     <Box pt="md" sx={{ position: "relative" }}>
       <LoadingOverlay visible={isFetching} zIndex={10} />
+
+       <CTAGenerator />
 
       <Box
         pb={"lg"}

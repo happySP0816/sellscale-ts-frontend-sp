@@ -112,6 +112,7 @@ import {
   IconChevronRight,
   IconCircle,
   IconCircleMinus,
+  IconQuestionMark,
   IconRobot,
   IconSettings,
   IconSwitch,
@@ -127,6 +128,7 @@ import {
 import { patchArchetypeDelayDays } from "@utils/requests/patchArchetypeDelayDays";
 import { patchArchetypeBumpAmount } from "@utils/requests/patchArchetypeBumpAmount";
 import { CtaSection } from "./CtaSection";
+import CTAGenerator from "./CTAGenerator";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);

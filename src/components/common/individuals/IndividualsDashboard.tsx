@@ -44,7 +44,7 @@ import getIndividuals from '@utils/requests/getIndividuals';
 import _ from 'lodash';
 import { convertIndividualsToProspects } from '@utils/requests/convertIndividualsToProspects';
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 1000;
 
 const IndividualsDashboard: FC<{
   openFilter: () => void;
@@ -91,7 +91,7 @@ const IndividualsDashboard: FC<{
       const response = await getIndividuals(
         userToken,
         currentProject!.id,
-        pagination.pageSize+1,
+        pagination.pageSize,
         pagination.pageIndex * pagination.pageSize
       );
       if (response.status === 'success') {
@@ -233,7 +233,7 @@ const IndividualsDashboard: FC<{
           loading={isFetching}
           height={480}
           withPagination
-          paginationMode='compact'
+          paginationMode='default'
           pageSizes={[PAGE_SIZE.toString()]}
           withRowSelection
           withColumnResizing

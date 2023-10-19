@@ -136,19 +136,19 @@ export const CTAOption: React.FC<{
             )} */}
         </Flex>
         <Flex align={"center"} mr='md'>
-          <Text color={"gray.8"} fw={400} fz='14px'>
+          <Text color={"gray.8"} fw={500} fz='14px'>
             {data.label}
-            <Button
-              size="compact-xs"
-              variant="light"
-              ml='8px'
-              leftIcon={<IconEdit size={14} />}
-              fz="xs"
-              radius="lg"
-              onClick={onClickEdit}
-            >
-              Edit CTA
-            </Button>
+            <Tooltip label="Edit CTA">
+              <Button
+                size="compact-xs"
+                variant="subtle"
+                ml='8px'
+                fz="xs"
+                onClick={onClickEdit}
+              >
+                  <IconEdit size={14} />
+              </Button>
+            </Tooltip>
           </Text>
         </Flex>
         <Flex gap={"0.5rem"} align={"center"} ml={"auto"}>

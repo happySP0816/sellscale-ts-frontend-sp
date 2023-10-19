@@ -803,7 +803,44 @@ function BumpFrameworkSelect(props: {
     refetchOnWindowFocus: false,
   });
 
+  const { data: frameworkTemplates } = useQuery({
+    queryKey: [`query-get-bump-framework-templates`],
+    queryFn: async () => {
+      
+      const res = await fetch(`${API_URL}/bump_framework/bump_framework_templates?bumped_count=${props.bumpedCount}&overall_status=${props.overallStatus}`, {
+        method: "GET",
+      });
+      const result = await res.json();
+
+      const data = result.bump_framework_templates as {
+        name: string;
+        raw_prompt: string;
+        human_readable_prompt: string;
+        length: string;
+        tag: string;
+        bumped_counts: number[];
+        overall_statuses: string[];
+        transformer_blocklist: string[];
+      }[];
+      return data.map((template) => {
+        return {
+          name: template.name,
+          prompt: template.raw_prompt,
+          human_readable_prompt: template.human_readable_prompt,
+          length: template.length,
+          tag: template.tag,
+          bumped_counts: template.bumped_counts,
+          overall_statuses: template.overall_statuses,
+          transformer_blocklist: template.transformer_blocklist
+        };
+      });
+
+    },
+    refetchOnWindowFocus: false,
+  });
+
   return (
+  <>
     <ModalSelector
       selector={{
         override: (
@@ -940,6 +977,115 @@ function BumpFrameworkSelect(props: {
       size={800}
       activeItemId={props.activeBumpFrameworkId}
     />
+    {/* Create New Framework */}
+      <ModalSelector
+        selector={{
+          override: <Tooltip label="Create New Framework" withinPortal>
+              <ActionIcon radius="xl">
+                <IconPlus size="1.1rem" />
+              </ActionIcon>
+            </Tooltip>,
+        }}
+        title={{
+          name: "Choose a Template",
+          rightSection: (
+              <Button variant="outline" radius="md" size='xs' 
+                leftIcon={<IconTool size="1rem" />}
+                onClick={() => {
+                    openContextModal({
+                      modal: "createBumpFramework",
+                      title: "Make your own framework",
+                      innerProps: {
+                        modalOpened: true,
+                        openModal: () => {},
+                        closeModal: () => {
+                          queryClient.refetchQueries({
+                            queryKey: [`query-get-bump-frameworks`],
+                          });
+                          modals.closeAll();
+                        },
+                        backFunction: () => {},
+                        dataChannels: dataChannels,
+                        status: props.overallStatus,
+                        archetypeID: currentProject?.id,
+                        bumpedCount: props.bumpedCount,
+                        initialValues: {
+                          title: "",
+                          description: "",
+                          default: false,
+                          bumpDelayDays: 2,
+                          useAccountResearch: true,
+                          bumpLength: "1 week",
+                          human_readable_prompt: ""
+                        }
+                      },
+                    });
+                  }}>
+                Make a Custom Framework
+              </Button>
+          ),
+        }}
+        showSearchbar
+        size={600}
+        loading={false}
+        zIndex={200}
+        items={
+          frameworkTemplates?.filter((f) => {
+            return (
+              props.overallStatus === "ACCEPTED" &&
+              f.overall_statuses?.includes("ACCEPTED")
+            ) || (
+              props.overallStatus === "BUMPED" &&
+              f.overall_statuses?.includes("BUMPED") && 
+              f.bumped_counts.includes(props.bumpedCount)
+            ) || (
+              !f.overall_statuses
+            )
+          }).map((template, index) => {
+            return {
+              id: index,
+              name: template.name,
+              content: (
+                <Box>
+                  <Text>{template.name}</Text>
+                </Box>
+              ),
+              onClick: () => {
+                openContextModal({
+                  modal: "createBumpFramework",
+                  title: "Create Bump Framework",
+                  innerProps: {
+                    modalOpened: true,
+                    openModal: () => {},
+                    closeModal: () => {
+                      queryClient.refetchQueries({
+                        queryKey: [`query-get-bump-frameworks`],
+                      });
+                      modals.closeAll();
+                    },
+                    backFunction: () => {},
+                    dataChannels: dataChannels,
+                    status: props.overallStatus,
+                    archetypeID: currentProject?.id,
+                    bumpedCount: props.bumpedCount,
+                    initialValues: {
+                      title: template.name,
+                      description: template.prompt,
+                      default: true,
+                      bumpDelayDays: 2,
+                      useAccountResearch: true,
+                      bumpLength: template.length,
+                      human_readable_prompt: template.human_readable_prompt,
+                      transformerBlocklist: template.transformer_blocklist
+                    }
+                  },
+                });
+              },
+            };
+          }) ?? []
+        }
+      />
+    </>
   );
 }
 

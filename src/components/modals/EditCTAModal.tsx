@@ -41,6 +41,7 @@ export default function EditCTAModal({
 
   const [ctaTypes, setCTATypes]: any = useState([] as any[]);
   const [ctaType, setCTAType] = useState(innerProps.cta.cta_type);
+  const [typedValue, setTypedValue] = useState("");
   console.log(ctaType);
 
   const fetchCTATypes = async () => {
@@ -181,6 +182,15 @@ export default function EditCTAModal({
               return item;
             }}
             getCreateLabel={(query) => `+ Add a CTA type for ${query}`}
+            onSearchChange={(value: string) => {
+              setTypedValue(value);
+            }}
+            onBlur={() => {
+              if (typedValue) {
+                setCTAType(typedValue);
+                setTypedValue("");
+              }
+            }}
             data={ctaTypes}
             onChange={(value: string) => { setCTAType(ctaTypes.find((ctaType: any) => ctaType.value === value)?.label); }}
           />

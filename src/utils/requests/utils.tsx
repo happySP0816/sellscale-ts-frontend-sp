@@ -161,3 +161,25 @@ export function isMsgResponse(value: MsgResponse | any): value is MsgResponse {
     (value as MsgResponse).message !== undefined
   );
 }
+
+/**
+ * Helper function that, given a string, returns a Mantine color from the options:
+ * - gray, red, pink, grape, violet, indigo, blue, teal, green, lime, yellow, orange
+ */
+export function deterministicMantineColor(str: string): string {
+  const colors = [
+    "gray",
+    "red",
+    "pink",
+    "grape",
+    "violet",
+    "indigo",
+    "blue",
+    "teal",
+    "green",
+    "lime",
+    "yellow",
+    "orange",
+  ];
+  return colors[Math.abs(hashString(str, colors.length))];
+}

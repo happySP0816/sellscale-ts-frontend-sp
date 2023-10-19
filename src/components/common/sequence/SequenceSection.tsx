@@ -3,7 +3,7 @@ import {
   uploadDrawerOpenState,
 } from "@atoms/personaAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { logout, getFreshCurrentProject } from "@auth/core";
+import { getFreshCurrentProject } from "@auth/core";
 import ModalSelector from "@common/library/ModalSelector";
 import ProspectSelect from "@common/library/ProspectSelect";
 import VoiceSelect from "@common/library/VoiceSelect";
@@ -57,7 +57,7 @@ import {
   useHover,
   usePrevious,
 } from "@mantine/hooks";
-import sellScaleLogo from './assets/logo.jpg'
+import sellScaleLogo from "./assets/logo.jpg";
 import { modals, openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
@@ -93,7 +93,6 @@ import {
   getLiConvoSim,
 } from "@utils/requests/linkedinConvoSimulation";
 import { patchBumpFramework } from "@utils/requests/patchBumpFramework";
-import toggleCTA from "@utils/requests/toggleCTA";
 import {
   updateBlocklist,
   updateInitialBlocklist,
@@ -102,7 +101,7 @@ import { useDebouncedCallback } from "@utils/useDebouncedCallback";
 import _, { set } from "lodash";
 import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { BumpFramework, CTA } from "src";
+import { BumpFramework } from "src";
 import TextWithNewline from "@common/library/TextWithNewlines";
 import { getAcceptanceRates } from "@utils/requests/getAcceptanceRates";
 import { showNotification } from "@mantine/notifications";
@@ -113,6 +112,7 @@ import {
   IconChevronRight,
   IconCircle,
   IconCircleMinus,
+  IconQuestionMark,
   IconRobot,
   IconSettings,
   IconSwitch,
@@ -125,9 +125,10 @@ import {
   useNavigate,
   unstable_useBlocker,
 } from "react-router-dom";
-import { deleteCTA } from "@utils/requests/createCTA";
 import { patchArchetypeDelayDays } from "@utils/requests/patchArchetypeDelayDays";
 import { patchArchetypeBumpAmount } from "@utils/requests/patchArchetypeBumpAmount";
+import { CtaSection } from "./CtaSection";
+import CTAGenerator from "./CTAGenerator";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -452,7 +453,7 @@ export default function SequenceSection() {
                       ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
                       : (bf0 &&
                         bf0.etl_num_times_used &&
-                        bf0.etl_num_times_used < 10
+                        bf0.etl_num_times_used < 20
                           ? "Not enough data, "
                           : "") +
                         (bf0?.etl_num_times_converted || 0) +
@@ -525,7 +526,7 @@ export default function SequenceSection() {
                       ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
                       : (bf1 &&
                         bf1.etl_num_times_used &&
-                        bf1.etl_num_times_used < 10
+                        bf1.etl_num_times_used < 20
                           ? "Not enough data, "
                           : "") +
                         (bf1?.etl_num_times_converted || 0) +
@@ -603,7 +604,7 @@ export default function SequenceSection() {
                       ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
                       : (bf2 &&
                         bf2.etl_num_times_used &&
-                        bf2.etl_num_times_used < 10
+                        bf2.etl_num_times_used < 20
                           ? "Not enough data, "
                           : "") +
                         (bf2?.etl_num_times_converted || 0) +
@@ -680,7 +681,7 @@ export default function SequenceSection() {
                       ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
                       : (bf3 &&
                         bf3.etl_num_times_used &&
-                        bf3.etl_num_times_used < 10
+                        bf3.etl_num_times_used < 20
                           ? "Not enough data, "
                           : "") +
                         (bf3?.etl_num_times_converted || 0) +
@@ -802,62 +803,52 @@ function BumpFrameworkSelect(props: {
     refetchOnWindowFocus: false,
   });
 
-  const { data: frameworkTemplates } = useQuery({
-    queryKey: [`query-get-bump-framework-templates`],
-    queryFn: async () => {
-      
-      const res = await fetch(`${API_URL}/bump_framework/bump_framework_templates?bumped_count=${props.bumpedCount}&overall_status=${props.overallStatus}`, {
-        method: "GET",
-      });
-      const result = await res.json();
-
-      const data = result.bump_framework_templates as {
-        name: string;
-        raw_prompt: string;
-        human_readable_prompt: string;
-        length: string;
-        tag: string;
-        bumped_counts: number[];
-        overall_statuses: string[];
-        transformer_blocklist: string[];
-      }[];
-      return data.map((template) => {
-        return {
-          name: template.name,
-          prompt: template.raw_prompt,
-          human_readable_prompt: template.human_readable_prompt,
-          length: template.length,
-          tag: template.tag,
-          bumped_counts: template.bumped_counts,
-          overall_statuses: template.overall_statuses,
-          transformer_blocklist: template.transformer_blocklist
-        };
-      });
-
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  
-
   return (
-    <>
-      {/* Switch framework */}
-      <ModalSelector
-        zIndex={100}
-        selector={{
-          override: (
-            <Tooltip label="Change Framework" withinPortal>
-              <ActionIcon radius="xl">
-                <IconSwitch size="1.1rem" />
-              </ActionIcon>
-            </Tooltip>
-          ),
-        }}
-        title={{
-          name: props.title,
-          rightSection: (
-              <Button variant="outline" radius="md" size='xs' onClick={() => {
+    <ModalSelector
+      selector={{
+        override: (
+          <Tooltip label="Edit" withinPortal>
+            <ActionIcon radius="xl">
+              <IconPencil size="1.1rem" />
+            </ActionIcon>
+          </Tooltip>
+        ),
+      }}
+      title={{
+        name: props.title,
+        rightSection: (
+          <Menu shadow="md" width={200} withArrow>
+            <Menu.Target>
+              <Button variant="subtle" compact>
+                New Framework
+              </Button>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item
+                icon={<IconPlus size={14} />}
+                onClick={() => {
+                  openContextModal({
+                    modal: "createBumpFramework",
+                    title: "Create Bump Framework",
+                    innerProps: {
+                      modalOpened: true,
+                      openModal: () => {},
+                      closeModal: () => {},
+                      backFunction: () => {},
+                      dataChannels: dataChannels,
+                      status: props.overallStatus,
+                      archetypeID: currentProject?.id,
+                      bumpedCount: props.bumpedCount,
+                    },
+                  });
+                }}
+              >
+                Create New
+              </Menu.Item>
+              <Menu.Item
+                icon={<IconCopy size={14} />}
+                onClick={() => {
                   openContextModal({
                     modal: "cloneBumpFramework",
                     title: "Clone Bump Framework",
@@ -873,192 +864,82 @@ function BumpFrameworkSelect(props: {
                       showStatus: true,
                     },
                   });
-                }}>
-                Clone Framework
-              </Button>
-          ),
-        }}
-        loading={false}
-        items={props.bumpedFrameworks.sort((a, b) => {
-          if (a.default) return -1;
-          if (b.default) return 1;
-          return 0;
-        }).map((bf) => ({
-          id: bf.id,
-          name: bf.title,
-          onClick: () => {},
-          leftSection: (
-            <Badge
-              size="sm"
-              variant="filled"
-              color={valueToColor(theme, bf.bump_length)}
-              ml="6px"
-            >
-              {bf.bump_length}
-            </Badge>
-          ),
-          content: (
-            <Box>
-              <Text fz="sm" fw={500}>
-                {bf.title}
-              </Text>
-              <Text fz="xs" c="dimmed">
-                {bf.description}
-              </Text>
-            </Box>
-          ),
-          rightSection: (
-            <Box ml="auto">
-              <Switch
-                checked={bf.default}
-                onChange={(checked) => {
-                  setLoading(true);
-                  const result = patchBumpFramework(
-                    userToken,
-                    bf.id,
-                    bf.overall_status,
-                    bf.title,
-                    bf.description,
-                    bf.bump_length,
-                    bf.bumped_count,
-                    bf.bump_delay_days,
-                    !bf.default,
-                    bf.use_account_research,
-                    bf.transformer_blocklist
-                  )
-                    .then(() => {
-                      showNotification({
-                        title: "Success",
-                        message: "Bump Framework enabled",
-                        color: "green",
-                      });
-                    })
-                    .finally(() => {
-                      (async () => {
-                        await queryClient.refetchQueries({
-                          queryKey: [`query-get-bump-frameworks`],
-                        });
-                        setLoading(false);
-                      })();
-                    });
                 }}
-              />
-              {loading && <Loader size="xs" mt="xs" />}
-            </Box>
-          ),
-        }))}
-        size={800}
-        activeItemId={props.activeBumpFrameworkId}
-      />
-      {/* Create New Framework */}
-      <ModalSelector
-        selector={{
-          override: <Tooltip label="Create New Framework" withinPortal>
-              <ActionIcon radius="xl">
-                <IconPlus size="1.1rem" />
-              </ActionIcon>
-            </Tooltip>,
-        }}
-        title={{
-          name: "Choose a Template",
-          rightSection: (
-              <Button variant="outline" radius="md" size='xs' 
-                leftIcon={<IconTool size="1rem" />}
-                onClick={() => {
-                    openContextModal({
-                      modal: "createBumpFramework",
-                      title: "Make your own framework",
-                      innerProps: {
-                        modalOpened: true,
-                        openModal: () => {},
-                        closeModal: () => {
-                          queryClient.refetchQueries({
-                            queryKey: [`query-get-bump-frameworks`],
-                          });
-                          modals.closeAll();
-                        },
-                        backFunction: () => {},
-                        dataChannels: dataChannels,
-                        status: props.overallStatus,
-                        archetypeID: currentProject?.id,
-                        bumpedCount: props.bumpedCount,
-                        initialValues: {
-                          title: "",
-                          description: "",
-                          default: false,
-                          bumpDelayDays: 2,
-                          useAccountResearch: true,
-                          bumpLength: "1 week",
-                          human_readable_prompt: ""
-                        }
-                      },
+              >
+                Copy from Existing
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        ),
+      }}
+      loading={false}
+      items={props.bumpedFrameworks.map((bf) => ({
+        id: bf.id,
+        name: bf.title,
+        onClick: () => {},
+        leftSection: (
+          <Badge
+            size="sm"
+            variant="filled"
+            color={valueToColor(theme, bf.bump_length)}
+            ml="6px"
+          >
+            {bf.bump_length}
+          </Badge>
+        ),
+        content: (
+          <Box>
+            <Text fz="sm" fw={500}>
+              {bf.title}
+            </Text>
+            <Text fz="xs" c="dimmed">
+              {bf.description}
+            </Text>
+          </Box>
+        ),
+        rightSection: (
+          <Box ml="auto">
+            <Switch
+              checked={bf.default}
+              onChange={(checked) => {
+                setLoading(true);
+                const result = patchBumpFramework(
+                  userToken,
+                  bf.id,
+                  bf.overall_status,
+                  bf.title,
+                  bf.description,
+                  bf.bump_length,
+                  bf.bumped_count,
+                  bf.bump_delay_days,
+                  !bf.default,
+                  bf.use_account_research,
+                  bf.transformer_blocklist
+                )
+                  .then(() => {
+                    showNotification({
+                      title: "Success",
+                      message: "Bump Framework enabled",
+                      color: "green",
                     });
-                  }}>
-                Make a Custom Framework
-              </Button>
-          ),
-        }}
-        showSearchbar
-        size={600}
-        loading={false}
-        zIndex={200}
-        items={
-          frameworkTemplates?.filter((f) => {
-            return (
-              props.overallStatus === "ACCEPTED" &&
-              f.overall_statuses?.includes("ACCEPTED")
-            ) || (
-              props.overallStatus === "BUMPED" &&
-              f.overall_statuses?.includes("BUMPED") && 
-              f.bumped_counts.includes(props.bumpedCount)
-            ) || (
-              !f.overall_statuses
-            )
-          }).map((template, index) => {
-            return {
-              id: index,
-              name: template.name,
-              content: (
-                <Box>
-                  <Text>{template.name}</Text>
-                </Box>
-              ),
-              onClick: () => {
-                openContextModal({
-                  modal: "createBumpFramework",
-                  title: "Create Bump Framework",
-                  innerProps: {
-                    modalOpened: true,
-                    openModal: () => {},
-                    closeModal: () => {
-                      queryClient.refetchQueries({
+                  })
+                  .finally(() => {
+                    (async () => {
+                      await queryClient.refetchQueries({
                         queryKey: [`query-get-bump-frameworks`],
                       });
-                      modals.closeAll();
-                    },
-                    backFunction: () => {},
-                    dataChannels: dataChannels,
-                    status: props.overallStatus,
-                    archetypeID: currentProject?.id,
-                    bumpedCount: props.bumpedCount,
-                    initialValues: {
-                      title: template.name,
-                      description: template.prompt,
-                      default: true,
-                      bumpDelayDays: 2,
-                      useAccountResearch: true,
-                      bumpLength: template.length,
-                      human_readable_prompt: template.human_readable_prompt,
-                      transformerBlocklist: template.transformer_blocklist
-                    }
-                  },
-                });
-              },
-            };
-          }) ?? []
-        }
-      />
-    </>
+                      setLoading(false);
+                    })();
+                  });
+              }}
+            />
+            {loading && <Loader size="xs" mt="xs" />}
+          </Box>
+        ),
+      }))}
+      size={800}
+      activeItemId={props.activeBumpFrameworkId}
+    />
   );
 }
 
@@ -1696,7 +1577,8 @@ function LiExampleInvitation(props: {
             compact
           >
             Reply to{" "}
-            {liSDR?.miniProfile.firstName || userData.sdr_name.trim().split(" ")[0]}
+            {liSDR?.miniProfile.firstName ||
+              userData.sdr_name.trim().split(" ")[0]}
           </Button>
         </Box>
       </Stack>
@@ -1921,7 +1803,7 @@ function FrameworkCard(props: {
                   ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
                     Math.round(props.conversion * 10) / 10 +
                     "%."
-                  : (props.timesUsed && props.timesUsed < 10
+                  : (props.timesUsed && props.timesUsed < 20
                       ? "Not enough data, "
                       : "") +
                     props.timesConverted +
@@ -2067,10 +1949,14 @@ function FrameworkSection(props: {
   const [personalizationItemIds, setPersonalizationItemIds] = useState(
     props.framework.transformer_blocklist
   );
-  const [showUserFeedback, setShowUserFeedback] = useState(props.framework.human_feedback !== null);
+  const [showUserFeedback, setShowUserFeedback] = useState(
+    props.framework.human_feedback !== null
+  );
   const [feedbackChanged, setFeedbackChanged] = useState(false);
 
-  const [initialFrameworkId, setInitialFrameworkId] = useState<number>(props.framework.id);
+  const [initialFrameworkId, setInitialFrameworkId] = useState<number>(
+    props.framework.id
+  );
 
   let { hovered: hovered, ref: ref } = useHover();
 
@@ -2103,12 +1989,11 @@ function FrameworkSection(props: {
         bumpFrameworkHumanReadablePrompt:
           props.framework.bump_framework_human_readable_prompt,
         humanFeedback: props.framework.human_feedback,
-      })
+      });
       setPersonalizationItemIds(props.framework.transformer_blocklist);
     }
-  }, [props.framework.id])
+  }, [props.framework.id]);
 
-  
   const [debouncedForm] = useDebouncedValue(form.values, 200);
   const prevDebouncedForm = usePrevious(debouncedForm);
   const [
@@ -2145,10 +2030,10 @@ function FrameworkSection(props: {
     });
 
     showNotification({
-        title: "Settings Saved ✅",
-        message: "Hit Regenerate to see your new message.",
-        color: "green",
-      });
+      title: "Settings Saved ✅",
+      message: "Hit Regenerate to see your new message.",
+      color: "green",
+    });
 
     setSavingSettings(false);
     setChanged(false);
@@ -2217,8 +2102,8 @@ function FrameworkSection(props: {
   const onAnimatonComplete = () => {
     setTimeout(() => {
       setShowUserFeedback(true);
-    }, 500)
-  }
+    }, 500);
+  };
 
   if (!currentProject) return <></>;
 
@@ -2226,91 +2111,94 @@ function FrameworkSection(props: {
     <>
       <Stack ml="xl" spacing={0}>
         <Group position="apart">
-          <Group>
-            
-          </Group>
+          <Group></Group>
         </Group>
         <Card padding="lg" radius="md">
-            <Card.Section
-              sx={{
-                flexDirection: "row",
-                display: "flex",
-                gap: "1rem",
-              }}
-              w='100%'
-            >
-              <Box mt="4px" w='100%' sx={{}}>
-                <Title order={5} color='gray' mr='xs' fw='400'>
-                  Follow-Up {props.bumpCount + 1}:
-                </Title> 
-                
-                <Flex direction='row'>
-                  {!titleInEditingMode ? 
-                      <Title order={3} onClick={() => setTitleInEditingMode((p) => !p)}>
-                        <span style={{color: 'black', cursor: 'pointer'}}>
-                          {form.values.frameworkName}
-                        </span>
-                      </Title> 
-                      : 
-                      (
-                        <TextInput
-                          w='75%'
-                          placeholder="Name"
-                          variant="filled"
-                          {...form.getInputProps("frameworkName")}
-                          onChange={(e) => {
-                            form.setFieldValue("frameworkName", e.target.value);
-                            setChanged(true);
-                          }}
-                        />
-                      )
-                  }
-                  <ActionIcon
-                    ml='8px'
-                    mt='8px'
-                    size='1rem'
-                    sx={{ zIndex: 10, opacity: 0.7 }}
+          <Card.Section
+            sx={{
+              flexDirection: "row",
+              display: "flex",
+              gap: "1rem",
+            }}
+            w="100%"
+          >
+            <Box mt="4px" w="100%" sx={{}}>
+              <Title order={5} color="gray" mr="xs" fw="400">
+                Follow-Up {props.bumpCount + 1}:
+              </Title>
+
+              <Flex direction="row">
+                {!titleInEditingMode ? (
+                  <Title
+                    order={3}
                     onClick={() => setTitleInEditingMode((p) => !p)}
                   >
-                    <IconEdit />
-                  </ActionIcon>
-              </Flex>
-
-               
-              </Box>
-            </Card.Section>
-
-            <Card.Section mt='xs' w='100%'>
-              <Flex direction='row'>
-                {descriptionEditState ? (
-                  <Textarea
-                    w='100%'
-                    fz='xs'
-                    {...form.getInputProps("bumpFrameworkHumanReadablePrompt")}
+                    <span style={{ color: "black", cursor: "pointer" }}>
+                      {form.values.frameworkName}
+                    </span>
+                  </Title>
+                ) : (
+                  <TextInput
+                    w="75%"
+                    placeholder="Name"
+                    variant="filled"
+                    {...form.getInputProps("frameworkName")}
                     onChange={(e) => {
-                      form.setFieldValue(
-                        "bumpFrameworkHumanReadablePrompt",
-                        e.target.value
-                      );
+                      form.setFieldValue("frameworkName", e.target.value);
                       setChanged(true);
                     }}
                   />
-                ) : (
-                  <Text fz="xs" c="dimmed" sx={{cursor: 'pointer'}} onClick={() => setDescriptionEditState((p) => !p)}>
-                    <span style={{fontWeight: 'bold'}}>Goal:</span> {form.values.bumpFrameworkHumanReadablePrompt}
-                  </Text>
                 )}
                 <ActionIcon
-                  size='1rem'
-                  ml='8px'
+                  ml="8px"
+                  mt="8px"
+                  size="1rem"
                   sx={{ zIndex: 10, opacity: 0.7 }}
-                  onClick={() => setDescriptionEditState((p) => !p)}
+                  onClick={() => setTitleInEditingMode((p) => !p)}
                 >
                   <IconEdit />
                 </ActionIcon>
               </Flex>
-            </Card.Section>
-          </Card>
+            </Box>
+          </Card.Section>
+
+          <Card.Section mt="xs" w="100%">
+            <Flex direction="row">
+              {descriptionEditState ? (
+                <Textarea
+                  w="100%"
+                  fz="xs"
+                  {...form.getInputProps("bumpFrameworkHumanReadablePrompt")}
+                  onChange={(e) => {
+                    form.setFieldValue(
+                      "bumpFrameworkHumanReadablePrompt",
+                      e.target.value
+                    );
+                    setChanged(true);
+                  }}
+                />
+              ) : (
+                <Text
+                  fz="xs"
+                  c="dimmed"
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => setDescriptionEditState((p) => !p)}
+                >
+                  <span style={{ fontWeight: "bold" }}>Goal:</span>{" "}
+                  {form.values.bumpFrameworkHumanReadablePrompt}
+                </Text>
+              )}
+              <ActionIcon
+                size="1rem"
+                ml="8px"
+                sx={{ zIndex: 10, opacity: 0.7 }}
+                onClick={() => setDescriptionEditState((p) => !p)}
+              >
+                <IconEdit />
+              </ActionIcon>
+            </Flex>
+          </Card.Section>
+        </Card>
         <Stack pt={20} spacing={15}>
           <Box sx={{ position: "relative" }}>
             <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
@@ -2350,7 +2238,7 @@ function FrameworkSection(props: {
             ) : (
               <Box>
                 <Group position="apart" pb="0.3125rem">
-                  <Text fz="xs" fw={500} c="dimmed" sx={{opacity: 0.8}}>
+                  <Text fz="xs" fw={500} c="dimmed" sx={{ opacity: 0.8 }}>
                     EXAMPLE GENERATION:
                   </Text>
                   <Group>
@@ -2413,50 +2301,50 @@ function FrameworkSection(props: {
             )}
           </Box>
 
-          {changed && <Group
-            position="right"
-          >
-            <Center>
-              <Button
-                variant="default"
-                w="200px"
-                ml="auto"
-                loading={savingSettings}
-                disabled={!changed}
-                onClick={() => {
-                  form.reset();
-                  setChanged(false);
-                }}
-              >
-                Cancel
-              </Button>
-            </Center>
-            <Center>
-              <Button
-                color="green"
-                w="200px"
-                ml="auto"
-                loading={savingSettings}
-                disabled={!changed}
-                onClick={() => {
-                  showNotification({
-                    title: "Saving Settings...",
-                    message: "This may take a few seconds.",
-                    color: "blue",
-                  })
-                  saveSettings(debouncedForm);
-                  props.setIsDataChanged(false);
+          {changed && (
+            <Group position="right">
+              <Center>
+                <Button
+                  variant="default"
+                  w="200px"
+                  ml="auto"
+                  loading={savingSettings}
+                  disabled={!changed}
+                  onClick={() => {
+                    form.reset();
+                    setChanged(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Center>
+              <Center>
+                <Button
+                  color="green"
+                  w="200px"
+                  ml="auto"
+                  loading={savingSettings}
+                  disabled={!changed}
+                  onClick={() => {
+                    showNotification({
+                      title: "Saving Settings...",
+                      message: "This may take a few seconds.",
+                      color: "blue",
+                    });
+                    saveSettings(debouncedForm);
+                    props.setIsDataChanged(false);
 
-                  // close advanced settings
-                  if (opened) {
-                    toggle();
-                  }
-                }}
-              >
-                Save Settings
-              </Button>
-            </Center>
-          </Group>}
+                    // close advanced settings
+                    if (opened) {
+                      toggle();
+                    }
+                  }}
+                >
+                  Save Settings
+                </Button>
+              </Center>
+            </Group>
+          )}
 
           {form.values.promptInstructions.includes("Answer:") && (
             <Alert
@@ -2523,32 +2411,40 @@ function FrameworkSection(props: {
             )} */}
             {/* todo(Aakash) - remove this END */}
 
-            {
-              (showUserFeedback) && (
-                <Card  mb='16px'>
-                  <Card.Section sx={{backgroundColor: '#26241d', flexDirection: 'row', display: 'flex'}} p='sm'>
-                    <Image src={sellScaleLogo} width={30} height={30} mr='sm'/>
-                    <Text color='white' mt='4px'>
-                      Feel free to give me feedback on improving the message
-                    </Text>
-                  </Card.Section>
-                  <Card.Section sx={{border: 'solid 2px #26241d !important'}} p='8px'>
-                    <Textarea 
-                      minRows={5}
-                      placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
-                      {...form.getInputProps("humanFeedback")}
-                      />
-                  </Card.Section>
-                </Card>
-              )
-            }
+            {showUserFeedback && (
+              <Card mb="16px">
+                <Card.Section
+                  sx={{
+                    backgroundColor: "#26241d",
+                    flexDirection: "row",
+                    display: "flex",
+                  }}
+                  p="sm"
+                >
+                  <Image src={sellScaleLogo} width={30} height={30} mr="sm" />
+                  <Text color="white" mt="4px">
+                    Feel free to give me feedback on improving the message
+                  </Text>
+                </Card.Section>
+                <Card.Section
+                  sx={{ border: "solid 2px #26241d !important" }}
+                  p="8px"
+                >
+                  <Textarea
+                    minRows={5}
+                    placeholder="- make it shorter&#10;-use this fact&#10;-mention the value prop"
+                    {...form.getInputProps("humanFeedback")}
+                  />
+                </Card.Section>
+              </Card>
+            )}
 
             <Box maw={"100%"} mx="auto">
               <Group>
                 <Button
                   onClick={toggle}
                   w="100%"
-                  size='xs'
+                  size="xs"
                   color="gray"
                   variant="subtle"
                   leftIcon={<IconTools size={"0.8rem"} />}
@@ -2664,8 +2560,12 @@ function FrameworkSection(props: {
                       <PersonalizationSection
                         blocklist={props.framework.transformer_blocklist}
                         onItemsChange={async (items) => {
-                          setPersonalizationItemsCount(items.filter(x => x.checked).length);
-                          setPersonalizationItemIds(items.filter((x) => !x.checked).map(x => x.id));
+                          setPersonalizationItemsCount(
+                            items.filter((x) => x.checked).length
+                          );
+                          setPersonalizationItemIds(
+                            items.filter((x) => !x.checked).map((x) => x.id)
+                          );
                         }}
                         onChanged={() => {
                           setChanged(true);
@@ -2856,7 +2756,7 @@ export const PersonalizationSection = (props: {
   }
 
   useEffect(() => {
-    const allItems = [...prospectItems, ...companyItems]
+    const allItems = [...prospectItems, ...companyItems];
     props.onItemsChange(allItems);
   }, []);
 
@@ -2880,10 +2780,10 @@ export const PersonalizationSection = (props: {
     });
 
     setTimeout(() => {
-      props.onItemsChange([...prospectItems, ...companyItems])
+      props.onItemsChange([...prospectItems, ...companyItems]);
       props.onChanged && props.onChanged();
     }, 1000);
-  }
+  };
 
   function setProfileChecked(itemId: string, checked: boolean) {
     setProspectItems((prev) => {
@@ -2894,7 +2794,7 @@ export const PersonalizationSection = (props: {
         }
         return i;
       });
-      props.onItemsChange([...prospectItems, ...companyItems])
+      props.onItemsChange([...prospectItems, ...companyItems]);
       props.onChanged && props.onChanged();
       return items;
     });
@@ -2909,7 +2809,7 @@ export const PersonalizationSection = (props: {
         }
         return i;
       });
-      props.onItemsChange([...prospectItems, ...companyItems])
+      props.onItemsChange([...prospectItems, ...companyItems]);
       props.onChanged && props.onChanged();
       return items;
     });
@@ -2946,7 +2846,7 @@ export const PersonalizationSection = (props: {
         <Checkbox
           checked={allItems.every((x) => x.checked)}
           label={"Select All Frameworks"}
-          mb='md'
+          mb="md"
           onClick={(event) => markAll(event.currentTarget.checked)}
         />
         <Flex direction={"column"} gap={"0.5rem"}>
@@ -3069,303 +2969,6 @@ export const PersonalizationCard: React.FC<{
           );
         })}
       </Grid>
-    </Card>
-  );
-};
-
-const CtaSection = (props: {
-  onCTAsLoaded: (ctas: CTA[]) => void;
-  outlineCTA?: string;
-}) => {
-  const theme = useMantineTheme();
-  const currentProject = useRecoilValue(currentProjectState);
-  const userToken = useRecoilValue(userTokenState);
-  const [ctaActiveStatusesToShow, setCtaActiveStatusesToShow] = useState<
-    boolean[]
-  >([true]);
-
-  const { data, isFetching, refetch } = useQuery({
-    queryKey: [`query-cta-data-${currentProject?.id}`],
-    queryFn: async ({ queryKey }) => {
-      const response = await fetch(
-        `${API_URL}/client/archetype/${currentProject?.id}/get_ctas`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-      if (response.status === 401) {
-        logout();
-      }
-      const res = await response.json();
-      if (!res || !res.ctas) {
-        return [];
-      }
-
-      let pageData = (res.ctas as CTA[]).map((cta) => {
-        return {
-          ...cta,
-          percentage: cta.performance?.total_count
-            ? Math.round(
-                (cta.performance?.num_converted / cta.performance?.num_sent) *
-                  100
-              )
-            : 0,
-          total_responded: cta.performance?.num_converted,
-          total_count: cta.performance?.num_sent,
-        };
-      });
-      props.onCTAsLoaded(pageData);
-      if (!pageData) {
-        return [];
-      } else {
-        return _.sortBy(pageData, ["active", "percentage", "id"]).reverse();
-      }
-    },
-    refetchOnWindowFocus: false,
-    enabled: !!currentProject,
-  });
-
-  return (
-    <Box pt="md" sx={{ position: "relative" }}>
-      <LoadingOverlay visible={isFetching} zIndex={10} />
-      {/* Active CTAs Only */}
-
-      {ctaActiveStatusesToShow.map((ctaActive) => {
-        return (
-          data &&
-          data
-            .filter((e) => e.active == ctaActive)
-            .map((e, index) => (
-              <CTAOption
-                data={{
-                  id: e.id,
-                  label: e.text_value,
-                  description: "",
-                  checked: e.active,
-                  outlined:
-                    !!props.outlineCTA && props.outlineCTA === e.text_value,
-                  tags: [
-                    {
-                      label: "Acceptance:",
-                      highlight: e.percentage + "%",
-                      color: "blue",
-                      variant: "subtle",
-                      hovered:
-                        "Prospects: " + e.total_responded + "/" + e.total_count,
-                    },
-                    {
-                      label: e.cta_type,
-                      highlight: "",
-                      color: valueToColor(theme, e.cta_type),
-                      variant: "light",
-                    },
-                  ],
-                }}
-                autoMarkScheduling={e.auto_mark_as_scheduling_on_acceptance}
-                key={index}
-                onToggle={async (enabled) => {
-                  const result = await toggleCTA(userToken, e.id);
-                  if (result.status === "success") {
-                    await refetch();
-                  }
-                }}
-                onClickEdit={() => {
-                  openContextModal({
-                    modal: "editCTA",
-                    title: <Title order={3}>Edit CTA</Title>,
-                    innerProps: {
-                      personaId: currentProject?.id,
-                      cta: e,
-                    },
-                  });
-                }}
-                onClickDelete={async () => {
-                  const response = await deleteCTA(userToken, e.id);
-                  if (response.status === "success") {
-                    showNotification({
-                      title: "Success",
-                      message: "CTA has been deleted",
-                      color: "blue",
-                    });
-                  }
-                  refetch();
-                }}
-              />
-            ))
-        );
-      })}
-      <Button
-        variant="outline"
-        w="100%"
-        mt="xs"
-        size="xs"
-        onClick={() => {
-          if (ctaActiveStatusesToShow.length > 1) {
-            setCtaActiveStatusesToShow([true]);
-          } else {
-            setCtaActiveStatusesToShow([true, false]);
-          }
-        }}
-      >
-        {ctaActiveStatusesToShow.length > 1
-          ? "Hide Inactive CTAs"
-          : "Show " + data?.filter((e) => !e.active).length + " Inactive CTAs"}
-      </Button>
-
-      <Button
-        sx={{
-          position: "absolute",
-          top: -25,
-          right: 5,
-        }}
-        variant={"filled"}
-        size="sm"
-        compact
-        color={"blue"}
-        radius="xl"
-        fw={"500"}
-        leftIcon={<IconPlus size={"0.75rem"} />}
-        onClick={() => {
-          openContextModal({
-            modal: "createNewCTA",
-            title: <Title order={3}>Create CTA</Title>,
-            innerProps: {
-              personaId: currentProject?.id,
-            },
-          });
-        }}
-      >
-        Add CTA
-      </Button>
-    </Box>
-  );
-};
-
-interface Tag {
-  label: string;
-  highlight?: string;
-  color: MantineColor;
-  hovered?: string;
-  variant: "subtle" | "filled" | "light";
-}
-
-interface TabOption {
-  id: number;
-  label: string;
-  description: string;
-  checked: boolean;
-  tags: Tag[];
-  outlined?: boolean;
-}
-
-const CTAOption: React.FC<{
-  data: TabOption;
-  onToggle: (value: boolean) => void;
-  onClickEdit: () => void;
-  onClickDelete: () => void;
-  autoMarkScheduling?: boolean;
-}> = ({ data, onToggle, onClickEdit, onClickDelete, autoMarkScheduling }) => {
-  return (
-    <Card
-      shadow="xs"
-      radius={"md"}
-      py={10}
-      mb={5}
-      sx={(theme) => ({
-        border: data.outlined
-          ? "1px solid " + theme.colors.blue[4]
-          : "1px solid transparent",
-      })}
-    >
-      <Flex direction={"column"} w={"100%"}>
-        <Flex gap={"0.5rem"} mb={"0.75rem"} justify={"space-between"}>
-          <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>
-            {data.tags.map((e) => (
-              <Tooltip
-                disabled={!e.hovered}
-                label={e.hovered}
-                withArrow
-                withinPortal
-              >
-                <Button
-                  key={e.label}
-                  variant={e.variant}
-                  size="xs"
-                  color={e.color}
-                  radius="xl"
-                  h="auto"
-                  fz={"0.75rem"}
-                  py={"0.125rem"}
-                  px={"0.25rem"}
-                  fw={"400"}
-                >
-                  {e.label}
-                  {e.highlight && (
-                    <strong style={{ paddingLeft: 5 }}> {e.highlight}</strong>
-                  )}
-                </Button>
-              </Tooltip>
-            ))}
-            {autoMarkScheduling && (
-              <Tooltip
-                label="Accepted invite will automatically classify prospect as 'scheduling'"
-                withArrow
-              >
-                <Text sx={{ cursor: "pointer" }} size="sm">
-                  🛎
-                </Text>
-              </Tooltip>
-            )}
-          </Flex>
-
-          <Flex wrap={"wrap"} gap={"1rem"} align={"center"}>
-            {/* <Menu shadow="md" width={200} withinPortal withArrow>
-              <Menu.Target>
-                <ActionIcon radius="xl" size="sm">
-                  <IconEdit size="1.0rem" />
-                </ActionIcon>
-              </Menu.Target>
-
-              <Menu.Dropdown>
-                <Menu.Item icon={<IconEdit size={14} />} onClick={onClickEdit}>
-                  Edit
-                </Menu.Item>
-                <Menu.Item
-                  icon={<IconTrash size={14} />}
-                  onClick={onClickDelete}
-                >
-                  Delete
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu> */}
-            <ActionIcon radius="xl" size="sm" onClick={onClickEdit}>
-              <IconEdit size="1.0rem" />
-            </ActionIcon>
-            <ActionIcon radius="xl" size="sm" onClick={onClickDelete}>
-              <IconTrash size="1.0rem" />
-            </ActionIcon>
-            <Switch
-              checked={data.checked}
-              color={"blue"}
-              size="xs"
-              onChange={({ currentTarget: { checked } }) => onToggle(checked)}
-            />
-          </Flex>
-        </Flex>
-
-        <Text fw={"400"} fz={"0.75rem"} color={"gray.8"}>
-          {data.label}
-        </Text>
-        {/* <Text
-          fw={"500"}
-          fz={"0.75rem"}
-          color={"gray.5"}
-          dangerouslySetInnerHTML={{ __html: data.description }}
-        ></Text> */}
-      </Flex>
     </Card>
   );
 };

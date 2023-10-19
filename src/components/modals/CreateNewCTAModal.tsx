@@ -26,13 +26,13 @@ import { showNotification } from "@mantine/notifications";
 import createCTA from "@utils/requests/createCTA";
 import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
 import { DateInput } from "@mantine/dates";
-import { API_URL } from '@constants/data';
+import { API_URL } from "@constants/data";
 
 export default function CreateNewCTAModel({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ personaId: number; }>) {
+}: ContextModalProps<{ personaId: number }>) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -59,20 +59,120 @@ export default function CreateNewCTAModel({
     })
       .then((response) => response.json())
       .then((d) => {
-        const data = d['data']
+        const data = d["data"];
         let ctaTypesArray: any = Object.keys(data).map((key) => {
           return { value: data[key], label: data[key] };
-        })
+        });
 
         setCTATypes(ctaTypesArray);
-      }
-      );
-  }
+      });
+  };
 
   useEffect(() => {
     fetchCTATypes();
   }, []);
 
+  const calculateCTAError = () => {
+    const ctaText = form.getInputProps("cta").value.toLowerCase();
+
+    if (ctaText.length > 120) {
+      return "CTA must be less than 120 characters.";
+    }
+
+    if (
+      ctaText.includes("{") &&
+      !ctaText.includes("{{name}}") &&
+      !ctaText.includes("{{company}}") &&
+      !ctaText.includes("{{industry}}")
+    ) {
+      return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+    } else if (
+      ctaText.includes("[") &&
+      !ctaText.includes("[[name]]") &&
+      !ctaText.includes("[[company]]") &&
+      !ctaText.includes("[[industry]]")
+    ) {
+      return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+    }
+
+    let collection = [];
+    for (let char of ctaText) {
+      if (char == "{" || char == "[" || char == "}" || char == "]") {
+        collection.push(char);
+      }
+    }
+
+    while (collection.length > 0) {
+      // Find first occurence of closing bracket
+      let popped = false;
+      const i = collection.indexOf("}");
+      if (i != -1) {
+        // Make sure it is not at the beginning or end
+        if (i == 0 || i == collection.length - 1) {
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+        }
+
+        // Make sure there is a '}' on the right
+        if (collection[i + 1] != "}") {
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+        }
+
+        // Find the opening brackets
+        const j = collection.lastIndexOf("{", i);
+        if (j == -1 || j == 0 || j == collection.length - 1) {
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+        }
+
+        // Make sure the opening brackets are dual
+        if (collection[j - 1] != "{") {
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+        }
+
+        // Remove the brackets from the collection
+        collection.splice(i, 2);
+        collection.splice(j - 1, 2);
+        popped = true;
+      }
+
+      // Find first occurence of closing bracket
+      const j = collection.indexOf("]");
+      if (j != -1) {
+        // Make sure it is not at the beginning or end
+        if (j == 0 || j == collection.length - 1) {
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+        }
+
+        // Make sure there is a ']' on the right
+        if (collection[j + 1] != "]") {
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+        }
+
+        // Find the opening brackets
+        const i = collection.lastIndexOf("[", j);
+        if (i == -1 || i == 0 || i == collection.length - 1) {
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+        }
+
+        // Make sure the opening brackets are dual
+        if (collection[i - 1] != "[") {
+          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+        }
+
+        // Remove the brackets from the collection
+        collection.splice(j, 2);
+        collection.splice(i - 1, 2);
+        popped = true;
+      }
+
+      if (!popped) {
+        return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'";
+      }
+    }
+
+    return null;
+  };
+
+  const [typedValue, setTypedValue] = useState("");
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
 
@@ -111,104 +211,6 @@ export default function CreateNewCTAModel({
 
     context.closeModal(id);
   };
-
-  const calculateCTAError = () => {
-    const ctaText = form.getInputProps("cta").value.toLowerCase();
-    
-
-    if (ctaText.length > 120) {
-      return "CTA must be less than 120 characters.";
-    }
-
-    if (
-      ctaText.includes("{") && 
-      (!ctaText.includes("{{name}}") && !ctaText.includes("{{company}}") && !ctaText.includes("{{industry}}"))
-    ) {
-      return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-    } else if (
-      ctaText.includes("[") && 
-      (!ctaText.includes("[[name]]") && !ctaText.includes("[[company]]") && !ctaText.includes("[[industry]]"))
-    ) {
-      return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-    }
-
-    let collection = []
-    for (let char of ctaText) {
-      if (char == '{' || char == '[' || char == '}' || char == ']') {
-        collection.push(char)
-      }
-    }
-
-    while (collection.length > 0) {
-      // Find first occurence of closing bracket
-      let popped = false
-      const i = collection.indexOf('}')
-      if (i != -1) {
-        // Make sure it is not at the beginning or end
-        if (i == 0 || i == (collection.length - 1)) {
-          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-        }
-
-        // Make sure there is a '}' on the right
-        if (collection[i + 1] != '}') {
-          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-        }
-
-        // Find the opening brackets
-        const j = collection.lastIndexOf('{', i)
-        if (j == -1 || j == 0 || j == (collection.length - 1)) {
-          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-        }
-
-        // Make sure the opening brackets are dual
-        if (collection[j - 1] != '{') {
-          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-        }
-
-        // Remove the brackets from the collection
-        collection.splice(i, 2)
-        collection.splice(j - 1, 2)
-        popped = true
-      }
-
-      // Find first occurence of closing bracket
-      const j = collection.indexOf(']')
-      if (j != -1) {
-        // Make sure it is not at the beginning or end
-        if (j == 0 || j == (collection.length - 1)) {
-          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-        }
-
-        // Make sure there is a ']' on the right
-        if (collection[j + 1] != ']') {
-          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-        }
-
-        // Find the opening brackets
-        const i = collection.lastIndexOf('[', j)
-        if (i == -1 || i == 0 || i == (collection.length - 1)) {
-          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-        }
-
-        // Make sure the opening brackets are dual
-        if (collection[i - 1] != '[') {
-          return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-        }
-
-        // Remove the brackets from the collection
-        collection.splice(j, 2)
-        collection.splice(i - 1, 2)
-        popped = true
-      }
-
-      if (!popped) {
-        return "Format of dynamic fields: {{FIELD}}. FIELD options include 'Name', 'Company', or 'Industry'"
-      }
-    }
-
-    return null
-  };
-
   return (
     <Paper
       p={0}
@@ -284,11 +286,12 @@ export default function CreateNewCTAModel({
         <Flex direction="row" mt="md">
           <Group my={20}>
             <Box>
-              <Text fz='sm' fw={500}>
+              <Text fz="sm" fw={500}>
                 Set CTA Expiration
               </Text>
-              <Text fz='xs' c="dimmed">
-                This CTA will automatically deactivate after the date set (optional).
+              <Text fz="xs" c="dimmed">
+                This CTA will automatically deactivate after the date set
+                (optional).
               </Text>
               <DateInput
                 value={expirationDate}
@@ -301,7 +304,7 @@ export default function CreateNewCTAModel({
             </Box>
           </Group>
 
-          <Group my={20} ml='md'>
+          <Group my={20} ml="md">
             <Select
               label="Select CTA Type"
               description="Select the tag that best describes this CTA. (optional)"
@@ -310,18 +313,40 @@ export default function CreateNewCTAModel({
               searchable
               creatable
               data={ctaTypes}
-              onChange={(value: string) => { setCTAType(ctaTypes.find((ctaType: any) => ctaType.value === value)?.label); }}
+              // onChange={(value: any) => {
+              //   setCTAType(
+              //     ctaTypes.find((ctaType: any) => ctaType.value === value)
+              //       ?.label
+              //   );
+              // }}
+              onCreate={(query: any) => {
+                const item: any = { value: query, label: query };
+                setCTATypes([...ctaTypes, item]);
+                setCTAType(query);
+                return item;
+              }}
+              getCreateLabel={(query) => `+ Add a CTA type for ${query}`}
+              onSearchChange={(value: string) => {
+                setTypedValue(value);
+              }}
+              onBlur={() => {
+                if (typedValue) {
+                  setCTAType(typedValue);
+                  setTypedValue("");
+                }
+              }}
             />
           </Group>
         </Flex>
 
-         <Switch
-            label='If accepted, mark prospect as "scheduling"'
-            defaultChecked={markAsScheduling}
-            mb='md'
-            onChange={() => { 
-              setMarkAsScheduling(!markAsScheduling); 
-          }}/>
+        <Switch
+          label='If accepted, mark prospect as "scheduling"'
+          defaultChecked={markAsScheduling}
+          mb="md"
+          onChange={() => {
+            setMarkAsScheduling(!markAsScheduling);
+          }}
+        />
 
         {error && (
           <Text color="red" size="sm" mt="sm">
@@ -341,7 +366,10 @@ export default function CreateNewCTAModel({
               ml="auto"
               mr="auto"
               size="md"
-              disabled={form.getInputProps("cta").value.length > 120 || calculateCTAError() != null}
+              disabled={
+                form.getInputProps("cta").value.length > 120 ||
+                calculateCTAError() != null
+              }
             >
               Create new CTA
             </Button>

@@ -10,6 +10,7 @@ import {
   Badge,
 } from "@mantine/core";
 import { IconEdit, IconTrash } from "@tabler/icons";
+import { deterministicMantineColor } from '@utils/requests/utils';
 
 interface Tag {
   label: string;
@@ -61,11 +62,13 @@ export const CTAOption: React.FC<{
     >
       <Badge
         fw={700}
-        color={"green"}
         variant="light"
         pos={"absolute"}
         top={-10}
+        left={104}
+        size='sm'
         style={{ zIndex: 10 }}
+        color={deterministicMantineColor(data.type || "manually-added")}
       >
         {data.type ? data.type.replace("-", " ") : "CTA Type"}
       </Badge>
@@ -82,17 +85,16 @@ export const CTAOption: React.FC<{
             withinPortal
           >
             <Flex
-              bg={"blue.1"}
-              p={"0.5rem"}
               direction="column"
               align="center"
-              style={{ borderRadius: 12 }}
+              style={{ borderRadius: 12, cursor: 'pointer' }}
+              mr='md'
             >
-              <Text color={"blue.6"} fw={700} fz={20}>
+              <Text color={"blue.6"} fw={700} fz={18}>
                 {acceptance.percentage}%
               </Text>
-              <Text color="blue.4" size={"sm"}>
-                Acceptance
+              <Text color="blue.4" size='10px'>
+                ACCEPTANCE
               </Text>
             </Flex>
           </Tooltip>
@@ -133,16 +135,16 @@ export const CTAOption: React.FC<{
               </Tooltip>
             )} */}
         </Flex>
-        <Flex align={"center"}>
-          <Text color={"gray.8"} fw={500}>
+        <Flex align={"center"} mr='md'>
+          <Text color={"gray.8"} fw={400} fz='14px'>
             {data.label}
             <Button
               size="compact-xs"
               variant="light"
+              ml='8px'
               leftIcon={<IconEdit size={14} />}
               fz="xs"
               radius="lg"
-              ml={"0.25rem"}
               onClick={onClickEdit}
             >
               Edit CTA
@@ -150,15 +152,30 @@ export const CTAOption: React.FC<{
           </Text>
         </Flex>
         <Flex gap={"0.5rem"} align={"center"} ml={"auto"}>
+          {autoMarkScheduling && (
+              <Tooltip
+                label="Accepted invite will automatically classify prospect as 'scheduling'"
+                withArrow
+              >
+                <Text sx={{ cursor: "pointer" }} size="sm">
+                  🛎
+                </Text>
+              </Tooltip>
+            )}
+          <ActionIcon radius="xl" onClick={onClickDelete} sx={{
+            visibility: acceptance?.total_count && acceptance?.total_count > 0 ? 'hidden' : 'visible',
+            display: acceptance?.total_count && acceptance?.total_count > 0 ? 'none' : 'block',
+            opacity: acceptance?.total_count && acceptance?.total_count > 0 ? 0.5 : 1,
+            cursor: acceptance?.total_count && acceptance?.total_count > 0 ? 'not-allowed' : 'pointer'
+          }}>
+            <IconTrash size='1rem'/>
+          </ActionIcon>
           <Switch
             checked={data.checked}
             color={"green"}
-            size="md"
+            size="sm"
             onChange={({ currentTarget: { checked } }) => onToggle(checked)}
           />
-          <ActionIcon radius="xl" onClick={onClickDelete}>
-            <IconTrash />
-          </ActionIcon>
         </Flex>
       </Flex>
     </Card>

@@ -10,26 +10,15 @@ const CTAGenerator = () => {
     <Card withBorder mb='xs'>
       <Flex direction={"column"}>
         <Group mb='xs'>
-          <Title color="blue.5" order={4}>
+          <Title color="blue.5" order={6} fw='700'>
             CTA Generator
           </Title>
-          <ActionIcon
-            size="18px"
-            radius={999}
-            color="yellow"
-            variant="outline"
-            onClick={(event) => event.preventDefault()}
-          >
-            <IconQuestionMark />
-          </ActionIcon>
-
-          <Title color='black' order={4}>
+          <Title color='black' order={6} fw='500'>
             - Coming Soon ⚠️
           </Title>
         </Group>
 
         <Flex
-          wrap={"wrap"}
           align={"flex-start"}
           justify={"start"}
           sx={{
@@ -43,13 +32,13 @@ const CTAGenerator = () => {
             radius={"xl"}
             variant="light"
             color="blue"
-            h={"2.25rem"}
+            h={"1.5rem"}
             rightIcon={<IconPencil size={"1rem"} />}
           >
             Company
           </Button>
 
-          <Flex h={"2.25rem"} align={"center"}>
+          <Flex h={"1.5rem"} align={"center"}>
             <Text>help</Text>
           </Flex>
 
@@ -57,13 +46,13 @@ const CTAGenerator = () => {
             radius={"xl"}
             variant="light"
             color="blue"
-            h={"2.25rem"}
+            h={"1.5rem"}
             rightIcon={<IconPencil size={"1rem"} />}
           >
             Persona
           </Button>
 
-          <Flex h={"2.25rem"} align={"center"}>
+          <Flex h={"1.5rem"} align={"center"}>
             <Text>with</Text>
           </Flex>
 
@@ -71,7 +60,7 @@ const CTAGenerator = () => {
             radius={"xl"}
             variant="light"
             color="blue"
-            h={"2.25rem"}
+            h={"1.5rem"}
             rightIcon={<IconPencil size={"1rem"} />}
           >
             Value Added Proposition
@@ -81,11 +70,12 @@ const CTAGenerator = () => {
             radius={"xl"}
             variant="filled"
             color="blue"
-            h={"2.25rem"}
+            h={"1.5rem"}
             leftIcon={<IconPlus size={"1rem"} />}
             onClick={() => {
               setOpenCTAGeneratorModal(true);
             }}
+            ml='xl'
           >
             Generate CTA
           </Button>

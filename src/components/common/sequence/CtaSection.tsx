@@ -101,15 +101,16 @@ export const CtaSection = (props: {
       >
         <Flex
           bg={"blue"}
-          p={"lg"}
+          p={"xs"}
+          pl='xl'
           justify={"space-between"}
           style={{
             borderStartEndRadius: 12,
             borderStartStartRadius: 12,
           }}
         >
-          <Text color="white" fw={600} size={"md"}>
-            CTA Settings
+          <Text color="white" fw={500} size={"md"}>
+            Edit CTAs
           </Text>
         </Flex>
         <Box px={"lg"}>

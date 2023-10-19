@@ -319,6 +319,13 @@ export default function CreateNewCTAModel({
               //       ?.label
               //   );
               // }}
+              onCreate={(query: any) => {
+                const item: any = { value: query, label: query };
+                setCTATypes([...ctaTypes, item]);
+                setCTAType(query);
+                return item;
+              }}
+              getCreateLabel={(query) => `+ Add a CTA type for ${query}`}
               onSearchChange={(value: string) => {
                 setTypedValue(value);
               }}

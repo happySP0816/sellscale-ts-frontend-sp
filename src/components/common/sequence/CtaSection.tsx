@@ -132,6 +132,7 @@ export const CtaSection = (props: {
                           label: e.text_value,
                           description: "",
                           checked: e.active,
+                          type: e.cta_type,
                           outlined:
                             !!props.outlineCTA &&
                             props.outlineCTA === e.text_value,

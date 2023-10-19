@@ -26,6 +26,8 @@ export interface TabOption {
   checked: boolean;
   tags: Tag[];
   outlined?: boolean;
+
+  type: string;
 }
 
 export const CTAOption: React.FC<{
@@ -65,7 +67,7 @@ export const CTAOption: React.FC<{
         top={-10}
         style={{ zIndex: 10 }}
       >
-        Problem Based
+        {data.type ? data.type.replace("-", " ") : "CTA Type"}
       </Badge>
       <Flex direction={"row"} w={"100%"} gap={"0.75rem"}>
         <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>

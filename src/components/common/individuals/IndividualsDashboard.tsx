@@ -44,7 +44,7 @@ import getIndividuals from '@utils/requests/getIndividuals';
 import _ from 'lodash';
 import { convertIndividualsToProspects } from '@utils/requests/convertIndividualsToProspects';
 
-const PAGE_SIZE = 1000;
+const PAGE_SIZE = 100;
 
 const IndividualsDashboard: FC<{
   openFilter: () => void;
@@ -233,7 +233,7 @@ const IndividualsDashboard: FC<{
           loading={isFetching}
           height={480}
           withPagination
-          paginationMode='default'
+          paginationMode='compact'
           pageSizes={[PAGE_SIZE.toString()]}
           withRowSelection
           withColumnResizing

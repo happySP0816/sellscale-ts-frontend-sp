@@ -127,16 +127,15 @@ const IndividualsDashboard: FC<{
   const getRowSelection = (selectedRows: number[]) => {
     if (!data) return {};
     const result: Record<number, boolean> = {};
-    for(let i = 0; i < data.length; i++) {
+    for (let i = 0; i < data.length; i++) {
       result[i] = selectedRows.includes(data[i].id);
     }
     return result;
   };
 
-
   useEffect(() => {
     (async () => {
-      if(!currentProject) return;
+      if (!currentProject) return;
       // Auto save ICP rule set
       const response = await updateICPRuleSet(
         userToken,
@@ -166,6 +165,42 @@ const IndividualsDashboard: FC<{
       refetch();
     })();
   }, [globalRuleSetData]);
+
+  // Make extra columns show up if filtering
+  const extraColumns = [];
+  const getColumnTemplate = (key: string) => {
+    return {
+      accessorKey: key,
+      filterFn: stringFilterFn,
+      size: Math.min(100, window.innerWidth / 6),
+      header: key.toUpperCase(),
+      cell: (cell: any) => {
+        return <Text size='xs'>{cell.cell?.getValue()}</Text>;
+      },
+    };
+  };
+
+  if (globalRuleSetData?.included_individual_industry_keywords?.length > 0) {
+    extraColumns.push(getColumnTemplate('industry'));
+  }
+  if (globalRuleSetData?.included_individual_skills_keywords?.length > 0) {
+    extraColumns.push(getColumnTemplate('skills'));
+  }
+  if (globalRuleSetData?.included_individual_locations_keywords?.length > 0) {
+    extraColumns.push(getColumnTemplate('locations'));
+  }
+  if (globalRuleSetData?.included_individual_generalized_keywords?.length > 0) {
+    extraColumns.push(getColumnTemplate('bio'));
+  }
+  if (globalRuleSetData?.included_individual_generalized_keywords?.length > 0) {
+    extraColumns.push(getColumnTemplate('bio'));
+  }
+  if (globalRuleSetData?.individual_years_of_experience_start) {
+    extraColumns.push(getColumnTemplate('work.recent_start_date'));
+  }
+  if (globalRuleSetData?.individual_years_of_experience_end) {
+    extraColumns.push(getColumnTemplate('work.recent_end_date'));
+  }
 
   return (
     <Group

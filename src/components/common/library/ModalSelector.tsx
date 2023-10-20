@@ -65,6 +65,7 @@ export default function ModalSelector(props: {
 
   const [search, setSearch] = useState('');
   const filteredItems = props.items.filter((item) => {
+    if (!search) return true;
     return item?.name?.toLowerCase().includes(search.toLowerCase());
   })
 

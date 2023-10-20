@@ -324,6 +324,7 @@ const IndividualsDashboard: FC<{
                 </Anchor>
               ),
             },
+            ...extraColumns,
           ]}
           total={totalFound}
           onPageChange={(page) => {

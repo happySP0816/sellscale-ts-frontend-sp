@@ -59,6 +59,7 @@ export default function VoiceSelect(props: {
   const userData = useRecoilValue(userDataState);
   const currentProject = useRecoilValue(currentProjectState);
   const [selectedVoice, setSelectedVoice] = useState<any>();
+  const [baselineVoice, setBaselineVoice] = useState<any>();
 
   const [voiceBuilderOpen, setVoiceBuilderOpen] = useState(false);
 
@@ -84,10 +85,17 @@ export default function VoiceSelect(props: {
       ) ?? []) as any[];
       props.onFinishLoading && props.onFinishLoading(voices);
       if (props.autoSelect) {
-        const voice = voices.find((v) => v.active && v.archetype_id);
+        const voice = voices.find((v) => v.active && v.archetype_id && !v.always_enable)
+        const baselineVoice = voices.find((v) => v.active && !v.archetype_id && v.always_enable)
+        console.log(voices)
+        console.log(baselineVoice)
         if (voice) {
           setSelectedVoice(voice);
           props.onChange(voice);
+        }
+        if (baselineVoice) {
+          setBaselineVoice(baselineVoice);
+          props.onChange(baselineVoice);
         }
       }
       return voices;
@@ -118,13 +126,15 @@ export default function VoiceSelect(props: {
       <ModalSelector
         selector={{
           content: (
-            <Text>
-              {selectedVoice
-                ? `Using ${_.truncate(
-                    userData.sdr_name.trim().split(" ")[0]
-                  )}'s Voice`
-                : "Train Voice"}
-            </Text>
+            <>
+              <Text>
+                {selectedVoice
+                  ? `Using ${_.truncate(
+                      userData.sdr_name.trim().split(" ")[0]
+                    )}'s Voice`
+                  : baselineVoice ? `Using Baseline Voice` : `Train Voice`}
+              </Text>
+            </>
           ),
           buttonProps: {
             variant: "filled",
@@ -144,7 +154,7 @@ export default function VoiceSelect(props: {
               setVoiceBuilderOpen(true);
             }
           },
-          noChange: !selectedVoice,
+          noChange: !selectedVoice && !baselineVoice,
         }}
         title={{
           name: "Select Voice",

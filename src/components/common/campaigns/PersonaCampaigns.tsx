@@ -98,6 +98,7 @@ import { CampaignAnalyticsData } from "./CampaignAnalytics";
 // import { CampaignAnalyticChart } from "./CampaignAnalyticsV2";
 import OverallPipeline from "./OverallPipeline";
 import { TodayActivityData } from "./OverallPipeline/TodayActivity";
+import UserStatusToggle from "./UserStatusToggle";
 
 export type CampaignPersona = {
   id: number;
@@ -121,6 +122,7 @@ export default function PersonaCampaigns() {
 
   const [projects, setProjects] = useState<PersonaOverview[]>([]);
   const [personas, setPersonas] = useState<CampaignPersona[]>([]);
+
 
   const [search, setSearch] = useState<string>("");
 
@@ -149,71 +151,74 @@ export default function PersonaCampaigns() {
     "node-view" | "list-view"
   >("node-view");
 
-  useEffect(() => {
-    (async () => {
-      if (!isLoggedIn()) return;
-      setLoadingPersonas(true);
+  const fetchCampaignPersonas = async () => {
+    if (!isLoggedIn()) return;
+    setLoadingPersonas(true);
 
-      // Get Personas Campaign View
-      const response = await getPersonasCampaignView(userToken);
-      const result =
-        response.status === "success"
-          ? (response.data as CampaignPersona[])
-          : [];
+    // Get Personas Campaign View
+    const response = await getPersonasCampaignView(userToken);
+    const result =
+      response.status === "success" ? (response.data as CampaignPersona[]) : [];
 
-      // Aggregate campaign analytics
-      let analytics = {
-        sentOutreach: 0,
-        accepted: 0,
-        activeConvos: 0,
-        demos: 0,
+    // Aggregate campaign analytics
+    let analytics = {
+      sentOutreach: 0,
+      accepted: 0,
+      activeConvos: 0,
+      demos: 0,
+    };
+    for (const campaign of response.data) {
+      analytics.sentOutreach += campaign.li_sent;
+      analytics.accepted += campaign.li_opened;
+      analytics.activeConvos += campaign.li_replied;
+      analytics.demos += campaign.li_demo;
+    }
+    setCampaignAnalyticData(analytics);
+
+    // Get LinkedIn SLA
+    if (userData.sla_schedules) {
+      for (const schedule of userData.sla_schedules) {
+        if (
+          moment(schedule.start_date) < moment() &&
+          moment() <= moment(schedule.start_date).add(7, "days")
+        ) {
+          setCurrentLinkedInSLA(schedule.linkedin_volume);
+        }
+      }
+    }
+
+    // Set the Personas
+    setPersonas(result);
+    setLoadingPersonas(false);
+
+    // Get Personas Overview
+    const response2 = await getPersonasOverview(userToken);
+    const result2 =
+      response2.status === "success"
+        ? (response2.data as PersonaOverview[])
+        : [];
+    setProjects(result2);
+
+    // Get AI Activity
+    const response3 = await getPersonasActivity(userToken);
+    const result3 = response3.status === "success" ? response3.data : [];
+    if (result3.activities && result3.activities.length > 0) {
+      const newOutreach = result3.activities[0].messages_sent;
+      const newBumps = result3.activities[0].bumps_sent;
+      const newReplies = result3.activities[0].replies_sent;
+      const totalActivity = newOutreach + newBumps + newReplies;
+      const activity_data = {
+        totalActivity: totalActivity,
+        newOutreach: newOutreach,
+        newBumps: newBumps,
+        newReplies: newReplies,
       };
-      for (const campaign of response.data) {
-        analytics.sentOutreach += campaign.li_sent;
-        analytics.accepted += campaign.li_opened;
-        analytics.activeConvos += campaign.li_replied;
-        analytics.demos += campaign.li_demo;
-      }
-      setCampaignAnalyticData(analytics);
+      setAiActivityData(activity_data);
+    }
+  };
 
-      // Get LinkedIn SLA
-      if (userData.sla_schedules) {
-        for (const schedule of userData.sla_schedules) {
-          if (moment(schedule.start_date) < moment() && moment() <= moment(schedule.start_date).add(7, 'days')) {
-            setCurrentLinkedInSLA(schedule.linkedin_volume);
-          }
-        }
-      }
-
-      // Set the Personas
-      setPersonas(result);
-      setLoadingPersonas(false);
-
-      // Get Personas Overview
-      const response2 = await getPersonasOverview(userToken);
-      const result2 =
-        response2.status === "success"
-          ? (response2.data as PersonaOverview[])
-          : [];
-      setProjects(result2);
-
-      // Get AI Activity
-      const response3 = await getPersonasActivity(userToken);
-      const result3 = response3.status === "success" ? response3.data : [];
-      if (result3.activities && result3.activities.length > 0) {
-        const newOutreach = result3.activities[0].messages_sent;
-        const newBumps = result3.activities[0].bumps_sent;
-        const newReplies = result3.activities[0].replies_sent;
-        const totalActivity = newOutreach + newBumps + newReplies;
-        const activity_data = {
-          totalActivity: totalActivity,
-          newOutreach: newOutreach,
-          newBumps: newBumps,
-          newReplies: newReplies,
-        }
-        setAiActivityData(activity_data)
-      }
-    })();
+  useEffect(() => {
+    fetchCampaignPersonas()
   }, []);
 
   // sort personas by persona.active then persona.created_at in desc order
@@ -257,7 +262,7 @@ export default function PersonaCampaigns() {
               </Flex>
               <Group position="apart">
                 <Group>
-                   <Button
+                  <Button
                     radius="md"
                     leftIcon={<IconPlus size="1rem" />}
                     onClick={() => {
@@ -410,17 +415,17 @@ export default function PersonaCampaigns() {
                   )}
                   {filteredProjects.filter((persona) => persona.active).length >
                     1 && (
-                      <Alert
-                        sx={{
-                          borderRadius: "md",
-                          border: "solid 1px red",
-                        }}
-                        color="red"
-                        title="Multiple Active Personas"
-                        children="You have multiple active personas. This is not recommended as it will cause your campaigns to compete with each other. We recommend you deactivate all but one persona."
-                        icon={<IconAlertCircle size="1rem" />}
-                      />
-                    )}
+                    <Alert
+                      sx={{
+                        borderRadius: "md",
+                        border: "solid 1px red",
+                      }}
+                      color="red"
+                      title="Multiple Active Personas"
+                      children="You have multiple active personas. This is not recommended as it will cause your campaigns to compete with each other. We recommend you deactivate all but one persona."
+                      icon={<IconAlertCircle size="1rem" />}
+                    />
+                  )}
                   {!loadingPersonas &&
                     filteredProjects
                       .filter((persona) => persona.active)
@@ -432,17 +437,33 @@ export default function PersonaCampaigns() {
                             (project) => project.id == persona.id
                           )}
                           viewMode={campaignViewMode}
+                          onPersonaActiveStatusUpdate={async (
+                            id: number,
+                            active: boolean
+                          ) => {
+                            setProjects((cur) => {
+                              const temp = [...cur].map((e) => {
+                                if (e.id === id) {
+                                  e.active = active;
+                                  return e;
+                                }
+                                return e;
+                              });
+                              return temp;
+                            });
+                            await fetchCampaignPersonas();
+                          }}
                         />
                       ))}
 
                   {filteredProjects.filter((persona) => !persona.active)
                     .length > 0 && (
-                      <Divider
-                        label="Inactive Personas"
-                        labelPosition="center"
-                        color="gray"
-                      />
-                    )}
+                    <Divider
+                      label="Inactive Personas"
+                      labelPosition="center"
+                      color="gray"
+                    />
+                  )}
 
                   {!loadingPersonas &&
                     filteredProjects
@@ -455,6 +476,22 @@ export default function PersonaCampaigns() {
                             (project) => project.id == persona.id
                           )}
                           viewMode={campaignViewMode}
+                          onPersonaActiveStatusUpdate={async (
+                            id: number,
+                            active: boolean
+                          ) => {
+                            setProjects((cur) => {
+                              const temp = [...cur].map((e) => {
+                                if (e.id === id) {
+                                  e.active = active;
+                                  return e;
+                                }
+                                return e;
+                              });
+                              return temp;
+                            });
+                            await fetchCampaignPersonas();
+                          }}
                         />
                       ))}
 
@@ -502,6 +539,7 @@ function PersonCampaignCard(props: {
   persona: CampaignPersona;
   project?: PersonaOverview;
   viewMode: "node-view" | "list-view";
+  onPersonaActiveStatusUpdate?: (id: number, active: boolean) => void;
 }) {
   const navigate = useNavigate();
   const [currentProject, setCurrentProject] =
@@ -571,36 +609,38 @@ function PersonCampaignCard(props: {
   ];
 
   return (
-    <Paper radius='md' ref={ref}>
+    <Paper radius="md" ref={ref}>
       <Stack
         spacing={0}
         sx={{
           opacity: props.persona.active || hovered ? 1 : 0.6,
-          cursor: 'pointer',
+          cursor: "pointer",
         }}
       >
         <Group
           // position="apart"
           sx={(theme) => ({
-            backgroundColor: props.persona.active ? theme.colors.blue[6] : 'white',
-            borderRadius: '0.5rem 0.5rem 0 0',
-            border: 'solid 1px ' + theme.colors.gray[2],
+            backgroundColor: props.persona.active
+              ? theme.colors.blue[6]
+              : "white",
+            borderRadius: "0.5rem 0.5rem 0 0",
+            border: "solid 1px " + theme.colors.gray[2],
           })}
-          p={props.persona.active ? 'xs' : '4px'}
-          pl='xs'
-          pr='xs'
+          p={props.persona.active ? "xs" : "4px"}
+          pl="xs"
+          pr="xs"
         >
-          <Box sx={{ flexDirection: 'row', display: 'flex' }} w='46%'>
-            <Group w='500'>
-              <Popover position='bottom' withArrow shadow='md'>
+          <Box sx={{ flexDirection: "row", display: "flex" }} w="46%">
+            <Group w="500">
+              <Popover position="bottom" withArrow shadow="md">
                 <Popover.Target>
                   <Button
-                    variant='outline'
-                    color={props.persona.active ? 'blue' : 'gray'}
-                    radius='xl'
-                    size='lg'
+                    variant="outline"
+                    color={props.persona.active ? "blue" : "gray"}
+                    radius="xl"
+                    size="lg"
                     compact
-                    sx={{ backgroundColor: '#ffffff22' }}
+                    sx={{ backgroundColor: "#ffffff22" }}
                   >
                     {emoji}
                   </Button>
@@ -615,30 +655,42 @@ function PersonCampaignCard(props: {
                 </Popover.Dropdown>
               </Popover>
 
-              <Title order={5} c={props.persona.active ? 'white' : 'gray'}>
+              <Title order={5} c={props.persona.active ? "white" : "gray"}>
                 {_.truncate(props.persona.name, { length: 48 })}
               </Title>
             </Group>
           </Box>
 
-          <Box w='20%'>
-            <Button variant='subtle' onClick={toggle} sx={{ borderRadius: 100, backgroundColor: '#ffffff44' }}>
+          <Box w="20%">
+            <Button
+              variant="subtle"
+              onClick={toggle}
+              sx={{ borderRadius: 100, backgroundColor: "#ffffff44" }}
+            >
               {opened ? (
-                <IconChevronsUp size='1.5rem' color={props.persona.active ? 'white' : 'blue'} />
+                <IconChevronsUp
+                  size="1.5rem"
+                  color={props.persona.active ? "white" : "blue"}
+                />
               ) : (
-                <IconChevronsDown size='1.5rem' color={props.persona.active ? 'white' : 'gray'} />
+                <IconChevronsDown
+                  size="1.5rem"
+                  color={props.persona.active ? "white" : "gray"}
+                />
               )}
             </Button>
           </Box>
 
-          <Group>
+          <Group sx={{justifyContent: "flex-end", display: 'flex', flex: 1}}>
             <Button
               w={60}
-              radius='xl'
-              size='xs'
+              radius="xl"
+              size="xs"
               compact
               sx={(theme) => ({
-                backgroundColor: props.persona.active ? theme.colors.blue[5] : 'gray',
+                backgroundColor: props.persona.active
+                  ? theme.colors.blue[5]
+                  : "gray",
                 //color: theme.colors.blue[2],
               })}
               onClick={() => {
@@ -651,24 +703,30 @@ function PersonCampaignCard(props: {
               Edit
             </Button>
 
-            <Tooltip
+            {/* <Tooltip
               withArrow
-              position='bottom'
+              position="bottom"
               label={
                 personaActive
-                  ? 'Click to disable this campaign on settings page'
-                  : 'Click to enable this campaign on settings page'
+                  ? "Click to disable this campaign on settings page"
+                  : "Click to enable this campaign on settings page"
               }
             >
               <span>
                 <Button
-                  color={personaActive ? 'blue' : 'gray'}
+                  color={personaActive ? "blue" : "gray"}
                   sx={{
-                    border: 'solid 1px white',
-                    cursor: 'pointer',
+                    border: "solid 1px white",
+                    cursor: "pointer",
                   }}
-                  rightIcon={props.persona.active ? <IconCheck size='0.7rem' /> : <IconX size='0.7rem' />}
-                  size='xs'
+                  rightIcon={
+                    props.persona.active ? (
+                      <IconCheck size="0.7rem" />
+                    ) : (
+                      <IconX size="0.7rem" />
+                    )
+                  }
+                  size="xs"
                   onClick={() => {
                     if (props.project == undefined) return;
 
@@ -681,26 +739,54 @@ function PersonCampaignCard(props: {
                     );
 
                     showNotification({
-                      title: 'Activate / Deactive Campaign from Settings',
-                      message: 'You can activate & deactivate this persona from the settings page.',
-                      color: 'blue',
-                      icon: <IconAdjustmentsHorizontal size='1rem' />,
+                      title: "Activate / Deactive Campaign from Settings",
+                      message:
+                        "You can activate & deactivate this persona from the settings page.",
+                      color: "blue",
+                      icon: <IconAdjustmentsHorizontal size="1rem" />,
                       autoClose: 3000,
                     });
                   }}
                 >
-                  {personaActive ? 'Active' : 'Inactive'}
+                  {personaActive ? "Active" : "Inactive"}
                 </Button>
+              </span>
+            </Tooltip> */}
+
+            <Tooltip
+              withArrow
+              position="bottom"
+              label={
+                personaActive
+                  ? "Click to disable this campaign on settings page"
+                  : "Click to enable this campaign on settings page"
+              }
+            >
+              <span>
+                <UserStatusToggle
+                  projectId={props.project?.id}
+                  isActive={personaActive}
+                  onChangeUserStatusSuccess={(status: boolean) => {
+                    setPersonaActive(status);
+                    props.onPersonaActiveStatusUpdate?.(
+                      props.project?.id ?? 0,
+                      status
+                    );
+                  }}
+                />
               </span>
             </Tooltip>
           </Group>
         </Group>
         <Collapse in={opened}>
-          {props.viewMode === 'node-view' && (
+          {props.viewMode === "node-view" && (
             <Box>
               <CampaignGraph
                 personaId={props.persona.id}
-                unusedProspects={(props.project?.num_unused_email_prospects ?? 0) + (props.project?.num_unused_li_prospects ?? 0)}
+                unusedProspects={
+                  (props.project?.num_unused_email_prospects ?? 0) +
+                  (props.project?.num_unused_li_prospects ?? 0)
+                }
                 sections={types}
                 onChannelClick={(sectionType: string) => {
                   if (props.project == undefined) return;
@@ -715,7 +801,7 @@ function PersonCampaignCard(props: {
               />
             </Box>
           )}
-          {props.viewMode === 'list-view' && (
+          {props.viewMode === "list-view" && (
             <Box>
               {types.map((section, index) => {
                 if (!section.active && props.persona.active) return null;
@@ -732,7 +818,9 @@ function PersonCampaignCard(props: {
                         navigateToPage(
                           navigate,
                           `/setup/${section.type.toLowerCase()}`,
-                          new URLSearchParams(`?campaign_id=${props.persona.id}`)
+                          new URLSearchParams(
+                            `?campaign_id=${props.persona.id}`
+                          )
                         );
                       }}
                     />
@@ -757,7 +845,9 @@ function PersonCampaignCard(props: {
                               navigateToPage(
                                 navigate,
                                 `/setup/${section.type.toLowerCase()}`,
-                                new URLSearchParams(`?campaign_id=${props.persona.id}`)
+                                new URLSearchParams(
+                                  `?campaign_id=${props.persona.id}`
+                                )
                               );
                             }}
                           />
@@ -767,15 +857,24 @@ function PersonCampaignCard(props: {
                   </Collapse>
                   <Divider />
                   <Button
-                    w='100%'
-                    variant='subtle'
-                    size='xs'
-                    color='gray'
-                    onClick={() => setInactiveChannelsOpened(!inactiveChannelsOpened)}
-                    leftIcon={inactiveChannelsOpened ? <IconArrowUp size='0.7rem' /> : <IconArrowDown size='0.7rem' />}
+                    w="100%"
+                    variant="subtle"
+                    size="xs"
+                    color="gray"
+                    onClick={() =>
+                      setInactiveChannelsOpened(!inactiveChannelsOpened)
+                    }
+                    leftIcon={
+                      inactiveChannelsOpened ? (
+                        <IconArrowUp size="0.7rem" />
+                      ) : (
+                        <IconArrowDown size="0.7rem" />
+                      )
+                    }
                   >
-                    {inactiveChannelsOpened ? 'Hide' : 'Show'} {types.filter((x) => !x.active).length} Inactive Channel
-                    {types.filter((x) => !x.active).length > 1 ? 's' : ''}
+                    {inactiveChannelsOpened ? "Hide" : "Show"}{" "}
+                    {types.filter((x) => !x.active).length} Inactive Channel
+                    {types.filter((x) => !x.active).length > 1 ? "s" : ""}
                   </Button>
                 </>
               )}

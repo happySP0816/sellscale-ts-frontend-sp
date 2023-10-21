@@ -83,9 +83,6 @@ const CTAGenerator = () => {
           <Title color="blue.5" order={6} fw="700">
             CTA Generator
           </Title>
-          <Title color="black" order={6} fw="500">
-            - Coming Soon ⚠️
-          </Title>
         </Group>
         <Paper
           p={0}

@@ -365,7 +365,7 @@ const CTASuggestOption: React.FC<{
       currentProject.id,
       CTAValue,
       undefined,
-      data.tag.replace("[", "") + "-based"
+      data.tag?.replaceAll("[", "").replaceAll("]", "") + "-Based"
     );
     queryClient.invalidateQueries({
       queryKey: [`query-cta-data-${currentProject.id}`],
@@ -404,7 +404,7 @@ const CTASuggestOption: React.FC<{
     >
       <Flex pos={"absolute"} top={-10} gap={"0.5rem"}>
         <Badge fw={700} color={"green"} variant="light" style={{ zIndex: 10 }}>
-          {(data.tag || "Tag").replace("-", " ")}
+          {data.tag?.replaceAll("[", "").replaceAll("]", "")}-Based
         </Badge>
       </Flex>
 

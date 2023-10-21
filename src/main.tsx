@@ -53,6 +53,7 @@ import ChannelSetupPage from "@pages/ChannelSetupPage";
 import PulseTabSelector from "@common/persona/PulseTabSelector";
 import PersonaOnboarding from "@pages/PreOnboarding";
 import AnalyticPage from "@pages/AnalyticPage";
+import OverviewPage from '@pages/OverviewPage';
 
 const queryClient = new QueryClient();
 
@@ -117,6 +118,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "inbox",
         element: <RestrictedRoute page={<InboxPage />} />,
+      },
+      {
+        path: "Overview",
+        element: <RestrictedRoute page={<OverviewPage />} />,
       },
       {
         path: "teach",

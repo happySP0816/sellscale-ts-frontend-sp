@@ -39,6 +39,7 @@ import { LogoFull } from "./Logo";
 import { SearchBar } from "../../../legacy_code/old/SearchBar";
 import { openSpotlight } from "@mantine/spotlight";
 import { getPreOnboardingData } from '@pages/PreOnboarding';
+import { IconHome } from '@tabler/icons';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -183,6 +184,11 @@ export default function SideNavbar(props: {}) {
         <LogoFull />
         <Divider color="dark.4" />
         <Box m="md">
+           <SideNavbarItem
+            icon={<IconHome size="1.0rem" />}
+            label="Overview"
+            tabKey={["overview"]}
+          />
           <SideNavbarItem
             icon={<IconInbox size="1.0rem" />}
             label="Inbox"

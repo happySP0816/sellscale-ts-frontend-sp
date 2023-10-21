@@ -94,7 +94,7 @@ function BarChart() {
       <Flex direction='row' mb='xs'>
         <Box>
           <Text color='gray'>TOTAL OUTBOUND TOUCHPOINTS</Text>
-          <Title>{totalTouchpoints}</Title>
+          <Title>{totalTouchpoints.toLocaleString()}</Title>
         </Box>
         <Box sx={{justifyContent: 'right', textAlign: 'right', width: '300px'}} ml='auto' mt='md'>
           {['week', 'month', 'year'].map(mode => (
@@ -146,18 +146,20 @@ export function ActiveCampaigns() {
     <Title order={3} mt='md'>{activeCampaigns.length} Active Campaigns</Title>
       <Text color='gray'>These are the active campaigns running from across all of {userData.client?.company}'s users</Text>
       <Grid mt='md'>
-        {activeCampaigns.map((x: any) => {
+        {activeCampaigns.sort((a,b) => b.open_percent - a.open_percent).map((x: any) => {
           return (
             <Grid.Col span={6}>
               <Card withBorder padding="lg" radius="md">
-                <Group justify="space-between" mb="xs">
-                  <Text fw={500}>{x.emoji} {x.archetype.substring(0, 24)}{x.archetype.length > 24 ? '...' : ''}</Text>
-                  <Badge color="pink" variant="light">
-                    Active
-                  </Badge>
-                </Group>
+                <Tooltip label={x.archetype} withinPortal>
+                  <Group mb="xs" sx={{cursor: 'pointer'}}>
+                    <Text fw={500}>{x.emoji} {x.archetype.substring(0, 24)}{x.archetype.length > 24 ? '...' : ''}</Text>
+                    <Badge color="pink" variant="light">
+                      Active
+                    </Badge>
+                  </Group>
+                </Tooltip>
 
-                <Text c="dimmed" size='xs' h='110px' sx={{border: 'solid 1px #EFEFEF; padding: 8px; border-radius: 4px;'}}>
+                <Text c="dimmed" size='xs' h='90px'>
                   {x.persona_fit_reason?.substring(0, 200)}{x.persona_fit_reason?.length > 200 ? '...' : ''}
                 </Text>
 
@@ -170,7 +172,7 @@ export function ActiveCampaigns() {
                   ml='md'
                   mr='md'
                 >
-                  <Tooltip label={x.num_sent + " Sent / " + x.num_sent + " Sent"}>
+                  <Tooltip label={x.num_sent.toLocaleString() + " Sent / " + x.num_sent.toLocaleString() + " Sent"}>
                     <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
                       <IconSend size="0.75rem" color="#868E96" />
                       <Text fw={"600"} fz={"0.8rem"} color="gray.6">
@@ -182,7 +184,7 @@ export function ActiveCampaigns() {
                     </Flex>
                   </Tooltip>
 
-                  <Tooltip label={x.num_opens + " Opens / " + x.num_sent + " Sent"}>
+                  <Tooltip label={x.num_opens.toLocaleString() + " Opens / " + x.num_sent.toLocaleString() + " Sent"}>
                     <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
                       <IconChecks size="0.75rem" color="#868E96" />
                       <Text fw={"600"} fz={"0.8rem"} color="gray.6">
@@ -194,7 +196,7 @@ export function ActiveCampaigns() {
                     </Flex>
                   </Tooltip>
 
-                  <Tooltip label={x.num_replies + " Replies / " + x.num_sent + " Sent"}>
+                  <Tooltip label={x.num_replies.toLocaleString() + " Replies / " + x.num_sent.toLocaleString() + " Sent"}>
                     <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
                       <IconMessageCheck size="0.75rem" color="#868E96" />
                       <Text fw={"600"} fz={"0.8rem"} color="gray.6">

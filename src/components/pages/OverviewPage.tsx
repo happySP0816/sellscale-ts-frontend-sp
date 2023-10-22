@@ -136,7 +136,7 @@ export function ActiveCampaigns() {
         .then(data => {
           console.log(data.pipeline_data)
           setActiveCampaigns(data.pipeline_data || []);
-        }).finally(e => {
+        }).finally(() => {
           setFetchActiveCampaigns(true);
         });
     }
@@ -146,7 +146,7 @@ export function ActiveCampaigns() {
     <Title order={3} mt='md'>{activeCampaigns.length} Active Campaigns</Title>
       <Text color='gray'>These are the active campaigns running from across all of {userData.client?.company}'s users</Text>
       <Grid mt='md'>
-        {activeCampaigns.sort((a,b) => b.open_percent - a.open_percent).map((x: any) => {
+        {activeCampaigns.sort((a: any,b: any) => b.open_percent - a.open_percent).map((x: any) => {
           return (
             <Grid.Col span={6}>
               <Card withBorder padding="lg" radius="md">

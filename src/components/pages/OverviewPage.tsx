@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Title, Paper, Button, Tooltip, Image, Text, Card, Flex, Box, Avatar, Group, Badge, Grid } from '@mantine/core';
+import { Container, Title, Image, Button, Tooltip, Text, Card, Flex, Box, Avatar, Group, Badge, Grid } from '@mantine/core';
 import { Bar } from 'react-chartjs-2';
 import { IconChecks, IconEye, IconLetterA, IconPlane, IconSend } from '@tabler/icons';
 import { IconMessageCheck } from '@tabler/icons-react';
@@ -150,18 +150,25 @@ export function ActiveCampaigns() {
           return (
             <Grid.Col span={6}>
               <Card withBorder padding="lg" radius="md">
-                <Tooltip label={x.archetype} withinPortal>
+                
                   <Group mb="xs" sx={{cursor: 'pointer'}}>
-                    <Text fw={500}>{x.emoji} {x.archetype.substring(0, 24)}{x.archetype.length > 24 ? '...' : ''}</Text>
-                    <Badge color="pink" variant="light">
-                      Active
-                    </Badge>
+                    <Tooltip label={x.name} withinPortal>
+                      <Image src={x.img_url} width={40} height={40} radius="sm" />
+                    </Tooltip>
+                    <Tooltip label={x.archetype} withinPortal>
+                      <Flex direction='row'>
+                        <Text fw={500}>{x.emoji} {x.archetype.substring(0, 26)}{x.archetype.length > 26 ? '...' : ''}</Text>
+                        <Badge color="pink" variant="light" ml='4px'>
+                          Active
+                        </Badge>
+                      </Flex>
+                    </Tooltip>
                   </Group>
-                </Tooltip>
+                
 
                 <Text c="dimmed" size='xs' h='90px'>
                   {x.persona_fit_reason?.substring(0, 200)}{x.persona_fit_reason?.length > 200 ? '...' : ''}
-                </Text>
+                </Text> 
 
                 <Flex
                   align={"center"}

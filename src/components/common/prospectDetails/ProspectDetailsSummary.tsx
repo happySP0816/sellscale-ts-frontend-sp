@@ -230,7 +230,7 @@ export default function ProspectDetailsSummary(
               </Group>
             )}
 
-            {(
+            {/* {(
               <Group noWrap spacing={10} mt={5}>
                 <IconBrandCashapp
                   stroke={1.5}
@@ -244,7 +244,7 @@ export default function ProspectDetailsSummary(
                   {props.contractSize || 0}, contract size
                 </Text>
               </Group>
-            )}
+            )} */}
           </Flex>
           <Flex>
             <ActionIcon onClick={openProspectModal}>

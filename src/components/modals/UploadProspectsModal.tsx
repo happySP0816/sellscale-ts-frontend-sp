@@ -250,6 +250,7 @@ export default function UploadProspectsModal({
                 placeholder='eg. C-Suite Sales Leaders in tech companies'
                 label='Descriptive Name'
                 value={createdPersona}
+                required
                 onChange={(e) => setCreatedPersona(e.currentTarget.value)}
               />
             ) : (
@@ -302,40 +303,12 @@ export default function UploadProspectsModal({
 
         {innerProps.mode === 'CREATE-ONLY' && (
           <Stack spacing={10}>
-            <TextAreaWithAI
-              withAsterisk
-              value={fitReason}
-              onChange={(e) => setFitReason(e.target.value)}
-              placeholder='The AI will use this reasoning to reach out to prospects and explain why they are a good fit for your product.'
-              label='Why would this persona buy your product?'
-              description='This information is used by the AI to construct value prop messages'
-              loadingAIGenerate={loadingPersonaBuyReasonGeneration}
-              onAIGenerateClicked={async () => {
-                await displayNotification(
-                  'generate-persona-buy-reason',
-                  generatePersonaBuyReason,
-                  {
-                    title: 'Generating persona fit reason...',
-                    message: 'This may take a few seconds.',
-                    color: 'teal',
-                  },
-                  {
-                    title: 'Persona fit reason generated!',
-                    message: 'Your persona fit reason has been generated.',
-                    color: 'teal',
-                  },
-                  {
-                    title: 'Failed to generate persona fit reason',
-                    message: 'Please try again or contact SellScale team.',
-                    color: 'red',
-                  }
-                );
-              }}
-            />
+            
 
             <Divider
               my={0}
               labelPosition='center'
+              color='gray'
               label={
                 <Button
                   variant={advancedOpened ? 'light' : 'subtle'}
@@ -344,6 +317,7 @@ export default function UploadProspectsModal({
                     setAdvancedOpened((prev) => !prev);
                   }}
                   compact
+                  color='gray'
                 >
                   Advanced
                 </Button>
@@ -351,6 +325,36 @@ export default function UploadProspectsModal({
             />
             <Collapse in={advancedOpened}>
               <Stack spacing={10}>
+                <TextAreaWithAI
+                  withAsterisk
+                  value={fitReason}
+                  onChange={(e) => setFitReason(e.target.value)}
+                  placeholder='The AI will use this reasoning to reach out to prospects and explain why they are a good fit for your product.'
+                  label='Why would this persona buy your product?'
+                  description='This information is used by the AI to construct value prop messages'
+                  loadingAIGenerate={loadingPersonaBuyReasonGeneration}
+                  onAIGenerateClicked={async () => {
+                    await displayNotification(
+                      'generate-persona-buy-reason',
+                      generatePersonaBuyReason,
+                      {
+                        title: 'Generating persona fit reason...',
+                        message: 'This may take a few seconds.',
+                        color: 'teal',
+                      },
+                      {
+                        title: 'Persona fit reason generated!',
+                        message: 'Your persona fit reason has been generated.',
+                        color: 'teal',
+                      },
+                      {
+                        title: 'Failed to generate persona fit reason',
+                        message: 'Please try again or contact SellScale team.',
+                        color: 'red',
+                      }
+                    );
+                  }}
+                />
                 {/* {false && (
                   <TextAreaWithAI
                     withAsterisk

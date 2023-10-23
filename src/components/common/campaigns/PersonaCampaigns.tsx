@@ -681,7 +681,7 @@ function PersonCampaignCard(props: {
             </Button>
           </Box>
 
-          <Group sx={{justifyContent: "flex-end", display: 'flex', flexDirection: 'row', flex: 1}}>
+          <Group sx={{justifyContent: "flex-end", display: 'flex', flexDirection: 'row'}} ml='auto'>
             <Button
               w={60}
               radius="xl"
@@ -702,56 +702,6 @@ function PersonCampaignCard(props: {
             >
               Edit
             </Button>
-
-            {/* <Tooltip
-              withArrow
-              position="bottom"
-              label={
-                personaActive
-                  ? "Click to disable this campaign on settings page"
-                  : "Click to enable this campaign on settings page"
-              }
-            >
-              <span>
-                <Button
-                  color={personaActive ? "blue" : "gray"}
-                  sx={{
-                    border: "solid 1px white",
-                    cursor: "pointer",
-                  }}
-                  rightIcon={
-                    props.persona.active ? (
-                      <IconCheck size="0.7rem" />
-                    ) : (
-                      <IconX size="0.7rem" />
-                    )
-                  }
-                  size="xs"
-                  onClick={() => {
-                    if (props.project == undefined) return;
-
-                    setOpenedProspectId(-1);
-                    setCurrentProject(props.project);
-                    navigateToPage(
-                      navigate,
-                      `/persona/settings`,
-                      new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                    );
-
-                    showNotification({
-                      title: "Activate / Deactive Campaign from Settings",
-                      message:
-                        "You can activate & deactivate this persona from the settings page.",
-                      color: "blue",
-                      icon: <IconAdjustmentsHorizontal size="1rem" />,
-                      autoClose: 3000,
-                    });
-                  }}
-                >
-                  {personaActive ? "Active" : "Inactive"}
-                </Button>
-              </span>
-            </Tooltip> */}
 
             <Tooltip
               withArrow

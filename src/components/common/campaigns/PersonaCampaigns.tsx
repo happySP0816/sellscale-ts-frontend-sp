@@ -681,7 +681,7 @@ function PersonCampaignCard(props: {
             </Button>
           </Box>
 
-          <Group sx={{justifyContent: "flex-end", display: 'flex', flex: 1}}>
+          <Group sx={{justifyContent: "flex-end", display: 'flex', flexDirection: 'row', flex: 1}}>
             <Button
               w={60}
               radius="xl"

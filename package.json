@@ -84,6 +84,7 @@
     "react-markdown": "^8.0.5",
     "react-router-dom": "^6.6.1",
     "react-scripts": "5.0.1",
+    "react-type-animation": "^3.2.0",
     "recoil": "^0.7.6",
     "tiptap": "^1.32.2",
     "tiptap-markdown": "^0.7.4",

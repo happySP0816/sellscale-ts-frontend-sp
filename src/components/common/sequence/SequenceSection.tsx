@@ -11,6 +11,8 @@ import PersonaDetailsCTAs from "@common/persona/details/PersonaDetailsCTAs";
 import VoicesSection from "@common/voice_builder/VoicesSection";
 import { API_URL } from "@constants/data";
 import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
+import { TypeAnimation } from 'react-type-animation';
+
 import { C, co, ct, ex } from "@fullcalendar/core/internal-common";
 import {
   Group,
@@ -2569,7 +2571,22 @@ function FrameworkSection(props: {
                 >
                   <Image src={sellScaleLogo} width={30} height={30} mr="sm" />
                   <Text color="white" mt="4px">
-                    Feel free to give me feedback on improving the message
+                     <TypeAnimation
+                        sequence={[
+                          'Feel free to gvie me', // Types 'One'
+                          100, // Waits 1s
+                          'Feel free to give me feedback on ', // Deletes 'One' and types 'Two'
+                          400, // Waits 2s
+                          'Feel free to give me feedback on improving the message', // Types 'Three' without deleting 'Two'
+                          () => {
+                            console.log('Sequence completed');
+                          },
+                        ]}
+                        speed={50}
+                        wrapper="span"
+                        cursor={true}
+                      />
+                    
                   </Text>
                 </Card.Section>
                 <Card.Section

@@ -4,6 +4,9 @@ import { Button, Card, Text, Title } from "@mantine/core";
 import { useRecoilState } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { currentProjectState } from '@atoms/personaAtoms';
+import { showNotification } from '@mantine/notifications';
+import { useNavigate } from 'react-router-dom';
+import { navigateToPage } from '@utils/documentChange';
 
 type PropsType = {
   createPersona: {
@@ -20,6 +23,7 @@ export default function CreatePersona(props: PropsType) {
   const [creatingPersona, setCreatingPersona] = React.useState(false);
   const [userToken] = useRecoilState(userTokenState);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState)
+  const navigate = useNavigate();
 
   const createPersonaHandler = async () => {
     setCreatingPersona(true);
@@ -39,24 +43,28 @@ export default function CreatePersona(props: PropsType) {
       return;
     }
     setCreatingPersona(false);
-    window.location.reload();
+    showNotification({
+      title: "Persona created!",
+      message: "You can now find contacts to reach out to... redirecting now...",
+      color: "teal",
+    });
+
+    setTimeout(
+      () => {
+        window.location.href = `/contacts/find?campaign_id=${result.data}`;
+      }, 3000
+    )
+    
+
     setCurrentProject(result.data)
     return result.data as number;
   };
 
   return (
     <Card>
-      {/* <Title order={5}>Upload Prospects Later</Title>
-      <Text size="sm">
-        Create a persona without any prospects added. You can add prospects
-        later.
-      </Text> */}
       <Button
         disabled={
           !props.createPersona?.name ||
-          !props.createPersona?.ctas ||
-          !props.createPersona?.fitReason ||
-          !props.createPersona.icpMatchingPrompt ||
           !props.createPersona.contactObjective
         }
         onClick={() => createPersonaHandler()}

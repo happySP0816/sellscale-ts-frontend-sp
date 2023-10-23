@@ -69,16 +69,19 @@ export default function CreateEmailSubjectLineModal(props: CreateEmailSubjectLin
       <LoadingOverlay visible={loading} />
       <TextInput
         label="Subject Line"
-        description="AI will do it's best to smartfill in any prompts (denoted with double brackets e.g., [[First name]])"
+        description="AI will do its best to smartfill in any prompts (denoted with double brackets e.g., [[First name]])"
         placeholder="ex. [[First name]] - Supercharge your outbound?"
         value={subjectLine}
         onChange={(event) => setSubjectLine(event.currentTarget.value)}
         required
+        error={
+          subjectLine.length > 40 && "Subject line must be less than 40 characters"
+        }
       />
       <Flex justify={'center'} mt='xl'>
         <Button
           color='teal'
-          disabled={subjectLine.length === 0}
+          disabled={subjectLine.length === 0 || subjectLine.length > 40}
           onClick={triggerCreateEmailSubjectLineTemplate}
         >
           Create

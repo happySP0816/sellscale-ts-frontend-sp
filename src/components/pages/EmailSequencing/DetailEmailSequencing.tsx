@@ -89,12 +89,15 @@ const DetailEmailSequencing: FC<{
       setInitialEmailLoading(true);
 
       try {
+        const activeSubjectLines = subjectLines.filter((subjectLine: SubjectLineTemplate) => subjectLine.active)
+        const randomSubjectLineID = activeSubjectLines[Math.floor(Math.random() * activeSubjectLines.length)].id
+
         const response = await postGenerateInitialEmail(
           userToken,
           prospectID,
           activeTemplate?.id as number,
           null,
-          subjectLines.filter((subjectLine: SubjectLineTemplate) => subjectLine.active)[0]?.id as number,
+          randomSubjectLineID as number,
           null,
           initialEmailGenerationController
         )
@@ -711,6 +714,7 @@ const SubjectLineItem: React.FC<{
           editing ? (
             <TextInput
               value={editedSubjectLine}
+              error={editedSubjectLine.length > 40 && "Subject line must be less than 40 characters"}
               rightSection={
                 <Flex mr='150px'>
                   <Button
@@ -733,6 +737,7 @@ const SubjectLineItem: React.FC<{
                       triggerPatchEmailSubjectLineTemplate();
                       setEditing(false);
                     }}
+                    disabled={editedSubjectLine === subjectLine.subject_line || editedSubjectLine.length === 0 || editedSubjectLine.length > 40}
                   >
                     Save
                   </Button>

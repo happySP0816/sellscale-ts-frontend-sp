@@ -77,8 +77,8 @@ const DetailEmailSequencing: FC<{
 
     // Preview Email (Generation)
     const [prospectID, setProspectID] = React.useState<number>(0);
-    const [previewEmailSubject, setPreviewEmailSubject] = React.useState<string>('Random Subject Line');
-    const [previewEmailBody, setPreviewEmailBody] = React.useState<string>('Random Email Body');
+    const [previewEmailSubject, setPreviewEmailSubject] = React.useState<string | null>('Random Subject Line');
+    const [previewEmailBody, setPreviewEmailBody] = React.useState<string | null>('Random Email Body');
     const [initialEmailLoading, setInitialEmailLoading] = React.useState<boolean>(false);
     const [followupEmailLoading, setFollowupEmailLoading] = React.useState<boolean>(false);
 
@@ -155,6 +155,7 @@ const DetailEmailSequencing: FC<{
         if (currentTab !== "PROSPECTED") {
           setFollowupEmailLoading(false);
         }
+        setFollowupEmailLoading(true)
         console.log('Generation aborted')
       }
 
@@ -162,8 +163,8 @@ const DetailEmailSequencing: FC<{
 
     // Trigger Generation Router
     const triggerGenerateEmail = () => {
-      setPreviewEmailSubject('Random Subject Line');
-      setPreviewEmailBody('Random Email Body');
+      // setPreviewEmailSubject('Random Subject Line');
+      // setPreviewEmailBody('Random Email Body');
       followupEmailGenerationController.abort("Creating a new generation request");
       initialEmailGenerationController.abort("Creating a new generation request");
 
@@ -193,6 +194,9 @@ const DetailEmailSequencing: FC<{
     }, [templates])
 
     useEffect(() => {
+      setPreviewEmailBody(null)
+      setPreviewEmailSubject(null)
+
       if (currentTab === "PROSPECTED") {
         setPageTitle("Initial Email");
       } else if (currentTab === "ACCEPTED") {
@@ -211,6 +215,112 @@ const DetailEmailSequencing: FC<{
         setPageTitle(`${bumpToFollowupMap[bumpCount]} Follow Up Email`);
       }
     }, [currentTab])
+
+
+    const EmailBodySection = () => (
+      <Box mt={"md"}>
+        <Flex justify='flex-end' mb='md'>
+          <Button
+            variant='light'
+            leftIcon={<IconPlus size='.90rem' />}
+            radius={"sm"}
+            onClick={openCreateEmailTemplate}
+          >
+            Add Email Template
+          </Button>
+          <EmailSequenceStepModal
+            modalOpened={createEmailTemplateOpened}
+            openModal={openCreateEmailTemplate}
+            closeModal={closeCreateEmailTemplate}
+            type={"CREATE"}
+            backFunction={() => {
+              refetch()
+            }}
+            isDefault={true}
+            status={currentTab.includes("BUMPED-") ? "BUMPED" : currentTab}
+            archetypeID={currentProject.id}
+            bumpedCount={currentTab.includes("BUMPED-") ? parseInt(currentTab.split("-")[1]) : null}
+            onFinish={async (
+              title: any,
+              sequence: any,
+              isDefault: any,
+              status: any,
+              substatus: any
+            ) => {
+              const result = await createEmailSequenceStep(
+                userToken,
+                currentProject.id,
+                status ?? "",
+                title,
+                sequence,
+                currentTab.includes("BUMPED-") ? parseInt(currentTab.split("-")[1]) : null,
+                isDefault,
+                substatus
+              );
+              return result.status === "success";
+            }}
+          />
+        </Flex>
+
+        {/* ACTIVE TEMPLATE */}
+        {activeTemplate && (
+          <EmailBodyItem
+            key={activeTemplate.id}
+            template={activeTemplate}
+            refetch={async () => {
+              await refetch();
+            }}
+          />
+        )}
+
+        {/* INACTIVE TEMPLATES */}
+        {inactiveTemplates && inactiveTemplates.length > 0 && (
+          <Flex mt='md' w='100%'>
+            <Accordion w='100%'>
+              {inactiveTemplates.map((template: EmailSequenceStep, index: any) => {
+                return (
+                  <Accordion.Item value={'test'}>
+                    <Accordion.Control>
+                      <Flex direction='row' w='100%' justify={'space-between'}>
+                        <Flex direction='row' align='center'>
+                          <Text fw={500}>
+                            {template.title}
+                          </Text>
+                        </Flex>
+                        <Flex>
+                          <Tooltip label='Coming Soon' withArrow withinPortal>
+                            <Text fz='sm' mr='md'>
+                              Open %: <b>TBD</b>
+                            </Text>
+                          </Tooltip>
+                          <Tooltip label='Coming Soon' withArrow withinPortal>
+                            <Text fz='sm'>
+                              Reply %: <b>TBD</b>
+                            </Text>
+                          </Tooltip>
+                        </Flex>
+                      </Flex>
+
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                      <EmailBodyItem
+                        key={template.id}
+                        template={template}
+                        refetch={async () => {
+                          await refetch();
+                        }}
+                        hideHeader
+                      />
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                )
+              })}
+            </Accordion>
+          </Flex>
+        )}
+
+      </Box>
+    )
 
     return (
       <Box mt="md">
@@ -243,7 +353,11 @@ const DetailEmailSequencing: FC<{
                 variant="subtle"
                 compact
                 leftIcon={<IconReload size="0.75rem" />}
-                onClick={triggerGenerateEmail}
+                onClick={() => {
+                  setPreviewEmailBody(null)
+                  setPreviewEmailSubject(null)
+                  triggerGenerateEmail()
+                }}
               >
                 Regenerate
               </Button>
@@ -284,7 +398,7 @@ const DetailEmailSequencing: FC<{
                   </Flex>
                   <Flex>
                     {
-                      initialEmailLoading ? (
+                      (initialEmailLoading && !previewEmailSubject) ? (
                         <Flex align='center'>
                           <Loader mr='sm' size={20} color='purple' />
                           <Text color='purple'>
@@ -308,7 +422,7 @@ const DetailEmailSequencing: FC<{
               </Flex>
               <Flex>
                 {
-                  initialEmailLoading || followupEmailLoading ? (
+                  ((initialEmailLoading && !previewEmailSubject) || (followupEmailLoading && !previewEmailBody)) ? (
                     <Flex align='center'>
                       <Loader mr='sm' size={20} color='purple' />
                       <Text color='purple'>
@@ -326,7 +440,7 @@ const DetailEmailSequencing: FC<{
                       <Text color="gray.8" fw={500}>
                         <div
                           dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(previewEmailBody),
+                            __html: DOMPurify.sanitize(previewEmailBody as string),
                           }}
                         />
                       </Text>
@@ -338,23 +452,19 @@ const DetailEmailSequencing: FC<{
           </Box>
         </Box>
 
-        <Tabs defaultValue={currentTab === "PROSPECTED" ? "subject" : "body"} mt='sm'>
-          <Tabs.List>
-            {
-              currentTab === "PROSPECTED" && (
+        {
+          currentTab === "PROSPECTED" ? (
+            <Tabs defaultValue="subject">
+              <Tabs.List>
                 <Tabs.Tab value="subject">
                   Subject Lines
                 </Tabs.Tab>
-              )
-            }
 
-            <Tabs.Tab value="body">
-              Body
-            </Tabs.Tab>
-          </Tabs.List>
+                <Tabs.Tab value="body">
+                  Body
+                </Tabs.Tab>
+              </Tabs.List>
 
-          {
-            currentTab === "PROSPECTED" && (
               <Tabs.Panel value="subject">
                 <Flex direction='column' w='100%'>
                   <Flex justify='flex-end'>
@@ -392,115 +502,16 @@ const DetailEmailSequencing: FC<{
                   })}
                 </Flex>
               </Tabs.Panel>
-            )
-          }
 
-          <Tabs.Panel value="body">
-            <Box mt={"md"}>
-              <Flex justify='flex-end' mb='md'>
-                <Button
-                  variant='light'
-                  leftIcon={<IconPlus size='.90rem' />}
-                  radius={"sm"}
-                  onClick={openCreateEmailTemplate}
-                >
-                  Add Email Template
-                </Button>
-                <EmailSequenceStepModal
-                  modalOpened={createEmailTemplateOpened}
-                  openModal={openCreateEmailTemplate}
-                  closeModal={closeCreateEmailTemplate}
-                  type={"CREATE"}
-                  backFunction={() => {
-                    refetch()
-                  }}
-                  status={currentTab.includes("BUMPED-") ? "BUMPED" : currentTab}
-                  archetypeID={currentProject.id}
-                  bumpedCount={currentTab.includes("BUMPED-") ? parseInt(currentTab.split("-")[1]) : null}
-                  onFinish={async (
-                    title: any,
-                    sequence: any,
-                    isDefault: any,
-                    status: any,
-                    substatus: any
-                  ) => {
-                    const result = await createEmailSequenceStep(
-                      userToken,
-                      currentProject.id,
-                      status ?? "",
-                      title,
-                      sequence,
-                      currentTab.includes("BUMPED-") ? parseInt(currentTab.split("-")[1]) : null,
-                      isDefault,
-                      substatus
-                    );
-                    return result.status === "success";
-                  }}
-                />
-              </Flex>
+              <Tabs.Panel value="body">
+                <EmailBodySection />
+              </Tabs.Panel>
 
-              {/* ACTIVE TEMPLATE */}
-              {activeTemplate && (
-                <EmailBodyItem
-                  key={activeTemplate.id}
-                  template={activeTemplate}
-                  refetch={async () => {
-                    await refetch();
-                  }}
-                />
-              )}
-
-              {/* INACTIVE TEMPLATES */}
-              {inactiveTemplates && inactiveTemplates.length > 0 && (
-                <Flex mt='md' w='100%'>
-                  <Accordion w='100%'>
-                    {inactiveTemplates.map((template: EmailSequenceStep, index: any) => {
-                      return (
-                        <Accordion.Item value={'test'}>
-                          <Accordion.Control>
-                            <Flex direction='row' w='100%' justify={'space-between'}>
-                              <Flex direction='row' align='center'>
-                                <Text fw={500}>
-                                  {template.title}
-                                </Text>
-                              </Flex>
-                              <Flex>
-                                <Tooltip label='Coming Soon' withArrow withinPortal>
-                                  <Text fz='sm' mr='md'>
-                                    Open %: <b>TBD</b>
-                                  </Text>
-                                </Tooltip>
-                                <Tooltip label='Coming Soon' withArrow withinPortal>
-                                  <Text fz='sm'>
-                                    Reply %: <b>TBD</b>
-                                  </Text>
-                                </Tooltip>
-                              </Flex>
-                            </Flex>
-
-                          </Accordion.Control>
-                          <Accordion.Panel>
-                            <EmailBodyItem
-                              key={template.id}
-                              template={template}
-                              refetch={async () => {
-                                await refetch();
-                              }}
-                              hideHeader
-                            />
-                          </Accordion.Panel>
-                        </Accordion.Item>
-                      )
-                    })}
-                  </Accordion>
-                </Flex>
-              )}
-
-            </Box>
-          </Tabs.Panel>
-
-
-        </Tabs>
+            </Tabs>
+          ) : (
+            <EmailBodySection />
+          )
+        }
 
       </Box>
     );
@@ -928,11 +939,11 @@ const EmailBodyItem: React.FC<{
                   ) : ( // Not editing title
                     <>
                       {template.title ? (
-                        <Title order={4} onClick={() => {setEditingTitle(true)}}>
+                        <Title order={4} onClick={() => { setEditingTitle(true) }}>
                           {template.title}
                         </Title>
                       ) : (
-                        <Title order={4} color='gray.5' onClick={() => {setEditingTitle(true)}}>
+                        <Title order={4} color='gray.5' onClick={() => { setEditingTitle(true) }}>
                           Untitled Email Template
                         </Title>
                       )}

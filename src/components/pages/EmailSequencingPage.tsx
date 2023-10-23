@@ -131,6 +131,7 @@ function EmailInitialOutboundView(props: {
               status={"PROSPECTED"}
               archetypeID={props.archetypeID || -1}
               bumpedCount={0}
+              isDefault={true}
               onFinish={async (
                 title,
                 sequence,
@@ -376,6 +377,7 @@ function EmailSequenceStepView(props: {
             status={props.status}
             archetypeID={props.archetypeID || -1}
             bumpedCount={props.bumpedCount}
+            isDefault={true}
             onFinish={async (title, sequence, isDefault, status, substatus) => {
               const result = await createEmailSequenceStep(
                 userToken,
@@ -923,6 +925,7 @@ export default function EmailSequencingPage(props: {
                           status={"BUMPED"}
                           showStatus={false}
                           archetypeID={archetypeID}
+                          isDefault={true}
                           bumpedCount={
                             Object.keys(sequenceBuckets.current?.BUMPED)
                               .length + 1

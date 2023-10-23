@@ -43,6 +43,7 @@ export default function CreateEmailSubjectLineModal(props: CreateEmailSubjectLin
       setLoading(false);
       props.backFunction();
       props.closeModal();
+      setSubjectLine("");
     }
 
     
@@ -52,7 +53,10 @@ export default function CreateEmailSubjectLineModal(props: CreateEmailSubjectLin
   return (
     <Modal
       opened={props.modalOpened}
-      onClose={props.closeModal}
+      onClose={() => {
+        props.closeModal()
+        setSubjectLine("");
+      }}
       title="New Email Subject Line"
       size='md'
       centered

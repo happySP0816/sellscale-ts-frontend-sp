@@ -181,6 +181,7 @@ const Sidebar: React.FC<{
               bumpedCount={
                 Object.keys(templateBuckets?.BUMPED).length + 1
               }
+              isDefault={true}
               onFinish={async (
                 title,
                 sequence,

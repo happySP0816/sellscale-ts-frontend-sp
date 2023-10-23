@@ -51,7 +51,7 @@ export default function EmailSequenceStepCard(props: {
     if (delayDays < 1 || !defaultSequenceStep) return
 
     setLoading(true)
-    
+
     const result = await patchSequenceStep(
       userToken,
       defaultSequenceStep.id,
@@ -156,14 +156,24 @@ export default function EmailSequenceStepCard(props: {
         </Group>
         <Divider />
         <Box px={20} py={10}>
-          <Text fw={700} size="xl">
-            {defaultSequenceStep?.title || props.templateTitle}
-          </Text>
+          {
+            (defaultSequenceStep && defaultSequenceStep.title) ? (
+              <Text fw={700} size="xl">
+                {defaultSequenceStep.title}
+              </Text>
+            ) : (
+              <Flex w='100%' justify='center'>
+                <Text size='lg'  color="gray.7">
+                  No active template set
+                </Text>
+              </Flex>
+            )
+          }
           <Text size={"sm"} fw={500} color="gray.5">
             {props.content}
           </Text>
         </Box>
-        {props.includeFooter && (
+        {(props.includeFooter && defaultSequenceStep) && (
           <>
             <Divider />
             <Box px={20} py={10}>

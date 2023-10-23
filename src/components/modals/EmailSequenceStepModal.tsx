@@ -96,7 +96,7 @@ export default function EmailSequenceStepModal(props: EmailSequenceStep) {
       title: props.title || "",
       objective: "",
       archetypeID: props.archetypeID,
-      isDefault: !!props.isDefault,
+      isDefault: props.isDefault || false,
       bumpedCount: props.bumpedCount,
     },
   });

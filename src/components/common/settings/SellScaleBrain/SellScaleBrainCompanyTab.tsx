@@ -16,7 +16,7 @@ import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import DoNotContactList from "../DoNotContactList";
 
-export default function SellScaleBrainCompanyTab() {
+export default function SellScaleBrainCompanyTab(props: { siteUrl?: String }) {
   const [userToken] = useRecoilState(userTokenState);
   const [fetchedCompany, setFetchedCompany] = React.useState(false);
   const [fetchingCompany, setFetchingCompany] = React.useState(false);
@@ -47,7 +47,7 @@ export default function SellScaleBrainCompanyTab() {
   ]);
 
   const fetchCompany = async () => {
-    setFetchingCompany(true);
+    setFetchingCompany(false);
     const response = await fetch(`${API_URL}/client/`, {
       method: "GET",
       headers: {
@@ -91,11 +91,49 @@ export default function SellScaleBrainCompanyTab() {
     setNeedsSave(false);
     fetchCompany();
   };
+  useEffect(() => {
+    if (props.siteUrl) {
+      setFetchingCompany(true);
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      var raw = JSON.stringify({
+        url: props.siteUrl,
+      });
+
+      var requestOptions: any = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow",
+      };
+
+      fetch(
+        "https://sellscale-api-prod.onrender.com/research/generate_website_metadata",
+        requestOptions
+      )
+        .then((response) => response.text())
+        .then(async (result) => {
+          const data = await JSON.parse(result);
+          setCompanyName(data.company);
+          setCompanyTagline(data.tagline);
+          setCompanyDescription(data.description);
+          setCompanyMission(data.mission);
+          setCompanyCaseStudy(data.case_study);
+          setValuePropsKeyPoints(data.value_prop_key_points);
+          setToneAttributes(data.tone_attributes);
+          setFetchingCompany(false);
+          setNeedsSave(false);
+          setContractSize(data.contract_size);
+        })
+        .catch((error) => console.log("error", error));
+    }
+  }, [props.siteUrl]);
 
   useEffect(() => {
     if (!fetchedCompany) {
       fetchCompany();
-      setFetchedCompany(true);
+      setFetchedCompany(false);
     }
   }, [fetchedCompany]);
 

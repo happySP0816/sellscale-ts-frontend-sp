@@ -389,6 +389,7 @@ export type Channel = "EMAIL" | "LINKEDIN" | "SELLSCALE";
 export type BumpFramework = {
   id: number;
   title: string;
+  created_at: Date;
   description: string;
   overall_status: string;
   substatus: string;

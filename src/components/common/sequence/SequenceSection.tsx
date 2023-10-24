@@ -131,6 +131,8 @@ import { patchArchetypeDelayDays } from "@utils/requests/patchArchetypeDelayDays
 import { patchArchetypeBumpAmount } from "@utils/requests/patchArchetypeBumpAmount";
 import { CtaSection } from "./CtaSection";
 import CTAGenerator from "./CTAGenerator";
+import { deterministicMantineColor } from '@utils/requests/utils';
+import moment from 'moment';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -823,6 +825,8 @@ function BumpFrameworkSelect(props: {
         bumped_counts: number[];
         overall_statuses: string[];
         transformer_blocklist: string[];
+        labels: string[];
+        tone: string;
       }[];
       return data.map((template) => {
         return {
@@ -833,7 +837,9 @@ function BumpFrameworkSelect(props: {
           tag: template.tag,
           bumped_counts: template.bumped_counts,
           overall_statuses: template.overall_statuses,
-          transformer_blocklist: template.transformer_blocklist
+          transformer_blocklist: template.transformer_blocklist,
+          labels: template.labels,
+          tone: template.tone,
         };
       });
 
@@ -917,14 +923,17 @@ function BumpFrameworkSelect(props: {
         name: bf.title,
         onClick: () => {},
         leftSection: (
-          <Badge
-            size="sm"
-            variant="filled"
-            color={valueToColor(theme, bf.bump_length)}
-            ml="6px"
-          >
-            {bf.bump_length}
-          </Badge>
+          <Box w='100px' sx={{justifyContent: 'center', textAlign: 'center'}}> 
+            <Badge
+              size="sm"
+              variant="filled"
+              ml="6px"
+            >
+              {bf.etl_num_times_converted !== undefined && bf.etl_num_times_used !== undefined ? Math.round(bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001) * 1000) / 10 + '%' : ''}
+            </Badge>
+            <Text mt='xs' fz='xs'>{bf.etl_num_times_converted + " / " + bf.etl_num_times_used + " times"}</Text>
+            <Text fz='xs' color='gray'>{moment(bf.created_at).format('MMM DD, YYYY')}</Text>
+          </Box>
         ),
         content: (
           <Box>
@@ -1046,11 +1055,25 @@ function BumpFrameworkSelect(props: {
           }).map((template, index) => {
             return {
               id: index,
-              name: template.name,
+              name: template.name + template.tone + template.labels?.join(""),
               content: (
-                <Box>
-                  <Text>{template.name}</Text>
-                </Box>
+                <Flex>
+                  <Text ml='sm' size='sm' fw='500' mt='4px' mr='lg'>{template.name}</Text>
+                  {template.tone && <Badge size='xs' mt='7px' variant='filled' color={deterministicMantineColor(template.tone || "")}>
+                    {template.tone}
+                  </Badge>}
+                  <Box ml='md'>
+                    {
+                      template.labels?.map(x => {
+                        return (
+                          <Badge size='xs' variant='outline' mr='4px' mt='4px' color='gray'>
+                            {x}
+                          </Badge>
+                        )
+                      })
+                    }
+                  </Box>
+                </Flex>
               ),
               onClick: () => {
                 openContextModal({

@@ -75,13 +75,13 @@ export default function CreateEmailSubjectLineModal(props: CreateEmailSubjectLin
         onChange={(event) => setSubjectLine(event.currentTarget.value)}
         required
         error={
-          subjectLine.length > 40 && "Subject line must be less than 40 characters"
+          subjectLine.length > 120 && "Subject line must be less than 120 characters"
         }
       />
       <Flex justify={'center'} mt='xl'>
         <Button
           color='teal'
-          disabled={subjectLine.length === 0 || subjectLine.length > 40}
+          disabled={subjectLine.length === 0 || subjectLine.length > 120}
           onClick={triggerCreateEmailSubjectLineTemplate}
         >
           Create

@@ -714,7 +714,7 @@ const SubjectLineItem: React.FC<{
           editing ? (
             <TextInput
               value={editedSubjectLine}
-              error={editedSubjectLine.length > 40 && "Subject line must be less than 40 characters"}
+              error={editedSubjectLine.length > 120 && "Subject line must be less than 120 characters"}
               rightSection={
                 <Flex mr='150px'>
                   <Button
@@ -737,7 +737,7 @@ const SubjectLineItem: React.FC<{
                       triggerPatchEmailSubjectLineTemplate();
                       setEditing(false);
                     }}
-                    disabled={editedSubjectLine === subjectLine.subject_line || editedSubjectLine.length === 0 || editedSubjectLine.length > 40}
+                    disabled={editedSubjectLine === subjectLine.subject_line || editedSubjectLine.length === 0 || editedSubjectLine.length > 120}
                   >
                     Save
                   </Button>

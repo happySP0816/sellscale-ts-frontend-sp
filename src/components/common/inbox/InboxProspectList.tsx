@@ -56,6 +56,7 @@ import InboxProspectListFilter, {
 import {
   convertDateToCasualTime,
   convertDateToLocalTime,
+  convertDateToMMMDD,
   proxyURL,
   removeExtraCharacters,
   removeHTML,
@@ -560,38 +561,41 @@ export default function ProspectList(props: {
                       <div key={i}>
                         {filterSelectValue === "ALL" &&
                           (!displayProspects[i - 1] ||
-                            (prospect.linkedin_status !==
-                              displayProspects[i - 1].linkedin_status)) && (
-                                 
-                            <Box
-                              bg="blue.1"
-                              py={"sm"}
-                              px={"md"}
-                              color='blue'
-                            >
-                              <Flex w='100%'>
+                            prospect.linkedin_status !==
+                              displayProspects[i - 1].linkedin_status) && (
+                            <Box bg="blue.1" py={"sm"} px={"md"} color="blue">
+                              <Flex w="100%">
                                 <Text color="blue" ta="center" fz={14} fw={700}>
                                   {labelizeConvoSubstatus(
                                     prospect.linkedin_status
                                   )}
                                 </Text>
-                                <Badge color="blue" size='xs' ml='xs' mt='2px'>
+                                <Badge color="blue" size="xs" ml="xs" mt="2px">
                                   {
                                     prospects.filter(
                                       (p) =>
                                         p.linkedin_status ===
-                                        prospect.linkedin_status
-                                        && (
-                                          // if snoozed, check hidden until other wise not
-                                          sectionTab == 'snoozed' ? p.in_purgatory : !p.in_purgatory
-                                        )
+                                          prospect.linkedin_status &&
+                                        // if snoozed, check hidden until other wise not
+                                        (sectionTab == "snoozed"
+                                          ? p.in_purgatory
+                                          : !p.in_purgatory)
                                     ).length
                                   }
                                 </Badge>
-                               </Flex>
+                              </Flex>
                             </Box>
                           )}
-                        <Box sx={{ position: "relative", display: prospect.name.toLowerCase().includes(searchFilter.toLowerCase()) ? 'visible' : 'none' }}>
+                        <Box
+                          sx={{
+                            position: "relative",
+                            display: prospect.name
+                              .toLowerCase()
+                              .includes(searchFilter.toLowerCase())
+                              ? "visible"
+                              : "none",
+                          }}
+                        >
                           <Container
                             p={0}
                             m={0}
@@ -623,17 +627,23 @@ export default function ProspectList(props: {
                               withArrow
                               withinPortal
                             >
-                              <ActionIcon
-                                variant="subtle"
-                                radius="xl"
+                              <Flex
+                                align={"center"}
+                                gap={"0.25rem"}
                                 sx={{
                                   position: "absolute",
                                   right: 10,
                                   top: 30,
                                 }}
                               >
-                                <IconClock size="1.125rem" />
-                              </ActionIcon>
+                                <Text fz="0.75rem" fw={500} color="gray">
+                                  {convertDateToMMMDD(
+                                    new Date(prospect.purgatory_until)
+                                  )}
+                                </Text>
+
+                                <IconClock size="0.875rem" color="gray" />
+                              </Flex>
                             </Tooltip>
                           )}
                         </Box>

@@ -125,6 +125,12 @@ export function convertDateToLocalTime(date: Date) {
   return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
 }
 
+export function convertDateToMMMDD(date: Date) {
+  if (date.getTime() === 0) {
+    return "Unknown Time";
+  }
+  return date.toLocaleString("en-US", { month: "short", day: "numeric" });
+}
 
 /**
  * Converts a date to a relative timeframe string (e.g. 2 hours ago)

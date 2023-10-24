@@ -109,22 +109,23 @@ export default function SellScaleBrainCompanyTab(props: { siteUrl?: String }) {
       };
 
       fetch(
-        "https://sellscale-api-prod.onrender.com/research/generate_website_metadata",
+        `${API_URL}/research/generate_website_metadata`,
         requestOptions
       )
         .then((response) => response.text())
         .then(async (result) => {
           const data = await JSON.parse(result);
-          setCompanyName(data.company);
-          setCompanyTagline(data.tagline);
+          setCompanyName(data.company_name);
+          setCompanyTagline(data.summary);
           setCompanyDescription(data.description);
           setCompanyMission(data.mission);
           setCompanyCaseStudy(data.case_study);
-          setValuePropsKeyPoints(data.value_prop_key_points);
+          setValuePropsKeyPoints(data.value_proposition);
           setToneAttributes(data.tone_attributes);
-          setFetchingCompany(false);
-          setNeedsSave(false);
           setContractSize(data.contract_size);
+
+          setFetchingCompany(false);
+          setNeedsSave(true);
         })
         .catch((error) => console.log("error", error));
     }

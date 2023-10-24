@@ -133,12 +133,13 @@ export default function SellScaleBrain() {
         centered
       >
         <Box>
-          <p>
+          <Text size='sm' color='gray'>
             We will automatically pull information from your website to fill in
             your company 'brain'
-          </p>
+          </Text>
           <TextInput
-            size="lg"
+            size="md"
+            mt='md'
             label="website url"
             onChange={(event) => handleChange(event.target.value)}
             value={url}

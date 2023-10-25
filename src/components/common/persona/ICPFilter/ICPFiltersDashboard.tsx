@@ -143,7 +143,10 @@ const ICPFiltersDashboard: FC<{
     uploadDrawerOpenState
   );
   const openUploadProspects = () => {
-    setUploadDrawerOpened(true);
+    window.location.href = `/contacts/find`
+
+    // todo(Aakash) remove this as it opens drawer
+    // setUploadDrawerOpened(true);
   };
 
   const [icpDashboard, setIcpDashboard] = useState<any[]>([]);

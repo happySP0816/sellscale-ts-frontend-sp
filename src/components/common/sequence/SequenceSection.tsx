@@ -2607,7 +2607,7 @@ function FrameworkSection(props: {
                         ]}
                         speed={50}
                         wrapper="span"
-                        cursor={true}
+                        cursor={false}
                       />
                     
                   </Text>

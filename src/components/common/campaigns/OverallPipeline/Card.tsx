@@ -1,4 +1,4 @@
-import { Flex, Text } from "@mantine/core";
+import { Box, Flex, Text } from "@mantine/core";
 import { IconChevronsRight } from "@tabler/icons-react";
 import React, { ReactNode } from "react";
 const blue = "#228be6";
@@ -24,16 +24,18 @@ const Card: React.FC<{
         borderImage: `linear-gradient(#FFFFFF, ${blue}, #FFFFFF) 0 100%`,
       }}
     >
-      <Flex justify={"center"} align={"center"} gap={"0.5rem"} mb={"0.5rem"}>
-        {icon}
-        <Text size={"0.75rem"} color="gray.6" fw={600}>
-          {title}
-        </Text>
+      <Box justify={"center"} align={"center"} gap={"0.5rem"} mb={"0.5rem"}>
+        <Flex>
+          {icon}
+          <Text size={"0.7rem"} color="gray.6" fw={600} ml='4px'>
+            {title}
+          </Text>
+        </Flex>
 
         <Text weight={700} size={"0.75rem"}>
           {value}
         </Text>
-      </Flex>
+      </Box>
     </Flex>
   );
 };

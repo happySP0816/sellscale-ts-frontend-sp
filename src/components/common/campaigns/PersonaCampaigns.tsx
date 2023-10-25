@@ -237,13 +237,14 @@ export default function PersonaCampaigns() {
           <Title order={2}>Campaigns</Title>
         </Group>
         <Tabs defaultValue="overview">
-          <Tabs.List>
+          <Tabs.List mb='md'>
             <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />}>
               Overview
             </Tabs.Tab>
             <Tabs.Tab
               value="linkedin"
               icon={<IconBrandLinkedin size="0.8rem" />}
+              ml='auto'
             >
               Queued LinkedIns
             </Tabs.Tab>
@@ -254,12 +255,6 @@ export default function PersonaCampaigns() {
 
           <Tabs.Panel value="overview" pt="xs">
             <Stack>
-              <Flex direction="row">
-                <OverallPipeline
-                  campaignData={campaignAnalyticData}
-                  aiActivityData={aiActivityData}
-                />
-              </Flex>
               <Group position="apart">
                 <Group>
                   <Button

@@ -7,6 +7,14 @@ import { API_URL } from '@constants/data';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { showNotification } from '@mantine/notifications';
+import OverallPipeline from '@common/campaigns/OverallPipeline';
+import { getPersonasActivity, getPersonasCampaignView, getPersonasOverview } from '@utils/requests/getPersonas';
+import { PersonaOverview } from 'src';
+import { CampaignAnalyticsData } from '@common/campaigns/CampaignAnalytics';
+import { isLoggedIn } from '@auth/core';
+import { CampaignPersona } from '@common/campaigns/PersonaCampaigns';
+import { TodayActivityData } from '@common/campaigns/OverallPipeline/TodayActivity';
+import moment from 'moment';
 
 const options = {
   scales: {
@@ -90,7 +98,7 @@ function BarChart() {
   };
 
   return (
-    <Card withBorder>
+    <Card withBorder mt='md'>
       <Flex direction='row' mb='xs'>
         <Box>
           <Text color='gray'>TOTAL OUTBOUND TOUCHPOINTS</Text>
@@ -237,12 +245,78 @@ export function ActiveCampaigns() {
 
 export default function OverviewPage() {
 
+  const userData = useRecoilValue(userDataState)
+  const userToken = useRecoilValue(userTokenState);
+
+  const [campaignAnalyticData, setCampaignAnalyticData] =
+    useState<CampaignAnalyticsData>({
+      sentOutreach: 0,
+      accepted: 0,
+      activeConvos: 0,
+      demos: 0,
+    });
+
+  const [aiActivityData, setAiActivityData] = useState<TodayActivityData>({
+    totalActivity: 0,
+    newOutreach: 0,
+    newBumps: 0,
+    newReplies: 0,
+  });
+
+    const fetchCampaignPersonas = async () => {
+    if (!isLoggedIn()) return;
+
+    // Get AI Activity
+    const response3 = await getPersonasActivity(userToken);
+    const result3 = response3.status === "success" ? response3.data : [];
+    if (result3.activities && result3.activities.length > 0) {
+      const newOutreach = result3.activities[0].messages_sent;
+      const newBumps = result3.activities[0].bumps_sent;
+      const newReplies = result3.activities[0].replies_sent;
+      const totalActivity = newOutreach + newBumps + newReplies;
+      const activity_data = {
+        totalActivity: totalActivity,
+        newOutreach: newOutreach,
+        newBumps: newBumps,
+        newReplies: newReplies,
+      };
+      setAiActivityData(activity_data);
+    }
+
+    if (result3.overall_activity && result3.overall_activity.length > 0) {
+      const sentOutreach = result3.overall_activity[0].sent_outreach;
+      const emailOpened = result3.overall_activity[0].email_opened;
+      const activeConvo = result3.overall_activity[0].active_convo;
+      const demoSet = result3.overall_activity[0].demo_set;
+      const analytics_data = {
+        sentOutreach: sentOutreach,
+        accepted: emailOpened,
+        activeConvos: activeConvo,
+        demos: demoSet,
+      };
+      setCampaignAnalyticData(analytics_data);
+    }
+
+  };
+
+  useEffect(() => {
+    fetchCampaignPersonas()
+  }, []);
 
   return (
-    <Container p="xl">
-      <Title order={2} mb='md'>Overview</Title>
-      <BarChart />
+    <Box p="xl" maw='1000px' ml='auto' mr='auto'>
+      <Title order={2} mb='0px'>Overview</Title>
+      <Text mb='md' color='gray'>
+        View analytics from across all of {userData.client?.company}'s users
+      </Text>
+      <Box mb='xs'>
+        <OverallPipeline
+          campaignData={campaignAnalyticData}
+          aiActivityData={aiActivityData}
+        />
+      </Box>  
       <ActiveCampaigns />
-    </Container>
+      <BarChart />
+    </Box>
   );
 }

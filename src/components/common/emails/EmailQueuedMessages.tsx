@@ -1,5 +1,5 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { Badge, Box, Button, Flex, HoverCard, LoadingOverlay, Text, TextInput } from "@mantine/core";
+import { Badge, Box, Button, Flex, HoverCard, Text, TextInput } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import EmailQueuedMessageItem from "./EmailQueuedMessageItem";
@@ -55,7 +55,6 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
 
   return (
     <Flex w='100%' align='left' justify={'center'} direction='column'>
-      <LoadingOverlay visible={isFetching} />
       <TextInput
         rightSection={<IconSearch size={14} />}
         placeholder="Search by prospect name"
@@ -158,7 +157,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
                     {
                       disabled ? (
                         <Text>
-                          Not Available
+                          Generating soon...
                         </Text>
                       ) : (
                         <Button

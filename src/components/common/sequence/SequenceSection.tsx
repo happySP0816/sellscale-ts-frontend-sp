@@ -1525,16 +1525,16 @@ function LiExampleInvitation(props: {
 
   // Get SDR data from LinkedIn
   const imgURL = liSDR
-    ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+    ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
           .length - 1
       ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
-    ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
+    ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
     : userData.sdr_name;
-  const title = liSDR ? liSDR.miniProfile.occupation : userData.sdr_title;
+  const title = liSDR ? liSDR.miniProfile?.occupation : userData.sdr_title;
 
   // Split message into start and CTA (and handle cut off)
   let message = props.message.trim();
@@ -1748,7 +1748,7 @@ function LiExampleInvitation(props: {
             compact
           >
             Reply to{" "}
-            {liSDR?.miniProfile.firstName ||
+            {liSDR?.miniProfile?.firstName ||
               userData.sdr_name.trim().split(" ")[0]}
           </Button>
         </Box>
@@ -1803,16 +1803,16 @@ function LiExampleMessage(props: {
 
   // Get SDR data from LinkedIn
   const imgURL = liSDR
-    ? liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile.picture["com.linkedin.common.VectorImage"].artifacts
+    ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
           .length - 1
       ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
-    ? liSDR.miniProfile.firstName + " " + liSDR.miniProfile.lastName
+    ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
     : userData.sdr_name;
-  const title = liSDR ? liSDR.miniProfile.occupation : userData.sdr_title;
+  const title = liSDR ? liSDR.miniProfile?.occupation : userData.sdr_title;
 
   // Format message
   let message = props.message.trim();

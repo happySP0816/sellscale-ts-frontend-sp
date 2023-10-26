@@ -177,9 +177,10 @@ const CTAGenerator = () => {
                 {isShowingValueAddedPropositionInput ? (
                   <TextInput
                     withAsterisk
-                    placeholder="Value Added Proposition"
+                    placeholder="ex. filling their top of funnel leads."
                     size="xs"
                     radius="xl"
+                    w={350}
                     required
                     {...form.getInputProps("proposition")}
                     rightSection={
@@ -203,7 +204,7 @@ const CTAGenerator = () => {
                   >
                     {form.values.proposition?.length
                       ? form.values.proposition
-                      : "Value Added Proposition"}
+                      : "filling their top of funnel leads."}
                   </Button>
                 )}
 

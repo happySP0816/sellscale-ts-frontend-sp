@@ -192,9 +192,6 @@ const IndividualsDashboard: FC<{
   if (globalRuleSetData?.included_individual_generalized_keywords?.length > 0) {
     extraColumns.push(getColumnTemplate('bio'));
   }
-  if (globalRuleSetData?.included_individual_generalized_keywords?.length > 0) {
-    extraColumns.push(getColumnTemplate('bio'));
-  }
   if (globalRuleSetData?.individual_years_of_experience_start) {
     extraColumns.push(getColumnTemplate('work.recent_start_date'));
   }

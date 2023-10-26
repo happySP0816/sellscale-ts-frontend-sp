@@ -128,3 +128,61 @@ export async function runScoringICP(
   return await processResponse(response);
 
 }
+
+
+/**
+ * 
+ * @param userToken
+ * @param client_archetype_id
+ * @param message
+ * @returns - MsgResponse
+ */
+export async function generateNewICPFilters(
+  userToken: string,
+  client_archetype_id: number,
+  message: string,
+): Promise<MsgResponse> {
+
+  const response = await fetch(`${API_URL}/icp_scoring/generate_new_icp_filters`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_archetype_id: client_archetype_id,
+      message: message,
+    }),
+  });
+  return await processResponse(response, 'data');
+
+}
+
+
+/**
+ * 
+ * @param userToken
+ * @param client_archetype_id
+ * @param filters
+ * @returns - MsgResponse
+ */
+export async function updateICPFilters(
+  userToken: string,
+  client_archetype_id: number,
+  filters: any,
+): Promise<MsgResponse> {
+
+  const response = await fetch(`${API_URL}/icp_scoring/update_icp_filters`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_archetype_id: client_archetype_id,
+      filters: filters,
+    }),
+  });
+  return await processResponse(response, 'data');
+
+}

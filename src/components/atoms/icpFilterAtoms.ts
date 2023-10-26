@@ -10,4 +10,9 @@ const filterProspectsState = atom({
   default: [] as ProspectICP[],
 });
 
-export { filterRuleSetState, filterProspectsState };
+const filterDrawerOpenState = atom({
+  key: 'filter-drawer-open',
+  default: false,
+});
+
+export { filterRuleSetState, filterProspectsState, filterDrawerOpenState };

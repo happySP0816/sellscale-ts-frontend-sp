@@ -18,6 +18,7 @@ import { IconCsv } from '@tabler/icons-react';
 import FileDropAndPreview from '@modals/upload-prospects/FileDropAndPreview';
 import LinkedInURLUpload from '@modals/upload-prospects/LinkedInURLUpload';
 import { currentProjectState } from '@atoms/personaAtoms';
+import ChatDashboard from "@common/individuals/ChatDashboard";
 
 export default function FindContactsPage() {
   setPageTitle("Find Contacts")
@@ -28,9 +29,9 @@ export default function FindContactsPage() {
   const activePersonaName = currentProject?.name;
 
   return (
-    <Flex p='lg' direction='column'>
-      <Title>Find Contacts: {activePersonaEmoji} {activePersonaName}</Title>
-      <Tabs defaultValue='individuals' mt='md' keepMounted={false}>
+    <Flex p='lg' direction='column' h='100%'>
+      <Title>Find Contacts</Title>
+      <Tabs defaultValue='individuals' mt='md' keepMounted={false} h='100%'>
         <Tabs.List>
           <Tabs.Tab value='individuals' icon={<IconDatabase size='0.9rem' />}>
             SellScale Database
@@ -51,8 +52,9 @@ export default function FindContactsPage() {
           </Tooltip>
         </Tabs.List>
 
-        <Tabs.Panel value='individuals' pt='xs'>
-          <IndividualsDashboard openFilter={() => {}} />
+        <Tabs.Panel value='individuals' pt='xs' h='95%'>
+          {/* <IndividualsDashboard openFilter={() => {}} /> */}
+          <ChatDashboard />
         </Tabs.Panel>
 
         <Tabs.Panel value='linkedin-sales-navigator' pt='xs'>

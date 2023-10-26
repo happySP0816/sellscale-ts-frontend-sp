@@ -270,10 +270,10 @@ export function ActiveCampaigns() {
                   <Tooltip label={x.num_sent.toLocaleString() + " Sent / " + x.num_sent.toLocaleString() + " Sent"}>
                     <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
                       <IconSend size="0.75rem" color="#868E96" />
-                      <Text fw={"600"} fz={"0.8rem"} color="gray.6">
+                      <Text fw={"600"} fz={"0.7rem"} color="gray.6">
                         Send:
                       </Text>
-                      <Text fw={"600"} fz={"0.8rem"} color="gray.8">
+                      <Text fw={"600"} fz={"0.7rem"} color="gray.8">
                         {x.sent_percent}%
                       </Text>
                     </Flex>
@@ -284,10 +284,10 @@ export function ActiveCampaigns() {
                   <Tooltip label={x.num_opens.toLocaleString() + " Opens / " + x.num_sent.toLocaleString() + " Sent"}>
                     <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
                       <IconChecks size="0.75rem" color="#868E96" />
-                      <Text fw={"600"} fz={"0.8rem"} color="gray.6">
+                      <Text fw={"600"} fz={"0.7rem"} color="gray.6">
                         Opens:
                       </Text>
-                      <Text fw={"600"} fz={"0.8rem"} color="gray.8">
+                      <Text fw={"600"} fz={"0.7rem"} color="gray.8">
                         {Math.round(x.open_percent * 100)}%
                       </Text>
                     </Flex>
@@ -298,11 +298,25 @@ export function ActiveCampaigns() {
                   <Tooltip label={x.num_replies.toLocaleString() + " Replies / " + x.num_sent.toLocaleString() + " Sent"}>
                     <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
                       <IconMessageCheck size="0.75rem" color="#868E96" />
-                      <Text fw={"600"} fz={"0.8rem"} color="gray.6">
+                      <Text fw={"600"} fz={"0.7rem"} color="gray.6">
                         Replies:
                       </Text>
-                      <Text fw={"600"} fz={"0.8rem"} color="gray.8">
+                      <Text fw={"600"} fz={"0.7rem"} color="gray.8">
                         {Math.round(x.reply_percent * 100)}%
+                      </Text>
+                    </Flex>
+                  </Tooltip>
+
+                  <Divider orientation="vertical" size='xs' />
+
+                  <Tooltip label={x.num_demos.toLocaleString() + " Demos / " + x.num_sent.toLocaleString() + " Sent"}>
+                    <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
+                      <IconMessageCheck size="0.75rem" color="#868E96" />
+                      <Text fw={"600"} fz={"0.7rem"} color="gray.6">
+                        Demos:
+                      </Text>
+                      <Text fw={"600"} fz={"0.7rem"} color="gray.8">
+                        {Math.round(x.demo_percent * 100)}%
                       </Text>
                     </Flex>
                   </Tooltip>

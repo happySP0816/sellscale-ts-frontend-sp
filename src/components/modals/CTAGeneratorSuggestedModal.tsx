@@ -227,7 +227,7 @@ export const CTAGeneratorSuggestedModal: React.FC<{
                   {isShowingValueAddedPropositionInput ? (
                     <TextInput
                       withAsterisk
-                      placeholder="Value Added Proposition"
+                      placeholder="ex. filling their top of funnel leads."
                       size="xs"
                       radius="xl"
                       required
@@ -254,7 +254,7 @@ export const CTAGeneratorSuggestedModal: React.FC<{
                       <Text color="black">
                         {form.values.proposition?.length
                           ? form.values.proposition
-                          : "Value Added Proposition"}
+                          : "ex. filling their top of funnel leads."}
                       </Text>
                     </Button>
                   )}

@@ -37,7 +37,7 @@ export default function ChatDashboard() {
   const currentProject = useRecoilValue(currentProjectState);
 
   const [totalFound, setTotalFound] = useState(0);
-  const [showResults, setShowResults] = useState(false);
+  const [showResults, setShowResults] = useState(true);
   const [convoMessages, setConvoMessages] = useState<ConvoMessage[]>([{ isLoading: true }]);
 
   const { isFetching, refetch } = useQuery({
@@ -81,6 +81,7 @@ export default function ChatDashboard() {
               { message: message, isYou: true },
               { isLoading: true },
             ]);
+            setShowResults(true);
           }}
           onComplete={(message, filters) => {
             setConvoMessages([

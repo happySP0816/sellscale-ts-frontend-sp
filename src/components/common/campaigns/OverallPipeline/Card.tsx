@@ -24,7 +24,7 @@ const Card: React.FC<{
         borderImage: `linear-gradient(#FFFFFF, ${blue}, #FFFFFF) 0 100%`,
       }}
     >
-      <Box justify={"center"} align={"center"} gap={"0.5rem"} mb={"0.5rem"}>
+      <Box style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
         <Flex>
           {icon}
           <Text size={"0.7rem"} color="gray.6" fw={600} ml='4px'>

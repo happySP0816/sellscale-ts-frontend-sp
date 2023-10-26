@@ -96,7 +96,7 @@ export async function getPersonasCampaignView(userToken: string): Promise<MsgRes
 export async function getPersonasActivity(userToken: string): Promise<MsgResponse> {
   
     const response = await fetch(
-      `${API_URL}/client/archetype/get_archetypes/activity`,
+      `${API_URL}/client/overall/activity`,
       {
         method: "GET",
         headers: {

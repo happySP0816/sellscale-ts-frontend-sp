@@ -22,7 +22,7 @@ const TodayActivity: FC<{ aiActivityData: TodayActivityData }> = ({ aiActivityDa
   const values = useMemo(
     () => [
       {
-        name: "New Outreach",
+        name: "Outreach",
         icon: <IconBrandTelegram size={"0.75rem"} stroke="gray.6" />,
         number: !aiActivityData.newOutreach ? 0 : aiActivityData.newOutreach,
       },

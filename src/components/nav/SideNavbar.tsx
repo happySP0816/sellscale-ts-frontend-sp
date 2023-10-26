@@ -204,11 +204,11 @@ export default function SideNavbar(props: {}) {
             label="Contacts"
             tabKey={["contacts", "all/contacts"]}
           />
-          <SideNavbarItem
+          {/* <SideNavbarItem
             icon={<IconChartHistogram size="1.0rem" />}
             label="Analytics"
             tabKey={["analytics", "all/pipeline"]}
-          />
+          /> */}
         </Box>
       </Stack>
       <Stack w={"100%"} spacing={0}>

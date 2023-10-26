@@ -19,7 +19,7 @@ import {
   IconMessages,
   IconTrash,
 } from "@tabler/icons";
-import { patchSequenceStep } from "@utils/requests/emailSequencing";
+import { patchSequenceStep, postDeactivateAllSequenceSteps } from "@utils/requests/emailSequencing";
 import _ from "lodash";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
@@ -39,6 +39,8 @@ export default function EmailSequenceStepCard(props: {
   dataChannels?: MsgResponse | undefined;
   bumpedCount?: number;
   refetch?: () => void;
+  deletable?: boolean;
+  afterDelete?: () => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
   const { hovered, ref } = useHover();
@@ -72,6 +74,41 @@ export default function EmailSequenceStepCard(props: {
       showNotification({
         title: "Success",
         message: "Email delay days updated",
+        color: "green",
+      })
+      if (props.afterDelete) {
+        props.afterDelete()
+      }
+      if (props.refetch) {
+        props.refetch()
+      }
+    }
+
+    setLoading(false)
+  }
+
+  const triggerPostDeactivateAllSequenceSteps = async () => {
+    setLoading(true)
+
+    if (!props.sequenceBucket?.templates) return
+
+    // Get a random sequence step id to pass to the request
+    const randomSequenceStepId = props.sequenceBucket?.templates[0].id
+
+    const result = await postDeactivateAllSequenceSteps(
+      userToken,
+      randomSequenceStepId
+    )
+    if (result.status != 'success') {
+      showNotification({
+        title: "Error",
+        message: result.message,
+        color: "red",
+      })
+    } else {
+      showNotification({
+        title: "Success",
+        message: "All email steps deactivated",
         color: "green",
       })
       if (props.refetch) {
@@ -148,10 +185,17 @@ export default function EmailSequenceStepCard(props: {
               </Badge>
             )}
 
+            {props.deletable && (
+              <ActionIcon
+                ml="auto"
+                color="gray.9"
+                size='sm'
+                onClick={triggerPostDeactivateAllSequenceSteps}
+              >
+                <IconTrash />
+              </ActionIcon>
+            )}
 
-            <ActionIcon ml="auto" color="gray.9" size='sm'>
-              <IconTrash />
-            </ActionIcon>
           </Group>
         </Group>
         <Divider />
@@ -163,7 +207,7 @@ export default function EmailSequenceStepCard(props: {
               </Text>
             ) : (
               <Flex w='100%' justify='center'>
-                <Text size='lg'  color="gray.7">
+                <Text size='lg' color="gray.7">
                   No active template set
                 </Text>
               </Flex>

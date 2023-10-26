@@ -115,6 +115,31 @@ export async function patchSequenceStep(
 
 }
 
+/**
+ * Deactivates all Email Sequence Steps that belong to the same group as the provided SequenceStep
+ * @param userToken 
+ * @param sequenceStepID
+ * @returns - MsgResponse
+ */
+export async function postDeactivateAllSequenceSteps(userToken: string, sequenceStepID: number): Promise<MsgResponse> {
+
+  const response = await fetch(
+    `${API_URL}/email_sequence/step/deactivate/all`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sequence_step_id: sequenceStepID,
+      })
+    }
+  );
+  return await processResponse(response);
+
+}
+
 
 /**
  * Deactivates an Email Sequence Step

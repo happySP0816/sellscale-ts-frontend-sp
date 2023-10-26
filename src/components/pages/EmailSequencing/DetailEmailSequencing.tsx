@@ -72,7 +72,7 @@ const DetailEmailSequencing: FC<{
     const [createEmailTemplateOpened, { open: openCreateEmailTemplate, close: closeCreateEmailTemplate }] = useDisclosure();
 
     // Active vs Inactive Body Templates
-    const [activeTemplate, setActiveTemplate] = React.useState<EmailSequenceStep>();
+    const [activeTemplate, setActiveTemplate] = React.useState<EmailSequenceStep | null>(null);
     const [inactiveTemplates, setInactiveTemplates] = React.useState<EmailSequenceStep[]>([]);
 
     // Preview Email (Generation)
@@ -189,8 +189,14 @@ const DetailEmailSequencing: FC<{
     // Set Active / Inactive Templates
     useEffect(() => {
       // Get active template, everything else goes into inactive
-      const activeTemplate = templates.filter((template: EmailSequenceStep) => template.active)[0];
-      const inactiveTemplates = templates.filter((template: EmailSequenceStep) => template.id != activeTemplate.id);
+      const activeTemplates = templates.filter((template: EmailSequenceStep) => template.default);
+      const activeTemplate = activeTemplates.length > 0 ? activeTemplates[0] : null;
+      let inactiveTemplates = [];
+      if (activeTemplate) {
+        inactiveTemplates = templates.filter((template: EmailSequenceStep) => template.id != activeTemplate.id);
+      } else {
+        inactiveTemplates = templates;
+      }
 
       setActiveTemplate(activeTemplate);
       setInactiveTemplates(inactiveTemplates);
@@ -762,7 +768,7 @@ const SubjectLineItem: React.FC<{
 const EmailBodyItem: React.FC<{
   template: EmailSequenceStep,
   refetch: () => Promise<void>,
-  hideHeader?: boolean
+  hideHeader?: boolean,
 }> = ({ template, refetch, hideHeader }) => {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
@@ -973,23 +979,25 @@ const EmailBodyItem: React.FC<{
                     Reply %: <b>TBD</b>
                   </Text>
                 </Tooltip>
-                <Tooltip
-                  label={template.default ? 'Deactivate template' : 'Activate template'}
-                  withinPortal
-                  withArrow
-                >
-                  <div>
-                    <Switch
-                      disabled={editing}
-                      checked={template.default}
-                      color={"blue"}
-                      size="xs"
-                      onChange={({ currentTarget: { checked } }) => {
-                        triggerToggleEmailBodyTemplateActive();
-                      }}
-                    />
-                  </div>
-                </Tooltip>
+                {/*
+                    <Tooltip
+                      label={'Activate template'}
+                      withinPortal
+                      withArrow
+                    >
+                      <div>
+                        <Switch
+                          disabled={editing}
+                          checked={template.default}
+                          color={"blue"}
+                          size="xs"
+                          onChange={({ currentTarget: { checked } }) => {
+                            triggerToggleEmailBodyTemplateActive();
+                          }}
+                        />
+                      </div>
+                    </Tooltip>
+                */}
               </Flex>
             </Flex>
           )

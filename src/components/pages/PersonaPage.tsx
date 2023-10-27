@@ -87,9 +87,9 @@ export default function PersonaPage() {
     const create = searchParams.get('create');
     if(create){
       openContextModal({
-        modal: "uploadProspects",
-        title: <Title order={3}>Create Persona</Title>,
-        innerProps: { mode: "CREATE-ONLY" },
+        modal: 'uploadProspects',
+        title: <Title order={3}>Create Campaign</Title>,
+        innerProps: { mode: 'CREATE-ONLY' },
       });
     }
   }, []);
@@ -109,9 +109,9 @@ export default function PersonaPage() {
             size="xs"
             onClick={() => {
               openContextModal({
-                modal: "uploadProspects",
-                title: <Title order={3}>Create Persona</Title>,
-                innerProps: { mode: "CREATE-ONLY" },
+                modal: 'uploadProspects',
+                title: <Title order={3}>Create Campaign</Title>,
+                innerProps: { mode: 'CREATE-ONLY' },
               });
             }}
           >

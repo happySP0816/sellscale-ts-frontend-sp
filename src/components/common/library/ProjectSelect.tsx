@@ -130,7 +130,7 @@ export function ProjectSelect(props: { allOnNone?: boolean, onClick?: (persona: 
                       onClick={() => {
                         openContextModal({
                           modal: "uploadProspects",
-                          title: <Title order={3}>Create Persona</Title>,
+                          title: <Title order={3}>Create Campaign</Title>,
                           innerProps: { mode: "CREATE-ONLY" },
                         });
                       }}

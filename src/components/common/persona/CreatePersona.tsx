@@ -63,14 +63,11 @@ export default function CreatePersona(props: PropsType) {
   return (
     <Card>
       <Button
-        disabled={
-          !props.createPersona?.name ||
-          !props.createPersona.contactObjective
-        }
+        disabled={!props.createPersona?.name || !props.createPersona.contactObjective}
         onClick={() => createPersonaHandler()}
         loading={creatingPersona}
       >
-        Create Persona
+        Create Campaign
       </Button>
     </Card>
   );

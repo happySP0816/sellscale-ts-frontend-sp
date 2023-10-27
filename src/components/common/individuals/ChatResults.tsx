@@ -16,6 +16,10 @@ import {
   Box,
   Center,
   Loader,
+  Anchor,
+  Collapse,
+  HoverCard,
+  Tooltip,
 } from '@mantine/core';
 import Logo from '@assets/images/assistant.svg';
 import { showNotification } from '@mantine/notifications';
@@ -28,6 +32,8 @@ import { userTokenState } from '@atoms/userAtoms';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { proxyURL } from '@utils/general';
 import { convertIndividualsToProspects } from '@utils/requests/convertIndividualsToProspects';
+import { useDisclosure } from '@mantine/hooks';
+import { IconArrowUpRight, IconTargetArrow } from '@tabler/icons';
 
 const PAGE_SIZE = 100;
 
@@ -97,18 +103,31 @@ export default function ChatResults(props: { changeView: () => void }) {
             </Group>
           </td>
           <td>{item.title}</td>
-          <td>{item.company.name}</td>
+          <td>
+            <Tooltip label={item.company.description} openDelay={500} width={280} multiline withinPortal>
+              <Text sx={{ cursor: 'pointer' }}>{item.company.name}</Text>
+            </Tooltip>
+          </td>
+          <td>
+            {item.linkedin_url && (
+              <Anchor href={item.linkedin_url} target='_blank'>
+                {item.li_public_id}
+              </Anchor>
+            )}
+          </td>
         </tr>
       );
     }) ?? [];
 
   return (
-    <Stack spacing={5}>
+    <Stack spacing={5} mah={500}>
       <Group position='apart' noWrap>
         <Group noWrap>
           <Avatar radius='xl' src={Logo} alt='SellScale Assistant' />
           <Text fz='sm'>
-            I found {totalFound.toLocaleString() || '...'} contacts.{' '}
+            {isFetching
+              ? 'Fetching your contacts...'
+              : `I found ${totalFound.toLocaleString()} contacts.`}{' '}
             <Text fw='600' span>
               Refine your search with the chat bar
             </Text>{' '}
@@ -141,7 +160,24 @@ export default function ChatResults(props: { changeView: () => void }) {
                   );
                   if (response.status === 'success') {
                     showNotification({
-                      title: 'Success',
+                      title: (
+                        <Group>
+                          <Text fz='md'>Success</Text>
+                          <Button
+                            leftIcon={<IconArrowUpRight size='0.9rem' />}
+                            variant='light'
+                            color='green'
+                            size='xs'
+                            radius='xl'
+                            compact
+                            onClick={() => {
+                              window.location.href = '/campaigns';
+                            }}
+                          >
+                            Edit Campaign
+                          </Button>
+                        </Group>
+                      ),
                       message: `Currently importing prospects. This may take a few minutes...`,
                       color: 'green',
                     });
@@ -158,7 +194,7 @@ export default function ChatResults(props: { changeView: () => void }) {
           </Group>
         </Group>
         <Divider />
-        <ScrollArea h='52vh' p='md'>
+        <ScrollArea h='50vh' p='md'>
           <Table miw={800} verticalSpacing='sm'>
             <thead>
               <tr>
@@ -172,6 +208,7 @@ export default function ChatResults(props: { changeView: () => void }) {
                 <th>Name</th>
                 <th>Title</th>
                 <th>Company</th>
+                <th>LinkedIn</th>
               </tr>
             </thead>
             <tbody style={{ position: 'relative' }}>
@@ -198,7 +235,13 @@ export default function ChatResults(props: { changeView: () => void }) {
         </ScrollArea>
         <Divider />
         <Group px='md' py='xs' position='apart' noWrap>
-          <Pagination value={activePage} onChange={setPage} size='sm' radius='xl' total={Math.ceil(totalFound / PAGE_SIZE) || 1} />
+          <Pagination
+            value={activePage}
+            onChange={setPage}
+            size='sm'
+            radius='xl'
+            total={Math.ceil(totalFound / PAGE_SIZE) || 1}
+          />
           <Group spacing={10}>
             <Text fz='sm'>Seeing unexpected results? Try tuning your search with</Text>
             <Button

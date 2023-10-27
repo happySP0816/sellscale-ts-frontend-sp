@@ -161,7 +161,7 @@ function PersonaOnboarding(props: { data: any }) {
           complete: props.data.persona.create_personas,
         },
         // {
-        //   title: 'Create Persona Linkedin Filters',
+        //   title: 'Create Campaign Linkedin Filters',
         //   description: 'Select filters we can apply on Linkedin to find targets',
         //   link: null,
         //   complete: props.data.persona.linkedin_filters,

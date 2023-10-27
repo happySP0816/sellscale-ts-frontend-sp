@@ -1,9 +1,9 @@
 import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { Stack, Group, Button, useMantineTheme, Paper, Avatar, Text, Box, Center, Loader, Badge, TextInput, ActionIcon } from "@mantine/core";
+import { Stack, Group, Button, useMantineTheme, Paper, Avatar, Text, Box, Center, Loader, Badge, TextInput, ActionIcon, ScrollArea } from "@mantine/core";
 import { IconThumbUp, IconThumbDown, IconArrowUpRight, IconSend } from "@tabler/icons";
 import { proxyURL, valueToColor, nameToInitials, formatToLabel } from "@utils/general";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import Logo from '@assets/images/assistant.svg';
 import { updateICPFilters } from "@utils/requests/icpScoring";
@@ -30,43 +30,55 @@ export default function ChatConvo(props: { changeView: () => void; convoMessages
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
+  const viewport = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () =>
+    viewport.current?.scrollTo({ top: viewport.current.scrollHeight, behavior: 'smooth' });
+
+  useEffect(() => {
+    setTimeout(() => {
+      scrollToBottom();
+    }, 1);
+  }, [props.convoMessages]);
+
   return (
-    <Stack>
-      {props.convoMessages.map((message, index) => (
-        <Box key={index}>
-          {message.isLoading && <ChatBox loading />}
-          {message.message && (
-            <ChatBox you={message.isYou}>
-              <Text fz='sm'>{message.message}</Text>
-            </ChatBox>
-          )}
-          {message.requirements && (
-            <RequirementsChatBox
-              filters={message.requirements}
-              onApply={async (filter) => {
-                const response = await updateICPFilters(userToken, currentProject!.id, filter);
-                if (response.status === 'success') {
-                  props.changeView();
-                }
-              }}
-            />
-          )}
-          {message.foundContacts !== undefined && (
-            <ChatBox>
-              <Group position='apart'>
-                <Text fz='sm'>
-                  Success! I ran your search and found{' '}
-                  {displayContactsFound(message.foundContacts)} contacts.
-                </Text>
-                <Button radius='lg' variant='subtle' onClick={props.changeView}>
-                  View Search Results
-                </Button>
-              </Group>
-            </ChatBox>
-          )}
-        </Box>
-      ))}
-    </Stack>
+    <ScrollArea mah={500} p='md' viewportRef={viewport}>
+      <Stack>
+        {props.convoMessages.map((message, index) => (
+          <Box key={index}>
+            {message.isLoading && <ChatBox loading />}
+            {message.message && (
+              <ChatBox you={message.isYou}>
+                <Text fz='sm'>{message.message}</Text>
+              </ChatBox>
+            )}
+            {message.requirements && (
+              <RequirementsChatBox
+                filters={message.requirements}
+                onApply={async (filter) => {
+                  const response = await updateICPFilters(userToken, currentProject!.id, filter);
+                  if (response.status === 'success') {
+                    props.changeView();
+                  }
+                }}
+              />
+            )}
+            {message.foundContacts !== undefined && (
+              <ChatBox>
+                <Group position='apart'>
+                  <Text fz='sm'>
+                    Success! I ran your search and found{' '}
+                    {displayContactsFound(message.foundContacts)} contacts.
+                  </Text>
+                  <Button radius='lg' variant='subtle' onClick={props.changeView}>
+                    View Search Results
+                  </Button>
+                </Group>
+              </ChatBox>
+            )}
+          </Box>
+        ))}
+      </Stack>
+    </ScrollArea>
   );
 }
 
@@ -133,7 +145,7 @@ function RequirementsChatBox(props: { filters: any, onApply: (filters: any) => v
         exclude: convertArray(props.filters.excluded_individual_generalized_keywords),
       },
       {
-        type: 'location',
+        type: 'contact location',
         include: convertArray(props.filters.included_individual_locations_keywords),
         exclude: convertArray(props.filters.excluded_individual_locations_keywords),
       },

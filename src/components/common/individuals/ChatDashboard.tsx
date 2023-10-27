@@ -54,9 +54,9 @@ export default function ChatDashboard() {
         0,
       );
       if (response.status === 'success') {
-        setConvoMessages([
-          { foundContacts: response.data.total },
-        ])
+        if(convoMessages.length === 1){
+          setConvoMessages([{ foundContacts: response.data.total }]);
+        }
         setTotalFound(response.data.total);
         return response.data.results as Individual[];
       }
@@ -81,7 +81,7 @@ export default function ChatDashboard() {
               { message: message, isYou: true },
               { isLoading: true },
             ]);
-            setShowResults(true);
+            setShowResults(false);
           }}
           onComplete={(message, filters) => {
             setConvoMessages([

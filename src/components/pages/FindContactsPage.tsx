@@ -30,7 +30,7 @@ export default function FindContactsPage() {
 
   return (
     <Flex p='lg' direction='column' h='100%'>
-      <Title>Find Contacts</Title>
+      <Title order={2}><Text color='gray'>Find Contacts:</Text> {activePersonaEmoji} {activePersonaName}</Title>
       <Tabs defaultValue='individuals' mt='md' keepMounted={false} h='100%'>
         <Tabs.List>
           <Tabs.Tab value='individuals' icon={<IconDatabase size='0.9rem' />}>

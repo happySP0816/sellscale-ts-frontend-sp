@@ -98,40 +98,36 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
   
   return (
     <>
-        <Box>
-          <Container
-            size={"xl"}
+        <Box 
+            pl={"xl"}
+            pr='xl'>
+          <Box
             sx={{ display: "flex", justifyContent: "center" }}
           >
             <Flex bg={"gray.0"} direction={"column"} pt={"2rem"} w={"100%"}>
-              <Grid >
-                <Grid.Col xs={12} md={"auto"}>
-                  <Flex align={"center"} gap={"0.5rem"} mb='xs'>
-                    <ActionIcon
-                      variant="outline"
-                      color="blue"
-                      size={"sm"}
-                      onClick={close}
-                      sx={{ borderRadius: 999 }}
-                      onClickCapture={() => {
-                        navigateToPage(navigate, '/campaigns');
-                      }}
-                      mt='xs'
-                    >
-                      <IconArrowLeft size={"0.875rem"} />
-                    </ActionIcon>
-                    <Text fz={"1rem"} span color="gray.6" mt='8px'>
-                      Go back to Campaigns
-                    </Text>
-                    {/* <Text fz={"1rem"} span color="gray.6" mt='8px'>
-                      Campaign:
-                    </Text>
-                    <ProjectSelect /> */}
-                  </Flex>
-                </Grid.Col>
-                {currentProject?.id && <Box w='100%' mb='md' pl='xl' pr='xl'>
+      
+              <Flex align={"center"} gap={"0.5rem"} mb='xs'>
+                <ActionIcon
+                  variant="outline"
+                  color="blue"
+                  size={"sm"}
+                  onClick={close}
+                  sx={{ borderRadius: 999 }}
+                  onClickCapture={() => {
+                    navigateToPage(navigate, '/campaigns');
+                  }}
+                  mt='xs'
+                >
+                  <IconArrowLeft size={"0.875rem"} />
+                </ActionIcon>
+                <Text fz={"1rem"} span color="gray.6" mt='8px'>
+                  Go back to Campaigns
+                </Text>
+              </Flex>
+
+              {currentProject?.id && <Box w='100%' mb='md' mt='md'>
                   <Flex direction='row'>
-                    <Card withBorder  w='35%' mr='5%'>
+                    <Box  w='80%' mr='5%'>
                       <Box>
                         <Tooltip
                           label='Click to edit campaign name or objective'
@@ -157,63 +153,21 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                         <Title order={2} style={{marginBottom: 0}}>
                           {currentProject?.emoji} {currentProject?.name}
                         </Title>
-                        {/* <Text size='xs' mt='md'>
-                          <b>Objective:</b> {currentProject?.persona_contact_objective}
-                        </Text> */}
                       </Box>
-                    </Card>
-                    <Card withBorder w='20%' mr='xs' sx={{textAlign: 'center'}}>
-                        <Title order={6} style={{marginBottom: 0}}>
-                          Setup {brainPercentFilled}% Filled
-                        </Title>
-                        <Text sx={{fontSize: '10px'}} h='40px'>
-                          {brainFilled ? 'You are ready to go!' : 'You need to complete the setup so the AI can properly conduct outreach.'}
-                        </Text>
-                        <Button size='xs' leftIcon={<IconBrain size='0.8rem'/>} mt='xs' color={brainFilled ? 'green' : 'red'} onClick={
-                          () => {
-                            navigateToPage(navigate, '/persona/settings');
-                          }
-                        }>
-                          Go to Setup
-                        </Button>
-                    </Card>
-                    <Card withBorder w='20%' mr='xs'sx={{textAlign: 'center'}}>
-                      <Title order={6} style={{marginBottom: 0}}>
-                        Contacts: {currentProject?.num_unused_li_prospects} left
-                      </Title>
-                      <Text sx={{fontSize: '10px'}} h='40px'>
-                        {
-                          needMoreProspects ? 'You need to add more contacts to this campaign.' : 'You have enough contacts to continue this campaign. Add more to extend.'
-                        }
-                      </Text>
-                      <Button size='xs' leftIcon={<IconPlus size='0.8rem'/>} mt='xs' color={needMoreProspects ? 'red' : 'green'} onClick={
+                    </Box>
+                    
+                    <Box w='20%' sx={{textAlign: 'center'}}>
+                      <Button size='md' mt='md' leftIcon={<IconPlus size='0.8rem'/>} color={'blue'} onClick={
                         () => {
-                          navigateToPage(navigate, '/contacts');
+                          navigateToPage(navigate, '/contacts/find');
                         }
                       }>
-                        Add Contacts
+                        Add Prospects
                       </Button>
-                    </Card>
-                    <Card withBorder w='20%' mr='xs'sx={{textAlign: 'center'}}>
-                      <Title order={6} style={{marginBottom: 0}}>
-                        ICP Fit: {avgIcpScoreLabel} ({Math.round(currentProject?.avg_icp_fit_score * 100) / 100})
-                      </Title>
-                      <Text sx={{fontSize: '10px'}} h='40px'>
-                        {
-                          avgIcpScoreIsBad ? 'Your ICP fit score is low. You should adjust your ICP to improve your results.' : 'Your ICP fit score is above average. You can optionally adjust your ICP settings.'
-                        }
-                      </Text>
-                      <Button size='xs' leftIcon={<IconFilter size='0.8rem'/>} mt='xs' color={avgIcpScoreIsBad ? 'red' : 'green'} onClick={
-                        () => {
-                          navigateToPage(navigate, '/prioritize' + (currentProject ? `/${currentProject.id}` : ''));
-                        }
-                      }>
-                        Adjust Filters
-                      </Button>
-                    </Card>
+                    </Box>
+                    
                   </Flex>
                 </Box>}
-              </Grid>
 
               {!props.hideChannels &&
                 <Grid gutter={"0"} px={"2rem"}>
@@ -265,7 +219,7 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                 </Grid>
               }
             </Flex>
-          </Container>
+          </Box>
         </Box>
     </>
   );

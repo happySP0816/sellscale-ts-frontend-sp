@@ -1156,13 +1156,13 @@ function IntroMessageSection(props: {
     setActiveTab("ctas");
   };
 
-  const getIntroMessage = async (prospectId: number) => {
+  const getIntroMessage = async (prospectId: number, forceRegenerate: boolean = false) => {
     if (!currentProject) return null;
     setLoading(true);
     setMessage("");
 
     let convoResponse = await getLiConvoSim(userToken, undefined, prospectId);
-    if (convoResponse.status !== "success") {
+    if (convoResponse.status !== "success" || forceRegenerate) {
       // If convo doesn't exist, create it
       const createResponse = await createLiConvoSim(
         userToken,
@@ -1289,7 +1289,7 @@ function IntroMessageSection(props: {
                   leftIcon={<IconReload size="0.75rem" />}
                   onClick={() => {
                     if (prospectId) {
-                      getIntroMessage(prospectId).then((msg) => {
+                      getIntroMessage(prospectId, true).then((msg) => {
                         if (msg) {
                           setMessage(msg);
                         }

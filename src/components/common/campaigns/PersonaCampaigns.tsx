@@ -729,8 +729,7 @@ function PersonCampaignCard(props: {
               <CampaignGraph
                 personaId={props.persona.id}
                 unusedProspects={
-                  (props.project?.num_unused_email_prospects ?? 0) +
-                  (props.project?.num_unused_li_prospects ?? 0)
+                  Math.min(props.project?.num_unused_li_prospects ?? 0)
                 }
                 sections={types}
                 onChannelClick={(sectionType: string) => {

@@ -162,6 +162,11 @@ function RequirementsChatBox(props: { filters: any, onApply: (filters: any) => v
           `${props.filters.individual_years_of_experience_start} - ${props.filters.individual_years_of_experience_end}`,
       },
       {
+        type: 'company name',
+        include: convertArray(props.filters.included_company_name_keywords),
+        exclude: convertArray(props.filters.excluded_company_name_keywords),
+      },
+      {
         type: 'company description',
         include: convertArray(props.filters.included_company_generalized_keywords),
         exclude: convertArray(props.filters.excluded_company_generalized_keywords),

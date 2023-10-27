@@ -30,7 +30,11 @@ export default function FindContactsPage() {
 
   return (
     <Flex p='lg' direction='column' h='100%'>
-      <Title order={2}><Text color='gray'>Find Contacts:</Text> {activePersonaEmoji} {activePersonaName}</Title>
+      <Title order={2}>
+        <Text color='gray'>
+          Find Contacts: {activePersonaEmoji} {activePersonaName}
+        </Text>
+      </Title>
       <Tabs defaultValue='individuals' mt='md' keepMounted={false} h='100%'>
         <Tabs.List>
           <Tabs.Tab value='individuals' icon={<IconDatabase size='0.9rem' />}>
@@ -46,9 +50,11 @@ export default function FindContactsPage() {
             CSV
           </Tabs.Tab>
           <Tooltip label='Advanced - Linkedin Network' position='bottom'>
-            <Tabs.Tab value='your-network' icon={<IconAffiliate size='0.9rem' />} ml='auto'>
-              
-            </Tabs.Tab>
+            <Tabs.Tab
+              value='your-network'
+              icon={<IconAffiliate size='0.9rem' />}
+              ml='auto'
+            ></Tabs.Tab>
           </Tooltip>
         </Tabs.List>
 
@@ -65,30 +71,29 @@ export default function FindContactsPage() {
           <YourNetworkSection />
         </Tabs.Panel>
 
-        <Tabs.Panel value="linkedin-url" pt="xs">
+        <Tabs.Panel value='linkedin-url' pt='xs'>
           <Card maw='600px' ml='auto' mr='auto'>
-            <Title order={3}>
-              Upload Prospect from One LinkedIn URL
-            </Title>
+            <Title order={3}>Upload Prospect from One LinkedIn URL</Title>
             <Text mb='md' color='gray'>
-              Upload a LinkedIn URL to add a prospect to your database. This can be a Sales Navigator link (i.e. /sales) or a regular LinkedIn profile link (i.e. /in).
+              Upload a LinkedIn URL to add a prospect to your database. This can be a Sales
+              Navigator link (i.e. /sales) or a regular LinkedIn profile link (i.e. /in).
             </Text>
-            <LinkedInURLUpload afterUpload={() => {
-              showNotification({
-                title: "Success",
-                message: "Uploaded contact successfully",
-                color: "teal",
-              });
-            }}/>
+            <LinkedInURLUpload
+              afterUpload={() => {
+                showNotification({
+                  title: 'Success',
+                  message: 'Uploaded contact successfully',
+                  color: 'teal',
+                });
+              }}
+            />
           </Card>
         </Tabs.Panel>
-        <Tabs.Panel value="by-csv" pt="xs">
+        <Tabs.Panel value='by-csv' pt='xs'>
           <Card maw='600px' ml='auto' mr='auto'>
-            <Title order={3}>
-              Upload CSV
-            </Title>
+            <Title order={3}>Upload CSV</Title>
             <Text mb='md' color='gray'>
-              Upload a CSV file with the following columns: 
+              Upload a CSV file with the following columns:
               <ul>
                 <li>linkedin_url (required; if no email)</li>
                 <li>first_name (optional; required if no linkedin_url)</li>
@@ -101,14 +106,13 @@ export default function FindContactsPage() {
               personaId={activePersona + ''}
               onUploadSuccess={() => {
                 showNotification({
-                  title: "Success",
-                  message: "File uploaded successfully",
-                  color: "teal",
+                  title: 'Success',
+                  message: 'File uploaded successfully',
+                  color: 'teal',
                 });
               }}
             />
           </Card>
-          
         </Tabs.Panel>
       </Tabs>
     </Flex>

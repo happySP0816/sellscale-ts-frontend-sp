@@ -104,7 +104,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
         loaderColor="purple"
         fetching={isFetching}
         noRecordsText="No emails queued for outreach... yet!"
-        records={data}
+        records={messages}
         highlightOnHover
         columns={[
           {

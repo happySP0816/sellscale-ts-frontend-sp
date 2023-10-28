@@ -226,7 +226,24 @@ export default function ChatResults(props: { changeView: () => void }) {
                       <Loader />
                     </Box>
                   ) : (
-                    <>{rows}</>
+                    <>
+                      {rows.length > 0 ? (
+                        <>{rows}</>
+                      ) : (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            top: 130,
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                          }}
+                        >
+                          <Text fz='sm' fs='italic' ta='center' c='dimmed'>
+                            No contacts found, try adjusting your filters.
+                          </Text>
+                        </Box>
+                      )}
+                    </>
                   )}
                 </>
               }

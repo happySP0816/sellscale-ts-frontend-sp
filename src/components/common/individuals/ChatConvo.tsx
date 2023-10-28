@@ -145,7 +145,7 @@ function RequirementsChatBox(props: { filters: any, onApply: (filters: any) => v
         exclude: convertArray(props.filters.excluded_individual_generalized_keywords),
       },
       {
-        type: 'contact location',
+        type: 'person location',
         include: convertArray(props.filters.included_individual_locations_keywords),
         exclude: convertArray(props.filters.excluded_individual_locations_keywords),
       },

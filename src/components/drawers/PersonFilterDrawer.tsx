@@ -8,6 +8,7 @@ import { updateICPRuleSet } from '@utils/requests/icpScoring';
 import { useEffect } from 'react';
 import { userTokenState } from '@atoms/userAtoms';
 import { currentProjectState } from '@atoms/personaAtoms';
+import { update } from 'lodash';
 
 export default function PersonFilterDrawer(props: { onClickSearch?: () => void }) {
   const [opened, setOpened] = useRecoilState(filterDrawerOpenState);
@@ -17,38 +18,34 @@ export default function PersonFilterDrawer(props: { onClickSearch?: () => void }
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
-  useEffect(() => {
-    (async () => {
-      if (!currentProject) return;
-      // Auto save ICP rule set
-      const response = await updateICPRuleSet(
-        userToken,
-        currentProject.id,
-        globalRuleSetData.included_individual_title_keywords,
-        globalRuleSetData.excluded_individual_title_keywords,
-        globalRuleSetData.included_individual_industry_keywords,
-        globalRuleSetData.individual_years_of_experience_start,
-        globalRuleSetData.individual_years_of_experience_end,
-        globalRuleSetData.included_individual_skills_keywords,
-        globalRuleSetData.excluded_individual_skills_keywords,
-        globalRuleSetData.included_individual_locations_keywords,
-        globalRuleSetData.excluded_individual_locations_keywords,
-        globalRuleSetData.included_individual_generalized_keywords,
-        globalRuleSetData.excluded_individual_generalized_keywords,
-        globalRuleSetData.included_company_name_keywords,
-        globalRuleSetData.excluded_company_name_keywords,
-        globalRuleSetData.included_company_locations_keywords,
-        globalRuleSetData.excluded_company_locations_keywords,
-        globalRuleSetData.company_size_start,
-        globalRuleSetData.company_size_end,
-        globalRuleSetData.included_company_industries_keywords,
-        globalRuleSetData.excluded_company_industries_keywords,
-        globalRuleSetData.included_company_generalized_keywords,
-        globalRuleSetData.excluded_company_generalized_keywords
-      );
-      //refetch();
-    })();
-  }, [globalRuleSetData]);
+  const updateFilters = async () => {
+    if (!currentProject) return;
+    const response = await updateICPRuleSet(
+      userToken,
+      currentProject.id,
+      globalRuleSetData.included_individual_title_keywords,
+      globalRuleSetData.excluded_individual_title_keywords,
+      globalRuleSetData.included_individual_industry_keywords,
+      globalRuleSetData.individual_years_of_experience_start,
+      globalRuleSetData.individual_years_of_experience_end,
+      globalRuleSetData.included_individual_skills_keywords,
+      globalRuleSetData.excluded_individual_skills_keywords,
+      globalRuleSetData.included_individual_locations_keywords,
+      globalRuleSetData.excluded_individual_locations_keywords,
+      globalRuleSetData.included_individual_generalized_keywords,
+      globalRuleSetData.excluded_individual_generalized_keywords,
+      globalRuleSetData.included_company_name_keywords,
+      globalRuleSetData.excluded_company_name_keywords,
+      globalRuleSetData.included_company_locations_keywords,
+      globalRuleSetData.excluded_company_locations_keywords,
+      globalRuleSetData.company_size_start,
+      globalRuleSetData.company_size_end,
+      globalRuleSetData.included_company_industries_keywords,
+      globalRuleSetData.excluded_company_industries_keywords,
+      globalRuleSetData.included_company_generalized_keywords,
+      globalRuleSetData.excluded_company_generalized_keywords
+    );
+  };
 
   return (
     <Drawer
@@ -65,6 +62,7 @@ export default function PersonFilterDrawer(props: { onClickSearch?: () => void }
             onClick={() => {
               props.onClickSearch && props.onClickSearch();
               setOpened(false);
+              updateFilters();
               queryClient.refetchQueries({
                 queryKey: [`query-get-individuals`],
               });

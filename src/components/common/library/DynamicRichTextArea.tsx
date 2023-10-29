@@ -82,7 +82,6 @@ function InsertControl(props: { insert: DynamicInsert }) {
 //   // return found;
 // }
 
-
 interface JSONContentItem {
   type: string;
   content?: JSONContentItem[];
@@ -126,17 +125,20 @@ function formatFields(obj: JSONContentItem, inserts: DynamicInsert[]) {
         console.error(`Could not find custom insert!`);
         continue;
       }
-
+      console.log(
+        insert.key === "custom" ? match[1].replace("custom=", "") : insert.label
+      );
       textParts.push({
         type: "text",
         text: newParts[0],
       });
       textParts.push({
         type: "text",
-        text:
+        text: `[[${
           insert.key === "custom"
             ? match[1].replace("custom=", "")
-            : insert.label,
+            : insert.label
+        }]]`,
         marks: [{ type: `insert-${insert.key}` }],
       });
     }
@@ -146,7 +148,6 @@ function formatFields(obj: JSONContentItem, inserts: DynamicInsert[]) {
       type: "text",
       text: curText === "" ? " " : curText,
     });
-
   }
 
   // Set and remove empty text nodes
@@ -154,7 +155,6 @@ function formatFields(obj: JSONContentItem, inserts: DynamicInsert[]) {
     obj.content = textParts.filter((textPart) => textPart.text !== "");
   }
 }
-
 
 function formatJSONContent(json: JSONContent, inserts: DynamicInsert[]) {
   const content = Object.values(json)[1];
@@ -209,6 +209,7 @@ export default function DynamicRichTextArea(props: {
       ...getCustomInserts(theme, inserts),
     ],
     content: props.value ?? "",
+
     onUpdate({ editor, transaction: tr }) {
       if (props.onChange) {
         // TODO: Parsing HTML via regex is slow and not the best way to do this
@@ -218,11 +219,12 @@ export default function DynamicRichTextArea(props: {
           .getHTML()
           .replace(regex, (match, insertKey, insertLabel) => {
             if (insertKey === "custom") {
-              return `[[${props.signifyCustomInsert === undefined ||
+              return `[[${
+                props.signifyCustomInsert === undefined ||
                 props.signifyCustomInsert
-                ? `custom=`
-                : ``
-                }${insertLabel}]]`;
+                  ? `custom=`
+                  : ``
+              }${insertLabel}]]`;
             } else {
               return `[[${insertKey}]]`;
             }
@@ -246,6 +248,7 @@ export default function DynamicRichTextArea(props: {
     if (!editor || !props.value) return;
     const currentSelection = editor.state.selection;
     editor.commands.setContent(props.value);
+
     editor.commands.setTextSelection(currentSelection);
 
     // Format the text area to show the inserts

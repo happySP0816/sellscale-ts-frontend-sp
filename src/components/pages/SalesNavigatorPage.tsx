@@ -125,14 +125,14 @@ export default function SalesNavigatorComponent(props: {
               true
             }
           />
-          <Tooltip label="The number of contacts to find; capped at 1,000 contacts per search." withinPortal withArrow w='40%'>
+          <Tooltip label="The number of contacts to find; capped at 2,500 contacts per search." withinPortal withArrow w='40%'>
             <NumberInput
               ml='lg'
               label="Number of contacts"
               placeholder="100"
               withAsterisk
               min={0}
-              max={1000}
+              max={2500}
               value={salesNavigatorForm.values.numberOfContacts}
               onChange={(event) => salesNavigatorForm.setFieldValue("numberOfContacts", event as number)}
               required

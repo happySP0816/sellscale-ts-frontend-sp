@@ -436,6 +436,14 @@ export type SubjectLineTemplate = {
   sellscale_generated: boolean;
 };
 
+export type SpamScoreResults = {
+  read_minutes: number;
+  read_minutes_score: number;
+  spam_word_score: number;
+  spam_words: string[];
+  total_score: number;
+}
+
 export type SalesNavigatorLaunch = {
   id: number;
   sales_navigator_config_id: number;

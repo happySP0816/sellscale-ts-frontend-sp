@@ -242,6 +242,7 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
           icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
           contactObjective: props.createPersona.contactObjective,
           contractSize: props.createPersona.contractSize,
+          template_mode: false,
         }
       );
       if (result.status === "error") {

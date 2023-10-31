@@ -16,6 +16,7 @@ type PropsType = {
     icpMatchingPrompt: string;
     contactObjective: string;
     contractSize: number;
+    templateMode: boolean;
   };
 };
 
@@ -36,6 +37,7 @@ export default function CreatePersona(props: PropsType) {
         icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
         contactObjective: props.createPersona.contactObjective,
         contractSize: props.createPersona.contractSize,
+        template_mode: props.createPersona.templateMode,
       }
     );
     if (result.status === "error") {

@@ -286,6 +286,7 @@ export interface PersonaOverview {
   lookalike_profile_3: string;
   lookalike_profile_4: string;
   lookalike_profile_5: string;
+  template_mode: boolean;
 }
 
 export interface LinkedInMessage {

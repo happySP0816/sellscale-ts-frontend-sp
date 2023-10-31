@@ -20,6 +20,8 @@ import {
   LoadingOverlay,
   Tabs,
   NumberInput,
+  SegmentedControl,
+  Box,
 } from '@mantine/core';
 import { ContextModalProps } from '@mantine/modals';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -50,6 +52,7 @@ import TextAreaWithAI from '@common/library/TextAreaWithAI';
 import displayNotification from '@utils/notificationFlow';
 import CreatePersona from '@common/persona/CreatePersona';
 import { getSinglePersona } from '@utils/requests/getPersonas';
+import { set } from 'lodash';
 
 export default function UploadProspectsModal({
   context,
@@ -77,6 +80,7 @@ export default function UploadProspectsModal({
   const [contactObjective, setContactObjective] = useState('Set up a discovery call in order to identify a pain point');
 
   const [personaContractSize, setPersonaContractSize] = useState(userData.client.contract_size);
+  const [templateMode, setTemplateMode] = useState<string>('template');
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
@@ -290,7 +294,10 @@ export default function UploadProspectsModal({
                 }}
                 onChange={(value) => {
                   // If created persona exists and is one of the existing personas, clear it
-                  if (createdPersona.length > 0 && personas.filter((personas) => personas.value === value).length > 0) {
+                  if (
+                    createdPersona.length > 0 &&
+                    personas.filter((personas) => personas.value === value).length > 0
+                  ) {
                     setPersonas(defaultPersonas.current);
                     setCreatedPersona('');
                   }
@@ -303,8 +310,6 @@ export default function UploadProspectsModal({
 
         {innerProps.mode === 'CREATE-ONLY' && (
           <Stack spacing={10}>
-            
-
             <Divider
               my={0}
               labelPosition='center'
@@ -399,6 +404,18 @@ export default function UploadProspectsModal({
                   onChange={(e) => setContactObjective(e.target.value)}
                 />
 
+                <Box>
+                  <Text fz='sm' fw={500}>Gen Mode</Text>
+                  <SegmentedControl
+                    value={templateMode}
+                    onChange={setTemplateMode}
+                    data={[
+                      { label: 'CTA-based', value: 'cta' },
+                      { label: 'Template-based', value: 'template' },
+                    ]}
+                  />
+                </Box>
+
                 <NumberInput
                   label='Annual Contract Value (ACV)'
                   value={personaContractSize}
@@ -446,6 +463,7 @@ export default function UploadProspectsModal({
             icpMatchingPrompt: icpMatchingPrompt,
             contactObjective: contactObjective,
             contractSize: personaContractSize,
+            templateMode: templateMode === 'template',
           }}
         />
 

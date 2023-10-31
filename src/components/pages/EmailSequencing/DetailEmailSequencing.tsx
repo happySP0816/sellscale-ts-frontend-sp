@@ -21,6 +21,8 @@ import {
   Title,
   Accordion,
   Loader,
+  Popover,
+  Divider,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
@@ -35,11 +37,153 @@ import { patchEmailSubjectLineTemplate } from "@utils/requests/emailSubjectLines
 import DOMPurify from "dompurify";
 import React, { FC, useEffect } from "react";
 import { useRecoilValue } from "recoil";
-import { EmailSequenceStep, SubjectLineTemplate } from "src";
+import { EmailSequenceStep, SpamScoreResults, SubjectLineTemplate } from "src";
 
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
+
+
+const SpamScorePopover: FC<{
+  subjectSpamScoreDetails: SpamScoreResults | undefined,
+  bodySpamScoreDetails: SpamScoreResults | undefined,
+}> = ({
+  subjectSpamScoreDetails,
+  bodySpamScoreDetails
+}) => {
+
+    if (!subjectSpamScoreDetails && !bodySpamScoreDetails) {
+      return (<></>)
+    }
+
+    let totalScore = ((subjectSpamScoreDetails?.total_score || 100) + (bodySpamScoreDetails?.total_score || 0)) / 2
+    let color = 'red'
+    if (totalScore > 75) {
+      color = 'green'
+    } else if (totalScore > 25) {
+      color = 'orange'
+    }
+
+    let subjectColor = 'red'
+    if (subjectSpamScoreDetails?.total_score || 0 > 75) {
+      subjectColor = 'green'
+    } else if (subjectSpamScoreDetails?.total_score || 0 > 25) {
+      subjectColor = 'orange'
+    }
+
+    let bodyColor = 'red'
+    if (bodySpamScoreDetails?.total_score || 0 > 75) {
+      bodyColor = 'green'
+    } else if (bodySpamScoreDetails?.total_score || 0 > 25) {
+      bodyColor = 'orange'
+    }
+
+    return (
+      <>
+
+        <Popover width={360} position="bottom" withArrow shadow="md" >
+          <Popover.Target>
+            <Button
+              size='compact-sm'
+              variant='outline'
+              color={color}
+            >
+              Spam Score: {totalScore}%
+            </Button>
+          </Popover.Target>
+          <Popover.Dropdown style={{ pointerEvents: 'none' }}>
+            <Flex align='center' fz='lg'>
+              <Text mr={'sm'} fw='bold' >
+                Overall Score:
+              </Text>
+              <Text color={color} fw='bold'>
+                {totalScore}
+              </Text>
+            </Flex>
+            {
+              subjectSpamScoreDetails && (
+                <>
+                  <Divider my='xs' />
+                  <Flex align='center'>
+                    <Text mr={'sm'} fw='bold'>
+                      Subject Line Score:
+                    </Text>
+                    <Text color={subjectColor} fw='bold'>
+                      {subjectSpamScoreDetails?.total_score}
+                    </Text>
+                  </Flex>
+                  <Flex>
+                    <Flex pl='md' direction='column' fz='sm' mt='2px'>
+                      <Flex>
+                        <Text>
+                          Spam words:
+                        </Text>
+                        <Text
+                          ml='sm'
+                          color={
+                            subjectSpamScoreDetails?.spam_words.length === 0 ? 'green' : 'red'
+                          }
+                          fw={'bold'}
+                        >
+                          {subjectSpamScoreDetails?.spam_words.join(', ') || 'None'}
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </Flex>
+                </>
+              )
+            }
+            <Divider my='xs' />
+            <Flex align='center'>
+              <Text mr={'sm'} fw='bold'>
+                Body Score:
+              </Text>
+              <Text color={bodyColor} fw='bold'>
+                {bodySpamScoreDetails?.total_score}
+              </Text>
+            </Flex>
+            <Flex direction='column'>
+              <Flex pl='md' direction='column' fz='sm' mt='2px'>
+                <Flex>
+                  <Text>
+                    Read time:
+                  </Text>
+                  <Text
+                    ml='sm'
+                    color={
+                      bodySpamScoreDetails?.read_minutes === 1 ? 'green' :
+                        bodySpamScoreDetails?.read_minutes === 2 ? 'orange' :
+                          'red'
+                    }
+                    fw={'bold'}
+                  >
+                    ~ {bodySpamScoreDetails?.read_minutes} minutes
+                  </Text>
+                </Flex>
+                <Flex>
+                  <Text>
+                    Spam words:
+                  </Text>
+                  <Text
+                    ml='sm'
+                    color={
+                      bodySpamScoreDetails?.spam_words.length === 0 ? 'green' : 'red'
+                    }
+                    fw={'bold'}
+                  >
+                    {bodySpamScoreDetails?.spam_words.join(', ') || 'None'}
+                  </Text>
+                </Flex>
+              </Flex>
+
+            </Flex>
+          </Popover.Dropdown>
+        </Popover>
+
+
+      </>
+    )
+  }
 
 
 const DetailEmailSequencing: FC<{
@@ -82,6 +226,10 @@ const DetailEmailSequencing: FC<{
     const [initialEmailLoading, setInitialEmailLoading] = React.useState<boolean>(false);
     const [followupEmailLoading, setFollowupEmailLoading] = React.useState<boolean>(false);
 
+    // Spam Score
+    const [subjectSpamScoreDetails, setSubjectSpamScoreDetails] = React.useState<SpamScoreResults>();
+    const [bodySpamScoreDetails, setBodySpamScoreDetails] = React.useState<SpamScoreResults>();
+
     // Trigger Generate Initial Email
     const triggerPostGenerateInitialEmail = async () => {
       if (!prospectID || !subjectLines || subjectLines.length === 0 || currentTab !== "PROSPECTED") { return; }
@@ -112,8 +260,28 @@ const DetailEmailSequencing: FC<{
             });
           }
 
-          setPreviewEmailSubject(subject_line.completion)
-          setPreviewEmailBody(email_body.completion)
+          const subjectLineSpamWords = subject_line.spam_detection_results?.spam_words || []
+          let subjectLineCompletion = subject_line.completion
+          if (subjectLineSpamWords && subjectLineSpamWords.length > 0) {
+            subjectLineSpamWords.forEach((badWord: string) => {
+              const spannedWord = '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' + badWord + '</span>'
+              subjectLineCompletion = subjectLineCompletion.replace(new RegExp(badWord, 'g'), spannedWord)
+            })
+          }
+
+          const emailBodySpamWords = email_body.spam_detection_results?.spam_words || []
+          let emailBodyCompletion = email_body.completion
+          if (emailBodySpamWords && emailBodySpamWords.length > 0) {
+            emailBodySpamWords.forEach((badWord: string) => {
+              const spannedWord = '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' + badWord + '</span>'
+              emailBodyCompletion = emailBodyCompletion.replace(new RegExp(badWord, 'g'), spannedWord)
+            })
+          }
+
+          setPreviewEmailSubject(subjectLineCompletion)
+          setSubjectSpamScoreDetails(subject_line.spam_detection_results)
+          setPreviewEmailBody(emailBodyCompletion)
+          setBodySpamScoreDetails(email_body.spam_detection_results)
         }
 
         setInitialEmailLoading(false);
@@ -150,7 +318,17 @@ const DetailEmailSequencing: FC<{
               icon: <IconX radius='sm' />,
             });
           }
+          const emailBodySpamWords = email_body.spam_detection_results?.spam_words || []
+          let emailBodyCompletion = email_body.completion
+          if (emailBodySpamWords && emailBodySpamWords.length > 0) {
+            emailBodySpamWords.forEach((badWord: string) => {
+              const spannedWord = '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' + badWord + '</span>'
+              emailBodyCompletion = emailBodyCompletion.replace(new RegExp(badWord, 'g'), spannedWord)
+            })
+          }
+
           setPreviewEmailBody(email_body.completion)
+          setBodySpamScoreDetails(email_body.spam_detection_results)
         }
 
         setFollowupEmailLoading(false);
@@ -173,6 +351,9 @@ const DetailEmailSequencing: FC<{
 
       followupEmailGenerationController = new AbortController();
       initialEmailGenerationController = new AbortController();
+
+      setSubjectSpamScoreDetails(undefined);
+      setBodySpamScoreDetails(undefined);
 
       if (currentTab === "PROSPECTED") {
         triggerPostGenerateInitialEmail();
@@ -384,7 +565,12 @@ const DetailEmailSequencing: FC<{
             </Flex>
           </Flex>
 
-
+          <Flex justify='flex-end' mt='sm'>
+            <SpamScorePopover
+              subjectSpamScoreDetails={subjectSpamScoreDetails}
+              bodySpamScoreDetails={bodySpamScoreDetails}
+            />
+          </Flex>
 
           <Box
             mt="sm"
@@ -415,7 +601,11 @@ const DetailEmailSequencing: FC<{
                           </Text>
                         </Flex>) : (
                         <Text color="gray.8" fw={500}>
-                          {previewEmailSubject}
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: DOMPurify.sanitize(previewEmailSubject as string),
+                            }}
+                          />
                         </Text>
                       )
                     }
@@ -777,7 +967,14 @@ const EmailBodyItem: React.FC<{
 
   const [loading, setLoading] = React.useState(false);
   const [editing, setEditing] = React.useState(false);
-  const [sequence, _setSequence] = React.useState<string>(template.template || '');
+
+  // Span magic on the template.template
+  // Replace all [[ and ]] with span tags
+  let templateBody = template.template || '';
+  templateBody = templateBody.replace(new RegExp('\\[\\[', 'g'), '<span style="color: rgb(148,0,211); text-transform: uppercase; background: rgba(238,130,238,0.5); padding: 0 4px 0 4px; border-radius: 3px">')
+  templateBody = templateBody.replace(new RegExp('\\]\\]', 'g'), '</span>')
+
+  const [sequence, _setSequence] = React.useState<string>(templateBody);
   const sequenceRichRaw = React.useRef<JSONContent | string>(template.template || '');
 
   const [title, setTitle] = React.useState<string>(template.title || '')
@@ -884,7 +1081,7 @@ const EmailBodyItem: React.FC<{
 
   useEffect(() => {
     setEditing(false);
-    _setSequence(template.template || '')
+    _setSequence(templateBody)
     sequenceRichRaw.current = template.template || '';
   }, [template])
 
@@ -1042,7 +1239,7 @@ const EmailBodyItem: React.FC<{
                   mr='sm'
                   color='red'
                   onClick={() => {
-                    _setSequence(template.template || '');
+                    _setSequence(templateBody || '');
                     sequenceRichRaw.current = template.template || '';
                     setEditing(false);
                   }}
@@ -1072,7 +1269,7 @@ const EmailBodyItem: React.FC<{
               <Text fz="sm">
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(sequence),
+                    __html: DOMPurify.sanitize(sequence as string),
                   }}
                 />
               </Text>

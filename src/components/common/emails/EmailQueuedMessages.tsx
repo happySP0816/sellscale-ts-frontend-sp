@@ -1,15 +1,19 @@
 import { userTokenState } from "@atoms/userAtoms";
-import { Badge, Box, Button, Flex, HoverCard, Text, TextInput } from "@mantine/core";
+import { ActionIcon, Badge, Box, Button, Flex, HoverCard, Text, TextInput } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import EmailQueuedMessageItem from "./EmailQueuedMessageItem";
 import { currentProjectState } from "@atoms/personaAtoms";
 import { getScheduledEmails } from "@utils/requests/getScheduledEmails";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DataTable } from "mantine-datatable";
 import { Prospect } from "src";
-import { IconSearch } from "@tabler/icons";
+import { IconEdit, IconPencil, IconSearch } from "@tabler/icons";
 import DOMPurify from "dompurify";
+import { DateTimePicker } from "@mantine/dates";
+import { patchScheduledEmails } from "@utils/requests/patchScheduledEmail";
+import { showNotification } from "@mantine/notifications";
+import { useForceUpdate } from "@mantine/hooks";
 
 export default function EmailQueuedMessages(props: { all?: boolean }) {
   const userToken = useRecoilValue(userTokenState);
@@ -17,9 +21,11 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
   const [messages, setMessages] = useState<any[]>([]);
   const [search, setSearch] = useState<string>('');
 
+  const forceUpdate = useForceUpdate();
+
   useEffect(() => {
     if (search === '') {
-      setMessages(data);
+      setMessages(data || []);
       return;
     }
     const filtered = messages.filter((message: any) => {
@@ -48,10 +54,39 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
       })
       setMessages(messages);
 
-      return messages
+      console.log(messages)
+
+      return messages as any[]
     },
     refetchOnWindowFocus: false,
   });
+
+  const triggerModifyScheduledDate = async (scheduleID: number, newTime: Date | string) => {
+
+    const result = await patchScheduledEmails(
+      userToken,
+      scheduleID,
+      newTime
+    )
+    if (result.status === 'success') {
+      showNotification({
+        title: 'Updated',
+        message: 'Successfully updated the scheduled date and future dates',
+        color: 'green',
+        autoClose: 5000,
+      });
+      refetch()
+      forceUpdate();
+    } else {
+      showNotification({
+        title: 'Error',
+        message: result.message,
+        color: 'red',
+        autoClose: 5000,
+      });
+    }
+
+  }
 
   return (
     <Flex w='100%' align='left' justify={'center'} direction='column'>
@@ -69,7 +104,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
         loaderColor="purple"
         fetching={isFetching}
         noRecordsText="No emails queued for outreach... yet!"
-        records={messages ?? []}
+        records={messages}
         highlightOnHover
         columns={[
           {
@@ -87,7 +122,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
           {
             accessor: "date_scheduled",
             title: "Date Scheduled",
-            render: ({ date_scheduled }) => {
+            render: ({ date_scheduled, id }) => {
               // Convert the time string to SDRs timezone
               const date = new Date(date_scheduled);
               const month = date.toLocaleString('default', { month: 'long' });
@@ -95,13 +130,55 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
               const hours = date.getHours();
               const minutes = date.getMinutes();
 
+              // Get today's date
+              const today = new Date();
+
+              const [value, setValue] = useState<Date>(date);
+
+              useEffect(() => {
+                setValue(date)
+              }, [date_scheduled])
+
               const formattedTime = `${hours % 12 || 12}:${minutes.toString().padStart(2, '0')}${hours >= 12 ? 'PM' : 'AM'}`;
               const formattedDate = `${month} ${day} - ${formattedTime}`;
 
               return (
-                <Text>
-                  {formattedDate}
-                </Text>
+                <>
+                  <>
+                    <DateTimePicker
+                      value={value}
+                      onChange={(value) => {
+                        if (!value) {
+                          setValue(date)
+                        }
+                        setValue(value as Date)
+                      }}
+                      submitButtonProps={{
+                        onClick: () => {
+                          triggerModifyScheduledDate(id, value)
+                        }
+                      }}
+                      popoverProps={{
+                        withArrow: true,
+                        arrowPosition: 'center',
+                        withinPortal: true
+                      }}
+                      defaultValue={date}
+                      hideOutsideDates
+                      valueFormat={"MMMM D, YYYY - h:mm A"}
+                      maw={300}
+                      minDate={today}
+                    />
+                  </>
+                  {/* <Flex align='center'>
+                    <Text mr='4px'>
+                      {formattedDate}
+                    </Text>
+                    <ActionIcon>
+                      <IconPencil size={12} />
+                    </ActionIcon>
+                  </Flex> */}
+                </>
               )
             }
           },

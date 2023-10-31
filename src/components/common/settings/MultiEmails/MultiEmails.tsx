@@ -10,13 +10,16 @@ import {
   TextInput,
   Select,
   Tooltip,
+  Flex,
 } from "@mantine/core";
 import { FC, useEffect, useState } from "react";
 import { NylasData } from "./MutlEmails.types";
-import { IconPlus } from "@tabler/icons";
+import { IconPlus, IconSend } from "@tabler/icons";
 import { useDisclosure } from "@mantine/hooks";
-import { useRecoilState } from "recoil";
-import { userDataState } from "@atoms/userAtoms";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { getSmartleadWarmup } from "@utils/requests/getSmartleadWarmup";
+import { DataTable } from "mantine-datatable";
 
 
 interface EmailBankItem {
@@ -31,11 +34,13 @@ interface EmailBankItem {
 
 
 const MultiEmails = () => {
+  const userToken = useRecoilValue(userTokenState);
   const [opened, { open, toggle, close }] = useDisclosure(false);
   const [emailInput, setEmailInput] = useState("");
   const [emails, setEmails] = useState<EmailBankItem[]>([]);
 
   const [userData, setUserData] = useRecoilState(userDataState);
+  const [smartleadWarmup, setSmarleadWarmup] = useState<any>(null);
 
   const [selectItem, setSelectItem] = useState<null | string>(null);
   // const onOpenModal = () => {
@@ -56,10 +61,20 @@ const MultiEmails = () => {
   //   close();
   // };
 
+  const triggerGetSmartleadWarmup = async () => {
+    const result = await getSmartleadWarmup(userToken);
+    if (result.status == 'success') {
+      const data = result.data;
+      const inboxes = data.inboxes;
+      setSmarleadWarmup(inboxes);
+    }
+  }
+
   useEffect(() => {
     if (userData.emails) {
       setEmails(userData.emails)
     }
+    triggerGetSmartleadWarmup()
   }, [])
 
   return (
@@ -109,10 +124,75 @@ const MultiEmails = () => {
           }
           )}
 
-          <Button leftIcon={<IconPlus />} onClick={() => {}} disabled>
+          <Button leftIcon={<IconPlus />} onClick={() => { }} disabled>
             Add more - Coming Soon
           </Button>
+
+          {
+            smartleadWarmup && smartleadWarmup.length > 0 && (
+              <DataTable
+                records={smartleadWarmup}
+                columns={[
+                  {
+                    accessor: "from_email",
+                    title: "Inbox",
+                    // @ts-ignore
+                    render: ({ from_email }) => {
+                      return (
+                        <Flex direction='row' align='center'>
+                          <IconSend size={14} />
+                          <Text ml={4}>{from_email}</Text>
+                        </Flex>
+                      )
+                    }
+                  },
+                  {
+                    accessor: "limit",
+                    title: "Daily Limit",
+                    // @ts-ignore
+                    render: ({ daily_sent_count, message_per_day }) => {
+                      return (
+                        <Text>{daily_sent_count} / {message_per_day}</Text>
+                      )
+                    }
+                  },
+                  {
+                    accessor: "email_warmup_details",
+                    title: "Warmup Enabled",
+                    // @ts-ignore
+                    render: ({ email_warmup_details }) => {
+                      const status = email_warmup_details.status;
+                      return (
+                        <Badge
+                          color={status === "ACTIVE" ? "green" : "red"}
+                        >
+                          {status}
+                        </Badge>
+                      )
+                    }
+                  },
+                  {
+                    accessor: "email_warmup_details",
+                    title: "Reputation",
+                    // @ts-ignore
+                    render: ({ email_warmup_details }) => {
+                      const reputation = email_warmup_details.warmup_reputation;
+
+                      return (
+                        <Badge
+                          color={reputation > 80 ? "green" : reputation > 60 ? "yellow" : "red"}
+                        >
+                          {reputation}%
+                        </Badge>
+                      )
+                    }
+                  }
+                ]}
+              />
+            )
+          }
         </Stack>
+
       </Paper>
 
       {/* <Modal opened={opened} onClose={close} title="Add Email">

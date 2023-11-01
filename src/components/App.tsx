@@ -52,6 +52,7 @@ import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
 import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
 import { useViewportSize } from "@mantine/hooks";
 import Confetti from 'react-confetti';
+import LiTemplateModal from "@modals/LiTemplateModal";
 
 export default function App() {
   // Site light or dark mode
@@ -154,24 +155,20 @@ export default function App() {
   }, [location]);
 
   return (
-    <ColorSchemeProvider
-      colorScheme={colorScheme}
-      toggleColorScheme={toggleColorScheme}
-    >
+    <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider
         theme={{
           colorScheme: colorScheme,
           other: {
-            charcoal: "#333333",
+            charcoal: '#333333',
             primaryHeadingSize: 45,
             fontWeights: {
               bold: 700,
               extraBold: 900,
             },
           },
-          fontFamily: "Poppins, sans-serif",
-          fontFamilyMonospace:
-            "source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace",
+          fontFamily: 'Poppins, sans-serif',
+          fontFamilyMonospace: 'source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace',
         }}
         withGlobalStyles
         withNormalizeCSS
@@ -206,13 +203,14 @@ export default function App() {
               confirm: ConfirmModal,
               createBumpFramework: CreateBumpFrameworkContextModal,
               cloneBumpFramework: CloneBumpFrameworkContextModal,
+              liTemplate: LiTemplateModal,
             }}
             modalProps={{
               closeOnClickOutside: false,
-              size: "xl",
+              size: 'xl',
             }}
           >
-            <Notifications position="top-right" />
+            <Notifications position='top-right' />
             <LoadingOverlay visible={loading} overlayBlur={4} />
             <Layout>
               {/* Outlet is where react-router will render child routes */}

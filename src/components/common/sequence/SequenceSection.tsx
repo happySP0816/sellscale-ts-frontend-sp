@@ -133,6 +133,7 @@ import { CtaSection } from "./CtaSection";
 import CTAGenerator from "./CTAGenerator";
 import { deterministicMantineColor } from '@utils/requests/utils';
 import moment from 'moment';
+import { getLiTemplates } from "@utils/requests/linkedinTemplates";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1156,6 +1157,16 @@ function IntroMessageSection(props: {
     setActiveTab("ctas");
   };
 
+  const { data: templates, isFetching: isFetchingTemplates } = useQuery({
+    queryKey: [`query-get-li-templates`],
+    queryFn: async () => {
+      const response = await getLiTemplates(userToken, currentProject!.id);
+      return response.status === 'success' ? response.data as Record<string, any>[] : [];
+    },
+    refetchOnWindowFocus: false,
+    enabled: !!currentProject && !!currentProject.template_mode,
+  });
+
   const getIntroMessage = async (prospectId: number, forceRegenerate: boolean = false) => {
     if (!currentProject) return null;
     setLoading(true);
@@ -1219,52 +1230,53 @@ function IntroMessageSection(props: {
 
   if (!currentProject) return <></>;
   return (
-    <Stack ml="xl" spacing={0}>
-      <Group position="apart">
+    <Stack ml='xl' spacing={0}>
+      <Group position='apart'>
         <Group>
           <Title order={3}>Invite Message</Title>
           {/* {ctasItemsCount !== undefined && (
             <Badge color="blue" fw={500}>{ctasItemsCount} CTAs Active</Badge>
           )} */}
         </Group>
-        <VoiceSelect
-          personaId={currentProject.id}
-          onChange={(voice) => {}}
-          onFinishLoading={(voices) => {}}
-          autoSelect
-        />
+        {!currentProject.template_mode && (
+          <VoiceSelect
+            personaId={currentProject.id}
+            onChange={(voice) => {}}
+            onFinishLoading={(voices) => {}}
+            autoSelect
+          />
+        )}
       </Group>
       <Box my={5}>
-        <Text fz="xs" c="dimmed">
-          Your initial outreach message on LinkedIn, this message has a 300
-          character limit.
+        <Text fz='xs' c='dimmed'>
+          Your initial outreach message on LinkedIn, this message has a 300 character limit.
         </Text>
       </Box>
-      <Stack pt={20} spacing={5} sx={{ position: "relative" }}>
+      <Stack pt={20} spacing={5} sx={{ position: 'relative' }}>
         <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
         {noProspectsFound ? (
           <Box
             sx={{
-              border: "1px dashed #339af0",
-              borderRadius: "0.5rem",
+              border: '1px dashed #339af0',
+              borderRadius: '0.5rem',
             }}
-            p="sm"
+            p='sm'
             mih={100}
           >
             <Center h={100}>
               <Stack>
-                <Text ta="center" c="dimmed" fs="italic" fz="sm">
+                <Text ta='center' c='dimmed' fs='italic' fz='sm'>
                   No prospects found to show example message.
                 </Text>
                 <Center>
                   <Box>
                     <Button
-                      variant="filled"
-                      color="teal"
-                      radius="md"
-                      ml="auto"
-                      mr="0"
-                      size="xs"
+                      variant='filled'
+                      color='teal'
+                      radius='md'
+                      ml='auto'
+                      mr='0'
+                      size='xs'
                       rightIcon={<IconUpload size={14} />}
                       onClick={() => setUploadDrawerOpened(true)}
                     >
@@ -1277,16 +1289,16 @@ function IntroMessageSection(props: {
           </Box>
         ) : (
           <Box>
-            <Group position="apart" pb="0.3125rem">
-              <Text fz="sm" fw={500} c="dimmed">
+            <Group position='apart' pb='0.3125rem'>
+              <Text fz='sm' fw={500} c='dimmed'>
                 EXAMPLE INVITE MESSAGE:
               </Text>
               <Group>
                 <Button
-                  size="xs"
-                  variant="subtle"
+                  size='xs'
+                  variant='subtle'
                   compact
-                  leftIcon={<IconReload size="0.75rem" />}
+                  leftIcon={<IconReload size='0.75rem' />}
                   onClick={() => {
                     if (prospectId) {
                       getIntroMessage(prospectId, true).then((msg) => {
@@ -1318,25 +1330,19 @@ function IntroMessageSection(props: {
             </Group>
             <Box
               sx={{
-                border: "1px dashed #339af0",
-                borderRadius: "0.5rem",
+                border: '1px dashed #339af0',
+                borderRadius: '0.5rem',
               }}
-              p="sm"
+              p='sm'
               h={250}
             >
               {message && (
                 <LiExampleInvitation
                   message={message}
                   startHovered={
-                    activeTab === "personalization" || hoveredPersonSettingsBtn
-                      ? true
-                      : undefined
+                    activeTab === 'personalization' || hoveredPersonSettingsBtn ? true : undefined
                   }
-                  endHovered={
-                    activeTab === "ctas" || hoveredYourCTAsBtn
-                      ? true
-                      : undefined
-                  }
+                  endHovered={activeTab === 'ctas' || hoveredYourCTAsBtn ? true : undefined}
                   onClickStart={openPersonalizationSettings}
                   onClickEnd={openCTASettings}
                   onHoveredEnd={(hovered) => setHoveredCTA(hovered)}
@@ -1346,123 +1352,206 @@ function IntroMessageSection(props: {
           </Box>
         )}
 
-        <Tabs
-          value={activeTab}
-          onTabChange={setActiveTab}
-          pt="sm"
-          variant="pills"
-          keepMounted={true}
-          radius="md"
-          defaultValue="none"
-          allowTabDeactivation
-        >
-          <Tabs.List>
-            <Tabs.Tab
-              ref={refPersonSettingsBtn}
-              value="personalization"
-              color="teal.5"
-              rightSection={
-                <>
-                  {personalizationItemsCount ? (
-                    <Badge
-                      w={16}
-                      h={16}
-                      sx={{ pointerEvents: "none" }}
-                      variant="filled"
-                      size="xs"
-                      p={0}
-                      color="teal.6"
+        {currentProject.template_mode ? (
+          <>
+            {isFetchingTemplates ? (
+              <Box>
+                <Loader
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                />
+              </Box>
+            ) : (
+              <Stack>
+                <Stack>
+                  {templates?.map((template, index) => (
+                    <Paper key={index} p='md' mih={80} sx={{ position: 'relative' }} withBorder>
+                      <Badge
+                        size='lg'
+                        sx={{
+                          position: 'absolute',
+                          top: 10,
+                          right: 10,
+                        }}
+                      >
+                        {template.times_used
+                          ? (template.times_accepted / template.times_used) * 100
+                          : 0}
+                        %
+                      </Badge>
+                      <Button
+                        variant='subtle'
+                        radius='xl'
+                        size='sm'
+                        compact
+                        sx={{
+                          position: 'absolute',
+                          bottom: 10,
+                          right: 10,
+                        }}
+                        onClick={() => {
+                          openContextModal({
+                            modal: 'liTemplate',
+                            title: 'Edit Template',
+                            innerProps: {
+                              mode: 'EDIT',
+                              editProps: {
+                                templateId: template.id,
+                                message: template.message,
+                                active: template.active,
+                              },
+                            },
+                          });
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <TextWithNewline style={{ fontSize: '0.8em' }}>{template.message}</TextWithNewline>
+                    </Paper>
+                  ))}
+                </Stack>
+                <Center>
+                  <Stack spacing={5}>
+                    <Button
+                      variant='subtle'
+                      radius='md'
+                      compact
+                      onClick={() => {
+                        openContextModal({
+                          modal: 'liTemplate',
+                          title: 'Create Template',
+                          innerProps: {
+                            mode: 'CREATE',
+                          },
+                        });
+                      }}
                     >
-                      {personalizationItemsCount}
-                    </Badge>
-                  ) : (
-                    <></>
-                  )}
-                </>
-              }
-              sx={(theme) => ({
-                "&[data-active]": {
-                  backgroundColor: theme.colors.teal[0] + "!important",
-                  borderRadius: theme.radius.md + "!important",
-                  color: theme.colors.teal[8] + "!important",
-                },
-                border: "solid 1px " + theme.colors.teal[5] + "!important",
-              })}
-            >
-              Edit Personalization
-            </Tabs.Tab>
-            <Tabs.Tab
-              ref={refYourCTAsBtn}
-              value="ctas"
-              color="blue.4"
-              rightSection={
-                <>
-                  {ctasItemsCount ? (
-                    <Badge
-                      w={16}
-                      h={16}
-                      sx={{ pointerEvents: "none" }}
-                      variant="filled"
-                      size="xs"
-                      p={0}
-                      color="blue.5"
-                    >
-                      {ctasItemsCount}
-                    </Badge>
-                  ) : (
-                    <></>
-                  )}
-                </>
-              }
-              sx={(theme) => ({
-                "&[data-active]": {
-                  backgroundColor: theme.colors.blue[0] + "!important",
-                  borderRadius: theme.radius.md + "!important",
-                  color: theme.colors.blue[8] + "!important",
-                },
-                border: "solid 1px " + theme.colors.blue[4] + "!important",
-              })}
-            >
-              Edit CTAs
-            </Tabs.Tab>
-            {/* <Tabs.Tab value="voice" ml="auto">
+                      Add Template
+                    </Button>
+                  </Stack>
+                </Center>
+              </Stack>
+            )}
+          </>
+        ) : (
+          <Tabs
+            value={activeTab}
+            onTabChange={setActiveTab}
+            pt='sm'
+            variant='pills'
+            keepMounted={true}
+            radius='md'
+            defaultValue='none'
+            allowTabDeactivation
+          >
+            <Tabs.List>
+              <Tabs.Tab
+                ref={refPersonSettingsBtn}
+                value='personalization'
+                color='teal.5'
+                rightSection={
+                  <>
+                    {personalizationItemsCount ? (
+                      <Badge
+                        w={16}
+                        h={16}
+                        sx={{ pointerEvents: 'none' }}
+                        variant='filled'
+                        size='xs'
+                        p={0}
+                        color='teal.6'
+                      >
+                        {personalizationItemsCount}
+                      </Badge>
+                    ) : (
+                      <></>
+                    )}
+                  </>
+                }
+                sx={(theme) => ({
+                  '&[data-active]': {
+                    backgroundColor: theme.colors.teal[0] + '!important',
+                    borderRadius: theme.radius.md + '!important',
+                    color: theme.colors.teal[8] + '!important',
+                  },
+                  border: 'solid 1px ' + theme.colors.teal[5] + '!important',
+                })}
+              >
+                Edit Personalization
+              </Tabs.Tab>
+              <Tabs.Tab
+                ref={refYourCTAsBtn}
+                value='ctas'
+                color='blue.4'
+                rightSection={
+                  <>
+                    {ctasItemsCount ? (
+                      <Badge
+                        w={16}
+                        h={16}
+                        sx={{ pointerEvents: 'none' }}
+                        variant='filled'
+                        size='xs'
+                        p={0}
+                        color='blue.5'
+                      >
+                        {ctasItemsCount}
+                      </Badge>
+                    ) : (
+                      <></>
+                    )}
+                  </>
+                }
+                sx={(theme) => ({
+                  '&[data-active]': {
+                    backgroundColor: theme.colors.blue[0] + '!important',
+                    borderRadius: theme.radius.md + '!important',
+                    color: theme.colors.blue[8] + '!important',
+                  },
+                  border: 'solid 1px ' + theme.colors.blue[4] + '!important',
+                })}
+              >
+                Edit CTAs
+              </Tabs.Tab>
+              {/* <Tabs.Tab value="voice" ml="auto">
               Train Your AI
             </Tabs.Tab> */}
-          </Tabs.List>
+            </Tabs.List>
 
-          <Tabs.Panel value="personalization">
-            <PersonalizationSection
-              blocklist={currentProject.transformer_blocklist_initial ?? []}
-              onItemsChange={async (items) => {
-                setPersonalizationItemsCount(
-                  items.filter((x: any) => x.checked).length
-                );
+            <Tabs.Panel value='personalization'>
+              <PersonalizationSection
+                blocklist={currentProject.transformer_blocklist_initial ?? []}
+                onItemsChange={async (items) => {
+                  setPersonalizationItemsCount(items.filter((x: any) => x.checked).length);
 
-                // Update transformer blocklist
-                const result = await updateInitialBlocklist(
-                  userToken,
-                  currentProject.id,
-                  items.filter((x) => !x.checked).map((x) => x.id)
-                );
+                  // Update transformer blocklist
+                  const result = await updateInitialBlocklist(
+                    userToken,
+                    currentProject.id,
+                    items.filter((x) => !x.checked).map((x) => x.id)
+                  );
 
-                setCurrentProject(
-                  await getFreshCurrentProject(userToken, currentProject.id)
-                );
-              }}
-            />
-          </Tabs.Panel>
-          <Tabs.Panel value="ctas">
-            <CtaSection
-              onCTAsLoaded={(data) => {
-                setCtasItemsCount(data.filter((x: any) => x.active).length);
-              }}
-              outlineCTA={hoveredCTA ? messageMetaData.cta : undefined}
-            />
-          </Tabs.Panel>
-          {/* <Tabs.Panel value="voice">
+                  setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
+                }}
+              />
+            </Tabs.Panel>
+            <Tabs.Panel value='ctas'>
+              <CtaSection
+                onCTAsLoaded={(data) => {
+                  setCtasItemsCount(data.filter((x: any) => x.active).length);
+                }}
+                outlineCTA={hoveredCTA ? messageMetaData.cta : undefined}
+              />
+            </Tabs.Panel>
+            {/* <Tabs.Panel value="voice">
             <VoicesSection />
           </Tabs.Panel> */}
-        </Tabs>
+          </Tabs>
+        )}
       </Stack>
     </Stack>
   );

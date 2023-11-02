@@ -71,7 +71,7 @@ export default function LiTemplateModal({
     },
   });
 
-  const [debouncedMessage] = useDebouncedValue(form.values.message, 500);
+  const [debouncedMessage] = useDebouncedValue(form.values.message, 1000);
 
   useDidUpdate(() => {
     (async () => {

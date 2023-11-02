@@ -125,9 +125,7 @@ function formatFields(obj: JSONContentItem, inserts: DynamicInsert[]) {
         console.error(`Could not find custom insert!`);
         continue;
       }
-      console.log(
-        insert.key === "custom" ? match[1].replace("custom=", "") : insert.label
-      );
+
       textParts.push({
         type: "text",
         text: newParts[0],
@@ -146,7 +144,7 @@ function formatFields(obj: JSONContentItem, inserts: DynamicInsert[]) {
     // Add the remaining text to the parts
     textParts.push({
       type: "text",
-      text: curText === "" ? " " : curText,
+      text: curText,
     });
   }
 

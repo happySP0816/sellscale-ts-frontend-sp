@@ -54,9 +54,6 @@ function addCustomInsert(theme: MantineTheme, insert: DynamicInsert) {
           "data-button": true,
           "data-insert-key": insert.key,
           "data-insert-color": insert.color,
-          // style: `position: relative; background-color: ${
-          //   theme.colors[insert.color][0]
-          // }; color: ${theme.colors[insert.color][5]}`,
         }),
         [
           "div",

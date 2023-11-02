@@ -210,59 +210,21 @@ export default function DynamicRichTextArea(props: {
 
     onUpdate({ editor, transaction: tr }) {
       if (props.onChange) {
-        // TODO: Parsing HTML via regex is slow and not the best way to do this
-        const regex =
-          /<button.+?class="dynamic-insert".+?data-insert-key="(.+?)" .+? name="insert-label-span">(.+?)<\/span>.+?<\/button>/gm;
-        const convertedHTML = editor
-          .getHTML()
-          .replace(regex, (match, insertKey, insertLabel) => {
-            if (insertKey === "custom") {
-              return `[[${
-                props.signifyCustomInsert === undefined ||
-                props.signifyCustomInsert
-                  ? `custom=`
-                  : ``
-              }${insertLabel}]]`;
-            } else {
-              return `[[${insertKey}]]`;
-            }
-          });
+        const convertedHTML = editor.getHTML()
 
         props.onChange(convertedHTML, editor.getJSON());
       }
 
       // Format the text area to show the inserts
       setTimeout(() => {
-        editor.commands.setContent(
-          formatJSONContent(editor.getJSON(), inserts)
-        );
+        // editor.commands.setContent(
+        //   formatJSONContent(editor.getJSON(), inserts)
+        // );
         editor.commands.setTextSelection(tr.selection);
       });
     },
   });
 
-  // If value updates, update the contents accordingly
-  useEffect(() => {
-    if (!editor || !props.value) return;
-    const currentSelection = editor.state.selection;
-    editor.commands.setContent(props.value);
-
-    editor.commands.setTextSelection(currentSelection);
-
-    // Format the text area to show the inserts
-    setTimeout(() => {
-      if (!editor) return;
-      const currentSelection = editor.state.selection;
-      editor.commands.setContent(formatJSONContent(editor.getJSON(), inserts));
-      editor.commands.setTextSelection(currentSelection);
-    });
-  }, [props.value]);
-
-  // On initial load, format the text area to show the inserts
-  useEffect(() => {
-    if (!editor) return;
-    editor.commands.setContent(formatJSONContent(editor.getJSON(), inserts));
-  }, [editor]);
 
   return (
     <RichTextEditor

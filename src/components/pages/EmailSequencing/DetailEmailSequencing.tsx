@@ -1013,10 +1013,6 @@ const SubjectLineItem: React.FC<{
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(
                   editedSubjectLine
-                    .replace(
-                      /\[\[/g,
-                      '<span style="color: rgb(148,0,211); text-transform: uppercase; background: rgba(238,130,238,0.5); padding: 0 4px 0 4px; border-radius: 3px">'
-                    )
                     .replace(/\]\]/g, "</span>")
                 ),
               }}
@@ -1044,11 +1040,6 @@ const EmailBodyItem: React.FC<{
   // Span magic on the template.template
   // Replace all [[ and ]] with span tags
   let templateBody = template.template || "";
-  templateBody = templateBody.replace(
-    new RegExp("\\[\\[", "g"),
-    '<span style="color: rgb(148,0,211); text-transform: uppercase; background: rgba(238,130,238,0.5); padding: 0 4px 0 4px; border-radius: 3px">'
-  );
-  templateBody = templateBody.replace(new RegExp("\\]\\]", "g"), "</span>");
 
   const [sequence, _setSequence] = React.useState<string>(templateBody);
   const sequenceRichRaw = React.useRef<JSONContent | string>(

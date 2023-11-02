@@ -21,6 +21,8 @@ export async function updateLiTemplate(
   active?: boolean,
   times_used?: number,
   times_accepted?: number,
+  research_points?: string[],
+  additional_instructions?: string,
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/archetype/${archetypeId}/li_template`, {
     method: 'PATCH',
@@ -34,6 +36,8 @@ export async function updateLiTemplate(
       active,
       times_used,
       times_accepted,
+      research_points,
+      additional_instructions,
     }),
   });
 
@@ -46,6 +50,8 @@ export async function createLiTemplate(
   archetypeId: number,
   message: string,
   sellscale_generated: boolean,
+  research_points: string[],
+  additional_instructions: string
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/archetype/${archetypeId}/li_template`, {
     method: 'POST',
@@ -56,6 +62,8 @@ export async function createLiTemplate(
     body: JSON.stringify({
       message,
       sellscale_generated,
+      research_points,
+      additional_instructions,
     }),
   });
 
@@ -80,4 +88,29 @@ export async function deleteLiTemplate(
   });
 
   return await processResponse(response);
+}
+
+
+export async function detectLiTemplateResearch(
+  userToken: string,
+  archetypeId: number,
+  template_id?: number,
+  template_str?: string,
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/client/archetype/${archetypeId}/li_template/detect_research`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        template_id,
+        template_str,
+      }),
+    }
+  );
+
+  return await processResponse(response, 'data');
 }

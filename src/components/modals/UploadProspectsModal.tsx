@@ -80,7 +80,7 @@ export default function UploadProspectsModal({
   const [contactObjective, setContactObjective] = useState('Set up a discovery call in order to identify a pain point');
 
   const [personaContractSize, setPersonaContractSize] = useState(userData.client.contract_size);
-  const [templateMode, setTemplateMode] = useState<string>('template');
+  const [templateMode, setTemplateMode] = useState<string>('cta');
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {

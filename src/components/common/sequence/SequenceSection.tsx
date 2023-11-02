@@ -1403,6 +1403,8 @@ function IntroMessageSection(props: {
                                 templateId: template.id,
                                 message: template.message,
                                 active: template.active,
+                                humanFeedback: template.additional_instructions,
+                                researchPoints: template.research_points,
                               },
                             },
                           });
@@ -1410,7 +1412,11 @@ function IntroMessageSection(props: {
                       >
                         Edit
                       </Button>
-                      <TextWithNewline style={{ fontSize: '0.8em' }}>{template.message}</TextWithNewline>
+                      <Box mr={40}>
+                        <TextWithNewline style={{ fontSize: '0.8em' }}>
+                          {template.message}
+                        </TextWithNewline>
+                      </Box>
                     </Paper>
                   ))}
                 </Stack>
@@ -1573,6 +1579,7 @@ function LiExampleInvitation(props: {
   const userData = useRecoilValue(userDataState);
   const [liSDR, setLiSDR] = useState<any>();
   const [showFullMessage, setShowFullMessage] = useState(true);
+  const currentProject = useRecoilValue(currentProjectState);
 
   let { hovered: _startHovered, ref: startRef } = useHover();
   let { hovered: _endHovered, ref: endRef } = useHover();
@@ -1636,6 +1643,12 @@ function LiExampleInvitation(props: {
   }
 
   let startMessage = message.replace(endMessage, "");
+
+  // Don't split for template mode
+  if(currentProject?.template_mode){
+    startMessage = message;
+    endMessage = "";
+  }
 
   let cutEndMessage = endMessage;
   let cutStartMessage = startMessage;
@@ -2858,10 +2871,29 @@ function FrameworkSection(props: {
   );
 }
 
+export const RESEARCH_POINTS = [
+  'LINKEDIN_BIO_SUMMARY',
+  'LIST_OF_PAST_JOBS',
+  'YEARS_OF_EXPERIENCE',
+  'CURRENT_EXPERIENCE_DESCRIPTION',
+  'COMMON_EDUCATION',
+  'RECENT_RECOMMENDATIONS',
+  'RECENT_PATENTS',
+  'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB',
+  'CUSTOM',
+  'CURRENT_JOB_DESCRIPTION',
+  'CURRENT_JOB_SPECIALTIES',
+  'CURRENT_JOB_INDUSTRY',
+  'SERP_NEWS_SUMMARY',
+  'SERP_NEWS_SUMMARY_NEGATIVE',
+  'GENERAL_WEBSITE_TRANSFORMER',
+];
+
 export const PersonalizationSection = (props: {
   blocklist: string[];
   onItemsChange: (items: any[]) => void;
   onChanged?: () => void;
+  title?: string;
 }) => {
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
@@ -3091,50 +3123,39 @@ export const PersonalizationSection = (props: {
   }
 
   return (
-    <Flex direction="column" pt="md">
-      <Card shadow="md" radius={"md"} mb={"1rem"}>
-        <Group position="apart">
+    <Flex direction='column'>
+      <Card shadow='md' radius={'md'} mb={'1rem'}>
+        <Group position='apart'>
           <Box>
             <Title fw={300} order={4}>
-              Acceptance Rate by Personalization
+              {props.title ?? 'Acceptance Rate by Personalization'}
             </Title>
           </Box>
-          <Box sx={{ textAlign: "right" }} ml="auto" pb="sm">
-            <Badge
-              leftSection={<IconCircle size="0.7rem" />}
-              color="grape"
-              size="xs"
-            >
+          <Box sx={{ textAlign: 'right' }} ml='auto' pb='sm'>
+            <Badge leftSection={<IconCircle size='0.7rem' />} color='grape' size='xs'>
               Account Data
             </Badge>
             <br />
-            <Badge
-              leftSection={<IconCircle size="0.7rem" />}
-              color="green"
-              mt="xs"
-              size="xs"
-            >
+            <Badge leftSection={<IconCircle size='0.7rem' />} color='green' mt='xs' size='xs'>
               Contact Data
             </Badge>
           </Box>
         </Group>
         <Checkbox
           checked={allItems.every((x) => x.checked)}
-          label={"Select All Frameworks"}
-          mb="md"
+          label={'Select All Frameworks'}
+          mb='md'
           onClick={(event) => markAll(event.currentTarget.checked)}
         />
-        <Flex direction={"column"} gap={"0.5rem"}>
+        <Flex direction={'column'} gap={'0.5rem'}>
           {allItems.map((item) => (
             <ProcessBar
               id={item.id}
               title={item.title}
               percent={item.accepted || 0}
               checked={item.checked}
-              onPressItem={
-                item.type === "PROSPECT" ? setProfileChecked : setCompanyChecked
-              }
-              color={item.type === "PROSPECT" ? "teal" : "grape"}
+              onPressItem={item.type === 'PROSPECT' ? setProfileChecked : setCompanyChecked}
+              color={item.type === 'PROSPECT' ? 'teal' : 'grape'}
             />
           ))}
         </Flex>

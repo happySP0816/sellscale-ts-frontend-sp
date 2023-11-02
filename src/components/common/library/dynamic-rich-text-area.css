@@ -1,38 +1,13 @@
-
 .dynamic-insert {
-  -webkit-tap-highlight-color: transparent;
-  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
-  cursor: pointer;
-  border: 0;
   padding: 0;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  -ms-appearance: none;
-  appearance: none;
-  font-size: 0.7rem;
-  background-color: transparent;
-  text-align: left;
-  color: #000;
-  -webkit-text-decoration: none;
-  text-decoration: none;
-  box-sizing: border-box;
-  height: 1.6rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
-  -webkit-tap-highlight-color: transparent;
-  display: inline-block;
-  width: auto;
-  border-radius: 0.25rem;
-  font-weight: 600;
-  position: relative;
-  line-height: 1;
-  font-size: 0.875rem;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
   pointer-events: none;
-  cursor: default!important;
-  border: 0.0625rem solid transparent;
+  cursor: default !important;
+  border: none !important;
+  background-color: white;
+  font-family: inherit;
+
 }

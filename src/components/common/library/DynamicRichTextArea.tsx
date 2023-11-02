@@ -82,7 +82,6 @@ function InsertControl(props: { insert: DynamicInsert }) {
 //   // return found;
 // }
 
-
 interface JSONContentItem {
   type: string;
   content?: JSONContentItem[];
@@ -133,10 +132,11 @@ function formatFields(obj: JSONContentItem, inserts: DynamicInsert[]) {
       });
       textParts.push({
         type: "text",
-        text:
+        text: `[[${
           insert.key === "custom"
             ? match[1].replace("custom=", "")
-            : insert.label,
+            : insert.label
+        }]]`,
         marks: [{ type: `insert-${insert.key}` }],
       });
     }
@@ -144,9 +144,8 @@ function formatFields(obj: JSONContentItem, inserts: DynamicInsert[]) {
     // Add the remaining text to the parts
     textParts.push({
       type: "text",
-      text: curText === "" ? " " : curText,
+      text: curText,
     });
-
   }
 
   // Set and remove empty text nodes
@@ -154,7 +153,6 @@ function formatFields(obj: JSONContentItem, inserts: DynamicInsert[]) {
     obj.content = textParts.filter((textPart) => textPart.text !== "");
   }
 }
-
 
 function formatJSONContent(json: JSONContent, inserts: DynamicInsert[]) {
   const content = Object.values(json)[1];
@@ -209,59 +207,24 @@ export default function DynamicRichTextArea(props: {
       ...getCustomInserts(theme, inserts),
     ],
     content: props.value ?? "",
+
     onUpdate({ editor, transaction: tr }) {
       if (props.onChange) {
-        // TODO: Parsing HTML via regex is slow and not the best way to do this
-        const regex =
-          /<button.+?class="dynamic-insert".+?data-insert-key="(.+?)" .+? name="insert-label-span">(.+?)<\/span>.+?<\/button>/gm;
-        const convertedHTML = editor
-          .getHTML()
-          .replace(regex, (match, insertKey, insertLabel) => {
-            if (insertKey === "custom") {
-              return `[[${props.signifyCustomInsert === undefined ||
-                props.signifyCustomInsert
-                ? `custom=`
-                : ``
-                }${insertLabel}]]`;
-            } else {
-              return `[[${insertKey}]]`;
-            }
-          });
+        const convertedHTML = editor.getHTML()
 
         props.onChange(convertedHTML, editor.getJSON());
       }
 
       // Format the text area to show the inserts
       setTimeout(() => {
-        editor.commands.setContent(
-          formatJSONContent(editor.getJSON(), inserts)
-        );
+        // editor.commands.setContent(
+        //   formatJSONContent(editor.getJSON(), inserts)
+        // );
         editor.commands.setTextSelection(tr.selection);
       });
     },
   });
 
-  // If value updates, update the contents accordingly
-  useEffect(() => {
-    if (!editor || !props.value) return;
-    const currentSelection = editor.state.selection;
-    editor.commands.setContent(props.value);
-    editor.commands.setTextSelection(currentSelection);
-
-    // Format the text area to show the inserts
-    setTimeout(() => {
-      if (!editor) return;
-      const currentSelection = editor.state.selection;
-      editor.commands.setContent(formatJSONContent(editor.getJSON(), inserts));
-      editor.commands.setTextSelection(currentSelection);
-    });
-  }, [props.value]);
-
-  // On initial load, format the text area to show the inserts
-  useEffect(() => {
-    if (!editor) return;
-    editor.commands.setContent(formatJSONContent(editor.getJSON(), inserts));
-  }, [editor]);
 
   return (
     <RichTextEditor

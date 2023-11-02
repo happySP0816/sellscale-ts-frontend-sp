@@ -13,8 +13,11 @@ interface InsertOptions {
 
 let CustomInserts: Mark<InsertOptions, any>[] = [];
 
-export function getCustomInserts(theme: MantineTheme, inserts: DynamicInsert[]) {
-  if(CustomInserts.length === 0){
+export function getCustomInserts(
+  theme: MantineTheme,
+  inserts: DynamicInsert[]
+) {
+  if (CustomInserts.length === 0) {
     CustomInserts = inserts.map((insert) => addCustomInsert(theme, insert));
   }
   return CustomInserts;
@@ -31,7 +34,6 @@ export const getSVGContent = (icon: ReactNode, color: string) => {
 };
 
 function addCustomInsert(theme: MantineTheme, insert: DynamicInsert) {
-
   const Insert = Mark.create<InsertOptions>({
     name: `insert-${insert.key}`,
 
@@ -51,35 +53,34 @@ function addCustomInsert(theme: MantineTheme, insert: DynamicInsert) {
           type: "button",
           "data-button": true,
           "data-insert-key": insert.key,
-          style: `position: relative; background-color: ${
-            theme.colors[insert.color][0]
-          }; color: ${theme.colors[insert.color][5]}`,
+          "data-insert-color": insert.color,
         }),
         [
           "div",
-          mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
-            style:
-              "display: flex; align-items: center; justify-content: center; height: 100%;",
-          }),
-          [
-            "img",
-            mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
-              src: `data:image/svg+xml;utf8,${encodeURIComponent(
-                getSVGContent(insert.icon, theme.colors[insert.color][5]) || preCompiledRobot.replaceAll("currentColor", theme.colors[insert.color][5])
-              )}`,
-              style:
-                "position: absolute; top: 2px; left: 5px; height: 1.3rem; width: 1.3rem;",
-            }),
-          ],
-          [
-            "span",
-            mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
-              style:
-                "margin-left: 1.4rem; display: flex; align-items: center; height: 100%; white-space: nowrap; overflow: hidden; font-size: 0.8rem;",
-              name: "insert-label-span",
-            }),
-            0,
-          ],
+          mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
+          // [
+          //   "img",
+          //   mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
+          //     src: `data:image/svg+xml;utf8,${encodeURIComponent(
+          //       getSVGContent(insert.icon, theme.colors[insert.color][5]) ||
+          //         preCompiledRobot.replaceAll(
+          //           "currentColor",
+          //           theme.colors[insert.color][5]
+          //         )
+          //     )}`,
+          //     style:
+          //       "position: absolute; top: 2px; left: 5px; height: 1.3rem; width: 1.3rem;",
+          //   }),
+          // ],
+          // [
+          //   "span",
+          //   mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
+          //     style:
+          //       "margin-left: 1.4rem; display: flex; align-items: center; height: 100%; white-space: nowrap; overflow: hidden; font-size: 0.8rem;",
+          //     name: "insert-label-span",
+          //   }),
+          //   0,
+          // ],
         ],
       ];
     },

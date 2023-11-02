@@ -945,7 +945,7 @@ const SubjectLineItem: React.FC<{
             />
           ) : (
             <Text fw={"400"} fz={"0.9rem"} color={"gray.8"}>
-              {editedSubjectLine}
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(editedSubjectLine.replace(/\[\[/g, '<span style="color: rgb(148,0,211); text-transform: uppercase; background: rgba(238,130,238,0.5); padding: 0 4px 0 4px; border-radius: 3px">').replace(/\]\]/g, '</span>')) }} />
             </Text>
           )
         }

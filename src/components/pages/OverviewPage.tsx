@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Title, Image, Button, Tooltip, Text, Card, Flex, Box, Avatar, Group, Badge, Grid, Divider } from '@mantine/core';
+import { Container, Title, Image, Button, Tooltip, Text, Card, Flex, Box, Avatar, Group, Badge, Grid, Divider, SegmentedControl, Center, rem, Loader, Input, HoverCard, Table } from '@mantine/core';
 import { Bar } from 'react-chartjs-2';
-import { IconBook, IconBrandSuperhuman, IconBriefcase, IconBuilding, IconBuildingFactory, IconChecks, IconEye, IconGlobe, IconInfoCircle, IconLetterA, IconMan, IconPlane, IconSend, IconWoman, IconWorld } from '@tabler/icons';
-import { IconMessageCheck, IconSunElectricity } from '@tabler/icons-react';
+import { IconArrowDown, IconArrowUp, IconBook, IconBrandLinkedin, IconBrandSuperhuman, IconBriefcase, IconBuilding, IconBuildingFactory, IconChecks, IconCode, IconEye, IconGlobe, IconInfoCircle, IconLetterA, IconList, IconMail, IconMan, IconPlane, IconSearch, IconSend, IconWoman, IconWorld } from '@tabler/icons';
+import { IconGrid3x3, IconMessageCheck, IconSunElectricity } from '@tabler/icons-react';
 import { API_URL } from '@constants/data';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
@@ -124,15 +124,139 @@ function BarChart() {
   );
 }
 
+export function ActiveChannels() {
+  const [sdrs, setSDRs] = useState([]);
+  const [fetchedChannels, setFetchedChannels] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const userToken = useRecoilState(userTokenState)
+
+  useEffect(() => {
+    if (!fetchedChannels) {
+      setLoading(true)
+      fetch(`${API_URL}/email/warmup/channel_warmups`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken[0]}`
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          setSDRs(data.sdrs || []);
+        }).finally(() => {
+          setFetchedChannels(true);
+          setLoading(false);
+        });
+    }
+  }, [setFetchedChannels]);
+
+  if (loading) { 
+    return <Card withBorder mt='md'>
+      <Flex>
+        <Box>
+          <Loader />
+        </Box>
+      </Flex>
+    </Card>
+  }
+
+  return <>
+    <Card withBorder mt='md'>
+      <Box mb='md'>
+        <Title order={3} mt='md'>Active Seats</Title>
+        <Text color='gray'>These are the active seats running from your organization</Text>
+      </Box>
+      <Grid>
+        {
+          sdrs.sort((a: any, b: any) => -(a.active - b.active)).filter((x: any) => x.active).map((x: any) => {
+            // reduce `x.channels` based on daily_limit
+            let totalSendVolume = 0
+            let totalSentVolume = 0;
+            if (x.channels) {
+              for (const channel of x.channels) {
+                totalSendVolume += channel.daily_limit
+                totalSentVolume += channel.daily_sent_count
+              }
+            }
+
+            return <Grid.Col span={4}>
+                <Card withBorder>
+                  <Card.Section>
+                    <Image src={x.li_cover_img_url} />
+                  </Card.Section>
+                  <Flex mb='xs' mt='-20px' sx={{position: 'absolute', zIndex: 100}}>
+                    <Box sx={{border: 'solid 3px white', borderRadius: 10}}>
+                      <Image 
+                        src={x.img_url ? x.img_url : 'https://images.squarespace-cdn.com/content/v1/56031d09e4b0dc68f6197723/1469030770980-URDU63CK3Q4RODZYH0S1/Grey+Box.jpg?format=1500w'} 
+                        width={40} height={40} radius="sm" />
+                    </Box>
+                    <Box ml='xs'>
+                      <Badge size='xs' color={x.active ? 'green' : 'gray'} sx={{boxShadow: '0px 0px 5px 0px rgba(255,255,255,0.75)'}} >
+                        {x.active ? 'Active' : 'Inactive'}
+                      </Badge>
+                      <Text fw={500}>{x.sdr_name}</Text>
+                      <Text fz='xs'>{x.sdr_title?.substring(0, 30)} {x.sdr_title?.length > 30 ? '...' : ''}</Text>
+                    </Box>
+                  </Flex>
+                  <Flex mt='60px'>
+                    <Group w='100%'>
+                      <HoverCard shadow="md" withinPortal>
+                        <HoverCard.Target>
+                          <Button color='blue' variant='outline' leftIcon={<IconSend size='0.9rem'/>} size='sm' w='100%'>
+                            Daily Volume: {totalSentVolume} / {totalSendVolume}
+                          </Button>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown w={400}>
+                          <Table>
+                            <thead>
+                              <tr>
+                                <th>Channel</th>
+                                <th>Volume</th>
+                                <th>Warmup</th>
+                                <th>Reputation</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {
+                                x.channels.map((channel: any) => {
+                                  return <tr> 
+                                    <td>{channel.channel_type == 'LINKEDIN' ? <IconBrandLinkedin size='0.9rem'/> : <IconMail size='0.9rem'/>} {channel.account_name}</td>
+                                    <td>{channel.daily_sent_count} / {channel.daily_limit}</td>
+                                    <td><Badge size='xs' color={channel.warmup_enabled ? 'green' : 'blue'}>{channel.warmup_enabled ? 'In progress' : 'Done'}</Badge></td>
+                                    <td><Badge size='xs' color={channel.reputation > 80 ? 'green' : 'yellow'}>{channel.reputation}%</Badge></td>
+                                  </tr>
+                                })
+                              }
+                            </tbody>
+                          </Table>
+                        </HoverCard.Dropdown>
+                      </HoverCard>
+                    </Group>
+                  </Flex>
+                </Card>
+              </Grid.Col>
+          })
+        }
+      </Grid>
+    </Card>
+  </>
+}
+
 export function ActiveCampaigns() {
   const [activeCampaigns, setActiveCampaigns] = React.useState([]);
   const [fetchedActiveCampaigns, setFetchActiveCampaigns] = React.useState(false);
   const userData = useRecoilValue(userDataState)
+  const [mode, setMode] = useState('list');
+  const [campaignsShown, setCampaignsShown] = useState([true]);
+  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
+  const [query, setQuery] = useState('');
 
   const userToken = useRecoilState(userTokenState)
 
   useEffect(() => {
     if (!fetchedActiveCampaigns) {
+      setLoadingCampaigns(true);
       fetch(`${API_URL}/analytics/all_campaign_analytics`, {
         method: 'GET',
         headers: {
@@ -146,34 +270,102 @@ export function ActiveCampaigns() {
           setActiveCampaigns(data.pipeline_data || []);
         }).finally(() => {
           setFetchActiveCampaigns(true);
+          setLoadingCampaigns(false);
         });
     }
   }, [fetchedActiveCampaigns]);
 
-  return <Card withBorder mt='md'>
-    <Title order={3} mt='md'>{activeCampaigns.length} Active Campaigns</Title>
-      <Text color='gray'>These are the active campaigns running from across all of {userData.client?.company}'s users</Text>
-      <Grid mt='md'>
-        {activeCampaigns.sort((a: any,b: any) => b.open_percent - a.open_percent).map((x: any) => {
-          return (
-            <Grid.Col span={6}>
-              <Card withBorder padding="lg" radius="md">
-                
-                  <Group mb="xs" sx={{cursor: 'pointer'}}>
-                    <Tooltip label={x.name} withinPortal>
-                      <Image src={x.img_url} width={40} height={40} radius="sm" />
-                    </Tooltip>
-                    <Box>
-                      <Badge color="green" variant="light" size='xs' mb='2px'>
-                        Active
-                      </Badge>
-                      <Tooltip label={x.archetype} withinPortal>
-                        <Text fw={500}>{x.emoji} {x.archetype.substring(0, 34)}{x.archetype.length > 34 ? '...' : ''}</Text>
-                      </Tooltip>
-                    </Box>
-                  </Group>
-                
+  if (loadingCampaigns) {
+    return <Card withBorder mt='md'>
+      <Flex>
+        <Box>
+          <Loader />
+        </Box>
+      </Flex>
+    </Card>
+  }
 
+  return <Card withBorder mt='md'>
+    <Flex>
+      <Box>
+        <Title order={3} mt='md'>{campaignsShown.length == 1 ? 'Active' : 'All'} Campaigns {query.length > 0 ? `with "${query}"` : ''}</Title>
+        <Text color='gray'>These are the active campaigns running from across all of {userData.client?.company}'s users</Text>
+        <Text color='gray'>There are {activeCampaigns.filter((x: any) => x.active).length} <Badge size='sm' color='green'>Active</Badge> campaigns and {activeCampaigns.filter((x: any) => !x.active).length} <Badge size='sm' color='gray'>Inactive</Badge> campaigns</Text>
+      </Box>
+      <Box ml='auto' w='30%' sx={{textAlign: 'right'}}>
+        <SegmentedControl 
+          size='xs'
+          onChange={
+            (value) => {
+              setMode(value);
+            }
+          }
+          data={[
+            {
+            value: 'list',
+            label: (
+              <Center>
+                <IconList style={{ width: rem(16), height: rem(16) }} />
+                <Box ml={10}>List</Box>
+              </Center>
+            ),
+          },
+          {
+            value: 'grid',
+            label: (
+              <Center>
+                <IconGrid3x3 style={{ width: rem(16), height: rem(16) }} />
+                <Box ml={10}>Grid</Box>
+              </Center>
+            ),
+          }]} 
+        />
+        <Input
+          icon={<IconSearch size='0.75rem'/>}
+          placeholder='Search Campaigns'
+          mt='xs'
+          onChange={
+            (e) => {
+              setQuery(e.currentTarget.value);
+              setCampaignsShown([true, false]);
+
+              if (e.currentTarget.value.length === 0) {
+                setCampaignsShown([true]);
+              }
+            }
+          }
+        >
+        </Input>
+      </Box>
+    </Flex>
+    <Grid mt='md'>
+      {activeCampaigns
+        .sort((a: any,b: any) => b.open_percent - a.open_percent)
+        .sort((a: any, b:any) => -(a.active - b.active))
+        .filter((x: any) => campaignsShown.includes(x.active))
+        .filter((x: any) => x.name.toLowerCase().includes(query.toLowerCase()) || x.archetype.toLowerCase().includes(query.toLowerCase()))
+        .map((x: any) => {
+        return (
+          <Grid.Col span={mode === 'grid' ? 6 : 12}>
+            <Card withBorder padding={mode === 'grid' ? 'lg' : 'xs'} radius="md" style={mode === 'grid' ? {} : {display: 'flex', flexDirection: 'row', width: '100%'}}>
+              
+                <Group mb={mode === 'grid' ? "xs" : '0px'} sx={{cursor: 'pointer'}} w='100%'>
+                  <Tooltip label={x.name} withinPortal>
+                    <Image src={x.img_url} width={40} height={40} radius="sm" />
+                  </Tooltip>
+                  <Box>
+                    <Badge color={x.active ? 'green' : 'gray'} variant="light" size='sm' mb='xs'>
+                      {x.active ? 'Active' : 'Inactive'}
+                    </Badge>
+                    <Tooltip label={x.archetype} withinPortal>
+                      <Text fw={500}>{x.emoji} {x.archetype.substring(0, mode === 'grid' ? 34 : 44)}{x.archetype.length > (mode === 'grid' ? 34 : 44) ? '...' : ''}</Text>
+                    </Tooltip>
+                  </Box>
+                </Group>
+              
+
+              {mode === 'grid' && 
+              <>
                 <Text c="dimmed" size='xs' mah='110px' mb='xs' sx={{overflowY: 'scroll'}}> 
                   {x.included_individual_title_keywords?.length > 0 && (
                     <Tooltip label="Prioritized Job Titles" withinPortal>
@@ -255,88 +447,93 @@ export function ActiveCampaigns() {
                     </Tooltip>
                   ) : ''}
                 </Text> 
+              </>}
 
-                <Divider mt='md'/>
+              <Divider mt='md'/>
 
-                <Flex
-                  align={"center"}
-                  justify={"space-between"}
-                  gap={"0.1rem"}
-                  mt='md'
-                  mb='md'
-                  ml='md'
-                  mr='md'
-                >
-                  <Tooltip label={x.num_sent.toLocaleString() + " Sent / " + x.num_sent.toLocaleString() + " Sent"}>
-                    <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
-                      <IconSend size="0.75rem" color="#868E96" />
-                      <Text fw={"600"} fz={"0.7rem"} color="gray.6">
-                        Send:
-                      </Text>
-                      <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                        {x.sent_percent}%
-                      </Text>
-                    </Flex>
-                  </Tooltip>
+              <Flex
+                align={"center"}
+                justify={"space-between"}
+                gap={"0.1rem"}
+                mt='md'
+                mb='md'
+                ml='md'
+                mr='md'
+              >
+                <Tooltip label={x.num_sent.toLocaleString() + " Sent / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                  <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
+                    <IconSend size="0.75rem" color="#868E96" />
+                    <Text fw={"600"} fz={"0.7rem"} color="gray.6">
+                      Send:
+                    </Text>
+                    <Text fw={"600"} fz={"0.7rem"} color="gray.8">
+                      {x.sent_percent}%
+                    </Text>
+                  </Flex>
+                </Tooltip>
 
-                  <Divider orientation="vertical" size='xs' />
+                <Divider orientation="vertical" size='xs' m='4px' />
 
-                  <Tooltip label={x.num_opens.toLocaleString() + " Opens / " + x.num_sent.toLocaleString() + " Sent"}>
-                    <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
-                      <IconChecks size="0.75rem" color="#868E96" />
-                      <Text fw={"600"} fz={"0.7rem"} color="gray.6">
-                        Opens:
-                      </Text>
-                      <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                        {Math.round(x.open_percent * 100)}%
-                      </Text>
-                    </Flex>
-                  </Tooltip>
+                <Tooltip label={x.num_opens.toLocaleString() + " Opens / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                  <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
+                    <IconChecks size="0.75rem" color="#868E96" />
+                    <Text fw={"600"} fz={"0.7rem"} color="gray.6">
+                      Opens:
+                    </Text>
+                    <Text fw={"600"} fz={"0.7rem"} color="gray.8">
+                      {Math.round(x.open_percent * 100)}%
+                    </Text>
+                  </Flex>
+                </Tooltip>
 
-                  <Divider orientation="vertical" size='xs' />
+                <Divider orientation="vertical" size='xs' m='4px'/>
 
-                  <Tooltip label={x.num_replies.toLocaleString() + " Replies / " + x.num_sent.toLocaleString() + " Sent"}>
-                    <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
-                      <IconMessageCheck size="0.75rem" color="#868E96" />
-                      <Text fw={"600"} fz={"0.7rem"} color="gray.6">
-                        Replies:
-                      </Text>
-                      <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                        {Math.round(x.reply_percent * 100)}%
-                      </Text>
-                    </Flex>
-                  </Tooltip>
+                <Tooltip label={x.num_replies.toLocaleString() + " Replies / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                  <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
+                    <IconMessageCheck size="0.75rem" color="#868E96" />
+                    <Text fw={"600"} fz={"0.7rem"} color="gray.6">
+                      Replies:
+                    </Text>
+                    <Text fw={"600"} fz={"0.7rem"} color="gray.8">
+                      {Math.round(x.reply_percent * 100)}%
+                    </Text>
+                  </Flex>
+                </Tooltip>
 
-                  <Divider orientation="vertical" size='xs' />
+                <Divider orientation="vertical" size='xs' m='4px' />
 
-                  <Tooltip label={x.num_demos.toLocaleString() + " Demos / " + x.num_sent.toLocaleString() + " Sent"}>
-                    <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
-                      <IconMessageCheck size="0.75rem" color="#868E96" />
-                      <Text fw={"600"} fz={"0.7rem"} color="gray.6">
-                        Demos:
-                      </Text>
-                      <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                        {Math.round(x.demo_percent * 100)}%
-                      </Text>
-                    </Flex>
-                  </Tooltip>
-                </Flex>
-
-                <Button variant="light" color="blue" fullWidth mt="md" radius="md" onClick={() => {
-                  showNotification({
-                    title: 'Coming Soon',
-                    message: 'This feature is coming soon!',
-                    color: 'blue',
-                    icon: <IconEye />,
-                  });
-                }}>
-                  View in {x.name?.trim()}'s Sight
-                </Button>
-              </Card>
-          </Grid.Col>
-        )
-        })}
-      </Grid>
+                <Tooltip label={x.num_demos.toLocaleString() + " Demos / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                  <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
+                    <IconMessageCheck size="0.75rem" color="#868E96" />
+                    <Text fw={"600"} fz={"0.7rem"} color="gray.6">
+                      Demos:
+                    </Text>
+                    <Text fw={"600"} fz={"0.7rem"} color="gray.8">
+                      {Math.round(x.demo_percent * 100)}%
+                    </Text>
+                  </Flex>
+                </Tooltip>
+              </Flex>
+            </Card>
+        </Grid.Col>
+      )
+      })}
+      <Button 
+        variant='subtle'
+        leftIcon={campaignsShown.length === 1 ? <IconArrowDown size='0.8rem'/> : <IconArrowUp size='0.8rem'/>}
+        onClick={
+          () => {
+            if (campaignsShown.length === 1) {
+              setCampaignsShown([true, false]);
+            } else {
+              setCampaignsShown([true]);
+            }
+          }
+        }
+        color='gray'>
+        Show {campaignsShown.length === 1 ? 'All' : 'Active'} Campaigns
+      </Button>
+    </Grid>
   </Card>
 }
 
@@ -413,6 +610,7 @@ export default function OverviewPage() {
           aiActivityData={aiActivityData}
         />
       </Box>  
+      <ActiveChannels />
       <ActiveCampaigns />
       <BarChart />
     </Box>

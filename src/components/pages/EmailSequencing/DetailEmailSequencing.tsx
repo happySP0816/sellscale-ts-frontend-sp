@@ -57,6 +57,7 @@ import React, { FC, useEffect, useMemo } from "react";
 import { useRecoilValue } from "recoil";
 import { EmailSequenceStep, SpamScoreResults, SubjectLineTemplate } from "src";
 import ReactDOMServer from "react-dom/server";
+import { deterministicMantineColor } from '@utils/requests/utils';
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
@@ -1168,16 +1169,20 @@ const EmailBodyItem: React.FC<{
           ReactDOMServer.renderToString(
             <Text
               style={{
-                backgroundColor: theme.colors.blue[4],
+                backgroundColor: theme.colors[deterministicMantineColor(content)][6],
                 width: "fit-content",
                 color: theme.white,
                 borderRadius: 12,
                 padding: "0.25rem",
                 fontWeight: 700,
                 marginLeft: "0.25rem",
+                paddingLeft: '12px',
+                paddingRight: '12px',
+                cursor: 'pointer'
               }}
               component="span"
             >
+              <IconRobot size='1.1rem' color='white' style={{paddingTop: '4px'}}></IconRobot>
               {content}
             </Text>
           )
@@ -1374,6 +1379,9 @@ const EmailBodyItem: React.FC<{
               backgroundColor: "#F5F5F5",
             })}
             px="md"
+            onClick={() => {
+              setEditing(true);
+            }}
           >
             <Text fz="sm">
               <div

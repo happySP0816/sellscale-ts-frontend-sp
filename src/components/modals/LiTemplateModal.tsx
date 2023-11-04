@@ -48,6 +48,7 @@ export default function LiTemplateModal({
   mode: 'CREATE' | 'EDIT';
   editProps?: {
     templateId: number;
+    title: string;
     message: string;
     active: boolean;
     humanFeedback: string;

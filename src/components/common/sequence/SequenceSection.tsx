@@ -133,7 +133,7 @@ import { CtaSection } from "./CtaSection";
 import CTAGenerator from "./CTAGenerator";
 import { deterministicMantineColor } from '@utils/requests/utils';
 import moment from 'moment';
-import { getLiTemplates } from "@utils/requests/linkedinTemplates";
+import { getLiTemplates, updateLiTemplate } from "@utils/requests/linkedinTemplates";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1156,18 +1156,31 @@ function IntroMessageSection(props: {
   const openCTASettings = () => {
     setActiveTab("ctas");
   };
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
+
+  const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
+    useState<boolean>(false);
+  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] = useState<
+    string
+  >();
 
   const { data: templates, isFetching: isFetchingTemplates } = useQuery({
     queryKey: [`query-get-li-templates`],
     queryFn: async () => {
       const response = await getLiTemplates(userToken, currentProject!.id);
+
+      if (response.data?.length > 0) {
+        setSelectedTemplateId(response.data[0].id);
+        setHumanFeedbackForTemplate(response.data[0].additional_instructions);
+      }
+
       return response.status === 'success' ? response.data as Record<string, any>[] : [];
     },
     refetchOnWindowFocus: false,
     enabled: !!currentProject && !!currentProject.template_mode,
   });
 
-  const getIntroMessage = async (prospectId: number, forceRegenerate: boolean = false) => {
+  const getIntroMessage = async (prospectId: number, forceRegenerate: boolean = false, selectedTemplateId?: number) => {
     if (!currentProject) return null;
     setLoading(true);
     setMessage("");
@@ -1186,7 +1199,8 @@ function IntroMessageSection(props: {
       }
       const initMsgResponse = await generateInitialMessageForLiConvoSim(
         userToken,
-        createResponse.data
+        createResponse.data,
+        selectedTemplateId
       );
       if (initMsgResponse.status !== "success") {
         setLoading(false);
@@ -1221,12 +1235,12 @@ function IntroMessageSection(props: {
   // When prospect changes, get the intro message
   useEffect(() => {
     if (!prospectId) return;
-    getIntroMessage(prospectId).then((msg) => {
+    getIntroMessage(prospectId, false, selectedTemplateId).then((msg) => {
       if (msg) {
         setMessage(msg);
       }
     });
-  }, [prospectId]);
+  }, [prospectId, selectedTemplateId]);
 
   if (!currentProject) return <></>;
   return (
@@ -1301,7 +1315,7 @@ function IntroMessageSection(props: {
                   leftIcon={<IconReload size='0.75rem' />}
                   onClick={() => {
                     if (prospectId) {
-                      getIntroMessage(prospectId, true).then((msg) => {
+                      getIntroMessage(prospectId, true, selectedTemplateId).then((msg) => {
                         if (msg) {
                           setMessage(msg);
                         }
@@ -1352,6 +1366,75 @@ function IntroMessageSection(props: {
           </Box>
         )}
 
+        {currentProject.template_mode && (
+            <>
+              <Card mb='16px'>
+                <Card.Section
+                  sx={{
+                    backgroundColor: '#59a74f',
+                    flexDirection: 'row',
+                    display: 'flex',
+                  }}
+                  p='sm'
+                >
+                  <Text color='white' mt='4px'>
+                    <TypeAnimation
+                      sequence={[
+                        'Feel free to gvie me', // Types 'One'
+                        100, // Waits 1s
+                        'Feel free to give me feedback on ', // Deletes 'One' and types 'Two'
+                        400, // Waits 2s
+                        'Feel free to give me feedback on improving the message', // Types 'Three' without deleting 'Two'
+                        () => {
+                          console.log('Sequence completed');
+                        },
+                      ]}
+                      speed={50}
+                      wrapper='span'
+                      cursor={false}
+                    />
+                  </Text>
+                </Card.Section>
+                <Card.Section sx={{ border: 'solid 2px #59a74f !important' }} p='8px'>
+                  <Textarea
+                    variant='unstyled'
+                    pl={'8px'}
+                    pr={'8px'}
+                    minRows={3}
+                    placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                    value={humanFeedbackForTemplate}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      setHumanFeedbackForTemplate(value);
+                      setHumanFeedbackForTemplateChanged(true);
+                    }}
+                  />
+                </Card.Section>
+              </Card>
+              {humanFeedbackForTemplateChanged && <Box sx={{justifyContent: 'right', textAlign: 'right'}} onClick={() => {
+                updateLiTemplate(userToken, currentProject.id, selectedTemplateId || -1, undefined, undefined, undefined, undefined, undefined, undefined, humanFeedbackForTemplate).then(res => {
+                  queryClient.invalidateQueries({
+                    queryKey: [`query-get-li-templates`],
+                  });
+                }).then(res => {
+                  setHumanFeedbackForTemplateChanged(false);
+                  setHumanFeedbackForTemplate('');
+                  showNotification({
+                    title: 'Success',
+                    message: 'Feedback saved. Try regenerating.',
+                    color: 'green'
+                })
+                }
+                )               
+              }}>
+                <Button color='green'>
+                  Save Feedback
+                </Button>
+              </Box>}
+            </>
+          )}
+
         {currentProject.template_mode ? (
           <>
             {isFetchingTemplates ? (
@@ -1367,63 +1450,104 @@ function IntroMessageSection(props: {
               </Box>
             ) : (
               <Stack>
-                <Stack>
-                  {templates?.map((template, index) => (
-                    <Paper key={index} p='md' mih={80} sx={{ position: 'relative' }} withBorder>
-                      <Badge
-                        size='lg'
-                        sx={{
-                          position: 'absolute',
-                          top: 10,
-                          right: 10,
-                        }}
-                      >
-                        {template.times_used
-                          ? (template.times_accepted / template.times_used) * 100
-                          : 0}
-                        %
-                      </Badge>
-                      <Button
-                        variant='subtle'
-                        radius='xl'
-                        size='sm'
-                        compact
-                        sx={{
-                          position: 'absolute',
-                          bottom: 10,
-                          right: 10,
-                        }}
-                        onClick={() => {
-                          openContextModal({
-                            modal: 'liTemplate',
-                            title: 'Edit Template',
-                            innerProps: {
-                              mode: 'EDIT',
-                              editProps: {
-                                templateId: template.id,
-                                message: template.message,
-                                active: template.active,
-                                humanFeedback: template.additional_instructions,
-                                researchPoints: template.research_points,
-                              },
-                            },
-                          });
-                        }}
-                      >
-                        Edit
-                      </Button>
+                <Stack mt='xs'>
+                  {templates?.sort((a: any, b:any) => a.active != b.active ? -(a.active - b.active) : a.title - b.title).map((template, index) => (
+                    <Paper key={index} p='md' mih={80} 
+                      sx={{ 
+                        position: 'relative',
+                        cursor: 'pointer',
+                        border: selectedTemplateId === template.id ? 'solid 1px #339af0 !important' : '',
+                        backgroundColor: selectedTemplateId === template.id ? '#339af008 !important' : '',
+                        flexDirection: 'row',
+                        display: 'flex'
+                       }} 
+                      withBorder onClick={() => {
+                      setSelectedTemplateId(template.id);
+                      setHumanFeedbackForTemplate(template.additional_instructions);
+                    }}>
+
+                      <Box miw='100px' sx={{
+                        border: 'solid 1px #339af022',
+                        backgroundColor: '#339af022',
+                        padding: '8px',
+                        borderRadius: '4px',
+                        textAlign: 'center'
+                      }}
+                        mr='md'>
+                        <Text fw='bold' fz='md' color='blue'>
+                          {Math.round(template.times_accepted / (template.times_used + 0.0001) * 100)}%
+                        </Text>
+                        <Text size='8px' color='blue'>
+                          Reply rate
+                        </Text>
+                        <Text size='9px' color='blue' fz={'xs'} fw='bold'>
+                          {template.times_accepted} / {template.times_used} times
+                        </Text>
+                      </Box>
+
                       <Box mr={40}>
+                        <Text fw='bold' size='sm'>
+                          {template.title}
+                        </Text>
                         <TextWithNewline style={{ fontSize: '0.8em' }}>
                           {template.message}
                         </TextWithNewline>
                       </Box>
+
+                      <Box sx={{justifyContent: 'right'}} ml='auto'>
+                        <Switch sx={{cursor: 'pointer'}} checked={template.active} onChange={(e) => {
+                          updateLiTemplate(userToken, currentProject.id, template.id, template.title, template.message, e.target.checked).then(res => {
+                            queryClient.invalidateQueries({
+                              queryKey: [`query-get-li-templates`],
+                            });
+                          })
+                        }} />
+                        <Button
+                          mt='xs'
+                          variant='subtle'
+                          radius='xl'
+                          size='sm'
+                          compact
+                          onClick={() => {
+                            openContextModal({
+                              modal: 'liTemplate',
+                              title: 'Edit Template',
+                              innerProps: {
+                                mode: 'EDIT',
+                                editProps: {
+                                  templateId: template.id,
+                                  title: template.title,
+                                  message: template.message,
+                                  active: template.active,
+                                  humanFeedback: template.additional_instructions,
+                                  researchPoints: template.research_points,
+                                },
+                              },
+                            });
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </Box>
                     </Paper>
                   ))}
                 </Stack>
-                <Center>
+                <Flex sx={{justifyContent: 'right'}}>
+                  <Stack spacing={5} mr='xs'>
+                    <Tooltip label="Coming soon!">
+                      <Button
+                        variant='outline'
+                        radius='md'
+                        compact
+                        color='gray'
+                      >
+                        Choose a Template
+                      </Button>
+                    </Tooltip>
+                  </Stack>
                   <Stack spacing={5}>
                     <Button
-                      variant='subtle'
+                      variant='outline'
                       radius='md'
                       compact
                       onClick={() => {
@@ -1436,10 +1560,10 @@ function IntroMessageSection(props: {
                         });
                       }}
                     >
-                      Add Template
+                      Create New
                     </Button>
                   </Stack>
-                </Center>
+                </Flex>
               </Stack>
             )}
           </>

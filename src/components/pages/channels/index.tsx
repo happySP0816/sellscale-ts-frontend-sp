@@ -147,17 +147,19 @@ const ChannelsSetupSelector = (props: {selectedChannel: string, setSelectedChann
                             <IconPencil size={'0.9rem'}/>
                           </Button>
                         </Tooltip>
-                        <Badge size='lg' mb='xs' leftSection={<ChannelIcon />}>
-                          {props.selectedChannel}
-                        </Badge>
-                        <Title order={2} style={{marginBottom: 0}}>
-                          {currentProject?.emoji} {currentProject?.name}
-                        </Title>
+                        <Flex>
+                          <Title order={2} style={{marginBottom: 0}}>
+                            {currentProject?.emoji} {currentProject?.name}
+                          </Title>
+                          <Badge size='xl' mb='xs' leftSection={<ChannelIcon />} ml='xs' mt='3px' variant='outline'>
+                            {props.selectedChannel}
+                          </Badge>
+                        </Flex>
                       </Box>
                     </Box>
                     
                     <Box w='20%' sx={{textAlign: 'center'}}>
-                      <Button size='md' mt='md' leftIcon={<IconPlus size='0.8rem'/>} color={'blue'} onClick={
+                      <Button size='md' leftIcon={<IconPlus size='0.8rem'/>} color={'blue'} onClick={
                         () => {
                           navigateToPage(navigate, '/contacts/find');
                         }

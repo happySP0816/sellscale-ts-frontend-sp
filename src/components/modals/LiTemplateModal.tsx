@@ -16,6 +16,8 @@ import {
   Image,
   Switch,
   Stack,
+  Collapse,
+  TextInput,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useState } from "react";
@@ -35,7 +37,8 @@ import { PersonalizationSection, RESEARCH_POINTS } from "@common/sequence/Sequen
 import { TypeAnimation } from "react-type-animation";
 import sellScaleLogo from '../common/sequence/assets/logo.jpg';
 import _ from "lodash";
-import { useDebouncedValue, useDidUpdate, useTimeout } from "@mantine/hooks";
+import { useDebouncedValue, useDidUpdate, useDisclosure, useTimeout } from "@mantine/hooks";
+import { IconWashMachine } from '@tabler/icons';
 
 export default function LiTemplateModal({
   context,
@@ -45,6 +48,7 @@ export default function LiTemplateModal({
   mode: 'CREATE' | 'EDIT';
   editProps?: {
     templateId: number;
+    title: string;
     message: string;
     active: boolean;
     humanFeedback: string;
@@ -57,6 +61,8 @@ export default function LiTemplateModal({
   const [error, setError] = useState<string | null>(null);
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
+  const [opened, { toggle }] = useDisclosure(false);
+
 
   const [loadingResearch, setLoadingResearch] = useState(false);
   const [researchPoints, setResearchPoints] = useState<string[]>(innerProps.editProps?.researchPoints ?? []);
@@ -65,6 +71,7 @@ export default function LiTemplateModal({
 
   const form = useForm({
     initialValues: {
+      title: innerProps.editProps?.title ?? '',
       message: innerProps.editProps?.message ?? '',
       active: innerProps.editProps?.active === undefined ? true : innerProps.editProps.active,
       humanFeedback: innerProps.editProps?.humanFeedback ?? '',
@@ -117,6 +124,7 @@ export default function LiTemplateModal({
       userToken,
       currentProject.id,
       innerProps.editProps!.templateId,
+      values.title,
       values.message,
       values.active,
       undefined,
@@ -143,66 +151,81 @@ export default function LiTemplateModal({
 
         <Card withBorder>
           <Stack>
+            <TextInput
+              label='Name'
+              placeholder='Name'
+              required
+              {...form.getInputProps('title')}
+            />
             <Textarea
+              label='Template'
               minRows={4}
               placeholder='Template outline'
               {...form.getInputProps('message')}
             />
-            <Switch label='Active' {...form.getInputProps('active', { type: 'checkbox' })} />
 
-            <Box mih={500} sx={{ position: 'relative' }}>
-              {loadingResearch ? (
-                <LoadingOverlay visible />
-              ) : (
-                <PersonalizationSection
-                  title='Enabled Research Points'
-                  blocklist={_.difference(RESEARCH_POINTS, researchPoints)}
-                  onItemsChange={async (items) => {
-                    setResearchPoints(items.filter((x) => x.checked).map((x) => x.id));
-                  }}
-                  onChanged={() => {}}
-                />
-              )}
-            </Box>
-
-            {showUserFeedback && (
-              <Card mb='16px'>
-                <Card.Section
-                  sx={{
-                    backgroundColor: '#26241d',
-                    flexDirection: 'row',
-                    display: 'flex',
-                  }}
-                  p='sm'
-                >
-                  <Image src={sellScaleLogo} width={30} height={30} mr='sm' />
-                  <Text color='white' mt='4px'>
-                    <TypeAnimation
-                      sequence={[
-                        'Feel free to gvie me', // Types 'One'
-                        100, // Waits 1s
-                        'Feel free to give me feedback on ', // Deletes 'One' and types 'Two'
-                        400, // Waits 2s
-                        'Feel free to give me feedback on improving the message', // Types 'Three' without deleting 'Two'
-                        () => {
-                          console.log('Sequence completed');
-                        },
-                      ]}
-                      speed={50}
-                      wrapper='span'
-                      cursor={false}
+              <Collapse in={opened}>
+                <Box mih={500} sx={{ position: 'relative' }}>
+                  {loadingResearch ? (
+                    <LoadingOverlay visible />
+                  ) : (
+                    <PersonalizationSection
+                      title='Enabled Research Points'
+                      blocklist={_.difference(RESEARCH_POINTS, researchPoints)}
+                      onItemsChange={async (items) => {
+                        setResearchPoints(items.filter((x) => x.checked).map((x) => x.id));
+                      }}
+                      onChanged={() => {}}
                     />
-                  </Text>
-                </Card.Section>
-                <Card.Section sx={{ border: 'solid 2px #26241d !important' }} p='8px'>
-                  <Textarea
-                    minRows={5}
-                    placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
-                    {...form.getInputProps('humanFeedback')}
-                  />
-                </Card.Section>
-              </Card>
-            )}
+                  )}
+                </Box>
+                {showUserFeedback && (
+                    <Card mb='16px'>
+                      <Card.Section
+                        sx={{
+                          backgroundColor: '#59a74f',
+                          flexDirection: 'row',
+                          display: 'flex',
+                        }}
+                        p='sm'
+                      >
+                        <Text color='white' mt='4px'>
+                          <TypeAnimation
+                            sequence={[
+                              'Feel free to gvie me', // Types 'One'
+                              100, // Waits 1s
+                              'Feel free to give me feedback on ', // Deletes 'One' and types 'Two'
+                              400, // Waits 2s
+                              'Feel free to give me feedback on improving the message', // Types 'Three' without deleting 'Two'
+                              () => {
+                                console.log('Sequence completed');
+                              },
+                            ]}
+                            speed={50}
+                            wrapper='span'
+                            cursor={false}
+                          />
+                        </Text>
+                      </Card.Section>
+                      <Card.Section sx={{ border: 'solid 2px #59a74f !important' }} p='8px'>
+                        <Textarea
+                          variant='unstyled'
+                          pl={'8px'}
+                          pr={'8px'}
+                          minRows={3}
+                          placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                          {...form.getInputProps('humanFeedback')}
+                        />
+                      </Card.Section>
+                    </Card>
+                  )}
+            </Collapse>
+            <Button 
+              variant='subtle' color='gray' leftIcon={<IconWashMachine size={'0.9rem'} />}
+              onClick={() => toggle()}
+              >
+              {opened ? 'Hide' : 'Show'} Advanced Settings
+            </Button>
 
             <Box>
               <Button type='submit'>{innerProps.mode === 'CREATE' ? 'Create' : 'Update'}</Button>

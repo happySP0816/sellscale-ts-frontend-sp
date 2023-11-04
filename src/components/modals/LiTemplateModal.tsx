@@ -109,7 +109,7 @@ export default function LiTemplateModal({
   const createTemplate = async (values: typeof form.values) => {
     if (!currentProject) return;
 
-    await createLiTemplate(userToken, currentProject.id, values.message, false, researchPoints, values.humanFeedback);
+    await createLiTemplate(userToken, currentProject.id, values.title, values.message, false, researchPoints, values.humanFeedback);
 
     queryClient.refetchQueries({
       queryKey: [`query-get-li-templates`],

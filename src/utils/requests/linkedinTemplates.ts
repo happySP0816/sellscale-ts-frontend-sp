@@ -17,6 +17,7 @@ export async function updateLiTemplate(
   userToken: string,
   archetypeId: number,
   template_id: number,
+  title?: string,
   message?: string,
   active?: boolean,
   times_used?: number,
@@ -32,6 +33,7 @@ export async function updateLiTemplate(
     },
     body: JSON.stringify({
       template_id,
+      title,
       message,
       active,
       times_used,

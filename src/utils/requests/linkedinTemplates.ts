@@ -50,6 +50,7 @@ export async function updateLiTemplate(
 export async function createLiTemplate(
   userToken: string,
   archetypeId: number,
+  title: string,
   message: string,
   sellscale_generated: boolean,
   research_points: string[],
@@ -62,6 +63,7 @@ export async function createLiTemplate(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
+      title,
       message,
       sellscale_generated,
       research_points,

@@ -99,6 +99,7 @@ import { CampaignAnalyticsData } from "./CampaignAnalytics";
 import OverallPipeline from "./OverallPipeline";
 import { TodayActivityData } from "./OverallPipeline/TodayActivity";
 import UserStatusToggle from "./UserStatusToggle";
+import AllCampaign from "../../PersonaCampaigns/AllCampaign";
 
 export type CampaignPersona = {
   id: number;
@@ -122,7 +123,6 @@ export default function PersonaCampaigns() {
 
   const [projects, setProjects] = useState<PersonaOverview[]>([]);
   const [personas, setPersonas] = useState<CampaignPersona[]>([]);
-
 
   const [search, setSearch] = useState<string>("");
 
@@ -218,7 +218,7 @@ export default function PersonaCampaigns() {
   };
 
   useEffect(() => {
-    fetchCampaignPersonas()
+    fetchCampaignPersonas();
   }, []);
 
   // sort personas by persona.active then persona.created_at in desc order
@@ -237,14 +237,14 @@ export default function PersonaCampaigns() {
           <Title order={2}>Campaigns</Title>
         </Group>
         <Tabs defaultValue="overview">
-          <Tabs.List mb='md'>
+          <Tabs.List mb="md">
             <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />}>
               Overview
             </Tabs.Tab>
             <Tabs.Tab
               value="linkedin"
               icon={<IconBrandLinkedin size="0.8rem" />}
-              ml='auto'
+              ml="auto"
             >
               Queued LinkedIns
             </Tabs.Tab>
@@ -497,6 +497,8 @@ export default function PersonaCampaigns() {
                       </Text>
                     </Center>
                   )}
+
+                  <AllCampaign />
                 </Stack>
               </ScrollArea>
             </Stack>
@@ -676,7 +678,14 @@ function PersonCampaignCard(props: {
             </Button>
           </Box>
 
-          <Group sx={{justifyContent: "flex-end", display: 'flex', flexDirection: 'row'}} ml='auto'>
+          <Group
+            sx={{
+              justifyContent: "flex-end",
+              display: "flex",
+              flexDirection: "row",
+            }}
+            ml="auto"
+          >
             <Button
               w={60}
               radius="xl"
@@ -728,9 +737,9 @@ function PersonCampaignCard(props: {
             <Box>
               <CampaignGraph
                 personaId={props.persona.id}
-                unusedProspects={
-                  Math.min(props.project?.num_unused_li_prospects ?? 0)
-                }
+                unusedProspects={Math.min(
+                  props.project?.num_unused_li_prospects ?? 0
+                )}
                 sections={types}
                 onChannelClick={(sectionType: string) => {
                   if (props.project == undefined) return;

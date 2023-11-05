@@ -6,6 +6,7 @@ import {
   Divider,
   Flex,
   Input,
+  Loader,
   Table,
   Text,
   Title,
@@ -22,6 +23,7 @@ import {
 } from "mantine-react-table";
 import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import { sortBy } from "lodash";
+import { IconBrandLinkedin, IconMail, IconSearch } from '@tabler/icons';
 
 export interface Analytics {
   account: string;
@@ -32,6 +34,8 @@ export interface Analytics {
   reply: string;
   sourced: number;
   status: Status;
+  img_url: string;
+  channel: string;
 }
 
 export type Status = "Complete" | "Setup" | "Active";
@@ -50,7 +54,7 @@ const AllCampaign = () => {
     direction: "asc",
   });
   const [input, setInput] = useState("");
-  const [status, setStatus] = useState<Status | "All">("All");
+  const [status, setStatus] = useState("All");
   const [records, setRecords] = useState<Analytics[]>(sortBy(data, "name"));
 
   useEffect(() => {
@@ -73,7 +77,11 @@ const AllCampaign = () => {
     if (sortStatus) {
       setRecords(sortStatus.direction === "desc" ? newData.reverse() : newData);
     }
-  }, [sortStatus, status, input]);
+  }, [sortStatus, status, input, data]);
+
+  if (isLoading) {
+    return <Loader />
+  }
 
   return (
     <>
@@ -81,14 +89,15 @@ const AllCampaign = () => {
 
       <Box>
         <Flex justify={"space-between"} align={"center"}>
-          <Title color="gray.6" order={2}>
-            AllCampaign
+          <Title color="gray.6" order={3}>
+            All Campaigns
           </Title>
 
           <Flex gap={"sm"} wrap={"wrap"} align={"center"}>
             <Button
               variant={status === "All" ? "filled" : "light"}
               color="dark"
+              size='sm'
               onClick={() => setStatus("All")}
             >
               All
@@ -103,6 +112,7 @@ const AllCampaign = () => {
             <Button
               variant={status === "Active" ? "filled" : "light"}
               color="blue"
+              size='sm'
               onClick={() => setStatus("Active")}
             >
               Active
@@ -117,6 +127,7 @@ const AllCampaign = () => {
             <Button
               variant={status === "Setup" ? "filled" : "light"}
               color="yellow"
+              size='sm'
               onClick={() => setStatus("Setup")}
             >
               Setup
@@ -131,6 +142,7 @@ const AllCampaign = () => {
             <Button
               variant={status === "Complete" ? "filled" : "light"}
               color="green"
+              size='sm'
               onClick={() => setStatus("Complete")}
             >
               Completed
@@ -143,7 +155,11 @@ const AllCampaign = () => {
               </Badge>
             </Button>
 
-            <Input onChange={(e) => setInput(e.target.value)} value={input} />
+            <Input 
+              onChange={(e) => setInput(e.target.value)} value={input} 
+              placeholder={"Search"}
+              icon={<IconSearch size={20} />}
+            />
           </Flex>
         </Flex>
 
@@ -189,16 +205,31 @@ const AllCampaign = () => {
                   };
                 },
               },
-              // {
-              //   accessor: "channel",
-              //   title: "Channel",
-              //   titleSx(theme) {
-              //     return {
-              //       background: theme.colors.blue[6],
-              //       color: `${theme.white} !important`,
-              //     };
-              //   },
-              // },
+              {
+                accessor: "channel",
+                title: "Channel",
+                titleSx(theme) {
+                  return {
+                    background: theme.colors.blue[6],
+                    color: `${theme.white} !important`,
+                  };
+                },
+                render: ({ channel }) => {
+                  return channel?.replace('{', '').replace('}', '').split(',').map((c: string) => {
+                    let color = "blue";
+                    if (c === "LINKEDIN") {
+                      color = "orange";
+                    }
+
+                    let icon = <IconMail size={12} style={{marginTop: 4}} />;
+                    if (c === "LINKEDIN") {
+                      icon = <IconBrandLinkedin size={12} style={{marginTop: 4}} />;
+                    }
+
+                    return <Badge color={color}>{icon} {c}</Badge>;
+                  })
+                }
+              },
               {
                 sortable: true,
                 accessor: "account",
@@ -212,6 +243,20 @@ const AllCampaign = () => {
                     },
                   };
                 },
+                render: ({ account, img_url }) => {
+                  return (
+                    <Flex align={"center"} gap={"sm"}>
+                      <img
+                        src={img_url}
+                        alt={account}
+                        style={{ borderRadius: "8px" }}
+                        width={20}
+                        height={20}
+                      />
+                      <Text>{account}</Text>
+                    </Flex>
+                  );
+                }
               },
               {
                 sortable: true,
@@ -240,6 +285,9 @@ const AllCampaign = () => {
                     },
                   };
                 },
+                render: ({ contacted }) => {
+                  return <Text>{contacted}%</Text>
+                }
               },
               {
                 sortable: true,
@@ -254,6 +302,9 @@ const AllCampaign = () => {
                     },
                   };
                 },
+                render: ({ open }) => {
+                  return <Text>{open}%</Text>
+                }
               },
               {
                 sortable: true,
@@ -268,6 +319,9 @@ const AllCampaign = () => {
                     },
                   };
                 },
+                render: ({ reply }) => {
+                  return <Text>{reply}%</Text>
+                }
               },
               // {
               //   accessor: "demoSet",

@@ -144,6 +144,9 @@ export default function PersonaCampaigns() {
     newReplies: 0,
   });
   const [currentLinkedInSLA, setCurrentLinkedInSLA] = useState<number>(0);
+  const [showInactivePersonas, setShowInactivePersonas] = useState<boolean>(
+    false
+  )
 
   let [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
 
@@ -408,19 +411,6 @@ export default function PersonaCampaigns() {
                       <Loader />
                     </Center>
                   )}
-                  {filteredProjects.filter((persona) => persona.active).length >
-                    1 && (
-                    <Alert
-                      sx={{
-                        borderRadius: "md",
-                        border: "solid 1px red",
-                      }}
-                      color="red"
-                      title="Multiple Active Personas"
-                      children="You have multiple active personas. This is not recommended as it will cause your campaigns to compete with each other. We recommend you deactivate all but one persona."
-                      icon={<IconAlertCircle size="1rem" />}
-                    />
-                  )}
                   {!loadingPersonas &&
                     filteredProjects
                       .filter((persona) => persona.active)
@@ -451,16 +441,7 @@ export default function PersonaCampaigns() {
                         />
                       ))}
 
-                  {filteredProjects.filter((persona) => !persona.active)
-                    .length > 0 && (
-                    <Divider
-                      label="Inactive Personas"
-                      labelPosition="center"
-                      color="gray"
-                    />
-                  )}
-
-                  {!loadingPersonas &&
+                  {showInactivePersonas && !loadingPersonas &&
                     filteredProjects
                       .filter((persona) => !persona.active)
                       .map((persona, index) => (
@@ -489,6 +470,12 @@ export default function PersonaCampaigns() {
                           }}
                         />
                       ))}
+
+                  {filteredProjects.filter((persona) => !persona.active).length > 0 && (
+                    <Button color='gray' leftIcon={<IconCalendar color='gray' size='0.8rem'></IconCalendar>} variant='outline' onClick={() => setShowInactivePersonas(!showInactivePersonas)}>
+                      {showInactivePersonas ? 'Hide' : 'Show'} {filteredProjects.filter((persona) => !persona.active).length} Inactive Campaign{filteredProjects.filter((persona) => !persona.active) .length > 1 ? "s" : ""}  
+                    </Button>
+                  )}
 
                   {!loadingPersonas && filteredProjects.length === 0 && (
                     <Center h={200}>

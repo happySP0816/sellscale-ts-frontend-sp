@@ -45,6 +45,8 @@ import PersonaDetailsCTAs from '@common/persona/details/PersonaDetailsCTAs';
 import VoicesSection from '@common/voice_builder/VoicesSection';
 import SequenceSection from '@common/sequence/SequenceSection';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
+import { getFreshCurrentProject } from '@auth/core';
+import { API_URL } from '@constants/data';
 
 
 type BumpFrameworkBuckets = {
@@ -740,6 +742,39 @@ export default function BumpFrameworksPage(props: {
                           })
                         }}
                       />
+                  </Card>
+                  <Card withBorder mt='xs' radius={'md'}>
+                    <Title order={4}>Template Mode vs CTA Mode</Title>
+                    <Text size='xs' color='gray'>CTA Mode is a more generative mode where you use a combination of CTAs and Voice to control your messaging. Template mode is more controlled. Feel free to toggle this persona to your preference. </Text>
+                    <Switch label="Template Mode Enabled" onLabel="ON" offLabel="OFF" mt='xs' checked={currentProject?.template_mode}
+                      onClick={() => {
+                        fetch(`${API_URL}/client/archetype/${currentProject?.id}/toggle_template_mode`,
+                          {
+                            method: 'PATCH',
+                            headers: {
+                              "Content-Type": "application/json",
+                              "Authorization": `Bearer ${userToken}`
+                            },
+                            body: JSON.stringify({
+                              template_mode: !currentProject?.template_mode
+                            })
+                          }
+                        ).then(res => {
+                          getFreshCurrentProject(
+                            userToken,
+                            currentProject?.id as number
+                          ).then((project: any) => {
+                            showNotification({
+                              title: 'Success',
+                              message: `Template mode ${project?.template_mode ? 'enabled' : 'disabled'}`,
+                              color: 'green',
+                              icon: <IconCheck size='1rem' />,
+                            
+                            })
+                            setCurrentProject(project);
+                          });
+                        })
+                      }}/>
                   </Card>
                 </Container>
               </Tabs.Panel>

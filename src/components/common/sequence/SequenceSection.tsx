@@ -51,6 +51,7 @@ import {
   Alert,
   Loader,
   Image,
+  HoverCard,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
@@ -134,6 +135,7 @@ import CTAGenerator from "./CTAGenerator";
 import { deterministicMantineColor } from '@utils/requests/utils';
 import moment from 'moment';
 import { getLiTemplates, updateLiTemplate } from "@utils/requests/linkedinTemplates";
+import DOMPurify from 'isomorphic-dompurify';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1157,6 +1159,8 @@ function IntroMessageSection(props: {
     setActiveTab("ctas");
   };
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
+  const [showFeedback, setShowFeedback] = useState<boolean>(false);
+  const theme = useMantineTheme();
 
   const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
     useState<boolean>(false);
@@ -1195,6 +1199,9 @@ function IntroMessageSection(props: {
       );
       if (createResponse.status !== "success") {
         setLoading(false);
+        setTimeout(() => {
+          setShowFeedback(true)
+        }, 2000)
         return null;
       }
       const initMsgResponse = await generateInitialMessageForLiConvoSim(
@@ -1204,9 +1211,13 @@ function IntroMessageSection(props: {
       );
       if (initMsgResponse.status !== "success") {
         setLoading(false);
+        setTimeout(() => {
+          setShowFeedback(true)
+        }, 2000)
         return null;
       }
       convoResponse = await getLiConvoSim(userToken, createResponse.data);
+
     } else if (convoResponse.data.messages.length === 0) {
       // If convo exists but no messages, generate initial message
       const initMsgResponse = await generateInitialMessageForLiConvoSim(
@@ -1215,6 +1226,9 @@ function IntroMessageSection(props: {
       );
       if (initMsgResponse.status !== "success") {
         setLoading(false);
+        setTimeout(() => {
+          setShowFeedback(true)
+        }, 2000)
         return null;
       }
       convoResponse = await getLiConvoSim(
@@ -1224,6 +1238,9 @@ function IntroMessageSection(props: {
     }
 
     setLoading(false);
+    setTimeout(() => {
+      setShowFeedback(true)
+    }, 2000)
     try {
       setMessageMetaData(convoResponse.data.messages[0].meta_data);
       return convoResponse.data.messages[0].message;
@@ -1366,7 +1383,7 @@ function IntroMessageSection(props: {
           </Box>
         )}
 
-        {currentProject.template_mode && (
+        {currentProject.template_mode && showFeedback && (
             <>
               <Card mb='16px'>
                 <Card.Section
@@ -1375,24 +1392,10 @@ function IntroMessageSection(props: {
                     flexDirection: 'row',
                     display: 'flex',
                   }}
-                  p='sm'
+                  p='xs'
                 >
-                  <Text color='white' mt='4px'>
-                    <TypeAnimation
-                      sequence={[
-                        'Feel free to gvie me', // Types 'One'
-                        100, // Waits 1s
-                        'Feel free to give me feedback on ', // Deletes 'One' and types 'Two'
-                        400, // Waits 2s
-                        'Feel free to give me feedback on improving the message', // Types 'Three' without deleting 'Two'
-                        () => {
-                          console.log('Sequence completed');
-                        },
-                      ]}
-                      speed={50}
-                      wrapper='span'
-                      cursor={false}
-                    />
+                  <Text color='white' mt='4px' size='sm'>
+                    Feel free to give me feedback on improving the message.
                   </Text>
                 </Card.Section>
                 <Card.Section sx={{ border: 'solid 2px #59a74f !important' }} p='8px'>
@@ -1400,7 +1403,8 @@ function IntroMessageSection(props: {
                     variant='unstyled'
                     pl={'8px'}
                     pr={'8px'}
-                    minRows={3}
+                    size='xs'
+                    minRows={2}
                     placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
                     value={humanFeedbackForTemplate}
                     onChange={(e) => {
@@ -1466,7 +1470,7 @@ function IntroMessageSection(props: {
                       setHumanFeedbackForTemplate(template.additional_instructions);
                     }}>
 
-                      <Box miw='100px' sx={{
+                      <Box miw='100px' mah={80} sx={{
                         border: 'solid 1px #339af022',
                         backgroundColor: '#339af022',
                         padding: '8px',
@@ -1485,13 +1489,35 @@ function IntroMessageSection(props: {
                         </Text>
                       </Box>
 
-                      <Box mr={40}>
-                        <Text fw='bold' size='sm'>
+                      <Box mr={40} w='100%'>
+                        <Badge fw='bold' size='md' color={deterministicMantineColor(template.title + '')} mb='xs'>
                           {template.title}
-                        </Text>
-                        <TextWithNewline style={{ fontSize: '0.8em' }}>
-                          {template.message}
-                        </TextWithNewline>
+                        </Badge>
+                        <Card withBorder w='100%'>
+                          <Text style={{ fontSize: '0.8em', lineHeight: 2 }}>
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(template.message.replaceAll("[[", "<span style='margin-left: 6px; margin-right: 6px; background-color: " + theme.colors[deterministicMantineColor(template.message)][6] + "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>").replaceAll("]]", "</span>") as string),
+                              }}
+                            />
+                          </Text>
+                        </Card>
+
+                         {template.additional_instructions && <HoverCard width={280} shadow="md">
+                            <HoverCard.Target>
+                              <Badge leftSection={<IconBulb size='0.8rem'/>} color='yellow' variant='outline'>
+                                Fine Tuned
+                              </Badge>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown style={{ "backgroundColor": "rgb(34, 37, 41)", "padding": 0 }}>
+                              <Paper style={{ "backgroundColor": "rgb(34, 37, 41)", "color": "white", "padding": 10 }}>
+                                <TextWithNewline style={{fontSize: '12px'}}>
+                                    {"<b>Additional Instructions:</b>\n" + template.additional_instructions}
+                                </TextWithNewline>
+                              </Paper>
+                            </HoverCard.Dropdown>
+                          </HoverCard>}
+                        
                       </Box>
 
                       <Box sx={{justifyContent: 'right'}} ml='auto'>
@@ -2820,7 +2846,8 @@ function FrameworkSection(props: {
                 >
                   <Image src={sellScaleLogo} width={30} height={30} mr="sm" />
                   <Text color="white" mt="4px">
-                     <TypeAnimation
+                    Feel free to give me feedback on improving the message
+                     {/* <TypeAnimation
                         sequence={[
                           'Feel free to gvie me', // Types 'One'
                           100, // Waits 1s
@@ -2835,7 +2862,7 @@ function FrameworkSection(props: {
                         wrapper="span"
                         cursor={false}
                       />
-                    
+                     */}
                   </Text>
                 </Card.Section>
                 <Card.Section

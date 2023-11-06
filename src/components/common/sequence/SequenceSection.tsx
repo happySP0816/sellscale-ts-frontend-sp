@@ -1477,35 +1477,24 @@ function IntroMessageSection(props: {
                         borderRadius: '4px',
                         textAlign: 'center'
                       }}
+                        mt='xl'
                         mr='md'>
-                        <Text fw='bold' fz='md' color='blue'>
-                          {Math.round(template.times_accepted / (template.times_used + 0.0001) * 100)}%
+                        <Text fw='bold' fz='md' color='blue' mt='xs'>
+                          {Math.round(template.times_accepted / (template.times_used + 0.0001) * 100)}% reply
                         </Text>
-                        <Text size='8px' color='blue'>
-                          Reply rate
-                        </Text>
-                        <Text size='9px' color='blue' fz={'xs'} fw='bold'>
-                          {template.times_accepted} / {template.times_used} times
+                        <Text size='8px' color='blue' fz={'xs'} fw='500'>
+                          ({template.times_accepted}/{template.times_used} times)
                         </Text>
                       </Box>
 
                       <Box mr={40} w='100%'>
-                        <Badge fw='bold' size='md' color={deterministicMantineColor(template.title + '')} mb='xs'>
-                          {template.title}
-                        </Badge>
-                        <Card withBorder w='100%'>
-                          <Text style={{ fontSize: '0.8em', lineHeight: 2 }}>
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html: DOMPurify.sanitize(template.message.replaceAll("[[", "<span style='margin-left: 6px; margin-right: 6px; background-color: " + theme.colors[deterministicMantineColor(template.message)][6] + "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>").replaceAll("]]", "</span>") as string),
-                              }}
-                            />
-                          </Text>
-                        </Card>
-
-                         {template.additional_instructions && <HoverCard width={280} shadow="md">
+                        <Flex>
+                          <Badge size='sm' mb='xs' sx={{textTransform: 'uppercase'}} color='gray' variant='outline'>
+                            {template.title}
+                          </Badge>
+                              {template.additional_instructions && <HoverCard width={280} shadow="md">
                             <HoverCard.Target>
-                              <Badge leftSection={<IconBulb size='0.8rem'/>} color='yellow' variant='outline'>
+                              <Badge leftSection={<IconBulb size='0.8rem'/>} color='grape' variant='filled' ml='xs'>
                                 Fine Tuned
                               </Badge>
                             </HoverCard.Target>
@@ -1517,7 +1506,16 @@ function IntroMessageSection(props: {
                               </Paper>
                             </HoverCard.Dropdown>
                           </HoverCard>}
-                        
+                        </Flex>
+                        <Card withBorder w='100%' sx={{backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb'}}>
+                          <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(template.message.replaceAll("[[", "<span style='margin-left: 6px; margin-right: 6px; background-color: " + theme.colors['blue'][5] + "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ ").replaceAll("]]", "</span>") as string),
+                              }}
+                            />
+                          </Text>
+                        </Card> 
                       </Box>
 
                       <Box sx={{justifyContent: 'right'}} ml='auto'>

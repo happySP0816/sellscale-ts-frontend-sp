@@ -190,7 +190,8 @@ export default function LiTemplateModal({
                         p='sm'
                       >
                         <Text color='white' mt='4px'>
-                          <TypeAnimation
+                          Feel free to give me feedback on improving the message
+                          {/* <TypeAnimation
                             sequence={[
                               'Feel free to gvie me', // Types 'One'
                               100, // Waits 1s
@@ -204,7 +205,7 @@ export default function LiTemplateModal({
                             speed={50}
                             wrapper='span'
                             cursor={false}
-                          />
+                          /> */}
                         </Text>
                       </Card.Section>
                       <Card.Section sx={{ border: 'solid 2px #59a74f !important' }} p='8px'>

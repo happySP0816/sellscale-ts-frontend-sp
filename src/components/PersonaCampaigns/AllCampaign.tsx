@@ -50,7 +50,7 @@ const AllCampaign = () => {
   });
 
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-    columnAccessor: "campaign",
+    columnAccessor: "status",
     direction: "asc",
   });
   const [input, setInput] = useState("");

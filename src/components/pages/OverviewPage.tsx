@@ -54,7 +54,7 @@ function BarChart() {
   const sumOutbounds = modes[currentMode]?.data.outbound.reduce((a: any, b: any) => a + b, 0);
   const sumAcceptances = modes[currentMode]?.data.acceptances.reduce((a: any, b: any) => a + b, 0);
   const sumReplies = modes[currentMode]?.data.replies.reduce((a: any, b: any) => a + b, 0);
-  const sumDemos = modes[currentMode]?.data.demos.reduce((a: any, b: any) => a + b, 0);
+  const sumDemos = modes[currentMode]?.data.demos?.reduce((a: any, b: any) => a + b, 0);
   const theme = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(true);
 

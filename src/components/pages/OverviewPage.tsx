@@ -163,7 +163,7 @@ const WarmupChart = () => {
     ]
   };
 
-  const options = {
+  const options: any = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -236,7 +236,8 @@ export function ActiveChannels() {
   // Across every SDR count the total linkedin and email volume for their org
   let totalLinkedInWarmup = 0;
   let totalEmailWarmup = 0;
-  for (const sdr of sdrs) {
+  for (const x of sdrs) {
+    const sdr: any = x
     if (sdr.channels) {
       for (const channel of sdr.channels) {
         if (channel.channel_type == 'LINKEDIN') {

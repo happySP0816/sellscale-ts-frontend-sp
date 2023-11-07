@@ -1388,17 +1388,18 @@ function IntroMessageSection(props: {
               <Card mb='16px'>
                 <Card.Section
                   sx={{
-                    backgroundColor: '#59a74f',
+                    backgroundColor: theme.colors.grape[6],
                     flexDirection: 'row',
                     display: 'flex',
                   }}
                   p='xs'
                 >
                   <Text color='white' mt='4px' size='sm'>
-                    Feel free to give me feedback on improving the message.
+                    <IconBulb size='1.2rem' color='white' />
+                    <span style={{marginLeft: '8px'}}>FINE TUNING: Feel free to give me feedback on improving the message.</span>
                   </Text>
                 </Card.Section>
-                <Card.Section sx={{ border: 'solid 2px #59a74f !important' }} p='8px'>
+                <Card.Section sx={{ border: 'solid 2px ' + theme.colors.grape[6] + ' !important' }} p='8px'>
                   <Textarea
                     variant='unstyled'
                     pl={'8px'}

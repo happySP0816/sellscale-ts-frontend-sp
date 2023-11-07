@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Title, Image, Button, Tooltip, Text, Card, Flex, Box, Avatar, Group, Badge, Grid, Divider, SegmentedControl, Center, rem, Loader, Input, HoverCard, Table } from '@mantine/core';
-import { Bar } from 'react-chartjs-2';
-import { IconArrowDown, IconArrowUp, IconBook, IconBrandLinkedin, IconBrandSuperhuman, IconBriefcase, IconBuilding, IconBuildingFactory, IconChecks, IconCode, IconEye, IconGlobe, IconInfoCircle, IconLetterA, IconList, IconMail, IconMan, IconPlane, IconSearch, IconSend, IconWoman, IconWorld } from '@tabler/icons';
+import { Container, Title, Image, Button, Tooltip, Text, Card, Flex, Box, Avatar, Group, Badge, Grid, Divider, SegmentedControl, Center, rem, Loader, Input, HoverCard, Table, useMantineTheme } from '@mantine/core';
+import { Bar, Line } from 'react-chartjs-2';
+import { IconArrowDown, IconArrowUp, IconBook, IconBrandLinkedin, IconBrandSuperhuman, IconBriefcase, IconBuilding, IconBuildingFactory, IconChecks, IconChevronDown, IconClick, IconCode, IconEye, IconGlobe, IconInfoCircle, IconLetterA, IconList, IconMail, IconMan, IconPlane, IconSearch, IconSend, IconUser, IconWoman, IconWorld } from '@tabler/icons';
 import { IconGrid3x3, IconMessageCheck, IconSunElectricity } from '@tabler/icons-react';
 import { API_URL } from '@constants/data';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -15,6 +15,8 @@ import { isLoggedIn } from '@auth/core';
 import { CampaignPersona } from '@common/campaigns/PersonaCampaigns';
 import { TodayActivityData } from '@common/campaigns/OverallPipeline/TodayActivity';
 import moment from 'moment';
+import { deterministicMantineColor } from '@utils/requests/utils';
+import { useDisclosure } from '@mantine/hooks';
 
 const options = {
   scales: {
@@ -52,6 +54,7 @@ function BarChart() {
   const sumOutbounds = modes[currentMode]?.data.outbound.reduce((a: any, b: any) => a + b, 0);
   const sumAcceptances = modes[currentMode]?.data.acceptances.reduce((a: any, b: any) => a + b, 0);
   const sumReplies = modes[currentMode]?.data.replies.reduce((a: any, b: any) => a + b, 0);
+  const theme = useMantineTheme();
 
   const totalTouchpoints = sumOutbounds + sumAcceptances + sumReplies;
 
@@ -124,10 +127,79 @@ function BarChart() {
   );
 }
 
+
+const WarmupChart = () => {
+  const theme = useMantineTheme();
+  const data = {
+    labels: [
+      "Month 1",
+      "Month 2",
+      "Month 3",
+      "Month 4",
+      "Month 5",
+    ],
+    datasets: [
+      {
+        label: 'LinkedIn',
+        data: [7, 11, 32, 46, 48, 48],
+        fill: false,
+        borderColor: theme.colors.blue[6],
+        tension: 0.1
+      },
+      {
+        label: 'Email',
+        data: [20, 36, 48, 69, 140],
+        fill: false,
+        borderColor: theme.colors.orange[6],
+        tension: 0.1
+      },
+      {
+        label: 'Total',
+        data: [27, 47, 80, 115, 188],
+        fill: false,
+        borderColor: theme.colors.gray[6],
+        tension: 0.1
+      }
+    ]
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        // show at bottom
+        position: 'bottom',
+      },
+      title: {
+        display: true,
+        text: '🔥 Warming Volume'
+      }
+    },
+    scales: {
+      y: {
+        ticks: {
+          display: false, // This will hide the y-axis ticks
+        },
+        grid: {
+          drawBorder: false, // This will hide the y-axis line if you also want that
+        },
+      },
+    },
+  };
+
+  return <div style={{width: '100%', height: '400px'}}>
+     <Line data={data} options={options} />
+  </div>
+};
+
+
 export function ActiveChannels() {
   const [sdrs, setSDRs] = useState([]);
   const [fetchedChannels, setFetchedChannels] = useState(false);
   const [loading, setLoading] = useState(false);
+  const theme = useMantineTheme();
+  const [opened, { toggle }] = useDisclosure(false);
 
   const userToken = useRecoilState(userTokenState)
 
@@ -161,84 +233,182 @@ export function ActiveChannels() {
     </Card>
   }
 
-  return <>
-    <Card withBorder mt='md'>
-      <Box mb='md'>
-        <Title order={3} mt='md'>Active Seats</Title>
-        <Text color='gray'>These are the active seats running from your organization</Text>
-      </Box>
-      <Grid>
-        {
-          sdrs.sort((a: any, b: any) => -(a.active - b.active)).filter((x: any) => x.active).map((x: any) => {
-            // reduce `x.channels` based on daily_limit
-            let totalSendVolume = 0
-            let totalSentVolume = 0;
-            if (x.channels) {
-              for (const channel of x.channels) {
-                totalSendVolume += channel.daily_limit
-                totalSentVolume += channel.daily_sent_count
-              }
-            }
-
-            return <Grid.Col span={4}>
-                <Card withBorder>
-                  <Card.Section>
-                    <Image src={x.li_cover_img_url} />
-                  </Card.Section>
-                  <Flex mb='xs' mt='-20px' sx={{position: 'absolute', zIndex: 100}}>
-                    <Box sx={{border: 'solid 3px white', borderRadius: 10}}>
-                      <Image 
-                        src={x.img_url ? x.img_url : 'https://images.squarespace-cdn.com/content/v1/56031d09e4b0dc68f6197723/1469030770980-URDU63CK3Q4RODZYH0S1/Grey+Box.jpg?format=1500w'} 
-                        width={40} height={40} radius="sm" />
-                    </Box>
-                    <Box ml='xs'>
-                      <Badge size='xs' color={x.active ? 'green' : 'gray'} sx={{boxShadow: '0px 0px 5px 0px rgba(255,255,255,0.75)'}} >
-                        {x.active ? 'Active' : 'Inactive'}
-                      </Badge>
-                      <Text fw={500}>{x.sdr_name}</Text>
-                      <Text fz='xs'>{x.sdr_title?.substring(0, 30)} {x.sdr_title?.length > 30 ? '...' : ''}</Text>
-                    </Box>
-                  </Flex>
-                  <Flex mt='60px'>
-                    <Group w='100%'>
-                      <HoverCard shadow="md" withinPortal>
-                        <HoverCard.Target>
-                          <Button color='blue' variant='outline' leftIcon={<IconSend size='0.9rem'/>} size='sm' w='100%'>
-                            Daily Volume: {totalSentVolume} / {totalSendVolume}
-                          </Button>
-                        </HoverCard.Target>
-                        <HoverCard.Dropdown w={400}>
-                          <Table>
-                            <thead>
-                              <tr>
-                                <th>Channel</th>
-                                <th>Volume</th>
-                                <th>Warmup</th>
-                                <th>Reputation</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {
-                                x.channels.map((channel: any) => {
-                                  return <tr> 
-                                    <td>{channel.channel_type == 'LINKEDIN' ? <IconBrandLinkedin size='0.9rem'/> : <IconMail size='0.9rem'/>} {channel.account_name}</td>
-                                    <td>{channel.daily_sent_count} / {channel.daily_limit}</td>
-                                    <td><Badge size='xs' color={channel.warmup_enabled ? 'green' : 'blue'}>{channel.warmup_enabled ? 'In progress' : 'Done'}</Badge></td>
-                                    <td><Badge size='xs' color={channel.reputation > 80 ? 'green' : 'yellow'}>{channel.reputation}%</Badge></td>
-                                  </tr>
-                                })
-                              }
-                            </tbody>
-                          </Table>
-                        </HoverCard.Dropdown>
-                      </HoverCard>
-                    </Group>
-                  </Flex>
-                </Card>
-              </Grid.Col>
-          })
+  // Across every SDR count the total linkedin and email volume for their org
+  let totalLinkedInWarmup = 0;
+  let totalEmailWarmup = 0;
+  for (const sdr of sdrs) {
+    if (sdr.channels) {
+      for (const channel of sdr.channels) {
+        if (channel.channel_type == 'LINKEDIN') {
+          totalLinkedInWarmup += channel.daily_limit
+        } else if (channel.channel_type == 'EMAIL') {
+          totalEmailWarmup += channel.daily_limit
         }
-      </Grid>
+      }
+    }
+  }
+
+  return <>
+    <Card withBorder mt='xs' p={0} pt={0} >
+      <Flex mb='md' pl='md' pr='md' p='xs' sx={{backgroundColor: theme.colors.blue[6]}}>
+        <Title order={3} mt='0' sx={{flexDirection: 'row', display: 'flex', color: 'white'}}>Volume</Title>
+        <Badge color='red' variant='outline' size='lg' sx={{backgroundColor: 'white'}} ml='md' mt='2px'>
+          🔥 Warmup
+        </Badge>
+
+        <IconChevronDown color='white' size='2rem' style={{marginLeft: 'auto', cursor: 'pointer'}} onClick={() => toggle}/>
+      </Flex>
+      <Card mt='0' pt='0'>
+        <Flex>
+          <Card w='50%' pt='0'>
+            <Flex pl='xs' mb='xs'>
+              <Text mt='4px'>
+                <IconSend size='1rem' color={'gray'} />
+              </Text>
+              <Text ml='4px' fz='9px' color='gray' fw='500' mt='6px'>
+                Daily Send Volume:
+              </Text>
+              <Flex color='gray' pt='4px' pl='16px' pr='16px' ml='xs' sx={{border: 'solid 1px #ddd; border-radius: 20px;'}} mah={26}>
+                <IconBrandLinkedin size='1rem' color={theme.colors.blue[6]} />
+                <Text ml='4px' fz='9px' color='gray' fw='bold'>
+                  <span style={{color: theme.colors.blue[6], fontWeight: 'bold'}}>LinkedIn:</span> {totalLinkedInWarmup} / day
+                </Text>
+              </Flex>
+              <Flex color='gray' pt='4px' pl='16px' pr='16px' ml='xs' sx={{border: 'solid 1px #ddd; border-radius: 20px;'}}  mah={26}>
+                <IconMail size='1rem' color={theme.colors.orange[6]} />
+                <Text ml='4px' fz='9px' color='gray' fw='bold'>
+                  <span style={{color: theme.colors.orange[6], fontWeight: 'bold'}}>Email:</span> {totalEmailWarmup} / day
+                </Text>
+              </Flex>
+            </Flex>
+            <Card withBorder>
+              <WarmupChart />
+            </Card>
+          </Card>
+          <Box w='50%'>
+            <Text align='right' h={39}><IconUser size='1rem' color={theme.colors.blue[6]}/> <b>{sdrs.filter((x: any) => x.active).length}</b> Active Seats</Text>
+            {
+              sdrs.sort((a: any, b: any) => -(a.active - b.active)).filter((x: any) => x.active).map((x: any) => {
+                // reduce `x.channels` based on daily_limit
+                let totalSendVolume = 0
+                let totalSentVolume = 0;
+                if (x.channels) {
+                  for (const channel of x.channels) {
+                    totalSendVolume += channel.daily_limit
+                    totalSentVolume += channel.daily_sent_count
+                  }
+                }
+
+                let emails = x.channels?.filter((x: any) => x.channel_type == 'EMAIL').map((x: any) => x.account_name)
+
+                return <Card withBorder mb='xs'>
+                    <Card sx={{flexDirection: 'row', display: 'flex'}}>
+                      <Flex w='38%'>
+                        <Box sx={{borderRadius: 10}}>
+                          <Image 
+                            src={x.img_url ? x.img_url : 'https://images.squarespace-cdn.com/content/v1/56031d09e4b0dc68f6197723/1469030770980-URDU63CK3Q4RODZYH0S1/Grey+Box.jpg?format=1500w'} 
+                            width={40} height={40} radius="sm" />
+                        </Box>
+                        <Box ml='xs'>
+                          <Badge size='xs' color={x.active ? 'green' : 'gray'} >
+                            {x.active ? 'Active' : 'Inactive'}
+                          </Badge>
+                          <Text fw={500} fz={12}>{x.sdr_name}</Text>
+                        </Box>
+                      </Flex>
+                      <Divider orientation='vertical' mr='xs' />
+                      <Box w='60%'>
+                      {
+                        ["LINKEDIN", "EMAIL"].map((channel) => {
+                          let label = 'LinkedIn'
+                          if (channel == 'EMAIL') {
+                            label = 'Email'
+                          } 
+
+                          let icon = <IconBrandLinkedin size='1.1rem'  color={theme.colors.blue[6]}/>
+                          if (channel == 'EMAIL') {
+                            icon = <IconMail size='1.1rem' color={theme.colors.blue[6]} />
+                          }
+
+                          let unit = 'seat'
+                          if (channel == 'EMAIL') {
+                            unit = 'inboxes'
+                          }
+
+                          const numUnits = x.channels?.filter((x: any) => x.channel_type == channel).length
+
+                          return <Flex>
+                                    <Group w='100%'>
+                                      <HoverCard shadow="md" withinPortal>
+                                        <HoverCard.Target>
+                                          <Box w='100%'>
+                                            <Box w='100%' sx={{cursor: 'pointer'}}>
+                                              <Flex w='100%'>
+                                                {icon}
+                                                <Text mt='0' color='blue' fw='bold' w='50%' size='10px' ml='xs'>
+                                                  {label}
+                                                </Text>
+                                                <Badge color='gray' w='50%' fw='500' size='xs' variant='outline' mr='md'>
+                                                  {numUnits} {unit}
+                                                </Badge>
+                                                <Box ml='5pxs'>
+                                                  <IconClick size='1.1rem' color={theme.colors.blue[6]} />
+                                                </Box>
+                                              </Flex>
+                                            </Box>
+                                            {
+                                              channel === 'LINKEDIN' && <Divider mt='4px' mb='12px' />
+                                            }
+                                          </Box>
+                                        </HoverCard.Target>
+                                        <HoverCard.Dropdown w={400}>
+                                          <Table>
+                                            <thead>
+                                              <tr>
+                                                <th>Channel</th>
+                                                <th>Volume</th>
+                                                <th>Warmup</th>
+                                                <th>Reputation</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {
+                                                x.channels?.filter((x: any) => x.channel_type == channel).map((channel: any) => {
+                                                  return <tr> 
+                                                    <td>{channel.channel_type == 'LINKEDIN' ? <IconBrandLinkedin size='0.9rem'/> : <IconMail size='0.9rem'/>} {channel.account_name}</td>
+                                                    <td>{channel.daily_sent_count} / {channel.daily_limit}</td>
+                                                    <td><Badge size='xs' color={channel.warmup_enabled ? 'green' : 'blue'}>{channel.warmup_enabled ? 'In progress' : 'Done'}</Badge></td>
+                                                    <td><Badge size='xs' color={channel.reputation > 80 ? 'green' : 'yellow'}>{channel.reputation}%</Badge></td>
+                                                  </tr>
+                                                })
+                                              }
+                                            </tbody>
+                                          </Table>
+                                        </HoverCard.Dropdown>
+                                      </HoverCard>
+                                    </Group>
+                                  </Flex>
+                        })
+                      }
+                      </Box>
+                    </Card>
+
+                    {emails.length > 0 && <Divider mb='4px' />}
+
+                    {
+                      emails.slice(0, 4).map((email: any) => (
+                        <Badge size='xs' fz='8' mr='xs' color={'gray'} variant='outline'>{email}</Badge>
+                      ))
+                    }
+                    {emails.length > 4 && (
+                      <Text size='xs' color='gray'>... and {emails.length - 4} more</Text>
+                    )}
+                  </Card>
+              })
+            }
+          </Box>
+        </Flex>
+      </Card>
     </Card>
   </>
 }

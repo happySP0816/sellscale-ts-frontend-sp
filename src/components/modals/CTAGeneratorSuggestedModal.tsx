@@ -1,6 +1,7 @@
 import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import { CTA } from "@common/sequence/CTAGenerator";
+import LinkedinInitialMessageTemplate from '@common/sequence/LinkedinInitialMessageTemplate';
 import {
   Modal,
   Divider,
@@ -27,6 +28,8 @@ import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
 
 export const CTAGeneratorSuggestedModal: React.FC<{
+  templateMode?: boolean;
+  onTemplateSelected?: (template: LinkedinInitialMessageTemplate) => void;
   generatedCTAs: CTA[];
   modalOpened: boolean;
   closeModal: () => void;
@@ -35,7 +38,7 @@ export const CTAGeneratorSuggestedModal: React.FC<{
     persona: string;
     proposition: string;
   };
-}> = ({ generatedCTAs, modalOpened, closeModal, formValue }) => {
+}> = ({ templateMode, generatedCTAs, modalOpened, closeModal, formValue, onTemplateSelected }) => {
   const theme = useMantineTheme();
   const [isLoading, setLoading] = useState(false);
   const [CTAs, setCTAs] = useState<CTA[]>([]);
@@ -84,7 +87,15 @@ export const CTAGeneratorSuggestedModal: React.FC<{
     );
     setLoading(false);
     if (result.status === "success") {
-      setCTAs(result.data.map((cta: any) => ({ ...cta, enabled: true })));
+      console.log(result.data);
+      setCTAs(result.data.map((cta: any) => {
+        var data = { ...cta, enabled: true }
+        // if template mode
+        if (templateMode) {
+          data['cta'] = "Hi [[first name]], [[personalized first line]] " + data['cta']
+        }
+        return data
+      }));
     } else {
       showNotification({
         id: "generate-cta-ideas-error",
@@ -122,7 +133,7 @@ export const CTAGeneratorSuggestedModal: React.FC<{
               color: "#FFFFFF",
             }}
           >
-            CTA Generator
+            {templateMode ? 'Template' : 'CTA'} Generator
           </Modal.Title>
           <ActionIcon
             variant="outline"
@@ -274,7 +285,7 @@ export const CTAGeneratorSuggestedModal: React.FC<{
                     !form.values.proposition.length
                   }
                 >
-                  Re-Generate CTA
+                  Re-Generate {templateMode ? 'Template' : 'CTA'}
                 </Button>
               </Flex>
             </>
@@ -288,7 +299,7 @@ export const CTAGeneratorSuggestedModal: React.FC<{
             labelPosition="center"
             label={
               <Text fw={700} color="gray.5" size={"sm"}>
-                Suggested CTAs ({CTAs.length})
+                Suggested {templateMode ? 'Templates' : 'CTAs'} ({CTAs.length})
               </Text>
             }
           />
@@ -309,6 +320,9 @@ export const CTAGeneratorSuggestedModal: React.FC<{
                   data={e}
                   key={index}
                   onUseCTASuccess={onUseCTASuccess}
+                  templateMode={templateMode}
+                  onTemplateSelected={onTemplateSelected}
+                  closeModal={closeModal}
                 />
               );
             })}
@@ -322,7 +336,10 @@ export const CTAGeneratorSuggestedModal: React.FC<{
 const CTASuggestOption: React.FC<{
   data: CTA;
   onUseCTASuccess: () => void;
-}> = ({ data, onUseCTASuccess }) => {
+  templateMode?: boolean;
+  onTemplateSelected?: (template: LinkedinInitialMessageTemplate) => void;
+  closeModal: () => void;
+}> = ({ data, onUseCTASuccess, templateMode, onTemplateSelected, closeModal }) => {
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
   const [isLoading, setLoading] = useState(false);
@@ -335,6 +352,30 @@ const CTASuggestOption: React.FC<{
   }, [data.cta]);
 
   const handleUseCTA = async () => {
+    
+    if (templateMode) {
+      onTemplateSelected && onTemplateSelected(
+        new LinkedinInitialMessageTemplate({
+          active: true,
+          human_readable_prompt: "Personalized LinkedIn Intro Message",
+          name: data.tag?.replaceAll("[", "").replaceAll("]", "") + "-Based",
+          raw_prompt: CTAValue,
+          tag: data.tag?.replaceAll("[", "").replaceAll("]", "") + "-Based",
+          tone: "professional",
+          transformer_blocklist: [],
+        })
+      )
+      showNotification({
+        id: "create-template-success",
+        title: "Success",
+        message: `Added Template to Persona`,
+        color: "green",
+        autoClose: 5000,
+      });
+      closeModal()
+      return
+    }
+
     if (!currentProject) {
       showNotification({
         id: "create-cta-error",
@@ -440,7 +481,7 @@ const CTASuggestOption: React.FC<{
                 disabled={!data.enabled}
                 onClick={() => setEditing(true)}
               >
-                Edit CTA
+                Edit {templateMode ? 'Template' : 'CTA'}
               </Button>
             </Text>
           )}
@@ -456,7 +497,7 @@ const CTASuggestOption: React.FC<{
             fw={700}
             onClick={handleUseCTA}
           >
-            Use CTA
+            Use {templateMode ? 'Template' : 'CTA'}
           </Button>
         </Flex>
       </Flex>

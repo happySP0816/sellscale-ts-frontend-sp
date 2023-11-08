@@ -27,12 +27,12 @@ const Card: React.FC<{
       <Box style={{ justifyContent: "center", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
         <Flex>
           {icon}
-          <Text size={"0.7rem"} color="gray.6" fw={600} ml='4px'>
+          <Text size={"0.6rem"} color="gray.6" fw={500} ml='4px'>
             {title}
           </Text>
         </Flex>
 
-        <Text weight={700} size={"0.75rem"}>
+        <Text weight={700} size={"0.8rem"}>
           {value}
         </Text>
       </Box>

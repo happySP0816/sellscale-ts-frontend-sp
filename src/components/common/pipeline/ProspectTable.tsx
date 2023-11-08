@@ -60,9 +60,8 @@ export default function ProspectTable({
 }) {
   const theme = useMantineTheme();
   const tableContainerRef = useRef<HTMLDivElement>(null); //we can get access to the underlying TableContainer element and react to its scroll events
-  const rowVirtualizerInstanceRef = useRef<
-    MRT_Virtualizer<HTMLDivElement, HTMLTableRowElement>
-  >(null); //we can get access to the underlying Virtualizer instance and call its scrollToIndex method
+  const rowVirtualizerInstanceRef =
+    useRef<MRT_Virtualizer<HTMLDivElement, HTMLTableRowElement>>(null); //we can get access to the underlying Virtualizer instance and call its scrollToIndex method
 
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
     []
@@ -83,85 +82,80 @@ export default function ProspectTable({
   const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
   // ??
 
-  const {
-    data,
-    fetchNextPage,
-    isError,
-    isFetching,
-    isLoading,
-  } = useInfiniteQuery({
-    queryKey: [
-      `query-infinite-pipeline-prospects`,
-      columnFilters,
-      globalFilter,
-      sorting,
-    ],
-    queryFn: async ({ pageParam = 0 }) => {
-      const response = await fetch(`${API_URL}/prospect/get_prospects`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: "", //search.length > 0 ? search : undefined,
-          channel: "SELLSCALE", //channel.length > 0 ? channel : "SELLSCALE",
-          status: undefined, //statuses?.length > 0 ? statuses : undefined,
-          limit: fetchSize,
-          offset: pageParam * fetchSize,
-          ordering: [],
-        }),
-      });
-      if (response.status === 401) {
-        logout();
-      }
-      const res = await response.json();
-      if (!res || !res.prospects) {
-        return [] as any;
-      }
+  const { data, fetchNextPage, isError, isFetching, isLoading } =
+    useInfiniteQuery({
+      queryKey: [
+        `query-infinite-pipeline-prospects`,
+        columnFilters,
+        globalFilter,
+        sorting,
+      ],
+      queryFn: async ({ pageParam = 0 }) => {
+        const response = await fetch(`${API_URL}/prospect/get_prospects`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: "", //search.length > 0 ? search : undefined,
+            channel: "SELLSCALE", //channel.length > 0 ? channel : "SELLSCALE",
+            status: undefined, //statuses?.length > 0 ? statuses : undefined,
+            limit: fetchSize,
+            offset: pageParam * fetchSize,
+            ordering: [],
+          }),
+        });
+        if (response.status === 401) {
+          logout();
+        }
+        const res = await response.json();
+        if (!res || !res.prospects) {
+          return [] as any;
+        }
 
-      // TODO: Fix this
-      const channel = "SELLSCALE";
+        // TODO: Fix this
+        const channel = "SELLSCALE";
 
-      return {
-        data: res.prospects.map((prospect: any) => {
-          return {
-            id: prospect.id,
-            full_name: prospect.full_name,
-            company: prospect.company,
-            title: prospect.title,
-            industry: prospect.industry,
-            status:
-              channel === "SELLSCALE"
-                ? prospect.overall_status
-                : channel === "EMAIL"
-                ? prospect.email_status
-                : prospect.linkedin_status,
-            channels: [
-              prospect.linkedin_status &&
-              prospect.linkedin_status !== "PROSPECTED"
-                ? "LINKEDIN"
-                : undefined,
-              prospect.email_status ? "EMAIL" : undefined,
-            ].filter((x) => x),
-            review_details: {
-              last_reviewed: prospect.last_reviewed,
-              times_bumped: prospect.times_bumped,
-            },
-            meta: {
-              totalRowCount: res.total_count,
-            },
-          };
-        }),
-        meta: {
-          totalRowCount: res.total_count,
-        },
-      };
-    },
-    getNextPageParam: (_lastGroup, groups) => groups.length,
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
-  });
+        return {
+          data: res.prospects.map((prospect: any) => {
+            return {
+              id: prospect.id,
+              full_name: prospect.full_name,
+              company: prospect.company,
+              title: prospect.title,
+              industry: prospect.industry,
+              status:
+                channel === "SELLSCALE"
+                  ? prospect.overall_status
+                  : channel === "EMAIL"
+                  ? prospect.email_status
+                  : prospect.linkedin_status,
+              channels: [
+                prospect.linkedin_status &&
+                prospect.linkedin_status !== "PROSPECTED"
+                  ? "LINKEDIN"
+                  : undefined,
+                prospect.email_status ? "EMAIL" : undefined,
+              ].filter((x) => x),
+              review_details: {
+                last_reviewed: prospect.last_reviewed,
+                times_bumped: prospect.times_bumped,
+              },
+              meta: {
+                totalRowCount: res.total_count,
+              },
+            };
+          }),
+          meta: {
+            totalRowCount: res.total_count,
+          },
+        };
+      },
+      getNextPageParam: (_lastGroup, groups) => groups.length,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    });
 
   const flatData = useMemo(
     () => data?.pages.flatMap((page: any) => page.data) ?? [],
@@ -404,7 +398,6 @@ export default function ProspectTable({
           },
         })}
       />
-
     </Box>
   );
 }

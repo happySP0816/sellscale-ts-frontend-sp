@@ -100,6 +100,7 @@ import { CampaignAnalyticsData } from "./CampaignAnalytics";
 import OverallPipeline from "./OverallPipeline";
 import { TodayActivityData } from "./OverallPipeline/TodayActivity";
 import UserStatusToggle from "./UserStatusToggle";
+import AllCampaign from "../../PersonaCampaigns/AllCampaign";
 
 export type CampaignPersona = {
   id: number;
@@ -124,7 +125,6 @@ export default function PersonaCampaigns() {
   const [projects, setProjects] = useState<PersonaOverview[]>([]);
   const [personas, setPersonas] = useState<CampaignPersona[]>([]);
 
-
   const [search, setSearch] = useState<string>("");
 
   let filteredProjects = personas.filter((personas) =>
@@ -145,6 +145,9 @@ export default function PersonaCampaigns() {
     newReplies: 0,
   });
   const [currentLinkedInSLA, setCurrentLinkedInSLA] = useState<number>(0);
+  const [showInactivePersonas, setShowInactivePersonas] = useState<boolean>(
+    false
+  )
 
   let [loadingPersonas, setLoadingPersonas] = useState<boolean>(true);
 
@@ -219,7 +222,7 @@ export default function PersonaCampaigns() {
   };
 
   useEffect(() => {
-    fetchCampaignPersonas()
+    fetchCampaignPersonas();
   }, []);
 
   // sort personas by persona.active then persona.created_at in desc order
@@ -238,14 +241,14 @@ export default function PersonaCampaigns() {
           <Title order={2}>Campaigns</Title>
         </Group>
         <Tabs defaultValue="overview">
-          <Tabs.List mb='md'>
+          <Tabs.List mb="md">
             <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />}>
               Overview
             </Tabs.Tab>
             <Tabs.Tab
               value="linkedin"
               icon={<IconBrandLinkedin size="0.8rem" />}
-              ml='auto'
+              ml="auto"
             >
               Queued LinkedIns
             </Tabs.Tab>
@@ -409,19 +412,6 @@ export default function PersonaCampaigns() {
                       <Loader />
                     </Center>
                   )}
-                  {filteredProjects.filter((persona) => persona.active).length >
-                    1 && (
-                    <Alert
-                      sx={{
-                        borderRadius: "md",
-                        border: "solid 1px red",
-                      }}
-                      color="red"
-                      title="Multiple Active Personas"
-                      children="You have multiple active personas. This is not recommended as it will cause your campaigns to compete with each other. We recommend you deactivate all but one persona."
-                      icon={<IconAlertCircle size="1rem" />}
-                    />
-                  )}
                   {!loadingPersonas &&
                     filteredProjects
                       .filter((persona) => persona.active)
@@ -452,16 +442,7 @@ export default function PersonaCampaigns() {
                         />
                       ))}
 
-                  {filteredProjects.filter((persona) => !persona.active)
-                    .length > 0 && (
-                    <Divider
-                      label="Inactive Personas"
-                      labelPosition="center"
-                      color="gray"
-                    />
-                  )}
-
-                  {!loadingPersonas &&
+                  {showInactivePersonas && !loadingPersonas &&
                     filteredProjects
                       .filter((persona) => !persona.active)
                       .map((persona, index) => (
@@ -491,6 +472,12 @@ export default function PersonaCampaigns() {
                         />
                       ))}
 
+                  {filteredProjects.filter((persona) => !persona.active).length > 0 && (
+                    <Button color='gray' leftIcon={<IconCalendar color='gray' size='0.8rem'></IconCalendar>} variant='outline' onClick={() => setShowInactivePersonas(!showInactivePersonas)}>
+                      {showInactivePersonas ? 'Hide' : 'Show'} {filteredProjects.filter((persona) => !persona.active).length} Inactive Campaign{filteredProjects.filter((persona) => !persona.active) .length > 1 ? "s" : ""}  
+                    </Button>
+                  )}
+
                   {!loadingPersonas && filteredProjects.length === 0 && (
                     <Center h={200}>
                       <Text fs="italic" c="dimmed">
@@ -498,6 +485,8 @@ export default function PersonaCampaigns() {
                       </Text>
                     </Center>
                   )}
+
+                  <AllCampaign />
                 </Stack>
               </ScrollArea>
             </Stack>
@@ -669,8 +658,12 @@ function PersonCampaignCard(props: {
           </Box>
 
           <Group
-            sx={{ justifyContent: 'flex-end', display: 'flex', flexDirection: 'row' }}
-            ml='auto'
+            sx={{
+              justifyContent: "flex-end",
+              display: "flex",
+              flexDirection: "row",
+            }}
+            ml="auto"
           >
             <Button
               w={60}
@@ -718,7 +711,9 @@ function PersonCampaignCard(props: {
             <Box>
               <CampaignGraph
                 personaId={props.persona.id}
-                unusedProspects={Math.min(props.project?.num_unused_li_prospects ?? 0)}
+                unusedProspects={Math.min(
+                  props.project?.num_unused_li_prospects ?? 0
+                )}
                 sections={types}
                 onChannelClick={(sectionType: string) => {
                   if (props.project == undefined) return;

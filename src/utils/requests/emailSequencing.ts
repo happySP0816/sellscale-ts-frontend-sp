@@ -79,6 +79,7 @@ export async function getEmailSequenceSteps(userToken: string, overallStatuses: 
  * @param bumpedCount
  * @param setDefault
  * @param delayDays
+ * @param transformerBlocklist
  * @returns - MsgResponse
  */
 export async function patchSequenceStep(
@@ -89,7 +90,8 @@ export async function patchSequenceStep(
     template: string,
     bumpedCount: number | null,
     setDefault: boolean,
-    delayDays?: number | null
+    delayDays?: number | null,
+    transformerBlocklist?: string[] | null
   ): Promise<MsgResponse> {
 
   const response = await fetch(
@@ -108,6 +110,7 @@ export async function patchSequenceStep(
         default: setDefault,
         sequence_delay_days: delayDays,
         bumped_count: bumpedCount,
+        transformer_blocklist: transformerBlocklist
       })
     }
   );

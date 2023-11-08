@@ -58,6 +58,7 @@ export default function CreatePersona(props: PropsType) {
       await createLiTemplate(
         userToken,
         result.data,
+        'Great to connect!',
         `Hi [first name]! [personalization related to them]. It’s great to connect.`,
         true,
         RESEARCH_POINTS,

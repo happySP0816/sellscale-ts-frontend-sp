@@ -51,6 +51,7 @@ import {
   Alert,
   Loader,
   Image,
+  HoverCard,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
@@ -64,6 +65,7 @@ import { modals, openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
   IconCheck,
+  IconChevronCompactDown,
   IconCircle2Filled,
   IconCopy,
   IconDots,
@@ -111,6 +113,7 @@ import {
   IconArrowRight,
   IconArrowsExchange,
   IconBulb,
+  IconChevronDown,
   IconChevronRight,
   IconCircle,
   IconCircleMinus,
@@ -133,7 +136,11 @@ import { CtaSection } from "./CtaSection";
 import CTAGenerator from "./CTAGenerator";
 import { deterministicMantineColor } from '@utils/requests/utils';
 import moment from 'moment';
-import { getLiTemplates } from "@utils/requests/linkedinTemplates";
+import { createLiTemplate, getLiTemplates, updateLiTemplate } from "@utils/requests/linkedinTemplates";
+import DOMPurify from 'isomorphic-dompurify';
+import InitialMessageTemplateSelector from './InitialMessageTemplateSelector';
+import LinkedinInitialMessageTemplate from './LinkedinInitialMessageTemplate';
+import { CTAGeneratorSuggestedModal } from '@modals/CTAGeneratorSuggestedModal';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -276,8 +283,8 @@ export default function SequenceSection() {
       ? "green"
       : !bf?.etl_num_times_used ||
         (bf?.etl_num_times_used && bf?.etl_num_times_used < 10)
-      ? "gray"
-      : "red";
+        ? "gray"
+        : "red";
   };
 
   const getReplyPillText = (
@@ -434,8 +441,8 @@ export default function SequenceSection() {
                         isNaN(replyRate)
                           ? "grey"
                           : replyRate > 0.5
-                          ? "green"
-                          : "red"
+                            ? "green"
+                            : "red"
                       }
                     >
                       Replied:{" "}
@@ -459,11 +466,11 @@ export default function SequenceSection() {
                       : (bf0 &&
                         bf0.etl_num_times_used &&
                         bf0.etl_num_times_used < 20
-                          ? "Not enough data, "
-                          : "") +
-                        (bf0?.etl_num_times_converted || 0) +
-                        " / " +
-                        (bf0?.etl_num_times_used || 0)
+                        ? "Not enough data, "
+                        : "") +
+                      (bf0?.etl_num_times_converted || 0) +
+                      " / " +
+                      (bf0?.etl_num_times_used || 0)
                   }
                   bodyTitle={bf0?.title ?? ""}
                   // bodyText={bf0?.description ?? ""}
@@ -532,11 +539,11 @@ export default function SequenceSection() {
                       : (bf1 &&
                         bf1.etl_num_times_used &&
                         bf1.etl_num_times_used < 20
-                          ? "Not enough data, "
-                          : "") +
-                        (bf1?.etl_num_times_converted || 0) +
-                        " / " +
-                        (bf1?.etl_num_times_used || 0)
+                        ? "Not enough data, "
+                        : "") +
+                      (bf1?.etl_num_times_converted || 0) +
+                      " / " +
+                      (bf1?.etl_num_times_used || 0)
                   }
                   badgeColor={bumpConversionColor(bf1, bf1Conversion)}
                   bodyTitle={bf1?.title ?? ""}
@@ -610,11 +617,11 @@ export default function SequenceSection() {
                       : (bf2 &&
                         bf2.etl_num_times_used &&
                         bf2.etl_num_times_used < 20
-                          ? "Not enough data, "
-                          : "") +
-                        (bf2?.etl_num_times_converted || 0) +
-                        " / " +
-                        (bf2?.etl_num_times_used || 0)
+                        ? "Not enough data, "
+                        : "") +
+                      (bf2?.etl_num_times_converted || 0) +
+                      " / " +
+                      (bf2?.etl_num_times_used || 0)
                   }
                   bodyTitle={bf2?.title ?? ""}
                   // bodyText={bf2?.description ?? ""}
@@ -687,11 +694,11 @@ export default function SequenceSection() {
                       : (bf3 &&
                         bf3.etl_num_times_used &&
                         bf3.etl_num_times_used < 20
-                          ? "Not enough data, "
-                          : "") +
-                        (bf3?.etl_num_times_converted || 0) +
-                        " / " +
-                        (bf3?.etl_num_times_used || 0)
+                        ? "Not enough data, "
+                        : "") +
+                      (bf3?.etl_num_times_converted || 0) +
+                      " / " +
+                      (bf3?.etl_num_times_used || 0)
                   }
                   bodyTitle={bf3?.title ?? ""}
                   // bodyText={bf3?.description ?? ""}
@@ -779,7 +786,7 @@ export default function SequenceSection() {
         </Group>
         <PersonaUploadDrawer
           personaOverviews={currentProject ? [currentProject] : []}
-          afterUpload={() => {}}
+          afterUpload={() => { }}
         />
       </Card>
     </>
@@ -811,7 +818,7 @@ function BumpFrameworkSelect(props: {
   const { data: frameworkTemplates } = useQuery({
     queryKey: [`query-get-bump-framework-templates`],
     queryFn: async () => {
-      
+
       const res = await fetch(`${API_URL}/bump_framework/bump_framework_templates?bumped_count=${props.bumpedCount}&overall_status=${props.overallStatus}`, {
         method: "GET",
       });
@@ -849,192 +856,192 @@ function BumpFrameworkSelect(props: {
   });
 
   return (
-  <>
-    <ModalSelector
-      selector={{
-        override: (
-          <Tooltip label="Edit" withinPortal>
-            <ActionIcon radius="xl">
-              <IconPencil size="1.1rem" />
-            </ActionIcon>
-          </Tooltip>
-        ),
-      }}
-      title={{
-        name: props.title,
-        rightSection: (
-          <Menu shadow="md" width={200} withArrow>
-            <Menu.Target>
-              <Button variant="subtle" compact>
-                New Framework
-              </Button>
-            </Menu.Target>
-
-            <Menu.Dropdown>
-              <Menu.Item
-                icon={<IconPlus size={14} />}
-                onClick={() => {
-                  openContextModal({
-                    modal: "createBumpFramework",
-                    title: "Create Bump Framework",
-                    innerProps: {
-                      modalOpened: true,
-                      openModal: () => {},
-                      closeModal: () => {},
-                      backFunction: () => {},
-                      dataChannels: dataChannels,
-                      status: props.overallStatus,
-                      archetypeID: currentProject?.id,
-                      bumpedCount: props.bumpedCount,
-                    },
-                  });
-                }}
-              >
-                Create New
-              </Menu.Item>
-              <Menu.Item
-                icon={<IconCopy size={14} />}
-                onClick={() => {
-                  openContextModal({
-                    modal: "cloneBumpFramework",
-                    title: "Clone Bump Framework",
-                    innerProps: {
-                      openModal: () => {},
-                      closeModal: () => {},
-                      backFunction: () => {},
-                      status: props.bumpedFrameworks.find(
-                        (bf) => bf.id === props.activeBumpFrameworkId
-                      )?.overall_status,
-                      archetypeID: currentProject?.id,
-                      bumpedCount: props.bumpedCount,
-                      showStatus: true,
-                    },
-                  });
-                }}
-              >
-                Copy from Existing
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        ),
-      }}
-      loading={false}
-      items={props.bumpedFrameworks.map((bf) => ({
-        id: bf.id,
-        name: bf.title,
-        onClick: () => {},
-        leftSection: (
-          <Box w='100px' sx={{justifyContent: 'center', textAlign: 'center'}}> 
-            <Badge
-              size="sm"
-              variant="filled"
-              ml="6px"
-            >
-              {bf.etl_num_times_converted !== undefined && bf.etl_num_times_used !== undefined ? Math.round(bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001) * 1000) / 10 + '%' : ''}
-            </Badge>
-            <Text mt='xs' fz='xs'>{bf.etl_num_times_converted + " / " + bf.etl_num_times_used + " times"}</Text>
-            <Text fz='xs' color='gray'>{moment(bf.created_at).format('MMM DD, YYYY')}</Text>
-          </Box>
-        ),
-        content: (
-          <Box>
-            <Text fz="sm" fw={500}>
-              {bf.title}
-            </Text>
-            <Text fz="xs" c="dimmed">
-              {bf.description}
-            </Text>
-          </Box>
-        ),
-        rightSection: (
-          <Box ml="auto">
-            <Switch
-              checked={bf.default}
-              onChange={(checked) => {
-                setLoading(true);
-                const result = patchBumpFramework(
-                  userToken,
-                  bf.id,
-                  bf.overall_status,
-                  bf.title,
-                  bf.description,
-                  bf.bump_length,
-                  bf.bumped_count,
-                  bf.bump_delay_days,
-                  !bf.default,
-                  bf.use_account_research,
-                  bf.transformer_blocklist
-                )
-                  .then(() => {
-                    showNotification({
-                      title: "Success",
-                      message: "Bump Framework enabled",
-                      color: "green",
-                    });
-                  })
-                  .finally(() => {
-                    (async () => {
-                      await queryClient.refetchQueries({
-                        queryKey: [`query-get-bump-frameworks`],
-                      });
-                      setLoading(false);
-                    })();
-                  });
-              }}
-            />
-            {loading && <Loader size="xs" mt="xs" />}
-          </Box>
-        ),
-      }))}
-      size={800}
-      activeItemId={props.activeBumpFrameworkId}
-    />
-    {/* Create New Framework */}
+    <>
       <ModalSelector
         selector={{
-          override: <Tooltip label="Create New Framework" withinPortal>
+          override: (
+            <Tooltip label="Edit" withinPortal>
               <ActionIcon radius="xl">
-                <IconPlus size="1.1rem" />
+                <IconPencil size="1.1rem" />
               </ActionIcon>
-            </Tooltip>,
+            </Tooltip>
+          ),
         }}
         title={{
-          name: "Choose a Template",
+          name: props.title,
           rightSection: (
-              <Button variant="outline" radius="md" size='xs' 
-                leftIcon={<IconTool size="1rem" />}
-                onClick={() => {
+            <Menu shadow="md" width={200} withArrow>
+              <Menu.Target>
+                <Button variant="subtle" compact>
+                  New Framework
+                </Button>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Item
+                  icon={<IconPlus size={14} />}
+                  onClick={() => {
                     openContextModal({
                       modal: "createBumpFramework",
-                      title: "Make your own framework",
+                      title: "Create Bump Framework",
                       innerProps: {
                         modalOpened: true,
-                        openModal: () => {},
-                        closeModal: () => {
-                          queryClient.refetchQueries({
-                            queryKey: [`query-get-bump-frameworks`],
-                          });
-                          modals.closeAll();
-                        },
-                        backFunction: () => {},
+                        openModal: () => { },
+                        closeModal: () => { },
+                        backFunction: () => { },
                         dataChannels: dataChannels,
                         status: props.overallStatus,
                         archetypeID: currentProject?.id,
                         bumpedCount: props.bumpedCount,
-                        initialValues: {
-                          title: "",
-                          description: "",
-                          default: false,
-                          bumpDelayDays: 2,
-                          useAccountResearch: true,
-                          bumpLength: "1 week",
-                          human_readable_prompt: ""
-                        }
                       },
                     });
-                  }}>
-                Make a Custom Framework
-              </Button>
+                  }}
+                >
+                  Create New
+                </Menu.Item>
+                <Menu.Item
+                  icon={<IconCopy size={14} />}
+                  onClick={() => {
+                    openContextModal({
+                      modal: "cloneBumpFramework",
+                      title: "Clone Bump Framework",
+                      innerProps: {
+                        openModal: () => { },
+                        closeModal: () => { },
+                        backFunction: () => { },
+                        status: props.bumpedFrameworks.find(
+                          (bf) => bf.id === props.activeBumpFrameworkId
+                        )?.overall_status,
+                        archetypeID: currentProject?.id,
+                        bumpedCount: props.bumpedCount,
+                        showStatus: true,
+                      },
+                    });
+                  }}
+                >
+                  Copy from Existing
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          ),
+        }}
+        loading={false}
+        items={props.bumpedFrameworks.map((bf) => ({
+          id: bf.id,
+          name: bf.title,
+          onClick: () => { },
+          leftSection: (
+            <Box w='100px' sx={{ justifyContent: 'center', textAlign: 'center' }}>
+              <Badge
+                size="sm"
+                variant="filled"
+                ml="6px"
+              >
+                {bf.etl_num_times_converted !== undefined && bf.etl_num_times_used !== undefined ? Math.round(bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001) * 1000) / 10 + '%' : ''}
+              </Badge>
+              <Text mt='xs' fz='xs'>{bf.etl_num_times_converted + " / " + bf.etl_num_times_used + " times"}</Text>
+              <Text fz='xs' color='gray'>{moment(bf.created_at).format('MMM DD, YYYY')}</Text>
+            </Box>
+          ),
+          content: (
+            <Box>
+              <Text fz="sm" fw={500}>
+                {bf.title}
+              </Text>
+              <Text fz="xs" c="dimmed">
+                {bf.description}
+              </Text>
+            </Box>
+          ),
+          rightSection: (
+            <Box ml="auto">
+              <Switch
+                checked={bf.default}
+                onChange={(checked) => {
+                  setLoading(true);
+                  const result = patchBumpFramework(
+                    userToken,
+                    bf.id,
+                    bf.overall_status,
+                    bf.title,
+                    bf.description,
+                    bf.bump_length,
+                    bf.bumped_count,
+                    bf.bump_delay_days,
+                    !bf.default,
+                    bf.use_account_research,
+                    bf.transformer_blocklist
+                  )
+                    .then(() => {
+                      showNotification({
+                        title: "Success",
+                        message: "Bump Framework enabled",
+                        color: "green",
+                      });
+                    })
+                    .finally(() => {
+                      (async () => {
+                        await queryClient.refetchQueries({
+                          queryKey: [`query-get-bump-frameworks`],
+                        });
+                        setLoading(false);
+                      })();
+                    });
+                }}
+              />
+              {loading && <Loader size="xs" mt="xs" />}
+            </Box>
+          ),
+        }))}
+        size={800}
+        activeItemId={props.activeBumpFrameworkId}
+      />
+      {/* Create New Framework */}
+      <ModalSelector
+        selector={{
+          override: <Tooltip label="Create New Framework" withinPortal>
+            <ActionIcon radius="xl">
+              <IconPlus size="1.1rem" />
+            </ActionIcon>
+          </Tooltip>,
+        }}
+        title={{
+          name: "Choose a Template",
+          rightSection: (
+            <Button variant="outline" radius="md" size='xs'
+              leftIcon={<IconTool size="1rem" />}
+              onClick={() => {
+                openContextModal({
+                  modal: "createBumpFramework",
+                  title: "Make your own framework",
+                  innerProps: {
+                    modalOpened: true,
+                    openModal: () => { },
+                    closeModal: () => {
+                      queryClient.refetchQueries({
+                        queryKey: [`query-get-bump-frameworks`],
+                      });
+                      modals.closeAll();
+                    },
+                    backFunction: () => { },
+                    dataChannels: dataChannels,
+                    status: props.overallStatus,
+                    archetypeID: currentProject?.id,
+                    bumpedCount: props.bumpedCount,
+                    initialValues: {
+                      title: "",
+                      description: "",
+                      default: false,
+                      bumpDelayDays: 2,
+                      useAccountResearch: true,
+                      bumpLength: "1 week",
+                      human_readable_prompt: ""
+                    }
+                  },
+                });
+              }}>
+              Make a Custom Framework
+            </Button>
           ),
         }}
         showSearchbar
@@ -1047,12 +1054,12 @@ function BumpFrameworkSelect(props: {
               props.overallStatus === "ACCEPTED" &&
               f.overall_statuses?.includes("ACCEPTED")
             ) || (
-              props.overallStatus === "BUMPED" &&
-              f.overall_statuses?.includes("BUMPED") && 
-              f.bumped_counts.includes(props.bumpedCount)
-            ) || (
-              !f.overall_statuses
-            )
+                props.overallStatus === "BUMPED" &&
+                f.overall_statuses?.includes("BUMPED") &&
+                f.bumped_counts.includes(props.bumpedCount)
+              ) || (
+                !f.overall_statuses
+              )
           }).map((template, index) => {
             return {
               id: index,
@@ -1082,14 +1089,14 @@ function BumpFrameworkSelect(props: {
                   title: "Create Bump Framework",
                   innerProps: {
                     modalOpened: true,
-                    openModal: () => {},
+                    openModal: () => { },
                     closeModal: () => {
                       queryClient.refetchQueries({
                         queryKey: [`query-get-bump-frameworks`],
                       });
                       modals.closeAll();
                     },
-                    backFunction: () => {},
+                    backFunction: () => { },
                     dataChannels: dataChannels,
                     status: props.overallStatus,
                     archetypeID: currentProject?.id,
@@ -1120,6 +1127,7 @@ function IntroMessageSection(props: {
   setProspectId: (prospectId: number) => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
   const queryClient = useQueryClient();
@@ -1156,18 +1164,37 @@ function IntroMessageSection(props: {
   const openCTASettings = () => {
     setActiveTab("ctas");
   };
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
+  const [showFeedback, setShowFeedback] = useState<boolean>(false);
+  const theme = useMantineTheme();
+
+  const [ctaModalOpened, setCtaModalOpened] = useState(false);
+
+  const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
+    useState<boolean>(false);
+  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] = useState<
+    string
+  >();
+
+  const [templateActivesShow, setTemplateActivesShow] = useState([true]);
 
   const { data: templates, isFetching: isFetchingTemplates } = useQuery({
     queryKey: [`query-get-li-templates`],
     queryFn: async () => {
       const response = await getLiTemplates(userToken, currentProject!.id);
+
+      if (response.data?.length > 0) {
+        setSelectedTemplateId(response.data[0].id);
+        setHumanFeedbackForTemplate(response.data[0].additional_instructions);
+      }
+
       return response.status === 'success' ? response.data as Record<string, any>[] : [];
     },
     refetchOnWindowFocus: false,
     enabled: !!currentProject && !!currentProject.template_mode,
   });
 
-  const getIntroMessage = async (prospectId: number, forceRegenerate: boolean = false) => {
+  const getIntroMessage = async (prospectId: number, forceRegenerate: boolean = false, selectedTemplateId?: number) => {
     if (!currentProject) return null;
     setLoading(true);
     setMessage("");
@@ -1182,17 +1209,25 @@ function IntroMessageSection(props: {
       );
       if (createResponse.status !== "success") {
         setLoading(false);
+        setTimeout(() => {
+          setShowFeedback(true)
+        }, 2000)
         return null;
       }
       const initMsgResponse = await generateInitialMessageForLiConvoSim(
         userToken,
-        createResponse.data
+        createResponse.data,
+        selectedTemplateId
       );
       if (initMsgResponse.status !== "success") {
         setLoading(false);
+        setTimeout(() => {
+          setShowFeedback(true)
+        }, 2000)
         return null;
       }
       convoResponse = await getLiConvoSim(userToken, createResponse.data);
+
     } else if (convoResponse.data.messages.length === 0) {
       // If convo exists but no messages, generate initial message
       const initMsgResponse = await generateInitialMessageForLiConvoSim(
@@ -1201,6 +1236,9 @@ function IntroMessageSection(props: {
       );
       if (initMsgResponse.status !== "success") {
         setLoading(false);
+        setTimeout(() => {
+          setShowFeedback(true)
+        }, 2000)
         return null;
       }
       convoResponse = await getLiConvoSim(
@@ -1210,6 +1248,9 @@ function IntroMessageSection(props: {
     }
 
     setLoading(false);
+    setTimeout(() => {
+      setShowFeedback(true)
+    }, 2000)
     try {
       setMessageMetaData(convoResponse.data.messages[0].meta_data);
       return convoResponse.data.messages[0].message;
@@ -1221,12 +1262,12 @@ function IntroMessageSection(props: {
   // When prospect changes, get the intro message
   useEffect(() => {
     if (!prospectId) return;
-    getIntroMessage(prospectId).then((msg) => {
+    getIntroMessage(prospectId, false, selectedTemplateId).then((msg) => {
       if (msg) {
         setMessage(msg);
       }
     });
-  }, [prospectId]);
+  }, [prospectId, selectedTemplateId]);
 
   if (!currentProject) return <></>;
   return (
@@ -1241,8 +1282,8 @@ function IntroMessageSection(props: {
         {!currentProject.template_mode && (
           <VoiceSelect
             personaId={currentProject.id}
-            onChange={(voice) => {}}
-            onFinishLoading={(voices) => {}}
+            onChange={(voice) => { }}
+            onFinishLoading={(voices) => { }}
             autoSelect
           />
         )}
@@ -1301,7 +1342,7 @@ function IntroMessageSection(props: {
                   leftIcon={<IconReload size='0.75rem' />}
                   onClick={() => {
                     if (prospectId) {
-                      getIntroMessage(prospectId, true).then((msg) => {
+                      getIntroMessage(prospectId, true, selectedTemplateId).then((msg) => {
                         if (msg) {
                           setMessage(msg);
                         }
@@ -1352,8 +1393,82 @@ function IntroMessageSection(props: {
           </Box>
         )}
 
+        {currentProject.template_mode && showFeedback && (
+            <>
+              <Card mb='16px'>
+                <Card.Section
+                  sx={{
+                    backgroundColor: theme.colors.grape[6],
+                    flexDirection: 'row',
+                    display: 'flex',
+                  }}
+                  p='xs'
+                >
+                  <Text color='white' mt='4px' size='sm'>
+                    <IconBulb size='1.2rem' color='white' />
+                    <span style={{marginLeft: '8px'}}>FINE TUNING: Feel free to give me feedback on improving the message.</span>
+                  </Text>
+                </Card.Section>
+                <Card.Section sx={{ border: 'solid 2px ' + theme.colors.grape[6] + ' !important' }} p='8px'>
+                  <Textarea
+                    variant='unstyled'
+                    pl={'8px'}
+                    pr={'8px'}
+                    size='xs'
+                    minRows={2}
+                    placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                    value={humanFeedbackForTemplate}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      setHumanFeedbackForTemplate(value);
+                      setHumanFeedbackForTemplateChanged(true);
+                    }}
+                  />
+                </Card.Section>
+              </Card>
+              {humanFeedbackForTemplateChanged && <Box sx={{justifyContent: 'right', textAlign: 'right'}} onClick={() => {
+                updateLiTemplate(userToken, currentProject.id, selectedTemplateId || -1, undefined, undefined, undefined, undefined, undefined, undefined, humanFeedbackForTemplate).then(res => {
+                  queryClient.invalidateQueries({
+                    queryKey: [`query-get-li-templates`],
+                  });
+                }).then(res => {
+                  setHumanFeedbackForTemplateChanged(false);
+                  setHumanFeedbackForTemplate('');
+                  showNotification({
+                    title: 'Success',
+                    message: 'Feedback saved. Try regenerating.',
+                    color: 'green'
+                })
+                }
+                )               
+              }}>
+                <Button color='green'>
+                  Save Feedback
+                </Button>
+              </Box>}
+            </>
+          )}
+
         {currentProject.template_mode ? (
           <>
+             <CTAGeneratorSuggestedModal 
+                templateMode={true}
+                generatedCTAs={[]}
+                modalOpened={ctaModalOpened}
+                closeModal={() => {setCtaModalOpened(false)}}
+                formValue={{
+                  company: userData.client?.company || '',
+                  persona: currentProject?.name || '',
+                  proposition: currentProject?.cta_framework_action || '',
+                }}
+                onTemplateSelected={(template: LinkedinInitialMessageTemplate) => {
+                    createLiTemplate(userToken, currentProject.id, template.name, template.raw_prompt, false, [], '').then(res => {
+                      queryClient.refetchQueries({
+                        queryKey: [`query-get-li-templates`],
+                      });
+                    })
+                  }}/>
             {isFetchingTemplates ? (
               <Box>
                 <Loader
@@ -1367,65 +1482,174 @@ function IntroMessageSection(props: {
               </Box>
             ) : (
               <Stack>
-                <Stack>
-                  {templates?.map((template, index) => (
-                    <Paper key={index} p='md' mih={80} sx={{ position: 'relative' }} withBorder>
-                      <Badge
-                        size='lg'
-                        sx={{
-                          position: 'absolute',
-                          top: 10,
-                          right: 10,
-                        }}
-                      >
-                        {template.times_used
-                          ? (template.times_accepted / template.times_used) * 100
-                          : 0}
-                        %
-                      </Badge>
-                      <Button
-                        variant='subtle'
-                        radius='xl'
-                        size='sm'
-                        compact
-                        sx={{
-                          position: 'absolute',
-                          bottom: 10,
-                          right: 10,
-                        }}
-                        onClick={() => {
-                          openContextModal({
-                            modal: 'liTemplate',
-                            title: 'Edit Template',
-                            innerProps: {
-                              mode: 'EDIT',
-                              editProps: {
-                                templateId: template.id,
-                                message: template.message,
-                                active: template.active,
-                                humanFeedback: template.additional_instructions,
-                                researchPoints: template.research_points,
+                <Stack mt='xs'>
+                  {templates?.filter((t: any) => templateActivesShow.includes(t.active)).sort((a: any, b:any) => a.active != b.active ? -(a.active - b.active) : a.title - b.title).map((template, index) => (
+                    <Paper key={index} p='md' mih={80} 
+                      sx={{ 
+                        position: 'relative',
+                        cursor: 'pointer',
+                        border: selectedTemplateId === template.id ? 'solid 1px #339af0 !important' : '',
+                        backgroundColor: selectedTemplateId === template.id ? '#339af008 !important' : '',
+                        flexDirection: 'row',
+                        display: 'flex'
+                       }} 
+                      withBorder onClick={() => {
+                      setSelectedTemplateId(template.id);
+                      setHumanFeedbackForTemplate(template.additional_instructions);
+                    }}>
+
+                      <Box miw='100px' mah={80} sx={{
+                        border: 'solid 1px #339af022',
+                        backgroundColor: '#339af022',
+                        padding: '8px',
+                        borderRadius: '4px',
+                        textAlign: 'center'
+                      }}
+                        mt='xl'
+                        mr='md'>
+                        <Text fw='bold' fz='md' color='blue' mt='xs'>
+                          {Math.round(template.times_accepted / (template.times_used + 0.0001) * 100)}% reply
+                        </Text>
+                        <Text size='8px' color='blue' fz={'xs'} fw='500'>
+                          ({template.times_accepted}/{template.times_used} times)
+                        </Text>
+                      </Box>
+
+                      <Box mr={40} w='100%'>
+                        <Flex>
+                          <Text size='sm' fw='600' mb='xs' sx={{textTransform: 'uppercase'}} color='gray' variant='outline'>
+                            {template.title}
+                          </Text>
+                              {template.additional_instructions && <HoverCard width={280} shadow="md">
+                            <HoverCard.Target>
+                              <Badge leftSection={<IconBulb size='0.8rem'/>} color='grape' variant='filled' ml='xs'>
+                                Fine Tuned
+                              </Badge>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown style={{ "backgroundColor": "rgb(34, 37, 41)", "padding": 0 }}>
+                              <Paper style={{ "backgroundColor": "rgb(34, 37, 41)", "color": "white", "padding": 10 }}>
+                                <TextWithNewline style={{fontSize: '12px'}}>
+                                    {"<b>Additional Instructions:</b>\n" + template.additional_instructions}
+                                </TextWithNewline>
+                              </Paper>
+                            </HoverCard.Dropdown>
+                          </HoverCard>}
+                        </Flex>
+                        <Card withBorder w='100%' sx={{backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb'}}>
+                          <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(template.message.replaceAll("[[", "<span style='margin-left: 6px; margin-right: 6px; background-color: " + theme.colors['blue'][5] + "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ ").replaceAll("]]", "</span>") as string),
+                              }}
+                            />
+                          </Text>
+                        </Card> 
+                      </Box>
+
+                      <Box sx={{justifyContent: 'right'}} ml='auto'>
+                        <Switch sx={{cursor: 'pointer'}} checked={template.active} onChange={(e) => {
+                          updateLiTemplate(userToken, currentProject.id, template.id, template.title, template.message, e.target.checked).then(res => {
+                            queryClient.invalidateQueries({
+                              queryKey: [`query-get-li-templates`],
+                            });
+                          })
+                        }} />
+                        <Button
+                          mt='xs'
+                          variant='subtle'
+                          radius='xl'
+                          size='sm'
+                          compact
+                          onClick={() => {
+                            openContextModal({
+                              modal: 'liTemplate',
+                              title: 'Edit Template',
+                              innerProps: {
+                                mode: 'EDIT',
+                                editProps: {
+                                  templateId: template.id,
+                                  title: template.title,
+                                  message: template.message,
+                                  active: template.active,
+                                  humanFeedback: template.additional_instructions,
+                                  researchPoints: template.research_points,
+                                },
                               },
-                            },
-                          });
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Box mr={40}>
-                        <TextWithNewline style={{ fontSize: '0.8em' }}>
-                          {template.message}
-                        </TextWithNewline>
+                            });
+                          }}
+                        >
+                          Edit
+                        </Button>
                       </Box>
                     </Paper>
                   ))}
                 </Stack>
-                <Center>
+                <Button 
+                  onClick={() => {
+                    if (templateActivesShow.length === 1) {
+                      setTemplateActivesShow([true, false]);
+                    } else {
+                      setTemplateActivesShow([true]);
+                    }
+                  }}
+                  color='gray'
+                  variant='subtle'
+                  leftIcon={<IconChevronDown size='1rem' style={{transform: templateActivesShow.length === 1 ? '' : 'rotate(180deg)'}} />}
+                >
+                  Show {templateActivesShow.includes(true) ? 'All Templates' : 'Active Templates Only'}
+                </Button>
+              </Stack>
+            )}
+
+            <Flex sx={{justifyContent: 'right'}}>
+                  <Button onClick={() => setCtaModalOpened(true)} size='sm' variant='outline' color='lime' mr='sm' compact>
+                    Brainstorm Templates
+                  </Button>
+                  <InitialMessageTemplateSelector
+                    onSelect={(template: LinkedinInitialMessageTemplate) => {
+                      showNotification({
+                        title: '🤖 Generating...',
+                        message: 'Generating custom "' + template.name + '" template...',
+                        color: 'blue'
+                      })
+
+                      fetch(`${API_URL}/linkedin_template/adjust_template_for_client`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${userToken}`
+                        },
+                        body: JSON.stringify({
+                          'template_id': template.id,
+                        })
+                      }).then(res => {
+                        return res.json();
+                      }).then(res => {
+                        const adjustedTemplate = res['adjusted_template']
+                        openContextModal({
+                          modal: 'liTemplate',
+                          title: 'Create Template',
+                          innerProps: {
+                            mode: 'CREATE',
+                            editProps: {
+                              title: template.name,
+                              message: adjustedTemplate,
+                              active: true,
+                              humanFeedback: '',
+                              researchPoints: []
+                            }
+                          },
+                        });
+                      })
+                      
+                    }}
+                  />
                   <Stack spacing={5}>
                     <Button
-                      variant='subtle'
+                      variant='outline'
                       radius='md'
                       compact
+                      color='orange'
                       onClick={() => {
                         openContextModal({
                           modal: 'liTemplate',
@@ -1436,12 +1660,10 @@ function IntroMessageSection(props: {
                         });
                       }}
                     >
-                      Add Template
+                      Create New
                     </Button>
                   </Stack>
-                </Center>
-              </Stack>
-            )}
+                </Flex>
           </>
         ) : (
           <Tabs
@@ -1622,10 +1844,10 @@ function LiExampleInvitation(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
@@ -1645,7 +1867,7 @@ function LiExampleInvitation(props: {
   let startMessage = message.replace(endMessage, "");
 
   // Don't split for template mode
-  if(currentProject?.template_mode){
+  if (currentProject?.template_mode) {
     startMessage = message;
     endMessage = "";
   }
@@ -1906,10 +2128,10 @@ function LiExampleMessage(props: {
   // Get SDR data from LinkedIn
   const imgURL = liSDR
     ? liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].rootUrl +
-      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
-        liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
-          .length - 1
-      ].fileIdentifyingUrlPathSegment
+    liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts[
+      liSDR.miniProfile?.picture["com.linkedin.common.VectorImage"].artifacts
+        .length - 1
+    ].fileIdentifyingUrlPathSegment
     : userData.img_url;
   const name = liSDR
     ? liSDR.miniProfile?.firstName + " " + liSDR.miniProfile?.lastName
@@ -2034,17 +2256,17 @@ function FrameworkCard(props: {
         cursor: "pointer",
         backgroundColor: props.active
           ? theme.fn.lighten(
-              theme.fn.variant({ variant: "filled", color: "blue" })
-                .background!,
-              0.95
-            )
+            theme.fn.variant({ variant: "filled", color: "blue" })
+              .background!,
+            0.95
+          )
           : hovered
-          ? theme.fn.lighten(
+            ? theme.fn.lighten(
               theme.fn.variant({ variant: "filled", color: "blue" })
                 .background!,
               0.99
             )
-          : undefined,
+            : undefined,
         borderColor:
           props.active || hovered
             ? theme.colors.blue[5] + "!important"
@@ -2073,10 +2295,10 @@ function FrameworkCard(props: {
                 props.conversion > 9.0
                   ? "Your open rates are above industry standards (9%). Congrats!"
                   : props.conversion <= 9.0 && props.conversion > 0.0
-                  ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
+                    ? "Your open rates are below industry standards (9%). Try changing your message to improve from your current " +
                     Math.round(props.conversion * 10) / 10 +
                     "%."
-                  : (props.timesUsed && props.timesUsed < 20
+                    : (props.timesUsed && props.timesUsed < 20
                       ? "Not enough data, "
                       : "") +
                     props.timesConverted +
@@ -2093,8 +2315,8 @@ function FrameworkCard(props: {
                   isNaN(props.conversion)
                     ? "grey"
                     : props.conversion > 9.0
-                    ? "green"
-                    : "red"
+                      ? "green"
+                      : "red"
                 }
               >
                 Opened:{" "}
@@ -2696,7 +2918,9 @@ function FrameworkSection(props: {
                 >
                   <Image src={sellScaleLogo} width={30} height={30} mr="sm" />
                   <Text color="white" mt="4px">
-                     <TypeAnimation
+
+                    Feel free to give me feedback on improving the message
+                     {/* <TypeAnimation
                         sequence={[
                           'Feel free to gvie me', // Types 'One'
                           100, // Waits 1s
@@ -2711,7 +2935,7 @@ function FrameworkSection(props: {
                         wrapper="span"
                         cursor={false}
                       />
-                    
+                     */}
                   </Text>
                 </Card.Section>
                 <Card.Section
@@ -2801,7 +3025,7 @@ function FrameworkSection(props: {
                           rightSection={
                             <>
                               {personalizationItemsCount &&
-                              form.values.useAccountResearch ? (
+                                form.values.useAccountResearch ? (
                                 <Badge
                                   w={16}
                                   h={16}
@@ -2894,6 +3118,7 @@ export const PersonalizationSection = (props: {
   onItemsChange: (items: any[]) => void;
   onChanged?: () => void;
   title?: string;
+  hideAnalytics?: boolean;
 }) => {
   const currentProject = useRecoilValue(currentProjectState);
   const userToken = useRecoilValue(userTokenState);
@@ -3054,6 +3279,7 @@ export const PersonalizationSection = (props: {
 
   function getAcceptanceRate(itemId: string) {
     if (!data) return null;
+    if (props.hideAnalytics) return null;
     for (const d of data) {
       if (d.research_point_type === itemId) {
         return Math.round(d["avg. acceptance %"] * 100) as number;
@@ -3063,6 +3289,7 @@ export const PersonalizationSection = (props: {
   }
 
   useEffect(() => {
+    if (props.hideAnalytics) return;
     const allItems = [...prospectItems, ...companyItems];
     props.onItemsChange(allItems);
   }, []);
@@ -3156,6 +3383,7 @@ export const PersonalizationSection = (props: {
               checked={item.checked}
               onPressItem={item.type === 'PROSPECT' ? setProfileChecked : setCompanyChecked}
               color={item.type === 'PROSPECT' ? 'teal' : 'grape'}
+              hideAnalytics={props.hideAnalytics}
             />
           ))}
         </Flex>
@@ -3172,6 +3400,7 @@ const ProcessBar: React.FC<{
   checked?: boolean;
   color?: string;
   onPressItem: (itemId: string, checked: boolean) => void;
+  hideAnalytics?: boolean;
 }> = ({
   id,
   title,
@@ -3180,44 +3409,49 @@ const ProcessBar: React.FC<{
   disabled,
   checked,
   onPressItem,
+  hideAnalytics = false,
 }) => {
-  return (
-    <Flex align={"center"} gap={"0.5rem"}>
-      <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
-        <Checkbox
-          size={"sm"}
-          label={<Text fw={300}>{title}</Text>}
-          checked={checked}
-          disabled={disabled}
-          onChange={(event) => onPressItem(id, event.currentTarget.checked)}
-          color={color}
-          variant="outline"
-        />
-        <Flex sx={{ flex: 1 }}>
-          <Divider w={"100%"} color={"#E9ECEF"} />
-        </Flex>
-        <Tooltip label="Historical Acceptance Rate" withArrow>
-          <Button
-            variant={"light"}
-            fw={700}
-            size="xs"
+    return (
+      <Flex align={"center"} gap={"0.5rem"}>
+        <Flex sx={{ flex: 4 }} gap={"0.25rem"} align={"center"}>
+          <Checkbox
+            size={"sm"}
+            label={<Text fw={300}>{title}</Text>}
+            checked={checked}
+            disabled={disabled}
+            onChange={(event) => onPressItem(id, event.currentTarget.checked)}
             color={color}
-            radius="xl"
-            h="auto"
-            fz={"0.625rem"}
-            py={"0.125rem"}
-            px={"0.25rem"}
-          >
-            {percent}%
-          </Button>
-        </Tooltip>
+            variant="outline"
+          />
+          <Flex sx={{ flex: 1 }}>
+            <Divider w={"100%"} color={"#E9ECEF"} />
+          </Flex>
+          <Tooltip label="Historical Acceptance Rate" withArrow>
+            <Button
+              variant={"light"}
+              fw={700}
+              size="xs"
+              color={color}
+              radius="xl"
+              h="auto"
+              fz={"0.625rem"}
+              py={"0.125rem"}
+              px={"0.25rem"}
+            >
+              {hideAnalytics ? "Not Available" : percent + "%"}
+            </Button>
+          </Tooltip>
+        </Flex>
+        {
+          !hideAnalytics && (
+            <Flex direction={"column"} sx={{ flex: 6 }}>
+              <Progress value={percent} color={color} size={"lg"} radius="xl" />
+            </Flex>
+          )
+        }
       </Flex>
-      <Flex direction={"column"} sx={{ flex: 6 }}>
-        <Progress value={percent} color={color} size={"lg"} radius="xl" />
-      </Flex>
-    </Flex>
-  );
-};
+    );
+  };
 
 export const PersonalizationCard: React.FC<{
   title: string;

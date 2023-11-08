@@ -136,10 +136,11 @@ import { CtaSection } from "./CtaSection";
 import CTAGenerator from "./CTAGenerator";
 import { deterministicMantineColor } from '@utils/requests/utils';
 import moment from 'moment';
-import { getLiTemplates, updateLiTemplate } from "@utils/requests/linkedinTemplates";
+import { createLiTemplate, getLiTemplates, updateLiTemplate } from "@utils/requests/linkedinTemplates";
 import DOMPurify from 'isomorphic-dompurify';
 import InitialMessageTemplateSelector from './InitialMessageTemplateSelector';
 import LinkedinInitialMessageTemplate from './LinkedinInitialMessageTemplate';
+import { CTAGeneratorSuggestedModal } from '@modals/CTAGeneratorSuggestedModal';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1126,6 +1127,7 @@ function IntroMessageSection(props: {
   setProspectId: (prospectId: number) => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
   const [currentProject, setCurrentProject] =
     useRecoilState(currentProjectState);
   const queryClient = useQueryClient();
@@ -1165,6 +1167,8 @@ function IntroMessageSection(props: {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
   const [showFeedback, setShowFeedback] = useState<boolean>(false);
   const theme = useMantineTheme();
+
+  const [ctaModalOpened, setCtaModalOpened] = useState(false);
 
   const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
     useState<boolean>(false);
@@ -1448,6 +1452,23 @@ function IntroMessageSection(props: {
 
         {currentProject.template_mode ? (
           <>
+             <CTAGeneratorSuggestedModal 
+                templateMode={true}
+                generatedCTAs={[]}
+                modalOpened={ctaModalOpened}
+                closeModal={() => {setCtaModalOpened(false)}}
+                formValue={{
+                  company: userData.client?.company || '',
+                  persona: currentProject?.name || '',
+                  proposition: currentProject?.cta_framework_action || '',
+                }}
+                onTemplateSelected={(template: LinkedinInitialMessageTemplate) => {
+                    createLiTemplate(userToken, currentProject.id, template.name, template.raw_prompt, false, [], '').then(res => {
+                      queryClient.refetchQueries({
+                        queryKey: [`query-get-li-templates`],
+                      });
+                    })
+                  }}/>
             {isFetchingTemplates ? (
               <Box>
                 <Loader
@@ -1581,6 +1602,9 @@ function IntroMessageSection(props: {
             )}
 
             <Flex sx={{justifyContent: 'right'}}>
+                  <Button onClick={() => setCtaModalOpened(true)} size='sm' variant='outline' color='lime' mr='sm' compact>
+                    Brainstorm Templates
+                  </Button>
                   <InitialMessageTemplateSelector
                     onSelect={(template: LinkedinInitialMessageTemplate) => {
                       showNotification({

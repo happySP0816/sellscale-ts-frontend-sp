@@ -10,6 +10,8 @@ import { useLoaderData, useNavigate } from 'react-router-dom';
 import { PersonaOverview } from 'src';
 import { getPersonasOverview } from '@utils/requests/getPersonas';
 import { navigateToPage } from "@utils/documentChange";
+import UploadOverview from './UploadOverview';
+import { IconChartArcs, IconChartAreaLine, IconTable, IconTarget } from '@tabler/icons';
 
 const PulseTabSelector = () => {
   const userToken = useRecoilValue(userTokenState);
@@ -28,12 +30,16 @@ const PulseTabSelector = () => {
   }, []);
 
   return (
-    <Tabs defaultValue="new_view">
+    <Tabs defaultValue="overview">
       <Tabs.List>
-        <Tabs.Tab value="new_view">New View</Tabs.Tab>
-        <Tabs.Tab value="old_view">Old View</Tabs.Tab>
+        <Tabs.Tab value="overview"><IconTable size='0.8rem' style={{marginRight: '8px', marginTop: '4px'}} />Upload Overview</Tabs.Tab>
+        <Tabs.Tab value="new_view"><IconTarget size='0.8rem' style={{marginRight: '8px', marginTop: '4px'}} />Prospect Scoring</Tabs.Tab>
+        <Tabs.Tab value="old_view"><IconChartAreaLine size='0.8rem' style={{marginRight: '8px', marginTop: '4px'}} />Prospect Scoring (Old)</Tabs.Tab>
       </Tabs.List>
 
+      <Tabs.Panel value="overview">
+        <UploadOverview />
+      </Tabs.Panel>
       <Tabs.Panel value="old_view">
         <PulseWrapper />
       </Tabs.Panel>

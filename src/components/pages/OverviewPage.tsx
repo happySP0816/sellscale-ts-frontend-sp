@@ -29,7 +29,7 @@ function BarChart() {
   const [currentMode, setCurrentMode] = useState('month');
   const [modes, setModes] = useState({});
   const [fetchedModes, setFetchedModes] = useState(false);
-  const [isCumulativeMode, setIsCumulativeMode] = useState(false);
+  const [isCumulativeMode, setIsCumulativeMode] = useState(true);
 
   const userToken = useRecoilState(userTokenState);
 
@@ -136,20 +136,12 @@ function BarChart() {
         <Card pt='0'>
           <Flex direction='row' mb='xs'>
             <Box>
-              <Text color='gray'>TOTAL OUTBOUND TOUCHPOINTS</Text>
+              <Text color='gray'>{
+                isCumulativeMode ? 'CUMULATIVE' : 'DAILY'
+              } OUTBOUND TOUCHPOINTS</Text>
               <Title>{totalTouchpoints.toLocaleString()}</Title>
             </Box>
             <Flex ml='auto'>
-              <Switch 
-                  mt='4px'
-                  ml='10%'
-                  color='green'
-                  variant='outline'
-                  size='sm'
-                  label="Cumulative" 
-                  checked={isCumulativeMode} 
-                  onChange={(event) => setIsCumulativeMode(event.currentTarget.checked)} 
-                />
               <Box ml='auto' sx={{ justifyContent: 'right', textAlign: 'right', width: '300px', ml: 'auto', mt: 'md' }}>
                 {['week', 'month', 'year'].map(mode => (
                   <Button 
@@ -167,6 +159,16 @@ function BarChart() {
             </Flex>
           </Flex>
           <Bar data={chartData} options={options} />
+          <Switch 
+            mt='sm'
+            size='xs'
+            sx={{marginLeft: 'auto', marginRight: 0}}
+            color="blue"
+            labelPosition="right"
+            label="View cumulative activity" 
+            checked={isCumulativeMode} 
+            onChange={(event) => setIsCumulativeMode(event.currentTarget.checked)} 
+          />
         </Card>
       </Collapse>
     </Card>

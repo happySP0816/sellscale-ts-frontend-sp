@@ -65,12 +65,13 @@ function BarChart() {
   const sumOutbounds = modes[currentMode]?.data.outbound.reduce((a: any, b: any) => a + b, 0);
   const sumAcceptances = modes[currentMode]?.data.acceptances.reduce((a: any, b: any) => a + b, 0);
   const sumReplies = modes[currentMode]?.data.replies.reduce((a: any, b: any) => a + b, 0);
+  const sumPositiveReplies = modes[currentMode]?.data.positive_replies?.reduce((a: any, b: any) => a + b, 0);
   const sumDemos = modes[currentMode]?.data.demos?.reduce((a: any, b: any) => a + b, 0);
 
   const theme = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(true);
 
-  const totalTouchpoints = sumOutbounds + sumAcceptances + sumReplies + sumDemos;
+  const totalTouchpoints = sumOutbounds + sumAcceptances + sumReplies + sumPositiveReplies + sumDemos;
 
   const chartData = {
     labels: modes[currentMode]?.labels,
@@ -78,32 +79,40 @@ function BarChart() {
       {
         label: 'Total Outbound Volume',
         data: processData(modes[currentMode]?.data.outbound),
-        backgroundColor: 'rgba(75,192,192,0.4)',
-        borderColor: 'rgba(75,192,192,1)',
+        backgroundColor: theme.colors.yellow[2],
+        borderColor: theme.colors.yellow[6],
         borderWidth: 1,
         stack: 'Stack 0',
       },
       {
         label: 'Total Acceptances',
         data: processData(modes[currentMode]?.data.acceptances),
-        backgroundColor: 'rgba(255,99,132,0.2)',
-        borderColor: 'rgba(255,99,132,1)',
+        backgroundColor: theme.colors.red[2],
+        borderColor: theme.colors.red[6],
         borderWidth: 1,
         stack: 'Stack 0',
       },
       {
         label: 'Total Replies',
         data: processData(modes[currentMode]?.data.replies),
-        backgroundColor: 'rgba(255,206,86,0.2)',
-        borderColor: 'rgba(255,206,86,1)',
+        backgroundColor: theme.colors.blue[2],
+        borderColor: theme.colors.blue[6],
+        borderWidth: 1,
+        stack: 'Stack 0',
+      },
+      {
+        label: 'Total Positive Replies',
+        data: processData(modes[currentMode]?.data.positive_replies),
+        backgroundColor: theme.colors.grape[2],
+        borderColor: theme.colors.grape[6],
         borderWidth: 1,
         stack: 'Stack 0',
       },
       {
         label: 'Total Demos',
         data: processData(modes[currentMode]?.data.demos),
-        backgroundColor: 'rgba(54,162,235,0.2)',
-        borderColor: 'rgba(54,162,235,1)',
+        backgroundColor: theme.colors.green[2],
+        borderColor: theme.colors.green[6],
         borderWidth: 1,
         stack: 'Stack 0',
       }

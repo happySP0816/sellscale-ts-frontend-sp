@@ -332,8 +332,8 @@ export function ActiveChannels() {
   let totalEmailWarmup = 0;
   for (const x of sdrs) {
     const sdr: any = x
-    if (sdr.channels) {
-      for (const channel of sdr.channels) {
+    if (sdr.snapshots) {
+      for (const channel of sdr.snapshots) {
         if (channel.channel_type == 'LINKEDIN') {
           totalLinkedInWarmup += channel.daily_limit
         } else if (channel.channel_type == 'EMAIL') {
@@ -387,17 +387,17 @@ export function ActiveChannels() {
               <Grid>
                 {
                   sdrs.sort((a: any, b: any) => -(a.active - b.active)).filter((x: any) => x.active).map((x: any) => {
-                    // reduce `x.channels` based on daily_limit
+                    // reduce `x.snapshots` based on daily_limit
                     let totalSendVolume = 0
                     let totalSentVolume = 0;
-                    if (x.channels) {
-                      for (const channel of x.channels) {
+                    if (x.snapshots) {
+                      for (const channel of x.snapshots) {
                         totalSendVolume += channel.daily_limit
                         totalSentVolume += channel.daily_sent_count
                       }
                     }
 
-                    let emails = x.channels?.filter((x: any) => x.channel_type == 'EMAIL').map((x: any) => x.account_name)
+                    let emails = x.snapshots?.filter((x: any) => x.channel_type == 'EMAIL').map((x: any) => x.account_name)
 
                     return <Grid.Col span={4} mb='xs'>
                       <Card withBorder mt='0' pt='4'>
@@ -433,7 +433,7 @@ export function ActiveChannels() {
                                 unit = 'inboxes'
                               }
 
-                              const numUnits = x.channels?.filter((x: any) => x.channel_type == channel).length
+                              const numUnits = x.snapshots?.filter((x: any) => x.channel_type == channel).length
 
                               return <Flex>
                                 <Group w='100%'>
@@ -465,7 +465,7 @@ export function ActiveChannels() {
                                         </thead>
                                         <tbody>
                                           {
-                                            x.channels?.filter((x: any) => x.channel_type == channel).map((channel: any) => {
+                                            x.snapshots?.filter((x: any) => x.channel_type == channel).map((channel: any) => {
                                               return <tr>
                                                 <td>{channel.channel_type == 'LINKEDIN' ? <IconBrandLinkedin size='0.9rem' /> : <IconMail size='0.9rem' />} {channel.account_name}</td>
                                                 <td>{channel.daily_sent_count} / {channel.daily_limit}</td>

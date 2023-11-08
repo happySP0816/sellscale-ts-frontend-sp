@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Grid, Text, Card, Table, Pagination, TextInput, Box, Badge, Progress, useMantineTheme } from '@mantine/core';
+import { Container, Grid, Text, Card, Table, Pagination, TextInput, Box, Badge, Progress, useMantineTheme, Loader } from '@mantine/core';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend } from 'chart.js';
 import { IconCalendar, IconGlobe, IconSearch, IconSend, IconTarget, IconUpload } from '@tabler/icons';
 import { API_URL } from '@constants/data';
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
+import DOMPurify from 'isomorphic-dompurify';
+import moment from 'moment';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 const UploadOverview = () => {
-  const [analytics, setAnalytics] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [analytics, setAnalytics]: any = useState(null);
+  const [currentPage, setCurrentPage]: any = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const userToken = useRecoilValue(userTokenState);
   const itemsPerPage = 10;
@@ -40,11 +42,11 @@ const UploadOverview = () => {
   }, []);
 
   if (!analytics) {
-    return <div>Loading...</div>;
+    return <Box w='100%' h='100%' sx={{textAlign: 'center'}}><Loader ml='auto' mt='100px' mb='100px'/></Box>
   }
 
   // Sorting logic
-  const sortedAnalytics = analytics.uploads.sort((a, b) => {
+  const sortedAnalytics = analytics.uploads.sort((a: any, b: any) => {
     if (a[sortField] < b[sortField]) {
       return sortOrder === 'asc' ? -1 : 1;
     }
@@ -55,7 +57,7 @@ const UploadOverview = () => {
   });
 
   // Function to handle sorting
-  const handleSort = (field) => {
+  const handleSort = (field: any) => {
     setSortField(field);
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
@@ -67,18 +69,20 @@ const UploadOverview = () => {
   const theme = useMantineTheme();
 
   // Search filter function
-  const filteredItems = currentItems.filter(item => {
+  const totalFilteredItems = sortedAnalytics.filter((item: any) => {
     return item['upload name'].toLowerCase().includes(searchQuery.toLowerCase()) ||
-           item['upload date'].toLowerCase().includes(searchQuery.toLowerCase());
-  });
+           item['upload date'].toLowerCase().includes(searchQuery.toLowerCase()) || 
+            item['account'].toLowerCase().includes(searchQuery.toLowerCase())
+  })
+  const filteredItems = totalFilteredItems.slice(startIndex, endIndex);
   
 
-  const lineChartData = {
-    labels: analytics.contacts_over_time.map(entry => entry.x),
+  const lineChartData: any = {
+    labels: analytics.contacts_over_time.map((entry: any) => entry.x),
     datasets: [
       {
         label: 'Cumulative Total of Prospects',
-        data: analytics.contacts_over_time.map(entry => entry.y),
+        data: analytics.contacts_over_time.map((entry: any) => entry.y),
         fill: false,
         borderColor: theme.colors.blue[6],
         tension: 0.3
@@ -86,7 +90,7 @@ const UploadOverview = () => {
       {
         type: 'bar', // Specify 'bar' type for this dataset
         label: 'Number of Uploads',
-        data: analytics.contacts_over_time.map(entry => entry.y), // Your uploads per day data
+        data: analytics.contacts_over_time.map((entry: any) => entry.y), // Your uploads per day data
         backgroundColor: theme.colors.grape[0],
         borderColor: theme.colors.grape[3],
         borderWidth: 1,
@@ -94,8 +98,13 @@ const UploadOverview = () => {
     ]
   };
 
+  function getUploadName(uploadName: any) {
+    uploadName = uploadName.replace(new RegExp(searchQuery, 'gi'), (match: any) => `<span style="background-color: ${theme.colors.yellow[1]}">${match}</span>`)
+    return uploadName
+  }
+
   return (
-    <Container maxWidth={1200} style={{ margin: '0 auto' }} pt='lg' pb='xl'>
+    <Container style={{ margin: '0 auto', maxWidth: 800 }} pt='lg' pb='xl'>
       {/* Section 1: Top Line Metrics with Icons */}
       <Grid>
         <Grid.Col span={4}>
@@ -140,11 +149,21 @@ const UploadOverview = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredItems.map((upload, index) => (
+          {filteredItems.map((upload: any, index: number) => (
             <tr key={index}>
               <td style={{width: '40%'}}>
-                <Text>{upload['upload name'].substring(0, 45)}{upload['upload name'].length > 45 ? '...' : ''}</Text>
-                <Text size='xs' color='gray'>{upload['account']}'s Account</Text>
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(getUploadName(upload['upload name'].substring(0, 45) + (upload['upload name'].length > 45 ? '...' : '')))
+                  }}
+                />
+                <Text size='xs' color='gray'>
+                  <div 
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(getUploadName(upload['account'] + "'s Account"))
+                    }}
+                  />
+                </Text>
               </td>
               <td style={{width: '20%'}}>
                 <Text>{upload.scraped} / {upload.scraped}</Text>
@@ -154,16 +173,17 @@ const UploadOverview = () => {
                 <Badge color={upload.status === 'Complete' ? 'green' : 'yellow'} variant='outline'>{upload.status}</Badge>
               </td>
               <td style={{width: '20%', textAlign: 'right'}}>
-                <IconCalendar size='0.8rem' style={{marginRight: '4px'}} />{upload['upload date']}
+                <IconCalendar size='0.8rem' style={{marginRight: '4px'}} /> {moment(upload['upload date']).format('MMM D, YYYY')}
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
       <Pagination
+        // @ts-ignore
         page={currentPage}
         onChange={setCurrentPage}
-        total={Math.ceil(analytics.uploads.length / itemsPerPage)}
+        total={Math.ceil(totalFilteredItems.length / itemsPerPage)}
         style={{ marginTop: '1em' }}
       />
     </Container>

@@ -42,6 +42,7 @@ import {
   Alert,
   Flex,
   Card,
+  Avatar,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
@@ -604,41 +605,38 @@ function PersonCampaignCard(props: {
   ];
 
   return (
-    <Paper radius="md" ref={ref}>
+    <Paper radius='md' ref={ref}>
       <Stack
         spacing={0}
         sx={{
           opacity: props.persona.active || hovered ? 1 : 0.6,
-          cursor: "pointer",
+          cursor: 'pointer',
         }}
       >
         <Group
           // position="apart"
           sx={(theme) => ({
-            backgroundColor: props.persona.active
-              ? theme.colors.blue[6]
-              : "white",
-            borderRadius: "0.5rem 0.5rem 0 0",
-            border: "solid 1px " + theme.colors.gray[2],
+            backgroundColor: props.persona.active ? theme.colors.blue[6] : 'white',
+            borderRadius: '0.5rem 0.5rem 0 0',
+            border: 'solid 1px ' + theme.colors.gray[2],
           })}
-          p={props.persona.active ? "xs" : "4px"}
-          pl="xs"
-          pr="xs"
+          p={props.persona.active ? 'xs' : '4px'}
+          pl='xs'
+          pr='xs'
         >
-          <Box sx={{ flexDirection: "row", display: "flex" }} w="46%">
-            <Group w="500">
-              <Popover position="bottom" withArrow shadow="md">
+          <Box sx={{ flexDirection: 'row', display: 'flex' }} w='46%'>
+            <Group w='500'>
+              <Popover position='bottom' withArrow shadow='md'>
                 <Popover.Target>
-                  <Button
-                    variant="outline"
-                    color={props.persona.active ? "blue" : "gray"}
-                    radius="xl"
-                    size="lg"
-                    compact
-                    sx={{ backgroundColor: "#ffffff22" }}
+                  <Avatar
+                    variant='transparent'
+                    color={props.persona.active ? 'blue' : 'gray'}
+                    radius='xl'
+                    size='sm'
+                    sx={{ backgroundColor: '#ffffff22' }}
                   >
-                    {emoji}
-                  </Button>
+                    <Text fz='lg'>{emoji}</Text>
+                  </Avatar>
                 </Popover.Target>
                 <Popover.Dropdown>
                   <EmojiPicker
@@ -650,42 +648,37 @@ function PersonCampaignCard(props: {
                 </Popover.Dropdown>
               </Popover>
 
-              <Title order={5} c={props.persona.active ? "white" : "gray"}>
+              <Title order={5} c={props.persona.active ? 'white' : 'gray'}>
                 {_.truncate(props.persona.name, { length: 48 })}
               </Title>
             </Group>
           </Box>
 
-          <Box w="20%">
+          <Box w='20%'>
             <Button
-              variant="subtle"
+              variant='subtle'
               onClick={toggle}
-              sx={{ borderRadius: 100, backgroundColor: "#ffffff44" }}
+              sx={{ borderRadius: 100, backgroundColor: '#ffffff44' }}
             >
               {opened ? (
-                <IconChevronsUp
-                  size="1.5rem"
-                  color={props.persona.active ? "white" : "blue"}
-                />
+                <IconChevronsUp size='1.5rem' color={props.persona.active ? 'white' : 'blue'} />
               ) : (
-                <IconChevronsDown
-                  size="1.5rem"
-                  color={props.persona.active ? "white" : "gray"}
-                />
+                <IconChevronsDown size='1.5rem' color={props.persona.active ? 'white' : 'gray'} />
               )}
             </Button>
           </Box>
 
-          <Group sx={{justifyContent: "flex-end", display: 'flex', flexDirection: 'row'}} ml='auto'>
+          <Group
+            sx={{ justifyContent: 'flex-end', display: 'flex', flexDirection: 'row' }}
+            ml='auto'
+          >
             <Button
               w={60}
-              radius="xl"
-              size="xs"
+              radius='xl'
+              size='xs'
               compact
               sx={(theme) => ({
-                backgroundColor: props.persona.active
-                  ? theme.colors.blue[5]
-                  : "gray",
+                backgroundColor: props.persona.active ? theme.colors.blue[5] : 'gray',
                 //color: theme.colors.blue[2],
               })}
               onClick={() => {
@@ -700,11 +693,11 @@ function PersonCampaignCard(props: {
 
             <Tooltip
               withArrow
-              position="bottom"
+              position='bottom'
               label={
                 personaActive
-                  ? "Click to disable this campaign on settings page"
-                  : "Click to enable this campaign on settings page"
+                  ? 'Click to disable this campaign on settings page'
+                  : 'Click to enable this campaign on settings page'
               }
             >
               <span>
@@ -713,10 +706,7 @@ function PersonCampaignCard(props: {
                   isActive={personaActive}
                   onChangeUserStatusSuccess={(status: boolean) => {
                     setPersonaActive(status);
-                    props.onPersonaActiveStatusUpdate?.(
-                      props.project?.id ?? 0,
-                      status
-                    );
+                    props.onPersonaActiveStatusUpdate?.(props.project?.id ?? 0, status);
                   }}
                 />
               </span>
@@ -724,13 +714,11 @@ function PersonCampaignCard(props: {
           </Group>
         </Group>
         <Collapse in={opened}>
-          {props.viewMode === "node-view" && (
+          {props.viewMode === 'node-view' && (
             <Box>
               <CampaignGraph
                 personaId={props.persona.id}
-                unusedProspects={
-                  Math.min(props.project?.num_unused_li_prospects ?? 0)
-                }
+                unusedProspects={Math.min(props.project?.num_unused_li_prospects ?? 0)}
                 sections={types}
                 onChannelClick={(sectionType: string) => {
                   if (props.project == undefined) return;
@@ -745,7 +733,7 @@ function PersonCampaignCard(props: {
               />
             </Box>
           )}
-          {props.viewMode === "list-view" && (
+          {props.viewMode === 'list-view' && (
             <Box>
               {types.map((section, index) => {
                 if (!section.active && props.persona.active) return null;
@@ -762,9 +750,7 @@ function PersonCampaignCard(props: {
                         navigateToPage(
                           navigate,
                           `/setup/${section.type.toLowerCase()}`,
-                          new URLSearchParams(
-                            `?campaign_id=${props.persona.id}`
-                          )
+                          new URLSearchParams(`?campaign_id=${props.persona.id}`)
                         );
                       }}
                     />
@@ -789,9 +775,7 @@ function PersonCampaignCard(props: {
                               navigateToPage(
                                 navigate,
                                 `/setup/${section.type.toLowerCase()}`,
-                                new URLSearchParams(
-                                  `?campaign_id=${props.persona.id}`
-                                )
+                                new URLSearchParams(`?campaign_id=${props.persona.id}`)
                               );
                             }}
                           />
@@ -801,24 +785,22 @@ function PersonCampaignCard(props: {
                   </Collapse>
                   <Divider />
                   <Button
-                    w="100%"
-                    variant="subtle"
-                    size="xs"
-                    color="gray"
-                    onClick={() =>
-                      setInactiveChannelsOpened(!inactiveChannelsOpened)
-                    }
+                    w='100%'
+                    variant='subtle'
+                    size='xs'
+                    color='gray'
+                    onClick={() => setInactiveChannelsOpened(!inactiveChannelsOpened)}
                     leftIcon={
                       inactiveChannelsOpened ? (
-                        <IconArrowUp size="0.7rem" />
+                        <IconArrowUp size='0.7rem' />
                       ) : (
-                        <IconArrowDown size="0.7rem" />
+                        <IconArrowDown size='0.7rem' />
                       )
                     }
                   >
-                    {inactiveChannelsOpened ? "Hide" : "Show"}{" "}
+                    {inactiveChannelsOpened ? 'Hide' : 'Show'}{' '}
                     {types.filter((x) => !x.active).length} Inactive Channel
-                    {types.filter((x) => !x.active).length > 1 ? "s" : ""}
+                    {types.filter((x) => !x.active).length > 1 ? 's' : ''}
                   </Button>
                 </>
               )}

@@ -27,7 +27,7 @@ const options = {
 };
 function BarChart() {
   const [currentMode, setCurrentMode] = useState('month');
-  const [modes, setModes] = useState({});
+  const [modes, setModes]: any = useState({});
   const [fetchedModes, setFetchedModes] = useState(false);
   const [isCumulativeMode, setIsCumulativeMode] = useState(true);
 
@@ -51,21 +51,21 @@ function BarChart() {
     }
   }, [fetchedModes]);
 
-  const getCumulativeData = (data) => {
+  const getCumulativeData = (data: any) => {
     if (!data) return []; 
     let cumulative = 0;
-    return data.map((value) => {
+    return data.map((value: any) => {
       cumulative += value;
       return cumulative;
     });
   };
 
-  const processData = (data) => isCumulativeMode ? getCumulativeData(data) : data;
+  const processData = (data: any) => isCumulativeMode ? getCumulativeData(data) : data;
 
-  const sumOutbounds = modes[currentMode]?.data.outbound.reduce((a, b) => a + b, 0);
-  const sumAcceptances = modes[currentMode]?.data.acceptances.reduce((a, b) => a + b, 0);
-  const sumReplies = modes[currentMode]?.data.replies.reduce((a, b) => a + b, 0);
-  const sumDemos = modes[currentMode]?.data.demos?.reduce((a, b) => a + b, 0);
+  const sumOutbounds = modes[currentMode]?.data.outbound.reduce((a: any, b: any) => a + b, 0);
+  const sumAcceptances = modes[currentMode]?.data.acceptances.reduce((a: any, b: any) => a + b, 0);
+  const sumReplies = modes[currentMode]?.data.replies.reduce((a: any, b: any) => a + b, 0);
+  const sumDemos = modes[currentMode]?.data.demos?.reduce((a: any, b: any) => a + b, 0);
 
   const theme = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(true);

@@ -254,19 +254,6 @@ export function CreateBumpFrameworkContextModal({
         </HoverCard>
       </Flex>
 
-      {/* <Flex wrap="wrap" mt="xs" w="100%">
-        <PersonaSelect
-          disabled={false}
-          onChange={(archetypes) =>
-            form.setFieldValue("archetypes", archetypes)
-          }
-          selectMultiple={false}
-          label="Personas"
-          description="Select the personas this framework applies to."
-          defaultValues={[form.values.archetypeID || -1]}
-        />
-      </Flex> */}
-
       {innerProps.showStatus && (
         <Select
           label="Status"

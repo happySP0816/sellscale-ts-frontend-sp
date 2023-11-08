@@ -159,10 +159,17 @@ export default function LiTemplateModal({
             />
             <Textarea
               label='Template'
+              required
+              description="Use [[personalization]] to add personalization into your message."
               minRows={4}
               placeholder='Template outline'
               {...form.getInputProps('message')}
             />
+            {form.values['message'].length > 300 && (
+              <Text color='red' mt='0px' fz='xs' align='right'>
+                Message is too long ({form.values['message'].length} / 300 characters)
+              </Text>
+            )}
 
               <Collapse in={opened}>
                 <Box mih={500} sx={{ position: 'relative' }}>
@@ -191,21 +198,6 @@ export default function LiTemplateModal({
                       >
                         <Text color='white' mt='4px'>
                           Feel free to give me feedback on improving the message
-                          {/* <TypeAnimation
-                            sequence={[
-                              'Feel free to gvie me', // Types 'One'
-                              100, // Waits 1s
-                              'Feel free to give me feedback on ', // Deletes 'One' and types 'Two'
-                              400, // Waits 2s
-                              'Feel free to give me feedback on improving the message', // Types 'Three' without deleting 'Two'
-                              () => {
-                                console.log('Sequence completed');
-                              },
-                            ]}
-                            speed={50}
-                            wrapper='span'
-                            cursor={false}
-                          /> */}
                         </Text>
                       </Card.Section>
                       <Card.Section sx={{ border: 'solid 2px #59a74f !important' }} p='8px'>
@@ -229,7 +221,9 @@ export default function LiTemplateModal({
             </Button>
 
             <Box>
-              <Button type='submit'>{innerProps.mode === 'CREATE' ? 'Create' : 'Update'}</Button>
+              <Button 
+                disabled={loading || form.values['message'].length > 300}
+                type='submit'>{innerProps.mode === 'CREATE' ? 'Create' : 'Update'}</Button>
             </Box>
           </Stack>
         </Card>

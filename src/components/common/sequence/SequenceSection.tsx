@@ -65,6 +65,7 @@ import { modals, openConfirmModal, openContextModal } from "@mantine/modals";
 import {
   IconBrain,
   IconCheck,
+  IconChevronCompactDown,
   IconCircle2Filled,
   IconCopy,
   IconDots,
@@ -112,6 +113,7 @@ import {
   IconArrowRight,
   IconArrowsExchange,
   IconBulb,
+  IconChevronDown,
   IconChevronRight,
   IconCircle,
   IconCircleMinus,
@@ -136,6 +138,8 @@ import { deterministicMantineColor } from '@utils/requests/utils';
 import moment from 'moment';
 import { getLiTemplates, updateLiTemplate } from "@utils/requests/linkedinTemplates";
 import DOMPurify from 'isomorphic-dompurify';
+import InitialMessageTemplateSelector from './InitialMessageTemplateSelector';
+import LinkedinInitialMessageTemplate from './LinkedinInitialMessageTemplate';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1168,6 +1172,8 @@ function IntroMessageSection(props: {
     string
   >();
 
+  const [templateActivesShow, setTemplateActivesShow] = useState([true]);
+
   const { data: templates, isFetching: isFetchingTemplates } = useQuery({
     queryKey: [`query-get-li-templates`],
     queryFn: async () => {
@@ -1456,7 +1462,7 @@ function IntroMessageSection(props: {
             ) : (
               <Stack>
                 <Stack mt='xs'>
-                  {templates?.sort((a: any, b:any) => a.active != b.active ? -(a.active - b.active) : a.title - b.title).map((template, index) => (
+                  {templates?.filter((t: any) => templateActivesShow.includes(t.active)).sort((a: any, b:any) => a.active != b.active ? -(a.active - b.active) : a.title - b.title).map((template, index) => (
                     <Paper key={index} p='md' mih={80} 
                       sx={{ 
                         position: 'relative',
@@ -1490,9 +1496,9 @@ function IntroMessageSection(props: {
 
                       <Box mr={40} w='100%'>
                         <Flex>
-                          <Badge size='sm' mb='xs' sx={{textTransform: 'uppercase'}} color='gray' variant='outline'>
+                          <Text size='sm' fw='600' mb='xs' sx={{textTransform: 'uppercase'}} color='gray' variant='outline'>
                             {template.title}
-                          </Badge>
+                          </Text>
                               {template.additional_instructions && <HoverCard width={280} shadow="md">
                             <HoverCard.Target>
                               <Badge leftSection={<IconBulb size='0.8rem'/>} color='grape' variant='filled' ml='xs'>
@@ -1557,24 +1563,69 @@ function IntroMessageSection(props: {
                     </Paper>
                   ))}
                 </Stack>
-                <Flex sx={{justifyContent: 'right'}}>
-                  <Stack spacing={5} mr='xs'>
-                    <Tooltip label="Coming soon!">
-                      <Button
-                        variant='outline'
-                        radius='md'
-                        compact
-                        color='gray'
-                      >
-                        Choose a Template
-                      </Button>
-                    </Tooltip>
-                  </Stack>
+                <Button 
+                  onClick={() => {
+                    if (templateActivesShow.length === 1) {
+                      setTemplateActivesShow([true, false]);
+                    } else {
+                      setTemplateActivesShow([true]);
+                    }
+                  }}
+                  color='gray'
+                  variant='subtle'
+                  leftIcon={<IconChevronDown size='1rem' style={{transform: templateActivesShow.length === 1 ? '' : 'rotate(180deg)'}} />}
+                >
+                  Show {templateActivesShow.includes(true) ? 'All Templates' : 'Active Templates Only'}
+                </Button>
+              </Stack>
+            )}
+
+            <Flex sx={{justifyContent: 'right'}}>
+                  <InitialMessageTemplateSelector
+                    onSelect={(template: LinkedinInitialMessageTemplate) => {
+                      showNotification({
+                        title: '🤖 Generating...',
+                        message: 'Generating custom "' + template.name + '" template...',
+                        color: 'blue'
+                      })
+
+                      fetch(`${API_URL}/linkedin_template/adjust_template_for_client`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${userToken}`
+                        },
+                        body: JSON.stringify({
+                          'template_id': template.id,
+                        })
+                      }).then(res => {
+                        return res.json();
+                      }).then(res => {
+                        const adjustedTemplate = res['adjusted_template']
+                        openContextModal({
+                          modal: 'liTemplate',
+                          title: 'Create Template',
+                          innerProps: {
+                            mode: 'CREATE',
+                            editProps: {
+                              title: template.name,
+                              message: adjustedTemplate,
+                              active: true,
+                              humanFeedback: '',
+                              researchPoints: []
+                            }
+                          },
+                        });
+                      })
+                      
+                    }}
+                  />
                   <Stack spacing={5}>
                     <Button
                       variant='outline'
                       radius='md'
                       compact
+                      color='orange'
                       onClick={() => {
                         openContextModal({
                           modal: 'liTemplate',
@@ -1589,8 +1640,6 @@ function IntroMessageSection(props: {
                     </Button>
                   </Stack>
                 </Flex>
-              </Stack>
-            )}
           </>
         ) : (
           <Tabs

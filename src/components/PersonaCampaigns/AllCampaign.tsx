@@ -28,10 +28,10 @@ import { IconBrandLinkedin, IconMail, IconSearch } from '@tabler/icons';
 export interface Analytics {
   account: string;
   campaign: string;
-  contacted: string;
-  demoSet: number;
-  open: string;
-  reply: string;
+  contacted: number;
+  demo_set: number;
+  open: number;
+  reply: number;
   sourced: number;
   status: Status;
   img_url: string;

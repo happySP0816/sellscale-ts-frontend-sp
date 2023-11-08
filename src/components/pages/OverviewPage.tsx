@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Title, Image, Button, Tooltip, Text, Card, Flex, Box, Avatar, Group, Badge, Grid, Divider, SegmentedControl, Center, rem, Loader, Input, HoverCard, Table, useMantineTheme, Collapse } from '@mantine/core';
+import { Container, Title, Image, Button, Tooltip, Text, Card, Flex, Box, Avatar, Group, Badge, Grid, Divider, SegmentedControl, Center, rem, Loader, Input, HoverCard, Table, useMantineTheme, Collapse, Checkbox, Switch } from '@mantine/core';
 import { Bar, Line } from 'react-chartjs-2';
 import { IconArrowDown, IconArrowUp, IconBook, IconBrandLinkedin, IconBrandSuperhuman, IconBriefcase, IconBuilding, IconBuildingFactory, IconChecks, IconChevronDown, IconChevronUp, IconClick, IconCode, IconEye, IconGlobe, IconInfoCircle, IconLetterA, IconList, IconMail, IconMan, IconPlane, IconSearch, IconSend, IconUser, IconWoman, IconWorld } from '@tabler/icons';
 import { IconGrid3x3, IconMessageCheck, IconSunElectricity } from '@tabler/icons-react';
@@ -25,13 +25,13 @@ const options = {
     },
   },
 };
-
 function BarChart() {
   const [currentMode, setCurrentMode] = useState('month');
-  const [modes, setModes]: any = useState({});
+  const [modes, setModes] = useState({});
   const [fetchedModes, setFetchedModes] = useState(false);
+  const [isCumulativeMode, setIsCumulativeMode] = useState(false);
 
-  const userToken = useRecoilState(userTokenState)
+  const userToken = useRecoilState(userTokenState);
 
   useEffect(() => {
     if (!fetchedModes) {
@@ -51,10 +51,22 @@ function BarChart() {
     }
   }, [fetchedModes]);
 
-  const sumOutbounds = modes[currentMode]?.data.outbound.reduce((a: any, b: any) => a + b, 0);
-  const sumAcceptances = modes[currentMode]?.data.acceptances.reduce((a: any, b: any) => a + b, 0);
-  const sumReplies = modes[currentMode]?.data.replies.reduce((a: any, b: any) => a + b, 0);
-  const sumDemos = modes[currentMode]?.data.demos?.reduce((a: any, b: any) => a + b, 0);
+  const getCumulativeData = (data) => {
+    if (!data) return []; 
+    let cumulative = 0;
+    return data.map((value) => {
+      cumulative += value;
+      return cumulative;
+    });
+  };
+
+  const processData = (data) => isCumulativeMode ? getCumulativeData(data) : data;
+
+  const sumOutbounds = modes[currentMode]?.data.outbound.reduce((a, b) => a + b, 0);
+  const sumAcceptances = modes[currentMode]?.data.acceptances.reduce((a, b) => a + b, 0);
+  const sumReplies = modes[currentMode]?.data.replies.reduce((a, b) => a + b, 0);
+  const sumDemos = modes[currentMode]?.data.demos?.reduce((a, b) => a + b, 0);
+
   const theme = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(true);
 
@@ -65,7 +77,7 @@ function BarChart() {
     datasets: [
       {
         label: 'Total Outbound Volume',
-        data: modes[currentMode]?.data.outbound,
+        data: processData(modes[currentMode]?.data.outbound),
         backgroundColor: 'rgba(75,192,192,0.4)',
         borderColor: 'rgba(75,192,192,1)',
         borderWidth: 1,
@@ -73,7 +85,7 @@ function BarChart() {
       },
       {
         label: 'Total Acceptances',
-        data: modes[currentMode]?.data.acceptances,
+        data: processData(modes[currentMode]?.data.acceptances),
         backgroundColor: 'rgba(255,99,132,0.2)',
         borderColor: 'rgba(255,99,132,1)',
         borderWidth: 1,
@@ -81,7 +93,7 @@ function BarChart() {
       },
       {
         label: 'Total Replies',
-        data: modes[currentMode]?.data.replies,
+        data: processData(modes[currentMode]?.data.replies),
         backgroundColor: 'rgba(255,206,86,0.2)',
         borderColor: 'rgba(255,206,86,1)',
         borderWidth: 1,
@@ -89,7 +101,7 @@ function BarChart() {
       },
       {
         label: 'Total Demos',
-        data: modes[currentMode]?.data.demos,
+        data: processData(modes[currentMode]?.data.demos),
         backgroundColor: 'rgba(54,162,235,0.2)',
         borderColor: 'rgba(54,162,235,1)',
         borderWidth: 1,
@@ -127,20 +139,32 @@ function BarChart() {
               <Text color='gray'>TOTAL OUTBOUND TOUCHPOINTS</Text>
               <Title>{totalTouchpoints.toLocaleString()}</Title>
             </Box>
-            <Box sx={{justifyContent: 'right', textAlign: 'right', width: '300px'}} ml='auto' mt='md'>
-              {['week', 'month', 'year'].map(mode => (
-                <Button 
-                  onClick={() => setCurrentMode(mode)} 
+            <Flex ml='auto'>
+              <Switch 
+                  mt='4px'
+                  ml='10%'
+                  color='green'
+                  variant='outline'
+                  size='sm'
+                  label="Cumulative" 
+                  checked={isCumulativeMode} 
+                  onChange={(event) => setIsCumulativeMode(event.currentTarget.checked)} 
+                />
+              <Box ml='auto' sx={{ justifyContent: 'right', textAlign: 'right', width: '300px', ml: 'auto', mt: 'md' }}>
+                {['week', 'month', 'year'].map(mode => (
+                  <Button 
+                    onClick={() => setCurrentMode(mode)} 
                     mr='xs' 
                     size='xs'
                     color={currentMode === mode ? 'green' : 'gray'}
                     variant={currentMode === mode ? 'outline' : 'subtle'}
                     key={mode}
-                >
-                  {mode}
-                </Button>
-              ))}
-            </Box>
+                  >
+                    {mode}
+                  </Button>
+                ))}
+              </Box>
+            </Flex>
           </Flex>
           <Bar data={chartData} options={options} />
         </Card>
@@ -148,7 +172,6 @@ function BarChart() {
     </Card>
   );
 }
-
 
 const WarmupChart = () => {
   const theme = useMantineTheme();

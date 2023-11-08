@@ -42,17 +42,17 @@ function BarChart() {
           'Authorization': `Bearer ${userToken[0]}`
         },
       })
-      .then(response => response.json())
-      .then(data => {
-        setModes(data.outreach_over_time || {});
-      })
+        .then(response => response.json())
+        .then(data => {
+          setModes(data.outreach_over_time || {});
+        })
 
       setFetchedModes(true);
     }
   }, [fetchedModes]);
 
   const getCumulativeData = (data: any) => {
-    if (!data) return []; 
+    if (!data) return [];
     let cumulative = 0;
     return data.map((value: any) => {
       cumulative += value;
@@ -133,12 +133,12 @@ function BarChart() {
 
   return (
     <Card withBorder mt='md' p='0'>
-      <Flex mb='md' pl='md' pr='md' p='xs' sx={{backgroundColor: theme.colors.blue[6]}}>
-        <Title order={3} mt='0' sx={{flexDirection: 'row', display: 'flex', color: 'white'}}>Volume</Title>
+      <Flex mb='md' pl='md' pr='md' p='xs' sx={{ backgroundColor: theme.colors.blue[6] }}>
+        <Title order={3} mt='0' sx={{ flexDirection: 'row', display: 'flex', color: 'white' }}>Volume</Title>
         {
           opened ?
-            <IconChevronDown color='white' size='2rem' style={{marginLeft: 'auto', cursor: 'pointer'}} onClick={() => toggle()}/> : 
-            <IconChevronUp color='white' size='2rem' style={{marginLeft: 'auto', cursor: 'pointer'}} onClick={() => toggle()}/>
+            <IconChevronDown color='white' size='2rem' style={{ marginLeft: 'auto', cursor: 'pointer' }} onClick={() => toggle()} /> :
+            <IconChevronUp color='white' size='2rem' style={{ marginLeft: 'auto', cursor: 'pointer' }} onClick={() => toggle()} />
         }
       </Flex>
       <Collapse in={opened}>
@@ -153,9 +153,9 @@ function BarChart() {
             <Flex ml='auto'>
               <Box ml='auto' sx={{ justifyContent: 'right', textAlign: 'right', width: '300px', ml: 'auto', mt: 'md' }}>
                 {['week', 'month', 'year'].map(mode => (
-                  <Button 
-                    onClick={() => setCurrentMode(mode)} 
-                    mr='xs' 
+                  <Button
+                    onClick={() => setCurrentMode(mode)}
+                    mr='xs'
                     size='xs'
                     color={currentMode === mode ? 'green' : 'gray'}
                     variant={currentMode === mode ? 'outline' : 'subtle'}
@@ -168,15 +168,15 @@ function BarChart() {
             </Flex>
           </Flex>
           <Bar data={chartData} options={options} />
-          <Switch 
+          <Switch
             mt='sm'
             size='xs'
-            sx={{marginLeft: 'auto', marginRight: 0}}
+            sx={{ marginLeft: 'auto', marginRight: 0 }}
             color="blue"
             labelPosition="right"
-            label="View cumulative activity" 
-            checked={isCumulativeMode} 
-            onChange={(event) => setIsCumulativeMode(event.currentTarget.checked)} 
+            label="View cumulative activity"
+            checked={isCumulativeMode}
+            onChange={(event) => setIsCumulativeMode(event.currentTarget.checked)}
           />
         </Card>
       </Collapse>
@@ -244,14 +244,22 @@ const WarmupChart = () => {
     },
   };
 
-  return <div style={{width: '100%', height: '400px'}}>
-     <Line data={data} options={options} />
+  return <div style={{ width: '100%', height: '400px' }}>
+    <Line data={data} options={options} />
   </div>
 };
+
+interface DomainHealth {
+  domain: string;
+  spf: boolean;
+  dmarc: boolean;
+  dkim: boolean;
+}
 
 
 export function ActiveChannels() {
   const [sdrs, setSDRs] = useState([]);
+  const [domains, setDomains] = useState<DomainHealth[]>([]);
   const [fetchedChannels, setFetchedChannels] = useState(false);
   const [loading, setLoading] = useState(false);
   const theme = useMantineTheme();
@@ -262,7 +270,7 @@ export function ActiveChannels() {
   useEffect(() => {
     if (!fetchedChannels) {
       setLoading(true)
-      fetch(`${API_URL}/email/warmup/channel_warmups`, {
+      fetch(`${API_URL}/email/warmup/snapshots`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -272,6 +280,7 @@ export function ActiveChannels() {
         .then(response => response.json())
         .then(data => {
           setSDRs(data.sdrs || []);
+          calculateDomainStatuses(data.sdrs)
         }).finally(() => {
           setFetchedChannels(true);
           setLoading(false);
@@ -279,7 +288,36 @@ export function ActiveChannels() {
     }
   }, [setFetchedChannels]);
 
-  if (loading) { 
+  const calculateDomainStatuses = (sdrs: any) => {
+    let domains: DomainHealth[] = []
+    let seenDomains: string[] = []
+    for (const sdr of sdrs) {
+      const snapshots = sdr.snapshots
+      for (const snapshot of snapshots) {
+        if (snapshot.channel_type != "EMAIL") {
+          continue
+        }
+        const account_name = snapshot.account_name
+        const domain = account_name.split('@')[1]
+
+        // If we haven't seen this domain (it's new!) add to the list
+        if (!seenDomains.includes(domain)) {
+          seenDomains.push(domain)
+          domains.push({
+            domain: domain,
+            spf: snapshot.spf_record_valid,
+            dmarc: snapshot.dmarc_record_valid,
+            dkim: snapshot.dkim_record_valid
+          })
+        }
+      }
+    }
+
+    setDomains(domains)
+    console.log('domains', domains)
+  }
+
+  if (loading) {
     return <Card withBorder mt='md'>
       <Flex>
         <Box>
@@ -307,16 +345,16 @@ export function ActiveChannels() {
 
   return <>
     <Card withBorder mt='xs' p={0} pt={0} >
-      <Flex mb='md' pl='md' pr='md' p='xs' sx={{backgroundColor: theme.colors.blue[6]}}>
-        <Title order={3} mt='0' sx={{flexDirection: 'row', display: 'flex', color: 'white'}}>Infrastructure</Title>
-        <Badge color='red' variant='outline' size='lg' sx={{backgroundColor: 'white'}} ml='md' mt='2px'>
+      <Flex mb='md' pl='md' pr='md' p='xs' sx={{ backgroundColor: theme.colors.blue[6] }}>
+        <Title order={3} mt='0' sx={{ flexDirection: 'row', display: 'flex', color: 'white' }}>Infrastructure</Title>
+        <Badge color='red' variant='outline' size='lg' sx={{ backgroundColor: 'white' }} ml='md' mt='2px'>
           🔥 Warmup ENABLED
         </Badge>
-        
+
         {
           opened ?
-            <IconChevronDown color='white' size='2rem' style={{marginLeft: 'auto', cursor: 'pointer'}} onClick={() => toggle()}/> : 
-            <IconChevronUp color='white' size='2rem' style={{marginLeft: 'auto', cursor: 'pointer'}} onClick={() => toggle()}/>
+            <IconChevronDown color='white' size='2rem' style={{ marginLeft: 'auto', cursor: 'pointer' }} onClick={() => toggle()} /> :
+            <IconChevronUp color='white' size='2rem' style={{ marginLeft: 'auto', cursor: 'pointer' }} onClick={() => toggle()} />
         }
       </Flex>
       <Collapse in={opened}>
@@ -331,20 +369,20 @@ export function ActiveChannels() {
                   <Text ml='4px' fz='14px' color='gray' fw='500' mt='2px'>
                     Daily Send Volume:
                   </Text>
-                  <Flex color='gray' pt='4px' pl='16px' pr='16px' ml='xs' sx={{border: 'solid 1px #ddd; border-radius: 20px;'}} mah={30}>
+                  <Flex color='gray' pt='4px' pl='16px' pr='16px' ml='xs' sx={{ border: 'solid 1px #ddd; border-radius: 20px;' }} mah={30}>
                     <IconBrandLinkedin size='1rem' color={theme.colors.blue[6]} />
                     <Text ml='4px' fz='12px' color='gray' fw='bold'>
-                      <span style={{color: theme.colors.blue[6], fontWeight: 'bold'}}>LinkedIn:</span> {totalLinkedInWarmup} / day
+                      <span style={{ color: theme.colors.blue[6], fontWeight: 'bold' }}>LinkedIn:</span> {totalLinkedInWarmup} / day
                     </Text>
                   </Flex>
-                  <Flex color='gray' pt='4px' pl='16px' pr='16px' ml='xs' sx={{border: 'solid 1px #ddd; border-radius: 20px;'}}  mah={26}>
+                  <Flex color='gray' pt='4px' pl='16px' pr='16px' ml='xs' sx={{ border: 'solid 1px #ddd; border-radius: 20px;' }} mah={26}>
                     <IconMail size='1rem' color={theme.colors.orange[6]} />
                     <Text ml='4px' fz='12px' color='gray' fw='bold'>
-                      <span style={{color: theme.colors.orange[6], fontWeight: 'bold'}}>Email:</span> {totalEmailWarmup} / day
+                      <span style={{ color: theme.colors.orange[6], fontWeight: 'bold' }}>Email:</span> {totalEmailWarmup} / day
                     </Text>
                   </Flex>
                 </Flex>
-                <Text ml='auto' align='right' h={39}><IconUser size='1rem' color={theme.colors.blue[6]}/> <b>{sdrs.filter((x: any) => x.active).length}</b> Active Seats</Text>
+                <Text ml='auto' align='right' h={39}><IconUser size='1rem' color={theme.colors.blue[6]} /> <b>{sdrs.filter((x: any) => x.active).length}</b> Active Seats</Text>
               </Flex>
               <Grid>
                 {
@@ -362,30 +400,30 @@ export function ActiveChannels() {
                     let emails = x.channels?.filter((x: any) => x.channel_type == 'EMAIL').map((x: any) => x.account_name)
 
                     return <Grid.Col span={4} mb='xs'>
-                        <Card  withBorder mt='0' pt='4'>
-                          <Flex w='100%' mt='0'>
-                            <Box sx={{borderRadius: 10}} pt='0'>
-                              <Image 
-                                src={x.img_url ? x.img_url : 'https://images.squarespace-cdn.com/content/v1/56031d09e4b0dc68f6197723/1469030770980-URDU63CK3Q4RODZYH0S1/Grey+Box.jpg?format=1500w'} 
-                                width={40} height={40} radius="sm" />
-                            </Box>
-                            <Box ml='xs' mt='0'>
-                              <Badge size='xs' color={x.active ? 'green' : 'gray'} >
-                                {x.active ? 'Active' : 'Inactive'}
-                              </Badge>
-                              <Text fw={500} fz={16}>{x.sdr_name}</Text>
-                            </Box>
-                          </Flex>
-                          <Divider mt='xs' mb='xs' />
-                          <Box w='100%'>
+                      <Card withBorder mt='0' pt='4'>
+                        <Flex w='100%' mt='0'>
+                          <Box sx={{ borderRadius: 10 }} pt='0'>
+                            <Image
+                              src={x.img_url ? x.img_url : 'https://images.squarespace-cdn.com/content/v1/56031d09e4b0dc68f6197723/1469030770980-URDU63CK3Q4RODZYH0S1/Grey+Box.jpg?format=1500w'}
+                              width={40} height={40} radius="sm" />
+                          </Box>
+                          <Box ml='xs' mt='0'>
+                            <Badge size='xs' color={x.active ? 'green' : 'gray'} >
+                              {x.active ? 'Active' : 'Inactive'}
+                            </Badge>
+                            <Text fw={500} fz={16}>{x.sdr_name}</Text>
+                          </Box>
+                        </Flex>
+                        <Divider mt='xs' mb='xs' />
+                        <Box w='100%'>
                           {
                             ["LINKEDIN", "EMAIL"].map((channel) => {
                               let label = 'LinkedIn'
                               if (channel == 'EMAIL') {
                                 label = 'Email'
-                              } 
+                              }
 
-                              let icon = <IconBrandLinkedin size='1.4rem'  color={theme.colors.blue[6]}/>
+                              let icon = <IconBrandLinkedin size='1.4rem' color={theme.colors.blue[6]} />
                               if (channel == 'EMAIL') {
                                 icon = <IconMail size='1.4rem' color={theme.colors.blue[6]} />
                               }
@@ -398,66 +436,116 @@ export function ActiveChannels() {
                               const numUnits = x.channels?.filter((x: any) => x.channel_type == channel).length
 
                               return <Flex>
-                                        <Group w='100%'>
-                                          <HoverCard shadow="md" withinPortal>
-                                            <HoverCard.Target>
-                                              <Box w='100%'>
-                                                <Box w='100%' sx={{cursor: 'pointer'}} mt='xs'>
-                                                  <Flex w='100%'>
-                                                    {icon}
-                                                    <Text color='blue' fw='bold' w='40%' ml='xs'>
-                                                      {label}
-                                                    </Text>
-                                                    <Badge color='gray' w='60%'  ml='xs' fw='700' size='sm' variant='outline' mr='md' mt='4px'>
-                                                      {numUnits} {unit}
-                                                    </Badge>
-                                                  </Flex>
-                                                </Box>
-                                              </Box>
-                                            </HoverCard.Target>
-                                            <HoverCard.Dropdown w={400}>
-                                              <Table>
-                                                <thead>
-                                                  <tr>
-                                                    <th>Channel</th>
-                                                    <th>Volume</th>
-                                                    <th>Warmup</th>
-                                                    <th>Reputation</th>
-                                                  </tr>
-                                                </thead>
-                                                <tbody>
-                                                  {
-                                                    x.channels?.filter((x: any) => x.channel_type == channel).map((channel: any) => {
-                                                      return <tr> 
-                                                        <td>{channel.channel_type == 'LINKEDIN' ? <IconBrandLinkedin size='0.9rem'/> : <IconMail size='0.9rem'/>} {channel.account_name}</td>
-                                                        <td>{channel.daily_sent_count} / {channel.daily_limit}</td>
-                                                        <td><Badge size='xs' color={channel.warmup_enabled ? 'green' : 'blue'}>{channel.warmup_enabled ? 'In progress' : 'Done'}</Badge></td>
-                                                        <td><Badge size='xs' color={channel.reputation > 80 ? 'green' : 'yellow'}>{channel.reputation}%</Badge></td>
-                                                      </tr>
-                                                    })
-                                                  }
-                                                </tbody>
-                                              </Table>
-                                            </HoverCard.Dropdown>
-                                          </HoverCard>
-                                        </Group>
-                                      </Flex>
+                                <Group w='100%'>
+                                  <HoverCard shadow="md" withinPortal>
+                                    <HoverCard.Target>
+                                      <Box w='100%'>
+                                        <Box w='100%' sx={{ cursor: 'pointer' }} mt='xs'>
+                                          <Flex w='100%'>
+                                            {icon}
+                                            <Text color='blue' fw='bold' w='40%' ml='xs'>
+                                              {label}
+                                            </Text>
+                                            <Badge color='gray' w='60%' ml='xs' fw='700' size='sm' variant='outline' mr='md' mt='4px'>
+                                              {numUnits} {unit}
+                                            </Badge>
+                                          </Flex>
+                                        </Box>
+                                      </Box>
+                                    </HoverCard.Target>
+                                    <HoverCard.Dropdown w={400}>
+                                      <Table>
+                                        <thead>
+                                          <tr>
+                                            <th>Channel</th>
+                                            <th>Volume</th>
+                                            <th>Warmup</th>
+                                            <th>Reputation</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {
+                                            x.channels?.filter((x: any) => x.channel_type == channel).map((channel: any) => {
+                                              return <tr>
+                                                <td>{channel.channel_type == 'LINKEDIN' ? <IconBrandLinkedin size='0.9rem' /> : <IconMail size='0.9rem' />} {channel.account_name}</td>
+                                                <td>{channel.daily_sent_count} / {channel.daily_limit}</td>
+                                                <td><Badge size='xs' color={channel.warmup_enabled ? 'green' : 'blue'}>{channel.warmup_enabled ? 'In progress' : 'Done'}</Badge></td>
+                                                <td><Badge size='xs' color={channel.reputation > 80 ? 'green' : 'yellow'}>{channel.reputation}%</Badge></td>
+                                              </tr>
+                                            })
+                                          }
+                                        </tbody>
+                                      </Table>
+                                    </HoverCard.Dropdown>
+                                  </HoverCard>
+                                </Group>
+                              </Flex>
                             })
                           }
-                          </Box>
-                          
-                          {emails.length > 0 && <Divider mt='md' />}
+                        </Box>
 
-                          {
-                            emails.map((email: any) => {
-                              return <Badge size='xs' color='yellow' variant='dot'> WARMING - <span style={{textTransform: 'lowercase'}}>{email}</span></Badge>
-                            })
-                          }
-                        </Card>
-                      </Grid.Col>
+                        {emails.length > 0 && <Divider mt='md' />}
+
+                        {
+                          emails.map((email: any) => {
+                            return <Badge size='xs' color='yellow' variant='dot'> WARMING - <span style={{ textTransform: 'lowercase' }}>{email}</span></Badge>
+                          })
+                        }
+                      </Card>
+                    </Grid.Col>
                   })
                 }
               </Grid>
+              <Card
+                mt='sm'
+                withBorder
+              >
+                <Flex align='center'>
+                  <Flex>
+                    <Text fw='bold'>Domain(s):</Text>
+                  </Flex>
+                  <Flex ml='lg' w='100%' direction='column'>
+                    {
+                      domains.map((domain: DomainHealth) => {
+
+                        return (
+                          <Flex align='center' h='32px'>
+                            <Flex align='center'>
+                              <Flex align='center'>
+                                <IconMail size={16} />
+                                <Text ml='8px'>{domain.domain}</Text>
+                              </Flex>
+                              <Flex ml='lg' align='center'>
+                                <Tooltip
+                                  withArrow
+                                  withinPortal
+                                  label={domain.spf ? 'SPF record detected and validated' : 'SPF record missing or invalid'}
+                                >
+                                  <Badge size='md' color={domain.spf ? 'green' : 'red'} variant='dot' ml='8px'>SPF</Badge>
+                                </Tooltip>
+                                <Tooltip
+                                  withArrow
+                                  withinPortal
+                                  label={domain.dmarc ? 'DMARC record detected and validated' : 'DMARC record missing or invalid'}
+                                >
+                                  <Badge size='md' color={domain.dmarc ? 'green' : 'red'} variant='dot' ml='8px'>DMARC</Badge>
+                                </Tooltip>
+                                <Tooltip
+                                  withArrow
+                                  withinPortal
+                                  label={domain.dkim ? 'DKIM record detected and validated' : 'DKIM record missing or invalid'}
+                                >
+                                  <Badge size='md' color={domain.dkim ? 'green' : 'red'} variant='dot' ml='8px'>DKIM</Badge>
+                                </Tooltip>
+                              </Flex>
+                            </Flex>
+                          </Flex>
+                        )
+                      })
+                    }
+                  </Flex>
+                </Flex>
+              </Card>
             </Box>
           </Flex>
         </Card>
@@ -511,13 +599,13 @@ export function ActiveCampaigns() {
   }
 
   return <Card withBorder mt='md' p='0'>
-    <Flex mb='md' pl='md' pr='md' p='xs' color='white' sx={{backgroundColor: theme.colors.blue[6]}}>
-        <Title order={3} color='white'>{campaignsShown.length == 1 ? 'Active' : 'All'} Campaigns {query.length > 0 ? `with "${query}"` : ''}</Title>
-        {
-          opened ?
-            <IconChevronDown color='white' size='2rem' style={{marginLeft: 'auto', cursor: 'pointer'}} onClick={() => toggle()}/> : 
-            <IconChevronUp color='white' size='2rem' style={{marginLeft: 'auto', cursor: 'pointer'}} onClick={() => toggle()}/>
-        }
+    <Flex mb='md' pl='md' pr='md' p='xs' color='white' sx={{ backgroundColor: theme.colors.blue[6] }}>
+      <Title order={3} color='white'>{campaignsShown.length == 1 ? 'Active' : 'All'} Campaigns {query.length > 0 ? `with "${query}"` : ''}</Title>
+      {
+        opened ?
+          <IconChevronDown color='white' size='2rem' style={{ marginLeft: 'auto', cursor: 'pointer' }} onClick={() => toggle()} /> :
+          <IconChevronUp color='white' size='2rem' style={{ marginLeft: 'auto', cursor: 'pointer' }} onClick={() => toggle()} />
+      }
     </Flex>
     <Collapse in={opened}>
       <Card>
@@ -526,9 +614,9 @@ export function ActiveCampaigns() {
             <Text color='gray'>These are the active campaigns running from across all of {userData.client?.company}'s users</Text>
             <Text color='gray'>There are {activeCampaigns.filter((x: any) => x.active).length} <Badge size='sm' color='green'>Active</Badge> campaigns and {activeCampaigns.filter((x: any) => !x.active).length} <Badge size='sm' color='gray'>Inactive</Badge> campaigns</Text>
           </Box>
-          
-          <Box ml='auto' w='30%' sx={{textAlign: 'right'}}>
-            <SegmentedControl 
+
+          <Box ml='auto' w='30%' sx={{ textAlign: 'right' }}>
+            <SegmentedControl
               size='xs'
               onChange={
                 (value) => {
@@ -537,26 +625,26 @@ export function ActiveCampaigns() {
               }
               data={[
                 {
-                value: 'list',
-                label: (
-                  <Center>
-                    <IconList style={{ width: rem(16), height: rem(16) }} />
-                    <Box ml={10}>List</Box>
-                  </Center>
-                ),
-              },
-              {
-                value: 'grid',
-                label: (
-                  <Center>
-                    <IconGrid3x3 style={{ width: rem(16), height: rem(16) }} />
-                    <Box ml={10}>Grid</Box>
-                  </Center>
-                ),
-              }]} 
+                  value: 'list',
+                  label: (
+                    <Center>
+                      <IconList style={{ width: rem(16), height: rem(16) }} />
+                      <Box ml={10}>List</Box>
+                    </Center>
+                  ),
+                },
+                {
+                  value: 'grid',
+                  label: (
+                    <Center>
+                      <IconGrid3x3 style={{ width: rem(16), height: rem(16) }} />
+                      <Box ml={10}>Grid</Box>
+                    </Center>
+                  ),
+                }]}
             />
             <Input
-              icon={<IconSearch size='0.75rem'/>}
+              icon={<IconSearch size='0.75rem' />}
               placeholder='Search Campaigns'
               mt='xs'
               onChange={
@@ -573,19 +661,19 @@ export function ActiveCampaigns() {
             </Input>
           </Box>
         </Flex>
-        
+
         <Grid mt='md'>
           {activeCampaigns
-            .sort((a: any,b: any) => b.open_percent - a.open_percent)
-            .sort((a: any, b:any) => -(a.active - b.active))
+            .sort((a: any, b: any) => b.open_percent - a.open_percent)
+            .sort((a: any, b: any) => -(a.active - b.active))
             .filter((x: any) => campaignsShown.includes(x.active))
             .filter((x: any) => x.name.toLowerCase().includes(query.toLowerCase()) || x.archetype.toLowerCase().includes(query.toLowerCase()))
             .map((x: any) => {
-            return (
-              <Grid.Col span={mode === 'grid' ? 6 : 12}>
-                <Card withBorder padding={mode === 'grid' ? 'lg' : 'xs'} radius="md" style={mode === 'grid' ? {} : {display: 'flex', flexDirection: 'row', width: '100%'}}>
-                  
-                    <Group mb={mode === 'grid' ? "xs" : '0px'} sx={{cursor: 'pointer'}} w='100%'>
+              return (
+                <Grid.Col span={mode === 'grid' ? 6 : 12}>
+                  <Card withBorder padding={mode === 'grid' ? 'lg' : 'xs'} radius="md" style={mode === 'grid' ? {} : { display: 'flex', flexDirection: 'row', width: '100%' }}>
+
+                    <Group mb={mode === 'grid' ? "xs" : '0px'} sx={{ cursor: 'pointer' }} w='100%'>
                       <Tooltip label={x.name} withinPortal>
                         <Image src={x.img_url} width={40} height={40} radius="sm" />
                       </Tooltip>
@@ -598,165 +686,165 @@ export function ActiveCampaigns() {
                         </Tooltip>
                       </Box>
                     </Group>
-                  
 
-                  {mode === 'grid' && 
-                  <>
-                    <Text c="dimmed" size='xs' mah='110px' mb='xs' sx={{overflowY: 'scroll'}}> 
-                      {x.included_individual_title_keywords?.length > 0 && (
-                        <Tooltip label="Prioritized Job Titles" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconBriefcase size="0.75rem" color="#868E96" /> {x.included_individual_title_keywords.join(", ").substring(0, 60)}{x.included_individual_title_keywords.join(", ").length > 60 ? '...' : ''}
-                          </p>
-                        </Tooltip>
-                      )}
 
-                      {x.included_individual_locations_keywords?.length > 0 && (
-                        <Tooltip label="Prioritized Prospect Locations" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconWorld size="0.75rem" color="#868E96" /> {x.included_individual_locations_keywords.join(", ").substring(0, 60)}{x.included_individual_locations_keywords.join(", ").length > 60 ? '...' : ''}
-                          </p>
-                        </Tooltip>
-                      )}
+                    {mode === 'grid' &&
+                      <>
+                        <Text c="dimmed" size='xs' mah='110px' mb='xs' sx={{ overflowY: 'scroll' }}>
+                          {x.included_individual_title_keywords?.length > 0 && (
+                            <Tooltip label="Prioritized Job Titles" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconBriefcase size="0.75rem" color="#868E96" /> {x.included_individual_title_keywords.join(", ").substring(0, 60)}{x.included_individual_title_keywords.join(", ").length > 60 ? '...' : ''}
+                              </p>
+                            </Tooltip>
+                          )}
 
-                      {x.included_individual_industry_keywords?.length > 0 && (
-                        <Tooltip label="Prioritized Prospect Industries" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconBuildingFactory size="0.75rem" color="#868E96" /> {x.included_individual_industry_keywords.join(", ").substring(0, 60)}{x.included_individual_industry_keywords.join(", ").length > 60 ? '...' : ''}
-                          </p>
-                        </Tooltip>
-                      )}
+                          {x.included_individual_locations_keywords?.length > 0 && (
+                            <Tooltip label="Prioritized Prospect Locations" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconWorld size="0.75rem" color="#868E96" /> {x.included_individual_locations_keywords.join(", ").substring(0, 60)}{x.included_individual_locations_keywords.join(", ").length > 60 ? '...' : ''}
+                              </p>
+                            </Tooltip>
+                          )}
 
-                      {x.included_individual_generalized_keywords?.length > 0 && (
-                        <Tooltip label="Prioritized Prospect Keywords" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconBook size="0.75rem" color="#868E96" /> {x.included_individual_generalized_keywords.join(", ").substring(0, 60)}{x.included_individual_generalized_keywords.join(", ").length > 60 ? '...' : ''}
-                          </p>
-                        </Tooltip>
-                      )}
+                          {x.included_individual_industry_keywords?.length > 0 && (
+                            <Tooltip label="Prioritized Prospect Industries" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconBuildingFactory size="0.75rem" color="#868E96" /> {x.included_individual_industry_keywords.join(", ").substring(0, 60)}{x.included_individual_industry_keywords.join(", ").length > 60 ? '...' : ''}
+                              </p>
+                            </Tooltip>
+                          )}
 
-                      {x.included_individual_skills_keywords?.length > 0 && (
-                        <Tooltip label="Prioritized Prospect Skills" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconSunElectricity size="0.75rem" color="#868E96" /> {x.included_individual_skills_keywords.join(", ").substring(0, 60)}{x.included_individual_skills_keywords.join(", ").length > 60 ? '...' : ''}
-                          </p>
-                        </Tooltip>
-                      )}
+                          {x.included_individual_generalized_keywords?.length > 0 && (
+                            <Tooltip label="Prioritized Prospect Keywords" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconBook size="0.75rem" color="#868E96" /> {x.included_individual_generalized_keywords.join(", ").substring(0, 60)}{x.included_individual_generalized_keywords.join(", ").length > 60 ? '...' : ''}
+                              </p>
+                            </Tooltip>
+                          )}
 
-                      {x.included_company_name_keywords?.length > 0 && (
-                        <Tooltip label="Prioritized Prospect Companies" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconBuilding size="0.75rem" color="#868E96" /> {x.included_company_name_keywords.join(", ").substring(0, 60)}{x.included_company_name_keywords.join(", ").length > 60 ? '...' : ''}
-                          </p>
-                        </Tooltip>
-                      )}
+                          {x.included_individual_skills_keywords?.length > 0 && (
+                            <Tooltip label="Prioritized Prospect Skills" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconSunElectricity size="0.75rem" color="#868E96" /> {x.included_individual_skills_keywords.join(", ").substring(0, 60)}{x.included_individual_skills_keywords.join(", ").length > 60 ? '...' : ''}
+                              </p>
+                            </Tooltip>
+                          )}
 
-                      {x.included_company_locations_keywords?.length > 0 && (
-                        <Tooltip label="Prioritized Prospect Company Locations" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconGlobe size="0.75rem" color="#868E96" /> {x.included_company_locations_keywords.join(", ").substring(0, 60)}{x.included_company_locations_keywords.join(", ").length > 60 ? '...' : ''}
-                          </p>
-                        </Tooltip>
-                      )}
+                          {x.included_company_name_keywords?.length > 0 && (
+                            <Tooltip label="Prioritized Prospect Companies" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconBuilding size="0.75rem" color="#868E96" /> {x.included_company_name_keywords.join(", ").substring(0, 60)}{x.included_company_name_keywords.join(", ").length > 60 ? '...' : ''}
+                              </p>
+                            </Tooltip>
+                          )}
 
-                      {x.included_company_generalized_keywords?.length > 0 && (
-                        <Tooltip label="Prioritized Prospect Company Keywords" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconInfoCircle size="0.75rem" color="#868E96" /> {x.included_company_generalized_keywords.join(", ").substring(0, 60)}{x.included_company_generalized_keywords.join(", ").length > 60 ? '...' : ''}
-                          </p>
-                        </Tooltip>
-                      )}
+                          {x.included_company_locations_keywords?.length > 0 && (
+                            <Tooltip label="Prioritized Prospect Company Locations" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconGlobe size="0.75rem" color="#868E96" /> {x.included_company_locations_keywords.join(", ").substring(0, 60)}{x.included_company_locations_keywords.join(", ").length > 60 ? '...' : ''}
+                              </p>
+                            </Tooltip>
+                          )}
 
-                      {x.included_company_industries_keywords?.length > 0 && (
-                        <Tooltip label="Prioritized Prospect Company Industries" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconBuildingFactory size="0.75rem" color="#868E96" /> {x.included_company_industries_keywords.join(", ").substring(0, 60)}{x.included_company_industries_keywords.join(", ").length > 60 ? '...' : ''}
-                          </p>
-                        </Tooltip>
-                      )}
+                          {x.included_company_generalized_keywords?.length > 0 && (
+                            <Tooltip label="Prioritized Prospect Company Keywords" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconInfoCircle size="0.75rem" color="#868E96" /> {x.included_company_generalized_keywords.join(", ").substring(0, 60)}{x.included_company_generalized_keywords.join(", ").length > 60 ? '...' : ''}
+                              </p>
+                            </Tooltip>
+                          )}
 
-                      {(x.company_size_start && x.company_size_end) ? (
-                        <Tooltip label="Prioritized Prospect Company Size" withinPortal>
-                          <p style={{margin: 0, marginBottom: 4}}>
-                            <IconMan size="0.75rem" color="#868E96" /> {x.company_size_start.toLocaleString()} - {x.company_size_end.toLocaleString()} Employees
-                          </p>
-                        </Tooltip>
-                      ) : ''}
-                    </Text> 
-                  </>}
+                          {x.included_company_industries_keywords?.length > 0 && (
+                            <Tooltip label="Prioritized Prospect Company Industries" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconBuildingFactory size="0.75rem" color="#868E96" /> {x.included_company_industries_keywords.join(", ").substring(0, 60)}{x.included_company_industries_keywords.join(", ").length > 60 ? '...' : ''}
+                              </p>
+                            </Tooltip>
+                          )}
 
-                  <Divider mt='md'/>
-
-                  <Flex
-                    align={"center"}
-                    justify={"space-between"}
-                    gap={"0.1rem"}
-                    mt='md'
-                    mb='md'
-                    ml='md'
-                    mr='md'
-                  >
-                    <Tooltip label={x.num_sent.toLocaleString() + " Sent / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
-                      <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
-                        <IconSend size="0.75rem" color="#868E96" />
-                        <Text fw={"600"} fz={"0.7rem"} color="gray.6">
-                          Send:
+                          {(x.company_size_start && x.company_size_end) ? (
+                            <Tooltip label="Prioritized Prospect Company Size" withinPortal>
+                              <p style={{ margin: 0, marginBottom: 4 }}>
+                                <IconMan size="0.75rem" color="#868E96" /> {x.company_size_start.toLocaleString()} - {x.company_size_end.toLocaleString()} Employees
+                              </p>
+                            </Tooltip>
+                          ) : ''}
                         </Text>
-                        <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                          {x.sent_percent}%
-                        </Text>
-                      </Flex>
-                    </Tooltip>
+                      </>}
 
-                    <Divider orientation="vertical" size='xs' m='4px' />
+                    <Divider mt='md' />
 
-                    <Tooltip label={x.num_opens.toLocaleString() + " Opens / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
-                      <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
-                        <IconChecks size="0.75rem" color="#868E96" />
-                        <Text fw={"600"} fz={"0.7rem"} color="gray.6">
-                          Opens:
-                        </Text>
-                        <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                          {Math.round(x.open_percent * 100)}%
-                        </Text>
-                      </Flex>
-                    </Tooltip>
+                    <Flex
+                      align={"center"}
+                      justify={"space-between"}
+                      gap={"0.1rem"}
+                      mt='md'
+                      mb='md'
+                      ml='md'
+                      mr='md'
+                    >
+                      <Tooltip label={x.num_sent.toLocaleString() + " Sent / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                        <Flex gap={"0.25rem"} align={"center"} sx={{ cursor: 'pointer' }}>
+                          <IconSend size="0.75rem" color="#868E96" />
+                          <Text fw={"600"} fz={"0.7rem"} color="gray.6">
+                            Send:
+                          </Text>
+                          <Text fw={"600"} fz={"0.7rem"} color="gray.8">
+                            {x.sent_percent}%
+                          </Text>
+                        </Flex>
+                      </Tooltip>
 
-                    <Divider orientation="vertical" size='xs' m='4px'/>
+                      <Divider orientation="vertical" size='xs' m='4px' />
 
-                    <Tooltip label={x.num_replies.toLocaleString() + " Replies / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
-                      <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
-                        <IconMessageCheck size="0.75rem" color="#868E96" />
-                        <Text fw={"600"} fz={"0.7rem"} color="gray.6">
-                          Replies:
-                        </Text>
-                        <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                          {Math.round(x.reply_percent * 100)}%
-                        </Text>
-                      </Flex>
-                    </Tooltip>
+                      <Tooltip label={x.num_opens.toLocaleString() + " Opens / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                        <Flex gap={"0.25rem"} align={"center"} sx={{ cursor: 'pointer' }}>
+                          <IconChecks size="0.75rem" color="#868E96" />
+                          <Text fw={"600"} fz={"0.7rem"} color="gray.6">
+                            Opens:
+                          </Text>
+                          <Text fw={"600"} fz={"0.7rem"} color="gray.8">
+                            {Math.round(x.open_percent * 100)}%
+                          </Text>
+                        </Flex>
+                      </Tooltip>
 
-                    <Divider orientation="vertical" size='xs' m='4px' />
+                      <Divider orientation="vertical" size='xs' m='4px' />
 
-                    <Tooltip label={x.num_demos.toLocaleString() + " Demos / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
-                      <Flex gap={"0.25rem"} align={"center"} sx={{cursor: 'pointer'}}>
-                        <IconMessageCheck size="0.75rem" color="#868E96" />
-                        <Text fw={"600"} fz={"0.7rem"} color="gray.6">
-                          Demos:
-                        </Text>
-                        <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                          {Math.round(x.demo_percent * 100)}%
-                        </Text>
-                      </Flex>
-                    </Tooltip>
-                  </Flex>
-                </Card>
-            </Grid.Col>
-          )
-          })}
-          <Button 
+                      <Tooltip label={x.num_replies.toLocaleString() + " Replies / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                        <Flex gap={"0.25rem"} align={"center"} sx={{ cursor: 'pointer' }}>
+                          <IconMessageCheck size="0.75rem" color="#868E96" />
+                          <Text fw={"600"} fz={"0.7rem"} color="gray.6">
+                            Replies:
+                          </Text>
+                          <Text fw={"600"} fz={"0.7rem"} color="gray.8">
+                            {Math.round(x.reply_percent * 100)}%
+                          </Text>
+                        </Flex>
+                      </Tooltip>
+
+                      <Divider orientation="vertical" size='xs' m='4px' />
+
+                      <Tooltip label={x.num_demos.toLocaleString() + " Demos / " + x.num_sent.toLocaleString() + " Sent"} withinPortal>
+                        <Flex gap={"0.25rem"} align={"center"} sx={{ cursor: 'pointer' }}>
+                          <IconMessageCheck size="0.75rem" color="#868E96" />
+                          <Text fw={"600"} fz={"0.7rem"} color="gray.6">
+                            Demos:
+                          </Text>
+                          <Text fw={"600"} fz={"0.7rem"} color="gray.8">
+                            {Math.round(x.demo_percent * 100)}%
+                          </Text>
+                        </Flex>
+                      </Tooltip>
+                    </Flex>
+                  </Card>
+                </Grid.Col>
+              )
+            })}
+          <Button
             variant='subtle'
-            leftIcon={campaignsShown.length === 1 ? <IconArrowDown size='0.8rem'/> : <IconArrowUp size='0.8rem'/>}
+            leftIcon={campaignsShown.length === 1 ? <IconArrowDown size='0.8rem' /> : <IconArrowUp size='0.8rem' />}
             onClick={
               () => {
                 if (campaignsShown.length === 1) {
@@ -796,7 +884,7 @@ export default function OverviewPage() {
     newReplies: 0,
   });
 
-    const fetchCampaignPersonas = async () => {
+  const fetchCampaignPersonas = async () => {
     if (!isLoggedIn()) return;
 
     // Get AI Activity
@@ -847,7 +935,7 @@ export default function OverviewPage() {
           campaignData={campaignAnalyticData}
           aiActivityData={aiActivityData}
         />
-      </Box>  
+      </Box>
       <BarChart />
       <ActiveChannels />
       <ActiveCampaigns />

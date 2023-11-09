@@ -495,30 +495,6 @@ const ICPFiltersDashboard: FC<{
               {averageICPFitLabel} ({averageICPFitScore.toFixed(2)})
             </Badge>
           </Flex>
-          {/* Legend */}
-          {/* <Box
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: "1rem",
-            }}
-          >
-            {icpDashboard.map((icp, index) => (
-              <Box style={{ display: "flex", gap: "0.4rem" }} key={index}>
-                <Box
-                  style={{
-                    width: "1rem",
-                    height: "1rem",
-                    borderRadius: "50%",
-                    backgroundColor: icp.color,
-                  }}
-                />
-                <Title size={"10px"} fw={400} color={theme.colors.gray[6]}>
-                  {icp.label}
-                </Title>
-              </Box>
-            ))}
-          </Box> */}
         </Box>
         <Box
           mt={"1rem"}
@@ -618,7 +594,7 @@ const ICPFiltersDashboard: FC<{
         >
           Remove {Object.keys(selectedRows).length} prospects
         </Button>
-        {currentProject?.is_unassigned_contact_archetype && <Container mt='xs'>
+        <Container mt='xs'>
           <BulkActions 
             selectedProspects={Object.keys(selectedRows).map(key => {
               return icpProspects[parseInt(key)];
@@ -636,7 +612,7 @@ const ICPFiltersDashboard: FC<{
               })
             }}
           />
-        </Container>}
+        </Container>
         <Box
           style={{
             display: "flex",

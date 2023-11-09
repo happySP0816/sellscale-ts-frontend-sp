@@ -1493,38 +1493,7 @@ function IntroMessageSection(props: {
                             )}
                             % reply
                           </Text>
-
-                          {/* Hovercard for fine tuned */}
-                          {template.additional_instructions && (
-                            <HoverCard width={280} shadow='md'>
-                              <HoverCard.Target>
-                                <Badge
-                                  leftSection={<IconBulb size='0.8rem' />}
-                                  color='grape'
-                                  variant='filled'
-                                  ml='xs'
-                                >
-                                  Fine Tuned
-                                </Badge>
-                              </HoverCard.Target>
-                              <HoverCard.Dropdown
-                                style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                              >
-                                <Paper
-                                  style={{
-                                    backgroundColor: 'rgb(34, 37, 41)',
-                                    color: 'white',
-                                    padding: 10,
-                                  }}
-                                >
-                                  <TextWithNewline style={{ fontSize: '12px' }}>
-                                    {'<b>Additional Instructions:</b>\n' +
-                                      template.additional_instructions}
-                                  </TextWithNewline>
-                                </Paper>
-                              </HoverCard.Dropdown>
-                            </HoverCard>
-                          )}
+                          <Text color='blue' size='xs'>{template.times_accepted} / {template.times_used} times</Text>
                         </Box>
 
                         <Box mr={40} w='100%'>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Title, Image, Button, Tooltip, Text, Card, Flex, Box, Avatar, Group, Badge, Grid, Divider, SegmentedControl, Center, rem, Loader, Input, HoverCard, Table, useMantineTheme, Collapse, Checkbox, Switch } from '@mantine/core';
 import { Bar, Line } from 'react-chartjs-2';
-import { IconArrowDown, IconArrowUp, IconBook, IconBrandLinkedin, IconBrandSuperhuman, IconBriefcase, IconBuilding, IconBuildingFactory, IconChecks, IconChevronDown, IconChevronUp, IconClick, IconCode, IconEye, IconGlobe, IconInfoCircle, IconLetterA, IconList, IconMail, IconMan, IconPlane, IconSearch, IconSend, IconUser, IconWoman, IconWorld } from '@tabler/icons';
+import { IconArrowDown, IconArrowUp, IconBook, IconBrandLinkedin, IconBrandSuperhuman, IconBriefcase, IconBuilding, IconBuildingFactory, IconChecks, IconChevronDown, IconChevronUp, IconClick, IconCode, IconEye, IconGlobe, IconInfoCircle, IconLetterA, IconList, IconMail, IconMan, IconPlane, IconRefresh, IconSearch, IconSend, IconUser, IconWoman, IconWorld } from '@tabler/icons';
 import { IconGrid3x3, IconMessageCheck, IconSunElectricity } from '@tabler/icons-react';
 import { API_URL } from '@constants/data';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -17,6 +17,7 @@ import { TodayActivityData } from '@common/campaigns/OverallPipeline/TodayActivi
 import moment from 'moment';
 import { deterministicMantineColor } from '@utils/requests/utils';
 import { useDisclosure } from '@mantine/hooks';
+import postTriggerSnapshot from '@utils/requests/postTriggerSnapshot';
 
 const options = {
   scales: {
@@ -262,6 +263,7 @@ export function ActiveChannels() {
   const [domains, setDomains] = useState<DomainHealth[]>([]);
   const [fetchedChannels, setFetchedChannels] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [domainRefreshing, setDomainRefreshing] = useState(false);
   const theme = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(true);
 
@@ -270,23 +272,27 @@ export function ActiveChannels() {
   useEffect(() => {
     if (!fetchedChannels) {
       setLoading(true)
-      fetch(`${API_URL}/email/warmup/snapshots`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken[0]}`
-        },
-      })
-        .then(response => response.json())
-        .then(data => {
-          setSDRs(data.sdrs || []);
-          calculateDomainStatuses(data.sdrs)
-        }).finally(() => {
-          setFetchedChannels(true);
-          setLoading(false);
-        });
+      fetchSnapshots()
     }
   }, [setFetchedChannels]);
+
+  const fetchSnapshots = async () => {
+    fetch(`${API_URL}/email/warmup/snapshots`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${userToken[0]}`
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        setSDRs(data.sdrs || []);
+        calculateDomainStatuses(data.sdrs)
+      }).finally(() => {
+        setFetchedChannels(true);
+        setLoading(false);
+      });
+  }
 
   const calculateDomainStatuses = (sdrs: any) => {
     let domains: DomainHealth[] = []
@@ -501,10 +507,44 @@ export function ActiveChannels() {
                 withBorder
               >
                 <Flex align='center'>
-                  <Flex>
+                  <Flex justify={'center'} align='center' w="200px" direction='column'>
                     <Text fw='bold'>Domain(s):</Text>
+                    <Button
+                      loading={domainRefreshing}
+                      mt='sm'
+                      variant='outline'
+                      compact
+                      leftIcon={!domainRefreshing && <IconRefresh size='1rem' />}
+                      onClick={async () => {
+                        setDomainRefreshing(true)
+
+                        const result = await postTriggerSnapshot(
+                          userToken[0]
+                        )
+                        if (result.status === 'success') {
+                          showNotification({
+                            title: 'Success',
+                            message: 'Domain statuses updated.',
+                            color: 'green',
+                          })
+                          fetchSnapshots()
+                        } else {
+                          showNotification({
+                            title: 'Error',
+                            message: 'Domain statuses failed to update.',
+                            color: 'red',
+                          })
+                        }
+
+                        setDomainRefreshing(false)
+                        }
+
+                      }
+                    >
+                      Refresh
+                    </Button>
                   </Flex>
-                  <Flex ml='lg' w='100%' direction='column'>
+                  <Flex w='100%' direction='column'>
                     {
                       domains.map((domain: DomainHealth) => {
 

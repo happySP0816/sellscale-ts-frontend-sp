@@ -544,3 +544,15 @@ export interface Individual {
   similar_profiles: Array<Record<string, any>> | null;
 }
 
+
+interface EmailTemplate {
+  id: number;
+  name: string;
+  description: string | null;
+  template: string;
+  template_type: "SUBJECT_LINE" | "BODY";
+  active: boolean;
+  transformer_blocklist: string[] | null;
+  tone: string | null;
+  labels: string[] | null;
+}

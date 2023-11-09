@@ -56,10 +56,12 @@ import { patchEmailSubjectLineTemplate } from "@utils/requests/emailSubjectLines
 import DOMPurify from "dompurify";
 import React, { FC, useEffect, useMemo } from "react";
 import { useRecoilValue } from "recoil";
-import { EmailSequenceStep, SpamScoreResults, SubjectLineTemplate } from "src";
+import { EmailSequenceStep, EmailTemplate, SpamScoreResults, SubjectLineTemplate } from "src";
 import ReactDOMServer from "react-dom/server";
 import { deterministicMantineColor } from '@utils/requests/utils';
 import EmailTemplateLibraryModal from "@modals/EmailTemplateLibraryModal";
+import { openConfirmModal } from "@mantine/modals";
+import postCopyEmailPoolEntry from "@utils/requests/postCopyEmailLibraryItem";
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
@@ -225,6 +227,7 @@ const DetailEmailSequencing: FC<{
 
   // Template library
   const [bodyLibraryOpened, { open: openBodyLibrary, close: closeBodyLibrary }] = useDisclosure(false);
+  const [subjectLibraryOpened, { open: openSubjectLibrary, close: closeSubjectLibrary }] = useDisclosure(false);
 
   // Active vs Inactive Body Templates
   const [activeTemplate, setActiveTemplate] =
@@ -490,9 +493,77 @@ const DetailEmailSequencing: FC<{
           modalOpened={bodyLibraryOpened}
           closeModal={closeBodyLibrary}
           templateType={"BODY"}
-          refetch={refetch}
-          onSelect={(template) => {
-            console.log(template);
+          onSelect={(template: EmailTemplate) => {
+            openConfirmModal({
+              title: <Title order={3}>Use "{template.name || "N/A"}" Template </Title>,
+              children: (
+                <>
+                  <Text fs="italic" fz='sm'>
+                    Review the details of the "{template.name || "N/A"}" template below. You can always edit the template after importing.
+                  </Text>
+                  <Text mt="sm" fw='light'>
+                    Name:
+                  </Text>
+                  <TextInput value={template.name} />
+                  <Text mt="md" fw='light'>
+                    Description:
+                  </Text>
+                  <TextInput value={template.description || "None..."} />
+                  <Text mt="md" fw='light'>
+                    Template:
+                  </Text>
+                  <Box
+                    sx={() => ({
+                      border: '1px solid #E0E0E0',
+                      borderRadius: '8px',
+                      backgroundColor: '#F5F5F5',
+                    })}
+                    px='md'
+                    mt='sm'
+                  >
+                    <Text fz="sm">
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.template) }} />
+                    </Text>
+                  </Box>
+                </>
+              ),
+              labels: {
+                confirm: "Import",
+                cancel: "Go Back",
+              },
+              cancelProps: { color: "grey", variant: "outline" },
+              confirmProps: { color: "green" },
+              onCancel: () => { },
+              onConfirm: async () => {
+
+                const bumpedCount = currentTab.includes("BUMPED-") ? parseInt(currentTab.split("-")[1]) : null;
+                const result = await postCopyEmailPoolEntry(
+                  userToken,
+                  template.template_type,
+                  currentProject.id,
+                  template.id,
+                  currentTab.includes("BUMPED-") ? "BUMPED" : currentTab,
+                  bumpedCount,
+                  template.transformer_blocklist
+                )
+                if (result.status === "success") {
+                  showNotification({
+                    title: "Success",
+                    message: `Successfully imported "${template.name}" template.`,
+                    color: "green",
+                  });
+                  closeBodyLibrary();
+                  refetch();
+                } else {
+                  showNotification({
+                    title: "Error",
+                    message: result.message,
+                    color: "red",
+                  });
+                }
+
+              },
+            })
           }}
         />
         <EmailSequenceStepModal
@@ -735,16 +806,20 @@ const DetailEmailSequencing: FC<{
 
           <Tabs.Panel value="subject">
             <Flex direction="column" w="100%">
-              <Flex justify="flex-end">
-                <Button
-                  mt="md"
-                  variant="light"
-                  leftIcon={<IconPlus size=".90rem" />}
-                  radius={"sm"}
-                  onClick={openCreateSubject}
-                >
-                  Add Subject Line
-                </Button>
+              <Flex justify="flex-end" align='center' mt='md'>
+                <Flex align='center'>
+                  <Button onClick={openSubjectLibrary} variant="outline" radius="md" color="blue" mr='xs'>
+                    📚 Choose from Template Library
+                  </Button>
+                  <Button
+                    variant="light"
+                    leftIcon={<IconPlus size=".90rem" />}
+                    radius={"sm"}
+                    onClick={openCreateSubject}
+                  >
+                    Add Subject Line
+                  </Button>
+                </Flex>
                 <CreateEmailSubjectLineModal
                   modalOpened={createSubjectLineOpened}
                   openModal={openCreateSubject}
@@ -754,6 +829,82 @@ const DetailEmailSequencing: FC<{
                   }}
                   archetypeID={currentProject.id}
                 />
+                <EmailTemplateLibraryModal
+                  modalOpened={subjectLibraryOpened}
+                  closeModal={closeSubjectLibrary}
+                  templateType={"SUBJECT_LINE"}
+                  onSelect={(template: EmailTemplate) => {
+                    openConfirmModal({
+                      title: <Title order={3}>Use "{template.name || "N/A"}" Template </Title>,
+                      children: (
+                        <>
+                          <Text fs="italic" fz='sm'>
+                            Review the details of the "{template.name || "N/A"}" template below. You can always edit the template after importing.
+                          </Text>
+                          <Text mt="sm" fw='light'>
+                            Name:
+                          </Text>
+                          <TextInput value={template.name} />
+                          <Text mt="md" fw='light'>
+                            Description:
+                          </Text>
+                          <TextInput value={template.description || "None..."} />
+                          <Text mt="md" fw='light'>
+                            Template:
+                          </Text>
+                          <Box
+                            sx={() => ({
+                              border: '1px solid #E0E0E0',
+                              borderRadius: '8px',
+                              backgroundColor: '#F5F5F5',
+                            })}
+                            px='md'
+                            mt='sm'
+                          >
+                            <Text fz="sm">
+                              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.template) }} />
+                            </Text>
+                          </Box>
+                        </>
+                      ),
+                      labels: {
+                        confirm: "Import",
+                        cancel: "Go Back",
+                      },
+                      cancelProps: { color: "grey", variant: "outline" },
+                      confirmProps: { color: "green" },
+                      onCancel: () => { },
+                      onConfirm: async () => {
+                        const result = await postCopyEmailPoolEntry(
+                          userToken,
+                          template.template_type,
+                          currentProject.id,
+                          template.id,
+                          null,
+                          null,
+                          template.transformer_blocklist
+                        )
+                        if (result.status === "success") {
+                          showNotification({
+                            title: "Success",
+                            message: `Successfully imported "${template.name}" template.`,
+                            color: "green",
+                          });
+                          closeSubjectLibrary();
+                          refetch();
+                        } else {
+                          showNotification({
+                            title: "Error",
+                            message: result.message,
+                            color: "red",
+                          });
+                        }
+
+                      },
+                    })
+                  }}
+                />
+
               </Flex>
               {subjectLines.map(
                 (subjectLine: SubjectLineTemplate, index: any) => {

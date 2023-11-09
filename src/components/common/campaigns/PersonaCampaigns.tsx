@@ -525,7 +525,7 @@ function PersonCampaignCard(props: {
   const navigate = useNavigate();
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
-  const [opened, { toggle }] = useDisclosure(props.persona.active);
+  const [opened, { toggle }] = useDisclosure(false); //props.persona.active
   const [inactiveChannelsOpened, setInactiveChannelsOpened] = useState(false);
   const [emoji, setEmojiState] = useState<string>(props.persona.emoji || '⬜️');
   const { hovered, ref } = useHover();
@@ -658,14 +658,44 @@ function PersonCampaignCard(props: {
           <Group sx={{ flex: '10%' }} grow>
             <Center>
               {!!userData?.weekly_li_outbound_target && (
-                <ThemeIcon variant='light' radius='sm' size='lg' color='blue'>
+                <ActionIcon
+                  variant='subtle'
+                  radius='md'
+                  size='lg'
+                  color='blue'
+                  onClick={() => {
+                    if (props.project == undefined) return;
+                    setOpenedProspectId(-1);
+                    setCurrentProject(props.project);
+                    navigateToPage(
+                      navigate,
+                      `/setup/linkedin`,
+                      new URLSearchParams(`?campaign_id=${props.persona.id}`)
+                    );
+                  }}
+                >
                   <IconBrandLinkedin size='2.0rem' />
-                </ThemeIcon>
+                </ActionIcon>
               )}
               {!!userData?.weekly_email_outbound_target && (
-                <ThemeIcon variant='light' radius='sm' size='lg' color='yellow'>
+                <ActionIcon
+                  variant='subtle'
+                  radius='md'
+                  size='lg'
+                  color='yellow'
+                  onClick={() => {
+                    if (props.project == undefined) return;
+                    setOpenedProspectId(-1);
+                    setCurrentProject(props.project);
+                    navigateToPage(
+                      navigate,
+                      `/setup/email`,
+                      new URLSearchParams(`?campaign_id=${props.persona.id}`)
+                    );
+                  }}
+                >
                   <IconMail size='2.0rem' />
-                </ThemeIcon>
+                </ActionIcon>
               )}
             </Center>
           </Group>

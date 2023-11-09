@@ -585,8 +585,6 @@ function PersonCampaignCard(props: {
     },
   ];
 
-  console.log(props.persona)
-
   return (
     <Paper radius='md' ref={ref}>
       <Stack

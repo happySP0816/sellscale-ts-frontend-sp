@@ -20,6 +20,7 @@ import React, { FC, MutableRefObject, ReactNode, useEffect, useState } from "rea
 import DetailEmailSequencing from "./DetailEmailSequencing";
 import EmailSequenceStepCard from "./EmailSequenceStepCard";
 import { EmailSequenceStep, MsgResponse, SubjectLineTemplate } from "src";
+import EmailTemplateLibraryModal from "@modals/EmailTemplateLibraryModal";
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
     total: number;
@@ -350,6 +351,7 @@ const NewUIEmailSequencing: FC<{
   closeSequenceStep,
 }) => {
     const [opened, { open, close, toggle }] = useDisclosure(false);
+
     const lgScreenOrLess = useMediaQuery(
       `(max-width: ${SCREEN_SIZES.LG})`,
       false,
@@ -437,13 +439,6 @@ const NewUIEmailSequencing: FC<{
               await refetch()
             }}
           />
-          <Flex mt={"md"} gap={"1rem"}>
-            <Tooltip label={"Coming Soon!"} withArrow withinPortal>
-              <Button variant="default" radius={"md"} disabled>
-                Browse Templates
-              </Button>
-            </Tooltip>
-          </Flex>
         </Box>
       </Flex>
     );

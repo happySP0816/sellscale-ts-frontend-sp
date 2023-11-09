@@ -59,6 +59,7 @@ import { useRecoilValue } from "recoil";
 import { EmailSequenceStep, SpamScoreResults, SubjectLineTemplate } from "src";
 import ReactDOMServer from "react-dom/server";
 import { deterministicMantineColor } from '@utils/requests/utils';
+import EmailTemplateLibraryModal from "@modals/EmailTemplateLibraryModal";
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
@@ -221,6 +222,9 @@ const DetailEmailSequencing: FC<{
     createEmailTemplateOpened,
     { open: openCreateEmailTemplate, close: closeCreateEmailTemplate },
   ] = useDisclosure();
+
+  // Template library
+  const [bodyLibraryOpened, { open: openBodyLibrary, close: closeBodyLibrary }] = useDisclosure(false);
 
   // Active vs Inactive Body Templates
   const [activeTemplate, setActiveTemplate] =
@@ -469,14 +473,25 @@ const DetailEmailSequencing: FC<{
   const EmailBodySection = () => (
     <Box mt={"md"}>
       <Flex justify="flex-end" mb="md">
-        <Button
-          variant="light"
-          leftIcon={<IconPlus size=".90rem" />}
-          radius={"sm"}
-          onClick={openCreateEmailTemplate}
-        >
-          Add Email Template
-        </Button>
+        <Flex>
+          <Button onClick={openBodyLibrary} variant="outline" radius="md" color="blue" mr='xs'>
+            📚 Choose from Template Library
+          </Button>
+          <Button
+            variant="light"
+            leftIcon={<IconPlus size=".90rem" />}
+            radius={"sm"}
+            onClick={openCreateEmailTemplate}
+          >
+            Add Email Template
+          </Button>
+        </Flex>
+        <EmailTemplateLibraryModal
+          modalOpened={bodyLibraryOpened}
+          closeModal={closeBodyLibrary}
+          templateType={"BODY"}
+          refetch={refetch}
+        />
         <EmailSequenceStepModal
           modalOpened={createEmailTemplateOpened}
           openModal={openCreateEmailTemplate}

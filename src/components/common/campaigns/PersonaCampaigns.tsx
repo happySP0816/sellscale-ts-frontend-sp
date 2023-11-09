@@ -613,18 +613,18 @@ function PersonCampaignCard(props: {
           pr='xs'
           spacing={0}
         >
-          <Group sx={{ flex: '25%' }} spacing={5}>
+          <Group sx={{ flex: '25%' }} spacing={5} noWrap>
             <RingProgress
               size={55}
               thickness={5}
               label={
                 <Text size='xs' align='center'>
-                  {((analytics?.contacted ?? 0) / (analytics?.sourced ?? 1)) * 100}%
+                  {Math.floor(((analytics?.contacted ?? 0) / (analytics?.sourced ?? 1)) * 100)}%
                 </Text>
               }
               sections={[
                 {
-                  value: ((analytics?.contacted ?? 0) / (analytics?.sourced ?? 1)) * 100,
+                  value: Math.floor(((analytics?.contacted ?? 0) / (analytics?.sourced ?? 1)) * 100),
                   color: 'blue',
                 },
               ]}
@@ -652,7 +652,7 @@ function PersonCampaignCard(props: {
             </Popover>
 
             <Title order={5} c={'gray.7'}>
-              {_.truncate(props.persona.name, { length: 48 })}
+              {_.truncate(props.persona.name, { length: 35 })}
             </Title>
           </Group>
 
@@ -709,28 +709,28 @@ function PersonCampaignCard(props: {
               icon={<IconSend color={theme.colors.blue[6]} size='0.9rem' />}
               label='Sent'
               total={analytics?.contacted ?? 0}
-              percentage={((analytics?.contacted ?? 0) / (analytics?.sourced ?? 1)) * 100}
+              percentage={Math.floor(((analytics?.contacted ?? 0) / (analytics?.sourced ?? 1)) * 100)}
             />
             <StatDisplay
               color='pink'
               icon={<IconChecks color={theme.colors.pink[6]} size='0.9rem' />}
               label='Open'
               total={analytics?.open ?? 0}
-              percentage={((analytics?.open ?? 0) / (analytics?.sourced ?? 1)) * 100}
+              percentage={Math.floor(((analytics?.open ?? 0) / (analytics?.sourced ?? 1)) * 100)}
             />
             <StatDisplay
               color='orange'
               icon={<IconMessage color={theme.colors.orange[6]} size='0.9rem' />}
               label='Reply'
               total={analytics?.reply ?? 0}
-              percentage={((analytics?.reply ?? 0) / (analytics?.sourced ?? 1)) * 100}
+              percentage={Math.floor(((analytics?.reply ?? 0) / (analytics?.sourced ?? 1)) * 100)}
             />
             <StatDisplay
               color='green'
               icon={<IconCalendar color={theme.colors.green[6]} size='0.9rem' />}
               label='Demo'
               total={analytics?.demo_set ?? 0}
-              percentage={((analytics?.demo_set ?? 0) / (analytics?.sourced ?? 1)) * 100}
+              percentage={Math.floor(((analytics?.demo_set ?? 0) / (analytics?.sourced ?? 1)) * 100)}
             />
           </Group>
 

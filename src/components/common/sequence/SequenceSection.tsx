@@ -1525,15 +1525,6 @@ function IntroMessageSection(props: {
                               </Paper>
                             </HoverCard.Dropdown>
                           </HoverCard>}
-                        </Flex>
-                        <Card withBorder w='100%' sx={{backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb'}}>
-                          <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html: DOMPurify.sanitize(template.message.replaceAll("[[", "<span style='margin-left: 6px; margin-right: 6px; background-color: " + theme.colors['blue'][5] + "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ ").replaceAll("]]", "</span>") as string),
-                              }}
-                            />
-                          </Text>
                         </Box>
 
                         <Box mr={40} w='100%'>

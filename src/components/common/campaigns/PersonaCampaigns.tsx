@@ -122,6 +122,11 @@ export type CampaignPersona = {
   active: boolean;
   created_at: string;
   emoji: string;
+  total_sent: number;
+  total_opened: number;
+  total_replied: number;
+  total_demo: number;
+  total_prospects: number;
 };
 
 export default function PersonaCampaigns() {
@@ -580,16 +585,7 @@ function PersonCampaignCard(props: {
     },
   ];
 
-  const { data, isFetching, isError, isLoading } = useQuery<Analytics[]>({
-    queryKey: [`query-get-all-analytics`],
-    queryFn: async () => {
-      const result = await getAnalytics(userToken);
-      return result.status === 'success' ? result.data : [];
-    },
-  });
-  const analytics = data?.find((x) => x.campaign.endsWith(props.persona.name));
-
-  console.log(analytics);
+  console.log(props.persona)
 
   return (
     <Paper radius='md' ref={ref}>
@@ -619,12 +615,17 @@ function PersonCampaignCard(props: {
               thickness={5}
               label={
                 <Text size='xs' align='center'>
-                  {Math.floor(((analytics?.contacted ?? 0) / (analytics?.sourced ?? 1)) * 100)}%
+                  {Math.floor(
+                    ((props.persona.total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
+                  )}
+                  %
                 </Text>
               }
               sections={[
                 {
-                  value: Math.floor(((analytics?.contacted ?? 0) / (analytics?.sourced ?? 1)) * 100),
+                  value: Math.floor(
+                    ((props.persona.total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
+                  ),
                   color: 'blue',
                 },
               ]}
@@ -708,29 +709,37 @@ function PersonCampaignCard(props: {
               color='blue'
               icon={<IconSend color={theme.colors.blue[6]} size='0.9rem' />}
               label='Sent'
-              total={analytics?.contacted ?? 0}
-              percentage={Math.floor(((analytics?.contacted ?? 0) / (analytics?.sourced ?? 1)) * 100)}
+              total={props.persona.total_sent ?? 0}
+              percentage={Math.floor(
+                ((props.persona.total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
+              )}
             />
             <StatDisplay
               color='pink'
               icon={<IconChecks color={theme.colors.pink[6]} size='0.9rem' />}
               label='Open'
-              total={analytics?.open ?? 0}
-              percentage={Math.floor(((analytics?.open ?? 0) / (analytics?.sourced ?? 1)) * 100)}
+              total={props.persona.total_opened ?? 0}
+              percentage={Math.floor(
+                ((props.persona.total_opened ?? 0) / (props.persona.total_prospects || 1)) * 100
+              )}
             />
             <StatDisplay
               color='orange'
               icon={<IconMessage color={theme.colors.orange[6]} size='0.9rem' />}
               label='Reply'
-              total={analytics?.reply ?? 0}
-              percentage={Math.floor(((analytics?.reply ?? 0) / (analytics?.sourced ?? 1)) * 100)}
+              total={props.persona.total_replied ?? 0}
+              percentage={Math.floor(
+                ((props.persona.total_replied ?? 0) / (props.persona.total_prospects || 1)) * 100
+              )}
             />
             <StatDisplay
               color='green'
               icon={<IconCalendar color={theme.colors.green[6]} size='0.9rem' />}
               label='Demo'
-              total={analytics?.demo_set ?? 0}
-              percentage={Math.floor(((analytics?.demo_set ?? 0) / (analytics?.sourced ?? 1)) * 100)}
+              total={props.persona.total_demo ?? 0}
+              percentage={Math.floor(
+                ((props.persona.total_demo ?? 0) / (props.persona.total_prospects || 1)) * 100
+              )}
             />
           </Group>
 

@@ -20,6 +20,7 @@ import {
 import {
   Stack,
   Group,
+  Avatar,
   Title,
   Button,
   Divider,
@@ -42,11 +43,11 @@ import {
   Alert,
   Flex,
   Card,
-  Avatar,
   RingProgress,
   ThemeIcon,
   MantineColor,
   Badge,
+  Image,
 } from '@mantine/core';
 import { useDisclosure, useHover } from '@mantine/hooks';
 import { openContextModal } from '@mantine/modals';
@@ -127,6 +128,8 @@ export type CampaignPersona = {
   total_replied: number;
   total_demo: number;
   total_prospects: number;
+  sdr_name: string;
+  sdr_img_url: string;
 };
 
 export default function PersonaCampaigns() {
@@ -274,46 +277,6 @@ export default function PersonaCampaigns() {
                   >
                     Create New Campaign
                   </Button>
-                  {/* <TextInput
-                    radius="md"
-                    placeholder="Search"
-                    rightSection={<IconSearch color="#767e85" size="1.0rem" />}
-                    w={250}
-                    styles={{
-                      input: {
-                        backgroundColor: "transparent",
-                      },
-                    }}
-                    value={search}
-                    onChange={(event) => setSearch(event.currentTarget.value)}
-                  /> */}
-                  {/* <Select
-                    radius="md"
-                    placeholder="Sort by"
-                    data={[]}
-                    w={100}
-                    styles={{
-                      input: {
-                        backgroundColor: "transparent",
-                      },
-                    }}
-                  />
-                  <Button
-                    variant="outline"
-                    color="gray"
-                    radius="md"
-                    sx={{
-                      border: "0.0625rem solid #ced4da;",
-                    }}
-                    rightIcon={
-                      <IconAdjustmentsHorizontal
-                        color="#767e85"
-                        size="1.0rem"
-                      />
-                    }
-                  >
-                    <Text fw={400}>Filters</Text>
-                  </Button> */}
                 </Group>
 
                 {userData?.warmup_linkedin_complete ? (
@@ -344,66 +307,14 @@ export default function PersonaCampaigns() {
                   </Tooltip>
                 )}
 
-                {/* <Box>
-                  <Button.Group>
-                    <Button
-                      variant="outline"
-                      color="gray"
-                      radius="md"
-                      sx={{
-                        border: "0.0625rem solid #ced4da;",
-                      }}
-                    >
-                      <Text fw={500}>
-                        LinkedIn:{" "}
-                        <Text c="blue" fw={600} span>
-                          {userData.weekly_li_outbound_target}/100
-                        </Text>
-                      </Text>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      color="gray"
-                      radius="md"
-                      sx={{
-                        border: "0.0625rem solid #ced4da;",
-                      }}
-                    >
-                      <Text fw={500}>
-                        Email:{" "}
-                        <Text c="blue" fw={600} span>
-                          {userData.weekly_email_outbound_target}/100
-                        </Text>
-                      </Text>
-                    </Button>
-
-                    <SegmentedControl
-                    value={campaignViewMode}
-                    onChange={(mode: any) => setCampaignViewMode(mode)}
-                    ml='sm'
-                    color='blue'
-                    data={[
-                      { label: (
-                        <Center>
-                          <IconChartDots3 size="1rem" />
-                          <Box ml={10}>Node View</Box>
-                        </Center>
-                      ), value: 'node-view' },
-                      { label:(
-                        <Center>
-                          <IconList size="1rem" />
-                          <Box ml={10}>List View</Box>
-                        </Center>
-                      ), value: 'list-view' },
-                    ]}
-                  />
-                  </Button.Group>
-
-
-                </Box> */}
               </Group>
+
+              <Title color="gray.6" order={3}>
+                {userData?.sdr_name?.split(' ')[0]}'s Campaigns
+              </Title>
+
               <ScrollArea h={'78vh'}>
-                <Stack>
+                <Stack spacing={0}>
                   {loadingPersonas && (
                     <Center h={200}>
                       <Loader />
@@ -465,7 +376,14 @@ export default function PersonaCampaigns() {
                       color='gray'
                       leftIcon={<IconCalendar color='gray' size='0.8rem'></IconCalendar>}
                       variant='outline'
+                      size='xs'
+                      w='300px'
+                      ml='auto'
+                      mr='auto'
+                      sx={{borderRadius: '0.5rem' }}
                       onClick={() => setShowInactivePersonas(!showInactivePersonas)}
+                      mt='md'
+                      mb='md'
                     >
                       {showInactivePersonas ? 'Hide' : 'Show'}{' '}
                       {filteredProjects.filter((persona) => !persona.active).length} Inactive
@@ -556,7 +474,7 @@ function PersonCampaignCard(props: {
     {
       id: 1,
       type: 'LinkedIn',
-      active: !!userData?.weekly_li_outbound_target && props.persona.active,
+      active: props.persona.li_sent > 0 && props.persona.active,
       icon: <IconBrandLinkedin size='0.925rem' />,
       sends: props.persona.li_sent,
       opens: props.persona.li_opened,
@@ -566,7 +484,7 @@ function PersonCampaignCard(props: {
     {
       id: 2,
       type: 'Email',
-      active: !!userData?.weekly_email_outbound_target && props.persona.active,
+      active: props.persona.emails_sent > 0 && props.persona.active,
       icon: <IconMail size='0.925rem' />,
       sends: props.persona.emails_sent,
       opens: props.persona.emails_opened,
@@ -602,12 +520,12 @@ function PersonCampaignCard(props: {
             border: 'solid 1px ' + theme.colors.gray[2],
             position: 'relative',
           })}
-          p={props.persona.active ? 'xs' : '4px'}
+          p={'4px'}
           pl='xs'
           pr='xs'
           spacing={0}
         >
-          <Group sx={{ flex: '25%' }} spacing={5} noWrap>
+          <Group sx={{ flex: '35%' }} spacing={5} noWrap>
             <RingProgress
               size={55}
               thickness={5}
@@ -650,14 +568,31 @@ function PersonCampaignCard(props: {
               </Popover.Dropdown>
             </Popover>
 
-            <Title order={5} c={'gray.7'}>
-              {_.truncate(props.persona.name, { length: 35 })}
+            <Title order={6} c={'gray.7'}>
+              {_.truncate(props.persona.name, { length: 25 })}
             </Title>
+
+            <Badge size='xs' color={props.persona.active && props.persona.total_sent > 0 ? "blue" :
+              !props.persona.active && props.persona.total_sent > 0 ? "yellow" :
+              "green"
+            }>
+              {props.persona.active && props.persona.total_sent > 0 ? "Active" : 
+                !props.persona.active && props.persona.total_sent > 0 ? "Complete" :
+                "Setup"
+              }
+            </Badge>
+          </Group>
+
+          <Group sx={{ flex: '10%' }} grow>
+              <Flex>
+                <Avatar src={props.persona.sdr_img_url} radius='xl' size='sm' />
+                <Text size='xs' fw='450' mt='2px' ml='xs'>{props.persona.sdr_name}</Text>
+              </Flex>
           </Group>
 
           <Group sx={{ flex: '10%' }} grow>
             <Center>
-              {!!userData?.weekly_li_outbound_target && (
+              {props.persona.li_sent > 0 && props.persona.active && (
                 <ActionIcon
                   variant='subtle'
                   radius='md'
@@ -677,7 +612,7 @@ function PersonCampaignCard(props: {
                   <IconBrandLinkedin size='2.0rem' />
                 </ActionIcon>
               )}
-              {!!userData?.weekly_email_outbound_target && (
+              {props.persona.emails_sent > 0 && props.persona.active && (
                 <ActionIcon
                   variant='subtle'
                   radius='md'
@@ -700,119 +635,99 @@ function PersonCampaignCard(props: {
             </Center>
           </Group>
 
+
+          <Group sx={{ flex: '30%' }}>
+            <Box w={'20%'}>
+              <StatDisplay
+                color='blue'
+                icon={<IconSend color={theme.colors.blue[6]} size='0.9rem' />}
+                label='Sent'
+                total={props.persona.total_sent ?? 0}
+                percentage={Math.floor(
+                  ((props.persona.total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
+                )}
+              />
+            </Box>
+            <Box w={'20%'}>
+              <StatDisplay
+                color='pink'
+                icon={<IconChecks color={theme.colors.pink[6]} size='0.9rem' />}
+                label='Open'
+                total={props.persona.total_opened ?? 0}
+                percentage={Math.floor(
+                  ((props.persona.total_opened ?? 0) / (props.persona.total_prospects || 1)) * 100
+                )}
+              />
+            </Box>
+            <Box w={'20%'}>
+              <StatDisplay
+                color='orange'
+                icon={<IconMessage color={theme.colors.orange[6]} size='0.9rem' />}
+                label='Reply'
+                total={props.persona.total_replied ?? 0}
+                percentage={Math.floor(
+                  ((props.persona.total_replied ?? 0) / (props.persona.total_prospects || 1)) * 100
+                )}
+              />
+            </Box>
+            <Box w={'20%'}>
+              <StatDisplay
+                color='green'
+                icon={<IconCalendar color={theme.colors.green[6]} size='0.9rem' />}
+                label='Demo'
+                total={props.persona.total_demo ?? 0}
+                percentage={Math.floor(
+                  ((props.persona.total_demo ?? 0) / (props.persona.total_prospects || 1)) * 100
+                )}
+              />
+            </Box>
+          </Group>
+
           <Group sx={{ flex: '15%' }}>
-            <Stack spacing={5}>
+            <Flex>
               <Button
+                w={60}
+                mr='xs'
+                radius='xl'
                 size='xs'
-                variant='subtle'
-                color='gray'
-                c='dark'
-                onClick={() => {
-                  window.location.href = `/contacts?campaign_id=${props.persona.id}`;
-                }}
                 compact
+                sx={(theme) => ({
+                  color: theme.colors.blue[6],
+                  backgroundColor: theme.colors.blue[0],
+                })}
+                onClick={() => {
+                  if (props.project == undefined) return;
+                  setOpenedProspectId(-1);
+                  setCurrentProject(props.project);
+                  window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
+                }}
               >
-                {Math.min(props.project?.num_unused_li_prospects ?? 0)} contacts
+                Edit
               </Button>
-              <Center>
-                <Button
-                  variant='filled'
-                  color='dark'
-                  radius='lg'
-                  size='xs'
-                  onClick={() => {
-                    window.location.href = `/contacts/find?campaign_id=${props.persona.id}`;
-                  }}
-                  compact
-                  leftIcon={<IconPlus size='0.9rem' />}
-                >
-                  Add More
-                </Button>
-              </Center>
-            </Stack>
-          </Group>
 
-          <Group sx={{ flex: '40%' }}>
-            <StatDisplay
-              color='blue'
-              icon={<IconSend color={theme.colors.blue[6]} size='0.9rem' />}
-              label='Sent'
-              total={props.persona.total_sent ?? 0}
-              percentage={Math.floor(
-                ((props.persona.total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
-              )}
-            />
-            <StatDisplay
-              color='pink'
-              icon={<IconChecks color={theme.colors.pink[6]} size='0.9rem' />}
-              label='Open'
-              total={props.persona.total_opened ?? 0}
-              percentage={Math.floor(
-                ((props.persona.total_opened ?? 0) / (props.persona.total_prospects || 1)) * 100
-              )}
-            />
-            <StatDisplay
-              color='orange'
-              icon={<IconMessage color={theme.colors.orange[6]} size='0.9rem' />}
-              label='Reply'
-              total={props.persona.total_replied ?? 0}
-              percentage={Math.floor(
-                ((props.persona.total_replied ?? 0) / (props.persona.total_prospects || 1)) * 100
-              )}
-            />
-            <StatDisplay
-              color='green'
-              icon={<IconCalendar color={theme.colors.green[6]} size='0.9rem' />}
-              label='Demo'
-              total={props.persona.total_demo ?? 0}
-              percentage={Math.floor(
-                ((props.persona.total_demo ?? 0) / (props.persona.total_prospects || 1)) * 100
-              )}
-            />
+              <Tooltip
+                withArrow
+                position='bottom'
+                label={
+                  personaActive
+                    ? 'Click to disable this campaign on settings page'
+                    : 'Click to enable this campaign on settings page'
+                }
+              >
+                <span>
+                  <UserStatusToggle
+                    projectId={props.project?.id}
+                    isActive={personaActive}
+                    onChangeUserStatusSuccess={(status: boolean) => {
+                      setPersonaActive(status);
+                      props.onPersonaActiveStatusUpdate?.(props.project?.id ?? 0, status);
+                    }}
+                  />
+                </span>
+              </Tooltip>
+            </Flex>
           </Group>
-
-          <Group sx={{ flex: '10%' }}>
-            <Button
-              w={60}
-              radius='xl'
-              size='xs'
-              compact
-              sx={(theme) => ({
-                backgroundColor: 'gray',
-                //color: theme.colors.blue[2],
-              })}
-              onClick={() => {
-                if (props.project == undefined) return;
-                setOpenedProspectId(-1);
-                setCurrentProject(props.project);
-                window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
-              }}
-            >
-              Edit
-            </Button>
-
-            <Tooltip
-              withArrow
-              position='bottom'
-              label={
-                personaActive
-                  ? 'Click to disable this campaign on settings page'
-                  : 'Click to enable this campaign on settings page'
-              }
-            >
-              <span>
-                <UserStatusToggle
-                  projectId={props.project?.id}
-                  isActive={personaActive}
-                  onChangeUserStatusSuccess={(status: boolean) => {
-                    setPersonaActive(status);
-                    props.onPersonaActiveStatusUpdate?.(props.project?.id ?? 0, status);
-                  }}
-                />
-              </span>
-            </Tooltip>
-          </Group>
-          <Box sx={{ position: 'absolute', right: 15, top: 30 }}>
+          <Box sx={{ position: 'absolute', right: 15, top: 20 }}>
             <ActionIcon color='blue' variant='filled' radius='lg' onClick={toggle}>
               {opened ? <IconChevronUp size='1.1rem' /> : <IconChevronDown size='1.1rem' />}
             </ActionIcon>
@@ -845,7 +760,7 @@ function PersonCampaignCard(props: {
 
                 return (
                   <Box key={index}>
-                    {index > 0 && <Divider />}
+                    {index > 0 && <Divider mb='xs'  />}
                     <PersonCampaignCardSection
                       section={section}
                       onClick={() => {
@@ -870,7 +785,7 @@ function PersonCampaignCard(props: {
 
                       return (
                         <Box key={index}>
-                          {index > 0 && <Divider />}
+                          {index > 0 && <Divider  mb='xs' />}
                           <PersonCampaignCardSection
                             section={section}
                             onClick={() => {
@@ -888,7 +803,7 @@ function PersonCampaignCard(props: {
                       );
                     })}
                   </Collapse>
-                  <Divider />
+                  <Divider mb='xs' />
                   <Button
                     w='100%'
                     variant='subtle'
@@ -1007,11 +922,11 @@ function StatDisplay(props: {
 }) {
   return (
     <Stack spacing={0}>
-      <Group spacing={5}>
+      <Group spacing={5} sx={{justifyContent: 'left'}}>
         <Text color={props.color} fz='lg' fw={500}>
           {props.total.toLocaleString()}
         </Text>
-        <Badge variant='light' color={props.color}>
+        <Badge variant='light' color={props.color} size='xs'>
           {props.percentage}%
         </Badge>
       </Group>

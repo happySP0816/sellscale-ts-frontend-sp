@@ -119,6 +119,7 @@ import {
   IconCircleMinus,
   IconQuestionMark,
   IconRobot,
+  IconSearch,
   IconSettings,
   IconSwitch,
   IconTool,
@@ -1187,7 +1188,6 @@ function IntroMessageSection(props: {
         setSelectedTemplateId(response.data[0].id);
         setHumanFeedbackForTemplate(response.data[0].additional_instructions);
       }
-
       return response.status === 'success' ? response.data as Record<string, any>[] : [];
     },
     refetchOnWindowFocus: false,
@@ -1520,7 +1520,9 @@ function IntroMessageSection(props: {
                           <Text size='sm' fw='600' mb='xs' sx={{textTransform: 'uppercase'}} color='gray' variant='outline'>
                             {template.title}
                           </Text>
-                              {template.additional_instructions && <HoverCard width={280} shadow="md">
+
+                          {/* Hovercard for fine tuned */}
+                          {template.additional_instructions && <HoverCard width={280} shadow="md">
                             <HoverCard.Target>
                               <Badge leftSection={<IconBulb size='0.8rem'/>} color='grape' variant='filled' ml='xs'>
                                 Fine Tuned
@@ -1530,6 +1532,22 @@ function IntroMessageSection(props: {
                               <Paper style={{ "backgroundColor": "rgb(34, 37, 41)", "color": "white", "padding": 10 }}>
                                 <TextWithNewline style={{fontSize: '12px'}}>
                                     {"<b>Additional Instructions:</b>\n" + template.additional_instructions}
+                                </TextWithNewline>
+                              </Paper>
+                            </HoverCard.Dropdown>
+                          </HoverCard>}
+
+                          {/* Hovercard for transformers */}
+                          {template.research_points && template.research_points.length > 0 && <HoverCard width={280} shadow="md">
+                            <HoverCard.Target>
+                              <Badge leftSection={<IconSearch size='0.8rem' style={{marginTop: 4}} />} color='lime' variant='filled' ml='xs'>
+                                {template.research_points.length} Research Points
+                              </Badge>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown style={{ "backgroundColor": "rgb(34, 37, 41)", "padding": 0 }}>
+                              <Paper style={{ "backgroundColor": "rgb(34, 37, 41)", "color": "white", "padding": 10 }}>
+                                <TextWithNewline style={{fontSize: '12px'}}>
+                                    {"<b>Active Research Points:</b>\n- " + template.research_points.map((rp: any) => rp.replaceAll("_", " ").toLowerCase()).join('\n- ')}
                                 </TextWithNewline>
                               </Paper>
                             </HoverCard.Dropdown>

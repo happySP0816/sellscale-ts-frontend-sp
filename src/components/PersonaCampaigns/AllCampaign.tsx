@@ -88,7 +88,7 @@ const AllCampaign = () => {
       <Divider />
 
       <Box>
-        <Flex justify={"space-between"} align={"center"}>
+        <Flex justify={"space-between"} align={"center"} mt='md'>
           <Title color="gray.6" order={3}>
             All Campaigns
           </Title>

@@ -2951,7 +2951,8 @@ function FrameworkSection(props: {
                 mr='md'
               >
                 <Text fw='bold' fz='md' color='blue' mt='xs'>
-                  {Math.round(props.framework.etl_num_times_converted / (props.framework.etl_num_times_used + 0.0001) * 100)}% reply
+                  {props.framework.etl_num_times_used != null && props.framework.etl_num_times_converted != null &&
+                    Math.round(props.framework.etl_num_times_converted / (props.framework.etl_num_times_used + 0.0001) * 100)}% reply
                 </Text>
                 <Text size='8px' color='blue' fz={'xs'} fw='500'>
                   ({props.framework.etl_num_times_converted}/{props.framework.etl_num_times_used} times)

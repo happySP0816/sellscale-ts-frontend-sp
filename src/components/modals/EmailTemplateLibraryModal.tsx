@@ -113,7 +113,8 @@ export default function EmailTemplateLibraryModal(props: EmailTemplateLibraryMod
                 <Grid.Col span={6} key={template.id}>
                   <div
                     onClick={() => {
-                      onSelect(template);
+                      props.onSelect(template);
+                      props.closeModal();
                     }}
                     style={{
                       cursor: 'pointer',

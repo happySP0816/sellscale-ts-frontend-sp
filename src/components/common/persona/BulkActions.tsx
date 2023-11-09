@@ -157,7 +157,7 @@ const MovePersonaAction = ({ selectedProspects, backFunc, mx }: MovePersonaActio
               mt='md'
               height={"300px"}
               withBorder
-              records={shownRecords}
+              records={shownRecords || []}
               page={page}
               onPageChange={(p) => {
                 const beginning = (page - 1) * 10

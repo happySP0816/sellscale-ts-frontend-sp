@@ -491,6 +491,9 @@ const DetailEmailSequencing: FC<{
           closeModal={closeBodyLibrary}
           templateType={"BODY"}
           refetch={refetch}
+          onSelect={(template) => {
+            console.log(template);
+          }}
         />
         <EmailSequenceStepModal
           modalOpened={createEmailTemplateOpened}

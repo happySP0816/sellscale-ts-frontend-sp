@@ -542,12 +542,15 @@ export function PersonCampaignCard(props: {
                   %
                 </Text>
               }
+              variant='animated'
               sections={[
                 {
                   value: Math.floor(
                     ((props.persona.total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
                   ),
-                  color: 'blue',
+                  color: Math.round(
+                    ((props.persona.total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
+                  ) >= 100 ? 'green' : 'blue'
                 },
               ]}
             />

@@ -16,6 +16,7 @@ import {
   HoverCard,
   Group,
   Container,
+  Select,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
@@ -59,6 +60,7 @@ import { IconX } from "@tabler/icons";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
 import BulkActions from '../BulkActions';
+import { deterministicMantineColor } from '@utils/requests/utils';
 
 const demoData = [
   {
@@ -134,6 +136,7 @@ const ICPFiltersDashboard: FC<{
     value: string;
     count: number;
   }>(tabFilters[0]);
+  const [selectedProspectStatusFilter, setSelectedProspectStatusFilter] = useState("All Contacts")
 
   const [invitedOnLinkedIn, setInvitedOnLinkedIn] = useState(false);
   const [selectedRows, setSelectedRows] = useState<DataGridRowSelectionState>(
@@ -203,7 +206,7 @@ const ICPFiltersDashboard: FC<{
       return;
     }
 
-    const prospects = icpProspects.filter((_, index) => {
+    const prospects = displayProspects.filter((_, index) => {
       return selectedRows[index] === true;
     });
     const prospectIDs = prospects.map((prospect) => {
@@ -382,8 +385,19 @@ const ICPFiltersDashboard: FC<{
       );
     });
 
+    filteredProspects = filteredProspects.filter((prospect) => {
+      if (selectedProspectStatusFilter === "All Contacts") {
+        return true;
+      } else if (selectedProspectStatusFilter === "Not Contacted") {
+        return prospect.has_been_sent_outreach === false;
+      } else if (selectedProspectStatusFilter === "Contacted") {
+        return prospect.has_been_sent_outreach === true;
+      }
+      return false;
+    });
+
     return filteredProspects;
-  }, [globalSearch, icpProspects]);
+  }, [globalSearch, icpProspects, selectedProspectStatusFilter]);
 
   let averageICPFitScore = 0;
   let averageICPFitLabel = "";
@@ -597,7 +611,7 @@ const ICPFiltersDashboard: FC<{
         <Container mt='xs'>
           <BulkActions 
             selectedProspects={Object.keys(selectedRows).map(key => {
-              return icpProspects[parseInt(key)];
+              return displayProspects[parseInt(key)];
             })}
             backFunc={() => {
               setSelectedRows({});
@@ -680,6 +694,7 @@ const ICPFiltersDashboard: FC<{
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0.5rem",
+          paddingTop: "0rem",
         }}
       >
         {invitedOnLinkedIn && getSelectedRowCount > 0 && (
@@ -689,12 +704,33 @@ const ICPFiltersDashboard: FC<{
             onConfirm={withdrawInvites}
           />
         )}
-        <GridTabs
-          selectedTab={selectedTab}
-          setSelectedTab={setSelectedTab}
-          icpDashboard={icpDashboard}
-          numProspects={icpProspects.length}
+        <Flex w='100%'>
+
+        <Box mt='10px'>
+          <GridTabs
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
+            icpDashboard={icpDashboard}
+            numProspects={icpProspects.length}
+          />
+        </Box> 
+
+        <Select
+          size="sm"
+          ml='auto'
+          label="Filter by Status"
+          placeholder="Select a filter"
+          data={[
+            "All Contacts",
+            "Not Contacted",
+            "Contacted",
+          ]}
+          defaultValue={selectedProspectStatusFilter}
+          onChange={(value: string) => {
+            setSelectedProspectStatusFilter(value)
+          }}
         />
+        </Flex>
       </Paper>
 
       <DataGrid
@@ -766,6 +802,29 @@ const ICPFiltersDashboard: FC<{
             header: "COMPANY",
             cell: (cell) => {
               return <Text size='xs'>{cell.cell?.getValue<string>()}</Text>
+            }
+          },
+          {
+            accessorKey: "status",
+            filterFn: stringFilterFn,
+            size: Math.min(100, window.innerWidth / 6),
+            header: "STATUS",
+            cell: (cell) => {
+              let color = "gray";
+              if (cell.cell?.getValue<string>() === "PROSPECTED") {
+                color = "yellow";
+              } else if (cell.cell?.getValue<string>() === "SENT_OUTREACH") {
+                color = "blue";
+              } else if (cell.cell?.getValue<string>() === "BUMPED") {
+                color = "orange";
+              } else if (cell.cell?.getValue<string>() === "ACTIVE_CONVO") {
+                color = "purple";
+              } else if (cell.cell?.getValue<string>() === "DEMO") {
+                color = "green";
+              } else if (cell.cell?.getValue<string>() === "REMOVED") {
+                color = "red";
+              }
+              return <Badge size='sm' color={color}>{cell.cell?.getValue<string>().replaceAll("_", " ")}</Badge>
             }
           },
           {

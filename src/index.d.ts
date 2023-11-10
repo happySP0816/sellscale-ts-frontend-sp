@@ -149,6 +149,8 @@ export interface ProspectICP {
   industry: string;
   linkedin_url: string;
   title: string;
+  status: string;
+  has_been_sent_outreach: boolean;
 }
 
 export interface ProspectDetails {

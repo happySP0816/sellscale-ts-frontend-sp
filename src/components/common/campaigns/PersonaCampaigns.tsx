@@ -107,9 +107,7 @@ import { CampaignAnalyticsData } from './CampaignAnalytics';
 import OverallPipeline from './OverallPipeline';
 import { TodayActivityData } from './OverallPipeline/TodayActivity';
 import UserStatusToggle from './UserStatusToggle';
-import AllCampaign, { Analytics } from '../../PersonaCampaigns/AllCampaign';
-import { getAnalytics } from '@utils/requests/getAnalytics';
-import { useQuery } from '@tanstack/react-query';
+import AllCampaign from '../../PersonaCampaigns/AllCampaign';
 
 export type CampaignPersona = {
   id: number;

@@ -138,7 +138,7 @@ const AllCampaign = (props: PropsType) => {
               <PersonCampaignCard
                 key={index}
                 persona={persona}
-                viewMode={'list-view'}
+                viewMode={'node-view'}
                 onPersonaActiveStatusUpdate={async (id: number, active: boolean) => {
                 }}
               />

@@ -30,7 +30,7 @@ const AllCampaign = (props: PropsType) => {
   const [activeStatusesShow, setActiveStatusesShow] = useState([true]);
   
   const filteredCampaigns = props.campaigns
-    .sort((a: CampaignPersona, b: CampaignPersona) => {
+    .sort((a: CampaignPersona, b: CampaignPersona): any => {
       if (!a.active && !b.active) {
         return a.total_sent - b.total_sent
       }

@@ -202,7 +202,7 @@ export default function SideNavbar(props: {}) {
           <SideNavbarItem
             icon={<IconUsers size="1.0rem" />}
             label="Contacts"
-            tabKey={["contacts", "all/contacts"]}
+            tabKey={["contacts/overview", "contacts", "all/contacts"]}
           />
           {/* <SideNavbarItem
             icon={<IconChartHistogram size="1.0rem" />}

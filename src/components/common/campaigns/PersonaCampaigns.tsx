@@ -62,6 +62,7 @@ import {
   IconChevronDown,
   IconChevronUp,
   IconEdit,
+  IconExternalLink,
   IconMail,
   IconPlus,
   IconSearch,
@@ -582,10 +583,21 @@ export function PersonCampaignCard(props: {
                     "Setup"
                   }
                 </Badge>
-                <Tooltip label={props.persona.name} withArrow withinPortal>
-                  <Title order={6} c={'gray.7'}>
-                    {_.truncate(props.persona.name, { length: 40 })}
-                  </Title>
+                <Tooltip label={props.persona.name + " - " + + props.persona.total_sent + " / " + props.persona.total_prospects + " prospects sent"} withArrow>
+                  <Flex onClick={() => {
+                    if (props.persona.sdr_id != userData?.id) return;
+                    window.location.href = `/contacts?campaign_id=${props.persona.id}`;
+                  }}>
+                    <Title order={6} c={'gray.7'}>
+                      {_.truncate(props.persona.name, { length: 40 })}
+                    </Title>
+                    {
+                      props.persona.sdr_id == userData?.id &&
+                      <Box ml='xs'>
+                        <IconExternalLink size='0.8rem' color='gray' />
+                      </Box>
+                    }
+                  </Flex>
                 </Tooltip>
             </Box>
           </Group>
@@ -599,12 +611,12 @@ export function PersonCampaignCard(props: {
 
           <Group sx={{ flex: '10%' }} grow>
             <Center>
-              {props.persona.li_sent > 0 && props.persona.active && (
+              {props.persona.li_sent > 0 && (
                 <ActionIcon
                   variant='subtle'
                   radius='md'
                   size='lg'
-                  color='blue'
+                  color={props.persona.active ? 'bliue' : 'gray'}
                   onClick={() => {
                     if (props.project == undefined) return;
                     setOpenedProspectId(-1);
@@ -616,15 +628,15 @@ export function PersonCampaignCard(props: {
                     );
                   }}
                 >
-                  <IconBrandLinkedin size='2.0rem' />
+                  <IconBrandLinkedin size='2.0rem' color={props.persona.active ? theme.colors.blue[6] : 'gray'} />
                 </ActionIcon>
               )}
-              {props.persona.emails_sent > 0 && props.persona.active && (
+              {props.persona.emails_sent > 0 && (
                 <ActionIcon
                   variant='subtle'
                   radius='md'
                   size='lg'
-                  color='yellow'
+                  color={props.persona.active ? 'yellow' : 'gray'}
                   onClick={() => {
                     if (props.project == undefined) return;
                     setOpenedProspectId(-1);
@@ -636,7 +648,7 @@ export function PersonCampaignCard(props: {
                     );
                   }}
                 >
-                  <IconMail size='2.0rem' />
+                  <IconMail size='2.0rem' color={props.persona.active ? theme.colors.yellow[6] : 'gray'} />
                 </ActionIcon>
               )}
             </Center>

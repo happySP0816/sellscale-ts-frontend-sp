@@ -54,6 +54,7 @@ import PulseTabSelector from "@common/persona/PulseTabSelector";
 import PersonaOnboarding from "@pages/PreOnboarding";
 import AnalyticPage from "@pages/AnalyticPage";
 import OverviewPage from '@pages/OverviewPage';
+import ContactOverview from '@common/persona/ContactOverview';
 
 const queryClient = new QueryClient();
 
@@ -141,6 +142,10 @@ const router = sentryCreateBrowserRouter([
         loader: async ({ params }: { params: any }) => {
           return { archetypeId: params.archetypeId };
         },
+      },
+      {
+        path: "contacts/overview",
+        element: <RestrictedRoute page={<ContactOverview />} />,
       },
       {
         path: "contacts/find",

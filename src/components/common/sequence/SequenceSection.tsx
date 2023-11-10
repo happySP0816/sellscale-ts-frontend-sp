@@ -2971,6 +2971,71 @@ function FrameworkSection(props: {
                   >
                     {props.framework.title}
                   </Text>
+                  {/* Hovercard for transformers */}
+                  {props.framework.active_transformers && props.framework.active_transformers.length > 0 && (
+                    <HoverCard width={280} shadow='md'>
+                      <HoverCard.Target>
+                        <Badge
+                          leftSection={
+                            <IconSearch size='0.8rem' style={{ marginTop: 4 }} />
+                          }
+                          color='lime'
+                          variant='filled'
+                          ml='xs'
+                        >
+                          {props.framework.active_transformers.length} Research Points
+                        </Badge>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown
+                        style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                      >
+                        <Paper
+                          style={{
+                            backgroundColor: 'rgb(34, 37, 41)',
+                            color: 'white',
+                            padding: 10,
+                          }}
+                        >
+                          <TextWithNewline style={{ fontSize: '12px' }}>
+                            {'<b>Active Research Points:</b>\n- ' +
+                              props.framework.active_transformers
+                                .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
+                                .join('\n- ')}
+                          </TextWithNewline>
+                        </Paper>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  )}
+                  {props.framework.human_feedback && (
+                    <HoverCard width={280} shadow='md'>
+                      <HoverCard.Target>
+                        <Badge
+                          leftSection={<IconBulb size='0.8rem' />}
+                          color='grape'
+                          variant='filled'
+                          ml='xs'
+                        >
+                          Fine Tuned
+                        </Badge>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown
+                        style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                      >
+                        <Paper
+                          style={{
+                            backgroundColor: 'rgb(34, 37, 41)',
+                            color: 'white',
+                            padding: 10,
+                          }}
+                        >
+                          <TextWithNewline style={{ fontSize: '12px' }}>
+                            {'<b>Additional Instructions:</b>\n' +
+                              props.framework.human_feedback}
+                          </TextWithNewline>
+                        </Paper>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  )}
                 </Flex>
                 <Card withBorder w='100%' sx={{}}>
                   {editing ? (

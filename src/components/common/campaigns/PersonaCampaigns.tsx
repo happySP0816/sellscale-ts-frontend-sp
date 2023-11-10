@@ -121,6 +121,8 @@ export type CampaignPersona = {
   li_opened: number;
   li_replied: number;
   active: boolean;
+  linkedin_active: boolean;
+  email_active: boolean;
   created_at: string;
   emoji: string;
   total_sent: number;
@@ -474,7 +476,7 @@ function PersonCampaignCard(props: {
     {
       id: 1,
       type: 'LinkedIn',
-      active: props.persona.li_sent > 0 && props.persona.active,
+      active: props.persona.linkedin_active,
       icon: <IconBrandLinkedin size='0.925rem' />,
       sends: props.persona.li_sent,
       opens: props.persona.li_opened,
@@ -484,7 +486,7 @@ function PersonCampaignCard(props: {
     {
       id: 2,
       type: 'Email',
-      active: props.persona.emails_sent > 0 && props.persona.active,
+      active: props.persona.email_active,
       icon: <IconMail size='0.925rem' />,
       sends: props.persona.emails_sent,
       opens: props.persona.emails_opened,

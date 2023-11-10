@@ -109,7 +109,7 @@ const UploadOverview = () => {
       <Grid>
         <Grid.Col span={4}>
           <Card withBorder padding="md">
-            <Text align="center"><IconSearch size='1rem' /> Top Line Scraped</Text>
+            <Text align="center"><IconSearch size='1rem' /> Top Line Contacts</Text>
             <Text align="center" size="24px">{analytics.top_line_scraped.toLocaleString()}</Text>
           </Card>
         </Grid.Col>

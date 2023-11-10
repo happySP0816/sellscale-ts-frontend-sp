@@ -313,7 +313,7 @@ export default function PersonaCampaigns() {
               </Group>
 
               <Title color="gray.6" order={3}>
-                {userData?.sdr_name?.split(' ')[0]}'s Campaigns
+                All Campaigns
               </Title>
 
               <ScrollArea h={'78vh'}>
@@ -572,19 +572,22 @@ export function PersonCampaignCard(props: {
               </Popover.Dropdown>
             </Popover>
 
-            <Title order={6} c={'gray.7'}>
-              {_.truncate(props.persona.name, { length: 30 })}
-            </Title>
-
-            <Badge size='xs' color={props.persona.active && props.persona.total_sent > 0 ? "blue" :
-              !props.persona.active && props.persona.total_sent > 0 ? "green" :
-              "yellow"
-            }>
-              {props.persona.active && props.persona.total_sent > 0 ? "Active" : 
-                !props.persona.active && props.persona.total_sent > 0 ? "Complete" :
-                "Setup"
-              }
-            </Badge>
+            <Box>
+               <Badge size='xs' color={props.persona.active && props.persona.total_sent > 0 ? "blue" :
+                  !props.persona.active && props.persona.total_sent > 0 ? "green" :
+                  "yellow"
+                }>
+                  {props.persona.active && props.persona.total_sent > 0 ? "Active" : 
+                    !props.persona.active && props.persona.total_sent > 0 ? "Complete" :
+                    "Setup"
+                  }
+                </Badge>
+                <Tooltip label={props.persona.name} withArrow withinPortal>
+                  <Title order={6} c={'gray.7'}>
+                    {_.truncate(props.persona.name, { length: 40 })}
+                  </Title>
+                </Tooltip>
+            </Box>
           </Group>
 
           <Group sx={{ flex: '10%' }} grow>
@@ -944,9 +947,11 @@ function StatDisplay(props: {
   return (
     <Stack spacing={0}>
       <Group spacing={5} sx={{justifyContent: 'left'}}>
-        <Text color={props.color} fz='lg' fw={500}>
-          {props.total.toLocaleString()}
-        </Text>
+        <Tooltip label={props.percentage + '% conversion'} withArrow withinPortal>
+          <Text color={props.color} fz='lg' fw={500}>
+            {props.total.toLocaleString()}
+          </Text>
+        </Tooltip>
       </Group>
       <Group grow>
         <Group spacing={8}>

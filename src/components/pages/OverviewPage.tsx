@@ -464,7 +464,7 @@ export function ActiveChannels() {
                                         <thead>
                                           <tr>
                                             <th>Channel</th>
-                                            <th>Volume</th>
+                                            <th>Daily Limit</th>
                                             <th>Warmup</th>
                                             <th>Reputation</th>
                                           </tr>

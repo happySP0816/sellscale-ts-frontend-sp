@@ -78,6 +78,7 @@ const CampaignSequenceDAG: React.FC<{
           }}
           ref={ref}
           miw={300}
+          onClick={onChannelClick}
         >
           <Flex
             align={"center"}

@@ -130,6 +130,7 @@ export type CampaignPersona = {
   total_prospects: number;
   sdr_name: string;
   sdr_img_url: string;
+  sdr_id: number;
 };
 
 export default function PersonaCampaigns() {
@@ -145,7 +146,9 @@ export default function PersonaCampaigns() {
 
   let filteredProjects = personas.filter((personas) =>
     personas.name.toLowerCase().includes(search.toLowerCase())
-  );
+  )
+  let allProjects = personas;
+
 
   const [campaignAnalyticData, setCampaignAnalyticData] = useState<CampaignAnalyticsData>({
     sentOutreach: 0,
@@ -322,6 +325,7 @@ export default function PersonaCampaigns() {
                   )}
                   {!loadingPersonas &&
                     filteredProjects
+                      .filter((persona: CampaignPersona) => persona.sdr_id === userData?.id)
                       .filter((persona) => persona.active)
                       .map((persona, index) => (
                         <PersonCampaignCard
@@ -349,6 +353,7 @@ export default function PersonaCampaigns() {
                     !loadingPersonas &&
                     filteredProjects
                       .filter((persona) => !persona.active)
+                      .filter((persona: CampaignPersona) => persona.sdr_id === userData?.id)
                       .map((persona, index) => (
                         <PersonCampaignCard
                           key={index}
@@ -371,7 +376,7 @@ export default function PersonaCampaigns() {
                         />
                       ))}
 
-                  {filteredProjects.filter((persona) => !persona.active).length > 0 && (
+                  {filteredProjects.filter((persona) => !persona.active).filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length > 0 && (
                     <Button
                       color='gray'
                       leftIcon={<IconCalendar color='gray' size='0.8rem'></IconCalendar>}
@@ -386,9 +391,9 @@ export default function PersonaCampaigns() {
                       mb='md'
                     >
                       {showInactivePersonas ? 'Hide' : 'Show'}{' '}
-                      {filteredProjects.filter((persona) => !persona.active).length} Inactive
+                      {filteredProjects.filter((persona) => !persona.active).filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length} Inactive
                       Campaign
-                      {filteredProjects.filter((persona) => !persona.active).length > 1 ? 's' : ''}
+                      {filteredProjects.filter((persona) => !persona.active).filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length > 1 ? 's' : ''}
                     </Button>
                   )}
 
@@ -400,7 +405,7 @@ export default function PersonaCampaigns() {
                     </Center>
                   )}
 
-                  <AllCampaign />
+                  <AllCampaign campaigns={allProjects} />
                 </Stack>
               </ScrollArea>
             </Stack>
@@ -434,7 +439,7 @@ type ChannelSection = {
   date: string;
 };
 
-function PersonCampaignCard(props: {
+export function PersonCampaignCard(props: {
   persona: CampaignPersona;
   project?: PersonaOverview;
   viewMode: 'node-view' | 'list-view';
@@ -508,7 +513,6 @@ function PersonCampaignCard(props: {
       <Stack
         spacing={0}
         sx={{
-          opacity: props.persona.active || hovered ? 1 : 0.6,
           cursor: 'pointer',
         }}
       >
@@ -569,12 +573,12 @@ function PersonCampaignCard(props: {
             </Popover>
 
             <Title order={6} c={'gray.7'}>
-              {_.truncate(props.persona.name, { length: 25 })}
+              {_.truncate(props.persona.name, { length: 30 })}
             </Title>
 
             <Badge size='xs' color={props.persona.active && props.persona.total_sent > 0 ? "blue" :
-              !props.persona.active && props.persona.total_sent > 0 ? "yellow" :
-              "green"
+              !props.persona.active && props.persona.total_sent > 0 ? "green" :
+              "yellow"
             }>
               {props.persona.active && props.persona.total_sent > 0 ? "Active" : 
                 !props.persona.active && props.persona.total_sent > 0 ? "Complete" :
@@ -586,7 +590,7 @@ function PersonCampaignCard(props: {
           <Group sx={{ flex: '10%' }} grow>
               <Flex>
                 <Avatar src={props.persona.sdr_img_url} radius='xl' size='sm' />
-                <Text size='xs' fw='450' mt='2px' ml='xs'>{props.persona.sdr_name}</Text>
+                <Text size='xs' fw='450' mt='2px' ml='xs'>{props.persona.sdr_name.split(' ')[0]}</Text>
               </Flex>
           </Group>
 
@@ -727,8 +731,25 @@ function PersonCampaignCard(props: {
               </Tooltip>
             </Flex>
           </Group>
-          <Box sx={{ position: 'absolute', right: 15, top: 20 }}>
-            <ActionIcon color='blue' variant='filled' radius='lg' onClick={toggle}>
+          <Box sx={{ position: 'absolute', right: 15, top: 20}}>
+            <ActionIcon 
+              color={props.persona?.sdr_id === userData?.id ? 'blue' : 'gray'} 
+              sx={{opacity: props.persona?.sdr_id === userData?.id ? 1 : 0.5 }} 
+              variant='filled' radius='lg' 
+              onClick={
+                () => {
+                  if (props.persona?.sdr_id === userData?.id) {
+                    toggle();
+                  } else {
+                    showNotification({
+                      title: 'You cannot edit this campaign',
+                      message: 'You are not the owner of this campaign',
+                      color: 'gray',
+                      autoClose: 5000,
+                    });
+                  }
+                }
+              }>
               {opened ? <IconChevronUp size='1.1rem' /> : <IconChevronDown size='1.1rem' />}
             </ActionIcon>
           </Box>
@@ -926,9 +947,6 @@ function StatDisplay(props: {
         <Text color={props.color} fz='lg' fw={500}>
           {props.total.toLocaleString()}
         </Text>
-        <Badge variant='light' color={props.color} size='xs'>
-          {props.percentage}%
-        </Badge>
       </Group>
       <Group grow>
         <Group spacing={8}>

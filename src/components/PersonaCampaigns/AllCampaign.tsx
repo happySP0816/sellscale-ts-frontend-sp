@@ -34,7 +34,15 @@ const AllCampaign = (props: PropsType) => {
       if (!a.active && !b.active) {
         return a.total_sent - b.total_sent
       }
-      return -((a.active ? 1 : 0) - (b.active ? 1 : 0))
+      if (!a.active) {
+        return 1
+      }
+      if (!b.active) {
+        return -1
+      }
+      if (a.active && b.active) {
+        return -(a.total_sent - b.total_sent)
+      }
     })
     .filter((a: CampaignPersona) => {
       return a.name.toLowerCase().includes(input.toLowerCase())

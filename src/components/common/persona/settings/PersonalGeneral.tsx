@@ -261,13 +261,13 @@ export const PersonaGeneral = () => {
                           carefully.
                         </Text>
                         <Text mt="md">
-                          <b>Basic Deactivate:</b> Deactivating this
+                          <b>Pause Campaign:</b> Deactivating this
                           persona will prevent any new message
                           generation, but Prospects still in the
                           pipeline will continue to receive messages.
                         </Text>
                         <Text mt="xs">
-                          <b>Hard Deactivate:</b> Hard deactivating this
+                          <b>Finish Campaign:</b> Hard deactivating this
                           persona will wipe all messages from the
                           pipeline and stop any and all contact with
                           Prospects. Hard deactivating may take a few
@@ -287,8 +287,8 @@ export const PersonaGeneral = () => {
                       </>
                     ),
                     labels: {
-                      confirm: "Basic Deactivate",
-                      cancel: "Hard Deactivate",
+                      confirm: "Pause Campaign",
+                      cancel: "Finish Campaign",
                     },
                     cancelProps: { color: "red", variant: "outline" },
                     confirmProps: { color: "red" },

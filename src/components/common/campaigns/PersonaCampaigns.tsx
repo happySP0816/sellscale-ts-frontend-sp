@@ -738,11 +738,11 @@ export function PersonCampaignCard(props: {
               >
                 <span>
                   <UserStatusToggle
-                    projectId={props.project?.id}
+                    projectId={props.persona.id}
                     isActive={personaActive}
                     onChangeUserStatusSuccess={(status: boolean) => {
                       setPersonaActive(status);
-                      props.onPersonaActiveStatusUpdate?.(props.project?.id ?? 0, status);
+                      props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
                     }}
                   />
                 </span>

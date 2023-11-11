@@ -20,17 +20,20 @@ import {
 } from "@mantine/core";
 import { IconCalendar } from "@tabler/icons";
 import { useState } from "react";
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
 
 export const borderGray = "#E9ECEF";
 
 const AnalyticPage = () => {
   const [period] = useState("Nov 01 - Nov 12");
+  const userToken = useRecoilValue(userTokenState)
   return (
     <div>
       <Title>Analytics</Title>
 
       <Tabs
-        defaultValue="overall_pipeline"
+        defaultValue="compare_campaigns"
         px={20}
         py={10}
         styles={(theme) => ({
@@ -45,6 +48,7 @@ const AnalyticPage = () => {
         })}
       >
         <Tabs.List>
+          <Tabs.Tab value="compare_campaigns">Compare Campaigns</Tabs.Tab>
           <Tabs.Tab value="overall_pipeline">Overall Pipeline</Tabs.Tab>
           <Tabs.Tab value="prospect_fit">Prospect Fit</Tabs.Tab>
           <Tabs.Tab value="volume">Volume</Tabs.Tab>
@@ -76,6 +80,23 @@ const AnalyticPage = () => {
             </Button>
           </Flex>
         </Tabs.List>
+
+        <Tabs.Panel value="compare_campaigns">
+          <Box h={"80vh"}>
+            <iframe 
+              src={"https://sellscale.retool.com/embedded/public/a4e28dc1-b9bf-4df4-99a1-0f2c47dcd9d5#authToken=" + userToken}
+              width="100%"
+              height="100%"
+              allowFullScreen
+              style={{
+                border: "none",
+                borderRadius: rem(8),
+                overflow: "hidden",
+              }}
+            />
+          </Box>
+
+        </Tabs.Panel>
 
         <Tabs.Panel value="overall_pipeline">
           <Paper radius={"lg"} mt="md">

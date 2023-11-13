@@ -13,6 +13,7 @@ import { navigateToPage } from "@utils/documentChange";
 import UploadOverview from './UploadOverview';
 import { IconChartArcs, IconChartAreaLine, IconList, IconTable, IconTarget } from '@tabler/icons';
 import ComingSoonCard from '@common/library/ComingSoonCard';
+import GlobalContacts from './GlobalContacts';
 
 const ContactOverview = () => {
   return (
@@ -27,7 +28,7 @@ const ContactOverview = () => {
       </Tabs.Panel>
 
       <Tabs.Panel value="global_contacts">
-        <ComingSoonCard />
+        <GlobalContacts />
       </Tabs.Panel>
     </Tabs>
   );

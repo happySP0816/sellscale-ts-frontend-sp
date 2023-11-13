@@ -14,6 +14,8 @@ import UploadOverview from './UploadOverview';
 import { IconChartArcs, IconChartAreaLine, IconList, IconTable, IconTarget } from '@tabler/icons';
 import ComingSoonCard from '@common/library/ComingSoonCard';
 import GlobalContacts from './GlobalContacts';
+import DoNotContactList from '@common/settings/DoNotContactList';
+import PageFrame from '@common/PageFrame';
 
 const ContactOverview = () => {
   return (
@@ -21,6 +23,7 @@ const ContactOverview = () => {
       <Tabs.List>
         <Tabs.Tab value="overview"><IconTable size='0.8rem' style={{marginRight: '8px', marginTop: '4px'}} />Upload Overview</Tabs.Tab>
         <Tabs.Tab value="global_contacts"><IconList size='0.8rem' style={{marginRight: '8px', marginTop: '4px'}} />Global Contacts</Tabs.Tab>
+        <Tabs.Tab value="do_not_contact"><IconTarget size='0.8rem' style={{marginRight: '8px', marginTop: '4px'}} />Do Not Contact</Tabs.Tab>
       </Tabs.List>
 
       <Tabs.Panel value="overview">
@@ -29,6 +32,12 @@ const ContactOverview = () => {
 
       <Tabs.Panel value="global_contacts">
         <GlobalContacts />
+      </Tabs.Panel>
+
+      <Tabs.Panel value="do_not_contact">
+        <PageFrame>
+          <DoNotContactList />
+        </PageFrame>
       </Tabs.Panel>
     </Tabs>
   );

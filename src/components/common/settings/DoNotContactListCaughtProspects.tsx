@@ -90,7 +90,7 @@ export default function DoNotContactListCaughtProspects(props: { forSDR?: boolea
       <td>{p.full_name}</td>
       <td>{p.company}</td>
       <td>{p.title}</td>
-
+      <td>{p.industry}</td>
       <td>{p.overall_status.toLowerCase()}</td>
     </tr>
   ));
@@ -155,6 +155,7 @@ export default function DoNotContactListCaughtProspects(props: { forSDR?: boolea
                     <th>Prospect Name</th>
                     <th>Company</th>
                     <th>Title</th>
+                    <th>Industry</th>
                     <th>Status</th>
                   </tr>
                 </thead>

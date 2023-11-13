@@ -35,9 +35,7 @@ const ContactOverview = () => {
       </Tabs.Panel>
 
       <Tabs.Panel value="do_not_contact">
-        <PageFrame>
           <DoNotContactList />
-        </PageFrame>
       </Tabs.Panel>
     </Tabs>
   );

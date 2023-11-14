@@ -1493,38 +1493,7 @@ function IntroMessageSection(props: {
                             )}
                             % reply
                           </Text>
-
-                          {/* Hovercard for fine tuned */}
-                          {template.additional_instructions && (
-                            <HoverCard width={280} shadow='md'>
-                              <HoverCard.Target>
-                                <Badge
-                                  leftSection={<IconBulb size='0.8rem' />}
-                                  color='grape'
-                                  variant='filled'
-                                  ml='xs'
-                                >
-                                  Fine Tuned
-                                </Badge>
-                              </HoverCard.Target>
-                              <HoverCard.Dropdown
-                                style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                              >
-                                <Paper
-                                  style={{
-                                    backgroundColor: 'rgb(34, 37, 41)',
-                                    color: 'white',
-                                    padding: 10,
-                                  }}
-                                >
-                                  <TextWithNewline style={{ fontSize: '12px' }}>
-                                    {'<b>Additional Instructions:</b>\n' +
-                                      template.additional_instructions}
-                                  </TextWithNewline>
-                                </Paper>
-                              </HoverCard.Dropdown>
-                            </HoverCard>
-                          )}
+                          <Text color='blue' size='xs'>{template.times_accepted} / {template.times_used} times</Text>
                         </Box>
 
                         <Box mr={40} w='100%'>
@@ -2914,51 +2883,6 @@ function FrameworkSection(props: {
               setChanged(true);
             }}
           >
-            {/* todo(Aakash) - remove this START */}
-            {/* {false && form.values.additionalContext && (
-              <Box mb="xs">
-                <Group>
-                  <Button
-                    onClick={moreAdditionInformationToggle}
-                    variant="white"
-                    color="gray.6"
-                    m={0}
-                    p={0}
-                    fs={"1.25rem"}
-                  >
-                    <IconChevronRight
-                      style={{
-                        transform: moreAdditionInformationOpened
-                          ? "rotate(90deg)"
-                          : "",
-                      }}
-                    />
-                    More Info requested ⚠️
-                  </Button>
-                </Group>
-                <Collapse in={moreAdditionInformationOpened}>
-                  <Box w="100%">
-                    <Textarea
-                      minRows={7}
-                      label="Make your answer better by providing additional text"
-                      {...form.getInputProps("additionalContext")}
-                    />
-                    <Button
-                      color="grape"
-                      size="xs"
-                      mt="xs"
-                      ml="auto"
-                      leftIcon={<IconRobot size="0.8rem" />}
-                      onClick={() => autoCompleteWithBrain()}
-                      loading={aiGenerating}
-                    >
-                      AI Complete Context
-                    </Button>
-                  </Box>
-                </Collapse>
-              </Box>
-            )} */}
-            {/* todo(Aakash) - remove this END */}
 
             {showUserFeedback && (
               <>
@@ -2994,49 +2918,6 @@ function FrameworkSection(props: {
                   </Card.Section>
                 </Card>
               </>
-
-              // <Card mb="16px">
-              //   <Card.Section
-              //     sx={{
-              //       backgroundColor: "#26241d",
-              //       flexDirection: "row",
-              //       display: "flex",
-              //     }}
-              //     p="sm"
-              //   >
-              //     <Image src={sellScaleLogo} width={30} height={30} mr="sm" />
-              //     <Text color="white" mt="4px">
-
-              //       Feel free to give me feedback on improving the message
-              //        {/* <TypeAnimation
-              //           sequence={[
-              //             'Feel free to gvie me', // Types 'One'
-              //             100, // Waits 1s
-              //             'Feel free to give me feedback on ', // Deletes 'One' and types 'Two'
-              //             400, // Waits 2s
-              //             'Feel free to give me feedback on improving the message', // Types 'Three' without deleting 'Two'
-              //             () => {
-              //               console.log('Sequence completed');
-              //             },
-              //           ]}
-              //           speed={50}
-              //           wrapper="span"
-              //           cursor={false}
-              //         />
-              //        */}
-              //     </Text>
-              //   </Card.Section>
-              //   <Card.Section
-              //     sx={{ border: "solid 2px #26241d !important" }}
-              //     p="8px"
-              //   >
-              //     <Textarea
-              //       minRows={5}
-              //       placeholder="- make it shorter&#10;-use this fact&#10;-mention the value prop"
-              //       {...form.getInputProps("humanFeedback")}
-              //     />
-              //   </Card.Section>
-              // </Card>
             )}
 
             <Paper
@@ -3070,13 +2951,11 @@ function FrameworkSection(props: {
                 mr='md'
               >
                 <Text fw='bold' fz='md' color='blue' mt='xs'>
-                  {/* {Math.round(
-                            (template.times_accepted / (template.times_used + 0.0001)) * 100
-                          )} */}
-                  0% reply
+                  {props.framework.etl_num_times_used != null && props.framework.etl_num_times_converted != null &&
+                    Math.round(props.framework.etl_num_times_converted / (props.framework.etl_num_times_used + 0.0001) * 100)}% reply
                 </Text>
                 <Text size='8px' color='blue' fz={'xs'} fw='500'>
-                  (0/0 times)
+                  ({props.framework.etl_num_times_converted}/{props.framework.etl_num_times_used} times)
                 </Text>
               </Box>
 
@@ -3090,8 +2969,73 @@ function FrameworkSection(props: {
                     color='gray'
                     variant='outline'
                   >
-                    {/* {template.title} */}
+                    {props.framework.title}
                   </Text>
+                  {/* Hovercard for transformers */}
+                  {props.framework.active_transformers && props.framework.active_transformers.length > 0 && (
+                    <HoverCard width={280} shadow='md'>
+                      <HoverCard.Target>
+                        <Badge
+                          leftSection={
+                            <IconSearch size='0.8rem' style={{ marginTop: 4 }} />
+                          }
+                          color='lime'
+                          variant='filled'
+                          ml='xs'
+                        >
+                          {props.framework.active_transformers.length} Research Points
+                        </Badge>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown
+                        style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                      >
+                        <Paper
+                          style={{
+                            backgroundColor: 'rgb(34, 37, 41)',
+                            color: 'white',
+                            padding: 10,
+                          }}
+                        >
+                          <TextWithNewline style={{ fontSize: '12px' }}>
+                            {'<b>Active Research Points:</b>\n- ' +
+                              props.framework.active_transformers
+                                .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
+                                .join('\n- ')}
+                          </TextWithNewline>
+                        </Paper>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  )}
+                  {props.framework.human_feedback && (
+                    <HoverCard width={280} shadow='md'>
+                      <HoverCard.Target>
+                        <Badge
+                          leftSection={<IconBulb size='0.8rem' />}
+                          color='grape'
+                          variant='filled'
+                          ml='xs'
+                        >
+                          Fine Tuned
+                        </Badge>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown
+                        style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                      >
+                        <Paper
+                          style={{
+                            backgroundColor: 'rgb(34, 37, 41)',
+                            color: 'white',
+                            padding: 10,
+                          }}
+                        >
+                          <TextWithNewline style={{ fontSize: '12px' }}>
+                            {'<b>Additional Instructions:</b>\n' +
+                              props.framework.human_feedback}
+                          </TextWithNewline>
+                        </Paper>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  )}
                 </Flex>
                 <Card withBorder w='100%' sx={{}}>
                   {editing ? (
@@ -3178,17 +3122,6 @@ function FrameworkSection(props: {
                       />
                     </Box>
                   </Group>
-                  <Box mt='xs'>
-                    {/* <Text fz='sm' fw={500} c='dimmed'>
-                      RAW PROMPT INSTRUCTIONS:
-                    </Text>
-                    <Textarea
-                      placeholder='Instructions'
-                      minRows={7}
-                      variant='filled'
-                      {...form.getInputProps('promptInstructions')}
-                    /> */}
-                  </Box>
                   <Tabs
                     value={activeTab}
                     onTabChange={setActiveTab}

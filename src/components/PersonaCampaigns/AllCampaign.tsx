@@ -1,4 +1,4 @@
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   Badge,
   Box,
@@ -6,94 +6,74 @@ import {
   Divider,
   Flex,
   Input,
-  Loader,
-  Table,
-  Text,
   Title,
 } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { getAnalytics } from "@utils/requests/getAnalytics";
 import { useRecoilValue } from "recoil";
 import { useEffect, useMemo, useState } from "react";
-import {
-  MantineReactTable,
-  MRT_ColumnDef,
-  MRT_ColumnFiltersState,
-  MRT_SortingState,
-} from "mantine-react-table";
-import { DataTable, DataTableSortStatus } from "mantine-datatable";
-import { sortBy } from "lodash";
-import { IconBrandLinkedin, IconMail, IconSearch } from '@tabler/icons';
 
-export interface Analytics {
-  account: string;
-  campaign: string;
-  contacted: number;
-  demo_set: number;
-  open: number;
-  reply: number;
-  sourced: number;
-  status: Status;
-  img_url: string;
-  channel: string;
-}
+import { IconBrandLinkedin, IconMail, IconSearch } from '@tabler/icons';
+import { CampaignPersona, PersonCampaignCard } from '@common/campaigns/PersonaCampaigns';
 
 export type Status = "Complete" | "Setup" | "Active";
-const AllCampaign = () => {
-  const userToken = useRecoilValue(userTokenState);
-  const { data, isFetching, isError, isLoading } = useQuery<Analytics[]>({
-    queryKey: [`query-get-all-analytics`],
-    queryFn: async () => {
-      const result = await getAnalytics(userToken);
-      return result.status === "success" ? result.data : [];
-    },
-  });
+type PropsType = {
+  campaigns: CampaignPersona[];
+}
+const AllCampaign = (props: PropsType) => {
+  const userData = useRecoilValue(userDataState);
 
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-    columnAccessor: "status",
-    direction: "asc",
-  });
+
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("All");
-  const [records, setRecords] = useState<Analytics[]>(sortBy(data, "name"));
 
-  useEffect(() => {
-    let newData = (
-      sortStatus?.columnAccessor
-        ? sortBy(data, sortStatus?.columnAccessor)
-        : data
-    ) as Analytics[];
-
-    if (status !== "All") {
-      newData = newData.filter((d) => d.status === status);
-    }
-    if (input !== "") {
-      newData = newData.filter(
-        (d) =>
-          d.campaign.toLowerCase().includes(input.toLowerCase()) ||
-          d.account.toLowerCase().includes(input.toLowerCase())
-      );
-    }
-    if (sortStatus) {
-      setRecords(sortStatus.direction === "desc" ? newData.reverse() : newData);
-    }
-  }, [sortStatus, status, input, data]);
-
-  if (isLoading) {
-    return <Loader />
-  }
+  const [activeStatusesShow, setActiveStatusesShow] = useState([true]);
+  
+  const filteredCampaigns = props.campaigns
+    .sort((a: CampaignPersona, b: CampaignPersona): any => {
+      if (!a.active && !b.active) {
+        return a.total_sent - b.total_sent
+      }
+      if (!a.active) {
+        return 1
+      }
+      if (!b.active) {
+        return -1
+      }
+      if (a.active && b.active) {
+        return -(a.total_sent - b.total_sent)
+      }
+    })
+    .filter((a: CampaignPersona) => {
+      return a.name.toLowerCase().includes(input.toLowerCase())
+    })
+    .filter((a: CampaignPersona) => {
+      return activeStatusesShow.includes(a.active)
+    })
+    .filter((a: CampaignPersona) => {
+      if (status === 'All') {
+        return true;
+      } else if (status === 'Active' && a.active && a.total_sent > 0) {
+        return a.active;
+      } else if (status === 'Complete' && !a.active && a.total_sent > 0) {
+        return true
+      } else if (status === 'Setup' && a.total_sent === 0 && !a.active) {
+        return true;
+      }
+      return false;
+    })
 
   return (
     <>
       <Divider />
 
       <Box>
-        <Flex justify={"space-between"} align={"center"}>
+        <Flex justify={"space-between"} align={"center"} mt='md'>
           <Title color="gray.6" order={3}>
-            All Campaigns
+            {userData?.client.company}'s' Campaigns
           </Title>
 
-          <Flex gap={"sm"} wrap={"wrap"} align={"center"}>
+          <Flex gap={"sm"} wrap={"wrap"} align={"center"} mb='md'>
             <Button
               variant={status === "All" ? "filled" : "light"}
               color="dark"
@@ -106,7 +86,7 @@ const AllCampaign = () => {
                 variant={status === "All" ? "light" : "filled"}
                 ml={"xs"}
               >
-                {data?.length}
+                {props.campaigns.length}
               </Badge>
             </Button>
             <Button
@@ -118,10 +98,9 @@ const AllCampaign = () => {
               Active
               <Badge
                 color="blue"
-                variant={status === "Active" ? "light" : "filled"}
                 ml={"xs"}
               >
-                {data?.filter((r) => r.status === "Active").length}
+                {props.campaigns.filter((r) => r.active && r.total_sent > 0).length}
               </Badge>
             </Button>
             <Button
@@ -133,10 +112,9 @@ const AllCampaign = () => {
               Setup
               <Badge
                 color="yellow"
-                variant={status === "Active" ? "light" : "filled"}
                 ml={"xs"}
               >
-                {data?.filter((r) => r.status === "Setup").length}
+                {props.campaigns.filter((r) => r.total_sent === 0 && !r.active).length}
               </Badge>
             </Button>
             <Button
@@ -148,10 +126,9 @@ const AllCampaign = () => {
               Completed
               <Badge
                 color="green"
-                variant={status === "Active" ? "light" : "filled"}
                 ml={"xs"}
               >
-                {data?.filter((r) => r.status === "Complete").length}
+                {props.campaigns.filter((r) => !r.active && r.total_sent > 0).length}
               </Badge>
             </Button>
 
@@ -163,228 +140,43 @@ const AllCampaign = () => {
           </Flex>
         </Flex>
 
-        <Box mt={"md"}>
-          <DataTable
-            sortStatus={sortStatus}
-            onSortStatusChange={(s) => {
-              setSortStatus(s);
-            }}
-            height={"min(870px, 100vh - 200px)"}
-            verticalAlignment="top"
-            loaderColor="teal"
-            fetching={isFetching}
-            styles={(theme) => ({
-              root: {
-                borderRadius: theme.radius.md,
-                zIndex: 10,
-              },
-              header: {
-                backgroundColor: theme.colors.blue[6],
-                color: theme.white,
-                "&& th:hover": {
-                  backgroundColor: `${theme.colors.blue[6]} !important`,
-                },
-
-                ":hover": { backgroundColor: theme.colors.blue[6] },
-              },
-            })}
-            noRecordsText={"No analytic found"}
-            columns={[
-              {
-                sortable: true,
-                accessor: "campaign",
-                title: "Campaign",
-
-                titleSx(theme) {
-                  return {
-                    background: theme.colors.blue[6],
-                    color: `${theme.white} !important`,
-                    "&, &:hover": {
-                      backgroundColor: `${theme.colors.blue[6]} !important`,
-                    },
-                  };
-                },
-              },
-              {
-                accessor: "channel",
-                title: "Channel",
-                titleSx(theme) {
-                  return {
-                    background: theme.colors.blue[6],
-                    color: `${theme.white} !important`,
-                  };
-                },
-                render: ({ channel }) => {
-                  return channel?.replace('{', '').replace('}', '').split(',').map((c: string) => {
-                    let color = "blue";
-                    if (c === "LINKEDIN") {
-                      color = "orange";
-                    }
-
-                    let icon = <IconMail size={12} style={{marginTop: 4}} />;
-                    if (c === "LINKEDIN") {
-                      icon = <IconBrandLinkedin size={12} style={{marginTop: 4}} />;
-                    }
-
-                    return <Badge color={color}>{icon} {c}</Badge>;
-                  })
-                }
-              },
-              {
-                sortable: true,
-                accessor: "account",
-                title: "Account",
-                titleSx(theme) {
-                  return {
-                    background: theme.colors.blue[6],
-                    color: `${theme.white} !important`,
-                    "&, &:hover": {
-                      backgroundColor: `${theme.colors.blue[6]} !important`,
-                    },
-                  };
-                },
-                render: ({ account, img_url }) => {
-                  return (
-                    <Flex align={"center"} gap={"sm"}>
-                      <img
-                        src={img_url}
-                        alt={account}
-                        style={{ borderRadius: "8px" }}
-                        width={20}
-                        height={20}
-                      />
-                      <Text>{account}</Text>
-                    </Flex>
-                  );
-                }
-              },
-              {
-                sortable: true,
-                accessor: "sourced",
-                title: "Sourced",
-                titleSx(theme) {
-                  return {
-                    background: theme.colors.blue[6],
-                    color: `${theme.white} !important`,
-                    "&, &:hover": {
-                      backgroundColor: `${theme.colors.blue[6]} !important`,
-                    },
-                  };
-                },
-              },
-              {
-                sortable: true,
-                accessor: "contacted",
-                title: "Contacted",
-                titleSx(theme) {
-                  return {
-                    background: theme.colors.blue[6],
-                    color: `${theme.white} !important`,
-                    "&, &:hover": {
-                      backgroundColor: `${theme.colors.blue[6]} !important`,
-                    },
-                  };
-                },
-                render: ({ contacted }) => {
-                  return <Text>{contacted}%</Text>
-                }
-              },
-              {
-                sortable: true,
-                accessor: "open",
-                title: "Open",
-                titleSx(theme) {
-                  return {
-                    background: theme.colors.blue[6],
-                    color: `${theme.white} !important`,
-                    "&, &:hover": {
-                      backgroundColor: `${theme.colors.blue[6]} !important`,
-                    },
-                  };
-                },
-                render: ({ open }) => {
-                  return <Text>{open}%</Text>
-                }
-              },
-              {
-                sortable: true,
-                accessor: "reply",
-                title: "Reply",
-                titleSx(theme) {
-                  return {
-                    background: theme.colors.blue[6],
-                    color: `${theme.white} !important`,
-                    "&, &:hover": {
-                      backgroundColor: `${theme.colors.blue[6]} !important`,
-                    },
-                  };
-                },
-                render: ({ reply }) => {
-                  return <Text>{reply}%</Text>
-                }
-              },
-              // {
-              //   accessor: "demoSet",
-              //   title: "Demo",
-              //   titleSx(theme) {
-              //     return {
-              //       background: theme.colors.blue[6],
-              //       color: `${theme.white} !important`,
-              //     };
-              //   },
-              // },
-              // {
-              //   accessor: "bounce",
-              //   title: "Bounce",
-              //   titleSx(theme) {
-              //     return {
-              //       background: theme.colors.blue[6],
-              //       color: `${theme.white} !important`,
-              //     };
-              //   },
-              // },
-              {
-                sortable: true,
-                accessor: "status",
-                title: "Status",
-                titleSx(theme) {
-                  return {
-                    background: theme.colors.blue[6],
-                    color: `${theme.white} !important`,
-                    "&, &:hover": {
-                      backgroundColor: `${theme.colors.blue[6]} !important`,
-                    },
-                  };
-                },
-                render: ({ status }) => {
-                  let color = "blue";
-
-                  if (status === "Active") {
-                    color = "blue";
+        {
+          filteredCampaigns
+            .map((persona, index) => (
+              <PersonCampaignCard
+                key={index}
+                persona={persona}
+                viewMode={'node-view'}
+                onPersonaActiveStatusUpdate={async (id: number, active: boolean) => {
+                }}
+              />
+            ))
+        }
+        <Box w='100%' sx={{textAlign: 'center'}}>
+          {
+            props.campaigns.filter((persona) => !persona.active).length > 0 && (
+              <Button
+                color='gray'
+                variant='outline'
+                size='xs'
+                w='300px'
+                ml='auto'
+                mr='auto'
+                sx={{borderRadius: '0.5rem' }}
+                onClick={() => {
+                  if (activeStatusesShow.length == 2) {
+                    setActiveStatusesShow([true])
+                  } else {
+                    setActiveStatusesShow([true, false])
                   }
-                  if (status === "Setup") {
-                    color = "yellow";
-                  }
-                  if (status === "Complete") {
-                    color = "green";
-                  }
-                  return <Badge color={color}>{status}</Badge>;
-                },
-              },
-
-              // {
-              //   accessor: "contactSample",
-              //   title: "Contact Sample",
-              //   titleSx(theme) {
-              //     return {
-              //       background: theme.colors.blue[6],
-              //       color: `${theme.white} !important`,
-              //     };
-              //   },
-              // },
-            ]}
-            records={records ?? []}
-          />
+                }}
+                mt='md'
+                mb='md'
+              >
+                Show {activeStatusesShow.length === 0 ? 'All' : 'Active'} Campaigns
+              </Button>
+            )
+          }
         </Box>
       </Box>
     </>

@@ -6,26 +6,15 @@ import { getEmailTemplateLibrary } from "@utils/requests/getEmailTemplateLibrary
 import { deterministicMantineColor } from "@utils/requests/utils";
 import { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
+import { EmailTemplate } from "src";
 
 interface EmailTemplateLibraryModalProps extends Record<string, unknown> {
   modalOpened: boolean;
   closeModal: () => void;
   templateType: "SUBJECT_LINE" | "BODY";
-  refetch: () => void;
   onSelect: (template: EmailTemplate) => void;
 }
 
-interface EmailTemplate {
-  id: number;
-  name: string;
-  description: string | null;
-  template: string;
-  template_type: "SUBJECT_LINE" | "BODY";
-  active: boolean;
-  transformer_blocklist: string[] | null;
-  tone: string | null;
-  labels: string[] | null;
-}
 
 export default function EmailTemplateLibraryModal(props: EmailTemplateLibraryModalProps) {
   const [userToken] = useRecoilState(userTokenState);
@@ -45,7 +34,6 @@ export default function EmailTemplateLibraryModal(props: EmailTemplateLibraryMod
       userToken,
       props.templateType
     );
-    console.log('result', result)
     if (result.status === 'success') {
       setTemplates(result.data.templates);
       setFilteredTemplates(result.data.templates);
@@ -113,7 +101,7 @@ export default function EmailTemplateLibraryModal(props: EmailTemplateLibraryMod
                 <Grid.Col span={6} key={template.id}>
                   <div
                     onClick={() => {
-                      onSelect(template);
+                      props.onSelect(template);
                     }}
                     style={{
                       cursor: 'pointer',

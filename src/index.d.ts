@@ -149,6 +149,8 @@ export interface ProspectICP {
   industry: string;
   linkedin_url: string;
   title: string;
+  status: string;
+  has_been_sent_outreach: boolean;
 }
 
 export interface ProspectDetails {
@@ -406,6 +408,7 @@ export type BumpFramework = {
   etl_num_times_used?: number;
   etl_num_times_converted?: number;
   transformer_blocklist: string[];
+  active_transformers: string[];
   additional_context?: string;
   bump_framework_template_name?: string;
   bump_framework_human_readable_prompt?: string;

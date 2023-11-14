@@ -373,7 +373,7 @@ export function ActiveChannels() {
                     <IconSend size='1.2rem' color={'gray'} />
                   </Text>
                   <Text ml='4px' fz='14px' color='gray' fw='500' mt='2px'>
-                    Daily Send Volume:
+                    Company Send Limit:
                   </Text>
                   <Flex color='gray' pt='4px' pl='16px' pr='16px' ml='xs' sx={{ border: 'solid 1px #ddd; border-radius: 20px;' }} mah={30}>
                     <IconBrandLinkedin size='1rem' color={theme.colors.blue[6]} />
@@ -464,7 +464,7 @@ export function ActiveChannels() {
                                         <thead>
                                           <tr>
                                             <th>Channel</th>
-                                            <th>Volume</th>
+                                            <th>Daily Limit</th>
                                             <th>Warmup</th>
                                             <th>Reputation</th>
                                           </tr>

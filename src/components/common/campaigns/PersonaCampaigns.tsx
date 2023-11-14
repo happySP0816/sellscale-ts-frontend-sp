@@ -339,6 +339,7 @@ export default function PersonaCampaigns() {
                   {showInactivePersonas && !loadingPersonas && (
                     <>
                       <PersonCampaignTable
+                        hideHeader
                         campaignViewMode={campaignViewMode}
                         projects={projects}
                         filteredProjects={filteredProjects
@@ -1078,14 +1079,28 @@ export const PersonCampaignTable = (props: {
   projects?: PersonaOverview[];
   campaignViewMode: "node-view" | "list-view";
   onPersonaActiveStatusUpdate?: (id: number, active: boolean) => void;
+  hideHeader?: boolean;
 }) => {
   const [sort, setSort] = useState<"asc" | "desc">("desc");
-  const data = useMemo(() => {
-    return orderBy(props.filteredProjects, ["name"], [sort]);
+  let tempData = useMemo(() => {
+    if (sort === "asc") {
+      return props.filteredProjects.sort((a, b) =>
+        moment(a.created_at).isAfter(moment(b.created_at)) ? 1 : -1
+      );
+    } else {
+      return props.filteredProjects.sort((a, b) =>
+        moment(a.created_at).isAfter(moment(b.created_at)) ? -1 : 1
+      );
+    }
   }, [sort]);
 
   if (props.filteredProjects.length === 0) {
     return null;
+  }
+
+  let data = tempData;
+  if (!data || data.length === 0) {
+    data = props.filteredProjects;
   }
 
   return (
@@ -1099,6 +1114,7 @@ export const PersonCampaignTable = (props: {
             border: "solid 1px " + theme.colors.gray[2],
             position: "relative",
           })}
+          display={props.hideHeader ? "none" : "flex"}
           py={"md"}
           pl="xs"
           pr="xs"

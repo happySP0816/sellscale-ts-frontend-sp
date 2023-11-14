@@ -589,7 +589,12 @@ export function PersonCampaignCard(props: {
                 <Tooltip label={props.persona.name + " - " + + props.persona.total_sent + " / " + props.persona.total_prospects + " prospects sent"} withArrow>
                   <Flex onClick={() => {
                     if (props.persona.sdr_id != userData?.id) return;
-                    window.location.href = `/contacts?campaign_id=${props.persona.id}`;
+
+                    if (props.persona.emails_sent >= props.persona.li_sent) { 
+                      window.location.href = `/setup/email?campaign_id=${props.persona.id}`;
+                    } else {
+                      window.location.href = `/setup/linkedin?campaign_id=${props.persona.id}`;
+                    }
                   }}>
                     <Title order={6} c={'gray.7'}>
                       {_.truncate(props.persona.name, { length: 40 })}

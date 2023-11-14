@@ -529,7 +529,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
     }
   }
 
-  if (!openedProspectId || openedProspectId == -1) {
+  if (!openedProspectId || openedProspectId === -1) {
     return (
       <Flex
         direction="column"

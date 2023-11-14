@@ -2883,7 +2883,6 @@ function FrameworkSection(props: {
               setChanged(true);
             }}
           >
-
             {showUserFeedback && (
               <>
                 <Card mb='16px'>
@@ -2951,11 +2950,18 @@ function FrameworkSection(props: {
                 mr='md'
               >
                 <Text fw='bold' fz='md' color='blue' mt='xs'>
-                  {props.framework.etl_num_times_used != null && props.framework.etl_num_times_converted != null &&
-                    Math.round(props.framework.etl_num_times_converted / (props.framework.etl_num_times_used + 0.0001) * 100)}% reply
+                  {props.framework.etl_num_times_used != null &&
+                    props.framework.etl_num_times_converted != null &&
+                    Math.round(
+                      (props.framework.etl_num_times_converted /
+                        (props.framework.etl_num_times_used + 0.0001)) *
+                        100
+                    )}
+                  % reply
                 </Text>
                 <Text size='8px' color='blue' fz={'xs'} fw='500'>
-                  ({props.framework.etl_num_times_converted}/{props.framework.etl_num_times_used} times)
+                  ({props.framework.etl_num_times_converted}/{props.framework.etl_num_times_used}{' '}
+                  times)
                 </Text>
               </Box>
 
@@ -2972,40 +2978,39 @@ function FrameworkSection(props: {
                     {props.framework.title}
                   </Text>
                   {/* Hovercard for transformers */}
-                  {props.framework.active_transformers && props.framework.active_transformers.length > 0 && (
-                    <HoverCard width={280} shadow='md'>
-                      <HoverCard.Target>
-                        <Badge
-                          leftSection={
-                            <IconSearch size='0.8rem' style={{ marginTop: 4 }} />
-                          }
-                          color='lime'
-                          variant='filled'
-                          ml='xs'
+                  {props.framework.active_transformers &&
+                    props.framework.active_transformers.length > 0 && (
+                      <HoverCard width={280} shadow='md'>
+                        <HoverCard.Target>
+                          <Badge
+                            leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
+                            color='lime'
+                            variant='filled'
+                            ml='xs'
+                          >
+                            {props.framework.active_transformers.length} Research Points
+                          </Badge>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown
+                          style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
                         >
-                          {props.framework.active_transformers.length} Research Points
-                        </Badge>
-                      </HoverCard.Target>
-                      <HoverCard.Dropdown
-                        style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                      >
-                        <Paper
-                          style={{
-                            backgroundColor: 'rgb(34, 37, 41)',
-                            color: 'white',
-                            padding: 10,
-                          }}
-                        >
-                          <TextWithNewline style={{ fontSize: '12px' }}>
-                            {'<b>Active Research Points:</b>\n- ' +
-                              props.framework.active_transformers
-                                .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                .join('\n- ')}
-                          </TextWithNewline>
-                        </Paper>
-                      </HoverCard.Dropdown>
-                    </HoverCard>
-                  )}
+                          <Paper
+                            style={{
+                              backgroundColor: 'rgb(34, 37, 41)',
+                              color: 'white',
+                              padding: 10,
+                            }}
+                          >
+                            <TextWithNewline style={{ fontSize: '12px' }}>
+                              {'<b>Active Research Points:</b>\n- ' +
+                                props.framework.active_transformers
+                                  .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
+                                  .join('\n- ')}
+                            </TextWithNewline>
+                          </Paper>
+                        </HoverCard.Dropdown>
+                      </HoverCard>
+                    )}
                   {props.framework.human_feedback && (
                     <HoverCard width={280} shadow='md'>
                       <HoverCard.Target>
@@ -3029,8 +3034,7 @@ function FrameworkSection(props: {
                           }}
                         >
                           <TextWithNewline style={{ fontSize: '12px' }}>
-                            {'<b>Additional Instructions:</b>\n' +
-                              props.framework.human_feedback}
+                            {'<b>Additional Instructions:</b>\n' + props.framework.human_feedback}
                           </TextWithNewline>
                         </Paper>
                       </HoverCard.Dropdown>
@@ -3057,7 +3061,11 @@ function FrameworkSection(props: {
                                   theme.colors['blue'][5] +
                                   "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                               )
-                              .replaceAll(']]', '</span>') as string
+                              .replaceAll(']]', '</span>')
+                              .replaceAll(
+                                '\n',
+                                `<br style="display: block; content: ' '; margin: 10px 0 "/>`
+                              ) as string
                           ),
                         }}
                       />

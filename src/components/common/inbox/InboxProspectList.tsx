@@ -359,12 +359,12 @@ export default function ProspectList(props: {
   prospects = prospects.sort(
     (a, b) => (a.in_purgatory ? 1 : 0) - (b.in_purgatory ? 1 : 0)
   );
-
-  useEffect(() => {
-    if (prospects.length > 0 && openedProspectId === -1) {
-      setOpenedProspectId(prospects[0].id);
-    }
-  }, [props.prospects]);
+  
+  // useEffect(() => {
+  //   if (prospects.length > 0 && (!openedProspectId || openedProspectId === -1)) {
+  //     setOpenedProspectId(prospects[0].id);
+  //   }
+  // }, [props.prospects]);
 
   useEffect(() => {
     if (segmentedSection === "RECOMMENDED") {

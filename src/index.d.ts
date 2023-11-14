@@ -100,6 +100,7 @@ export interface Prospect {
   icp_fit_score_override: number | null;
   email_store: EmailStore;
   contract_size: number;
+  matched_filter_words?: string[];
 }
 
 export interface ProspectShallow {

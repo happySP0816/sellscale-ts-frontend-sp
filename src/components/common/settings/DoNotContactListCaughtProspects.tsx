@@ -12,6 +12,7 @@ import {
   Box,
   Collapse,
   Pagination,
+  Badge,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconChevronUp, IconRefresh } from "@tabler/icons";
@@ -21,6 +22,7 @@ import { Prospect } from "src";
 import { openConfirmModal } from "@mantine/modals";
 import displayNotification from "@utils/notificationFlow";
 import { truncate } from 'lodash';
+import { deterministicMantineColor } from '@utils/requests/utils';
 
 export default function DoNotContactListCaughtProspects(props: { forSDR?: boolean }) {
   const [userToken] = useRecoilState(userTokenState);
@@ -105,11 +107,12 @@ export default function DoNotContactListCaughtProspects(props: { forSDR?: boolea
 
   const rows = paginatedProspects.map((p: Prospect) => (
     <tr key={p.id} style={{height: '20px !important;'}}>
-      <td style={{width: '15%'}}>{truncate(p.full_name, {length: 20})}</td>
-      <td style={{width: '15%'}}>{truncate(p.company, {length: 25})}</td>
-      <td style={{width: '30%'}}>{truncate(p.title, {length: 50})}</td>
-      <td style={{width: '15%'}}>{truncate(p.industry, {length: 20})}</td>
-      <td style={{width: '15%'}}>{p.overall_status.toLowerCase()}</td>
+      <td style={{width: '15%'}}><Text fz='xs'>{truncate(p.full_name, {length: 20})}</Text></td>
+      <td style={{width: '15%'}}><Text fz='xs'>{truncate(p.company, {length: 25})}</Text></td>
+      <td style={{width: '30%'}}><Text fz='xs'>{truncate(p.title, {length: 50})}</Text></td>
+      <td style={{width: '15%'}}><Text fz='xs'>{truncate(p.industry, {length: 20})}</Text></td>
+      <td style={{width: '15%'}}><Badge size='xs' color={deterministicMantineColor(p.overall_status)}>{p.overall_status.toUpperCase().replaceAll("_", " ")}</Badge></td>
+      <td style={{width: '10%'}}>{p.matched_filter_words?.map((x: string) => <Badge color={deterministicMantineColor(x)} size='xs'>{x}</Badge>)}</td>
     </tr>
   ));
 
@@ -134,11 +137,11 @@ export default function DoNotContactListCaughtProspects(props: { forSDR?: boolea
       {!loading && caughtProspects.length > 0 && (
         <Box>
           <Title order={5}>
-            🚨 Warning: {caughtProspects.length} prospects caught in these
+            🚨 Warning: {caughtProspects.length >= 500 ? caughtProspects.length + '+' : caughtProspects.length} prospects caught in these
             filters
           </Title>
           <Text size="sm">
-            {caughtProspects.length} prospects are currently still in the
+            {caughtProspects.length >= 500 && "More than "} {caughtProspects.length} prospects are currently still in the
             SellScale pipeline that meet these criteria. Press the button below
             to remove them from the pipeline.
           </Text>
@@ -165,6 +168,7 @@ export default function DoNotContactListCaughtProspects(props: { forSDR?: boolea
                   <th>Title</th>
                   <th>Industry</th>
                   <th>Status</th>
+                  <th>Matched Filters</th>
                 </tr>
               </thead>
               <tbody>{rows}</tbody>

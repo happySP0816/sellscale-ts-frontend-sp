@@ -3154,7 +3154,7 @@ function FrameworkSection(props: {
               <Collapse in={opened} mt={'xs'}>
                 <Card withBorder mb='xs'>
                   <Group grow>
-                    <Box>
+                    {/* <Box>
                       <Text fz='sm' fw={500} c='dimmed'>
                         MESSAGE LENGTH:
                       </Text>
@@ -3166,7 +3166,7 @@ function FrameworkSection(props: {
                         ]}
                         {...form.getInputProps('bumpLength')}
                       />
-                    </Box>
+                    </Box> */}
                     <Box>
                       <Text fz='sm' fw={500} c='dimmed'>
                         DELAY DAYS:

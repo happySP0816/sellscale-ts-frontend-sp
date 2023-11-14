@@ -8,25 +8,28 @@ import { API_URL } from "@constants/data";
  * @param prospectId 
  * @returns - MsgResponse
  */
-export async function generateBumpLiMessage(userToken: string, prospectId: number, bumpFrameworkId: number, bumpCount: number, useCache: boolean): Promise<MsgResponse> {
-
-  const response = await fetch(
-    `${API_URL}/message_generation/generate_bump_li_message`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        prospect_id: prospectId,
-        bump_framework_id: bumpFrameworkId,
-        bump_count: bumpCount,
-        use_cache: useCache,
-      })
-    }
-  );
+export async function generateBumpLiMessage(
+  userToken: string,
+  prospectId: number,
+  bumpFrameworkId: number,
+  bumpCount: number,
+  useCache: boolean,
+  bump_framework_template_id?: number,
+): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/message_generation/generate_bump_li_message`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      prospect_id: prospectId,
+      bump_framework_id: bumpFrameworkId,
+      bump_count: bumpCount,
+      use_cache: useCache,
+      bump_framework_template_i: bump_framework_template_id,
+    }),
+  });
 
   return await processResponse(response, 'data');
-
 }

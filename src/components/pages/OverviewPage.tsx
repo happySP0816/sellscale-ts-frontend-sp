@@ -9,7 +9,7 @@ import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { showNotification } from '@mantine/notifications';
 import OverallPipeline from '@common/campaigns/OverallPipeline';
 import { getPersonasActivity, getPersonasCampaignView, getPersonasOverview } from '@utils/requests/getPersonas';
-import { PersonaOverview } from 'src';
+import { EmailWarming, PersonaOverview } from 'src';
 import { CampaignAnalyticsData } from '@common/campaigns/CampaignAnalytics';
 import { isLoggedIn } from '@auth/core';
 import { CampaignPersona } from '@common/campaigns/PersonaCampaigns';
@@ -18,6 +18,8 @@ import moment from 'moment';
 import { deterministicMantineColor } from '@utils/requests/utils';
 import { useDisclosure } from '@mantine/hooks';
 import postTriggerSnapshot from '@utils/requests/postTriggerSnapshot';
+import { useQuery } from '@tanstack/react-query';
+import getEmailWarmings from '@utils/requests/getEmailWarmings';
 
 const options = {
   scales: {
@@ -40,7 +42,7 @@ function BarChart() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken[0]}`
+          'Authorization': `Bearer ${userToken}`
         },
       })
         .then(response => response.json())
@@ -267,7 +269,7 @@ export function ActiveChannels() {
   const theme = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(true);
 
-  const userToken = useRecoilState(userTokenState)
+  const userToken = useRecoilValue(userTokenState);
 
   useEffect(() => {
     if (!fetchedChannels) {
@@ -281,7 +283,7 @@ export function ActiveChannels() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${userToken[0]}`
+        'Authorization': `Bearer ${userToken}`
       },
     })
       .then(response => response.json())
@@ -322,6 +324,14 @@ export function ActiveChannels() {
     setDomains(domains)
     console.log('domains', domains)
   }
+
+  const { data: warmings } = useQuery({
+    queryKey: [`query-get-email-warmings`],
+    queryFn: async () => {
+      const response = await getEmailWarmings(userToken);
+      return response.status === 'success' ? (response.data as EmailWarming[]) : undefined;
+    },
+  });
 
   if (loading) {
     return <Card withBorder mt='md'>
@@ -472,12 +482,52 @@ export function ActiveChannels() {
                                         <tbody>
                                           {
                                             x.snapshots?.filter((x: any) => x.channel_type == channel).map((channel: any) => {
-                                              return <tr>
-                                                <td>{channel.channel_type == 'LINKEDIN' ? <IconBrandLinkedin size='0.9rem' /> : <IconMail size='0.9rem' />} {channel.account_name}</td>
-                                                <td>{channel.daily_sent_count} / {channel.daily_limit}</td>
-                                                <td><Badge size='xs' color={channel.warmup_enabled ? 'green' : 'blue'}>{channel.warmup_enabled ? 'In progress' : 'Done'}</Badge></td>
-                                                <td><Badge size='xs' color={channel.reputation > 80 ? 'green' : 'yellow'}>{channel.reputation}%</Badge></td>
-                                              </tr>
+                                              
+                                              const warming = warmings?.find((x: any) => x.email == channel.account_name) as EmailWarming | undefined;
+                                              console.log(warming);
+                                              
+                                              return (
+                                                <tr>
+                                                  <td>
+                                                    {channel.channel_type == 'LINKEDIN' ? (
+                                                      <IconBrandLinkedin size='0.9rem' />
+                                                    ) : (
+                                                      <IconMail size='0.9rem' />
+                                                    )}{' '}
+                                                    {channel.account_name}
+                                                  </td>
+                                                  <td>
+                                                    {channel.daily_sent_count} /{' '}
+                                                    {channel.daily_limit}
+                                                  </td>
+                                                  <td>
+                                                    <Badge
+                                                      size='xs'
+                                                      color={
+                                                        warming?.warmup_reputation !== '100%'
+                                                          ? 'green'
+                                                          : 'blue'
+                                                      }
+                                                    >
+                                                      {warming?.warmup_reputation !== '100%'
+                                                        ? 'In progress'
+                                                        : 'Done'}
+                                                    </Badge>
+                                                  </td>
+                                                  <td>
+                                                    <Badge
+                                                      size='xs'
+                                                      color={
+                                                        warming?.warmup_reputation === '100%'
+                                                          ? 'green'
+                                                          : 'yellow'
+                                                      }
+                                                    >
+                                                      {warming?.warmup_reputation}
+                                                    </Badge>
+                                                  </td>
+                                                </tr>
+                                              );
                                             })
                                           }
                                         </tbody>
@@ -519,7 +569,7 @@ export function ActiveChannels() {
                         setDomainRefreshing(true)
 
                         const result = await postTriggerSnapshot(
-                          userToken[0]
+                          userToken
                         )
                         if (result.status === 'success') {
                           showNotification({
@@ -605,7 +655,7 @@ export function ActiveCampaigns() {
   const theme = useMantineTheme();
   const [opened, { toggle }] = useDisclosure(true);
 
-  const userToken = useRecoilState(userTokenState)
+  const userToken = useRecoilValue(userTokenState)
 
   useEffect(() => {
     if (!fetchedActiveCampaigns) {
@@ -614,7 +664,7 @@ export function ActiveCampaigns() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken[0]}`
+          'Authorization': `Bearer ${userToken}`
         },
       })
         .then(response => response.json())

@@ -560,3 +560,13 @@ interface EmailTemplate {
   tone: string | null;
   labels: string[] | null;
 }
+
+interface EmailWarming {
+  id: number;
+  email: string;
+  name: string;
+  status: string;
+  total_sent: number;
+  total_spam: number;
+  warmup_reputation: string;
+}

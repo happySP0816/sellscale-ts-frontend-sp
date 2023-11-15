@@ -586,7 +586,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
           </Box>
         </Box>
         <Box w='75%' ml='md'>
-          <DoNotContactListCaughtProspects forSDR={props.forSDR} />
+          <DoNotContactListCaughtProspects forSDR={props.forSDR} needsSave={needsSave} />
         </Box>
       </Flex>
 

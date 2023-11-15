@@ -24,7 +24,7 @@ import displayNotification from "@utils/notificationFlow";
 import { truncate } from 'lodash';
 import { deterministicMantineColor } from '@utils/requests/utils';
 
-export default function DoNotContactListCaughtProspects(props: { forSDR?: boolean }) {
+export default function DoNotContactListCaughtProspects(props: { forSDR?: boolean, needsSave?: boolean }) {
   const [userToken] = useRecoilState(userTokenState);
   const [caughtProspects, setCaughtProspects] = useState([]); // [ { id: 1, name: "John Doe", company: "Medicus", title: "CEO" }
   const [fetchedCaughtProspects, setFetchedCaughtProspects] = useState(false); // [ { id: 1, name: "John Doe", company: "Medicus", title: "CEO" }
@@ -146,7 +146,7 @@ export default function DoNotContactListCaughtProspects(props: { forSDR?: boolea
             to remove them from the pipeline.
           </Text>
           <Flex>
-            <Button mt="md" color="red" onClick={openProspectRemovalModal}>
+            <Button mt="md" color="red" onClick={openProspectRemovalModal} disabled={props.needsSave}>
               Remove {caughtProspects.length} Prospects
             </Button>
             <Button

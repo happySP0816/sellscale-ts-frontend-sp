@@ -569,4 +569,10 @@ interface EmailWarming {
   total_sent: number;
   total_spam: number;
   warmup_reputation: string;
+  sent_count: string;
+  spam_count: string;
+  inbox_count: string;
+  warmup_email_received_count: string;
+  stats_by_date: Record<string, any>[];
+  percent_complete: number;
 }

@@ -483,8 +483,7 @@ export function ActiveChannels() {
                                           {
                                             x.snapshots?.filter((x: any) => x.channel_type == channel).map((channel: any) => {
                                               
-                                              const warming = warmings?.find((x: any) => x.email == channel.account_name) as EmailWarming | undefined;
-                                              console.log(warming);
+                                              const warming = warmings?.find((x: any) => x.email === channel.account_name) as EmailWarming | undefined;
                                               
                                               return (
                                                 <tr>
@@ -504,13 +503,13 @@ export function ActiveChannels() {
                                                     <Badge
                                                       size='xs'
                                                       color={
-                                                        warming?.warmup_reputation !== '100%'
+                                                        warming?.percent_complete !== 100
                                                           ? 'green'
                                                           : 'blue'
                                                       }
                                                     >
-                                                      {warming?.warmup_reputation !== '100%'
-                                                        ? 'In progress'
+                                                      {warming?.percent_complete !== 100
+                                                        ? `In progress - ${warming?.percent_complete ?? '...'}%`
                                                         : 'Done'}
                                                     </Badge>
                                                   </td>
@@ -518,12 +517,10 @@ export function ActiveChannels() {
                                                     <Badge
                                                       size='xs'
                                                       color={
-                                                        warming?.warmup_reputation === '100%'
-                                                          ? 'green'
-                                                          : 'yellow'
+                                                        channel.reputation > 80 ? 'green' : 'yellow'
                                                       }
                                                     >
-                                                      {warming?.warmup_reputation}
+                                                      {channel.reputation}%
                                                     </Badge>
                                                   </td>
                                                 </tr>
@@ -544,7 +541,30 @@ export function ActiveChannels() {
 
                         {
                           emails.map((email: any) => {
-                            return <Badge size='xs' color='yellow' variant='dot'> WARMING - <span style={{ textTransform: 'lowercase' }}>{email}</span></Badge>
+
+                            const warming = warmings?.find((x: any) => x.email === email) as
+                              | EmailWarming
+                              | undefined;
+
+                            if(warming?.percent_complete === 100) {
+                              return (
+                                <Badge size='xs' color='blue' variant='dot'>
+                                  {' '}
+                                  READY -{' '}
+                                  <span style={{ textTransform: 'lowercase' }}>{email}</span>
+                                </Badge>
+                              );
+                            } else {
+                              return (
+                                <Badge size='xs' color='yellow' variant='dot'>
+                                  {' '}
+                                  WARMING -{' '}
+                                  <span style={{ textTransform: 'lowercase' }}>{email}</span>
+                                </Badge>
+                              );
+                            }
+
+                            
                           })
                         }
                       </Card>

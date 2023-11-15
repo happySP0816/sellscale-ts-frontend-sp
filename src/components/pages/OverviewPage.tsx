@@ -42,10 +42,13 @@ function BarChart() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
+          'Authorization': `Bearer ${userToken[0]}`
         },
       })
-        .then(response => response.json())
+        .then(response => {
+          const resp = response.json()
+          return resp
+        })
         .then(data => {
           setModes(data.outreach_over_time || {});
         })

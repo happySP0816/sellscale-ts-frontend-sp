@@ -501,9 +501,9 @@ export function ActiveChannels() {
                                             {x.snapshots
                                               ?.filter((x: any) => x.channel_type == channel)
                                               .map((channel: any) => {
-                                                const warming = channel.warming_details as
-                                                  | EmailWarming
-                                                  | undefined;
+
+
+                                                const warming = ((channel.warming_details ?? []) as EmailWarming[]).find((warming) => warming.email === channel.account_name);
 
                                                 return (
                                                   <tr>
@@ -563,7 +563,10 @@ export function ActiveChannels() {
                           {email_snapshots.length > 0 && <Divider mt='md' />}
 
                           {email_snapshots.map((snapshot: any) => {
-                            const warming = snapshot.warming_details as EmailWarming | undefined;
+
+                            const warming = (
+                              (snapshot.warming_details ?? []) as EmailWarming[]
+                            ).find((warming) => warming.email === snapshot.account_name);
 
                             if(warming?.percent_complete === 100) {
                               return (

@@ -298,7 +298,7 @@ export default function PersonaCampaigns() {
               </Group>
 
               <Title color="gray.6" order={3}>
-                All Campaigns
+                {userData?.sdr_name.split(" ")[0]}'s Campaigns
               </Title>
 
               <ScrollArea h={"78vh"}>
@@ -1158,7 +1158,15 @@ export const PersonCampaignTable = (props: {
           <Group sx={{ flex: "15%" }}></Group>
         </Group>
       </Paper>
-      {data.map((persona, index) => (
+      {data.sort(
+        (a: any, b: any) =>
+          {
+            if (a.active && b.active) return -(a.total_sent - b.total_sent)
+            if (a.active && !b.active) return -1;
+            if (!a.active && b.active) return 1;
+            return a.total_sent - b.total_sent;
+          }
+      ).map((persona, index) => (
         <PersonCampaignCard
           key={index}
           persona={persona}

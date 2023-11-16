@@ -65,7 +65,7 @@ const AllCampaign = (props: PropsType) => {
       <Box>
         <Flex justify={"space-between"} align={"center"} mt="md">
           <Title color="gray.6" order={3}>
-            {userData?.client.company}'s' Campaigns
+            All Campaigns
           </Title>
 
           <Flex gap={"sm"} wrap={"wrap"} align={"center"} mb="md">

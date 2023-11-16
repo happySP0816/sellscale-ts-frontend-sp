@@ -328,14 +328,6 @@ export function ActiveChannels() {
     console.log('domains', domains)
   }
 
-  const { data: warmings } = useQuery({
-    queryKey: [`query-get-email-warmings`],
-    queryFn: async () => {
-      const response = await getEmailWarmings(userToken);
-      return response.status === 'success' ? (response.data as EmailWarming[]) : undefined;
-    },
-  });
-
   if (loading) {
     return <Card withBorder mt='md'>
       <Flex>
@@ -416,145 +408,169 @@ export function ActiveChannels() {
                       }
                     }
 
-                    let emails = x.snapshots?.filter((x: any) => x.channel_type == 'EMAIL').map((x: any) => x.account_name)
+                    let email_snapshots = x.snapshots?.filter((x: any) => x.channel_type == 'EMAIL');
 
-                    return <Grid.Col span={4} mb='xs'>
-                      <Card withBorder mt='0' pt='4'>
-                        <Flex w='100%' mt='0'>
-                          <Box sx={{ borderRadius: 10 }} pt='0'>
-                            <Image
-                              src={x.img_url ? x.img_url : 'https://images.squarespace-cdn.com/content/v1/56031d09e4b0dc68f6197723/1469030770980-URDU63CK3Q4RODZYH0S1/Grey+Box.jpg?format=1500w'}
-                              width={40} height={40} radius="sm" />
-                          </Box>
-                          <Box ml='xs' mt='0'>
-                            <Badge size='xs' color={x.active ? 'green' : 'gray'} >
-                              {x.active ? 'Active' : 'Inactive'}
-                            </Badge>
-                            <Text fw={500} fz={16}>{x.sdr_name}</Text>
-                          </Box>
-                        </Flex>
-                        <Divider mt='xs' mb='xs' />
-                        <Box w='100%'>
-                          {
-                            ["LINKEDIN", "EMAIL"].map((channel) => {
-                              let label = 'LinkedIn'
+                    return (
+                      <Grid.Col span={4} mb='xs'>
+                        <Card withBorder mt='0' pt='4'>
+                          <Flex w='100%' mt='0'>
+                            <Box sx={{ borderRadius: 10 }} pt='0'>
+                              <Image
+                                src={
+                                  x.img_url
+                                    ? x.img_url
+                                    : 'https://images.squarespace-cdn.com/content/v1/56031d09e4b0dc68f6197723/1469030770980-URDU63CK3Q4RODZYH0S1/Grey+Box.jpg?format=1500w'
+                                }
+                                width={40}
+                                height={40}
+                                radius='sm'
+                              />
+                            </Box>
+                            <Box ml='xs' mt='0'>
+                              <Badge size='xs' color={x.active ? 'green' : 'gray'}>
+                                {x.active ? 'Active' : 'Inactive'}
+                              </Badge>
+                              <Text fw={500} fz={16}>
+                                {x.sdr_name}
+                              </Text>
+                            </Box>
+                          </Flex>
+                          <Divider mt='xs' mb='xs' />
+                          <Box w='100%'>
+                            {['LINKEDIN', 'EMAIL'].map((channel) => {
+                              let label = 'LinkedIn';
                               if (channel == 'EMAIL') {
-                                label = 'Email'
+                                label = 'Email';
                               }
 
-                              let icon = <IconBrandLinkedin size='1.4rem' color={theme.colors.blue[6]} />
+                              let icon = (
+                                <IconBrandLinkedin size='1.4rem' color={theme.colors.blue[6]} />
+                              );
                               if (channel == 'EMAIL') {
-                                icon = <IconMail size='1.4rem' color={theme.colors.blue[6]} />
+                                icon = <IconMail size='1.4rem' color={theme.colors.blue[6]} />;
                               }
 
-                              let unit = 'seat'
+                              let unit = 'seat';
                               if (channel == 'EMAIL') {
-                                unit = 'inboxes'
+                                unit = 'inboxes';
                               }
 
-                              const numUnits = x.snapshots?.filter((x: any) => x.channel_type == channel).length
+                              const numUnits = x.snapshots?.filter(
+                                (x: any) => x.channel_type == channel
+                              ).length;
 
-                              return <Flex>
-                                <Group w='100%'>
-                                  <HoverCard shadow="md" withinPortal>
-                                    <HoverCard.Target>
-                                      <Box w='100%'>
-                                        <Box w='100%' sx={{ cursor: 'pointer' }} mt='xs'>
-                                          <Flex w='100%'>
-                                            {icon}
-                                            <Text color='blue' fw='bold' w='40%' ml='xs'>
-                                              {label}
-                                            </Text>
-                                            <Badge color='gray' w='60%' ml='xs' fw='700' size='sm' variant='outline' mr='md' mt='4px'>
-                                              {numUnits} {unit}
-                                            </Badge>
-                                          </Flex>
+                              return (
+                                <Flex>
+                                  <Group w='100%'>
+                                    <HoverCard shadow='md' withinPortal>
+                                      <HoverCard.Target>
+                                        <Box w='100%'>
+                                          <Box w='100%' sx={{ cursor: 'pointer' }} mt='xs'>
+                                            <Flex w='100%'>
+                                              {icon}
+                                              <Text color='blue' fw='bold' w='40%' ml='xs'>
+                                                {label}
+                                              </Text>
+                                              <Badge
+                                                color='gray'
+                                                w='60%'
+                                                ml='xs'
+                                                fw='700'
+                                                size='sm'
+                                                variant='outline'
+                                                mr='md'
+                                                mt='4px'
+                                              >
+                                                {numUnits} {unit}
+                                              </Badge>
+                                            </Flex>
+                                          </Box>
                                         </Box>
-                                      </Box>
-                                    </HoverCard.Target>
-                                    <HoverCard.Dropdown w={400}>
-                                      <Table>
-                                        <thead>
-                                          <tr>
-                                            <th>Channel</th>
-                                            <th>Daily Limit</th>
-                                            <th>Warmup</th>
-                                            <th>Reputation</th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          {
-                                            x.snapshots?.filter((x: any) => x.channel_type == channel).map((channel: any) => {
-                                              
-                                              const warming = warmings?.find((x: any) => x.email === channel.account_name) as EmailWarming | undefined;
-                                              
-                                              return (
-                                                <tr>
-                                                  <td>
-                                                    {channel.channel_type == 'LINKEDIN' ? (
-                                                      <IconBrandLinkedin size='0.9rem' />
-                                                    ) : (
-                                                      <IconMail size='0.9rem' />
-                                                    )}{' '}
-                                                    {channel.account_name}
-                                                  </td>
-                                                  <td>
-                                                    {channel.daily_sent_count} /{' '}
-                                                    {channel.daily_limit}
-                                                  </td>
-                                                  <td>
-                                                    <Badge
-                                                      size='xs'
-                                                      color={
-                                                        warming?.percent_complete !== 100
-                                                          ? 'green'
-                                                          : 'blue'
-                                                      }
-                                                    >
-                                                      {warming?.percent_complete !== 100
-                                                        ? `In progress - ${warming?.percent_complete ?? '...'}%`
-                                                        : 'Done'}
-                                                    </Badge>
-                                                  </td>
-                                                  <td>
-                                                    <Badge
-                                                      size='xs'
-                                                      color={
-                                                        channel.reputation > 80 ? 'green' : 'yellow'
-                                                      }
-                                                    >
-                                                      {channel.reputation}%
-                                                    </Badge>
-                                                  </td>
-                                                </tr>
-                                              );
-                                            })
-                                          }
-                                        </tbody>
-                                      </Table>
-                                    </HoverCard.Dropdown>
-                                  </HoverCard>
-                                </Group>
-                              </Flex>
-                            })
-                          }
-                        </Box>
+                                      </HoverCard.Target>
+                                      <HoverCard.Dropdown w={400}>
+                                        <Table>
+                                          <thead>
+                                            <tr>
+                                              <th>Channel</th>
+                                              <th>Daily Limit</th>
+                                              <th>Warmup</th>
+                                              <th>Reputation</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {x.snapshots
+                                              ?.filter((x: any) => x.channel_type == channel)
+                                              .map((channel: any) => {
+                                                const warming = channel.warming_details as
+                                                  | EmailWarming
+                                                  | undefined;
 
-                        {emails.length > 0 && <Divider mt='md' />}
+                                                return (
+                                                  <tr>
+                                                    <td>
+                                                      {channel.channel_type == 'LINKEDIN' ? (
+                                                        <IconBrandLinkedin size='0.9rem' />
+                                                      ) : (
+                                                        <IconMail size='0.9rem' />
+                                                      )}{' '}
+                                                      {channel.account_name}
+                                                    </td>
+                                                    <td>
+                                                      {channel.daily_sent_count} /{' '}
+                                                      {channel.daily_limit}
+                                                    </td>
+                                                    <td>
+                                                      <Badge
+                                                        size='xs'
+                                                        color={
+                                                          warming?.percent_complete !== 100
+                                                            ? 'green'
+                                                            : 'blue'
+                                                        }
+                                                      >
+                                                        {warming?.percent_complete !== 100
+                                                          ? `In progress - ${
+                                                              warming?.percent_complete ?? '...'
+                                                            }%`
+                                                          : 'Done'}
+                                                      </Badge>
+                                                    </td>
+                                                    <td>
+                                                      <Badge
+                                                        size='xs'
+                                                        color={
+                                                          channel.reputation > 80
+                                                            ? 'green'
+                                                            : 'yellow'
+                                                        }
+                                                      >
+                                                        {channel.reputation}%
+                                                      </Badge>
+                                                    </td>
+                                                  </tr>
+                                                );
+                                              })}
+                                          </tbody>
+                                        </Table>
+                                      </HoverCard.Dropdown>
+                                    </HoverCard>
+                                  </Group>
+                                </Flex>
+                              );
+                            })}
+                          </Box>
 
-                        {
-                          emails.map((email: any) => {
+                          {email_snapshots.length > 0 && <Divider mt='md' />}
 
-                            const warming = warmings?.find((x: any) => x.email === email) as
-                              | EmailWarming
-                              | undefined;
+                          {email_snapshots.map((snapshot: any) => {
+                            const warming = snapshot.warming_details as EmailWarming | undefined;
 
                             if(warming?.percent_complete === 100) {
                               return (
                                 <Badge size='xs' color='blue' variant='dot'>
                                   {' '}
                                   READY -{' '}
-                                  <span style={{ textTransform: 'lowercase' }}>{email}</span>
+                                  <span style={{ textTransform: 'lowercase' }}>{snapshot.account_name}</span>
                                 </Badge>
                               );
                             } else {
@@ -562,16 +578,16 @@ export function ActiveChannels() {
                                 <Badge size='xs' color='yellow' variant='dot'>
                                   {' '}
                                   WARMING -{' '}
-                                  <span style={{ textTransform: 'lowercase' }}>{email}</span>
+                                  <span style={{ textTransform: 'lowercase' }}>
+                                    {snapshot.account_name}
+                                  </span>
                                 </Badge>
                               );
                             }
-
-                            
-                          })
-                        }
-                      </Card>
-                    </Grid.Col>
+                          })}
+                        </Card>
+                      </Grid.Col>
+                    );
                   })
                 }
               </Grid>

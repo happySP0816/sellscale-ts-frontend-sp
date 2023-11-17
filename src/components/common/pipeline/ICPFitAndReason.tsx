@@ -175,7 +175,9 @@ export default function ICPFitPill(props: {
       withinPortal
     >
       <Popover.Target>
-        <div ref={ref}><ICPFitPillOnly icp_fit_score={props.icp_fit_score} /></div>
+        <div ref={ref}>
+          <ICPFitPillOnly icp_fit_score={props.icp_fit_score} />
+        </div>
       </Popover.Target>
       <Popover.Dropdown>
         <ICPFitContents {...props} />
@@ -185,10 +187,9 @@ export default function ICPFitPill(props: {
 }
 
 export function ICPFitPillOnly(props: { icp_fit_score: number }) {
-
   return (
     <div style={{ position: "relative" }}>
-      <Badge color={icpFitToColor(props.icp_fit_score)}>
+      <Badge color={icpFitToColor(props.icp_fit_score)} fw={800}>
         {icpFitToLabel(props.icp_fit_score)}
       </Badge>
       <div style={{ position: "absolute", top: -5, left: -5 }}>

@@ -12,13 +12,16 @@ import {
   Box,
   TextInput,
   LoadingOverlay,
+  Styles,
+  TextInputStylesNames,
 } from "@mantine/core";
-import { IconPencil, IconRobot, IconX } from "@tabler/icons";
+import { IconPencil, IconRobot, IconTrash, IconX } from "@tabler/icons";
 import { API_URL } from "@constants/data";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userTokenState } from "@atoms/userAtoms";
 import { useClickOutside } from "@mantine/hooks";
 import RichTextArea from "./RichTextArea";
+import { IconSparkles } from "@tabler/icons-react";
 
 type PropsType = {
   placeholder?: string;
@@ -33,6 +36,9 @@ type PropsType = {
   inputType?: "text-area" | "text-input" | "rich-text-area";
   loadingAIGenerate?: boolean;
   onAIGenerateClicked?: () => void;
+  styles?: Styles<TextInputStylesNames, Record<string, any>>;
+  hasDeleteButton?: boolean;
+  onDelete?: () => void;
 };
 
 export default function TextAreaWithAI(props: PropsType) {
@@ -80,7 +86,7 @@ export default function TextAreaWithAI(props: PropsType) {
           target: {
             value: j.data,
           },
-          defaultPrevented: true,// used for AI set value
+          defaultPrevented: true, // used for AI set value
         };
         props.onChange && props.onChange(updatedValue);
         setAIPopoverToggled(false);
@@ -91,7 +97,7 @@ export default function TextAreaWithAI(props: PropsType) {
   };
 
   return (
-    <Box mt="sm" sx={{ position: "relative" }} ref={ref} w='100%'>
+    <Box sx={{ position: "relative" }} ref={ref} w="100%" h="100%">
       <LoadingOverlay visible={props.loadingAIGenerate || false} />
       {/* AI Writing Popup */}
       <Popover
@@ -104,19 +110,20 @@ export default function TextAreaWithAI(props: PropsType) {
       >
         <Popover.Target>
           <Button
-            color="teal"
+            color="blue"
             variant="light"
             radius="xl"
             size="xs"
             compact
+            fw={700}
             onClick={() => setAIPopoverToggled(!AIPopoverToggled)}
             sx={{
               position: "absolute",
               top: props.label ? 0 : 7,
-              right: 7,
+              right: props.hasDeleteButton ? 84 : 7,
               zIndex: 100,
             }}
-            leftIcon={<IconPencil size="0.8rem" />}
+            leftIcon={<IconSparkles size="0.8rem" />}
             styles={{
               leftIcon: {
                 marginRight: 3,
@@ -211,7 +218,31 @@ export default function TextAreaWithAI(props: PropsType) {
           )}
         </Popover.Dropdown>
       </Popover>
-
+      {props.hasDeleteButton && (
+        <Button
+          color="red"
+          variant="light"
+          radius="xl"
+          size="xs"
+          compact
+          fw={700}
+          onClick={props.onDelete}
+          sx={{
+            position: "absolute",
+            top: props.label ? 0 : 7,
+            right: 7,
+            zIndex: 100,
+          }}
+          leftIcon={<IconTrash size="0.8rem" />}
+          styles={{
+            leftIcon: {
+              marginRight: 3,
+            },
+          }}
+        >
+          Delete
+        </Button>
+      )}
       {/* Main Text */}
       {props.inputType === "rich-text-area" ? (
         <RichTextArea
@@ -219,10 +250,10 @@ export default function TextAreaWithAI(props: PropsType) {
             props.onChange &&
               props.onChange({
                 currentTarget: { value },
-                defaultPrevented: false,// used to see if it's AI set value
+                defaultPrevented: false, // used to see if it's AI set value
               } as React.ChangeEvent<HTMLTextAreaElement>);
           }}
-          value={props.value || ''}
+          value={props.value || ""}
           personalizationBtn
         />
       ) : props.inputType === "text-input" ? (
@@ -233,15 +264,17 @@ export default function TextAreaWithAI(props: PropsType) {
           onChange={(e) => {
             props.onChange &&
               props.onChange(
-                (e as unknown) as React.ChangeEvent<HTMLTextAreaElement>
+                e as unknown as React.ChangeEvent<HTMLTextAreaElement>
               );
           }}
           disabled={props.disabled}
-          value={props.value || ''}
+          value={props.value || ""}
           withAsterisk={props.withAsterisk}
         />
       ) : (
         <Textarea
+          h={"100%"}
+          styles={props.styles}
           placeholder={props.placeholder}
           label={props.label}
           description={props.description}

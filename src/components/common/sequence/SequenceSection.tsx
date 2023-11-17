@@ -113,7 +113,7 @@ import {
   useLocation,
   unstable_usePrompt,
   useNavigate,
-  unstable_useBlocker,
+  useBlocker,
 } from 'react-router-dom';
 import { patchArchetypeDelayDays } from '@utils/requests/patchArchetypeDelayDays';
 import { patchArchetypeBumpAmount } from '@utils/requests/patchArchetypeBumpAmount';
@@ -172,7 +172,7 @@ export default function SequenceSection() {
   const [nextActiveCardIndex, setNextActiveCardIndex] = useState(0);
   const [prospectId, setProspectId] = useState<number>(-1);
 
-  let blocker = unstable_useBlocker(isDataChanged);
+  let blocker = useBlocker(isDataChanged);
 
   const bf0 = bumpFrameworks.find(
     (bf) => bf.overall_status === 'ACCEPTED' && bf.active && bf.default

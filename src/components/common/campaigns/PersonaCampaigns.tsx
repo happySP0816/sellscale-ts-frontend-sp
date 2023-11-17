@@ -438,15 +438,15 @@ export function PersonCampaignCard(props: {
 
   console.log(props.persona, total_sent);
 
-  if (
-    props.persona.smartlead_campaign_id &&
-    props.persona.meta_data?.smartlead_campaign_analytics
-  ) {
-    const analytics = props.persona.meta_data.smartlead_campaign_analytics;
-    total_replied = props.persona.li_replied + parseInt(analytics.reply_count);
-    total_opened = props.persona.li_opened + parseInt(analytics.open_count);
-    total_sent = props.persona.li_sent + parseInt(analytics.sent_count);
-  }
+  // if (
+  //   props.persona.smartlead_campaign_id &&
+  //   props.persona.meta_data?.smartlead_campaign_analytics
+  // ) {
+  //   const analytics = props.persona.meta_data.smartlead_campaign_analytics;
+  //   total_replied = props.persona.li_replied + parseInt(analytics.reply_count);
+  //   total_opened = props.persona.li_opened + parseInt(analytics.open_count);
+  //   total_sent = props.persona.li_sent + parseInt(analytics.sent_count);
+  // }
 
   const userData = useRecoilValue(userDataState);
 

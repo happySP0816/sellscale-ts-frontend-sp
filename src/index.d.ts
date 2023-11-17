@@ -290,6 +290,8 @@ export interface PersonaOverview {
   lookalike_profile_4: string;
   lookalike_profile_5: string;
   template_mode: boolean;
+  smartlead_campaign_id?: number;
+  meta_data?: Record<string, any>;
 }
 
 export interface LinkedInMessage {

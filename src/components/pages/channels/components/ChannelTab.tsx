@@ -42,7 +42,7 @@ const ChannelTab: React.FC<{
   }, [currentProject, fetchedProjectId]);
 
   const linkedinActive = personas[0]?.li_sent > 0
-  const emailActive = personas[0]?.emails_sent > 0
+  const emailActive = personas[0]?.email_sent > 0
   const nurtureActive = false // todo(Aakash) once Nurture is live, change this to something real
   
   const renderLabel = useMemo(() => {

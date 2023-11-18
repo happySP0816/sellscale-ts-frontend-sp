@@ -56,6 +56,7 @@ import { modals } from '@mantine/modals';
 import ScheduleSetting from './ScheduleSetting/ScheduleSetting';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { setSmartleadCampaign } from '@utils/requests/setSmartleadCampaign';
+import { syncSmartleadContacts } from '@utils/requests/syncSmartleadContacts';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -129,6 +130,11 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
       onCancel: () => {},
       onConfirm: () => disconnectNylas(),
     });
+
+
+    const persona_prospect_count = currentProject?.num_prospects;
+    const smartlead_lead_count =
+      currentProject?.meta_data?.smartlead_campaign_analytics?.campaign_lead_stats?.total;
 
   return (
     <>
@@ -284,6 +290,30 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
               )}
             </div>
           )}
+        </Stack>
+      </Paper>
+
+      <Paper withBorder m='xs' p='md' radius='md'>
+        <Stack>
+          <div>
+            <Group>
+              <Title order={3}>Sync Contacts into Smartlead</Title>
+              <Text>
+                Only {smartlead_lead_count} out of {persona_prospect_count} contacts have been
+                synced into Smartlead. Press button below to complete syncing.
+              </Text>
+              <Button
+                onClick={async () => {
+                  if (!currentProject) return;
+
+                  await syncSmartleadContacts(userToken, currentProject?.id);
+                  window.location.reload();
+                }}
+              >
+                Sync Contacts Now
+              </Button>
+            </Group>
+          </div>
         </Stack>
       </Paper>
 

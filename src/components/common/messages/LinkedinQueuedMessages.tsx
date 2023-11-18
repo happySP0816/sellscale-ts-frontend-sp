@@ -3,7 +3,19 @@ import { useRecoilValue } from "recoil";
 import { getLIMessagesQueuedForOutreach } from "@utils/requests/getMessagesQueuedForOutreach";
 import { useDebouncedState, useDidUpdate } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
-import { Card, Center, Flex, Loader, Paper, ScrollArea, Stack, Title, Text, Avatar, Badge } from "@mantine/core";
+import {
+  Card,
+  Center,
+  Flex,
+  Loader,
+  Paper,
+  ScrollArea,
+  Stack,
+  Title,
+  Text,
+  Avatar,
+  Badge,
+} from "@mantine/core";
 
 import LinkedinQueuedMessageItem from "./LinkedinQueuedMessageItem";
 import { getUpcomingGenerations } from "@utils/requests/getUpcomingGenerations";
@@ -35,38 +47,36 @@ type UpcomingGeneration = {
   linkedin_active: boolean;
   sdr_img_url: string;
   sdr_name: string;
-  daily_sla_count: number
-}
+  daily_sla_count: number;
+};
 
 const UpcomingGenerationsView = () => {
   const userToken = useRecoilValue(userTokenState);
   const [isFetching, setIsFetching] = useState(false);
-  const [upcomingGenerations, setUpcomingGenerations] = useState<UpcomingGeneration[]>([]);
+  const [upcomingGenerations, setUpcomingGenerations] = useState<
+    UpcomingGeneration[]
+  >([]);
 
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-    columnAccessor: 'archetype',
-    direction: 'desc',
+    columnAccessor: "archetype",
+    direction: "desc",
   });
 
   const triggerGetUpcomingGenerations = async () => {
     setIsFetching(true);
 
-    const response = await getUpcomingGenerations(
-      userToken,
-      true,
-      true,
-    );
+    const response = await getUpcomingGenerations(userToken, true, true);
     const archetypes = response.status === "success" ? response.data : [];
-    let linkedinActiveArchetypes = []
+    let linkedinActiveArchetypes = [];
     for (const archetype of archetypes) {
       if (archetype.linkedin_active) {
-        linkedinActiveArchetypes.push(archetype)
+        linkedinActiveArchetypes.push(archetype);
       }
     }
     setUpcomingGenerations(linkedinActiveArchetypes);
 
     setIsFetching(false);
-  }
+  };
 
   useEffect(() => {
     triggerGetUpcomingGenerations();
@@ -74,9 +84,10 @@ const UpcomingGenerationsView = () => {
 
   useEffect(() => {
     const pageData = sortBy(upcomingGenerations, sortStatus.columnAccessor);
-    setUpcomingGenerations(sortStatus.direction === "desc" ? pageData.reverse() : pageData)
-  }, [sortStatus])
-
+    setUpcomingGenerations(
+      sortStatus.direction === "desc" ? pageData.reverse() : pageData
+    );
+  }, [sortStatus]);
 
   return (
     <>
@@ -107,44 +118,41 @@ const UpcomingGenerationsView = () => {
               const firstName = sdr_name.split(" ")[0];
               return (
                 <Flex>
-                  <Avatar src={sdr_img_url} radius="xl" size="sm" mr='sm' />
+                  <Avatar src={sdr_img_url} radius="xl" size="sm" mr="sm" />
                   <Text>{firstName}</Text>
                 </Flex>
-              )
-            }
+              );
+            },
           },
           {
             accessor: "id",
             title: "Scheduled For",
             render: () => {
-              return (
-                <Text>Tonight, 11:59pm</Text>
-              )
-            }
+              return <Text>Tonight, 11:59pm</Text>;
+            },
           },
           {
             accessor: "daily_sla_count",
             title: "Status",
             render: ({ daily_sla_count }) => {
               return (
-                <Badge color='green.9'>Generating: {daily_sla_count}</Badge>
-              )
-            }
-          }
+                <Badge color="green.9">Generating: {daily_sla_count}</Badge>
+              );
+            },
+          },
         ]}
-
       />
     </>
-  )
-}
+  );
+};
 
 export default function LinkedinQueuedMessages(props: { all?: boolean }) {
   const [isFetching, setIsFetching] = useState(false);
   const [page, setPage] = useDebouncedState(0, 300);
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
-  const allMessages = useRef<MessageType[]>([]);
 
+  const [allMessages, setAllMessages] = useState<MessageType[]>([]);
   const [scrollPosition, onScrollPositionChange] = useDebouncedState(
     { x: 0, y: 0 },
     300
@@ -165,7 +173,7 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
       response.status === "success" ? response.data.messages : [];
     totalItems.current =
       response.status === "success" ? response.data.total_count : -1;
-    allMessages.current = allMessages.current.concat(messages);
+    setAllMessages((oldMessages) => [...oldMessages, ...messages]);
 
     setIsFetching(false);
   };
@@ -178,8 +186,7 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
     if (
       !scrollRef.current ||
       !outerScrollRef.current ||
-      (totalItems.current !== -1 &&
-        allMessages.current.length >= totalItems.current)
+      (totalItems.current !== -1 && allMessages.length >= totalItems.current)
     ) {
       return;
     }
@@ -188,7 +195,7 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
     if (scrollPosition.y >= maxScroll - 150 && !isFetching) {
       setPage(page + 1);
     }
-  }, [scrollPosition]);
+  }, [scrollPosition, allMessages]);
 
   return (
     <ScrollArea
@@ -196,15 +203,15 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
       onScrollPositionChange={onScrollPositionChange}
       ref={outerScrollRef}
       viewportRef={scrollRef}
-      w='100%'
+      w="100%"
     >
-      <Stack p='md'>
+      <Stack p="md">
         <UpcomingGenerationsView />
         <Title order={4}>{userData.sdr_name}'s Queued Messages</Title>
-        {allMessages.current && allMessages.current.length > 0 ? (
-          allMessages.current?.map((messageItem: MessageType, i: number) => {
+        {allMessages && allMessages.length > 0 ? (
+          allMessages.map((messageItem: MessageType, i: number) => {
             return (
-              <div key={i}>
+              <div key={messageItem.prospect_id + messageItem.message_id}>
                 <LinkedinQueuedMessageItem
                   prospect_id={messageItem.prospect_id}
                   full_name={messageItem.full_name}
@@ -218,6 +225,11 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
                   icp_fit_reason={messageItem.icp_fit_reason}
                   archetype={messageItem.archetype}
                   refresh={triggerGetMessagesQueuedForOutreach}
+                  onDelete={(prospect_id) =>
+                    setAllMessages((oldMessages) =>
+                      oldMessages.filter((i) => i.prospect_id !== prospect_id)
+                    )
+                  }
                 />
               </div>
             );

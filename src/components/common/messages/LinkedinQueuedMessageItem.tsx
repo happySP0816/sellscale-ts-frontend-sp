@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Anchor,
   Avatar,
   Badge,
   Box,
@@ -8,13 +9,22 @@ import {
   Flex,
   LoadingOverlay,
   Text,
-  Tooltip,
+  ThemeIcon,
+  rem,
   useMantineTheme,
 } from "@mantine/core";
 import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import TextAreaWithAI from "@common/library/TextAreaWithAI";
 import { useRef, useState } from "react";
-import { IconEdit, IconTrash } from "@tabler/icons";
+import {
+  IconBriefcase,
+  IconBuilding,
+  IconEdit,
+  IconExternalLink,
+  IconPencil,
+  IconTargetArrow,
+  IconUser,
+} from "@tabler/icons";
 
 import { patchLIMessage } from "@utils/requests/patchLIMessage";
 import { useRecoilValue } from "recoil";
@@ -22,7 +32,6 @@ import { userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
 import ICPFitPill from "@common/pipeline/ICPFitAndReason";
 import { removeProspectFromContactList } from "@common/prospectDetails/ProspectDetailsRemove";
-import { openConfirmModal } from "@mantine/modals";
 
 type MessageItemProps = {
   prospect_id: number;
@@ -37,6 +46,7 @@ type MessageItemProps = {
   icp_fit_reason: string;
   archetype: string;
   refresh: () => void;
+  onDelete: (prospect_id: number) => void;
 };
 
 export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
@@ -122,7 +132,10 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
   const triggerRemoveProspectFromContactList = async () => {
     setIsLoading(true);
 
-    const response = await removeProspectFromContactList(props.prospect_id, userToken);
+    const response = await removeProspectFromContactList(
+      props.prospect_id,
+      userToken
+    );
     if (response.status === "success") {
       showNotification({
         id: "prospect-removed",
@@ -135,145 +148,200 @@ export default function LinkedinQueuedMessageItem(props: MessageItemProps) {
       showNotification({
         id: "prospect-removed",
         title: "Prospect removal failed",
-        message: "This prospect could not be removed. Please try again, or contact support.",
+        message:
+          "This prospect could not be removed. Please try again, or contact support.",
         color: "red",
         autoClose: false,
-      })
+      });
     }
-
+    props.onDelete(props.prospect_id);
     props.refresh();
     setIsLoading(false);
-  }
+  };
 
   return (
     <Card
       style={{
         overflow: "visible",
+        paddingTop: 0,
+        paddingBottom: 0,
       }}
     >
       <LoadingOverlay visible={isLoading} />
-      <Flex direction="row" mb="sm" w="100%" justify={"space-between"}>
-        <Flex>
-          <Flex mr="sm">
-            <Avatar
-              src={proxyURL(props.img_url)}
-              alt={props.full_name}
-              color={valueToColor(theme, props.full_name)}
-              radius="lg"
-              size={50}
+      <Flex direction="row" gap={"xs"}>
+        <Flex
+          direction="column"
+          justify={"space-between"}
+          w={"30%"}
+          pr={"xs"}
+          pt={"sm"}
+          pb={"sm"}
+          sx={(theme) => ({ borderRight: `1px solid ${theme.colors.gray[4]}` })}
+        >
+          <Flex direction="column" rowGap={"xs"}>
+            <Anchor
+              href={`https://app.sellscale.com/setup/linkedin?campaign_id=${props.prospect_id}`}
+              target="_blank"
             >
-              {nameToInitials(props.full_name)}
-            </Avatar>
-          </Flex>
-
-          <Flex direction="column">
-            <Box>
-              <ICPFitPill
-                archetype={props.archetype}
-                icp_fit_score={props.icp_fit_score}
-                icp_fit_reason={props.icp_fit_reason}
-              />
               <Badge
-                variant="outline"
-                size="sm"
-                color={valueToColor(theme, props.archetype)}
-                style={{ marginLeft: "0.5rem" }}
-              >
-                {props.archetype}
-              </Badge>
-            </Box>
-            <Text fw="bold" fz="xl">
-              {props.full_name}
-            </Text>
-            <Text fz="md">
-              {props.title} @ {props.company}
-            </Text>
-          </Flex>
-        </Flex>
-        <Flex align='flex-start'>
-          <Flex align='center'>
-            <Tooltip label={"Remove this prospect"} withinPortal withArrow>
-              <ActionIcon
-                variant='transparent'
-                onClick={() => {
-                  openConfirmModal({
-                    title: "Remove this prospect?",
-                    children: (
-                      <Text>
-                        Are you sure you want to remove this prospect? This will remove them from your pipeline and block messages across all channels.
-                      </Text>
-                    ),
-                    labels: { confirm: 'Confirm', cancel: 'Cancel' },
-                    onCancel: () => {},
-                    onConfirm: () => {triggerRemoveProspectFromContactList()},
-                  })
+                variant="light"
+                fullWidth
+                rightSection={
+                  <ActionIcon
+                    size="xs"
+                    color="blue"
+                    radius="xl"
+                    variant="transparent"
+                  >
+                    <IconExternalLink size={rem(12)} />
+                  </ActionIcon>
+                }
+                styles={{
+                  inner: {
+                    flex: 1,
+                    width: "100%",
+                  },
                 }}
               >
-                <IconTrash size='.875rem' />
-              </ActionIcon>
-            </Tooltip>
-            <Tooltip
-              width={200}
-              withinPortal
-              withArrow
-              multiline
-              label={
-                "We send LinkedIn messages strategically and randomly throughout the day. We can't reveal the exact time, but rest assured that this message is number " +
-                (props.index + 1) +
-                " in line!"
-              }
-            >
-              <Badge>Position in Queue to be sent: {props.index + 1}</Badge>
-            </Tooltip>
-          </Flex>
+                <Flex justify={"space-between"} w={"100%"} style={{ flex: 1 }}>
+                  <Flex align={"center"} gap={"xs"}>
+                    <IconTargetArrow size={rem(12)} />
 
+                    <Text>{props.archetype}</Text>
+                  </Flex>
+                </Flex>
+              </Badge>
+            </Anchor>
+
+            <Flex gap={"xs"} align={"center"}>
+              <Avatar
+                src={proxyURL(props.img_url)}
+                alt={props.full_name}
+                color={valueToColor(theme, props.full_name)}
+                radius="lg"
+                size={28}
+              >
+                {nameToInitials(props.full_name)}
+              </Avatar>
+              <Text fw="bold" fz="xl">
+                {props.full_name}
+              </Text>
+              <Box>
+                <ICPFitPill
+                  archetype={props.archetype}
+                  icp_fit_score={props.icp_fit_score}
+                  icp_fit_reason={props.icp_fit_reason}
+                />
+              </Box>
+            </Flex>
+            <Flex direction={"column"}>
+              <Flex gap={"xs"} align={"center"}>
+                <IconUser size={rem(16)} color={theme.colors.gray[6]} />
+                <Text color="gray.6" fw={500} fz={"sm"}>
+                  {props.archetype}
+                </Text>
+              </Flex>
+              <Flex gap={"xs"} align={"center"}>
+                <IconBriefcase size={rem(16)} color={theme.colors.gray[6]} />
+                <Text color="gray.6" fw={500} fz={"sm"}>
+                  {props.title}
+                </Text>
+              </Flex>
+              <Flex gap={"xs"} align={"center"}>
+                <IconBuilding size={rem(16)} color={theme.colors.gray[6]} />
+                <Text color="gray.6" fw={500} fz={"sm"}>
+                  {props.company}
+                </Text>
+              </Flex>
+
+              <Text
+                color="gray.6"
+                fw={500}
+                fz={"sm"}
+                style={{ display: "flex" }}
+              >
+                Created: <Text fw={700}>&nbsp;coming soon</Text> &nbsp;|
+                Sending: <Text fw={700}>&nbsp;coming soon</Text>
+              </Text>
+            </Flex>
+          </Flex>
         </Flex>
-      </Flex>
-      <Box pos="relative">
-        <TextAreaWithAI
-          placeholder="Write your message here..."
-          label="Message"
-          minRows={3}
-          maxRows={10}
-          onChange={(e) => {
-            setMessageCompletion(e.currentTarget.value);
-            setIsEditing(true);
-          }}
-          value={messageCompletion}
-        />
-        {!isEditing && (
-          <Box pos="absolute" right="0" bottom="0">
-            <ActionIcon
-              color="dark"
-              variant="transparent"
-              onClick={() => setIsEditing(true)}
-            >
-              <IconEdit size="1.125rem" />
-            </ActionIcon>
-          </Box>
-        )}
-        {isEditing && (
-          <Flex justify="space-between" mt="sm">
+        <Flex direction={"column"} pos="relative" w={"70%"} pt={"sm"} pb={"sm"}>
+          <TextAreaWithAI
+            onDelete={triggerRemoveProspectFromContactList}
+            hasDeleteButton
+            placeholder="Write your message here..."
+            label="Message:"
+            styles={(theme) => ({
+              root: {
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+              },
+              wrapper: {
+                flex: 1,
+                marginTop: "8px",
+              },
+              input: {
+                height: "100%",
+              },
+              label: {
+                display: "block",
+                color: theme.colors.gray[8],
+              },
+            })}
+            onChange={(e) => {
+              setMessageCompletion(e.currentTarget.value);
+              setIsEditing(true);
+            }}
+            value={messageCompletion}
+          />
+          {!isEditing && (
             <Button
+              onClick={() => setIsEditing(true)}
+              color="dark"
               variant="light"
-              color="red"
-              onClick={() => {
-                setIsEditing(false);
-                setMessageCompletion(original_completion.current);
+              radius="xl"
+              size="xs"
+              compact
+              fw={700}
+              leftIcon={<IconPencil size="0.8rem" />}
+              styles={{
+                leftIcon: {
+                  marginRight: 3,
+                },
+                label: {
+                  color: "white",
+                },
+                root: { position: "absolute", bottom: "20px", right: "10px" },
               }}
             >
-              Cancel
+              Edit
             </Button>
-            <Button
-              variant="light"
-              color="green"
-              onClick={() => triggerPatchLIMessage()}
-            >
-              Save
-            </Button>
-          </Flex>
-        )}
-      </Box>
+          )}
+          {isEditing && (
+            <Flex justify="space-between" mt="sm">
+              <Button
+                variant="light"
+                color="red"
+                onClick={() => {
+                  setIsEditing(false);
+                  setMessageCompletion(original_completion.current);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="light"
+                color="green"
+                onClick={() => triggerPatchLIMessage()}
+              >
+                Save
+              </Button>
+            </Flex>
+          )}
+        </Flex>
+      </Flex>
     </Card>
   );
 }

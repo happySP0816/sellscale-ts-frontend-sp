@@ -689,7 +689,7 @@ export function PersonCampaignCard(props: {
                 label='Sent'
                 total={total_sent ?? 0}
                 percentage={Math.floor(
-                  ((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
+                  ((total_sent ?? 0) / (total_sent || 1)) * 100
                 )}
               />
             </Box>
@@ -700,7 +700,7 @@ export function PersonCampaignCard(props: {
                 label='Open'
                 total={total_opened ?? 0}
                 percentage={Math.floor(
-                  ((total_opened ?? 0) / (props.persona.total_prospects || 1)) * 100
+                  ((total_opened ?? 0) / (total_sent || 1)) * 100
                 )}
               />
             </Box>
@@ -711,7 +711,7 @@ export function PersonCampaignCard(props: {
                 label='Reply'
                 total={total_replied ?? 0}
                 percentage={Math.floor(
-                  ((total_replied ?? 0) / (props.persona.total_prospects || 1)) * 100
+                  ((total_replied ?? 0) / (total_sent || 1)) * 100
                 )}
               />
             </Box>
@@ -722,7 +722,7 @@ export function PersonCampaignCard(props: {
                 label='Demo'
                 total={props.persona.total_demo ?? 0}
                 percentage={Math.floor(
-                  ((props.persona.total_demo ?? 0) / (props.persona.total_prospects || 1)) * 100
+                  ((props.persona.total_demo ?? 0) / (total_sent || 1)) * 100
                 )}
               />
             </Box>

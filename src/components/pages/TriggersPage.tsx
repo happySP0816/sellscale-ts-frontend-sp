@@ -169,8 +169,6 @@ function TriggersPage() {
     setStackedBlocks(stackedBlocks.filter((block: any) => block.id !== id));
   };
 
-
-
   return (
     <PageFrame>
       <Title order={2} mb='0px'>Create Trigger: Coming Soon ⚠️ <IconEdit color='gray' style={{marginLeft: '4px'}} size={16} /></Title>

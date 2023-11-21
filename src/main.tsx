@@ -56,6 +56,7 @@ import AnalyticPage from "@pages/AnalyticPage";
 import OverviewPage from '@pages/OverviewPage';
 import ContactOverview from '@common/persona/ContactOverview';
 import TriggersPage from '@pages/TriggersPage';
+import TriggersList from '@pages/TriggersList';
 
 const queryClient = new QueryClient();
 
@@ -410,8 +411,12 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<AdvancedPage />} />,
       },
       {
-        path: "/triggers",
+        path: "/create-trigger",
         element: <RestrictedRoute page={<TriggersPage />} />,
+      },
+      {
+        path: "/triggers",
+        element: <RestrictedRoute page={<TriggersList />} />,
       },
       {
         path: "*",

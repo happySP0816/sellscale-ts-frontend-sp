@@ -601,7 +601,7 @@ export function PersonCampaignCard(props: {
                   onClick={() => {
                     if (props.persona.sdr_id != userData?.id) return;
 
-                    if (props.persona.email_sent >= props.persona.li_sent) {
+                    if (props.persona.email_sent > props.persona.li_sent) {
                       window.location.href = `/setup/email?campaign_id=${props.persona.id}`;
                     } else {
                       window.location.href = `/setup/linkedin?campaign_id=${props.persona.id}`;

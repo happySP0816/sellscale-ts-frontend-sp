@@ -39,7 +39,7 @@ import { LogoFull } from "./Logo";
 import { SearchBar } from "../../../legacy_code/old/SearchBar";
 import { openSpotlight } from "@mantine/spotlight";
 import { getPreOnboardingData } from '@pages/PreOnboarding';
-import { IconHome } from '@tabler/icons';
+import { IconHome, IconTarget } from '@tabler/icons';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -203,6 +203,11 @@ export default function SideNavbar(props: {}) {
             icon={<IconUsers size="1.0rem" />}
             label="Contacts"
             tabKey={["contacts/overview", "contacts", "all/contacts"]}
+          />
+          <SideNavbarItem
+            icon={<IconTarget size="1.0rem" />}
+            label="Triggers"
+            tabKey={["triggers", "create-trigger"]}
           />
           {/* <SideNavbarItem
             icon={<IconChartHistogram size="1.0rem" />}

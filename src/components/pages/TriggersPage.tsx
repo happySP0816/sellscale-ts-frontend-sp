@@ -173,7 +173,7 @@ function TriggersPage() {
 
   return (
     <PageFrame>
-      <Title order={2} mb='0px'>Trigger: B2B USA EdTech Company Sourcer <IconEdit color='gray' style={{marginLeft: '4px'}} size={16} /></Title>
+      <Title order={2} mb='0px'>Create Trigger: Coming Soon ⚠️ <IconEdit color='gray' style={{marginLeft: '4px'}} size={16} /></Title>
       <Text mb='md' color='gray'>
         Triggers are the building blocks for an automated prospect sourcing workflow.
       </Text>

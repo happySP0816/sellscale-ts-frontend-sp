@@ -1,4 +1,4 @@
-import { Box, Card, Flex, Switch, Text, Tooltip } from "@mantine/core";
+import { Box, Button, Card, Flex, Switch, Text, Tooltip } from "@mantine/core";
 import { IconLeaf } from "@tabler/icons-react";
 import {
   IconChecks,
@@ -10,6 +10,7 @@ import { FaLinkedin } from "@react-icons/all-files/fa/FaLinkedin";
 import { MdEmail } from "@react-icons/all-files/md/MdEmail";
 import React, { useMemo } from "react";
 import { useHover } from '@mantine/hooks';
+import { IconEdit } from '@tabler/icons';
 
 const CampaignSequenceDAG: React.FC<{
   type: "linkedin" | "email" | "nurture";
@@ -95,7 +96,7 @@ const CampaignSequenceDAG: React.FC<{
               />
             </span>
           </Flex>
-          <Box onClick={onChannelClick}>
+          <Box>
             <Flex
               align={"center"}
               justify={"space-between"}
@@ -133,6 +134,10 @@ const CampaignSequenceDAG: React.FC<{
               </Flex>
             </Flex>
           </Box>
+
+          <Button compact size="xs" onClick={onChannelClick} color={active ? "blue" : "gray"} w='100%' rightIcon={<IconEdit size={16} />}>
+            Edit Sequence
+          </Button>
 
         </Card>
       </Tooltip>

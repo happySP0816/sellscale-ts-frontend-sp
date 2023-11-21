@@ -3009,39 +3009,53 @@ function FrameworkSection(props: {
                     {props.framework.title}
                   </Text>
                   {/* Hovercard for transformers */}
-                  {props.framework.active_transformers &&
-                    props.framework.active_transformers.length > 0 && (
-                      <HoverCard width={280} shadow='md'>
-                        <HoverCard.Target>
-                          <Badge
-                            leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                            color='lime'
-                            variant='filled'
-                            ml='xs'
-                          >
-                            {props.framework.active_transformers.length} Research Points
-                          </Badge>
-                        </HoverCard.Target>
-                        <HoverCard.Dropdown
-                          style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                  
+                    <HoverCard width={280} shadow='md'>
+                      <HoverCard.Target>
+                        <Badge
+                          leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
+                          color='lime'
+                          variant={
+                            props.framework.active_transformers &&
+                              props.framework.active_transformers.length > 0 ? 'filled' : 'outline'
+                          }
+                          ml='xs'
+                          size='xs'
+                          onClick={
+                            () => {
+                              toggle()
+                            }
+                          }
                         >
-                          <Paper
-                            style={{
-                              backgroundColor: 'rgb(34, 37, 41)',
-                              color: 'white',
-                              padding: 10,
-                            }}
-                          >
-                            <TextWithNewline style={{ fontSize: '12px' }}>
-                              {'<b>Active Research Points:</b>\n- ' +
-                                props.framework.active_transformers
-                                  .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                  .join('\n- ')}
-                            </TextWithNewline>
-                          </Paper>
-                        </HoverCard.Dropdown>
-                      </HoverCard>
-                    )}
+                          {
+                            props.framework.active_transformers &&
+                              props.framework.active_transformers.length > 0 ? props.framework.active_transformers.length + ' Research Points' : '0 Research Points'
+                          }
+                        </Badge>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown
+                        style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                      >
+                        <Paper
+                          style={{
+                            backgroundColor: 'rgb(34, 37, 41)',
+                            color: 'white',
+                            padding: 10,
+                          }}
+                        >
+                          <TextWithNewline style={{ fontSize: '12px' }}>
+                            {props.framework.active_transformers.length > 0 ? '<b>Active Research Points:</b>\n- ' +
+                              props.framework.active_transformers
+                                .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
+                                .join('\n- ')
+                              :
+                              "Click to activate more research points"
+                            }
+                          </TextWithNewline>
+                        </Paper>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  
                   {props.framework.human_feedback && (
                     <HoverCard width={280} shadow='md'>
                       <HoverCard.Target>
@@ -3050,6 +3064,7 @@ function FrameworkSection(props: {
                           color='grape'
                           variant='filled'
                           ml='xs'
+                          size='xs'
                         >
                           Fine Tuned
                         </Badge>
@@ -3120,130 +3135,46 @@ function FrameworkSection(props: {
                 </Button>
               </Box>
             </Paper>
-
-            <Box maw={'100%'} mx='auto'>
-              <Group>
-                <Button
-                  onClick={toggle}
-                  w='100%'
-                  size='xs'
-                  color='gray'
-                  variant='subtle'
-                  leftIcon={<IconTools size={'0.8rem'} />}
-                >
-                  {opened ? 'Hide Advanced Settings' : 'Show Advanced Settings'}
-                </Button>
-              </Group>
-              <Collapse in={opened} mt={'xs'}>
-                <Card withBorder mb='xs'>
-                  <Group grow>
-                    {/* <Box>
-                      <Text fz='sm' fw={500} c='dimmed'>
-                        MESSAGE LENGTH:
-                      </Text>
-                      <SegmentedControl
-                        data={[
-                          { label: 'Short', value: 'SHORT' },
-                          { label: 'Medium', value: 'MEDIUM' },
-                          { label: 'Long', value: 'LONG' },
-                        ]}
-                        {...form.getInputProps('bumpLength')}
-                      />
-                    </Box> */}
-                    <Box>
-                      <Text fz='sm' fw={500} c='dimmed'>
-                        DELAY DAYS:
-                      </Text>
-                      <NumberInput
-                        placeholder='Days to Wait'
-                        variant='filled'
-                        {...form.getInputProps('delayDays')}
-                      />
-                    </Box>
-                  </Group>
-                  <Tabs
-                    value={activeTab}
-                    onTabChange={setActiveTab}
-                    pt='sm'
-                    variant='pills'
-                    keepMounted={true}
-                    radius='md'
-                    allowTabDeactivation
-                    sx={{ position: 'relative' }}
-                  >
-                    <Tabs.List>
-                      <Tooltip
-                        label='Account Research Required'
-                        disabled={form.values.useAccountResearch}
-                        openDelay={500}
-                        withArrow
-                      >
-                        <Tabs.Tab
-                          value='personalization'
-                          color='teal.5'
-                          rightSection={
-                            <>
-                              {personalizationItemsCount && form.values.useAccountResearch ? (
-                                <Badge
-                                  w={16}
-                                  h={16}
-                                  sx={{ pointerEvents: 'none' }}
-                                  variant='filled'
-                                  size='xs'
-                                  p={0}
-                                  color='teal.6'
-                                >
-                                  {personalizationItemsCount}
-                                </Badge>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          }
-                          disabled={!form.values.useAccountResearch}
-                          sx={(theme) => ({
-                            '&[data-active]': {
-                              backgroundColor: theme.colors.teal[0] + '!important',
-                              borderRadius: theme.radius.md + '!important',
-                              color: theme.colors.teal[8] + '!important',
-                            },
-                          })}
-                        >
-                          Personalization Settings
-                        </Tabs.Tab>
-                      </Tooltip>
-                    </Tabs.List>
-                    <Box sx={{ position: 'absolute', top: 20, right: 0 }}>
-                      <Switch
-                        {...form.getInputProps('useAccountResearch', {
-                          type: 'checkbox',
-                        })}
-                        color='teal'
-                        size='sm'
-                        label='Use Account Research'
-                        labelPosition='left'
-                      />
-                    </Box>
-
-                    <Tabs.Panel value='personalization'>
-                      <PersonalizationSection
-                        blocklist={props.framework.transformer_blocklist}
-                        onItemsChange={async (items) => {
-                          setPersonalizationItemsCount(items.filter((x) => x.checked).length);
-                          setPersonalizationItemIds(
-                            items.filter((x) => !x.checked).map((x) => x.id)
-                          );
-                        }}
-                        onChanged={() => {
-                          setChanged(true);
-                        }}
-                      />
-                    </Tabs.Panel>
-                  </Tabs>
-                </Card>
-              </Collapse>
-            </Box>
           </form>
+          <Modal
+            opened={opened}
+            onClose={toggle}
+            size='lg'
+          >
+            <Box w='100%' mb='md'>
+              <Title order={4}>
+                "{form.values.frameworkName}" Research Points
+              </Title>
+              <Text color='gray'>
+                {props.framework.active_transformers.length} research points enabled.
+              </Text>
+              <Divider />
+              <PersonalizationSection
+                blocklist={props.framework.transformer_blocklist}
+                onItemsChange={async (items) => {
+                  setPersonalizationItemsCount(items.filter((x) => x.checked).length);
+                  setPersonalizationItemIds(
+                    items.filter((x) => !x.checked).map((x) => x.id)
+                  );
+                }}
+                onChanged={() => {
+                  setChanged(true);
+                }}
+              />
+
+              <Button w='100%' mt='md' onClick={() => {
+                toggle();
+                setChanged(true);
+                saveSettings(debouncedForm);
+              }}
+                sx={{
+                  display: changed ? 'block' : 'none',
+                }}
+              >
+                Save and Close
+              </Button>
+            </Box>
+          </Modal>
         </Stack>
       </Stack>
     </>
@@ -3484,7 +3415,7 @@ export const PersonalizationSection = (props: {
 
   return (
     <Flex direction='column'>
-      <Card shadow='md' radius={'md'} mb={'1rem'}>
+      <Card radius={'md'} mb={'1rem'}>
         <Group position='apart'>
           <Box>
             <Title fw={300} order={4}>

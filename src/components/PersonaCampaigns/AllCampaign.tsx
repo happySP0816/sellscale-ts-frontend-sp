@@ -164,7 +164,7 @@ const AllCampaign = (props: PropsType) => {
               mt="md"
               mb="md"
             >
-              Show {activeStatusesShow.length === 0 ? "All" : "Active"}{" "}
+              Show All
               Campaigns
             </Button>
           )}

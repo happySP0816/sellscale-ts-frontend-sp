@@ -38,7 +38,8 @@ import { TypeAnimation } from "react-type-animation";
 import sellScaleLogo from '../common/sequence/assets/logo.jpg';
 import _ from "lodash";
 import { useDebouncedValue, useDidUpdate, useDisclosure, useTimeout } from "@mantine/hooks";
-import { IconWashMachine } from '@tabler/icons';
+import { IconChevronDown, IconChevronUp, IconRotateRectangle, IconSettings, IconWashMachine } from '@tabler/icons';
+import { IconRobot } from "@tabler/icons";
 
 export default function LiTemplateModal({
   context,
@@ -78,25 +79,29 @@ export default function LiTemplateModal({
     },
   });
 
-  const [debouncedMessage] = useDebouncedValue(form.values.message, 1000);
+  // const [debouncedMessage] = useDebouncedValue(form.values.message, 1000);
 
-  useDidUpdate(() => {
-    (async () => {
-      if (!currentProject) return;
-      setLoadingResearch(true);
-      const response = await detectLiTemplateResearch(
-        userToken,
-        currentProject.id,
-        undefined,
-        debouncedMessage
-      );
-      if (response.status === 'success') {
-        console.log(response.data);
-        setResearchPoints(response.data);
-      }
-      setLoadingResearch(false);
-    })();
-  }, [debouncedMessage]);
+  // useDidUpdate(() => {
+  //   (async () => {
+      
+  //   })();
+  // }, [debouncedMessage]);
+
+  const autoDetectResearchPoints = async () => {
+    if (!currentProject) return;
+    setLoadingResearch(true);
+    const response = await detectLiTemplateResearch(
+      userToken,
+      currentProject.id,
+      undefined,
+      form.values.message
+    );
+    if (response.status === 'success') {
+      console.log(response.data);
+      setResearchPoints(response.data);
+    }
+    setLoadingResearch(false);
+  };
 
   const handleSubmit = async (values: typeof form.values) => {
     if (innerProps.mode === 'CREATE') {
@@ -151,79 +156,98 @@ export default function LiTemplateModal({
 
         <Card withBorder>
           <Stack>
-            <TextInput
-              label='Name'
-              placeholder='Name'
-              required
-              {...form.getInputProps('title')}
-            />
-            <Textarea
-              label='Template'
-              required
-              description="Use [[personalization]] to add personalization into your message."
-              minRows={4}
-              placeholder='Template outline'
-              {...form.getInputProps('message')}
-            />
-            {form.values['message'].length > 300 && (
-              <Text color='red' mt='0px' fz='xs' align='right'>
-                Message is too long ({form.values['message'].length} / 300 characters)
-              </Text>
-            )}
+            <TextInput label='Name' placeholder='Name' required {...form.getInputProps('title')} />
 
-              <Collapse in={opened}>
-                <Box mih={500} sx={{ position: 'relative' }}>
-                  {loadingResearch ? (
-                    <LoadingOverlay visible />
-                  ) : (
-                    <PersonalizationSection
-                      title='Enabled Research Points'
-                      blocklist={_.difference(RESEARCH_POINTS, researchPoints)}
-                      onItemsChange={async (items) => {
-                        setResearchPoints(items.filter((x) => x.checked).map((x) => x.id));
-                      }}
-                      onChanged={() => {}}
-                    />
-                  )}
-                </Box>
-                {showUserFeedback && (
-                    <Card mb='16px'>
-                      <Card.Section
-                        sx={{
-                          backgroundColor: '#59a74f',
-                          flexDirection: 'row',
-                          display: 'flex',
-                        }}
-                        p='sm'
-                      >
-                        <Text color='white' mt='4px'>
-                          Feel free to give me feedback on improving the message
-                        </Text>
-                      </Card.Section>
-                      <Card.Section sx={{ border: 'solid 2px #59a74f !important' }} p='8px'>
-                        <Textarea
-                          variant='unstyled'
-                          pl={'8px'}
-                          pr={'8px'}
-                          minRows={3}
-                          placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
-                          {...form.getInputProps('humanFeedback')}
-                        />
-                      </Card.Section>
-                    </Card>
-                  )}
-            </Collapse>
-            <Button 
-              variant='subtle' color='gray' leftIcon={<IconWashMachine size={'0.9rem'} />}
-              onClick={() => toggle()}
+            <Box style={{ position: 'relative' }}>
+              <Textarea
+                label='Template'
+                required
+                description='Use [[personalization]] to add personalization into your message.'
+                minRows={4}
+                placeholder='Template outline'
+                {...form.getInputProps('message')}
+              />
+              {form.values['message'].length > 300 && (
+                <Text color='red' mt='0px' fz='xs' align='right'>
+                  Message is too long ({form.values['message'].length} / 300 characters)
+                </Text>
+              )}
+              <Button
+                loading={loadingResearch}
+                variant='light'
+                size='xs'
+                compact
+                style={{
+                  position: 'absolute',
+                  top: 15,
+                  right: 0,
+                }}
+                leftIcon={<IconRotateRectangle size='0.9rem' />}
+                onClick={() => {
+                  autoDetectResearchPoints();
+                }}
               >
-              {opened ? 'Hide' : 'Show'} Advanced Settings
+                Autodetect Research Points
+              </Button>
+            </Box>
+
+            <Collapse in={opened}>
+              <Box mih={500} sx={{ position: 'relative' }}>
+                {loadingResearch ? (
+                  <LoadingOverlay visible />
+                ) : (
+                  <PersonalizationSection
+                    title='Enabled Research Points'
+                    blocklist={_.difference(RESEARCH_POINTS, researchPoints)}
+                    onItemsChange={async (items) => {
+                      setResearchPoints(items.filter((x) => x.checked).map((x) => x.id));
+                    }}
+                    onChanged={() => {}}
+                  />
+                )}
+              </Box>
+              {showUserFeedback && (
+                <Card mb='16px'>
+                  <Card.Section
+                    sx={{
+                      backgroundColor: '#59a74f',
+                      flexDirection: 'row',
+                      display: 'flex',
+                    }}
+                    p='sm'
+                  >
+                    <Text color='white' mt='4px'>
+                      Feel free to give me feedback on improving the message
+                    </Text>
+                  </Card.Section>
+                  <Card.Section sx={{ border: 'solid 2px #59a74f !important' }} p='8px'>
+                    <Textarea
+                      variant='unstyled'
+                      pl={'8px'}
+                      pr={'8px'}
+                      minRows={3}
+                      placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                      {...form.getInputProps('humanFeedback')}
+                    />
+                  </Card.Section>
+                </Card>
+              )}
+            </Collapse>
+            <Button
+              variant='light'
+              color='gray'
+              leftIcon={
+                opened ? <IconChevronUp size={'0.9rem'} /> : <IconChevronDown size={'0.9rem'} />
+              }
+              onClick={() => toggle()}
+            >
+              {opened ? 'Hide' : 'Show'} Settings
             </Button>
 
             <Box>
-              <Button 
-                disabled={loading || form.values['message'].length > 300}
-                type='submit'>{innerProps.mode === 'CREATE' ? 'Create' : 'Update'}</Button>
+              <Button disabled={loading || form.values['message'].length > 300} type='submit'>
+                {innerProps.mode === 'CREATE' ? 'Create' : 'Update'}
+              </Button>
             </Box>
           </Stack>
         </Card>

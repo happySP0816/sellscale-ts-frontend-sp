@@ -62,7 +62,7 @@ export default function LiTemplateModal({
   const [error, setError] = useState<string | null>(null);
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
-  const [opened, { toggle }] = useDisclosure(false);
+  const [opened, { toggle, open }] = useDisclosure(false);
 
 
   const [loadingResearch, setLoadingResearch] = useState(false);
@@ -99,6 +99,7 @@ export default function LiTemplateModal({
     if (response.status === 'success') {
       console.log(response.data);
       setResearchPoints(response.data);
+      open();
     }
     setLoadingResearch(false);
   };

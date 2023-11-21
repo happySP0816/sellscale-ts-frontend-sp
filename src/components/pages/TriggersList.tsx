@@ -84,7 +84,7 @@ const TriggersList = () => {
       }
 
       <Grid mt='md' w='100%'>
-        {triggers.map(trigger => (
+        {triggers.map((trigger: any) => (
           <Grid.Col span={12} key={trigger.id} mb='xs'>
             <Card shadow="sm" p="lg">
               <Grid justify="space-between" align="center">

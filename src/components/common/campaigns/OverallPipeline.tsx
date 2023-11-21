@@ -8,6 +8,7 @@ import {
   Select,
   Text,
   ThemeIcon,
+  Tooltip,
   em,
 } from "@mantine/core";
 import { IconCheck, IconEdit, IconExternalLink, IconPencil } from "@tabler/icons";
@@ -91,6 +92,7 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
         value: campaignData.sentOutreach,
         link: "",
         percentage: 100,
+        percentageText: campaignData.sentOutreach + " / " + campaignData.sentOutreach + " sent",
         color: grape,
       },
       {
@@ -102,7 +104,8 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
         color: blue,
         percentage: !campaignData.sentOutreach
           ? 0
-          : parseFloat(((campaignData.accepted / campaignData.sentOutreach) * 100).toFixed(0)),
+          : parseFloat(((campaignData.accepted / campaignData.sentOutreach) * 100).toFixed(1)),
+        percentageText: campaignData.accepted + " / " + campaignData.sentOutreach + " sent",
       },
       {
         title: "Replies",
@@ -111,11 +114,12 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
         value: campaignData.activeConvos,
         link: "",
         color: green,
-        percentage: !campaignData.sentOutreach
+        percentage: !campaignData.accepted
           ? 0
           : parseFloat(
-            ((campaignData.activeConvos / campaignData.sentOutreach) * 100).toFixed(0)
+            ((campaignData.activeConvos / campaignData.accepted) * 100).toFixed(1)
           ),
+        percentageText: campaignData.activeConvos + " / " + campaignData.accepted + " opens",
       },
       {
         title: "Demos",
@@ -123,10 +127,11 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
         goalPctEditable: true,
         value: campaignData.demos,
         link: "",
-        percentage: !campaignData.sentOutreach
+        percentage: !campaignData.activeConvos
           ? 0
-          : parseFloat(((campaignData.demos / campaignData.sentOutreach) * 100).toFixed(0)),
+          : parseFloat(((campaignData.demos / campaignData.activeConvos) * 100).toFixed(1)),
         color: orange,
+        percentageText: campaignData.demos + " / " + campaignData.activeConvos + " replies",
       },
     ],
     [campaignData, userData]
@@ -194,18 +199,6 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
                           &nbsp;
                           {i.value}
                         </Text>
-
-                        {/* <a
-                          href={i.link}
-                          style={{
-                            textDecoration: "none",
-                            display: "flex",
-                            fontSize: "0.75rem",
-                            marginBottom: "2px",
-                          }}
-                        >
-                          <IconExternalLink size="0.75rem" color={i.color} />
-                        </a> */}
                       </Flex>
                     </Flex>
                   </Flex>
@@ -233,9 +226,11 @@ const OverallPipeline: FC<{ campaignData: CampaignAnalyticsData, aiActivityData:
                             <IconX size="1rem" />
                           </ThemeIcon>
                         )}
-                        <Text fw={700} color="gray.6" size={"0.75rem"} ml='4px'>
-                          {i.percentage || 0}%&nbsp;
-                        </Text>
+                        <Tooltip label={i.percentageText} position={"bottom"}>
+                          <Text fw={700} color="gray.6" size={"0.75rem"} ml='4px' sx={{cursor: 'pointer'}}>
+                            {i.percentage || 0}%&nbsp;
+                          </Text>
+                        </Tooltip>
                       </Flex>
                     </Flex>
                     <Flex w={"100%"} justify={"space-between"}>

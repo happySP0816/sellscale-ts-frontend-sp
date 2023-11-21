@@ -109,12 +109,7 @@ import {
   IconTool,
   IconTrash,
 } from '@tabler/icons';
-import {
-  useLocation,
-  unstable_usePrompt,
-  useNavigate,
-  useBlocker,
-} from 'react-router-dom';
+import { useLocation, unstable_usePrompt, useNavigate, useBlocker } from 'react-router-dom';
 import { patchArchetypeDelayDays } from '@utils/requests/patchArchetypeDelayDays';
 import { patchArchetypeBumpAmount } from '@utils/requests/patchArchetypeBumpAmount';
 import { CtaSection } from './CtaSection';
@@ -130,6 +125,7 @@ import DOMPurify from 'isomorphic-dompurify';
 import InitialMessageTemplateSelector from './InitialMessageTemplateSelector';
 import LinkedinInitialMessageTemplate from './LinkedinInitialMessageTemplate';
 import { CTAGeneratorSuggestedModal } from '@modals/CTAGeneratorSuggestedModal';
+import { createBumpFramework } from '@utils/requests/createBumpFramework';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -1027,35 +1023,68 @@ function BumpFrameworkSelect(props: {
                     </Box>
                   </Flex>
                 ),
-                onClick: () => {
-                  openContextModal({
-                    modal: 'createBumpFramework',
-                    title: 'Create Bump Framework',
-                    innerProps: {
-                      modalOpened: true,
-                      openModal: () => {},
-                      closeModal: () => {
-                        queryClient.refetchQueries({
-                          queryKey: [`query-get-bump-frameworks`],
-                        });
-                        modals.closeAll();
-                      },
-                      backFunction: () => {},
-                      dataChannels: dataChannels,
-                      status: props.overallStatus,
-                      archetypeID: currentProject?.id,
-                      bumpedCount: props.bumpedCount,
-                      initialValues: {
-                        title: template.name,
-                        description: template.prompt,
-                        default: true,
-                        bumpDelayDays: 2,
-                        useAccountResearch: true,
-                        bumpLength: template.length,
-                        human_readable_prompt: template.human_readable_prompt,
-                        transformerBlocklist: template.transformer_blocklist,
-                      },
-                    },
+                onClick: async () => {
+                  // openContextModal({
+                  //   modal: 'createBumpFramework',
+                  //   title: 'Create Bump Framework',
+                  //   innerProps: {
+                  //     modalOpened: true,
+                  //     openModal: () => {},
+                  //     closeModal: () => {
+                  //       queryClient.refetchQueries({
+                  //         queryKey: [`query-get-bump-frameworks`],
+                  //       });
+                  //       modals.closeAll();
+                  //     },
+                  //     backFunction: () => {},
+                  //     dataChannels: dataChannels,
+                  //     status: props.overallStatus,
+                  //     archetypeID: currentProject?.id,
+                  //     bumpedCount: props.bumpedCount,
+                  //     initialValues: {
+                  //       title: template.name,
+                  //       description: template.prompt,
+                  //       default: true,
+                  //       bumpDelayDays: 2,
+                  //       useAccountResearch: true,
+                  //       bumpLength: template.length,
+                  //       human_readable_prompt: template.human_readable_prompt,
+                  //       transformerBlocklist: template.transformer_blocklist,
+                  //     },
+                  //   },
+                  // });
+                  const result = await createBumpFramework(
+                    userToken,
+                    currentProject?.id ?? -1,
+                    props.overallStatus,
+                    template.name,
+                    template.prompt,
+                    template.length,
+                    props.bumpedCount,
+                    2,
+                    true,
+                    props.overallStatus,
+                    true,
+                    template.human_readable_prompt,
+                    template.transformer_blocklist
+                  );
+                  if (result.status === 'success') {
+                    showNotification({
+                      title: 'Success',
+                      message: 'Bump Framework created successfully',
+                      color: 'green',
+                    });
+                  } else {
+                    showNotification({
+                      title: 'Error',
+                      message: result.message,
+                      color: 'red',
+                    });
+                  }
+                  modals.closeAll();
+
+                  queryClient.refetchQueries({
+                    queryKey: [`query-get-bump-frameworks`],
                   });
                 },
               };
@@ -1493,7 +1522,9 @@ function IntroMessageSection(props: {
                             )}
                             % reply
                           </Text>
-                          <Text color='blue' size='xs'>{template.times_accepted} / {template.times_used} times</Text>
+                          <Text color='blue' size='xs'>
+                            {template.times_accepted} / {template.times_used} times
+                          </Text>
                         </Box>
 
                         <Box mr={40} w='100%'>

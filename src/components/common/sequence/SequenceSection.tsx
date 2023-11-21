@@ -1368,7 +1368,7 @@ function IntroMessageSection(props: {
                 <Text color='white' mt='4px' size='sm'>
                   <IconBulb size='1.2rem' color='white' />
                   <span style={{ marginLeft: '8px' }}>
-                    FINE TUNING: Feel free to give me feedback on improving the message.
+                    FINE TUNING: Feel free to give me feedback on improving the message
                   </span>
                 </Text>
               </Card.Section>
@@ -1550,6 +1550,7 @@ function IntroMessageSection(props: {
                                     color='lime'
                                     variant='filled'
                                     ml='xs'
+                                    size='xs'
                                   >
                                     {template.research_points.length} Research Points
                                   </Badge>
@@ -1582,6 +1583,7 @@ function IntroMessageSection(props: {
                                     color='grape'
                                     variant='filled'
                                     ml='xs'
+                                    size='xs'
                                   >
                                     Fine Tuned
                                   </Badge>

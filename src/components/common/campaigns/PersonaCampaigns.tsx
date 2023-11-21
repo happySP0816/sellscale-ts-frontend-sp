@@ -520,28 +520,37 @@ export function PersonCampaignCard(props: {
           spacing={0}
         >
           <Group sx={{ flex: '35%' }} spacing={5} noWrap>
-            <RingProgress
-              size={55}
-              thickness={5}
-              label={
-                <Text size='xs' align='center'>
-                  {Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100)}%
-                </Text>
-              }
-              variant='animated'
-              sections={[
-                {
-                  value: Math.floor(
-                    ((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
-                  ),
-                  color:
-                    Math.round(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100) >=
-                    100
-                      ? 'green'
-                      : 'blue',
-                },
-              ]}
-            />
+            <Box onClick={() => {
+              navigateToPage(
+                navigate,
+                `/contacts`,
+                new URLSearchParams(`?campaign_id=${props.persona.id}`)
+              );
+            }}>
+              <RingProgress
+                size={55}
+                thickness={5}
+                label={
+                  <Text size='xs' align='center'>
+                    {Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100)}%
+                  </Text>
+                }
+                variant='animated'
+                sections={[
+                  {
+                    value: Math.floor(
+                      ((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
+                    ),
+                    color:
+                      Math.round(
+                        ((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
+                      ) >= 100
+                        ? 'green'
+                        : 'blue',
+                  },
+                ]}
+              />
+            </Box>
             <Popover position='bottom' withArrow shadow='md'>
               <Popover.Target>
                 <Avatar
@@ -688,9 +697,7 @@ export function PersonCampaignCard(props: {
                 icon={<IconSend color={theme.colors.blue[6]} size='0.9rem' />}
                 label='Sent'
                 total={total_sent ?? 0}
-                percentage={Math.floor(
-                  ((total_sent ?? 0) / (total_sent || 1)) * 100
-                )}
+                percentage={Math.floor(((total_sent ?? 0) / (total_sent || 1)) * 100)}
               />
             </Box>
             <Box w={'20%'}>
@@ -699,9 +706,7 @@ export function PersonCampaignCard(props: {
                 icon={<IconChecks color={theme.colors.pink[6]} size='0.9rem' />}
                 label='Open'
                 total={total_opened ?? 0}
-                percentage={Math.floor(
-                  ((total_opened ?? 0) / (total_sent || 1)) * 100
-                )}
+                percentage={Math.floor(((total_opened ?? 0) / (total_sent || 1)) * 100)}
               />
             </Box>
             <Box w={'20%'}>
@@ -710,9 +715,7 @@ export function PersonCampaignCard(props: {
                 icon={<IconMessage color={theme.colors.orange[6]} size='0.9rem' />}
                 label='Reply'
                 total={total_replied ?? 0}
-                percentage={Math.floor(
-                  ((total_replied ?? 0) / (total_opened || 1)) * 100
-                )}
+                percentage={Math.floor(((total_replied ?? 0) / (total_opened || 1)) * 100)}
               />
             </Box>
             <Box w={'20%'}>

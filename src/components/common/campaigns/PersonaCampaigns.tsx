@@ -711,7 +711,7 @@ export function PersonCampaignCard(props: {
                 label='Reply'
                 total={total_replied ?? 0}
                 percentage={Math.floor(
-                  ((total_replied ?? 0) / (total_sent || 1)) * 100
+                  ((total_replied ?? 0) / (total_opened || 1)) * 100
                 )}
               />
             </Box>
@@ -722,7 +722,7 @@ export function PersonCampaignCard(props: {
                 label='Demo'
                 total={props.persona.total_demo ?? 0}
                 percentage={Math.floor(
-                  ((props.persona.total_demo ?? 0) / (total_sent || 1)) * 100
+                  ((props.persona.total_demo ?? 0) / (total_replied || 1)) * 100
                 )}
               />
             </Box>
@@ -986,9 +986,15 @@ function StatDisplay(props: {
     <Stack spacing={0}>
       <Group spacing={5} sx={{ justifyContent: 'left' }}>
         <Tooltip label={props.percentage + '% conversion'} withArrow withinPortal>
-          <Text color={props.color} fz='lg' fw={500}>
-            {props.total.toLocaleString()}
-          </Text>
+          <Flex>
+            <Text color={props.color} fz='lg' fw={500}>
+              {props.total.toLocaleString()}
+            </Text>
+            <Text size='10px' color='gray' mt='9px' ml='xs'>
+              {/* percentage */}
+              {props.percentage}%
+            </Text>
+          </Flex>
         </Tooltip>
       </Group>
       <Group grow>

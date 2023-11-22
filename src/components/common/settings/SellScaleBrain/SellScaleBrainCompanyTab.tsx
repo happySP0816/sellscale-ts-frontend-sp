@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Card,
+  Collapse,
   Container,
   LoadingOverlay,
   MultiSelect,
@@ -15,6 +16,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 import DoNotContactList from "../DoNotContactList";
+import { IconWashMachine } from '@tabler/icons';
 
 export default function SellScaleBrainCompanyTab(props: { siteUrl?: String }) {
   const [userToken] = useRecoilState(userTokenState);
@@ -30,6 +32,7 @@ export default function SellScaleBrainCompanyTab(props: { siteUrl?: String }) {
   const [valuePropsKeyPoints, setValuePropsKeyPoints] = React.useState("");
   const [toneAttributes, setToneAttributes]: any = React.useState([]);
   const [contractSize, setContractSize] = useState(0);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const [toneOptions, setToneOptions] = useState([
     { value: "professional", label: "Professional" },
@@ -173,65 +176,70 @@ export default function SellScaleBrainCompanyTab(props: { siteUrl?: String }) {
             }}
             mb="sm"
           />
-          <Textarea
-            label="Company Mission"
-            description="Your company's mission statement"
-            minRows={5}
-            value={companyMission}
-            onChange={(event) => {
-              setCompanyMission(event.currentTarget.value);
-              setNeedsSave(true);
-            }}
-            mb="sm"
-          />
-          <Textarea
-            label="Value Proposition Key Points"
-            description="A list of 3-5 key points that describe your value proposition"
-            minRows={5}
-            value={valuePropsKeyPoints}
-            onChange={(event) => {
-              setValuePropsKeyPoints(event.currentTarget.value);
-              setNeedsSave(true);
-            }}
-            mb="sm"
-          />
-          <MultiSelect
-            label="(Optional) Tone Attributes"
-            description="Select 3-5 tone attributes that describe your company"
-            data={toneOptions}
-            value={toneAttributes}
-            onChange={(value) => {
-              setToneAttributes(value);
-              setNeedsSave(true);
-            }}
-            searchable
-            mb="sm"
-          />
-          <TextInput
-            label="(Optional) Company Case Study"
-            value={companyCaseStudy}
-            placeholder="https://example.com/fh/files/misc/hsw-sqrg.pdf"
-            onChange={(event) => {
-              setCompanyCaseStudy(event.currentTarget.value);
-              setNeedsSave(true);
-            }}
-            mb="sm"
-          />
+          <Collapse in={showAdvanced}>
+            <Textarea
+              label="Company Mission"
+              description="Your company's mission statement"
+              minRows={5}
+              value={companyMission}
+              onChange={(event) => {
+                setCompanyMission(event.currentTarget.value);
+                setNeedsSave(true);
+              }}
+              mb="sm"
+            />
+            <Textarea
+              label="Value Proposition Key Points"
+              description="A list of 3-5 key points that describe your value proposition"
+              minRows={5}
+              value={valuePropsKeyPoints}
+              onChange={(event) => {
+                setValuePropsKeyPoints(event.currentTarget.value);
+                setNeedsSave(true);
+              }}
+              mb="sm"
+            />
+            <MultiSelect
+              label="(Optional) Tone Attributes"
+              description="Select 3-5 tone attributes that describe your company"
+              data={toneOptions}
+              value={toneAttributes}
+              onChange={(value) => {
+                setToneAttributes(value);
+                setNeedsSave(true);
+              }}
+              searchable
+              mb="sm"
+            />
+            <TextInput
+              label="(Optional) Company Case Study"
+              value={companyCaseStudy}
+              placeholder="https://example.com/fh/files/misc/hsw-sqrg.pdf"
+              onChange={(event) => {
+                setCompanyCaseStudy(event.currentTarget.value);
+                setNeedsSave(true);
+              }}
+              mb="sm"
+            />
 
-          <NumberInput
-            label="Annual Contract Value (ACV)"
-            value={contractSize}
-            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-            formatter={(value) =>
-              !Number.isNaN(parseFloat(value))
-                ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-                : "$ "
-            }
-            onChange={(value) => {
-              setContractSize(value || 0);
-              setNeedsSave(true);
-            }}
-          />
+            <NumberInput
+              label="Annual Contract Value (ACV)"
+              value={contractSize}
+              parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+              formatter={(value) =>
+                !Number.isNaN(parseFloat(value))
+                  ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+                  : "$ "
+              }
+              onChange={(value) => {
+                setContractSize(value || 0);
+                setNeedsSave(true);
+              }}
+            />
+          </Collapse>
+          <Button w='100%' mt='xs' variant='outline' color='gray' onClick={() => setShowAdvanced(!showAdvanced)} leftIcon={<IconWashMachine />}>
+            {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
+          </Button>
 
           <Button
             color="blue"

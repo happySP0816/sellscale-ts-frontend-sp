@@ -17,6 +17,7 @@ import {
   Group,
   Menu,
   Switch,
+  Tooltip,
 } from "@mantine/core";
 import { valueToColor } from "@utils/general";
 import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
@@ -225,21 +226,25 @@ export default function VoiceSelect(props: {
             ),
             rightSection: (
               <Group noWrap>
-                {/* <Box>
+                <Box>
                   <Badge
                     color={
-                      voice.generated_message_type == "LINKEDIN"
-                        ? "blue"
-                        : "orange"
+                      voice.always_enable ? "blue" : icpFitToColor(voice.icp_fit)
                     }
+                    sx={{
+                      display: voice.always_enable ? "inline-block" : "none",
+                    }}
+                    size='sm'
+                    mt='4px'
                   >
-                    {voice.generated_message_type}
+                    {voice.always_enable ? "Baseline Voice" : ""}
                   </Badge>
-                </Box> */}
-                <Box>
+                </Box>
+                <Tooltip label={voice.always_enable ? "Since this is a baseline voice, it cannot be disabled." : "This voice is only active for this persona."} withinPortal>
                   <Switch
                     onLabel="ON"
                     offLabel="OFF"
+                    disabled={voice.always_enable}
                     checked={voice.active}
                     onChange={async (event) => {
                       for (let v of voices) {
@@ -252,7 +257,7 @@ export default function VoiceSelect(props: {
                       refetch();
                     }}
                   />
-                </Box>
+                </Tooltip>
               </Group>
             ),
             onClick: () => {

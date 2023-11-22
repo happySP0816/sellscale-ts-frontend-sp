@@ -1,6 +1,6 @@
 import { userTokenState } from "@atoms/userAtoms";
 import YourNetworkSection from "@common/your_network/YourNetworkSection";
-import { Card, Flex, Tabs, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Button, ActionIcon, Badge, useMantineTheme, Loader, Group, Stack, Box } from "@mantine/core";
+import { Card, Flex, Tabs, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Button, ActionIcon, Badge, useMantineTheme, Loader, Group, Stack, Box, Select } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -10,7 +10,7 @@ import { valueToColor } from "@utils/general";
 import getSalesNavigatorLaunches, { getSalesNavigatorLaunch } from "@utils/requests/getSalesNavigatorLaunches";
 import postLaunchSalesNavigator from "@utils/requests/postLaunchSalesNavigator";
 import { useEffect, useRef, useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { SalesNavigatorLaunch } from "src";
 import SalesNavigatorComponent from './SalesNavigatorPage';
 import IndividualsDashboard from "@common/individuals/IndividualsDashboard";
@@ -19,14 +19,32 @@ import FileDropAndPreview from '@modals/upload-prospects/FileDropAndPreview';
 import LinkedInURLUpload from '@modals/upload-prospects/LinkedInURLUpload';
 import { currentProjectState } from '@atoms/personaAtoms';
 import ChatDashboard from "@common/individuals/ChatDashboard";
+import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
+import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from "@atoms/uploadAtoms";
+import { getAllUploads } from "@utils/requests/getPersonas";
+import { useQuery } from "@tanstack/react-query";
 
 export default function FindContactsPage() {
   setPageTitle("Find Contacts")
 
+  const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const activePersona = currentProject?.id;
   const activePersonaEmoji = currentProject?.emoji;
   const activePersonaName = currentProject?.name;
+
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(prospectUploadDrawerOpenState);
+  const [uploadId, setUploadId] = useRecoilState(prospectUploadDrawerIdState);
+
+  const { data: uploads } = useQuery({
+    queryKey: [`query-get-persona-uploads`],
+    queryFn: async () => {
+      const response = await getAllUploads(userToken, activePersona!);
+      return response.status === "success" ? response.data : [];
+    },
+    enabled: !!activePersona,
+  });
+
 
   return (
     <Flex p='lg' direction='column' h='100%'>
@@ -89,7 +107,7 @@ export default function FindContactsPage() {
             />
           </Card>
         </Tabs.Panel>
-        <Tabs.Panel value='by-csv' pt='xs'>
+        <Tabs.Panel value='by-csv' pt='xs' style={{ position: 'relative' }}>
           <Card maw='600px' ml='auto' mr='auto'>
             <Title order={3}>Upload CSV</Title>
             <Text mb='md' color='gray'>
@@ -113,8 +131,31 @@ export default function FindContactsPage() {
               }}
             />
           </Card>
+          {uploads && uploads.length > 0 && (
+            <Select
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 0,
+              }}
+              placeholder='View Upload Details'
+              data={uploads.map((upload: any) => ({
+                value: upload.id + '',
+                label: upload.created_at,
+              }))}
+              searchValue=""
+              value=''
+              onChange={(value) => {
+                if(value) {
+                  setUploadId(+value);
+                  setUploadDrawerOpened(true);
+                }
+              }}
+            />
+          )}
         </Tabs.Panel>
       </Tabs>
+      <UploadDetailsDrawer />
     </Flex>
   );
 }

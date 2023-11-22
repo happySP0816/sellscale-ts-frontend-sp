@@ -57,3 +57,21 @@ export async function getSalesNavigatorLaunch(userToken: string, launch_id: numb
 
   return true;
 }
+
+/**
+ * Reset sales navigator launch
+ */
+export async function resetSalesNavigatorLaunch(userToken: string, launch_id: number): Promise<boolean> {
+
+  const response = await fetch(
+    `${API_URL}/automation/phantom_buster/sales_navigator/launch/${launch_id}/reset`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+
+  return true;
+}

@@ -2,15 +2,16 @@ import { currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from "@atoms/userAtoms";
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
 import YourNetworkSection from "@common/your_network/YourNetworkSection";
-import { Card, Flex, Tabs, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Button, ActionIcon, Badge, useMantineTheme, Loader, Group, Stack, Box } from "@mantine/core";
+import { Card, Flex, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Button, ActionIcon, Badge, useMantineTheme, Loader, Group, Stack, Box, Progress, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconAffiliate, IconBrandLinkedin, IconDownload } from "@tabler/icons";
+import { IconAffiliate, IconBrandLinkedin, IconDownload, IconRefresh, IconZoomReset } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { valueToColor } from "@utils/general";
-import getSalesNavigatorLaunches, { getSalesNavigatorLaunch } from "@utils/requests/getSalesNavigatorLaunches";
+import getSalesNavigatorLaunches, { getSalesNavigatorLaunch, resetSalesNavigatorLaunch } from "@utils/requests/getSalesNavigatorLaunches";
 import postLaunchSalesNavigator from "@utils/requests/postLaunchSalesNavigator";
+import moment, { now } from 'moment';
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { SalesNavigatorLaunch } from "src";
@@ -48,6 +49,17 @@ export default function SalesNavigatorComponent(props: {
     setLaunches(result.data.launches)
 
     setLoading(false)
+  }
+
+  const triggerResetSalesNavigatorLaunch = async (launch_id: number) => {
+    await resetSalesNavigatorLaunch(userToken, launch_id)
+
+    triggerGetSalesNavigatorLaunches()
+    
+    showNotification({
+      title: "Sales Navigator Reset",
+      message: "Your Sales Navigator search has been reset. This may take a few minutes.",
+    })
   }
 
   const triggerGetSalesNavigatorLaunch = async (launch_id: number) => {
@@ -183,6 +195,9 @@ export default function SalesNavigatorComponent(props: {
             >
               Find Contacts
             </Button>
+            <Button ml='auto' variant='outline' onClick={triggerGetSalesNavigatorLaunches} loading={loading}>
+              Refresh
+            </Button>
         </Flex>
 
         {launches && launches.length > 0 && launches.map((launch, index) => {
@@ -218,6 +233,19 @@ export default function SalesNavigatorComponent(props: {
                     {date}
                   </Text>
                 </Flex>
+
+                <Flex>
+                <Tooltip label="Reset Job" withinPortal withArrow>
+                  <ActionIcon 
+                    onClick={() => {
+                      triggerResetSalesNavigatorLaunch(launch.id)
+                    }} 
+                    sx={{opacity: moment.duration(moment().diff(moment(launch.launch_date))).asMinutes() > 10 ? 'block' : 'none'}}
+                    disabled={moment.duration(moment().diff(moment(launch.launch_date))).asMinutes() < 10}
+                  >
+                    <IconRefresh size='1.2rem'></IconRefresh>
+                  </ActionIcon>
+                </Tooltip>
                 {
                   launch.status === "SUCCESS" ?
                     <Tooltip label="Download CSV" withinPortal withArrow>
@@ -230,23 +258,49 @@ export default function SalesNavigatorComponent(props: {
                       <Loader mr='xs' size='xs' variant='dots' />
                     </Tooltip>
                 }
+                </Flex>
               </Flex>
               <Flex>
                 <Text>
                   {launch.scrape_count} contacts
                 </Text>
-
-                <Badge
-                  color={badgeColor}
-                  size='sm'
-                  ml='md'
-                  variant='outline'
-                  mt='4px'
-                >
-                  {launch.status}
-                </Badge>
+                
+                <Flex>
+                  <Badge
+                    color={badgeColor}
+                    size='sm'
+                    ml='md'
+                    variant='outline'
+                    mt='4px'
+                  >
+                    {launch.status}
+                  </Badge>
+                
+                  
+                </Flex>
               </Flex>
               <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">View Original Filters</Anchor>
+
+              <Text mt='xs' color='gray' transform='uppercase' fz='xs' fw='bold' align='right'>
+                {
+                  launch.status == 'SUCCESS' ? 100 :
+                  Math.min(
+                    launch.launch_date ? Math.round(moment.duration(moment().diff(moment(launch.launch_date))).asMinutes() / 15 * 100) : 0,
+                    95
+                  )
+                }% Complete
+              </Text>
+              <Progress 
+                value={
+                  launch.status == 'SUCCESS' ? 100 :
+                  Math.min(
+                    Math.round(moment.duration(moment().diff(moment(launch.launch_date))).asMinutes() / 15 * 100),
+                    95
+                  )
+                }
+                animate={launch.status != 'SUCCESS'}
+                color={launch.status == 'SUCCESS' ? 'green' : 'blue'}
+              />
             </Card>
           )
         })}

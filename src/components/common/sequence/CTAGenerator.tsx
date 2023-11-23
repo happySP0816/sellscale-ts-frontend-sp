@@ -183,6 +183,9 @@ const CTAGenerator = () => {
                     w={350}
                     required
                     {...form.getInputProps("proposition")}
+                    onBlur={() => {
+                      setShowingValueAddedPropositionInput(false);
+                    }}
                     rightSection={
                       <IconCheck
                         cursor={"pointer"}

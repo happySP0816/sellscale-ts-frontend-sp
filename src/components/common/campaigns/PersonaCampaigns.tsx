@@ -1058,39 +1058,57 @@ export const PersonCampaignTable = (props: {
           pr='xs'
           spacing={0}
         >
-          <Group sx={{ flex: '35%' }} spacing={5} noWrap>
+          <Group sx={{flex: '3%'}}>
+            <Text fw={600} color='gray.8' fz='sm'>
+              Contacts
+            </Text>
+          </Group>
+          <Divider orientation='vertical' ml='xs' mr='xs' />
+          <Group sx={{ flex: '25%' }} spacing={5} noWrap>
             <Flex
               style={{ cursor: 'pointer' }}
               align={'center'}
               gap={'xs'}
               onClick={() => setSort((s) => (s === 'asc' ? 'desc' : 'asc'))}
             >
-              <Text fw={600} color='gray.8'>
+              <Text fw={600} color='gray.8' fz='sm'>
                 Campaigns
               </Text>
 
-              <IconArrowDown
+              {/* <IconArrowDown
                 size='0.85rem'
                 style={{
                   transform: sort === 'desc' ? 'rotate(0deg)' : 'rotate(180deg)',
                 }}
-              />
+              /> */}
             </Flex>
           </Group>
 
+          <Divider orientation='vertical' ml='xs' mr='xs' />
+
           <Group sx={{ flex: '10%' }} grow>
-            <Text fw={600} color='gray.8'>
+            <Text fw={600} color='gray.8' fz='sm'>
               SDR
             </Text>
           </Group>
 
-          <Group sx={{ flex: '10%' }} grow></Group>
+          <Divider orientation='vertical' ml='xs' mr='xs' />
+
+          <Group sx={{ flex: '4%' }} grow>
+            <Text fw={600} color='gray.8' fz='sm'>
+              Channel
+            </Text>
+          </Group>
+
+          <Divider orientation='vertical' ml='xs' mr='xs' />
 
           <Group sx={{ flex: '30%' }}>
-            <Text fw={600} color='gray.8'>
+            <Text fw={600} color='gray.8' fz='sm'>
               Overall Report
             </Text>
           </Group>
+
+          <Divider orientation='vertical' ml='xs' mr='xs' />
 
           <Group sx={{ flex: '15%' }}></Group>
         </Group>

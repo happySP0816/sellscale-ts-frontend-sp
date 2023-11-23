@@ -118,7 +118,9 @@ export function SidebarHeader({
         );
         setScoringTimeRemaining(timeRemaining);
 
-        let progress = 100 - ((estimatedSeconds - timeElapsedSeconds) / estimatedSeconds) * 100;
+        let progress =
+          100 -
+          ((estimatedSeconds - timeElapsedSeconds) / estimatedSeconds) * 100;
         setScoringProgress(Math.floor(Math.min(progress, 99)));
       }
       return job ?? null;
@@ -129,56 +131,6 @@ export function SidebarHeader({
 
   return (
     <>
-      <Box
-        sx={(theme) => ({
-          padding: theme.spacing.sm,
-          borderBottom: `${rem(1)} solid ${
-            theme.colorScheme === "dark"
-              ? theme.colors.dark[4]
-              : theme.colors.gray[2]
-          }`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%",
-          backgroundColor: theme.fn.variant({
-            variant: "filled",
-            color: theme.primaryColor,
-          }).background,
-        })}
-      >
-        <Group position="apart" style={{ width: "100%" }} display={"flex"}>
-          <Box
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              color: "#fff",
-              justifyContent: "space-between",
-            }}
-            w="100%"
-          >
-            {sideBarVisible && <Title size={"14px"}>Filter Contacts</Title>}
-            <ActionIcon
-              onClick={() => toggleSideBar()}
-              className="ml-auto"
-              variant="filled"
-              color="blue"
-            >
-              <IconChevronLeft
-                size={24}
-                // color="#fff"
-                style={{
-                  transform: sideBarVisible ? "" : "rotate(180deg)",
-                  transition: "all",
-                  transitionDuration: "150ms",
-                  transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              />
-            </ActionIcon>
-          </Box>
-        </Group>
-      </Box>
       <Flex
         direction={"column"}
         gap={"0.5rem"}
@@ -202,7 +154,29 @@ export function SidebarHeader({
           </Tooltip> */}
         </Flex>
 
-        <Flex px={"md"} align={"center"} gap={"0.5rem"}>
+        <Flex px={"md"} align={"start"} gap={"0.5rem"} direction={"column"}>
+          <Tooltip label="(Test Mode) View sample of 50 prospects">
+            <SwitchWrapper>
+              <Box sx={{ textAlign: "center", justifyContent: "center" }}>
+                <Text fz="9px">Test Sample</Text>
+                <Flex>
+                  <Switch
+                    ml="md"
+                    mt="xs"
+                    size="xs"
+                    onChange={(event) => {
+                      setIsTesting(event.currentTarget.checked);
+                    }}
+                  />
+                  <Text size="xs" ml="6px" mt="10px">
+                    {" "}
+                    ℹ️
+                  </Text>
+                </Flex>
+              </Box>
+            </SwitchWrapper>
+          </Tooltip>
+
           <Button
             rightIcon={isTesting ? null : <IconArrowNarrowRight size={24} />}
             size="xs"
@@ -287,27 +261,6 @@ export function SidebarHeader({
           >
             {isTesting ? "Filter test sample" : "Start Filtering"}
           </Button>
-          <Tooltip label="(Test Mode) View sample of 50 prospects">
-            <SwitchWrapper>
-              <Box sx={{ textAlign: "center", justifyContent: "center" }}>
-                <Text fz="9px">Test Sample</Text>
-                <Flex>
-                  <Switch
-                    ml="md"
-                    mt="xs"
-                    size="xs"
-                    onChange={(event) => {
-                      setIsTesting(event.currentTarget.checked);
-                    }}
-                  />
-                  <Text size="xs" ml="6px" mt="10px">
-                    {" "}
-                    ℹ️
-                  </Text>
-                </Flex>
-              </Box>
-            </SwitchWrapper>
-          </Tooltip>
         </Flex>
 
         {currentScoringJob ? (

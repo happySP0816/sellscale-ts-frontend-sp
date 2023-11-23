@@ -10,6 +10,7 @@ import {
   useMantineTheme,
   Flex,
   Group,
+  SystemProp,
 } from "@mantine/core";
 import { openContextModal } from "@mantine/modals";
 import {
@@ -35,7 +36,7 @@ import {
 } from "@tabler/icons-react";
 import { navigateToPage } from "@utils/documentChange";
 import { getPersonasOverview } from "@utils/requests/getPersonas";
-import { useEffect, useState } from "react";
+import { CSSProperties, ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { PersonaOverview } from "src";
@@ -58,7 +59,16 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export function ProjectSelect(props: { allOnNone?: boolean, onClick?: (persona: PersonaOverview) => void, disableSelectDefaultProject?: boolean, extraBig?: boolean }) {
+export function ProjectSelect(props: {
+  allOnNone?: boolean;
+  onClick?: (persona: PersonaOverview) => void;
+  disableSelectDefaultProject?: boolean;
+  extraBig?: boolean;
+  hideCloseButton?: boolean;
+  rightLabel?: ReactNode;
+  maw?: SystemProp<CSSProperties["maxWidth"]>;
+  w?: SystemProp<CSSProperties["width"]>;
+}) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const navigate = useNavigate();
@@ -76,9 +86,9 @@ export function ProjectSelect(props: { allOnNone?: boolean, onClick?: (persona: 
         response.status === "success"
           ? (response.data as PersonaOverview[])
           : [];
-      
-      if (!props.disableSelectDefaultProject){
-        return
+
+      if (!props.disableSelectDefaultProject) {
+        return;
       }
 
       setProjects(result);
@@ -86,16 +96,18 @@ export function ProjectSelect(props: { allOnNone?: boolean, onClick?: (persona: 
       const currentPersonaId = getCurrentPersonaId();
       let activeProject = null;
       if (currentPersonaId) {
-        activeProject = result.find((project) => project.id === +currentPersonaId);
+        activeProject = result.find(
+          (project) => project.id === +currentPersonaId
+        );
       }
-      if (!activeProject){
+      if (!activeProject) {
         activeProject = result.find((project) => project.active);
       }
-      if (!activeProject){
+      if (!activeProject) {
         activeProject = null;
       }
 
-      if(window.location.href.includes("/all")){
+      if (window.location.href.includes("/all")) {
         setCurrentProject(null);
       } else {
         setCurrentProject(activeProject);
@@ -104,24 +116,29 @@ export function ProjectSelect(props: { allOnNone?: boolean, onClick?: (persona: 
   }, []);
 
   return (
-    <Flex direction='row'>
+    <Flex direction="row">
       <Button
-        variant='outline'
+        variant="outline"
         leftIcon={<IconLayoutSidebar size="1.05rem" stroke={1.5} />}
         rightIcon={<IconChevronDown size="1.05rem" stroke={1.5} />}
-        maw={'400px'}
-        w='85%'
-        ml='xs'
-        mr='xs'
-        mt='xs'
-        fz={props.extraBig ? '20px' : 'xs'}
-        size={props.extraBig ? 'lg' : 'xs'}
+        maw={props.maw || "400px"}
+        w={props.w || "85%"}
+        ml="xs"
+        mr="xs"
+        mt="xs"
+        fz={props.extraBig ? "20px" : "xs"}
+        size={props.extraBig ? "lg" : "xs"}
         onClick={() => {
           openContextModal({
             modal: "personaSelect",
             title: (
               <Flex w="100%" pr="6px">
-                <Flex dir="row" justify="space-between" align={"center"} w="100%">
+                <Flex
+                  dir="row"
+                  justify="space-between"
+                  align={"center"}
+                  w="100%"
+                >
                   <Title order={3}>Your Personas</Title>
                   <Group>
                     <Button
@@ -150,17 +167,25 @@ export function ProjectSelect(props: { allOnNone?: boolean, onClick?: (persona: 
           });
         }}
       >
-        {currentProject?.name || (props.allOnNone ? "All Personas" : "Select Persona")}
+        {currentProject?.name ||
+          (props.allOnNone ? "All Personas" : "Select Persona")}
+
+        {props.rightLabel}
       </Button>
 
-      <Button color='blue' size='xs' variant='subtle' mt='xs'
-        onClick={
-          () => {
+      {!props.hideCloseButton && (
+        <Button
+          color="blue"
+          size="xs"
+          variant="subtle"
+          mt="xs"
+          onClick={() => {
             setCurrentProject(null);
-          }
-        }>
-        <IconX size='0.8rem' />
-      </Button>
+          }}
+        >
+          <IconX size="0.8rem" />
+        </Button>
+      )}
     </Flex>
   );
 }

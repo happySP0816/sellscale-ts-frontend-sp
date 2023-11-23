@@ -39,39 +39,9 @@ const ICPFilters = () => {
   );
 
   return (
-    <Flex h={`calc(100vh - 2.25rem)`}>
-      {smScreenOrLess ? (
-        <Drawer
-          opened={opened}
-          onClose={close}
-          withCloseButton={false}
-          size={"20rem"}
-          overlayProps={{ blur: 4 }}
-        >
-          <Box h={"100vh"} pos={"relative"} m={"-1rem"}>
-            <Sidebar
-              isTesting={isTesting}
-              sideBarVisible={sideBarVisible}
-              toggleSideBar={() => {
-                toggleSideBar();
-                toggle();
-              }}
-              setIsTesting={setIsTesting}
-            />
-          </Box>
-        </Drawer>
-      ) : (
-        <Sidebar
-          isTesting={isTesting}
-          sideBarVisible={sideBarVisible}
-          toggleSideBar={toggleSideBar}
-          setIsTesting={setIsTesting}
-        />
-      )}
-
+    <Flex h={`calc(100vh)`}>
       <Box w={"100%"}>
         <ICPFiltersDashboard
-          setIsTesting={setIsTesting}
           isTesting={isTesting}
           openFilter={() => {
             openSideBar();

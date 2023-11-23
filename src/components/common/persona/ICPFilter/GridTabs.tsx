@@ -71,13 +71,13 @@ const GridTabs = ({
         value: "-1",
         count: icpDashboard.find((c) => c.label === "Unscored")?.value || "0",
       },
-    ]
-  }
+    ];
+  };
   const [tabFilters, setTabFilters] = useState(computeTabFilters());
 
   useEffect(() => {
-    setTabFilters(computeTabFilters())
-  }, [icpDashboard])
+    setTabFilters(computeTabFilters());
+  }, [icpDashboard]);
 
   const generateBackgroundBudge = (value: string) => {
     const COLORS: { [key: string]: string } = {
@@ -105,6 +105,7 @@ const GridTabs = ({
           <Button
             key={tab.value}
             variant="subtle"
+            size="sm"
             onClick={() => setSelectedTab(tab)}
             style={{
               padding: "0.5rem 1rem",

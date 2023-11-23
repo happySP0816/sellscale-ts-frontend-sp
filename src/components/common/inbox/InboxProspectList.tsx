@@ -376,6 +376,8 @@ export default function ProspectList(props: {
   const snoozedProspects = prospects.filter((p) => p.in_purgatory);
   const demoProspects = prospects.filter((p) => p.overall_status === 'DEMO')
 
+  localStorage.setItem('inbox-count', `${activeProspects.length}`);
+
   let displayProspects = activeProspects
   if (sectionTab === 'snoozed') {
     displayProspects = snoozedProspects

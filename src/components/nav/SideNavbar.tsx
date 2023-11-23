@@ -11,6 +11,7 @@ import {
   Stack,
   Divider,
   Center,
+  Badge,
 } from "@mantine/core";
 import {
   IconUsers,
@@ -173,41 +174,50 @@ export default function SideNavbar(props: {}) {
 
   return (
     <Group
-      position="apart"
+      position='apart'
       sx={{
-        flexDirection: "column",
+        flexDirection: 'column',
       }}
       className={classes.navbar}
       w={NAV_BAR_SIDE_WIDTH}
     >
-      <Stack w={"100%"} spacing={0}>
+      <Stack w={'100%'} spacing={0}>
         <LogoFull />
-        <Divider color="dark.4" />
-        <Box m="md">
-           <SideNavbarItem
-            icon={<IconHome size="1.0rem" />}
-            label="Overview"
-            tabKey={["overview"]}
+        <Divider color='dark.4' />
+        <Box m='md'>
+          <SideNavbarItem
+            icon={<IconHome size='1.0rem' />}
+            label='Overview'
+            tabKey={['overview']}
           />
           <SideNavbarItem
-            icon={<IconInbox size="1.0rem" />}
-            label="Inbox"
-            tabKey={["inbox"]}
+            icon={<IconInbox size='1.0rem' />}
+            label={
+              <Group noWrap>
+                <Text>Inbox</Text>
+                {parseInt(localStorage.getItem('inbox-count') ?? '') && (
+                    <Badge sx={{ pointerEvents: 'none' }} variant='filled' size='xs' color='blue'>
+                      {localStorage.getItem('inbox-count')}
+                    </Badge>
+                  )}
+              </Group>
+            }
+            tabKey={['inbox']}
           />
           <SideNavbarItem
-            icon={<IconTargetArrow size="1.0rem" />}
-            label="Campaigns"
-            tabKey={["campaigns", "all/campaigns", ""]}
+            icon={<IconTargetArrow size='1.0rem' />}
+            label='Campaigns'
+            tabKey={['campaigns', 'all/campaigns', '']}
           />
           <SideNavbarItem
-            icon={<IconUsers size="1.0rem" />}
-            label="Contacts"
-            tabKey={["contacts/overview", "contacts", "all/contacts"]}
+            icon={<IconUsers size='1.0rem' />}
+            label='Contacts'
+            tabKey={['contacts/overview', 'contacts', 'all/contacts']}
           />
           <SideNavbarItem
-            icon={<IconTarget size="1.0rem" />}
-            label="Triggers"
-            tabKey={["triggers", "create-trigger"]}
+            icon={<IconTarget size='1.0rem' />}
+            label='Triggers'
+            tabKey={['triggers', 'create-trigger']}
           />
           {/* <SideNavbarItem
             icon={<IconChartHistogram size="1.0rem" />}
@@ -216,16 +226,16 @@ export default function SideNavbar(props: {}) {
           /> */}
         </Box>
       </Stack>
-      <Stack w={"100%"} spacing={0}>
-        <Box m="md">
+      <Stack w={'100%'} spacing={0}>
+        <Box m='md'>
           {percentage !== 100 && (
             <Button
-              variant="gradient"
-              gradient={{ from: "green.6", to: "green.9", deg: 90 }}
+              variant='gradient'
+              gradient={{ from: 'green.6', to: 'green.9', deg: 90 }}
               compact
               fullWidth
-              size="xs"
-              leftIcon={<IconMap size="1.0rem" />}
+              size='xs'
+              leftIcon={<IconMap size='1.0rem' />}
               styles={{
                 label: {
                   fontSize: 10,
@@ -234,17 +244,17 @@ export default function SideNavbar(props: {}) {
               }}
               h={25}
               onClick={() => {
-                navigateToPage(navigate, "/onboarding");
+                navigateToPage(navigate, '/onboarding');
               }}
             >
               Onboarding {percentage}%
             </Button>
           )}
 
-          <Divider color="dark.4" mt="lg" mb="sm" />
+          <Divider color='dark.4' mt='lg' mb='sm' />
           <SideNavbarItem
-            icon={<IconSearch size="1.0rem" />}
-            label="Search"
+            icon={<IconSearch size='1.0rem' />}
+            label='Search'
             onClick={openSpotlight}
           />
           {/* <SideNavbarItem
@@ -252,19 +262,15 @@ export default function SideNavbar(props: {}) {
             label="Notifications"
             tabKey={["notifications", "all/recent-activity"]}
           /> */}
+          <SideNavbarItem icon={<IconBooks size='1.0rem' />} label='Advanced' tabKey='advanced' />
           <SideNavbarItem
-            icon={<IconBooks size="1.0rem" />}
-            label="Advanced"
-            tabKey="advanced"
-          />
-          <SideNavbarItem
-            icon={<IconSettings size="1.0rem" />}
-            label="Settings"
-            tabKey="settings"
+            icon={<IconSettings size='1.0rem' />}
+            label='Settings'
+            tabKey='settings'
           />
         </Box>
         <Box>
-          <Divider color="dark.4" />
+          <Divider color='dark.4' />
           <ProfileCard />
         </Box>
       </Stack>
@@ -274,7 +280,7 @@ export default function SideNavbar(props: {}) {
 
 function SideNavbarItem(props: {
   icon: ReactNode;
-  label: string;
+  label: ReactNode;
   tabKey?: string | string[];
   onClick?: () => void;
 }) {

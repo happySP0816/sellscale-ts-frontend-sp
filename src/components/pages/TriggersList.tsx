@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Text, Badge, Switch, Grid, Box, Title, Flex, Loader, Collapse, Divider, Modal, Table, LoadingOverlay} from '@mantine/core';
+import { Button, Card, Text, Badge, Switch, Grid, Box, Title, Flex, Loader, Collapse, Divider, Modal, Table, LoadingOverlay, Tooltip} from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
@@ -298,12 +298,46 @@ const TriggersList = () => {
         </Card>
       }
 
+      {/* Header */}
+      <Grid mt='md' w='100%' sx={{ borderBottom: '1px solid #E0E0E0', backgroundColor: 'white' }} p='md' align='center'>
+        <Grid.Col span={5}>
+          <Flex>
+            <Text color='gray' fw='bold'>Trigger</Text>
+            <Divider orientation='vertical' ml='md' mr='md' />
+          </Flex>
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <Flex>
+            <Text color='gray' fw='bold'>Sourced</Text>
+            <Divider orientation='vertical' ml='md' mr='md' />
+          </Flex>
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <Flex>
+            <Text color='gray' fw='bold'>Campaign</Text>
+            <Divider orientation='vertical' ml='md' mr='md' />
+          </Flex>
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <Flex>
+            <Text color='gray' fw='bold'>Status</Text>
+            <Divider orientation='vertical' ml='md' mr='md' />
+          </Flex>
+        </Grid.Col>
+        <Grid.Col span={1}>
+          <Flex>
+            <Text color='gray' fw='bold'>Runs</Text>
+            <Divider orientation='vertical' ml='md' mr='md' />
+          </Flex>
+        </Grid.Col>
+      </Grid>
+
       <Grid mt='md' w='100%'>
         {triggers.map((trigger: any) => {
-          return <Box w='100%' key={trigger.id}>
-              <Card shadow="sm" p="lg">
+          return <Box w='100%' key={trigger.id} mb='md'>
+              <Card shadow="sm" p="lg" withBorder>
                 <Grid justify="space-between" align="center">
-                  <Grid.Col span={6}>
+                  <Grid.Col span={5}>
                     <Box>
                       <Badge size='xs' color="blue">{trigger.trigger_type.replaceAll("_", " ")}</Badge>
                       <Box>
@@ -317,35 +351,44 @@ const TriggersList = () => {
                   <Grid.Col span={2}>
                     <Box>
                       <Flex sx={{textAlign: 'center'}}>
-                        <Box>
-                          <Text fw='bold' align='center'>
-                            132 
-                          </Text>
-                          <Text fz='xs' color='gray' align='center'>
-                            sourced
-                          </Text>
-                        </Box>
-                        <Box ml='xl'>
-                          <Text fw='bold' align='center'>
-                            84 
-                          </Text>
-                          <Text fz='xs' color='gray' align='center'>
-                            queued
-                          </Text>
-                        </Box>
+                        <Tooltip label='Total number of prospects found by this trigger.'>
+                          <Box onClick={() => setCurrentOpenTrigger(trigger.id)} sx={{cursor: 'pointer'}}>
+                            <Text fw='bold' align='center'>
+                              {trigger.num_prospects_scraped} 
+                            </Text>
+                            <Text fz='xs' color='gray' align='center'>
+                              prospects
+                            </Text>
+                          </Box>
+                        </Tooltip>
+                        <Tooltip label='Total number of unique companies found by this trigger.'>
+                          <Box onClick={() => setCurrentOpenTrigger(trigger.id)} ml="md" sx={{cursor: 'pointer'}}>
+                            <Text fw='bold' align='center'>
+                              {trigger.num_prospect_companies} 
+                            </Text>
+                            <Text fz='xs' color='gray' align='center'>
+                              companies
+                            </Text>
+                          </Box>
+                        </Tooltip>
                       </Flex>
-                      <Button mt='xs' compact size='xs' leftIcon={<IconEdit size={16} />} onClick={() => navigate(`/setup/linkedin?campaign_id=${trigger.client_archetype_id}`)}>
-                        Edit Campaign
-                      </Button>
                     </Box>
                   </Grid.Col>
 
-                  <Grid.Col span={1}>
-                    <Switch defaultChecked={trigger.active} label="Active" color="green" />
+                  <Grid.Col span={2}>
+                    <Button mt='xs' compact size='xs' leftIcon={<IconEdit size={16} />} onClick={() => navigate(`/setup/linkedin?campaign_id=${trigger.client_archetype_id}`)}>
+                      Edit Campaign
+                    </Button>
                   </Grid.Col>
 
                   <Grid.Col span={2}>
+                    <Switch defaultChecked={trigger.active} label="Active" color="green" />
+                  </Grid.Col>
+
+                  <Grid.Col span={1}>
                     <Button
+                      compact
+                      ml='-32px'
                       variant='outline'
                       onClick={() => {
                         if (currentOpenTrigger === trigger.id) {
@@ -360,7 +403,7 @@ const TriggersList = () => {
                     </Button>
                   </Grid.Col>
                 </Grid>
-
+                
                 <Collapse in={currentOpenTrigger === trigger.id}>
                   <Card withBorder mt='md' p='md'>
                     <RecentRuns trigger_id={trigger.id} userToken={userToken} />

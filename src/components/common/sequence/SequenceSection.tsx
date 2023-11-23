@@ -49,6 +49,7 @@ import {
   Loader,
   Image,
   HoverCard,
+  FocusTrap,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDebouncedValue, useDisclosure, useHover, usePrevious } from '@mantine/hooks';
@@ -3011,53 +3012,50 @@ function FrameworkSection(props: {
                     {props.framework.title}
                   </Text>
                   {/* Hovercard for transformers */}
-                  
-                    <HoverCard width={280} shadow='md'>
-                      <HoverCard.Target>
-                        <Badge
-                          leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                          color='lime'
-                          variant={
-                            props.framework.active_transformers &&
-                              props.framework.active_transformers.length > 0 ? 'filled' : 'outline'
-                          }
-                          ml='xs'
-                          size='xs'
-                          onClick={
-                            () => {
-                              toggle()
-                            }
-                          }
-                        >
-                          {
-                            props.framework.active_transformers &&
-                              props.framework.active_transformers.length > 0 ? props.framework.active_transformers.length + ' Research Points' : '0 Research Points'
-                          }
-                        </Badge>
-                      </HoverCard.Target>
-                      <HoverCard.Dropdown
-                        style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+
+                  <HoverCard width={280} shadow='md'>
+                    <HoverCard.Target>
+                      <Badge
+                        leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
+                        color='lime'
+                        variant={
+                          props.framework.active_transformers &&
+                          props.framework.active_transformers.length > 0
+                            ? 'filled'
+                            : 'outline'
+                        }
+                        ml='xs'
+                        size='xs'
+                        onClick={() => {
+                          toggle();
+                        }}
                       >
-                        <Paper
-                          style={{
-                            backgroundColor: 'rgb(34, 37, 41)',
-                            color: 'white',
-                            padding: 10,
-                          }}
-                        >
-                          <TextWithNewline style={{ fontSize: '12px' }}>
-                            {props.framework.active_transformers.length > 0 ? '<b>Active Research Points:</b>\n- ' +
+                        {props.framework.active_transformers &&
+                        props.framework.active_transformers.length > 0
+                          ? props.framework.active_transformers.length + ' Research Points'
+                          : '0 Research Points'}
+                      </Badge>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
+                      <Paper
+                        style={{
+                          backgroundColor: 'rgb(34, 37, 41)',
+                          color: 'white',
+                          padding: 10,
+                        }}
+                      >
+                        <TextWithNewline style={{ fontSize: '12px' }}>
+                          {props.framework.active_transformers.length > 0
+                            ? '<b>Active Research Points:</b>\n- ' +
                               props.framework.active_transformers
                                 .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
                                 .join('\n- ')
-                              :
-                              "Click to activate more research points"
-                            }
-                          </TextWithNewline>
-                        </Paper>
-                      </HoverCard.Dropdown>
-                    </HoverCard>
-                  
+                            : 'Click to activate more research points'}
+                        </TextWithNewline>
+                      </Paper>
+                    </HoverCard.Dropdown>
+                  </HoverCard>
+
                   {props.framework.human_feedback && (
                     <HoverCard width={280} shadow='md'>
                       <HoverCard.Target>
@@ -3091,15 +3089,24 @@ function FrameworkSection(props: {
                 </Flex>
                 <Card withBorder w='100%' sx={{}}>
                   {editing ? (
-                    <Textarea
-                      placeholder='Instructions'
-                      minRows={7}
-                      variant='filled'
-                      {...form.getInputProps('promptInstructions')}
-                    />
+                    <FocusTrap active={true}>
+                      <Textarea
+                        placeholder='Instructions'
+                        minRows={3}
+                        autosize
+                        variant='filled'
+                        {...form.getInputProps('promptInstructions')}
+                        onBlur={() => {
+                          setEditing(false);
+                        }}
+                      />
+                    </FocusTrap>
                   ) : (
                     <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
                       <div
+                        onClick={() => {
+                          setEditing(true);
+                        }}
                         dangerouslySetInnerHTML={{
                           __html: DOMPurify.sanitize(
                             form.values.promptInstructions
@@ -3122,7 +3129,7 @@ function FrameworkSection(props: {
                 </Card>
               </Box>
 
-              <Box sx={{ justifyContent: 'right' }} ml='auto'>
+              {/* <Box sx={{ justifyContent: 'right' }} ml='auto'>
                 <Button
                   mt='xs'
                   variant='subtle'
@@ -3135,18 +3142,12 @@ function FrameworkSection(props: {
                 >
                   {editing ? 'Save' : 'Edit'}
                 </Button>
-              </Box>
+              </Box> */}
             </Paper>
           </form>
-          <Modal
-            opened={opened}
-            onClose={toggle}
-            size='lg'
-          >
+          <Modal opened={opened} onClose={toggle} size='lg'>
             <Box w='100%' mb='md'>
-              <Title order={4}>
-                "{form.values.frameworkName}" Research Points
-              </Title>
+              <Title order={4}>"{form.values.frameworkName}" Research Points</Title>
               <Text color='gray'>
                 {props.framework.active_transformers.length} research points enabled.
               </Text>
@@ -3155,20 +3156,21 @@ function FrameworkSection(props: {
                 blocklist={props.framework.transformer_blocklist}
                 onItemsChange={async (items) => {
                   setPersonalizationItemsCount(items.filter((x) => x.checked).length);
-                  setPersonalizationItemIds(
-                    items.filter((x) => !x.checked).map((x) => x.id)
-                  );
+                  setPersonalizationItemIds(items.filter((x) => !x.checked).map((x) => x.id));
                 }}
                 onChanged={() => {
                   setChanged(true);
                 }}
               />
 
-              <Button w='100%' mt='md' onClick={() => {
-                toggle();
-                setChanged(true);
-                saveSettings(debouncedForm);
-              }}
+              <Button
+                w='100%'
+                mt='md'
+                onClick={() => {
+                  toggle();
+                  setChanged(true);
+                  saveSettings(debouncedForm);
+                }}
                 sx={{
                   display: changed ? 'block' : 'none',
                 }}

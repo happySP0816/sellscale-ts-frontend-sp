@@ -30,9 +30,9 @@ const Sidebar: FC<{
 
       {sideBarVisible && (
         <>
-          <ScrollArea px={"md"}>
+          <Box>
             <Filters isTesting={isTesting} selectOptions={[]} autofill />
-          </ScrollArea>
+          </Box>
         </>
       )}
     </Flex>

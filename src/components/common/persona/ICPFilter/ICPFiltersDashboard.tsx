@@ -17,6 +17,8 @@ import {
   Group,
   Container,
   Select,
+  ScrollArea,
+  Pagination,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
@@ -25,6 +27,7 @@ import {
   IconPlus,
   IconSearch,
   IconTrash,
+  IconFilter,
 } from "@tabler/icons-react";
 import {
   DataGrid,
@@ -59,8 +62,9 @@ import {
 import { IconX } from "@tabler/icons";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
-import BulkActions from '../BulkActions';
-import { deterministicMantineColor } from '@utils/requests/utils';
+import BulkActions from "../BulkActions_new";
+import Filters from "./Filters";
+import { SidebarHeader } from "./SidebarHeader";
 
 const demoData = [
   {
@@ -113,14 +117,14 @@ const tabFilters = [
 ];
 
 const ICPFiltersDashboard: FC<{
-  setIsTesting: (val: boolean) => void;
   isTesting: boolean;
   openFilter: () => void;
-}> = ({ isTesting, openFilter }) => {
+}> = ({ openFilter }) => {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [icpProspects, setIcpProspects] = useRecoilState(filterProspectsState);
   const navigate = useNavigate();
+  const [isTesting, setIsTesting] = useState(false);
   const [removeProspectsLoading, setRemoveProspectsLoading] = useState(false);
   const smScreenOrLess = useMediaQuery(
     `(max-width: ${SCREEN_SIZES.LG})`,
@@ -136,7 +140,8 @@ const ICPFiltersDashboard: FC<{
     value: string;
     count: number;
   }>(tabFilters[0]);
-  const [selectedProspectStatusFilter, setSelectedProspectStatusFilter] = useState("All Contacts")
+  const [selectedProspectStatusFilter, setSelectedProspectStatusFilter] =
+    useState("All Contacts");
 
   const [invitedOnLinkedIn, setInvitedOnLinkedIn] = useState(false);
   const [selectedRows, setSelectedRows] = useState<DataGridRowSelectionState>(
@@ -146,12 +151,13 @@ const ICPFiltersDashboard: FC<{
     uploadDrawerOpenState
   );
   const openUploadProspects = () => {
-    window.location.href = `/contacts/find`
+    window.location.href = `/contacts/find`;
 
     // todo(Aakash) remove this as it opens drawer
     // setUploadDrawerOpened(true);
   };
-
+  const [sideBarVisible, { toggle: toggleSideBar, open: openSideBar }] =
+    useDisclosure(false);
   const [icpDashboard, setIcpDashboard] = useState<any[]>([]);
   const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
@@ -433,32 +439,23 @@ const ICPFiltersDashboard: FC<{
         width: "100%",
       })}
     >
-      <Box
+      <Flex
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          width: "100%",
-          flexWrap: "wrap",
-          gap: "0.5rem",
+          justifyContent: "flex-end",
         }}
       >
-        <Box style={{ display: "flex", alignItems: "center" }}>
-          <Box ml={"0.5rem"}>
-            <ProjectSelect
-              extraBig
-              onClick={(persona?: PersonaOverview) => {
-                // queryClient.refetchQueries({
-                //   queryKey: [`query-get-icp-prospects`],
-                // });
-                // refetch();
-                navigateToPage(navigate, `/prioritize/${persona?.id}`);
-              }}
-            />
-          </Box>
-        </Box>
-        <Flex gap={"1rem"} align={"center"}>
-          <Button.Group color="gray">
-            <Button variant="default" sx={{ color: "gray !important" }}>
+        <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>
+          Add Prospects
+        </Button>
+      </Flex>
+
+      <Flex justify={"space-between"} ml={"-0.625rem"} mt={"sm"}>
+        <ProjectSelect
+          hideCloseButton
+          maw={"600px"}
+          w="100%"
+          rightLabel={
+            <>
               <span
                 style={{
                   marginLeft: "6px",
@@ -469,195 +466,20 @@ const ICPFiltersDashboard: FC<{
                 {currentProject?.num_unused_li_prospects} /{" "}
                 {currentProject?.num_prospects}
               </span>{" "}
-              remaining (
-              <span style={{ marginLeft: "0px", color: theme.colors.blue[5] }}>
-                {currentProject
-                  ? Math.round(
-                      (currentProject?.num_unused_li_prospects /
-                        (currentProject?.num_prospects + 0.0001)) *
-                        100
-                    ) + "% Left"
-                  : "-% Left"}
-              </span>
-              )
-            </Button>
-          </Button.Group>
-          <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>
-            Add Prospects
-          </Button>
-          {smScreenOrLess && <Button onClick={openFilter}>Open filter</Button>}
-        </Flex>
-      </Box>
-      <Divider my="sm" />
-      <Paper
-        shadow="xs"
-        p="sm"
-        radius="6px"
-        style={{ backgroundColor: "#FFF" }}
-      >
-        <Box style={{ display: "flex", justifyContent: "space-between" }}>
-          <Flex>
-            <Title size={"21px"} fw={600}>
-              Average ICP Fit Score:
-            </Title>
-            <Badge
-              color={averageICPFitColor}
-              size="lg"
-              variant="outline"
-              ml="8px"
-            >
-              {averageICPFitLabel} ({averageICPFitScore.toFixed(2)})
-            </Badge>
-          </Flex>
-        </Box>
-        <Box
-          mt={"1rem"}
-          sx={{
-            display: "flex",
-            gap: "1.25rem",
-            justifyContent: "space-between",
+              remaining
+            </>
+          }
+          onClick={(persona?: PersonaOverview) => {
+            // queryClient.refetchQueries({
+            //   queryKey: [`query-get-icp-prospects`],
+            // });
+            // refetch();
+            navigateToPage(navigate, `/prioritize/${persona?.id}`);
           }}
-        >
-          {icpDashboard.map((icp, index) => {
-            return (
-              <Box
-                key={`filter-${index}`}
-                style={{
-                  width: Math.floor((icp.gridWidthOf20 / 20) * 100) + "%",
-                }}
-              >
-                <Paper
-                  sx={{
-                    backgroundColor: icp.bgColor,
-                    color: icp.color,
-                    border: `1px solid #E9ECEF`,
-                    overflow: "hidden",
-                  }}
-                  p="md"
-                  radius="7px"
-                >
-                  <Text fz="10px" fw="bold">
-                    {icp.label}
-                  </Text>
-                  <Flex>
-                    <Title size={"20px"} fw={500}>
-                      {icp.value}
-                    </Title>
-                    {/* <Badge
-                      color={icp.badgeColor}
-                      size="xs"
-                      mt="4px"
-                      ml="4px"
-                      variant="filled"
-                    >
-                      {icp.percent.toFixed(1)}%
-                    </Badge> */}
-                  </Flex>
-                  <Title fw={500} color="gray.6" fz="12px">
-                    Contacts
-                  </Title>
-                </Paper>
-                <Progress
-                  value={100}
-                  mt={"0.5rem"}
-                  color={icp.color}
-                  radius={"11px"}
-                  size={"xl"}
-                  label={icp.percent.toFixed(1) + "%"}
-                />
-              </Box>
-            );
-          })}
-        </Box>
-      </Paper>
-
-      <Box
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "1rem",
-        }}
-      >
-        <Button
-          color="red"
-          leftIcon={<IconTrash size={14} />}
-          size="sm"
-          loading={removeProspectsLoading}
-          onClick={() => {
-            openConfirmModal({
-              title: "Remove these prospects?",
-              children: (
-                <Text>
-                  Are you sure you want to remove these{" "}
-                  {Object.keys(selectedRows).length} prospects? This will move
-                  them into your Unassigned Contacts list.
-                </Text>
-              ),
-              labels: {
-                confirm: "Remove",
-                cancel: "Cancel",
-              },
-              confirmProps: { color: "red" },
-              onCancel: () => {},
-              onConfirm: () => {
-                triggerMoveToUnassigned();
-              },
-            });
-          }}
-        >
-          Remove {Object.keys(selectedRows).length} prospects
-        </Button>
-        <Container mt='xs'>
-          <BulkActions 
-            selectedProspects={Object.keys(selectedRows).map(key => {
-              return displayProspects[parseInt(key)];
-            })}
-            backFunc={() => {
-              setSelectedRows({});
-              queryClient.refetchQueries({
-                queryKey: [`query-get-icp-prospects`],
-              });
-              showNotification({
-                title: 'Success',
-                message: `${Object.keys(selectedRows).length} prospects has been moved from Unassigned Contacts to the new persona.`,
-                color: 'green',
-                autoClose: 5000,
-              })
-            }}
-          />
-        </Container>
-        <Box
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            gap: "1rem",
-          }}
-        >
-          <Box
-            mt="1rem"
-            mb="1rem"
-            style={{
-              display: "flex",
-              gap: "1rem",
-              alignItems: "center",
-            }}
-          >
-            <Input
-              placeholder="Search Contacts"
-              onChange={(event) => setGlobalSearch(event.currentTarget.value)}
-              rightSection={
-                <IconSearch size={18} color={theme.colors.gray[6]} />
-              }
-            />
-          </Box>
-
+        />
+        <Flex justify={"flex-end"} align={"center"} gap={"xs"}>
           <Box
             style={{
-              padding: "0.5rem",
-              border: "1px solid #E0E0E0",
-              borderRadius: "8px",
               backgroundColor: invitedOnLinkedIn
                 ? "rgba(231, 245, 255, 1)"
                 : "",
@@ -682,21 +504,99 @@ const ICPFiltersDashboard: FC<{
               }}
             />
           </Box>
-        </Box>
-      </Box>
+          <Flex align={"center"} gap={"xs"}>
+            <Text
+              styles={{
+                color: theme.colors.gray[6],
+                fontWeight: 600,
+              }}
+            >
+              Filter by Status
+            </Text>
+            <Select
+              size="sm"
+              ml="auto"
+              placeholder="Select a filter"
+              data={["All Contacts", "Not Contacted", "Contacted"]}
+              defaultValue={selectedProspectStatusFilter}
+              onChange={(value: string) => {
+                setSelectedProspectStatusFilter(value);
+              }}
+            />
+          </Flex>
+          <Box
+            style={{
+              display: "flex",
+              gap: "1rem",
+              alignItems: "center",
+            }}
+          >
+            <Input
+              placeholder="Search Contacts"
+              onChange={(event) => setGlobalSearch(event.currentTarget.value)}
+              rightSection={
+                <IconSearch size={18} color={theme.colors.gray[6]} />
+              }
+            />
+          </Box>
+        </Flex>
+      </Flex>
 
-      <Paper
-        radius={"8px"}
-        shadow="lg"
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0.5rem",
-          paddingTop: "0rem",
-        }}
-      >
+      {Object.keys(selectedRows).length > 0 && (
+        <Flex justify={"flex-end"} align={"center"} gap={"xs"}>
+          <Text>Bulk Actions - 7 Selected</Text>
+          <Button
+            color="red"
+            leftIcon={<IconTrash size={14} />}
+            size="sm"
+            loading={removeProspectsLoading}
+            onClick={() => {
+              openConfirmModal({
+                title: "Remove these prospects?",
+                children: (
+                  <Text>
+                    Are you sure you want to remove these{" "}
+                    {Object.keys(selectedRows).length} prospects? This will move
+                    them into your Unassigned Contacts list.
+                  </Text>
+                ),
+                labels: {
+                  confirm: "Remove",
+                  cancel: "Cancel",
+                },
+                confirmProps: { color: "red" },
+                onCancel: () => {},
+                onConfirm: () => {
+                  triggerMoveToUnassigned();
+                },
+              });
+            }}
+          >
+            Remove
+          </Button>
+          <BulkActions
+            selectedProspects={Object.keys(selectedRows).map((key) => {
+              return displayProspects[parseInt(key)];
+            })}
+            backFunc={() => {
+              setSelectedRows({});
+              queryClient.refetchQueries({
+                queryKey: [`query-get-icp-prospects`],
+              });
+              showNotification({
+                title: "Success",
+                message: `${
+                  Object.keys(selectedRows).length
+                } prospects has been moved from Unassigned Contacts to the new persona.`,
+                color: "green",
+                autoClose: 5000,
+              });
+            }}
+          />
+        </Flex>
+      )}
+
+      <Flex wrap={"wrap"} align={"center"} justify={"space-between"}>
         {invitedOnLinkedIn && getSelectedRowCount > 0 && (
           <WithdrawInvitesControl
             count={getSelectedRowCount}
@@ -704,282 +604,343 @@ const ICPFiltersDashboard: FC<{
             onConfirm={withdrawInvites}
           />
         )}
-        <Flex w='100%'>
+        <Flex w="100%" align={"center"} justify={"space-between"} mt={"sm"}>
+          <Button
+            size="sm"
+            onClick={toggleSideBar}
+            variant="outline"
+            color="gray"
+            leftIcon={<IconFilter size={14} />}
+          >
+            Show Filter
+          </Button>
 
-        <Box mt='10px'>
-          <GridTabs
-            selectedTab={selectedTab}
-            setSelectedTab={setSelectedTab}
-            icpDashboard={icpDashboard}
-            numProspects={icpProspects.length}
+          <Box>
+            <GridTabs
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+              icpDashboard={icpDashboard}
+              numProspects={icpProspects.length}
+            />
+          </Box>
+        </Flex>
+      </Flex>
+      <Paper radius={"8px"} shadow="lg" mt={"xs"} py={"lg"}>
+        <Flex w={`calc(100vw - 13rem)`}>
+          {sideBarVisible && (
+            <Box
+              sx={(theme) => ({
+                borderRight: `1px solid ${theme.colors.gray[0]}`,
+                overflowX: "hidden",
+              })}
+            >
+              <Filters isTesting={isTesting} selectOptions={[]} autofill />
+
+              <SidebarHeader
+                sideBarVisible={sideBarVisible}
+                toggleSideBar={toggleSideBar}
+                isTesting={isTesting}
+                setIsTesting={setIsTesting}
+              />
+            </Box>
+          )}
+
+          <DataGrid
+            data={displayProspects}
+            highlightOnHover
+            withPagination
+            withSorting
+            withRowSelection
+            sx={{ cursor: "pointer" }}
+            columns={[
+              {
+                accessorKey: "icp_fit_score",
+                header: "ICP SCORE",
+                maxSize: 140,
+                cell: (cell) => {
+                  const score = cell.cell.getValue<number>();
+                  let readable_score = "";
+                  let color = "";
+
+                  switch (score) {
+                    case -1:
+                      readable_score = "Unscored";
+                      color = "gray";
+                      break;
+                    case 0:
+                      readable_score = "Very Low";
+                      color = "red";
+                      break;
+                    case 1:
+                      readable_score = "Low";
+                      color = "orange";
+                      break;
+                    case 2:
+                      readable_score = "Medium";
+                      color = "yellow";
+                      break;
+                    case 3:
+                      readable_score = "High";
+                      color = "blue";
+                      break;
+                    case 4:
+                      readable_score = "Very High";
+                      color = "green";
+                      break;
+                    default:
+                      readable_score = "Unknown";
+                      color = "gray";
+                      break;
+                  }
+
+                  return <Badge color={color}>{readable_score}</Badge>;
+                },
+                filterFn: stringFilterFn,
+              },
+              {
+                accessorKey: "full_name",
+                header: "Full name",
+                size: Math.min(200, window.innerWidth / 3),
+                filterFn: stringFilterFn,
+                cell: (cell) => {
+                  return <Text size="xs">{cell.cell?.getValue<string>()}</Text>;
+                },
+              },
+              {
+                accessorKey: "title",
+                header: "TITLE",
+                size: Math.min(300, window.innerWidth / 3),
+                filterFn: stringFilterFn,
+                cell: (cell) => {
+                  return <Text size="xs">{cell.cell?.getValue<string>()}</Text>;
+                },
+              },
+
+              {
+                accessorKey: "company",
+                filterFn: stringFilterFn,
+                size: Math.min(100, window.innerWidth / 6),
+                header: "COMPANY",
+                cell: (cell) => {
+                  return <Text size="xs">{cell.cell?.getValue<string>()}</Text>;
+                },
+              },
+              {
+                accessorKey: "status",
+                filterFn: stringFilterFn,
+                size: Math.min(100, window.innerWidth / 6),
+                header: "STATUS",
+                cell: (cell) => {
+                  let color = "gray";
+                  if (cell.cell?.getValue<string>() === "PROSPECTED") {
+                    color = "yellow";
+                  } else if (
+                    cell.cell?.getValue<string>() === "SENT_OUTREACH"
+                  ) {
+                    color = "blue";
+                  } else if (cell.cell?.getValue<string>() === "BUMPED") {
+                    color = "orange";
+                  } else if (cell.cell?.getValue<string>() === "ACTIVE_CONVO") {
+                    color = "purple";
+                  } else if (cell.cell?.getValue<string>() === "DEMO") {
+                    color = "green";
+                  } else if (cell.cell?.getValue<string>() === "REMOVED") {
+                    color = "red";
+                  }
+                  return (
+                    <Badge size="sm" color={color}>
+                      {cell.cell?.getValue<string>().replaceAll("_", " ")}
+                    </Badge>
+                  );
+                },
+              },
+              {
+                accessorKey: "icp_fit_reason",
+                filterFn: stringFilterFn,
+                header: "ICP FIT REASON",
+                cell: (cell) => {
+                  const values = cell.cell
+                    ?.getValue<string>()
+                    ?.split(") (")
+                    .map((x) => x.replaceAll(")", "").replaceAll("(", ""));
+
+                  return (
+                    <Flex gap={"0.25rem"} align={"center"}>
+                      {values?.map((v) => (
+                        <Flex key={v} gap={"0.25rem"} align={"center"}>
+                          <Tooltip label={v}>
+                            <Flex
+                              justify={"center"}
+                              align={"center"}
+                              style={{ borderRadius: "4px" }}
+                              bg={
+                                v.includes("✅")
+                                  ? "green"
+                                  : v.includes("❌")
+                                  ? "red"
+                                  : "yellow"
+                              }
+                              p={"0.25rem"}
+                              w={"1rem"}
+                              h={"1rem"}
+                              sx={{ cursor: "pointer" }}
+                            >
+                              {v.includes("✅") ? (
+                                <IconCheck color="white" size="0.5rem" />
+                              ) : v.includes("❌") ? (
+                                <IconX color="white" size="0.5rem" />
+                              ) : (
+                                <IconPlus color="white" size="0.5rem" />
+                              )}
+                            </Flex>
+                          </Tooltip>
+                          {/* {v} */}
+                        </Flex>
+                      ))}
+                      <HoverCard width={280} shadow="md">
+                        <HoverCard.Target>
+                          <Badge
+                            color="green"
+                            ml="xs"
+                            variant="outline"
+                            size="xs"
+                            sx={{ cursor: "pointer" }}
+                          >
+                            Show Details
+                          </Badge>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown w="280" p="0">
+                          {values?.map((v, i) => (
+                            <>
+                              <Flex
+                                key={v}
+                                gap={"0.25rem"}
+                                align={"center"}
+                                mb="8px"
+                                mt="8px"
+                              >
+                                <Tooltip label={v}>
+                                  <Flex
+                                    ml="md"
+                                    mr="md"
+                                    justify={"center"}
+                                    align={"center"}
+                                    style={{ borderRadius: "4px" }}
+                                    bg={
+                                      v.includes("✅")
+                                        ? "green"
+                                        : v.includes("❌")
+                                        ? "red"
+                                        : "yellow"
+                                    }
+                                    p={"0.25rem"}
+                                    w={"1rem"}
+                                    h={"1rem"}
+                                    sx={{ cursor: "pointer" }}
+                                  >
+                                    <IconCheck color="white" />
+                                  </Flex>
+                                </Tooltip>
+                                <Text size="xs">{v.substring(2)}</Text>
+                              </Flex>
+                              {i !== values.length - 1 && <Divider />}
+                            </>
+                          ))}
+                        </HoverCard.Dropdown>
+                      </HoverCard>
+                    </Flex>
+                  );
+                },
+              },
+              {
+                accessorKey: "linkedin_url",
+                header: "LINKEDIN URL",
+                filterFn: stringFilterFn,
+                cell: (cell) => (
+                  <Anchor
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                    target="_blank"
+                    href={"https://" + cell.row.original.linkedin_url}
+                    color={theme.colors.blue[6]}
+                    fw={600}
+                    size="xs"
+                  >
+                    <IconExternalLink size={16} />
+                    {cell.row.original.full_name.substring(0, 20)}
+                    {cell.row.original.full_name.length > 20
+                      ? "..."
+                      : ""}'s {getChannelType(cell.getValue<string>())}
+                  </Anchor>
+                ),
+              },
+            ]}
+            options={{
+              enableFilters: true,
+            }}
+            state={{
+              columnFilters,
+              rowSelection: selectedRows,
+            }}
+            components={{
+              pagination: ({ table }) => (
+                <Flex justify={"space-between"} align={"center"} px={"sm"}>
+                  <Text>
+                    {" "}
+                    {table.getState().pagination.pageSize *
+                      table.getState().pagination.pageIndex +
+                      1}{" "}
+                    -
+                    {Math.min(
+                      table.getState().pagination.pageSize *
+                        (table.getState().pagination.pageIndex + 1),
+                      table.getPrePaginationRowModel().rows.length
+                    )}{" "}
+                    / {table.getPrePaginationRowModel().rows.length}
+                  </Text>
+                  <Pagination
+                    size={"sm"}
+                    value={table.getState().pagination.pageIndex + 1}
+                    total={table.getPageCount()}
+                    onChange={(pageNum) =>
+                      table.setPageIndex(Number(pageNum) - 1)
+                    }
+                    siblings={1}
+                  />
+                </Flex>
+              ),
+            }}
+            w={"100%"}
+            onRowSelectionChange={(rows) => {
+              if (Object.keys(rows).length > 10) {
+                setSelectedRows(
+                  Object.keys(rows)
+                    .slice(0, 10)
+                    .reduce((obj: any, key: any) => {
+                      obj[key] = rows[key];
+                      return obj;
+                    }, {})
+                );
+              }
+              setSelectedRows(rows);
+            }}
+            pageSizes={["20"]}
+            styles={(theme) => ({
+              thead: {
+                height: "44px",
+                backgroundColor: theme.colors.gray[0],
+                "::after": {
+                  backgroundColor: "transparent",
+                },
+              },
+            })}
           />
-        </Box> 
-
-        <Select
-          size="sm"
-          ml='auto'
-          label="Filter by Status"
-          placeholder="Select a filter"
-          data={[
-            "All Contacts",
-            "Not Contacted",
-            "Contacted",
-          ]}
-          defaultValue={selectedProspectStatusFilter}
-          onChange={(value: string) => {
-            setSelectedProspectStatusFilter(value)
-          }}
-        />
         </Flex>
       </Paper>
 
-      <DataGrid
-        data={displayProspects}
-        highlightOnHover
-        withPagination
-        withSorting
-        withRowSelection
-        withColumnResizing
-        sx={{cursor: 'pointer'}}
-        columns={[
-          {
-            accessorKey: "icp_fit_score",
-            header: "ICP SCORE",
-            maxSize: 140,
-            cell: (cell) => {
-              const score = cell.cell.getValue<number>();
-              let readable_score = "";
-              let color = "";
-
-              switch (score) {
-                case -1:
-                  readable_score = "Unscored";
-                  color = "gray";
-                  break;
-                case 0:
-                  readable_score = "Very Low";
-                  color = "red";
-                  break;
-                case 1:
-                  readable_score = "Low";
-                  color = "orange";
-                  break;
-                case 2:
-                  readable_score = "Medium";
-                  color = "yellow";
-                  break;
-                case 3:
-                  readable_score = "High";
-                  color = "blue";
-                  break;
-                case 4:
-                  readable_score = "Very High";
-                  color = "green";
-                  break;
-                default:
-                  readable_score = "Unknown";
-                  color = "gray";
-                  break;
-              }
-
-              return <Badge color={color}>{readable_score}</Badge>;
-            },
-            filterFn: stringFilterFn,
-          },
-          {
-            accessorKey: "title",
-            header: "TITLE",
-            size: Math.min(300, window.innerWidth / 3),
-            filterFn: stringFilterFn,
-            cell: (cell) => {
-              return <Text size='xs'>{cell.cell?.getValue<string>()}</Text>
-            }
-          },
-          {
-            accessorKey: "company",
-            filterFn: stringFilterFn,
-            size: Math.min(100, window.innerWidth / 6),
-            header: "COMPANY",
-            cell: (cell) => {
-              return <Text size='xs'>{cell.cell?.getValue<string>()}</Text>
-            }
-          },
-          {
-            accessorKey: "status",
-            filterFn: stringFilterFn,
-            size: Math.min(100, window.innerWidth / 6),
-            header: "STATUS",
-            cell: (cell) => {
-              let color = "gray";
-              if (cell.cell?.getValue<string>() === "PROSPECTED") {
-                color = "yellow";
-              } else if (cell.cell?.getValue<string>() === "SENT_OUTREACH") {
-                color = "blue";
-              } else if (cell.cell?.getValue<string>() === "BUMPED") {
-                color = "orange";
-              } else if (cell.cell?.getValue<string>() === "ACTIVE_CONVO") {
-                color = "purple";
-              } else if (cell.cell?.getValue<string>() === "DEMO") {
-                color = "green";
-              } else if (cell.cell?.getValue<string>() === "REMOVED") {
-                color = "red";
-              }
-              return <Badge size='sm' color={color}>{cell.cell?.getValue<string>().replaceAll("_", " ")}</Badge>
-            }
-          },
-          {
-            accessorKey: "icp_fit_reason",
-            filterFn: stringFilterFn,
-            header: "ICP FIT REASON",
-            cell: (cell) => {
-              const values = cell.cell
-                ?.getValue<string>()
-                ?.split(") (")
-                .map((x) => x.replaceAll(")", "").replaceAll("(", ""));
-
-              return (
-                <Flex gap={"0.25rem"} align={"center"}>
-                  {values?.map((v) => (
-                    <Flex key={v} gap={"0.25rem"} align={"center"}>
-                      <Tooltip label={v}>
-                        <Flex
-                          justify={"center"}
-                          align={"center"}
-                          style={{ borderRadius: "4px" }}
-                          bg={
-                            v.includes("✅")
-                              ? "green"
-                              : v.includes("❌")
-                              ? "red"
-                              : "yellow"
-                          }
-                          p={"0.25rem"}
-                          w={"1rem"}
-                          h={"1rem"}
-                          sx={{ cursor: "pointer" }}
-                        >
-                          {v.includes("✅") ? (
-                            <IconCheck color="white" size='0.5rem' />
-                          ) : v.includes("❌") ? (
-                            <IconX color="white" size='0.5rem' />
-                          ) : (
-                            <IconPlus color="white" size='0.5rem' />
-                          )}
-                        </Flex>
-                      </Tooltip>
-                      {/* {v} */}
-                    </Flex>
-                  ))}
-                  <HoverCard width={280} shadow="md">
-                    <HoverCard.Target>
-                      <Badge
-                        color="green"
-                        ml="xs"
-                        variant="outline"
-                        size="xs"
-                        sx={{ cursor: "pointer" }}
-                      >
-                        Show Details
-                      </Badge>
-                    </HoverCard.Target>
-                    <HoverCard.Dropdown w="280" p="0">
-                      {values?.map((v, i) => (
-                        <>
-                          <Flex
-                            key={v}
-                            gap={"0.25rem"}
-                            align={"center"}
-                            mb="8px"
-                            mt="8px"
-                          >
-                            <Tooltip label={v}>
-                              <Flex
-                                ml="md"
-                                mr="md"
-                                justify={"center"}
-                                align={"center"}
-                                style={{ borderRadius: "4px" }}
-                                bg={
-                                  v.includes("✅")
-                                    ? "green"
-                                    : v.includes("❌")
-                                    ? "red"
-                                    : "yellow"
-                                }
-                                p={"0.25rem"}
-                                w={"1rem"}
-                                h={"1rem"}
-                                sx={{ cursor: "pointer" }}
-                              >
-                                <IconCheck color="white" />
-                              </Flex>
-                            </Tooltip>
-                            <Text size="xs">{v.substring(2)}</Text>
-                          </Flex>
-                          {i !== values.length - 1 && <Divider />}
-                        </>
-                      ))}
-                    </HoverCard.Dropdown>
-                  </HoverCard>
-                </Flex>
-              );
-            },
-          },
-          {
-            accessorKey: "linkedin_url",
-            header: "LINKEDIN URL",
-            filterFn: stringFilterFn,
-            cell: (cell) => (
-              <Anchor
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                }}
-                target="_blank"
-                href={"https://" + cell.row.original.linkedin_url}
-                color={theme.colors.blue[6]}
-                fw={600}
-                size='xs'
-              >
-                <IconExternalLink size={16} />
-                {cell.row.original.full_name.substring(0,20)}{cell.row.original.full_name.length > 20 ? '...' : ''}'s{" "}
-                {getChannelType(cell.getValue<string>())}
-                
-              </Anchor>
-            ),
-          },
-        ]}
-        options={{
-          enableFilters: true,
-        }}
-        state={{
-          columnFilters,
-          rowSelection: selectedRows,
-        }}
-        w={"100%"}
-        onRowSelectionChange={(rows) => {
-          if (Object.keys(rows).length > 10) {
-            setSelectedRows(
-              Object.keys(rows)
-                .slice(0, 10)
-                .reduce((obj: any, key: any) => {
-                  obj[key] = rows[key];
-                  return obj;
-                }, {})
-            );
-          }
-          setSelectedRows(rows);
-        }}
-        styles={(theme) => ({
-          thead: {
-            backgroundColor: theme.colors.gray[0],
-            "::after": {
-              backgroundColor: "transparent",
-            },
-          },
-        })}
-      />
       <WithdrawInvitesModal
         opened={opened}
         close={close}

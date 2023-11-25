@@ -258,13 +258,26 @@ function Filters(props: {
         defaultValue="personal"
         styles={(theme) => ({
           tabsList: {
-            backgroundColor: theme.colors.gray[0],
+            backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
             paddingLeft: "0.5rem",
             paddingRight: "0.5rem",
-            height: '44px',
+            height: "44px",
           },
           panel: {
             padding: "0.5rem",
+          },
+          tab: {
+            ...theme.fn.focusStyles(),
+            color: theme.white,
+            marginBottom: 0,
+            "&:hover": {
+              backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
+              color: theme.white,
+            },
+            "&[data-active]": {
+              borderBottomColor: theme.white,
+              color: theme.white,
+            },
           },
         })}
       >
@@ -282,7 +295,7 @@ function Filters(props: {
             }}
           >
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={included_individual_title_keywords}
               label="Titles (Included)"
               placeholder="Select options"
@@ -291,7 +304,7 @@ function Filters(props: {
               setData={setIncludedIndividualTitleKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={excluded_individual_title_keywords}
               label="Titles (Excluded)"
               placeholder="Select options"
@@ -300,7 +313,7 @@ function Filters(props: {
               setData={setExcludedIndividualTitleKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={included_individual_industry_keywords}
               label="Industry Keywords (Included)"
               placeholder="Select options"
@@ -311,7 +324,7 @@ function Filters(props: {
               setData={setIncludedIndividualIndustryKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={excluded_individual_industry_keywords}
               label="Industry Keywords (Excluded)"
               placeholder="Select options"
@@ -331,7 +344,7 @@ function Filters(props: {
                 mt={"0.2rem"}
                 w={"100%"}
                 gap={"xs"}
-                maw={'16rem'}
+                maw={"30vw"}
               >
                 <NumberInput
                   value={individual_years_of_experience_start}
@@ -360,7 +373,7 @@ function Filters(props: {
               </Button>
             </Flex>
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={included_individual_skills_keywords}
               label="Skills Keywords (Included)"
               placeholder="Select options"
@@ -369,7 +382,7 @@ function Filters(props: {
               setData={setIncludedIndividualSkillsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={excluded_individual_skills_keywords}
               label="Skills Keywords (Excluded)"
               placeholder="Select options"
@@ -378,7 +391,7 @@ function Filters(props: {
               setData={setExcludedIndividualSkillsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={included_individual_locations_keywords}
               label="Location Keywords (Included)"
               placeholder="Select options"
@@ -389,7 +402,7 @@ function Filters(props: {
               setData={setIncludedIndividualLocationsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={excluded_individual_locations_keywords}
               label="Location Keywords (Excluded)"
               placeholder="Select options"
@@ -400,7 +413,7 @@ function Filters(props: {
               setData={setExcludedIndividualLocationsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={included_individual_generalized_keywords}
               label="Bio & Jobs Description (Included)"
               placeholder="Select options"
@@ -409,7 +422,7 @@ function Filters(props: {
               setData={setIncludedIndividualGeneralizedKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={excluded_individual_generalized_keywords}
               label="Bio & Jobs Description (Excluded)"
               placeholder="Select options"
@@ -424,7 +437,7 @@ function Filters(props: {
             style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
           >
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={included_company_name_keywords}
               label="Companies Keywords (Included)"
               placeholder="Select options"
@@ -433,7 +446,7 @@ function Filters(props: {
               setData={setIncludedCompanyNameKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={excluded_company_name_keywords}
               label="Companies Keywords (Excluded)"
               placeholder="Select options"
@@ -442,7 +455,7 @@ function Filters(props: {
               setData={setExcludedCompanyNameKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={included_company_locations_keywords}
               label="Location Keywords (Included)"
               placeholder="Select options"
@@ -453,7 +466,7 @@ function Filters(props: {
               setData={setIncludedCompanyLocationsKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={excluded_company_locations_keywords}
               label="Location Keywords (Excluded)"
               placeholder="Select options"
@@ -463,7 +476,7 @@ function Filters(props: {
               ])}
               setData={setExcludedCompanyLocationsKeywords}
             />
-            <Flex direction="column" maw={'16rem'}>
+            <Flex direction="column" maw={"30vw"}>
               <Title size={"14px"} fw={"500"}>
                 Employee Count
               </Title>
@@ -499,7 +512,7 @@ function Filters(props: {
               </Button>
             </Flex>
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={included_company_industries_keywords}
               label="Industries Keywords (Included)"
               placeholder="Select options"
@@ -510,7 +523,7 @@ function Filters(props: {
               setData={setIncludedCompanyIndustriesKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={excluded_company_industries_keywords}
               label="Industries Keywords (Excluded)"
               placeholder="Select options"
@@ -521,7 +534,7 @@ function Filters(props: {
               setData={setExcludedCompanyIndustriesKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={included_company_generalized_keywords}
               label="Company Description (Included)"
               placeholder="Select options"
@@ -530,7 +543,7 @@ function Filters(props: {
               setData={setIncludedCompanyGeneralizedKeywords}
             />
             <CustomSelect
-              maxWidth="16rem"
+              maxWidth="30vw"
               value={excluded_company_generalized_keywords}
               label="Company Description (Excluded)"
               placeholder="Select options"
@@ -542,7 +555,7 @@ function Filters(props: {
         </Tabs.Panel>
       </Tabs>
       {props.autofill && (
-        <Center pb="sm">
+        <Center>
           <Button
             variant="light"
             loading={loading}

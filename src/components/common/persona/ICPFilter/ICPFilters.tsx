@@ -39,16 +39,14 @@ const ICPFilters = () => {
   );
 
   return (
-    <Flex h={`calc(100vh)`}>
-      <Box w={"100%"}>
-        <ICPFiltersDashboard
-          isTesting={isTesting}
-          openFilter={() => {
-            openSideBar();
-            open();
-          }}
-        />
-      </Box>
+    <Flex h="100%" w={"100%"}>
+      <ICPFiltersDashboard
+        isTesting={isTesting}
+        openFilter={() => {
+          openSideBar();
+          open();
+        }}
+      />
     </Flex>
   );
 };

@@ -19,6 +19,9 @@ import {
   Select,
   ScrollArea,
   Pagination,
+  RingProgress,
+  NumberInput,
+  ActionIcon,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import {
@@ -49,7 +52,7 @@ import {
   uploadDrawerOpenState,
 } from "@atoms/personaAtoms";
 import { showNotification } from "@mantine/notifications";
-import { ProjectSelect } from "@common/library/ProjectSelect";
+import { ProjectSelect } from "./ProjectSelect";
 import PersonaUploadDrawer from "@drawers/PersonaUploadDrawer";
 import { PersonaOverview, ProspectICP } from "src";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -59,24 +62,21 @@ import {
   filterProspectsState,
   filterRuleSetState,
 } from "@atoms/icpFilterAtoms";
-import { IconX } from "@tabler/icons";
+import {
+  IconArrowLeft,
+  IconArrowRight,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronsRight,
+  IconFileDownload,
+  IconX,
+} from "@tabler/icons";
 import { navigateToPage } from "@utils/documentChange";
 import { useNavigate } from "react-router-dom";
 import BulkActions from "../BulkActions_new";
 import Filters from "./Filters";
 import { SidebarHeader } from "./SidebarHeader";
-
-const demoData = [
-  {
-    id: 1,
-    full_name: "Aakanksha Mitra",
-    title: "Staff Software Engineer",
-    company: "Airbnb",
-    linkedin_url: "https://www.linkedin.com/in/ronaldnolasco/",
-    icp_fit_score: "Very High",
-    icp_fit_reason: "Random Reason",
-  },
-];
+import { CSVLink } from "react-csv";
 
 const tabFilters = [
   {
@@ -119,20 +119,13 @@ const tabFilters = [
 const ICPFiltersDashboard: FC<{
   isTesting: boolean;
   openFilter: () => void;
-}> = ({ openFilter }) => {
+}> = () => {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [icpProspects, setIcpProspects] = useRecoilState(filterProspectsState);
   const navigate = useNavigate();
   const [isTesting, setIsTesting] = useState(false);
   const [removeProspectsLoading, setRemoveProspectsLoading] = useState(false);
-  const smScreenOrLess = useMediaQuery(
-    `(max-width: ${SCREEN_SIZES.LG})`,
-    false,
-    {
-      getInitialValueInEffect: true,
-    }
-  );
   const theme = useMantineTheme();
   const [globalSearch, setGlobalSearch] = useState("");
   const [selectedTab, setSelectedTab] = useState<{
@@ -156,8 +149,7 @@ const ICPFiltersDashboard: FC<{
     // todo(Aakash) remove this as it opens drawer
     // setUploadDrawerOpened(true);
   };
-  const [sideBarVisible, { toggle: toggleSideBar, open: openSideBar }] =
-    useDisclosure(false);
+  const [sideBarVisible, { toggle: toggleSideBar }] = useDisclosure(false);
   const [icpDashboard, setIcpDashboard] = useState<any[]>([]);
   const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
@@ -174,7 +166,6 @@ const ICPFiltersDashboard: FC<{
   const getSelectedRowCount = useMemo(() => {
     return Object.keys(selectedRows).length;
   }, [selectedRows]);
-  const globalRuleSetData = useRecoilValue(filterRuleSetState);
 
   useEffect(() => {
     let newFilters: DataGridFiltersState = [];
@@ -260,7 +251,7 @@ const ICPFiltersDashboard: FC<{
     }
   };
 
-  const { isFetching, refetch } = useQuery({
+  const { refetch } = useQuery({
     queryKey: [`query-get-icp-prospects`, { isTesting, invitedOnLinkedIn }],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
@@ -450,12 +441,37 @@ const ICPFiltersDashboard: FC<{
       </Flex>
 
       <Flex justify={"space-between"} ml={"-0.625rem"} mt={"sm"}>
-        <ProjectSelect
-          hideCloseButton
-          maw={"600px"}
-          w="100%"
-          rightLabel={
-            <>
+        <Flex>
+          <ProjectSelect
+            hideCloseButton
+            maw={"600px"}
+            w="100%"
+            onClick={(persona?: PersonaOverview) => {
+              navigateToPage(navigate, `/prioritize/${persona?.id}`);
+            }}
+          />
+          <Tooltip
+            label={`${currentProject?.num_unused_li_prospects}/${currentProject?.num_prospects} remaining`}
+            withArrow
+            withinPortal
+            color="blue"
+            fw={700}
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              sx={{
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+              }}
+              leftIcon={
+                <RingProgress
+                  thickness={5}
+                  size={30}
+                  sections={[{ value: 40, color: "blue" }]}
+                />
+              }
+            >
               <span
                 style={{
                   marginLeft: "6px",
@@ -463,20 +479,15 @@ const ICPFiltersDashboard: FC<{
                   marginRight: "4px",
                 }}
               >
-                {currentProject?.num_unused_li_prospects} /{" "}
-                {currentProject?.num_prospects}
-              </span>{" "}
-              remaining
-            </>
-          }
-          onClick={(persona?: PersonaOverview) => {
-            // queryClient.refetchQueries({
-            //   queryKey: [`query-get-icp-prospects`],
-            // });
-            // refetch();
-            navigateToPage(navigate, `/prioritize/${persona?.id}`);
-          }}
-        />
+                {((currentProject?.num_unused_li_prospects || 0) /
+                  (currentProject?.num_prospects || 1)) *
+                  100}
+                %
+              </span>
+            </Button>
+          </Tooltip>
+        </Flex>
+
         <Flex justify={"flex-end"} align={"center"} gap={"xs"}>
           <Box
             style={{
@@ -543,8 +554,10 @@ const ICPFiltersDashboard: FC<{
       </Flex>
 
       {Object.keys(selectedRows).length > 0 && (
-        <Flex justify={"flex-end"} align={"center"} gap={"xs"}>
-          <Text>Bulk Actions - 7 Selected</Text>
+        <Flex justify={"flex-end"} align={"center"} gap={"xs"} mt={"sm"}>
+          <Text>
+            Bulk Actions - {Object.keys(selectedRows).length} Selected
+          </Text>
           <Button
             color="red"
             leftIcon={<IconTrash size={14} />}
@@ -593,6 +606,20 @@ const ICPFiltersDashboard: FC<{
               });
             }}
           />
+          <CSVLink
+            data={displayProspects.filter((i, idx) =>
+              Object.keys(selectedRows).includes(String(idx))
+            )}
+          >
+            <Button
+              color="green"
+              leftIcon={<IconFileDownload size={14} />}
+              size="sm"
+              onClick={() => console.log()}
+            >
+              Download CSV
+            </Button>
+          </CSVLink>
         </Flex>
       )}
 
@@ -625,8 +652,8 @@ const ICPFiltersDashboard: FC<{
           </Box>
         </Flex>
       </Flex>
-      <Paper radius={"8px"} shadow="lg" mt={"xs"} py={"lg"}>
-        <Flex w={`calc(100vw - 13rem)`}>
+      <Paper radius={"8px"} shadow="lg" mt={"sm"}>
+        <Flex w={`calc(100vw - 13rem)`} gap={"sm"}>
           {sideBarVisible && (
             <Box
               sx={(theme) => ({
@@ -887,29 +914,112 @@ const ICPFiltersDashboard: FC<{
             }}
             components={{
               pagination: ({ table }) => (
-                <Flex justify={"space-between"} align={"center"} px={"sm"}>
-                  <Text>
-                    {" "}
-                    {table.getState().pagination.pageSize *
-                      table.getState().pagination.pageIndex +
-                      1}{" "}
-                    -
-                    {Math.min(
-                      table.getState().pagination.pageSize *
-                        (table.getState().pagination.pageIndex + 1),
-                      table.getPrePaginationRowModel().rows.length
-                    )}{" "}
-                    / {table.getPrePaginationRowModel().rows.length}
-                  </Text>
-                  <Pagination
-                    size={"sm"}
-                    value={table.getState().pagination.pageIndex + 1}
-                    total={table.getPageCount()}
-                    onChange={(pageNum) =>
-                      table.setPageIndex(Number(pageNum) - 1)
-                    }
-                    siblings={1}
-                  />
+                <Flex
+                  justify={"space-between"}
+                  align={"center"}
+                  px={"sm"}
+                  pb={"1.25rem"}
+                >
+                  <Flex align={"center"} gap={"sm"}>
+                    <Text fw={700} color="gray.6">
+                      Show
+                    </Text>
+
+                    <Flex align={"center"}>
+                      <NumberInput
+                        maw={100}
+                        value={table.getState().pagination.pageSize}
+                        onChange={(v) => {
+                          if (v) {
+                            table.setPageSize(v);
+                          }
+                        }}
+                      />
+                      <Flex
+                        sx={(theme) => ({
+                          borderTop: `1px solid ${theme.colors.gray[4]}`,
+                          borderRight: `1px solid ${theme.colors.gray[4]}`,
+                          borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                          marginLeft: "-2px",
+                          paddingLeft: "1rem",
+                          paddingRight: "1rem",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: "0.25rem",
+                        })}
+                        h={36}
+                      >
+                        <Text color="gray.5" fw={700} fz={14}>
+                          of {table.getPrePaginationRowModel().rows.length}
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </Flex>
+
+                  <Flex align={"center"} gap={"sm"}>
+                    <Flex align={"center"}>
+                      <Select
+                        maw={100}
+                        value={`${table.getState().pagination.pageIndex + 1}`}
+                        data={new Array(table.getPageCount())
+                          .fill(0)
+                          .map((i, idx) => ({
+                            label: String(idx + 1),
+                            value: String(idx + 1),
+                          }))}
+                        onChange={(v) => {
+                          table.setPageIndex(Number(v) - 1);
+                        }}
+                      />
+                      <Flex
+                        sx={(theme) => ({
+                          borderTop: `1px solid ${theme.colors.gray[4]}`,
+                          borderRight: `1px solid ${theme.colors.gray[4]}`,
+                          borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                          marginLeft: "-2px",
+                          paddingLeft: "1rem",
+                          paddingRight: "1rem",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: "0.25rem",
+                        })}
+                        h={36}
+                      >
+                        <Text color="gray.5" fw={700} fz={14}>
+                          of {table.getPageCount()} pages
+                        </Text>
+                      </Flex>
+                      <ActionIcon
+                        variant="default"
+                        color="gray.4"
+                        h={36}
+                        disabled={table.getState().pagination.pageIndex === 0}
+                        onClick={() => {
+                          table.setPageIndex(
+                            table.getState().pagination.pageIndex - 1
+                          );
+                        }}
+                      >
+                        <IconChevronLeft stroke={theme.colors.gray[4]} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="default"
+                        color="gray.4"
+                        h={36}
+                        disabled={
+                          table.getState().pagination.pageIndex ===
+                          table.getPageCount() - 1
+                        }
+                        onClick={() => {
+                          table.setPageIndex(
+                            table.getState().pagination.pageIndex + 1
+                          );
+                        }}
+                      >
+                        <IconChevronRight stroke={theme.colors.gray[4]} />
+                      </ActionIcon>
+                    </Flex>
+                  </Flex>
                 </Flex>
               ),
             }}

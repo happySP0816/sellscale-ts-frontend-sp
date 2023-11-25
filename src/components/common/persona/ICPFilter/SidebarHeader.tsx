@@ -134,7 +134,6 @@ export function SidebarHeader({
       <Flex
         direction={"column"}
         gap={"0.5rem"}
-        mt={"0.5rem"}
         sx={{
           borderBottom: "solid 1px #CCC",
           paddingBottom: "16px",
@@ -154,29 +153,36 @@ export function SidebarHeader({
           </Tooltip> */}
         </Flex>
 
-        <Flex px={"md"} align={"start"} gap={"0.5rem"} direction={"column"}>
-          <Tooltip label="(Test Mode) View sample of 50 prospects">
-            <SwitchWrapper>
-              <Box sx={{ textAlign: "center", justifyContent: "center" }}>
-                <Text fz="9px">Test Sample</Text>
-                <Flex>
-                  <Switch
-                    ml="md"
-                    mt="xs"
-                    size="xs"
-                    onChange={(event) => {
-                      setIsTesting(event.currentTarget.checked);
-                    }}
-                  />
-                  <Text size="xs" ml="6px" mt="10px">
-                    {" "}
-                    ℹ️
-                  </Text>
-                </Flex>
-              </Box>
-            </SwitchWrapper>
-          </Tooltip>
+        {currentScoringJob ? (
+          <>
+            <Flex justify="space-evenly">
+              <Text fz="10px" w="25%" ml="md" fw="bold">
+                Scoring...
+              </Text>
+              <Text fz="10px" w="50%" align="center">
+                {scoringTimeRemaining} mins remaining
+              </Text>
+              <Text fz="10px" w="25%" align="right" mr="md" fw="bold">
+                {scoringProgress}%
+              </Text>
+            </Flex>
+            <Progress ml="md" mr="md" value={scoringProgress} />
+          </>
+        ) : (
+          <>
+            <Flex justify="space-between">
+              <Text fz="10px" w="25%" ml="md" fw="bold">
+                Complete
+              </Text>
+              <Text fz="10px" w="25%" align="right" mr="md" fw="bold">
+                100%
+              </Text>
+            </Flex>
+            <Progress ml="md" mr="md" value={100} />
+          </>
+        )}
 
+        <Flex px={"md"} align={"start"} gap={"0.5rem"} direction={"row"}>
           <Button
             rightIcon={isTesting ? null : <IconArrowNarrowRight size={24} />}
             size="xs"
@@ -261,36 +267,29 @@ export function SidebarHeader({
           >
             {isTesting ? "Filter test sample" : "Start Filtering"}
           </Button>
-        </Flex>
 
-        {currentScoringJob ? (
-          <>
-            <Flex mt="md" justify="space-evenly">
-              <Text fz="10px" w="25%" ml="md" fw="bold">
-                Scoring...
-              </Text>
-              <Text fz="10px" w="50%" align="center">
-                {scoringTimeRemaining} mins remaining
-              </Text>
-              <Text fz="10px" w="25%" align="right" mr="md" fw="bold">
-                {scoringProgress}%
-              </Text>
-            </Flex>
-            <Progress ml="md" mr="md" value={scoringProgress} />
-          </>
-        ) : (
-          <>
-            <Flex mt="md" justify="space-between">
-              <Text fz="10px" w="25%" ml="md" fw="bold">
-                Complete
-              </Text>
-              <Text fz="10px" w="25%" align="right" mr="md" fw="bold">
-                100%
-              </Text>
-            </Flex>
-            <Progress ml="md" mr="md" value={100} />
-          </>
-        )}
+          <Tooltip label="(Test Mode) View sample of 50 prospects">
+            <SwitchWrapper>
+              <Box sx={{ textAlign: "center", justifyContent: "center" }}>
+                <Text fz="9px">Test Sample</Text>
+                <Flex>
+                  <Switch
+                    ml="md"
+                    mt="xs"
+                    size="xs"
+                    onChange={(event) => {
+                      setIsTesting(event.currentTarget.checked);
+                    }}
+                  />
+                  <Text size="xs" ml="6px" mt="10px">
+                    {" "}
+                    ℹ️
+                  </Text>
+                </Flex>
+              </Box>
+            </SwitchWrapper>
+          </Tooltip>
+        </Flex>
       </Flex>
     </>
   );

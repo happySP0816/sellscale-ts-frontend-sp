@@ -447,10 +447,6 @@ const ICPFiltersDashboard: FC<{
             maw={"600px"}
             w="100%"
             onClick={(persona?: PersonaOverview) => {
-              // queryClient.refetchQueries({
-              //   queryKey: [`query-get-icp-prospects`],
-              // });
-              // refetch();
               navigateToPage(navigate, `/prioritize/${persona?.id}`);
             }}
           />

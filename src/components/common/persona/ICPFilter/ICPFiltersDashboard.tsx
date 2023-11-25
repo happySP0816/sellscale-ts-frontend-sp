@@ -479,9 +479,9 @@ const ICPFiltersDashboard: FC<{
                   marginRight: "4px",
                 }}
               >
-                {((currentProject?.num_unused_li_prospects || 0) /
+                {Math.round(((currentProject?.num_unused_li_prospects || 0) /
                   (currentProject?.num_prospects || 1)) *
-                  100}
+                  1000) / 10}
                 %
               </span>
             </Button>

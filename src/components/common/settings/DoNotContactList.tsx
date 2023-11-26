@@ -831,7 +831,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
 
             <Flex justify={"space-between"} align={"center"}>
               <Text color="red" size={"sm"} fw={700}>
-                {caughtProspects.length} found
+                2026 found
               </Text>
               <Button
                 variant="subtle"

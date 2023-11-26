@@ -57,6 +57,7 @@ import OverviewPage from '@pages/OverviewPage';
 import ContactOverview from '@common/persona/ContactOverview';
 import TriggersPage from '@pages/TriggersPage';
 import TriggersList from '@pages/TriggersList';
+import EmailHome from '@common/resend_email/resend_email';
 
 const queryClient = new QueryClient();
 
@@ -417,6 +418,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: "/triggers",
         element: <RestrictedRoute page={<TriggersList />} />,
+      },
+      {
+        path: "/weekly-update",
+        element: <RestrictedRoute page={<EmailHome />} />,
       },
       {
         path: "*",

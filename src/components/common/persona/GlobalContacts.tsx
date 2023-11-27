@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Title, Table, TextInput, Box, Pagination, Button, Checkbox, Loader, Card, Flex } from '@mantine/core';
+import { Title, Table, TextInput, Box, Pagination, Button, Checkbox, Loader, Card, Flex, MultiSelect, Tabs } from '@mantine/core';
 import { Text, Badge } from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
@@ -27,19 +27,33 @@ const GlobalContacts = () => {
   const [loadingProspects, setLoadingProspects] = useState(false);
   const [allContactsSelected, setAllContactsSelected] = useState(false);
 
-  const [search, setSearch] = useState({
-    name: '',
-    title: '',
-    company: '',
-    industry: '',
-    userName: ''
+  const [prospectNames, setProspectNames]: any = useState([]);
+  const [prospectTitles, setProspectTitles]: any = useState([]);
+  const [prospectCompanies, setProspectCompanies]: any = useState([]);
+  const [prospectIndustries, setProspectIndustries]: any = useState([]);
+
+  const [search, setSearch]: any = useState({
+    name: [],
+    title: [],
+    company: [],
+    industry: [],
+    userName: []
   });
   const [currentPage, setCurrentPage]: any = useState(1);
-  const resultsPerPage = 25;
+  const resultsPerPage = 7;
 
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
+
+  const sortByFrequency = (array: any) => {
+    const frequency = array.reduce((acc: any, value: any) => {
+      acc[value] = (acc[value] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Array.from(new Set(array.sort((a: any, b: any) => frequency[b] - frequency[a])));
+  };
 
   useEffect(() => {
     setLoadingProspects(true);
@@ -49,17 +63,37 @@ const GlobalContacts = () => {
       },
     })
     .then(response => response.json())
-    .then(data => setContacts(data.data))
+    .then(data => {
+      setContacts(data.data)
+
+      const tempProspectNames: any = sortByFrequency(data.data.map((contact: GlobalContact) => contact.prospect_name).filter((x: any) => x));
+      const tempProspectTitles: any = sortByFrequency(data.data.map((contact: GlobalContact) => contact.prospect_title).filter((x: any) => x));
+      const tempProspectCompanies: any = sortByFrequency(data.data.map((contact: GlobalContact) => contact.prospect_company).filter((x: any) => x));
+      const tempProspectIndustries: any = sortByFrequency(data.data.map((contact: GlobalContact) => contact.prospect_industry).filter((x: any) => x));
+
+      setProspectNames(tempProspectNames);
+      setProspectTitles(tempProspectTitles);
+      setProspectCompanies(tempProspectCompanies);
+      setProspectIndustries(tempProspectIndustries);
+    })
     .finally(() => setLoadingProspects(false))
     .catch(error => console.error('Error fetching contacts:', error))
   }, [userToken]);
 
+  const isSearchTermIncluded = (searchTerms: any, contactProperty: any) => {
+    return searchTerms.some((term: string) => contactProperty?.toLowerCase().includes(term?.toLowerCase()));
+  };
+
+  const isSearchTermDiscluded = (searchTerms: any, contactProperty: any) => {
+    return searchTerms.every((term: string) => !contactProperty?.toLowerCase().includes(term?.toLowerCase()));
+  }
+
   const filteredContacts = contacts.filter((contact: GlobalContact) =>
-    contact.prospect_name?.toLowerCase().includes(search.name.toLowerCase()) &&
-    contact.prospect_title?.toLowerCase().includes(search.title.toLowerCase()) &&
-    contact.prospect_company?.toLowerCase().includes(search.company.toLowerCase()) &&
-    contact.prospect_industry?.toLowerCase().includes(search.industry.toLowerCase()) &&
-    contact.user_name?.toLowerCase().includes(search.userName.toLowerCase())
+    (search.name.length === 0 || isSearchTermIncluded(search.name, contact.prospect_name)) &&
+    (search.title.length === 0 || isSearchTermIncluded(search.title, contact.prospect_title)) &&
+    (search.company.length === 0 || isSearchTermIncluded(search.company, contact.prospect_company)) &&
+    (search.industry.length === 0 || isSearchTermIncluded(search.industry, contact.prospect_industry)) &&
+    (search.userName.length === 0 || isSearchTermIncluded(search.userName, contact.user_name))
   );
 
   const startIndex = (currentPage - 1) * resultsPerPage;
@@ -129,38 +163,74 @@ const GlobalContacts = () => {
       <Box sx={{ display: 'flex', height: '100%' }} mt='xs'>
         
         <Card withBorder sx={{ width: '20%', padding: '20px' }} bgr={'0'}>
-          <TextInput
-            mb='xs'
-            placeholder="Search by Name"
-            value={search.name}
-            onChange={(e) => setSearch({ ...search, name: e.target.value })}
-            icon={<IconUser size={14} />}
-            label="Full Name"
-          />
-          <TextInput
-            mb='xs'
-            placeholder="Search by Title"
-            value={search.title}
-            onChange={(e) => setSearch({ ...search, title: e.target.value })}
-            icon={<IconBriefcase size={14} />}
-            label="Title"
-          />
-          <TextInput
-            mb='xs'
-            placeholder="Search by Company"
-            value={search.company}
-            onChange={(e) => setSearch({ ...search, company: e.target.value })}
-            icon={<IconBuilding size={14} />}
-            label="Company"
-          />
-          <TextInput
-            mb='xs'
-            placeholder="Search by Industry"
-            value={search.industry}
-            onChange={(e) => setSearch({ ...search, industry: e.target.value })}
-            icon={<IconBuildingFactory size={14} />}
-            label="Industry"
-          />
+          <Tabs defaultValue="person">
+            <Tabs.List>
+              <Tabs.Tab value="person">
+                Person
+              </Tabs.Tab>
+              <Tabs.Tab value="company">
+                Company
+              </Tabs.Tab>
+            </Tabs.List>
+          
+
+            <Tabs.Panel value="person">
+              <MultiSelect
+                withinPortal
+                data={prospectNames}
+                creatable
+                searchable
+                value={search.name}
+                onChange={(value) => setSearch({ ...search, name: value })}
+                label="Full Name"
+                placeholder="Search by Name"
+                getCreateLabel={(query) => `+ Add a filter for ${query}`}
+                onCreate={(query: any) => {
+                  const item: any = { value: query, label: query };
+                  setProspectNames((current: any) => [...current, item]);
+                  return item;
+                }}
+              />
+              <MultiSelect
+                withinPortal
+                data={prospectTitles}
+                creatable
+                searchable
+                getCreateLabel={(query) => `+ Add a filter for ${query}`}
+                onCreate={(query: any) => {
+                  const item: any = { value: query, label: query };
+                  setProspectTitles((current: any) => [...current, item]);
+                  return item;
+                }}
+                value={search.title}
+                onChange={(value) => setSearch({ ...search, title: value })}
+                label="Title"
+                placeholder="Search by Title"
+              />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="company">
+              <MultiSelect
+                data={prospectCompanies}
+                creatable
+                searchable
+                value={search.company}
+                onChange={(value) => setSearch({ ...search, company: value })}
+                label="Company"
+                placeholder="Search by Company"
+              />
+              <MultiSelect
+                data={prospectIndustries}
+                creatable
+                searchable
+                value={search.industry}
+                onChange={(value) => setSearch({ ...search, industry: value })}
+                label="Industry"
+                placeholder="Search by Industry"
+              />
+            </Tabs.Panel>
+          </Tabs>
+          
           <Text>
             {filteredContacts.length} prospects of {contacts.length} total
           </Text>

@@ -88,6 +88,7 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
   const [reschedule, setReschedule] = useState(false);
   const [showedUp, setShowedUp] = useState(false);
   const [followup, setFollowup] = useState(false);
+  const [noShow, setNoShow] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -105,6 +106,7 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       setReschedule(false);
       setShowedUp(true);
     } else {
+      setNoShow(true);
       setReschedule(false);
       setShowedUp(false);
     }
@@ -181,9 +183,6 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       <Avatar src={Assistant} alt='AI Assistant' size={30} />
       <Text fz='sm'>You scheduled a demo - how did it go? Your feedback will be used to improve our AI.</Text>
 
-      {/* <div style={{ marginTop: 20 }}>
-        <DemoFeedbackCard prospect={activeProspect} />
-      </div> */}
 
       <form onSubmit={form.onSubmit((values) => submitDemoFeedback(values))}>
         <Stack style={{ marginTop: 20 }}>
@@ -245,12 +244,6 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
         <Flex
           justify='center'
           mt='xl'
-        // style={{
-        //   position: 'absolute',
-        //   bottom: 0,
-        //   left: '50%',
-        //   transform: 'translate(-50%, -50%)',
-        // }}
         >
           <Group>
             <Button hidden={reschedule} type='submit' color='green' radius='xl'>

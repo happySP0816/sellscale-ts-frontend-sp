@@ -105,7 +105,6 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
   });
 
   const moveToScheduling = async () => {
-    alert('move to scheduling');
     if (!activeProspect) return;
 
     await postSubmitDemoFeedback(

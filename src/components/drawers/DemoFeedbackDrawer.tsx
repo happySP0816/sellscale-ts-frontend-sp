@@ -29,6 +29,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import {
   channelToIcon,
+  sendAttemptingRescheduleNotification,
   updateChannelStatus,
 } from '../common/prospectDetails/ProspectDetailsChangeStatus';
 import { userTokenState } from '@atoms/userAtoms';
@@ -120,8 +121,16 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       activeProspect.id,
       userToken,
       'LINKEDIN',
-      'ACTIVE_CONVO_SCHEDULING'
+      'ACTIVE_CONVO_SCHEDULING',
+      false,
+      true
     );
+
+    await sendAttemptingRescheduleNotification(
+      userToken,
+      activeProspect.id,
+    )
+
     queryClient.invalidateQueries({
       queryKey: ["query-dash-get-prospects"],
     });

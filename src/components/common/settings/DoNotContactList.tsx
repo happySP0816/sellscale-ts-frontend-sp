@@ -24,6 +24,8 @@ import {
   IconAlertCircle,
   IconKeyboard,
   IconRefresh,
+  IconChevronDown,
+  IconTrash,
 } from "@tabler/icons";
 import { INDUSTRIES, LOCATION, TITLES } from "./DoNotContactListConstants";
 import { openConfirmModal } from "@mantine/modals";
@@ -32,6 +34,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
   const [userToken] = useRecoilState(userTokenState);
   const [fetchedData, setFetchedData] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [accordion, setAccordion] = useState("account");
   const [keywords, setKeywords] = useState<{ value: string; label: string }[]>([
     // { value: "staffing", label: "staffing" },
   ]);
@@ -296,6 +299,10 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
     setLoading(false);
   };
 
+  const handleAccordion = (type: string) => {
+    setAccordion(type);
+  };
+
   return (
     <Box m="xs" p="md">
       <Box>
@@ -364,13 +371,17 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
               </Text>
             </Alert>
             <Flex align={"center"} gap={"sm"}>
-              <Button leftIcon={<IconRefresh />} onClick={fetchCaughtProspects}>
+              <Button
+                leftIcon={<IconRefresh size={14} />}
+                onClick={fetchCaughtProspects}
+              >
                 Refresh
               </Button>
               <Button
                 color="red"
                 onClick={openProspectRemovalModal}
                 disabled={needsSave}
+                leftIcon={<IconTrash size={14} />}
               >
                 Remove {caughtProspects.length} Prospects
               </Button>
@@ -381,443 +392,11 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
       <Flex mt={"md"}>
         <Box
           w="25%"
-          bg={"white"}
           sx={{
             borderRadius: 12,
           }}
         >
-          <Accordion
-            defaultValue="accountData"
-            styles={(theme) => ({
-              control: {
-                backgroundColor: theme.colors.gray[2],
-
-                "&[data-active]": {
-                  backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
-                  color: theme.white,
-                },
-              },
-            })}
-          >
-            <Accordion.Item value="accountData">
-              <Accordion.Control
-                sx={{
-                  borderTopRightRadius: 12,
-                  borderTopLeftRadius: 12,
-                }}
-              >
-                <Title order={4}>Account Data</Title>
-              </Accordion.Control>
-              <Accordion.Panel>
-                <Card withBorder mb="xs">
-                  <Title order={6}>👾 Exclude by Company Names </Title>
-                  <MultiSelect
-                    withinPortal
-                    mt="md"
-                    data={companyNames}
-                    placeholder="Select or create companies"
-                    searchable
-                    creatable
-                    value={selectedCompanies}
-                    onChange={(value: any) => {
-                      setSelectedCompanies(value);
-                      setNeedsSave(true);
-                      setSaveAsNothing(false);
-                    }}
-                    getCreateLabel={(query) => `+ Add a filter for ${query}`}
-                    onCreate={(query: any) => {
-                      const item: any = { value: query, label: query };
-                      setCompanyNames((current: any) => [...current, item]);
-                      return item;
-                    }}
-                    searchValue={companySearchValue}
-                    onSearchChange={(query) => {
-                      // If search value includes any newlines, add those items
-                      let newValue = query;
-                      let newCompanyNames: {
-                        value: string;
-                        label: string;
-                      }[] = [];
-
-                      const matches = [...query.matchAll(/(.*?)\\n/gm)];
-                      for (const match of matches) {
-                        newCompanyNames.push({
-                          value: match[1],
-                          label: match[1],
-                        });
-                        newValue = newValue.replace(match[0], "");
-                      }
-
-                      // If there are more than 4 being added, add the last input to the list as well
-                      if (matches.length > 4) {
-                        newCompanyNames.push({
-                          value: newValue,
-                          label: newValue,
-                        });
-                        newValue = "";
-                      }
-
-                      if (matches.length > 0) {
-                        setCompanyNames((current) => [
-                          ...current,
-                          ...newCompanyNames,
-                        ]);
-                        setSelectedCompanies((current) => [
-                          ...current,
-                          ...newCompanyNames.map((x) => x.value),
-                        ]);
-                        setNeedsSave(true);
-                        setSaveAsNothing(false);
-                      }
-                      setCompanySearchValue(newValue);
-                    }}
-                  />
-                </Card>
-
-                {/* Company Keywords */}
-                <Card withBorder mb="xs">
-                  <Title order={6}>✨ Exclude by Keywords </Title>
-                  <MultiSelect
-                    withinPortal
-                    mt="md"
-                    data={keywords}
-                    placeholder="Select or create keywords"
-                    searchable
-                    creatable
-                    value={selectedKeywords}
-                    onChange={(value: any) => {
-                      setSelectedKeywords(value);
-                      setNeedsSave(true);
-                      setSaveAsNothing(false);
-                    }}
-                    getCreateLabel={(query) => `+ Add a filter for ${query}`}
-                    onCreate={(query: any) => {
-                      const item: any = { value: query, label: query };
-                      setKeywords((current: any) => [...current, item]);
-                      return item;
-                    }}
-                    searchValue={keywordSearchValue}
-                    onSearchChange={(query) => {
-                      // If search value includes any newlines, add those items
-                      let newValue = query;
-                      let newKeywords: { value: string; label: string }[] = [];
-
-                      const matches = [...query.matchAll(/(.*?)\\n/gm)];
-                      for (const match of matches) {
-                        newKeywords.push({
-                          value: match[1],
-                          label: match[1],
-                        });
-                        newValue = newValue.replace(match[0], "");
-                      }
-
-                      // If there are more than 4 being added, add the last input to the list as well
-                      if (matches.length > 4) {
-                        newKeywords.push({
-                          value: newValue,
-                          label: newValue,
-                        });
-                        newValue = "";
-                      }
-
-                      if (matches.length > 0) {
-                        setKeywords((current) => [...current, ...newKeywords]);
-                        setSelectedKeywords((current) => [
-                          ...current,
-                          ...newKeywords.map((x) => x.value),
-                        ]);
-                        setNeedsSave(true);
-                        setSaveAsNothing(false);
-                      }
-                      setKeywordSearchValue(newValue);
-                    }}
-                  />
-                </Card>
-
-                {/* Company Location Keywords */}
-                <Card withBorder mb="xs">
-                  <Title order={6}>🌍 Exclude by Company Location </Title>
-                  <MultiSelect
-                    withinPortal
-                    mt="md"
-                    data={LOCATION.map((x) => ({
-                      value: x,
-                      label: x,
-                    })).concat(companyLocations)}
-                    placeholder="Select or create location"
-                    searchable
-                    creatable
-                    value={selectedCompanyLocations}
-                    onChange={(value: any) => {
-                      setSelectedCompanyLocations(value);
-                      setNeedsSave(true);
-                      setSaveAsNothing(false);
-                    }}
-                    getCreateLabel={(query) => `+ Add a filter for ${query}`}
-                    onCreate={(query: any) => {
-                      const item: any = { value: query, label: query };
-                      setCompanyLocations((current: any) => [...current, item]);
-                      return item;
-                    }}
-                    searchValue={companyLocationSearchValue}
-                    onSearchChange={(query) => {
-                      // If search value includes any newlines, add those items
-                      let newValue = query;
-                      let newKeywords: { value: string; label: string }[] = [];
-
-                      const matches = [...query.matchAll(/(.*?)\\n/gm)];
-                      for (const match of matches) {
-                        newKeywords.push({
-                          value: match[1],
-                          label: match[1],
-                        });
-                        newValue = newValue.replace(match[0], "");
-                      }
-
-                      // If there are more than 4 being added, add the last input to the list as well
-                      if (matches.length > 4) {
-                        newKeywords.push({
-                          value: newValue,
-                          label: newValue,
-                        });
-                        newValue = "";
-                      }
-
-                      if (matches.length > 0) {
-                        setCompanyLocations((current) => [
-                          ...current,
-                          ...newKeywords,
-                        ]);
-                        setSelectedCompanyLocations((current) => [
-                          ...current,
-                          ...newKeywords.map((x) => x.value),
-                        ]);
-                        setNeedsSave(true);
-                        setSaveAsNothing(false);
-                      }
-                      setCompanyLocationSearchValue(newValue);
-                    }}
-                  />
-                </Card>
-
-                {/* Company Industry */}
-                <Card withBorder mb="xs">
-                  <Title order={6}>🔎 Exclude by Company Industries </Title>
-                  <MultiSelect
-                    withinPortal
-                    mt="md"
-                    data={INDUSTRIES.map((x) => ({
-                      value: x,
-                      label: x,
-                    })).concat(companyIndustries)}
-                    placeholder="Select or create industry"
-                    searchable
-                    creatable
-                    value={selectedCompanyIndustries}
-                    onChange={(value: any) => {
-                      setSelectedCompanyIndustries(value);
-                      setNeedsSave(true);
-                      setSaveAsNothing(false);
-                    }}
-                    getCreateLabel={(query) => `+ Add a filter for ${query}`}
-                    onCreate={(query: any) => {
-                      const item: any = { value: query, label: query };
-                      setCompanyIndustries((current: any) => [
-                        ...current,
-                        item,
-                      ]);
-                      return item;
-                    }}
-                    searchValue={companyIndustrySearchValue}
-                    onSearchChange={(query) => {
-                      // If search value includes any newlines, add those items
-                      let newValue = query;
-                      let newKeywords: { value: string; label: string }[] = [];
-
-                      const matches = [...query.matchAll(/(.*?)\\n/gm)];
-                      for (const match of matches) {
-                        newKeywords.push({
-                          value: match[1],
-                          label: match[1],
-                        });
-                        newValue = newValue
-                          .replace(match[0], "")
-                          .replace(/(^\s+|\s+$)/g, "");
-                      }
-
-                      // If there are more than 4 being added, add the last input to the list as well
-                      if (matches.length > 4) {
-                        newKeywords.push({
-                          value: newValue,
-                          label: newValue,
-                        });
-                        newValue = "";
-                      }
-
-                      if (matches.length > 0) {
-                        setCompanyIndustries((current) => [
-                          ...current,
-                          ...newKeywords,
-                        ]);
-                        setSelectedCompanyIndustries((current) => [
-                          ...current,
-                          ...newKeywords.map((x) => x.value),
-                        ]);
-                        setNeedsSave(true);
-                        setSaveAsNothing(false);
-                      }
-                      setCompanyIndustrySearchValue(newValue);
-                    }}
-                  />
-                </Card>
-              </Accordion.Panel>
-            </Accordion.Item>
-
-            <Accordion.Item value="flexibility">
-              <Accordion.Control>
-                <Title order={4}>Prospect Data</Title>
-              </Accordion.Control>
-              <Accordion.Panel>
-                {/* Prospect Title */}
-                <Card withBorder mb="xs">
-                  <Title order={6}>💼 Exclude by Prospect Titles </Title>
-                  <MultiSelect
-                    withinPortal
-                    mt="md"
-                    data={TITLES.map((x) => ({ value: x, label: x })).concat(
-                      prospectTitles
-                    )}
-                    placeholder="Select or create title"
-                    searchable
-                    creatable
-                    value={selectedProspectTitles}
-                    onChange={(value: any) => {
-                      setSelectedProspectTitles(value);
-                      setNeedsSave(true);
-                      setSaveAsNothing(false);
-                    }}
-                    getCreateLabel={(query) => `+ Add a filter for ${query}`}
-                    onCreate={(query: any) => {
-                      const item: any = { value: query, label: query };
-                      setProspectTitles((current: any) => [...current, item]);
-                      return item;
-                    }}
-                    searchValue={prospectTitleSearchValue}
-                    onSearchChange={(query) => {
-                      // If search value includes any newlines, add those items
-                      let newValue = query;
-                      let newKeywords: { value: string; label: string }[] = [];
-
-                      const matches = [...query.matchAll(/(.*?)\\n/gm)];
-                      for (const match of matches) {
-                        newKeywords.push({
-                          value: match[1],
-                          label: match[1],
-                        });
-                        newValue = newValue.replace(match[0], "");
-                      }
-
-                      // If there are more than 4 being added, add the last input to the list as well
-                      if (matches.length > 4) {
-                        newKeywords.push({
-                          value: newValue,
-                          label: newValue,
-                        });
-                        newValue = "";
-                      }
-
-                      if (matches.length > 0) {
-                        setProspectTitles((current) => [
-                          ...current,
-                          ...newKeywords,
-                        ]);
-                        setSelectedProspectTitles((current) => [
-                          ...current,
-                          ...newKeywords.map((x) => x.value),
-                        ]);
-                        setNeedsSave(true);
-                        setSaveAsNothing(false);
-                      }
-
-                      setProspectTitleSearchValue(newValue);
-                    }}
-                  />
-                </Card>
-
-                {/* Prospect Location */}
-                <Card withBorder mb="xs">
-                  <Title order={6}>🌍 Exclude by Prospect Locations </Title>
-                  <MultiSelect
-                    withinPortal
-                    mt="md"
-                    data={LOCATION.map((x) => ({
-                      value: x,
-                      label: x,
-                    })).concat(prospectLocations)}
-                    placeholder="Select or create location"
-                    searchable
-                    creatable
-                    value={selectedProspectLocations}
-                    onChange={(value: any) => {
-                      setSelectedProspectLocations(value);
-                      setNeedsSave(true);
-                      setSaveAsNothing(false);
-                    }}
-                    getCreateLabel={(query) => `+ Add a filter for ${query}`}
-                    onCreate={(query: any) => {
-                      const item: any = { value: query, label: query };
-                      setProspectLocations((current: any) => [
-                        ...current,
-                        item,
-                      ]);
-                      return item;
-                    }}
-                    searchValue={prospectLocationSearchValue}
-                    onSearchChange={(query) => {
-                      // If search value includes any newlines, add those items
-                      let newValue = query;
-                      let newKeywords: { value: string; label: string }[] = [];
-
-                      const matches = [...query.matchAll(/(.*?)\\n/gm)];
-                      for (const match of matches) {
-                        newKeywords.push({
-                          value: match[1],
-                          label: match[1],
-                        });
-                        newValue = newValue.replace(match[0], "");
-                      }
-
-                      // If there are more than 4 being added, add the last input to the list as well
-                      if (matches.length > 4) {
-                        newKeywords.push({
-                          value: newValue,
-                          label: newValue,
-                        });
-                        newValue = "";
-                      }
-
-                      if (matches.length > 0) {
-                        setProspectLocations((current) => [
-                          ...current,
-                          ...newKeywords,
-                        ]);
-                        setSelectedProspectLocations((current) => [
-                          ...current,
-                          ...newKeywords.map((x) => x.value),
-                        ]);
-                        setNeedsSave(true);
-                        setSaveAsNothing(false);
-                      }
-
-                      setProspectLocationSearchValue(newValue);
-                    }}
-                  />
-                </Card>
-              </Accordion.Panel>
-            </Accordion.Item>
-          </Accordion>
-
-          <Flex mb="xs" px={"1rem"} direction={"column"} mt="md" gap={"sm"}>
+          <Flex mt={"md"} mb={"md"} align={"center"} justify={"space-between"}>
             <Button
               size="md"
               w={"100%"}
@@ -826,35 +405,657 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
               }}
               disabled={!needsSave}
             >
-              {saveAsNothing ? "Save with no filters" : "Save filters"}
+              {saveAsNothing ? "SAVE WITH NO FILTERS" : "SAVE FILTERS"}
             </Button>
-
-            <Flex justify={"space-between"} align={"center"}>
-              <Text color="red" size={"sm"} fw={700}>
-                2026 found
-              </Text>
-              <Button
-                variant="subtle"
-                color="gray"
-                size="sm"
-                disabled={!needsSave}
-                onClick={() => {
-                  // reset back to original values
-                  setSelectedCompanies([]);
-                  setSelectedKeywords([]);
-                  setSelectedCompanyLocations([]);
-                  setSelectedCompanyIndustries([]);
-                  setSelectedProspectTitles([]);
-                  setSelectedProspectLocations([]);
-                  setNeedsSave(false);
-
-                  getKeywords();
+            <div style={{ width: "100%", textAlign: "center" }}>
+              <a
+                style={{
+                  width: "100%",
+                  textAlign: "center",
+                  textDecoration: "normal",
+                  color: "#8a8891",
+                  borderBottom: "1px solid",
+                  borderStyle: "dashed",
+                  borderTop: "0px",
+                  borderLeft: "0px",
+                  borderRight: "0px",
+                }}
+                onClick={() => console.log("")}
+              >
+                Clear Filters
+              </a>
+            </div>
+          </Flex>
+          <Accordion
+            defaultValue="accountData"
+            styles={(theme) => ({
+              control: {
+                border: "1.5px solid #eceaee",
+                "&[data-active]": {
+                  backgroundColor: "#ebf2fd",
+                  color: "#3c85ee",
+                  border: "1.5px solid #c8ddfa",
+                  borderBottom: "0px",
+                  borderTopLeftRadius: 12,
+                  borderTopRightRadius: 12,
+                  borderBottomLeftRadius: 0,
+                  borderBottomRightRadius: 0,
+                },
+              },
+            })}
+          >
+            <Accordion.Item
+              value="accountData"
+              my={"md"}
+              sx={{ borderBottom: "0px" }}
+            >
+              <Accordion.Control
+                sx={{ borderRadius: 12 }}
+                onClick={() => handleAccordion("account")}
+              >
+                <Flex justify={"space-between"} align={"center"}>
+                  <Title order={4}>Account Data</Title>
+                  <Title
+                    style={{
+                      borderRadius: "100%",
+                      width: "18px",
+                      height: "18px",
+                      fontSize: "10px",
+                      alignItems: "center",
+                      display: "flex",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      background:
+                        accordion === "account" ? "#3c85ee" : "#eceaee",
+                      color: accordion === "account" ? "white" : "",
+                    }}
+                  >
+                    4
+                  </Title>
+                </Flex>
+              </Accordion.Control>
+              <Accordion.Panel
+                bg={"white"}
+                sx={{
+                  border: "1.5px solid #c8ddfa",
+                  borderBottomLeftRadius: 12,
+                  borderBottomRightRadius: 12,
                 }}
               >
-                Clear Changes
-              </Button>
-            </Flex>
-          </Flex>
+                <Title order={6} color="#8a8891" mt={"md"}>
+                  EXCLUDE BY{" "}
+                </Title>
+                <Accordion
+                  style={{
+                    border: "1px solid #eceaee",
+                    borderBottom: "0px",
+                    borderRadius: "6px",
+                  }}
+                  mt={"md"}
+                >
+                  <Accordion.Item value="test">
+                    <Accordion.Control style={{ color: "#5b5b5b" }}>
+                      Company Names
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                      <MultiSelect
+                        withinPortal
+                        variant={
+                          selectedCompanies.length ? "unstyled" : "default"
+                        }
+                        data={companyNames}
+                        rightSection={<></>}
+                        placeholder="Company Names"
+                        searchable
+                        creatable
+                        value={selectedCompanies}
+                        onChange={(value: any) => {
+                          setSelectedCompanies(value);
+                          setNeedsSave(true);
+                          setSaveAsNothing(false);
+                        }}
+                        getCreateLabel={(query) =>
+                          `+ Add a filter for ${query}`
+                        }
+                        onCreate={(query: any) => {
+                          const item: any = { value: query, label: query };
+                          setCompanyNames((current: any) => [...current, item]);
+                          return item;
+                        }}
+                        searchValue={companySearchValue}
+                        onSearchChange={(query) => {
+                          // If search value includes any newlines, add those items
+                          let newValue = query;
+                          let newCompanyNames: {
+                            value: string;
+                            label: string;
+                          }[] = [];
+
+                          const matches = [...query.matchAll(/(.*?)\\n/gm)];
+                          for (const match of matches) {
+                            newCompanyNames.push({
+                              value: match[1],
+                              label: match[1],
+                            });
+                            newValue = newValue.replace(match[0], "");
+                          }
+
+                          // If there are more than 4 being added, add the last input to the list as well
+                          if (matches.length > 4) {
+                            newCompanyNames.push({
+                              value: newValue,
+                              label: newValue,
+                            });
+                            newValue = "";
+                          }
+
+                          if (matches.length > 0) {
+                            setCompanyNames((current) => [
+                              ...current,
+                              ...newCompanyNames,
+                            ]);
+                            setSelectedCompanies((current) => [
+                              ...current,
+                              ...newCompanyNames.map((x) => x.value),
+                            ]);
+                            setNeedsSave(true);
+                            setSaveAsNothing(false);
+                          }
+                          setCompanySearchValue(newValue);
+                        }}
+                      />
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
+
+                {/* Company Keywords */}
+                <Accordion
+                  style={{
+                    border: "1px solid #eceaee",
+                    borderBottom: "0px",
+                    borderRadius: "6px",
+                  }}
+                  mt={"md"}
+                >
+                  <Accordion.Item value="test">
+                    <Accordion.Control style={{ color: "#5b5b5b" }}>
+                      Keywords
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                      <MultiSelect
+                        withinPortal
+                        variant={
+                          selectedKeywords.length ? "unstyled" : "default"
+                        }
+                        data={keywords}
+                        placeholder="Keywords"
+                        searchable
+                        creatable
+                        value={selectedKeywords}
+                        onChange={(value: any) => {
+                          setSelectedKeywords(value);
+                          setNeedsSave(true);
+                          setSaveAsNothing(false);
+                        }}
+                        getCreateLabel={(query) =>
+                          `+ Add a filter for ${query}`
+                        }
+                        onCreate={(query: any) => {
+                          const item: any = { value: query, label: query };
+                          setKeywords((current: any) => [...current, item]);
+                          return item;
+                        }}
+                        searchValue={keywordSearchValue}
+                        onSearchChange={(query) => {
+                          // If search value includes any newlines, add those items
+                          let newValue = query;
+                          let newKeywords: { value: string; label: string }[] =
+                            [];
+
+                          const matches = [...query.matchAll(/(.*?)\\n/gm)];
+                          for (const match of matches) {
+                            newKeywords.push({
+                              value: match[1],
+                              label: match[1],
+                            });
+                            newValue = newValue.replace(match[0], "");
+                          }
+
+                          // If there are more than 4 being added, add the last input to the list as well
+                          if (matches.length > 4) {
+                            newKeywords.push({
+                              value: newValue,
+                              label: newValue,
+                            });
+                            newValue = "";
+                          }
+
+                          if (matches.length > 0) {
+                            setKeywords((current) => [
+                              ...current,
+                              ...newKeywords,
+                            ]);
+                            setSelectedKeywords((current) => [
+                              ...current,
+                              ...newKeywords.map((x) => x.value),
+                            ]);
+                            setNeedsSave(true);
+                            setSaveAsNothing(false);
+                          }
+                          setKeywordSearchValue(newValue);
+                        }}
+                      />
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
+
+                {/* Company Location Keywords */}
+                <Accordion
+                  style={{
+                    border: "1px solid #eceaee",
+                    borderBottom: "0px",
+                    borderRadius: "6px",
+                  }}
+                  mt={"md"}
+                >
+                  <Accordion.Item value="test">
+                    <Accordion.Control style={{ color: "#5b5b5b" }}>
+                      Location
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                      <MultiSelect
+                        withinPortal
+                        variant={
+                          selectedCompanyLocations.length
+                            ? "unstyled"
+                            : "default"
+                        }
+                        data={LOCATION.map((x) => ({
+                          value: x,
+                          label: x,
+                        })).concat(companyLocations)}
+                        placeholder="Location"
+                        searchable
+                        creatable
+                        value={selectedCompanyLocations}
+                        onChange={(value: any) => {
+                          setSelectedCompanyLocations(value);
+                          setNeedsSave(true);
+                          setSaveAsNothing(false);
+                        }}
+                        getCreateLabel={(query) =>
+                          `+ Add a filter for ${query}`
+                        }
+                        onCreate={(query: any) => {
+                          const item: any = { value: query, label: query };
+                          setCompanyLocations((current: any) => [
+                            ...current,
+                            item,
+                          ]);
+                          return item;
+                        }}
+                        searchValue={companyLocationSearchValue}
+                        onSearchChange={(query) => {
+                          // If search value includes any newlines, add those items
+                          let newValue = query;
+                          let newKeywords: { value: string; label: string }[] =
+                            [];
+
+                          const matches = [...query.matchAll(/(.*?)\\n/gm)];
+                          for (const match of matches) {
+                            newKeywords.push({
+                              value: match[1],
+                              label: match[1],
+                            });
+                            newValue = newValue.replace(match[0], "");
+                          }
+
+                          // If there are more than 4 being added, add the last input to the list as well
+                          if (matches.length > 4) {
+                            newKeywords.push({
+                              value: newValue,
+                              label: newValue,
+                            });
+                            newValue = "";
+                          }
+
+                          if (matches.length > 0) {
+                            setCompanyLocations((current) => [
+                              ...current,
+                              ...newKeywords,
+                            ]);
+                            setSelectedCompanyLocations((current) => [
+                              ...current,
+                              ...newKeywords.map((x) => x.value),
+                            ]);
+                            setNeedsSave(true);
+                            setSaveAsNothing(false);
+                          }
+                          setCompanyLocationSearchValue(newValue);
+                        }}
+                      />
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
+
+                {/* Company Industry */}
+                <Accordion
+                  style={{
+                    border: "1px solid #eceaee",
+                    borderBottom: "0px",
+                    borderRadius: "6px",
+                  }}
+                  mt={"md"}
+                >
+                  <Accordion.Item value="test">
+                    <Accordion.Control style={{ color: "#5b5b5b" }}>
+                      Industry
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                      <MultiSelect
+                        withinPortal
+                        variant={
+                          selectedCompanyIndustries.length
+                            ? "unstyled"
+                            : "default"
+                        }
+                        data={INDUSTRIES.map((x) => ({
+                          value: x,
+                          label: x,
+                        })).concat(companyIndustries)}
+                        placeholder="Industry"
+                        searchable
+                        creatable
+                        value={selectedCompanyIndustries}
+                        onChange={(value: any) => {
+                          setSelectedCompanyIndustries(value);
+                          setNeedsSave(true);
+                          setSaveAsNothing(false);
+                        }}
+                        getCreateLabel={(query) =>
+                          `+ Add a filter for ${query}`
+                        }
+                        onCreate={(query: any) => {
+                          const item: any = { value: query, label: query };
+                          setCompanyIndustries((current: any) => [
+                            ...current,
+                            item,
+                          ]);
+                          return item;
+                        }}
+                        searchValue={companyIndustrySearchValue}
+                        onSearchChange={(query) => {
+                          // If search value includes any newlines, add those items
+                          let newValue = query;
+                          let newKeywords: { value: string; label: string }[] =
+                            [];
+
+                          const matches = [...query.matchAll(/(.*?)\\n/gm)];
+                          for (const match of matches) {
+                            newKeywords.push({
+                              value: match[1],
+                              label: match[1],
+                            });
+                            newValue = newValue
+                              .replace(match[0], "")
+                              .replace(/(^\s+|\s+$)/g, "");
+                          }
+
+                          // If there are more than 4 being added, add the last input to the list as well
+                          if (matches.length > 4) {
+                            newKeywords.push({
+                              value: newValue,
+                              label: newValue,
+                            });
+                            newValue = "";
+                          }
+
+                          if (matches.length > 0) {
+                            setCompanyIndustries((current) => [
+                              ...current,
+                              ...newKeywords,
+                            ]);
+                            setSelectedCompanyIndustries((current) => [
+                              ...current,
+                              ...newKeywords.map((x) => x.value),
+                            ]);
+                            setNeedsSave(true);
+                            setSaveAsNothing(false);
+                          }
+                          setCompanyIndustrySearchValue(newValue);
+                        }}
+                      />
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
+              </Accordion.Panel>
+            </Accordion.Item>
+
+            <Accordion.Item value="flexibility" sx={{ borderBottom: "0px" }}>
+              <Accordion.Control
+                sx={{
+                  borderRadius: 12,
+                }}
+                onClick={() => handleAccordion("prospect")}
+              >
+                <Flex justify={"space-between"} align={"center"}>
+                  <Title order={4}>Prospect Data</Title>
+                  <Title
+                    id="prospect"
+                    style={{
+                      borderRadius: "100%",
+                      width: "18px",
+                      height: "18px",
+                      fontSize: "10px",
+                      alignItems: "center",
+                      display: "flex",
+                      justifyContent: "center",
+                      textAlign: "center",
+                      background:
+                        accordion === "prospect" ? "#3c85ee" : "#eceaee",
+                      color: accordion === "prospect" ? "white" : "",
+                    }}
+                  >
+                    2
+                  </Title>
+                </Flex>
+              </Accordion.Control>
+              <Accordion.Panel
+                bg={"white"}
+                sx={{
+                  border: "1.5px solid #c8ddfa",
+                  borderBottomLeftRadius: 12,
+                  borderBottomRightRadius: 12,
+                }}
+              >
+                {/* Prospect Title */}
+                <Title order={6} color="#8a8891" mt={"md"}>
+                  EXCLUDE BY{" "}
+                </Title>
+                <Accordion
+                  style={{
+                    border: "1px solid #eceaee",
+                    borderBottom: "0px",
+                    borderRadius: "6px",
+                  }}
+                  mt={"md"}
+                >
+                  <Accordion.Item value="test">
+                    <Accordion.Control style={{ color: "#5b5b5b" }}>
+                      Title
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                      <MultiSelect
+                        withinPortal
+                        variant={
+                          selectedProspectTitles.length ? "unstyled" : "default"
+                        }
+                        data={TITLES.map((x) => ({
+                          value: x,
+                          label: x,
+                        })).concat(prospectTitles)}
+                        rightSection={<></>}
+                        placeholder="Title"
+                        searchable
+                        creatable
+                        value={selectedProspectTitles}
+                        onChange={(value: any) => {
+                          setSelectedProspectTitles(value);
+                          setNeedsSave(true);
+                          setSaveAsNothing(false);
+                        }}
+                        getCreateLabel={(query) =>
+                          `+ Add a filter for ${query}`
+                        }
+                        onCreate={(query: any) => {
+                          const item: any = { value: query, label: query };
+                          setProspectTitles((current: any) => [
+                            ...current,
+                            item,
+                          ]);
+                          return item;
+                        }}
+                        searchValue={prospectTitleSearchValue}
+                        onSearchChange={(query) => {
+                          // If search value includes any newlines, add those items
+                          let newValue = query;
+                          let newKeywords: { value: string; label: string }[] =
+                            [];
+
+                          const matches = [...query.matchAll(/(.*?)\\n/gm)];
+                          for (const match of matches) {
+                            newKeywords.push({
+                              value: match[1],
+                              label: match[1],
+                            });
+                            newValue = newValue.replace(match[0], "");
+                          }
+
+                          // If there are more than 4 being added, add the last input to the list as well
+                          if (matches.length > 4) {
+                            newKeywords.push({
+                              value: newValue,
+                              label: newValue,
+                            });
+                            newValue = "";
+                          }
+
+                          if (matches.length > 0) {
+                            setProspectTitles((current) => [
+                              ...current,
+                              ...newKeywords,
+                            ]);
+                            setSelectedProspectTitles((current) => [
+                              ...current,
+                              ...newKeywords.map((x) => x.value),
+                            ]);
+                            setNeedsSave(true);
+                            setSaveAsNothing(false);
+                          }
+
+                          setProspectTitleSearchValue(newValue);
+                        }}
+                        styles={{
+                          rightSection: { pointerEvents: "none" },
+                          label: { width: "100%" },
+                        }}
+                      />
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
+
+                <Accordion
+                  mt={"md"}
+                  style={{
+                    border: "1px solid #eceaee",
+                    borderBottom: "0px",
+                    borderRadius: "6px",
+                  }}
+                >
+                  <Accordion.Item value="test">
+                    <Accordion.Control style={{ color: "#5b5b5b" }}>
+                      Location
+                    </Accordion.Control>
+                    <Accordion.Panel>
+                      <MultiSelect
+                        withinPortal
+                        variant={
+                          selectedProspectLocations.length
+                            ? "unstyled"
+                            : "default"
+                        }
+                        rightSection={<></>}
+                        data={LOCATION.map((x) => ({
+                          value: x,
+                          label: x,
+                        })).concat(prospectLocations)}
+                        placeholder="Location"
+                        searchable
+                        creatable
+                        value={selectedProspectLocations}
+                        onChange={(value: any) => {
+                          setSelectedProspectLocations(value);
+                          setNeedsSave(true);
+                          setSaveAsNothing(false);
+                        }}
+                        getCreateLabel={(query) =>
+                          `+ Add a filter for ${query}`
+                        }
+                        onCreate={(query: any) => {
+                          const item: any = { value: query, label: query };
+                          setProspectLocations((current: any) => [
+                            ...current,
+                            item,
+                          ]);
+                          return item;
+                        }}
+                        searchValue={prospectLocationSearchValue}
+                        onSearchChange={(query) => {
+                          // If search value includes any newlines, add those items
+                          let newValue = query;
+                          let newKeywords: { value: string; label: string }[] =
+                            [];
+
+                          const matches = [...query.matchAll(/(.*?)\\n/gm)];
+                          for (const match of matches) {
+                            newKeywords.push({
+                              value: match[1],
+                              label: match[1],
+                            });
+                            newValue = newValue.replace(match[0], "");
+                          }
+
+                          // If there are more than 4 being added, add the last input to the list as well
+                          if (matches.length > 4) {
+                            newKeywords.push({
+                              value: newValue,
+                              label: newValue,
+                            });
+                            newValue = "";
+                          }
+
+                          if (matches.length > 0) {
+                            setProspectLocations((current) => [
+                              ...current,
+                              ...newKeywords,
+                            ]);
+                            setSelectedProspectLocations((current) => [
+                              ...current,
+                              ...newKeywords.map((x) => x.value),
+                            ]);
+                            setNeedsSave(true);
+                            setSaveAsNothing(false);
+                          }
+
+                          setProspectLocationSearchValue(newValue);
+                        }}
+                      />
+                    </Accordion.Panel>
+                  </Accordion.Item>
+                </Accordion>
+              </Accordion.Panel>
+            </Accordion.Item>
+          </Accordion>
         </Box>
         <Box w="75%" ml="md">
           <DoNotContactListCaughtProspects

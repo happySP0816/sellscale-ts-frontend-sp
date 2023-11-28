@@ -76,7 +76,9 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
   const queryClient = useQueryClient();
   const currentProject = useRecoilValue(currentProjectState);
 
-  const [campaignUrl, setCampaignUrl] = useState<string>('');
+  const [campaignUrl, setCampaignUrl] = useState<string>(
+    currentProject?.smartlead_campaign_id ? `https://app.smartlead.ai/app/email-campaign/${currentProject?.smartlead_campaign_id}/analytics` : ""
+  );
 
   const { classes } = useStyles();
 
@@ -361,6 +363,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
               placeholder='https://app.smartlead.ai/app/email-campaign/...'
               value={campaignUrl}
               onChange={(event) => setCampaignUrl(event.currentTarget.value)}
+              miw={500}
             />
             <Button
               disabled={!campaignUrl.trim()}

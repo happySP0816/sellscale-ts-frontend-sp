@@ -34,7 +34,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
   const [userToken] = useRecoilState(userTokenState);
   const [fetchedData, setFetchedData] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [accordion, setAccordion] = useState("account");
+  const [accordion, setAccordion] = useState("");
   const [keywords, setKeywords] = useState<{ value: string; label: string }[]>([
     // { value: "staffing", label: "staffing" },
   ]);
@@ -89,6 +89,17 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
     useState("");
   const [caughtProspects, setCaughtProspects] = useState([]);
   const userData = useRecoilValue(userDataState);
+
+  const [AccoundData_Count, setAccountData_Count] = useState(
+    selectedCompanies.length +
+      selectedKeywords.length +
+      selectedCompanyLocations.length +
+      selectedCompanyIndustries.length
+  );
+
+  const [ProspectData_Count, setProspectData_Count] = useState(
+    selectedProspectTitles.length + selectedProspectLocations.length
+  );
 
   // Save as nothing tracking state
   // - No clean, bug-free way to do this without a component restructure
@@ -303,6 +314,36 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
     setAccordion(type);
   };
 
+  const handleRemoveFilter = () => {
+    console.log("asdfasdf");
+    setSelectedCompanies([]);
+    setSelectedKeywords([]);
+    setSelectedCompanyLocations([]);
+    setSelectedCompanyIndustries([]);
+    setSelectedProspectTitles([]);
+    setSelectedProspectLocations([]);
+  };
+
+  useEffect(() => {
+    setAccountData_Count(
+      selectedCompanies.length +
+        selectedKeywords.length +
+        selectedCompanyLocations.length +
+        selectedCompanyIndustries.length
+    );
+  }, [
+    selectedCompanies,
+    selectedKeywords,
+    selectedCompanyLocations,
+    selectedCompanyIndustries,
+  ]);
+
+  useEffect(() => {
+    setProspectData_Count(
+      selectedProspectTitles.length + selectedProspectLocations.length
+    );
+  }, [selectedProspectTitles, selectedProspectLocations]);
+
   return (
     <Box m="xs" p="md">
       <Box>
@@ -419,15 +460,22 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                   borderTop: "0px",
                   borderLeft: "0px",
                   borderRight: "0px",
+                  cursor: "pointer",
                 }}
-                onClick={() => console.log("")}
+                onClick={handleRemoveFilter}
               >
                 Clear Filters
               </a>
             </div>
           </Flex>
           <Accordion
-            defaultValue="accountData"
+            defaultValue={
+              AccoundData_Count > 0
+                ? "accountData"
+                : ProspectData_Count > 0
+                ? "prospectData"
+                : ""
+            }
             styles={(theme) => ({
               control: {
                 border: "1.5px solid #eceaee",
@@ -470,7 +518,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                       color: accordion === "account" ? "white" : "",
                     }}
                   >
-                    4
+                    {AccoundData_Count}
                   </Title>
                 </Flex>
               </Accordion.Control>
@@ -486,6 +534,9 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                   EXCLUDE BY{" "}
                 </Title>
                 <Accordion
+                  defaultValue={
+                    selectedCompanies.length > 0 ? "company_name" : ""
+                  }
                   style={{
                     border: "1px solid #eceaee",
                     borderBottom: "0px",
@@ -493,7 +544,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                   }}
                   mt={"md"}
                 >
-                  <Accordion.Item value="test">
+                  <Accordion.Item value="company_name">
                     <Accordion.Control style={{ color: "#5b5b5b" }}>
                       Company Names
                     </Accordion.Control>
@@ -570,6 +621,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
 
                 {/* Company Keywords */}
                 <Accordion
+                  defaultValue={selectedKeywords.length > 0 ? "keywords" : ""}
                   style={{
                     border: "1px solid #eceaee",
                     borderBottom: "0px",
@@ -577,7 +629,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                   }}
                   mt={"md"}
                 >
-                  <Accordion.Item value="test">
+                  <Accordion.Item value="keywords">
                     <Accordion.Control style={{ color: "#5b5b5b" }}>
                       Keywords
                     </Accordion.Control>
@@ -651,6 +703,11 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
 
                 {/* Company Location Keywords */}
                 <Accordion
+                  defaultValue={
+                    selectedCompanyLocations.length > 0
+                      ? "company_location"
+                      : ""
+                  }
                   style={{
                     border: "1px solid #eceaee",
                     borderBottom: "0px",
@@ -658,7 +715,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                   }}
                   mt={"md"}
                 >
-                  <Accordion.Item value="test">
+                  <Accordion.Item value="company_location">
                     <Accordion.Control style={{ color: "#5b5b5b" }}>
                       Location
                     </Accordion.Control>
@@ -740,6 +797,11 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
 
                 {/* Company Industry */}
                 <Accordion
+                  defaultValue={
+                    selectedCompanyIndustries.length > 0
+                      ? "company_industry"
+                      : ""
+                  }
                   style={{
                     border: "1px solid #eceaee",
                     borderBottom: "0px",
@@ -747,7 +809,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                   }}
                   mt={"md"}
                 >
-                  <Accordion.Item value="test">
+                  <Accordion.Item value="company_industry">
                     <Accordion.Control style={{ color: "#5b5b5b" }}>
                       Industry
                     </Accordion.Control>
@@ -856,7 +918,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                       color: accordion === "prospect" ? "white" : "",
                     }}
                   >
-                    2
+                    {ProspectData_Count}
                   </Title>
                 </Flex>
               </Accordion.Control>
@@ -873,6 +935,9 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                   EXCLUDE BY{" "}
                 </Title>
                 <Accordion
+                  defaultValue={
+                    selectedProspectTitles.length > 0 ? "prospect_title" : ""
+                  }
                   style={{
                     border: "1px solid #eceaee",
                     borderBottom: "0px",
@@ -880,7 +945,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                   }}
                   mt={"md"}
                 >
-                  <Accordion.Item value="test">
+                  <Accordion.Item value="prospect_title">
                     <Accordion.Control style={{ color: "#5b5b5b" }}>
                       Title
                     </Accordion.Control>
@@ -965,6 +1030,11 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                 </Accordion>
 
                 <Accordion
+                  defaultValue={
+                    selectedProspectLocations.length > 0
+                      ? "prospect_location"
+                      : ""
+                  }
                   mt={"md"}
                   style={{
                     border: "1px solid #eceaee",
@@ -972,7 +1042,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                     borderRadius: "6px",
                   }}
                 >
-                  <Accordion.Item value="test">
+                  <Accordion.Item value="prospect_location">
                     <Accordion.Control style={{ color: "#5b5b5b" }}>
                       Location
                     </Accordion.Control>

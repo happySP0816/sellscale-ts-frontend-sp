@@ -259,6 +259,39 @@ export function channelToIcon(channel: Channel, size: number) {
   }
 }
 
+/**
+ * Send attempting reschedule notification to a prospect.
+ * @param {string} userToken - The token for user authentication.
+ * @param {number} prospectId - The ID of the prospect.
+ * @returns {Promise<{status: string, message: string}>} - The result of the operation.
+ */
+export async function sendAttemptingRescheduleNotification(
+  userToken: string,
+  prospectId: number
+) {
+  try {
+    const response = await fetch(`${API_URL}/prospect/${prospectId}/send_attempting_reschedule_notification`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${userToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ })
+    });
+
+    if (response.ok) {
+      return { status: 'success', message: 'Notification sent successfully.' };
+    } else {
+      const errorData = await response.json();
+      return { status: 'error', message: errorData.message || 'Failed to send notification.' };
+    }
+  } catch (error) {
+    console.error('Error sending attempting reschedule notification:', error);
+    return { status: 'error', message: 'An error occurred while sending the notification.' };
+  }
+}
+
+
 export async function updateChannelStatus(
   prospectId: number,
   userToken: string,

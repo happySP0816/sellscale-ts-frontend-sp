@@ -532,7 +532,7 @@ export function PersonCampaignCard(props: {
                 thickness={5}
                 label={
                   <Text size='xs' align='center'>
-                    {Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100)}%
+                    {Math.min(100, Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100))}%
                   </Text>
                 }
                 variant='animated'

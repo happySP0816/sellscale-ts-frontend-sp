@@ -32,12 +32,19 @@ const PulseTabSelector = () => {
   return (
     <Tabs defaultValue="new_view">
       <Tabs.List>
-        <Tabs.Tab value="new_view"><IconTarget size='0.8rem' style={{marginRight: '8px', marginTop: '4px'}} />Prospect Scoring</Tabs.Tab>
-        <Tooltip label="Old View" position='bottom' withArrow withinPortal>
-          <Tabs.Tab value="old_view" ml='auto'>
-            
-              <IconWashMachine size='0.8rem' style={{marginRight: '8px', marginTop: '4px'}} />
-            
+        <Tabs.Tab value="new_view">
+          <IconTarget
+            size="0.8rem"
+            style={{ marginRight: "8px", marginTop: "4px" }}
+          />
+          Prospect Scoring
+        </Tabs.Tab>
+        <Tooltip label="Old View" position="bottom" withArrow withinPortal>
+          <Tabs.Tab value="old_view" ml="auto">
+            <IconWashMachine
+              size="0.8rem"
+              style={{ marginRight: "8px", marginTop: "4px" }}
+            />
           </Tabs.Tab>
         </Tooltip>
       </Tabs.List>

@@ -115,11 +115,16 @@ const tabFilters = [
     count: 0,
   },
 ];
-
-const ICPFiltersDashboard: FC<{
-  isTesting: boolean;
-  openFilter: () => void;
-}> = () => {
+type ProspectFilterState =
+  | "Prospected"
+  | "Sent Outreach"
+  | "Accepted"
+  | "Bumped"
+  | "Active Convo"
+  | "Demo"
+  | "Removed"
+  | "All Contacts";
+const ICPFiltersDashboard: FC = () => {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [icpProspects, setIcpProspects] = useRecoilState(filterProspectsState);
@@ -134,7 +139,7 @@ const ICPFiltersDashboard: FC<{
     count: number;
   }>(tabFilters[0]);
   const [selectedProspectStatusFilter, setSelectedProspectStatusFilter] =
-    useState("All Contacts");
+    useState<ProspectFilterState>("All Contacts");
 
   const [invitedOnLinkedIn, setInvitedOnLinkedIn] = useState(false);
   const [selectedRows, setSelectedRows] = useState<DataGridRowSelectionState>(
@@ -383,14 +388,32 @@ const ICPFiltersDashboard: FC<{
     });
 
     filteredProspects = filteredProspects.filter((prospect) => {
-      if (selectedProspectStatusFilter === "All Contacts") {
-        return true;
-      } else if (selectedProspectStatusFilter === "Not Contacted") {
-        return prospect.has_been_sent_outreach === false;
-      } else if (selectedProspectStatusFilter === "Contacted") {
-        return prospect.has_been_sent_outreach === true;
+      switch (selectedProspectStatusFilter) {
+        case "Prospected":
+          return prospect.status === "PROSPECTED";
+
+        case "Sent Outreach":
+          return prospect.status === "SENT_OUTREACH";
+
+        case "Accepted":
+          return prospect.status === "ACCEPTED";
+
+        case "Bumped":
+          return prospect.status === "BUMPED";
+
+        case "Active Convo":
+          return prospect.status === "ACTIVE_CONVO";
+
+        case "Demo":
+          return prospect.status === "DEMO";
+        case "Removed":
+          return prospect.status === "REMOVED";
+        case "All Contacts":
+          return true;
+
+        default:
+          return false;
       }
-      return false;
     });
 
     return filteredProspects;
@@ -479,9 +502,11 @@ const ICPFiltersDashboard: FC<{
                   marginRight: "4px",
                 }}
               >
-                {Math.round(((currentProject?.num_unused_li_prospects || 0) /
-                  (currentProject?.num_prospects || 1)) *
-                  1000) / 10}
+                {Math.round(
+                  ((currentProject?.num_unused_li_prospects || 0) /
+                    (currentProject?.num_prospects || 1)) *
+                    1000
+                ) / 10}
                 %
               </span>
             </Button>
@@ -528,9 +553,18 @@ const ICPFiltersDashboard: FC<{
               size="sm"
               ml="auto"
               placeholder="Select a filter"
-              data={["All Contacts", "Not Contacted", "Contacted"]}
+              data={[
+                "Prospected",
+                "Sent Outreach",
+                "Accepted",
+                "Bumped",
+                "Active Convo",
+                "Demo",
+                "Removed",
+                "All Contacts",
+              ]}
               defaultValue={selectedProspectStatusFilter}
-              onChange={(value: string) => {
+              onChange={(value: ProspectFilterState) => {
                 setSelectedProspectStatusFilter(value);
               }}
             />

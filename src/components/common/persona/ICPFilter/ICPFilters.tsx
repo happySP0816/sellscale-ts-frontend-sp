@@ -14,7 +14,7 @@ import { SCREEN_SIZES } from "@constants/data";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles(() => ({
   header: {
     // backgroundColor: theme.fn.variant({
     //   variant: "filled",
@@ -24,29 +24,9 @@ const useStyles = createStyles((theme) => ({
 }));
 
 const ICPFilters = () => {
-  const { classes, theme, cx } = useStyles();
-
-  const queryClient = useQueryClient();
-
-  const [sideBarVisible, { toggle: toggleSideBar, open: openSideBar }] =
-    useDisclosure(false);
-  const [isTesting, setIsTesting] = useState(false);
-  const [opened, { open, close, toggle }] = useDisclosure(false);
-  const smScreenOrLess = useMediaQuery(
-    `(max-width: ${SCREEN_SIZES.LG})`,
-    false,
-    { getInitialValueInEffect: true }
-  );
-
   return (
     <Flex h="100%" w={"100%"}>
-      <ICPFiltersDashboard
-        isTesting={isTesting}
-        openFilter={() => {
-          openSideBar();
-          open();
-        }}
-      />
+      <ICPFiltersDashboard />
     </Flex>
   );
 };

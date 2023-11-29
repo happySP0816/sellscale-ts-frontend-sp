@@ -588,43 +588,45 @@ export function PersonCampaignCard(props: {
                 opened={popoverOpened}
               >
                 <Popover.Target>
-                  <RingProgress
-                    onMouseEnter={openPopover}
-                    onMouseLeave={closePopover}
-                    size={55}
-                    thickness={5}
-                    label={
-                      <Text size="xs" align="center">
-                        {Math.min(
-                          100,
-                          Math.floor(
+                  <Button variant="outline" radius="xl" size="sm" h={55} color='gray' sx={{border: 'solid 1px #f1f1f1'}}>
+                    <RingProgress
+                      onMouseEnter={openPopover}
+                      onMouseLeave={closePopover}
+                      size={55}
+                      thickness={5}
+                      label={
+                        <Text size="xs" align="center">
+                          {Math.min(
+                            100,
+                            Math.floor(
+                              ((total_sent ?? 0) /
+                                (props.persona.total_prospects || 1)) *
+                                100
+                            )
+                          )}
+                          %
+                        </Text>
+                      }
+                      variant="animated"
+                      sections={[
+                        {
+                          value: Math.floor(
                             ((total_sent ?? 0) /
                               (props.persona.total_prospects || 1)) *
                               100
-                          )
-                        )}
-                        %
-                      </Text>
-                    }
-                    variant="animated"
-                    sections={[
-                      {
-                        value: Math.floor(
-                          ((total_sent ?? 0) /
-                            (props.persona.total_prospects || 1)) *
-                            100
-                        ),
-                        color:
-                          Math.round(
-                            ((total_sent ?? 0) /
-                              (props.persona.total_prospects || 1)) *
-                              100
-                          ) >= 100
-                            ? "green"
-                            : "blue",
-                      },
-                    ]}
-                  />
+                          ),
+                          color:
+                            Math.round(
+                              ((total_sent ?? 0) /
+                                (props.persona.total_prospects || 1)) *
+                                100
+                            ) >= 100
+                              ? "green"
+                              : "blue",
+                        },
+                      ]}
+                    />
+                </Button>
                 </Popover.Target>
                 <Popover.Dropdown sx={{ pointerEvents: "none" }} bg={"blue"}>
                   <Flex direction="column">
@@ -647,11 +649,15 @@ export function PersonCampaignCard(props: {
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
-                        Total # Sourced: {props.persona.total_prospects || 0}
+                        <Flex>
+                          <Text fw='bold'>Total # Sourced: </Text> <Text ml='auto'>{props.persona.total_prospects || 0}</Text>
+                        </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
-                        Total # Contacted: {total_sent ?? 0}
+                        <Flex>
+                          <Text fw='bold'>Total # Contacted: </Text> <Text ml='auto'>{total_sent ?? 0}</Text>
+                        </Flex>
                       </Text>
                     </Box>
 
@@ -663,27 +669,40 @@ export function PersonCampaignCard(props: {
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
-                        Prospected: {props.persona.total_prospects}
+                        <Flex>
+                          <Text fw='bold'>Prospected: </Text> <Text ml='auto'>{props.persona.total_prospects}</Text>
+                        </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
-                        Sending: {total_sent}
+                        <Flex>
+                          <Text fw='bold'>Sending: </Text> <Text ml='auto'>{total_sent}</Text>
+                        </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
-                        Replies: {total_replied}
+                        <Flex>
+                          <Text fw='bold'>Opened: </Text> <Text ml='auto'>{total_opened}</Text>
+                        </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
-                        Scheduling: 0
+                        <Flex>
+                          <Text fw='bold'>Replies: </Text> <Text ml='auto'>{total_replied}</Text>
+                        </Flex>
+                        
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
-                        Demo Set: {props.persona.total_demo}
+                        <Flex>
+                          <Text fw='bold'>Demo Set: </Text> <Text ml='auto'>{props.persona.total_demo}</Text>
+                        </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
-                        Removed:0
+                        <Flex>
+                          <Text fw='bold'>Removed: </Text> <Text ml='auto'>-</Text>
+                        </Flex>
                       </Text>
                     </Box>
                   </Flex>

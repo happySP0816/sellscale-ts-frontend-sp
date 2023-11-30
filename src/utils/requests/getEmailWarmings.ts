@@ -5,7 +5,7 @@ import { processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
 export default async function getEmailWarmings(userToken: string): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/smart_email/email_warmings`, {
+  const response = await fetch(`${API_URL}/smartlead/email_warmings`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${userToken}`,

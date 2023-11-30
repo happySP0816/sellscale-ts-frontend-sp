@@ -482,9 +482,10 @@ export function PersonCampaignCard(props: {
 
   console.log(props.persona);
 
-  let total_replied = props.persona.li_replied + props.persona.email_replied;
-  let total_opened = props.persona.li_opened + props.persona.email_opened;
-  let total_sent = props.persona.li_sent + props.persona.email_sent;
+  let total_replied = props.persona.total_replied;
+  let total_opened = props.persona.total_opened;
+  let total_sent = props.persona.total_sent;
+  console.log('props', props.persona)
 
   console.log(props.persona, total_sent);
 

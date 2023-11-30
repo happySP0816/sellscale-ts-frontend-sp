@@ -578,3 +578,90 @@ interface EmailWarming {
   stats_by_date: Record<string, any>[];
   percent_complete: number;
 }
+
+
+///////////////////////////////////////////////////////////////////
+//                         Trigger Types                         //
+///////////////////////////////////////////////////////////////////
+
+interface Trigger {
+  active: boolean;
+  blocks: TriggerBlock[];
+  client_archetype_id: number;
+  description: string;
+  emoji: string;
+  id: number;
+  interval_in_minutes: number;
+  keyword_blacklist: Record<string, any>;
+  last_run: string;
+  name: string;
+  next_run: string;
+  trigger_config: Record<string, any>;
+  trigger_type: string;
+}
+
+///////////////////////////////////////////////////////////////////
+
+type TriggerBlockType = 'SOURCE' | 'FILTER' | 'ACTION';
+interface TriggerBlock {
+  type: TriggerBlockType;
+}
+
+type TriggerSourceType = "GOOGLE_COMPANY_NEWS" | "EXTRACT_PROSPECTS_FROM_COMPANIES";
+type TriggerSourceData = {
+  prospect_titles?: string[];
+  company_query?: string;
+};
+interface TriggerSourceBlock extends TriggerBlock {
+  type: 'SOURCE';
+  source: TriggerSourceType;
+  data: TriggerSourceData;
+}
+
+type TriggerFilterCriteria = {
+  prospect_titles?: string[];
+  company_names?: string[];
+  article_titles?: string[];
+  article_snippets?: string[];
+  prospect_query?: string;
+  company_query?: string;
+};
+interface TriggerFilterBlock extends TriggerBlock {
+  type: 'FILTER';
+  criteria: TriggerFilterCriteria;
+}
+
+type TriggerActionType = 'SEND_SLACK_MESSAGE' | 'UPLOAD_PROSPECTS';
+type TriggerActionData = {
+  slack_message?: Record<string, any>[] | string;
+  slack_webhook_urls?: string[];
+};
+interface TriggerActionBlock extends TriggerBlock {
+  type: 'ACTION';
+  action: TriggerActionType;
+  data: TriggerActionData;
+}
+
+///////////////////////////////////////////////////////////////////
+
+type TriggerInputType = 'TEXT' | 'NUMBER' | 'JSON' | 'BOOLEAN';
+type TriggerInput = {
+  type: TriggerInputType;
+  keyLink: string;
+  label?: string;
+  placeholder?: string;
+  defaultValue?: string | number | boolean;
+};
+
+interface TriggerDisplayFramework {
+  type: TriggerBlockType;
+  subType?: TriggerSourceType | TriggerActionType | 'FILTER_PROSPECTS' | 'FILTER_COMPANIES';
+  label: string;
+  description: string;
+  emoji: string;
+  inputs: TriggerInput[];
+}
+
+///////////////////////////////////////////////////////////////////
+//                                                               //
+///////////////////////////////////////////////////////////////////

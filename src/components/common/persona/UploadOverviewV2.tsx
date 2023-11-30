@@ -69,7 +69,7 @@ ChartJS.register(
   Legend
 );
 
-const getOrCreateLegendList = (chart, id) => {
+const getOrCreateLegendList = (chart: any, id: any) => {
   const legendContainer = document.getElementById(id);
   let listContainer = legendContainer?.querySelector("ul");
 

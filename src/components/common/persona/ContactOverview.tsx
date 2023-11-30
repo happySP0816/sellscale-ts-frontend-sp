@@ -12,6 +12,7 @@ import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { navigateToPage } from "@utils/documentChange";
 import UploadOverview from "./UploadOverview";
 import {
+  IconBeta,
   IconChartArcs,
   IconChartAreaLine,
   IconList,
@@ -49,12 +50,9 @@ const ContactOverview = () => {
           />
           Do Not Contact
         </Tabs.Tab>
-        <Tabs.Tab value="overviewV2">
-          <IconTarget
-            size="0.8rem"
-            style={{ marginRight: "8px", marginTop: "4px" }}
-          />
-          Upload Overview V2
+        <Tabs.Tab value="overviewV2" ml='auto'>
+          <IconBeta size="0.8rem" style={{ marginRight: "8px" }} />
+          Overview (Beta)
         </Tabs.Tab>
       </Tabs.List>
 

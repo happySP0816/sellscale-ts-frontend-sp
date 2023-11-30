@@ -65,6 +65,7 @@ const PROSPECT_DB_COLUMNS = [
   "linkedin_bio",
   "title",
   "twitter_url",
+  "custom_data",
 ];
 
 function findBestPreviewRows(fileJSON: any[], previewAmount: number) {

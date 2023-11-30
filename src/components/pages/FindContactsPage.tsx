@@ -118,6 +118,7 @@ export default function FindContactsPage() {
                 <li>last_name (optional; required if no linkedin_url)</li>
                 <li>email (optional; required if no linkedin_url)</li>
                 <li>company (optional; required if no linkedin_url)</li>
+                <li>custom_data (optional)</li>
               </ul>
             </Text>
             <FileDropAndPreview
@@ -143,10 +144,10 @@ export default function FindContactsPage() {
                 value: upload.id + '',
                 label: upload.created_at,
               }))}
-              searchValue=""
+              searchValue=''
               value=''
               onChange={(value) => {
-                if(value) {
+                if (value) {
                   setUploadId(+value);
                   setUploadDrawerOpened(true);
                 }

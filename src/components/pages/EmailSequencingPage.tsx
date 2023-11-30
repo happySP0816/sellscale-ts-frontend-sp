@@ -48,7 +48,9 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import { EmailSequenceStep, MsgResponse, SubjectLineTemplate } from "src";
 import DOMPurify from "dompurify";
 import NewUIEmailSequencing from "./EmailSequencing/NewUIEmailSequencing";
-import NylasConnectedCard from '@common/settings/NylasConnectedCard';
+import NylasConnectedCard from "@common/settings/NylasConnectedCard";
+import SmartleadVisualizer from "@common/sequence/SmartleadSequence";
+import { getSmartleadSequence } from "@utils/requests/getSmartleadSequences";
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -83,7 +85,8 @@ function EmailInitialOutboundView(props: {
 }) {
   const userToken = useRecoilValue(userTokenState);
 
-  const [subjectLineTemplates, setSubjectLineTemplates] = useState<SubjectLineTemplate[]>();
+  const [subjectLineTemplates, setSubjectLineTemplates] =
+    useState<SubjectLineTemplate[]>();
 
   const [showAll, setShowAll] = useState(false);
   const [editSequenceStepModalOpened, { open: openEdit, close: closeEdit }] =
@@ -621,7 +624,9 @@ export default function EmailSequencingPage(props: {
     return <></>;
   }
 
-  const [subjectLineTemplates, setSubjectLineTemplates] = useState<SubjectLineTemplate[]>([])
+  const [subjectLineTemplates, setSubjectLineTemplates] = useState<
+    SubjectLineTemplate[]
+  >([]);
 
   const triggerGetEmailSubjectLineTemplates = async () => {
     const result = await getEmailSubjectLineTemplates(
@@ -640,8 +645,8 @@ export default function EmailSequencingPage(props: {
     const templates = result.data
       .subject_line_templates as SubjectLineTemplate[];
 
-    setSubjectLineTemplates(templates);    
-    return 
+    setSubjectLineTemplates(templates);
+    return;
   };
 
   const sequenceBuckets = useRef<EmailSequenceStepBuckets>({
@@ -659,7 +664,8 @@ export default function EmailSequencingPage(props: {
       templates: [],
     },
   } as EmailSequenceStepBuckets);
-  const [sequenceBucketsState, setSequenceBucketsState] = useState<EmailSequenceStepBuckets>(sequenceBuckets.current)
+  const [sequenceBucketsState, setSequenceBucketsState] =
+    useState<EmailSequenceStepBuckets>(sequenceBuckets.current);
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -747,7 +753,7 @@ export default function EmailSequencingPage(props: {
       }
     }
     sequenceBuckets.current = newsequenceBuckets;
-    setSequenceBucketsState(newsequenceBuckets)
+    setSequenceBucketsState(newsequenceBuckets);
 
     // BumpFrameworks have been updated, submit event to parent
     if (props.onPopulateSequenceSteps) {
@@ -757,6 +763,32 @@ export default function EmailSequencingPage(props: {
     setLoading(false);
   };
 
+  const [smartleadSequence, setSmartleadSequence] = useState<any[]>([]);
+  const triggerGetSmartleadSequenceSteps = async () => {
+    if (!currentProject.smartlead_campaign_id) {
+      return;
+    }
+    setLoading(true);
+
+    const result = await getSmartleadSequence(
+      userToken,
+      currentProject.smartlead_campaign_id
+    );
+
+    if (result.status !== "success") {
+      setLoading(false);
+      showNotification({
+        title: "Error",
+        message: "Could not get beta sequence variants.",
+        color: "red",
+        autoClose: false,
+      });
+      return;
+    } else {
+      setSmartleadSequence(result.data.sequence);
+    }
+  };
+
   useEffect(() => {
     triggerGetEmailSequenceSteps();
   }, [archetypeID]);
@@ -764,6 +796,10 @@ export default function EmailSequencingPage(props: {
   useEffect(() => {
     triggerGetEmailSubjectLineTemplates();
     triggerGetEmailSequenceSteps();
+
+    if (currentProject.smartlead_campaign_id) {
+      triggerGetSmartleadSequenceSteps();
+    }
   }, []);
 
   return (
@@ -771,49 +807,50 @@ export default function EmailSequencingPage(props: {
       <LoadingOverlay visible={loading} />
       {!props.hideTitle && <Title>Email Setup</Title>}
 
-      <Card mt="md" withBorder>
-        <Card.Section px="md">
-          <Tabs
-            color="blue"
-            variant="outline"
-            defaultValue="sequence"
-            my="lg"
-            orientation="horizontal"
-          >
-            <Tabs.List>
-              {/* <Tabs.Tab
+      <Card.Section px="md">
+        <Tabs
+          color="blue"
+          variant="outline"
+          defaultValue="sequence"
+          orientation="horizontal"
+        >
+          <Tabs.List>
+            {/* <Tabs.Tab
                 value="qnolibrary"
                 icon={<IconMessages size="0.8rem" />}
               >
                 Conversation
               </Tabs.Tab> */}
-              <Tabs.Tab
-                value="sequence"
-                icon={<IconMessages size="0.8rem" />}
-              >
-                Email Sequence
+            <Tabs.Tab value="sequence" icon={<IconMessages size="0.8rem" />}>
+              Email Sequence
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="email_settings"
+              icon={<IconWashMachine size="0.8rem" />}
+            >
+              Settings
+            </Tabs.Tab>
+
+            {currentProject.smartlead_campaign_id && (
+              <Tabs.Tab value="smartlead" icon={<IconMessages size="0.8rem" />}>
+                Beta - Variants
               </Tabs.Tab>
-              <Tabs.Tab
-                value="email_settings"
-                icon={<IconWashMachine size="0.8rem" />}
-              >
-                Settings
-              </Tabs.Tab>
-            </Tabs.List>
-            <Tabs.Panel value="email_settings">
-              <Box maw='800px' ml='auto' mr='auto'>
-                <NylasConnectedCard
-                    connected={userData ? userData.nylas_connected : false}
-                  />
-              </Box>
-            </Tabs.Panel>                                
-            <Tabs.Panel value="qnolibrary">
-              <Card withBorder shadow="xs" mt="md">
-                <Flex w="100%" align="center" justify="center">
-                  Coming soon!
-                </Flex>
-              </Card>
-              {/* {!loading ? (
+            )}
+          </Tabs.List>
+          <Tabs.Panel value="email_settings">
+            <Box maw="800px" ml="auto" mr="auto">
+              <NylasConnectedCard
+                connected={userData ? userData.nylas_connected : false}
+              />
+            </Box>
+          </Tabs.Panel>
+          <Tabs.Panel value="qnolibrary">
+            <Card withBorder shadow="xs" mt="md">
+              <Flex w="100%" align="center" justify="center">
+                Coming soon!
+              </Flex>
+            </Card>
+            {/* {!loading ? (
               <Flex direction='column' ml='xs'>
                 <Flex align='center' w='100%' justify='center'>
                   <Button variant='outline' mb='md' w='50%' onClick={openQuestionObjection}>
@@ -849,27 +886,30 @@ export default function EmailSequencingPage(props: {
                 <Loader />
               </Flex>
             )} */}
-            </Tabs.Panel>{" "}
-            <Tabs.Panel value="sequence">
-              <NewUIEmailSequencing
-                userToken={userToken}
-                archetypeID={archetypeID}
-                templateBuckets={sequenceBucketsState}
-                subjectLines={subjectLineTemplates}
-                refetch={async () => {
-                  await triggerGetEmailSequenceSteps();
-                  await triggerGetEmailSubjectLineTemplates();
-                }}
-
-                loading={loading}
-                addNewSequenceStepOpened={addNewSequenceStepOpened}
-                closeSequenceStep={closeSequenceStep}
-                openSequenceStep={openSequenceStep}
-              />
+          </Tabs.Panel>{" "}
+          <Tabs.Panel value="sequence">
+            <NewUIEmailSequencing
+              userToken={userToken}
+              archetypeID={archetypeID}
+              templateBuckets={sequenceBucketsState}
+              subjectLines={subjectLineTemplates}
+              refetch={async () => {
+                await triggerGetEmailSequenceSteps();
+                await triggerGetEmailSubjectLineTemplates();
+              }}
+              loading={loading}
+              addNewSequenceStepOpened={addNewSequenceStepOpened}
+              closeSequenceStep={closeSequenceStep}
+              openSequenceStep={openSequenceStep}
+            />
+          </Tabs.Panel>
+          {currentProject.smartlead_campaign_id && (
+            <Tabs.Panel value="smartlead">
+              <SmartleadVisualizer data={smartleadSequence} />
             </Tabs.Panel>
-          </Tabs>
-        </Card.Section>
-      </Card>
+          )}
+        </Tabs>
+      </Card.Section>
     </Flex>
   );
 }

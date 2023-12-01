@@ -430,6 +430,35 @@ function Filters(props: {
               data={excluded_individual_generalized_keywords}
               setData={setExcludedIndividualGeneralizedKeywords}
             />
+            <CustomSelect
+              maxWidth="30vw"
+              value={[]}
+              // value={included_individual_generalized_keywords}
+              label="University / College (Included)"
+              description='Coming soon ⚠️'
+              placeholder="Select options"
+              // setValue={setIncludedIndividualGeneralizedKeywords}
+              // data={included_individual_generalized_keywords}
+              // setData={setIncludedIndividualGeneralizedKeywords}
+              setValue={() => {}}
+              data={[]}
+              setData={() => {}}
+            />
+            <CustomSelect
+              maxWidth="30vw"
+              value={[]}
+              // value={excluded_individual_generalized_keywords}
+              label="University / College (Excluded)"
+              description='Coming soon ⚠️'
+              placeholder="Select options"
+              
+              // setValue={setExcludedIndividualGeneralizedKeywords}
+              // data={excluded_individual_generalized_keywords}
+              // setData={setExcludedIndividualGeneralizedKeywords}
+              setValue={() => {}}
+              data={[]}
+              setData={() => {}}
+            />
           </Box>
         </Tabs.Panel>
         <Tabs.Panel value="company">

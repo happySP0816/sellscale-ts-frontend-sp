@@ -5,6 +5,7 @@ import { useState } from "react";
 interface ICustomSelect {
   data: string[];
   label?: string;
+  description?: string;
   placeholder?: string;
   includeCurrent?: boolean;
   allowInclude?: boolean;
@@ -29,6 +30,7 @@ const CustomSelect = ({
   value,
   setValue,
   label = "",
+  description = "",
   placeholder = "Select",
   includeCurrent = false,
   allowInclude = false,
@@ -47,6 +49,7 @@ const CustomSelect = ({
         data={data}
         value={value}
         onChange={(value) => setValue(value)}
+        description={description}
         label={
           label ? (
             <Box

@@ -268,7 +268,12 @@ function getDisplayFromBlock(block: TriggerBlock): TriggerDisplayFramework | nul
 function getBlockFromDisplay(display: TriggerDisplayFramework): TriggerBlock {
   const convertData = (value: any) => {
     try {
-      return JSON.parse(value);
+      const parsed = JSON.parse(value);
+      if(parsed.blocks) {
+        return parsed.blocks;
+      } else {
+        return parsed;
+      }
     } catch (error) {
       return value;
     }

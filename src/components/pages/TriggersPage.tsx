@@ -45,7 +45,7 @@ import { getTrigger, runTrigger, updateTrigger } from '@utils/requests/triggerBl
 import { userTokenState } from '@atoms/userAtoms';
 import { useLocation } from 'react-router-dom';
 import { get } from 'lodash';
-import { useListState } from '@mantine/hooks';
+import { useDidUpdate, useListState } from '@mantine/hooks';
 import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import useRefresh from '@common/library/use-refresh';
 
@@ -558,6 +558,7 @@ export default function TriggersPage() {
                     blocks={stackedBlocks}
                     onInputChange={handleInputChange}
                     onBlockDelete={handleDeleteBlock}
+                    onBlockOrderChange={(blocks) => setStackedBlocks(blocks)}
                   />
                 )}
                 {stackedBlocks.length === 0 && (
@@ -582,8 +583,13 @@ function DndListHandler(props: {
   blocks: TriggerDisplayFramework[];
   onInputChange: (index: number, keyLink: string, value: string) => void;
   onBlockDelete: (index: number) => void;
+  onBlockOrderChange: (blocks: TriggerDisplayFramework[]) => void;
 }) {
   const [state, handlers] = useListState(props.blocks);
+
+  useDidUpdate(() => {
+    props.onBlockOrderChange(state);
+  }, [state]);
 
   const items = state.map((block, index) => (
     <Draggable key={block.uuid + ''} index={index} draggableId={block.uuid + ''}>

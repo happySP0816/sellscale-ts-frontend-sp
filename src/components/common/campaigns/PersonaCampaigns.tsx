@@ -46,6 +46,7 @@ import {
   IconExternalLink,
   IconMail,
   IconPlus,
+  IconRefresh,
   IconSeeding,
   IconSend,
   IconX,
@@ -80,6 +81,7 @@ import { CampaignAnalyticsData } from "./CampaignAnalytics";
 import { TodayActivityData } from "./OverallPipeline/TodayActivity";
 import UserStatusToggle from "./UserStatusToggle";
 import AllCampaign from "../../PersonaCampaigns/AllCampaign";
+import postSyncSmartleadCampaigns from "@utils/requests/postSyncSmartleadCampaigns";
 
 export type CampaignPersona = {
   id: number;
@@ -482,21 +484,9 @@ export function PersonCampaignCard(props: {
 
   console.log(props.persona);
 
-  let total_replied = props.persona.li_replied + props.persona.email_replied;
-  let total_opened = props.persona.li_opened + props.persona.email_opened;
-  let total_sent = props.persona.li_sent + props.persona.email_sent;
-
-  console.log(props.persona, total_sent);
-
-  // if (
-  //   props.persona.smartlead_campaign_id &&
-  //   props.persona.meta_data?.smartlead_campaign_analytics
-  // ) {
-  //   const analytics = props.persona.meta_data.smartlead_campaign_analytics;
-  //   total_replied = props.persona.li_replied + parseInt(analytics.reply_count);
-  //   total_opened = props.persona.li_opened + parseInt(analytics.open_count);
-  //   total_sent = props.persona.li_sent + parseInt(analytics.sent_count);
-  // }
+  let total_replied = props.persona.total_replied;
+  let total_opened = props.persona.total_opened;
+  let total_sent = props.persona.total_sent;
 
   const userData = useRecoilValue(userDataState);
 
@@ -588,7 +578,14 @@ export function PersonCampaignCard(props: {
                 opened={popoverOpened}
               >
                 <Popover.Target>
-                  <Button variant="outline" radius="xl" size="sm" h={55} color='gray' sx={{border: 'solid 1px #f1f1f1'}}>
+                  <Button
+                    variant="outline"
+                    radius="xl"
+                    size="sm"
+                    h={55}
+                    color="gray"
+                    sx={{ border: "solid 1px #f1f1f1" }}
+                  >
                     <RingProgress
                       onMouseEnter={openPopover}
                       onMouseLeave={closePopover}
@@ -626,7 +623,7 @@ export function PersonCampaignCard(props: {
                         },
                       ]}
                     />
-                </Button>
+                  </Button>
                 </Popover.Target>
                 <Popover.Dropdown sx={{ pointerEvents: "none" }} bg={"blue"}>
                   <Flex direction="column">
@@ -650,13 +647,17 @@ export function PersonCampaignCard(props: {
 
                       <Text color="white" size={"sm"} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Total # Sourced: </Text> <Text ml='auto'>{props.persona.total_prospects || 0}</Text>
+                          <Text fw="bold">Total # Sourced: </Text>{" "}
+                          <Text ml="auto">
+                            {props.persona.total_prospects || 0}
+                          </Text>
                         </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Total # Contacted: </Text> <Text ml='auto'>{total_sent ?? 0}</Text>
+                          <Text fw="bold">Total # Contacted: </Text>{" "}
+                          <Text ml="auto">{total_sent ?? 0}</Text>
                         </Flex>
                       </Text>
                     </Box>
@@ -670,38 +671,43 @@ export function PersonCampaignCard(props: {
 
                       <Text color="white" size={"sm"} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Prospected: </Text> <Text ml='auto'>{props.persona.total_prospects}</Text>
+                          <Text fw="bold">Prospected: </Text>{" "}
+                          <Text ml="auto">{props.persona.total_prospects}</Text>
                         </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Sending: </Text> <Text ml='auto'>{total_sent}</Text>
+                          <Text fw="bold">Sending: </Text>{" "}
+                          <Text ml="auto">{total_sent}</Text>
                         </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Opened: </Text> <Text ml='auto'>{total_opened}</Text>
+                          <Text fw="bold">Opened: </Text>{" "}
+                          <Text ml="auto">{total_opened}</Text>
                         </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Replies: </Text> <Text ml='auto'>{total_replied}</Text>
-                        </Flex>
-                        
-                      </Text>
-
-                      <Text color="white" size={"sm"} fw={600}>
-                        <Flex>
-                          <Text fw='bold'>Demo Set: </Text> <Text ml='auto'>{props.persona.total_demo}</Text>
+                          <Text fw="bold">Replies: </Text>{" "}
+                          <Text ml="auto">{total_replied}</Text>
                         </Flex>
                       </Text>
 
                       <Text color="white" size={"sm"} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Removed: </Text> <Text ml='auto'>-</Text>
+                          <Text fw="bold">Demo Set: </Text>{" "}
+                          <Text ml="auto">{props.persona.total_demo}</Text>
+                        </Flex>
+                      </Text>
+
+                      <Text color="white" size={"sm"} fw={600}>
+                        <Flex>
+                          <Text fw="bold">Removed: </Text>{" "}
+                          <Text ml="auto">-</Text>
                         </Flex>
                       </Text>
                     </Box>
@@ -1211,6 +1217,8 @@ export const PersonCampaignTable = (props: {
   onPersonaActiveStatusUpdate?: (id: number, active: boolean) => void;
   hideHeader?: boolean;
 }) => {
+  const userToken = useRecoilValue(userTokenState);
+
   const [sort, setSort] = useState<"asc" | "desc">("desc");
   let tempData = useMemo(() => {
     if (sort === "asc") {
@@ -1298,6 +1306,28 @@ export const PersonCampaignTable = (props: {
             <Text fw={600} color="gray.8" fz="sm">
               Overall Report
             </Text>
+            <Tooltip label="Refresh overall report." withArrow withinPortal>
+              <ActionIcon ml={-12} variant='transparent' onClick={async () => {
+                const result = await postSyncSmartleadCampaigns(userToken)
+                if (result.status === 'success') {
+                  showNotification({
+                    title: "Refreshing overall report.",
+                    message: "Please wait for a few minutes for changes to take effect. You can refresh this page to see the changes.",
+                    color: "blue",
+                    autoClose: 5000,
+                  })
+                } else {
+                  showNotification({
+                    title: "Error refreshing overall report.",
+                    message: "Please try again later.",
+                    color: "red",
+                    autoClose: 5000,
+                  })
+                }
+              }}>
+                <IconRefresh size="0.8rem" />
+              </ActionIcon>
+            </Tooltip>
           </Group>
 
           <Divider orientation="vertical" ml="xs" mr="xs" />

@@ -11,7 +11,7 @@ export async function syncSmartleadContacts(
   userToken: string,
   archetype_id: number,
 ): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/smart_email/sync_prospects_to_campaign`, {
+  const response = await fetch(`${API_URL}/smartlead/sync_prospects_to_campaign`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${userToken}`,

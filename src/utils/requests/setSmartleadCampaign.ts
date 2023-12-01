@@ -8,7 +8,7 @@ import { API_URL } from "@constants/data";
  * @returns - MsgResponse
  */
 export async function setSmartleadCampaign(userToken: string, archetype_id: number, campaign_id: number): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/smart_email/set_campaign`, {
+  const response = await fetch(`${API_URL}/smartlead/set_campaign`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${userToken}`,

@@ -654,6 +654,7 @@ type TriggerInput = {
 };
 
 interface TriggerDisplayFramework {
+  uuid?: string;
   type: TriggerBlockType;
   subType?: TriggerSourceType | TriggerActionType | 'FILTER_PROSPECTS' | 'FILTER_COMPANIES';
   label: string;

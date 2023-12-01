@@ -16,10 +16,11 @@ import {
   Textarea,
   Group,
   Flex,
+  rem,
 } from '@mantine/core';
 import PageFrame from '@common/PageFrame';
 import { deterministicMantineColor } from '@utils/requests/utils';
-import { IconCirclePlus, IconEdit, IconPlus } from '@tabler/icons';
+import { IconCirclePlus, IconEdit, IconGripHorizontal, IconGripVertical, IconPlus } from '@tabler/icons';
 import { showNotification } from '@mantine/notifications';
 import {
   Trigger,
@@ -36,7 +37,7 @@ import {
   TriggerSourceData,
   TriggerSourceType,
 } from 'src';
-import { aC } from '@fullcalendar/core/internal-common';
+import { aC, cx } from '@fullcalendar/core/internal-common';
 import { useRecoilValue } from 'recoil';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { useQuery } from '@tanstack/react-query';
@@ -44,6 +45,9 @@ import { getTrigger, runTrigger, updateTrigger } from '@utils/requests/triggerBl
 import { userTokenState } from '@atoms/userAtoms';
 import { useLocation } from 'react-router-dom';
 import { get } from 'lodash';
+import { useListState } from '@mantine/hooks';
+import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
+import useRefresh from '@common/library/use-refresh';
 
 function createTriggerActionBlock(
   action: TriggerActionType,
@@ -226,6 +230,7 @@ function getDisplayFromBlock(block: TriggerBlock): TriggerDisplayFramework | nul
     if (!display) return null;
     return {
       ...display,
+      uuid: crypto.randomUUID(),
       inputs: [
         ...display.inputs.map((input) => ({
           ...input,
@@ -242,6 +247,7 @@ function getDisplayFromBlock(block: TriggerBlock): TriggerDisplayFramework | nul
     if (!display) return null;
     return {
       ...display,
+      uuid: crypto.randomUUID(),
       inputs: [
         ...display.inputs.map((input) => ({
           ...input,
@@ -254,6 +260,7 @@ function getDisplayFromBlock(block: TriggerBlock): TriggerDisplayFramework | nul
     if (!display) return null;
     return {
       ...display,
+      uuid: crypto.randomUUID(),
       inputs: [
         ...display.inputs.map((input) => ({
           ...input,
@@ -269,7 +276,7 @@ function getBlockFromDisplay(display: TriggerDisplayFramework): TriggerBlock {
   const convertData = (value: any) => {
     try {
       const parsed = JSON.parse(value);
-      if(parsed.blocks) {
+      if (parsed.blocks) {
         return parsed.blocks;
       } else {
         return parsed;
@@ -277,7 +284,7 @@ function getBlockFromDisplay(display: TriggerDisplayFramework): TriggerBlock {
     } catch (error) {
       return value;
     }
-  }
+  };
 
   const convertInputsToData = (inputs: TriggerInput[]): Record<string, any> => {
     return inputs.reduce((acc, input) => {
@@ -304,7 +311,7 @@ function getBlockFromDisplay(display: TriggerDisplayFramework): TriggerBlock {
   throw new Error('Unknown block type');
 }
 
-function TriggersPage() {
+export default function TriggersPage() {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
@@ -328,6 +335,7 @@ function TriggersPage() {
     if (trigger) {
       const triggerBlocks = trigger.blocks.map((block) => getDisplayFromBlock(block) ?? undefined);
       setStackedBlocks(triggerBlocks.filter((block) => block) as TriggerDisplayFramework[]);
+      refreshDisplayBlocks();
     }
   }, [trigger]);
 
@@ -358,6 +366,7 @@ function TriggersPage() {
 
   ///
 
+  const [displayBlocks, refreshDisplayBlocks] = useRefresh();
   const [searchTerm, setSearchTerm] = useState('');
   const [stackedBlocks, setStackedBlocks] = useState<TriggerDisplayFramework[]>([]);
 
@@ -394,10 +403,12 @@ function TriggersPage() {
         return [...prev, display];
       });
     }
+    refreshDisplayBlocks();
   };
 
   const handleDeleteBlock = (index: number) => {
     setStackedBlocks(stackedBlocks.filter((block, i) => i !== index));
+    refreshDisplayBlocks();
   };
 
   return (
@@ -542,71 +553,13 @@ function TriggersPage() {
               }}
             >
               <Box ml='auto' mr='auto' w='50%'>
-                {stackedBlocks.map((block, index) => (
-                  <Box key={index} w='100%'>
-                    <Card
-                      withBorder
-                      padding='lg'
-                      style={{ position: 'relative', marginBottom: '10px' }}
-                    >
-                      <CloseButton
-                        style={{ position: 'absolute', top: 10, right: 10 }}
-                        onClick={() => handleDeleteBlock(index)}
-                      />
-                      <Text fw='bold'>
-                        {block.emoji} {block.label}
-                      </Text>
-                      <Text color='gray' fz='sm'>
-                        {block.description}
-                      </Text>
-                      {block.inputs.map((input, inputIndex) => (
-                        <Box key={inputIndex}>
-                          {input.type === 'TEXT' && (
-                            <Textarea
-                              placeholder={input.placeholder}
-                              label={input.label}
-                              defaultValue={input.defaultValue as string}
-                              onChange={(event) =>
-                                handleInputChange(index, input.keyLink, event.target.value)
-                              }
-                              autosize
-                              my='xs'
-                            />
-                          )}
-                          {input.type === 'NUMBER' && (
-                            <NumberInput
-                              placeholder={input.placeholder}
-                              label={input.label}
-                              defaultValue={input.defaultValue as number}
-                              onChange={(value) =>
-                                handleInputChange(index, input.keyLink, `${value}`)
-                              }
-                              my='xs'
-                            />
-                          )}
-                          {input.type === 'JSON' && (
-                            <JsonInput
-                              placeholder={input.placeholder}
-                              label={input.label}
-                              defaultValue={input.defaultValue as string}
-                              onChange={(value) => handleInputChange(index, input.keyLink, value)}
-                              formatOnBlur
-                              validationError='Invalid JSON'
-                              autosize
-                              minRows={3}
-                              my='xs'
-                            />
-                          )}
-                        </Box>
-                      ))}
-                    </Card>
-                    {index < stackedBlocks.length - 1 && (
-                      <Text fz='xl' mb='xs' mt='xs' style={{ textAlign: 'center' }}>
-                        ↓
-                      </Text>
-                    )}
-                  </Box>
-                ))}
+                {displayBlocks && (
+                  <DndListHandler
+                    blocks={stackedBlocks}
+                    onInputChange={handleInputChange}
+                    onBlockDelete={handleDeleteBlock}
+                  />
+                )}
                 {stackedBlocks.length === 0 && (
                   <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Text style={{ textAlign: 'center' }} color='gray' mt='30%' fz='xl'>
@@ -624,7 +577,108 @@ function TriggersPage() {
   );
 }
 
-export default TriggersPage;
+
+function DndListHandler(props: {
+  blocks: TriggerDisplayFramework[];
+  onInputChange: (index: number, keyLink: string, value: string) => void;
+  onBlockDelete: (index: number) => void;
+}) {
+  const [state, handlers] = useListState(props.blocks);
+
+  const items = state.map((block, index) => (
+    <Draggable key={block.uuid + ''} index={index} draggableId={block.uuid + ''}>
+      {(provided, snapshot) => (
+        <div
+          //className={cx(classes.item, { [classes.itemDragging]: snapshot.isDragging })}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+        >
+          <Box key={index} w='100%'>
+            <Card withBorder padding='lg' style={{ position: 'relative', marginBottom: '10px' }}>
+              <Box sx={{ position: 'absolute', top: 8, right: 40 }}>
+                <div {...provided.dragHandleProps}>
+                  {/* className={classes.dragHandle} */}
+                  <IconGripHorizontal style={{ width: rem(25), height: rem(25) }} stroke={1.5} />
+                </div>
+              </Box>
+              <CloseButton
+                style={{ position: 'absolute', top: 10, right: 10 }}
+                onClick={() => props.onBlockDelete(index)}
+              />
+              <Text fw='bold'>
+                {block.emoji} {block.label}
+              </Text>
+              <Text color='gray' fz='sm'>
+                {block.description}
+              </Text>
+              {block.inputs.map((input, inputIndex) => (
+                <Box key={inputIndex}>
+                  {input.type === 'TEXT' && (
+                    <Textarea
+                      placeholder={input.placeholder}
+                      label={input.label}
+                      defaultValue={input.defaultValue as string}
+                      onChange={(event) =>
+                        props.onInputChange(index, input.keyLink, event.target.value)
+                      }
+                      autosize
+                      my='xs'
+                    />
+                  )}
+                  {input.type === 'NUMBER' && (
+                    <NumberInput
+                      placeholder={input.placeholder}
+                      label={input.label}
+                      defaultValue={input.defaultValue as number}
+                      onChange={(value) => props.onInputChange(index, input.keyLink, `${value}`)}
+                      my='xs'
+                    />
+                  )}
+                  {input.type === 'JSON' && (
+                    <JsonInput
+                      placeholder={input.placeholder}
+                      label={input.label}
+                      defaultValue={input.defaultValue as string}
+                      onChange={(value) => props.onInputChange(index, input.keyLink, value)}
+                      formatOnBlur
+                      validationError='Invalid JSON'
+                      autosize
+                      minRows={3}
+                      my='xs'
+                    />
+                  )}
+                </Box>
+              ))}
+            </Card>
+            {index < props.blocks.length - 1 && (
+              <Text fz='xl' mb='xs' mt='xs' style={{ textAlign: 'center' }}>
+                ↓
+              </Text>
+            )}
+          </Box>
+        </div>
+      )}
+    </Draggable>
+  ));
+
+  return (
+    <DragDropContext
+      onDragEnd={({ destination, source }) =>
+        handlers.reorder({ from: source.index, to: destination?.index || 0 })
+      }
+    >
+      <Droppable droppableId='dnd-list' direction='vertical'>
+        {(provided) => (
+          <div {...provided.droppableProps} ref={provided.innerRef}>
+            {items}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+}
+
 
 // const blockTypeOutlines: {
 //   label: string;

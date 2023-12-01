@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Text, Badge, Switch, Grid, Box, Title, Flex, Loader, Collapse, Divider, Modal, Table, LoadingOverlay, Tooltip} from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import { API_URL } from '@constants/data';
 import PageFrame from '@common/PageFrame';
@@ -13,6 +13,9 @@ import 'react-datasheet-grid/dist/style.css';
 import { deterministicMantineColor } from '@utils/requests/utils';
 import { IconChevronCompactDown } from '@tabler/icons-react';
 import { List } from 'lodash';
+import { createTrigger } from '@utils/requests/triggerBlocks';
+import { cu } from '@fullcalendar/core/internal-common';
+import { currentProjectState } from '@atoms/personaAtoms';
 
 export interface TriggerRun {
   id: number;
@@ -226,6 +229,8 @@ const TriggersList = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const currentProject = useRecoilValue(currentProjectState);
+
   const [currentOpenTrigger, setCurrentOpenTrigger] = useState(-1);
 
   useEffect(() => {
@@ -268,7 +273,14 @@ const TriggersList = () => {
         <Button
           ml='auto'
           mt='lg'
-          onClick={() => navigate('/create-trigger')}
+          onClick={async () => {
+            if (!currentProject) return;
+            const response = await createTrigger(userToken, currentProject.id);
+            if(response.status === 'success'){
+              const triggerId = response.data.trigger_id;
+              navigate('/create-trigger?trigger_id=' + triggerId);
+            }
+          }}
         >
           Create New Trigger
         </Button>
@@ -340,7 +352,14 @@ const TriggersList = () => {
                   <Grid.Col span={5}>
                     <Box>
                       <Badge size='xs' color="blue">{trigger.trigger_type.replaceAll("_", " ")}</Badge>
-                      <Box>
+                      <Box sx={{
+                        cursor: 'pointer',
+                        '&:hover': {
+                          textDecoration: 'underline',
+                        }
+                      }} onClick={() => {
+                        navigate('/create-trigger?trigger_id=' + trigger.id);
+                      }}>
                         <Text fw='bold' size="lg">{trigger.emoji} {trigger.name}</Text>
                       </Box>
                       <Text fz='xs' color='black'>{trigger.description}</Text>

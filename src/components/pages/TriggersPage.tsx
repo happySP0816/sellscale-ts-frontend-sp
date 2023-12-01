@@ -40,9 +40,10 @@ import { aC } from '@fullcalendar/core/internal-common';
 import { useRecoilValue } from 'recoil';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { useQuery } from '@tanstack/react-query';
-import { getTrigger, updateTrigger } from '@utils/requests/triggerBlocks';
+import { getTrigger, runTrigger, updateTrigger } from '@utils/requests/triggerBlocks';
 import { userTokenState } from '@atoms/userAtoms';
 import { useLocation } from 'react-router-dom';
+import { get } from 'lodash';
 
 function createTriggerActionBlock(
   action: TriggerActionType,
@@ -193,7 +194,7 @@ const ACTION_BLOCKS: TriggerDisplayFramework[] = [
     inputs: [
       {
         keyLink: 'slack_message',
-        type: 'TEXT',
+        type: 'JSON',
         label: 'Message (https://app.slack.com/block-kit-builder)',
         defaultValue: '',
       },
@@ -265,28 +266,19 @@ function getDisplayFromBlock(block: TriggerBlock): TriggerDisplayFramework | nul
 }
 
 function getBlockFromDisplay(display: TriggerDisplayFramework): TriggerBlock {
-  const convertToData = (
-    inputs: Record<string, any>,
-    key: string
-  ): string | number | boolean | undefined => {
-    const result = inputs[key];
-    console.log('result', result);
-    if (typeof result === 'string') {
-      try {
-        return JSON.parse(result);
-      } catch (error) {
-        return result;
-      }
-    } else {
-      return result;
+  const convertData = (value: any) => {
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return value;
     }
-  };
+  }
 
   const convertInputsToData = (inputs: TriggerInput[]): Record<string, any> => {
     return inputs.reduce((acc, input) => {
       return {
         ...acc,
-        [input.keyLink]: input.defaultValue,
+        [input.keyLink]: convertData(input.defaultValue),
       };
     }, {});
   };
@@ -329,41 +321,31 @@ function TriggersPage() {
 
   useEffect(() => {
     if (trigger) {
-      console.log('data', trigger);
       const triggerBlocks = trigger.blocks.map((block) => getDisplayFromBlock(block) ?? undefined);
       setStackedBlocks(triggerBlocks.filter((block) => block) as TriggerDisplayFramework[]);
     }
   }, [trigger]);
 
-  const saveTrigger = async () => {
+  const saveTrigger = async (showNotif?: boolean) => {
     if (trigger) {
       // Update
-
-      const updatedStackedBlocks = stackedBlocks.map((display, index) => {
-        return {
-          ...display,
-          inputs: display.inputs.map((input) => ({
-            ...input,
-            defaultValue: updatedValues[`${index}-${input.keyLink}`],
-          })),
-        };
-      });
-
-      console.log(
-        'trigger',
-        updatedStackedBlocks.map((display) => getBlockFromDisplay(display))
+      const response = await updateTrigger(
+        userToken,
+        trigger.id,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        stackedBlocks.map((display) => getBlockFromDisplay(display))
       );
-
-      // const response = await updateTrigger(
-      //   userToken,
-      //   trigger.id,
-      //   undefined,
-      //   undefined,
-      //   undefined,
-      //   undefined,
-      //   undefined,
-      //   stackedBlocks.map((display) => getBlockFromDisplay(display))
-      // );
+      if (showNotif || showNotif === undefined) {
+        showNotification({
+          title: 'Trigger Saved',
+          message: 'Your trigger has been saved.',
+          color: 'blue',
+        });
+      }
     } else {
       // Create
     }
@@ -373,7 +355,6 @@ function TriggersPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [stackedBlocks, setStackedBlocks] = useState<TriggerDisplayFramework[]>([]);
-  const [updatedValues, setUpdatedValues] = useState<Record<string, any>>({}); // index + keyLink -> value
 
   const filteredBlocks = useMemo(() => {
     return [...SOURCE_BLOCKS, ...FILTER_BLOCKS, ...ACTION_BLOCKS].filter((display) =>
@@ -384,12 +365,19 @@ function TriggersPage() {
   const [blockType, setBlockType] = useState<TriggerBlockType[]>(['SOURCE', 'FILTER', 'ACTION']);
 
   const handleInputChange = (index: number, keyLink: string, value: string) => {
-    setUpdatedValues((prev) => {
+    const updatedStackedBlocks = stackedBlocks.map((display, i) => {
       return {
-        ...prev,
-        [`${index}-${keyLink}`]: value,
+        ...display,
+        inputs:
+          i === index
+            ? display.inputs.map((input) => ({
+                ...input,
+                defaultValue: input.keyLink === keyLink ? value : input.defaultValue,
+              }))
+            : display.inputs,
       };
     });
+    setStackedBlocks(updatedStackedBlocks);
   };
 
   const handleAddBlock = (label: string) => {
@@ -414,9 +402,28 @@ function TriggersPage() {
           {triggerId ? 'Edit' : 'Create'} Trigger{' '}
           <IconEdit color='gray' style={{ marginLeft: '4px' }} size={16} />
         </Title>
-        <Button radius='md' onClick={saveTrigger}>
-          {triggerId ? 'Save' : 'Create'}
-        </Button>
+        <Group noWrap>
+          <Button
+            radius='md'
+            variant='outline'
+            onClick={async () => {
+              if (!trigger) return;
+              await saveTrigger(false);
+              showNotification({
+                loading: true,
+                title: 'Running Trigger',
+                message: 'This may take a few minutes.',
+                color: 'blue',
+              });
+              const response = await runTrigger(userToken, trigger.id);
+            }}
+          >
+            Run Trigger
+          </Button>
+          <Button radius='md' onClick={() => saveTrigger()}>
+            {triggerId ? 'Save' : 'Create'}
+          </Button>
+        </Group>
       </Flex>
       <Text mb='md' color='gray'>
         Triggers are the building blocks for an automated prospect sourcing workflow.
@@ -555,7 +562,7 @@ function TriggersPage() {
                               label={input.label}
                               defaultValue={input.defaultValue as string}
                               onChange={(event) =>
-                                handleInputChange(inputIndex, input.keyLink, event.target.value)
+                                handleInputChange(index, input.keyLink, event.target.value)
                               }
                               autosize
                               my='xs'
@@ -567,7 +574,7 @@ function TriggersPage() {
                               label={input.label}
                               defaultValue={input.defaultValue as number}
                               onChange={(value) =>
-                                handleInputChange(inputIndex, input.keyLink, `${value}`)
+                                handleInputChange(index, input.keyLink, `${value}`)
                               }
                               my='xs'
                             />
@@ -577,9 +584,7 @@ function TriggersPage() {
                               placeholder={input.placeholder}
                               label={input.label}
                               defaultValue={input.defaultValue as string}
-                              onChange={(value) =>
-                                handleInputChange(inputIndex, input.keyLink, value)
-                              }
+                              onChange={(value) => handleInputChange(index, input.keyLink, value)}
                               formatOnBlur
                               validationError='Invalid JSON'
                               autosize

@@ -53,3 +53,15 @@ export async function updateTrigger(
   });
   return await processResponse(response);
 }
+
+export async function runTrigger(userToken: string, triggerId: number): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/triggers/trigger/run/${triggerId}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({}),
+  });
+  return await processResponse(response);
+}

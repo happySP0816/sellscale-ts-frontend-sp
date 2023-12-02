@@ -53,30 +53,40 @@ import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectA
 import { useViewportSize } from "@mantine/hooks";
 import Confetti from 'react-confetti';
 import LiTemplateModal from "@modals/LiTemplateModal";
+import { io } from 'socket.io-client';
+import { API_URL } from '@constants/data';
+import { socketState } from "@atoms/socketAtoms";
+
+export const socket = io(API_URL);
 
 export default function App() {
   // Site light or dark mode
   const isSystemDarkMode = false; // window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const savedSiteTheme = localStorage.getItem("site-theme");
+  const savedSiteTheme = localStorage.getItem('site-theme');
   const currentColorScheme: ColorScheme =
     savedSiteTheme != null
-      ? savedSiteTheme === "dark"
-        ? "dark"
-        : "light"
+      ? savedSiteTheme === 'dark'
+        ? 'dark'
+        : 'light'
       : isSystemDarkMode
-      ? "dark"
-      : "light";
+      ? 'dark'
+      : 'light';
 
-  const [colorScheme, setColorScheme] =
-    useState<ColorScheme>(currentColorScheme);
+  const [colorScheme, setColorScheme] = useState<ColorScheme>(currentColorScheme);
   const toggleColorScheme = (value?: ColorScheme) => {
-    let nextColorScheme = value || (colorScheme === "dark" ? "light" : "dark");
+    let nextColorScheme = value || (colorScheme === 'dark' ? 'light' : 'dark');
     setColorScheme(nextColorScheme);
-    localStorage.setItem("site-theme", nextColorScheme);
+    localStorage.setItem('site-theme', nextColorScheme);
   };
 
   const userData = useRecoilValue(userDataState);
   const location = useLocation();
+  const [socket, setSocket] = useRecoilState(socketState);
+
+  // Socket.IO Connection
+  // useEffect(() => {
+  //   if (!socket) setSocket();
+  // }, []);
 
   // Fill in Crisp widget w/ info
   // useEffect(() => {
@@ -99,7 +109,7 @@ export default function App() {
 
   const loading = useRecoilValue(navLoadingState);
   const [confetti, setConfetti] = useRecoilState(navConfettiState);
-  
+
   const { height, width } = useViewportSize();
 
   const [drawerProspectId, setDrawerProspectId] = useRecoilState(prospectDrawerIdState);
@@ -107,45 +117,40 @@ export default function App() {
 
   // Select the last used project
   const userToken = useRecoilValue(userTokenState);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   // Set persona query param
   const [searchParams] = useSearchParams();
   useEffect(() => {
     (async () => {
-      if (!isLoggedIn()) {return;}
+      if (!isLoggedIn()) {
+        return;
+      }
 
       // If there is a prospect query param, open the prospect drawer
-      const prospect_id = searchParams.get("prospect_id");
+      const prospect_id = searchParams.get('prospect_id');
       if (prospect_id) {
         setDrawerProspectId(+prospect_id);
         setDrawerOpened(true);
-        removeQueryParam("prospect_id");
+        removeQueryParam('prospect_id');
       }
 
       // If there is a persona query param, set the current project to that
-      const persona_id = searchParams.get("campaign_id");
+      const persona_id = searchParams.get('campaign_id');
       if (persona_id) {
         // Set to query param persona
         const project = await getFreshCurrentProject(userToken, +persona_id);
         setCurrentProject(project);
-        removeQueryParam("campaign_id");
+        removeQueryParam('campaign_id');
       } else {
         // Set to last used persona
         const currentPersonaId = getCurrentPersonaId();
         if (!currentProject && currentPersonaId) {
-          const project = await getFreshCurrentProject(
-            userToken,
-            +currentPersonaId
-          );
+          const project = await getFreshCurrentProject(userToken, +currentPersonaId);
           setCurrentProject(project);
         } else if (!currentPersonaId) {
           // Set to first persona
           const response = await getPersonasOverview(userToken);
-          const result =
-            response.status === "success"
-              ? (response.data as PersonaOverview[])
-              : [];
+          const result = response.status === 'success' ? (response.data as PersonaOverview[]) : [];
           if (result.length > 0) {
             setCurrentProject(result[0]);
           }

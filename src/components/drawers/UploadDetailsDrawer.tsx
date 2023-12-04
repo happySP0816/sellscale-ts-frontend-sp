@@ -15,7 +15,10 @@ import {
   Select,
   Stack,
   Flex,
+  Box,
   ActionIcon,
+  CloseButton,
+  TextInput,
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
@@ -27,12 +30,14 @@ import {
   campaignDrawerIdState,
   campaignDrawerOpenState,
 } from "@atoms/campaignAtoms";
+import { userTokenState } from "@atoms/userAtoms";
 import {
-  userTokenState,
-} from "@atoms/userAtoms";
-import {
+  IconArrowNarrowLeft,
+  IconArrowNarrowRight,
   IconCalendar,
   IconClockRecord,
+  IconMan,
+  IconNavigation,
   IconRefresh,
   IconUsers,
 } from "@tabler/icons";
@@ -147,197 +152,291 @@ export default function UploadDetailsDrawer() {
   }, [opened]);
 
   return (
-    <Drawer
-      opened={opened}
-      onClose={() => setOpened(false)}
-      title={
-        <FlexSeparate>
-          <Title order={3}>{"Upload Details: "}</Title>
-          <Select
-            placeholder="Upload Record"
-            maxDropdownHeight={280}
-            variant="unstyled"
-            data={
-              persona?.uploads?.map((upload) => {
-                return {
-                  value: upload.id + "",
-                  label: convertDateToShortFormat(new Date(upload.created_at)),
-                };
-              }) ?? []
-            }
-            value={uploadId + ""}
-            onChange={(value) => value && setUploadId(+value)}
-            styles={{
-              input: {
-                fontWeight: 500,
-                fontSize: "20px",
-              },
-              root: {
-                width: 240,
-              },
-            }}
-          />
-        </FlexSeparate>
-      }
-      padding="xl"
-      size="lg"
-      position="right"
-      styles={{
-        title: {
-          display: "block",
-          width: "100%",
-        },
-        body: {
-          position: "relative",
-        },
-      }}
-    >
-      <LoadingOverlay
-        visible={isFetching || isFetching_personas}
-        overlayBlur={2}
-      />
-      <div style={{ position: "absolute", top: 0, right: 0 }}>
-        <ActionIcon onClick={refreshDrawer}>
-          <IconRefresh size="1.125rem" />
-        </ActionIcon>
-      </div>
-      <Group noWrap grow>
-        <Group>
-          <Avatar size={84} radius="md">
-            <IconUsers size="3rem" />
-          </Avatar>
-          <div>
-            <Title order={6}>Total</Title>
-            <Title order={1}>{uploadData?.stats.total}</Title>
-            <Text fs="italic" fz="xs" opacity={0.5}>
-              Potential Prospects
-            </Text>
-          </div>
-        </Group>
-        <Group>
-          <Avatar size={84} radius="md">
-            <IconClockRecord size="3rem" />
-          </Avatar>
-          <div>
-            <Title order={6} color="orange.2">
-              Queued
+    <Drawer.Root size="44rem" position="right" opened={opened} onClose={close}>
+      <Drawer.Overlay />
+      <Drawer.Content>
+        <Drawer.Header bg={"blue"}>
+          <Flex
+            bg={"#0287f7"}
+            align={"center"}
+            justify={"space-between"}
+            w={"100%"}
+            px={30}
+          >
+            <Title color="white" order={3}>
+              {"Upload Details: "}
             </Title>
-            <Title order={1} color="orange.2">
-              {uploadData?.stats.queued +
-                uploadData?.stats.not_started +
-                uploadData?.stats.in_progress}
-            </Title>
-            <Text fs="italic" fz="xs" opacity={0.5} color="orange.2">
-              Scheduled to upload
-            </Text>
+            <CloseButton
+              style={{
+                border: "1px solid white",
+                color: "white",
+                borderRadius: "20px",
+              }}
+              onClick={() => setOpened(false)}
+            />
+          </Flex>
+        </Drawer.Header>
+        <Drawer.Body mt={22} px={40}>
+          {/* <LoadingOverlay
+            visible={isFetching || isFetching_personas}
+            overlayBlur={2}
+          /> */}
+          <div style={{ position: "absolute", top: 0, right: 0 }}>
+            <ActionIcon onClick={refreshDrawer}>
+              <IconRefresh size="1.125rem" />
+            </ActionIcon>
           </div>
-        </Group>
-      </Group>
-      <Group noWrap grow pt="lg" pl="md">
-        <div>
-          <Title order={6} color="green.4">
-            Success
-          </Title>
-          <Title order={2} color="green.4">
-            {uploadData?.stats.success}
-          </Title>
-          <Text fs="italic" fz="xs" opacity={0.5} color="green.4">
-            Prospects created
-          </Text>
-        </div>
-        <div>
-          <Title order={6} color="red.4">
-            Disqualified
-          </Title>
-          <Title order={2} color="red.4">
-            {uploadData?.stats.disqualified}
-          </Title>
-          <Text fs="italic" fz="xs" opacity={0.5} color="red.4">
-            Not Eligible
-          </Text>
-        </div>
-        <div>
-          <Title order={6} color="red.4">
-            Failed
-          </Title>
-          <Title order={2} color="red.4">
-            {uploadData?.stats.failed}
-          </Title>
-          <Text fs="italic" fz="xs" opacity={0.5} color="red.4">
-            Error Occurred
-          </Text>
-        </div>
-      </Group>
-      <Text pt="md" fw={650}>
-        File Rows
-      </Text>
-      <DataTable
-        withBorder
-        height={"min(670px, 100vh - 300px)"}
-        verticalAlignment="top"
-        loaderColor="teal"
-        highlightOnHover
-        noRecordsText={"No rows found"}
-        rowExpansion={{
-          content: ({ record }) => (
-            <Stack p="xs" spacing={6}>
-              {Object.keys(record.csv_row_data).map((key, i) => (
-                <Flex key={i} wrap="nowrap">
-                  <div style={{ width: 105 }}>
-                    <Text fw={700} truncate>
-                      {formatToLabel(key)}
-                    </Text>
-                  </div>
-                  <div>
-                    <Text sx={{ wordBreak: "break-word" }}>
-                      {record.csv_row_data[key]}
-                    </Text>
-                  </div>
-                </Flex>
-              ))}
-            </Stack>
-          ),
-        }}
-        columns={[
-          {
-            accessor: "csv_row_hash",
-            title: "Row ID",
-            width: 100,
-            sortable: true,
-            render: ({ csv_row_hash }) => <Text truncate>{csv_row_hash}</Text>,
-          },
-          {
-            accessor: "upload_attempts",
-            title: "Attempts",
-            sortable: true,
-          },
-          {
-            accessor: "status",
-            sortable: true,
-            render: ({ status }) => (
-              <Badge
-                color={valueToColor(theme, formatToLabel(status))}
-                variant="light"
+          <Flex direction={"column"} gap={10}>
+            <Flex gap={20}>
+              <Flex
+                align={"center"}
+                gap={5}
+                w={"100%"}
+                style={{ borderRight: "3px solid #f4f2f5" }}
               >
-                {formatToLabel(status)}
-              </Badge>
-            ),
-          },
-          {
-            accessor: "error_type",
-            sortable: true,
-            render: ({ error_type }) => <Text>{_.capitalize(error_type)}</Text>,
-          },
-        ]}
-        records={data ?? []}
-        totalRecords={totalRecords.current}
-        recordsPerPage={PAGE_SIZE}
-        page={page}
-        onPageChange={(p) => setPage(p)}
-        paginationColor="teal"
-        sortStatus={sortStatus}
-        onSortStatusChange={handleSortStatusChange}
-      />
-    </Drawer>
+                <IconUsers color="#0287f7" />
+                <Text size={"lg"}>Total Prospect:</Text>
+                <Text
+                  size={20}
+                  px={14}
+                  style={{ border: "3px solid #f4f2f5", borderRadius: "10px" }}
+                >
+                  {uploadData?.stats.total}
+                </Text>
+              </Flex>
+              <Flex align={"center"} gap={5} w={"100%"}>
+                <IconCalendar color="#0287f7" />
+                <Text size={"lg"}>Date:</Text>
+                <Select
+                  placeholder="Upload Record"
+                  maxDropdownHeight={280}
+                  data={
+                    persona?.uploads?.map((upload) => {
+                      return {
+                        value: upload.id + "",
+                        label: convertDateToShortFormat(
+                          new Date(upload.created_at)
+                        ),
+                      };
+                    }) ?? []
+                  }
+                  value={uploadId + ""}
+                  onChange={(value) => value && setUploadId(+value)}
+                  styles={{
+                    input: {
+                      fontWeight: 500,
+                      fontSize: "16px",
+                    },
+                    root: {
+                      width: 220,
+                    },
+                  }}
+                />
+              </Flex>
+            </Flex>
+
+            <Flex
+              style={{
+                gap: "0px",
+                border: "2px solid #f4f2f5",
+                borderStyle: "dashed",
+                borderRadius: "10px",
+              }}
+              w={"100%"}
+            >
+              <Box
+                w={"100%"}
+                p={16}
+                style={{ border: "4px solid #57ca7a", borderRadius: "10px" }}
+              >
+                <Text size={"md"}>Success</Text>
+                <Text size={28} color="#009600">
+                  {" "}
+                  {uploadData?.stats.success}
+                </Text>
+                <Text size={12} w={"100%"}>
+                  Potential prospects
+                </Text>
+              </Box>
+              <Box
+                w={"100%"}
+                p={16}
+                style={{
+                  borderRight: "2px solid #f4f2f5",
+                  borderRightStyle: "dashed",
+                }}
+              >
+                <Flex w={"100%"} align={"center"} justify={"space-between"}>
+                  <Text>Queued</Text>
+                  <IconRefresh size={18} />
+                </Flex>
+                <Text size={28} color="#f9b31c">
+                  {" "}
+                  {uploadData?.stats.queued}
+                </Text>
+                <Text size={12} w={"100%"}>
+                  Potential identified
+                </Text>
+              </Box>
+              <Box
+                w={"100%"}
+                p={16}
+                style={{
+                  borderRight: "2px solid #f4f2f5",
+                  borderRightStyle: "dashed",
+                }}
+              >
+                <Text>Failed</Text>
+                <Text size={28} color="#fa5757">
+                  {" "}
+                  {uploadData?.stats.failed}
+                </Text>
+                <Text size={12} w={"100%"}>
+                  Lorem Ipsurm
+                </Text>
+              </Box>
+              <Box w={"100%"} p={16}>
+                <Text>Disqualified</Text>
+                <Text size={28} color="#717171">
+                  {" "}
+                  {uploadData?.stats.disqualified}
+                </Text>
+                <Text size={12} w={"100%"}>
+                  Error Occurred
+                </Text>
+              </Box>
+            </Flex>
+
+            <Flex w={"100%"} align={"center"}>
+              <Text fw={500} w={"100%"} size={20} style={{ width: "140px" }}>
+                File Rows:{" "}
+              </Text>
+              <hr style={{ width: "100%", backgroundColor: "#f4f2f5" }} />
+            </Flex>
+
+            <DataTable
+              withBorder
+              height={"min(520px, 100vh - 240px)"}
+              verticalAlignment="top"
+              loaderColor="teal"
+              highlightOnHover
+              noRecordsText={"No rows found"}
+              rowExpansion={{
+                content: ({ record }) => (
+                  <Stack p="xs" spacing={6}>
+                    {Object.keys(record.csv_row_data).map((key, i) => (
+                      <Flex key={i} wrap="nowrap">
+                        <div style={{ width: 105 }}>
+                          <Text fw={700} truncate>
+                            {formatToLabel(key)}
+                          </Text>
+                        </div>
+                        <div>
+                          <Text sx={{ wordBreak: "break-word" }}>
+                            {record.csv_row_data[key]}
+                          </Text>
+                        </div>
+                      </Flex>
+                    ))}
+                  </Stack>
+                ),
+              }}
+              style={{
+                borderTopLeftRadius: "10px",
+                borderTopRightRadius: "10px",
+              }}
+              columns={[
+                {
+                  accessor: "csv_row_hash",
+                  title: "Row ID",
+                  width: 100,
+                  sortable: true,
+                  render: ({ csv_row_hash }) => (
+                    <Text truncate>{csv_row_hash}</Text>
+                  ),
+                },
+                {
+                  accessor: "upload_attempts",
+                  title: "Attempts",
+                  sortable: true,
+                },
+                {
+                  accessor: "status",
+                  sortable: true,
+                  render: ({ status }) => (
+                    <Badge
+                      color={valueToColor(theme, formatToLabel(status))}
+                      variant="light"
+                    >
+                      {formatToLabel(status)}
+                    </Badge>
+                  ),
+                },
+                {
+                  accessor: "error_type",
+                  sortable: true,
+                  render: ({ error_type }) => (
+                    <Text>{_.capitalize(error_type)}</Text>
+                  ),
+                },
+              ]}
+              records={data ?? []}
+              // totalRecords={totalRecords.current}
+              // recordsPerPage={PAGE_SIZE}
+              // page={page}
+              // onPageChange={(p) => setPage(p)}
+              // paginationColor="teal"
+              sortStatus={sortStatus}
+              onSortStatusChange={handleSortStatusChange}
+            />
+            <Flex
+              w={"100%"}
+              justify={"space-between"}
+              mt={-10}
+              px={20}
+              pt={45}
+              pb={20}
+              style={{
+                border: "1px solid #dee2e6",
+                borderBottomLeftRadius: "10px",
+                borderBottomRightRadius: "10px",
+              }}
+            >
+              <Select
+                style={{ width: "150px" }}
+                data={["Show 25 rows", "Show 5 rows", "Show 10 rows"]}
+              />
+              <Flex>
+                <Select
+                  style={{
+                    width: "80px",
+                  }}
+                  data={["01", "02", "03", "04", "05", "06", "071"]}
+                />
+                <Text
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    borderRadius: "5px",
+                    border: "1px solid #ced4da",
+                    alignItems: "center",
+                  }}
+                  size={"sm"}
+                  px={10}
+                >
+                  of {page} pages
+                </Text>
+                <Button variant="default" px={5}>
+                  <IconArrowNarrowLeft />
+                </Button>
+                <Button variant="default" px={5}>
+                  <IconArrowNarrowRight />
+                </Button>
+              </Flex>
+            </Flex>
+          </Flex>
+        </Drawer.Body>
+      </Drawer.Content>
+    </Drawer.Root>
   );
 }

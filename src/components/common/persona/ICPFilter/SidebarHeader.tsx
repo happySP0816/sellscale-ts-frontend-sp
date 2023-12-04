@@ -224,7 +224,9 @@ export function SidebarHeader({
                 globalRuleSetData.included_company_industries_keywords,
                 globalRuleSetData.excluded_company_industries_keywords,
                 globalRuleSetData.included_company_generalized_keywords,
-                globalRuleSetData.excluded_company_generalized_keywords
+                globalRuleSetData.excluded_company_generalized_keywords,
+                globalRuleSetData.included_individual_education_keywords,
+                globalRuleSetData.excluded_individual_education_keywords,
               );
               console.log("response", response);
               console.log("running scoring");

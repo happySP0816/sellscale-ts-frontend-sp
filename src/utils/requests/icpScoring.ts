@@ -57,6 +57,8 @@ export async function updateICPRuleSet(
   excluded_company_industries_keywords: string[],
   included_company_generalized_keywords: string[],
   excluded_company_generalized_keywords: string[],
+  included_individual_education_keywords: string[],
+  excluded_individual_education_keywords: string[],
 ): Promise<MsgResponse> {
 
   const response = await fetch(
@@ -90,6 +92,8 @@ export async function updateICPRuleSet(
         excluded_company_industries_keywords,
         included_company_generalized_keywords,
         excluded_company_generalized_keywords,
+        included_individual_education_keywords,
+        excluded_individual_education_keywords,
       })
     }
   );

@@ -43,7 +43,9 @@ export default function PersonFilterDrawer(props: { onClickSearch?: () => void }
       globalRuleSetData.included_company_industries_keywords,
       globalRuleSetData.excluded_company_industries_keywords,
       globalRuleSetData.included_company_generalized_keywords,
-      globalRuleSetData.excluded_company_generalized_keywords
+      globalRuleSetData.excluded_company_generalized_keywords,
+      globalRuleSetData.included_individual_education_keywords,
+      globalRuleSetData.excluded_individual_education_keywords,
     );
   };
 

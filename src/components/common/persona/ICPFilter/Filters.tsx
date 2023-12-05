@@ -88,6 +88,14 @@ function Filters(props: {
     excluded_individual_generalized_keywords,
     setExcludedIndividualGeneralizedKeywords,
   ] = useState<string[]>([]);
+  const [
+    included_individual_education_keywords,
+    setIncludedIndividualEducationKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_individual_education_keywords,
+    setExcludedIndividualEducationKeywords,
+  ] = useState<string[]>([]);
   const [included_company_name_keywords, setIncludedCompanyNameKeywords] =
     useState<string[]>([]);
   const [excluded_company_name_keywords, setExcludedCompanyNameKeywords] =
@@ -162,6 +170,12 @@ function Filters(props: {
         setExcludedIndividualGeneralizedKeywords(
           response.data.excluded_individual_generalized_keywords ?? []
         );
+        setIncludedIndividualEducationKeywords(
+          response.data.included_individual_education_keywords ?? []
+        );
+        setExcludedIndividualEducationKeywords(
+          response.data.excluded_individual_education_keywords ?? []
+        );
         setIncludedCompanyNameKeywords(
           response.data.included_company_name_keywords ?? []
         );
@@ -216,6 +230,8 @@ function Filters(props: {
       excluded_company_industries_keywords,
       included_company_generalized_keywords,
       excluded_company_generalized_keywords,
+      included_individual_education_keywords,
+      excluded_individual_education_keywords,
     });
   }, [
     included_individual_title_keywords,
@@ -240,6 +256,8 @@ function Filters(props: {
     excluded_company_industries_keywords,
     included_company_generalized_keywords,
     excluded_company_generalized_keywords,
+    included_individual_education_keywords,
+    excluded_individual_education_keywords,
   ]);
 
   const titleOptions = [
@@ -286,306 +304,303 @@ function Filters(props: {
           <Tabs.Tab value="company">Company</Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="personal">
-          <Box
-            style={{
-              display: "flex",
-              gap: "1rem",
-              flexDirection: "column",
-            }}
-          >
-            <CustomSelect
-              maxWidth="30vw"
-              value={included_individual_title_keywords}
-              label="Titles (Included)"
-              placeholder="Select options"
-              setValue={setIncludedIndividualTitleKeywords}
-              data={included_individual_title_keywords.concat(titleOptions)}
-              setData={setIncludedIndividualTitleKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={excluded_individual_title_keywords}
-              label="Titles (Excluded)"
-              placeholder="Select options"
-              setValue={setExcludedIndividualTitleKeywords}
-              data={excluded_individual_title_keywords.concat(titleOptions)}
-              setData={setExcludedIndividualTitleKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={included_individual_industry_keywords}
-              label="Industry Keywords (Included)"
-              placeholder="Select options"
-              setValue={setIncludedIndividualIndustryKeywords}
-              data={included_individual_industry_keywords.concat(
-                industryOptions
-              )}
-              setData={setIncludedIndividualIndustryKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={excluded_individual_industry_keywords}
-              label="Industry Keywords (Excluded)"
-              placeholder="Select options"
-              setValue={setExcludedIndividualIndustryKeywords}
-              data={excluded_individual_industry_keywords.concat(
-                industryOptions
-              )}
-              setData={setExcludedIndividualIndustryKeywords}
-            />
-            <Flex direction="column">
-              <Title size={"14px"} fw={"500"}>
-                Years of Experience
-              </Title>
-              <Flex
-                justify={"space-between"}
-                align={"center"}
-                mt={"0.2rem"}
-                w={"100%"}
-                gap={"xs"}
-                maw={"30vw"}
-              >
-                <NumberInput
-                  value={individual_years_of_experience_start}
-                  placeholder="Min"
-                  hideControls
-                  onChange={(value) =>
-                    setIndividualYearsOfExperienceStart(value || 0)
-                  }
-                />
-                <NumberInput
-                  value={individual_years_of_experience_end}
-                  placeholder="Max"
-                  hideControls
-                  onChange={(value) =>
-                    setIndividualYearsOfExperienceEnd(value || 0)
-                  }
-                />
+        
+        <Box sx={{
+          maxHeight: "50vh",
+          overflowY: "scroll",
+          paddingBottom: "1rem",
+        }}>
+          <Tabs.Panel value="personal">
+            <Box
+              style={{
+                display: "flex",
+                gap: "1rem",
+                flexDirection: "column",
+              }}
+            >
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_individual_title_keywords}
+                label="Titles (Included)"
+                placeholder="Select options"
+                setValue={setIncludedIndividualTitleKeywords}
+                data={included_individual_title_keywords.concat(titleOptions)}
+                setData={setIncludedIndividualTitleKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_individual_title_keywords}
+                label="Titles (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedIndividualTitleKeywords}
+                data={excluded_individual_title_keywords.concat(titleOptions)}
+                setData={setExcludedIndividualTitleKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_individual_industry_keywords}
+                label="Industry Keywords (Included)"
+                placeholder="Select options"
+                setValue={setIncludedIndividualIndustryKeywords}
+                data={included_individual_industry_keywords.concat(
+                  industryOptions
+                )}
+                setData={setIncludedIndividualIndustryKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_individual_industry_keywords}
+                label="Industry Keywords (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedIndividualIndustryKeywords}
+                data={excluded_individual_industry_keywords.concat(
+                  industryOptions
+                )}
+                setData={setExcludedIndividualIndustryKeywords}
+              />
+              <Flex direction="column">
+                <Title size={"14px"} fw={"500"}>
+                  Years of Experience
+                </Title>
+                <Flex
+                  justify={"space-between"}
+                  align={"center"}
+                  mt={"0.2rem"}
+                  w={"100%"}
+                  gap={"xs"}
+                  maw={"30vw"}
+                >
+                  <NumberInput
+                    value={individual_years_of_experience_start}
+                    placeholder="Min"
+                    hideControls
+                    onChange={(value) =>
+                      setIndividualYearsOfExperienceStart(value || 0)
+                    }
+                  />
+                  <NumberInput
+                    value={individual_years_of_experience_end}
+                    placeholder="Max"
+                    hideControls
+                    onChange={(value) =>
+                      setIndividualYearsOfExperienceEnd(value || 0)
+                    }
+                  />
+                </Flex>
+                <Button
+                  mt={"0.5rem"}
+                  size="sm"
+                  ml={"auto"}
+                  onClick={() => setIndividualYearsOfExperienceEnd(100)}
+                >
+                  Max
+                </Button>
               </Flex>
-              <Button
-                mt={"0.5rem"}
-                size="sm"
-                ml={"auto"}
-                onClick={() => setIndividualYearsOfExperienceEnd(100)}
-              >
-                Max
-              </Button>
-            </Flex>
-            <CustomSelect
-              maxWidth="30vw"
-              value={included_individual_skills_keywords}
-              label="Skills Keywords (Included)"
-              placeholder="Select options"
-              setValue={setIncludedIndividualSkillsKeywords}
-              data={included_individual_skills_keywords}
-              setData={setIncludedIndividualSkillsKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={excluded_individual_skills_keywords}
-              label="Skills Keywords (Excluded)"
-              placeholder="Select options"
-              setValue={setExcludedIndividualSkillsKeywords}
-              data={excluded_individual_skills_keywords}
-              setData={setExcludedIndividualSkillsKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={included_individual_locations_keywords}
-              label="Location Keywords (Included)"
-              placeholder="Select options"
-              setValue={setIncludedIndividualLocationsKeywords}
-              data={included_individual_locations_keywords.concat([
-                "United States",
-              ])}
-              setData={setIncludedIndividualLocationsKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={excluded_individual_locations_keywords}
-              label="Location Keywords (Excluded)"
-              placeholder="Select options"
-              setValue={setExcludedIndividualLocationsKeywords}
-              data={excluded_individual_locations_keywords.concat([
-                "United States",
-              ])}
-              setData={setExcludedIndividualLocationsKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={included_individual_generalized_keywords}
-              label="Bio & Jobs Description (Included)"
-              placeholder="Select options"
-              setValue={setIncludedIndividualGeneralizedKeywords}
-              data={included_individual_generalized_keywords}
-              setData={setIncludedIndividualGeneralizedKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={excluded_individual_generalized_keywords}
-              label="Bio & Jobs Description (Excluded)"
-              placeholder="Select options"
-              setValue={setExcludedIndividualGeneralizedKeywords}
-              data={excluded_individual_generalized_keywords}
-              setData={setExcludedIndividualGeneralizedKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={[]}
-              // value={included_individual_generalized_keywords}
-              label="University / College (Included)"
-              description='Coming soon ⚠️'
-              placeholder="Select options"
-              // setValue={setIncludedIndividualGeneralizedKeywords}
-              // data={included_individual_generalized_keywords}
-              // setData={setIncludedIndividualGeneralizedKeywords}
-              setValue={() => {}}
-              data={[]}
-              setData={() => {}}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={[]}
-              // value={excluded_individual_generalized_keywords}
-              label="University / College (Excluded)"
-              description='Coming soon ⚠️'
-              placeholder="Select options"
-              
-              // setValue={setExcludedIndividualGeneralizedKeywords}
-              // data={excluded_individual_generalized_keywords}
-              // setData={setExcludedIndividualGeneralizedKeywords}
-              setValue={() => {}}
-              data={[]}
-              setData={() => {}}
-            />
-          </Box>
-        </Tabs.Panel>
-        <Tabs.Panel value="company">
-          <Box
-            style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
-          >
-            <CustomSelect
-              maxWidth="30vw"
-              value={included_company_name_keywords}
-              label="Companies Keywords (Included)"
-              placeholder="Select options"
-              setValue={setIncludedCompanyNameKeywords}
-              data={included_company_name_keywords.concat(companyOptions)}
-              setData={setIncludedCompanyNameKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={excluded_company_name_keywords}
-              label="Companies Keywords (Excluded)"
-              placeholder="Select options"
-              setValue={setExcludedCompanyNameKeywords}
-              data={excluded_company_name_keywords.concat(companyOptions)}
-              setData={setExcludedCompanyNameKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={included_company_locations_keywords}
-              label="Location Keywords (Included)"
-              placeholder="Select options"
-              setValue={setIncludedCompanyLocationsKeywords}
-              data={included_company_locations_keywords.concat([
-                "United States",
-              ])}
-              setData={setIncludedCompanyLocationsKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={excluded_company_locations_keywords}
-              label="Location Keywords (Excluded)"
-              placeholder="Select options"
-              setValue={setExcludedCompanyLocationsKeywords}
-              data={excluded_company_locations_keywords.concat([
-                "United States",
-              ])}
-              setData={setExcludedCompanyLocationsKeywords}
-            />
-            <Flex direction="column" maw={"30vw"}>
-              <Title size={"14px"} fw={"500"}>
-                Employee Count
-              </Title>
-              <Box
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "1rem",
-                  alignItems: "center",
-                  marginTop: "0.2rem",
-                }}
-              >
-                <NumberInput
-                  value={company_size_start}
-                  placeholder="Min"
-                  hideControls
-                  onChange={(value) => setCompanySizeStart(value || 0)}
-                />
-                <NumberInput
-                  value={company_size_end}
-                  placeholder="Max"
-                  hideControls
-                  onChange={(value) => setCompanySizeEnd(value || 0)}
-                />
-              </Box>
-              <Button
-                mt={"0.5rem"}
-                size="sm"
-                ml={"auto"}
-                onClick={() => setCompanySizeEnd(100_000)}
-              >
-                Max
-              </Button>
-            </Flex>
-            <CustomSelect
-              maxWidth="30vw"
-              value={included_company_industries_keywords}
-              label="Industries Keywords (Included)"
-              placeholder="Select options"
-              setValue={setIncludedCompanyIndustriesKeywords}
-              data={included_company_industries_keywords.concat(
-                industryOptions
-              )}
-              setData={setIncludedCompanyIndustriesKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={excluded_company_industries_keywords}
-              label="Industries Keywords (Excluded)"
-              placeholder="Select options"
-              setValue={setExcludedCompanyIndustriesKeywords}
-              data={excluded_company_industries_keywords.concat(
-                industryOptions
-              )}
-              setData={setExcludedCompanyIndustriesKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={included_company_generalized_keywords}
-              label="Company Description (Included)"
-              placeholder="Select options"
-              setValue={setIncludedCompanyGeneralizedKeywords}
-              data={included_company_generalized_keywords}
-              setData={setIncludedCompanyGeneralizedKeywords}
-            />
-            <CustomSelect
-              maxWidth="30vw"
-              value={excluded_company_generalized_keywords}
-              label="Company Description (Excluded)"
-              placeholder="Select options"
-              setValue={setExcludedCompanyGeneralizedKeywords}
-              data={excluded_company_generalized_keywords}
-              setData={setExcludedCompanyGeneralizedKeywords}
-            />
-          </Box>
-        </Tabs.Panel>
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_individual_skills_keywords}
+                label="Skills Keywords (Included)"
+                placeholder="Select options"
+                setValue={setIncludedIndividualSkillsKeywords}
+                data={included_individual_skills_keywords}
+                setData={setIncludedIndividualSkillsKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_individual_skills_keywords}
+                label="Skills Keywords (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedIndividualSkillsKeywords}
+                data={excluded_individual_skills_keywords}
+                setData={setExcludedIndividualSkillsKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_individual_locations_keywords}
+                label="Location Keywords (Included)"
+                placeholder="Select options"
+                setValue={setIncludedIndividualLocationsKeywords}
+                data={included_individual_locations_keywords.concat([
+                  "United States",
+                ])}
+                setData={setIncludedIndividualLocationsKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_individual_locations_keywords}
+                label="Location Keywords (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedIndividualLocationsKeywords}
+                data={excluded_individual_locations_keywords.concat([
+                  "United States",
+                ])}
+                setData={setExcludedIndividualLocationsKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_individual_generalized_keywords}
+                label="Bio & Jobs Description (Included)"
+                placeholder="Select options"
+                setValue={setIncludedIndividualGeneralizedKeywords}
+                data={included_individual_generalized_keywords}
+                setData={setIncludedIndividualGeneralizedKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_individual_generalized_keywords}
+                label="Bio & Jobs Description (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedIndividualGeneralizedKeywords}
+                data={excluded_individual_generalized_keywords}
+                setData={setExcludedIndividualGeneralizedKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_individual_education_keywords}
+                label="University / College (Included)"
+                placeholder="Select options"
+                setValue={setIncludedIndividualEducationKeywords}
+                data={included_individual_education_keywords}
+                setData={setIncludedIndividualEducationKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_individual_education_keywords}
+                label="University / College (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedIndividualEducationKeywords}
+                data={excluded_individual_education_keywords}
+                setData={setExcludedIndividualEducationKeywords}
+              />
+            </Box>
+          </Tabs.Panel>
+          <Tabs.Panel value="company">
+            <Box
+              style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
+            >
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_company_name_keywords}
+                label="Companies Keywords (Included)"
+                placeholder="Select options"
+                setValue={setIncludedCompanyNameKeywords}
+                data={included_company_name_keywords.concat(companyOptions)}
+                setData={setIncludedCompanyNameKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_company_name_keywords}
+                label="Companies Keywords (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedCompanyNameKeywords}
+                data={excluded_company_name_keywords.concat(companyOptions)}
+                setData={setExcludedCompanyNameKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_company_locations_keywords}
+                label="Location Keywords (Included)"
+                placeholder="Select options"
+                setValue={setIncludedCompanyLocationsKeywords}
+                data={included_company_locations_keywords.concat([
+                  "United States",
+                ])}
+                setData={setIncludedCompanyLocationsKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_company_locations_keywords}
+                label="Location Keywords (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedCompanyLocationsKeywords}
+                data={excluded_company_locations_keywords.concat([
+                  "United States",
+                ])}
+                setData={setExcludedCompanyLocationsKeywords}
+              />
+              <Flex direction="column" maw={"30vw"}>
+                <Title size={"14px"} fw={"500"}>
+                  Employee Count
+                </Title>
+                <Box
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "1rem",
+                    alignItems: "center",
+                    marginTop: "0.2rem",
+                  }}
+                >
+                  <NumberInput
+                    value={company_size_start}
+                    placeholder="Min"
+                    hideControls
+                    onChange={(value) => setCompanySizeStart(value || 0)}
+                  />
+                  <NumberInput
+                    value={company_size_end}
+                    placeholder="Max"
+                    hideControls
+                    onChange={(value) => setCompanySizeEnd(value || 0)}
+                  />
+                </Box>
+                <Button
+                  mt={"0.5rem"}
+                  size="sm"
+                  ml={"auto"}
+                  onClick={() => setCompanySizeEnd(100_000)}
+                >
+                  Max
+                </Button>
+              </Flex>
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_company_industries_keywords}
+                label="Industries Keywords (Included)"
+                placeholder="Select options"
+                setValue={setIncludedCompanyIndustriesKeywords}
+                data={included_company_industries_keywords.concat(
+                  industryOptions
+                )}
+                setData={setIncludedCompanyIndustriesKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_company_industries_keywords}
+                label="Industries Keywords (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedCompanyIndustriesKeywords}
+                data={excluded_company_industries_keywords.concat(
+                  industryOptions
+                )}
+                setData={setExcludedCompanyIndustriesKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={included_company_generalized_keywords}
+                label="Company Description (Included)"
+                placeholder="Select options"
+                setValue={setIncludedCompanyGeneralizedKeywords}
+                data={included_company_generalized_keywords}
+                setData={setIncludedCompanyGeneralizedKeywords}
+              />
+              <CustomSelect
+                maxWidth="30vw"
+                value={excluded_company_generalized_keywords}
+                label="Company Description (Excluded)"
+                placeholder="Select options"
+                setValue={setExcludedCompanyGeneralizedKeywords}
+                data={excluded_company_generalized_keywords}
+                setData={setExcludedCompanyGeneralizedKeywords}
+              />
+            </Box>
+          </Tabs.Panel>
+        </Box>
       </Tabs>
       {props.autofill && (
         <Center>
           <Button
+            mt="xs"
             variant="light"
             loading={loading}
             onClick={async () => {

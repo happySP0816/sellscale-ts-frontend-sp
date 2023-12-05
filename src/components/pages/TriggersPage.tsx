@@ -55,6 +55,10 @@ import { useDidUpdate, useListState } from '@mantine/hooks';
 import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import useRefresh from '@common/library/use-refresh';
 import { socketState } from '@atoms/socketAtoms';
+<<<<<<< HEAD
+=======
+// import { socket } from '../App';
+>>>>>>> 53d1d2a160b96fb24e07be2db7fe71d3359dee07
 
 function createTriggerActionBlock(
   action: TriggerActionType,
@@ -322,15 +326,16 @@ export default function TriggersPage() {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
-  // useEffect(() => {
-  //   socket.on('message', function (msg) {
-  //     console.log('Message:', msg);
-  //   });
-  //   setInterval(() => {
-  //     console.log('got here');
-  //     socket.emit('message', 'Hello, server!');
-  //   }, 1000);
-  // }, [socket]);
+  useEffect(() => {
+    // if (socket) {
+    //   console.log('got here1234')
+    //   console.log(socket)
+      // setInterval(() => {
+      //   socket.emit('ping-event', { name: 'John' });
+      // }, 1000);
+      //socket.emit('ping-event', { data: "I'm connected!" });
+    // };
+  }, []);
 
   const location = useLocation();
   const triggerId = new URLSearchParams(location.search).get('trigger_id');

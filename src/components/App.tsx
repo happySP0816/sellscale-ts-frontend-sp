@@ -1,63 +1,58 @@
-import {
-  MantineProvider,
-  ColorSchemeProvider,
-  LoadingOverlay,
-  ColorScheme,
-} from "@mantine/core";
+import { MantineProvider, ColorSchemeProvider, LoadingOverlay, ColorScheme } from '@mantine/core';
 
-import Layout from "./nav/Layout";
-import { Outlet, useLocation, useSearchParams } from "react-router-dom";
-import { ModalsProvider } from "@mantine/modals";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { navConfettiState, navLoadingState } from "@atoms/navAtoms";
-import SpotlightWrapper from "@nav/SpotlightWrapper";
-import UploadProspectsModal from "@modals/UploadProspectsModal";
-import SendLinkedInCredentialsModal from "@modals/SendLinkedInCredentialsModal";
-import InstructionsLinkedInCookieModal from "@modals/InstructionsLinkedInCookieModal";
-import CreateNewCTAModal from "@modals/CreateNewCTAModal";
-import ViewEmailModal from "@modals/ViewEmailModal";
-import { useEffect, useState } from "react";
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import SequenceWriterModal from "@modals/SequenceWriterModal";
-import CTAGeneratorModal from "@modals/CTAGeneratorModal";
-import ManagePulsePrompt from "@modals/ManagePulsePromptModal";
-import ViewEmailThreadModal from "@modals/ViewEmailThreadModal";
-import ManageBumpFramework from "@modals/ManageBumpFrameworkModal";
-import ComposeEmailModal from "@modals/ComposeEmailModal";
-import { Notifications } from "@mantine/notifications";
-import ClientProductModal from "@modals/ClientProductModal";
-import CopyCTAsModal from "@modals/CopyCTAsModal";
-import EditCTAModal from "@modals/EditCTAModal";
-import DemoFeedbackDetailsModal from "@modals/DemoFeedbackDetailsModal";
-import VoiceBuilderModal from "@modals/VoiceBuilderModal";
-import EditBumpFrameworkModal from "@modals/EditBumpFrameworkModal";
-import EditEmailSequenceStepModal from "@modals/EditEmailSequenceStepModal";
-import VoiceEditorModal from "@modals/VoiceEditorModal";
-import AccountModal from "@modals/AccountModal";
-import AddProspectModal from "@modals/AddProspectModal";
-import SendLiOutreachModal from "@modals/SendOutreachModal";
-import SendOutreachModal from "@modals/SendOutreachModal";
-import PersonaSelectModal from "@modals/PersonaSelectModal";
-import ClonePersonaModal from "@modals/ClonePersonaModal";
-import ConfirmModal from "@modals/ConfirmModal";
-import PatchEmailSubjectLineModal from "@modals/PatchEmailSubjectLineModal";
-import { CreateBumpFrameworkContextModal } from "@modals/CreateBumpFrameworkModal";
-import { CloneBumpFrameworkContextModal } from "@modals/CloneBumpFrameworkModal";
-import { currentProjectState } from "@atoms/personaAtoms";
-import { getFreshCurrentProject, getCurrentPersonaId, isLoggedIn } from "@auth/core";
-import { removeQueryParam } from "@utils/documentChange";
-import { getPersonasOverview } from "@utils/requests/getPersonas";
-import { PersonaOverview } from "src";
-import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
-import { prospectDrawerIdState, prospectDrawerOpenState } from "@atoms/prospectAtoms";
-import { useViewportSize } from "@mantine/hooks";
+import Layout from './nav/Layout';
+import { Outlet, useLocation, useSearchParams } from 'react-router-dom';
+import { ModalsProvider } from '@mantine/modals';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { navConfettiState, navLoadingState } from '@atoms/navAtoms';
+import SpotlightWrapper from '@nav/SpotlightWrapper';
+import UploadProspectsModal from '@modals/UploadProspectsModal';
+import SendLinkedInCredentialsModal from '@modals/SendLinkedInCredentialsModal';
+import InstructionsLinkedInCookieModal from '@modals/InstructionsLinkedInCookieModal';
+import CreateNewCTAModal from '@modals/CreateNewCTAModal';
+import ViewEmailModal from '@modals/ViewEmailModal';
+import { useEffect, useState } from 'react';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import SequenceWriterModal from '@modals/SequenceWriterModal';
+import CTAGeneratorModal from '@modals/CTAGeneratorModal';
+import ManagePulsePrompt from '@modals/ManagePulsePromptModal';
+import ViewEmailThreadModal from '@modals/ViewEmailThreadModal';
+import ManageBumpFramework from '@modals/ManageBumpFrameworkModal';
+import ComposeEmailModal from '@modals/ComposeEmailModal';
+import { Notifications } from '@mantine/notifications';
+import ClientProductModal from '@modals/ClientProductModal';
+import CopyCTAsModal from '@modals/CopyCTAsModal';
+import EditCTAModal from '@modals/EditCTAModal';
+import DemoFeedbackDetailsModal from '@modals/DemoFeedbackDetailsModal';
+import VoiceBuilderModal from '@modals/VoiceBuilderModal';
+import EditBumpFrameworkModal from '@modals/EditBumpFrameworkModal';
+import EditEmailSequenceStepModal from '@modals/EditEmailSequenceStepModal';
+import VoiceEditorModal from '@modals/VoiceEditorModal';
+import AccountModal from '@modals/AccountModal';
+import AddProspectModal from '@modals/AddProspectModal';
+import SendLiOutreachModal from '@modals/SendOutreachModal';
+import SendOutreachModal from '@modals/SendOutreachModal';
+import PersonaSelectModal from '@modals/PersonaSelectModal';
+import ClonePersonaModal from '@modals/ClonePersonaModal';
+import ConfirmModal from '@modals/ConfirmModal';
+import PatchEmailSubjectLineModal from '@modals/PatchEmailSubjectLineModal';
+import { CreateBumpFrameworkContextModal } from '@modals/CreateBumpFrameworkModal';
+import { CloneBumpFrameworkContextModal } from '@modals/CloneBumpFrameworkModal';
+import { currentProjectState } from '@atoms/personaAtoms';
+import { getFreshCurrentProject, getCurrentPersonaId, isLoggedIn } from '@auth/core';
+import { removeQueryParam } from '@utils/documentChange';
+import { getPersonasOverview } from '@utils/requests/getPersonas';
+import { PersonaOverview } from 'src';
+import ProspectDetailsDrawer from '@drawers/ProspectDetailsDrawer';
+import { prospectDrawerIdState, prospectDrawerOpenState } from '@atoms/prospectAtoms';
+import { useViewportSize } from '@mantine/hooks';
 import Confetti from 'react-confetti';
-import LiTemplateModal from "@modals/LiTemplateModal";
-import { io } from 'socket.io-client';
+import LiTemplateModal from '@modals/LiTemplateModal';
+//import { io } from 'socket.io-client';
 import { API_URL } from '@constants/data';
-import { socketState } from "@atoms/socketAtoms";
+import { socketState } from '@atoms/socketAtoms';
 
-export const socket = io(API_URL);
+//export const socket = io(API_URL);
 
 export default function App() {
   // Site light or dark mode

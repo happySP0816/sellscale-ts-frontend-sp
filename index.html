@@ -14,20 +14,42 @@
     <link rel="manifest" href="/manifest.json" />
 
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="8360b56a-9a23-44c1-ac2a-6be6649217ac";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script> -->
 
     <title>SellScale</title>
-
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script>
+      const socket = io('http://127.0.0.1:5000');
+
+      // This event handler is triggered when the connection is established
+      socket.on('connect', function () {
+        console.log('Socket.IO is connected!!!');
+
+        // Emit a message to the server after the connection is established
+        socket.emit('message', 'Hello from the client!');
+      });
+
+      // This event handler is triggered when the server sends a message
+      socket.on('message', function (data) {
+        console.log('Received message from the server:', data);
+      });
+    </script> -->
   </body>
 </html>

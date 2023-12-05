@@ -94,7 +94,7 @@
     "react-type-animation": "^3.2.0",
     "recoil": "^0.7.6",
     "resend": "^2.0.0",
-    "socket.io-client": "^4.7.2",
+    "socket.io": "^4.7.2",
     "sort-by": "^1.2.0",
     "tiptap": "^1.32.2",
     "tiptap-markdown": "^0.7.4",

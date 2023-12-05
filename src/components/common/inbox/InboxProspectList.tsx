@@ -110,6 +110,7 @@ export function ProspectConvoCard(props: {
     <>
       <Flex
         p={10}
+        w='100%'
         wrap="nowrap"
         sx={(theme) => ({
           overflow: "hidden",

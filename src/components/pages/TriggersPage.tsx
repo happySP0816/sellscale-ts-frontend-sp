@@ -49,7 +49,7 @@ import { useDidUpdate, useListState } from '@mantine/hooks';
 import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import useRefresh from '@common/library/use-refresh';
 import { socketState } from '@atoms/socketAtoms';
-import { socket } from '../App';
+// import { socket } from '../App';
 
 function createTriggerActionBlock(
   action: TriggerActionType,
@@ -318,14 +318,14 @@ export default function TriggersPage() {
   const currentProject = useRecoilValue(currentProjectState);
 
   useEffect(() => {
-    if (socket) {
-      console.log('got here1234')
-      console.log(socket)
+    // if (socket) {
+    //   console.log('got here1234')
+    //   console.log(socket)
       // setInterval(() => {
       //   socket.emit('ping-event', { name: 'John' });
       // }, 1000);
       //socket.emit('ping-event', { data: "I'm connected!" });
-    };
+    // };
   }, []);
 
   const location = useLocation();

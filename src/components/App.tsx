@@ -57,7 +57,7 @@ import { io } from 'socket.io-client';
 import { API_URL } from '@constants/data';
 import { socketState } from "@atoms/socketAtoms";
 
-export const socket = io(API_URL);
+// export const socket = io(API_URL);
 
 export default function App() {
   // Site light or dark mode

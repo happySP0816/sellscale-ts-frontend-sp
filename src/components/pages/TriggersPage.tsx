@@ -321,9 +321,9 @@ export default function TriggersPage() {
     if (socket) {
       console.log('got here1234')
       console.log(socket)
-      setInterval(() => {
-        socket.emit('ping-event', { name: 'John' });
-      }, 1000);
+      // setInterval(() => {
+      //   socket.emit('ping-event', { name: 'John' });
+      // }, 1000);
       //socket.emit('ping-event', { data: "I'm connected!" });
     };
   }, []);

@@ -4,6 +4,7 @@ import InboxProspectDetails from "@common/inbox/InboxProspectDetails";
 import InboxProspectList, {
   ProspectConvoCard,
 } from "@common/inbox/InboxProspectList";
+import RichTextArea from "@common/library/RichTextArea";
 import {
   Button,
   Card,
@@ -16,30 +17,50 @@ import {
   Box,
   ScrollArea,
 } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
 import { IconList, IconWorld } from "@tabler/icons";
 import { useQuery } from "@tanstack/react-query";
+import { JSONContent } from "@tiptap/react";
 import { setPageTitle } from "@utils/documentChange";
 import { getSmartleadProspectConvo } from "@utils/requests/getSmartleadProspectConvo";
 import { getSmartleadRepliedProspects } from "@utils/requests/getSmartleadRepliedProspects";
+import postSmartleadReply from "@utils/requests/postSmartleadReply";
 import DOMPurify from "dompurify";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 export const INBOX_PAGE_HEIGHT = `100vh`; //`calc(100vh - ${NAV_HEADER_HEIGHT}px)`;
 
 // OH GOD THIS IS A MESS
-export default function InboxSmartleadPage(props: { setNumberLeads: (number: number) => void, all?: boolean }) {
+export default function InboxSmartleadPage(props: {
+  setNumberLeads: (number: number) => void;
+  all?: boolean;
+}) {
   setPageTitle("Inbox");
 
   const userToken = useRecoilValue(userTokenState);
   const [fetchingProspects, setFetchingProspects] = useState(false);
   const [fetchingConversation, setFetchingConversation] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
   const [prospects, setProspects] = useState([]);
   const [conversation, setConversation] = useState<any>(null);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(
     openedProspectIdState
   );
+
+  // We use this to store the value of the text area
+  const [messageDraft, _setMessageDraft] = useState("");
+  // We use this to store the raw value of the rich text editor
+  const messageDraftRichRaw = useRef<JSONContent | string>();
+
+  // We use this to set the value of the text area (for both rich text and normal text)
+  const setMessageDraft = (value: string) => {
+    messageDraftRichRaw.current = value;
+    _setMessageDraft(value);
+  };
+  // For email we have to use this ref instead, otherwise the textbox does a weird refocusing.
+  const messageDraftEmail = useRef("");
 
   const triggerGetSmartleadRepliedProspects = async () => {
     setFetchingProspects(true);
@@ -59,25 +80,61 @@ export default function InboxSmartleadPage(props: { setNumberLeads: (number: num
     setFetchingProspects(false);
   };
 
-  const triggerGetSmartleadProspectConvo = async () => {
+  const triggerGetSmartleadProspectConvo = async (prospectID?: any) => {
     setFetchingConversation(true);
 
     if (!selectedProspect) {
       return;
     }
 
-    const prospectID = selectedProspect.prospect_id;
+    const prospectid = prospectID || selectedProspect.prospect_id;
     const smartleadCampaignID = selectedProspect.smartlead_campaign_id;
     const response = await getSmartleadProspectConvo(
       userToken,
-      prospectID,
+      prospectid,
       smartleadCampaignID
     );
 
-    console.log("convo", response);
     setConversation(response.data.conversation);
 
     setFetchingConversation(false);
+  };
+
+  const triggerPostSmartleadReply = async () => {
+    setSendingMessage(true);
+
+    if (!selectedProspect) {
+      return;
+    }
+
+    const prospectid = selectedProspect.prospect_id;
+    const response = await postSmartleadReply(
+      userToken,
+      prospectid,
+      messageDraftEmail.current
+    );
+    if (response.status !== "success") {
+      showNotification({
+        title: "Error",
+        message: "Failed to send email",
+        color: "red",
+      });
+    } else {
+      showNotification({
+        title: "Success",
+        message:
+          "Email sent. It may take a few minutes to appear in your inbox.",
+        color: "green",
+      });
+      messageDraftEmail.current = "";
+      messageDraftRichRaw.current = "";
+      setMessageDraft("");
+
+    };
+
+    setSendingMessage(false);
+
+    triggerGetSmartleadProspectConvo();
   };
 
   useEffect(() => {
@@ -98,8 +155,9 @@ export default function InboxSmartleadPage(props: { setNumberLeads: (number: num
               <Flex
                 w="100%"
                 onClick={() => {
+                  console.log("clicked", prospect);
                   setSelectedProspect(prospect);
-                  triggerGetSmartleadProspectConvo();
+                  triggerGetSmartleadProspectConvo(prospect.prospect_id);
                 }}
               >
                 <ProspectConvoCard
@@ -123,35 +181,68 @@ export default function InboxSmartleadPage(props: { setNumberLeads: (number: num
         <>
           <Grid.Col span={46}>
             {fetchingConversation ? (
-              <Flex w="100%" my="xl">
+              <Flex
+                w="100%"
+                h="60vh"
+                my="xl"
+                align={"center"}
+                justify={"center"}
+                direction="column"
+              >
                 <Loader color="purple" />
+                <Text color="purple" mt="md">
+                  Fetching conversation, please wait...
+                </Text>
               </Flex>
             ) : (
-              <ScrollArea h='100vh'>
-                {conversation &&
-                  conversation.map((message: any) => {
-                    return (
-                      <Card my="sm">
-                        <Box
-                          sx={() => ({
-                            border: "1px solid #E0E0E0",
-                            borderRadius: "8px",
-                            backgroundColor: "#F5F5F5",
-                          })}
-                          p="md"
-                          mt="sm"
-                        >
-                          <Text fz="sm">
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html: DOMPurify.sanitize(message.email_body),
-                              }}
-                            />
-                          </Text>
-                        </Box>
-                      </Card>
-                    );
-                  })}
+              <ScrollArea h="100vh" pb="lg">
+                {conversation && (
+                  <>
+                    {conversation.map((message: any) => {
+                      return (
+                        <Card my="sm">
+                          <Box
+                            sx={() => ({
+                              border: "1px solid #E0E0E0",
+                              borderRadius: "8px",
+                              backgroundColor: "#F5F5F5",
+                            })}
+                            p="md"
+                            mt="sm"
+                          >
+                            <Text fz="sm">
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html: DOMPurify.sanitize(
+                                    message.email_body
+                                  ),
+                                }}
+                              />
+                            </Text>
+                          </Box>
+                        </Card>
+                      );
+                    })}
+                    <RichTextArea
+                      onChange={(value, rawValue) => {
+                        messageDraftRichRaw.current = rawValue;
+                        messageDraftEmail.current = value;
+                      }}
+                      value={messageDraftRichRaw.current}
+                      height={200}
+                    />
+                    <Flex justify={"flex-end"} mt="xs">
+                      <Button
+                        color="green"
+                        onClick={() => {
+                          triggerPostSmartleadReply();
+                        }}
+                      >
+                        Reply
+                      </Button>
+                    </Flex>
+                  </>
+                )}
               </ScrollArea>
             )}
           </Grid.Col>

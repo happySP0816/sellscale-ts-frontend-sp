@@ -24,10 +24,11 @@ import GlobalContacts from "./GlobalContacts";
 import DoNotContactList from "@common/settings/DoNotContactList";
 import PageFrame from "@common/PageFrame";
 import UploadOverviewV2 from "./UploadOverviewV2";
+import TAMGraph from "./TAMGraph";
 
 const ContactOverview = () => {
   return (
-    <Tabs defaultValue="overview">
+    <Tabs defaultValue="overview" className="min-h-full flex flex-col">
       <Tabs.List>
         <Tabs.Tab value="overview">
           <IconTable
@@ -50,7 +51,10 @@ const ContactOverview = () => {
           />
           Do Not Contact
         </Tabs.Tab>
-        <Tabs.Tab value="overviewV2" ml='auto'>
+        <Tabs.Tab value="TAM_graph" ml="auto">
+          TAM Graph
+        </Tabs.Tab>
+        <Tabs.Tab value="overviewV2" >
           <IconBeta size="0.8rem" style={{ marginRight: "8px" }} />
           Overview (Beta)
         </Tabs.Tab>
@@ -66,6 +70,10 @@ const ContactOverview = () => {
 
       <Tabs.Panel value="do_not_contact">
         <DoNotContactList />
+      </Tabs.Panel>
+
+      <Tabs.Panel value="TAM_graph" className="h-0 grow">
+        <TAMGraph />
       </Tabs.Panel>
 
       <Tabs.Panel value="overviewV2">

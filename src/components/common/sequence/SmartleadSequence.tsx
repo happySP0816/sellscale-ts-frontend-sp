@@ -45,6 +45,8 @@ interface SequenceStepProps {
       delayInDays: number;
     };
     sequence_variants: Array<EmailProps["email"]>;
+    subject: string;
+    email_body: string;
   };
   stepIndex: number;
   selectedStep: EmailProps["email"] | null;
@@ -92,34 +94,66 @@ const SequenceStep: React.FC<SequenceStepProps> = ({
           Step {stepIndex + 1}
         </Text>
         <Flex direction="column">
-          {sequenceStep.sequence_variants.map((email, index) => {
-            return (
+          {sequenceStep.sequence_variants ? (
+            <>
+              {sequenceStep?.sequence_variants?.map((email, index) => {
+                return (
+                  <Flex
+                    key={email.id}
+                    onClick={() => onSelectStep(email)}
+                    align="center"
+                    mt="4px"
+                  >
+                    <Badge
+                      variant="filled"
+                      color={colors[index % colors.length]}
+                      mr="5px"
+                    >
+                      {numberToAlphabet(index)}
+                    </Badge>
+                    <Flex
+                      sx={(theme) => ({
+                        backgroundColor:
+                          selectedStep?.id === email.id
+                            ? theme.colors.gray[3]
+                            : "",
+                        borderRadius: "4px",
+                      })}
+                      px="3px"
+                    >
+                      <Text fz="sm">Subject: {email.subject}</Text>
+                    </Flex>
+                  </Flex>
+                );
+              })}
+            </>
+          ) : (
+            <>
               <Flex
-                key={email.id}
-                onClick={() => onSelectStep(email)}
+                onClick={() => onSelectStep({ id: sequenceStep.id, subject: sequenceStep.subject, email_body: sequenceStep.email_body })}
                 align="center"
                 mt="4px"
               >
                 <Badge
                   variant="filled"
-                  color={colors[index % colors.length]}
+                  color={colors[0 % colors.length]}
                   mr="5px"
                 >
-                  {numberToAlphabet(index)}
+                  {numberToAlphabet(0)}
                 </Badge>
                 <Flex
                   sx={(theme) => ({
                     backgroundColor:
-                      selectedStep?.id === email.id ? theme.colors.gray[3] : "",
+                      selectedStep?.id === sequenceStep.id ? theme.colors.gray[3] : "",
                     borderRadius: "4px",
                   })}
                   px="3px"
                 >
-                  <Text fz="sm">Subject: {email.subject}</Text>
+                  <Text fz="sm">Subject: {sequenceStep.subject}</Text>
                 </Flex>
               </Flex>
-            );
-          })}
+            </>
+          )}
         </Flex>
       </Card>
     </>
@@ -154,7 +188,7 @@ const SmartleadVisualizer: React.FC<SmartleadVisualizerProps> = ({ data }) => {
               />
             ))}
         </Flex>
-        <Flex w={'50%'}>{selectedStep && <Email email={selectedStep} />}</Flex>
+        <Flex w={"50%"}>{selectedStep && <Email email={selectedStep} />}</Flex>
       </Flex>
     </>
   );

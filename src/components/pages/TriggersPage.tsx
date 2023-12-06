@@ -209,12 +209,12 @@ const ACTION_BLOCKS: TriggerDisplayFramework[] = [
         label: 'Message (https://app.slack.com/block-kit-builder)',
         defaultValue: '',
       },
-      {
-        keyLink: 'slack_webhook_urls',
-        type: 'JSON',
-        label: 'Webhook URLs',
-        defaultValue: '',
-      },
+      // {
+      //   keyLink: 'slack_webhook_urls',
+      //   type: 'JSON',
+      //   label: 'Webhook URLs',
+      //   defaultValue: '',
+      // },
     ],
   },
 ];

@@ -590,7 +590,7 @@ export function PersonCampaignCard(props: {
             py={25}
           >
             <Text size={"lg"} color="white">
-              Outreach for: {"AskEdith Partners"}
+              Outreach for: {"Coming soon! ⚠️ - This is all mock data..."}
             </Text>
             <CloseButton
               aria-label="Close modal"

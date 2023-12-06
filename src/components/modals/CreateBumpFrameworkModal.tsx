@@ -201,6 +201,19 @@ export function CreateBumpFrameworkContextModal({
         {...form.getInputProps("description")}
       />
 
+      {selectedStatus === "ACTIVE_CONVO" && (
+        <Select
+          label="Substatus"
+          description="Which substatus should use this bump?"
+          placeholder="select substatus..."
+          value={selectedSubstatus ? selectedSubstatus : null}
+          data={getActiveConvoSubstatusValues()}
+          onChange={setSelectedSubstatus}
+          mt="md"
+          withAsterisk
+        />
+      )}
+
       <Box mx="auto">
         <Group mb={5}>
           <Button onClick={toggle} leftIcon={<IconWashMachine size="0.8rem"/>} variant='outline' color='gray' mt='xs' w='100%'>
@@ -275,19 +288,7 @@ export function CreateBumpFrameworkContextModal({
           withAsterisk
         />
       )}
-      {selectedStatus === "ACTIVE_CONVO" && (
-        <Select
-          label="Substatus"
-          description="Which substatus should use this bump?"
-          placeholder="select substatus..."
-          value={selectedSubstatus ? selectedSubstatus : null}
-          data={getActiveConvoSubstatusValues()}
-          onChange={setSelectedSubstatus}
-          mt="md"
-          withAsterisk
-        />
-      )}
-
+      
 
    
       {(selectedStatus === "BUMPED" && form.values.bumpedCount != null && innerProps.showStatus) && (

@@ -51,6 +51,7 @@ import LiTemplateModal from '@modals/LiTemplateModal';
 //import { io } from 'socket.io-client';
 import { API_URL } from '@constants/data';
 import { socketState } from '@atoms/socketAtoms';
+import SalesNavURLModal from '@modals/SalesNavURLModal';
 
 // export const socket = io(API_URL);
 
@@ -204,6 +205,7 @@ export default function App() {
               createBumpFramework: CreateBumpFrameworkContextModal,
               cloneBumpFramework: CloneBumpFrameworkContextModal,
               liTemplate: LiTemplateModal,
+              salesNavURL: SalesNavURLModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

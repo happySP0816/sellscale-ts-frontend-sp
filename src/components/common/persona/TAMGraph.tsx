@@ -9,7 +9,7 @@ export default function TAMGraph () {
         title="TAM Graph"
         width="100%"
         height="100%"
-        src={`https://sellscale.retool.com/apps/25107d88-9099-11ee-9a56-f36fbd4c0f30/TAM Graph - Experiment#authToken=${userToken}`}
+        src={`https://sellscale.retool.com/embedded/public/87e00bae-34e7-4c62-a205-c93d2a09b62f#authToken=${userToken}`}
         >
        </iframe>
   )

@@ -113,7 +113,7 @@ export default function InboxSmartleadPage(props: {
   // For email we have to use this ref instead, otherwise the textbox does a weird refocusing.
   const messageDraftEmail = useRef("");
 
-  const triggerGetSmartleadRepliedProspects = async () => {
+  const triggerGetSmartleadProspects = async () => {
     setFetchingProspects(true);
 
     const response = await getSmartleadRepliedProspects(userToken);
@@ -126,10 +126,19 @@ export default function InboxSmartleadPage(props: {
 
     if (mainTab === "inbox") {
       setProspects(repliedProspects);
+      setSelectedProspect(repliedProspects[0]);
+      setOpenedProspectId(repliedProspects[0].prospect_id);
+      triggerGetSmartleadProspectConvo(repliedProspects[0].prospect_id, repliedProspects[0].smartlead_campaign_id);
     } else if (mainTab === "snoozed") {
       setProspects(snoozedProspects);
+      setSelectedProspect(snoozedProspects[0]);
+      setOpenedProspectId(snoozedProspects[0].prospect_id);
+      triggerGetSmartleadProspectConvo(snoozedProspects[0].prospect_id, snoozedProspects[0].smartlead_campaign_id);
     } else {
       setProspects(repliedProspects);
+      setSelectedProspect(repliedProspects[0]);
+      setOpenedProspectId(repliedProspects[0].prospect_id);
+      triggerGetSmartleadProspectConvo(repliedProspects[0].prospect_id, repliedProspects[0].smartlead_campaign_id);
     }
 
     // Sort by ID
@@ -140,15 +149,15 @@ export default function InboxSmartleadPage(props: {
     setFetchingProspects(false);
   };
 
-  const triggerGetSmartleadProspectConvo = async (prospectID?: any) => {
+  const triggerGetSmartleadProspectConvo = async (prospectID?: any, campaignID?: any) => {
     setFetchingConversation(true);
 
-    if (!selectedProspect) {
+    if (!selectedProspect && !prospectID) {
       return;
     }
 
     const prospectid = prospectID || selectedProspect.prospect_id;
-    const smartleadCampaignID = selectedProspect.smartlead_campaign_id;
+    const smartleadCampaignID = campaignID || selectedProspect.smartlead_campaign_id;
     const response = await getSmartleadProspectConvo(
       userToken,
       prospectid,
@@ -167,7 +176,6 @@ export default function InboxSmartleadPage(props: {
     );
 
     setConversation(Object.values(result));
-
     setFetchingConversation(false);
   };
 
@@ -245,7 +253,7 @@ export default function InboxSmartleadPage(props: {
   };
 
   useEffect(() => {
-    triggerGetSmartleadRepliedProspects();
+    triggerGetSmartleadProspects();
   }, []);
 
   return (
@@ -420,7 +428,7 @@ export default function InboxSmartleadPage(props: {
               </Flex>
             ) : (
               <ScrollArea h="100vh" pb="lg" w="100%">
-                {conversation && (
+                {conversation.length > 0 && (
                   <Flex w="100%" direction="column">
                     {conversation.map((item: any, index: any) => (
                       <>
@@ -624,7 +632,14 @@ export default function InboxSmartleadPage(props: {
             )}
           </Grid.Col>
           <Grid.Col span={27}>
-            <InboxProspectDetails prospects={prospects} snoozeProspectEmail />
+            <InboxProspectDetails
+              prospects={prospects}
+              snoozeProspectEmail
+              emailStatuses
+              refetchSmartleadProspects={() => {
+                triggerGetSmartleadProspects();
+              }}
+            />
           </Grid.Col>
         </>
       ) : (

@@ -97,6 +97,8 @@ const useStyles = createStyles((theme) => ({
 export default function ProjectDetails(props: {
   prospects: ProspectShallow[];
   snoozeProspectEmail?: boolean;
+  emailStatuses?: boolean;
+  refetchSmartleadProspects?: () => void;
 }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
@@ -204,12 +206,25 @@ export default function ProjectDetails(props: {
 
   // For changing the status of the prospect
   const changeStatus = async (status: string, changeProspect?: boolean) => {
-    await updateChannelStatus(
-      openedProspectId,
-      userToken,
-      openedOutboundChannel.toUpperCase() as Channel,
-      status
-    );
+    
+    if (props.emailStatuses) { // HARD CODE IN THE EMAIL FOR NOW
+      await updateChannelStatus(
+        openedProspectId,
+        userToken,
+        "EMAIL",
+        status
+      )
+      if (props.refetchSmartleadProspects) {
+        props.refetchSmartleadProspects()
+      };
+    } else {
+      await updateChannelStatus(
+        openedProspectId,
+        userToken,
+        openedOutboundChannel.toUpperCase() as Channel,
+        status
+      );
+    }
     queryClient.invalidateQueries({
       queryKey: ["query-dash-get-prospects"],
     });
@@ -659,7 +674,7 @@ export default function ProjectDetails(props: {
               let daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
               if (props.snoozeProspectEmail) {
-                console.log('snoozing email')
+
                 await displayNotification(
                   "snooze-prospect-email",
                   async () => {
@@ -688,6 +703,9 @@ export default function ProjectDetails(props: {
                 );
                 setOpenedSnoozeModal(false);
                 setOpenedProspectId(-1);
+                if (props.refetchSmartleadProspects) {
+                  props.refetchSmartleadProspects()
+                }
                 return;
               }
 

@@ -11,8 +11,8 @@ import { processResponse } from "./utils";
  */
 export default async function postSmartleadReply(userToken: string, prospectID: number, emailBody: string): Promise<MsgResponse> {
   const response = await fetch(
-    // `${API_URL}/smartlead/prospect/conversation`,
-    `http://127.0.0.1:5000/smartlead/prospect/conversation`,
+    `${API_URL}/smartlead/prospect/conversation`,
+    // `http://127.0.0.1:5000/smartlead/prospect/conversation`,
     {
       method: "POST",
       headers: {

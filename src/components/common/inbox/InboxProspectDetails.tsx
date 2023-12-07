@@ -66,7 +66,7 @@ import { showNotification } from "@mantine/notifications";
 import getDemoFeedback from "@utils/requests/getDemoFeedback";
 import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
 import displayNotification from "@utils/notificationFlow";
-import { snoozeProspect } from "@utils/requests/snoozeProspect";
+import { snoozeProspect, snoozeProspectEmail } from "@utils/requests/snoozeProspect";
 import EmailStoreView from "@common/prospectDetails/EmailStoreView";
 
 const useStyles = createStyles((theme) => ({
@@ -96,6 +96,7 @@ const useStyles = createStyles((theme) => ({
 
 export default function ProjectDetails(props: {
   prospects: ProspectShallow[];
+  snoozeProspectEmail?: boolean;
 }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
@@ -656,6 +657,40 @@ export default function ProjectDetails(props: {
               }
               let timeDiff = date.getTime() - new Date().getTime();
               let daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+
+              if (props.snoozeProspectEmail) {
+                console.log('snoozing email')
+                await displayNotification(
+                  "snooze-prospect-email",
+                  async () => {
+                    let result = await snoozeProspectEmail(
+                      userToken,
+                      openedProspectId,
+                      daysDiff
+                    );
+                    return result;
+                  },
+                  {
+                    title: `Snoozing prospect for ${daysDiff} days...`,
+                    message: `Working with servers...`,
+                    color: "teal",
+                  },
+                  {
+                    title: `Snoozed!`,
+                    message: `Your prospect has been snoozed from outreach for ${daysDiff} days.`,
+                    color: "green",
+                  },
+                  {
+                    title: `Error while snoozing your prospect.`,
+                    message: `Please try again later.`,
+                    color: "red",
+                  }
+                );
+                setOpenedSnoozeModal(false);
+                setOpenedProspectId(-1);
+                return;
+              }
+
               await displayNotification(
                 "snooze-prospect",
                 async () => {

@@ -553,7 +553,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
     <Flex gap={0} direction="column" wrap="nowrap" h={"100%"} bg="white">
       <div style={{ height: HEADER_HEIGHT, position: "relative" }}>
         <></>
-          {!props.hideTitle && 
+        {!props.hideTitle &&
           <Group position="apart" p={15} h={66} sx={{ flexWrap: "nowrap" }}>
             <div style={{ overflow: "hidden" }}>
               <Title order={3} truncate>
@@ -587,7 +587,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
             </Group>
           </Group>
         }
-        
+
         <Tabs
           variant="outline"
           defaultValue="LINKEDIN"
@@ -845,7 +845,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
                 }
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
-                
+
               />
             </Box>
             <Box

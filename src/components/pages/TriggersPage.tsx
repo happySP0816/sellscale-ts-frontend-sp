@@ -20,6 +20,7 @@ import {
   Drawer,
   Paper,
   Stack,
+  ActionIcon,
 } from '@mantine/core';
 import PageFrame from '@common/PageFrame';
 import { deterministicMantineColor } from '@utils/requests/utils';
@@ -59,6 +60,7 @@ import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import useRefresh from '@common/library/use-refresh';
 import { socket } from '../App';
 import { convertDateToCasualTime, convertDateToLocalTime } from '@utils/general';
+import { openContextModal } from '@mantine/modals';
 
 function createTriggerActionBlock(
   action: TriggerActionType,
@@ -447,10 +449,41 @@ export default function TriggersPage() {
   return (
     <PageFrame>
       <Flex justify='space-between' wrap='nowrap'>
-        <Title order={2} mb='0px'>
-          {triggerId ? 'Edit' : 'Create'} Trigger{' '}
-          <IconEdit color='gray' style={{ marginLeft: '4px' }} size={16} />
-        </Title>
+        <Group spacing={10} noWrap>
+          <Title order={2} mb='0px'>
+            {triggerId ? 'Edit' : 'Create'} Trigger
+          </Title>
+          <ActionIcon
+            onClick={() => {
+              openContextModal({
+                modal: 'editTrigger',
+                title: 'Edit Trigger',
+                innerProps: {
+                  title: trigger?.name ?? '',
+                  active: trigger?.active ?? false,
+                  interval: trigger?.interval_in_minutes ?? 0,
+                  onSave: async (title: string, active: boolean, interval: number) => {
+                    if (trigger) {
+                      await updateTrigger(
+                        userToken,
+                        trigger.id,
+                        undefined,
+                        title,
+                        undefined,
+                        interval,
+                        active,
+                        undefined
+                      );
+                      window.location.reload();
+                    }
+                  },
+                },
+              });
+            }}
+          >
+            <IconEdit color='gray' style={{ marginLeft: '4px' }} size={16} />
+          </ActionIcon>
+        </Group>
         <Group noWrap>
           <Button
             radius='md'

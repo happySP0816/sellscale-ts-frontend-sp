@@ -17,6 +17,9 @@ import {
   Group,
   Flex,
   rem,
+  Drawer,
+  Paper,
+  Stack,
 } from '@mantine/core';
 import PageFrame from '@common/PageFrame';
 import { deterministicMantineColor } from '@utils/requests/utils';
@@ -48,13 +51,14 @@ import { useRecoilValue } from 'recoil';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { useQuery } from '@tanstack/react-query';
 import { getTrigger, runTrigger, updateTrigger } from '@utils/requests/triggerBlocks';
-import { userTokenState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { useLocation } from 'react-router-dom';
-import { get } from 'lodash';
+import { get, set } from 'lodash';
 import { useDidUpdate, useListState } from '@mantine/hooks';
 import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import useRefresh from '@common/library/use-refresh';
-import { socketState } from '@atoms/socketAtoms';
+import { socket } from '../App';
+import { convertDateToCasualTime, convertDateToLocalTime } from '@utils/general';
 
 function createTriggerActionBlock(
   action: TriggerActionType,
@@ -320,18 +324,28 @@ function getBlockFromDisplay(display: TriggerDisplayFramework): TriggerBlock {
 
 export default function TriggersPage() {
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
   const currentProject = useRecoilValue(currentProjectState);
 
+  const [openedLogs, setOpenedLogs] = useState(false);
+  const [logs, setLogs] = useState<{ msg: string; timestamp: Date }[]>([]);
+
   useEffect(() => {
-    // if (socket) {
-    //   console.log('got here1234')
-    //   console.log(socket)
-    // setInterval(() => {
-    //   socket.emit('ping-event', { name: 'John' });
-    // }, 1000);
-    //socket.emit('ping-event', { data: "I'm connected!" });
-    // };
+    // Join the room in which the messages will be sent
+    if (socket) {
+      const triggerId = new URLSearchParams(location.search).get('trigger_id');
+      socket.emit('join-trigger-room', {
+        sdr_id: userData.id,
+        payload: { trigger_id: `trigger-$${triggerId}` },
+      });
+    }
+
+    socket.on('trigger-log', (data) => {
+      setLogs((prev) => [...prev, { msg: data.message, timestamp: new Date() }]);
+    });
   }, []);
+
+  console.log(logs);
 
   const location = useLocation();
   const triggerId = new URLSearchParams(location.search).get('trigger_id');
@@ -450,6 +464,7 @@ export default function TriggersPage() {
                 color: 'blue',
               });
               const response = await runTrigger(userToken, trigger.id);
+              setOpenedLogs(true);
             }}
           >
             Run Trigger
@@ -592,6 +607,24 @@ export default function TriggersPage() {
           </ScrollArea>
         </Card>
       </div>
+      <Drawer
+        opened={openedLogs}
+        onClose={() => setOpenedLogs(false)}
+        title={<Title order={3}>Trigger Logs</Title>}
+        size='xs'
+        position='right'
+      >
+        <Stack>
+          {logs.map((log, index) => (
+            <Paper key={index} shadow='xs' p='md' style={{ position: 'relative' }}>
+              <Text>{log.msg}</Text>
+              <Text color='gray' fz='xs' style={{ position: 'absolute', top: 5, right: 5 }}>
+                {convertDateToLocalTime(log.timestamp)}
+              </Text>
+            </Paper>
+          ))}
+        </Stack>
+      </Drawer>
     </PageFrame>
   );
 }

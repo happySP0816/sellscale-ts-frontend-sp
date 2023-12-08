@@ -331,18 +331,19 @@ export default function TriggersPage() {
   const [logs, setLogs] = useState<{ msg: string; timestamp: Date }[]>([]);
 
   useEffect(() => {
-    // Join the room in which the messages will be sent
     if (socket) {
+      // Join the room in which the messages will be sent
       const triggerId = new URLSearchParams(location.search).get('trigger_id');
-      socket.emit('join-trigger-room', {
+      socket.emit('join-room', {
         sdr_id: userData.id,
-        payload: { trigger_id: `trigger-$${triggerId}` },
+        payload: { room_id: `trigger-${triggerId}` },
+      });
+
+      // Listen for messages
+      socket.on('trigger-log', (data) => {
+        setLogs((prev) => [...prev, { msg: data.message, timestamp: new Date() }]);
       });
     }
-
-    socket.on('trigger-log', (data) => {
-      setLogs((prev) => [...prev, { msg: data.message, timestamp: new Date() }]);
-    });
   }, []);
 
   console.log(logs);
@@ -457,14 +458,15 @@ export default function TriggersPage() {
             onClick={async () => {
               if (!trigger) return;
               await saveTrigger(false);
-              showNotification({
-                loading: true,
-                title: 'Running Trigger',
-                message: 'This may take a few minutes.',
-                color: 'blue',
-              });
-              const response = await runTrigger(userToken, trigger.id);
+              // showNotification({
+              //   loading: true,
+              //   title: 'Running Trigger',
+              //   message: 'This may take a few minutes.',
+              //   color: 'blue',
+              // });
+              setLogs([]);
               setOpenedLogs(true);
+              const response = await runTrigger(userToken, trigger.id);
             }}
           >
             Run Trigger

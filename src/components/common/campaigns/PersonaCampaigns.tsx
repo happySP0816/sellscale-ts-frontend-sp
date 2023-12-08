@@ -270,7 +270,9 @@ export default function PersonaCampaigns() {
                       openContextModal({
                         modal: "uploadProspects",
                         title: <Title order={3}>Create Campaign</Title>,
-                        innerProps: { mode: "CREATE-ONLY" },
+                        innerProps: {
+                          mode: "CREATE-ONLY",
+                        },
                       });
                     }}
                   >
@@ -311,7 +313,8 @@ export default function PersonaCampaigns() {
               </Group>
 
               <Title color="gray.6" order={3}>
-                {userData?.sdr_name.split(" ")[0]}'s Campaigns
+                {userData?.sdr_name.split(" ")[0]}
+                's Campaigns
               </Title>
 
               <ScrollArea h={"78vh"}>
@@ -397,7 +400,9 @@ export default function PersonaCampaigns() {
                       w="300px"
                       ml="auto"
                       mr="auto"
-                      sx={{ borderRadius: "0.5rem" }}
+                      sx={{
+                        borderRadius: "0.5rem",
+                      }}
                       onClick={() =>
                         setShowInactivePersonas(!showInactivePersonas)
                       }
@@ -491,8 +496,6 @@ export function PersonCampaignCard(props: {
     props.persona.active
   );
 
-  console.log(props.persona);
-
   let total_replied = props.persona.total_replied;
   let total_opened = props.persona.total_opened;
   let total_sent = props.persona.total_sent;
@@ -500,6 +503,8 @@ export function PersonCampaignCard(props: {
   const userData = useRecoilValue(userDataState);
 
   const [value, setValue] = useState<string>("");
+  const [campaignList, setCampaignList] = useState([]);
+  const [campaignName, setCampaignName] = useState("");
 
   const setEmoji = (emoji: string) => {
     setEmojiState(emoji);
@@ -590,19 +595,34 @@ export function PersonCampaignCard(props: {
             py={25}
           >
             <Text size={"lg"} color="white">
-              Outreach for: {"Coming soon! ⚠️ - This is all mock data..."}
+              Outreach for:{" "}
+              <span className=" font-semibold text-[20px]">
+                {" "}
+                {campaignName
+                  ? campaignName
+                  : "Coming soon! ⚠️ - This is all mock data..."}
+              </span>
             </Text>
             <CloseButton
               aria-label="Close modal"
               onClick={channelClose}
               variant="outline"
               radius="xl"
-              style={{ borderColor: "white", color: "white" }}
+              style={{
+                borderColor: "white",
+                color: "white",
+              }}
             />
           </Flex>
         </Modal.Header>
         <Modal.Body mt={20} px={20}>
-          <Group grow style={{ justifyContent: "center", gap: "0px" }}>
+          <Group
+            grow
+            style={{
+              justifyContent: "center",
+              gap: "0px",
+            }}
+          >
             <Box
               w={"100%"}
               onClick={() => {
@@ -678,363 +698,151 @@ export function PersonCampaignCard(props: {
           </Group>
           <ScrollArea h={600} scrollbarSize={6}>
             <Flex direction={"column"} gap={20} my={20}>
-              <Group
-                grow
-                style={{
-                  justifyContent: "start",
-                  gap: "0px",
-                }}
-              >
-                <Flex
-                  mx={25}
-                  w={"100%"}
-                  style={{ borderRadius: "10px", border: "3px solid #e9ecef" }}
-                >
-                  <Box
-                    px={15}
-                    py={12}
-                    style={{ borderRight: "3px solid #e9ecef" }}
-                    w={"30rem"}
+              {campaignList?.map((item: any, index) => {
+                return (
+                  <Group
+                    grow
+                    style={{
+                      justifyContent: "start",
+                      gap: "0px",
+                    }}
+                    key={index}
                   >
-                    <Flex align={"center"} gap={10} mb={8}>
-                      <Avatar
-                        src={props.persona.sdr_img_url}
-                        radius="xl"
-                        size="lg"
-                      />
-                      <Box>
-                        <Flex align={"center"} gap={10}>
-                          <Text fw={600}>Donald Bryant</Text>
-                          <IconMail size={20} color="#817e7e" />
+                    <Flex
+                      mx={25}
+                      w={"100%"}
+                      style={{
+                        borderRadius: "10px",
+                        border: "3px solid #e9ecef",
+                      }}
+                    >
+                      <Box
+                        px={15}
+                        py={12}
+                        style={{
+                          borderRight: "3px solid #e9ecef",
+                        }}
+                        w={"30rem"}
+                      >
+                        <Flex align={"center"} gap={10} mb={8}>
+                          <Avatar
+                            src={props.persona.sdr_img_url}
+                            radius="xl"
+                            size="lg"
+                          />
+                          <Box>
+                            <Flex align={"center"} gap={10}>
+                              <Text fw={600}>{item.prospect_name}</Text>
+                              <IconMail size={20} color="#817e7e" />
+                            </Flex>
+                            <Flex align={"center"} gap={10} w={"100%"} mt={3}>
+                              <Text>ICP Score: </Text>
+                              <Text
+                                bg={"#e7f5ff"}
+                                color="blue"
+                                px={15}
+                                fw={600}
+                                style={{
+                                  borderRadius: "20px",
+                                }}
+                              >
+                                {item.prospect_icp_fit_score}
+                              </Text>
+                            </Flex>
+                          </Box>
                         </Flex>
-                        <Flex align={"center"} gap={10} w={"100%"} mt={3}>
-                          <Text>ICP Score: </Text>
-                          <Text
-                            bg={"#e7f5ff"}
-                            color="blue"
-                            px={15}
-                            fw={600}
-                            style={{ borderRadius: "20px" }}
-                          >
-                            VERY HIGH
+                        <Flex gap={6}>
+                          <div className="mt-1">
+                            <IconMan size={20} color="#817e7e" />
+                          </div>
+                          <Text color="#817e7e" mt={3}>
+                            {campaignName}
+                          </Text>
+                        </Flex>
+                        <Flex gap={6}>
+                          <div className="mt-1">
+                            <IconBriefcase size={20} color="#817e7e" />
+                          </div>
+                          <Text color="#817e7e" mt={3}>
+                            {item.prospect_title}
+                          </Text>
+                        </Flex>
+                        <Flex gap={6}>
+                          <div className="mt-1">
+                            <IconBuilding size={20} color="#817e7e" />
+                          </div>
+                          <Text color="#817e7e" mt={3}>
+                            {item.prospect_company}
                           </Text>
                         </Flex>
                       </Box>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconMan size={20} color="#817e7e" />
-                      <Text color="#817e7e">Senior Engineering Hiring</Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBriefcase size={20} color="#817e7e" />
-                      <Text color="#817e7e">
-                        Field Chief Technology Officer
-                      </Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBuilding size={20} color="#817e7e" />
-                      <Text color="#817e7e">CloudBees</Text>
-                    </Flex>
-                  </Box>
-                  <Box px={15} py={12}>
-                    <Flex justify={"space-between"}>
-                      <Text color="#817e7e" fw={600}>
-                        Last Message From Prospect:
-                      </Text>
-                      <Text color="#817e7e">Today 01:05</Text>
-                    </Flex>
-                    <Box
-                      bg={
-                        value === "sent"
-                          ? "#e7f5ff"
-                          : value === "open"
-                          ? "#ffedff"
-                          : value === "reply"
-                          ? "#fff5ee"
-                          : "#e2f6e7"
-                      }
-                      p={20}
-                      mt={15}
-                      style={{ borderRadius: "10px" }}
-                    >
-                      <Text fw={500}>
-                        "Hi yes. Can you please send me an email to
-                        michael@abs.com. and i will to the person who is
-                        oncharge Of the seetion prosess"
-                      </Text>
-                    </Box>
-                  </Box>
-                </Flex>
-              </Group>
-              <Group
-                grow
-                style={{
-                  justifyContent: "start",
-                  gap: "0px",
-                }}
-              >
-                <Flex
-                  mx={25}
-                  w={"100%"}
-                  style={{ borderRadius: "10px", border: "3px solid #e9ecef" }}
-                >
-                  <Box
-                    px={15}
-                    py={12}
-                    style={{ borderRight: "3px solid #e9ecef" }}
-                    w={"30rem"}
-                  >
-                    <Flex align={"center"} gap={10} mb={8}>
-                      <Avatar
-                        src={props.persona.sdr_img_url}
-                        radius="xl"
-                        size="lg"
-                      />
-                      <Box>
-                        <Flex align={"center"} gap={10}>
-                          <Text fw={600}>Donald Bryant</Text>
-                          <IconMail size={20} color="#817e7e" />
-                        </Flex>
-                        <Flex align={"center"} gap={10} w={"100%"} mt={3}>
-                          <Text>ICP Score: </Text>
-                          <Text
-                            bg={"#e7f5ff"}
-                            color="blue"
-                            px={15}
-                            fw={600}
-                            style={{ borderRadius: "20px" }}
-                          >
-                            VERY HIGH
+                      <Box px={15} py={12} w={"100%"} h={"400px"}>
+                        <Flex justify={"space-between"}>
+                          <Text color="#817e7e" fw={600}>
+                            Last Message From Prospect:
+                          </Text>
+                          <Text color="#817e7e">
+                            {item.li_last_message_timestamp}
                           </Text>
                         </Flex>
-                      </Box>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconMan size={20} color="#817e7e" />
-                      <Text color="#817e7e">Senior Engineering Hiring</Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBriefcase size={20} color="#817e7e" />
-                      <Text color="#817e7e">
-                        Field Chief Technology Officer
-                      </Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBuilding size={20} color="#817e7e" />
-                      <Text color="#817e7e">CloudBees</Text>
-                    </Flex>
-                  </Box>
-                  <Box px={15} py={12}>
-                    <Flex justify={"space-between"}>
-                      <Text color="#817e7e" fw={600}>
-                        Last Message From Prospect:
-                      </Text>
-                      <Text color="#817e7e">Today 01:05</Text>
-                    </Flex>
-                    <Box
-                      bg={
-                        value === "sent"
-                          ? "#e7f5ff"
-                          : value === "open"
-                          ? "#ffedff"
-                          : value === "reply"
-                          ? "#fff5ee"
-                          : "#e2f6e7"
-                      }
-                      p={20}
-                      mt={15}
-                      style={{ borderRadius: "10px" }}
-                    >
-                      <Text fw={500}>
-                        "Hi yes. Can you please send me an email to
-                        michael@abs.com. and i will to the person who is
-                        oncharge Of the seetion prosess"
-                      </Text>
-                    </Box>
-                  </Box>
-                </Flex>
-              </Group>
-              <Group
-                grow
-                style={{
-                  justifyContent: "start",
-                  gap: "0px",
-                }}
-              >
-                <Flex
-                  mx={25}
-                  w={"100%"}
-                  style={{ borderRadius: "10px", border: "3px solid #e9ecef" }}
-                >
-                  <Box
-                    px={15}
-                    py={12}
-                    style={{ borderRight: "3px solid #e9ecef" }}
-                    w={"30rem"}
-                  >
-                    <Flex align={"center"} gap={10} mb={8}>
-                      <Avatar
-                        src={props.persona.sdr_img_url}
-                        radius="xl"
-                        size="lg"
-                      />
-                      <Box>
-                        <Flex align={"center"} gap={10}>
-                          <Text fw={600}>Donald Bryant</Text>
-                          <IconMail size={20} color="#817e7e" />
-                        </Flex>
-                        <Flex align={"center"} gap={10} w={"100%"} mt={3}>
-                          <Text>ICP Score: </Text>
-                          <Text
-                            bg={"#e7f5ff"}
-                            color="blue"
-                            px={15}
-                            fw={600}
-                            style={{ borderRadius: "20px" }}
-                          >
-                            VERY HIGH
+                        <Box
+                          bg={
+                            value === "sent"
+                              ? "#e7f5ff"
+                              : value === "open"
+                              ? "#ffedff"
+                              : value === "reply"
+                              ? "#fff5ee"
+                              : "#e2f6e7"
+                          }
+                          p={20}
+                          mt={15}
+                          style={{
+                            borderRadius: "10px",
+                          }}
+                        >
+                          <Text fw={500}>
+                            {item?.li_last_message_from_prospect}
                           </Text>
-                        </Flex>
+                        </Box>
                       </Box>
                     </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconMan size={20} color="#817e7e" />
-                      <Text color="#817e7e">Senior Engineering Hiring</Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBriefcase size={20} color="#817e7e" />
-                      <Text color="#817e7e">
-                        Field Chief Technology Officer
-                      </Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBuilding size={20} color="#817e7e" />
-                      <Text color="#817e7e">CloudBees</Text>
-                    </Flex>
-                  </Box>
-                  <Box px={15} py={12}>
-                    <Flex justify={"space-between"}>
-                      <Text color="#817e7e" fw={600}>
-                        Last Message From Prospect:
-                      </Text>
-                      <Text color="#817e7e">Today 01:05</Text>
-                    </Flex>
-                    <Box
-                      bg={
-                        value === "sent"
-                          ? "#e7f5ff"
-                          : value === "open"
-                          ? "#ffedff"
-                          : value === "reply"
-                          ? "#fff5ee"
-                          : "#e2f6e7"
-                      }
-                      p={20}
-                      mt={15}
-                      style={{ borderRadius: "10px" }}
-                    >
-                      <Text fw={500}>
-                        "Hi yes. Can you please send me an email to
-                        michael@abs.com. and i will to the person who is
-                        oncharge Of the seetion prosess"
-                      </Text>
-                    </Box>
-                  </Box>
-                </Flex>
-              </Group>
-              <Group
-                grow
-                style={{
-                  justifyContent: "start",
-                  gap: "0px",
-                }}
-              >
-                <Flex
-                  mx={25}
-                  w={"100%"}
-                  style={{ borderRadius: "10px", border: "3px solid #e9ecef" }}
-                >
-                  <Box
-                    px={15}
-                    py={12}
-                    style={{ borderRight: "3px solid #e9ecef" }}
-                    w={"30rem"}
-                  >
-                    <Flex align={"center"} gap={10} mb={8}>
-                      <Avatar
-                        src={props.persona.sdr_img_url}
-                        radius="xl"
-                        size="lg"
-                      />
-                      <Box>
-                        <Flex align={"center"} gap={10}>
-                          <Text fw={600}>Donald Bryant</Text>
-                          <IconMail size={20} color="#817e7e" />
-                        </Flex>
-                        <Flex align={"center"} gap={10} w={"100%"} mt={3}>
-                          <Text>ICP Score: </Text>
-                          <Text
-                            bg={"#e7f5ff"}
-                            color="blue"
-                            px={15}
-                            fw={600}
-                            style={{ borderRadius: "20px" }}
-                          >
-                            VERY HIGH
-                          </Text>
-                        </Flex>
-                      </Box>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconMan size={20} color="#817e7e" />
-                      <Text color="#817e7e">Senior Engineering Hiring</Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBriefcase size={20} color="#817e7e" />
-                      <Text color="#817e7e">
-                        Field Chief Technology Officer
-                      </Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBuilding size={20} color="#817e7e" />
-                      <Text color="#817e7e">CloudBees</Text>
-                    </Flex>
-                  </Box>
-                  <Box px={15} py={12}>
-                    <Flex justify={"space-between"}>
-                      <Text color="#817e7e" fw={600}>
-                        Last Message From Prospect:
-                      </Text>
-                      <Text color="#817e7e">Today 01:05</Text>
-                    </Flex>
-                    <Box
-                      bg={
-                        value === "sent"
-                          ? "#e7f5ff"
-                          : value === "open"
-                          ? "#ffedff"
-                          : value === "reply"
-                          ? "#fff5ee"
-                          : "#e2f6e7"
-                      }
-                      p={20}
-                      mt={15}
-                      style={{ borderRadius: "10px" }}
-                    >
-                      <Text fw={500}>
-                        "Hi yes. Can you please send me an email to
-                        michael@abs.com. and i will to the person who is
-                        oncharge Of the seetion prosess"
-                      </Text>
-                    </Box>
-                  </Box>
-                </Flex>
-              </Group>
+                  </Group>
+                );
+              })}
             </Flex>
           </ScrollArea>
         </Modal.Body>
       </Modal>
     );
+  };
+
+  const handleChannelOpen = async (
+    type: string,
+    id: number,
+    campaign_name: string
+  ) => {
+    setValue(type);
+    setCampaignName(campaign_name);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${userToken}`);
+
+    var requestOptions: any = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+
+    await fetch(
+      `${API_URL}/analytics/get_campaign_drilldown/${id}`,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .then((result) => {
+        channelOpen();
+        setCampaignList(JSON.parse(result).analytics);
+      })
+      .catch((error) => console.log("error", error));
   };
   return (
     <Paper radius="md" ref={ref}>
@@ -1058,7 +866,13 @@ export function PersonCampaignCard(props: {
           pr="xs"
           spacing={0}
         >
-          <Group sx={{ flex: "35%" }} spacing={5} noWrap>
+          <Group
+            sx={{
+              flex: "35%",
+            }}
+            spacing={5}
+            noWrap
+          >
             <Box
               onClick={() => {
                 navigateToPage(
@@ -1082,7 +896,9 @@ export function PersonCampaignCard(props: {
                     size="sm"
                     h={55}
                     color="gray"
-                    sx={{ border: "solid 1px #f1f1f1" }}
+                    sx={{
+                      border: "solid 1px #f1f1f1",
+                    }}
                   >
                     <RingProgress
                       onMouseEnter={openPopover}
@@ -1123,7 +939,12 @@ export function PersonCampaignCard(props: {
                     />
                   </Button>
                 </Popover.Target>
-                <Popover.Dropdown sx={{ pointerEvents: "none" }} bg={"blue"}>
+                <Popover.Dropdown
+                  sx={{
+                    pointerEvents: "none",
+                  }}
+                  bg={"blue"}
+                >
                   <Flex direction="column">
                     <Box>
                       <Text size={"sm"} color="white">
@@ -1220,7 +1041,9 @@ export function PersonCampaignCard(props: {
                   color={"gray"}
                   radius="xl"
                   size="sm"
-                  sx={{ backgroundColor: "#ffffff22" }}
+                  sx={{
+                    backgroundColor: "#ffffff22",
+                  }}
                 >
                   <Text fz="lg">{emoji}</Text>
                 </Avatar>
@@ -1280,7 +1103,9 @@ export function PersonCampaignCard(props: {
                   }}
                 >
                   <Title order={6} c={"gray.7"}>
-                    {_.truncate(props.persona.name, { length: 40 })}
+                    {_.truncate(props.persona.name, {
+                      length: 40,
+                    })}
                   </Title>
                   {props.persona.sdr_id == userData?.id && (
                     <Box ml="xs">
@@ -1292,7 +1117,12 @@ export function PersonCampaignCard(props: {
             </Box>
           </Group>
 
-          <Group sx={{ flex: "10%" }} grow>
+          <Group
+            sx={{
+              flex: "10%",
+            }}
+            grow
+          >
             <Flex>
               <Avatar src={props.persona.sdr_img_url} radius="xl" size="sm" />
               <Text size="xs" fw="450" mt="2px" ml="xs">
@@ -1301,7 +1131,12 @@ export function PersonCampaignCard(props: {
             </Flex>
           </Group>
 
-          <Group sx={{ flex: "10%" }} grow>
+          <Group
+            sx={{
+              flex: "10%",
+            }}
+            grow
+          >
             <Center>
               {props.persona.li_sent > 0 && (
                 <ActionIcon
@@ -1354,12 +1189,15 @@ export function PersonCampaignCard(props: {
             </Center>
           </Group>
 
-          <Group sx={{ flex: "30%" }}>
+          <Group
+            sx={{
+              flex: "30%",
+            }}
+          >
             <Box
               w={"20%"}
               onClick={() => {
-                channelOpen();
-                setValue("sent");
+                handleChannelOpen("sent", props.persona.id, props.persona.name);
               }}
             >
               <StatDisplay
@@ -1376,8 +1214,7 @@ export function PersonCampaignCard(props: {
             <Box
               w={"20%"}
               onClick={() => {
-                channelOpen();
-                setValue("open");
+                handleChannelOpen("open", props.persona.id, props.persona.name);
               }}
             >
               <StatDisplay
@@ -1393,8 +1230,11 @@ export function PersonCampaignCard(props: {
             <Box
               w={"20%"}
               onClick={() => {
-                channelOpen();
-                setValue("reply");
+                handleChannelOpen(
+                  "reply",
+                  props.persona.id,
+                  props.persona.name
+                );
               }}
             >
               <StatDisplay
@@ -1412,8 +1252,7 @@ export function PersonCampaignCard(props: {
             <Box
               w={"20%"}
               onClick={() => {
-                channelOpen();
-                setValue("demo");
+                handleChannelOpen("demo", props.persona.id, props.persona.name);
               }}
             >
               <StatDisplay
@@ -1430,7 +1269,11 @@ export function PersonCampaignCard(props: {
             </Box>
           </Group>
 
-          <Group sx={{ flex: "15%" }}>
+          <Group
+            sx={{
+              flex: "15%",
+            }}
+          >
             <Flex>
               <Button
                 w={60}
@@ -1477,10 +1320,18 @@ export function PersonCampaignCard(props: {
               </Tooltip>
             </Flex>
           </Group>
-          <Box sx={{ position: "absolute", right: 15, top: 20 }}>
+          <Box
+            sx={{
+              position: "absolute",
+              right: 15,
+              top: 20,
+            }}
+          >
             <ActionIcon
               color={props.persona?.sdr_id === userData?.id ? "blue" : "gray"}
-              sx={{ opacity: props.persona?.sdr_id === userData?.id ? 1 : 0.5 }}
+              sx={{
+                opacity: props.persona?.sdr_id === userData?.id ? 1 : 0.5,
+              }}
               variant="filled"
               radius="lg"
               onClick={() => {
@@ -1617,7 +1468,7 @@ function PersonCampaignCardSection(props: {
 }) {
   const theme = useMantineTheme();
   const [checked, setChecked] = useState(props.section.active);
-
+  console.log("dsssssssssssssssssssssssssss", props.section);
   return (
     <>
       <Group
@@ -1629,7 +1480,11 @@ function PersonCampaignCardSection(props: {
           cursor: "pointer",
         }}
       >
-        <Box sx={{ flexBasis: "30%" }}>
+        <Box
+          sx={{
+            flexBasis: "30%",
+          }}
+        >
           <Group spacing={8}>
             <ActionIcon color="blue" radius="xl" variant="light" size="sm">
               {props.section.icon}
@@ -1638,29 +1493,61 @@ function PersonCampaignCardSection(props: {
           </Group>
         </Box>
 
-        <Box sx={{ flexBasis: "30%" }}>
+        <Box
+          sx={{
+            flexBasis: "30%",
+          }}
+        >
           <Group>
             <Text fz="xs" color="gray" w="90px">
+              {/* <IconSend size='0.8rem' /> Sent: <span style={{ color: 'black' }}>{props.section.sends}</span> */}
               <IconSend size="0.8rem" /> Sent:{" "}
-              <span style={{ color: "black" }}>{props.section.sends}</span>
+              <span
+                style={{
+                  color: "black",
+                }}
+              >
+                {"123123123"}
+              </span>
             </Text>
             <Text fz="xs" color="gray" w="90px">
               <IconChecks size="0.8rem" /> Opens:{" "}
-              <span style={{ color: "black" }}>{props.section.opens}</span>
+              <span
+                style={{
+                  color: "black",
+                }}
+              >
+                {props.section.opens}
+              </span>
             </Text>
             <Text fz="xs" color="gray" w="90px">
               <IconMessageCheck size="0.8rem" /> Replies:{" "}
-              <span style={{ color: "black" }}>{props.section.replies}</span>
+              <span
+                style={{
+                  color: "black",
+                }}
+              >
+                {props.section.replies}
+              </span>
             </Text>
           </Group>
         </Box>
-        <Box sx={{ flexBasis: "20%", color: "gray" }}>
+        <Box
+          sx={{
+            flexBasis: "20%",
+            color: "gray",
+          }}
+        >
           <Text fz="xs" span>
             <IconCalendar size="0.8rem" />{" "}
             {convertDateToShortFormatWithoutTime(new Date(props.section.date))}
           </Text>
         </Box>
-        <Box sx={{ flexBasis: "10%" }}>
+        <Box
+          sx={{
+            flexBasis: "10%",
+          }}
+        >
           <Group>
             <Switch
               checked={checked}
@@ -1715,7 +1602,12 @@ function StatModalDisplay(props: {
         borderRadius: props.border ? "5px" : "0px",
       }}
     >
-      <Group spacing={5} sx={{ justifyContent: "center" }}>
+      <Group
+        spacing={5}
+        sx={{
+          justifyContent: "center",
+        }}
+      >
         <Tooltip
           label={props.percentage + "% conversion"}
           withArrow
@@ -1733,7 +1625,9 @@ function StatModalDisplay(props: {
               fz={"12px"}
               color={props.color}
               bg={props.percentcolor}
-              style={{ borderRadius: "20px" }}
+              style={{
+                borderRadius: "20px",
+              }}
               px={"10px"}
             >
               {/* percentage */}
@@ -1755,7 +1649,12 @@ function StatDisplay(props: {
 }) {
   return (
     <Stack spacing={0}>
-      <Group spacing={5} sx={{ justifyContent: "left" }}>
+      <Group
+        spacing={5}
+        sx={{
+          justifyContent: "left",
+        }}
+      >
         <Tooltip
           label={props.percentage + "% conversion"}
           withArrow
@@ -1832,15 +1731,27 @@ export const PersonCampaignTable = (props: {
           pr="xs"
           spacing={0}
         >
-          <Group sx={{ flex: "3%" }}>
+          <Group
+            sx={{
+              flex: "3%",
+            }}
+          >
             <Text fw={600} color="gray.8" fz="sm">
               Contacts
             </Text>
           </Group>
           <Divider orientation="vertical" ml="xs" mr="xs" />
-          <Group sx={{ flex: "25%" }} spacing={5} noWrap>
+          <Group
+            sx={{
+              flex: "25%",
+            }}
+            spacing={5}
+            noWrap
+          >
             <Flex
-              style={{ cursor: "pointer" }}
+              style={{
+                cursor: "pointer",
+              }}
               align={"center"}
               gap={"xs"}
               onClick={() => setSort((s) => (s === "asc" ? "desc" : "asc"))}
@@ -1860,7 +1771,12 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation="vertical" ml="xs" mr="xs" />
 
-          <Group sx={{ flex: "10%" }} grow>
+          <Group
+            sx={{
+              flex: "10%",
+            }}
+            grow
+          >
             <Text fw={600} color="gray.8" fz="sm">
               SDR
             </Text>
@@ -1868,7 +1784,12 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation="vertical" ml="xs" mr="xs" />
 
-          <Group sx={{ flex: "4%" }} grow>
+          <Group
+            sx={{
+              flex: "4%",
+            }}
+            grow
+          >
             <Text fw={600} color="gray.8" fz="sm">
               Channel
             </Text>
@@ -1876,29 +1797,38 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation="vertical" ml="xs" mr="xs" />
 
-          <Group sx={{ flex: "30%" }}>
+          <Group
+            sx={{
+              flex: "30%",
+            }}
+          >
             <Text fw={600} color="gray.8" fz="sm">
               Overall Report
             </Text>
             <Tooltip label="Refresh overall report." withArrow withinPortal>
-              <ActionIcon ml={-12} variant='transparent' onClick={async () => {
-                const result = await postSyncSmartleadCampaigns(userToken)
-                if (result.status === 'success') {
-                  showNotification({
-                    title: "Refreshing overall report.",
-                    message: "Please wait for a few minutes for changes to take effect. You can refresh this page to see the changes.",
-                    color: "blue",
-                    autoClose: 5000,
-                  })
-                } else {
-                  showNotification({
-                    title: "Error refreshing overall report.",
-                    message: "Please try again later.",
-                    color: "red",
-                    autoClose: 5000,
-                  })
-                }
-              }}>
+              <ActionIcon
+                ml={-12}
+                variant="transparent"
+                onClick={async () => {
+                  const result = await postSyncSmartleadCampaigns(userToken);
+                  if (result.status === "success") {
+                    showNotification({
+                      title: "Refreshing overall report.",
+                      message:
+                        "Please wait for a few minutes for changes to take effect. You can refresh this page to see the changes.",
+                      color: "blue",
+                      autoClose: 5000,
+                    });
+                  } else {
+                    showNotification({
+                      title: "Error refreshing overall report.",
+                      message: "Please try again later.",
+                      color: "red",
+                      autoClose: 5000,
+                    });
+                  }
+                }}
+              >
                 <IconRefresh size="0.8rem" />
               </ActionIcon>
             </Tooltip>
@@ -1906,7 +1836,11 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation="vertical" ml="xs" mr="xs" />
 
-          <Group sx={{ flex: "15%" }}></Group>
+          <Group
+            sx={{
+              flex: "15%",
+            }}
+          ></Group>
         </Group>
       </Paper>
       {data

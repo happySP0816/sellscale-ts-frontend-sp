@@ -48,12 +48,21 @@ import { prospectDrawerIdState, prospectDrawerOpenState } from '@atoms/prospectA
 import { useViewportSize } from '@mantine/hooks';
 import Confetti from 'react-confetti';
 import LiTemplateModal from '@modals/LiTemplateModal';
-//import { io } from 'socket.io-client';
-import { API_URL } from '@constants/data';
+import { SOCKET_SERVICE_URL } from '@constants/data';
 import { socketState } from '@atoms/socketAtoms';
 import SalesNavURLModal from '@modals/SalesNavURLModal';
 
-// export const socket = io(API_URL);
+import { io } from 'socket.io-client';
+
+export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
+
+socket.on('connect', () => {
+  console.log(`Socket connected: ${socket.id}`);
+});
+
+socket.on('disconnect', () => {
+  console.log(`Socket disconnected: ${socket.id}`);
+});
 
 export default function App() {
   // Site light or dark mode

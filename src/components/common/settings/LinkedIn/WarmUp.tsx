@@ -1,14 +1,9 @@
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { Button, Flex, Text, Grid, Badge, Popover, Center, Container, Divider, HoverCard, Box } from "@mantine/core";
-import { useHover } from "@mantine/hooks";
-import { showNotification } from "@mantine/notifications";
-import {
-  IconChecks,
-  IconMessageCheck,
-  IconMoodSmile,
-  IconSend,
-} from "@tabler/icons-react";
-import getSDRSLASchedules from "@utils/requests/getSDRSLASchedules";
+import { userDataState, userTokenState } from '@atoms/userAtoms'
+import { Button, Flex, Text, Grid, Badge, Popover, Center, Container, Divider, HoverCard, Box } from '@mantine/core'
+import { useHover } from '@mantine/hooks'
+import { showNotification } from '@mantine/notifications'
+import { IconChecks, IconMessageCheck, IconMoodSmile, IconSend } from '@tabler/icons-react'
+import getSDRSLASchedules from '@utils/requests/getSDRSLASchedules'
 import {
   BarElement,
   CategoryScale,
@@ -19,64 +14,45 @@ import {
   PointElement,
   Title,
   Tooltip,
-} from "chart.js";
-import { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
-import { useRecoilValue } from "recoil";
-import annotationPlugin from 'chartjs-plugin-annotation';
+} from 'chart.js'
+import { useEffect, useState } from 'react'
+import { Bar } from 'react-chartjs-2'
+import { useRecoilValue } from 'recoil'
+import annotationPlugin from 'chartjs-plugin-annotation'
 
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  BarElement,
-  Title,
-  Filler,
-  Tooltip,
-  annotationPlugin,
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, BarElement, Title, Filler, Tooltip, annotationPlugin)
 
 const data = {
-  labels: [
-    "Nov 01",
-    "Nov 02",
-    "Nov 03",
-    "Nov 04",
-    "Nov 05",
-    "Nov 06",
-    "Nov 07",
-    "Nov 08",
-  ],
+  labels: ['Nov 01', 'Nov 02', 'Nov 03', 'Nov 04', 'Nov 05', 'Nov 06', 'Nov 07', 'Nov 08'],
   datasets: [
     {
       data: [50, 70, 120, 180, 200, 240, 220, 230],
-      backgroundColor: "rgb(99,215,104)",
+      backgroundColor: 'rgb(99,215,104)',
       fill: true,
-      yAxisID: "yAxis",
-      xAxisID: "xAxis",
+      yAxisID: 'yAxis',
+      xAxisID: 'xAxis',
       borderRadius: 4,
     },
   ],
-};
+}
 
 export const WarmUp: React.FC = () => {
-  const userData = useRecoilValue(userDataState);
+  const userData = useRecoilValue(userDataState)
 
-  const options: ChartOptions<"bar"> = {
+  const options: ChartOptions<'bar'> = {
     scales: {
       xAxis: {
         border: {
           display: true,
         },
         grid: {
-          color: "transparent",
+          color: 'transparent',
         },
       },
       yAxis: {
         grid: {
           tickBorderDash: [2],
-          color: "#88888830",
+          color: '#88888830',
         },
         border: {
           display: false,
@@ -85,13 +61,13 @@ export const WarmUp: React.FC = () => {
         display: true,
         ticks: {
           padding: 10,
-          color: "#888888",
-          font: {
-            weight: "300",
-          },
+          color: '#888888',
+          // font: {
+          //   weight: "300",
+          // },
         },
         beginAtZero: true,
-        grace: "5%",
+        grace: '5%',
       },
     },
     plugins: {
@@ -118,13 +94,13 @@ export const WarmUp: React.FC = () => {
             yMax: userData.weekly_li_outbound_target,
             borderColor: 'rgb(255, 99, 132)',
             borderWidth: 2,
-          }
-        }
-      }
+          },
+        },
+      },
     },
-  };
+  }
 
-  const userToken = useRecoilValue(userTokenState);
+  const userToken = useRecoilValue(userTokenState)
 
   const [loading, setLoading] = useState(false)
   const [slaScheduleData, setSLAScheduleData] = useState<any>()
@@ -137,15 +113,12 @@ export const WarmUp: React.FC = () => {
   const triggerGetSLASchedules = async () => {
     setLoading(true)
 
-    const result = await getSDRSLASchedules(
-      userToken,
-      startDate.toISOString(),
-    )
+    const result = await getSDRSLASchedules(userToken, startDate.toISOString())
     if (result.status !== 'success') {
       showNotification({
-        title: "Error",
-        message: "Failed to get outbound volume data",
-        color: "red",
+        title: 'Error',
+        message: 'Failed to get outbound volume data',
+        color: 'red',
         autoClose: 3000,
       })
       setLoading(false)
@@ -182,37 +155,37 @@ export const WarmUp: React.FC = () => {
             if (startDate <= new Date() && endDate >= new Date()) {
               // See if warmup is complete
               if (schedule.linkedin_volume >= userData.weekly_li_outbound_target) {
-                return "rgb(99,215,104)"
+                return 'rgb(99,215,104)'
               }
-              return "rgb(242, 169, 59)"
+              return 'rgb(242, 169, 59)'
             }
 
             // See if the Start Date is a future week
             if (startDate > new Date()) {
               // See if warmup is complete
               if (schedule.linkedin_volume >= userData.weekly_li_outbound_target) {
-                return "rgb(99,215,104, 0.5)"
+                return 'rgb(99,215,104, 0.5)'
               }
 
-              return "rgb(242, 169, 59, 0.5)"
+              return 'rgb(242, 169, 59, 0.5)'
             }
 
             // See if the Start Date is a past week
             if (endDate < new Date()) {
               // See if warmup is complete
               if (schedule.linkedin_volume >= userData.weekly_li_outbound_target) {
-                return "rgb(99,215,104, 0.5)"
+                return 'rgb(99,215,104, 0.5)'
               }
 
-              return "rgb(99,215,104, 0.1)"
+              return 'rgb(99,215,104, 0.1)'
             }
           }),
           fill: true,
-          yAxisID: "yAxis",
-          xAxisID: "xAxis",
+          yAxisID: 'yAxis',
+          xAxisID: 'xAxis',
           borderRadius: 4,
-        }
-      ]
+        },
+      ],
     }
     setSLAScheduleData(data)
 
@@ -224,113 +197,104 @@ export const WarmUp: React.FC = () => {
   }, [])
 
   return (
-    <Flex direction={"column"} mb={"2rem"} w='100%'>
-      <Flex align={"center"} mb={"0.5rem"} gap={"0.5rem"}>
-        <Text fw={"500"} fz={"1rem"}>
+    <Flex direction={'column'} mb={'2rem'} w='100%'>
+      <Flex align={'center'} mb={'0.5rem'} gap={'0.5rem'}>
+        <Text fw={'500'} fz={'1rem'}>
           Outbound Volume
         </Text>
-        {
-          userData?.warmup_linkedin_complete ? (
-            <></>
-          ) : (
-            <HoverCard
-              withArrow
-              withinPortal
-              styles={{
-                dropdown: {
-                  border: "1px solid orange",
-                  borderRadius: "0.5rem",
-                },
-                arrow: {
-                  borderColor: "orange",
-                }
-              }}
-            >
-              <HoverCard.Target>
-                <Badge
-                  variant="light"
-                  size="md"
-                  color="orange"
-                >
+        {userData?.warmup_linkedin_complete ? (
+          <></>
+        ) : (
+          <HoverCard
+            withArrow
+            withinPortal
+            styles={{
+              dropdown: {
+                border: '1px solid orange',
+                borderRadius: '0.5rem',
+              },
+              arrow: {
+                borderColor: 'orange',
+              },
+            }}
+          >
+            <HoverCard.Target>
+              <Badge variant='light' size='md' color='orange'>
+                Warming Up
+              </Badge>
+            </HoverCard.Target>
+            <HoverCard.Dropdown>
+              <Box w={400}>
+                <Text size='lg' weight='700'>
                   Warming Up
-                </Badge>
-              </HoverCard.Target>
-              <HoverCard.Dropdown>
-                <Box
-                  w={400}
-                >
-                  <Text size="lg" weight="700">
-                    Warming Up
-                  </Text>
-                  <Text mt='xs'>In order to protect your LinkedIn, our AI follows a set of outbound heuristics specific to your account. This enables us to slowly "warm up" your LinkedIn account before sending full volume outbound.</Text>
-                  <Text mt='xs'>The following is a sample "warmup schedule". Reference the graph for the exact, AI-determined schedule, and if you would like to make adjustments, please contact a SellScale team member:</Text>
-                  <Text mt='md'>
-                    <ul>
-                      <Flex>
-                        <Text fw='bold' w='150px'>Week 0:</Text>
-                        <Text>
-                          5 connections
-                        </Text>
-                      </Flex>
-                    </ul>
-                    <ul>
-                      <Flex>
-                        <Text fw='bold' w='150px'>Week 1:</Text>
-                        <Text>
-                          25 connections
-                        </Text>
-                      </Flex>
-                    </ul>
-                    <ul>
-                      <Flex>
-                        <Text fw='bold' w='150px'>Week 2:</Text>
-                        <Text>
-                          50 connections
-                        </Text>
-                      </Flex>
-                    </ul>
-                    <ul>
-                      <Flex>
-                        <Text fw='bold' w='150px'>Week 3:</Text>
-                        <Text>
-                          75 connections
-                        </Text>
-                      </Flex>
-                    </ul>
-                    <ul>
-                      <Flex>
-                        <Text fw='bold' w='150px'>Week 4:</Text>
-                        <Text>
-                          90 connections
-                        </Text>
-                      </Flex>
-                    </ul>
-                  </Text>
-                </Box>
-              </HoverCard.Dropdown>
-            </HoverCard>
-          )
-        }
-
+                </Text>
+                <Text mt='xs'>
+                  In order to protect your LinkedIn, our AI follows a set of outbound heuristics specific to your
+                  account. This enables us to slowly "warm up" your LinkedIn account before sending full volume
+                  outbound.
+                </Text>
+                <Text mt='xs'>
+                  The following is a sample "warmup schedule". Reference the graph for the exact, AI-determined
+                  schedule, and if you would like to make adjustments, please contact a SellScale team member:
+                </Text>
+                <Text mt='md'>
+                  <ul>
+                    <Flex>
+                      <Text fw='bold' w='150px'>
+                        Week 0:
+                      </Text>
+                      <Text>5 connections</Text>
+                    </Flex>
+                  </ul>
+                  <ul>
+                    <Flex>
+                      <Text fw='bold' w='150px'>
+                        Week 1:
+                      </Text>
+                      <Text>25 connections</Text>
+                    </Flex>
+                  </ul>
+                  <ul>
+                    <Flex>
+                      <Text fw='bold' w='150px'>
+                        Week 2:
+                      </Text>
+                      <Text>50 connections</Text>
+                    </Flex>
+                  </ul>
+                  <ul>
+                    <Flex>
+                      <Text fw='bold' w='150px'>
+                        Week 3:
+                      </Text>
+                      <Text>75 connections</Text>
+                    </Flex>
+                  </ul>
+                  <ul>
+                    <Flex>
+                      <Text fw='bold' w='150px'>
+                        Week 4:
+                      </Text>
+                      <Text>90 connections</Text>
+                    </Flex>
+                  </ul>
+                </Text>
+              </Box>
+            </HoverCard.Dropdown>
+          </HoverCard>
+        )}
       </Flex>
-      <Text c={"gray.6"} fz={"0.75rem"} mb={"1rem"}>
+      <Text c={'gray.6'} fz={'0.75rem'} mb={'1rem'}>
         The following graph shows your historical and future outbound volumes.
       </Text>
 
-      {
-        slaScheduleData ? (
-          <Flex
-            h={"100%"}
-            direction={"column"}
-            align={"flex-start"}
-            justify={"flex-end"}
-          >
-            <Bar options={options} data={slaScheduleData} height={160} />
-          </Flex>
-        ) : (
-          <Flex></Flex>
-        )
-      }
+      {slaScheduleData ? (
+        <Flex h={'100%'} direction={'column'} align={'flex-start'} justify={'flex-end'}>
+          <Bar options={options} data={slaScheduleData} height={160} />
+        </Flex>
+      ) : (
+        <Flex></Flex>
+      )}
 
       {/* <Grid.Col xs={12} sm={4}>
         <Text fw={"500"} fz={"1rem"} color="gray.6" mb={"0.5rem"}>
@@ -389,6 +353,6 @@ export const WarmUp: React.FC = () => {
           </Flex>
         </Flex>
       </Grid.Col> */}
-    </Flex >
+    </Flex>
   )
 }

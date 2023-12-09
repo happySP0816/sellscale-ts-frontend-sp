@@ -44,7 +44,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { getProspectByID } from "@utils/requests/getProspectByID";
-import { prospectStatuses } from "./utils";
+import { prospectEmailStatuses, prospectStatuses } from "./utils";
 import { Channel, DemoFeedback, ProspectDetails, ProspectShallow } from "src";
 import { ProspectDetailsResearchTabs } from "@common/prospectDetails/ProspectDetailsResearch";
 import { updateProspectNote } from "@utils/requests/prospectNotes";
@@ -109,6 +109,7 @@ export default function ProjectDetails(props: {
   prospects: ProspectShallow[];
   snoozeProspectEmail?: boolean;
   emailStatuses?: boolean;
+  currentEmailStatus?: string;
   refetchSmartleadProspects?: () => void;
 }) {
   const theme = useMantineTheme();
@@ -156,7 +157,10 @@ export default function ProjectDetails(props: {
     enabled: openedProspectId !== -1,
   });
 
-  const statusValue = data?.details?.linkedin_status || "ACCEPTED";
+  let statusValue = data?.details?.linkedin_status || "ACCEPTED";
+  if (props.emailStatuses) {
+    statusValue = props.currentEmailStatus || "ACTIVE_CONVO";
+  }
 
   const [
     editProspectModalOpened,
@@ -219,7 +223,34 @@ export default function ProjectDetails(props: {
   const changeStatus = async (status: string, changeProspect?: boolean) => {
     if (props.emailStatuses) {
       // HARD CODE IN THE EMAIL FOR NOW
-      await updateChannelStatus(openedProspectId, userToken, "EMAIL", status);
+      const response = await updateChannelStatus(
+        openedProspectId,
+        userToken,
+        "EMAIL",
+        status
+      );
+      if (response.status !== "success") {
+        showNotification({
+          title: "Error",
+          message: "There was an error changing the status",
+          color: "red",
+          autoClose: 5000,
+        });
+        return;
+      } else {
+        const formatted_status = status
+          .replace(/_/g, " ")
+          .toLowerCase()
+          .replace(/\b\w/g, function (c) {
+            return c.toUpperCase();
+          });
+        showNotification({
+          title: "Status changed",
+          message: `Prospect's status has been changed to ${formatted_status}`,
+          color: "green",
+          autoClose: 5000,
+        });
+      }
       if (props.refetchSmartleadProspects) {
         props.refetchSmartleadProspects();
       }
@@ -506,30 +537,157 @@ export default function ProjectDetails(props: {
                       icp_fit_reason={data?.details.icp_fit_reason || ""}
                       archetype={data?.details.persona || ""}
                     />
-                  </Flex>
-                </Accordion.Control>
-                <Accordion.Panel>
-                  {!statusValue.startsWith("DEMO_") ? (
-                    <Flex direction={"column"} gap={"sm"}>
-                      <StatusBlockButton
-                        title="Snooze"
-                        icon={
-                          <IconAlarm color={theme.colors.yellow[6]} size={24} />
-                        }
-                        onClick={async () => {
-                          setOpenedSnoozeModal(true);
+                  </Center>
+                </Box>
+                <Box>
+                  <Text fz="xs">
+                    - <u>{_.truncate(data?.details.persona, { length: 25 })}</u>
+                  </Text>
+                </Box>
+              </Flex>
+
+              {!statusValue.startsWith("DEMO_") ? (
+                <Center>
+                  <Group mb="xs" mx="xl" sx={{ justifyContent: "center" }}>
+                    <StatusBlockButton
+                      title="Snooze"
+                      icon={
+                        <IconAlarm color={theme.colors.yellow[6]} size={24} />
+                      }
+                      onClick={async () => {
+                        setOpenedSnoozeModal(true);
+                      }}
+                    />
+                    <StatusBlockButton
+                      title="Demo Set"
+                      icon={
+                        <IconCalendarEvent
+                          color={theme.colors.pink[6]}
+                          size={24}
+                        />
+                      }
+                      onClick={async () => {
+                        await changeStatus("DEMO_SET", false);
+                      }}
+                    />
+                    <StatusBlockButton
+                      title="Not Interested"
+                      icon={
+                        <IconSeeding color={theme.colors.green[6]} size={24} />
+                      }
+                      onClick={async () => {
+                        await changeStatus("NOT_INTERESTED");
+                      }}
+                    />
+                    <StatusBlockButton
+                      title="Not Qualified"
+                      icon={<IconTrash color={theme.colors.red[6]} size={24} />}
+                      onClick={async () => {
+                        await changeStatus("NOT_QUALIFIED");
+                      }}
+                    />
+                  </Group>
+                </Center>
+              ) : (
+                <Stack spacing={10}>
+                  <Box mx={10} mb={10}>
+                    {data && demoFeedbacks && demoFeedbacks.length > 0 && (
+                      <ScrollArea h="250px">
+                        {demoFeedbacks?.map((feedback, index) => (
+                          <div style={{ marginBottom: 10 }}>
+                            <DemoFeedbackCard
+                              prospect={data.data}
+                              index={index + 1}
+                              demoFeedback={feedback}
+                              refreshDemoFeedback={refreshDemoFeedback}
+                            />
+                          </div>
+                        ))}
+                      </ScrollArea>
+                    )}
+                    <Button
+                      variant="light"
+                      radius="md"
+                      fullWidth
+                      onClick={() => {
+                        setDrawerProspectId(openedProspectId);
+                        setDemosDrawerOpened(true);
+                      }}
+                    >
+                      {demoFeedbacks && demoFeedbacks.length > 0
+                        ? "Add"
+                        : "Give"}{" "}
+                      Demo Feedback
+                    </Button>
+                    {(!demoFeedbacks || demoFeedbacks.length === 0) && (
+                      <Box mx={10} mb={10} mt={10}>
+                        <ProspectDemoDateSelector
+                          prospectId={openedProspectId}
+                        />
+                      </Box>
+                    )}
+                    <DemoFeedbackDrawer refetch={refetch} />
+                  </Box>
+                </Stack>
+              )}
+            </Paper>
+          </div>
+          {!statusValue.startsWith("DEMO_") &&
+            statusValue !== "ACCEPTED" &&
+            statusValue !== "RESPONDED" && (
+              <div style={{ flexBasis: "10%" }}>
+                <Paper
+                  withBorder
+                  radius={theme.radius.lg}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    flexWrap: "nowrap",
+                  }}
+                  mx={10}
+                  mb={10}
+                >
+                  <Flex gap={0} wrap="nowrap">
+                    <div style={{ flexBasis: "10%", margin: 15 }}>
+                      <Text fw={500} fz={13}>
+                        Substatus
+                      </Text>
+                    </div>
+                    <div style={{ flexBasis: "90%", margin: 10 }}>
+                      <Select
+                        size="xs"
+                        variant="filled"
+                        radius={theme.radius.lg}
+                        styles={{
+                          input: {
+                            backgroundColor: theme.colors["blue"][6],
+                            color: theme.white,
+                            "&:focus": {
+                              borderColor: "transparent",
+                            },
+                          },
+                          rightSection: {
+                            svg: {
+                              color: `${theme.white}!important`,
+                            },
+                          },
+                          item: {
+                            "&[data-selected], &[data-selected]:hover": {
+                              backgroundColor: theme.colors["blue"][6],
+                            },
+                          },
                         }}
-                      />
-                      <StatusBlockButton
-                        title="Demo Set"
-                        icon={
-                          <IconCalendarEvent
-                            color={theme.colors.green[6]}
-                            size={24}
-                          />
+                        data={
+                          props.emailStatuses
+                            ? prospectEmailStatuses
+                            : prospectStatuses
                         }
-                        onClick={async () => {
-                          await changeStatus("DEMO_SET", false);
+                        value={statusValue}
+                        onChange={async (value) => {
+                          if (!value) {
+                            return;
+                          }
+                          await changeStatus(value);
                         }}
                       />
                       <StatusBlockButton

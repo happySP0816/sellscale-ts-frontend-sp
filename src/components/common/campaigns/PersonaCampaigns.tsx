@@ -610,7 +610,7 @@ export function PersonCampaignCard(props: {
           </Group>
           <ScrollArea h={600} scrollbarSize={6}>
             <Flex direction={'column'} gap={20} my={20}>
-              {campaignList?.map((item: any, index) => {
+              {filteredCampaignList?.map((item: any, index) => {
                 return (
                   <Group
                     grow
@@ -641,21 +641,21 @@ export function PersonCampaignCard(props: {
                           <Box>
                             <Flex align={'center'} gap={10}>
                               <Text fw={600}>{item.prospect_name}</Text>
-                              <IconMail size={20} color='#817e7e' />
                             </Flex>
                             <Flex align={'center'} gap={10} w={'100%'} mt={3}>
                               <Text>ICP Score: </Text>
-                              <Text
-                                bg={'#e7f5ff'}
-                                color='blue'
-                                px={15}
+                              <Badge
+                                color={
+                                  item.prospect_icp_fit_score == 'VERY HIGH' ? 'green' : 
+                                  item.prospect_icp_fit_score == 'HIGH' ? 'blue' :
+                                  item.prospect_icp_fit_score == 'MEDIUM' ? 'yellow' :
+                                  item.prospect_icp_fit_score == 'LOW' ? 'orange' : 
+                                  item.prospect_icp_fit_score == 'VERY LOW' ? 'red' : 'gray'
+                                }
                                 fw={600}
-                                style={{
-                                  borderRadius: '20px',
-                                }}
                               >
                                 {item.prospect_icp_fit_score}
-                              </Text>
+                              </Badge>
                             </Flex>
                           </Box>
                         </Flex>
@@ -741,6 +741,20 @@ export function PersonCampaignCard(props: {
       })
       .catch((error) => console.log('error', error))
   }
+
+  // if mode is sent then 'SENT_OUTREACH' only, if mode is open then 'OPENED' only, if mode is reply then 'REPLIED' only, if mode is demo then 'DEMO' only
+  const filteredCampaignList = useMemo(() => {
+    if (value === 'sent') {
+      return campaignList?.filter((item: any) => item.to_status === 'SENT_OUTREACH')
+    } else if (value === 'open') {
+      return campaignList?.filter((item: any) => item.to_status === 'ACCEPTED')
+    } else if (value === 'reply') {
+      return campaignList?.filter((item: any) => item.to_status === 'ACTIVE_CONVO')
+    } else if (value === 'demo') {
+      return campaignList?.filter((item: any) => item.to_status === 'DEMO_SET')
+    }
+  }, [value, campaignList])
+
   return (
     <Paper radius='md' ref={ref}>
       <ChannelModal />

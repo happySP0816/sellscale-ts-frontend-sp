@@ -1,35 +1,20 @@
 import ICPFitPill from "@common/pipeline/ICPFitAndReason";
-import {
-  Paper,
-  Flex,
-  Avatar,
-  Box,
-  Text,
-  Button,
-  ActionIcon,
-} from "@mantine/core";
+import { Paper, Flex, Avatar, Box, Text, Button, ActionIcon } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import EditDemoFeedbackModal from "@modals/EditDemoFeedbackModal";
 import { IconEdit, IconPencil } from "@tabler/icons";
 import { proxyURL, convertDateToLocalTime } from "@utils/general";
 import { DemoFeedback, Prospect } from "src";
 
-export default function DemoFeedbackCard(props: {
-  prospect: Prospect;
-  index?: number;
-  demoFeedback?: DemoFeedback;
-  refreshDemoFeedback?: () => void;
-}) {
+export default function DemoFeedbackCard(props: { prospect: Prospect, index?: number, demoFeedback?: DemoFeedback, refreshDemoFeedback?: () => void }) {
+  
   if (props.demoFeedback === undefined) return <></>;
-
-  const [
-    editDemoFeedbackModal,
-    { open: openEditDemoFeedbackModal, close: closeeditDemoFeedbackModal },
-  ] = useDisclosure();
-
+  
+  const [editDemoFeedbackModal, { open: openEditDemoFeedbackModal, close: closeeditDemoFeedbackModal }] = useDisclosure()
+  
   return (
     <Paper withBorder p="xs" radius="md" sx={{ position: "relative" }}>
-      <Flex justify="space-between" gap={"xs"}>
+      <Flex justify="space-between">
         <Flex direction="row">
           <Avatar
             size="md"

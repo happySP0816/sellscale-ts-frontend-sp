@@ -192,9 +192,9 @@ export function ICPFitPillOnly(props: { icp_fit_score: number }) {
       <Badge color={icpFitToColor(props.icp_fit_score)} fw={800}>
         {icpFitToLabel(props.icp_fit_score)}
       </Badge>
-      {/* <div style={{ position: "absolute", top: -5, left: -5 }}>
+      <div style={{ position: "absolute", top: -5, left: -5 }}>
         {icpFitToIcon(props.icp_fit_score)}
-      </div> */}
+      </div>
     </div>
   );
 }

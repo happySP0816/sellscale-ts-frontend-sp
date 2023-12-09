@@ -20,7 +20,6 @@ import {
   Drawer,
   Paper,
   Stack,
-  ActionIcon,
 } from '@mantine/core';
 import PageFrame from '@common/PageFrame';
 import { deterministicMantineColor } from '@utils/requests/utils';
@@ -60,7 +59,6 @@ import { Draggable, DragDropContext, Droppable } from 'react-beautiful-dnd';
 import useRefresh from '@common/library/use-refresh';
 import { socket } from '../App';
 import { convertDateToCasualTime, convertDateToLocalTime } from '@utils/general';
-import { openContextModal } from '@mantine/modals';
 
 function createTriggerActionBlock(
   action: TriggerActionType,
@@ -333,19 +331,18 @@ export default function TriggersPage() {
   const [logs, setLogs] = useState<{ msg: string; timestamp: Date }[]>([]);
 
   useEffect(() => {
+    // Join the room in which the messages will be sent
     if (socket) {
-      // Join the room in which the messages will be sent
       const triggerId = new URLSearchParams(location.search).get('trigger_id');
-      socket.emit('join-room', {
+      socket.emit('join-trigger-room', {
         sdr_id: userData.id,
-        payload: { room_id: `trigger-${triggerId}` },
-      });
-
-      // Listen for messages
-      socket.on('trigger-log', (data) => {
-        setLogs((prev) => [...prev, { msg: data.message, timestamp: new Date() }]);
+        payload: { trigger_id: `trigger-$${triggerId}` },
       });
     }
+
+    socket.on('trigger-log', (data) => {
+      setLogs((prev) => [...prev, { msg: data.message, timestamp: new Date() }]);
+    });
   }, []);
 
   console.log(logs);
@@ -449,41 +446,10 @@ export default function TriggersPage() {
   return (
     <PageFrame>
       <Flex justify='space-between' wrap='nowrap'>
-        <Group spacing={10} noWrap>
-          <Title order={2} mb='0px'>
-            {triggerId ? 'Edit' : 'Create'} Trigger
-          </Title>
-          <ActionIcon
-            onClick={() => {
-              openContextModal({
-                modal: 'editTrigger',
-                title: 'Edit Trigger',
-                innerProps: {
-                  title: trigger?.name ?? '',
-                  active: trigger?.active ?? false,
-                  interval: trigger?.interval_in_minutes ?? 0,
-                  onSave: async (title: string, active: boolean, interval: number) => {
-                    if (trigger) {
-                      await updateTrigger(
-                        userToken,
-                        trigger.id,
-                        undefined,
-                        title,
-                        undefined,
-                        interval,
-                        active,
-                        undefined
-                      );
-                      window.location.reload();
-                    }
-                  },
-                },
-              });
-            }}
-          >
-            <IconEdit color='gray' style={{ marginLeft: '4px' }} size={16} />
-          </ActionIcon>
-        </Group>
+        <Title order={2} mb='0px'>
+          {triggerId ? 'Edit' : 'Create'} Trigger{' '}
+          <IconEdit color='gray' style={{ marginLeft: '4px' }} size={16} />
+        </Title>
         <Group noWrap>
           <Button
             radius='md'
@@ -491,15 +457,14 @@ export default function TriggersPage() {
             onClick={async () => {
               if (!trigger) return;
               await saveTrigger(false);
-              // showNotification({
-              //   loading: true,
-              //   title: 'Running Trigger',
-              //   message: 'This may take a few minutes.',
-              //   color: 'blue',
-              // });
-              setLogs([]);
-              setOpenedLogs(true);
+              showNotification({
+                loading: true,
+                title: 'Running Trigger',
+                message: 'This may take a few minutes.',
+                color: 'blue',
+              });
               const response = await runTrigger(userToken, trigger.id);
+              setOpenedLogs(true);
             }}
           >
             Run Trigger

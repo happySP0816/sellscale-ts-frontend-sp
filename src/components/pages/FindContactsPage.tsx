@@ -36,7 +36,7 @@ import { useRecoilState, useRecoilValue } from 'recoil'
 import { SalesNavigatorLaunch } from 'src'
 import SalesNavigatorComponent from './SalesNavigatorPage'
 import IndividualsDashboard from '@common/individuals/IndividualsDashboard'
-import { IconCsv } from '@tabler/icons-react'
+import { IconCsv, IconSparkles } from '@tabler/icons-react'
 import FileDropAndPreview from '@modals/upload-prospects/FileDropAndPreview'
 import LinkedInURLUpload from '@modals/upload-prospects/LinkedInURLUpload'
 import { currentProjectState } from '@atoms/personaAtoms'
@@ -203,14 +203,14 @@ export default function FindContactsPage() {
           <Tabs.Tab value='linkedin-url' icon={<IconBrandLinkedin size='0.9rem' />}>
             LinkedIn URL
           </Tabs.Tab>
-          {/* <Tabs.Tab value='by-csv' icon={<IconFile size='0.9rem' />}>
+          <Tabs.Tab value='by-csv' icon={<IconFile size='0.9rem' />}>
             CSV
-          </Tabs.Tab> */}
-          <Tabs.Tab value='csv-beta' icon={<IconFile size='0.9rem' />}>
-            Upload CSV
+          </Tabs.Tab>
+          <Tabs.Tab value='csv-beta' icon={<IconSparkles size='0.9rem' />} ml='auto'>
+            CSV (BETA)
           </Tabs.Tab>
           <Tooltip label='Advanced - Linkedin Network' position='bottom'>
-            <Tabs.Tab value='your-network' icon={<IconAffiliate size='0.9rem' />} ml='auto'></Tabs.Tab>
+            <Tabs.Tab value='your-network' icon={<IconAffiliate size='0.9rem' />}></Tabs.Tab>
           </Tooltip>
         </Tabs.List>
 
@@ -245,7 +245,7 @@ export default function FindContactsPage() {
             />
           </Card>
         </Tabs.Panel>
-        {/* <Tabs.Panel value='by-csv' pt='xs' style={{ position: 'relative' }}>
+        <Tabs.Panel value='by-csv' pt='xs' style={{ position: 'relative' }}>
           <Card maw='600px' ml='auto' mr='auto'>
             <Title order={3}>Upload CSV</Title>
             <Text mb='md' color='gray'>
@@ -292,7 +292,7 @@ export default function FindContactsPage() {
               }}
             />
           )}
-        </Tabs.Panel> */}
+        </Tabs.Panel>
         <Tabs.Panel value='csv-beta' pt='xs' style={{ position: 'relative' }}>
           <Card ml='auto' mr='auto'>
             <FileDropAndPreviewV2

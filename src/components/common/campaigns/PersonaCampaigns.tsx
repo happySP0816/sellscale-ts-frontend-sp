@@ -167,6 +167,7 @@ export default function PersonaCampaigns() {
     const result =
       response.status === "success" ? (response.data as CampaignPersona[]) : [];
 
+    console.log({result})
     // Aggregate campaign analytics
     let analytics = {
       sentOutreach: 0,
@@ -206,6 +207,7 @@ export default function PersonaCampaigns() {
         : [];
     setProjects(result2);
 
+    console.log({result2})
     // Get AI Activity
     const response3 = await getPersonasActivity(userToken);
     const result3 = response3.status === "success" ? response3.data : [];

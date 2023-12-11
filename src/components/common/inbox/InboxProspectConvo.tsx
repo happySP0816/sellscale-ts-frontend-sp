@@ -237,7 +237,11 @@ export function ProspectConvoMessage(props: {
 
 export let HEADER_HEIGHT = 190;
 
+type LiStepProgress = 'COMPLETE' | 'INCOMPLETE' | 'COMING_SOON' | 'OPTIONAL';
+
+
 export default function ProspectConvo(props: { prospects: ProspectShallow[], onTabChange?: (tab: string) => void, openConvoBox?: boolean, hideTitle?: boolean }) {
+  const [stepThreeComplete, setStepThreeComplete] = useState<LiStepProgress>('INCOMPLETE');
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
 
@@ -888,6 +892,11 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
           messages={currentConvoLiMessages || []}
           onClose={() => {
             triggerGetBumpFrameworks();
+          }}
+          onPopulateBumpFrameworks={(buckets) => {
+            if (buckets.ACCEPTED.total > 0 || Object.values(buckets.BUMPED).find(d => d.total > 0) || buckets.ACTIVE_CONVO.total > 0) {
+              setStepThreeComplete('COMPLETE');
+            }
           }}
         />
       )}

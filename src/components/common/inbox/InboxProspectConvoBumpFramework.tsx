@@ -1,50 +1,38 @@
-import { openedBumpFameworksState, openedProspectIdState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
+import { openedBumpFameworksState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
-import TextWithNewlines from '@common/library/TextWithNewlines';
-import loaderWithText from '@common/library/loaderWithText';
 import {
   Button,
   Flex,
-  Group,
-  Paper,
   Title,
   Text,
-  Textarea,
   useMantineTheme,
   Divider,
-  Tabs,
   ActionIcon,
   Badge,
-  Container,
-  Avatar,
-  Stack,
-  ScrollArea,
-  LoadingOverlay,
-  Center,
   Modal,
   Grid,
-  Card
+  Card,
+  Loader,
 } from '@mantine/core';
-import { IconEdit } from '@tabler/icons'
 
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, EmailSequenceStep, LinkedInMessage, Prospect, ProspectShallow } from 'src';
-import { showNotification } from '@mantine/notifications';
-import { postBumpGenerateEmailResponse, postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
-import _, { String } from 'lodash';
-import SelectBumpInstruction from '@common/bump_instructions/SelectBumpInstruction';
-import { API_URL } from '@constants/data';
-import { prospectDrawerStatusesState } from '@atoms/prospectAtoms';
-import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
-import TextWithNewline from '@common/library/TextWithNewlines';
-import { openConfirmModal, openContextModal } from '@mantine/modals';
-import { formatToLabel, valueToColor } from '@utils/general';
-import { useDisclosure } from '@mantine/hooks';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import { currentProjectState } from '@atoms/personaAtoms';
+import { useEffect, useRef, useState } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { BumpFramework, EmailSequenceStep, LinkedInMessage, ProspectShallow } from 'src';
+import { showNotification } from '@mantine/notifications';
+import { postBumpGenerateEmailResponse, postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
+import _ from 'lodash';
+import { API_URL } from '@constants/data';
+import { prospectDrawerStatusesState } from '@atoms/prospectAtoms';
+import { useDisclosure } from '@mantine/hooks';
+import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import { useQuery } from '@tanstack/react-query';
 import getChannels from '@utils/requests/getChannels';
+import { openContextModal } from '@mantine/modals';
+import { IconEdit } from '@tabler/icons';
+import TextWithNewline from '@common/library/TextWithNewlines';
+import { valueToColor } from '@utils/general';
 
 type BumpFrameworkBuckets = {
   ACCEPTED: {
@@ -152,198 +140,6 @@ export const autoFillBumpFrameworkAccountResearch = (userToken: string, prospect
     });
 };
 
-
-export default function InboxProspectConvoBumpFramework(props: {
-  prospect: ProspectShallow;
-  onPopulateBumpFrameworks?: (buckets: BumpFrameworkBuckets) => void;
-  messages: LinkedInMessage[];
-  onClose?: () => void;
-}) {
-
-  const [open, setOpen] = useRecoilState(openedBumpFameworksState);
-
-  const userToken = useRecoilValue(userTokenState);
-  const userData = useRecoilValue(userDataState);
-  const [bumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState);
-
-  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(prospectDrawerStatusesState);
-
-  const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
-    useDisclosure();
-
-  const [loading, setLoading] = useState(false);
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
-  const archetypeID = currentProject?.id || -1;
-  const bumpBuckets = useRef<BumpFrameworkBuckets>({
-    ACCEPTED: {
-      total: 0,
-      frameworks: [],
-    },
-    BUMPED: {},
-    ACTIVE_CONVO: {
-      total: 0,
-      frameworks: [],
-    },
-  } as BumpFrameworkBuckets);
-  const [maximumBumpSoftLock, setMaximumBumpSoftLock] = useState(false);
-
-  // Update the prospectDrawerStatusesState global var for the bump framework modal (since it uses it)
-  useEffect(() => {
-    if (open) {
-      setProspectDrawerStatuses({
-        overall: props.prospect.overall_status,
-        linkedin: props.prospect.linkedin_status,
-        email: props.prospect.email_status,
-      })
-    }
-  }, [open]);
-
-  const triggerGetBumpFrameworks = async () => {
-    setLoading(true);
-
-    const result = await getBumpFrameworks(userToken, [], [], [archetypeID]);
-
-    if (result.status !== 'success') {
-      setLoading(false);
-      showNotification({
-        title: 'Error',
-        message: 'Could not get bump frameworks for archetype ID ' + archetypeID,
-        color: 'red',
-        autoClose: false,
-      });
-      return;
-    }
-
-    // Populate bump buckets
-    let newBumpBuckets = {
-      ACCEPTED: {
-        total: 0,
-        frameworks: [],
-      },
-      BUMPED: {
-        1: {
-          total: 0,
-          frameworks: [],
-        },
-        2: {
-          total: 0,
-          frameworks: [],
-        },
-        3: {
-          total: 0,
-          frameworks: [],
-        },
-      },
-      ACTIVE_CONVO: {
-        total: 0,
-        frameworks: [],
-      },
-    } as BumpFrameworkBuckets;
-
-    for (const bumpFramework of result.data.bump_frameworks as BumpFramework[]) {
-      const status = bumpFramework.overall_status;
-      if (status === 'ACCEPTED') {
-        newBumpBuckets.ACCEPTED.total += 1;
-        if (bumpFramework.default) {
-          newBumpBuckets.ACCEPTED.frameworks.unshift(bumpFramework);
-        } else {
-          newBumpBuckets.ACCEPTED.frameworks.push(bumpFramework);
-        }
-      } else if (status === 'BUMPED') {
-        const bumpCount = bumpFramework.bumped_count as number;
-        if (!(bumpCount in newBumpBuckets.BUMPED)) {
-          continue;
-        }
-        newBumpBuckets.BUMPED[bumpCount].total += 1;
-        if (bumpCount >= 3) {
-          setMaximumBumpSoftLock(true);
-        }
-        if (bumpFramework.default) {
-          newBumpBuckets.BUMPED[bumpCount].frameworks.unshift(bumpFramework);
-        } else {
-          newBumpBuckets.BUMPED[bumpCount].frameworks.push(bumpFramework);
-        }
-      } else if (status === 'ACTIVE_CONVO') {
-        newBumpBuckets.ACTIVE_CONVO.total += 1;
-        if (bumpFramework.default) {
-          newBumpBuckets.ACTIVE_CONVO.frameworks.unshift(bumpFramework);
-        } else {
-          newBumpBuckets.ACTIVE_CONVO.frameworks.push(bumpFramework);
-        }
-      }
-    }
-    bumpBuckets.current = newBumpBuckets;
-
-    // BumpFrameworks have been updated, submit event to parent
-    if (props.onPopulateBumpFrameworks) {
-      props.onPopulateBumpFrameworks(newBumpBuckets);
-    }
-
-    setLoading(false);
-  };
-
-  const { data: dataChannels } = useQuery({
-    queryKey: [`query-get-channels-campaign-prospects`],
-    queryFn: async () => {
-      return await getChannels(userToken);
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  return (
-    <Modal
-      opened={open}
-      onClose={() => {
-        setOpen(false);
-        props.onClose && props.onClose();
-      }}
-      title={<Title order={4}>Message Generation Config</Title>}
-      size={900}
-      yOffset={"40dvh"}
-      padding={'lg'}
-    >
-      <div className="w-full h-full">
-        <Flex direction='column' ml='xs'>
-          <Flex w='100%'>
-            <Text mt='xs'>
-              Automate your replies by editing the response frameworks below.
-            </Text>
-            <Button variant='outline' w='30%' mb='md' ml='auto' onClick={openQuestionObjection}>
-              Add another reply framework
-            </Button>
-          </Flex>
-
-          <CreateBumpFrameworkModal
-            modalOpened={addNewQuestionObjectionOpened}
-            openModal={openQuestionObjection}
-            closeModal={closeQuestionObjection}
-            backFunction={triggerGetBumpFrameworks}
-            status='ACTIVE_CONVO'
-            dataChannels={dataChannels}
-            archetypeID={archetypeID}
-          />
-
-          <Grid>
-            {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
-              return (
-                <Grid.Col span={6}>
-                  <QuestionObjectionLibraryCard
-                    bumpFramework={bumpBuckets.current?.ACTIVE_CONVO.frameworks[index]}
-                    archetypeID={archetypeID}
-                    afterEdit={triggerGetBumpFrameworks}
-                  />
-                </Grid.Col>
-              );
-            })}
-          </Grid>
-        </Flex>
-
-      </div>
-    </Modal>
-  );
-}
-
-
 function QuestionObjectionLibraryCard(props: {
   archetypeID: number | null;
   bumpFramework: BumpFramework;
@@ -403,5 +199,195 @@ function QuestionObjectionLibraryCard(props: {
         <Badge color={valueToColor(theme, splitted_substatus || "ACTIVE_CONVO")}>{splitted_substatus || "ACTIVE_CONVO"}</Badge>
       </Card>
     </>
+  );
+}
+
+
+export default function InboxProspectConvoBumpFramework(props: {
+  prospect: ProspectShallow;
+  messages: LinkedInMessage[];
+  onClose?: () => void;
+  onPopulateBumpFrameworks?: (buckets: BumpFrameworkBuckets) => void;
+}) {
+
+  const [open, setOpen] = useRecoilState(openedBumpFameworksState);
+
+  const userToken = useRecoilValue(userTokenState);
+
+  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(prospectDrawerStatusesState);
+
+
+  const [loading, setLoading] = useState(false);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const archetypeID = 8;
+
+
+  const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
+    useDisclosure();
+
+  const { data: dataChannels } = useQuery({
+    queryKey: [`query-get-channels-campaign-prospects`],
+    queryFn: async () => {
+      return await getChannels(userToken);
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const bumpBuckets = useRef<BumpFrameworkBuckets>({
+    ACCEPTED: {
+      total: 0,
+      frameworks: [],
+    },
+    BUMPED: {},
+    ACTIVE_CONVO: {
+      total: 0,
+      frameworks: [],
+    },
+  } as BumpFrameworkBuckets);
+
+
+  const triggerGetBumpFrameworks = async () => {
+    setLoading(true);
+
+    const result = await getBumpFrameworks(userToken, [], [], [archetypeID]);
+    if (result.status !== 'success') {
+      setLoading(false);
+      showNotification({
+        title: 'Error',
+        message: 'Could not get bump frameworks for archetype ID ' + archetypeID,
+        color: 'red',
+        autoClose: false,
+      });
+      return;
+    }
+
+    // Populate bump buckets
+    let newBumpBuckets = {
+      ACCEPTED: {
+        total: 0,
+        frameworks: [],
+      },
+      BUMPED: {
+        1: {
+          total: 0,
+          frameworks: [],
+        },
+        2: {
+          total: 0,
+          frameworks: [],
+        },
+        3: {
+          total: 0,
+          frameworks: [],
+        },
+      },
+      ACTIVE_CONVO: {
+        total: 0,
+        frameworks: [],
+      },
+    } as BumpFrameworkBuckets;
+    for (const bumpFramework of result.data.bump_frameworks as BumpFramework[]) {
+      const status = bumpFramework.overall_status;
+      if (status === 'ACCEPTED') {
+        newBumpBuckets.ACCEPTED.total += 1;
+        if (bumpFramework.default) {
+          newBumpBuckets.ACCEPTED.frameworks.unshift(bumpFramework);
+        } else {
+          newBumpBuckets.ACCEPTED.frameworks.push(bumpFramework);
+        }
+      } else if (status === 'BUMPED') {
+        const bumpCount = bumpFramework.bumped_count as number;
+        if (!(bumpCount in newBumpBuckets.BUMPED)) {
+          continue;
+        }
+        newBumpBuckets.BUMPED[bumpCount].total += 1;
+        if (bumpFramework.default) {
+          newBumpBuckets.BUMPED[bumpCount].frameworks.unshift(bumpFramework);
+        } else {
+          newBumpBuckets.BUMPED[bumpCount].frameworks.push(bumpFramework);
+        }
+      } else if (status === 'ACTIVE_CONVO') {
+        newBumpBuckets.ACTIVE_CONVO.total += 1;
+        if (bumpFramework.default) {
+          newBumpBuckets.ACTIVE_CONVO.frameworks.unshift(bumpFramework);
+        } else {
+          newBumpBuckets.ACTIVE_CONVO.frameworks.push(bumpFramework);
+        }
+      }
+    }
+    bumpBuckets.current = newBumpBuckets;
+
+    // BumpFrameworks have been updated, submit event to parent
+    if (props.onPopulateBumpFrameworks) {
+      props.onPopulateBumpFrameworks(newBumpBuckets);
+    }
+
+    setLoading(false);
+  };
+  // Update the prospectDrawerStatusesState global var for the bump framework modal (since it uses it)
+  // useEffect(() => {
+  //   if (open) {
+  //     setProspectDrawerStatuses({
+  //       overall: props.prospect.overall_status,
+  //       linkedin: props.prospect.linkedin_status,
+  //       email: props.prospect.email_status,
+  //     })
+  //   }
+  // }, [open]);
+
+  useEffect(() => {
+    triggerGetBumpFrameworks();
+  }, [archetypeID]);
+
+  return (
+    <Modal
+      size="calc(100vw - 3rem)"
+      opened={open}
+      onClose={() => {
+        setOpen(false);
+        props.onClose && props.onClose();
+      }}
+      title={<Title order={4}>Message Generation Config</Title>}
+    >
+      {!loading ? (
+        <Flex direction='column'>
+          <Flex w='100%'>
+            <Text mt='xs'>
+              Automate your replies by editing the response frameworks below.
+            </Text>
+            <Button variant='outline' w='30%' mb='md' ml='auto' onClick={openQuestionObjection}>
+              Add another reply framework
+            </Button>
+          </Flex>
+
+          <CreateBumpFrameworkModal
+            modalOpened={addNewQuestionObjectionOpened}
+            openModal={openQuestionObjection}
+            closeModal={closeQuestionObjection}
+            backFunction={triggerGetBumpFrameworks}
+            status='ACTIVE_CONVO'
+            dataChannels={dataChannels}
+            archetypeID={archetypeID}
+          />
+          <Grid>
+            {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
+              return (
+                <Grid.Col span={6}>
+                  <QuestionObjectionLibraryCard
+                    bumpFramework={bumpBuckets.current?.ACTIVE_CONVO.frameworks[index]}
+                    archetypeID={archetypeID}
+                    afterEdit={triggerGetBumpFrameworks}
+                  />
+                </Grid.Col>
+              );
+            })}
+          </Grid>
+        </Flex>
+      ) : (
+        <Flex justify='center'>
+          <Loader />
+        </Flex>
+      )}
+    </Modal>
   );
 }

@@ -36,7 +36,7 @@ const ScrappingReport = () => {
   const [sortField, setSortField] = useState('upload date')
   const [sortOrder, setSortOrder] = useState('desc')
 
-  const chartOptions = {
+  const chartOptions: any = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {

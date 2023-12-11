@@ -35,6 +35,7 @@ export async function updateTrigger(
   intervalInMinutes?: number,
   active?: boolean,
   blocks?: Record<string, any>[],
+  campaignId?: number
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/triggers/trigger/${triggerId}`, {
     method: 'POST',
@@ -49,6 +50,7 @@ export async function updateTrigger(
       interval_in_minutes: intervalInMinutes,
       active,
       blocks,
+      campaign_id: campaignId,
     }),
   });
   return await processResponse(response);

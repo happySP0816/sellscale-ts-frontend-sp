@@ -21,6 +21,7 @@ import {
   Paper,
   Stack,
   ActionIcon,
+  Loader,
 } from '@mantine/core';
 import PageFrame from '@common/PageFrame';
 import { deterministicMantineColor } from '@utils/requests/utils';
@@ -459,20 +460,19 @@ export default function TriggersPage() {
                 modal: 'editTrigger',
                 title: 'Edit Trigger',
                 innerProps: {
-                  title: trigger?.name ?? '',
-                  active: trigger?.active ?? false,
-                  interval: trigger?.interval_in_minutes ?? 0,
-                  onSave: async (title: string, active: boolean, interval: number) => {
+                  trigger: trigger,
+                  onSave: async (newTrigger: Trigger) => {
                     if (trigger) {
                       await updateTrigger(
                         userToken,
                         trigger.id,
+                        newTrigger.emoji,
+                        newTrigger.name,
+                        newTrigger.description,
+                        newTrigger.interval_in_minutes,
+                        newTrigger.active,
                         undefined,
-                        title,
-                        undefined,
-                        interval,
-                        active,
-                        undefined
+                        trigger.client_archetype_id
                       );
                       window.location.reload();
                     }
@@ -652,7 +652,12 @@ export default function TriggersPage() {
         <Stack>
           {logs.map((log, index) => (
             <Paper key={index} shadow='xs' p='md' style={{ position: 'relative' }}>
-              <Text>{log.msg}</Text>
+              <Group noWrap>
+                {index === logs.length - 1 && !log.msg.startsWith('Done') && (
+                  <Loader color='blue' size='sm' />
+                )}
+                <Text>{log.msg}</Text>
+              </Group>
               <Text color='gray' fz='xs' style={{ position: 'absolute', top: 5, right: 5 }}>
                 {convertDateToLocalTime(log.timestamp)}
               </Text>

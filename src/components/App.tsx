@@ -53,7 +53,6 @@ import { socketState } from '@atoms/socketAtoms';
 import SalesNavURLModal from '@modals/SalesNavURLModal';
 
 import { io } from 'socket.io-client';
-import EditTriggerModal from '@modals/EditTriggerModal';
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -216,7 +215,6 @@ export default function App() {
               cloneBumpFramework: CloneBumpFrameworkContextModal,
               liTemplate: LiTemplateModal,
               salesNavURL: SalesNavURLModal,
-              editTrigger: EditTriggerModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

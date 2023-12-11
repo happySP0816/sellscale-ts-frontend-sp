@@ -93,30 +93,31 @@ import AllCampaign from "../../PersonaCampaigns/AllCampaign";
 import postSyncSmartleadCampaigns from "@utils/requests/postSyncSmartleadCampaigns";
 
 export type CampaignPersona = {
-  id: number;
-  name: string;
-  email_sent: number;
-  email_opened: number;
-  email_replied: number;
-  li_sent: number;
-  li_opened: number;
-  li_replied: number;
-  active: boolean;
-  linkedin_active: boolean;
-  email_active: boolean;
-  created_at: string;
-  emoji: string;
-  total_sent: number;
-  total_opened: number;
-  total_replied: number;
-  total_demo: number;
-  total_prospects: number;
-  sdr_name: string;
-  sdr_img_url: string;
-  sdr_id: number;
-  smartlead_campaign_id?: number;
-  meta_data?: Record<string, any>;
-};
+  id: number
+  name: string
+  email_sent: number
+  email_opened: number
+  email_replied: number
+  li_sent: number
+  li_opened: number
+  li_replied: number
+  active: boolean
+  linkedin_active: boolean
+  email_active: boolean
+  created_at: string
+  emoji: string
+  total_sent: number
+  total_opened: number
+  total_replied: number
+  total_demo: number
+  total_prospects: number
+  sdr_name: string
+  sdr_img_url: string
+  sdr_id: number
+  smartlead_campaign_id?: number
+  meta_data?: Record<string, any>
+  first_message_delay_days?: number
+}
 
 export default function PersonaCampaigns() {
   const navigate = useNavigate();

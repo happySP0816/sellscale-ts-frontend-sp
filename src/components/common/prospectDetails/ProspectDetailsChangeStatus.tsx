@@ -300,7 +300,9 @@ export async function updateChannelStatus(
   override: boolean = false,
   quietly: boolean = false
 ) {
-  return await fetch(`${API_URL}/prospect/${prospectId}`, {
+  return await fetch(
+    `${API_URL}/prospect/${prospectId}`,
+    {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${userToken}`,

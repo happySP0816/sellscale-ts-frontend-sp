@@ -585,7 +585,7 @@ function Filters(props: {
             onClick={async () => {
               openContextModal({
                 modal: 'salesNavURL',
-                title: 'Import Filters from Sales Nav URL',
+                title: 'Improt Filters from Sales Nav URL',
                 innerProps: {},
               });
             }}

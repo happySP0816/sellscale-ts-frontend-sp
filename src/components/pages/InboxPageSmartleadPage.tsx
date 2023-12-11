@@ -27,6 +27,7 @@ import {
   Input,
   useMantineTheme,
   ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 
@@ -37,6 +38,7 @@ import {
   IconArrowDown,
   IconArrowForwardUp,
   IconBackpack,
+  IconClock,
   IconList,
   IconSearch,
   IconWorld,
@@ -63,6 +65,7 @@ import DOMPurify from "dompurify";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import _ from "lodash";
+import { convertDateToLocalTime, convertDateToMMMDD } from "@utils/general";
 
 export const INBOX_PAGE_HEIGHT = `100vh`; //`calc(100vh - ${NAV_HEADER_HEIGHT}px)`;
 
@@ -80,8 +83,9 @@ export default function InboxSmartleadPage(props: {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [selectedProspect, setSelectedProspect] = useState<any>(null);
   const [prospects, setProspects] = useState([]);
-  const [repliedProspects, setRepliedProspects] = useState([]);
-  const [snoozedProspects, setSnoozedProspects] = useState([]);
+  const [repliedProspects, setRepliedProspects] = useState<any>([]);
+  const [snoozedProspects, setSnoozedProspects] = useState<any>([]);
+  const [demoProspects, setDemoProspects] = useState<any>([]);
   const [conversation, setConversation] = useState<any>([]);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(
     openedProspectIdState
@@ -119,26 +123,55 @@ export default function InboxSmartleadPage(props: {
     const response = await getSmartleadRepliedProspects(userToken);
     const repliedProspects = response.data.inbox.inbox;
     const snoozedProspects = response.data.inbox.snoozed;
+    const demoProspects = response.data.inbox.demo;
 
     setRepliedProspects(repliedProspects);
     setSnoozedProspects(snoozedProspects);
+    setDemoProspects(demoProspects);
     props.setNumberLeads(repliedProspects.length);
 
     if (mainTab === "inbox") {
       setProspects(repliedProspects);
-      setSelectedProspect(repliedProspects[0]);
-      setOpenedProspectId(repliedProspects[0].prospect_id);
-      triggerGetSmartleadProspectConvo(repliedProspects[0].prospect_id, repliedProspects[0].smartlead_campaign_id);
+      if (repliedProspects.length > 0) {
+        setSelectedProspect(repliedProspects[0]);
+        setOpenedProspectId(repliedProspects[0].prospect_id);
+        triggerGetSmartleadProspectConvo(
+          repliedProspects[0].prospect_id,
+          repliedProspects[0].smartlead_campaign_id
+        );
+      } else {
+        setSelectedProspect(null);
+        setOpenedProspectId(-1);
+        setConversation([]);
+      }
     } else if (mainTab === "snoozed") {
       setProspects(snoozedProspects);
-      setSelectedProspect(snoozedProspects[0]);
-      setOpenedProspectId(snoozedProspects[0].prospect_id);
-      triggerGetSmartleadProspectConvo(snoozedProspects[0].prospect_id, snoozedProspects[0].smartlead_campaign_id);
-    } else {
-      setProspects(repliedProspects);
-      setSelectedProspect(repliedProspects[0]);
-      setOpenedProspectId(repliedProspects[0].prospect_id);
-      triggerGetSmartleadProspectConvo(repliedProspects[0].prospect_id, repliedProspects[0].smartlead_campaign_id);
+      if (snoozedProspects.length > 0) {
+        setSelectedProspect(snoozedProspects[0]);
+        setOpenedProspectId(snoozedProspects[0].prospect_id);
+        triggerGetSmartleadProspectConvo(
+          snoozedProspects[0].prospect_id,
+          snoozedProspects[0].smartlead_campaign_id
+        );
+      } else {
+        setSelectedProspect(null);
+        setOpenedProspectId(-1);
+        setConversation([]);
+      }
+    } else if (mainTab === "demos") {
+      setProspects(demoProspects);
+      if (demoProspects.length > 0) {
+        setSelectedProspect(demoProspects[0]);
+        setOpenedProspectId(demoProspects[0].prospect_id);
+        triggerGetSmartleadProspectConvo(
+          demoProspects[0].prospect_id,
+          demoProspects[0].smartlead_campaign_id
+        );
+      } else {
+        setSelectedProspect(null);
+        setOpenedProspectId(-1);
+        setConversation([]);
+      }
     }
 
     // Sort by ID
@@ -149,7 +182,10 @@ export default function InboxSmartleadPage(props: {
     setFetchingProspects(false);
   };
 
-  const triggerGetSmartleadProspectConvo = async (prospectID?: any, campaignID?: any) => {
+  const triggerGetSmartleadProspectConvo = async (
+    prospectID?: any,
+    campaignID?: any
+  ) => {
     setFetchingConversation(true);
 
     if (!selectedProspect && !prospectID) {
@@ -157,25 +193,28 @@ export default function InboxSmartleadPage(props: {
     }
 
     const prospectid = prospectID || selectedProspect.prospect_id;
-    const smartleadCampaignID = campaignID || selectedProspect.smartlead_campaign_id;
+    const smartleadCampaignID =
+      campaignID || selectedProspect.smartlead_campaign_id;
     const response = await getSmartleadProspectConvo(
       userToken,
       prospectid,
       smartleadCampaignID
     );
+    let conversation = response?.data?.conversation;
 
-    let result = response?.data?.conversation?.reduce(
-      (grouped: any, item: any) => {
-        if (!grouped[item.stats_id]) {
-          grouped[item.stats_id] = [];
-        }
-        grouped[item.stats_id].push(item);
-        return grouped;
-      },
-      {}
-    );
+    // Sort results by time ascending
+    conversation = conversation.sort((a: any, b: any) => {
+      if (a.time === null) {
+        return 1; // Move null to the bottom
+      }
+      if (b.time === null) {
+        return -1; // Move null to the bottom
+      }
 
-    setConversation(Object.values(result));
+      return new Date(a.time).getTime() - new Date(b.time).getTime();
+    });
+
+    setConversation([conversation]);
     setFetchingConversation(false);
   };
 
@@ -218,7 +257,6 @@ export default function InboxSmartleadPage(props: {
   const handleConvertDate = (date: string) => {
     const timestamp = date;
     const dateObject = new Date(timestamp);
-    console.log("date", dateObject);
     const days = [
       "Sunday",
       "Monday",
@@ -272,8 +310,46 @@ export default function InboxSmartleadPage(props: {
               setSectionTab(value as string);
               if (value === "inbox") {
                 setProspects(repliedProspects);
+                if (repliedProspects && repliedProspects.length > 0) {
+                  setSelectedProspect(repliedProspects[0]);
+                  setOpenedProspectId(repliedProspects[0].prospect_id);
+                  triggerGetSmartleadProspectConvo(
+                    repliedProspects[0].prospect_id,
+                    repliedProspects[0].smartlead_campaign_id
+                  );
+                } else {
+                  setSelectedProspect(null);
+                  setOpenedProspectId(-1);
+                  setConversation([]);
+                }
               } else if (value === "snoozed") {
                 setProspects(snoozedProspects);
+                if (snoozedProspects && snoozedProspects.length > 0) {
+                  setSelectedProspect(snoozedProspects[0]);
+                  setOpenedProspectId(snoozedProspects[0].prospect_id);
+                  triggerGetSmartleadProspectConvo(
+                    snoozedProspects[0].prospect_id,
+                    snoozedProspects[0].smartlead_campaign_id
+                  );
+                } else {
+                  setSelectedProspect(null);
+                  setOpenedProspectId(-1);
+                  setConversation([]);
+                }
+              } else if (value === "demos") {
+                setProspects(demoProspects);
+                if (demoProspects && demoProspects.length > 0) {
+                  setSelectedProspect(demoProspects[0]);
+                  setOpenedProspectId(demoProspects[0].prospect_id);
+                  triggerGetSmartleadProspectConvo(
+                    demoProspects[0].prospect_id,
+                    demoProspects[0].smartlead_campaign_id
+                  );
+                } else {
+                  setSelectedProspect(null);
+                  setOpenedProspectId(-1);
+                  setConversation([]);
+                }
               }
             }}
             styles={(theme) => ({
@@ -321,7 +397,6 @@ export default function InboxSmartleadPage(props: {
                 Snoozed
               </Tabs.Tab>
               <Tabs.Tab
-                disabled // REMOVE ME
                 value="demos"
                 rightSection={
                   <Badge
@@ -330,7 +405,7 @@ export default function InboxSmartleadPage(props: {
                     size="xs"
                     color={mainTab === "demos" ? "blue" : "gray"}
                   >
-                    TBD
+                    {demoProspects.length}
                   </Badge>
                 }
               >
@@ -391,18 +466,49 @@ export default function InboxSmartleadPage(props: {
                       : "none",
                   }}
                 >
-                  <ProspectConvoCard
-                    id={prospect.prospect_id}
-                    name={prospect.prospect_name}
-                    title={prospect.prospect_title}
-                    img_url={prospect.prospect_img_url}
-                    latest_msg={""}
-                    latest_msg_time={""}
-                    icp_fit={prospect.prospect_icp_fit_score}
-                    new_msg_count={0}
-                    latest_msg_from_sdr={false}
-                    opened={prospect.prospect_id === openedProspectId}
-                  />
+                  <Container pr="0px">
+                    <Flex direction="row" justify={"space-between"} w="100%">
+                      <ProspectConvoCard
+                        id={prospect.prospect_id}
+                        name={prospect.prospect_name}
+                        title={prospect.prospect_title}
+                        img_url={prospect.prospect_img_url}
+                        latest_msg={""}
+                        latest_msg_time={""}
+                        icp_fit={prospect.prospect_icp_fit_score}
+                        new_msg_count={0}
+                        latest_msg_from_sdr={false}
+                        opened={prospect.prospect_id === openedProspectId}
+                      />
+                      {prospect.hidden_until && (
+                        <Tooltip
+                          label={`Snoozed until ${convertDateToLocalTime(
+                            new Date(prospect.hidden_until)
+                          )}`}
+                          withArrow
+                          withinPortal
+                        >
+                          <Flex
+                            align={"center"}
+                            gap={"0.25rem"}
+                            sx={{
+                              position: "absolute",
+                              right: 10,
+                              top: 30,
+                            }}
+                          >
+                            <Text fz="0.75rem" fw={500} color="gray">
+                              {convertDateToMMMDD(
+                                new Date(prospect.hidden_until)
+                              )}
+                            </Text>
+
+                            <IconClock size="0.875rem" color="gray" />
+                          </Flex>
+                        </Tooltip>
+                      )}
+                    </Flex>
+                  </Container>
                 </Box>
               );
             })}
@@ -432,180 +538,185 @@ export default function InboxSmartleadPage(props: {
                   <Flex w="100%" direction="column">
                     {conversation.map((item: any, index: any) => (
                       <>
-                        {item.map((message: any, index: any) => (
-                          <>
-                            <Flex
-                              p="sm"
-                              justify={
-                                message.type === "SENT" ? "end" : "start"
-                              }
-                              w="100%"
-                            >
-                              {message?.type !== "SENT" ? (
-                                <Avatar
-                                  src={""}
-                                  size={"60px"}
-                                  radius={"100%"}
-                                />
-                              ) : (
-                                <></>
-                              )}
+                        {item &&
+                          item.map((message: any, index: any) => (
+                            <>
                               <Flex
-                                direction={"column"}
-                                align={
+                                p="sm"
+                                justify={
                                   message.type === "SENT" ? "end" : "start"
                                 }
                                 w="100%"
                               >
-                                <Card
-                                  my="sm"
-                                  withBorder
-                                  shadow="sm"
-                                  radius="md"
-                                  key={message.id}
-                                  right={"0px"}
-                                  style={{
-                                    maxWidth: "600px",
-                                    minWidth: "100%",
-                                  }}
+                                {message?.type !== "SENT" ? (
+                                  <Avatar
+                                    mx={"xs"}
+                                    mt="xs"
+                                    src={selectedProspect?.prospect_img_url}
+                                    size={"40px"}
+                                    radius={"100%"}
+                                  />
+                                ) : (
+                                  <></>
+                                )}
+                                <Flex
+                                  direction={"column"}
+                                  align={
+                                    message.type === "SENT" ? "end" : "start"
+                                  }
+                                  w="100%"
                                 >
-                                  <Card.Section
-                                    bg={
-                                      message.type === "SENT"
-                                        ? "blue"
-                                        : "#dcdbdd"
-                                    }
-                                    p={14}
-                                    px={20}
+                                  <Card
+                                    my="sm"
+                                    withBorder
+                                    shadow="sm"
+                                    radius="md"
+                                    key={message.id}
+                                    right={"0px"}
+                                    style={{
+                                      maxWidth: "600px",
+                                      minWidth: "100%",
+                                    }}
                                   >
-                                    <Flex justify="space-between">
-                                      <Text
-                                        color={
-                                          message.type !== "SENT"
-                                            ? "#9a9a9d"
-                                            : "#85b3f5"
-                                        }
-                                        fw={500}
-                                      >
-                                        To:{" "}
-                                        <span
-                                          style={{
-                                            color:
-                                              message.type === "SENT"
-                                                ? "white"
-                                                : "black",
-                                          }}
+                                    <Card.Section
+                                      bg={
+                                        message.type === "SENT"
+                                          ? "blue"
+                                          : "#dcdbdd"
+                                      }
+                                      p={14}
+                                      px={20}
+                                    >
+                                      <Flex justify="space-between">
+                                        <Text
+                                          color={
+                                            message.type !== "SENT"
+                                              ? "#9a9a9d"
+                                              : "#85b3f5"
+                                          }
+                                          fw={500}
                                         >
-                                          {message.type === "SENT"
-                                            ? selectedProspect.prospect_name
-                                            : userData.sdr_name}
+                                          {message.type == "SENT"
+                                            ? "To"
+                                            : "From"}{": "}
+                                          <span
+                                            style={{
+                                              color:
+                                                message.type === "SENT"
+                                                  ? "white"
+                                                  : "black",
+                                            }}
+                                          >
+                                            {selectedProspect?.prospect_name}
+                                          </span>
+                                        </Text>
+                                        <Flex gap={30} align="center">
+                                          <Text
+                                            color={
+                                              message.type !== "SENT"
+                                                ? "#9a9a9d"
+                                                : "#85b3f5"
+                                            }
+                                            style={{
+                                              display: "flex",
+                                              alignItems: "center",
+                                              gap: "10px",
+                                            }}
+                                          >
+                                            <IconArrowBackUp size={20} /> Reply
+                                          </Text>
+                                          <Text
+                                            color={
+                                              message.type !== "SENT"
+                                                ? "#9a9a9d"
+                                                : "#85b3f5"
+                                            }
+                                            style={{
+                                              display: "flex",
+                                              alignItems: "center",
+                                              gap: "10px",
+                                            }}
+                                          >
+                                            <IconArrowForwardUp size={20} />{" "}
+                                            Forward
+                                          </Text>
+                                        </Flex>
+                                      </Flex>
+                                    </Card.Section>
+                                    <Card.Section px={24} py={20}>
+                                      <Text color="gray" fw={500}>
+                                        Subject:{" "}
+                                        <span style={{ color: "black" }}>
+                                          {message.subject || "..."}
                                         </span>
                                       </Text>
-                                      <Flex gap={30} align="center">
-                                        <Text
-                                          color={
-                                            message.type !== "SENT"
-                                              ? "#9a9a9d"
-                                              : "#85b3f5"
-                                          }
-                                          style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "10px",
-                                          }}
-                                        >
-                                          <IconArrowBackUp size={20} /> Reply
-                                        </Text>
-                                        <Text
-                                          color={
-                                            message.type !== "SENT"
-                                              ? "#9a9a9d"
-                                              : "#85b3f5"
-                                          }
-                                          style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "10px",
-                                          }}
-                                        >
-                                          <IconArrowForwardUp size={20} />{" "}
-                                          Forward
-                                        </Text>
-                                      </Flex>
-                                    </Flex>
-                                  </Card.Section>
-                                  <Card.Section px={24} py={20}>
-                                    <Text color="gray" fw={500}>
-                                      Subject:{" "}
-                                      <span style={{ color: "black" }}>
-                                        {message.subject || "..."}
-                                      </span>
-                                    </Text>
-                                    <Text
-                                      fz="sm"
-                                      color="black"
-                                      mt={14}
-                                      style={{
-                                        display: "flex",
-                                        alignItems: "end",
-                                        flexDirection: "column",
-                                      }}
-                                    >
-                                      <div
-                                        dangerouslySetInnerHTML={{
-                                          __html: DOMPurify.sanitize(
-                                            message.email_body
-                                          ),
+                                      <Text
+                                        fz="sm"
+                                        color="black"
+                                        mt={14}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "end",
+                                          flexDirection: "column",
                                         }}
-                                        className={`${
-                                          conversationdetail[index]
-                                            ? ""
-                                            : "line-clamp-4"
-                                        }`}
-                                      />
-                                      <Button
-                                        onClick={() => {
-                                          const newState = [
-                                            ...conversationdetail,
-                                          ];
-                                          newState[index] = !newState[index];
-                                          setConversationDetail(newState);
-                                        }}
-                                        // rightIcon={<IconArrowDown />}
-                                        bg="#dcdbdd"
-                                        radius="xl"
-                                        mt="sm"
-                                        size="xs"
                                       >
-                                        {conversationdetail[index]
-                                          ? "Less more"
-                                          : "Read more"}
-                                      </Button>
-                                    </Text>
-                                  </Card.Section>
-                                </Card>
-                                <Text
-                                  align={
-                                    message?.type === "SENT" ? "end" : "start"
-                                  }
-                                  color="#9a9a9d"
-                                  size={12}
-                                >
-                                  {handleConvertDate(message.time)}
-                                </Text>
+                                        <div
+                                          dangerouslySetInnerHTML={{
+                                            __html: DOMPurify.sanitize(
+                                              message.email_body
+                                            ),
+                                          }}
+                                          className={`${
+                                            conversationdetail[index]
+                                              ? ""
+                                              : "line-clamp-4"
+                                          }`}
+                                        />
+                                        <Button
+                                          onClick={() => {
+                                            const newState = [
+                                              ...conversationdetail,
+                                            ];
+                                            newState[index] = !newState[index];
+                                            setConversationDetail(newState);
+                                          }}
+                                          // rightIcon={<IconArrowDown />}
+                                          bg="#dcdbdd"
+                                          radius="xl"
+                                          mt="sm"
+                                          size="xs"
+                                        >
+                                          {conversationdetail[index]
+                                            ? "Less more"
+                                            : "Read more"}
+                                        </Button>
+                                      </Text>
+                                    </Card.Section>
+                                  </Card>
+                                  <Text
+                                    align={
+                                      message?.type === "SENT" ? "end" : "start"
+                                    }
+                                    color="#9a9a9d"
+                                    size={12}
+                                  >
+                                    {handleConvertDate(message.time)}
+                                  </Text>
+                                </Flex>
+                                {message?.type !== "SENT" ? (
+                                  <></>
+                                ) : (
+                                  <Avatar
+                                    mt="xs"
+                                    mx="xs"
+                                    src={userData.img_url}
+                                    size={"40px"}
+                                    radius={"100%"}
+                                  />
+                                )}
                               </Flex>
-                              {message?.type !== "SENT" ? (
-                                <></>
-                              ) : (
-                                <Avatar
-                                  src={""}
-                                  size={"60px"}
-                                  radius={"100%"}
-                                />
-                              )}
-                            </Flex>
-                          </>
-                        ))}
+                            </>
+                          ))}
                       </>
                     ))}
                     <RichTextArea
@@ -618,12 +729,15 @@ export default function InboxSmartleadPage(props: {
                     />
                     <Flex justify={"flex-end"} mt="xs">
                       <Button
-                        color="green"
+                        color="blue"
+                        disabled={sendingMessage}
+                        loading={sendingMessage}
+                        leftIcon={<IconClock />}
                         onClick={() => {
                           triggerPostSmartleadReply();
                         }}
                       >
-                        Reply
+                        Send and Snooze
                       </Button>
                     </Flex>
                   </Flex>
@@ -636,7 +750,10 @@ export default function InboxSmartleadPage(props: {
               prospects={prospects}
               snoozeProspectEmail
               emailStatuses
+              currentEmailStatus={selectedProspect?.outreach_status}
               refetchSmartleadProspects={() => {
+                setOpenedProspectId(-1);
+                setSelectedProspect(null);
                 triggerGetSmartleadProspects();
               }}
             />

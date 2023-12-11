@@ -87,7 +87,7 @@ export const WarmUp: React.FC = () => {
           padding: 10,
           color: "#888888",
           font: {
-            weight: "300",
+            weight: 300,
           },
         },
         beginAtZero: true,

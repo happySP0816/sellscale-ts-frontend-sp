@@ -292,6 +292,7 @@ export interface PersonaOverview {
   template_mode: boolean;
   smartlead_campaign_id?: number;
   meta_data?: Record<string, any>;
+  first_message_delay_days?: number;
 }
 
 export interface LinkedInMessage {

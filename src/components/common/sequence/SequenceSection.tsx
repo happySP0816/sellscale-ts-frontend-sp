@@ -330,7 +330,7 @@ export default function SequenceSection() {
                         max={99}
                         w={bf0Delay.current > 9 ? 50 : 32}
                         size='xs'
-                        defaultValue={0}
+                        defaultValue={currentProject?.first_message_delay_days}
                         onChange={async (value) => {
                           if (!currentProject) {
                             showNotification({

@@ -40,6 +40,45 @@ export const prospectStatuses = [
   },
 ];
 
+export const prospectEmailStatuses = [
+  {
+    label: "Scheduling",
+    value: "ACTIVE_CONVO_SCHEDULING",
+  },
+  {
+    label: "Next Steps",
+    value: "ACTIVE_CONVO_NEXT_STEPS",
+  },
+  {
+    label: "Question",
+    value: "ACTIVE_CONVO_QUESTION",
+  },
+  {
+    label: "Objection",
+    value: "ACTIVE_CONVO_OBJECTION",
+  },
+  {
+    label: "Qual Needed",
+    value: "ACTIVE_CONVO_QUAL_NEEDED",
+  },
+  {
+    label: "Queued for AI Revival",
+    value: "ACTIVE_CONVO_REVIVAL",
+  },
+  {
+    label: "Out of Office",
+    value: "ACTIVE_CONVO_OOO",
+  },
+  {
+    label: "Demoing",
+    value: "DEMO_SET",
+  },
+  {
+    label: "Uncategorized",
+    value: "ACTIVE_CONVO",
+  },
+];
+
 export const nurturingProspectStatuses = [
   {
     label: "Accepted",

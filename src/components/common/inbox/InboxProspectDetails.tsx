@@ -21,6 +21,8 @@ import {
   Skeleton,
   ActionIcon,
   Modal,
+  rem,
+  Accordion,
 } from "@mantine/core";
 import {
   IconBriefcase,
@@ -42,7 +44,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { getProspectByID } from "@utils/requests/getProspectByID";
-import { prospectStatuses } from "./utils";
+import { prospectEmailStatuses, prospectStatuses } from "./utils";
 import { Channel, DemoFeedback, ProspectDetails, ProspectShallow } from "src";
 import { ProspectDetailsResearchTabs } from "@common/prospectDetails/ProspectDetailsResearch";
 import { updateProspectNote } from "@utils/requests/prospectNotes";
@@ -61,12 +63,21 @@ import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 import EditProspectModal from "@modals/EditProspectModal";
 import { proxyURL } from "@utils/general";
-import { IconAlarm, IconHomeHeart, IconSeeding } from "@tabler/icons";
+import {
+  IconAlarm,
+  IconEdit,
+  IconHomeHeart,
+  IconSeeding,
+  IconX,
+} from "@tabler/icons";
 import { showNotification } from "@mantine/notifications";
 import getDemoFeedback from "@utils/requests/getDemoFeedback";
 import DemoFeedbackCard from "@common/demo_feedback/DemoFeedbackCard";
 import displayNotification from "@utils/notificationFlow";
-import { snoozeProspect, snoozeProspectEmail } from "@utils/requests/snoozeProspect";
+import {
+  snoozeProspect,
+  snoozeProspectEmail,
+} from "@utils/requests/snoozeProspect";
 import EmailStoreView from "@common/prospectDetails/EmailStoreView";
 
 const useStyles = createStyles((theme) => ({
@@ -76,15 +87,15 @@ const useStyles = createStyles((theme) => ({
 
   item: {
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     textAlign: "center",
     borderRadius: theme.radius.md,
-    height: 60,
-    width: 88,
-    backgroundColor:
-      theme.colorScheme === "dark" ? theme.colors.dark[9] : theme.white,
+    height: 40,
+    gap: rem(4),
+    width: "100%",
+    backgroundColor: theme.white,
+    border: `solid 1px ${theme.colors.gray[4]}`,
     transition: "box-shadow 150ms ease, transform 100ms ease",
 
     "&:hover": {
@@ -98,6 +109,7 @@ export default function ProjectDetails(props: {
   prospects: ProspectShallow[];
   snoozeProspectEmail?: boolean;
   emailStatuses?: boolean;
+  currentEmailStatus?: string;
   refetchSmartleadProspects?: () => void;
 }) {
   const theme = useMantineTheme();
@@ -145,7 +157,10 @@ export default function ProjectDetails(props: {
     enabled: openedProspectId !== -1,
   });
 
-  const statusValue = data?.details?.linkedin_status || "ACCEPTED";
+  let statusValue = data?.details?.linkedin_status || "ACCEPTED";
+  if (props.emailStatuses) {
+    statusValue = props.currentEmailStatus || "ACTIVE_CONVO";
+  }
 
   const [
     editProspectModalOpened,
@@ -206,17 +221,39 @@ export default function ProjectDetails(props: {
 
   // For changing the status of the prospect
   const changeStatus = async (status: string, changeProspect?: boolean) => {
-    
-    if (props.emailStatuses) { // HARD CODE IN THE EMAIL FOR NOW
-      await updateChannelStatus(
+    if (props.emailStatuses) {
+      // HARD CODE IN THE EMAIL FOR NOW
+      const response = await updateChannelStatus(
         openedProspectId,
         userToken,
         "EMAIL",
         status
-      )
+      );
+      if (response.status !== "success") {
+        showNotification({
+          title: "Error",
+          message: "There was an error changing the status",
+          color: "red",
+          autoClose: 5000,
+        });
+        return;
+      } else {
+        const formatted_status = status
+          .replace(/_/g, " ")
+          .toLowerCase()
+          .replace(/\b\w/g, function (c) {
+            return c.toUpperCase();
+          });
+        showNotification({
+          title: "Status changed",
+          message: `Prospect's status has been changed to ${formatted_status}`,
+          color: "green",
+          autoClose: 5000,
+        });
+      }
       if (props.refetchSmartleadProspects) {
-        props.refetchSmartleadProspects()
-      };
+        props.refetchSmartleadProspects();
+      }
     } else {
       await updateChannelStatus(
         openedProspectId,
@@ -258,31 +295,32 @@ export default function ProjectDetails(props: {
       wrap="nowrap"
       direction="column"
       h={"100%"}
+      bg={"white"}
       sx={{ borderLeft: "0.0625rem solid #dee2e6" }}
     >
       <div style={{ flexBasis: "20%" }}>
-        <Stack spacing={0}>
-          <Center>
-            <Avatar
-              size="xl"
-              radius={100}
-              mt={20}
-              mb={8}
-              src={proxyURL(data?.details.profile_pic)}
-            />
-          </Center>
-          <Title order={4} ta="center">
-            {data?.details.full_name}
-          </Title>
+        <Stack spacing={0} mt={"md"}>
+          <Card bg={"blue.2"} mx={"md"}>
+            <Flex align={"center"} gap={"sm"}>
+              <Avatar
+                size="md"
+                radius={100}
+                src={proxyURL(data?.details.profile_pic)}
+              />
+              <Box>
+                <Title order={4}>{data?.details.full_name}</Title>
+              </Box>
+            </Flex>
+          </Card>
 
-          <Card m="xs" withBorder>
+          <Card m="xs" withBorder mx={"md"}>
             <ActionIcon
               onClick={openProspectModal}
               pos={"absolute"}
               right="5px"
               top="4px"
             >
-              <IconPencil size="1rem" />
+              <IconEdit size="1rem" />
             </ActionIcon>
             <EditProspectModal
               modalOpened={editProspectModalOpened}
@@ -396,190 +434,198 @@ export default function ProjectDetails(props: {
       </div>
       <Divider />
       <ScrollArea h="60vh">
+        {!statusValue.startsWith("DEMO_") &&
+          statusValue !== "ACCEPTED" &&
+          statusValue !== "RESPONDED" && (
+            <>
+              <Box style={{ flexBasis: "10%" }} my={10}>
+                <Flex gap={"md"} wrap="nowrap" align={"center"} px={"md"}>
+                  <div style={{ flexBasis: "10%" }}>
+                    <Text fw={700} fz={"sm"}>
+                      Substatus
+                    </Text>
+                  </div>
+                  <div style={{ flexBasis: "90%" }}>
+                    <Select
+                      size="xs"
+                      styles={{
+                        input: {
+                          backgroundColor: theme.colors["blue"][0],
+                          borderColor: theme.colors["blue"][4],
+                          color: theme.colors.blue[6],
+                          fontWeight: 700,
+                          "&:focus": {
+                            borderColor: theme.colors["blue"][4],
+                          },
+                        },
+                        rightSection: {
+                          svg: {
+                            color: `${theme.colors.gray[6]}!important`,
+                          },
+                        },
+                        item: {
+                          "&[data-selected], &[data-selected]:hover": {
+                            backgroundColor: theme.colors["blue"][6],
+                          },
+                        },
+                      }}
+                      data={prospectStatuses}
+                      value={statusValue}
+                      onChange={async (value) => {
+                        if (!value) {
+                          return;
+                        }
+                        await changeStatus(value);
+                      }}
+                    />
+                  </div>
+                </Flex>
+              </Box>
+
+              <Divider />
+            </>
+          )}
+
         <div>
-          <div style={{ flexBasis: "15%" }}>
-            <Paper
-              withBorder
-              radius={theme.radius.lg}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                flexWrap: "nowrap",
-              }}
-              m={10}
+          <Box style={{ flexBasis: "15%" }} p={10} px={"md"}>
+            <Accordion
+              defaultValue="customization"
+              styles={(theme) => ({
+                content: {
+                  padding: 0,
+                  "&[data-active]": {
+                    backgroundColor: "transparent",
+                  },
+                },
+                chevron: {
+                  margin: 0,
+                },
+                label: {
+                  fontSize: theme.fontSizes.sm,
+
+                  padding: 0,
+                },
+                item: {
+                  border: "0px",
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
+                },
+                panel: {
+                  paddingTop: "8px",
+                },
+                control: {
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
+                  padding: `0 !important`,
+                  backgroundColor: "transparent",
+                  paddingLeft: theme.spacing.sm,
+                  paddingRight: theme.spacing.sm,
+                },
+              })}
             >
-              <Flex
-                gap={5}
-                justify="center"
-                align="center"
-                my={10}
-                wrap="nowrap"
-              >
-                <Box>
-                  <Center>
+              <Accordion.Item value="customization">
+                <Accordion.Control>
+                  <Flex gap={5} align="end" my={10} wrap="nowrap">
+                    <Text fw={700} fz={"sm"}>
+                      Lead Status:
+                    </Text>
+
                     <ICPFitPill
                       icp_fit_score={data?.details.icp_fit_score || 0}
                       icp_fit_reason={data?.details.icp_fit_reason || ""}
                       archetype={data?.details.persona || ""}
                     />
-                  </Center>
-                </Box>
-                <Box>
-                  <Text fz="xs">
-                    - <u>{_.truncate(data?.details.persona, { length: 25 })}</u>
-                  </Text>
-                </Box>
-              </Flex>
-
-              {!statusValue.startsWith("DEMO_") ? (
-                <Center>
-                  <Group
-                    mb="xs"
-                    mx="xl"
-                    sx={{ justifyContent: "center" }}
-                  >
-                    <StatusBlockButton
-                      title="Snooze"
-                      icon={
-                        <IconAlarm color={theme.colors.yellow[6]} size={24} />
-                      }
-                      onClick={async () => {
-                        setOpenedSnoozeModal(true);
-                      }}
-                    />
-                    <StatusBlockButton
-                      title="Demo Set"
-                      icon={
-                        <IconCalendarEvent
-                          color={theme.colors.pink[6]}
-                          size={24}
-                        />
-                      }
-                      onClick={async () => {
-                        await changeStatus("DEMO_SET", false);
-                      }}
-                    />
-                    <StatusBlockButton
-                      title="Not Interested"
-                      icon={
-                        <IconSeeding color={theme.colors.green[6]} size={24} />
-                      }
-                      onClick={async () => {
-                        await changeStatus("NOT_INTERESTED");
-                      }}
-                    />
-                    <StatusBlockButton
-                      title="Not Qualified"
-                      icon={<IconTrash color={theme.colors.red[6]} size={24} />}
-                      onClick={async () => {
-                        await changeStatus("NOT_QUALIFIED");
-                      }}
-                    />
-                  </Group>
-                </Center>
-              ) : (
-                <Stack spacing={10}>
-                  <Box mx={10} mb={10}>
-                    {data && demoFeedbacks && demoFeedbacks.length > 0 && (
-                      <ScrollArea h="250px">
-                        {demoFeedbacks?.map((feedback, index) => (
-                          <div style={{ marginBottom: 10 }}>
-                            <DemoFeedbackCard
-                              prospect={data.data}
-                              index={index + 1}
-                              demoFeedback={feedback}
-                              refreshDemoFeedback={refreshDemoFeedback}
-                            />
-                          </div>
-                        ))}
-                      </ScrollArea>
-                    )}
-                    <Button
-                      variant="light"
-                      radius="md"
-                      fullWidth
-                      onClick={() => {
-                        setDrawerProspectId(openedProspectId);
-                        setDemosDrawerOpened(true);
-                      }}
-                    >
-                      {demoFeedbacks && demoFeedbacks.length > 0
-                        ? "Add"
-                        : "Give"}{" "}
-                      Demo Feedback
-                    </Button>
-                    {(!demoFeedbacks || demoFeedbacks.length === 0) && (
-                      <Box mx={10} mb={10} mt={10}>
-                        <ProspectDemoDateSelector
-                          prospectId={openedProspectId}
-                        />
-                      </Box>
-                    )}
-                    <DemoFeedbackDrawer refetch={refetch} />
-                  </Box>
-                </Stack>
-              )}
-            </Paper>
-          </div>
-          {!statusValue.startsWith("DEMO_") &&
-            statusValue !== "ACCEPTED" &&
-            statusValue !== "RESPONDED" && (
-              <div style={{ flexBasis: "10%" }}>
-                <Paper
-                  withBorder
-                  radius={theme.radius.lg}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    flexWrap: "nowrap",
-                  }}
-                  mx={10}
-                  mb={10}
-                >
-                  <Flex gap={0} wrap="nowrap">
-                    <div style={{ flexBasis: "10%", margin: 15 }}>
-                      <Text fw={500} fz={13}>
-                        Substatus
-                      </Text>
-                    </div>
-                    <div style={{ flexBasis: "90%", margin: 10 }}>
-                      <Select
-                        size="xs"
-                        variant="filled"
-                        radius={theme.radius.lg}
-                        styles={{
-                          input: {
-                            backgroundColor: theme.colors["blue"][6],
-                            color: theme.white,
-                            "&:focus": {
-                              borderColor: "transparent",
-                            },
-                          },
-                          rightSection: {
-                            svg: {
-                              color: `${theme.white}!important`,
-                            },
-                          },
-                          item: {
-                            "&[data-selected], &[data-selected]:hover": {
-                              backgroundColor: theme.colors["blue"][6],
-                            },
-                          },
-                        }}
-                        data={prospectStatuses}
-                        value={statusValue}
-                        onChange={async (value) => {
-                          if (!value) {
-                            return;
-                          }
-                          await changeStatus(value);
+                  </Flex>
+                </Accordion.Control>
+                <Accordion.Panel>
+                  {!statusValue.startsWith("DEMO_") ? (
+                    <Flex direction={"column"} gap={"sm"}>
+                      <StatusBlockButton
+                        title="Snooze"
+                        icon={
+                          <IconAlarm color={theme.colors.yellow[6]} size={24} />
+                        }
+                        onClick={async () => {
+                          setOpenedSnoozeModal(true);
                         }}
                       />
-                    </div>
-                  </Flex>
-                </Paper>
-              </div>
-            )}
+                      <StatusBlockButton
+                        title="Demo Set"
+                        icon={
+                          <IconCalendarEvent
+                            color={theme.colors.green[6]}
+                            size={24}
+                          />
+                        }
+                        onClick={async () => {
+                          await changeStatus("DEMO_SET", false);
+                        }}
+                      />
+                      <StatusBlockButton
+                        title="Not Interested"
+                        icon={<IconX color={theme.colors.red[6]} size={24} />}
+                        onClick={async () => {
+                          await changeStatus("NOT_INTERESTED");
+                        }}
+                      />
+                      <StatusBlockButton
+                        title="Not Qualified"
+                        icon={
+                          <IconTrash color={theme.colors.red[6]} size={24} />
+                        }
+                        onClick={async () => {
+                          await changeStatus("NOT_QUALIFIED");
+                        }}
+                      />
+                    </Flex>
+                  ) : (
+                    <Stack spacing={10}>
+                      <Box>
+                        {data && demoFeedbacks && demoFeedbacks.length > 0 && (
+                          <ScrollArea h="250px">
+                            {demoFeedbacks?.map((feedback, index) => (
+                              <div style={{ marginBottom: 10 }}>
+                                <DemoFeedbackCard
+                                  prospect={data.data}
+                                  index={index + 1}
+                                  demoFeedback={feedback}
+                                  refreshDemoFeedback={refreshDemoFeedback}
+                                />
+                              </div>
+                            ))}
+                          </ScrollArea>
+                        )}
+                        <Button
+                          variant="light"
+                          radius="md"
+                          fullWidth
+                          onClick={() => {
+                            setDrawerProspectId(openedProspectId);
+                            setDemosDrawerOpened(true);
+                          }}
+                        >
+                          {demoFeedbacks && demoFeedbacks.length > 0
+                            ? "Add"
+                            : "Give"}{" "}
+                          Demo Feedback
+                        </Button>
+                        {(!demoFeedbacks || demoFeedbacks.length === 0) && (
+                          <Box mx={10} mb={10} mt={10}>
+                            <ProspectDemoDateSelector
+                              prospectId={openedProspectId}
+                            />
+                          </Box>
+                        )}
+                        <DemoFeedbackDrawer refetch={refetch} />
+                      </Box>
+                    </Stack>
+                  )}
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion>
+          </Box>
 
           <div style={{ flexBasis: "55%" }}>
             <Divider />
@@ -674,7 +720,6 @@ export default function ProjectDetails(props: {
               let daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
               if (props.snoozeProspectEmail) {
-
                 await displayNotification(
                   "snooze-prospect-email",
                   async () => {
@@ -704,7 +749,7 @@ export default function ProjectDetails(props: {
                 setOpenedSnoozeModal(false);
                 setOpenedProspectId(-1);
                 if (props.refetchSmartleadProspects) {
-                  props.refetchSmartleadProspects()
+                  props.refetchSmartleadProspects();
                 }
                 return;
               }
@@ -765,12 +810,9 @@ function StatusBlockButton(props: {
       onClick={async () => {
         props.onClick();
       }}
-      sx={{
-        border: "solid 1px #999",
-      }}
     >
       {props.icon}
-      <Text size="xs" mt={3}>
+      <Text size="sm" mt={3} fw={600}>
         {props.title}
       </Text>
     </UnstyledButton>

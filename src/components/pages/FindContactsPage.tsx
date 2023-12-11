@@ -1,50 +1,189 @@
-import { userTokenState } from "@atoms/userAtoms";
-import YourNetworkSection from "@common/your_network/YourNetworkSection";
-import { Card, Flex, Tabs, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Button, ActionIcon, Badge, useMantineTheme, Loader, Group, Stack, Box, Select } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { openConfirmModal } from "@mantine/modals";
-import { showNotification } from "@mantine/notifications";
-import { IconAffiliate, IconBrandLinkedin, IconDatabase, IconDownload, IconFile } from "@tabler/icons";
-import { setPageTitle } from "@utils/documentChange";
-import { valueToColor } from "@utils/general";
-import getSalesNavigatorLaunches, { getSalesNavigatorLaunch } from "@utils/requests/getSalesNavigatorLaunches";
-import postLaunchSalesNavigator from "@utils/requests/postLaunchSalesNavigator";
-import { useEffect, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { SalesNavigatorLaunch } from "src";
-import SalesNavigatorComponent from './SalesNavigatorPage';
-import IndividualsDashboard from "@common/individuals/IndividualsDashboard";
-import { IconCsv } from '@tabler/icons-react';
-import FileDropAndPreview from '@modals/upload-prospects/FileDropAndPreview';
-import LinkedInURLUpload from '@modals/upload-prospects/LinkedInURLUpload';
-import { currentProjectState } from '@atoms/personaAtoms';
-import ChatDashboard from "@common/individuals/ChatDashboard";
-import UploadDetailsDrawer from "@drawers/UploadDetailsDrawer";
-import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from "@atoms/uploadAtoms";
-import { getAllUploads } from "@utils/requests/getPersonas";
-import { useQuery } from "@tanstack/react-query";
+import { userTokenState } from '@atoms/userAtoms'
+import YourNetworkSection from '@common/your_network/YourNetworkSection'
+import {
+  Card,
+  Flex,
+  Tabs,
+  Title,
+  Text,
+  TextInput,
+  Anchor,
+  NumberInput,
+  Tooltip,
+  Button,
+  ActionIcon,
+  Badge,
+  useMantineTheme,
+  Loader,
+  Group,
+  Stack,
+  Box,
+  Select,
+  Progress,
+  Divider,
+  Avatar,
+} from '@mantine/core'
+import { useForm } from '@mantine/form'
+import { openConfirmModal } from '@mantine/modals'
+import { showNotification } from '@mantine/notifications'
+import { IconAffiliate, IconBrandLinkedin, IconDatabase, IconDownload, IconFile } from '@tabler/icons'
+import { setPageTitle } from '@utils/documentChange'
+import { valueToColor } from '@utils/general'
+import getSalesNavigatorLaunches, { getSalesNavigatorLaunch } from '@utils/requests/getSalesNavigatorLaunches'
+import postLaunchSalesNavigator from '@utils/requests/postLaunchSalesNavigator'
+import { useEffect, useRef, useState } from 'react'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import { SalesNavigatorLaunch } from 'src'
+import SalesNavigatorComponent from './SalesNavigatorPage'
+import IndividualsDashboard from '@common/individuals/IndividualsDashboard'
+import { IconCsv } from '@tabler/icons-react'
+import FileDropAndPreview from '@modals/upload-prospects/FileDropAndPreview'
+import LinkedInURLUpload from '@modals/upload-prospects/LinkedInURLUpload'
+import { currentProjectState } from '@atoms/personaAtoms'
+import ChatDashboard from '@common/individuals/ChatDashboard'
+import UploadDetailsDrawer from '@drawers/UploadDetailsDrawer'
+import { prospectUploadDrawerIdState, prospectUploadDrawerOpenState } from '@atoms/uploadAtoms'
+import { getAllUploads } from '@utils/requests/getPersonas'
+import { useQuery } from '@tanstack/react-query'
+import { DataTable, DataTableSortStatus } from 'mantine-datatable'
+import _ from 'lodash'
+import FileDropAndPreviewV2 from '@modals/upload-prospects/FileDropAndPreviewV2'
+
+type UploadDetailType = {
+  process: number
+  success: number
+  failed: number
+  disqualified: number
+  total: number
+  percent: number
+}
+
+type SDRType = {
+  avatar: string
+  name: string
+}
+
+type CSVType = {
+  fileName: string
+  sdr: SDRType
+  upload_details: UploadDetailType
+}
+
+const test_data = [
+  {
+    fileName: 'NewUploads1.csv',
+    sdr: {
+      avatar: '',
+      name: 'Adam Meehan',
+    } as SDRType,
+    upload_details: {
+      process: 300,
+      success: 199,
+      failed: 50,
+      disqualified: 50,
+      total: 521,
+      percent: (300 / 500) * 100,
+    } as UploadDetailType,
+  },
+  {
+    fileName: 'NewUploads2.csv',
+    sdr: {
+      avatar: '',
+      name: 'Adam Meehan',
+    } as SDRType,
+    upload_details: {
+      process: 100,
+      success: 99,
+      failed: 0,
+      disqualified: 0,
+      total: 521,
+      percent: (100 / 521) * 100,
+    } as UploadDetailType,
+  },
+  {
+    fileName: 'NewUploads3.csv',
+    sdr: {
+      avatar: '',
+      name: 'Adam Meehan',
+    } as SDRType,
+    upload_details: {
+      process: 521,
+      success: 479,
+      failed: 20,
+      disqualified: 20,
+      total: 521,
+      percent: (521 / 521) * 100,
+    } as UploadDetailType,
+  },
+  {
+    fileName: 'NewUploads4.csv',
+    sdr: {
+      avatar: '',
+      name: 'Adam Meehan',
+    } as SDRType,
+    upload_details: {
+      process: 521,
+      success: 499,
+      failed: 20,
+      disqualified: 0,
+      total: 521,
+      percent: (521 / 521) * 100,
+    } as UploadDetailType,
+  },
+  {
+    fileName: 'NewUploads5.csv',
+    sdr: {
+      avatar: '',
+      name: 'Adam Meehan',
+    } as SDRType,
+    upload_details: {
+      process: 100,
+      success: 99,
+      failed: 0,
+      disqualified: 0,
+      total: 521,
+      percent: (100 / 521) * 100,
+    } as UploadDetailType,
+  },
+]
 
 export default function FindContactsPage() {
-  setPageTitle("Find Contacts")
+  setPageTitle('Find Contacts')
 
-  const userToken = useRecoilValue(userTokenState);
-  const currentProject = useRecoilValue(currentProjectState);
-  const activePersona = currentProject?.id;
-  const activePersonaEmoji = currentProject?.emoji;
-  const activePersonaName = currentProject?.name;
+  const userToken = useRecoilValue(userTokenState)
+  const currentProject = useRecoilValue(currentProjectState)
+  const activePersona = currentProject?.id
+  const activePersonaEmoji = currentProject?.emoji
+  const activePersonaName = currentProject?.name
 
-  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(prospectUploadDrawerOpenState);
-  const [uploadId, setUploadId] = useRecoilState(prospectUploadDrawerIdState);
+  const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(prospectUploadDrawerOpenState)
+  const [uploadId, setUploadId] = useRecoilState(prospectUploadDrawerIdState)
+
+  const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
+    columnAccessor: 'fileName',
+    direction: 'desc',
+  })
+
+  const [records, setRecords] = useState(test_data)
+
+  const handleSortStatusChange = (status: DataTableSortStatus) => {
+    // setPage(1)
+    console.log(status)
+    const data = _.sortBy(test_data, sortStatus.columnAccessor)
+    setRecords(sortStatus.direction === 'desc' ? data.reverse() : data)
+    // const data = sortBy(companies, sortStatus.columnAccessor) as Company[]
+    // setRecords(sortStatus.direction === 'desc' ? data.reverse() : data)
+    setSortStatus(status)
+  }
 
   const { data: uploads } = useQuery({
     queryKey: [`query-get-persona-uploads`],
     queryFn: async () => {
-      const response = await getAllUploads(userToken, activePersona!);
-      return response.status === "success" ? response.data : [];
+      const response = await getAllUploads(userToken, activePersona!)
+      return response.status === 'success' ? response.data : []
     },
     enabled: !!activePersona,
-  });
-
+  })
 
   return (
     <Flex p='lg' direction='column' h='100%'>
@@ -64,15 +203,14 @@ export default function FindContactsPage() {
           <Tabs.Tab value='linkedin-url' icon={<IconBrandLinkedin size='0.9rem' />}>
             LinkedIn URL
           </Tabs.Tab>
-          <Tabs.Tab value='by-csv' icon={<IconFile size='0.9rem' />}>
+          {/* <Tabs.Tab value='by-csv' icon={<IconFile size='0.9rem' />}>
             CSV
+          </Tabs.Tab> */}
+          <Tabs.Tab value='csv-beta' icon={<IconFile size='0.9rem' />}>
+            Upload CSV
           </Tabs.Tab>
           <Tooltip label='Advanced - Linkedin Network' position='bottom'>
-            <Tabs.Tab
-              value='your-network'
-              icon={<IconAffiliate size='0.9rem' />}
-              ml='auto'
-            ></Tabs.Tab>
+            <Tabs.Tab value='your-network' icon={<IconAffiliate size='0.9rem' />} ml='auto'></Tabs.Tab>
           </Tooltip>
         </Tabs.List>
 
@@ -93,8 +231,8 @@ export default function FindContactsPage() {
           <Card maw='600px' ml='auto' mr='auto'>
             <Title order={3}>Upload Prospect from One LinkedIn URL</Title>
             <Text mb='md' color='gray'>
-              Upload a LinkedIn URL to add a prospect to your database. This can be a Sales
-              Navigator link (i.e. /sales) or a regular LinkedIn profile link (i.e. /in).
+              Upload a LinkedIn URL to add a prospect to your database. This can be a Sales Navigator link (i.e. /sales)
+              or a regular LinkedIn profile link (i.e. /in).
             </Text>
             <LinkedInURLUpload
               afterUpload={() => {
@@ -102,12 +240,12 @@ export default function FindContactsPage() {
                   title: 'Success',
                   message: 'Uploaded contact successfully',
                   color: 'teal',
-                });
+                })
               }}
             />
           </Card>
         </Tabs.Panel>
-        <Tabs.Panel value='by-csv' pt='xs' style={{ position: 'relative' }}>
+        {/* <Tabs.Panel value='by-csv' pt='xs' style={{ position: 'relative' }}>
           <Card maw='600px' ml='auto' mr='auto'>
             <Title order={3}>Upload CSV</Title>
             <Text mb='md' color='gray'>
@@ -128,7 +266,7 @@ export default function FindContactsPage() {
                   title: 'Success',
                   message: 'File uploaded successfully',
                   color: 'teal',
-                });
+                })
               }}
             />
           </Card>
@@ -148,15 +286,132 @@ export default function FindContactsPage() {
               value=''
               onChange={(value) => {
                 if (value) {
-                  setUploadId(+value);
-                  setUploadDrawerOpened(true);
+                  setUploadId(+value)
+                  setUploadDrawerOpened(true)
                 }
               }}
             />
           )}
+        </Tabs.Panel> */}
+        <Tabs.Panel value='csv-beta' pt='xs' style={{ position: 'relative' }}>
+          <Card ml='auto' mr='auto'>
+            <FileDropAndPreviewV2
+              personaId={activePersona + ''}
+              onUploadSuccess={() => {
+                showNotification({
+                  title: 'Success',
+                  message: 'File uploaded successfully',
+                  color: 'teal',
+                })
+              }}
+            />
+            <Text my={'lg'} color='#878a8c' fw={500} size={'xl'}>
+              Upload Prospects
+            </Text>
+            <DataTable
+              withBorder
+              verticalAlignment='center'
+              verticalSpacing='sm'
+              loaderColor='teal'
+              highlightOnHover
+              borderRadius='sm'
+              noRecordsText={'No rows found'}
+              columns={[
+                {
+                  accessor: 'fileName',
+                  title: 'File Name',
+                  width: '12%',
+                  sortable: true,
+                },
+                {
+                  accessor: 'sdr',
+                  title: 'SDR',
+                  width: '15%',
+                  render: ({ sdr }) => (
+                    <Flex align={'center'} gap={10}>
+                      <Avatar src={sdr?.avatar} radius={'xl'} />
+                      <Text>{sdr?.name}</Text>
+                    </Flex>
+                  ),
+                },
+                {
+                  accessor: 'upload_details',
+                  title: 'Upload Details',
+                  render: ({ upload_details }) => (
+                    <Flex align={'center'} justify={'space-between'} gap={40} w={'100%'}>
+                      <Flex align={'center'} w={'100%'} gap={20}>
+                        <Text color='gray' w={150}>
+                          Processed: {''}{' '}
+                          <span style={{ fontWeight: '600', color: 'black' }}>{upload_details?.process}</span>/
+                          {upload_details?.total}
+                        </Text>
+                        <Progress
+                          w={130}
+                          value={upload_details?.percent}
+                          color={upload_details?.percent > 80 ? 'green' : upload_details?.percent > 50 ? 'yellow' : ''}
+                        />
+                        <Divider orientation='vertical' />
+                        <Text w={100} align='center' color='gray'>
+                          Success: <span style={{ color: 'green', fontWeight: '600' }}>{upload_details?.success}</span>
+                        </Text>
+                        <Divider orientation='vertical' />
+                        <Text w={100} align='center' color='gray'>
+                          Failed: <span style={{ color: 'red', fontWeight: '600' }}>{upload_details?.failed}</span>
+                        </Text>
+                        <Divider orientation='vertical' />
+                        <Text w={120} align='center' color='gray'>
+                          Disqualified:{' '}
+                          <span style={{ fontWeight: '600', color: 'black' }}>{upload_details?.disqualified}</span>
+                        </Text>
+                      </Flex>
+                      <Flex gap={14} justify={'center'} w={'100%'}>
+                        <Button variant='outline' radius='xl' size='xs'>
+                          Refresh
+                        </Button>
+                        <Button variant='filled' radius='xl' size='xs'>
+                          Show More
+                        </Button>
+                      </Flex>
+                    </Flex>
+                  ),
+                },
+              ]}
+              // totalRecords={totalRecords.current}
+              // recordsPerPage={PAGE_SIZE}
+              // page={page}
+              // onPageChange={(p) => setPage(p)}
+              // paginationColor="teal"
+              records={records ?? []}
+              sortStatus={sortStatus}
+              onSortStatusChange={handleSortStatusChange}
+            />
+          </Card>
+          {/* {uploads && uploads.length > 0 && (
+            <Select
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 0,
+              }}
+              placeholder='View Upload Details'
+              data={uploads.map((upload: any) => ({
+                value: upload.id + '',
+                label: upload.created_at,
+              }))}
+              searchValue=''
+              value=''
+              onChange={(value) => {
+                if (value) {
+                  setUploadId(+value)
+                  setUploadDrawerOpened(true)
+                }
+              }}
+            />
+          )} */}
+          {/* <Text>Uploaded Prospects</Text> */}
         </Tabs.Panel>
       </Tabs>
       <UploadDetailsDrawer />
     </Flex>
-  );
+  )
 }

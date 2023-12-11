@@ -308,8 +308,15 @@ export default function ProjectDetails(props: {
                 src={proxyURL(data?.details.profile_pic)}
               />
               <Box>
-                <Title order={4}>{data?.details.full_name}</Title>
+                <Title order={4}>
+                  {data?.details.full_name}
+                </Title>
               </Box>
+              <ICPFitPill
+                icp_fit_score={data?.details.icp_fit_score || 0}
+                icp_fit_reason={data?.details.icp_fit_reason || ""}
+                archetype={data?.details.persona || ""}
+              />
             </Flex>
           </Card>
 
@@ -439,46 +446,45 @@ export default function ProjectDetails(props: {
           statusValue !== "RESPONDED" && (
             <>
               <Box style={{ flexBasis: "10%" }} my={10}>
-                <Flex gap={"md"} wrap="nowrap" align={"center"} px={"md"}>
-                  <div style={{ flexBasis: "10%" }}>
+                <Flex gap={"md"} align={"center"} px={"md"}>
+                  <div>
                     <Text fw={700} fz={"sm"}>
-                      Substatus
+                      Reply label
                     </Text>
                   </div>
-                  <div style={{ flexBasis: "90%" }}>
-                    <Select
-                      size="xs"
-                      styles={{
-                        input: {
-                          backgroundColor: theme.colors["blue"][0],
+                  <Select
+                    size="xs"
+                    styles={{
+                      root: { flex: 1 },
+                      input: {
+                        backgroundColor: theme.colors["blue"][0],
+                        borderColor: theme.colors["blue"][4],
+                        color: theme.colors.blue[6],
+                        fontWeight: 700,
+                        "&:focus": {
                           borderColor: theme.colors["blue"][4],
-                          color: theme.colors.blue[6],
-                          fontWeight: 700,
-                          "&:focus": {
-                            borderColor: theme.colors["blue"][4],
-                          },
                         },
-                        rightSection: {
-                          svg: {
-                            color: `${theme.colors.gray[6]}!important`,
-                          },
+                      },
+                      rightSection: {
+                        svg: {
+                          color: `${theme.colors.gray[6]}!important`,
                         },
-                        item: {
-                          "&[data-selected], &[data-selected]:hover": {
-                            backgroundColor: theme.colors["blue"][6],
-                          },
+                      },
+                      item: {
+                        "&[data-selected], &[data-selected]:hover": {
+                          backgroundColor: theme.colors["blue"][6],
                         },
-                      }}
-                      data={prospectStatuses}
-                      value={statusValue}
-                      onChange={async (value) => {
-                        if (!value) {
-                          return;
-                        }
-                        await changeStatus(value);
-                      }}
-                    />
-                  </div>
+                      },
+                    }}
+                    data={prospectStatuses}
+                    value={statusValue}
+                    onChange={async (value) => {
+                      if (!value) {
+                        return;
+                      }
+                      await changeStatus(value);
+                    }}
+                  />
                 </Flex>
               </Box>
 
@@ -531,12 +537,6 @@ export default function ProjectDetails(props: {
                     <Text fw={700} fz={"sm"}>
                       Lead Status:
                     </Text>
-
-                    <ICPFitPill
-                      icp_fit_score={data?.details.icp_fit_score || 0}
-                      icp_fit_reason={data?.details.icp_fit_reason || ""}
-                      archetype={data?.details.persona || ""}
-                    />
                   </Flex>
                 </Accordion.Control>
                 <Accordion.Panel>

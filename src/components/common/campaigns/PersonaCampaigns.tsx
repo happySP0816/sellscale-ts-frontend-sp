@@ -501,6 +501,8 @@ export function PersonCampaignCard(props: {
   const userData = useRecoilValue(userDataState);
 
   const [value, setValue] = useState<string>("");
+  const [campaignList, setCampaignList] = useState([])
+  const [campaignName, setCampaignName] = useState('')
 
   const setEmoji = (emoji: string) => {
     setEmojiState(emoji);
@@ -565,478 +567,263 @@ export function PersonCampaignCard(props: {
           blur: 3,
         }}
         centered
-        size="70rem"
+        size='70rem'
         withCloseButton={false}
         padding={0}
-        radius={"md"}
+        radius={'md'}
       >
         <Modal.Header
           bg={
-            value === "sent"
-              ? "#228be6"
-              : value === "open"
-              ? "#fd4efe"
-              : value === "reply"
-              ? "orange"
-              : value === "demo"
-              ? "green"
-              : ""
+            value === 'sent'
+              ? '#228be6'
+              : value === 'open'
+              ? '#fd4efe'
+              : value === 'reply'
+              ? 'orange'
+              : value === 'demo'
+              ? 'green'
+              : ''
           }
         >
-          <Flex
-            justify={"space-between"}
-            w={"100%"}
-            align={"center"}
-            px={43}
-            py={25}
-          >
-            <Text size={"lg"} color="white">
-              Outreach for: {"Coming soon! ⚠️ - This is all mock data..."}
+          <Flex justify={'space-between'} w={'100%'} align={'center'} px={43} py={25}>
+            <Text size={'lg'} color='white'>
+              Outreach for:{' '}
+              <span className=' font-semibold text-[20px]'>
+                {' '}
+                {campaignName ? campaignName : 'Coming soon! ⚠️ - This is all mock data...'}
+              </span>
             </Text>
             <CloseButton
-              aria-label="Close modal"
+              aria-label='Close modal'
               onClick={channelClose}
-              variant="outline"
-              radius="xl"
-              style={{ borderColor: "white", color: "white" }}
+              variant='outline'
+              radius='xl'
+              style={{
+                borderColor: 'white',
+                color: 'white',
+              }}
             />
           </Flex>
         </Modal.Header>
         <Modal.Body mt={20} px={20}>
-          <Group grow style={{ justifyContent: "center", gap: "0px" }}>
+          <Group
+            grow
+            style={{
+              justifyContent: 'center',
+              gap: '0px',
+            }}
+          >
             <Box
-              w={"100%"}
+              w={'100%'}
               onClick={() => {
-                setValue("sent");
+                setValue('sent')
               }}
             >
               <StatModalDisplay
-                color="#228be6"
-                icon={<IconSend color={theme.colors.blue[6]} size="20" />}
-                label="Sent"
-                percentcolor="#e7f5ff"
+                color='#228be6'
+                icon={<IconSend color={theme.colors.blue[6]} size='20' />}
+                label='Sent'
+                percentcolor='#e7f5ff'
                 total={total_sent ?? 0}
-                border={value === "sent" ? "#228be6" : ""}
-                percentage={Math.floor(
-                  ((total_sent ?? 0) / (total_sent || 1)) * 100
-                )}
+                border={value === 'sent' ? '#228be6' : ''}
+                percentage={Math.floor(((total_sent ?? 0) / (total_sent || 1)) * 100)}
               />
             </Box>
             <Box
-              w={"100%"}
+              w={'100%'}
               onClick={() => {
-                setValue("open");
+                setValue('open')
               }}
             >
               <StatModalDisplay
-                color="#fd4efe"
-                icon={<IconChecks color={"#fd4efe"} size="20" />}
-                label="Open"
-                percentcolor="#ffedff"
-                border={value === "open" ? "#fd4efe" : ""}
+                color='#fd4efe'
+                icon={<IconChecks color={'#fd4efe'} size='20' />}
+                label='Open'
+                percentcolor='#ffedff'
+                border={value === 'open' ? '#fd4efe' : ''}
                 total={total_opened ?? 0}
-                percentage={Math.floor(
-                  ((total_opened ?? 0) / (total_sent || 1)) * 100
-                )}
+                percentage={Math.floor(((total_opened ?? 0) / (total_sent || 1)) * 100)}
               />
             </Box>
             <Box
-              w={"100%"}
+              w={'100%'}
               onClick={() => {
-                setValue("reply");
+                setValue('reply')
               }}
             >
               <StatModalDisplay
-                color="#fd7e14"
-                icon={<IconMessage color={theme.colors.orange[6]} size="20" />}
-                label="Reply"
-                percentcolor="#fff5ee"
-                border={value === "reply" ? "#fd7e14" : ""}
+                color='#fd7e14'
+                icon={<IconMessage color={theme.colors.orange[6]} size='20' />}
+                label='Reply'
+                percentcolor='#fff5ee'
+                border={value === 'reply' ? '#fd7e14' : ''}
                 total={total_replied ?? 0}
-                percentage={Math.floor(
-                  ((total_replied ?? 0) / (total_opened || 1)) * 100
-                )}
+                percentage={Math.floor(((total_replied ?? 0) / (total_opened || 1)) * 100)}
               />
             </Box>
             <Box
-              w={"100%"}
+              w={'100%'}
               onClick={() => {
-                setValue("demo");
+                setValue('demo')
               }}
             >
               <StatModalDisplay
-                color="#40c057"
-                icon={<IconCalendar color={theme.colors.green[6]} size="20" />}
-                label="Demo"
-                percentcolor="#e2f6e7"
-                border={value === "demo" ? "#40c057" : ""}
+                color='#40c057'
+                icon={<IconCalendar color={theme.colors.green[6]} size='20' />}
+                label='Demo'
+                percentcolor='#e2f6e7'
+                border={value === 'demo' ? '#40c057' : ''}
                 total={props.persona.total_demo ?? 0}
-                percentage={Math.floor(
-                  ((props.persona.total_demo ?? 0) / (total_replied || 1)) * 100
-                )}
+                percentage={Math.floor(((props.persona.total_demo ?? 0) / (total_replied || 1)) * 100)}
               />
             </Box>
           </Group>
           <ScrollArea h={600} scrollbarSize={6}>
-            <Flex direction={"column"} gap={20} my={20}>
-              <Group
-                grow
-                style={{
-                  justifyContent: "start",
-                  gap: "0px",
-                }}
-              >
-                <Flex
-                  mx={25}
-                  w={"100%"}
-                  style={{ borderRadius: "10px", border: "3px solid #e9ecef" }}
-                >
-                  <Box
-                    px={15}
-                    py={12}
-                    style={{ borderRight: "3px solid #e9ecef" }}
-                    w={"30rem"}
+            <Flex direction={'column'} gap={20} my={20}>
+              {filteredCampaignList?.map((item: any, index) => {
+                return (
+                  <Group
+                    grow
+                    style={{
+                      justifyContent: 'start',
+                      gap: '0px',
+                    }}
+                    key={index}
                   >
-                    <Flex align={"center"} gap={10} mb={8}>
-                      <Avatar
-                        src={props.persona.sdr_img_url}
-                        radius="xl"
-                        size="lg"
-                      />
-                      <Box>
-                        <Flex align={"center"} gap={10}>
-                          <Text fw={600}>Donald Bryant</Text>
-                          <IconMail size={20} color="#817e7e" />
+                    <Flex
+                      mx={25}
+                      w={'100%'}
+                      style={{
+                        borderRadius: '10px',
+                        border: '3px solid #e9ecef',
+                      }}
+                    >
+                      <Box
+                        px={15}
+                        py={12}
+                        style={{
+                          borderRight: '3px solid #e9ecef',
+                        }}
+                        w={'30rem'}
+                      >
+                        <Flex align={'center'} gap={10} mb={8}>
+                          <Avatar src={props.persona.sdr_img_url} radius='xl' size='lg' />
+                          <Box>
+                            <Flex align={'center'} gap={10}>
+                              <Text fw={600}>{item.prospect_name}</Text>
+                            </Flex>
+                            <Flex align={'center'} gap={10} w={'100%'} mt={3}>
+                              <Text>ICP Score: </Text>
+                              <Badge
+                                color={
+                                  item.prospect_icp_fit_score == 'VERY HIGH' ? 'green' : 
+                                  item.prospect_icp_fit_score == 'HIGH' ? 'blue' :
+                                  item.prospect_icp_fit_score == 'MEDIUM' ? 'yellow' :
+                                  item.prospect_icp_fit_score == 'LOW' ? 'orange' : 
+                                  item.prospect_icp_fit_score == 'VERY LOW' ? 'red' : 'gray'
+                                }
+                                fw={600}
+                              >
+                                {item.prospect_icp_fit_score}
+                              </Badge>
+                            </Flex>
+                          </Box>
                         </Flex>
-                        <Flex align={"center"} gap={10} w={"100%"} mt={3}>
-                          <Text>ICP Score: </Text>
-                          <Text
-                            bg={"#e7f5ff"}
-                            color="blue"
-                            px={15}
-                            fw={600}
-                            style={{ borderRadius: "20px" }}
-                          >
-                            VERY HIGH
+                        <Flex gap={6}>
+                          <div className='mt-1'>
+                            <IconMan size={20} color='#817e7e' />
+                          </div>
+                          <Text color='#817e7e' mt={3}>
+                            {campaignName}
+                          </Text>
+                        </Flex>
+                        <Flex gap={6}>
+                          <div className='mt-1'>
+                            <IconBriefcase size={20} color='#817e7e' />
+                          </div>
+                          <Text color='#817e7e' mt={3}>
+                            {item.prospect_title}
+                          </Text>
+                        </Flex>
+                        <Flex gap={6}>
+                          <div className='mt-1'>
+                            <IconBuilding size={20} color='#817e7e' />
+                          </div>
+                          <Text color='#817e7e' mt={3}>
+                            {item.prospect_company}
                           </Text>
                         </Flex>
                       </Box>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconMan size={20} color="#817e7e" />
-                      <Text color="#817e7e">Senior Engineering Hiring</Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBriefcase size={20} color="#817e7e" />
-                      <Text color="#817e7e">
-                        Field Chief Technology Officer
-                      </Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBuilding size={20} color="#817e7e" />
-                      <Text color="#817e7e">CloudBees</Text>
-                    </Flex>
-                  </Box>
-                  <Box px={15} py={12}>
-                    <Flex justify={"space-between"}>
-                      <Text color="#817e7e" fw={600}>
-                        Last Message From Prospect:
-                      </Text>
-                      <Text color="#817e7e">Today 01:05</Text>
-                    </Flex>
-                    <Box
-                      bg={
-                        value === "sent"
-                          ? "#e7f5ff"
-                          : value === "open"
-                          ? "#ffedff"
-                          : value === "reply"
-                          ? "#fff5ee"
-                          : "#e2f6e7"
-                      }
-                      p={20}
-                      mt={15}
-                      style={{ borderRadius: "10px" }}
-                    >
-                      <Text fw={500}>
-                        "Hi yes. Can you please send me an email to
-                        michael@abs.com. and i will to the person who is
-                        oncharge Of the seetion prosess"
-                      </Text>
-                    </Box>
-                  </Box>
-                </Flex>
-              </Group>
-              <Group
-                grow
-                style={{
-                  justifyContent: "start",
-                  gap: "0px",
-                }}
-              >
-                <Flex
-                  mx={25}
-                  w={"100%"}
-                  style={{ borderRadius: "10px", border: "3px solid #e9ecef" }}
-                >
-                  <Box
-                    px={15}
-                    py={12}
-                    style={{ borderRight: "3px solid #e9ecef" }}
-                    w={"30rem"}
-                  >
-                    <Flex align={"center"} gap={10} mb={8}>
-                      <Avatar
-                        src={props.persona.sdr_img_url}
-                        radius="xl"
-                        size="lg"
-                      />
-                      <Box>
-                        <Flex align={"center"} gap={10}>
-                          <Text fw={600}>Donald Bryant</Text>
-                          <IconMail size={20} color="#817e7e" />
-                        </Flex>
-                        <Flex align={"center"} gap={10} w={"100%"} mt={3}>
-                          <Text>ICP Score: </Text>
-                          <Text
-                            bg={"#e7f5ff"}
-                            color="blue"
-                            px={15}
-                            fw={600}
-                            style={{ borderRadius: "20px" }}
-                          >
-                            VERY HIGH
+                      <Box px={15} py={12} w={'100%'}>
+                        <Flex justify={'space-between'}>
+                          <Text color='#817e7e' fw={600}>
+                            Last Message From Prospect:
                           </Text>
+                          <Text color='#817e7e'>{item.li_last_message_timestamp}</Text>
                         </Flex>
+                        <Box
+                          bg={
+                            value === 'sent'
+                              ? '#e7f5ff'
+                              : value === 'open'
+                              ? '#ffedff'
+                              : value === 'reply'
+                              ? '#fff5ee'
+                              : '#e2f6e7'
+                          }
+                          p={20}
+                          mt={15}
+                          style={{
+                            borderRadius: '10px',
+                          }}
+                        >
+                          <Text fw={500}>{item?.li_last_message_from_prospect}</Text>
+                        </Box>
                       </Box>
                     </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconMan size={20} color="#817e7e" />
-                      <Text color="#817e7e">Senior Engineering Hiring</Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBriefcase size={20} color="#817e7e" />
-                      <Text color="#817e7e">
-                        Field Chief Technology Officer
-                      </Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBuilding size={20} color="#817e7e" />
-                      <Text color="#817e7e">CloudBees</Text>
-                    </Flex>
-                  </Box>
-                  <Box px={15} py={12}>
-                    <Flex justify={"space-between"}>
-                      <Text color="#817e7e" fw={600}>
-                        Last Message From Prospect:
-                      </Text>
-                      <Text color="#817e7e">Today 01:05</Text>
-                    </Flex>
-                    <Box
-                      bg={
-                        value === "sent"
-                          ? "#e7f5ff"
-                          : value === "open"
-                          ? "#ffedff"
-                          : value === "reply"
-                          ? "#fff5ee"
-                          : "#e2f6e7"
-                      }
-                      p={20}
-                      mt={15}
-                      style={{ borderRadius: "10px" }}
-                    >
-                      <Text fw={500}>
-                        "Hi yes. Can you please send me an email to
-                        michael@abs.com. and i will to the person who is
-                        oncharge Of the seetion prosess"
-                      </Text>
-                    </Box>
-                  </Box>
-                </Flex>
-              </Group>
-              <Group
-                grow
-                style={{
-                  justifyContent: "start",
-                  gap: "0px",
-                }}
-              >
-                <Flex
-                  mx={25}
-                  w={"100%"}
-                  style={{ borderRadius: "10px", border: "3px solid #e9ecef" }}
-                >
-                  <Box
-                    px={15}
-                    py={12}
-                    style={{ borderRight: "3px solid #e9ecef" }}
-                    w={"30rem"}
-                  >
-                    <Flex align={"center"} gap={10} mb={8}>
-                      <Avatar
-                        src={props.persona.sdr_img_url}
-                        radius="xl"
-                        size="lg"
-                      />
-                      <Box>
-                        <Flex align={"center"} gap={10}>
-                          <Text fw={600}>Donald Bryant</Text>
-                          <IconMail size={20} color="#817e7e" />
-                        </Flex>
-                        <Flex align={"center"} gap={10} w={"100%"} mt={3}>
-                          <Text>ICP Score: </Text>
-                          <Text
-                            bg={"#e7f5ff"}
-                            color="blue"
-                            px={15}
-                            fw={600}
-                            style={{ borderRadius: "20px" }}
-                          >
-                            VERY HIGH
-                          </Text>
-                        </Flex>
-                      </Box>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconMan size={20} color="#817e7e" />
-                      <Text color="#817e7e">Senior Engineering Hiring</Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBriefcase size={20} color="#817e7e" />
-                      <Text color="#817e7e">
-                        Field Chief Technology Officer
-                      </Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBuilding size={20} color="#817e7e" />
-                      <Text color="#817e7e">CloudBees</Text>
-                    </Flex>
-                  </Box>
-                  <Box px={15} py={12}>
-                    <Flex justify={"space-between"}>
-                      <Text color="#817e7e" fw={600}>
-                        Last Message From Prospect:
-                      </Text>
-                      <Text color="#817e7e">Today 01:05</Text>
-                    </Flex>
-                    <Box
-                      bg={
-                        value === "sent"
-                          ? "#e7f5ff"
-                          : value === "open"
-                          ? "#ffedff"
-                          : value === "reply"
-                          ? "#fff5ee"
-                          : "#e2f6e7"
-                      }
-                      p={20}
-                      mt={15}
-                      style={{ borderRadius: "10px" }}
-                    >
-                      <Text fw={500}>
-                        "Hi yes. Can you please send me an email to
-                        michael@abs.com. and i will to the person who is
-                        oncharge Of the seetion prosess"
-                      </Text>
-                    </Box>
-                  </Box>
-                </Flex>
-              </Group>
-              <Group
-                grow
-                style={{
-                  justifyContent: "start",
-                  gap: "0px",
-                }}
-              >
-                <Flex
-                  mx={25}
-                  w={"100%"}
-                  style={{ borderRadius: "10px", border: "3px solid #e9ecef" }}
-                >
-                  <Box
-                    px={15}
-                    py={12}
-                    style={{ borderRight: "3px solid #e9ecef" }}
-                    w={"30rem"}
-                  >
-                    <Flex align={"center"} gap={10} mb={8}>
-                      <Avatar
-                        src={props.persona.sdr_img_url}
-                        radius="xl"
-                        size="lg"
-                      />
-                      <Box>
-                        <Flex align={"center"} gap={10}>
-                          <Text fw={600}>Donald Bryant</Text>
-                          <IconMail size={20} color="#817e7e" />
-                        </Flex>
-                        <Flex align={"center"} gap={10} w={"100%"} mt={3}>
-                          <Text>ICP Score: </Text>
-                          <Text
-                            bg={"#e7f5ff"}
-                            color="blue"
-                            px={15}
-                            fw={600}
-                            style={{ borderRadius: "20px" }}
-                          >
-                            VERY HIGH
-                          </Text>
-                        </Flex>
-                      </Box>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconMan size={20} color="#817e7e" />
-                      <Text color="#817e7e">Senior Engineering Hiring</Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBriefcase size={20} color="#817e7e" />
-                      <Text color="#817e7e">
-                        Field Chief Technology Officer
-                      </Text>
-                    </Flex>
-                    <Flex align={"center"} gap={6}>
-                      <IconBuilding size={20} color="#817e7e" />
-                      <Text color="#817e7e">CloudBees</Text>
-                    </Flex>
-                  </Box>
-                  <Box px={15} py={12}>
-                    <Flex justify={"space-between"}>
-                      <Text color="#817e7e" fw={600}>
-                        Last Message From Prospect:
-                      </Text>
-                      <Text color="#817e7e">Today 01:05</Text>
-                    </Flex>
-                    <Box
-                      bg={
-                        value === "sent"
-                          ? "#e7f5ff"
-                          : value === "open"
-                          ? "#ffedff"
-                          : value === "reply"
-                          ? "#fff5ee"
-                          : "#e2f6e7"
-                      }
-                      p={20}
-                      mt={15}
-                      style={{ borderRadius: "10px" }}
-                    >
-                      <Text fw={500}>
-                        "Hi yes. Can you please send me an email to
-                        michael@abs.com. and i will to the person who is
-                        oncharge Of the seetion prosess"
-                      </Text>
-                    </Box>
-                  </Box>
-                </Flex>
-              </Group>
+                  </Group>
+                )
+              })}
             </Flex>
           </ScrollArea>
         </Modal.Body>
       </Modal>
-    );
-  };
+    )
+  }
+
+  const handleChannelOpen = async (type: string, id: number, campaign_name: string) => {
+    setValue(type)
+    setCampaignName(campaign_name)
+    var myHeaders = new Headers()
+    myHeaders.append('Authorization', `Bearer ${userToken}`)
+
+    var requestOptions: any = {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow',
+    }
+
+    await fetch(`${API_URL}/analytics/get_campaign_drilldown/${id}`, requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        channelOpen()
+        setCampaignList(JSON.parse(result).analytics)
+      })
+      .catch((error) => console.log('error', error))
+  }
+
+  const filteredCampaignList = useMemo(() => {
+    if (value === 'sent') {
+      return campaignList?.filter((item: any) => item.to_status === 'SENT_OUTREACH')
+    } else if (value === 'open') {
+      return campaignList?.filter((item: any) => item.to_status === 'ACCEPTED')
+    } else if (value === 'reply') {
+      return campaignList?.filter((item: any) => item.to_status === 'ACTIVE_CONVO')
+    } else if (value === 'demo') {
+      return campaignList?.filter((item: any) => item.to_status === 'DEMO_SET')
+    }
+  }, [value, campaignList])
+
   return (
     <Paper radius="md" ref={ref}>
       <ChannelModal />
@@ -1359,8 +1146,7 @@ export function PersonCampaignCard(props: {
             <Box
               w={"20%"}
               onClick={() => {
-                channelOpen();
-                setValue("sent");
+                handleChannelOpen('sent', props.persona.id, props.persona.name)
               }}
             >
               <StatDisplay
@@ -1371,14 +1157,15 @@ export function PersonCampaignCard(props: {
                 percentage={Math.floor(
                   ((total_sent ?? 0) / (total_sent || 1)) * 100
                 )}
+                percentColor='#eaf3ff'
+                hoverColor='hover:bg-[#cadef9]'
               />
             </Box>
 
             <Box
               w={"20%"}
               onClick={() => {
-                channelOpen();
-                setValue("open");
+                handleChannelOpen('open', props.persona.id, props.persona.name)
               }}
             >
               <StatDisplay
@@ -1389,13 +1176,14 @@ export function PersonCampaignCard(props: {
                 percentage={Math.floor(
                   ((total_opened ?? 0) / (total_sent || 1)) * 100
                 )}
+                percentColor='#ffeeff'
+                hoverColor='hover:bg-[#fbdefb]'
               />
             </Box>
             <Box
               w={"20%"}
               onClick={() => {
-                channelOpen();
-                setValue("reply");
+                handleChannelOpen('reply', props.persona.id, props.persona.name)
               }}
             >
               <StatDisplay
@@ -1408,13 +1196,14 @@ export function PersonCampaignCard(props: {
                 percentage={Math.floor(
                   ((total_replied ?? 0) / (total_opened || 1)) * 100
                 )}
+                percentColor='#f9e7dc'
+                hoverColor='hover:bg-[#f8f3f0]'
               />
             </Box>
             <Box
               w={"20%"}
               onClick={() => {
-                channelOpen();
-                setValue("demo");
+                handleChannelOpen('demo', props.persona.id, props.persona.name)
               }}
             >
               <StatDisplay
@@ -1427,6 +1216,8 @@ export function PersonCampaignCard(props: {
                 percentage={Math.floor(
                   ((props.persona.total_demo ?? 0) / (total_replied || 1)) * 100
                 )}
+                percentColor='#e2f6e7'
+                hoverColor='hover:bg-[#d9f5e0]'
               />
             </Box>
           </Group>
@@ -1753,35 +1544,42 @@ function StatDisplay(props: {
   label: string;
   total: number;
   percentage: number;
+  percentColor: MantineColor
+  hoverColor: string
 }) {
   return (
-    <Stack spacing={0}>
-      <Group spacing={5} sx={{ justifyContent: "left" }}>
-        <Tooltip
-          label={props.percentage + "% conversion"}
-          withArrow
-          withinPortal
-        >
-          <Flex>
-            <Text color={props.color} fz="lg" fw={500}>
-              {props.total.toLocaleString()}
+    <div className={`${props.hoverColor} rounded-md px-2 py-1`}>
+      <Stack spacing={0}>
+        <Flex justify='left' gap='xl'>
+          <Tooltip label={props.percentage + '% conversion'} withArrow withinPortal>
+            <Flex align={'center'} gap={4}>
+              <Text color={props.color} fz='lg' fw={500}>
+                {props.total.toLocaleString()}
+              </Text>
+              <Text
+                size='8px'
+                color={props.color}
+                bg={props.percentColor}
+                py={2}
+                px={4}
+                style={{ borderRadius: '8px' }}
+              >
+                {/* percentage */}
+                {props.percentage}%
+              </Text>
+            </Flex>
+          </Tooltip>
+        </Flex>
+        <Flex>
+            <Box mt='1px'>
+              {props.icon}
+            </Box>
+            <Text c='gray.7' fz='sm' ml="4px">
+              {props.label}
             </Text>
-            <Text size="10px" color="gray" mt="9px" ml="xs">
-              {/* percentage */}
-              {props.percentage}%
-            </Text>
-          </Flex>
-        </Tooltip>
-      </Group>
-      <Group grow>
-        <Group spacing={8}>
-          {props.icon}
-          <Text c="gray.7" fz="sm">
-            {props.label}
-          </Text>
-        </Group>
-      </Group>
-    </Stack>
+        </Flex>
+      </Stack>
+    </div>
   );
 }
 

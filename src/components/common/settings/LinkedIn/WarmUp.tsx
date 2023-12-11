@@ -63,7 +63,7 @@ const data = {
 export const WarmUp: React.FC = () => {
   const userData = useRecoilValue(userDataState);
 
-  const options: ChartOptions<"bar"> = {
+  const options: any = {
     scales: {
       xAxis: {
         border: {

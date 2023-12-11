@@ -200,7 +200,7 @@ export default function InboxSmartleadPage(props: {
       prospectid,
       smartleadCampaignID
     );
-    let conversation = response?.data?.conversation
+    let conversation = response?.data?.conversation;
 
     // Sort results by time ascending
     conversation = conversation.sort((a: any, b: any) => {
@@ -596,7 +596,9 @@ export default function InboxSmartleadPage(props: {
                                           }
                                           fw={500}
                                         >
-                                          To:{" "}
+                                          {message.type == "SENT"
+                                            ? "To"
+                                            : "From"}{": "}
                                           <span
                                             style={{
                                               color:
@@ -605,9 +607,7 @@ export default function InboxSmartleadPage(props: {
                                                   : "black",
                                             }}
                                           >
-                                            {message.type === "SENT"
-                                              ? selectedProspect?.prospect_name
-                                              : userData.sdr_name}
+                                            {selectedProspect?.prospect_name}
                                           </span>
                                         </Text>
                                         <Flex gap={30} align="center">

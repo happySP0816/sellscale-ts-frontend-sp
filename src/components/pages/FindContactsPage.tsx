@@ -203,8 +203,11 @@ export default function FindContactsPage() {
           <Tabs.Tab value='linkedin-url' icon={<IconBrandLinkedin size='0.9rem' />}>
             LinkedIn URL
           </Tabs.Tab>
-          <Tabs.Tab value='by-csv' icon={<IconFile size='0.9rem' />}>
+          {/* <Tabs.Tab value='by-csv' icon={<IconFile size='0.9rem' />}>
             CSV
+          </Tabs.Tab> */}
+          <Tabs.Tab value='by-csv' icon={<IconFile size='0.9rem' />}>
+            Upload CSV
           </Tabs.Tab>
           <Tabs.Tab value='csv-beta' icon={<IconSparkles size='0.9rem' />} ml='auto'>
             CSV (BETA)
@@ -292,6 +295,123 @@ export default function FindContactsPage() {
               }}
             />
           )}
+        </Tabs.Panel>
+        <Tabs.Panel value='csv-beta' pt='xs' style={{ position: 'relative' }}>
+          <Card ml='auto' mr='auto'>
+            <FileDropAndPreviewV2
+              personaId={activePersona + ''}
+              onUploadSuccess={() => {
+                showNotification({
+                  title: 'Success',
+                  message: 'File uploaded successfully',
+                  color: 'teal',
+                })
+              }}
+            />
+            <Text my={'lg'} color='#878a8c' fw={500} size={'xl'}>
+              Upload Prospects
+            </Text>
+            <DataTable
+              withBorder
+              verticalAlignment='center'
+              verticalSpacing='sm'
+              loaderColor='teal'
+              highlightOnHover
+              borderRadius='sm'
+              noRecordsText={'No rows found'}
+              columns={[
+                {
+                  accessor: 'fileName',
+                  title: 'File Name',
+                  width: '12%',
+                  sortable: true,
+                },
+                {
+                  accessor: 'sdr',
+                  title: 'SDR',
+                  width: '15%',
+                  render: ({ sdr }) => (
+                    <Flex align={'center'} gap={10}>
+                      <Avatar src={sdr?.avatar} radius={'xl'} />
+                      <Text>{sdr?.name}</Text>
+                    </Flex>
+                  ),
+                },
+                {
+                  accessor: 'upload_details',
+                  title: 'Upload Details',
+                  render: ({ upload_details }) => (
+                    <Flex align={'center'} justify={'space-between'} gap={40} w={'100%'}>
+                      <Flex align={'center'} w={'100%'} gap={20}>
+                        <Text color='gray' w={150}>
+                          Processed: {''}{' '}
+                          <span style={{ fontWeight: '600', color: 'black' }}>{upload_details?.process}</span>/
+                          {upload_details?.total}
+                        </Text>
+                        <Progress
+                          w={130}
+                          value={upload_details?.percent}
+                          color={upload_details?.percent > 80 ? 'green' : upload_details?.percent > 50 ? 'yellow' : ''}
+                        />
+                        <Divider orientation='vertical' />
+                        <Text w={100} align='center' color='gray'>
+                          Success: <span style={{ color: 'green', fontWeight: '600' }}>{upload_details?.success}</span>
+                        </Text>
+                        <Divider orientation='vertical' />
+                        <Text w={100} align='center' color='gray'>
+                          Failed: <span style={{ color: 'red', fontWeight: '600' }}>{upload_details?.failed}</span>
+                        </Text>
+                        <Divider orientation='vertical' />
+                        <Text w={120} align='center' color='gray'>
+                          Disqualified:{' '}
+                          <span style={{ fontWeight: '600', color: 'black' }}>{upload_details?.disqualified}</span>
+                        </Text>
+                      </Flex>
+                      <Flex gap={14} justify={'center'} w={'100%'}>
+                        <Button variant='outline' radius='xl' size='xs'>
+                          Refresh
+                        </Button>
+                        <Button variant='filled' radius='xl' size='xs'>
+                          Show More
+                        </Button>
+                      </Flex>
+                    </Flex>
+                  ),
+                },
+              ]}
+              // totalRecords={totalRecords.current}
+              // recordsPerPage={PAGE_SIZE}
+              // page={page}
+              // onPageChange={(p) => setPage(p)}
+              // paginationColor="teal"
+              records={records ?? []}
+              sortStatus={sortStatus}
+              onSortStatusChange={handleSortStatusChange}
+            />
+          </Card>
+          {/* {uploads && uploads.length > 0 && (
+            <Select
+              style={{
+                position: 'absolute',
+                top: 10,
+                right: 0,
+              }}
+              placeholder='View Upload Details'
+              data={uploads.map((upload: any) => ({
+                value: upload.id + '',
+                label: upload.created_at,
+              }))}
+              searchValue=''
+              value=''
+              onChange={(value) => {
+                if (value) {
+                  setUploadId(+value)
+                  setUploadDrawerOpened(true)
+                }
+              }}
+            />
+          )} */}
+          {/* <Text>Uploaded Prospects</Text> */}
         </Tabs.Panel>
         <Tabs.Panel value='csv-beta' pt='xs' style={{ position: 'relative' }}>
           <Card ml='auto' mr='auto'>

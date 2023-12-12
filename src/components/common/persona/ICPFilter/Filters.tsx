@@ -1,178 +1,92 @@
-import { useEffect, useState } from 'react';
-import {
-  InputBase,
-  Box,
-  Title,
-  Select,
-  Tabs,
-  Button,
-  Flex,
-  Progress,
-  NumberInput,
-  Center,
-  Text,
-} from '@mantine/core';
-import CustomSelect from './CustomSelect';
-import { IconBuildingCommunity, IconPhoto, IconUser } from '@tabler/icons';
-import { useForm } from '@mantine/form';
-import { set } from 'lodash';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms';
-import { getICPRuleSet, updateICPFiltersBySalesNavURL } from '@utils/requests/icpScoring';
-import { userTokenState } from '@atoms/userAtoms';
-import { currentProjectState } from '@atoms/personaAtoms';
-import { getFiltersAutofill } from '@utils/requests/getFiltersAutofill';
-import { openConfirmModal, openContextModal } from '@mantine/modals';
-import { showNotification } from '@mantine/notifications';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react'
+import { InputBase, Box, Title, Select, Tabs, Button, Flex, Progress, NumberInput, Center, Text } from '@mantine/core'
+import CustomSelect from './CustomSelect'
+import { IconBuildingCommunity, IconPhoto, IconUser } from '@tabler/icons'
+import { useForm } from '@mantine/form'
+import { set } from 'lodash'
+import { useRecoilState, useRecoilValue } from 'recoil'
+import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms'
+import { getICPRuleSet, updateICPFiltersBySalesNavURL } from '@utils/requests/icpScoring'
+import { userTokenState } from '@atoms/userAtoms'
+import { currentProjectState } from '@atoms/personaAtoms'
+import { getFiltersAutofill } from '@utils/requests/getFiltersAutofill'
+import { openConfirmModal, openContextModal } from '@mantine/modals'
+import { showNotification } from '@mantine/notifications'
+import { useQuery } from '@tanstack/react-query'
 
-function Filters(props: {
-  isTesting: boolean;
-  selectOptions: { value: string; label: string }[];
-  autofill: boolean;
-}) {
-  const [loading, setLoading] = useState(false);
-  const userToken = useRecoilValue(userTokenState);
-  const currentProject = useRecoilValue(currentProjectState);
-  const [globalRuleSetData, setGlobalRuleSetData] = useRecoilState(filterRuleSetState);
-  const icpProspects = useRecoilValue(filterProspectsState);
+function Filters(props: { isTesting: boolean; selectOptions: { value: string; label: string }[]; autofill: boolean }) {
+  const [loading, setLoading] = useState(false)
+  const userToken = useRecoilValue(userTokenState)
+  const currentProject = useRecoilValue(currentProjectState)
+  const [globalRuleSetData, setGlobalRuleSetData] = useRecoilState(filterRuleSetState)
+  const icpProspects = useRecoilValue(filterProspectsState)
 
-  const [included_individual_title_keywords, setIncludedIndividualTitleKeywords] = useState<
-    string[]
-  >([]);
-  const [excluded_individual_title_keywords, setExcludedIndividualTitleKeywords] = useState<
-    string[]
-  >([]);
-  const [included_individual_industry_keywords, setIncludedIndividualIndustryKeywords] = useState<
-    string[]
-  >([]);
-  const [excluded_individual_industry_keywords, setExcludedIndividualIndustryKeywords] = useState<
-    string[]
-  >([]);
-  const [individual_years_of_experience_start, setIndividualYearsOfExperienceStart] =
-    useState<number>(0);
-  const [individual_years_of_experience_end, setIndividualYearsOfExperienceEnd] =
-    useState<number>(0);
-  const [included_individual_skills_keywords, setIncludedIndividualSkillsKeywords] = useState<
-    string[]
-  >([]);
-  const [excluded_individual_skills_keywords, setExcludedIndividualSkillsKeywords] = useState<
-    string[]
-  >([]);
-  const [included_individual_locations_keywords, setIncludedIndividualLocationsKeywords] = useState<
-    string[]
-  >([]);
-  const [excluded_individual_locations_keywords, setExcludedIndividualLocationsKeywords] = useState<
-    string[]
-  >([]);
-  const [included_individual_generalized_keywords, setIncludedIndividualGeneralizedKeywords] =
-    useState<string[]>([]);
-  const [excluded_individual_generalized_keywords, setExcludedIndividualGeneralizedKeywords] =
-    useState<string[]>([]);
-  const [included_individual_education_keywords, setIncludedIndividualEducationKeywords] = useState<
-    string[]
-  >([]);
-  const [excluded_individual_education_keywords, setExcludedIndividualEducationKeywords] = useState<
-    string[]
-  >([]);
-  const [included_company_name_keywords, setIncludedCompanyNameKeywords] = useState<string[]>([]);
-  const [excluded_company_name_keywords, setExcludedCompanyNameKeywords] = useState<string[]>([]);
-  const [included_company_locations_keywords, setIncludedCompanyLocationsKeywords] = useState<
-    string[]
-  >([]);
-  const [excluded_company_locations_keywords, setExcludedCompanyLocationsKeywords] = useState<
-    string[]
-  >([]);
-  const [company_size_start, setCompanySizeStart] = useState<number>(0);
-  const [company_size_end, setCompanySizeEnd] = useState<number>(0);
-  const [included_company_industries_keywords, setIncludedCompanyIndustriesKeywords] = useState<
-    string[]
-  >([]);
-  const [excluded_company_industries_keywords, setExcludedCompanyIndustriesKeywords] = useState<
-    string[]
-  >([]);
-  const [included_company_generalized_keywords, setIncludedCompanyGeneralizedKeywords] = useState<
-    string[]
-  >([]);
-  const [excluded_company_generalized_keywords, setExcludedCompanyGeneralizedKeywords] = useState<
-    string[]
-  >([]);
+  const [included_individual_title_keywords, setIncludedIndividualTitleKeywords] = useState<string[]>([])
+  const [excluded_individual_title_keywords, setExcludedIndividualTitleKeywords] = useState<string[]>([])
+  const [included_individual_industry_keywords, setIncludedIndividualIndustryKeywords] = useState<string[]>([])
+  const [excluded_individual_industry_keywords, setExcludedIndividualIndustryKeywords] = useState<string[]>([])
+  const [individual_years_of_experience_start, setIndividualYearsOfExperienceStart] = useState<number>(0)
+  const [individual_years_of_experience_end, setIndividualYearsOfExperienceEnd] = useState<number>(0)
+  const [included_individual_skills_keywords, setIncludedIndividualSkillsKeywords] = useState<string[]>([])
+  const [excluded_individual_skills_keywords, setExcludedIndividualSkillsKeywords] = useState<string[]>([])
+  const [included_individual_locations_keywords, setIncludedIndividualLocationsKeywords] = useState<string[]>([])
+  const [excluded_individual_locations_keywords, setExcludedIndividualLocationsKeywords] = useState<string[]>([])
+  const [included_individual_generalized_keywords, setIncludedIndividualGeneralizedKeywords] = useState<string[]>([])
+  const [excluded_individual_generalized_keywords, setExcludedIndividualGeneralizedKeywords] = useState<string[]>([])
+  const [included_individual_education_keywords, setIncludedIndividualEducationKeywords] = useState<string[]>([])
+  const [excluded_individual_education_keywords, setExcludedIndividualEducationKeywords] = useState<string[]>([])
+  const [included_company_name_keywords, setIncludedCompanyNameKeywords] = useState<string[]>([])
+  const [excluded_company_name_keywords, setExcludedCompanyNameKeywords] = useState<string[]>([])
+  const [included_company_locations_keywords, setIncludedCompanyLocationsKeywords] = useState<string[]>([])
+  const [excluded_company_locations_keywords, setExcludedCompanyLocationsKeywords] = useState<string[]>([])
+  const [company_size_start, setCompanySizeStart] = useState<number>(0)
+  const [company_size_end, setCompanySizeEnd] = useState<number>(0)
+  const [included_company_industries_keywords, setIncludedCompanyIndustriesKeywords] = useState<string[]>([])
+  const [excluded_company_industries_keywords, setExcludedCompanyIndustriesKeywords] = useState<string[]>([])
+  const [included_company_generalized_keywords, setIncludedCompanyGeneralizedKeywords] = useState<string[]>([])
+  const [excluded_company_generalized_keywords, setExcludedCompanyGeneralizedKeywords] = useState<string[]>([])
 
   useQuery({
     queryKey: [`get-icp-filters`, { currentProject }],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { currentProject }] = queryKey;
+      const [_key, { currentProject }] = queryKey
 
-      if (!currentProject) return null;
+      if (!currentProject) return null
 
-      const response = await getICPRuleSet(userToken, currentProject.id);
+      const response = await getICPRuleSet(userToken, currentProject.id)
 
       if (response.status === 'success') {
-        setIncludedIndividualTitleKeywords(response.data.included_individual_title_keywords ?? []);
-        setExcludedIndividualTitleKeywords(response.data.excluded_individual_title_keywords ?? []);
-        setIncludedIndividualIndustryKeywords(
-          response.data.included_individual_industry_keywords ?? []
-        );
-        setExcludedIndividualIndustryKeywords(
-          response.data.excluded_individual_industry_keywords ?? []
-        );
-        setIndividualYearsOfExperienceStart(
-          response.data.individual_years_of_experience_start ?? 0
-        );
-        setIndividualYearsOfExperienceEnd(response.data.individual_years_of_experience_end ?? 0);
-        setIncludedIndividualSkillsKeywords(
-          response.data.included_individual_skills_keywords ?? []
-        );
-        setExcludedIndividualSkillsKeywords(
-          response.data.excluded_individual_skills_keywords ?? []
-        );
-        setIncludedIndividualLocationsKeywords(
-          response.data.included_individual_locations_keywords ?? []
-        );
-        setExcludedIndividualLocationsKeywords(
-          response.data.excluded_individual_locations_keywords ?? []
-        );
-        setIncludedIndividualGeneralizedKeywords(
-          response.data.included_individual_generalized_keywords ?? []
-        );
-        setExcludedIndividualGeneralizedKeywords(
-          response.data.excluded_individual_generalized_keywords ?? []
-        );
-        setIncludedIndividualEducationKeywords(
-          response.data.included_individual_education_keywords ?? []
-        );
-        setExcludedIndividualEducationKeywords(
-          response.data.excluded_individual_education_keywords ?? []
-        );
-        setIncludedCompanyNameKeywords(response.data.included_company_name_keywords ?? []);
-        setExcludedCompanyNameKeywords(response.data.excluded_company_name_keywords ?? []);
-        setIncludedCompanyLocationsKeywords(
-          response.data.included_company_locations_keywords ?? []
-        );
-        setExcludedCompanyLocationsKeywords(
-          response.data.excluded_company_locations_keywords ?? []
-        );
-        setCompanySizeStart(response.data.company_size_start ?? 0);
-        setCompanySizeEnd(response.data.company_size_end ?? 0);
-        setIncludedCompanyIndustriesKeywords(
-          response.data.included_company_industries_keywords ?? []
-        );
-        setExcludedCompanyIndustriesKeywords(
-          response.data.excluded_company_industries_keywords ?? []
-        );
-        setIncludedCompanyGeneralizedKeywords(
-          response.data.included_company_generalized_keywords ?? []
-        );
-        setExcludedCompanyGeneralizedKeywords(
-          response.data.excluded_company_generalized_keywords ?? []
-        );
+        setIncludedIndividualTitleKeywords(response.data.included_individual_title_keywords ?? [])
+        setExcludedIndividualTitleKeywords(response.data.excluded_individual_title_keywords ?? [])
+        setIncludedIndividualIndustryKeywords(response.data.included_individual_industry_keywords ?? [])
+        setExcludedIndividualIndustryKeywords(response.data.excluded_individual_industry_keywords ?? [])
+        setIndividualYearsOfExperienceStart(response.data.individual_years_of_experience_start ?? 0)
+        setIndividualYearsOfExperienceEnd(response.data.individual_years_of_experience_end ?? 0)
+        setIncludedIndividualSkillsKeywords(response.data.included_individual_skills_keywords ?? [])
+        setExcludedIndividualSkillsKeywords(response.data.excluded_individual_skills_keywords ?? [])
+        setIncludedIndividualLocationsKeywords(response.data.included_individual_locations_keywords ?? [])
+        setExcludedIndividualLocationsKeywords(response.data.excluded_individual_locations_keywords ?? [])
+        setIncludedIndividualGeneralizedKeywords(response.data.included_individual_generalized_keywords ?? [])
+        setExcludedIndividualGeneralizedKeywords(response.data.excluded_individual_generalized_keywords ?? [])
+        setIncludedIndividualEducationKeywords(response.data.included_individual_education_keywords ?? [])
+        setExcludedIndividualEducationKeywords(response.data.excluded_individual_education_keywords ?? [])
+        setIncludedCompanyNameKeywords(response.data.included_company_name_keywords ?? [])
+        setExcludedCompanyNameKeywords(response.data.excluded_company_name_keywords ?? [])
+        setIncludedCompanyLocationsKeywords(response.data.included_company_locations_keywords ?? [])
+        setExcludedCompanyLocationsKeywords(response.data.excluded_company_locations_keywords ?? [])
+        setCompanySizeStart(response.data.company_size_start ?? 0)
+        setCompanySizeEnd(response.data.company_size_end ?? 0)
+        setIncludedCompanyIndustriesKeywords(response.data.included_company_industries_keywords ?? [])
+        setExcludedCompanyIndustriesKeywords(response.data.excluded_company_industries_keywords ?? [])
+        setIncludedCompanyGeneralizedKeywords(response.data.included_company_generalized_keywords ?? [])
+        setExcludedCompanyGeneralizedKeywords(response.data.excluded_company_generalized_keywords ?? [])
       }
-      return null;
+      return null
     },
     refetchOnWindowFocus: false,
-  });
+  })
 
   useEffect(() => {
     setGlobalRuleSetData({
@@ -200,7 +114,7 @@ function Filters(props: {
       excluded_company_generalized_keywords,
       included_individual_education_keywords,
       excluded_individual_education_keywords,
-    });
+    })
   }, [
     included_individual_title_keywords,
     excluded_individual_title_keywords,
@@ -226,13 +140,11 @@ function Filters(props: {
     excluded_company_generalized_keywords,
     included_individual_education_keywords,
     excluded_individual_education_keywords,
-  ]);
+  ])
 
-  const titleOptions = [...new Set(icpProspects.map((x) => (x.title ? x.title : '')))].filter(
-    (x) => x
-  );
-  const industryOptions = [...new Set(icpProspects.map((x) => x.industry))].filter((x) => x);
-  const companyOptions = [...new Set(icpProspects.map((x) => x.company))].filter((x) => x);
+  const titleOptions = [...new Set(icpProspects.map((x) => (x.title ? x.title : '')))].filter((x) => x)
+  const industryOptions = [...new Set(icpProspects.map((x) => x.industry))].filter((x) => x)
+  const companyOptions = [...new Set(icpProspects.map((x) => x.company))].filter((x) => x)
 
   return (
     <>
@@ -323,14 +235,7 @@ function Filters(props: {
                 <Title size={'14px'} fw={'500'}>
                   Years of Experience
                 </Title>
-                <Flex
-                  justify={'space-between'}
-                  align={'center'}
-                  mt={'0.2rem'}
-                  w={'100%'}
-                  gap={'xs'}
-                  maw={'30vw'}
-                >
+                <Flex justify={'space-between'} align={'center'} mt={'0.2rem'} w={'100%'} gap={'xs'} maw={'30vw'}>
                   <NumberInput
                     value={individual_years_of_experience_start}
                     placeholder='Min'
@@ -344,12 +249,7 @@ function Filters(props: {
                     onChange={(value) => setIndividualYearsOfExperienceEnd(value || 0)}
                   />
                 </Flex>
-                <Button
-                  mt={'0.5rem'}
-                  size='sm'
-                  ml={'auto'}
-                  onClick={() => setIndividualYearsOfExperienceEnd(100)}
-                >
+                <Button mt={'0.5rem'} size='sm' ml={'auto'} onClick={() => setIndividualYearsOfExperienceEnd(100)}>
                   Max
                 </Button>
               </Flex>
@@ -491,12 +391,7 @@ function Filters(props: {
                     onChange={(value) => setCompanySizeEnd(value || 0)}
                   />
                 </Box>
-                <Button
-                  mt={'0.5rem'}
-                  size='sm'
-                  ml={'auto'}
-                  onClick={() => setCompanySizeEnd(100_000)}
-                >
+                <Button mt={'0.5rem'} size='sm' ml={'auto'} onClick={() => setCompanySizeEnd(100_000)}>
                   Max
                 </Button>
               </Flex>
@@ -541,42 +436,39 @@ function Filters(props: {
         </Box>
       </Tabs>
       {props.autofill && (
-        <Center>
+        <Flex align={'center'} justify={'space-between'}>
           <Button
-            mt='xs'
+            // mt='xs'
             variant='light'
             loading={loading}
             onClick={async () => {
               openConfirmModal({
                 title: 'Override existing filters?',
                 children: (
-                  <Text>
-                    Are you sure you want to override existing filters? This action cannot be
-                    undone.
-                  </Text>
+                  <Text>Are you sure you want to override existing filters? This action cannot be undone.</Text>
                 ),
                 labels: { confirm: 'Confirm', cancel: 'Cancel' },
                 onCancel: () => {},
                 onConfirm: () => {
-                  (async () => {
-                    if (!currentProject) return;
-                    setLoading(true);
-                    const response = await getFiltersAutofill(userToken, currentProject.id);
-                    const results = response.data;
-                    console.log(results);
-                    setIncludedIndividualTitleKeywords(results.job_titles);
-                    setIncludedIndividualIndustryKeywords(results.industries);
-                    setCompanySizeStart(results.yoe.min);
-                    setCompanySizeEnd(results.yoe.max);
-                    setLoading(false);
+                  ;(async () => {
+                    if (!currentProject) return
+                    setLoading(true)
+                    const response = await getFiltersAutofill(userToken, currentProject.id)
+                    const results = response.data
+                    console.log(results)
+                    setIncludedIndividualTitleKeywords(results.job_titles)
+                    setIncludedIndividualIndustryKeywords(results.industries)
+                    setCompanySizeStart(results.yoe.min)
+                    setCompanySizeEnd(results.yoe.max)
+                    setLoading(false)
 
                     showNotification({
                       title: 'Filters autofilled',
                       message: 'Filters have been autofilled based on your prospects',
-                    });
-                  })();
+                    })
+                  })()
                 },
-              });
+              })
             }}
           >
             AI Autofill
@@ -587,17 +479,17 @@ function Filters(props: {
                 modal: 'salesNavURL',
                 title: 'Improt Filters from Sales Nav URL',
                 innerProps: {},
-              });
+              })
             }}
-            size='xs'
+            size='md'
             compact
           >
             Import from Sales Nav URL
           </Button>
-        </Center>
+        </Flex>
       )}
     </>
-  );
+  )
 }
 
-export default Filters;
+export default Filters

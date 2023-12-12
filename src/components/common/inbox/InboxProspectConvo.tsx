@@ -237,7 +237,11 @@ export function ProspectConvoMessage(props: {
 
 export let HEADER_HEIGHT = 190;
 
+type LiStepProgress = 'COMPLETE' | 'INCOMPLETE' | 'COMING_SOON' | 'OPTIONAL';
+
+
 export default function ProspectConvo(props: { prospects: ProspectShallow[], onTabChange?: (tab: string) => void, openConvoBox?: boolean, hideTitle?: boolean }) {
+  const [stepThreeComplete, setStepThreeComplete] = useState<LiStepProgress>('INCOMPLETE');
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
 
@@ -553,7 +557,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
     <Flex gap={0} direction="column" wrap="nowrap" h={"100%"} bg="white">
       <div style={{ height: HEADER_HEIGHT, position: "relative" }}>
         <></>
-          {!props.hideTitle && 
+        {!props.hideTitle &&
           <Group position="apart" p={15} h={66} sx={{ flexWrap: "nowrap" }}>
             <div style={{ overflow: "hidden" }}>
               <Title order={3} truncate>
@@ -587,7 +591,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
             </Group>
           </Group>
         }
-        
+
         <Tabs
           variant="outline"
           defaultValue="LINKEDIN"
@@ -845,7 +849,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
                 }
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
-                
+
               />
             </Box>
             <Box
@@ -888,6 +892,11 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
           messages={currentConvoLiMessages || []}
           onClose={() => {
             triggerGetBumpFrameworks();
+          }}
+          onPopulateBumpFrameworks={(buckets) => {
+            if (buckets.ACCEPTED.total > 0 || Object.values(buckets.BUMPED).find(d => d.total > 0) || buckets.ACTIVE_CONVO.total > 0) {
+              setStepThreeComplete('COMPLETE');
+            }
           }}
         />
       )}

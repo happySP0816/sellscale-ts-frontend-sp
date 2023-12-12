@@ -145,7 +145,7 @@ export default function VoiceSelect(props: {
             if (selectedVoice) {
               openContextModal({
                 modal: "voiceEditor",
-                title: <Title order={3}>Voice Editor</Title>,
+                title: <Title order={3}>Voice Editor: {selectedVoice.name}</Title>,
                 innerProps: {
                   persona_id: selectedVoice?.archetype_id,
                   voiceId: selectedVoice?.id,
@@ -204,24 +204,6 @@ export default function VoiceSelect(props: {
                     </div>
                   </Group>
                 </td>
-                {/* <td>
-                    <Button
-                      color="grape"
-                      rightIcon={<IconEdit size="0.9rem" />}
-                      onClick={() => {
-                        openContextModal({
-                          modal: "voiceEditor",
-                          title: <Title order={3}>Voice Editor</Title>,
-                          innerProps: {
-                            persona_id: voice.archetype_id,
-                            voiceId: voice.id,
-                          },
-                        });
-                      }}
-                    >
-                      Edit Voice
-                    </Button>
-                  </td> */}
               </tr>
             ),
             rightSection: (

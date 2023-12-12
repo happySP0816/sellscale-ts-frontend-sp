@@ -140,7 +140,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
                       onClick={() => {
                         openContextModal({
                           modal: "voiceEditor",
-                          title: <Title order={3}>Voice Editor</Title>,
+                          title: <Title order={3}>Voice Editor: {item.name}</Title>,
                           innerProps: {
                             persona_id: item.archetype_id,
                             voiceId: item.id,

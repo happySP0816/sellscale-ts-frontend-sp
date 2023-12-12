@@ -1,8 +1,8 @@
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { useRecoilValue } from "recoil";
-import { getLIMessagesQueuedForOutreach } from "@utils/requests/getMessagesQueuedForOutreach";
-import { useDebouncedState, useDidUpdate } from "@mantine/hooks";
-import { useEffect, useRef, useState } from "react";
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { useRecoilValue } from 'recoil';
+import { getLIMessagesQueuedForOutreach } from '@utils/requests/getMessagesQueuedForOutreach';
+import { useDebouncedState, useDidUpdate } from '@mantine/hooks';
+import { useEffect, useRef, useState } from 'react';
 import {
   Card,
   Center,
@@ -15,13 +15,13 @@ import {
   Text,
   Avatar,
   Badge,
-} from "@mantine/core";
+} from '@mantine/core';
 
-import LinkedinQueuedMessageItem from "./LinkedinQueuedMessageItem";
-import { getUpcomingGenerations } from "@utils/requests/getUpcomingGenerations";
-import { DataTable, type DataTableSortStatus } from "mantine-datatable";
-import { IconChevronUp, IconSelector } from "@tabler/icons";
-import { sortBy } from "lodash";
+import LinkedinQueuedMessageItem from './LinkedinQueuedMessageItem';
+import { getUpcomingGenerations } from '@utils/requests/getUpcomingGenerations';
+import { DataTable, type DataTableSortStatus } from 'mantine-datatable';
+import { IconChevronUp, IconSelector } from '@tabler/icons';
+import { sortBy } from 'lodash';
 
 const LI_MESSAGE_PAGE_LIMIT = 5;
 
@@ -36,6 +36,7 @@ type MessageType = {
   icp_fit_score: number;
   icp_fit_reason: string;
   archetype: string;
+  created_at: string;
 };
 
 type UpcomingGeneration = {
@@ -53,20 +54,18 @@ type UpcomingGeneration = {
 const UpcomingGenerationsView = () => {
   const userToken = useRecoilValue(userTokenState);
   const [isFetching, setIsFetching] = useState(false);
-  const [upcomingGenerations, setUpcomingGenerations] = useState<
-    UpcomingGeneration[]
-  >([]);
+  const [upcomingGenerations, setUpcomingGenerations] = useState<UpcomingGeneration[]>([]);
 
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
-    columnAccessor: "archetype",
-    direction: "desc",
+    columnAccessor: 'archetype',
+    direction: 'desc',
   });
 
   const triggerGetUpcomingGenerations = async () => {
     setIsFetching(true);
 
     const response = await getUpcomingGenerations(userToken, true, true);
-    const archetypes = response.status === "success" ? response.data : [];
+    const archetypes = response.status === 'success' ? response.data : [];
     let linkedinActiveArchetypes = [];
     for (const archetype of archetypes) {
       if (archetype.linkedin_active) {
@@ -84,9 +83,7 @@ const UpcomingGenerationsView = () => {
 
   useEffect(() => {
     const pageData = sortBy(upcomingGenerations, sortStatus.columnAccessor);
-    setUpcomingGenerations(
-      sortStatus.direction === "desc" ? pageData.reverse() : pageData
-    );
+    setUpcomingGenerations(sortStatus.direction === 'desc' ? pageData.reverse() : pageData);
   }, [sortStatus]);
 
   return (
@@ -103,41 +100,39 @@ const UpcomingGenerationsView = () => {
           sorted: <IconChevronUp size={14} />,
           unsorted: <IconSelector size={14} />,
         }}
-        noRecordsText="No upcoming generations"
+        noRecordsText='No upcoming generations'
         columns={[
           {
-            accessor: "archetype",
-            title: "Campaign",
+            accessor: 'archetype',
+            title: 'Campaign',
             sortable: true,
           },
           {
-            accessor: "sdr_name",
-            title: "SDR",
+            accessor: 'sdr_name',
+            title: 'SDR',
             sortable: true,
             render: ({ sdr_name, sdr_img_url }) => {
-              const firstName = sdr_name.split(" ")[0];
+              const firstName = sdr_name.split(' ')[0];
               return (
                 <Flex>
-                  <Avatar src={sdr_img_url} radius="xl" size="sm" mr="sm" />
+                  <Avatar src={sdr_img_url} radius='xl' size='sm' mr='sm' />
                   <Text>{firstName}</Text>
                 </Flex>
               );
             },
           },
           {
-            accessor: "id",
-            title: "Scheduled For",
+            accessor: 'id',
+            title: 'Scheduled For',
             render: () => {
               return <Text>Tonight, 11:59pm</Text>;
             },
           },
           {
-            accessor: "daily_sla_count",
-            title: "Status",
+            accessor: 'daily_sla_count',
+            title: 'Status',
             render: ({ daily_sla_count }) => {
-              return (
-                <Badge color="green.9">Generating: {daily_sla_count}</Badge>
-              );
+              return <Badge color='green.9'>Generating: {daily_sla_count}</Badge>;
             },
           },
         ]}
@@ -153,10 +148,7 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
   const userData = useRecoilValue(userDataState);
 
   const [allMessages, setAllMessages] = useState<MessageType[]>([]);
-  const [scrollPosition, onScrollPositionChange] = useDebouncedState(
-    { x: 0, y: 0 },
-    300
-  );
+  const [scrollPosition, onScrollPositionChange] = useDebouncedState({ x: 0, y: 0 }, 300);
   const scrollRef = useRef<HTMLDivElement>(null);
   const outerScrollRef = useRef<HTMLDivElement>(null);
   const totalItems = useRef<number>(-1);
@@ -169,10 +161,8 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
       LI_MESSAGE_PAGE_LIMIT,
       (page - 1) * LI_MESSAGE_PAGE_LIMIT
     );
-    const messages =
-      response.status === "success" ? response.data.messages : [];
-    totalItems.current =
-      response.status === "success" ? response.data.total_count : -1;
+    const messages = response.status === 'success' ? response.data.messages : [];
+    totalItems.current = response.status === 'success' ? response.data.total_count : -1;
     setAllMessages((oldMessages) => [...oldMessages, ...messages]);
 
     setIsFetching(false);
@@ -190,26 +180,27 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
     ) {
       return;
     }
-    const maxScroll =
-      scrollRef.current.scrollHeight - outerScrollRef.current.scrollHeight;
+    const maxScroll = scrollRef.current.scrollHeight - outerScrollRef.current.scrollHeight;
     if (scrollPosition.y >= maxScroll - 150 && !isFetching) {
       setPage(page + 1);
     }
   }, [scrollPosition, allMessages]);
 
+  console.log('allMessages', allMessages);
+
   return (
     <ScrollArea
-      h="100vh"
+      h='100vh'
       onScrollPositionChange={onScrollPositionChange}
       ref={outerScrollRef}
       viewportRef={scrollRef}
-      w="100%"
+      w='100%'
     >
-      <Stack p="md">
+      <Stack p='md'>
         <UpcomingGenerationsView />
         <Title order={4}>{userData.sdr_name}'s Queued Messages</Title>
         {allMessages && allMessages.length > 0 ? (
-          allMessages.map((messageItem: MessageType, i: number) => {
+          allMessages.map((messageItem, i) => {
             return (
               <div key={messageItem.prospect_id + messageItem.message_id}>
                 <LinkedinQueuedMessageItem
@@ -230,16 +221,18 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
                       oldMessages.filter((i) => i.prospect_id !== prospect_id)
                     )
                   }
+                  created_at={messageItem.created_at}
+                  sending_at={new Date(new Date().getTime() + i * 20 * 60000).toUTCString()}
                 />
               </div>
             );
           })
         ) : (
-          <Card m="md">No messages queued for outreach... yet!</Card>
+          <Card m='md'>No messages queued for outreach... yet!</Card>
         )}
       </Stack>
-      <Center my={20} sx={{ visibility: isFetching ? "visible" : "hidden" }}>
-        <Loader variant="dots" />
+      <Center my={20} sx={{ visibility: isFetching ? 'visible' : 'hidden' }}>
+        <Loader variant='dots' />
       </Center>
     </ScrollArea>
   );

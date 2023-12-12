@@ -27,7 +27,7 @@ import { IconSelector } from '@tabler/icons-react'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend)
 
-const ScrappingReport = () => {
+const ScrapingReport = () => {
   const [analytics, setAnalytics]: any = useState(null)
   const [currentPage, setCurrentPage]: any = useState(1)
   const [searchQuery, setSearchQuery] = useState('')
@@ -206,13 +206,13 @@ const ScrappingReport = () => {
             <tr key={index}>
               <td style={{ width: '25%' }}>
                 <Flex my={4} align={'center'}>
-                  <Avatar size={'lg'} radius={'xl'} />
+                  <Avatar size={'md'} mr='xs' radius={'xl'} />
                   <Stack>
-                    <Text size={16} className=' line-clamp-1'>
+                    <Text size='sm' size={16} className=' line-clamp-1'>
                       {upload['upload name']}
                     </Text>
                     <Text
-                      size='10'
+                      size='xs' 
                       color='blue'
                       mt={-15}
                       style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer' }}
@@ -225,25 +225,25 @@ const ScrappingReport = () => {
               </td>
               <td style={{ width: '20%' }}>
                 <Flex align={'center'}>
-                  <Avatar src={upload?.avatar} size={'md'} radius={'xl'} />
+                  <Avatar src={upload?.account_img} size={'sm'} radius={'xl'} mr='xs' />
                   <Stack>
-                    <Text style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer' }}>
+                    <Text size='xs' style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer' }}>
                       {upload.account} <IconExternalLink size={14} color='#478cef' />
                     </Text>
-                    <Text size='xs' color='gray' mt={-20}>
-                      GTM Leadership
+                    <Text size='xs' size='xs' color='gray' mt={-20}>
+                      {upload.account_title.substr(0, 20)}{' '}{upload.account_title.length > 20 ? '...' : ''}
                     </Text>
                   </Stack>
                 </Flex>
               </td>
               <td style={{ width: '20%' }}>
-                <Progress value={(upload.scraped / 150) * 100} color='blue' />
-                <Text mt={4}>
-                  {upload.scraped} <span style={{ color: 'gray' }}> out of 3000</span>
+                <Progress value={100} color='green' />
+                <Text size='xs' mt={4}>
+                  {upload.scraped} <span style={{ color: 'gray' }}> out of {upload.scraped}</span>
                 </Text>
               </td>
               <td style={{ width: '20%', textAlign: 'center' }}>
-                <Badge color={upload.status === 'Complete' ? 'green' : 'yellow'} variant='outline'>
+                <Badge color={upload.status === 'Complete' ? 'green' : 'yellow'} variant='outline' size='md'>
                   {upload.status}
                 </Badge>
               </td>
@@ -266,4 +266,4 @@ const ScrappingReport = () => {
   )
 }
 
-export default ScrappingReport
+export default ScrapingReport

@@ -18,7 +18,7 @@ import DoNotContactList from '@common/settings/DoNotContactList'
 import PageFrame from '@common/PageFrame'
 import UploadOverviewV2 from './UploadOverviewV2'
 import TAMGraph from './TAMGraph'
-import ScrappingReport from './ScrappingReport'
+import ScrapingReport from './ScrapingReport'
 
 const ContactOverview = () => {
   return (
@@ -30,7 +30,7 @@ const ContactOverview = () => {
         </Tabs.Tab>
         <Tabs.Tab value='scrapping_report'>
           <IconTable size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
-          Scrapping Report
+          Scraping Report
         </Tabs.Tab>
         <Tabs.Tab value='global_contacts'>
           <IconList size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
@@ -53,7 +53,7 @@ const ContactOverview = () => {
         <UploadOverview />
       </Tabs.Panel>
       <Tabs.Panel value='scrapping_report'>
-        <ScrappingReport />
+        <ScrapingReport />
       </Tabs.Panel>
       <Tabs.Panel value='global_contacts'>
         <GlobalContacts />

@@ -249,7 +249,7 @@ export default function InboxProspectConvoBumpFramework(props: {
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
 
-    const result = await getBumpFrameworks(userToken, [], [], [archetypeID]);
+    const result = await getBumpFrameworks(userToken, [], [], []);
     if (result.status !== 'success') {
       setLoading(false);
       showNotification({

@@ -9,6 +9,7 @@ import EmojiPicker from "emoji-picker-react";
 import {
   IconFlagCancel,
   IconMessage,
+  IconPencil,
   IconPointerCancel,
 } from "@tabler/icons-react";
 
@@ -93,31 +94,31 @@ import AllCampaign from "../../PersonaCampaigns/AllCampaign";
 import postSyncSmartleadCampaigns from "@utils/requests/postSyncSmartleadCampaigns";
 
 export type CampaignPersona = {
-  id: number
-  name: string
-  email_sent: number
-  email_opened: number
-  email_replied: number
-  li_sent: number
-  li_opened: number
-  li_replied: number
-  active: boolean
-  linkedin_active: boolean
-  email_active: boolean
-  created_at: string
-  emoji: string
-  total_sent: number
-  total_opened: number
-  total_replied: number
-  total_demo: number
-  total_prospects: number
-  sdr_name: string
-  sdr_img_url: string
-  sdr_id: number
-  smartlead_campaign_id?: number
-  meta_data?: Record<string, any>
-  first_message_delay_days?: number
-}
+  id: number;
+  name: string;
+  email_sent: number;
+  email_opened: number;
+  email_replied: number;
+  li_sent: number;
+  li_opened: number;
+  li_replied: number;
+  active: boolean;
+  linkedin_active: boolean;
+  email_active: boolean;
+  created_at: string;
+  emoji: string;
+  total_sent: number;
+  total_opened: number;
+  total_replied: number;
+  total_demo: number;
+  total_prospects: number;
+  sdr_name: string;
+  sdr_img_url: string;
+  sdr_id: number;
+  smartlead_campaign_id?: number;
+  meta_data?: Record<string, any>;
+  first_message_delay_days?: number;
+};
 
 export default function PersonaCampaigns() {
   const navigate = useNavigate();
@@ -167,7 +168,7 @@ export default function PersonaCampaigns() {
     const result =
       response.status === "success" ? (response.data as CampaignPersona[]) : [];
 
-    console.log({result})
+    console.log({ result });
     // Aggregate campaign analytics
     let analytics = {
       sentOutreach: 0,
@@ -207,7 +208,7 @@ export default function PersonaCampaigns() {
         : [];
     setProjects(result2);
 
-    console.log({result2})
+    console.log({ result2 });
     // Get AI Activity
     const response3 = await getPersonasActivity(userToken);
     const result3 = response3.status === "success" ? response3.data : [];
@@ -494,8 +495,6 @@ export function PersonCampaignCard(props: {
     props.persona.active
   );
 
-  console.log(props.persona);
-
   let total_replied = props.persona.total_replied;
   let total_opened = props.persona.total_opened;
   let total_sent = props.persona.total_sent;
@@ -503,8 +502,8 @@ export function PersonCampaignCard(props: {
   const userData = useRecoilValue(userDataState);
 
   const [value, setValue] = useState<string>("");
-  const [campaignList, setCampaignList] = useState([])
-  const [campaignName, setCampaignName] = useState('')
+  const [campaignList, setCampaignList] = useState([]);
+  const [campaignName, setCampaignName] = useState("");
 
   const setEmoji = (emoji: string) => {
     setEmojiState(emoji);
@@ -569,40 +568,48 @@ export function PersonCampaignCard(props: {
           blur: 3,
         }}
         centered
-        size='70rem'
+        size="70rem"
         withCloseButton={false}
         padding={0}
-        radius={'md'}
+        radius={"md"}
       >
         <Modal.Header
           bg={
-            value === 'sent'
-              ? '#228be6'
-              : value === 'open'
-              ? '#fd4efe'
-              : value === 'reply'
-              ? 'orange'
-              : value === 'demo'
-              ? 'green'
-              : ''
+            value === "sent"
+              ? "#228be6"
+              : value === "open"
+              ? "#fd4efe"
+              : value === "reply"
+              ? "orange"
+              : value === "demo"
+              ? "green"
+              : ""
           }
         >
-          <Flex justify={'space-between'} w={'100%'} align={'center'} px={43} py={25}>
-            <Text size={'lg'} color='white'>
-              Outreach for:{' '}
-              <span className=' font-semibold text-[20px]'>
-                {' '}
-                {campaignName ? campaignName : 'Coming soon! ⚠️ - This is all mock data...'}
+          <Flex
+            justify={"space-between"}
+            w={"100%"}
+            align={"center"}
+            px={43}
+            py={25}
+          >
+            <Text size={"lg"} color="white">
+              Outreach for:{" "}
+              <span className=" font-semibold text-[20px]">
+                {" "}
+                {campaignName
+                  ? campaignName
+                  : "Coming soon! ⚠️ - This is all mock data..."}
               </span>
             </Text>
             <CloseButton
-              aria-label='Close modal'
+              aria-label="Close modal"
               onClick={channelClose}
-              variant='outline'
-              radius='xl'
+              variant="outline"
+              radius="xl"
               style={{
-                borderColor: 'white',
-                color: 'white',
+                borderColor: "white",
+                color: "white",
               }}
             />
           </Flex>
@@ -611,118 +618,136 @@ export function PersonCampaignCard(props: {
           <Group
             grow
             style={{
-              justifyContent: 'center',
-              gap: '0px',
+              justifyContent: "center",
+              gap: "0px",
             }}
           >
             <Box
-              w={'100%'}
+              w={"100%"}
               onClick={() => {
-                setValue('sent')
+                setValue("sent");
               }}
             >
               <StatModalDisplay
-                color='#228be6'
-                icon={<IconSend color={theme.colors.blue[6]} size='20' />}
-                label='Sent'
-                percentcolor='#e7f5ff'
+                color="#228be6"
+                icon={<IconSend color={theme.colors.blue[6]} size="20" />}
+                label="Sent"
+                percentcolor="#e7f5ff"
                 total={total_sent ?? 0}
-                border={value === 'sent' ? '#228be6' : ''}
-                percentage={Math.floor(((total_sent ?? 0) / (total_sent || 1)) * 100)}
+                border={value === "sent" ? "#228be6" : ""}
+                percentage={Math.floor(
+                  ((total_sent ?? 0) / (total_sent || 1)) * 100
+                )}
               />
             </Box>
             <Box
-              w={'100%'}
+              w={"100%"}
               onClick={() => {
-                setValue('open')
+                setValue("open");
               }}
             >
               <StatModalDisplay
-                color='#fd4efe'
-                icon={<IconChecks color={'#fd4efe'} size='20' />}
-                label='Open'
-                percentcolor='#ffedff'
-                border={value === 'open' ? '#fd4efe' : ''}
+                color="#fd4efe"
+                icon={<IconChecks color={"#fd4efe"} size="20" />}
+                label="Open"
+                percentcolor="#ffedff"
+                border={value === "open" ? "#fd4efe" : ""}
                 total={total_opened ?? 0}
-                percentage={Math.floor(((total_opened ?? 0) / (total_sent || 1)) * 100)}
+                percentage={Math.floor(
+                  ((total_opened ?? 0) / (total_sent || 1)) * 100
+                )}
               />
             </Box>
             <Box
-              w={'100%'}
+              w={"100%"}
               onClick={() => {
-                setValue('reply')
+                setValue("reply");
               }}
             >
               <StatModalDisplay
-                color='#fd7e14'
-                icon={<IconMessage color={theme.colors.orange[6]} size='20' />}
-                label='Reply'
-                percentcolor='#fff5ee'
-                border={value === 'reply' ? '#fd7e14' : ''}
+                color="#fd7e14"
+                icon={<IconMessage color={theme.colors.orange[6]} size="20" />}
+                label="Reply"
+                percentcolor="#fff5ee"
+                border={value === "reply" ? "#fd7e14" : ""}
                 total={total_replied ?? 0}
-                percentage={Math.floor(((total_replied ?? 0) / (total_opened || 1)) * 100)}
+                percentage={Math.floor(
+                  ((total_replied ?? 0) / (total_opened || 1)) * 100
+                )}
               />
             </Box>
             <Box
-              w={'100%'}
+              w={"100%"}
               onClick={() => {
-                setValue('demo')
+                setValue("demo");
               }}
             >
               <StatModalDisplay
-                color='#40c057'
-                icon={<IconCalendar color={theme.colors.green[6]} size='20' />}
-                label='Demo'
-                percentcolor='#e2f6e7'
-                border={value === 'demo' ? '#40c057' : ''}
+                color="#40c057"
+                icon={<IconCalendar color={theme.colors.green[6]} size="20" />}
+                label="Demo"
+                percentcolor="#e2f6e7"
+                border={value === "demo" ? "#40c057" : ""}
                 total={props.persona.total_demo ?? 0}
-                percentage={Math.floor(((props.persona.total_demo ?? 0) / (total_replied || 1)) * 100)}
+                percentage={Math.floor(
+                  ((props.persona.total_demo ?? 0) / (total_replied || 1)) * 100
+                )}
               />
             </Box>
           </Group>
           <ScrollArea h={600} scrollbarSize={6}>
-            <Flex direction={'column'} gap={20} my={20}>
+            <Flex direction={"column"} gap={20} my={20}>
               {filteredCampaignList?.map((item: any, index) => {
                 return (
                   <Group
                     grow
                     style={{
-                      justifyContent: 'start',
-                      gap: '0px',
+                      justifyContent: "start",
+                      gap: "0px",
                     }}
                     key={index}
                   >
                     <Flex
                       mx={25}
-                      w={'100%'}
+                      w={"100%"}
                       style={{
-                        borderRadius: '10px',
-                        border: '3px solid #e9ecef',
+                        borderRadius: "10px",
+                        border: "3px solid #e9ecef",
                       }}
                     >
                       <Box
                         px={15}
                         py={12}
                         style={{
-                          borderRight: '3px solid #e9ecef',
+                          borderRight: "3px solid #e9ecef",
                         }}
-                        w={'30rem'}
+                        w={"30rem"}
                       >
-                        <Flex align={'center'} gap={10} mb={8}>
-                          <Avatar src={props.persona.sdr_img_url} radius='xl' size='lg' />
+                        <Flex align={"center"} gap={10} mb={8}>
+                          <Avatar
+                            src={props.persona.sdr_img_url}
+                            radius="xl"
+                            size="lg"
+                          />
                           <Box>
-                            <Flex align={'center'} gap={10}>
+                            <Flex align={"center"} gap={10}>
                               <Text fw={600}>{item.prospect_name}</Text>
                             </Flex>
-                            <Flex align={'center'} gap={10} w={'100%'} mt={3}>
+                            <Flex align={"center"} gap={10} w={"100%"} mt={3}>
                               <Text>ICP Score: </Text>
                               <Badge
                                 color={
-                                  item.prospect_icp_fit_score == 'VERY HIGH' ? 'green' : 
-                                  item.prospect_icp_fit_score == 'HIGH' ? 'blue' :
-                                  item.prospect_icp_fit_score == 'MEDIUM' ? 'yellow' :
-                                  item.prospect_icp_fit_score == 'LOW' ? 'orange' : 
-                                  item.prospect_icp_fit_score == 'VERY LOW' ? 'red' : 'gray'
+                                  item.prospect_icp_fit_score == "VERY HIGH"
+                                    ? "green"
+                                    : item.prospect_icp_fit_score == "HIGH"
+                                    ? "blue"
+                                    : item.prospect_icp_fit_score == "MEDIUM"
+                                    ? "yellow"
+                                    : item.prospect_icp_fit_score == "LOW"
+                                    ? "orange"
+                                    : item.prospect_icp_fit_score == "VERY LOW"
+                                    ? "red"
+                                    : "gray"
                                 }
                                 fw={600}
                               >
@@ -732,99 +757,114 @@ export function PersonCampaignCard(props: {
                           </Box>
                         </Flex>
                         <Flex gap={6}>
-                          <div className='mt-1'>
-                            <IconMan size={20} color='#817e7e' />
+                          <div className="mt-1">
+                            <IconMan size={20} color="#817e7e" />
                           </div>
-                          <Text color='#817e7e' mt={3}>
+                          <Text color="#817e7e" mt={3}>
                             {campaignName}
                           </Text>
                         </Flex>
                         <Flex gap={6}>
-                          <div className='mt-1'>
-                            <IconBriefcase size={20} color='#817e7e' />
+                          <div className="mt-1">
+                            <IconBriefcase size={20} color="#817e7e" />
                           </div>
-                          <Text color='#817e7e' mt={3}>
+                          <Text color="#817e7e" mt={3}>
                             {item.prospect_title}
                           </Text>
                         </Flex>
                         <Flex gap={6}>
-                          <div className='mt-1'>
-                            <IconBuilding size={20} color='#817e7e' />
+                          <div className="mt-1">
+                            <IconBuilding size={20} color="#817e7e" />
                           </div>
-                          <Text color='#817e7e' mt={3}>
+                          <Text color="#817e7e" mt={3}>
                             {item.prospect_company}
                           </Text>
                         </Flex>
                       </Box>
-                      <Box px={15} py={12} w={'100%'}>
-                        <Flex justify={'space-between'}>
-                          <Text color='#817e7e' fw={600}>
+                      <Box px={15} py={12} w={"100%"}>
+                        <Flex justify={"space-between"}>
+                          <Text color="#817e7e" fw={600}>
                             Last Message From Prospect:
                           </Text>
-                          <Text color='#817e7e'>{item.li_last_message_timestamp}</Text>
+                          <Text color="#817e7e">
+                            {item.li_last_message_timestamp}
+                          </Text>
                         </Flex>
                         <Box
                           bg={
-                            value === 'sent'
-                              ? '#e7f5ff'
-                              : value === 'open'
-                              ? '#ffedff'
-                              : value === 'reply'
-                              ? '#fff5ee'
-                              : '#e2f6e7'
+                            value === "sent"
+                              ? "#e7f5ff"
+                              : value === "open"
+                              ? "#ffedff"
+                              : value === "reply"
+                              ? "#fff5ee"
+                              : "#e2f6e7"
                           }
                           p={20}
                           mt={15}
                           style={{
-                            borderRadius: '10px',
+                            borderRadius: "10px",
                           }}
                         >
-                          <Text fw={500}>{item?.li_last_message_from_prospect}</Text>
+                          <Text fw={500}>
+                            {item?.li_last_message_from_prospect}
+                          </Text>
                         </Box>
                       </Box>
                     </Flex>
                   </Group>
-                )
+                );
               })}
             </Flex>
           </ScrollArea>
         </Modal.Body>
       </Modal>
-    )
-  }
+    );
+  };
 
-  const handleChannelOpen = async (type: string, id: number, campaign_name: string) => {
-    setValue(type)
-    setCampaignName(campaign_name)
-    var myHeaders = new Headers()
-    myHeaders.append('Authorization', `Bearer ${userToken}`)
+  const handleChannelOpen = async (
+    type: string,
+    id: number,
+    campaign_name: string
+  ) => {
+    setValue(type);
+    setCampaignName(campaign_name);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${userToken}`);
 
     var requestOptions: any = {
-      method: 'GET',
+      method: "GET",
       headers: myHeaders,
-      redirect: 'follow',
-    }
+      redirect: "follow",
+    };
 
-    await fetch(`${API_URL}/analytics/get_campaign_drilldown/${id}`, requestOptions)
+    await fetch(
+      `${API_URL}/analytics/get_campaign_drilldown/${id}`,
+      requestOptions
+    )
       .then((response) => response.text())
       .then((result) => {
-        channelOpen()
-        setCampaignList(JSON.parse(result).analytics)
+        channelOpen();
+        setCampaignList(JSON.parse(result).analytics);
       })
-      .catch((error) => console.log('error', error))
-  }
+      .catch((error) => console.log("error", error));
+  };
 
   const filteredCampaignList = useMemo(() => {
-    if (value === 'sent') {
-      return campaignList?.filter((item: any) => item.to_status === 'SENT_OUTREACH')
-    } else if (value === 'open') {
-      return campaignList?.filter((item: any) => item.to_status === 'ACCEPTED')
-    } else if (value === 'reply') {
-      return campaignList?.filter((item: any) => item.to_status === 'ACTIVE_CONVO')
-    } else if (value === 'demo') {
-      return campaignList?.filter((item: any) => item.to_status === 'DEMO_SET')
+    if (value === "sent") {
+      return campaignList?.filter(
+        (item: any) => item.to_status === "SENT_OUTREACH"
+      );
+    } else if (value === "open") {
+      return campaignList?.filter((item: any) => item.to_status === "ACCEPTED");
+    } else if (value === "reply") {
+      return campaignList?.filter(
+        (item: any) => item.to_status === "ACTIVE_CONVO"
+      );
+    } else if (value === "demo") {
+      return campaignList?.filter((item: any) => item.to_status === "DEMO_SET");
     }
-  }, [value, campaignList])
+  }, [value, campaignList]);
 
   return (
     <Paper radius="md" ref={ref}>
@@ -848,7 +888,7 @@ export function PersonCampaignCard(props: {
           pr="xs"
           spacing={0}
         >
-          <Group sx={{ flex: "35%" }} spacing={5} noWrap>
+          <Group sx={{ flex: "10%" }}>
             <Box
               onClick={() => {
                 navigateToPage(
@@ -1003,86 +1043,127 @@ export function PersonCampaignCard(props: {
                 </Popover.Dropdown>
               </Popover>
             </Box>
-            <Popover position="bottom" withArrow shadow="md">
-              <Popover.Target>
-                <Avatar
-                  variant="transparent"
-                  color={"gray"}
-                  radius="xl"
-                  size="sm"
-                  sx={{ backgroundColor: "#ffffff22" }}
-                >
-                  <Text fz="lg">{emoji}</Text>
-                </Avatar>
-              </Popover.Target>
-              <Popover.Dropdown>
-                <EmojiPicker
-                  onEmojiClick={(event: any, _: any) => {
-                    const emoji = event.emoji;
-                    setEmoji(emoji);
-                  }}
-                />
-              </Popover.Dropdown>
-            </Popover>
-
-            <Box>
-              <Badge
-                size="xs"
-                color={
-                  props.persona.active && total_sent > 0
-                    ? "blue"
-                    : !props.persona.active && total_sent > 0
-                    ? "green"
-                    : "yellow"
-                }
-              >
-                {props.persona.active && total_sent > 0
-                  ? "Active"
-                  : !props.persona.active && total_sent > 0
-                  ? "Complete"
-                  : "Setup"}
-              </Badge>
-              {!!props.persona.smartlead_campaign_id && (
-                <Badge size="xs" color={"violet"}>
-                  {"Smartlead Synced"}
-                </Badge>
-              )}
-              <Tooltip
-                label={
-                  props.persona.name +
-                  " - " +
-                  +total_sent +
-                  " / " +
-                  props.persona.total_prospects +
-                  " prospects sent"
-                }
-                withArrow
-              >
-                <Flex
-                  onClick={() => {
-                    if (props.persona.sdr_id != userData?.id) return;
-
-                    if (props.persona.email_sent > props.persona.li_sent) {
-                      window.location.href = `/setup/email?campaign_id=${props.persona.id}`;
-                    } else {
-                      window.location.href = `/setup/linkedin?campaign_id=${props.persona.id}`;
-                    }
-                  }}
-                >
-                  <Title order={6} c={"gray.7"}>
-                    {_.truncate(props.persona.name, { length: 40 })}
-                  </Title>
-                  {props.persona.sdr_id == userData?.id && (
-                    <Box ml="xs">
-                      <IconExternalLink size="0.8rem" color="gray" />
-                    </Box>
+          </Group>
+          <Divider orientation="vertical" ml="xs" mr="xs" color="white" />
+          <Group sx={{ flex: "25%" }}>
+            <Flex gap={"xs"}>
+              <Popover position="bottom" withArrow shadow="md">
+                <Popover.Target>
+                  <Avatar
+                    variant="transparent"
+                    color={"gray"}
+                    radius="xl"
+                    size="sm"
+                    sx={{
+                      backgroundColor: "#ffffff22",
+                      marginTop: "auto",
+                      marginBottom: "auto",
+                    }}
+                  >
+                    <Text fz="lg">{emoji}</Text>
+                  </Avatar>
+                </Popover.Target>
+                <Popover.Dropdown>
+                  <EmojiPicker
+                    onEmojiClick={(event: any, _: any) => {
+                      const emoji = event.emoji;
+                      setEmoji(emoji);
+                    }}
+                  />
+                </Popover.Dropdown>
+              </Popover>
+              <Box>
+                <Flex>
+                  {props.persona.li_sent > 0 && (
+                    <ActionIcon
+                      variant="subtle"
+                      radius="md"
+                      color={props.persona.active ? "bliue" : "gray"}
+                      onClick={() => {
+                        if (props.project == undefined) return;
+                        setOpenedProspectId(-1);
+                        setCurrentProject(props.project);
+                        navigateToPage(
+                          navigate,
+                          `/setup/linkedin`,
+                          new URLSearchParams(
+                            `?campaign_id=${props.persona.id}`
+                          )
+                        );
+                      }}
+                    >
+                      <IconBrandLinkedin
+                        size="1rem"
+                        color={
+                          props.persona.active ? theme.colors.blue[6] : "gray"
+                        }
+                      />
+                    </ActionIcon>
+                  )}
+                  {props.persona.email_sent > 0 && (
+                    <ActionIcon
+                      variant="subtle"
+                      radius="md"
+                      color={props.persona.active ? "yellow" : "gray"}
+                      onClick={() => {
+                        if (props.project == undefined) return;
+                        setOpenedProspectId(-1);
+                        setCurrentProject(props.project);
+                        navigateToPage(
+                          navigate,
+                          `/setup/email`,
+                          new URLSearchParams(
+                            `?campaign_id=${props.persona.id}`
+                          )
+                        );
+                      }}
+                    >
+                      <IconMail
+                        size="1rem"
+                        color={
+                          props.persona.active ? theme.colors.yellow[6] : "gray"
+                        }
+                      />
+                    </ActionIcon>
                   )}
                 </Flex>
-              </Tooltip>
-            </Box>
-          </Group>
+                <Tooltip
+                  label={
+                    props.persona.name +
+                    " - " +
+                    +total_sent +
+                    " / " +
+                    props.persona.total_prospects +
+                    " prospects sent"
+                  }
+                  withArrow
+                >
+                  <Flex
+                    onClick={() => {
+                      if (props.persona.sdr_id != userData?.id) return;
 
-          <Group sx={{ flex: "10%" }} grow>
+                      if (props.persona.email_sent > props.persona.li_sent) {
+                        window.location.href = `/setup/email?campaign_id=${props.persona.id}`;
+                      } else {
+                        window.location.href = `/setup/linkedin?campaign_id=${props.persona.id}`;
+                      }
+                    }}
+                  >
+                    <Text fz={"sm"} c={"gray.7"} fw={700}>
+                      {props.persona.name}
+                    </Text>
+                    {props.persona.sdr_id == userData?.id && (
+                      <Box ml="xs">
+                        <IconPencil size="0.8rem" color="gray" />
+                      </Box>
+                    )}
+                  </Flex>
+                </Tooltip>
+              </Box>
+            </Flex>
+          </Group>
+          <Divider orientation="vertical" ml="xs" mr="xs" color="white" />
+          <Group sx={{ flex: "10%" }}>
             <Flex>
               <Avatar src={props.persona.sdr_img_url} radius="xl" size="sm" />
               <Text size="xs" fw="450" mt="2px" ml="xs">
@@ -1090,65 +1171,12 @@ export function PersonCampaignCard(props: {
               </Text>
             </Flex>
           </Group>
-
-          <Group sx={{ flex: "10%" }} grow>
-            <Center>
-              {props.persona.li_sent > 0 && (
-                <ActionIcon
-                  variant="subtle"
-                  radius="md"
-                  size="lg"
-                  color={props.persona.active ? "bliue" : "gray"}
-                  onClick={() => {
-                    if (props.project == undefined) return;
-                    setOpenedProspectId(-1);
-                    setCurrentProject(props.project);
-                    navigateToPage(
-                      navigate,
-                      `/setup/linkedin`,
-                      new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                    );
-                  }}
-                >
-                  <IconBrandLinkedin
-                    size="2.0rem"
-                    color={props.persona.active ? theme.colors.blue[6] : "gray"}
-                  />
-                </ActionIcon>
-              )}
-              {props.persona.email_sent > 0 && (
-                <ActionIcon
-                  variant="subtle"
-                  radius="md"
-                  size="lg"
-                  color={props.persona.active ? "yellow" : "gray"}
-                  onClick={() => {
-                    if (props.project == undefined) return;
-                    setOpenedProspectId(-1);
-                    setCurrentProject(props.project);
-                    navigateToPage(
-                      navigate,
-                      `/setup/email`,
-                      new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                    );
-                  }}
-                >
-                  <IconMail
-                    size="2.0rem"
-                    color={
-                      props.persona.active ? theme.colors.yellow[6] : "gray"
-                    }
-                  />
-                </ActionIcon>
-              )}
-            </Center>
-          </Group>
-
+          <Divider orientation="vertical" ml="xs" mr="xs" color="white" />
           <Group sx={{ flex: "30%" }}>
             <Box
               w={"20%"}
               onClick={() => {
-                handleChannelOpen('sent', props.persona.id, props.persona.name)
+                handleChannelOpen("sent", props.persona.id, props.persona.name);
               }}
             >
               <StatDisplay
@@ -1159,15 +1187,15 @@ export function PersonCampaignCard(props: {
                 percentage={Math.floor(
                   ((total_sent ?? 0) / (total_sent || 1)) * 100
                 )}
-                percentColor='#eaf3ff'
-                hoverColor='hover:bg-[#cadef9]'
+                percentColor="#eaf3ff"
+                hoverColor="hover:bg-[#cadef9]"
               />
             </Box>
 
             <Box
               w={"20%"}
               onClick={() => {
-                handleChannelOpen('open', props.persona.id, props.persona.name)
+                handleChannelOpen("open", props.persona.id, props.persona.name);
               }}
             >
               <StatDisplay
@@ -1178,14 +1206,18 @@ export function PersonCampaignCard(props: {
                 percentage={Math.floor(
                   ((total_opened ?? 0) / (total_sent || 1)) * 100
                 )}
-                percentColor='#ffeeff'
-                hoverColor='hover:bg-[#fbdefb]'
+                percentColor="#ffeeff"
+                hoverColor="hover:bg-[#fbdefb]"
               />
             </Box>
             <Box
               w={"20%"}
               onClick={() => {
-                handleChannelOpen('reply', props.persona.id, props.persona.name)
+                handleChannelOpen(
+                  "reply",
+                  props.persona.id,
+                  props.persona.name
+                );
               }}
             >
               <StatDisplay
@@ -1198,14 +1230,14 @@ export function PersonCampaignCard(props: {
                 percentage={Math.floor(
                   ((total_replied ?? 0) / (total_opened || 1)) * 100
                 )}
-                percentColor='#f9e7dc'
-                hoverColor='hover:bg-[#f8f3f0]'
+                percentColor="#f9e7dc"
+                hoverColor="hover:bg-[#f8f3f0]"
               />
             </Box>
             <Box
               w={"20%"}
               onClick={() => {
-                handleChannelOpen('demo', props.persona.id, props.persona.name)
+                handleChannelOpen("demo", props.persona.id, props.persona.name);
               }}
             >
               <StatDisplay
@@ -1218,20 +1250,24 @@ export function PersonCampaignCard(props: {
                 percentage={Math.floor(
                   ((props.persona.total_demo ?? 0) / (total_replied || 1)) * 100
                 )}
-                percentColor='#e2f6e7'
-                hoverColor='hover:bg-[#d9f5e0]'
+                percentColor="#e2f6e7"
+                hoverColor="hover:bg-[#d9f5e0]"
               />
             </Box>
           </Group>
-
-          <Group sx={{ flex: "15%" }}>
-            <Flex>
+          <Divider orientation="vertical" ml="xs" mr="xs" color="white" />
+          <Group
+            sx={{
+              flex: "15%",
+            }}
+          >
+            <Flex gap={"sm"}>
               <Button
                 w={60}
-                mr="xs"
                 radius="xl"
                 size="xs"
                 compact
+                mt={"auto"}
                 sx={(theme) => ({
                   color: theme.colors.blue[6],
                   backgroundColor: theme.colors.blue[0],
@@ -1246,32 +1282,65 @@ export function PersonCampaignCard(props: {
                 Edit
               </Button>
 
-              <Tooltip
-                withArrow
-                position="bottom"
-                label={
-                  personaActive
-                    ? "Click to disable this campaign on settings page"
-                    : "Click to enable this campaign on settings page"
-                }
-              >
-                <span>
-                  <UserStatusToggle
-                    projectId={props.persona.id}
-                    isActive={personaActive}
-                    onChangeUserStatusSuccess={(status: boolean) => {
-                      setPersonaActive(status);
-                      props.onPersonaActiveStatusUpdate?.(
-                        props.persona?.id ?? 0,
-                        status
-                      );
-                    }}
-                  />
-                </span>
-              </Tooltip>
+              <Box>
+                <Flex justify={"end"}>
+                  <Badge
+                    mb={"xs"}
+                    size="xs"
+                    color={
+                      props.persona.active && total_sent > 0
+                        ? "blue"
+                        : !props.persona.active && total_sent > 0
+                        ? "green"
+                        : "yellow"
+                    }
+                  >
+                    {props.persona.active && total_sent > 0
+                      ? "Active"
+                      : !props.persona.active && total_sent > 0
+                      ? "Complete"
+                      : "Setup"}
+                  </Badge>
+                  {!!props.persona.smartlead_campaign_id && (
+                    <Badge size="xs" color={"violet"}>
+                      {"Smartlead Synced"}
+                    </Badge>
+                  )}
+                </Flex>
+                <Tooltip
+                  withArrow
+                  position="bottom"
+                  label={
+                    personaActive
+                      ? "Click to disable this campaign on settings page"
+                      : "Click to enable this campaign on settings page"
+                  }
+                >
+                  <span>
+                    <UserStatusToggle
+                      projectId={props.persona.id}
+                      isActive={personaActive}
+                      onChangeUserStatusSuccess={(status: boolean) => {
+                        setPersonaActive(status);
+                        props.onPersonaActiveStatusUpdate?.(
+                          props.persona?.id ?? 0,
+                          status
+                        );
+                      }}
+                    />
+                  </span>
+                </Tooltip>
+              </Box>
             </Flex>
           </Group>
-          <Box sx={{ position: "absolute", right: 15, top: 20 }}>
+          <Box
+            sx={{
+              position: "absolute",
+              right: 15,
+              top: "50%",
+              transform: "translateY(-50%)",
+            }}
+          >
             <ActionIcon
               color={props.persona?.sdr_id === userData?.id ? "blue" : "gray"}
               sx={{ opacity: props.persona?.sdr_id === userData?.id ? 1 : 0.5 }}
@@ -1546,25 +1615,29 @@ function StatDisplay(props: {
   label: string;
   total: number;
   percentage: number;
-  percentColor: MantineColor
-  hoverColor: string
+  percentColor: MantineColor;
+  hoverColor: string;
 }) {
   return (
     <div className={`${props.hoverColor} rounded-md px-2 py-1`}>
       <Stack spacing={0}>
-        <Flex justify='left' gap='xl'>
-          <Tooltip label={props.percentage + '% conversion'} withArrow withinPortal>
-            <Flex align={'center'} gap={4}>
-              <Text color={props.color} fz='lg' fw={500}>
+        <Flex justify="left" gap="xl">
+          <Tooltip
+            label={props.percentage + "% conversion"}
+            withArrow
+            withinPortal
+          >
+            <Flex align={"center"} gap={4}>
+              <Text color={props.color} fz="lg" fw={500}>
                 {props.total.toLocaleString()}
               </Text>
               <Text
-                size='8px'
+                size="8px"
                 color={props.color}
                 bg={props.percentColor}
                 py={2}
                 px={4}
-                style={{ borderRadius: '8px' }}
+                style={{ borderRadius: "8px" }}
               >
                 {/* percentage */}
                 {props.percentage}%
@@ -1573,12 +1646,10 @@ function StatDisplay(props: {
           </Tooltip>
         </Flex>
         <Flex>
-            <Box mt='1px'>
-              {props.icon}
-            </Box>
-            <Text c='gray.7' fz='sm' ml="4px">
-              {props.label}
-            </Text>
+          <Box mt="1px">{props.icon}</Box>
+          <Text c="gray.7" fz="sm" ml="4px">
+            {props.label}
+          </Text>
         </Flex>
       </Stack>
     </div>
@@ -1633,7 +1704,7 @@ export const PersonCampaignTable = (props: {
           pr="xs"
           spacing={0}
         >
-          <Group sx={{ flex: "3%" }}>
+          <Group sx={{ flex: "10%" }}>
             <Text fw={600} color="gray.8" fz="sm">
               Contacts
             </Text>
@@ -1669,37 +1740,34 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation="vertical" ml="xs" mr="xs" />
 
-          <Group sx={{ flex: "4%" }} grow>
-            <Text fw={600} color="gray.8" fz="sm">
-              Channel
-            </Text>
-          </Group>
-
-          <Divider orientation="vertical" ml="xs" mr="xs" />
-
           <Group sx={{ flex: "30%" }}>
             <Text fw={600} color="gray.8" fz="sm">
               Overall Report
             </Text>
             <Tooltip label="Refresh overall report." withArrow withinPortal>
-              <ActionIcon ml={-12} variant='transparent' onClick={async () => {
-                const result = await postSyncSmartleadCampaigns(userToken)
-                if (result.status === 'success') {
-                  showNotification({
-                    title: "Refreshing overall report.",
-                    message: "Please wait for a few minutes for changes to take effect. You can refresh this page to see the changes.",
-                    color: "blue",
-                    autoClose: 5000,
-                  })
-                } else {
-                  showNotification({
-                    title: "Error refreshing overall report.",
-                    message: "Please try again later.",
-                    color: "red",
-                    autoClose: 5000,
-                  })
-                }
-              }}>
+              <ActionIcon
+                ml={-12}
+                variant="transparent"
+                onClick={async () => {
+                  const result = await postSyncSmartleadCampaigns(userToken);
+                  if (result.status === "success") {
+                    showNotification({
+                      title: "Refreshing overall report.",
+                      message:
+                        "Please wait for a few minutes for changes to take effect. You can refresh this page to see the changes.",
+                      color: "blue",
+                      autoClose: 5000,
+                    });
+                  } else {
+                    showNotification({
+                      title: "Error refreshing overall report.",
+                      message: "Please try again later.",
+                      color: "red",
+                      autoClose: 5000,
+                    });
+                  }
+                }}
+              >
                 <IconRefresh size="0.8rem" />
               </ActionIcon>
             </Tooltip>
@@ -1707,7 +1775,11 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation="vertical" ml="xs" mr="xs" />
 
-          <Group sx={{ flex: "15%" }}></Group>
+          <Group sx={{ flex: "15%" }} grow>
+            <Text fw={600} color="gray.8" fz="sm">
+              Details
+            </Text>
+          </Group>
         </Group>
       </Paper>
       {data

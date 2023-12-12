@@ -231,7 +231,7 @@ const ScrapingReport = () => {
                       {upload.account} <IconExternalLink size={14} color='#478cef' />
                     </Text>
                     <Text size='xs' size='xs' color='gray' mt={-20}>
-                      {upload.account_title.substr(0, 20)}{' '}{upload.account_title.length > 20 ? '...' : ''}
+                      {upload.account_title?.substr(0, 20)}{' '}{upload.account_title?.length > 20 ? '...' : ''}
                     </Text>
                   </Stack>
                 </Flex>

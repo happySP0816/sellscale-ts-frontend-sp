@@ -23,7 +23,9 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
 const barThickness = 15;
+
 export const options = {
   indexAxis: "y" as const,
   borderSkipped: false,

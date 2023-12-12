@@ -19,6 +19,7 @@ import PageFrame from '@common/PageFrame'
 import UploadOverviewV2 from './UploadOverviewV2'
 import TAMGraph from './TAMGraph'
 import ScrapingReport from './ScrapingReport'
+import TAMGraphV2 from "./TAMGraphV2";
 
 const ContactOverview = () => {
   return (
@@ -40,11 +41,16 @@ const ContactOverview = () => {
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Do Not Contact
         </Tabs.Tab>
-        <Tabs.Tab value='TAM_graph' ml='auto'>
+
+        <Tabs.Tab value="TAM_graph_v2" ml="auto">
+          TAM Graph Beta
+        </Tabs.Tab>
+        <Tabs.Tab value="TAM_graph" style={{ marginRight: "8px" }}>
           TAM Graph
         </Tabs.Tab>
-        <Tabs.Tab value='overviewV2'>
-          <IconBeta size='0.8rem' style={{ marginRight: '8px' }} />
+
+        <Tabs.Tab value="overviewV2">
+          <IconBeta size="0.8rem" style={{ marginRight: "8px" }} />
           Overview (Beta)
         </Tabs.Tab>
       </Tabs.List>
@@ -66,6 +72,9 @@ const ContactOverview = () => {
       </Tabs.Panel>
       <Tabs.Panel value='overviewV2'>
         <UploadOverviewV2 />
+      </Tabs.Panel>
+      <Tabs.Panel value="TAM_graph_v2" className="h-0 grow">
+        <TAMGraphV2 />
       </Tabs.Panel>
     </Tabs>
   )

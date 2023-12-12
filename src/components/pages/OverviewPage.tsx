@@ -697,63 +697,47 @@ export function ActiveChannels() {
                                                   (x: any) =>
                                                     x.channel_type == channel
                                                 )
-                                                .map((channel: any) => {
-                                                  const warming = (
-                                                    (channel.warming_details ??
-                                                      []) as EmailWarming[]
-                                                  ).find(
-                                                    (warming) =>
-                                                      warming.email ===
-                                                      channel.account_name
-                                                  );
+                                                .map((snapshot: any) => {
+                                                  const warmed = snapshot.total_sent_count > 180;
+                                                  const days_left = (180 - snapshot.total_sent_count) / snapshot.daily_limit;
 
                                                   return (
                                                     <tr>
                                                       <td>
-                                                        {channel.channel_type ==
+                                                        {snapshot.channel_type ==
                                                         "LINKEDIN" ? (
                                                           <IconBrandLinkedin size="0.9rem" />
                                                         ) : (
                                                           <IconMail size="0.9rem" />
                                                         )}{" "}
-                                                        {channel.account_name}
+                                                        {snapshot.account_name}
                                                       </td>
                                                       <td>
-                                                        {
-                                                          channel.daily_sent_count
-                                                        }{" "}
-                                                        / {channel.daily_limit}
+                                                        {snapshot.daily_limit} per day
                                                       </td>
                                                       <td>
                                                         <Badge
                                                           size="xs"
                                                           color={
-                                                            warming?.percent_complete !==
-                                                            100
-                                                              ? "green"
-                                                              : "blue"
+                                                            warmed ? "green" : "orange"
                                                           }
                                                         >
-                                                          {warming?.percent_complete !==
-                                                          100
-                                                            ? `In progress - ${
-                                                                warming?.percent_complete ??
-                                                                "..."
-                                                              }%`
-                                                            : "Done"}
+                                                          {
+                                                            warmed ? "Warm" : `${Math.ceil(days_left)} Days left`
+                                                          }
                                                         </Badge>
                                                       </td>
                                                       <td>
                                                         <Badge
                                                           size="xs"
                                                           color={
-                                                            channel.reputation >
+                                                            snapshot.reputation >
                                                             80
                                                               ? "green"
                                                               : "yellow"
                                                           }
                                                         >
-                                                          {channel.reputation}%
+                                                          {snapshot.reputation}%
                                                         </Badge>
                                                       </td>
                                                     </tr>
@@ -773,31 +757,78 @@ export function ActiveChannels() {
 
                             {email_snapshots.map((snapshot: any) => {
                               console.log("snapshot", snapshot);
-                              const warming = (
-                                (snapshot.warming_details ??
-                                  []) as EmailWarming[]
-                              ).find(
-                                (warming) =>
-                                  warming.email === snapshot.account_name
-                              );
+                              const warmed = snapshot.total_sent_count > 180;
+                              const days_left = (180 - snapshot.total_sent_count) / snapshot.daily_limit;
 
                               return (
-                                <Badge
-                                  size="xs"
-                                  color={
-                                    snapshot.total_sent_count > 180
-                                      ? "green"
-                                      : "yellow"
-                                  }
-                                  variant="dot"
-                                >
-                                  {snapshot.total_sent_count > 180
-                                    ? "WARMED -"
-                                    : "WARMING -"}
-                                  <span style={{ textTransform: "lowercase" }}>
-                                    {snapshot.account_name}
-                                  </span>
-                                </Badge>
+                                <HoverCard withinPortal withArrow position='right-end'>
+                                  <HoverCard.Target>
+                                    <Badge
+                                      size="xs"
+                                      color={
+                                        snapshot.total_sent_count > 180
+                                          ? "green"
+                                          : "yellow"
+                                      }
+                                      variant="dot"
+                                    >
+                                      {snapshot.total_sent_count > 180
+                                        ? "WARMED -"
+                                        : "WARMING -"}
+                                      <span
+                                        style={{ textTransform: "lowercase" }}
+                                      >
+                                        {snapshot.account_name}
+                                      </span>
+                                    </Badge>
+                                  </HoverCard.Target>
+                                  <HoverCard.Dropdown w={400}>
+                                    <Table>
+                                      <thead>
+                                        <tr>
+                                          <th>Channel</th>
+                                          <th>Daily Limit</th>
+                                          <th>Warmup</th>
+                                          <th>Reputation</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr>
+                                          <td>
+                                            <IconMail size="0.9rem" />{" "}
+                                            {snapshot.account_name}
+                                          </td>
+                                          <td>{snapshot.daily_limit} per day</td>
+                                          <td>
+                                            <Badge
+                                              size="xs"
+                                              color={
+                                                warmed ? "green" : "orange"
+                                              }
+                                            >
+                                              { 
+                                                warmed ? "Warm" : `${Math.ceil(days_left)} Days left`
+                                              }
+
+                                            </Badge>
+                                          </td>
+                                          <td>
+                                            <Badge
+                                              size="xs"
+                                              color={
+                                                snapshot.reputation > 80
+                                                  ? "green"
+                                                  : "yellow"
+                                              }
+                                            >
+                                              {snapshot.reputation}%
+                                            </Badge>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </Table>
+                                  </HoverCard.Dropdown>
+                                </HoverCard>
                               );
                             })}
                           </Card>

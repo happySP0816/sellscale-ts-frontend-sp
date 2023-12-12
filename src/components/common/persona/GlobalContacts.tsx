@@ -544,7 +544,7 @@ const GlobalContacts = () => {
           </Text>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Badge size="xs" color={deterministicMantineColor(contact.persona)}>
-              {contact.persona}
+              {contact.persona.substring(0, 30)} {contact.persona.length > 30 && '...'}
             </Badge>
           </Box>
         </Box>

@@ -430,12 +430,12 @@ const ICPFiltersDashboard: FC = () => {
             <Text bg={'#e2ecf8'} color='blue' px={'sm'} style={{ borderRadius: '12px' }}>
               {currentProject?.active ? (currentProject?.num_prospects > 0 ? 'Active' : 'Setup') : 'Complete'}
             </Text>
-            {currentProject?.num_unused_li_prospects && currentProject?.num_unused_li_prospects > 0 ? (
+            {currentProject?.linkedin_active ? (
               <IconBrandLinkedin color='white' fill='#228be8' />
             ) : (
               <></>
             )}
-            {currentProject?.num_unused_email_prospects && currentProject?.num_unused_email_prospects > 0 ? (
+            {currentProject?.email_active ? (
               <IconMail color='white' fill='#228be8' />
             ) : (
               <></>

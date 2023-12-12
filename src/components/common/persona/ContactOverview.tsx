@@ -1,4 +1,4 @@
-import { Tabs } from '@mantine/core'
+import { Tabs, Tooltip } from '@mantine/core'
 import { PulseWrapper } from './PulseWrapper'
 import ICPFilters from './ICPFilter/ICPFilters'
 import { currentProjectState } from '@atoms/personaAtoms'
@@ -11,7 +11,7 @@ import { PersonaOverview } from 'src'
 import { getPersonasOverview } from '@utils/requests/getPersonas'
 import { navigateToPage } from '@utils/documentChange'
 import UploadOverview from './UploadOverview'
-import { IconBeta, IconChartArcs, IconChartAreaLine, IconList, IconTable, IconTarget } from '@tabler/icons'
+import { IconBeta, IconChartArcs, IconChartAreaLine, IconList, IconTable, IconTarget, IconWashMachine } from '@tabler/icons'
 import ComingSoonCard from '@common/library/ComingSoonCard'
 import GlobalContacts from './GlobalContacts'
 import DoNotContactList from '@common/settings/DoNotContactList'
@@ -20,6 +20,7 @@ import UploadOverviewV2 from './UploadOverviewV2'
 import TAMGraph from './TAMGraph'
 import ScrapingReport from './ScrapingReport'
 import TAMGraphV2 from "./TAMGraphV2";
+import PulseTabSelector from './PulseTabSelector'
 
 const ContactOverview = () => {
   return (
@@ -36,6 +37,10 @@ const ContactOverview = () => {
         <Tabs.Tab value='global_contacts'>
           <IconList size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Global Contacts
+        </Tabs.Tab>
+        <Tabs.Tab value='prospect_scoring'>
+          <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
+          Prospect Scoring
         </Tabs.Tab>
         <Tabs.Tab value='do_not_contact'>
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
@@ -63,6 +68,34 @@ const ContactOverview = () => {
       </Tabs.Panel>
       <Tabs.Panel value='global_contacts'>
         <GlobalContacts />
+      </Tabs.Panel>
+      <Tabs.Panel value='prospect_scoring'>
+        <Tabs defaultValue="new_view">
+          <Tabs.List>
+            <Tabs.Tab value="new_view">
+              <IconTarget
+                size="0.8rem"
+                style={{ marginRight: "8px", marginTop: "4px" }}
+              />
+              Prospect Scoring
+            </Tabs.Tab>
+            <Tooltip label="Old View" position="bottom" withArrow withinPortal>
+              <Tabs.Tab value="old_view" ml="auto">
+                <IconWashMachine
+                  size="0.8rem"
+                  style={{ marginRight: "8px", marginTop: "4px" }}
+                />
+              </Tabs.Tab>
+            </Tooltip>
+          </Tabs.List>
+
+          <Tabs.Panel value="old_view">
+            <PulseWrapper />
+          </Tabs.Panel>
+          <Tabs.Panel value="new_view">
+            <ICPFilters />
+          </Tabs.Panel>
+        </Tabs>
       </Tabs.Panel>
       <Tabs.Panel value='do_not_contact'>
         <DoNotContactList />

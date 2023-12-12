@@ -14,6 +14,7 @@ import {
 } from "@tabler/icons-react";
 
 import {
+  Tooltip,
   Stack,
   Group,
   Avatar,
@@ -26,7 +27,6 @@ import {
   Paper,
   ActionIcon,
   Center,
-  Tooltip,
   Switch,
   useMantineTheme,
   ScrollArea,
@@ -888,7 +888,7 @@ export function PersonCampaignCard(props: {
           pr="xs"
           spacing={0}
         >
-          <Group sx={{ flex: "10%" }}>
+          <Group sx={{ flex: "8%" }}>
             <Box
               onClick={() => {
                 navigateToPage(
@@ -1045,7 +1045,7 @@ export function PersonCampaignCard(props: {
             </Box>
           </Group>
           <Divider orientation="vertical" ml="xs" mr="xs" color="white" />
-          <Group sx={{ flex: "25%" }}>
+          <Group sx={{ flex: "27%" }}>
             <Flex gap={"xs"}>
               <Popover position="bottom" withArrow shadow="md">
                 <Popover.Target>
@@ -1127,19 +1127,22 @@ export function PersonCampaignCard(props: {
                     </ActionIcon>
                   )}
                 </Flex>
-                <Tooltip
-                  label={
-                    props.persona.name +
-                    " - " +
-                    +total_sent +
-                    " / " +
-                    props.persona.total_prospects +
-                    " prospects sent"
-                  }
-                  withArrow
-                >
-                  <Flex
-                    onClick={() => {
+                
+                <Flex>
+                  <Tooltip
+                    label={
+                      props.persona.name +
+                      " - " +
+                      +total_sent +
+                      " / " +
+                      props.persona.total_prospects +
+                      " prospects sent"
+                    }
+                    withArrow
+                  >
+                    <Text 
+                      fz={"sm"} c={"gray.7"} fw={700}
+                      onClick={() => {
                       if (props.persona.sdr_id != userData?.id) return;
 
                       if (props.persona.email_sent > props.persona.li_sent) {
@@ -1147,18 +1150,21 @@ export function PersonCampaignCard(props: {
                       } else {
                         window.location.href = `/setup/linkedin?campaign_id=${props.persona.id}`;
                       }
-                    }}
-                  >
-                    <Text fz={"sm"} c={"gray.7"} fw={700}>
+                    }}>
                       {props.persona.name}
                     </Text>
-                    {props.persona.sdr_id == userData?.id && (
-                      <Box ml="xs">
-                        <IconPencil size="0.8rem" color="gray" />
-                      </Box>
-                    )}
-                  </Flex>
-                </Tooltip>
+                  </Tooltip>
+                  {props.persona.sdr_id == userData?.id && (
+                    <Box ml="xs" onClick={() => {
+                      if (props.project == undefined) return;
+                      setOpenedProspectId(-1);
+                      setCurrentProject(props.project);
+                      window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
+                    }}>
+                      <IconPencil size="0.9rem" color="gray" />
+                    </Box>
+                  )}
+                </Flex>
               </Box>
             </Flex>
           </Group>
@@ -1262,7 +1268,7 @@ export function PersonCampaignCard(props: {
             }}
           >
             <Flex gap={"sm"}>
-              <Button
+              {/* <Button
                 w={60}
                 radius="xl"
                 size="xs"
@@ -1280,7 +1286,7 @@ export function PersonCampaignCard(props: {
                 }}
               >
                 Edit
-              </Button>
+              </Button> */}
 
               <Box>
                 <Flex justify={"end"}>
@@ -1302,9 +1308,11 @@ export function PersonCampaignCard(props: {
                       : "Setup"}
                   </Badge>
                   {!!props.persona.smartlead_campaign_id && (
-                    <Badge size="xs" color={"violet"}>
-                      {"Smartlead Synced"}
-                    </Badge>
+                    <Tooltip label="Synced with SmartLead" withArrow>
+                      <Badge size="xs" color={"violet"}>
+                        {"Synced"}
+                      </Badge>
+                    </Tooltip>
                   )}
                 </Flex>
                 <Tooltip
@@ -1704,13 +1712,13 @@ export const PersonCampaignTable = (props: {
           pr="xs"
           spacing={0}
         >
-          <Group sx={{ flex: "10%" }}>
+          <Group sx={{ flex: "8%" }}>
             <Text fw={600} color="gray.8" fz="sm">
               Contacts
             </Text>
           </Group>
           <Divider orientation="vertical" ml="xs" mr="xs" />
-          <Group sx={{ flex: "25%" }} spacing={5} noWrap>
+          <Group sx={{ flex: "27%" }} spacing={5} noWrap>
             <Flex
               style={{ cursor: "pointer" }}
               align={"center"}

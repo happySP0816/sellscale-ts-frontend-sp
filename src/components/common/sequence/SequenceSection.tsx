@@ -1352,6 +1352,22 @@ function IntroMessageSection(props: {
                 />
               )}
             </Box>
+            {messageMetaData && (
+              <Group py='xs' noWrap>
+                <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
+                  Personalizations:{' '}
+                  <Text fw={500} span>
+                    {messageMetaData.notes?.length}
+                  </Text>
+                </Badge>
+                <Badge color='blue' styles={{ root: { textTransform: 'initial' } }}>
+                  CTA Used:{' '}
+                  <Text fw={500} span>
+                    {_.truncate(messageMetaData.cta, { length: 45 })}
+                  </Text>
+                </Badge>
+              </Group>
+            )}
           </Box>
         )}
 

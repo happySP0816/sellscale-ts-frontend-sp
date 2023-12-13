@@ -50,6 +50,7 @@ import {
   Image,
   HoverCard,
   FocusTrap,
+  List,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDebouncedValue, useDisclosure, useHover, usePrevious } from '@mantine/hooks';
@@ -1231,6 +1232,8 @@ function IntroMessageSection(props: {
     });
   }, [prospectId, selectedTemplateId]);
 
+  console.log(messageMetaData);
+
   if (!currentProject) return <></>;
   return (
     <Stack ml='xl' spacing={0}>
@@ -1354,18 +1357,38 @@ function IntroMessageSection(props: {
             </Box>
             {messageMetaData && (
               <Group py='xs' noWrap>
-                <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
-                  Personalizations:{' '}
-                  <Text fw={500} span>
-                    {messageMetaData.notes?.length}
-                  </Text>
-                </Badge>
-                <Badge color='blue' styles={{ root: { textTransform: 'initial' } }}>
-                  CTA Used:{' '}
-                  <Text fw={500} span>
-                    {_.truncate(messageMetaData.cta, { length: 45 })}
-                  </Text>
-                </Badge>
+                <HoverCard width={280} shadow='md'>
+                  <HoverCard.Target>
+                    <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
+                      Personalizations:{' '}
+                      <Text fw={500} span>
+                        {messageMetaData.notes?.length}
+                      </Text>
+                    </Badge>
+                  </HoverCard.Target>
+                  <HoverCard.Dropdown>
+                    <List>
+                      {messageMetaData.notes?.map((note: any, index: number) => (
+                        <List.Item key={index}>
+                          <Text fz='sm'>{note}</Text>
+                        </List.Item>
+                      ))}
+                    </List>
+                  </HoverCard.Dropdown>
+                </HoverCard>
+                <HoverCard width={280} shadow='md'>
+                  <HoverCard.Target>
+                    <Badge color='blue' styles={{ root: { textTransform: 'initial' } }}>
+                      CTA Used:{' '}
+                      <Text fw={500} span>
+                        {_.truncate(messageMetaData.cta, { length: 45 })}
+                      </Text>
+                    </Badge>
+                  </HoverCard.Target>
+                  <HoverCard.Dropdown>
+                    <Text size='sm'>{messageMetaData.cta}</Text>
+                  </HoverCard.Dropdown>
+                </HoverCard>
               </Group>
             )}
           </Box>

@@ -123,7 +123,7 @@ export function CreateBumpFrameworkContextModal({
         ?.api_label as string,
       form.values.bumpedCount as number,
       form.values.bumpDelayDays,
-      form.values.default,
+      true,
       selectedSubstatus,
       form.values.useAccountResearch,
       form.values.human_readable_prompt,

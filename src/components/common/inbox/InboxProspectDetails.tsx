@@ -62,7 +62,7 @@ import _ from "lodash";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
 import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
 import EditProspectModal from "@modals/EditProspectModal";
-import { proxyURL } from "@utils/general";
+import { proxyURL, valueToColor, nameToInitials } from "@utils/general";
 import {
   IconAlarm,
   IconEdit,
@@ -288,7 +288,6 @@ export default function ProjectDetails(props: {
       </Flex>
     );
   }
-
   return (
     <Flex
       gap={0}
@@ -306,11 +305,12 @@ export default function ProjectDetails(props: {
                 size="md"
                 radius={100}
                 src={proxyURL(data?.details.profile_pic)}
-              />
+                color={valueToColor(theme, data?.details.full_name)}
+              >
+                {nameToInitials(data?.details.full_name)}
+              </Avatar>
               <Box>
-                <Title order={4}>
-                  {data?.details.full_name}
-                </Title>
+                <Title order={4}>{data?.details.full_name}</Title>
               </Box>
               <ICPFitPill
                 icp_fit_score={data?.details.icp_fit_score || 0}
@@ -476,7 +476,11 @@ export default function ProjectDetails(props: {
                         },
                       },
                     }}
-                    data={prospectStatuses}
+                    data={
+                      props.emailStatuses
+                        ? prospectEmailStatuses
+                        : prospectStatuses
+                    }
                     value={statusValue}
                     onChange={async (value) => {
                       if (!value) {

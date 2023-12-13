@@ -43,7 +43,8 @@ export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
       values.demoHappen === 'yes' ? 'OCCURRED' : 'NO_SHOW',
       values.demoRating + '/5',
       values.feedback,
-      values.followupDate
+      values.followupDate,
+      values.aiAdjustments
     );
     if (result.status === 'success') {
       showNotification({

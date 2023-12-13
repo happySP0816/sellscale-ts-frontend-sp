@@ -121,7 +121,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
           },
           {
             accessor: "date_scheduled",
-            title: "Date Scheduled",
+            title: "Estimated Send Time",
             render: ({ date_scheduled, id }) => {
               // Convert the time string to SDRs timezone
               const date = new Date(date_scheduled);

@@ -1,14 +1,26 @@
-import { userTokenState } from "@atoms/userAtoms";
-import { DemoRating } from "@common/home/dashboard/demo/DemoRating";
-import { Button, Checkbox, Flex, Group, LoadingOverlay, Modal, Radio, Stack, Text, Textarea, Title, useMantineTheme } from "@mantine/core";
-import { DatePicker } from "@mantine/dates";
-import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
-import patchDemoFeedback from "@utils/requests/patchDemoFeedback";
-import { useEffect, useState } from "react";
-import { useRecoilValue } from "recoil";
-import { DemoFeedback, Prospect } from "src";
-
+import { userTokenState } from '@atoms/userAtoms';
+import { DemoRating } from '@common/home/dashboard/demo/DemoRating';
+import {
+  Button,
+  Checkbox,
+  Flex,
+  Group,
+  LoadingOverlay,
+  Modal,
+  Radio,
+  Stack,
+  Text,
+  Textarea,
+  Title,
+  useMantineTheme,
+} from '@mantine/core';
+import { DatePicker } from '@mantine/dates';
+import { useForm } from '@mantine/form';
+import { showNotification } from '@mantine/notifications';
+import patchDemoFeedback from '@utils/requests/patchDemoFeedback';
+import { useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { DemoFeedback, Prospect } from 'src';
 
 interface EditDemoFeedback extends Record<string, unknown> {
   modalOpened: boolean;
@@ -23,7 +35,7 @@ export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
   const [loading, setLoading] = useState(false);
 
   const triggerUpdateDemoFeedback = async (values: typeof demoFeedbackForm.values) => {
-    setLoading(true)
+    setLoading(true);
 
     const result = await patchDemoFeedback(
       userToken,
@@ -31,29 +43,29 @@ export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
       values.demoHappen === 'yes' ? 'OCCURRED' : 'NO_SHOW',
       values.demoRating + '/5',
       values.feedback,
-      values.followupDate,
-    )
+      values.followupDate
+    );
     if (result.status === 'success') {
       showNotification({
-        title: "Success",
-        message: "Demo feedback updated.",
-        color: "green",
+        title: 'Success',
+        message: 'Demo feedback updated.',
+        color: 'green',
         autoClose: 2000,
       });
-      demoFeedbackForm.reset()
-      props.backFunction()
-      props.closeModal()
-      setLoading(false)
+      demoFeedbackForm.reset();
+      props.backFunction();
+      props.closeModal();
+      setLoading(false);
     } else {
       showNotification({
-        title: "Error",
-        message: "Failed to update demo feedback.",
-        color: "red",
+        title: 'Error',
+        message: 'Failed to update demo feedback.',
+        color: 'red',
       });
     }
 
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const [reschedule, setReschedule] = useState(false);
   const [showedUp, setShowedUp] = useState(false);
@@ -65,6 +77,7 @@ export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
       demoRating: parseInt(props.demoFeedback.rating.split('/')[0]),
       feedback: props.demoFeedback.feedback,
       followupDate: props.demoFeedback.next_demo_date,
+      aiAdjustments: props.demoFeedback.ai_adjustments,
     },
   });
 
@@ -84,32 +97,40 @@ export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
     <Modal
       opened={props.modalOpened}
       onClose={props.closeModal}
-      title={
-        <Title order={3}>
-          Edit Demo Feedback
-        </Title>
-      }
-      size="md"
+      title={<Title order={3}>Edit Demo Feedback</Title>}
+      size='md'
     >
       <LoadingOverlay visible={loading} />
 
       <form onSubmit={demoFeedbackForm.onSubmit((values) => triggerUpdateDemoFeedback(values))}>
         <Stack>
-          <Radio.Group name='demoHappen' label='Did the demo happen?' {...demoFeedbackForm.getInputProps('demoHappen')}>
+          <Title order={3}>Did the demo happen?</Title>
+          <Radio.Group name='demoHappen' {...demoFeedbackForm.getInputProps('demoHappen')}>
             <Radio color='green' value='yes' label='Yes' />
             <Radio color='green' value='no-show' label='No show' />
           </Radio.Group>
 
+          {showedUp && (
+            <Stack spacing={5}>
+              <Text fw='bold' fz='md'>
+                Follow up
+              </Text>
+              <Checkbox
+                label='I have a followup meeting scheduled with this Prospect.'
+                checked={followup || demoFeedbackForm.values.followupDate != undefined}
+                onChange={(e) => setFollowup(e.target.checked)}
+              />
+              <Flex align='center' justify='center' mt='md'>
+                {(followup || demoFeedbackForm.values.followupDate != undefined) && (
+                  <DatePicker size='xs' {...demoFeedbackForm.getInputProps('followupDate')} />
+                )}
+              </Flex>
+            </Stack>
+          )}
+
           <>
             <Stack spacing={5}>
-              <Text
-                sx={{
-                  fontSize: '14px',
-                  fontWeight: 500,
-                }}
-              >
-                How did it go?
-              </Text>
+              <Title order={3}>How did it go?</Title>
               <DemoRating {...demoFeedbackForm.getInputProps('demoRating')} />
             </Stack>
             <Textarea
@@ -120,36 +141,17 @@ export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
               label='What did you like / what would you change?'
               {...demoFeedbackForm.getInputProps('feedback')}
             />
-            {
-              showedUp && (
-                <Stack spacing={5}>
-                  <Text fw='bold' fz='md'>Follow up</Text>
-                  <Checkbox
-                    label='I have a followup meeting scheduled with this Prospect.'
-                    checked={followup || demoFeedbackForm.values.followupDate != undefined}
-                    onChange={(e) => setFollowup(e.target.checked)}
-                  />
-                  <Flex align='center' justify='center' mt='md'>
-                    {
-                      (followup || demoFeedbackForm.values.followupDate != undefined) && (
-                        <DatePicker
-                          size='xs'
-                          {...demoFeedbackForm.getInputProps('followupDate')}
-                        />
-                      )
-                    }
-                  </Flex>
-                </Stack>
-              )
-            }
+            <Textarea
+              autosize
+              minRows={2}
+              maxRows={6}
+              label='AI adjustments from feedback (optional)'
+              {...demoFeedbackForm.getInputProps('aiAdjustments')}
+            />
           </>
-
         </Stack>
 
-        <Flex
-          justify='center'
-          mt='xl'
-        >
+        <Flex justify='center' mt='xl'>
           <Group>
             <Button hidden={reschedule} type='submit' color='green' radius='xl'>
               Edit feedback
@@ -157,7 +159,6 @@ export default function EditDemoFeedbackModal(props: EditDemoFeedback) {
           </Group>
         </Flex>
       </form>
-
     </Modal>
-  )
+  );
 }

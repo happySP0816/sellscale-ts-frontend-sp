@@ -36,10 +36,7 @@ import { userTokenState } from '@atoms/userAtoms';
 import { useEffect, useRef, useState } from 'react';
 import { Channel, Prospect } from 'src';
 import { API_URL } from '@constants/data';
-import {
-  demosDrawerOpenState,
-  demosDrawerProspectIdState
-} from '@atoms/dashboardAtoms';
+import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
 import Assistant from '@assets/images/assistant.svg';
 import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSelector';
 import { useForm } from '@mantine/form';
@@ -51,7 +48,7 @@ import { DatePicker, DatePickerInput } from '@mantine/dates';
 import postSubmitDemoFeedback from '@utils/requests/postSubmitDemoFeedback';
 import { IconCalendar } from '@tabler/icons';
 
-export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmit?: () => void }) {
+export default function DemoFeedbackDrawer(props: { refetch: () => void; onSubmit?: () => void }) {
   const theme = useMantineTheme();
   const queryClient = new QueryClient();
 
@@ -77,12 +74,12 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       const response = await getProspects(
         userToken,
         undefined,
-        "SELLSCALE",
+        'SELLSCALE',
         10000, // TODO: Maybe use pagination method instead
-        ["DEMO"],
-        'ALL',
+        ['DEMO'],
+        'ALL'
       );
-      return response.status === 'success' ? response.data as Prospect[] : [];
+      return response.status === 'success' ? (response.data as Prospect[]) : [];
     },
     refetchOnWindowFocus: false,
   });
@@ -92,7 +89,7 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
   const [reschedule, setReschedule] = useState(false);
   const [showedUp, setShowedUp] = useState(false);
   const [followup, setFollowup] = useState(false);
-  
+
   const [noShow, setNoShow] = useState(false);
 
   const form = useForm({
@@ -102,6 +99,7 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       feedback: '',
       followupDate: undefined,
       rescheduleNoShow: 'no',
+      aiAdjustments: '',
     },
   });
 
@@ -114,8 +112,9 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       'NO-SHOW',
       `3/5`,
       form.values.feedback,
-      undefined
-    )
+      undefined,
+      form.values.aiAdjustments
+    );
 
     await updateChannelStatus(
       activeProspect.id,
@@ -126,13 +125,10 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       true
     );
 
-    await sendAttemptingRescheduleNotification(
-      userToken,
-      activeProspect.id,
-    )
+    await sendAttemptingRescheduleNotification(userToken, activeProspect.id);
 
     queryClient.invalidateQueries({
-      queryKey: ["query-dash-get-prospects"],
+      queryKey: ['query-dash-get-prospects'],
     });
 
     showNotification({
@@ -145,7 +141,7 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
 
     setDrawerOpened(false);
     setDrawerProspectId(-1);
-  }
+  };
 
   useEffect(() => {
     if (form.values.demoHappen === 'reschedule') {
@@ -165,7 +161,6 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
   if (!activeProspect) return <></>;
 
   const submitDemoFeedback = async (values: typeof form.values) => {
-    
     const res = await postSubmitDemoFeedback(
       userToken,
       activeProspect.id,
@@ -173,25 +168,14 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       `${values.demoRating}/5`,
       values.feedback,
       values.followupDate
-    )
+    );
 
     if (res.status === 'success') {
       if (values.demoHappen === 'yes') {
-        await updateChannelStatus(
-          activeProspect.id,
-          userToken,
-          'LINKEDIN',
-          'DEMO_WON'
-        );
+        await updateChannelStatus(activeProspect.id, userToken, 'LINKEDIN', 'DEMO_WON');
       } else if (values.demoHappen === 'reschedule') {
-
       } else {
-        await updateChannelStatus(
-          activeProspect.id,
-          userToken,
-          'LINKEDIN',
-          'DEMO_LOSS'
-        );
+        await updateChannelStatus(activeProspect.id, userToken, 'LINKEDIN', 'DEMO_LOSS');
       }
       showNotification({
         id: 'demo-feedback-submit',
@@ -231,72 +215,101 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
       sx={{ position: 'relative' }}
     >
       <Avatar src={Assistant} alt='AI Assistant' size={30} />
-      <Text fz='sm'>You scheduled a demo with {activeProspect.full_name} - how did it go? Your feedback will be used to improve our AI.</Text>
+      <Text fz='sm'>
+        You scheduled a demo with {activeProspect.full_name} - how did it go? Your feedback will be
+        used to improve our AI.
+      </Text>
 
-
-      <form onSubmit={(noShow && form.values.rescheduleNoShow === 'yes') ? 
-          () => { moveToScheduling() } 
-          :
-          form.onSubmit((values) => submitDemoFeedback(values))
-        }>
+      <form
+        onSubmit={
+          noShow && form.values.rescheduleNoShow === 'yes'
+            ? () => {
+                moveToScheduling();
+              }
+            : form.onSubmit((values) => submitDemoFeedback(values))
+        }
+      >
         <Stack style={{ marginTop: 20 }}>
-          <Radio.Group name='demoHappen' label='Did the demo happen?' {...form.getInputProps('demoHappen')}>
-            <Radio color='green' value='yes' label='Yes' mb='xs'  />
-            <Radio color='green' value='no-show' label='No show' mb='xs'  />
-            <Radio color='green' value='reschedule' label='Rescheduled' mb='xs'  />
+          <Title order={3}>Did the demo happen?</Title>
+          <Radio.Group name='demoHappen' {...form.getInputProps('demoHappen')}>
+            <Radio color='green' value='yes' label='Yes' mb='xs' />
+            <Radio color='green' value='no-show' label='No show' mb='xs' />
+            <Radio color='green' value='reschedule' label='Rescheduled' mb='xs' />
           </Radio.Group>
 
-          {form.values.demoHappen !== 'reschedule' && <Textarea
-            autosize
-            minRows={2}
-            maxRows={6}
-            required
-            label={noShow  ? 'What happened?' : 'How did it go?'}
-            placeholder='ex. Prospect is no longer working at their company....'
-            {...form.getInputProps('feedback')}
-          />}
+          {showedUp && (
+            <Stack spacing={5}>
+              <Text fw='bold' fz='md'>
+                Follow up
+              </Text>
+              <Checkbox
+                label='I have a followup meeting scheduled with this Prospect.'
+                checked={followup}
+                onChange={(e) => setFollowup(e.target.checked)}
+              />
+              <Flex align='center' justify='center' mt='md'>
+                {followup && <DatePicker size='xs' {...form.getInputProps('followupDate')} />}
+              </Flex>
+            </Stack>
+          )}
 
-          {
-            noShow ? (
-              <Card withBorder>
-                <Text mb='xs' >Do you want SellScale reschedule this demo?</Text>
-                <Radio.Group name='rescheduleNoShow' {...form.getInputProps('rescheduleNoShow')} mb='md' defaultValue='no'>
-                  <Radio color='green' value='yes' label='Yes' mb='xs' defaultChecked={false}/>
-                  <Radio color='green' value='no' label='No' mb='xs'  defaultChecked={true}/>
-                </Radio.Group>
-                {
-                  form.values.rescheduleNoShow === 'yes' ? (
-                    <Tooltip withinPortal label='This will move the prospect back to a scheduling status.'>
-                      <Button leftIcon={<IconCalendar />} color='green' variant='filled' size='sm' radius='xl' onClick={() => moveToScheduling()}>
-                        Move back to scheduling
-                      </Button>
-                    </Tooltip>
-                  ) : (
-                    ''
-                  )
-                }
-              </Card>
-            ) : ''
-          }
+          {form.values.demoHappen !== 'reschedule' && (
+            <Textarea
+              autosize
+              minRows={2}
+              maxRows={6}
+              required
+              label={noShow ? 'What happened?' : 'How did it go?'}
+              placeholder='ex. Prospect is no longer working at their company....'
+              {...form.getInputProps('feedback')}
+            />
+          )}
+
+          {noShow ? (
+            <Card withBorder>
+              <Text mb='xs'>Do you want SellScale reschedule this demo?</Text>
+              <Radio.Group
+                name='rescheduleNoShow'
+                {...form.getInputProps('rescheduleNoShow')}
+                mb='md'
+                defaultValue='no'
+              >
+                <Radio color='green' value='yes' label='Yes' mb='xs' defaultChecked={false} />
+                <Radio color='green' value='no' label='No' mb='xs' defaultChecked={true} />
+              </Radio.Group>
+              {form.values.rescheduleNoShow === 'yes' ? (
+                <Tooltip
+                  withinPortal
+                  label='This will move the prospect back to a scheduling status.'
+                >
+                  <Button
+                    leftIcon={<IconCalendar />}
+                    color='green'
+                    variant='filled'
+                    size='sm'
+                    radius='xl'
+                    onClick={() => moveToScheduling()}
+                  >
+                    Move back to scheduling
+                  </Button>
+                </Tooltip>
+              ) : (
+                ''
+              )}
+            </Card>
+          ) : (
+            ''
+          )}
 
           {reschedule ? (
             <ProspectDemoDateSelector prospectId={activeProspect.id} />
-          ) : 
-            !noShow ? 
-            (
-              <>
-                <Stack spacing={5}>
-                  <Text
-                    sx={{
-                      fontSize: '14px',
-                      fontWeight: 500,
-                    }}
-                  >
-                    How did it go?
-                  </Text>
-                  <DemoRating {...form.getInputProps('demoRating')} />
-                </Stack>
-                {/* <Textarea
+          ) : !noShow ? (
+            <>
+              <Stack spacing={5}>
+                <Title order={3}>How did it go?</Title>
+                <DemoRating {...form.getInputProps('demoRating')} />
+              </Stack>
+              {/* <Textarea
                   autosize
                   minRows={2}
                   maxRows={6}
@@ -304,50 +317,30 @@ export default function DemoFeedbackDrawer(props: { refetch: () => void, onSubmi
                   label='What did you like / what would you change?'
                   {...form.getInputProps('feedback')}
                 /> */}
-                {
-                  showedUp && (
-                    <Stack spacing={5}>
-                      <Text fw='bold' fz='md'>Follow up</Text>
-                      <Checkbox
-                        label='I have a followup meeting scheduled with this Prospect.'
-                        checked={followup}
-                        onChange={(e) => setFollowup(e.target.checked)}
-                      />
-                      <Flex align='center' justify='center' mt='md'>
-                        {
-                          followup && (
-                            <DatePicker
-                              size='xs'
-                              {...form.getInputProps('followupDate')}
-                            />
-                          )
-                        }
-                      </Flex>
-                    </Stack>
-                  )
-                }
-              </>
-            )
-            :
+              <Textarea
+                autosize
+                minRows={2}
+                maxRows={6}
+                label='AI adjustments from feedback (optional)'
+                {...form.getInputProps('aiAdjustments')}
+              />
+            </>
+          ) : (
             ''
-          }
+          )}
         </Stack>
 
-        {
-          noShow && form.values.rescheduleNoShow !== 'no' ? '' : (
-            <Flex
-              justify='center'
-              mt='xl'
-            >
-              <Group>
-                <Button hidden={reschedule} type='submit' color='green' radius='xl'>
-                  Submit feedback
-                </Button>
-              </Group>
-            </Flex>
-          )
-        }
-        
+        {noShow && form.values.rescheduleNoShow !== 'no' ? (
+          ''
+        ) : (
+          <Flex justify='center' mt='xl'>
+            <Group>
+              <Button hidden={reschedule} type='submit' color='green' radius='xl'>
+                Submit feedback
+              </Button>
+            </Group>
+          </Flex>
+        )}
       </form>
     </Drawer>
   );

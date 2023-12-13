@@ -1,6 +1,6 @@
-declare module "react-render-html";
+declare module 'react-render-html';
 export interface MsgResponse {
-  status: "success" | "error";
+  status: 'success' | 'error';
   title: string;
   message: string;
   data?: any;
@@ -26,13 +26,13 @@ export interface Campaign {
   num_demos: number;
   demos: list;
   status:
-    | "PENDING"
-    | "NEEDS_REVIEW"
-    | "IN_PROGRESS"
-    | "INITIAL_EDIT_COMPLETE"
-    | "READY_TO_SEND"
-    | "COMPLETE"
-    | "CANCELLED";
+    | 'PENDING'
+    | 'NEEDS_REVIEW'
+    | 'IN_PROGRESS'
+    | 'INITIAL_EDIT_COMPLETE'
+    | 'READY_TO_SEND'
+    | 'COMPLETE'
+    | 'CANCELLED';
 }
 
 export interface Sequence {
@@ -212,6 +212,7 @@ export interface DemoFeedback {
   status: string;
   demo_date: Date;
   next_demo_date: Date;
+  ai_adjustments?: string;
 }
 
 export interface Simulation {
@@ -393,7 +394,7 @@ export interface ProspectEmail extends Record<string, unknown> {
   from: string;
 }
 
-export type Channel = "EMAIL" | "LINKEDIN" | "SELLSCALE";
+export type Channel = 'EMAIL' | 'LINKEDIN' | 'SELLSCALE';
 
 export type BumpFramework = {
   id: number;
@@ -453,7 +454,7 @@ export type SpamScoreResults = {
   spam_word_score: number;
   spam_words: string[];
   total_score: number;
-}
+};
 
 export type SalesNavigatorLaunch = {
   id: number;
@@ -553,13 +554,12 @@ export interface Individual {
   similar_profiles: Array<Record<string, any>> | null;
 }
 
-
 interface EmailTemplate {
   id: number;
   name: string;
   description: string | null;
   template: string;
-  template_type: "SUBJECT_LINE" | "BODY";
+  template_type: 'SUBJECT_LINE' | 'BODY';
   active: boolean;
   transformer_blocklist: string[] | null;
   tone: string | null;
@@ -581,7 +581,6 @@ interface EmailWarming {
   stats_by_date: Record<string, any>[];
   percent_complete: number;
 }
-
 
 ///////////////////////////////////////////////////////////////////
 //                         Trigger Types                         //
@@ -610,7 +609,7 @@ interface TriggerBlock {
   type: TriggerBlockType;
 }
 
-type TriggerSourceType = "GOOGLE_COMPANY_NEWS" | "EXTRACT_PROSPECTS_FROM_COMPANIES";
+type TriggerSourceType = 'GOOGLE_COMPANY_NEWS' | 'EXTRACT_PROSPECTS_FROM_COMPANIES';
 type TriggerSourceData = {
   prospect_titles?: string[];
   company_query?: string;

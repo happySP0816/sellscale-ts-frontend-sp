@@ -240,6 +240,57 @@ export default function PersonaCampaigns() {
     return 0;
   });
 
+  const campaignsSectionHeader = <>
+      <Group position="apart" mb='xs'>
+        <Group>
+          <Button
+            radius="md"
+            leftIcon={<IconPlus size="1rem" />}
+            onClick={() => {
+              openContextModal({
+                modal: "uploadProspects",
+                title: <Title order={3}>Create Campaign</Title>,
+                innerProps: { mode: "CREATE-ONLY" },
+              });
+            }}
+          >
+            Create New Campaign
+          </Button>
+        </Group>
+
+        {userData?.warmup_linkedin_complete ? (
+          <Button
+            variant="filled"
+            radius="md"
+            onClick={() => {
+              navigateToPage(navigate, `/settings/linkedinConnection`);
+            }}
+          >
+            {`LinkedIn Send Rate (per week): ${currentLinkedInSLA}`}
+          </Button>
+        ) : (
+          <Tooltip
+            label="Your LinkedIn account is in a warmup phase. Explore more."
+            withArrow
+            withinPortal
+          >
+            <Button
+              variant="outline"
+              radius="md"
+              onClick={() => {
+                navigateToPage(
+                  navigate,
+                  `/settings/linkedinConnection`
+                );
+              }}
+            >
+              {`LinkedIn Warming Up (per week): ${currentLinkedInSLA}`}
+            </Button>
+          </Tooltip>
+        )}
+      </Group>
+    </>
+
   return (
     <PageFrame>
       <Stack>
@@ -249,7 +300,10 @@ export default function PersonaCampaigns() {
         <Tabs defaultValue="overview">
           <Tabs.List mb="md">
             <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />}>
-              Overview
+              {userData?.sdr_name.split(" ")[0]}'s Campaigns
+            </Tabs.Tab>
+            <Tabs.Tab value="all-campaigns" icon={<IconClipboard size="0.8rem" />}>
+              {userData?.client?.company}'s Campaigns
             </Tabs.Tab>
             <Tabs.Tab
               value="linkedin"
@@ -263,56 +317,14 @@ export default function PersonaCampaigns() {
             </Tabs.Tab>
           </Tabs.List>
 
+          <Tabs.Panel value="all-campaigns" pt="xs">
+            {campaignsSectionHeader}
+            <AllCampaign campaigns={allProjects} />
+          </Tabs.Panel>
+
           <Tabs.Panel value="overview" pt="xs">
             <Stack>
-              <Group position="apart">
-                <Group>
-                  <Button
-                    radius="md"
-                    leftIcon={<IconPlus size="1rem" />}
-                    onClick={() => {
-                      openContextModal({
-                        modal: "uploadProspects",
-                        title: <Title order={3}>Create Campaign</Title>,
-                        innerProps: { mode: "CREATE-ONLY" },
-                      });
-                    }}
-                  >
-                    Create New Campaign
-                  </Button>
-                </Group>
-
-                {userData?.warmup_linkedin_complete ? (
-                  <Button
-                    variant="filled"
-                    radius="md"
-                    onClick={() => {
-                      navigateToPage(navigate, `/settings/linkedinConnection`);
-                    }}
-                  >
-                    {`LinkedIn Send Rate (per week): ${currentLinkedInSLA}`}
-                  </Button>
-                ) : (
-                  <Tooltip
-                    label="Your LinkedIn account is in a warmup phase. Explore more."
-                    withArrow
-                    withinPortal
-                  >
-                    <Button
-                      variant="outline"
-                      radius="md"
-                      onClick={() => {
-                        navigateToPage(
-                          navigate,
-                          `/settings/linkedinConnection`
-                        );
-                      }}
-                    >
-                      {`LinkedIn Warming Up (per week): ${currentLinkedInSLA}`}
-                    </Button>
-                  </Tooltip>
-                )}
-              </Group>
+              {campaignsSectionHeader}
 
               <Title color="gray.6" order={3}>
                 {userData?.sdr_name.split(" ")[0]}'s Campaigns
@@ -436,8 +448,6 @@ export default function PersonaCampaigns() {
                       </Text>
                     </Center>
                   )}
-
-                  <AllCampaign campaigns={allProjects} />
                 </Stack>
               </ScrollArea>
             </Stack>

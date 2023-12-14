@@ -22,13 +22,46 @@ import {
   Container,
   Accordion,
   Box,
+  Checkbox,
+  UnstyledButton,
+  Radio,
+  Group,
+  Input,
+  Select,
+  TextInput,
+  Textarea,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { openConfirmModal, openContextModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import CloneBumpFrameworkModal from '@modals/CloneBumpFrameworkModal';
-import { IconAlertTriangle, IconAnalyze, IconArrowLeft, IconArrowLeftBar, IconArrowRight, IconBook, IconBrandPushbullet, IconChartBubble, IconCheck, IconChecklist, IconEdit, IconFolders, IconList, IconMessage, IconMessage2, IconPlus, IconPoint, IconRobot, IconSearch, IconTool, IconTransferIn, IconWashMachine, IconX } from '@tabler/icons';
+import {
+  IconAlertTriangle,
+  IconAnalyze,
+  IconArrowLeft,
+  IconArrowLeftBar,
+  IconArrowRight,
+  IconBook,
+  IconBrandPushbullet,
+  IconChartBubble,
+  IconCheck,
+  IconChecklist,
+  IconEdit,
+  IconFolders,
+  IconList,
+  IconMessage,
+  IconMessage2,
+  IconPencil,
+  IconPlus,
+  IconPoint,
+  IconRobot,
+  IconSearch,
+  IconTool,
+  IconTransferIn,
+  IconWashMachine,
+  IconX,
+} from '@tabler/icons';
 import { useQuery } from '@tanstack/react-query';
 import { formatToLabel, valueToColor } from '@utils/general';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
@@ -47,7 +80,6 @@ import SequenceSection from '@common/sequence/SequenceSection';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
 import { getFreshCurrentProject } from '@auth/core';
 import { API_URL } from '@constants/data';
-
 
 type BumpFrameworkBuckets = {
   ACCEPTED: {
@@ -150,9 +182,9 @@ function BumpBucketView(props: {
                   return <></>;
                 }
 
-                let bumpConversionRate
+                let bumpConversionRate;
                 if (framework.etl_num_times_converted && framework.etl_num_times_used) {
-                  bumpConversionRate = framework.etl_num_times_converted / framework.etl_num_times_used * 100
+                  bumpConversionRate = (framework.etl_num_times_converted / framework.etl_num_times_used) * 100;
                 }
 
                 return (
@@ -174,54 +206,46 @@ function BumpBucketView(props: {
                             disabled={true}
                             styles={{
                               label: {
-                                backgroundColor: framework.default === true
-                                  ? theme.colors.teal[theme.fn.primaryShade()]
-                                  : theme.colors.red[theme.fn.primaryShade()],
+                                backgroundColor:
+                                  framework.default === true ? theme.colors.teal[theme.fn.primaryShade()] : theme.colors.red[theme.fn.primaryShade()],
                               },
                             }}
                           />
 
                           <Tooltip
-                            label={`Prospects reply to this bump directly, ${bumpConversionRate?.toFixed(2) || "an unknown "}% of the time`}
+                            label={`Prospects reply to this bump directly, ${bumpConversionRate?.toFixed(2) || 'an unknown '}% of the time`}
                             withinPortal
                             withArrow
                           >
                             <Badge mt='xs' variant='outline' size='xs' color={'green'}>
-                              {bumpConversionRate?.toFixed(2) || "N/A"}%
+                              {bumpConversionRate?.toFixed(2) || 'N/A'}%
                             </Badge>
                           </Tooltip>
-
                         </Flex>
                         <Flex direction='column' ml='xl'>
                           <Flex direction='row'>
                             <Text fw='bold' fz='lg' mr='8px'>
                               {framework.title}
                             </Text>
-                            {
-                              framework.use_account_research &&
-                              <Tooltip
-                                withArrow
-                                withinPortal
-                                label='This BumpFramework will use Account Research'
-                              >
+                            {framework.use_account_research && (
+                              <Tooltip withArrow withinPortal label='This BumpFramework will use Account Research'>
                                 <div>
                                   <IconSearch size='.75rem' stroke='2px' />
                                 </div>
                               </Tooltip>
-                            }
-
+                            )}
                           </Flex>
-                          <TextWithNewline breakheight='6px' style={{ fontSize: '80%' }}>{framework.description}</TextWithNewline>
+                          <TextWithNewline breakheight='6px' style={{ fontSize: '80%' }}>
+                            {framework.description}
+                          </TextWithNewline>
                         </Flex>
                       </Flex>
                       <Tooltip label='Edit Bump Framework' withinPortal>
                         <ActionIcon
                           onClick={() => {
                             openContextModal({
-                              modal: "editBumpFramework",
-                              title: (
-                                <Title order={3}>Edit: {framework.title}</Title>
-                              ),
+                              modal: 'editBumpFramework',
+                              title: <Title order={3}>Edit: {framework.title}</Title>,
                               innerProps: {
                                 bumpFrameworkID: framework.id,
                                 overallStatus: framework.overall_status,
@@ -232,10 +256,8 @@ function BumpBucketView(props: {
                                 onSave: props.afterEdit,
                                 bumpedCount: framework.bumped_count,
                                 bumpDelayDays: framework.bump_delay_days,
-                                useAccountResearch:
-                                  framework.use_account_research,
-                                transformerBlocklist:
-                                  framework.transformer_blocklist,
+                                useAccountResearch: framework.use_account_research,
+                                transformerBlocklist: framework.transformer_blocklist,
                               },
                             });
                           }}
@@ -274,39 +296,30 @@ function BumpBucketView(props: {
         </Card.Section>
       </Card>
       {props.bumpBucket.frameworks.map((framework, index) => {
-                // Show only the first Bump Framework of not showing all
-                if (index > 0 && !showAll) {
-                  return <></>;
-                }
-                return <Card padding='sm' w='100%' mb='12px' mt='12px'>
-                  <Card.Section px='xs'>
-                    <Flex align={'center'} justify={'center'} w='100%'>
-                      <Tooltip
-                        label={`Prospect will be snoozed for ${framework.bump_delay_days} days after bump is sent`}
-                        withinPortal
-                      >
-                        <Badge
-                          mt='12px'
-                          size='md'
-                          color={valueToColor(theme, formatToLabel(framework.bump_delay_days + ''))}
-                          variant='filled'
-                        >
-                          Snooze for {framework.bump_delay_days} day{framework.bump_delay_days > 1 ? 's' : ''}
-                      </Badge>
-                    </Tooltip>
-                  </Flex>
-                  </Card.Section> 
-              </Card>;
+        // Show only the first Bump Framework of not showing all
+        if (index > 0 && !showAll) {
+          return <></>;
+        }
+        return (
+          <Card padding='sm' w='100%' mb='12px' mt='12px'>
+            <Card.Section px='xs'>
+              <Flex align={'center'} justify={'center'} w='100%'>
+                <Tooltip label={`Prospect will be snoozed for ${framework.bump_delay_days} days after bump is sent`} withinPortal>
+                  <Badge mt='12px' size='md' color={valueToColor(theme, formatToLabel(framework.bump_delay_days + ''))} variant='filled'>
+                    Snooze for {framework.bump_delay_days} day
+                    {framework.bump_delay_days > 1 ? 's' : ''}
+                  </Badge>
+                </Tooltip>
+              </Flex>
+            </Card.Section>
+          </Card>
+        );
       })}
     </Box>
   );
 }
 
-function QuestionObjectionLibraryCard(props: {
-  archetypeID: number | null;
-  bumpFramework: BumpFramework;
-  afterEdit: () => void;
-}) {
+function QuestionObjectionLibraryCard(props: { archetypeID: number | null; bumpFramework: BumpFramework; afterEdit: () => void }) {
   const theme = useMantineTheme();
 
   const splitted_substatus = props.bumpFramework?.substatus?.replace('ACTIVE_CONVO_', '');
@@ -354,11 +367,8 @@ function QuestionObjectionLibraryCard(props: {
           <Divider my='xs' />
         </Card.Section>
 
-        
-        <Text fz='xs'>
-          For convos with status labeled:
-        </Text>
-        <Badge color={valueToColor(theme, splitted_substatus || "ACTIVE_CONVO")}>{splitted_substatus || "ACTIVE_CONVO"}</Badge>
+        <Text fz='xs'>For convos with status labeled:</Text>
+        <Badge color={valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO')}>{splitted_substatus || 'ACTIVE_CONVO'}</Badge>
       </Card>
     </>
   );
@@ -368,18 +378,19 @@ function BumpFrameworkAnalysisTable(props: {
   bumpBucket: {
     total: number;
     frameworks: BumpFramework[];
-  },
+  };
   bucketViewDescription: string;
   bucketViewTitle: string;
   showSubstatus?: boolean;
   persona?: string;
 }) {
-
   return (
     <Flex direction='column' w='100%'>
       <Flex>
         <Title order={5}>{props.bucketViewTitle}</Title>
-        <Text ml='sm' fz='sm' color='gray'>- {props.bucketViewDescription}</Text>
+        <Text ml='sm' fz='sm' color='gray'>
+          - {props.bucketViewDescription}
+        </Text>
       </Flex>
 
       {props.bumpBucket?.frameworks?.length > 0 ? (
@@ -387,13 +398,13 @@ function BumpFrameworkAnalysisTable(props: {
           mt='sm'
           withBorder
           shadow='sm'
-          borderRadius="sm"
+          borderRadius='sm'
           highlightOnHover
           records={props.bumpBucket.frameworks}
           columns={[
             {
               accessor: 'title',
-              title: "Title",
+              title: 'Title',
               sortable: true,
               width: '50%',
               render: ({ title, description }) => {
@@ -410,53 +421,45 @@ function BumpFrameworkAnalysisTable(props: {
                     }}
                   >
                     <HoverCard.Target>
-                      <Text>
-                        {title}
-                      </Text>
+                      <Text>{title}</Text>
                     </HoverCard.Target>
                     <HoverCard.Dropdown p='md'>
-                      <Title order={3}>
-                        {title}
-                      </Title>
+                      <Title order={3}>{title}</Title>
                       <Badge mt='xs' size='sm'>
                         {props.persona}
                       </Badge>
                       <Flex mt='md'>
-                        <TextWithNewline breakheight='10px'>
-                          {description}
-                        </TextWithNewline>
+                        <TextWithNewline breakheight='10px'>{description}</TextWithNewline>
                       </Flex>
                     </HoverCard.Dropdown>
                   </HoverCard>
-
-                )
-              }
+                );
+              },
             },
             {
-              accessor: "etl_num_times_used",
-              title: "Times Used",
+              accessor: 'etl_num_times_used',
+              title: 'Times Used',
               sortable: true,
               render: ({ etl_num_times_used }) => (etl_num_times_used ? etl_num_times_used : 0),
             },
             {
-              accessor: "etl_num_times_converted",
-              title: "Times Converted",
+              accessor: 'etl_num_times_converted',
+              title: 'Times Converted',
               sortable: true,
               render: ({ etl_num_times_converted }) => (etl_num_times_converted ? etl_num_times_converted : 0),
             },
             {
-              accessor: "etl_conversion_rate",
-              title: "Conversion Rate",
+              accessor: 'etl_conversion_rate',
+              title: 'Conversion Rate',
               sortable: true,
               render: ({ etl_num_times_used, etl_num_times_converted }) => {
                 if (etl_num_times_used && etl_num_times_converted) {
-                  const percentage = etl_num_times_converted / etl_num_times_used * 100;
-                  return `${percentage.toFixed(2)}%`
+                  const percentage = (etl_num_times_converted / etl_num_times_used) * 100;
+                  return `${percentage.toFixed(2)}%`;
                 }
                 return `0%`;
-              }
-            }
-
+              },
+            },
           ]}
         />
       ) : (
@@ -465,7 +468,7 @@ function BumpFrameworkAnalysisTable(props: {
         </Flex>
       )}
     </Flex>
-  )
+  );
 }
 
 export default function BumpFrameworksPage(props: {
@@ -479,13 +482,15 @@ export default function BumpFrameworksPage(props: {
   const [loading, setLoading] = useState(false);
 
   const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
-  const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
-    useDisclosure();
+  const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] = useDisclosure();
   const [maximumBumpSoftLock, setMaximumBumpSoftLock] = useState(false);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const archetypeID = currentProject?.id || -1;
   const [collapseSimulation, setCollapseSimulator] = useState(true);
   const [numActiveCTAs, setNumActiveCTAs] = useState(0);
+
+  const [data, setData] = useState<any>({} || undefined);
+  const [edit, setEdit] = useState(false);
 
   const bumpBuckets = useRef<BumpFrameworkBuckets>({
     ACCEPTED: {
@@ -508,14 +513,14 @@ export default function BumpFrameworksPage(props: {
   });
 
   const triggerToggleAutoBump = async () => {
-    let status = userData.auto_bump
-    let old_status
+    let status = userData.auto_bump;
+    let old_status;
     if (status == true) {
-      status = "Disabled"
-      old_status = "Enabled"
+      status = 'Disabled';
+      old_status = 'Enabled';
     } else {
-      status = "Enabled"
-      old_status = "Disabled"
+      status = 'Enabled';
+      old_status = 'Disabled';
     }
 
     const result = await postToggleAutoBump(userToken);
@@ -527,16 +532,16 @@ export default function BumpFrameworksPage(props: {
         message: `AutoBump has been ${status.toLower()}. You can ${old_status.toLowerCase()} it at any time.`,
         color: 'green',
         icon: <IconCheck size='1rem' />,
-      })
+      });
     } else {
       showNotification({
         title: 'Error',
         message: 'Something went wrong. Please try again later.',
         color: 'red',
         icon: <IconAlertTriangle size='1rem' />,
-      })
+      });
     }
-  }
+  };
 
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
@@ -613,6 +618,8 @@ export default function BumpFrameworksPage(props: {
     }
     bumpBuckets.current = newBumpBuckets;
 
+    setData(bumpBuckets.current?.ACTIVE_CONVO.frameworks[0]);
+
     // BumpFrameworks have been updated, submit event to parent
     if (props.onPopulateBumpFrameworks) {
       props.onPopulateBumpFrameworks(newBumpBuckets);
@@ -621,18 +628,22 @@ export default function BumpFrameworksPage(props: {
     setLoading(false);
   };
 
-
   useEffect(() => {
     triggerGetBumpFrameworks();
   }, [archetypeID]);
+
+  console.log('11111111111111111', bumpBuckets.current?.ACTIVE_CONVO.frameworks);
+  console.log('ddddddddddddddd', data);
 
   return (
     <>
       <Flex direction='column'>
         {/* <LoadingOverlay visible={loading} /> */}
-        {!props.hideTitle && <Flex justify='space-between'>
-          <Title mb='xs'>LinkedIn Setup</Title>
-        </Flex>}
+        {!props.hideTitle && (
+          <Flex justify='space-between'>
+            <Title mb='xs'>LinkedIn Setup</Title>
+          </Flex>
+        )}
 
         <Flex direction={'row'}>
           <Box w={'100%'}>
@@ -670,131 +681,281 @@ export default function BumpFrameworksPage(props: {
 
               <Tabs.Panel value='settings' pt='xs'>
                 <Container maw='800px' ml='auto' mr='auto'>
-                  <LinkedInConnectedCard
-                    connected={userData ? userData.li_voyager_connected : false}
-                  />
+                  <LinkedInConnectedCard connected={userData ? userData.li_voyager_connected : false} />
                   {/* Auto bump component */}
                   <Card withBorder mt='xs' radius={'md'}>
                     <Title order={4}>Autobump</Title>
-                    <Text size='xs' color='gray'>By enabling AutoBump, SellScale will automatically send follow-up messages to prospects who do not respond to your initial message.</Text>
-                    <Switch label="AutoBump" onLabel="ON" offLabel="OFF"
-                        size='xs'
-                        mt='xs'
-                        
-                        styles={{
-                          labelWrapper: {
-                            cursor: 'pointer',
-                          },
-                          label: {
-                            cursor: 'pointer',
-                          },
-                          track: {
-                            cursor: 'pointer',
-                          }
-                        }}
-                        checked={userData.auto_bump}
-                        onChange={(e) => {
-                          let status = userData.auto_bump
-                          let old_status
-                          if (status == true) {
-                            status = "Disable"
-                            old_status = "enable"
-                          } else {
-                            status = "Enable"
-                            old_status = "disable"
-                          }
-                          openConfirmModal({
-                            title: (
-                              <Flex direction='row' align='center' justify='space-between'>
-                                <Title order={3}>
-                                  AutoBump
-                                </Title>
-                                <Badge
-                                  color={userData.auto_bump ? 'green' : 'red'}
-                                  variant='filled'
-                                  ml='sm'
-                                >
-                                  {userData.auto_bump ? 'Enabled' : 'Disabled'}
-                                </Badge>
-                              </Flex>
-                            ),
-                            children: (
-                              <>
-                                <Text fz='sm'>
-                                  AutoBump is SellScale AI's system for automatically sending follow-up messages to prospects. AutoBumps are sent when a prospect does not respond to a message, and are sent at random times between 9am and 5pm in your timezone on workdays.
+                    <Text size='xs' color='gray'>
+                      By enabling AutoBump, SellScale will automatically send follow-up messages to prospects who do not respond to your initial message.
+                    </Text>
+                    <Switch
+                      label='AutoBump'
+                      onLabel='ON'
+                      offLabel='OFF'
+                      size='xs'
+                      mt='xs'
+                      styles={{
+                        labelWrapper: {
+                          cursor: 'pointer',
+                        },
+                        label: {
+                          cursor: 'pointer',
+                        },
+                        track: {
+                          cursor: 'pointer',
+                        },
+                      }}
+                      checked={userData.auto_bump}
+                      onChange={(e) => {
+                        let status = userData.auto_bump;
+                        let old_status;
+                        if (status == true) {
+                          status = 'Disable';
+                          old_status = 'enable';
+                        } else {
+                          status = 'Enable';
+                          old_status = 'disable';
+                        }
+                        openConfirmModal({
+                          title: (
+                            <Flex direction='row' align='center' justify='space-between'>
+                              <Title order={3}>AutoBump</Title>
+                              <Badge color={userData.auto_bump ? 'green' : 'red'} variant='filled' ml='sm'>
+                                {userData.auto_bump ? 'Enabled' : 'Disabled'}
+                              </Badge>
+                            </Flex>
+                          ),
+                          children: (
+                            <>
+                              <Text fz='sm'>
+                                AutoBump is SellScale AI's system for automatically sending follow-up messages to prospects. AutoBumps are sent when a prospect
+                                does not respond to a message, and are sent at random times between 9am and 5pm in your timezone on workdays.
+                              </Text>
+                              <Card mt='sm' mb='md' withBorder shadow='sm'>
+                                <Text fw='bold'>
+                                  Please test your bump frameworks before enabling AutoBump. AutoBump will always use your default bump framework, so make sure
+                                  it is working as expected.
                                 </Text>
-                                <Card mt='sm' mb='md' withBorder shadow='sm'>
-                                  <Text fw='bold'>
-                                    Please test your bump frameworks before enabling AutoBump. AutoBump will always use your default bump framework, so make sure it is working as expected.
-                                  </Text>
-                                </Card>
+                              </Card>
 
-                                <Text mt='md' fz='sm'>
-                                  AutoBumps using personalized bump frameworks see a significant increase in response rates.
-                                </Text>
-                              </>
-                            ),
-                            labels: { confirm: status, cancel: 'Cancel' },
-                            cancelProps: { color: "gray" },
-                            confirmProps: { color: userData.auto_bump ? 'red' : 'pink' },
-                            onCancel: () => { },
-                            onConfirm: () => { triggerToggleAutoBump() }
-                          })
-                        }}
-                      />
+                              <Text mt='md' fz='sm'>
+                                AutoBumps using personalized bump frameworks see a significant increase in response rates.
+                              </Text>
+                            </>
+                          ),
+                          labels: { confirm: status, cancel: 'Cancel' },
+                          cancelProps: { color: 'gray' },
+                          confirmProps: {
+                            color: userData.auto_bump ? 'red' : 'pink',
+                          },
+                          onCancel: () => {},
+                          onConfirm: () => {
+                            triggerToggleAutoBump();
+                          },
+                        });
+                      }}
+                    />
                   </Card>
                   <Card withBorder mt='xs' radius={'md'}>
                     <Title order={4}>Template Mode vs CTA Mode</Title>
-                    <Text size='xs' color='gray'>CTA Mode is a more generative mode where you use a combination of CTAs and Voice to control your messaging. Template mode is more controlled. Feel free to toggle this persona to your preference. </Text>
-                    <Switch label="Template Mode Enabled" onLabel="ON" offLabel="OFF" mt='xs' checked={currentProject?.template_mode}
+                    <Text size='xs' color='gray'>
+                      CTA Mode is a more generative mode where you use a combination of CTAs and Voice to control your messaging. Template mode is more
+                      controlled. Feel free to toggle this persona to your preference.{' '}
+                    </Text>
+                    <Switch
+                      label='Template Mode Enabled'
+                      onLabel='ON'
+                      offLabel='OFF'
+                      mt='xs'
+                      checked={currentProject?.template_mode}
                       onClick={() => {
-                        fetch(`${API_URL}/client/archetype/${currentProject?.id}/toggle_template_mode`,
-                          {
-                            method: 'PATCH',
-                            headers: {
-                              "Content-Type": "application/json",
-                              "Authorization": `Bearer ${userToken}`
-                            },
-                            body: JSON.stringify({
-                              template_mode: !currentProject?.template_mode
-                            })
-                          }
-                        ).then(res => {
-                          getFreshCurrentProject(
-                            userToken,
-                            currentProject?.id as number
-                          ).then((project: any) => {
+                        fetch(`${API_URL}/client/archetype/${currentProject?.id}/toggle_template_mode`, {
+                          method: 'PATCH',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${userToken}`,
+                          },
+                          body: JSON.stringify({
+                            template_mode: !currentProject?.template_mode,
+                          }),
+                        }).then((res) => {
+                          getFreshCurrentProject(userToken, currentProject?.id as number).then((project: any) => {
                             showNotification({
                               title: 'Success',
                               message: `Template mode ${project?.template_mode ? 'enabled' : 'disabled'}`,
                               color: 'green',
                               icon: <IconCheck size='1rem' />,
-                            
-                            })
+                            });
                             setCurrentProject(project);
                           });
-                        })
-                      }}/>
+                        });
+                      }}
+                    />
                   </Card>
                 </Container>
               </Tabs.Panel>
 
               <Tabs.Panel value='simulate' pt='xs'>
-                <LinkedInConvoSimulator personaId={
-                  archetypeID as number
-                } sequenceSetUpMode={true} />
+                <LinkedInConvoSimulator personaId={archetypeID as number} sequenceSetUpMode={true} />
               </Tabs.Panel>
 
               <Tabs.Panel value='replies' pt='xs'>
                 {!loading ? (
-                  <Flex direction='column' ml='xs'>
-                    <Flex w='100%'>
-                      <Text mt='xs'>
-                        Automate your replies by editing the response frameworks below.
-                      </Text>
+                  <Flex mt='md' w={'100%'} gap={'50px'}>
+                    <Flex w='40%' direction='column'>
+                      {/* <Text mt='xs'>Automate your replies by editing the response frameworks below.</Text>
                       <Button variant='outline' w='30%' mb='md' ml='auto' onClick={openQuestionObjection}>
                         Add another reply framework
+                      </Button> */}
+                      <Button
+                        variant='outline'
+                        mb='md'
+                        leftIcon={<IconPlus />}
+                        onClick={openQuestionObjection}
+                        style={{ borderStyle: 'dashed' }}
+                        size='lg'
+                        fw={'sm'}
+                      >
+                        Create New Framework
                       </Button>
+                      <Radio.Group value={data?.id}>
+                        <Group mt='xs'>
+                          {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map((item: any, i: number) => {
+                            const splitted_substatus = item.substatus?.replace('ACTIVE_CONVO_', '');
+                            const theme = useMantineTheme();
+
+                            return (
+                              <>
+                                {(!bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1] ||
+                                  item.substatus !== bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1].substatus) && (
+                                  <Divider
+                                    label={
+                                      <Flex align={'center'} gap={4}>
+                                        <div
+                                          style={{
+                                            width: '10px',
+                                            height: '10px',
+                                            background: valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO'),
+                                            borderRadius: '100%',
+                                          }}
+                                        ></div>
+                                        <Text color='gray' fw={600}>
+                                          {splitted_substatus || 'ACTIVE_CONVERSATION'}
+                                        </Text>
+                                      </Flex>
+                                    }
+                                    labelPosition='left'
+                                    w={'100%'}
+                                  />
+                                )}
+
+                                <label
+                                  htmlFor={item?.title}
+                                  style={{
+                                    outline: `${data?.id === item?.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
+                                    borderRadius: '8px',
+                                    padding: '14px',
+                                    width: '100%',
+                                  }}
+                                >
+                                  <Flex align={'center'} gap={10}>
+                                    <Radio
+                                      value={item?.id}
+                                      id={item?.title}
+                                      size='xs'
+                                      onClick={() => {
+                                        setData(item);
+                                      }}
+                                    />
+                                    <Text fw={600} mt={2}>
+                                      {item?.title}
+                                    </Text>
+                                  </Flex>
+                                </label>
+                              </>
+                            );
+                          })}
+                        </Group>
+                      </Radio.Group>
+                    </Flex>
+
+                    <Flex w={'100%'} direction='column' gap={'xl'}>
+                      <Flex w={'100%'} justify={'space-between'} align={'center'}>
+                        <Text
+                          size={'24px'}
+                          fw={600}
+                          color='gray'
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                          }}
+                          inline
+                        >
+                          Edit Framework:{' '}
+                          {edit ? <TextInput size='md' defaultValue={data?.title} w='400px' /> : <span style={{ color: 'black' }}>{data?.title}</span>}
+                          <IconPencil onClick={() => setEdit(!edit)} style={{ cursor: 'pointer' }} />
+                        </Text>
+                        <Checkbox label='Default Framework' />
+                      </Flex>
+                      <Flex w='100%' justify={'space-between'} gap={'xl'}>
+                        <Flex direction='column' w='100%'>
+                          <Text color='gray' fw={600}>
+                            REPLY FRAMEWORK TITLE:
+                          </Text>
+                          <TextInput description=' ' placeholder='reply framework' defaultValue={data?.title} w={'100%'} size='md' />
+                        </Flex>
+                        <Flex direction='column' w='100%'>
+                          <Text color='gray' fw={600}>
+                            SUB-STATUS
+                          </Text>
+                          <Select
+                            description=' '
+                            placeholder='Pick value'
+                            data={data?.active_transformers ? data?.active_transformers : []}
+                            defaultValue={data?.active_transformers && data?.active_transformers[0]}
+                            w={'100%'}
+                            size='md'
+                          />
+                        </Flex>
+                      </Flex>
+                      <Flex direction='column'>
+                        <Text color='gray' fw={600}>
+                          PROMPT INSTRUCTION
+                        </Text>
+                        <Textarea
+                          size='md'
+                          description=' '
+                          placeholder='These are instructions the AI will read to craft a personalized message.'
+                          minRows={6}
+                          value={data?.description}
+                        />
+                      </Flex>
+                      <Flex gap={'xl'}>
+                        <Button variant='filled' color='red' w={'100%'} size='lg'>
+                          Deactivate
+                        </Button>
+                        <Button variant='filled' w={'100%'} size='lg'>
+                          Save Framework
+                        </Button>
+                      </Flex>
+                      <label>
+                        <Flex
+                          style={{
+                            border: '0.0625rem solid #ced4da',
+                            borderRadius: '8px',
+                          }}
+                          align={'center'}
+                          px='md'
+                          py={'8px'}
+                          justify={'space-between'}
+                        >
+                          <Text color='gray' fw={600}>
+                            USER ACCOUNT RESEARCH:
+                          </Text>
+                          <Switch />
+                        </Flex>
+                      </label>
                     </Flex>
 
                     <CreateBumpFrameworkModal
@@ -806,7 +967,7 @@ export default function BumpFrameworksPage(props: {
                       dataChannels={dataChannels}
                       archetypeID={archetypeID}
                     />
-                    <Grid>
+                    {/* <Grid>
                       {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
                         return (
                           <Grid.Col span={6}>
@@ -816,9 +977,9 @@ export default function BumpFrameworksPage(props: {
                               afterEdit={triggerGetBumpFrameworks}
                             />
                           </Grid.Col>
-                        );
+                        )
                       })}
-                    </Grid>
+                    </Grid> */}
                   </Flex>
                 ) : (
                   <Flex justify='center'>
@@ -828,7 +989,7 @@ export default function BumpFrameworksPage(props: {
               </Tabs.Panel>
 
               <Tabs.Panel value='analytics' pt='xs'>
-                {!loading && bumpBuckets.current &&
+                {!loading && bumpBuckets.current && (
                   <Stack mx='md'>
                     {/* Table for Step 1 */}
                     <Flex>
@@ -879,43 +1040,56 @@ export default function BumpFrameworksPage(props: {
                         persona={currentProject?.name}
                       />
                     </Flex>
-
                   </Stack>
-                }
+                )}
               </Tabs.Panel>
             </Tabs>
           </Box>
           {/* <Card withBorder ml='xs' w={collapseSimulation ? '15%' : '40%'}>
-            {
-              !collapseSimulation ?
-                <Button variant='outline' size='xs' color='gray' mb='xs' rightIcon={<IconArrowRight />} onClick={() => { setCollapseSimulator(!collapseSimulation) }}>Hide</Button> :
-                <Button variant='outline' size='xs' color='gray' mb='xs' leftIcon={<IconArrowLeft />} onClick={() => { setCollapseSimulator(!collapseSimulation) }}>Show</Button>
-            }
+            {!collapseSimulation ? (
+              <Button
+                variant='outline'
+                size='xs'
+                color='gray'
+                mb='xs'
+                rightIcon={<IconArrowRight />}
+                onClick={() => {
+                  setCollapseSimulator(!collapseSimulation);
+                }}
+              >
+                Hide
+              </Button>
+            ) : (
+              <Button
+                variant='outline'
+                size='xs'
+                color='gray'
+                mb='xs'
+                leftIcon={<IconArrowLeft />}
+                onClick={() => {
+                  setCollapseSimulator(!collapseSimulation);
+                }}
+              >
+                Show
+              </Button>
+            )}
 
-            {
-              collapseSimulation &&
+            {collapseSimulation && (
               <Card withBorder>
-                <Text color='#42b9f5'>
-                  Show Conversation Simulator
-                </Text>
+                <Text color='#42b9f5'>Show Conversation Simulator</Text>
                 <IconMessage color='#42b9f5' size='3rem' />
               </Card>
-            }
+            )}
 
             <Container opacity={collapseSimulation ? 0 : 1}>
-              <LinkedInConvoSimulator personaId={
-                archetypeID as number
-              } sequenceSetUpMode={true} />
+              <LinkedInConvoSimulator personaId={archetypeID as number} sequenceSetUpMode={true} />
             </Container>
-
           </Card> */}
         </Flex>
-
       </Flex>
     </>
   );
 }
-
 
 /*
 

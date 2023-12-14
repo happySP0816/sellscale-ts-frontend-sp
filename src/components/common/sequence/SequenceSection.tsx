@@ -1748,7 +1748,7 @@ function IntroMessageSection(props: {
             )}
 
             <Flex sx={{ justifyContent: 'right' }}>
-              <Button
+              {/* <Button
                 onClick={() => setCtaModalOpened(true)}
                 size='sm'
                 variant='outline'
@@ -1757,7 +1757,7 @@ function IntroMessageSection(props: {
                 compact
               >
                 Brainstorm Templates
-              </Button>
+              </Button> */}
               <InitialMessageTemplateSelector
                 onSelect={(template: LinkedinInitialMessageTemplate) => {
                   showNotification({

@@ -60,8 +60,6 @@ const AllCampaign = (props: PropsType) => {
 
   return (
     <>
-      <Divider />
-
       <Box>
         <Flex justify={"space-between"} align={"center"} mt="md">
           <Title color="gray.6" order={3}>

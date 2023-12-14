@@ -132,6 +132,7 @@ type ProspectFilterState =
 const csvHeaders = [
   { label: "Label", key: "label" },
   { label: "Title", key: "title" },
+  { label: "Company", key: "company" },
   { label: "Icp fit reason", key: "icp_fit_reason" },
   { label: "Linkedin URL", key: "linkedin_url" },
   { label: "Full name", key: "full_name" },
@@ -500,7 +501,7 @@ const ICPFiltersDashboard: FC = () => {
           break;
         default:
           readable_score = "Unknown";
-          color = "gray";
+          color = "";
           break;
       }
       return {

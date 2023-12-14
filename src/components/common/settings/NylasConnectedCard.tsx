@@ -79,7 +79,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
-  const currentProject = useRecoilValue(currentProjectState);
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
 
   const [campaignUrl, setCampaignUrl] = useState<string>(
     currentProject?.smartlead_campaign_id
@@ -151,8 +151,19 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
       async () => {
         let result = await postCreateSmartleadCampaign(
           userToken,
-          currentProject?.id
+          currentProject?.id,
+          true,
         );
+        if (result.status === "success") {
+          // Refresh the smartlead data
+          setCurrentProject({
+            ...currentProject,
+            smartlead_campaign_id: result.data.campaign_id,
+          });
+          setCampaignUrl(
+            `https://app.smartlead.ai/app/email-campaign/${result.data.campaign_id}/analytics`
+          )
+        }
         return result;
       },
       {

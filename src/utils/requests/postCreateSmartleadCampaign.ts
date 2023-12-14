@@ -4,12 +4,13 @@ import { MsgResponse } from "src";
 import { processResponse } from "./utils";
 
 /**
- * Modifies the ICP Prompt for a given archetype
+ * Creates a new smartlead campaign
  * @param userToken
  * @param archetypeID
+ * @param sync
  * @returns - MsgResponse
  */
-export default async function postCreateSmartleadCampaign(userToken: string, archetypeID: number): Promise<MsgResponse> {
+export default async function postCreateSmartleadCampaign(userToken: string, archetypeID: number, sync: boolean): Promise<MsgResponse> {
   const response = await fetch(
     `${API_URL}/smartlead/campaigns/create`,
     {
@@ -20,6 +21,7 @@ export default async function postCreateSmartleadCampaign(userToken: string, arc
       },
       body: JSON.stringify({
         archetype_id: archetypeID,
+        sync_to_archetype: sync,
       }),
     }
   );

@@ -3021,6 +3021,13 @@ function FrameworkSection(props: {
                 }}
                 mt='xl'
                 mr='md'
+                onClick={() => {
+                  openContextModal({
+                    modal: 'frameworkReplies',
+                    title: '7 Example Usages in the Past',
+                    innerProps: {},
+                  });
+                }}
               >
                 <Text fw='bold' fz='md' color='blue' mt='xs'>
                   {props.framework.etl_num_times_used != null &&

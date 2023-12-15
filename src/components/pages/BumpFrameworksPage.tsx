@@ -76,10 +76,12 @@ import TextWithNewline from '@common/library/TextWithNewlines';
 import postToggleAutoBump from '@utils/requests/postToggleAutoBump';
 import PersonaDetailsCTAs from '@common/persona/details/PersonaDetailsCTAs';
 import VoicesSection from '@common/voice_builder/VoicesSection';
-import SequenceSection from '@common/sequence/SequenceSection';
+import SequenceSection, { PersonalizationSection } from '@common/sequence/SequenceSection';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
 import { getFreshCurrentProject } from '@auth/core';
 import { API_URL } from '@constants/data';
+import { postBumpDeactivate } from '@utils/requests/postBumpDeactivate';
+import { patchBumpFramework } from '@utils/requests/patchBumpFramework';
 
 type BumpFrameworkBuckets = {
   ACCEPTED: {
@@ -480,6 +482,7 @@ export default function BumpFrameworksPage(props: {
   const userToken = useRecoilValue(userTokenState);
   const [userData, setUserData] = useRecoilState(userDataState);
   const [loading, setLoading] = useState(false);
+  const theme = useMantineTheme();
 
   const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
   const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] = useDisclosure();
@@ -491,6 +494,7 @@ export default function BumpFrameworksPage(props: {
 
   const [data, setData] = useState<any>({} || undefined);
   const [edit, setEdit] = useState(false);
+  const [deactivateState, setDeactivateState] = useState(false);
 
   const bumpBuckets = useRef<BumpFrameworkBuckets>({
     ACCEPTED: {
@@ -628,9 +632,67 @@ export default function BumpFrameworksPage(props: {
     setLoading(false);
   };
 
+  const triggerPostBumpDeactivate = async () => {
+    setLoading(true);
+    setDeactivateState(true);
+
+    const result = await postBumpDeactivate(userToken, data?.id);
+    if (result.status === 'success') {
+      showNotification({
+        title: 'Success',
+        message: 'Bump Framework deactivated successfully',
+        color: theme.colors.green[7],
+      });
+      setLoading(false);
+      alert('Bump Framework deactivated successfully');
+    } else {
+      showNotification({
+        title: 'Error',
+        message: result.message,
+        color: theme.colors.red[7],
+      });
+    }
+
+    setLoading(false);
+    setDeactivateState(false);
+  };
+
+  const triggerEditBumpFramework = async () => {
+    // setLoading(true);
+    // const result = await patchBumpFramework(
+    //   userToken,
+    //   innerProps.bumpFrameworkID,
+    //   innerProps.overallStatus,
+    //   form.values.title,
+    //   form.values.description,
+    //   bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
+    //   form.values.bumpedCount,
+    //   form.values.bumpDelayDays,
+    //   form.values.default,
+    //   form.values.useAccountResearch
+    // );
+    // if (result.status === 'success') {
+    //   showNotification({
+    //     title: 'Success',
+    //     message: 'Bump Framework updated successfully',
+    //     color: theme.colors.green[7],
+    //   });
+    //   setLoading(false);
+    //   innerProps.onSave();
+    //   context.closeModal(id);
+    // } else {
+    //   showNotification({
+    //     title: 'Error',
+    //     message: result.message,
+    //     color: theme.colors.red[7],
+    //   });
+    // }
+    // setLoading(false);
+  };
+
   useEffect(() => {
     triggerGetBumpFrameworks();
-  }, [archetypeID]);
+  }, [archetypeID, deactivateState]);
 
   console.log('11111111111111111', bumpBuckets.current?.ACTIVE_CONVO.frameworks);
   console.log('ddddddddddddddd', data);
@@ -812,7 +874,7 @@ export default function BumpFrameworksPage(props: {
                         mb='md'
                         leftIcon={<IconPlus />}
                         onClick={openQuestionObjection}
-                        style={{ borderStyle: 'dashed' }}
+                        style={{ borderStyle: 'dashed', fontSize: '16px' }}
                         size='lg'
                         fw={'sm'}
                       >
@@ -822,7 +884,6 @@ export default function BumpFrameworksPage(props: {
                         <Group mt='xs'>
                           {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map((item: any, i: number) => {
                             const splitted_substatus = item.substatus?.replace('ACTIVE_CONVO_', '');
-                            const theme = useMantineTheme();
 
                             return (
                               <>
@@ -854,7 +915,7 @@ export default function BumpFrameworksPage(props: {
                                   style={{
                                     outline: `${data?.id === item?.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
                                     borderRadius: '8px',
-                                    padding: '14px',
+                                    padding: '10px 14px',
                                     width: '100%',
                                   }}
                                 >
@@ -896,14 +957,21 @@ export default function BumpFrameworksPage(props: {
                           {edit ? <TextInput size='md' defaultValue={data?.title} w='400px' /> : <span style={{ color: 'black' }}>{data?.title}</span>}
                           <IconPencil onClick={() => setEdit(!edit)} style={{ cursor: 'pointer' }} />
                         </Text>
-                        <Checkbox label='Default Framework' />
+                        <Checkbox label='Default Framework' defaultChecked />
                       </Flex>
                       <Flex w='100%' justify={'space-between'} gap={'xl'}>
                         <Flex direction='column' w='100%'>
                           <Text color='gray' fw={600}>
                             REPLY FRAMEWORK TITLE:
                           </Text>
-                          <TextInput description=' ' placeholder='reply framework' defaultValue={data?.title} w={'100%'} size='md' />
+                          <TextInput
+                            description=' '
+                            placeholder='reply framework'
+                            // defaultValue={data?.title}
+                            w={'100%'}
+                            size='md'
+                            {...data?.getInputProps('title')}
+                          />
                         </Flex>
                         <Flex direction='column' w='100%'>
                           <Text color='gray' fw={600}>
@@ -928,14 +996,15 @@ export default function BumpFrameworksPage(props: {
                           description=' '
                           placeholder='These are instructions the AI will read to craft a personalized message.'
                           minRows={6}
-                          value={data?.description}
+                          // value={data?.description}
+                          {...data?.getInputProps('description')}
                         />
                       </Flex>
                       <Flex gap={'xl'}>
-                        <Button variant='filled' color='red' w={'100%'} size='lg'>
+                        <Button variant='filled' color='red' w={'100%'} size='lg' onClick={() => triggerPostBumpDeactivate()}>
                           Deactivate
                         </Button>
-                        <Button variant='filled' w={'100%'} size='lg'>
+                        <Button variant='filled' w={'100%'} size='lg' onClick={() => triggerEditBumpFramework()}>
                           Save Framework
                         </Button>
                       </Flex>
@@ -953,9 +1022,30 @@ export default function BumpFrameworksPage(props: {
                           <Text color='gray' fw={600}>
                             USER ACCOUNT RESEARCH:
                           </Text>
-                          <Switch />
+                          <Switch
+                            checked={data?.use_account_research}
+                            onChange={(e) => {
+                              setData({
+                                ...data,
+                                use_account_research: e.currentTarget.checked,
+                              });
+                            }}
+                          />
                         </Flex>
                       </label>
+                      {data?.use_account_research && (
+                        <PersonalizationSection
+                          blocklist={[]}
+                          onItemsChange={async (items) => {
+                            console.log(items);
+                            // form?.setFieldValue(
+                            //   'transformerBlocklist',
+                            //   items.filter((x) => !x.checked).map((x) => x.id)
+                            // );
+                          }}
+                          onChanged={() => {}}
+                        />
+                      )}
                     </Flex>
 
                     <CreateBumpFrameworkModal
@@ -967,7 +1057,7 @@ export default function BumpFrameworksPage(props: {
                       dataChannels={dataChannels}
                       archetypeID={archetypeID}
                     />
-                    {/* <Grid>
+                    <Grid>
                       {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
                         return (
                           <Grid.Col span={6}>
@@ -977,9 +1067,9 @@ export default function BumpFrameworksPage(props: {
                               afterEdit={triggerGetBumpFrameworks}
                             />
                           </Grid.Col>
-                        )
+                        );
                       })}
-                    </Grid> */}
+                    </Grid>
                   </Flex>
                 ) : (
                   <Flex justify='center'>

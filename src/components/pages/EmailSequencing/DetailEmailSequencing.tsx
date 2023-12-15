@@ -1,9 +1,9 @@
-import { currentProjectState } from "@atoms/personaAtoms";
-import { userTokenState } from "@atoms/userAtoms";
-import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
-import ProspectSelect from "@common/library/ProspectSelect";
-import { PersonalizationSection } from "@common/sequence/SequenceSection";
-import { SCREEN_SIZES } from "@constants/data";
+import { currentProjectState } from '@atoms/personaAtoms';
+import { userTokenState } from '@atoms/userAtoms';
+import DynamicRichTextArea from '@common/library/DynamicRichTextArea';
+import ProspectSelect from '@common/library/ProspectSelect';
+import { PersonalizationSection } from '@common/sequence/SequenceSection';
+import { SCREEN_SIZES } from '@constants/data';
 import {
   Badge,
   Box,
@@ -25,12 +25,12 @@ import {
   Popover,
   Divider,
   useMantineTheme,
-} from "@mantine/core";
-import { useDisclosure, useHover, useMediaQuery } from "@mantine/hooks";
-import { showNotification } from "@mantine/notifications";
-import CreateEmailSubjectLineModal from "@modals/CreateEmailSubjectLineModal";
-import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
-import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
+} from '@mantine/core';
+import { useDisclosure, useHover, useMediaQuery } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
+import CreateEmailSubjectLineModal from '@modals/CreateEmailSubjectLineModal';
+import EmailSequenceStepModal from '@modals/EmailSequenceStepModal';
+import ManageEmailSubjectLineTemplatesModal from '@modals/ManageEmailSubjectLineTemplatesModal';
 import {
   IconCheck,
   IconDatabase,
@@ -42,26 +42,24 @@ import {
   IconTrash,
   IconWritingSign,
   IconX,
-} from "@tabler/icons";
-import { JSONContent } from "@tiptap/react";
+} from '@tabler/icons';
+import { JSONContent } from '@tiptap/react';
 import {
   postGenerateFollowupEmail,
   postGenerateInitialEmail,
-} from "@utils/requests/emailMessageGeneration";
-import {
-  createEmailSequenceStep,
-  patchSequenceStep,
-} from "@utils/requests/emailSequencing";
-import { patchEmailSubjectLineTemplate } from "@utils/requests/emailSubjectLines";
-import DOMPurify from "dompurify";
-import React, { FC, useEffect, useMemo } from "react";
-import { useRecoilValue } from "recoil";
-import { EmailSequenceStep, EmailTemplate, SpamScoreResults, SubjectLineTemplate } from "src";
-import ReactDOMServer from "react-dom/server";
+} from '@utils/requests/emailMessageGeneration';
+import { createEmailSequenceStep, patchSequenceStep } from '@utils/requests/emailSequencing';
+import { patchEmailSubjectLineTemplate } from '@utils/requests/emailSubjectLines';
+import DOMPurify from 'dompurify';
+import React, { FC, useEffect, useMemo } from 'react';
+import { useRecoilValue } from 'recoil';
+import { EmailSequenceStep, EmailTemplate, SpamScoreResults, SubjectLineTemplate } from 'src';
+import ReactDOMServer from 'react-dom/server';
 import { deterministicMantineColor } from '@utils/requests/utils';
-import EmailTemplateLibraryModal from "@modals/EmailTemplateLibraryModal";
-import { openConfirmModal } from "@mantine/modals";
-import postCopyEmailPoolEntry from "@utils/requests/postCopyEmailLibraryItem";
+import EmailTemplateLibraryModal from '@modals/EmailTemplateLibraryModal';
+import { openConfirmModal } from '@mantine/modals';
+import postCopyEmailPoolEntry from '@utils/requests/postCopyEmailLibraryItem';
+import { isValidUrl } from '@utils/general';
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
@@ -75,101 +73,95 @@ const SpamScorePopover: FC<{
   }
 
   let totalScore =
-    ((subjectSpamScoreDetails?.total_score || 100) +
-      (bodySpamScoreDetails?.total_score || 0)) /
-    2;
-  let color = "red";
+    ((subjectSpamScoreDetails?.total_score || 100) + (bodySpamScoreDetails?.total_score || 0)) / 2;
+  let color = 'red';
   if (totalScore > 75) {
-    color = "green";
+    color = 'green';
   } else if (totalScore > 25) {
-    color = "orange";
+    color = 'orange';
   }
 
-  let subjectColor = "red";
+  let subjectColor = 'red';
   if (subjectSpamScoreDetails?.total_score || 0 > 75) {
-    subjectColor = "green";
+    subjectColor = 'green';
   } else if (subjectSpamScoreDetails?.total_score || 0 > 25) {
-    subjectColor = "orange";
+    subjectColor = 'orange';
   }
 
-  let bodyColor = "red";
+  let bodyColor = 'red';
   if (bodySpamScoreDetails?.total_score || 0 > 75) {
-    bodyColor = "green";
+    bodyColor = 'green';
   } else if (bodySpamScoreDetails?.total_score || 0 > 25) {
-    bodyColor = "orange";
+    bodyColor = 'orange';
   }
 
   return (
     <>
-      <Popover width={360} position="bottom" withArrow shadow="md">
+      <Popover width={360} position='bottom' withArrow shadow='md'>
         <Popover.Target>
-          <Button size="compact-sm" variant="outline" color={color}>
+          <Button size='compact-sm' variant='outline' color={color}>
             Spam Score: {totalScore}%
           </Button>
         </Popover.Target>
-        <Popover.Dropdown style={{ pointerEvents: "none" }}>
-          <Flex align="center" fz="lg">
-            <Text mr={"sm"} fw="bold">
+        <Popover.Dropdown style={{ pointerEvents: 'none' }}>
+          <Flex align='center' fz='lg'>
+            <Text mr={'sm'} fw='bold'>
               Overall Score:
             </Text>
-            <Text color={color} fw="bold">
+            <Text color={color} fw='bold'>
               {totalScore}
             </Text>
           </Flex>
           {subjectSpamScoreDetails && (
             <>
-              <Divider my="xs" />
-              <Flex align="center">
-                <Text mr={"sm"} fw="bold">
+              <Divider my='xs' />
+              <Flex align='center'>
+                <Text mr={'sm'} fw='bold'>
                   Subject Line Score:
                 </Text>
-                <Text color={subjectColor} fw="bold">
+                <Text color={subjectColor} fw='bold'>
                   {subjectSpamScoreDetails?.total_score}
                 </Text>
               </Flex>
               <Flex>
-                <Flex pl="md" direction="column" fz="sm" mt="2px">
+                <Flex pl='md' direction='column' fz='sm' mt='2px'>
                   <Flex>
                     <Text>Spam words:</Text>
                     <Text
-                      ml="sm"
-                      color={
-                        subjectSpamScoreDetails?.spam_words.length === 0
-                          ? "green"
-                          : "red"
-                      }
-                      fw={"bold"}
+                      ml='sm'
+                      color={subjectSpamScoreDetails?.spam_words.length === 0 ? 'green' : 'red'}
+                      fw={'bold'}
                     >
-                      {subjectSpamScoreDetails?.spam_words.join(", ") || "None"}
+                      {subjectSpamScoreDetails?.spam_words.join(', ') || 'None'}
                     </Text>
                   </Flex>
                 </Flex>
               </Flex>
             </>
           )}
-          <Divider my="xs" />
-          <Flex align="center">
-            <Text mr={"sm"} fw="bold">
+          <Divider my='xs' />
+          <Flex align='center'>
+            <Text mr={'sm'} fw='bold'>
               Body Score:
             </Text>
-            <Text color={bodyColor} fw="bold">
+            <Text color={bodyColor} fw='bold'>
               {bodySpamScoreDetails?.total_score}
             </Text>
           </Flex>
-          <Flex direction="column">
-            <Flex pl="md" direction="column" fz="sm" mt="2px">
+          <Flex direction='column'>
+            <Flex pl='md' direction='column' fz='sm' mt='2px'>
               <Flex>
                 <Text>Read time:</Text>
                 <Text
-                  ml="sm"
+                  ml='sm'
                   color={
                     bodySpamScoreDetails?.read_minutes === 1
-                      ? "green"
+                      ? 'green'
                       : bodySpamScoreDetails?.read_minutes === 2
-                        ? "orange"
-                        : "red"
+                      ? 'orange'
+                      : 'red'
                   }
-                  fw={"bold"}
+                  fw={'bold'}
                 >
                   ~ {bodySpamScoreDetails?.read_minutes} minutes
                 </Text>
@@ -177,15 +169,11 @@ const SpamScorePopover: FC<{
               <Flex>
                 <Text>Spam words:</Text>
                 <Text
-                  ml="sm"
-                  color={
-                    bodySpamScoreDetails?.spam_words.length === 0
-                      ? "green"
-                      : "red"
-                  }
-                  fw={"bold"}
+                  ml='sm'
+                  color={bodySpamScoreDetails?.spam_words.length === 0 ? 'green' : 'red'}
+                  fw={'bold'}
                 >
-                  {bodySpamScoreDetails?.spam_words.join(", ") || "None"}
+                  {bodySpamScoreDetails?.spam_words.join(', ') || 'None'}
                 </Text>
               </Flex>
             </Flex>
@@ -203,66 +191,52 @@ const DetailEmailSequencing: FC<{
   subjectLines: SubjectLineTemplate[];
   refetch: () => Promise<void>;
 }> = ({ toggleDrawer, currentTab, templates, subjectLines, refetch }) => {
-  const lgScreenOrLess = useMediaQuery(
-    `(max-width: ${SCREEN_SIZES.LG})`,
-    false,
-    { getInitialValueInEffect: true }
-  );
+  const lgScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.LG})`, false, {
+    getInitialValueInEffect: true,
+  });
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   if (!currentProject) return <></>;
 
   // Page Title
-  const [pageTitle, setPageTitle] = React.useState<string>("Email Sequencing");
+  const [pageTitle, setPageTitle] = React.useState<string>('Email Sequencing');
 
   // Create Subject Line / Email Template
-  const [
-    createSubjectLineOpened,
-    { open: openCreateSubject, close: closeCreateSubject },
-  ] = useDisclosure();
+  const [createSubjectLineOpened, { open: openCreateSubject, close: closeCreateSubject }] =
+    useDisclosure();
   const [
     createEmailTemplateOpened,
     { open: openCreateEmailTemplate, close: closeCreateEmailTemplate },
   ] = useDisclosure();
 
   // Template library
-  const [bodyLibraryOpened, { open: openBodyLibrary, close: closeBodyLibrary }] = useDisclosure(false);
-  const [subjectLibraryOpened, { open: openSubjectLibrary, close: closeSubjectLibrary }] = useDisclosure(false);
+  const [bodyLibraryOpened, { open: openBodyLibrary, close: closeBodyLibrary }] =
+    useDisclosure(false);
+  const [subjectLibraryOpened, { open: openSubjectLibrary, close: closeSubjectLibrary }] =
+    useDisclosure(false);
 
   // Active vs Inactive Body Templates
-  const [activeTemplate, setActiveTemplate] =
-    React.useState<EmailSequenceStep | null>(null);
-  const [inactiveTemplates, setInactiveTemplates] = React.useState<
-    EmailSequenceStep[]
-  >([]);
+  const [activeTemplate, setActiveTemplate] = React.useState<EmailSequenceStep | null>(null);
+  const [inactiveTemplates, setInactiveTemplates] = React.useState<EmailSequenceStep[]>([]);
 
   // Preview Email (Generation)
   const [prospectID, setProspectID] = React.useState<number>(0);
-  const [previewEmailSubject, setPreviewEmailSubject] = React.useState<
-    string | null
-  >("Random Subject Line");
-  const [previewEmailBody, setPreviewEmailBody] = React.useState<string | null>(
-    "Random Email Body"
+  const [previewEmailSubject, setPreviewEmailSubject] = React.useState<string | null>(
+    'Random Subject Line'
   );
-  const [initialEmailLoading, setInitialEmailLoading] =
-    React.useState<boolean>(false);
-  const [followupEmailLoading, setFollowupEmailLoading] =
-    React.useState<boolean>(false);
+  const [previewEmailBody, setPreviewEmailBody] = React.useState<string | null>(
+    'Random Email Body'
+  );
+  const [initialEmailLoading, setInitialEmailLoading] = React.useState<boolean>(false);
+  const [followupEmailLoading, setFollowupEmailLoading] = React.useState<boolean>(false);
 
   // Spam Score
-  const [subjectSpamScoreDetails, setSubjectSpamScoreDetails] =
-    React.useState<SpamScoreResults>();
-  const [bodySpamScoreDetails, setBodySpamScoreDetails] =
-    React.useState<SpamScoreResults>();
+  const [subjectSpamScoreDetails, setSubjectSpamScoreDetails] = React.useState<SpamScoreResults>();
+  const [bodySpamScoreDetails, setBodySpamScoreDetails] = React.useState<SpamScoreResults>();
 
   // Trigger Generate Initial Email
   const triggerPostGenerateInitialEmail = async () => {
-    if (
-      !prospectID ||
-      !subjectLines ||
-      subjectLines.length === 0 ||
-      currentTab !== "PROSPECTED"
-    ) {
+    if (!prospectID || !subjectLines || subjectLines.length === 0 || currentTab !== 'PROSPECTED') {
       return;
     }
 
@@ -273,9 +247,7 @@ const DetailEmailSequencing: FC<{
         (subjectLine: SubjectLineTemplate) => subjectLine.active
       );
       const randomSubjectLineID =
-        activeSubjectLines[
-          Math.floor(Math.random() * activeSubjectLines.length)
-        ].id;
+        activeSubjectLines[Math.floor(Math.random() * activeSubjectLines.length)].id;
 
       const response = await postGenerateInitialEmail(
         userToken,
@@ -286,44 +258,42 @@ const DetailEmailSequencing: FC<{
         null,
         initialEmailGenerationController
       );
-      if (response.status === "success") {
+      if (response.status === 'success') {
         const email_body = response.data.email_body;
         const subject_line = response.data.subject_line;
         if (!email_body || !subject_line) {
           showNotification({
-            title: "Error",
-            message: "Something went wrong with generation, please try again.",
-            icon: <IconX radius="sm" />,
+            title: 'Error',
+            message: 'Something went wrong with generation, please try again.',
+            icon: <IconX radius='sm' />,
           });
         }
 
-        const subjectLineSpamWords =
-          subject_line.spam_detection_results?.spam_words || [];
+        const subjectLineSpamWords = subject_line.spam_detection_results?.spam_words || [];
         let subjectLineCompletion = subject_line.completion;
         if (subjectLineSpamWords && subjectLineSpamWords.length > 0) {
           subjectLineSpamWords.forEach((badWord: string) => {
             const spannedWord =
               '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' +
               badWord +
-              "</span>";
+              '</span>';
             subjectLineCompletion = subjectLineCompletion.replace(
-              new RegExp(badWord, "g"),
+              new RegExp(badWord, 'g'),
               spannedWord
             );
           });
         }
 
-        const emailBodySpamWords =
-          email_body.spam_detection_results?.spam_words || [];
+        const emailBodySpamWords = email_body.spam_detection_results?.spam_words || [];
         let emailBodyCompletion = email_body.completion;
         if (emailBodySpamWords && emailBodySpamWords.length > 0) {
           emailBodySpamWords.forEach((badWord: string) => {
             const spannedWord =
               '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' +
               badWord +
-              "</span>";
+              '</span>';
             emailBodyCompletion = emailBodyCompletion.replace(
-              new RegExp(badWord, "g"),
+              new RegExp(badWord, 'g'),
               spannedWord
             );
           });
@@ -338,16 +308,16 @@ const DetailEmailSequencing: FC<{
       setInitialEmailLoading(false);
     } catch (error) {
       // Must have been aborted. No action needed
-      if (currentTab !== "PROSPECTED") {
+      if (currentTab !== 'PROSPECTED') {
         setInitialEmailLoading(false);
       }
-      console.log("Generation aborted");
+      console.log('Generation aborted');
     }
   };
 
   // Trigger Generate Followup Email
   const triggerPostGenerateFollowupEmail = async () => {
-    if (!prospectID || currentTab === "PROSPECTED") {
+    if (!prospectID || currentTab === 'PROSPECTED') {
       return;
     }
 
@@ -362,26 +332,25 @@ const DetailEmailSequencing: FC<{
         null,
         followupEmailGenerationController
       );
-      if (response.status === "success") {
+      if (response.status === 'success') {
         const email_body = response.data.email_body;
         if (!email_body) {
           showNotification({
-            title: "Error",
-            message: "Something went wrong with generation, please try again.",
-            icon: <IconX radius="sm" />,
+            title: 'Error',
+            message: 'Something went wrong with generation, please try again.',
+            icon: <IconX radius='sm' />,
           });
         }
-        const emailBodySpamWords =
-          email_body.spam_detection_results?.spam_words || [];
+        const emailBodySpamWords = email_body.spam_detection_results?.spam_words || [];
         let emailBodyCompletion = email_body.completion;
         if (emailBodySpamWords && emailBodySpamWords.length > 0) {
           emailBodySpamWords.forEach((badWord: string) => {
             const spannedWord =
               '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' +
               badWord +
-              "</span>";
+              '</span>';
             emailBodyCompletion = emailBodyCompletion.replace(
-              new RegExp(badWord, "g"),
+              new RegExp(badWord, 'g'),
               spannedWord
             );
           });
@@ -394,11 +363,11 @@ const DetailEmailSequencing: FC<{
       setFollowupEmailLoading(false);
     } catch (error) {
       // Must have been aborted. No action needed
-      if (currentTab !== "PROSPECTED") {
+      if (currentTab !== 'PROSPECTED') {
         setFollowupEmailLoading(false);
       }
       setFollowupEmailLoading(true);
-      console.log("Generation aborted");
+      console.log('Generation aborted');
     }
   };
 
@@ -406,10 +375,8 @@ const DetailEmailSequencing: FC<{
   const triggerGenerateEmail = () => {
     // setPreviewEmailSubject('Random Subject Line');
     // setPreviewEmailBody('Random Email Body');
-    followupEmailGenerationController.abort(
-      "Creating a new generation request"
-    );
-    initialEmailGenerationController.abort("Creating a new generation request");
+    followupEmailGenerationController.abort('Creating a new generation request');
+    initialEmailGenerationController.abort('Creating a new generation request');
 
     followupEmailGenerationController = new AbortController();
     initialEmailGenerationController = new AbortController();
@@ -417,7 +384,7 @@ const DetailEmailSequencing: FC<{
     setSubjectSpamScoreDetails(undefined);
     setBodySpamScoreDetails(undefined);
 
-    if (currentTab === "PROSPECTED") {
+    if (currentTab === 'PROSPECTED') {
       triggerPostGenerateInitialEmail();
     } else {
       triggerPostGenerateFollowupEmail();
@@ -432,11 +399,8 @@ const DetailEmailSequencing: FC<{
   // Set Active / Inactive Templates
   useEffect(() => {
     // Get active template, everything else goes into inactive
-    const activeTemplates = templates.filter(
-      (template: EmailSequenceStep) => template.default
-    );
-    const activeTemplate =
-      activeTemplates.length > 0 ? activeTemplates[0] : null;
+    const activeTemplates = templates.filter((template: EmailSequenceStep) => template.default);
+    const activeTemplate = activeTemplates.length > 0 ? activeTemplates[0] : null;
     let inactiveTemplates = [];
     if (activeTemplate) {
       inactiveTemplates = templates.filter(
@@ -454,36 +418,36 @@ const DetailEmailSequencing: FC<{
     setPreviewEmailBody(null);
     setPreviewEmailSubject(null);
 
-    if (currentTab === "PROSPECTED") {
-      setPageTitle("Initial Email");
-    } else if (currentTab === "ACCEPTED") {
-      setPageTitle("First Follow Up Email");
-    } else if (currentTab.includes("BUMPED-")) {
-      const bumpCount = currentTab.split("-")[1];
+    if (currentTab === 'PROSPECTED') {
+      setPageTitle('Initial Email');
+    } else if (currentTab === 'ACCEPTED') {
+      setPageTitle('First Follow Up Email');
+    } else if (currentTab.includes('BUMPED-')) {
+      const bumpCount = currentTab.split('-')[1];
       const bumpToFollowupMap: Record<string, string> = {
-        "1": "Second",
-        "2": "Third",
-        "3": "Fourth",
-        "4": "Fifth",
-        "5": "Sixth",
-        "6": "Seventh",
-        "7": "Eighth",
+        '1': 'Second',
+        '2': 'Third',
+        '3': 'Fourth',
+        '4': 'Fifth',
+        '5': 'Sixth',
+        '6': 'Seventh',
+        '7': 'Eighth',
       };
       setPageTitle(`${bumpToFollowupMap[bumpCount]} Follow Up Email`);
     }
   }, [currentTab]);
 
   const EmailBodySection = () => (
-    <Box mt={"md"}>
-      <Flex justify="flex-end" mb="md">
+    <Box mt={'md'}>
+      <Flex justify='flex-end' mb='md'>
         <Flex>
-          <Button onClick={openBodyLibrary} variant="outline" radius="md" color="blue" mr='xs'>
+          <Button onClick={openBodyLibrary} variant='outline' radius='md' color='blue' mr='xs'>
             📚 Choose from Template Library
           </Button>
           <Button
-            variant="light"
-            leftIcon={<IconPlus size=".90rem" />}
-            radius={"sm"}
+            variant='light'
+            leftIcon={<IconPlus size='.90rem' />}
+            radius={'sm'}
             onClick={openCreateEmailTemplate}
           >
             Add Email Template
@@ -492,24 +456,25 @@ const DetailEmailSequencing: FC<{
         <EmailTemplateLibraryModal
           modalOpened={bodyLibraryOpened}
           closeModal={closeBodyLibrary}
-          templateType={"BODY"}
+          templateType={'BODY'}
           onSelect={(template: EmailTemplate) => {
             openConfirmModal({
-              title: <Title order={3}>Use "{template.name || "N/A"}" Template </Title>,
+              title: <Title order={3}>Use "{template.name || 'N/A'}" Template </Title>,
               children: (
                 <>
-                  <Text fs="italic" fz='sm'>
-                    Review the details of the "{template.name || "N/A"}" template below. You can always edit the template after importing.
+                  <Text fs='italic' fz='sm'>
+                    Review the details of the "{template.name || 'N/A'}" template below. You can
+                    always edit the template after importing.
                   </Text>
-                  <Text mt="sm" fw='light'>
+                  <Text mt='sm' fw='light'>
                     Name:
                   </Text>
                   <TextInput value={template.name} />
-                  <Text mt="md" fw='light'>
+                  <Text mt='md' fw='light'>
                     Description:
                   </Text>
-                  <TextInput value={template.description || "None..."} />
-                  <Text mt="md" fw='light'>
+                  <TextInput value={template.description || 'None...'} />
+                  <Text mt='md' fw='light'>
                     Template:
                   </Text>
                   <Box
@@ -521,67 +486,65 @@ const DetailEmailSequencing: FC<{
                     px='md'
                     mt='sm'
                   >
-                    <Text fz="sm">
-                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.template) }} />
+                    <Text fz='sm'>
+                      <div
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.template) }}
+                      />
                     </Text>
                   </Box>
                 </>
               ),
               labels: {
-                confirm: "Import",
-                cancel: "Go Back",
+                confirm: 'Import',
+                cancel: 'Go Back',
               },
-              cancelProps: { color: "grey", variant: "outline" },
-              confirmProps: { color: "green" },
-              onCancel: () => { },
+              cancelProps: { color: 'grey', variant: 'outline' },
+              confirmProps: { color: 'green' },
+              onCancel: () => {},
               onConfirm: async () => {
-
-                const bumpedCount = currentTab.includes("BUMPED-") ? parseInt(currentTab.split("-")[1]) : null;
+                const bumpedCount = currentTab.includes('BUMPED-')
+                  ? parseInt(currentTab.split('-')[1])
+                  : null;
                 const result = await postCopyEmailPoolEntry(
                   userToken,
                   template.template_type,
                   currentProject.id,
                   template.id,
-                  currentTab.includes("BUMPED-") ? "BUMPED" : currentTab,
+                  currentTab.includes('BUMPED-') ? 'BUMPED' : currentTab,
                   bumpedCount,
                   template.transformer_blocklist
-                )
-                if (result.status === "success") {
+                );
+                if (result.status === 'success') {
                   showNotification({
-                    title: "Success",
+                    title: 'Success',
                     message: `Successfully imported "${template.name}" template.`,
-                    color: "green",
+                    color: 'green',
                   });
                   closeBodyLibrary();
                   refetch();
                 } else {
                   showNotification({
-                    title: "Error",
+                    title: 'Error',
                     message: result.message,
-                    color: "red",
+                    color: 'red',
                   });
                 }
-
               },
-            })
+            });
           }}
         />
         <EmailSequenceStepModal
           modalOpened={createEmailTemplateOpened}
           openModal={openCreateEmailTemplate}
           closeModal={closeCreateEmailTemplate}
-          type={"CREATE"}
+          type={'CREATE'}
           backFunction={() => {
             refetch();
           }}
           isDefault={true}
-          status={currentTab.includes("BUMPED-") ? "BUMPED" : currentTab}
+          status={currentTab.includes('BUMPED-') ? 'BUMPED' : currentTab}
           archetypeID={currentProject.id}
-          bumpedCount={
-            currentTab.includes("BUMPED-")
-              ? parseInt(currentTab.split("-")[1])
-              : null
-          }
+          bumpedCount={currentTab.includes('BUMPED-') ? parseInt(currentTab.split('-')[1]) : null}
           onFinish={async (
             title: any,
             sequence: any,
@@ -592,16 +555,14 @@ const DetailEmailSequencing: FC<{
             const result = await createEmailSequenceStep(
               userToken,
               currentProject.id,
-              status ?? "",
+              status ?? '',
               title,
               sequence,
-              currentTab.includes("BUMPED-")
-                ? parseInt(currentTab.split("-")[1])
-                : null,
+              currentTab.includes('BUMPED-') ? parseInt(currentTab.split('-')[1]) : null,
               isDefault,
               substatus
             );
-            return result.status === "success";
+            return result.status === 'success';
           }}
         />
       </Flex>
@@ -619,45 +580,43 @@ const DetailEmailSequencing: FC<{
 
       {/* INACTIVE TEMPLATES */}
       {inactiveTemplates && inactiveTemplates.length > 0 && (
-        <Flex mt="md" w="100%">
-          <Accordion w="100%">
-            {inactiveTemplates.map(
-              (template: EmailSequenceStep, index: any) => {
-                return (
-                  <Accordion.Item value={"test"}>
-                    <Accordion.Control>
-                      <Flex direction="row" w="100%" justify={"space-between"}>
-                        <Flex direction="row" align="center">
-                          <Text fw={500}>{template.title}</Text>
-                        </Flex>
-                        <Flex>
-                          <Tooltip label="Coming Soon" withArrow withinPortal>
-                            <Text fz="sm" mr="md">
-                              Open %: <b>TBD</b>
-                            </Text>
-                          </Tooltip>
-                          <Tooltip label="Coming Soon" withArrow withinPortal>
-                            <Text fz="sm">
-                              Reply %: <b>TBD</b>
-                            </Text>
-                          </Tooltip>
-                        </Flex>
+        <Flex mt='md' w='100%'>
+          <Accordion w='100%'>
+            {inactiveTemplates.map((template: EmailSequenceStep, index: any) => {
+              return (
+                <Accordion.Item value={'test'}>
+                  <Accordion.Control>
+                    <Flex direction='row' w='100%' justify={'space-between'}>
+                      <Flex direction='row' align='center'>
+                        <Text fw={500}>{template.title}</Text>
                       </Flex>
-                    </Accordion.Control>
-                    <Accordion.Panel>
-                      <EmailBodyItem
-                        key={template.id}
-                        template={template}
-                        refetch={async () => {
-                          await refetch();
-                        }}
-                        hideHeader
-                      />
-                    </Accordion.Panel>
-                  </Accordion.Item>
-                );
-              }
-            )}
+                      <Flex>
+                        <Tooltip label='Coming Soon' withArrow withinPortal>
+                          <Text fz='sm' mr='md'>
+                            Open %: <b>TBD</b>
+                          </Text>
+                        </Tooltip>
+                        <Tooltip label='Coming Soon' withArrow withinPortal>
+                          <Text fz='sm'>
+                            Reply %: <b>TBD</b>
+                          </Text>
+                        </Tooltip>
+                      </Flex>
+                    </Flex>
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <EmailBodyItem
+                      key={template.id}
+                      template={template}
+                      refetch={async () => {
+                        await refetch();
+                      }}
+                      hideHeader
+                    />
+                  </Accordion.Panel>
+                </Accordion.Item>
+              );
+            })}
           </Accordion>
         </Flex>
       )}
@@ -665,36 +624,36 @@ const DetailEmailSequencing: FC<{
   );
 
   return (
-    <Box mt="md">
-      <Flex align={"center"} justify={"space-between"}>
-        <Flex align={"center"}>
-          <Text fw={700} size={"xl"}>
+    <Box mt='md'>
+      <Flex align={'center'} justify={'space-between'}>
+        <Flex align={'center'}>
+          <Text fw={700} size={'xl'}>
             Set {pageTitle}
           </Text>
         </Flex>
         {lgScreenOrLess && <Button onClick={toggleDrawer}>Open toggle</Button>}
       </Flex>
 
-      <Box mt={"sm"}>
-        <Text color="gray.6" size={"sm"} fw={600}>
+      <Box mt={'sm'}>
+        <Text color='gray.6' size={'sm'} fw={600}>
           Select an email and a body.
         </Text>
       </Box>
 
-      <Box mt={"md"}>
-        <Flex align="center" justify="space-between">
+      <Box mt={'md'}>
+        <Flex align='center' justify='space-between'>
           <Flex>
-            <Text color="gray.8" size={"md"} fw={700}>
+            <Text color='gray.8' size={'md'} fw={700}>
               EXAMPLE EMAIL
             </Text>
           </Flex>
-          <Flex align="center">
+          <Flex align='center'>
             <Button
-              mr="sm"
-              size="sm"
-              variant="subtle"
+              mr='sm'
+              size='sm'
+              variant='subtle'
               compact
-              leftIcon={<IconReload size="0.75rem" />}
+              leftIcon={<IconReload size='0.75rem' />}
               onClick={() => {
                 setPreviewEmailBody(null);
                 setPreviewEmailSubject(null);
@@ -717,7 +676,7 @@ const DetailEmailSequencing: FC<{
           </Flex>
         </Flex>
 
-        <Flex justify="flex-end" mt="sm">
+        <Flex justify='flex-end' mt='sm'>
           <SpamScorePopover
             subjectSpamScoreDetails={subjectSpamScoreDetails}
             bodySpamScoreDetails={bodySpamScoreDetails}
@@ -725,35 +684,33 @@ const DetailEmailSequencing: FC<{
         </Flex>
 
         <Box
-          mt="sm"
-          px={"sm"}
-          py={"md"}
+          mt='sm'
+          px={'sm'}
+          py={'md'}
           sx={(theme) => ({
-            borderRadius: "12px",
+            borderRadius: '12px',
             border: `1px dashed ${theme.colors.blue[5]}`,
           })}
-          pos={"relative"}
+          pos={'relative'}
         >
-          {currentTab === "PROSPECTED" && (
-            <Flex mb={"md"}>
-              <Flex w={80} mr="sm">
-                <Text color="gray.6" fw={500}>
+          {currentTab === 'PROSPECTED' && (
+            <Flex mb={'md'}>
+              <Flex w={80} mr='sm'>
+                <Text color='gray.6' fw={500}>
                   Subject:
                 </Text>
               </Flex>
               <Flex>
                 {initialEmailLoading && !previewEmailSubject ? (
-                  <Flex align="center">
-                    <Loader mr="sm" size={20} color="purple" />
-                    <Text color="purple">AI generating subject line...</Text>
+                  <Flex align='center'>
+                    <Loader mr='sm' size={20} color='purple' />
+                    <Text color='purple'>AI generating subject line...</Text>
                   </Flex>
                 ) : (
-                  <Text color="gray.8" fw={500}>
+                  <Text color='gray.8' fw={500}>
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(
-                          previewEmailSubject as string
-                        ),
+                        __html: DOMPurify.sanitize(previewEmailSubject as string),
                       }}
                     />
                   </Text>
@@ -762,17 +719,17 @@ const DetailEmailSequencing: FC<{
             </Flex>
           )}
           <Flex>
-            <Flex w={60} mr="md">
-              <Text color="gray.6" fw={500}>
+            <Flex w={60} mr='md'>
+              <Text color='gray.6' fw={500}>
                 Body:
               </Text>
             </Flex>
             <Flex>
               {(initialEmailLoading && !previewEmailSubject) ||
-                (followupEmailLoading && !previewEmailBody) ? (
-                <Flex align="center">
-                  <Loader mr="sm" size={20} color="purple" />
-                  <Text color="purple">AI generating email body...</Text>
+              (followupEmailLoading && !previewEmailBody) ? (
+                <Flex align='center'>
+                  <Loader mr='sm' size={20} color='purple' />
+                  <Text color='purple'>AI generating email body...</Text>
                 </Flex>
               ) : (
                 <Box
@@ -782,7 +739,7 @@ const DetailEmailSequencing: FC<{
                     // backgroundColor: "#F5F5F5",
                   })}
                 >
-                  <Text color="gray.8" fw={500}>
+                  <Text color='gray.8' fw={500}>
                     <div
                       dangerouslySetInnerHTML={{
                         __html: DOMPurify.sanitize(previewEmailBody as string),
@@ -796,25 +753,31 @@ const DetailEmailSequencing: FC<{
         </Box>
       </Box>
 
-      {currentTab === "PROSPECTED" ? (
-        <Tabs defaultValue="subject">
+      {currentTab === 'PROSPECTED' ? (
+        <Tabs defaultValue='subject'>
           <Tabs.List>
-            <Tabs.Tab value="subject">Subject Lines</Tabs.Tab>
+            <Tabs.Tab value='subject'>Subject Lines</Tabs.Tab>
 
-            <Tabs.Tab value="body">Body</Tabs.Tab>
+            <Tabs.Tab value='body'>Body</Tabs.Tab>
           </Tabs.List>
 
-          <Tabs.Panel value="subject">
-            <Flex direction="column" w="100%">
-              <Flex justify="flex-end" align='center' mt='md'>
+          <Tabs.Panel value='subject'>
+            <Flex direction='column' w='100%'>
+              <Flex justify='flex-end' align='center' mt='md'>
                 <Flex align='center'>
-                  <Button onClick={openSubjectLibrary} variant="outline" radius="md" color="blue" mr='xs'>
+                  <Button
+                    onClick={openSubjectLibrary}
+                    variant='outline'
+                    radius='md'
+                    color='blue'
+                    mr='xs'
+                  >
                     📚 Choose from Template Library
                   </Button>
                   <Button
-                    variant="light"
-                    leftIcon={<IconPlus size=".90rem" />}
-                    radius={"sm"}
+                    variant='light'
+                    leftIcon={<IconPlus size='.90rem' />}
+                    radius={'sm'}
                     onClick={openCreateSubject}
                   >
                     Add Subject Line
@@ -832,24 +795,25 @@ const DetailEmailSequencing: FC<{
                 <EmailTemplateLibraryModal
                   modalOpened={subjectLibraryOpened}
                   closeModal={closeSubjectLibrary}
-                  templateType={"SUBJECT_LINE"}
+                  templateType={'SUBJECT_LINE'}
                   onSelect={(template: EmailTemplate) => {
                     openConfirmModal({
-                      title: <Title order={3}>Use "{template.name || "N/A"}" Template </Title>,
+                      title: <Title order={3}>Use "{template.name || 'N/A'}" Template </Title>,
                       children: (
                         <>
-                          <Text fs="italic" fz='sm'>
-                            Review the details of the "{template.name || "N/A"}" template below. You can always edit the template after importing.
+                          <Text fs='italic' fz='sm'>
+                            Review the details of the "{template.name || 'N/A'}" template below. You
+                            can always edit the template after importing.
                           </Text>
-                          <Text mt="sm" fw='light'>
+                          <Text mt='sm' fw='light'>
                             Name:
                           </Text>
                           <TextInput value={template.name} />
-                          <Text mt="md" fw='light'>
+                          <Text mt='md' fw='light'>
                             Description:
                           </Text>
-                          <TextInput value={template.description || "None..."} />
-                          <Text mt="md" fw='light'>
+                          <TextInput value={template.description || 'None...'} />
+                          <Text mt='md' fw='light'>
                             Template:
                           </Text>
                           <Box
@@ -861,19 +825,23 @@ const DetailEmailSequencing: FC<{
                             px='md'
                             mt='sm'
                           >
-                            <Text fz="sm">
-                              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.template) }} />
+                            <Text fz='sm'>
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html: DOMPurify.sanitize(template.template),
+                                }}
+                              />
                             </Text>
                           </Box>
                         </>
                       ),
                       labels: {
-                        confirm: "Import",
-                        cancel: "Go Back",
+                        confirm: 'Import',
+                        cancel: 'Go Back',
                       },
-                      cancelProps: { color: "grey", variant: "outline" },
-                      confirmProps: { color: "green" },
-                      onCancel: () => { },
+                      cancelProps: { color: 'grey', variant: 'outline' },
+                      confirmProps: { color: 'green' },
+                      onCancel: () => {},
                       onConfirm: async () => {
                         const result = await postCopyEmailPoolEntry(
                           userToken,
@@ -883,48 +851,44 @@ const DetailEmailSequencing: FC<{
                           null,
                           null,
                           template.transformer_blocklist
-                        )
-                        if (result.status === "success") {
+                        );
+                        if (result.status === 'success') {
                           showNotification({
-                            title: "Success",
+                            title: 'Success',
                             message: `Successfully imported "${template.name}" template.`,
-                            color: "green",
+                            color: 'green',
                           });
                           closeSubjectLibrary();
                           refetch();
                         } else {
                           showNotification({
-                            title: "Error",
+                            title: 'Error',
                             message: result.message,
-                            color: "red",
+                            color: 'red',
                           });
                         }
-
                       },
-                    })
+                    });
                   }}
                 />
-
               </Flex>
-              {subjectLines.map(
-                (subjectLine: SubjectLineTemplate, index: any) => {
-                  return (
-                    <Box w={"100%"}>
-                      <SubjectLineItem
-                        key={subjectLine.id}
-                        subjectLine={subjectLine}
-                        refetch={async () => {
-                          await refetch();
-                        }}
-                      />
-                    </Box>
-                  );
-                }
-              )}
+              {subjectLines.map((subjectLine: SubjectLineTemplate, index: any) => {
+                return (
+                  <Box w={'100%'}>
+                    <SubjectLineItem
+                      key={subjectLine.id}
+                      subjectLine={subjectLine}
+                      refetch={async () => {
+                        await refetch();
+                      }}
+                    />
+                  </Box>
+                );
+              })}
             </Flex>
           </Tabs.Panel>
 
-          <Tabs.Panel value="body">
+          <Tabs.Panel value='body'>
             <EmailBodySection />
           </Tabs.Panel>
         </Tabs>
@@ -939,17 +903,13 @@ const SubjectLineItem: React.FC<{
   subjectLine: SubjectLineTemplate;
   refetch: () => Promise<void>;
 }> = ({ subjectLine, refetch }) => {
-  const [
-    manageSubjectLineOpened,
-    { open: openManageSubject, close: closeManageSubject },
-  ] = useDisclosure();
+  const [manageSubjectLineOpened, { open: openManageSubject, close: closeManageSubject }] =
+    useDisclosure();
   const userToken = useRecoilValue(userTokenState);
 
   const [loading, setLoading] = React.useState(false);
   const [editing, setEditing] = React.useState(false);
-  const [editedSubjectLine, setEditedSubjectLine] = React.useState(
-    subjectLine.subject_line
-  );
+  const [editedSubjectLine, setEditedSubjectLine] = React.useState(subjectLine.subject_line);
 
   // Edit Subject Line
   const triggerPatchEmailSubjectLineTemplate = async () => {
@@ -961,19 +921,19 @@ const SubjectLineItem: React.FC<{
       editedSubjectLine,
       subjectLine.active
     );
-    if (result.status != "success") {
+    if (result.status != 'success') {
       showNotification({
-        title: "Error",
+        title: 'Error',
         message: result.message,
-        color: "red",
+        color: 'red',
       });
       setLoading(false);
       return;
     } else {
       showNotification({
-        title: "Success",
-        message: "Successfully updated email subject line",
-        color: "green",
+        title: 'Success',
+        message: 'Successfully updated email subject line',
+        color: 'green',
       });
 
       await refetch();
@@ -993,20 +953,21 @@ const SubjectLineItem: React.FC<{
       subjectLine.subject_line,
       !subjectLine.active
     );
-    if (result.status != "success") {
+    if (result.status != 'success') {
       showNotification({
-        title: "Error",
+        title: 'Error',
         message: result.message,
-        color: "red",
+        color: 'red',
       });
       setLoading(false);
       return;
     } else {
       showNotification({
-        title: "Success",
-        message: `Successfully ${subjectLine.active ? "deactivated" : "activated"
-          } email subject line`,
-        color: "green",
+        title: 'Success',
+        message: `Successfully ${
+          subjectLine.active ? 'deactivated' : 'activated'
+        } email subject line`,
+        color: 'green',
       });
 
       await refetch();
@@ -1018,20 +979,18 @@ const SubjectLineItem: React.FC<{
 
   return (
     <Card
-      mt="sm"
-      shadow="xs"
-      radius={"md"}
+      mt='sm'
+      shadow='xs'
+      radius={'md'}
       py={10}
       mb={5}
       sx={(theme) => ({
-        border: subjectLine.active
-          ? "1px solid " + theme.colors.blue[4]
-          : "1px solid transparent",
+        border: subjectLine.active ? '1px solid ' + theme.colors.blue[4] : '1px solid transparent',
       })}
     >
       <LoadingOverlay visible={loading} />
-      <Flex direction={"column"} w={"100%"}>
-        <Flex gap={"0.5rem"} mb={"0.5rem"} justify={"space-between"}>
+      <Flex direction={'column'} w={'100%'}>
+        <Flex gap={'0.5rem'} mb={'0.5rem'} justify={'space-between'}>
           <Flex>
             <Tooltip
               label={`Prospects: ${subjectLine.times_accepted} / ${subjectLine.times_used}`}
@@ -1039,27 +998,22 @@ const SubjectLineItem: React.FC<{
               withinPortal
             >
               <Button
-                variant={"white"}
-                size="xs"
-                color={"blue"}
-                h="auto"
-                fz={"0.75rem"}
-                py={"0.125rem"}
-                px={"0.25rem"}
-                fw={"400"}
+                variant={'white'}
+                size='xs'
+                color={'blue'}
+                h='auto'
+                fz={'0.75rem'}
+                py={'0.125rem'}
+                px={'0.25rem'}
+                fw={'400'}
               >
-                Acceptance:{" "}
-                {Math.max(
-                  Math.floor(
-                    subjectLine.times_accepted / subjectLine.times_used
-                  ) || 0
-                )}
-                %
+                Acceptance:{' '}
+                {Math.max(Math.floor(subjectLine.times_accepted / subjectLine.times_used) || 0)}%
               </Button>
             </Tooltip>
           </Flex>
 
-          <Flex wrap={"wrap"} gap={"1rem"} align={"center"}>
+          <Flex wrap={'wrap'} gap={'1rem'} align={'center'}>
             {/* <Menu shadow="md" width={200} withinPortal withArrow>
                 <Menu.Target>
                   <ActionIcon radius="xl" size="sm">
@@ -1082,33 +1036,29 @@ const SubjectLineItem: React.FC<{
             <Tooltip
               label={
                 subjectLine.times_used > 0
-                  ? "Cannot edit subject line after it has been used"
-                  : "Edit subject line"
+                  ? 'Cannot edit subject line after it has been used'
+                  : 'Edit subject line'
               }
               withinPortal
               withArrow
             >
               <ActionIcon
-                size="sm"
+                size='sm'
                 onClick={() => {
                   setEditing(!editing);
                 }}
                 disabled={subjectLine.times_used > 0}
               >
-                <IconPencil size="1.0rem" />
+                <IconPencil size='1.0rem' />
               </ActionIcon>
             </Tooltip>
-            <Tooltip label="Coming Soon" withinPortal withArrow>
-              <ActionIcon size="sm" disabled={editing}>
-                <IconTrash size="1.0rem" />
+            <Tooltip label='Coming Soon' withinPortal withArrow>
+              <ActionIcon size='sm' disabled={editing}>
+                <IconTrash size='1.0rem' />
               </ActionIcon>
             </Tooltip>
             <Tooltip
-              label={
-                subjectLine.active
-                  ? "Deactivate subject line"
-                  : "Activate subject line"
-              }
+              label={subjectLine.active ? 'Deactivate subject line' : 'Activate subject line'}
               withinPortal
               withArrow
             >
@@ -1116,8 +1066,8 @@ const SubjectLineItem: React.FC<{
                 <Switch
                   disabled={editing}
                   checked={subjectLine.active}
-                  color={"blue"}
-                  size="xs"
+                  color={'blue'}
+                  size='xs'
                   onChange={({ currentTarget: { checked } }) => {
                     triggerPatchEmailSubjectLineTemplateActive();
                   }}
@@ -1129,7 +1079,7 @@ const SubjectLineItem: React.FC<{
             modalOpened={manageSubjectLineOpened}
             openModal={openManageSubject}
             closeModal={closeManageSubject}
-            backFunction={() => { }}
+            backFunction={() => {}}
             archetypeID={subjectLine.client_archetype_id}
           />
         </Flex>
@@ -1138,16 +1088,15 @@ const SubjectLineItem: React.FC<{
           <TextInput
             value={editedSubjectLine}
             error={
-              editedSubjectLine.length > 120 &&
-              "Subject line must be less than 120 characters"
+              editedSubjectLine.length > 120 && 'Subject line must be less than 120 characters'
             }
             rightSection={
-              <Flex mr="150px">
+              <Flex mr='150px'>
                 <Button
-                  size="sm"
-                  h="24px"
-                  mr="4px"
-                  color="red"
+                  size='sm'
+                  h='24px'
+                  mr='4px'
+                  color='red'
                   onClick={() => {
                     setEditedSubjectLine(subjectLine.subject_line);
                     setEditing(false);
@@ -1156,9 +1105,9 @@ const SubjectLineItem: React.FC<{
                   Cancel
                 </Button>
                 <Button
-                  size="sm"
-                  h="24px"
-                  color="green"
+                  size='sm'
+                  h='24px'
+                  color='green'
                   onClick={() => {
                     triggerPatchEmailSubjectLineTemplate();
                     setEditing(false);
@@ -1178,13 +1127,10 @@ const SubjectLineItem: React.FC<{
             }}
           />
         ) : (
-          <Text fw={"400"} fz={"0.9rem"} color={"gray.8"}>
+          <Text fw={'400'} fz={'0.9rem'} color={'gray.8'}>
             <div
               dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(
-                  editedSubjectLine
-                    .replace(/\]\]/g, "</span>")
-                ),
+                __html: DOMPurify.sanitize(editedSubjectLine.replace(/\]\]/g, '</span>')),
               }}
             />
           </Text>
@@ -1211,137 +1157,115 @@ const EmailBodyItem: React.FC<{
   // Transformer items
   const [prospectItems, setProspectItems] = React.useState([
     {
-      title: "Personal Bio",
-      id: "LINKEDIN_BIO_SUMMARY",
-      checked: !template.transformer_blocklist.includes("LINKEDIN_BIO_SUMMARY"),
+      title: 'Personal Bio',
+      id: 'LINKEDIN_BIO_SUMMARY',
+      checked: !template.transformer_blocklist.includes('LINKEDIN_BIO_SUMMARY'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('LINKEDIN_BIO_SUMMARY'),
+    },
+    {
+      title: 'List Of Past Jobs',
+      id: 'LIST_OF_PAST_JOBS',
+      checked: !template.transformer_blocklist.includes('LIST_OF_PAST_JOBS'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('LIST_OF_PAST_JOBS'),
+    },
+    {
+      title: 'Years of Experience',
+      id: 'YEARS_OF_EXPERIENCE',
+      checked: !template.transformer_blocklist.includes('YEARS_OF_EXPERIENCE'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('YEARS_OF_EXPERIENCE'),
+    },
+    {
+      title: 'Current Experience',
+      id: 'CURRENT_EXPERIENCE_DESCRIPTION',
+      checked: !template.transformer_blocklist.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
+    },
+    {
+      title: 'Education History',
+      id: 'COMMON_EDUCATION',
+      checked: !template.transformer_blocklist.includes('COMMON_EDUCATION'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('COMMON_EDUCATION'),
+    },
+    {
+      title: 'Recommendations',
+      id: 'RECENT_RECOMMENDATIONS',
+      checked: !template.transformer_blocklist.includes('RECENT_RECOMMENDATIONS'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_RECOMMENDATIONS'),
+    },
+    {
+      title: 'Patents',
+      id: 'RECENT_PATENTS',
+      checked: !template.transformer_blocklist.includes('RECENT_PATENTS'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_PATENTS'),
+    },
+    {
+      title: 'Years at Current Job',
+      id: 'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB',
+      checked: !template.transformer_blocklist.includes('YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'),
       disabled: !!currentProject?.transformer_blocklist?.includes(
-        "LINKEDIN_BIO_SUMMARY"
+        'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'
       ),
     },
     {
-      title: "List Of Past Jobs",
-      id: "LIST_OF_PAST_JOBS",
-      checked: !template.transformer_blocklist.includes("LIST_OF_PAST_JOBS"),
-      disabled:
-        !!currentProject?.transformer_blocklist?.includes("LIST_OF_PAST_JOBS"),
-    },
-    {
-      title: "Years of Experience",
-      id: "YEARS_OF_EXPERIENCE",
-      checked: !template.transformer_blocklist.includes("YEARS_OF_EXPERIENCE"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "YEARS_OF_EXPERIENCE"
-      ),
-    },
-    {
-      title: "Current Experience",
-      id: "CURRENT_EXPERIENCE_DESCRIPTION",
-      checked: !template.transformer_blocklist.includes("CURRENT_EXPERIENCE_DESCRIPTION"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "CURRENT_EXPERIENCE_DESCRIPTION"
-      ),
-    },
-    {
-      title: "Education History",
-      id: "COMMON_EDUCATION",
-      checked: !template.transformer_blocklist.includes("COMMON_EDUCATION"),
-      disabled:
-        !!currentProject?.transformer_blocklist?.includes("COMMON_EDUCATION"),
-    },
-    {
-      title: "Recommendations",
-      id: "RECENT_RECOMMENDATIONS",
-      checked: !template.transformer_blocklist.includes("RECENT_RECOMMENDATIONS"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "RECENT_RECOMMENDATIONS"
-      ),
-    },
-    {
-      title: "Patents",
-      id: "RECENT_PATENTS",
-      checked: !template.transformer_blocklist.includes("RECENT_PATENTS"),
-      disabled:
-        !!currentProject?.transformer_blocklist?.includes("RECENT_PATENTS"),
-    },
-    {
-      title: "Years at Current Job",
-      id: "YEARS_OF_EXPERIENCE_AT_CURRENT_JOB",
-      checked: !template.transformer_blocklist.includes("YEARS_OF_EXPERIENCE_AT_CURRENT_JOB"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "YEARS_OF_EXPERIENCE_AT_CURRENT_JOB"
-      ),
-    },
-    {
-      title: "Custom Data Points",
-      id: "CUSTOM",
-      checked: !template.transformer_blocklist.includes("CUSTOM"),
-      disabled: !!currentProject?.transformer_blocklist?.includes("CUSTOM"),
+      title: 'Custom Data Points',
+      id: 'CUSTOM',
+      checked: !template.transformer_blocklist.includes('CUSTOM'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CUSTOM'),
     },
   ]);
 
   const [companyItems, setCompanyItems] = React.useState([
     {
-      title: "Company Description",
-      id: "CURRENT_JOB_DESCRIPTION",
-      checked: !template.transformer_blocklist.includes("CURRENT_JOB_DESCRIPTION"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "CURRENT_JOB_DESCRIPTION"
-      ),
+      title: 'Company Description',
+      id: 'CURRENT_JOB_DESCRIPTION',
+      checked: !template.transformer_blocklist.includes('CURRENT_JOB_DESCRIPTION'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_DESCRIPTION'),
     },
     {
-      title: "Company Specialites",
-      id: "CURRENT_JOB_SPECIALTIES",
-      checked: !template.transformer_blocklist.includes("CURRENT_JOB_SPECIALTIES"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "CURRENT_JOB_SPECIALTIES"
-      ),
+      title: 'Company Specialites',
+      id: 'CURRENT_JOB_SPECIALTIES',
+      checked: !template.transformer_blocklist.includes('CURRENT_JOB_SPECIALTIES'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_SPECIALTIES'),
     },
     {
-      title: "Company Industry",
-      id: "CURRENT_JOB_INDUSTRY",
-      checked: !template.transformer_blocklist.includes("CURRENT_JOB_INDUSTRY"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "CURRENT_JOB_INDUSTRY"
-      ),
+      title: 'Company Industry',
+      id: 'CURRENT_JOB_INDUSTRY',
+      checked: !template.transformer_blocklist.includes('CURRENT_JOB_INDUSTRY'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_INDUSTRY'),
     },
     {
-      title: "General Company News",
-      id: "SERP_NEWS_SUMMARY",
-      checked: !template.transformer_blocklist.includes("SERP_NEWS_SUMMARY"),
-      disabled:
-        !!currentProject?.transformer_blocklist?.includes("SERP_NEWS_SUMMARY"),
+      title: 'General Company News',
+      id: 'SERP_NEWS_SUMMARY',
+      checked: !template.transformer_blocklist.includes('SERP_NEWS_SUMMARY'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY'),
     },
     {
-      title: "Negative Company News",
-      id: "SERP_NEWS_SUMMARY_NEGATIVE",
-      checked: !template.transformer_blocklist.includes("SERP_NEWS_SUMMARY_NEGATIVE"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "SERP_NEWS_SUMMARY_NEGATIVE"
-      ),
+      title: 'Negative Company News',
+      id: 'SERP_NEWS_SUMMARY_NEGATIVE',
+      checked: !template.transformer_blocklist.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
     },
     {
-      title: "Website Info",
-      id: "GENERAL_WEBSITE_TRANSFORMER",
-      checked: !template.transformer_blocklist.includes("GENERAL_WEBSITE_TRANSFORMER"),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        "GENERAL_WEBSITE_TRANSFORMER"
-      ),
+      title: 'Website Info',
+      id: 'GENERAL_WEBSITE_TRANSFORMER',
+      checked: !template.transformer_blocklist.includes('GENERAL_WEBSITE_TRANSFORMER'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('GENERAL_WEBSITE_TRANSFORMER'),
     },
   ]);
 
   // Span magic on the template.template
   // Replace all [[ and ]] with span tags
-  let templateBody = template.template || "";
+  let templateBody = template.template || '';
 
   const [sequence, _setSequence] = React.useState<string>(templateBody);
-  const sequenceRichRaw = React.useRef<JSONContent | string>(
-    template.template || ""
-  );
+  const sequenceRichRaw = React.useRef<JSONContent | string>(template.template || '');
 
-  const [title, setTitle] = React.useState<string>(template.title || "");
+  const [title, setTitle] = React.useState<string>(template.title || '');
   const [editingTitle, setEditingTitle] = React.useState<boolean>(false);
 
-  const [personalizationItemsCount, setPersonalizationItemsCount] = React.useState<number>(prospectItems.length + companyItems.length - template.transformer_blocklist?.length);
+  const [personalizationItemsCount, setPersonalizationItemsCount] = React.useState<number>(
+    prospectItems.length + companyItems.length - template.transformer_blocklist?.length
+  );
 
   const triggerPatchEmailBodyTemplateTitle = async () => {
     setLoading(true);
@@ -1355,19 +1279,19 @@ const EmailBodyItem: React.FC<{
       template.bumped_count,
       template.default
     );
-    if (result.status != "success") {
+    if (result.status != 'success') {
       showNotification({
-        title: "Error",
+        title: 'Error',
         message: result.message,
-        color: "red",
+        color: 'red',
       });
       setLoading(false);
       return;
     } else {
       showNotification({
-        title: "Success",
-        message: "Successfully updated email title",
-        color: "green",
+        title: 'Success',
+        message: 'Successfully updated email title',
+        color: 'green',
       });
 
       await refetch();
@@ -1388,19 +1312,19 @@ const EmailBodyItem: React.FC<{
       template.bumped_count,
       template.default
     );
-    if (result.status != "success") {
+    if (result.status != 'success') {
       showNotification({
-        title: "Error",
+        title: 'Error',
         message: result.message,
-        color: "red",
+        color: 'red',
       });
       setLoading(false);
       return;
     } else {
       showNotification({
-        title: "Success",
-        message: "Successfully updated email body",
-        color: "green",
+        title: 'Success',
+        message: 'Successfully updated email body',
+        color: 'green',
       });
 
       await refetch();
@@ -1421,20 +1345,19 @@ const EmailBodyItem: React.FC<{
       template.bumped_count,
       !template.default
     );
-    if (result.status != "success") {
+    if (result.status != 'success') {
       showNotification({
-        title: "Error",
+        title: 'Error',
         message: result.message,
-        color: "red",
+        color: 'red',
       });
       setLoading(false);
       return;
     } else {
       showNotification({
-        title: "Success",
-        message: `Successfully ${template.default ? "deactivated" : "activated"
-          } email body`,
-        color: "green",
+        title: 'Success',
+        message: `Successfully ${template.default ? 'deactivated' : 'activated'} email body`,
+        color: 'green',
       });
 
       await refetch();
@@ -1446,7 +1369,7 @@ const EmailBodyItem: React.FC<{
   useEffect(() => {
     setEditing(false);
     _setSequence(templateBody);
-    sequenceRichRaw.current = template.template || "";
+    sequenceRichRaw.current = template.template || '';
   }, [template]);
   const theme = useMantineTheme();
   const formatedSequence = useMemo(() => {
@@ -1454,7 +1377,14 @@ const EmailBodyItem: React.FC<{
 
     if (newText) {
       newText.match(/\[\[(.*?)]\]/g)?.forEach((v) => {
-        const content = v.replace("[[", "").replace("]]", "");
+        const content = v.replace('[[', '').replace(']]', '');
+
+        // Add 'https://' to urls that don't have a 'https://'
+        for (const word of content.trim().split(/\s/)) {
+          if (isValidUrl(word) && !word.startsWith('https://')) {
+            content.replace(word, 'https://' + word);
+          }
+        }
 
         newText = newText?.replace(
           v,
@@ -1462,17 +1392,17 @@ const EmailBodyItem: React.FC<{
             <Text
               style={{
                 backgroundColor: theme.colors[deterministicMantineColor(content)][6],
-                width: "fit-content",
+                width: 'fit-content',
                 color: theme.white,
                 borderRadius: 12,
-                padding: "0.25rem",
+                padding: '0.25rem',
                 fontWeight: 700,
-                marginLeft: "0.25rem",
+                marginLeft: '0.25rem',
                 paddingLeft: '12px',
                 paddingRight: '12px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
-              component="span"
+              component='span'
             >
               <IconRobot size='1.1rem' color='white' style={{ paddingTop: '4px' }}></IconRobot>
               {content}
@@ -1485,51 +1415,51 @@ const EmailBodyItem: React.FC<{
     return newText;
   }, []);
   return (
-    <Flex w="100%">
+    <Flex w='100%'>
       <LoadingOverlay visible={loading} />
-      <Flex direction="column" w="100%">
+      <Flex direction='column' w='100%'>
         {hideHeader ? (
-          <Flex justify={"flex-end"} mb="md">
+          <Flex justify={'flex-end'} mb='md'>
             <div>
               <Button
-                variant="light"
+                variant='light'
                 disabled={editing}
-                color={"green"}
-                size="xs"
+                color={'green'}
+                size='xs'
                 onClick={() => {
                   triggerToggleEmailBodyTemplateActive();
                 }}
               >
-                {template.default ? "Deactivate" : "Activate"}
+                {template.default ? 'Deactivate' : 'Activate'}
               </Button>
             </div>
           </Flex>
         ) : (
-          <Flex mb="sm" direction="row" w="100%" justify={"space-between"}>
-            <Flex align="center">
+          <Flex mb='sm' direction='row' w='100%' justify={'space-between'}>
+            <Flex align='center'>
               {editingTitle ? ( // Editing title
                 <>
                   <TextInput
                     w={200}
-                    placeholder="Untitled Email Template"
+                    placeholder='Untitled Email Template'
                     value={title}
                     onChange={(event) => {
                       setTitle(event.currentTarget.value);
                     }}
                   />
-                  <Flex justify={"flex-end"}>
+                  <Flex justify={'flex-end'}>
                     <Button
-                      mx="sm"
-                      color="red"
+                      mx='sm'
+                      color='red'
                       onClick={() => {
-                        setTitle(template.title || "");
+                        setTitle(template.title || '');
                         setEditingTitle(false);
                       }}
                     >
                       Cancel
                     </Button>
                     <Button
-                      color="green"
+                      color='green'
                       onClick={() => {
                         triggerPatchEmailBodyTemplateTitle();
                         setEditingTitle(false);
@@ -1554,7 +1484,7 @@ const EmailBodyItem: React.FC<{
                   ) : (
                     <Title
                       order={4}
-                      color="gray.5"
+                      color='gray.5'
                       onClick={() => {
                         setEditingTitle(true);
                       }}
@@ -1563,24 +1493,24 @@ const EmailBodyItem: React.FC<{
                     </Title>
                   )}
                   <ActionIcon
-                    variant="transparent"
+                    variant='transparent'
                     onClick={() => {
                       setEditingTitle(!editingTitle);
                     }}
                   >
-                    <IconPencil size={"0.9rem"} />
+                    <IconPencil size={'0.9rem'} />
                   </ActionIcon>
                 </>
               )}
             </Flex>
-            <Flex align="center">
-              <Tooltip label="Coming Soon" withArrow withinPortal>
-                <Text fz="sm" mr="md">
+            <Flex align='center'>
+              <Tooltip label='Coming Soon' withArrow withinPortal>
+                <Text fz='sm' mr='md'>
                   Open %: <b>TBD</b>
                 </Text>
               </Tooltip>
-              <Tooltip label="Coming Soon" withArrow withinPortal>
-                <Text fz="sm" mr="md">
+              <Tooltip label='Coming Soon' withArrow withinPortal>
+                <Text fz='sm' mr='md'>
                   Reply %: <b>TBD</b>
                 </Text>
               </Tooltip>
@@ -1620,40 +1550,40 @@ const EmailBodyItem: React.FC<{
                 signifyCustomInsert={false}
                 inserts={[
                   {
-                    key: "first_name",
-                    label: "First Name",
-                    icon: <IconWritingSign stroke={1.5} size="0.9rem" />,
-                    color: "blue",
+                    key: 'first_name',
+                    label: 'First Name',
+                    icon: <IconWritingSign stroke={1.5} size='0.9rem' />,
+                    color: 'blue',
                   },
                   {
-                    key: "last_name",
-                    label: "Last Name",
-                    icon: <IconRobot stroke={2} size="0.9rem" />,
-                    color: "red",
+                    key: 'last_name',
+                    label: 'Last Name',
+                    icon: <IconRobot stroke={2} size='0.9rem' />,
+                    color: 'red',
                   },
                   {
-                    key: "company_name",
-                    label: "Company Name",
-                    icon: <IconDatabase stroke={2} size="0.9rem" />,
-                    color: "teal",
+                    key: 'company_name',
+                    label: 'Company Name',
+                    icon: <IconDatabase stroke={2} size='0.9rem' />,
+                    color: 'teal',
                   },
                 ]}
               />
             </Box>
-            <Flex mt="sm" justify={"flex-end"}>
+            <Flex mt='sm' justify={'flex-end'}>
               <Button
-                mr="sm"
-                color="red"
+                mr='sm'
+                color='red'
                 onClick={() => {
-                  _setSequence(templateBody || "");
-                  sequenceRichRaw.current = template.template || "";
+                  _setSequence(templateBody || '');
+                  sequenceRichRaw.current = template.template || '';
                   setEditing(false);
                 }}
               >
                 Cancel
               </Button>
               <Button
-                color="green"
+                color='green'
                 onClick={() => {
                   triggerPatchEmailBodyTemplate();
                   setEditing(false);
@@ -1666,30 +1596,30 @@ const EmailBodyItem: React.FC<{
         ) : (
           <Box
             sx={() => ({
-              border: "1px solid #E0E0E0",
-              borderRadius: "8px",
-              backgroundColor: "#F5F5F5",
+              border: '1px solid #E0E0E0',
+              borderRadius: '8px',
+              backgroundColor: '#F5F5F5',
             })}
-            px="md"
+            px='md'
             onClick={() => {
               setEditing(true);
             }}
           >
-            <Text fz="sm">
+            <Text fz='sm'>
               <div
                 dangerouslySetInnerHTML={{
                   __html: DOMPurify.sanitize(formatedSequence as string),
                 }}
               />
             </Text>
-            <Flex h="0px" w="100%">
+            <Flex h='0px' w='100%'>
               <Button
-                leftIcon={<IconEdit size="1.0rem" />}
-                variant="outline"
-                pos="relative"
-                bottom="50px"
-                left="88%"
-                h="32px"
+                leftIcon={<IconEdit size='1.0rem' />}
+                variant='outline'
+                pos='relative'
+                bottom='50px'
+                left='88%'
+                h='32px'
                 onClick={() => {
                   setEditing(true);
                 }}
@@ -1744,9 +1674,15 @@ const EmailBodyItem: React.FC<{
           >
             Edit Personalization
           </Tabs.Tab>
-          <Tabs.Panel value="personalization">
+          <Tabs.Panel value='personalization'>
             <PersonalizationSection
-              blocklist={currentProject.transformer_blocklist_initial?.concat(template.transformer_blocklist) || template.transformer_blocklist || []}
+              blocklist={
+                currentProject.transformer_blocklist_initial?.concat(
+                  template.transformer_blocklist
+                ) ||
+                template.transformer_blocklist ||
+                []
+              }
               onItemsChange={async (items) => {
                 const checked = items.filter((x: any) => x.checked).map((x: any) => x.id);
                 setPersonalizationItemsCount(checked.length);
@@ -1770,15 +1706,15 @@ const EmailBodyItem: React.FC<{
                     title: 'Error',
                     message: result.message,
                     color: 'red',
-                  })
+                  });
                   return;
                 } else {
                   showNotification({
                     title: 'Success',
                     message: 'Successfully updated research used',
                     color: 'green',
-                  })
-                  refetch()
+                  });
+                  refetch();
                 }
                 // setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
               }}
@@ -1787,9 +1723,8 @@ const EmailBodyItem: React.FC<{
           </Tabs.Panel>
         </Tabs>
       </Flex>
-    </Flex >
-  )
-
-}
+    </Flex>
+  );
+};
 
 export default DetailEmailSequencing;

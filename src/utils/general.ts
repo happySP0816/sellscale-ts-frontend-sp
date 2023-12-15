@@ -1,13 +1,13 @@
-import { EMAIL_REGEX, ICON_GRABBER_URL, PROXY_SERVER_URL, URL_REGEX } from '@constants/data'
-import { ex } from '@fullcalendar/core/internal-common'
-import { MantineColor, MantineTheme } from '@mantine/core'
-import _ from 'lodash'
-import { startCase } from 'lodash'
-import moment from 'moment'
-import { SetterOrUpdater } from 'recoil'
+import { EMAIL_REGEX, ICON_GRABBER_URL, PROXY_SERVER_URL, URL_REGEX } from '@constants/data';
+import { ex } from '@fullcalendar/core/internal-common';
+import { MantineColor, MantineTheme } from '@mantine/core';
+import _ from 'lodash';
+import { startCase } from 'lodash';
+import moment from 'moment';
+import { SetterOrUpdater } from 'recoil';
 
 export function testDelay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -20,13 +20,13 @@ export function splitName(name: string | null) {
     return {
       first: '',
       last: '',
-    }
+    };
   }
-  let parts = name.split(' ')
+  let parts = name.split(' ');
   return {
     first: parts[0],
     last: parts[parts.length - 1],
-  }
+  };
 }
 
 /**
@@ -35,7 +35,7 @@ export function splitName(name: string | null) {
  * @returns
  */
 export function formatDate(date: Date) {
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
 
 /**
@@ -45,11 +45,11 @@ export function formatDate(date: Date) {
  * @returns - Consistent number between 0 and range
  */
 export function hashString(str: string, range: number): number {
-  let hash = 0
+  let hash = 0;
   for (let i = 0; i < str.length; i++) {
-    hash = (hash * 31 + str.charCodeAt(i)) % range
+    hash = (hash * 31 + str.charCodeAt(i)) % range;
   }
-  return hash
+  return hash;
 }
 
 /**
@@ -59,25 +59,28 @@ export function hashString(str: string, range: number): number {
  */
 export function percentageToColor(input: number): string {
   if (input < 0 || input > 100) {
-    throw new Error('Input must be between 0 and 100')
+    throw new Error('Input must be between 0 and 100');
   }
 
-  const startColor = { r: 224, g: 49, b: 49 }
-  const midColor = { r: 255, g: 212, b: 59 }
-  const endColor = { r: 9, g: 146, b: 104 }
+  const startColor = { r: 224, g: 49, b: 49 };
+  const midColor = { r: 255, g: 212, b: 59 };
+  const endColor = { r: 9, g: 146, b: 104 };
 
-  let r, g, b
+  let r, g, b;
   if (input <= 50) {
-    r = startColor.r + ((midColor.r - startColor.r) * input) / 50
-    g = startColor.g + ((midColor.g - startColor.g) * input) / 50
-    b = startColor.b + ((midColor.b - startColor.b) * input) / 50
+    r = startColor.r + ((midColor.r - startColor.r) * input) / 50;
+    g = startColor.g + ((midColor.g - startColor.g) * input) / 50;
+    b = startColor.b + ((midColor.b - startColor.b) * input) / 50;
   } else {
-    r = midColor.r + ((endColor.r - midColor.r) * (input - 50)) / 50
-    g = midColor.g + ((endColor.g - midColor.g) * (input - 50)) / 50
-    b = midColor.b + ((endColor.b - midColor.b) * (input - 50)) / 50
+    r = midColor.r + ((endColor.r - midColor.r) * (input - 50)) / 50;
+    g = midColor.g + ((endColor.g - midColor.g) * (input - 50)) / 50;
+    b = midColor.b + ((endColor.b - midColor.b) * (input - 50)) / 50;
   }
 
-  return '#' + ((1 << 24) + (Math.round(r) << 16) + (Math.round(g) << 8) + Math.round(b)).toString(16).slice(1)
+  return (
+    '#' +
+    ((1 << 24) + (Math.round(r) << 16) + (Math.round(g) << 8) + Math.round(b)).toString(16).slice(1)
+  );
 }
 
 /**
@@ -86,10 +89,10 @@ export function percentageToColor(input: number): string {
  * @returns - Date in the format YYYY-MM-DD, h:mm a
  */
 export function convertDateToShortFormatWithoutTime(date: Date) {
-  const year = date.getFullYear()
-  const month = ('0' + (date.getMonth() + 1)).slice(-2)
-  const day = ('0' + date.getDate()).slice(-2)
-  return `${year}-${month}-${day}`
+  const year = date.getFullYear();
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const day = ('0' + date.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -98,13 +101,13 @@ export function convertDateToShortFormatWithoutTime(date: Date) {
  * @returns - Date in the format YYYY-MM-DD, h:mm a
  */
 export function convertDateToShortFormat(date: Date) {
-  const year = date.getFullYear()
-  const month = ('0' + (date.getMonth() + 1)).slice(-2)
-  const day = ('0' + date.getDate()).slice(-2)
-  const hours = date.getHours() % 12 || 12
-  const minutes = ('0' + date.getMinutes()).slice(-2)
-  const ampm = date.getHours() >= 12 ? 'pm' : 'am'
-  return `${year}-${month}-${day}, ${hours}:${minutes} ${ampm}`
+  const year = date.getFullYear();
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);
+  const day = ('0' + date.getDate()).slice(-2);
+  const hours = date.getHours() % 12 || 12;
+  const minutes = ('0' + date.getMinutes()).slice(-2);
+  const ampm = date.getHours() >= 12 ? 'pm' : 'am';
+  return `${year}-${month}-${day}, ${hours}:${minutes} ${ampm}`;
 }
 
 /**
@@ -114,7 +117,7 @@ export function convertDateToShortFormat(date: Date) {
  */
 export function convertDateToLocalTime(date: Date) {
   if (date.getTime() === 0) {
-    return 'Unknown Time'
+    return 'Unknown Time';
   }
   return date.toLocaleString('en-US', {
     month: 'short',
@@ -122,14 +125,14 @@ export function convertDateToLocalTime(date: Date) {
     hour: 'numeric',
     minute: 'numeric',
     hour12: true,
-  })
+  });
 }
 
 export function convertDateToMMMDD(date: Date) {
   if (date.getTime() === 0) {
-    return 'Unknown Time'
+    return 'Unknown Time';
   }
-  return date.toLocaleString('en-US', { month: 'short', day: 'numeric' })
+  return date.toLocaleString('en-US', { month: 'short', day: 'numeric' });
 }
 
 /**
@@ -137,11 +140,11 @@ export function convertDateToMMMDD(date: Date) {
  */
 export function convertDateToCasualTime(date: Date) {
   if (date.getTime() === 0 || date.getTime() === -1) {
-    return ''
+    return '';
   }
-  const currentTime = moment()
-  const inputTime = moment(date)
-  return inputTime.from(currentTime)
+  const currentTime = moment();
+  const inputTime = moment(date);
+  return inputTime.from(currentTime);
 }
 
 /**
@@ -149,9 +152,9 @@ export function convertDateToCasualTime(date: Date) {
  */
 export function convertToStandardDate(value: string) {
   try {
-    return moment(value).format('MM/DD/YYYY')
+    return moment(value).format('MM/DD/YYYY');
   } catch (e) {
-    return value
+    return value;
   }
 }
 
@@ -208,51 +211,51 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   '5': 'yellow',
   '6': 'orange',
   '7': 'red',
-}
+};
 export function valueToColor(theme: MantineTheme, value: string | undefined): MantineColor {
   if (!value) {
-    return 'gray'
+    return 'gray';
   }
-  value = value.toLowerCase().trim().replaceAll(' ', '_')
+  value = value.toLowerCase().trim().replaceAll(' ', '_');
 
   if (PRESET_COLOR_MAPS[value]) {
-    return PRESET_COLOR_MAPS[value]
+    return PRESET_COLOR_MAPS[value];
   }
 
   // Get a 'random' mantine color name
-  let i = 0
-  let index = hashString(value, Object.keys(theme.colors).length)
+  let i = 0;
+  let index = hashString(value, Object.keys(theme.colors).length);
   for (let color in theme.colors) {
     if (i === index) {
-      return color satisfies MantineColor
+      return color satisfies MantineColor;
     }
-    i++
+    i++;
   }
 
-  return 'gray'
+  return 'gray';
 }
 
 export function formatToLabel(value: string) {
   if (!value) {
-    return ''
+    return '';
   }
-  value = value.toLowerCase().replaceAll(' ', '_')
+  value = value.toLowerCase().replaceAll(' ', '_');
   if (value === 'responded') {
-    return 'Bumped'
+    return 'Bumped';
   }
   if (value === 'demo_set') {
-    return 'Demo Scheduled'
+    return 'Demo Scheduled';
   }
   if (value === 'demo_won') {
-    return 'Demo Complete'
+    return 'Demo Complete';
   }
   if (value === 'demo_loss' || value === 'demo_lost') {
-    return 'Demo Missed'
+    return 'Demo Missed';
   }
   if (value === 'linkedin') {
-    return 'LinkedIn'
+    return 'LinkedIn';
   }
-  return startCase(value.replaceAll('_', ' ')).replace('Url', 'URL')
+  return startCase(value.replaceAll('_', ' ')).replace('Url', 'URL');
 }
 
 /**
@@ -262,13 +265,13 @@ export function formatToLabel(value: string) {
  */
 export function nameToInitials(name: string | undefined) {
   if (!name) {
-    return ''
+    return '';
   }
-  const names = name.split(' ')
+  const names = name.split(' ');
   if (names.length === 1) {
-    return names[0][0]
+    return names[0][0];
   } else {
-    return names[0][0] + names[names.length - 1][0]
+    return names[0][0] + names[names.length - 1][0];
   }
 }
 
@@ -279,53 +282,53 @@ export function nameToInitials(name: string | undefined) {
  */
 export function getBrowserExtensionURL(isFirefox: boolean) {
   if (isFirefox) {
-    return 'https://addons.mozilla.org/en-US/firefox/addon/sellscale-browser-extension/'
+    return 'https://addons.mozilla.org/en-US/firefox/addon/sellscale-browser-extension/';
   } else {
-    return 'https://chrome.google.com/webstore/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa/'
+    return 'https://chrome.google.com/webstore/detail/sellscale-browser-extensi/hicchmdfaadkadnmmkdjmcilgaplfeoa/';
   }
 }
 
 export function isEmail(text: string) {
-  if (typeof text !== 'string') return false // sanity check
-  return !!text.match(EMAIL_REGEX)
+  if (typeof text !== 'string') return false; // sanity check
+  return !!text.match(EMAIL_REGEX);
 }
 
 export function isURL(text: string) {
-  if (typeof text !== 'string') return false // sanity check
-  return !!text.match(URL_REGEX)
+  if (typeof text !== 'string') return false; // sanity check
+  return !!text.match(URL_REGEX);
 }
 
 export function isLinkedInURL(text: string) {
-  if (typeof text !== 'string') return false // sanity check
-  return text.includes('linkedin.com/in/')
+  if (typeof text !== 'string') return false; // sanity check
+  return text.includes('linkedin.com/in/');
 }
 
 export function hexToHexWithAlpha(hexColor: string, transparency: number): string | null {
   // Remove the "#" character from the hex color code
-  hexColor = hexColor.replace('#', '')
+  hexColor = hexColor.replace('#', '');
 
   // Ensure that the hex color code is valid
-  const isValidHex = /^([0-9A-F]{3}){1,2}$/i.test(hexColor)
+  const isValidHex = /^([0-9A-F]{3}){1,2}$/i.test(hexColor);
   if (!isValidHex) {
-    return null
+    return null;
   }
 
   // Extract the RGB values
-  const red = parseInt(hexColor.substring(0, 2), 16)
-  const green = parseInt(hexColor.substring(2, 4), 16)
-  const blue = parseInt(hexColor.substring(4, 6), 16)
+  const red = parseInt(hexColor.substring(0, 2), 16);
+  const green = parseInt(hexColor.substring(2, 4), 16);
+  const blue = parseInt(hexColor.substring(4, 6), 16);
 
   // Calculate the alpha value
   const alpha = Math.round(transparency * 255)
     .toString(16)
-    .padStart(2, '0')
+    .padStart(2, '0');
 
   // Create the hex color code with transparency
-  const hexColorWithAlpha = `#${red.toString(16).padStart(2, '0')}${green.toString(16).padStart(2, '0')}${blue
+  const hexColorWithAlpha = `#${red.toString(16).padStart(2, '0')}${green
     .toString(16)
-    .padStart(2, '0')}${alpha}`
+    .padStart(2, '0')}${blue.toString(16).padStart(2, '0')}${alpha}`;
 
-  return hexColorWithAlpha
+  return hexColorWithAlpha;
 }
 
 /**
@@ -339,7 +342,7 @@ export function removeExtraCharacters(str: string) {
       /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
       ''
     )
-    .trim()
+    .trim();
 }
 
 /**
@@ -349,7 +352,7 @@ export function removeExtraCharacters(str: string) {
  * @returns - Whether the date is within the last X days
  */
 export function isWithinLastXDays(date: Date, days: number) {
-  return Date.now() - date.getTime() > days * 24 * 60 * 60 * 1000
+  return Date.now() - date.getTime() > days * 24 * 60 * 60 * 1000;
 }
 
 /**
@@ -364,9 +367,9 @@ export function isWithinLastXDays(date: Date, days: number) {
  */
 export function removeHTML(text: string | null) {
   if (!text) {
-    return ''
+    return '';
   }
-  return text.replace(/<\/?[^>]+(>|$)/g, ' ')
+  return text.replace(/<\/?[^>]+(>|$)/g, ' ');
 }
 
 /**
@@ -376,9 +379,9 @@ export function removeHTML(text: string | null) {
  */
 export function proxyURL(url?: string | null) {
   if (!url) {
-    return undefined
+    return undefined;
   }
-  return `${PROXY_SERVER_URL}?url=${encodeURIComponent(url)}`
+  return `${PROXY_SERVER_URL}?url=${encodeURIComponent(url)}`;
 }
 
 /**
@@ -389,15 +392,15 @@ export function proxyURL(url?: string | null) {
  */
 export function getRandomItems<T>(list: T[], numItems: number): T[] {
   // Ensure the requested number of items doesn't exceed the length of the list
-  const itemCount = Math.min(numItems, list.length)
+  const itemCount = Math.min(numItems, list.length);
 
   // Create an array of unique random indices
-  const randomIndices = _.uniq(_.times(itemCount, () => _.random(0, list.length - 1)))
+  const randomIndices = _.uniq(_.times(itemCount, () => _.random(0, list.length - 1)));
 
   // Use the random indices to select the random items
-  const randomItems = randomIndices.map((index) => list[index])
+  const randomItems = randomIndices.map((index) => list[index]);
 
-  return randomItems
+  return randomItems;
 }
 
 /**
@@ -407,30 +410,43 @@ export function getRandomItems<T>(list: T[], numItems: number): T[] {
  */
 export async function getFavIconFromURL(url: string): Promise<string | null> {
   if (!import.meta.env.PROD) {
-    return null
+    return null;
   }
 
-  const urlParts = url.split('://')
-  let cleanURL = urlParts.length > 1 ? urlParts[1] : urlParts[0]
-  cleanURL = cleanURL.split('/')[0]
+  const urlParts = url.split('://');
+  let cleanURL = urlParts.length > 1 ? urlParts[1] : urlParts[0];
+  cleanURL = cleanURL.split('/')[0];
 
-  const response = await fetch(`${ICON_GRABBER_URL}/${cleanURL}`)
-  if (!response.ok) return null
+  const response = await fetch(`${ICON_GRABBER_URL}/${cleanURL}`);
+  if (!response.ok) return null;
 
-  const data = await response.json()
-  if (!data.icons || data.icons.length === 0) return null
+  const data = await response.json();
+  if (!data.icons || data.icons.length === 0) return null;
 
   // Find the largest icon
-  let largestIcon = null
+  let largestIcon = null;
   for (const icon of data.icons) {
     if (largestIcon) {
       if (icon.sizes && parseInt(icon.sizes) > parseInt(largestIcon.sizes)) {
-        largestIcon = icon
+        largestIcon = icon;
       }
     } else {
-      largestIcon = icon
+      largestIcon = icon;
     }
   }
 
-  return largestIcon.src
+  return largestIcon.src;
+}
+
+export function isValidUrl(str: string) {
+  const pattern = new RegExp(
+    '^([a-zA-Z]+:\\/\\/)?' + // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+      '(\\#[-a-z\\d_]*)?$', // fragment locator
+    'i'
+  );
+  return pattern.test(str);
 }

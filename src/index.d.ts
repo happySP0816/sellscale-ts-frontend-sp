@@ -394,7 +394,7 @@ export interface ProspectEmail extends Record<string, unknown> {
   from: string;
 }
 
-export type Channel = 'EMAIL' | 'LINKEDIN' | 'SELLSCALE';
+export type Channel = 'EMAIL' | 'LINKEDIN' | 'SELLSCALE' | 'SMARTLEAD';
 
 export type BumpFramework = {
   id: number;

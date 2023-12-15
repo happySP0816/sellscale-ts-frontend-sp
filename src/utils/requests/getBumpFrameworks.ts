@@ -64,3 +64,16 @@ export async function getSingleBumpFramework(userToken: string, bumpID: number):
   return await processResponse(response, "data");
 
 }
+
+export async function getBumpFrameworkMessages(userToken: string, bumpID: number): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/bump_framework/bump-messages?bump_id=${bumpID}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      }
+    }
+  );
+  return await processResponse(response, "data");
+}

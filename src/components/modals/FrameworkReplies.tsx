@@ -1,25 +1,13 @@
-import { userTokenState } from '@atoms/userAtoms';
 import {
   Text,
   Paper,
   useMantineTheme,
-  Divider,
   ScrollArea,
-  LoadingOverlay,
-  Badge,
-  Group,
   Avatar,
-  Flex,
-  Button,
+  Box,
+  Flex
 } from '@mantine/core';
 import { ContextModalProps } from '@mantine/modals';
-import { useQuery } from '@tanstack/react-query';
-import { convertDateToLocalTime, nameToInitials, valueToColor } from '@utils/general';
-import { getEmailMessages } from '@utils/requests/getEmails';
-import DOMPurify from 'isomorphic-dompurify';
-import ReactMarkdown from 'react-markdown';
-import { useRecoilValue } from 'recoil';
-import { ProspectEmail } from 'src';
 
 export default function FrameworkReplies({
   innerProps,
@@ -80,17 +68,13 @@ export default function FrameworkReplies({
   return (
     <Paper
       p={0}
-      style={{
-        position: 'relative',
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-      }}
+      pos={'relative'}
+      bg={theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white}
     >
       {/* <LoadingOverlay visible={isFetching} overlayBlur={2} /> */}
       <ScrollArea mih={200}>
-        <Text style={{
-            color: 'grey',
-            fontSize: '12px'
-        }}>
+        <Text
+          className='text-gray-500 text-xs'>
           Here is a couple examples where this framework was used in the past
         </Text>
         {data?.map((element: any, index: number) => (
@@ -99,46 +83,32 @@ export default function FrameworkReplies({
             key={index}
             my={10}
             p={10}
-            style={{
-              position: 'relative',
-              backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-            }}
+            pos={'relative'}
+            bg={theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0]}
           >
-            <div>
-              <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between'
-                }}>
-                <div style={{
-                  display: 'flex',
-                  gap: '10px',
-                  alignItems: 'center'
-                }}>
-                  <div>
+            <Box>
+              <Flex justify={'space-between'}>
+                <Flex align={'center'} className='gap-2.5'>
+                  <Box>
                     <Avatar
                       size="md"
                       radius="xl"
                       src={element.img_url}
                     />
-                  </div>
-                  <div>
+                  </Box>
+                  <Text>
                     {element.full_name}
-                  </div>
-                </div>
-                <div>
+                  </Text>
+                </Flex>
+                <Text>
                   {element.created_at}
-                </div>
-              </div>
-              <div style={{
-                marginTop: '20px',
-                border: '1px',
-                borderColor: 'black',
-                borderStyle: 'solid',
-                padding: '4px'
-              }}>
-                  {element.message}
-              </div>
-            </div>
+                </Text>
+              </Flex>
+              <Text
+                className='mt-5 border border-black p-1'>
+                {element.message}
+              </Text>
+            </Box>
           </Paper>
         ))}
       </ScrollArea>

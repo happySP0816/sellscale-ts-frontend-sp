@@ -783,6 +783,25 @@ export function ActiveChannels() {
                       },
                     },
                     {
+                      accessor: 'avg_reputation',
+                      title: 'Avg. Health',
+                      render: ({ inboxes }) => {
+                        // Calculate average reputation
+                        inboxes = inboxes || [];
+                        const avg =
+                          inboxes.reduce(
+                            (sum, inbox) =>
+                              sum + (inbox?.email_warmup_details?.warmup_reputation || 0),
+                            0
+                          ) / inboxes.length;
+                        return (
+                          <Text>
+                            {avg}% {avg === 100 ? '🟩' : '🟥'}
+                          </Text>
+                        );
+                      },
+                    },
+                    {
                       accessor: 'spf',
                       title: 'SPF',
                       render: ({ spf }) => {

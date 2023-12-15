@@ -3224,6 +3224,328 @@ function FrameworkSection(props: {
   );
 }
 
+// {currentProject.template_mode && (
+//   <>
+//     {isFetchingTemplates ? (
+//       <Box>
+//         <Loader
+//           sx={{
+//             position: 'absolute',
+//             top: '50%',
+//             left: '50%',
+//             transform: 'translate(-50%, -50%)',
+//           }}
+//         />
+//       </Box>
+//     ) : (
+//       <Stack>
+//         <Stack mt='xs'>
+//           {templates
+//             ?.filter((t: any) => templateActivesShow.includes(t.active))
+//             .sort((a: any, b: any) =>
+//               a.active != b.active ? -(a.active - b.active) : a.title - b.title
+//             )
+//             .map((template, index) => (
+//               <Paper
+//                 key={index}
+//                 p='md'
+//                 mih={80}
+//                 sx={{
+//                   position: 'relative',
+//                   cursor: 'pointer',
+//                   border:
+//                     selectedTemplateId === template.id
+//                       ? 'solid 1px #339af0 !important'
+//                       : '',
+//                   backgroundColor:
+//                     selectedTemplateId === template.id ? '#339af008 !important' : '',
+//                   flexDirection: 'row',
+//                   display: 'flex',
+//                 }}
+//                 withBorder
+//                 onClick={() => {
+//                   setSelectedTemplateId(template.id);
+//                   setHumanFeedbackForTemplate(template.additional_instructions);
+//                 }}
+//               >
+//                 <Box
+//                   miw='100px'
+//                   mah={80}
+//                   sx={{
+//                     border: 'solid 1px #339af022',
+//                     backgroundColor: '#339af022',
+//                     padding: '8px',
+//                     borderRadius: '4px',
+//                     textAlign: 'center',
+//                   }}
+//                   mt='xl'
+//                   mr='md'
+//                 >
+//                   <Text fw='bold' fz='md' color='blue' mt='xs'>
+//                     {Math.round(
+//                       (template.times_accepted / (template.times_used + 0.0001)) * 100
+//                     )}
+//                     % reply
+//                   </Text>
+//                   <Text color='blue' size='xs'>
+//                     {template.times_accepted} / {template.times_used} times
+//                   </Text>
+//                 </Box>
+
+//                 <Box mr={40} w='100%'>
+//                   <Flex>
+//                     <Text
+//                       size='sm'
+//                       fw='600'
+//                       mb='xs'
+//                       sx={{ textTransform: 'uppercase' }}
+//                       color='gray'
+//                       variant='outline'
+//                     >
+//                       {template.title}
+//                     </Text>
+//                     {/* Hovercard for transformers */}
+//                     {template.research_points && template.research_points.length > 0 && (
+//                       <HoverCard width={280} shadow='md'>
+//                         <HoverCard.Target>
+//                           <Badge
+//                             leftSection={
+//                               <IconSearch size='0.8rem' style={{ marginTop: 4 }} />
+//                             }
+//                             color='lime'
+//                             variant='filled'
+//                             ml='xs'
+//                             size='xs'
+//                           >
+//                             {template.research_points.length} Research Points
+//                           </Badge>
+//                         </HoverCard.Target>
+//                         <HoverCard.Dropdown
+//                           style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+//                         >
+//                           <Paper
+//                             style={{
+//                               backgroundColor: 'rgb(34, 37, 41)',
+//                               color: 'white',
+//                               padding: 10,
+//                             }}
+//                           >
+//                             <TextWithNewline style={{ fontSize: '12px' }}>
+//                               {'<b>Active Research Points:</b>\n- ' +
+//                                 template.research_points
+//                                   .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
+//                                   .join('\n- ')}
+//                             </TextWithNewline>
+//                           </Paper>
+//                         </HoverCard.Dropdown>
+//                       </HoverCard>
+//                     )}
+//                     {template.additional_instructions && (
+//                       <HoverCard width={280} shadow='md'>
+//                         <HoverCard.Target>
+//                           <Badge
+//                             leftSection={<IconBulb size='0.8rem' />}
+//                             color='grape'
+//                             variant='filled'
+//                             ml='xs'
+//                             size='xs'
+//                           >
+//                             Fine Tuned
+//                           </Badge>
+//                         </HoverCard.Target>
+//                         <HoverCard.Dropdown
+//                           style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+//                         >
+//                           <Paper
+//                             style={{
+//                               backgroundColor: 'rgb(34, 37, 41)',
+//                               color: 'white',
+//                               padding: 10,
+//                             }}
+//                           >
+//                             <TextWithNewline style={{ fontSize: '12px' }}>
+//                               {'<b>Additional Instructions:</b>\n' +
+//                                 template.additional_instructions}
+//                             </TextWithNewline>
+//                           </Paper>
+//                         </HoverCard.Dropdown>
+//                       </HoverCard>
+//                     )}
+//                   </Flex>
+//                   <Card
+//                     withBorder
+//                     w='100%'
+//                     sx={{
+//                       backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb',
+//                     }}
+//                   >
+//                     <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+//                       <div
+//                         dangerouslySetInnerHTML={{
+//                           __html: DOMPurify.sanitize(
+//                             template.message
+//                               .replaceAll(
+//                                 '[[',
+//                                 "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
+//                                   theme.colors['blue'][5] +
+//                                   "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+//                               )
+//                               .replaceAll(']]', '</span>') as string
+//                           ),
+//                         }}
+//                       />
+//                     </Text>
+//                   </Card>
+//                 </Box>
+
+//                 <Box sx={{ justifyContent: 'right' }} ml='auto'>
+//                   <Switch
+//                     sx={{ cursor: 'pointer' }}
+//                     checked={template.active}
+//                     onChange={(e) => {
+//                       updateLiTemplate(
+//                         userToken,
+//                         currentProject.id,
+//                         template.id,
+//                         template.title,
+//                         template.message,
+//                         e.target.checked
+//                       ).then((res) => {
+//                         queryClient.invalidateQueries({
+//                           queryKey: [`query-get-li-templates`],
+//                         });
+//                       });
+//                     }}
+//                   />
+//                   <Button
+//                     mt='xs'
+//                     variant='subtle'
+//                     radius='xl'
+//                     size='sm'
+//                     compact
+//                     onClick={() => {
+//                       openContextModal({
+//                         modal: 'liTemplate',
+//                         title: 'Edit Template',
+//                         innerProps: {
+//                           mode: 'EDIT',
+//                           editProps: {
+//                             templateId: template.id,
+//                             title: template.title,
+//                             message: template.message,
+//                             active: template.active,
+//                             humanFeedback: template.additional_instructions,
+//                             researchPoints: template.research_points,
+//                           },
+//                         },
+//                       });
+//                     }}
+//                   >
+//                     Edit
+//                   </Button>
+//                 </Box>
+//               </Paper>
+//             ))}
+//         </Stack>
+//         <Button
+//           onClick={() => {
+//             if (templateActivesShow.length === 1) {
+//               setTemplateActivesShow([true, false]);
+//             } else {
+//               setTemplateActivesShow([true]);
+//             }
+//           }}
+//           color='gray'
+//           variant='subtle'
+//           leftIcon={
+//             <IconChevronDown
+//               size='1rem'
+//               style={{
+//                 transform: templateActivesShow.length === 1 ? '' : 'rotate(180deg)',
+//               }}
+//             />
+//           }
+//         >
+//           Show{' '}
+//           {templateActivesShow.includes(true) ? 'All Templates' : 'Active Templates Only'}
+//         </Button>
+//       </Stack>
+//     )}
+
+//     <Flex sx={{ justifyContent: 'right' }}>
+//       {/* <Button
+//         onClick={() => setCtaModalOpened(true)}
+//         size='sm'
+//         variant='outline'
+//         color='lime'
+//         mr='sm'
+//         compact
+//       >
+//         Brainstorm Templates
+//       </Button> */}
+//       <InitialMessageTemplateSelector
+//         onSelect={(template: LinkedinInitialMessageTemplate) => {
+//           showNotification({
+//             title: '🤖 Generating...',
+//             message: 'Generating custom "' + template.name + '" template...',
+//             color: 'blue',
+//           });
+
+//           fetch(`${API_URL}/linkedin_template/adjust_template_for_client`, {
+//             method: 'POST',
+//             headers: {
+//               'Content-Type': 'application/json',
+//               Authorization: `Bearer ${userToken}`,
+//             },
+//             body: JSON.stringify({
+//               template_id: template.id,
+//             }),
+//           })
+//             .then((res) => {
+//               return res.json();
+//             })
+//             .then((res) => {
+//               const adjustedTemplate = res['adjusted_template'];
+//               openContextModal({
+//                 modal: 'liTemplate',
+//                 title: 'Create Template',
+//                 innerProps: {
+//                   mode: 'CREATE',
+//                   editProps: {
+//                     title: template.name,
+//                     message: adjustedTemplate,
+//                     active: true,
+//                     humanFeedback: '',
+//                     researchPoints: [],
+//                   },
+//                 },
+//               });
+//             });
+//         }}
+//       />
+//       <Stack spacing={5}>
+//         <Button
+//           variant='outline'
+//           radius='md'
+//           compact
+//           color='orange'
+//           onClick={() => {
+//             openContextModal({
+//               modal: 'liTemplate',
+//               title: 'Create Template',
+//               innerProps: {
+//                 mode: 'CREATE',
+//               },
+//             });
+//           }}
+//         >
+//           Create New
+//         </Button>
+//       </Stack>
+//     </Flex>
+//   </>
+// )}
+
 export const RESEARCH_POINTS = [
   'LINKEDIN_BIO_SUMMARY',
   'LIST_OF_PAST_JOBS',

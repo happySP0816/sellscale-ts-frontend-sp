@@ -10,10 +10,14 @@ import { API_URL } from "@constants/data";
 export async function getSmartleadProspectConvo(
   userToken: string,
   prospectID: number,
-  smartleadCampaignID: number
+  smartleadCampaignID: number | null
 ): Promise<MsgResponse> {
+  let url = `${API_URL}/smartlead/prospect/conversation?prospect_id=${prospectID}`;
+  if (smartleadCampaignID) {
+    url += `&smartlead_campaign_id=${smartleadCampaignID}`;
+  }
   const response = await fetch(
-    `${API_URL}/smartlead/prospect/conversation?prospect_id=${prospectID}&smartlead_campaign_id=${smartleadCampaignID}`,
+    url,
     {
       method: "GET",
       headers: {

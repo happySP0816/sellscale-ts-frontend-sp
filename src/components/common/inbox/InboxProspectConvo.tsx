@@ -35,6 +35,7 @@ import {
   Skeleton,
   Select,
   Tooltip,
+  Card,
 } from "@mantine/core";
 import {
   IconExternalLink,
@@ -50,12 +51,16 @@ import {
   IconPencilPlus,
   IconPencil,
   IconEdit,
+  IconArrowBackUp,
+  IconArrowForwardUp,
 } from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   convertDateToCasualTime,
   convertDateToLocalTime,
+  nameToInitials,
   proxyURL,
+  valueToColor,
 } from "@utils/general";
 import { getConversation } from "@utils/requests/getConversation";
 import { getProspectByID } from "@utils/requests/getProspectByID";
@@ -90,6 +95,7 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { useHover } from "@mantine/hooks";
 import DOMPurify from "dompurify";
 import { getEmailSequenceSteps } from "@utils/requests/emailSequencing";
+import { getSmartleadProspectConvo } from "@utils/requests/getSmartleadProspectConvo";
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -141,7 +147,6 @@ export function ProspectConvoMessage(props: {
     }
   }, []);
 
-
   // const replyMatch = props.message.match(/>On .+[AM|PM] .+ wrote:<br>/gm);
   // let realMessage = props.message;
   // let replyMessage = "";
@@ -169,7 +174,7 @@ export function ProspectConvoMessage(props: {
       if (element) {
         setFinalMessage(element.innerHTML);
       }
-    })
+    });
   }, []);
 
   return (
@@ -224,7 +229,10 @@ export function ProspectConvoMessage(props: {
                   {props.timestamp}
                 </Text>
               </Group>
-              <TextWithNewlines style={{ fontSize: "0.875rem" }} breakheight='12px'>
+              <TextWithNewlines
+                style={{ fontSize: "0.875rem" }}
+                breakheight="12px"
+              >
                 {finalMessage}
               </TextWithNewlines>
             </Stack>
@@ -237,11 +245,16 @@ export function ProspectConvoMessage(props: {
 
 export let HEADER_HEIGHT = 190;
 
-type LiStepProgress = 'COMPLETE' | 'INCOMPLETE' | 'COMING_SOON' | 'OPTIONAL';
+type LiStepProgress = "COMPLETE" | "INCOMPLETE" | "COMING_SOON" | "OPTIONAL";
 
-
-export default function ProspectConvo(props: { prospects: ProspectShallow[], onTabChange?: (tab: string) => void, openConvoBox?: boolean, hideTitle?: boolean }) {
-  const [stepThreeComplete, setStepThreeComplete] = useState<LiStepProgress>('INCOMPLETE');
+export default function ProspectConvo(props: {
+  prospects: ProspectShallow[];
+  onTabChange?: (tab: string) => void;
+  openConvoBox?: boolean;
+  hideTitle?: boolean;
+}) {
+  const [stepThreeComplete, setStepThreeComplete] =
+    useState<LiStepProgress>("INCOMPLETE");
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
 
@@ -330,11 +343,11 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
           );
         });
         setEmailThread(sortedThreads[0]);
-        setSelectedThread(sortedThreads[0])
+        setSelectedThread(sortedThreads[0]);
         return sortedThreads;
       } else {
         setEmailThread(undefined);
-        setSelectedThread(undefined)
+        setSelectedThread(undefined);
         return [];
       }
     },
@@ -342,7 +355,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
     refetchOnWindowFocus: false,
   });
 
-  const INBOX_HEIGHT = props.hideTitle ? '70vh' : INBOX_PAGE_HEIGHT
+  const INBOX_HEIGHT = props.hideTitle ? "70vh" : INBOX_PAGE_HEIGHT;
 
   const { isFetching: isFetchingMessages, refetch } = useQuery({
     queryKey: [
@@ -440,6 +453,70 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
 
   let HEADER_HEIGHT = props.hideTitle ? 40 : 102;
 
+  const [conversationdetail, setConversationDetail] = useState<boolean[]>([]);
+  const [smartleadEmailConversation, setSmartleadEmailConversation] = useState<
+    any[]
+  >([]);
+  const triggerGetSmartleadProspectConvo = async () => {
+    if (!prospect) return;
+
+    const response = await getSmartleadProspectConvo(
+      userToken,
+      prospect.id,
+      null
+    );
+    let conversation = response?.data?.conversation;
+
+    // Sort results by time ascending
+    conversation = conversation.sort((a: any, b: any) => {
+      if (a.time === null) {
+        return 1; // Move null to the bottom
+      }
+      if (b.time === null) {
+        return -1; // Move null to the bottom
+      }
+
+      return new Date(a.time).getTime() - new Date(b.time).getTime();
+    });
+    setSmartleadEmailConversation(conversation);
+  };
+
+  const handleConvertDate = (date: string) => {
+    const timestamp = date;
+    const dateObject = new Date(timestamp);
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+
+    const options: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    };
+    const formattedDate = dateObject.toLocaleDateString("en-US", options);
+
+    const hours = dateObject.getHours();
+    const minutes = dateObject.getMinutes();
+
+    // Convert hours to 12-hour format and determine AM/PM
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12; // Convert 0 to 12
+
+    // Add leading zero to minutes if needed
+    const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+
+    // Combine the formatted date and time components
+    const formattedDateTime = `${formattedDate} - ${formattedHours}:${formattedMinutes}${ampm}`;
+
+    return formattedDateTime;
+  };
+
   useEffect(() => {
     scrollToBottom();
     if (isFetchingMessages) {
@@ -452,6 +529,8 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
     sendBoxRef.current?.setMessageDraft("");
     sendBoxRef.current?.setAiMessage("");
     currentMessagesProspectId.current = openedProspectId;
+    setSmartleadEmailConversation([]);
+    triggerGetSmartleadProspectConvo();
   }, [openedProspectId]);
 
   // The prospect is no longer loading if we are not fetching any data
@@ -557,7 +636,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
     <Flex gap={0} direction="column" wrap="nowrap" h={"100%"} bg="white">
       <div style={{ height: HEADER_HEIGHT, position: "relative" }}>
         <></>
-        {!props.hideTitle &&
+        {!props.hideTitle && (
           <Group position="apart" p={15} h={66} sx={{ flexWrap: "nowrap" }}>
             <div style={{ overflow: "hidden" }}>
               <Title order={3} truncate>
@@ -565,7 +644,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
               </Title>
               <Text weight={300} fs="italic" size={10} c="dimmed" truncate>
                 {prospect &&
-                  new Date(prospect.hidden_until).getTime() >
+                new Date(prospect.hidden_until).getTime() >
                   new Date().getTime() ? (
                   <>
                     Snoozed Until:{" "}
@@ -590,7 +669,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
               />
             </Group>
           </Group>
-        }
+        )}
 
         <Tabs
           variant="outline"
@@ -630,6 +709,11 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
             {prospect?.email && (
               <Tabs.Tab value="EMAIL" icon={<IconMail size="0.8rem" />}>
                 Email
+              </Tabs.Tab>
+            )}
+            {smartleadEmailConversation.length > 0 && (
+              <Tabs.Tab value="SMARTLEAD" icon={<IconMail size="0.8rem" />}>
+                Email - Beta
               </Tabs.Tab>
             )}
           </Tabs.List>
@@ -693,20 +777,22 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
                   leftSection={<IconArrowBigLeftFilled size="0.5rem" />}
                   styles={{ root: { textTransform: "initial" } }}
                   onClick={() => {
-                    setEmailThread(undefined)
-                    setSelectedThread(undefined)
+                    setEmailThread(undefined);
+                    setSelectedThread(undefined);
                   }}
                 >
                   Back to Threads
                 </Badge>
                 <Box
                   sx={{
-                    backgroundColor: 'white',
-                    borderRadius: '10px',
-                    padding: '0px 5px',
+                    backgroundColor: "white",
+                    borderRadius: "10px",
+                    padding: "0px 5px",
                   }}
                 >
-                  <Title order={5}>{_.truncate(emailThread?.subject, { length: 36 })}</Title>
+                  <Title order={5}>
+                    {_.truncate(emailThread?.subject, { length: 36 })}
+                  </Title>
                 </Box>
               </Group>
             )}
@@ -762,7 +848,7 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
                       name={
                         msg.message_from.length > 0
                           ? msg.message_from[0].name ||
-                          msg.message_from[0].email
+                            msg.message_from[0].email
                           : "Unknown"
                       }
                       message={msg.body}
@@ -809,12 +895,193 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
                         threads={threads || []}
                         onThreadClick={(thread) => {
                           setEmailThread(thread);
-                          setSelectedThread(thread)
+                          setSelectedThread(thread);
                         }}
                       />
                     )}
                   </>
                 )}
+              </>
+            )}
+
+            {openedOutboundChannel === "SMARTLEAD" && (
+              <>
+                {smartleadEmailConversation.map((message, index) => (
+                  <Box
+                    key={index}
+                    sx={{ display: "flex", overflowX: "hidden" }}
+                  >
+                    <Flex
+                      p="sm"
+                      justify={message.type === "SENT" ? "end" : "start"}
+                      w="100%"
+                    >
+                      {message?.type !== "SENT" ? (
+                        <Avatar
+                          mx={"xs"}
+                          mt="xs"
+                          src={prospect?.img_url}
+                          color={valueToColor(theme, prospect?.full_name)}
+                          size={"40px"}
+                          radius={"100%"}
+                        >
+                          {nameToInitials(prospect?.full_name)}
+                        </Avatar>
+                      ) : (
+                        <></>
+                      )}
+                      <Flex
+                        direction={"column"}
+                        align={message.type === "SENT" ? "end" : "start"}
+                        w="100%"
+                      >
+                        <Card
+                          my="sm"
+                          withBorder
+                          shadow="sm"
+                          radius="md"
+                          key={message.id}
+                          right={"0px"}
+                          style={{
+                            maxWidth: "600px",
+                            minWidth: "100%",
+                          }}
+                        >
+                          <Card.Section
+                            bg={message.type === "SENT" ? "blue" : "#dcdbdd"}
+                            p={14}
+                            px={20}
+                          >
+                            <Flex justify="space-between">
+                              <Text
+                                color={
+                                  message.type !== "SENT"
+                                    ? "#9a9a9d"
+                                    : "#85b3f5"
+                                }
+                                fw={500}
+                              >
+                                {message.type == "SENT" ? "To" : "From"}
+                                {": "}
+                                <span
+                                  style={{
+                                    color:
+                                      message.type === "SENT"
+                                        ? "white"
+                                        : "black",
+                                  }}
+                                >
+                                  {prospect?.full_name}
+                                </span>
+                              </Text>
+                              <Flex gap={30} align="center">
+                                <Text
+                                  color={
+                                    message.type !== "SENT"
+                                      ? "#9a9a9d"
+                                      : "#85b3f5"
+                                  }
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px",
+                                  }}
+                                >
+                                  <IconArrowBackUp size={20} /> Reply
+                                </Text>
+                                <Text
+                                  color={
+                                    message.type !== "SENT"
+                                      ? "#9a9a9d"
+                                      : "#85b3f5"
+                                  }
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px",
+                                  }}
+                                >
+                                  <IconArrowForwardUp size={20} /> Forward
+                                </Text>
+                              </Flex>
+                            </Flex>
+                          </Card.Section>
+                          <Card.Section px={24} py={20}>
+                            <Text color="gray" fw={500}>
+                              Subject:{" "}
+                              <span style={{ color: "black" }}>
+                                {message.subject || "..."}
+                              </span>
+                            </Text>
+                            <Text
+                              fz="sm"
+                              color="black"
+                              mt={14}
+                              style={{
+                                display: "flex",
+                                alignItems: "end",
+                                flexDirection: "column",
+                              }}
+                            >
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html: DOMPurify.sanitize(
+                                    message.email_body
+                                  ),
+                                }}
+                                className={`${
+                                  conversationdetail[index]
+                                    ? ""
+                                    : "line-clamp-4"
+                                }`}
+                              />
+                              <Button
+                                onClick={() => {
+                                  const newState = [...conversationdetail];
+                                  newState[index] = !newState[index];
+                                  setConversationDetail(newState);
+                                }}
+                                // rightIcon={<IconArrowDown />}
+                                bg="#dcdbdd"
+                                radius="xl"
+                                mt="sm"
+                                size="xs"
+                              >
+                                {conversationdetail[index]
+                                  ? "Less more"
+                                  : "Read more"}
+                              </Button>
+                            </Text>
+                          </Card.Section>
+                        </Card>
+                        <Text
+                          align={message?.type === "SENT" ? "end" : "start"}
+                          color="#9a9a9d"
+                          size={12}
+                        >
+                          {handleConvertDate(message.time)}
+                        </Text>
+                      </Flex>
+                      {message?.type !== "SENT" ? (
+                        <></>
+                      ) : (
+                        <Avatar
+                          mt="xs"
+                          mx="xs"
+                          src={userData.img_url}
+                          color={valueToColor(
+                            theme,
+                            prospect?.full_name
+                          )}
+                          size={"40px"}
+                          radius={"100%"}
+                        >
+                          {nameToInitials(prospect?.full_name)}
+                        </Avatar>
+                      )}
+                    </Flex>
+                  </Box>
+                ))}
               </>
             )}
 
@@ -841,15 +1108,14 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
                 prospectId={openedProspectId}
                 nylasMessageId={
                   currentConvoEmailMessages &&
-                    currentConvoEmailMessages.length > 0
+                  currentConvoEmailMessages.length > 0
                     ? currentConvoEmailMessages[
-                      currentConvoEmailMessages.length - 1
-                    ].nylas_message_id
+                        currentConvoEmailMessages.length - 1
+                      ].nylas_message_id
                     : undefined
                 }
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
-
               />
             </Box>
             <Box
@@ -894,8 +1160,12 @@ export default function ProspectConvo(props: { prospects: ProspectShallow[], onT
             triggerGetBumpFrameworks();
           }}
           onPopulateBumpFrameworks={(buckets) => {
-            if (buckets.ACCEPTED.total > 0 || Object.values(buckets.BUMPED).find(d => d.total > 0) || buckets.ACTIVE_CONVO.total > 0) {
-              setStepThreeComplete('COMPLETE');
+            if (
+              buckets.ACCEPTED.total > 0 ||
+              Object.values(buckets.BUMPED).find((d) => d.total > 0) ||
+              buckets.ACTIVE_CONVO.total > 0
+            ) {
+              setStepThreeComplete("COMPLETE");
             }
           }}
         />
@@ -977,7 +1247,7 @@ function EmailThreadsOption(props: {
       <Box
         py={5}
         sx={{
-          position: 'relative',
+          position: "relative",
           backgroundColor: hovered ? theme.colors.gray[1] : "transparent",
           cursor: "pointer",
         }}
@@ -999,13 +1269,17 @@ function EmailThreadsOption(props: {
         </Flex>
         <Text
           sx={{
-            position: 'absolute',
+            position: "absolute",
             top: 5,
             right: 5,
           }}
-          weight={400} size={8} c="dimmed"
+          weight={400}
+          size={8}
+          c="dimmed"
         >
-          {convertDateToCasualTime(new Date(props.thread.last_message_timestamp))}
+          {convertDateToCasualTime(
+            new Date(props.thread.last_message_timestamp)
+          )}
         </Text>
       </Box>
       <Divider m={0} />

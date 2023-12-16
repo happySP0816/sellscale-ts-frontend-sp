@@ -53,6 +53,7 @@ import {
   IconEdit,
   IconArrowBackUp,
   IconArrowForwardUp,
+  IconClock,
 } from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -96,6 +97,10 @@ import { useHover } from "@mantine/hooks";
 import DOMPurify from "dompurify";
 import { getEmailSequenceSteps } from "@utils/requests/emailSequencing";
 import { getSmartleadProspectConvo } from "@utils/requests/getSmartleadProspectConvo";
+import RichTextArea from "@common/library/RichTextArea";
+import { JSONContent } from "@tiptap/react";
+import { showNotification } from "@mantine/notifications";
+import postSmartleadReply from "@utils/requests/postSmartleadReply";
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -454,9 +459,22 @@ export default function ProspectConvo(props: {
   let HEADER_HEIGHT = props.hideTitle ? 40 : 102;
 
   const [conversationdetail, setConversationDetail] = useState<boolean[]>([]);
+  const [sendingMessage, setSendingMessage] = useState(false);
   const [smartleadEmailConversation, setSmartleadEmailConversation] = useState<
     any[]
   >([]);
+  // We use this to store the value of the text area
+  const [messageDraft, _setMessageDraft] = useState("");
+  // We use this to store the raw value of the rich text editor
+  const messageDraftRichRaw = useRef<JSONContent | string>();
+
+  // We use this to set the value of the text area (for both rich text and normal text)
+  const setMessageDraft = (value: string) => {
+    messageDraftRichRaw.current = value;
+    _setMessageDraft(value);
+  };
+  // For email we have to use this ref instead, otherwise the textbox does a weird refocusing.
+  const messageDraftEmail = useRef("");
   const triggerGetSmartleadProspectConvo = async () => {
     if (!prospect) return;
 
@@ -479,6 +497,41 @@ export default function ProspectConvo(props: {
       return new Date(a.time).getTime() - new Date(b.time).getTime();
     });
     setSmartleadEmailConversation(conversation);
+  };
+  const triggerPostSmartleadReply = async () => {
+    setSendingMessage(true);
+
+    if (!prospect) {
+      return;
+    }
+
+    const prospectid = prospect.id;
+    const response = await postSmartleadReply(
+      userToken,
+      prospectid,
+      messageDraftEmail.current
+    );
+    if (response.status !== "success") {
+      showNotification({
+        title: "Error",
+        message: "Failed to send email",
+        color: "red",
+      });
+    } else {
+      showNotification({
+        title: "Success",
+        message:
+          "Email sent. It may take a few minutes to appear in your inbox.",
+        color: "green",
+      });
+      messageDraftEmail.current = "";
+      messageDraftRichRaw.current = "";
+      setMessageDraft("");
+    }
+
+    setSendingMessage(false);
+
+    triggerGetSmartleadProspectConvo();
   };
 
   const handleConvertDate = (date: string) => {
@@ -1069,10 +1122,7 @@ export default function ProspectConvo(props: {
                           mt="xs"
                           mx="xs"
                           src={userData.img_url}
-                          color={valueToColor(
-                            theme,
-                            prospect?.full_name
-                          )}
+                          color={valueToColor(theme, prospect?.full_name)}
                           size={"40px"}
                           radius={"100%"}
                         >
@@ -1082,12 +1132,33 @@ export default function ProspectConvo(props: {
                     </Flex>
                   </Box>
                 ))}
+                <RichTextArea
+                  onChange={(value, rawValue) => {
+                    messageDraftRichRaw.current = rawValue;
+                    messageDraftEmail.current = value;
+                  }}
+                  value={messageDraftRichRaw.current}
+                  height={200}
+                />
+                <Flex justify="flex-end" mt='md'>
+                  <Button
+                    color="blue"
+                    disabled={sendingMessage}
+                    loading={sendingMessage}
+                    leftIcon={<IconClock />}
+                    onClick={() => {
+                      triggerPostSmartleadReply();
+                    }}
+                  >
+                    Send and Snooze
+                  </Button>
+                </Flex>
               </>
             )}
 
-            <Box
+            {/* <Box
               sx={{ width: "100%", height: openedConvoBox ? "250px" : "50px" }}
-            ></Box>
+            ></Box> */}
           </div>
         </ScrollArea>
 

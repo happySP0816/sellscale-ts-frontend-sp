@@ -1,26 +1,34 @@
-import { Tabs, Tooltip } from '@mantine/core'
-import { PulseWrapper } from './PulseWrapper'
-import ICPFilters from './ICPFilter/ICPFilters'
-import { currentProjectState } from '@atoms/personaAtoms'
-import { getCurrentPersonaId, getFreshCurrentProject } from '@auth/core'
-import { useEffect } from 'react'
-import { useRecoilState, useRecoilValue } from 'recoil'
-import { userTokenState } from '@atoms/userAtoms'
-import { useLoaderData, useNavigate } from 'react-router-dom'
-import { PersonaOverview } from 'src'
-import { getPersonasOverview } from '@utils/requests/getPersonas'
-import { navigateToPage } from '@utils/documentChange'
-import UploadOverview from './UploadOverview'
-import { IconBeta, IconChartArcs, IconChartAreaLine, IconList, IconTable, IconTarget, IconWashMachine } from '@tabler/icons'
-import ComingSoonCard from '@common/library/ComingSoonCard'
-import GlobalContacts from './GlobalContacts'
-import DoNotContactList from '@common/settings/DoNotContactList'
-import PageFrame from '@common/PageFrame'
-import UploadOverviewV2 from './UploadOverviewV2'
-import TAMGraph from './TAMGraph'
-import ScrapingReport from './ScrapingReport'
-import TAMGraphV2 from "./TAMGraphV2";
-import PulseTabSelector from './PulseTabSelector'
+import { Tabs, Tooltip } from '@mantine/core';
+import { PulseWrapper } from './PulseWrapper';
+import ICPFilters from './ICPFilter/ICPFilters';
+import { currentProjectState } from '@atoms/personaAtoms';
+import { getCurrentPersonaId, getFreshCurrentProject } from '@auth/core';
+import { useEffect } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
+import { useLoaderData, useNavigate } from 'react-router-dom';
+import { PersonaOverview } from 'src';
+import { getPersonasOverview } from '@utils/requests/getPersonas';
+import { navigateToPage } from '@utils/documentChange';
+import UploadOverview from './UploadOverview';
+import {
+  IconBeta,
+  IconChartArcs,
+  IconChartAreaLine,
+  IconList,
+  IconTable,
+  IconTarget,
+  IconWashMachine,
+} from '@tabler/icons';
+import ComingSoonCard from '@common/library/ComingSoonCard';
+import GlobalContacts from './GlobalContacts';
+import DoNotContactList from '@common/settings/DoNotContactList';
+import PageFrame from '@common/PageFrame';
+import UploadOverviewV2 from './UploadOverviewV2';
+import TAMGraph from './TAMGraph';
+import ScrapingReport from './ScrapingReport';
+import TAMGraphV2 from './TAMGraphV2';
+import PulseTabSelector from './PulseTabSelector';
 
 const ContactOverview = () => {
   return (
@@ -47,15 +55,15 @@ const ContactOverview = () => {
           Do Not Contact
         </Tabs.Tab>
 
-        <Tabs.Tab value="TAM_graph_v2" ml="auto">
+        <Tabs.Tab value='TAM_graph_v2' ml='auto'>
           TAM Graph Beta
         </Tabs.Tab>
-        <Tabs.Tab value="TAM_graph" style={{ marginRight: "8px" }}>
+        <Tabs.Tab value='TAM_graph' style={{ marginRight: '8px' }}>
           TAM Graph
         </Tabs.Tab>
 
-        <Tabs.Tab value="overviewV2">
-          <IconBeta size="0.8rem" style={{ marginRight: "8px" }} />
+        <Tabs.Tab value='overviewV2'>
+          <IconBeta size='0.8rem' style={{ marginRight: '8px' }} />
           Overview (Beta)
         </Tabs.Tab>
       </Tabs.List>
@@ -70,29 +78,23 @@ const ContactOverview = () => {
         <GlobalContacts />
       </Tabs.Panel>
       <Tabs.Panel value='prospect_scoring'>
-        <Tabs defaultValue="new_view">
+        <Tabs defaultValue='new_view'>
           <Tabs.List>
-            <Tabs.Tab value="new_view">
-              <IconTarget
-                size="0.8rem"
-                style={{ marginRight: "8px", marginTop: "4px" }}
-              />
+            <Tabs.Tab value='new_view'>
+              <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
               Prospect Scoring
             </Tabs.Tab>
-            <Tooltip label="Old View" position="bottom" withArrow withinPortal>
-              <Tabs.Tab value="old_view" ml="auto">
-                <IconWashMachine
-                  size="0.8rem"
-                  style={{ marginRight: "8px", marginTop: "4px" }}
-                />
+            <Tooltip label='Old View' position='bottom' withArrow withinPortal>
+              <Tabs.Tab value='old_view' ml='auto'>
+                <IconWashMachine size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
               </Tabs.Tab>
             </Tooltip>
           </Tabs.List>
 
-          <Tabs.Panel value="old_view">
+          <Tabs.Panel value='old_view'>
             <PulseWrapper />
           </Tabs.Panel>
-          <Tabs.Panel value="new_view">
+          <Tabs.Panel value='new_view'>
             <ICPFilters />
           </Tabs.Panel>
         </Tabs>
@@ -100,17 +102,17 @@ const ContactOverview = () => {
       <Tabs.Panel value='do_not_contact'>
         <DoNotContactList />
       </Tabs.Panel>
-      <Tabs.Panel value='TAM_graph' className='h-0 grow'>
+      {/* <Tabs.Panel value='TAM_graph' className='h-0 grow'>
         <TAMGraph />
-      </Tabs.Panel>
+      </Tabs.Panel> */}
       <Tabs.Panel value='overviewV2'>
         <UploadOverviewV2 />
       </Tabs.Panel>
-      <Tabs.Panel value="TAM_graph_v2" className="h-0 grow">
+      <Tabs.Panel value='TAM_graph_v2' className='h-0 grow'>
         <TAMGraphV2 />
       </Tabs.Panel>
     </Tabs>
-  )
-}
+  );
+};
 
-export default ContactOverview
+export default ContactOverview;

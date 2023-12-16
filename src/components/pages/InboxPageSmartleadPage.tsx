@@ -789,6 +789,7 @@ export default function InboxSmartleadPage(props: {
                         <Button
                           color='grape'
                           size='xs'
+                          loading={sendingMessage}
                           sx={{ borderRadius: '4px' }}
                           onClick={() => {
                             showNotification({
@@ -802,7 +803,9 @@ export default function InboxSmartleadPage(props: {
                           }}
                         >
                           <IconWand size='0.8rem' />
-                          Smart Generate
+                          <Text pl={5} span>
+                            Smart Generate
+                          </Text>
                         </Button>
                       </Tooltip>
                       <Button

@@ -3024,8 +3024,10 @@ function FrameworkSection(props: {
                 onClick={() => {
                   openContextModal({
                     modal: 'frameworkReplies',
-                    title: '7 Example Usages in the Past',
-                    innerProps: {},
+                    title: 'Past Example Usages',
+                    innerProps: {
+                      bumpId: props.framework.id,
+                    },
                   });
                 }}
               >

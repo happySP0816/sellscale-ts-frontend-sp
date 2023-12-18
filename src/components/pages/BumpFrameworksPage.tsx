@@ -82,6 +82,7 @@ import { getFreshCurrentProject } from '@auth/core';
 import { API_URL } from '@constants/data';
 import { postBumpDeactivate } from '@utils/requests/postBumpDeactivate';
 import { patchBumpFramework } from '@utils/requests/patchBumpFramework';
+import _ from 'lodash';
 
 type BumpFrameworkBuckets = {
   ACCEPTED: {
@@ -495,6 +496,7 @@ export default function BumpFrameworksPage(props: {
   const [data, setData] = useState<any>({} || undefined);
   const [edit, setEdit] = useState(false);
   const [blocklist, setBlockList] = useState<any>([]);
+  const [list, setList] = useState<any>([]);
   const [deactivateState, setDeactivateState] = useState(false);
 
   const [bumpLengthValue, setBumpLengthValue] = useState(50);
@@ -629,9 +631,13 @@ export default function BumpFrameworksPage(props: {
         }
       }
     }
+    const sortedActiveConvo = _.sortBy(newBumpBuckets.ACTIVE_CONVO.frameworks, (obj) => obj.substatus);
+    newBumpBuckets.ACTIVE_CONVO.frameworks = sortedActiveConvo;
+
     bumpBuckets.current = newBumpBuckets;
 
     setData(bumpBuckets.current?.ACTIVE_CONVO.frameworks[0]);
+    setBlockList(bumpBuckets.current?.ACTIVE_CONVO.frameworks[0].transformer_blocklist);
 
     // BumpFrameworks have been updated, submit event to parent
     if (props.onPopulateBumpFrameworks) {
@@ -667,8 +673,6 @@ export default function BumpFrameworksPage(props: {
   };
 
   const triggerEditBumpFramework = async () => {
-    setLoading(true);
-
     const result = await patchBumpFramework(
       userToken,
       data.id,
@@ -680,7 +684,7 @@ export default function BumpFrameworksPage(props: {
       data.bump_delay_days,
       data.default,
       data.use_account_research,
-      blocklist
+      list
     );
 
     if (result.status === 'success') {
@@ -697,8 +701,7 @@ export default function BumpFrameworksPage(props: {
         color: theme.colors.red[7],
       });
     }
-
-    setLoading(false);
+    triggerGetBumpFrameworks();
   };
 
   useEffect(() => {
@@ -943,6 +946,7 @@ export default function BumpFrameworksPage(props: {
                                       size='xs'
                                       onClick={() => {
                                         setData(item);
+                                        setBlockList(item?.transformer_blocklist);
                                       }}
                                     />
                                     <Text fw={600} mt={2}>
@@ -1082,11 +1086,10 @@ export default function BumpFrameworksPage(props: {
                       </label>
                       {data?.use_account_research && (
                         <PersonalizationSection
-                          blocklist={blocklist}
-                          // setList={setBlockList}
+                          blocklist={data?.transformer_blocklist}
                           onItemsChange={async (items) => {
+                            setList(items.filter((x) => !x.checked).map((x) => x.id));
                             // Update transformer blocklist
-                            setBlockList(items.filter((x) => !x.checked));
                             const result = await patchBumpFramework(
                               userToken,
                               data.id,
@@ -1114,7 +1117,7 @@ export default function BumpFrameworksPage(props: {
                       dataChannels={dataChannels}
                       archetypeID={archetypeID}
                     />
-                    <Grid>
+                    {/* <Grid>
                       {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
                         return (
                           <Grid.Col span={6}>
@@ -1126,7 +1129,7 @@ export default function BumpFrameworksPage(props: {
                           </Grid.Col>
                         );
                       })}
-                    </Grid>
+                    </Grid> */}
                   </Flex>
                 ) : (
                   <Flex justify='center'>

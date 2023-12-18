@@ -494,7 +494,10 @@ export default function BumpFrameworksPage(props: {
 
   const [data, setData] = useState<any>({} || undefined);
   const [edit, setEdit] = useState(false);
+  const [blocklist, setBlockList] = useState<any>([]);
   const [deactivateState, setDeactivateState] = useState(false);
+
+  const [bumpLengthValue, setBumpLengthValue] = useState(50);
 
   const bumpBuckets = useRef<BumpFrameworkBuckets>({
     ACCEPTED: {
@@ -507,6 +510,12 @@ export default function BumpFrameworksPage(props: {
       frameworks: [],
     },
   } as BumpFrameworkBuckets);
+
+  const bumpFrameworkLengthMarks = [
+    { value: 0, label: 'Short', api_label: 'SHORT' },
+    { value: 50, label: 'Medium', api_label: 'MEDIUM' },
+    { value: 100, label: 'Long', api_label: 'LONG' },
+  ];
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -658,44 +667,52 @@ export default function BumpFrameworksPage(props: {
   };
 
   const triggerEditBumpFramework = async () => {
-    // setLoading(true);
-    // const result = await patchBumpFramework(
-    //   userToken,
-    //   innerProps.bumpFrameworkID,
-    //   innerProps.overallStatus,
-    //   form.values.title,
-    //   form.values.description,
-    //   bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
-    //   form.values.bumpedCount,
-    //   form.values.bumpDelayDays,
-    //   form.values.default,
-    //   form.values.useAccountResearch
-    // );
-    // if (result.status === 'success') {
-    //   showNotification({
-    //     title: 'Success',
-    //     message: 'Bump Framework updated successfully',
-    //     color: theme.colors.green[7],
-    //   });
-    //   setLoading(false);
-    //   innerProps.onSave();
-    //   context.closeModal(id);
-    // } else {
-    //   showNotification({
-    //     title: 'Error',
-    //     message: result.message,
-    //     color: theme.colors.red[7],
-    //   });
-    // }
-    // setLoading(false);
+    setLoading(true);
+
+    const result = await patchBumpFramework(
+      userToken,
+      data.id,
+      data.overall_status,
+      data.title,
+      data.description,
+      bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
+      data.bumped_count,
+      data.bump_delay_days,
+      data.default,
+      data.use_account_research,
+      blocklist
+    );
+
+    if (result.status === 'success') {
+      showNotification({
+        title: 'Success',
+        message: 'Bump Framework updated successfully',
+        color: theme.colors.green[7],
+      });
+      setLoading(false);
+    } else {
+      showNotification({
+        title: 'Error',
+        message: result.message,
+        color: theme.colors.red[7],
+      });
+    }
+
+    setLoading(false);
   };
 
   useEffect(() => {
     triggerGetBumpFrameworks();
   }, [archetypeID, deactivateState]);
 
-  console.log('11111111111111111', bumpBuckets.current?.ACTIVE_CONVO.frameworks);
-  console.log('ddddddddddddddd', data);
+  useEffect(() => {
+    let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === data.bumpLength)?.value;
+    if (length == null) {
+      length = 50;
+    }
+
+    setBumpLengthValue(length);
+  }, []);
 
   return (
     <>
@@ -954,7 +971,21 @@ export default function BumpFrameworksPage(props: {
                           inline
                         >
                           Edit Framework:{' '}
-                          {edit ? <TextInput size='md' defaultValue={data?.title} w='400px' /> : <span style={{ color: 'black' }}>{data?.title}</span>}
+                          {edit ? (
+                            <TextInput
+                              size='md'
+                              value={data?.title}
+                              onChange={(e) =>
+                                setData({
+                                  ...data,
+                                  title: e.target.value,
+                                })
+                              }
+                              w='400px'
+                            />
+                          ) : (
+                            <span style={{ color: 'black' }}>{data?.title}</span>
+                          )}
                           <IconPencil onClick={() => setEdit(!edit)} style={{ cursor: 'pointer' }} />
                         </Text>
                         <Checkbox label='Default Framework' defaultChecked />
@@ -967,10 +998,15 @@ export default function BumpFrameworksPage(props: {
                           <TextInput
                             description=' '
                             placeholder='reply framework'
-                            // defaultValue={data?.title}
+                            value={data?.title}
                             w={'100%'}
                             size='md'
-                            {...data?.getInputProps('title')}
+                            // onChange={(e) =>
+                            //   setData({
+                            //     ...data,
+                            //     title: e.target.value,
+                            //   })
+                            // }
                           />
                         </Flex>
                         <Flex direction='column' w='100%'>
@@ -982,6 +1018,10 @@ export default function BumpFrameworksPage(props: {
                             placeholder='Pick value'
                             data={data?.active_transformers ? data?.active_transformers : []}
                             defaultValue={data?.active_transformers && data?.active_transformers[0]}
+                            // onChange={(e) => setData({
+                            //   ...data,
+
+                            // })}
                             w={'100%'}
                             size='md'
                           />
@@ -996,8 +1036,15 @@ export default function BumpFrameworksPage(props: {
                           description=' '
                           placeholder='These are instructions the AI will read to craft a personalized message.'
                           minRows={6}
-                          // value={data?.description}
-                          {...data?.getInputProps('description')}
+                          value={data?.description}
+                          onChange={(e) =>
+                            setData({
+                              ...data,
+                              description: e.target.value,
+                            })
+                          }
+
+                          // {...data?.getInputProps('description')}
                         />
                       </Flex>
                       <Flex gap={'xl'}>
@@ -1035,15 +1082,25 @@ export default function BumpFrameworksPage(props: {
                       </label>
                       {data?.use_account_research && (
                         <PersonalizationSection
-                          blocklist={[]}
+                          blocklist={blocklist}
+                          // setList={setBlockList}
                           onItemsChange={async (items) => {
-                            console.log(items);
-                            // form?.setFieldValue(
-                            //   'transformerBlocklist',
-                            //   items.filter((x) => !x.checked).map((x) => x.id)
-                            // );
+                            // Update transformer blocklist
+                            setBlockList(items.filter((x) => !x.checked));
+                            const result = await patchBumpFramework(
+                              userToken,
+                              data.id,
+                              data.overall_status,
+                              data.title,
+                              data.description,
+                              bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
+                              data.bumped_count,
+                              data.bump_delay_days,
+                              data.default,
+                              data.use_account_research,
+                              items.filter((x) => !x.checked).map((x) => x.id)
+                            );
                           }}
-                          onChanged={() => {}}
                         />
                       )}
                     </Flex>

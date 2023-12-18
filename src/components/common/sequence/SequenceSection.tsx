@@ -80,11 +80,7 @@ import { getArchetypeConversion } from '@utils/requests/getArchetypeConversion';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import getChannels from '@utils/requests/getChannels';
 import getLiProfile from '@utils/requests/getLiProfile';
-import {
-  createLiConvoSim,
-  generateInitialMessageForLiConvoSim,
-  getLiConvoSim,
-} from '@utils/requests/linkedinConvoSimulation';
+import { createLiConvoSim, generateInitialMessageForLiConvoSim, getLiConvoSim } from '@utils/requests/linkedinConvoSimulation';
 import { patchBumpFramework } from '@utils/requests/patchBumpFramework';
 import { updateBlocklist, updateInitialBlocklist } from '@utils/requests/updatePersonaBlocklist';
 import { useDebouncedCallback } from '@utils/useDebouncedCallback';
@@ -118,11 +114,7 @@ import { CtaSection } from './CtaSection';
 import CTAGenerator from './CTAGenerator';
 import { deterministicMantineColor } from '@utils/requests/utils';
 import moment from 'moment';
-import {
-  createLiTemplate,
-  getLiTemplates,
-  updateLiTemplate,
-} from '@utils/requests/linkedinTemplates';
+import { createLiTemplate, getLiTemplates, updateLiTemplate } from '@utils/requests/linkedinTemplates';
 import DOMPurify from 'isomorphic-dompurify';
 import InitialMessageTemplateSelector from './InitialMessageTemplateSelector';
 import LinkedinInitialMessageTemplate from './LinkedinInitialMessageTemplate';
@@ -149,7 +141,6 @@ export default function SequenceSection() {
 
     setConversionRate((data.li_opened / data.li_sent) * 100);
     setReplyRate((data.li_replied / data.li_sent) * 100);
-    console.log(data);
   };
 
   useEffect(() => {
@@ -173,41 +164,20 @@ export default function SequenceSection() {
 
   let blocker = useBlocker(isDataChanged);
 
-  const bf0 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'ACCEPTED' && bf.active && bf.default
-  );
-  const bf1 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1 && bf.active && bf.default
-  );
-  const bf2 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2 && bf.active && bf.default
-  );
-  const bf3 = bumpFrameworks.find(
-    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3 && bf.active && bf.default
-  );
+  const bf0 = bumpFrameworks.find((bf) => bf.overall_status === 'ACCEPTED' && bf.active && bf.default);
+  const bf1 = bumpFrameworks.find((bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1 && bf.active && bf.default);
+  const bf2 = bumpFrameworks.find((bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2 && bf.active && bf.default);
+  const bf3 = bumpFrameworks.find((bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3 && bf.active && bf.default);
   const bf0Delay = useRef(bf0?.bump_delay_days ?? 2);
   const bf1Delay = useRef(bf1?.bump_delay_days ?? 2);
   const bf2Delay = useRef(bf2?.bump_delay_days ?? 2);
 
-  let bf0Conversion =
-    bf0 && bf0?.etl_num_times_converted && bf0?.etl_num_times_used
-      ? (bf0.etl_num_times_converted / bf0.etl_num_times_used) * 100
-      : undefined;
-  let bf1Conversion =
-    bf1 && bf1?.etl_num_times_converted && bf1?.etl_num_times_used
-      ? (bf1.etl_num_times_converted / bf1.etl_num_times_used) * 100
-      : undefined;
-  let bf2Conversion =
-    bf2 && bf2?.etl_num_times_converted && bf2?.etl_num_times_used
-      ? (bf2.etl_num_times_converted / bf2.etl_num_times_used) * 100
-      : undefined;
-  let bf3Conversion =
-    bf3 && bf3?.etl_num_times_converted && bf3?.etl_num_times_used
-      ? (bf3.etl_num_times_converted / bf3.etl_num_times_used) * 100
-      : undefined;
+  let bf0Conversion = bf0 && bf0?.etl_num_times_converted && bf0?.etl_num_times_used ? (bf0.etl_num_times_converted / bf0.etl_num_times_used) * 100 : undefined;
+  let bf1Conversion = bf1 && bf1?.etl_num_times_converted && bf1?.etl_num_times_used ? (bf1.etl_num_times_converted / bf1.etl_num_times_used) * 100 : undefined;
+  let bf2Conversion = bf2 && bf2?.etl_num_times_converted && bf2?.etl_num_times_used ? (bf2.etl_num_times_converted / bf2.etl_num_times_used) * 100 : undefined;
+  let bf3Conversion = bf3 && bf3?.etl_num_times_converted && bf3?.etl_num_times_used ? (bf3.etl_num_times_converted / bf3.etl_num_times_used) * 100 : undefined;
 
   const bump_amount = currentProject?.li_bump_amount ?? 3;
-  console.log(bump_amount);
 
   const closeModal = () => {
     setIsModalBlockerVisible(false);
@@ -236,11 +206,7 @@ export default function SequenceSection() {
   };
 
   const bumpConversionColor = (bf: BumpFramework | undefined, conversion: number | undefined) => {
-    return bf &&
-      conversion &&
-      bf?.etl_num_times_used &&
-      conversion > 5 &&
-      bf?.etl_num_times_used > 10
+    return bf && conversion && bf?.etl_num_times_used && conversion > 5 && bf?.etl_num_times_used > 10
       ? 'green'
       : !bf?.etl_num_times_used || (bf?.etl_num_times_used && bf?.etl_num_times_used < 10)
       ? 'gray'
@@ -248,9 +214,7 @@ export default function SequenceSection() {
   };
 
   const getReplyPillText = (bf: BumpFramework | undefined, bfConversion: number | undefined) => {
-    return bf && bf.etl_num_times_used && bf.etl_num_times_used >= 10
-      ? (bfConversion ? bfConversion?.toFixed(0) : 0) + '%'
-      : 'TBD';
+    return bf && bf.etl_num_times_used && bf.etl_num_times_used >= 10 ? (bfConversion ? bfConversion?.toFixed(0) : 0) + '%' : 'TBD';
   };
 
   if (!currentProject) {
@@ -259,11 +223,7 @@ export default function SequenceSection() {
 
   return (
     <>
-      <Modal.Root
-        opened={isModalBlockerVisible || blocker.state === 'blocked'}
-        onClose={closeModal}
-        centered
-      >
+      <Modal.Root opened={isModalBlockerVisible || blocker.state === 'blocked'} onClose={closeModal} centered>
         <Modal.Overlay />
         <Modal.Content>
           <Modal.Header>
@@ -342,11 +302,7 @@ export default function SequenceSection() {
                             });
                             return;
                           }
-                          const result = await patchArchetypeDelayDays(
-                            userToken,
-                            currentProject.id,
-                            value || 0
-                          );
+                          const result = await patchArchetypeDelayDays(userToken, currentProject.id, value || 0);
                           if (result.status === 'success') refetch();
                         }}
                       />
@@ -379,11 +335,7 @@ export default function SequenceSection() {
                     withinPortal
                     withArrow
                   >
-                    <Badge
-                      ml='4px'
-                      variant='dot'
-                      color={isNaN(replyRate) ? 'grey' : replyRate > 0.5 ? 'green' : 'red'}
-                    >
+                    <Badge ml='4px' variant='dot' color={isNaN(replyRate) ? 'grey' : replyRate > 0.5 ? 'green' : 'red'}>
                       Replied: {!isNaN(replyRate) ? replyRate.toFixed(1) + '%' : 'TBD'}
                     </Badge>
                   </Tooltip>
@@ -401,9 +353,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf0 && bf0Conversion
                       ? `${bf0.etl_num_times_converted} / ${bf0.etl_num_times_used} prospects`
-                      : (bf0 && bf0.etl_num_times_used && bf0.etl_num_times_used < 20
-                          ? 'Not enough data, '
-                          : '') +
+                      : (bf0 && bf0.etl_num_times_used && bf0.etl_num_times_used < 20 ? 'Not enough data, ' : '') +
                         (bf0?.etl_num_times_converted || 0) +
                         ' / ' +
                         (bf0?.etl_num_times_used || 0)
@@ -454,9 +404,7 @@ export default function SequenceSection() {
                   editProps={{
                     title: 'Choose Bump Framework for Follow-Up 1',
                     bumpedCount: 0,
-                    bumpedFrameworks: bumpFrameworks.filter(
-                      (bf) => bf.overall_status === 'ACCEPTED'
-                    ),
+                    bumpedFrameworks: bumpFrameworks.filter((bf) => bf.overall_status === 'ACCEPTED'),
                     activeBumpFrameworkId: bf0?.id ?? -1,
                     overallStatus: 'ACCEPTED',
                   }}
@@ -472,9 +420,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf1 && bf1Conversion
                       ? `${bf1.etl_num_times_converted} / ${bf1.etl_num_times_used} prospects`
-                      : (bf1 && bf1.etl_num_times_used && bf1.etl_num_times_used < 20
-                          ? 'Not enough data, '
-                          : '') +
+                      : (bf1 && bf1.etl_num_times_used && bf1.etl_num_times_used < 20 ? 'Not enough data, ' : '') +
                         (bf1?.etl_num_times_converted || 0) +
                         ' / ' +
                         (bf1?.etl_num_times_used || 0)
@@ -526,9 +472,7 @@ export default function SequenceSection() {
                   editProps={{
                     title: 'Choose Bump Framework for Follow-Up 2',
                     bumpedCount: 1,
-                    bumpedFrameworks: bumpFrameworks.filter(
-                      (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1
-                    ),
+                    bumpedFrameworks: bumpFrameworks.filter((bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1),
                     activeBumpFrameworkId: bf1?.id ?? -1,
                     overallStatus: 'BUMPED',
                   }}
@@ -547,9 +491,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf2 && bf2Conversion
                       ? `${bf2.etl_num_times_converted} / ${bf2.etl_num_times_used} prospects`
-                      : (bf2 && bf2.etl_num_times_used && bf2.etl_num_times_used < 20
-                          ? 'Not enough data, '
-                          : '') +
+                      : (bf2 && bf2.etl_num_times_used && bf2.etl_num_times_used < 20 ? 'Not enough data, ' : '') +
                         (bf2?.etl_num_times_converted || 0) +
                         ' / ' +
                         (bf2?.etl_num_times_used || 0)
@@ -600,9 +542,7 @@ export default function SequenceSection() {
                   editProps={{
                     title: 'Choose Bump Framework for Follow-Up 3',
                     bumpedCount: 2,
-                    bumpedFrameworks: bumpFrameworks.filter(
-                      (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2
-                    ),
+                    bumpedFrameworks: bumpFrameworks.filter((bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2),
                     activeBumpFrameworkId: bf2?.id ?? -1,
                     overallStatus: 'BUMPED',
                   }}
@@ -621,9 +561,7 @@ export default function SequenceSection() {
                   badgeHoverText={
                     bf3 && bf3Conversion
                       ? `${bf3.etl_num_times_converted} / ${bf3.etl_num_times_used} prospects`
-                      : (bf3 && bf3.etl_num_times_used && bf3.etl_num_times_used < 20
-                          ? 'Not enough data, '
-                          : '') +
+                      : (bf3 && bf3.etl_num_times_used && bf3.etl_num_times_used < 20 ? 'Not enough data, ' : '') +
                         (bf3?.etl_num_times_converted || 0) +
                         ' / ' +
                         (bf3?.etl_num_times_used || 0)
@@ -636,9 +574,7 @@ export default function SequenceSection() {
                   editProps={{
                     title: 'Choose Bump Framework for Follow-Up 4',
                     bumpedCount: 3,
-                    bumpedFrameworks: bumpFrameworks.filter(
-                      (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3
-                    ),
+                    bumpedFrameworks: bumpFrameworks.filter((bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3),
                     activeBumpFrameworkId: bf3?.id ?? -1,
                     overallStatus: 'BUMPED',
                   }}
@@ -653,12 +589,7 @@ export default function SequenceSection() {
                     <Text ta='center' fw={200} c='dimmed' fz='xl'>
                       |
                     </Text>
-                    <Button
-                      variant='subtle'
-                      radius='md'
-                      compact
-                      onClick={() => updateBumpAmount(bump_amount + 1)}
-                    >
+                    <Button variant='subtle' radius='md' compact onClick={() => updateBumpAmount(bump_amount + 1)}>
                       Add Step
                     </Button>
                   </Stack>
@@ -667,6 +598,7 @@ export default function SequenceSection() {
             </Stack>
           </Box>
           <Box sx={{ flexBasis: '65%' }}>
+<<<<<<< HEAD
             {activeCard === 0 && (
               <IntroMessageSection prospectId={prospectId} setProspectId={setProspectId} />
             )}
@@ -743,13 +675,24 @@ export default function SequenceSection() {
                   overallStatus: 'BUMPED',
                 }}
               />
+=======
+            {activeCard === 0 && <IntroMessageSection prospectId={prospectId} setProspectId={setProspectId} />}
+            {activeCard === 1 && bf0 && (
+              <FrameworkSection framework={bf0} bumpCount={0} setIsDataChanged={setIsDataChanged} prospectId={prospectId} setProspectId={setProspectId} />
+            )}
+            {activeCard === 2 && bf1 && (
+              <FrameworkSection framework={bf1} bumpCount={1} setIsDataChanged={setIsDataChanged} prospectId={prospectId} setProspectId={setProspectId} />
+            )}
+            {activeCard === 3 && bf2 && (
+              <FrameworkSection framework={bf2} bumpCount={2} setIsDataChanged={setIsDataChanged} prospectId={prospectId} setProspectId={setProspectId} />
+            )}
+            {activeCard === 4 && bf3 && (
+              <FrameworkSection framework={bf3} bumpCount={3} setIsDataChanged={setIsDataChanged} prospectId={prospectId} setProspectId={setProspectId} />
+>>>>>>> e1643baa (New framework reply)
             )}
           </Box>
         </Group>
-        <PersonaUploadDrawer
-          personaOverviews={currentProject ? [currentProject] : []}
-          afterUpload={() => {}}
-        />
+        <PersonaUploadDrawer personaOverviews={currentProject ? [currentProject] : []} afterUpload={() => {}} />
       </Card>
     </>
   );
@@ -780,12 +723,9 @@ function BumpFrameworkSelect(props: {
   const { data: frameworkTemplates } = useQuery({
     queryKey: [`query-get-bump-framework-templates`],
     queryFn: async () => {
-      const res = await fetch(
-        `${API_URL}/bump_framework/bump_framework_templates?bumped_count=${props.bumpedCount}&overall_status=${props.overallStatus}`,
-        {
-          method: 'GET',
-        }
-      );
+      const res = await fetch(`${API_URL}/bump_framework/bump_framework_templates?bumped_count=${props.bumpedCount}&overall_status=${props.overallStatus}`, {
+        method: 'GET',
+      });
       const result = await res.json();
 
       const data = result.bump_framework_templates as {
@@ -870,9 +810,7 @@ function BumpFrameworkSelect(props: {
                         openModal: () => {},
                         closeModal: () => {},
                         backFunction: () => {},
-                        status: props.bumpedFrameworks.find(
-                          (bf) => bf.id === props.activeBumpFrameworkId
-                        )?.overall_status,
+                        status: props.bumpedFrameworks.find((bf) => bf.id === props.activeBumpFrameworkId)?.overall_status,
                         archetypeID: currentProject?.id,
                         bumpedCount: props.bumpedCount,
                         showStatus: true,
@@ -895,11 +833,7 @@ function BumpFrameworkSelect(props: {
             <Box w='100px' sx={{ justifyContent: 'center', textAlign: 'center' }}>
               <Badge size='sm' variant='filled' ml='6px'>
                 {bf.etl_num_times_converted !== undefined && bf.etl_num_times_used !== undefined
-                  ? Math.round(
-                      (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 1000
-                    ) /
-                      10 +
-                    '%'
+                  ? Math.round((bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 1000) / 10 + '%'
                   : ''}
               </Badge>
               <Text mt='xs' fz='xs'>
@@ -1024,9 +958,7 @@ function BumpFrameworkSelect(props: {
             ?.filter((f) => {
               return (
                 (props.overallStatus === 'ACCEPTED' && f.overall_statuses?.includes('ACCEPTED')) ||
-                (props.overallStatus === 'BUMPED' &&
-                  f.overall_statuses?.includes('BUMPED') &&
-                  f.bumped_counts.includes(props.bumpedCount)) ||
+                (props.overallStatus === 'BUMPED' && f.overall_statuses?.includes('BUMPED') && f.bumped_counts.includes(props.bumpedCount)) ||
                 !f.overall_statuses
               );
             })
@@ -1040,12 +972,7 @@ function BumpFrameworkSelect(props: {
                       {template.name}
                     </Text>
                     {template.tone && (
-                      <Badge
-                        size='xs'
-                        mt='7px'
-                        variant='filled'
-                        color={deterministicMantineColor(template.tone || '')}
-                      >
+                      <Badge size='xs' mt='7px' variant='filled' color={deterministicMantineColor(template.tone || '')}>
                         {template.tone}
                       </Badge>
                     )}
@@ -1132,10 +1059,7 @@ function BumpFrameworkSelect(props: {
   );
 }
 
-function IntroMessageSection(props: {
-  prospectId: number;
-  setProspectId: (prospectId: number) => void;
-}) {
+function IntroMessageSection(props: { prospectId: number; setProspectId: (prospectId: number) => void }) {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
@@ -1156,8 +1080,7 @@ function IntroMessageSection(props: {
   const [hoveredCTA, setHoveredCTA] = useState(false);
 
   const [activeTab, setActiveTab] = useState<string | null>('none');
-  const { hovered: hoveredPersonSettingsBtn, ref: refPersonSettingsBtn } =
-    useHover<HTMLButtonElement>();
+  const { hovered: hoveredPersonSettingsBtn, ref: refPersonSettingsBtn } = useHover<HTMLButtonElement>();
   const { hovered: hoveredYourCTAsBtn, ref: refYourCTAsBtn } = useHover<HTMLButtonElement>();
 
   const [personalizationItemsCount, setPersonalizationItemsCount] = useState<number>();
@@ -1175,11 +1098,35 @@ function IntroMessageSection(props: {
 
   const [ctaModalOpened, setCtaModalOpened] = useState(false);
 
+<<<<<<< HEAD
   const getIntroMessage = async (
     prospectId: number,
     forceRegenerate: boolean = false,
     selectedTemplateId?: number
   ) => {
+=======
+  const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] = useState<boolean>(false);
+  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] = useState<string>();
+
+  const [templateActivesShow, setTemplateActivesShow] = useState([true]);
+
+  const { data: templates, isFetching: isFetchingTemplates } = useQuery({
+    queryKey: [`query-get-li-templates`],
+    queryFn: async () => {
+      const response = await getLiTemplates(userToken, currentProject!.id);
+
+      if (response.data?.length > 0) {
+        setSelectedTemplateId(response.data[0].id);
+        setHumanFeedbackForTemplate(response.data[0].additional_instructions);
+      }
+      return response.status === 'success' ? (response.data as Record<string, any>[]) : [];
+    },
+    refetchOnWindowFocus: false,
+    enabled: !!currentProject && !!currentProject.template_mode,
+  });
+
+  const getIntroMessage = async (prospectId: number, forceRegenerate: boolean = false, selectedTemplateId?: number) => {
+>>>>>>> e1643baa (New framework reply)
     if (!currentProject) return null;
     setLoading(true);
     setMessage('');
@@ -1195,11 +1142,7 @@ function IntroMessageSection(props: {
         }, 2000);
         return null;
       }
-      const initMsgResponse = await generateInitialMessageForLiConvoSim(
-        userToken,
-        createResponse.data,
-        selectedTemplateId
-      );
+      const initMsgResponse = await generateInitialMessageForLiConvoSim(userToken, createResponse.data, selectedTemplateId);
       if (initMsgResponse.status !== 'success') {
         setLoading(false);
         setTimeout(() => {
@@ -1210,10 +1153,7 @@ function IntroMessageSection(props: {
       convoResponse = await getLiConvoSim(userToken, createResponse.data);
     } else if (convoResponse.data.messages.length === 0) {
       // If convo exists but no messages, generate initial message
-      const initMsgResponse = await generateInitialMessageForLiConvoSim(
-        userToken,
-        convoResponse.data.simulation.id
-      );
+      const initMsgResponse = await generateInitialMessageForLiConvoSim(userToken, convoResponse.data.simulation.id);
       if (initMsgResponse.status !== 'success') {
         setLoading(false);
         setTimeout(() => {
@@ -1246,8 +1186,6 @@ function IntroMessageSection(props: {
     });
   }, [prospectId, selectedTemplateId]);
 
-  console.log(messageMetaData);
-
   if (!currentProject) return <></>;
   return (
     <Stack ml='xl' spacing={0}>
@@ -1258,14 +1196,7 @@ function IntroMessageSection(props: {
             <Badge color="blue" fw={500}>{ctasItemsCount} CTAs Active</Badge>
           )} */}
         </Group>
-        {!currentProject.template_mode && (
-          <VoiceSelect
-            personaId={currentProject.id}
-            onChange={(voice) => {}}
-            onFinishLoading={(voices) => {}}
-            autoSelect
-          />
-        )}
+        {!currentProject.template_mode && <VoiceSelect personaId={currentProject.id} onChange={(voice) => {}} onFinishLoading={(voices) => {}} autoSelect />}
       </Group>
       <Box my={5}>
         <Text fz='xs' c='dimmed'>
@@ -1359,9 +1290,7 @@ function IntroMessageSection(props: {
               {message && (
                 <LiExampleInvitation
                   message={message}
-                  startHovered={
-                    activeTab === 'personalization' || hoveredPersonSettingsBtn ? true : undefined
-                  }
+                  startHovered={activeTab === 'personalization' || hoveredPersonSettingsBtn ? true : undefined}
                   endHovered={activeTab === 'ctas' || hoveredYourCTAsBtn ? true : undefined}
                   onClickStart={openPersonalizationSettings}
                   onClickEnd={openCTASettings}
@@ -1408,6 +1337,81 @@ function IntroMessageSection(props: {
           </Box>
         )}
 
+<<<<<<< HEAD
+=======
+        {currentProject.template_mode && showFeedback && (
+          <>
+            <Card mb='16px'>
+              <Card.Section
+                sx={{
+                  backgroundColor: theme.colors.grape[6],
+                  flexDirection: 'row',
+                  display: 'flex',
+                }}
+                p='xs'
+              >
+                <Text color='white' mt='4px' size='sm'>
+                  <IconBulb size='1.2rem' color='white' />
+                  <span style={{ marginLeft: '8px' }}>FINE TUNING: Feel free to give me feedback on improving the message</span>
+                </Text>
+              </Card.Section>
+              <Card.Section sx={{ border: 'solid 2px ' + theme.colors.grape[6] + ' !important' }} p='8px'>
+                <Textarea
+                  variant='unstyled'
+                  pl={'8px'}
+                  pr={'8px'}
+                  size='xs'
+                  minRows={3}
+                  placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                  value={humanFeedbackForTemplate}
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    setHumanFeedbackForTemplate(value);
+                    setHumanFeedbackForTemplateChanged(true);
+                  }}
+                />
+              </Card.Section>
+            </Card>
+            {humanFeedbackForTemplateChanged && (
+              <Box
+                sx={{ justifyContent: 'right', textAlign: 'right' }}
+                onClick={() => {
+                  updateLiTemplate(
+                    userToken,
+                    currentProject.id,
+                    selectedTemplateId || -1,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    humanFeedbackForTemplate
+                  )
+                    .then((res) => {
+                      queryClient.invalidateQueries({
+                        queryKey: [`query-get-li-templates`],
+                      });
+                    })
+                    .then((res) => {
+                      setHumanFeedbackForTemplateChanged(false);
+                      setHumanFeedbackForTemplate('');
+                      showNotification({
+                        title: 'Success',
+                        message: 'Feedback saved. Try regenerating.',
+                        color: 'green',
+                      });
+                    });
+                }}
+              >
+                <Button color='green'>Save Feedback</Button>
+              </Box>
+            )}
+          </>
+        )}
+
+>>>>>>> e1643baa (New framework reply)
         {currentProject.template_mode ? (
           <>
             <CTAGeneratorSuggestedModal
@@ -1423,39 +1427,297 @@ function IntroMessageSection(props: {
                 proposition: currentProject?.cta_framework_action || '',
               }}
               onTemplateSelected={(template: LinkedinInitialMessageTemplate) => {
-                createLiTemplate(
-                  userToken,
-                  currentProject.id,
-                  template.name,
-                  template.raw_prompt,
-                  false,
-                  [],
-                  ''
-                ).then((res) => {
+                createLiTemplate(userToken, currentProject.id, template.name, template.raw_prompt, false, [], '').then((res) => {
                   queryClient.refetchQueries({
                     queryKey: [`query-get-li-templates`],
                   });
                 });
               }}
             />
+<<<<<<< HEAD
             <TemplateSection
               showFeedback={showFeedback}
               onFoundTemplate={(id) => {
                 setSelectedTemplateId(id);
               }}
             />
+=======
+            {isFetchingTemplates ? (
+              <Box>
+                <Loader
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                />
+              </Box>
+            ) : (
+              <Stack>
+                <Stack mt='xs'>
+                  {templates
+                    ?.filter((t: any) => templateActivesShow.includes(t.active))
+                    .sort((a: any, b: any) => (a.active != b.active ? -(a.active - b.active) : a.title - b.title))
+                    .map((template, index) => (
+                      <Paper
+                        key={index}
+                        p='md'
+                        mih={80}
+                        sx={{
+                          position: 'relative',
+                          cursor: 'pointer',
+                          border: selectedTemplateId === template.id ? 'solid 1px #339af0 !important' : '',
+                          backgroundColor: selectedTemplateId === template.id ? '#339af008 !important' : '',
+                          flexDirection: 'row',
+                          display: 'flex',
+                        }}
+                        withBorder
+                        onClick={() => {
+                          setSelectedTemplateId(template.id);
+                          setHumanFeedbackForTemplate(template.additional_instructions);
+                        }}
+                      >
+                        <Box
+                          miw='100px'
+                          mah={80}
+                          sx={{
+                            border: 'solid 1px #339af022',
+                            backgroundColor: '#339af022',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            textAlign: 'center',
+                          }}
+                          mt='xl'
+                          mr='md'
+                        >
+                          <Text fw='bold' fz='md' color='blue' mt='xs'>
+                            {Math.round((template.times_accepted / (template.times_used + 0.0001)) * 100)}% reply
+                          </Text>
+                          <Text color='blue' size='xs'>
+                            {template.times_accepted} / {template.times_used} times
+                          </Text>
+                        </Box>
+
+                        <Box mr={40} w='100%'>
+                          <Flex>
+                            <Text size='sm' fw='600' mb='xs' sx={{ textTransform: 'uppercase' }} color='gray' variant='outline'>
+                              {template.title}
+                            </Text>
+                            {/* Hovercard for transformers */}
+                            {template.research_points && template.research_points.length > 0 && (
+                              <HoverCard width={280} shadow='md'>
+                                <HoverCard.Target>
+                                  <Badge leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />} color='lime' variant='filled' ml='xs' size='xs'>
+                                    {template.research_points.length} Research Points
+                                  </Badge>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
+                                  <Paper
+                                    style={{
+                                      backgroundColor: 'rgb(34, 37, 41)',
+                                      color: 'white',
+                                      padding: 10,
+                                    }}
+                                  >
+                                    <TextWithNewline style={{ fontSize: '12px' }}>
+                                      {'<b>Active Research Points:</b>\n- ' +
+                                        template.research_points.map((rp: any) => rp.replaceAll('_', ' ').toLowerCase()).join('\n- ')}
+                                    </TextWithNewline>
+                                  </Paper>
+                                </HoverCard.Dropdown>
+                              </HoverCard>
+                            )}
+                            {template.additional_instructions && (
+                              <HoverCard width={280} shadow='md'>
+                                <HoverCard.Target>
+                                  <Badge leftSection={<IconBulb size='0.8rem' />} color='grape' variant='filled' ml='xs' size='xs'>
+                                    Fine Tuned
+                                  </Badge>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
+                                  <Paper
+                                    style={{
+                                      backgroundColor: 'rgb(34, 37, 41)',
+                                      color: 'white',
+                                      padding: 10,
+                                    }}
+                                  >
+                                    <TextWithNewline style={{ fontSize: '12px' }}>
+                                      {'<b>Additional Instructions:</b>\n' + template.additional_instructions}
+                                    </TextWithNewline>
+                                  </Paper>
+                                </HoverCard.Dropdown>
+                              </HoverCard>
+                            )}
+                          </Flex>
+                          <Card
+                            withBorder
+                            w='100%'
+                            sx={{
+                              backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb',
+                            }}
+                          >
+                            <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                              <div
+                                dangerouslySetInnerHTML={{
+                                  __html: DOMPurify.sanitize(
+                                    template.message
+                                      .replaceAll(
+                                        '[[',
+                                        "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
+                                          theme.colors['blue'][5] +
+                                          "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                      )
+                                      .replaceAll(']]', '</span>') as string
+                                  ),
+                                }}
+                              />
+                            </Text>
+                          </Card>
+                        </Box>
+
+                        <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                          <Switch
+                            sx={{ cursor: 'pointer' }}
+                            checked={template.active}
+                            onChange={(e) => {
+                              updateLiTemplate(userToken, currentProject.id, template.id, template.title, template.message, e.target.checked).then((res) => {
+                                queryClient.invalidateQueries({
+                                  queryKey: [`query-get-li-templates`],
+                                });
+                              });
+                            }}
+                          />
+                          <Button
+                            mt='xs'
+                            variant='subtle'
+                            radius='xl'
+                            size='sm'
+                            compact
+                            onClick={() => {
+                              openContextModal({
+                                modal: 'liTemplate',
+                                title: 'Edit Template',
+                                innerProps: {
+                                  mode: 'EDIT',
+                                  editProps: {
+                                    templateId: template.id,
+                                    title: template.title,
+                                    message: template.message,
+                                    active: template.active,
+                                    humanFeedback: template.additional_instructions,
+                                    researchPoints: template.research_points,
+                                  },
+                                },
+                              });
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        </Box>
+                      </Paper>
+                    ))}
+                </Stack>
+                <Button
+                  onClick={() => {
+                    if (templateActivesShow.length === 1) {
+                      setTemplateActivesShow([true, false]);
+                    } else {
+                      setTemplateActivesShow([true]);
+                    }
+                  }}
+                  color='gray'
+                  variant='subtle'
+                  leftIcon={
+                    <IconChevronDown
+                      size='1rem'
+                      style={{
+                        transform: templateActivesShow.length === 1 ? '' : 'rotate(180deg)',
+                      }}
+                    />
+                  }
+                >
+                  Show {templateActivesShow.includes(true) ? 'All Templates' : 'Active Templates Only'}
+                </Button>
+              </Stack>
+            )}
+
+            <Flex sx={{ justifyContent: 'right' }}>
+              {/* <Button
+                onClick={() => setCtaModalOpened(true)}
+                size='sm'
+                variant='outline'
+                color='lime'
+                mr='sm'
+                compact
+              >
+                Brainstorm Templates
+              </Button> */}
+              <InitialMessageTemplateSelector
+                onSelect={(template: LinkedinInitialMessageTemplate) => {
+                  showNotification({
+                    title: '🤖 Generating...',
+                    message: 'Generating custom "' + template.name + '" template...',
+                    color: 'blue',
+                  });
+
+                  fetch(`${API_URL}/linkedin_template/adjust_template_for_client`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${userToken}`,
+                    },
+                    body: JSON.stringify({
+                      template_id: template.id,
+                    }),
+                  })
+                    .then((res) => {
+                      return res.json();
+                    })
+                    .then((res) => {
+                      const adjustedTemplate = res['adjusted_template'];
+                      openContextModal({
+                        modal: 'liTemplate',
+                        title: 'Create Template',
+                        innerProps: {
+                          mode: 'CREATE',
+                          editProps: {
+                            title: template.name,
+                            message: adjustedTemplate,
+                            active: true,
+                            humanFeedback: '',
+                            researchPoints: [],
+                          },
+                        },
+                      });
+                    });
+                }}
+              />
+              <Stack spacing={5}>
+                <Button
+                  variant='outline'
+                  radius='md'
+                  compact
+                  color='orange'
+                  onClick={() => {
+                    openContextModal({
+                      modal: 'liTemplate',
+                      title: 'Create Template',
+                      innerProps: {
+                        mode: 'CREATE',
+                      },
+                    });
+                  }}
+                >
+                  Create New
+                </Button>
+              </Stack>
+            </Flex>
+>>>>>>> e1643baa (New framework reply)
           </>
         ) : (
-          <Tabs
-            value={activeTab}
-            onTabChange={setActiveTab}
-            pt='sm'
-            variant='pills'
-            keepMounted={true}
-            radius='md'
-            defaultValue='none'
-            allowTabDeactivation
-          >
+          <Tabs value={activeTab} onTabChange={setActiveTab} pt='sm' variant='pills' keepMounted={true} radius='md' defaultValue='none' allowTabDeactivation>
             <Tabs.List>
               <Tabs.Tab
                 ref={refPersonSettingsBtn}
@@ -1464,15 +1726,7 @@ function IntroMessageSection(props: {
                 rightSection={
                   <>
                     {personalizationItemsCount ? (
-                      <Badge
-                        w={16}
-                        h={16}
-                        sx={{ pointerEvents: 'none' }}
-                        variant='filled'
-                        size='xs'
-                        p={0}
-                        color='teal.6'
-                      >
+                      <Badge w={16} h={16} sx={{ pointerEvents: 'none' }} variant='filled' size='xs' p={0} color='teal.6'>
                         {personalizationItemsCount}
                       </Badge>
                     ) : (
@@ -1498,15 +1752,7 @@ function IntroMessageSection(props: {
                 rightSection={
                   <>
                     {ctasItemsCount ? (
-                      <Badge
-                        w={16}
-                        h={16}
-                        sx={{ pointerEvents: 'none' }}
-                        variant='filled'
-                        size='xs'
-                        p={0}
-                        color='blue.5'
-                      >
+                      <Badge w={16} h={16} sx={{ pointerEvents: 'none' }} variant='filled' size='xs' p={0} color='blue.5'>
                         {ctasItemsCount}
                       </Badge>
                     ) : (
@@ -1628,9 +1874,7 @@ function LiExampleInvitation(props: {
         liSDR.miniProfile?.picture['com.linkedin.common.VectorImage'].artifacts.length - 1
       ].fileIdentifyingUrlPathSegment
     : userData.img_url;
-  const name = liSDR
-    ? liSDR.miniProfile?.firstName + ' ' + liSDR.miniProfile?.lastName
-    : userData.sdr_name;
+  const name = liSDR ? liSDR.miniProfile?.firstName + ' ' + liSDR.miniProfile?.lastName : userData.sdr_name;
   const title = liSDR ? liSDR.miniProfile?.occupation : userData.sdr_title;
 
   // Split message into start and CTA (and handle cut off)
@@ -1688,13 +1932,7 @@ function LiExampleInvitation(props: {
   return (
     <Group spacing={10} sx={{ alignItems: 'flex-start' }} noWrap>
       <Box w={55}>
-        <Avatar
-          src={proxyURL(imgURL)}
-          alt={`${name}'s Profile Picture`}
-          color={valueToColor(theme, name)}
-          radius='xl'
-          size='lg'
-        >
+        <Avatar src={proxyURL(imgURL)} alt={`${name}'s Profile Picture`} color={valueToColor(theme, name)} radius='xl' size='lg'>
           {nameToInitials(name)}
         </Avatar>
       </Box>
@@ -1747,10 +1985,8 @@ function LiExampleInvitation(props: {
                   ref={startRef}
                   span
                   sx={{
-                    color:
-                      startHovered || animationPlaying.current ? theme.colors.teal[8] : undefined,
-                    backgroundColor:
-                      startHovered || animationPlaying.current ? theme.colors.teal[0] : undefined, //theme.colors.teal[0]+"99",
+                    color: startHovered || animationPlaying.current ? theme.colors.teal[8] : undefined,
+                    backgroundColor: startHovered || animationPlaying.current ? theme.colors.teal[0] : undefined, //theme.colors.teal[0]+"99",
                     cursor: 'pointer',
                   }}
                   onClick={props.onClickStart}
@@ -1762,10 +1998,8 @@ function LiExampleInvitation(props: {
                   ml={5}
                   span
                   sx={{
-                    color:
-                      endHovered || animationPlaying.current ? theme.colors.blue[8] : undefined,
-                    backgroundColor:
-                      endHovered || animationPlaying.current ? theme.colors.blue[0] : undefined, //theme.colors.blue[0]+"99",
+                    color: endHovered || animationPlaying.current ? theme.colors.blue[8] : undefined,
+                    backgroundColor: endHovered || animationPlaying.current ? theme.colors.blue[0] : undefined, //theme.colors.blue[0]+"99",
                     cursor: 'pointer',
                   }}
                   onClick={props.onClickEnd}
@@ -1846,12 +2080,7 @@ function LiExampleInvitation(props: {
   );
 }
 
-function LiExampleMessage(props: {
-  message: string;
-  hovered?: boolean;
-  onClick?: () => void;
-  onAnimatonComplete?: () => void;
-}) {
+function LiExampleMessage(props: { message: string; hovered?: boolean; onClick?: () => void; onAnimatonComplete?: () => void }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
@@ -1897,9 +2126,7 @@ function LiExampleMessage(props: {
         liSDR.miniProfile?.picture['com.linkedin.common.VectorImage'].artifacts.length - 1
       ].fileIdentifyingUrlPathSegment
     : userData.img_url;
-  const name = liSDR
-    ? liSDR.miniProfile?.firstName + ' ' + liSDR.miniProfile?.lastName
-    : userData.sdr_name;
+  const name = liSDR ? liSDR.miniProfile?.firstName + ' ' + liSDR.miniProfile?.lastName : userData.sdr_name;
   const title = liSDR ? liSDR.miniProfile?.occupation : userData.sdr_title;
 
   // Format message
@@ -1916,13 +2143,7 @@ function LiExampleMessage(props: {
   return (
     <Group spacing={10} sx={{ alignItems: 'flex-start' }} noWrap>
       <Box w={55}>
-        <Avatar
-          src={proxyURL(imgURL)}
-          alt={`${name}'s Profile Picture`}
-          color={valueToColor(theme, name)}
-          radius='xl'
-          size='lg'
-        >
+        <Avatar src={proxyURL(imgURL)} alt={`${name}'s Profile Picture`} color={valueToColor(theme, name)} radius='xl' size='lg'>
           {nameToInitials(name)}
         </Avatar>
       </Box>
@@ -1940,8 +2161,7 @@ function LiExampleMessage(props: {
                 span
                 sx={{
                   color: hovered || animationPlaying.current ? theme.colors.teal[8] : undefined,
-                  backgroundColor:
-                    hovered || animationPlaying.current ? theme.colors.teal[0] : undefined, //theme.colors.teal[0]+"99",
+                  backgroundColor: hovered || animationPlaying.current ? theme.colors.teal[0] : undefined, //theme.colors.teal[0]+"99",
                   cursor: 'pointer',
                 }}
               >
@@ -2014,15 +2234,9 @@ function FrameworkCard(props: {
       sx={(theme) => ({
         cursor: 'pointer',
         backgroundColor: props.active
-          ? theme.fn.lighten(
-              theme.fn.variant({ variant: 'filled', color: 'blue' }).background!,
-              0.95
-            )
+          ? theme.fn.lighten(theme.fn.variant({ variant: 'filled', color: 'blue' }).background!, 0.95)
           : hovered
-          ? theme.fn.lighten(
-              theme.fn.variant({ variant: 'filled', color: 'blue' }).background!,
-              0.99
-            )
+          ? theme.fn.lighten(theme.fn.variant({ variant: 'filled', color: 'blue' }).background!, 0.99)
           : undefined,
         borderColor: props.active || hovered ? theme.colors.blue[5] + '!important' : undefined,
       })}
@@ -2061,22 +2275,13 @@ function FrameworkCard(props: {
               withArrow
               withinPortal
             >
-              <Badge
-                variant='dot'
-                color={isNaN(props.conversion) ? 'grey' : props.conversion > 9.0 ? 'green' : 'red'}
-              >
+              <Badge variant='dot' color={isNaN(props.conversion) ? 'grey' : props.conversion > 9.0 ? 'green' : 'red'}>
                 Opened: {!isNaN(props.conversion) ? Math.trunc(props.conversion) + '%' : 'TBD'}
               </Badge>
             </Tooltip>
           )}
           {props.badgeText && (
-            <Tooltip
-              label={props.badgeHoverText}
-              openDelay={100}
-              withArrow
-              withinPortal
-              disabled={!props.badgeHoverText}
-            >
+            <Tooltip label={props.badgeHoverText} openDelay={100} withArrow withinPortal disabled={!props.badgeHoverText}>
               <Badge
                 ml='auto'
                 color={props.badgeColor || 'gray'}
@@ -2112,16 +2317,7 @@ function FrameworkCard(props: {
             {props.bodyTitle}
           </Title>
           {props.bodyText && (
-            <Tooltip
-              label={props.bodyText}
-              maw={500}
-              openDelay={500}
-              position='bottom'
-              withArrow
-              withinPortal
-              multiline
-              disabled={props.bodyText.length < 150}
-            >
+            <Tooltip label={props.bodyText} maw={500} openDelay={500} position='bottom' withArrow withinPortal multiline disabled={props.bodyText.length < 150}>
               <Text fz={12} c='dimmed' truncate>
                 {_.truncate(props.bodyText, {
                   length: 50,
@@ -2223,14 +2419,17 @@ function FrameworkSection(props: {
   const [noProspectsFound, setNoProspectsFound] = useState(false);
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
 
+<<<<<<< HEAD
+=======
+  const [humanReadableContext, setHumanReadableContext] = useState<string | undefined>(props.framework.bump_framework_human_readable_prompt);
+  const [contextQuestion, setContextQuestion] = useState(props.framework.bump_framework_human_readable_prompt);
+>>>>>>> e1643baa (New framework reply)
   const [opened, { toggle }] = useDisclosure(false);
 
   const [activeTab, setActiveTab] = useState<string | null>('none');
   const [descriptionEditState, setDescriptionEditState] = useState(false);
   const [personalizationItemsCount, setPersonalizationItemsCount] = useState<number>();
-  const [personalizationItemIds, setPersonalizationItemIds] = useState(
-    props.framework.transformer_blocklist
-  );
+  const [personalizationItemIds, setPersonalizationItemIds] = useState(props.framework.transformer_blocklist);
   const [showUserFeedback, setShowUserFeedback] = useState(props.framework.human_feedback !== null);
   const [feedbackChanged, setFeedbackChanged] = useState(false);
 
@@ -2272,8 +2471,7 @@ function FrameworkSection(props: {
 
   const [debouncedForm] = useDebouncedValue(form.values, 200);
   const prevDebouncedForm = usePrevious(debouncedForm);
-  const [moreAdditionInformationOpened, { toggle: moreAdditionInformationToggle }] =
-    useDisclosure(false);
+  const [moreAdditionInformationOpened, { toggle: moreAdditionInformationToggle }] = useDisclosure(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [editing, setEditing] = useState(false);
 
@@ -2332,13 +2530,7 @@ function FrameworkSection(props: {
 
     setShowUserFeedback(false);
 
-    const result = await generateBumpLiMessage(
-      userToken,
-      prospectId,
-      props.framework.id,
-      props.bumpCount,
-      useCache
-    );
+    const result = await generateBumpLiMessage(userToken, prospectId, props.framework.id, props.bumpCount, useCache);
 
     setLoading(false);
     return result.status === 'success' ? result.data.message : null;
@@ -2408,9 +2600,7 @@ function FrameworkSection(props: {
               <Flex direction='row'>
                 {!titleInEditingMode ? (
                   <Title order={3} onClick={() => setTitleInEditingMode((p) => !p)}>
-                    <span style={{ color: 'black', cursor: 'pointer' }}>
-                      {form.values.frameworkName}
-                    </span>
+                    <span style={{ color: 'black', cursor: 'pointer' }}>{form.values.frameworkName}</span>
                   </Title>
                 ) : (
                   <TextInput
@@ -2424,13 +2614,7 @@ function FrameworkSection(props: {
                     }}
                   />
                 )}
-                <ActionIcon
-                  ml='8px'
-                  mt='8px'
-                  size='1rem'
-                  sx={{ zIndex: 10, opacity: 0.7 }}
-                  onClick={() => setTitleInEditingMode((p) => !p)}
-                >
+                <ActionIcon ml='8px' mt='8px' size='1rem' sx={{ zIndex: 10, opacity: 0.7 }} onClick={() => setTitleInEditingMode((p) => !p)}>
                   <IconEdit />
                 </ActionIcon>
               </Flex>
@@ -2450,22 +2634,11 @@ function FrameworkSection(props: {
                   }}
                 />
               ) : (
-                <Text
-                  fz='xs'
-                  c='dimmed'
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => setDescriptionEditState((p) => !p)}
-                >
-                  <span style={{ fontWeight: 'bold' }}>Goal:</span>{' '}
-                  {form.values.bumpFrameworkHumanReadablePrompt}
+                <Text fz='xs' c='dimmed' sx={{ cursor: 'pointer' }} onClick={() => setDescriptionEditState((p) => !p)}>
+                  <span style={{ fontWeight: 'bold' }}>Goal:</span> {form.values.bumpFrameworkHumanReadablePrompt}
                 </Text>
               )}
-              <ActionIcon
-                size='1rem'
-                ml='8px'
-                sx={{ zIndex: 10, opacity: 0.7 }}
-                onClick={() => setDescriptionEditState((p) => !p)}
-              >
+              <ActionIcon size='1rem' ml='8px' sx={{ zIndex: 10, opacity: 0.7 }} onClick={() => setDescriptionEditState((p) => !p)}>
                 <IconEdit />
               </ActionIcon>
             </Flex>
@@ -2615,15 +2788,9 @@ function FrameworkSection(props: {
           )}
 
           {form.values.promptInstructions.includes('Answer:') && (
-            <Alert
-              icon={<IconBulb size='1rem' />}
-              variant='outline'
-              onClick={toggle}
-              sx={{ cursor: 'pointer' }}
-            >
+            <Alert icon={<IconBulb size='1rem' />} variant='outline' onClick={toggle} sx={{ cursor: 'pointer' }}>
               <Text color='blue' fz='12px'>
-                Note: This framework requires you fill out additional context in the prompt. Please
-                press 'Advanced Settings'
+                Note: This framework requires you fill out additional context in the prompt. Please press 'Advanced Settings'
               </Text>
             </Alert>
           )}
@@ -2646,15 +2813,10 @@ function FrameworkSection(props: {
                   >
                     <Text color='white' mt='4px' size='sm'>
                       <IconBulb size='1.2rem' color='white' />
-                      <span style={{ marginLeft: '8px' }}>
-                        FINE TUNING: Feel free to give me feedback on improving the message.
-                      </span>
+                      <span style={{ marginLeft: '8px' }}>FINE TUNING: Feel free to give me feedback on improving the message.</span>
                     </Text>
                   </Card.Section>
-                  <Card.Section
-                    sx={{ border: 'solid 2px ' + theme.colors.grape[6] + ' !important' }}
-                    p='8px'
-                  >
+                  <Card.Section sx={{ border: 'solid 2px ' + theme.colors.grape[6] + ' !important' }} p='8px'>
                     <Textarea
                       variant='unstyled'
                       pl={'8px'}
@@ -2669,6 +2831,7 @@ function FrameworkSection(props: {
               </>
             )}
 
+<<<<<<< HEAD
             <Stack spacing={10}>
               {(templateShowAll
                 ? props.frameworks
@@ -2919,14 +3082,181 @@ function FrameworkSection(props: {
                 </Paper>
               ))}
             </Stack>
+=======
+            <Paper
+              p='md'
+              mih={80}
+              sx={{
+                position: 'relative',
+                cursor: 'pointer',
+                border: 'solid 1px #339af0 !important',
+                backgroundColor: '#339af008 !important',
+                flexDirection: 'row',
+                display: 'flex',
+              }}
+              withBorder
+              onClick={() => {
+                // setSelectedTemplateId(template.id);
+                // setHumanFeedbackForTemplate(template.additional_instructions);
+              }}
+            >
+              <Box
+                miw='100px'
+                mah={80}
+                sx={{
+                  border: 'solid 1px #339af022',
+                  backgroundColor: '#339af022',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  textAlign: 'center',
+                }}
+                mt='xl'
+                mr='md'
+                onClick={() => {
+                  openContextModal({
+                    modal: 'frameworkReplies',
+                    title: 'Past Example Usages',
+                    innerProps: {
+                      bumpId: props.framework.id,
+                    },
+                  });
+                }}
+              >
+                <Text fw='bold' fz='md' color='blue' mt='xs'>
+                  {props.framework.etl_num_times_used != null &&
+                    props.framework.etl_num_times_converted != null &&
+                    Math.round((props.framework.etl_num_times_converted / (props.framework.etl_num_times_used + 0.0001)) * 100)}
+                  % reply
+                </Text>
+                <Text size='8px' color='blue' fz={'xs'} fw='500'>
+                  ({props.framework.etl_num_times_converted}/{props.framework.etl_num_times_used} times)
+                </Text>
+              </Box>
+
+              <Box mr={40} w='100%'>
+                <Flex>
+                  <Text size='sm' fw='600' mb='xs' sx={{ textTransform: 'uppercase' }} color='gray' variant='outline'>
+                    {props.framework.title}
+                  </Text>
+                  {/* Hovercard for transformers */}
+
+                  <HoverCard width={280} shadow='md'>
+                    <HoverCard.Target>
+                      <Badge
+                        leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
+                        color='lime'
+                        variant={props.framework.active_transformers && props.framework.active_transformers.length > 0 ? 'filled' : 'outline'}
+                        ml='xs'
+                        size='xs'
+                        onClick={() => {
+                          toggle();
+                        }}
+                      >
+                        {props.framework.active_transformers && props.framework.active_transformers.length > 0
+                          ? props.framework.active_transformers.length + ' Research Points'
+                          : '0 Research Points'}
+                      </Badge>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
+                      <Paper
+                        style={{
+                          backgroundColor: 'rgb(34, 37, 41)',
+                          color: 'white',
+                          padding: 10,
+                        }}
+                      >
+                        <TextWithNewline style={{ fontSize: '12px' }}>
+                          {props.framework.active_transformers.length > 0
+                            ? '<b>Active Research Points:</b>\n- ' +
+                              props.framework.active_transformers.map((rp: any) => rp.replaceAll('_', ' ').toLowerCase()).join('\n- ')
+                            : 'Click to activate more research points'}
+                        </TextWithNewline>
+                      </Paper>
+                    </HoverCard.Dropdown>
+                  </HoverCard>
+
+                  {props.framework.human_feedback && (
+                    <HoverCard width={280} shadow='md'>
+                      <HoverCard.Target>
+                        <Badge leftSection={<IconBulb size='0.8rem' />} color='grape' variant='filled' ml='xs' size='xs'>
+                          Fine Tuned
+                        </Badge>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
+                        <Paper
+                          style={{
+                            backgroundColor: 'rgb(34, 37, 41)',
+                            color: 'white',
+                            padding: 10,
+                          }}
+                        >
+                          <TextWithNewline style={{ fontSize: '12px' }}>{'<b>Additional Instructions:</b>\n' + props.framework.human_feedback}</TextWithNewline>
+                        </Paper>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  )}
+                </Flex>
+                <Card withBorder w='100%' sx={{}}>
+                  {editing ? (
+                    <FocusTrap active={true}>
+                      <Textarea
+                        placeholder='Instructions'
+                        minRows={3}
+                        autosize
+                        variant='filled'
+                        {...form.getInputProps('promptInstructions')}
+                        onBlur={() => {
+                          setEditing(false);
+                        }}
+                      />
+                    </FocusTrap>
+                  ) : (
+                    <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                      <div
+                        onClick={() => {
+                          setEditing(true);
+                        }}
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(
+                            form.values.promptInstructions
+                              .replaceAll(
+                                '[[',
+                                "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
+                                  theme.colors['blue'][5] +
+                                  "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                              )
+                              .replaceAll(']]', '</span>')
+                              .replaceAll('\n', `<br style="display: block; content: ' '; margin: 10px 0 "/>`) as string
+                          ),
+                        }}
+                      />
+                    </Text>
+                  )}
+                </Card>
+              </Box>
+
+              {/* <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                <Button
+                  mt='xs'
+                  variant='subtle'
+                  radius='xl'
+                  size='sm'
+                  compact
+                  onClick={() => {
+                    setEditing((prev) => !prev);
+                  }}
+                >
+                  {editing ? 'Save' : 'Edit'}
+                </Button>
+              </Box> */}
+            </Paper>
+>>>>>>> e1643baa (New framework reply)
           </form>
 
           <Modal opened={opened} onClose={toggle} size='lg'>
             <Box w='100%' mb='md'>
               <Title order={4}>"{form.values.frameworkName}" Research Points</Title>
-              <Text color='gray'>
-                {props.framework.active_transformers.length} research points enabled.
-              </Text>
+              <Text color='gray'>{props.framework.active_transformers.length} research points enabled.</Text>
               <Divider />
               <PersonalizationSection
                 blocklist={props.framework.transformer_blocklist}
@@ -3447,103 +3777,180 @@ export const PersonalizationSection = (props: {
 
   const [acceptanceRates, setAcceptanceRates] = useState<any>();
 
-  const [prospectItems, setProspectItems] = useState([
+  interface PectItem {
+    title: string;
+    id: string;
+    checked?: boolean;
+    disabled?: boolean;
+  }
+
+  const pectItemList: PectItem[] = [
     {
       title: 'Personal Bio',
       id: 'LINKEDIN_BIO_SUMMARY',
-      checked: !props.blocklist.includes('LINKEDIN_BIO_SUMMARY'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('LINKEDIN_BIO_SUMMARY'),
     },
     {
       title: 'List Of Past Jobs',
       id: 'LIST_OF_PAST_JOBS',
-      checked: !props.blocklist.includes('LIST_OF_PAST_JOBS'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('LIST_OF_PAST_JOBS'),
     },
     {
       title: 'Years of Experience',
       id: 'YEARS_OF_EXPERIENCE',
-      checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('YEARS_OF_EXPERIENCE'),
     },
     {
       title: 'Current Experience',
       id: 'CURRENT_EXPERIENCE_DESCRIPTION',
-      checked: !props.blocklist.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
     },
     {
       title: 'Education History',
       id: 'COMMON_EDUCATION',
-      checked: !props.blocklist.includes('COMMON_EDUCATION'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('COMMON_EDUCATION'),
     },
     {
       title: 'Recommendations',
       id: 'RECENT_RECOMMENDATIONS',
-      checked: !props.blocklist.includes('RECENT_RECOMMENDATIONS'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_RECOMMENDATIONS'),
     },
     {
       title: 'Patents',
       id: 'RECENT_PATENTS',
-      checked: !props.blocklist.includes('RECENT_PATENTS'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_PATENTS'),
     },
     {
       title: 'Years at Current Job',
       id: 'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB',
-      checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'
-      ),
     },
     {
       title: 'Custom Data Points',
       id: 'CUSTOM',
-      checked: !props.blocklist.includes('CUSTOM'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CUSTOM'),
     },
-  ]);
+  ];
 
-  const [companyItems, setCompanyItems] = useState([
+  const companyItemList: PectItem[] = [
     {
       title: 'Company Description',
       id: 'CURRENT_JOB_DESCRIPTION',
-      checked: !props.blocklist.includes('CURRENT_JOB_DESCRIPTION'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_DESCRIPTION'),
     },
     {
       title: 'Company Specialites',
       id: 'CURRENT_JOB_SPECIALTIES',
-      checked: !props.blocklist.includes('CURRENT_JOB_SPECIALTIES'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_SPECIALTIES'),
     },
     {
       title: 'Company Industry',
       id: 'CURRENT_JOB_INDUSTRY',
-      checked: !props.blocklist.includes('CURRENT_JOB_INDUSTRY'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_INDUSTRY'),
     },
     {
       title: 'General Company News',
       id: 'SERP_NEWS_SUMMARY',
-      checked: !props.blocklist.includes('SERP_NEWS_SUMMARY'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY'),
     },
     {
       title: 'Negative Company News',
       id: 'SERP_NEWS_SUMMARY_NEGATIVE',
-      checked: !props.blocklist.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
     },
     {
       title: 'Website Info',
       id: 'GENERAL_WEBSITE_TRANSFORMER',
-      checked: !props.blocklist.includes('GENERAL_WEBSITE_TRANSFORMER'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('GENERAL_WEBSITE_TRANSFORMER'),
     },
-  ]);
+  ];
+
+  const [prospectItems, setProspectItems] = useState<PectItem[]>([]);
+
+  const [companyItems, setCompanyItems] = useState<PectItem[]>([]);
+
+  // const [allItems, setAllItems] = useState<any>([]);
+
+  // const [prospectItems, setProspectItems] = useState([
+  //   {
+  //     title: 'Personal Bio',
+  //     id: 'LINKEDIN_BIO_SUMMARY',
+  //     checked: !props.blocklist.includes('LINKEDIN_BIO_SUMMARY'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('LINKEDIN_BIO_SUMMARY'),
+  //   },
+  //   {
+  //     title: 'List Of Past Jobs',
+  //     id: 'LIST_OF_PAST_JOBS',
+  //     checked: !props.blocklist.includes('LIST_OF_PAST_JOBS'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('LIST_OF_PAST_JOBS'),
+  //   },
+  //   {
+  //     title: 'Years of Experience',
+  //     id: 'YEARS_OF_EXPERIENCE',
+  //     checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('YEARS_OF_EXPERIENCE'),
+  //   },
+  //   {
+  //     title: 'Current Experience',
+  //     id: 'CURRENT_EXPERIENCE_DESCRIPTION',
+  //     checked: !props.blocklist.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
+  //   },
+  //   {
+  //     title: 'Education History',
+  //     id: 'COMMON_EDUCATION',
+  //     checked: !props.blocklist.includes('COMMON_EDUCATION'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('COMMON_EDUCATION'),
+  //   },
+  //   {
+  //     title: 'Recommendations',
+  //     id: 'RECENT_RECOMMENDATIONS',
+  //     checked: !props.blocklist.includes('RECENT_RECOMMENDATIONS'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_RECOMMENDATIONS'),
+  //   },
+  //   {
+  //     title: 'Patents',
+  //     id: 'RECENT_PATENTS',
+  //     checked: !props.blocklist.includes('RECENT_PATENTS'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_PATENTS'),
+  //   },
+  //   {
+  //     title: 'Years at Current Job',
+  //     id: 'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB',
+  //     checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'),
+  //   },
+  //   {
+  //     title: 'Custom Data Points',
+  //     id: 'CUSTOM',
+  //     checked: !props.blocklist.includes('CUSTOM'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('CUSTOM'),
+  //   },
+  // ]);
+
+  // const [companyItems, setCompanyItems] = useState([
+  //   {
+  //     title: 'Company Description',
+  //     id: 'CURRENT_JOB_DESCRIPTION',
+  //     checked: !props.blocklist.includes('CURRENT_JOB_DESCRIPTION'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_DESCRIPTION'),
+  //   },
+  //   {
+  //     title: 'Company Specialites',
+  //     id: 'CURRENT_JOB_SPECIALTIES',
+  //     checked: !props.blocklist.includes('CURRENT_JOB_SPECIALTIES'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_SPECIALTIES'),
+  //   },
+  //   {
+  //     title: 'Company Industry',
+  //     id: 'CURRENT_JOB_INDUSTRY',
+  //     checked: !props.blocklist.includes('CURRENT_JOB_INDUSTRY'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_INDUSTRY'),
+  //   },
+  //   {
+  //     title: 'General Company News',
+  //     id: 'SERP_NEWS_SUMMARY',
+  //     checked: !props.blocklist.includes('SERP_NEWS_SUMMARY'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY'),
+  //   },
+  //   {
+  //     title: 'Negative Company News',
+  //     id: 'SERP_NEWS_SUMMARY_NEGATIVE',
+  //     checked: !props.blocklist.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
+  //   },
+  //   {
+  //     title: 'Website Info',
+  //     id: 'GENERAL_WEBSITE_TRANSFORMER',
+  //     checked: !props.blocklist.includes('GENERAL_WEBSITE_TRANSFORMER'),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes('GENERAL_WEBSITE_TRANSFORMER'),
+  //   },
+  // ]);
 
   const { data, isFetching } = useQuery({
     queryKey: [`query-get-acceptance-rates`],
@@ -3590,9 +3997,47 @@ export const PersonalizationSection = (props: {
 
   useEffect(() => {
     if (props.hideAnalytics) return;
-    const allItems = [...prospectItems, ...companyItems];
+    const newPectList: PectItem[] = pectItemList.map((item) => ({
+      ...item,
+      checked: !props.blocklist.includes(item.id),
+      disabled: !!currentProject?.transformer_blocklist?.includes(item.id),
+    }));
+
+    const newCompanyList: PectItem[] = companyItemList.map((item) => ({
+      ...item,
+      checked: !props.blocklist.includes(item.id),
+      disabled: !!currentProject?.transformer_blocklist?.includes(item.id),
+    }));
+    const allItems = [...newPectList, ...newCompanyList];
+    // const newAllItems = newPectList
+    //   .map((x) => {
+    //     return {
+    //       ...x,
+    //       type: 'PROSPECT',
+    //       accepted: getAcceptanceRate(x.id),
+    //     };
+    //   })
+    //   .concat(
+    //     newCompanyList.map((x) => {
+    //       return {
+    //         ...x,
+    //         type: 'COMPANY',
+    //         accepted: getAcceptanceRate(x.id),
+    //       };
+    //     })
+    //   )
+    //   .sort((a, b) => {
+    //     if (a.accepted === null && b.accepted === null) return 0;
+    //     if (a.accepted === null) return 1;
+    //     if (b.accepted === null) return -1;
+    //     return b.accepted - a.accepted;
+    //   });
+
+    setProspectItems(newPectList);
+    setCompanyItems(newCompanyList);
+    // setAllItems(newAllItems);
     props.onItemsChange(allItems);
-  }, []);
+  }, [props.blocklist]);
 
   const markAll = (newLabel: boolean) => {
     setProspectItems((prev) => {
@@ -3669,13 +4114,13 @@ export const PersonalizationSection = (props: {
           </Box>
         </Group>
         <Checkbox
-          checked={allItems.every((x) => x.checked)}
+          checked={allItems.every((x: any) => x.checked)}
           label={'Select All Frameworks'}
           mb='md'
-          onClick={(event) => markAll(event.currentTarget.checked)}
+          onChange={(event) => markAll(event.currentTarget.checked)}
         />
         <Flex direction={'column'} gap={'0.5rem'}>
-          {allItems.map((item) => (
+          {allItems.map((item: any) => (
             <ProcessBar
               id={item.id}
               title={item.title}
@@ -3701,16 +4146,7 @@ const ProcessBar: React.FC<{
   color?: string;
   onPressItem: (itemId: string, checked: boolean) => void;
   hideAnalytics?: boolean;
-}> = ({
-  id,
-  title,
-  percent,
-  color = 'green',
-  disabled,
-  checked,
-  onPressItem,
-  hideAnalytics = false,
-}) => {
+}> = ({ id, title, percent, color = 'green', disabled, checked, onPressItem, hideAnalytics = false }) => {
   return (
     <Flex align={'center'} gap={'0.5rem'}>
       <Flex sx={{ flex: 4 }} gap={'0.25rem'} align={'center'}>
@@ -3727,17 +4163,7 @@ const ProcessBar: React.FC<{
           <Divider w={'100%'} color={'#E9ECEF'} />
         </Flex>
         <Tooltip label='Historical Acceptance Rate' withArrow>
-          <Button
-            variant={'light'}
-            fw={700}
-            size='xs'
-            color={color}
-            radius='xl'
-            h='auto'
-            fz={'0.625rem'}
-            py={'0.125rem'}
-            px={'0.25rem'}
-          >
+          <Button variant={'light'} fw={700} size='xs' color={color} radius='xl' h='auto' fz={'0.625rem'} py={'0.125rem'} px={'0.25rem'}>
             {hideAnalytics ? 'Not Available' : percent + '%'}
           </Button>
         </Tooltip>
@@ -3755,22 +4181,12 @@ export const PersonalizationCard: React.FC<{
   title: string;
   isPurple?: boolean;
   items: { title: string; checked: boolean; disabled: boolean }[];
-  onPressItem: (
-    item: { title: string; checked: boolean; disabled: boolean },
-    checked: boolean
-  ) => void;
+  onPressItem: (item: { title: string; checked: boolean; disabled: boolean }, checked: boolean) => void;
 }> = ({ title, isPurple, items, onPressItem }) => {
   return (
     <Card shadow='xs' radius={'md'} mb={'1rem'}>
       <Card.Section>
-        <Flex
-          align={'center'}
-          justify={'space-between'}
-          bg={`${isPurple ? 'grape' : 'teal'}.0`}
-          py={'0.5rem'}
-          px={'1rem'}
-          gap={'0.5rem'}
-        >
+        <Flex align={'center'} justify={'space-between'} bg={`${isPurple ? 'grape' : 'teal'}.0`} py={'0.5rem'} px={'1rem'} gap={'0.5rem'}>
           <Text fw={'400'} fz='xs' color={"${isPurple ? 'grape' : 'teal'}.8"}>
             {title}
           </Text>

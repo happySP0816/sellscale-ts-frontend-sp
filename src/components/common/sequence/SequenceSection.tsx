@@ -598,9 +598,7 @@ export default function SequenceSection() {
             </Stack>
           </Box>
           <Box sx={{ flexBasis: '65%' }}>
-            {activeCard === 0 && (
-              <IntroMessageSection prospectId={prospectId} setProspectId={setProspectId} />
-            )}
+            {activeCard === 0 && <IntroMessageSection prospectId={prospectId} setProspectId={setProspectId} />}
             {activeCard === 1 && (
               <FrameworkSectionShell
                 frameworks={bumpFrameworks}
@@ -629,9 +627,7 @@ export default function SequenceSection() {
                 editProps={{
                   title: 'Choose Bump Framework for Follow-Up 2',
                   bumpedCount: 1,
-                  bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1
-                  ),
+                  bumpedFrameworks: bumpFrameworks.filter((bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1),
                   activeBumpFrameworkId: bf1?.id ?? -1,
                   overallStatus: 'BUMPED',
                 }}
@@ -648,9 +644,7 @@ export default function SequenceSection() {
                 editProps={{
                   title: 'Choose Bump Framework for Follow-Up 3',
                   bumpedCount: 2,
-                  bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2
-                  ),
+                  bumpedFrameworks: bumpFrameworks.filter((bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2),
                   activeBumpFrameworkId: bf2?.id ?? -1,
                   overallStatus: 'BUMPED',
                 }}
@@ -667,9 +661,7 @@ export default function SequenceSection() {
                 editProps={{
                   title: 'Choose Bump Framework for Follow-Up 4',
                   bumpedCount: 3,
-                  bumpedFrameworks: bumpFrameworks.filter(
-                    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3
-                  ),
+                  bumpedFrameworks: bumpFrameworks.filter((bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3),
                   activeBumpFrameworkId: bf3?.id ?? -1,
                   overallStatus: 'BUMPED',
                 }}
@@ -1315,8 +1307,6 @@ function IntroMessageSection(props: { prospectId: number; setProspectId: (prospe
             )}
           </Box>
         )}
-
-        
 
         {currentProject.template_mode ? (
           <>
@@ -1988,9 +1978,7 @@ function FrameworkSectionShell(props: {
     return 0;
   });
 
-  const [activeFramework, setActiveFramework] = useState<BumpFramework>(
-    props.framework ?? frameworks[0]
-  );
+  const [activeFramework, setActiveFramework] = useState<BumpFramework>(props.framework ?? frameworks[0]);
   const [displayFrameworkSection, refreshFrameworkSection] = useRefresh();
 
   return (
@@ -2462,138 +2450,88 @@ function FrameworkSection(props: {
                     if (a.default) return 1;
                     if (b.default) return -1;
                     return 0;
-                  }
-                )
+                  })
                 : [props.frameworks.filter((a) => a.default).find((v) => v.id === props.framework.id)!]
-              ).filter((v) => v && v.bumped_count == props.bumpCount).sort((a, b) => {
-                if (a.default) return -1;
-                if (b.default) return 1;
-                return 0;
-              }).map((bf, index) => (
-                <Paper
-                  key={index}
-                  p='md'
-                  mih={80}
-                  sx={{
-                    position: 'relative',
-                    cursor: 'pointer',
-                    border:
-                      bf.id === props.framework.id ? 'solid 1px #339af0 !important' : undefined,
-                    backgroundColor:
-                      bf.id === props.framework.id ? '#339af008 !important' : undefined,
-                    flexDirection: 'row',
-                    display: 'flex',
-                  }}
-                  withBorder
-                >
-                  <Box
-                    miw='100px'
-                    mah={80}
+              )
+                .filter((v) => v && v.bumped_count == props.bumpCount)
+                .sort((a, b) => {
+                  if (a.default) return -1;
+                  if (b.default) return 1;
+                  return 0;
+                })
+                .map((bf, index) => (
+                  <Paper
+                    key={index}
+                    p='md'
+                    mih={80}
                     sx={{
-                      border: 'solid 1px #339af022',
-                      backgroundColor: '#339af022',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      textAlign: 'center',
+                      position: 'relative',
+                      cursor: 'pointer',
+                      border: bf.id === props.framework.id ? 'solid 1px #339af0 !important' : undefined,
+                      backgroundColor: bf.id === props.framework.id ? '#339af008 !important' : undefined,
+                      flexDirection: 'row',
+                      display: 'flex',
                     }}
-                    mt='xl'
-                    mr='md'
-                    onClick={() => {
-                      openContextModal({
-                        modal: 'frameworkReplies',
-                        title: 'Past Example Usages',
-                        innerProps: {
-                          bumpId: bf.id,
-                        },
-                      });
-                    }}
+                    withBorder
                   >
-                    <Text fw='bold' fz='md' color='blue' mt='xs'>
-                      {bf.etl_num_times_used != null &&
-                        bf.etl_num_times_converted != null &&
-                        Math.round(
-                          (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 100
-                        )}
-                      % reply
-                    </Text>
-                    <Text size='8px' color='blue' fz={'xs'} fw='500'>
-                      ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
-                    </Text>
-                  </Box>
-
-                  <Box mr={40} w='100%'>
-                    <Flex>
-                      <Text
-                        size='sm'
-                        fw='600'
-                        mb='xs'
-                        sx={{ textTransform: 'uppercase' }}
-                        color='gray'
-                        variant='outline'
-                      >
-                        {bf.title}
+                    <Box
+                      miw='100px'
+                      mah={80}
+                      sx={{
+                        border: 'solid 1px #339af022',
+                        backgroundColor: '#339af022',
+                        padding: '8px',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                      }}
+                      mt='xl'
+                      mr='md'
+                      onClick={() => {
+                        openContextModal({
+                          modal: 'frameworkReplies',
+                          title: 'Past Example Usages',
+                          innerProps: {
+                            bumpId: bf.id,
+                          },
+                        });
+                      }}
+                    >
+                      <Text fw='bold' fz='md' color='blue' mt='xs'>
+                        {bf.etl_num_times_used != null &&
+                          bf.etl_num_times_converted != null &&
+                          Math.round((bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 100)}
+                        % reply
                       </Text>
-                      {/* Hovercard for transformers */}
+                      <Text size='8px' color='blue' fz={'xs'} fw='500'>
+                        ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
+                      </Text>
+                    </Box>
 
-                      <HoverCard width={280} shadow='md'>
-                        <HoverCard.Target>
-                          <Badge
-                            leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                            color='lime'
-                            variant={
-                              bf.active_transformers && bf.active_transformers.length > 0
-                                ? 'filled'
-                                : 'outline'
-                            }
-                            ml='xs'
-                            size='xs'
-                            onClick={() => {
-                              toggle();
-                            }}
-                          >
-                            {bf.active_transformers && bf.active_transformers.length > 0
-                              ? bf.active_transformers.length + ' Research Points'
-                              : '0 Research Points'}
-                          </Badge>
-                        </HoverCard.Target>
-                        <HoverCard.Dropdown
-                          style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                        >
-                          <Paper
-                            style={{
-                              backgroundColor: 'rgb(34, 37, 41)',
-                              color: 'white',
-                              padding: 10,
-                            }}
-                          >
-                            <TextWithNewline style={{ fontSize: '12px' }}>
-                              {bf.active_transformers.length > 0
-                                ? '<b>Active Research Points:</b>\n- ' +
-                                  bf.active_transformers
-                                    .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                    .join('\n- ')
-                                : 'Click to activate more research points'}
-                            </TextWithNewline>
-                          </Paper>
-                        </HoverCard.Dropdown>
-                      </HoverCard>
+                    <Box mr={40} w='100%'>
+                      <Flex>
+                        <Text size='sm' fw='600' mb='xs' sx={{ textTransform: 'uppercase' }} color='gray' variant='outline'>
+                          {bf.title}
+                        </Text>
+                        {/* Hovercard for transformers */}
 
-                      {bf.human_feedback && (
                         <HoverCard width={280} shadow='md'>
                           <HoverCard.Target>
                             <Badge
-                              leftSection={<IconBulb size='0.8rem' />}
-                              color='grape'
-                              variant='filled'
+                              leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
+                              color='lime'
+                              variant={bf.active_transformers && bf.active_transformers.length > 0 ? 'filled' : 'outline'}
                               ml='xs'
                               size='xs'
+                              onClick={() => {
+                                toggle();
+                              }}
                             >
-                              Fine Tuned
+                              {bf.active_transformers && bf.active_transformers.length > 0
+                                ? bf.active_transformers.length + ' Research Points'
+                                : '0 Research Points'}
                             </Badge>
                           </HoverCard.Target>
-                          <HoverCard.Dropdown
-                            style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                          >
+                          <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
                             <Paper
                               style={{
                                 backgroundColor: 'rgb(34, 37, 41)',
@@ -2602,116 +2540,136 @@ function FrameworkSection(props: {
                               }}
                             >
                               <TextWithNewline style={{ fontSize: '12px' }}>
-                                {'<b>Additional Instructions:</b>\n' + bf.human_feedback}
+                                {bf.active_transformers.length > 0
+                                  ? '<b>Active Research Points:</b>\n- ' +
+                                    bf.active_transformers.map((rp: any) => rp.replaceAll('_', ' ').toLowerCase()).join('\n- ')
+                                  : 'Click to activate more research points'}
                               </TextWithNewline>
                             </Paper>
                           </HoverCard.Dropdown>
                         </HoverCard>
-                      )}
-                    </Flex>
-                    <Card withBorder w='100%' sx={{}}>
-                      {editing ? (
-                        <FocusTrap active={true}>
-                          <Textarea
-                            placeholder='Instructions'
-                            minRows={3}
-                            autosize
-                            variant='filled'
-                            defaultValue={bf.description}
-                            onChange={(e) => {
-                              form.setFieldValue('promptInstructions', e.target.value);
-                              setChanged(true);
-                            }}
-                            onBlur={() => {
-                              setEditing(false);
-                            }}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                          />
-                        </FocusTrap>
-                      ) : (
-                        <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
-                          <div
-                            // onClick={() => {
-                            //   setEditing(true);
-                            // }}
-                            dangerouslySetInnerHTML={{
-                              __html: DOMPurify.sanitize(
-                                bf.description
-                                  .replaceAll(
-                                    '[[',
-                                    "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                      theme.colors['blue'][5] +
-                                      "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
-                                  )
-                                  .replaceAll(']]', '</span>')
-                                  .replaceAll(
-                                    '\n',
-                                    `<br style="display: block; content: ' '; margin: 10px 0 "/>`
-                                  ) as string
-                              ),
-                            }}
-                          />
-                        </Text>
-                      )}
-                    </Card>
-                  </Box>
-                  <Box sx={{ justifyContent: 'right' }} ml='auto'>
-                    <Switch
-                      sx={{ cursor: 'pointer' }}
-                      checked={bf.default}
-                      onChange={(checked) => {
-                        setLoading(true);
-                        const result = patchBumpFramework(
-                          userToken,
-                          bf.id,
-                          bf.overall_status,
-                          bf.title,
-                          bf.description,
-                          bf.bump_length,
-                          bf.bumped_count,
-                          bf.bump_delay_days,
-                          !bf.default,
-                          bf.use_account_research,
-                          bf.transformer_blocklist
-                        )
-                          .then(() => {
-                            showNotification({
-                              title: 'Success',
-                              message: 'Bump Framework enabled',
-                              color: 'green',
-                            });
-                          })
-                          .finally(() => {
-                            (async () => {
-                              await queryClient.refetchQueries({
-                                queryKey: [`query-get-bump-frameworks`],
+
+                        {bf.human_feedback && (
+                          <HoverCard width={280} shadow='md'>
+                            <HoverCard.Target>
+                              <Badge leftSection={<IconBulb size='0.8rem' />} color='grape' variant='filled' ml='xs' size='xs'>
+                                Fine Tuned
+                              </Badge>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
+                              <Paper
+                                style={{
+                                  backgroundColor: 'rgb(34, 37, 41)',
+                                  color: 'white',
+                                  padding: 10,
+                                }}
+                              >
+                                <TextWithNewline style={{ fontSize: '12px' }}>{'<b>Additional Instructions:</b>\n' + bf.human_feedback}</TextWithNewline>
+                              </Paper>
+                            </HoverCard.Dropdown>
+                          </HoverCard>
+                        )}
+                      </Flex>
+                      <Card withBorder w='100%' sx={{}}>
+                        {editing ? (
+                          <FocusTrap active={true}>
+                            <Textarea
+                              placeholder='Instructions'
+                              minRows={3}
+                              autosize
+                              variant='filled'
+                              defaultValue={bf.description}
+                              onChange={(e) => {
+                                form.setFieldValue('promptInstructions', e.target.value);
+                                setChanged(true);
+                              }}
+                              onBlur={() => {
+                                setEditing(false);
+                              }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                            />
+                          </FocusTrap>
+                        ) : (
+                          <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                            <div
+                              // onClick={() => {
+                              //   setEditing(true);
+                              // }}
+                              dangerouslySetInnerHTML={{
+                                __html: DOMPurify.sanitize(
+                                  bf.description
+                                    .replaceAll(
+                                      '[[',
+                                      "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
+                                        theme.colors['blue'][5] +
+                                        "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                    )
+                                    .replaceAll(']]', '</span>')
+                                    .replaceAll('\n', `<br style="display: block; content: ' '; margin: 10px 0 "/>`) as string
+                                ),
+                              }}
+                            />
+                          </Text>
+                        )}
+                      </Card>
+                    </Box>
+                    <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                      <Switch
+                        sx={{ cursor: 'pointer' }}
+                        checked={bf.default}
+                        onChange={(checked) => {
+                          setLoading(true);
+                          const result = patchBumpFramework(
+                            userToken,
+                            bf.id,
+                            bf.overall_status,
+                            bf.title,
+                            bf.description,
+                            bf.bump_length,
+                            bf.bumped_count,
+                            bf.bump_delay_days,
+                            !bf.default,
+                            bf.use_account_research,
+                            bf.transformer_blocklist
+                          )
+                            .then(() => {
+                              showNotification({
+                                title: 'Success',
+                                message: 'Bump Framework enabled',
+                                color: 'green',
                               });
-                              setLoading(false);
-                            })();
-                            setChanged(false);
-                          });
-                      }}
-                    />
-                    <Button
-                      mt='xs'
-                      variant='subtle'
-                      radius='xl'
-                      size='sm'
-                      compact
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setEditing(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </Box>
-                </Paper>
-              ))}
+                            })
+                            .finally(() => {
+                              (async () => {
+                                await queryClient.refetchQueries({
+                                  queryKey: [`query-get-bump-frameworks`],
+                                });
+                                setLoading(false);
+                              })();
+                              setChanged(false);
+                            });
+                        }}
+                      />
+                      <Button
+                        mt='xs'
+                        variant='subtle'
+                        radius='xl'
+                        size='sm'
+                        compact
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setEditing(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </Box>
+                  </Paper>
+                ))}
             </Stack>
           </form>
 
@@ -2777,18 +2735,14 @@ function FrameworkSection(props: {
   );
 }
 
-function TemplateSection(props: {
-  showFeedback: boolean;
-  onFoundTemplate: (templateId: number) => void;
-}) {
+function TemplateSection(props: { showFeedback: boolean; onFoundTemplate: (templateId: number) => void }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
-  const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
-    useState<boolean>(false);
+  const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] = useState<boolean>(false);
   const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] = useState<string>();
 
   const [templateActivesShow, setTemplateActivesShow] = useState([true]);
@@ -2828,15 +2782,10 @@ function TemplateSection(props: {
             >
               <Text color='white' mt='4px' size='sm'>
                 <IconBulb size='1.2rem' color='white' />
-                <span style={{ marginLeft: '8px' }}>
-                  FINE TUNING: Feel free to give me feedback on improving the message
-                </span>
+                <span style={{ marginLeft: '8px' }}>FINE TUNING: Feel free to give me feedback on improving the message</span>
               </Text>
             </Card.Section>
-            <Card.Section
-              sx={{ border: 'solid 2px ' + theme.colors.grape[6] + ' !important' }}
-              p='8px'
-            >
+            <Card.Section sx={{ border: 'solid 2px ' + theme.colors.grape[6] + ' !important' }} p='8px'>
               <Textarea
                 variant='unstyled'
                 pl={'8px'}
@@ -2908,9 +2857,7 @@ function TemplateSection(props: {
           <Stack mt='xs'>
             {templates
               ?.filter((t: any) => templateActivesShow.includes(t.active))
-              .sort((a: any, b: any) =>
-                a.active != b.active ? -(a.active - b.active) : a.title - b.title
-              )
+              .sort((a: any, b: any) => (a.active != b.active ? -(a.active - b.active) : a.title - b.title))
               .map((template, index) => (
                 <Paper
                   key={index}
@@ -2919,10 +2866,8 @@ function TemplateSection(props: {
                   sx={{
                     position: 'relative',
                     cursor: 'pointer',
-                    border:
-                      selectedTemplateId === template.id ? 'solid 1px #339af0 !important' : '',
-                    backgroundColor:
-                      selectedTemplateId === template.id ? '#339af008 !important' : '',
+                    border: selectedTemplateId === template.id ? 'solid 1px #339af0 !important' : '',
+                    backgroundColor: selectedTemplateId === template.id ? '#339af008 !important' : '',
                     flexDirection: 'row',
                     display: 'flex',
                   }}
@@ -2946,8 +2891,7 @@ function TemplateSection(props: {
                     mr='md'
                   >
                     <Text fw='bold' fz='md' color='blue' mt='xs'>
-                      {Math.round((template.times_accepted / (template.times_used + 0.0001)) * 100)}
-                      % reply
+                      {Math.round((template.times_accepted / (template.times_used + 0.0001)) * 100)}% reply
                     </Text>
                     <Text color='blue' size='xs'>
                       {template.times_accepted} / {template.times_used} times
@@ -2956,33 +2900,18 @@ function TemplateSection(props: {
 
                   <Box mr={40} w='100%'>
                     <Flex>
-                      <Text
-                        size='sm'
-                        fw='600'
-                        mb='xs'
-                        sx={{ textTransform: 'uppercase' }}
-                        color='gray'
-                        variant='outline'
-                      >
+                      <Text size='sm' fw='600' mb='xs' sx={{ textTransform: 'uppercase' }} color='gray' variant='outline'>
                         {template.title}
                       </Text>
                       {/* Hovercard for transformers */}
                       {template.research_points && template.research_points.length > 0 && (
                         <HoverCard width={280} shadow='md'>
                           <HoverCard.Target>
-                            <Badge
-                              leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                              color='lime'
-                              variant='filled'
-                              ml='xs'
-                              size='xs'
-                            >
+                            <Badge leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />} color='lime' variant='filled' ml='xs' size='xs'>
                               {template.research_points.length} Research Points
                             </Badge>
                           </HoverCard.Target>
-                          <HoverCard.Dropdown
-                            style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                          >
+                          <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
                             <Paper
                               style={{
                                 backgroundColor: 'rgb(34, 37, 41)',
@@ -2992,9 +2921,7 @@ function TemplateSection(props: {
                             >
                               <TextWithNewline style={{ fontSize: '12px' }}>
                                 {'<b>Active Research Points:</b>\n- ' +
-                                  template.research_points
-                                    .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                    .join('\n- ')}
+                                  template.research_points.map((rp: any) => rp.replaceAll('_', ' ').toLowerCase()).join('\n- ')}
                               </TextWithNewline>
                             </Paper>
                           </HoverCard.Dropdown>
@@ -3003,19 +2930,11 @@ function TemplateSection(props: {
                       {template.additional_instructions && (
                         <HoverCard width={280} shadow='md'>
                           <HoverCard.Target>
-                            <Badge
-                              leftSection={<IconBulb size='0.8rem' />}
-                              color='grape'
-                              variant='filled'
-                              ml='xs'
-                              size='xs'
-                            >
+                            <Badge leftSection={<IconBulb size='0.8rem' />} color='grape' variant='filled' ml='xs' size='xs'>
                               Fine Tuned
                             </Badge>
                           </HoverCard.Target>
-                          <HoverCard.Dropdown
-                            style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                          >
+                          <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
                             <Paper
                               style={{
                                 backgroundColor: 'rgb(34, 37, 41)',
@@ -3024,8 +2943,7 @@ function TemplateSection(props: {
                               }}
                             >
                               <TextWithNewline style={{ fontSize: '12px' }}>
-                                {'<b>Additional Instructions:</b>\n' +
-                                  template.additional_instructions}
+                                {'<b>Additional Instructions:</b>\n' + template.additional_instructions}
                               </TextWithNewline>
                             </Paper>
                           </HoverCard.Dropdown>
@@ -3064,14 +2982,7 @@ function TemplateSection(props: {
                       checked={template.active}
                       onChange={(e) => {
                         if (!currentProject) return;
-                        updateLiTemplate(
-                          userToken,
-                          currentProject.id,
-                          template.id,
-                          template.title,
-                          template.message,
-                          e.target.checked
-                        ).then((res) => {
+                        updateLiTemplate(userToken, currentProject.id, template.id, template.title, template.message, e.target.checked).then((res) => {
                           queryClient.invalidateQueries({
                             queryKey: [`query-get-li-templates`],
                           });
@@ -3559,23 +3470,23 @@ export const PersonalizationSection = (props: {
   return (
     <Flex direction='column'>
       <Card radius={'md'} mb={'1rem'}>
-        <Group position='apart'>
+        <Flex direction={'column'}>
           <Box>
             <Title fw={300} order={4}>
-              {props.title ?? 'Acceptance Rate by Personalization'}
+              {props.title ?? 'ACCEPTANCE RATE BY PERSONALIZATION:'}
             </Title>
           </Box>
-          <Box sx={{ textAlign: 'right' }} ml='auto' pb='sm'>
-            <Badge leftSection={<IconCircle size='0.7rem' />} color='grape' size='xs'>
-              Account Data
+          <Flex gap={'lg'} align={'center'} justify={'space-between'} my={'sm'}>
+            <Badge leftSection={<IconCircle size='0.7rem' />} color='grape' size='lg' w={'100%'}>
+              Profile Based Personalization:
             </Badge>
-            <br />
-            <Badge leftSection={<IconCircle size='0.7rem' />} color='green' mt='xs' size='xs'>
-              Contact Data
+            <Badge leftSection={<IconCircle size='0.7rem' />} color='green' size='lg' w={'100%'}>
+              Account Based Personalization:
             </Badge>
-          </Box>
-        </Group>
+          </Flex>
+        </Flex>
         <Checkbox
+          variant='outline'
           checked={allItems.every((x: any) => x.checked)}
           label={'Select All Frameworks'}
           mb='md'
@@ -3617,9 +3528,9 @@ const ProcessBar: React.FC<{
           label={<Text fw={300}>{title}</Text>}
           checked={checked}
           disabled={disabled}
+          variant='outline'
           onChange={(event) => onPressItem(id, event.currentTarget.checked)}
           color={color}
-          variant='outline'
         />
         <Flex sx={{ flex: 1 }}>
           <Divider w={'100%'} color={'#E9ECEF'} />

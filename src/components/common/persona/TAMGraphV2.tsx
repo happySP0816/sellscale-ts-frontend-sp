@@ -112,7 +112,10 @@ export default function TAMGraphV2() {
   console.log(graphData);
 
   const data = {
-    labels,
+    labels:
+      filteredBy === 'COMPANY_SIZE'
+        ? graphData?.employees.map((i) => i.employee_count_comp) || []
+        : graphData?.industry_breakdown.map((i) => i.industry) || [],
     datasets: [
       {
         label: 'Currently Engaged',
@@ -337,7 +340,7 @@ export default function TAMGraphV2() {
               <Text fz={'xl'} fw={500}>
                 Companies
               </Text>
-              <Text color='gray.6'>How many distinct companies you pull</Text>
+              <Text color='gray.6'># Distinct companies in database</Text>
             </Box>
             <Divider />
             <Box py={'lg'}>
@@ -347,7 +350,7 @@ export default function TAMGraphV2() {
               <Text fz={'xl'} fw={500}>
                 Contacts
               </Text>
-              <Text color='gray.6'>How many contact we have</Text>
+              <Text color='gray.6'># Unique contact we in database</Text>
             </Box>
             <Divider />
             <Box py={'lg'}>
@@ -363,7 +366,7 @@ export default function TAMGraphV2() {
                 Engaged
               </Text>
               <Text color='gray.6'>
-                How many we're outreaching to from at least 1 Sellscale seat
+                % Contacts Contacted at least once
               </Text>
             </Box>
           </Stack>
@@ -385,7 +388,7 @@ export default function TAMGraphV2() {
         )} */}
         {getList(
           'Top Industries',
-          (graphData?.industries || []).map((i) => ({ title: '', count: i.count }))
+          (graphData?.industries || []).map((i) => ({ title: i.company, count: i.count }))
         )}
       </Flex>
     </Box>

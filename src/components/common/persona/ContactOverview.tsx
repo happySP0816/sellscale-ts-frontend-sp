@@ -19,6 +19,7 @@ import {
   IconTable,
   IconTarget,
   IconWashMachine,
+  IconWorld,
 } from '@tabler/icons';
 import ComingSoonCard from '@common/library/ComingSoonCard';
 import GlobalContacts from './GlobalContacts';
@@ -32,45 +33,47 @@ import PulseTabSelector from './PulseTabSelector';
 
 const ContactOverview = () => {
   return (
-    <Tabs defaultValue='overview' className='min-h-full flex flex-col'>
+    <Tabs defaultValue='contact_overview' className='min-h-full flex flex-col'>
       <Tabs.List>
-        <Tabs.Tab value='overview'>
+        {/* <Tabs.Tab value='overview'>
           <IconTable size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Upload Overview
+        </Tabs.Tab> */}
+        <Tabs.Tab value='contact_overview'>
+          <IconWorld size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
+          Overview
         </Tabs.Tab>
         <Tabs.Tab value='scrapping_report'>
           <IconTable size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Scraping Report
         </Tabs.Tab>
-        <Tabs.Tab value='global_contacts'>
-          <IconList size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
-          Global Contacts
-        </Tabs.Tab>
         <Tabs.Tab value='prospect_scoring'>
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Prospect Scoring
+        </Tabs.Tab>
+        <Tabs.Tab value='global_contacts'>
+          <IconList size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
+          Global Contacts
         </Tabs.Tab>
         <Tabs.Tab value='do_not_contact'>
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Do Not Contact
         </Tabs.Tab>
 
-        <Tabs.Tab value='TAM_graph_v2' ml='auto'>
-          TAM Graph Beta
-        </Tabs.Tab>
-        <Tabs.Tab value='TAM_graph' style={{ marginRight: '8px' }}>
+        
+        {/* <Tabs.Tab value='TAM_graph' style={{ marginRight: '8px' }}>
           TAM Graph
-        </Tabs.Tab>
+        </Tabs.Tab> */}
 
-        <Tabs.Tab value='overviewV2'>
+        {/* <Tabs.Tab value='overviewV2'>
           <IconBeta size='0.8rem' style={{ marginRight: '8px' }} />
           Overview (Beta)
-        </Tabs.Tab>
+        </Tabs.Tab> */}
       </Tabs.List>
 
-      <Tabs.Panel value='overview'>
+      {/* <Tabs.Panel value='overview'>
         <UploadOverview />
-      </Tabs.Panel>
+      </Tabs.Panel> */}
       <Tabs.Panel value='scrapping_report'>
         <ScrapingReport />
       </Tabs.Panel>
@@ -78,37 +81,18 @@ const ContactOverview = () => {
         <GlobalContacts />
       </Tabs.Panel>
       <Tabs.Panel value='prospect_scoring'>
-        <Tabs defaultValue='new_view'>
-          <Tabs.List>
-            <Tabs.Tab value='new_view'>
-              <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
-              Prospect Scoring
-            </Tabs.Tab>
-            <Tooltip label='Old View' position='bottom' withArrow withinPortal>
-              <Tabs.Tab value='old_view' ml='auto'>
-                <IconWashMachine size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
-              </Tabs.Tab>
-            </Tooltip>
-          </Tabs.List>
-
-          <Tabs.Panel value='old_view'>
-            <PulseWrapper />
-          </Tabs.Panel>
-          <Tabs.Panel value='new_view'>
-            <ICPFilters />
-          </Tabs.Panel>
-        </Tabs>
+          <ICPFilters />
       </Tabs.Panel>
       <Tabs.Panel value='do_not_contact'>
         <DoNotContactList />
       </Tabs.Panel>
-      {/* <Tabs.Panel value='TAM_graph' className='h-0 grow'>
+      <Tabs.Panel value='TAM_graph' className='h-0 grow'>
         <TAMGraph />
-      </Tabs.Panel> */}
-      <Tabs.Panel value='overviewV2'>
+      </Tabs.Panel>
+      <Tabs.Panel value='upload_overview'>
         <UploadOverviewV2 />
       </Tabs.Panel>
-      <Tabs.Panel value='TAM_graph_v2' className='h-0 grow'>
+      <Tabs.Panel value='contact_overview' className='h-0 grow'>
         <TAMGraphV2 />
       </Tabs.Panel>
     </Tabs>

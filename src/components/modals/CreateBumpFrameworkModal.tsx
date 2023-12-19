@@ -139,6 +139,9 @@ export function CreateBumpFrameworkContextModal({
       form.reset();
       innerProps.backFunction();
       innerProps.closeModal();
+
+      // Close all modals
+      closeAllModals();
     } else {
       showNotification({
         title: "Error",

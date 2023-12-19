@@ -24,7 +24,7 @@ import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, EmailSequenceStep, LinkedInMessage, ProspectShallow } from 'src';
+import { BumpFramework, EmailSequenceStep, LinkedInMessage, PersonaOverview, ProspectShallow } from 'src';
 import { showNotification } from '@mantine/notifications';
 import { postBumpGenerateEmailResponse, postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
 import _ from 'lodash';
@@ -38,6 +38,8 @@ import { openContextModal } from '@mantine/modals';
 import { IconEdit, IconPencil, IconPlus } from '@tabler/icons';
 import TextWithNewline from '@common/library/TextWithNewlines';
 import { valueToColor } from '@utils/general';
+import { getPersonasOverview } from '@utils/requests/getPersonas';
+import { isLoggedIn } from '@auth/core';
 
 type BumpFrameworkBuckets = {
   ACCEPTED: {
@@ -150,20 +152,43 @@ export default function InboxProspectConvoBumpFramework(props: {
   const [open, setOpen] = useRecoilState(openedBumpFameworksState);
 
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
 
   const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(prospectDrawerStatusesState);
 
   const [loading, setLoading] = useState(false);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
-  const archetypeID = 8;
 
   const [data, setData] = useState<any>({} || undefined);
   const [edit, setEdit] = useState(false);
   const [blocklist, setBlockList] = useState<any>([]);
   const [list, setList] = useState<any>([]);
   const [deactivateState, setDeactivateState] = useState(false);
+  const [projects, setProjects] = useState<PersonaOverview[]>([]);
+
+  const [fetched, setFetched] = useState(false);
 
   const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] = useDisclosure();
+
+  useEffect(() => {
+    (async () => {
+      if (!isLoggedIn()) return;
+      const response = await getPersonasOverview(userToken);
+      const result =
+        response.status === "success"
+          ? (response.data as PersonaOverview[])
+          : [];
+      setProjects(result);
+    })();
+  }, []);
+
+
+  const unassignedPersona = projects.find(
+    (project) => project.is_unassigned_contact_archetype
+  );
+
+  const archetypeID = unassignedPersona?.id
+
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],

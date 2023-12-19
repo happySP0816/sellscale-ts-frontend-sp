@@ -187,7 +187,7 @@ export default function InboxProspectConvoBumpFramework(props: {
     (project) => project.is_unassigned_contact_archetype
   );
 
-  const archetypeID = unassignedPersona?.id
+  const archetypeID = unassignedPersona?.id || -1
 
 
   const { data: dataChannels } = useQuery({

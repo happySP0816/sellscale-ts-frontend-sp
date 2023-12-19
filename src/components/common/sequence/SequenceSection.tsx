@@ -128,6 +128,7 @@ import InitialMessageTemplateSelector from './InitialMessageTemplateSelector';
 import LinkedinInitialMessageTemplate from './LinkedinInitialMessageTemplate';
 import { CTAGeneratorSuggestedModal } from '@modals/CTAGeneratorSuggestedModal';
 import { createBumpFramework } from '@utils/requests/createBumpFramework';
+import useRefresh from '@common/library/use-refresh';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -669,40 +670,78 @@ export default function SequenceSection() {
             {activeCard === 0 && (
               <IntroMessageSection prospectId={prospectId} setProspectId={setProspectId} />
             )}
-            {activeCard === 1 && bf0 && (
-              <FrameworkSection
+            {activeCard === 1 && (
+              <FrameworkSectionShell
+                frameworks={bumpFrameworks}
                 framework={bf0}
                 bumpCount={0}
                 setIsDataChanged={setIsDataChanged}
                 prospectId={prospectId}
                 setProspectId={setProspectId}
+                editProps={{
+                  title: 'Choose Bump Framework for Follow-Up 1',
+                  bumpedCount: 0,
+                  bumpedFrameworks: bumpFrameworks.filter((bf) => bf.overall_status === 'ACCEPTED'),
+                  activeBumpFrameworkId: bf0?.id ?? -1,
+                  overallStatus: 'ACCEPTED',
+                }}
               />
             )}
-            {activeCard === 2 && bf1 && (
-              <FrameworkSection
+            {activeCard === 2 && (
+              <FrameworkSectionShell
+                frameworks={bumpFrameworks}
                 framework={bf1}
                 bumpCount={1}
                 setIsDataChanged={setIsDataChanged}
                 prospectId={prospectId}
                 setProspectId={setProspectId}
+                editProps={{
+                  title: 'Choose Bump Framework for Follow-Up 2',
+                  bumpedCount: 1,
+                  bumpedFrameworks: bumpFrameworks.filter(
+                    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 1
+                  ),
+                  activeBumpFrameworkId: bf1?.id ?? -1,
+                  overallStatus: 'BUMPED',
+                }}
               />
             )}
-            {activeCard === 3 && bf2 && (
-              <FrameworkSection
+            {activeCard === 3 && (
+              <FrameworkSectionShell
+                frameworks={bumpFrameworks}
                 framework={bf2}
                 bumpCount={2}
                 setIsDataChanged={setIsDataChanged}
                 prospectId={prospectId}
                 setProspectId={setProspectId}
+                editProps={{
+                  title: 'Choose Bump Framework for Follow-Up 3',
+                  bumpedCount: 2,
+                  bumpedFrameworks: bumpFrameworks.filter(
+                    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 2
+                  ),
+                  activeBumpFrameworkId: bf2?.id ?? -1,
+                  overallStatus: 'BUMPED',
+                }}
               />
             )}
-            {activeCard === 4 && bf3 && (
-              <FrameworkSection
+            {activeCard === 4 && (
+              <FrameworkSectionShell
+                frameworks={bumpFrameworks}
                 framework={bf3}
                 bumpCount={3}
                 setIsDataChanged={setIsDataChanged}
                 prospectId={prospectId}
                 setProspectId={setProspectId}
+                editProps={{
+                  title: 'Choose Bump Framework for Follow-Up 4',
+                  bumpedCount: 3,
+                  bumpedFrameworks: bumpFrameworks.filter(
+                    (bf) => bf.overall_status === 'BUMPED' && bf.bumped_count === 3
+                  ),
+                  activeBumpFrameworkId: bf3?.id ?? -1,
+                  overallStatus: 'BUMPED',
+                }}
               />
             )}
           </Box>
@@ -784,11 +823,9 @@ function BumpFrameworkSelect(props: {
       <ModalSelector
         selector={{
           override: (
-            <Tooltip label='Edit' withinPortal>
-              <ActionIcon radius='xl'>
-                <IconPencil size='1.1rem' />
-              </ActionIcon>
-            </Tooltip>
+            <Button variant='outline' radius='md' compact color='blue' mr='xs'>
+              ✨ Choose a Template
+            </Button>
           ),
         }}
         title={{
@@ -930,11 +967,9 @@ function BumpFrameworkSelect(props: {
       <ModalSelector
         selector={{
           override: (
-            <Tooltip label='Create New Framework' withinPortal>
-              <ActionIcon radius='xl'>
-                <IconPlus size='1.1rem' />
-              </ActionIcon>
-            </Tooltip>
+            <Button variant='outline' radius='md' compact color='orange'>
+              Create New
+            </Button>
           ),
         }}
         title={{
@@ -1134,32 +1169,11 @@ function IntroMessageSection(props: {
   const openCTASettings = () => {
     setActiveTab('ctas');
   };
+
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
-  const [showFeedback, setShowFeedback] = useState<boolean>(false);
-  const theme = useMantineTheme();
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const [ctaModalOpened, setCtaModalOpened] = useState(false);
-
-  const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
-    useState<boolean>(false);
-  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] = useState<string>();
-
-  const [templateActivesShow, setTemplateActivesShow] = useState([true]);
-
-  const { data: templates, isFetching: isFetchingTemplates } = useQuery({
-    queryKey: [`query-get-li-templates`],
-    queryFn: async () => {
-      const response = await getLiTemplates(userToken, currentProject!.id);
-
-      if (response.data?.length > 0) {
-        setSelectedTemplateId(response.data[0].id);
-        setHumanFeedbackForTemplate(response.data[0].additional_instructions);
-      }
-      return response.status === 'success' ? (response.data as Record<string, any>[]) : [];
-    },
-    refetchOnWindowFocus: false,
-    enabled: !!currentProject && !!currentProject.template_mode,
-  });
 
   const getIntroMessage = async (
     prospectId: number,
@@ -1394,83 +1408,6 @@ function IntroMessageSection(props: {
           </Box>
         )}
 
-        {currentProject.template_mode && showFeedback && (
-          <>
-            <Card mb='16px'>
-              <Card.Section
-                sx={{
-                  backgroundColor: theme.colors.grape[6],
-                  flexDirection: 'row',
-                  display: 'flex',
-                }}
-                p='xs'
-              >
-                <Text color='white' mt='4px' size='sm'>
-                  <IconBulb size='1.2rem' color='white' />
-                  <span style={{ marginLeft: '8px' }}>
-                    FINE TUNING: Feel free to give me feedback on improving the message
-                  </span>
-                </Text>
-              </Card.Section>
-              <Card.Section
-                sx={{ border: 'solid 2px ' + theme.colors.grape[6] + ' !important' }}
-                p='8px'
-              >
-                <Textarea
-                  variant='unstyled'
-                  pl={'8px'}
-                  pr={'8px'}
-                  size='xs'
-                  minRows={3}
-                  placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
-                  value={humanFeedbackForTemplate}
-                  onChange={(e) => {
-                    const value = e.target.value;
-
-                    setHumanFeedbackForTemplate(value);
-                    setHumanFeedbackForTemplateChanged(true);
-                  }}
-                />
-              </Card.Section>
-            </Card>
-            {humanFeedbackForTemplateChanged && (
-              <Box
-                sx={{ justifyContent: 'right', textAlign: 'right' }}
-                onClick={() => {
-                  updateLiTemplate(
-                    userToken,
-                    currentProject.id,
-                    selectedTemplateId || -1,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    humanFeedbackForTemplate
-                  )
-                    .then((res) => {
-                      queryClient.invalidateQueries({
-                        queryKey: [`query-get-li-templates`],
-                      });
-                    })
-                    .then((res) => {
-                      setHumanFeedbackForTemplateChanged(false);
-                      setHumanFeedbackForTemplate('');
-                      showNotification({
-                        title: 'Success',
-                        message: 'Feedback saved. Try regenerating.',
-                        color: 'green',
-                      });
-                    });
-                }}
-              >
-                <Button color='green'>Save Feedback</Button>
-              </Box>
-            )}
-          </>
-        )}
-
         {currentProject.template_mode ? (
           <>
             <CTAGeneratorSuggestedModal
@@ -1501,323 +1438,12 @@ function IntroMessageSection(props: {
                 });
               }}
             />
-            {isFetchingTemplates ? (
-              <Box>
-                <Loader
-                  sx={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                />
-              </Box>
-            ) : (
-              <Stack>
-                <Stack mt='xs'>
-                  {templates
-                    ?.filter((t: any) => templateActivesShow.includes(t.active))
-                    .sort((a: any, b: any) =>
-                      a.active != b.active ? -(a.active - b.active) : a.title - b.title
-                    )
-                    .map((template, index) => (
-                      <Paper
-                        key={index}
-                        p='md'
-                        mih={80}
-                        sx={{
-                          position: 'relative',
-                          cursor: 'pointer',
-                          border:
-                            selectedTemplateId === template.id
-                              ? 'solid 1px #339af0 !important'
-                              : '',
-                          backgroundColor:
-                            selectedTemplateId === template.id ? '#339af008 !important' : '',
-                          flexDirection: 'row',
-                          display: 'flex',
-                        }}
-                        withBorder
-                        onClick={() => {
-                          setSelectedTemplateId(template.id);
-                          setHumanFeedbackForTemplate(template.additional_instructions);
-                        }}
-                      >
-                        <Box
-                          miw='100px'
-                          mah={80}
-                          sx={{
-                            border: 'solid 1px #339af022',
-                            backgroundColor: '#339af022',
-                            padding: '8px',
-                            borderRadius: '4px',
-                            textAlign: 'center',
-                          }}
-                          mt='xl'
-                          mr='md'
-                        >
-                          <Text fw='bold' fz='md' color='blue' mt='xs'>
-                            {Math.round(
-                              (template.times_accepted / (template.times_used + 0.0001)) * 100
-                            )}
-                            % reply
-                          </Text>
-                          <Text color='blue' size='xs'>
-                            {template.times_accepted} / {template.times_used} times
-                          </Text>
-                        </Box>
-
-                        <Box mr={40} w='100%'>
-                          <Flex>
-                            <Text
-                              size='sm'
-                              fw='600'
-                              mb='xs'
-                              sx={{ textTransform: 'uppercase' }}
-                              color='gray'
-                              variant='outline'
-                            >
-                              {template.title}
-                            </Text>
-                            {/* Hovercard for transformers */}
-                            {template.research_points && template.research_points.length > 0 && (
-                              <HoverCard width={280} shadow='md'>
-                                <HoverCard.Target>
-                                  <Badge
-                                    leftSection={
-                                      <IconSearch size='0.8rem' style={{ marginTop: 4 }} />
-                                    }
-                                    color='lime'
-                                    variant='filled'
-                                    ml='xs'
-                                    size='xs'
-                                  >
-                                    {template.research_points.length} Research Points
-                                  </Badge>
-                                </HoverCard.Target>
-                                <HoverCard.Dropdown
-                                  style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                                >
-                                  <Paper
-                                    style={{
-                                      backgroundColor: 'rgb(34, 37, 41)',
-                                      color: 'white',
-                                      padding: 10,
-                                    }}
-                                  >
-                                    <TextWithNewline style={{ fontSize: '12px' }}>
-                                      {'<b>Active Research Points:</b>\n- ' +
-                                        template.research_points
-                                          .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                          .join('\n- ')}
-                                    </TextWithNewline>
-                                  </Paper>
-                                </HoverCard.Dropdown>
-                              </HoverCard>
-                            )}
-                            {template.additional_instructions && (
-                              <HoverCard width={280} shadow='md'>
-                                <HoverCard.Target>
-                                  <Badge
-                                    leftSection={<IconBulb size='0.8rem' />}
-                                    color='grape'
-                                    variant='filled'
-                                    ml='xs'
-                                    size='xs'
-                                  >
-                                    Fine Tuned
-                                  </Badge>
-                                </HoverCard.Target>
-                                <HoverCard.Dropdown
-                                  style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                                >
-                                  <Paper
-                                    style={{
-                                      backgroundColor: 'rgb(34, 37, 41)',
-                                      color: 'white',
-                                      padding: 10,
-                                    }}
-                                  >
-                                    <TextWithNewline style={{ fontSize: '12px' }}>
-                                      {'<b>Additional Instructions:</b>\n' +
-                                        template.additional_instructions}
-                                    </TextWithNewline>
-                                  </Paper>
-                                </HoverCard.Dropdown>
-                              </HoverCard>
-                            )}
-                          </Flex>
-                          <Card
-                            withBorder
-                            w='100%'
-                            sx={{
-                              backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb',
-                            }}
-                          >
-                            <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
-                              <div
-                                dangerouslySetInnerHTML={{
-                                  __html: DOMPurify.sanitize(
-                                    template.message
-                                      .replaceAll(
-                                        '[[',
-                                        "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                          theme.colors['blue'][5] +
-                                          "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
-                                      )
-                                      .replaceAll(']]', '</span>') as string
-                                  ),
-                                }}
-                              />
-                            </Text>
-                          </Card>
-                        </Box>
-
-                        <Box sx={{ justifyContent: 'right' }} ml='auto'>
-                          <Switch
-                            sx={{ cursor: 'pointer' }}
-                            checked={template.active}
-                            onChange={(e) => {
-                              updateLiTemplate(
-                                userToken,
-                                currentProject.id,
-                                template.id,
-                                template.title,
-                                template.message,
-                                e.target.checked
-                              ).then((res) => {
-                                queryClient.invalidateQueries({
-                                  queryKey: [`query-get-li-templates`],
-                                });
-                              });
-                            }}
-                          />
-                          <Button
-                            mt='xs'
-                            variant='subtle'
-                            radius='xl'
-                            size='sm'
-                            compact
-                            onClick={() => {
-                              openContextModal({
-                                modal: 'liTemplate',
-                                title: 'Edit Template',
-                                innerProps: {
-                                  mode: 'EDIT',
-                                  editProps: {
-                                    templateId: template.id,
-                                    title: template.title,
-                                    message: template.message,
-                                    active: template.active,
-                                    humanFeedback: template.additional_instructions,
-                                    researchPoints: template.research_points,
-                                  },
-                                },
-                              });
-                            }}
-                          >
-                            Edit
-                          </Button>
-                        </Box>
-                      </Paper>
-                    ))}
-                </Stack>
-                <Button
-                  onClick={() => {
-                    if (templateActivesShow.length === 1) {
-                      setTemplateActivesShow([true, false]);
-                    } else {
-                      setTemplateActivesShow([true]);
-                    }
-                  }}
-                  color='gray'
-                  variant='subtle'
-                  leftIcon={
-                    <IconChevronDown
-                      size='1rem'
-                      style={{
-                        transform: templateActivesShow.length === 1 ? '' : 'rotate(180deg)',
-                      }}
-                    />
-                  }
-                >
-                  Show{' '}
-                  {templateActivesShow.includes(true) ? 'All Templates' : 'Active Templates Only'}
-                </Button>
-              </Stack>
-            )}
-
-            <Flex sx={{ justifyContent: 'right' }}>
-              {/* <Button
-                onClick={() => setCtaModalOpened(true)}
-                size='sm'
-                variant='outline'
-                color='lime'
-                mr='sm'
-                compact
-              >
-                Brainstorm Templates
-              </Button> */}
-              <InitialMessageTemplateSelector
-                onSelect={(template: LinkedinInitialMessageTemplate) => {
-                  showNotification({
-                    title: '🤖 Generating...',
-                    message: 'Generating custom "' + template.name + '" template...',
-                    color: 'blue',
-                  });
-
-                  fetch(`${API_URL}/linkedin_template/adjust_template_for_client`, {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      Authorization: `Bearer ${userToken}`,
-                    },
-                    body: JSON.stringify({
-                      template_id: template.id,
-                    }),
-                  })
-                    .then((res) => {
-                      return res.json();
-                    })
-                    .then((res) => {
-                      const adjustedTemplate = res['adjusted_template'];
-                      openContextModal({
-                        modal: 'liTemplate',
-                        title: 'Create Template',
-                        innerProps: {
-                          mode: 'CREATE',
-                          editProps: {
-                            title: template.name,
-                            message: adjustedTemplate,
-                            active: true,
-                            humanFeedback: '',
-                            researchPoints: [],
-                          },
-                        },
-                      });
-                    });
-                }}
-              />
-              <Stack spacing={5}>
-                <Button
-                  variant='outline'
-                  radius='md'
-                  compact
-                  color='orange'
-                  onClick={() => {
-                    openContextModal({
-                      modal: 'liTemplate',
-                      title: 'Create Template',
-                      innerProps: {
-                        mode: 'CREATE',
-                      },
-                    });
-                  }}
-                >
-                  Create New
-                </Button>
-              </Stack>
-            </Flex>
+            <TemplateSection
+              showFeedback={showFeedback}
+              onFoundTemplate={(id) => {
+                setSelectedTemplateId(id);
+              }}
+            />
           </>
         ) : (
           <Tabs
@@ -2464,7 +2090,6 @@ function FrameworkCard(props: {
             </Tooltip>
           )}
           <Group spacing={3}>
-            {props.canEdit && props.editProps && <BumpFrameworkSelect {...props.editProps} />}
             {props.canRemove && props.onRemove && (
               <Tooltip label='Remove' withinPortal>
                 <ActionIcon
@@ -2518,12 +2143,68 @@ function FrameworkCard(props: {
   );
 }
 
+function FrameworkSectionShell(props: {
+  frameworks: BumpFramework[];
+  framework?: BumpFramework;
+  bumpCount: number;
+  setIsDataChanged: (val: boolean) => void;
+  prospectId: number;
+  setProspectId: (prospectId: number) => void;
+  editProps?: {
+    title: string;
+    bumpedCount: number;
+    bumpedFrameworks: BumpFramework[];
+    activeBumpFrameworkId: number;
+    overallStatus: string;
+  };
+}) {
+  const frameworks = props.frameworks.sort((a, b) => {
+    if (a.default) return 1;
+    if (b.default) return -1;
+    return 0;
+  });
+
+  const [activeFramework, setActiveFramework] = useState<BumpFramework>(
+    props.framework ?? frameworks[0]
+  );
+  const [displayFrameworkSection, refreshFrameworkSection] = useRefresh();
+
+  return (
+    <>
+      {displayFrameworkSection && (
+        <FrameworkSection
+          frameworks={frameworks}
+          framework={_.cloneDeep(activeFramework)}
+          bumpCount={props.bumpCount}
+          setIsDataChanged={props.setIsDataChanged}
+          prospectId={props.prospectId}
+          setProspectId={props.setProspectId}
+          editProps={props.editProps}
+          onFrameworkChange={(framework) => {
+            setActiveFramework(framework);
+            refreshFrameworkSection();
+          }}
+        />
+      )}
+    </>
+  );
+}
+
 function FrameworkSection(props: {
+  frameworks: BumpFramework[];
   framework: BumpFramework;
   bumpCount: number;
   setIsDataChanged: (val: boolean) => void;
   prospectId: number;
   setProspectId: (prospectId: number) => void;
+  editProps?: {
+    title: string;
+    bumpedCount: number;
+    bumpedFrameworks: BumpFramework[];
+    activeBumpFrameworkId: number;
+    overallStatus: string;
+  };
+  onFrameworkChange: (framework: BumpFramework) => void;
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
@@ -2542,12 +2223,6 @@ function FrameworkSection(props: {
   const [noProspectsFound, setNoProspectsFound] = useState(false);
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
 
-  const [humanReadableContext, setHumanReadableContext] = useState<string | undefined>(
-    props.framework.bump_framework_human_readable_prompt
-  );
-  const [contextQuestion, setContextQuestion] = useState(
-    props.framework.bump_framework_human_readable_prompt
-  );
   const [opened, { toggle }] = useDisclosure(false);
 
   const [activeTab, setActiveTab] = useState<string | null>('none');
@@ -2601,6 +2276,8 @@ function FrameworkSection(props: {
     useDisclosure(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [editing, setEditing] = useState(false);
+
+  const [templateShowAll, setTemplateShowAll] = useState(false);
 
   const [savingSettings, setSavingSettings] = useState(false);
   useEffect(() => {
@@ -2992,207 +2669,258 @@ function FrameworkSection(props: {
               </>
             )}
 
-            <Paper
-              p='md'
-              mih={80}
-              sx={{
-                position: 'relative',
-                cursor: 'pointer',
-                border: 'solid 1px #339af0 !important',
-                backgroundColor: '#339af008 !important',
-                flexDirection: 'row',
-                display: 'flex',
-              }}
-              withBorder
-              onClick={() => {
-                // setSelectedTemplateId(template.id);
-                // setHumanFeedbackForTemplate(template.additional_instructions);
-              }}
-            >
-              <Box
-                miw='100px'
-                mah={80}
-                sx={{
-                  border: 'solid 1px #339af022',
-                  backgroundColor: '#339af022',
-                  padding: '8px',
-                  borderRadius: '4px',
-                  textAlign: 'center',
-                }}
-                mt='xl'
-                mr='md'
-                onClick={() => {
-                  openContextModal({
-                    modal: 'frameworkReplies',
-                    title: 'Past Example Usages',
-                    innerProps: {
-                      bumpId: props.framework.id,
-                    },
-                  });
-                }}
-              >
-                <Text fw='bold' fz='md' color='blue' mt='xs'>
-                  {props.framework.etl_num_times_used != null &&
-                    props.framework.etl_num_times_converted != null &&
-                    Math.round(
-                      (props.framework.etl_num_times_converted /
-                        (props.framework.etl_num_times_used + 0.0001)) *
-                        100
-                    )}
-                  % reply
-                </Text>
-                <Text size='8px' color='blue' fz={'xs'} fw='500'>
-                  ({props.framework.etl_num_times_converted}/{props.framework.etl_num_times_used}{' '}
-                  times)
-                </Text>
-              </Box>
-
-              <Box mr={40} w='100%'>
-                <Flex>
-                  <Text
-                    size='sm'
-                    fw='600'
-                    mb='xs'
-                    sx={{ textTransform: 'uppercase' }}
-                    color='gray'
-                    variant='outline'
-                  >
-                    {props.framework.title}
-                  </Text>
-                  {/* Hovercard for transformers */}
-
-                  <HoverCard width={280} shadow='md'>
-                    <HoverCard.Target>
-                      <Badge
-                        leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                        color='lime'
-                        variant={
-                          props.framework.active_transformers &&
-                          props.framework.active_transformers.length > 0
-                            ? 'filled'
-                            : 'outline'
-                        }
-                        ml='xs'
-                        size='xs'
-                        onClick={() => {
-                          toggle();
-                        }}
-                      >
-                        {props.framework.active_transformers &&
-                        props.framework.active_transformers.length > 0
-                          ? props.framework.active_transformers.length + ' Research Points'
-                          : '0 Research Points'}
-                      </Badge>
-                    </HoverCard.Target>
-                    <HoverCard.Dropdown style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}>
-                      <Paper
-                        style={{
-                          backgroundColor: 'rgb(34, 37, 41)',
-                          color: 'white',
-                          padding: 10,
-                        }}
-                      >
-                        <TextWithNewline style={{ fontSize: '12px' }}>
-                          {props.framework.active_transformers.length > 0
-                            ? '<b>Active Research Points:</b>\n- ' +
-                              props.framework.active_transformers
-                                .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                .join('\n- ')
-                            : 'Click to activate more research points'}
-                        </TextWithNewline>
-                      </Paper>
-                    </HoverCard.Dropdown>
-                  </HoverCard>
-
-                  {props.framework.human_feedback && (
-                    <HoverCard width={280} shadow='md'>
-                      <HoverCard.Target>
-                        <Badge
-                          leftSection={<IconBulb size='0.8rem' />}
-                          color='grape'
-                          variant='filled'
-                          ml='xs'
-                          size='xs'
-                        >
-                          Fine Tuned
-                        </Badge>
-                      </HoverCard.Target>
-                      <HoverCard.Dropdown
-                        style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-                      >
-                        <Paper
-                          style={{
-                            backgroundColor: 'rgb(34, 37, 41)',
-                            color: 'white',
-                            padding: 10,
-                          }}
-                        >
-                          <TextWithNewline style={{ fontSize: '12px' }}>
-                            {'<b>Additional Instructions:</b>\n' + props.framework.human_feedback}
-                          </TextWithNewline>
-                        </Paper>
-                      </HoverCard.Dropdown>
-                    </HoverCard>
-                  )}
-                </Flex>
-                <Card withBorder w='100%' sx={{}}>
-                  {editing ? (
-                    <FocusTrap active={true}>
-                      <Textarea
-                        placeholder='Instructions'
-                        minRows={3}
-                        autosize
-                        variant='filled'
-                        {...form.getInputProps('promptInstructions')}
-                        onBlur={() => {
-                          setEditing(false);
-                        }}
-                      />
-                    </FocusTrap>
-                  ) : (
-                    <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
-                      <div
-                        onClick={() => {
-                          setEditing(true);
-                        }}
-                        dangerouslySetInnerHTML={{
-                          __html: DOMPurify.sanitize(
-                            form.values.promptInstructions
-                              .replaceAll(
-                                '[[',
-                                "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                  theme.colors['blue'][5] +
-                                  "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
-                              )
-                              .replaceAll(']]', '</span>')
-                              .replaceAll(
-                                '\n',
-                                `<br style="display: block; content: ' '; margin: 10px 0 "/>`
-                              ) as string
-                          ),
-                        }}
-                      />
-                    </Text>
-                  )}
-                </Card>
-              </Box>
-
-              {/* <Box sx={{ justifyContent: 'right' }} ml='auto'>
-                <Button
-                  mt='xs'
-                  variant='subtle'
-                  radius='xl'
-                  size='sm'
-                  compact
+            <Stack spacing={10}>
+              {(templateShowAll
+                ? props.frameworks
+                : [props.frameworks.find((v) => v.id === props.framework.id)!]
+              ).map((bf, index) => (
+                <Paper
+                  key={index}
+                  p='md'
+                  mih={80}
+                  sx={{
+                    position: 'relative',
+                    cursor: 'pointer',
+                    border:
+                      bf.id === props.framework.id ? 'solid 1px #339af0 !important' : undefined,
+                    backgroundColor:
+                      bf.id === props.framework.id ? '#339af008 !important' : undefined,
+                    flexDirection: 'row',
+                    display: 'flex',
+                  }}
+                  withBorder
                   onClick={() => {
-                    setEditing((prev) => !prev);
+                    props.onFrameworkChange(_.cloneDeep(bf));
                   }}
                 >
-                  {editing ? 'Save' : 'Edit'}
-                </Button>
-              </Box> */}
-            </Paper>
+                  <Box
+                    miw='100px'
+                    mah={80}
+                    sx={{
+                      border: 'solid 1px #339af022',
+                      backgroundColor: '#339af022',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      textAlign: 'center',
+                    }}
+                    mt='xl'
+                    mr='md'
+                    onClick={() => {
+                      openContextModal({
+                        modal: 'frameworkReplies',
+                        title: 'Past Example Usages',
+                        innerProps: {
+                          bumpId: bf.id,
+                        },
+                      });
+                    }}
+                  >
+                    <Text fw='bold' fz='md' color='blue' mt='xs'>
+                      {bf.etl_num_times_used != null &&
+                        bf.etl_num_times_converted != null &&
+                        Math.round(
+                          (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 100
+                        )}
+                      % reply
+                    </Text>
+                    <Text size='8px' color='blue' fz={'xs'} fw='500'>
+                      ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
+                    </Text>
+                  </Box>
+
+                  <Box mr={40} w='100%'>
+                    <Flex>
+                      <Text
+                        size='sm'
+                        fw='600'
+                        mb='xs'
+                        sx={{ textTransform: 'uppercase' }}
+                        color='gray'
+                        variant='outline'
+                      >
+                        {bf.title}
+                      </Text>
+                      {/* Hovercard for transformers */}
+
+                      <HoverCard width={280} shadow='md'>
+                        <HoverCard.Target>
+                          <Badge
+                            leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
+                            color='lime'
+                            variant={
+                              bf.active_transformers && bf.active_transformers.length > 0
+                                ? 'filled'
+                                : 'outline'
+                            }
+                            ml='xs'
+                            size='xs'
+                            onClick={() => {
+                              toggle();
+                            }}
+                          >
+                            {bf.active_transformers && bf.active_transformers.length > 0
+                              ? bf.active_transformers.length + ' Research Points'
+                              : '0 Research Points'}
+                          </Badge>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown
+                          style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                        >
+                          <Paper
+                            style={{
+                              backgroundColor: 'rgb(34, 37, 41)',
+                              color: 'white',
+                              padding: 10,
+                            }}
+                          >
+                            <TextWithNewline style={{ fontSize: '12px' }}>
+                              {bf.active_transformers.length > 0
+                                ? '<b>Active Research Points:</b>\n- ' +
+                                  bf.active_transformers
+                                    .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
+                                    .join('\n- ')
+                                : 'Click to activate more research points'}
+                            </TextWithNewline>
+                          </Paper>
+                        </HoverCard.Dropdown>
+                      </HoverCard>
+
+                      {bf.human_feedback && (
+                        <HoverCard width={280} shadow='md'>
+                          <HoverCard.Target>
+                            <Badge
+                              leftSection={<IconBulb size='0.8rem' />}
+                              color='grape'
+                              variant='filled'
+                              ml='xs'
+                              size='xs'
+                            >
+                              Fine Tuned
+                            </Badge>
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown
+                            style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                          >
+                            <Paper
+                              style={{
+                                backgroundColor: 'rgb(34, 37, 41)',
+                                color: 'white',
+                                padding: 10,
+                              }}
+                            >
+                              <TextWithNewline style={{ fontSize: '12px' }}>
+                                {'<b>Additional Instructions:</b>\n' + bf.human_feedback}
+                              </TextWithNewline>
+                            </Paper>
+                          </HoverCard.Dropdown>
+                        </HoverCard>
+                      )}
+                    </Flex>
+                    <Card withBorder w='100%' sx={{}}>
+                      {editing ? (
+                        <FocusTrap active={true}>
+                          <Textarea
+                            placeholder='Instructions'
+                            minRows={3}
+                            autosize
+                            variant='filled'
+                            defaultValue={bf.description}
+                            onChange={(e) => {
+                              form.setFieldValue('promptInstructions', e.target.value);
+                              setChanged(true);
+                            }}
+                            onBlur={() => {
+                              setEditing(false);
+                            }}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          />
+                        </FocusTrap>
+                      ) : (
+                        <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                          <div
+                            // onClick={() => {
+                            //   setEditing(true);
+                            // }}
+                            dangerouslySetInnerHTML={{
+                              __html: DOMPurify.sanitize(
+                                bf.description
+                                  .replaceAll(
+                                    '[[',
+                                    "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
+                                      theme.colors['blue'][5] +
+                                      "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                  )
+                                  .replaceAll(']]', '</span>')
+                                  .replaceAll(
+                                    '\n',
+                                    `<br style="display: block; content: ' '; margin: 10px 0 "/>`
+                                  ) as string
+                              ),
+                            }}
+                          />
+                        </Text>
+                      )}
+                    </Card>
+                  </Box>
+                  <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                    <Switch
+                      sx={{ cursor: 'pointer' }}
+                      checked={bf.default}
+                      onChange={(checked) => {
+                        setLoading(true);
+                        const result = patchBumpFramework(
+                          userToken,
+                          bf.id,
+                          bf.overall_status,
+                          bf.title,
+                          bf.description,
+                          bf.bump_length,
+                          bf.bumped_count,
+                          bf.bump_delay_days,
+                          !bf.default,
+                          bf.use_account_research,
+                          bf.transformer_blocklist
+                        )
+                          .then(() => {
+                            showNotification({
+                              title: 'Success',
+                              message: 'Bump Framework enabled',
+                              color: 'green',
+                            });
+                          })
+                          .finally(() => {
+                            (async () => {
+                              await queryClient.refetchQueries({
+                                queryKey: [`query-get-bump-frameworks`],
+                              });
+                              setLoading(false);
+                            })();
+                          });
+                      }}
+                    />
+                    <Button
+                      mt='xs'
+                      variant='subtle'
+                      radius='xl'
+                      size='sm'
+                      compact
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setEditing(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Box>
+                </Paper>
+              ))}
+            </Stack>
           </form>
+
           <Modal opened={opened} onClose={toggle} size='lg'>
             <Box w='100%' mb='md'>
               <Title order={4}>"{form.values.frameworkName}" Research Points</Title>
@@ -3228,332 +2956,466 @@ function FrameworkSection(props: {
             </Box>
           </Modal>
         </Stack>
+
+        {props.frameworks.length > 1 && (
+          <Button
+            onClick={() => {
+              setTemplateShowAll((p) => !p);
+            }}
+            color='gray'
+            variant='subtle'
+            leftIcon={
+              <IconChevronDown
+                size='1rem'
+                style={{
+                  transform: templateShowAll ? '' : 'rotate(180deg)',
+                }}
+              />
+            }
+          >
+            Show {templateShowAll ? 'All Templates' : 'Active Templates Only'}
+          </Button>
+        )}
+
+        <Flex pt={15} sx={{ justifyContent: 'right' }}>
+          {props.editProps && <BumpFrameworkSelect {...props.editProps} />}
+        </Flex>
       </Stack>
     </>
   );
 }
 
-// {currentProject.template_mode && (
-//   <>
-//     {isFetchingTemplates ? (
-//       <Box>
-//         <Loader
-//           sx={{
-//             position: 'absolute',
-//             top: '50%',
-//             left: '50%',
-//             transform: 'translate(-50%, -50%)',
-//           }}
-//         />
-//       </Box>
-//     ) : (
-//       <Stack>
-//         <Stack mt='xs'>
-//           {templates
-//             ?.filter((t: any) => templateActivesShow.includes(t.active))
-//             .sort((a: any, b: any) =>
-//               a.active != b.active ? -(a.active - b.active) : a.title - b.title
-//             )
-//             .map((template, index) => (
-//               <Paper
-//                 key={index}
-//                 p='md'
-//                 mih={80}
-//                 sx={{
-//                   position: 'relative',
-//                   cursor: 'pointer',
-//                   border:
-//                     selectedTemplateId === template.id
-//                       ? 'solid 1px #339af0 !important'
-//                       : '',
-//                   backgroundColor:
-//                     selectedTemplateId === template.id ? '#339af008 !important' : '',
-//                   flexDirection: 'row',
-//                   display: 'flex',
-//                 }}
-//                 withBorder
-//                 onClick={() => {
-//                   setSelectedTemplateId(template.id);
-//                   setHumanFeedbackForTemplate(template.additional_instructions);
-//                 }}
-//               >
-//                 <Box
-//                   miw='100px'
-//                   mah={80}
-//                   sx={{
-//                     border: 'solid 1px #339af022',
-//                     backgroundColor: '#339af022',
-//                     padding: '8px',
-//                     borderRadius: '4px',
-//                     textAlign: 'center',
-//                   }}
-//                   mt='xl'
-//                   mr='md'
-//                 >
-//                   <Text fw='bold' fz='md' color='blue' mt='xs'>
-//                     {Math.round(
-//                       (template.times_accepted / (template.times_used + 0.0001)) * 100
-//                     )}
-//                     % reply
-//                   </Text>
-//                   <Text color='blue' size='xs'>
-//                     {template.times_accepted} / {template.times_used} times
-//                   </Text>
-//                 </Box>
+function TemplateSection(props: {
+  showFeedback: boolean;
+  onFoundTemplate: (templateId: number) => void;
+}) {
+  const theme = useMantineTheme();
+  const queryClient = useQueryClient();
+  const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
 
-//                 <Box mr={40} w='100%'>
-//                   <Flex>
-//                     <Text
-//                       size='sm'
-//                       fw='600'
-//                       mb='xs'
-//                       sx={{ textTransform: 'uppercase' }}
-//                       color='gray'
-//                       variant='outline'
-//                     >
-//                       {template.title}
-//                     </Text>
-//                     {/* Hovercard for transformers */}
-//                     {template.research_points && template.research_points.length > 0 && (
-//                       <HoverCard width={280} shadow='md'>
-//                         <HoverCard.Target>
-//                           <Badge
-//                             leftSection={
-//                               <IconSearch size='0.8rem' style={{ marginTop: 4 }} />
-//                             }
-//                             color='lime'
-//                             variant='filled'
-//                             ml='xs'
-//                             size='xs'
-//                           >
-//                             {template.research_points.length} Research Points
-//                           </Badge>
-//                         </HoverCard.Target>
-//                         <HoverCard.Dropdown
-//                           style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-//                         >
-//                           <Paper
-//                             style={{
-//                               backgroundColor: 'rgb(34, 37, 41)',
-//                               color: 'white',
-//                               padding: 10,
-//                             }}
-//                           >
-//                             <TextWithNewline style={{ fontSize: '12px' }}>
-//                               {'<b>Active Research Points:</b>\n- ' +
-//                                 template.research_points
-//                                   .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-//                                   .join('\n- ')}
-//                             </TextWithNewline>
-//                           </Paper>
-//                         </HoverCard.Dropdown>
-//                       </HoverCard>
-//                     )}
-//                     {template.additional_instructions && (
-//                       <HoverCard width={280} shadow='md'>
-//                         <HoverCard.Target>
-//                           <Badge
-//                             leftSection={<IconBulb size='0.8rem' />}
-//                             color='grape'
-//                             variant='filled'
-//                             ml='xs'
-//                             size='xs'
-//                           >
-//                             Fine Tuned
-//                           </Badge>
-//                         </HoverCard.Target>
-//                         <HoverCard.Dropdown
-//                           style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
-//                         >
-//                           <Paper
-//                             style={{
-//                               backgroundColor: 'rgb(34, 37, 41)',
-//                               color: 'white',
-//                               padding: 10,
-//                             }}
-//                           >
-//                             <TextWithNewline style={{ fontSize: '12px' }}>
-//                               {'<b>Additional Instructions:</b>\n' +
-//                                 template.additional_instructions}
-//                             </TextWithNewline>
-//                           </Paper>
-//                         </HoverCard.Dropdown>
-//                       </HoverCard>
-//                     )}
-//                   </Flex>
-//                   <Card
-//                     withBorder
-//                     w='100%'
-//                     sx={{
-//                       backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb',
-//                     }}
-//                   >
-//                     <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
-//                       <div
-//                         dangerouslySetInnerHTML={{
-//                           __html: DOMPurify.sanitize(
-//                             template.message
-//                               .replaceAll(
-//                                 '[[',
-//                                 "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-//                                   theme.colors['blue'][5] +
-//                                   "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
-//                               )
-//                               .replaceAll(']]', '</span>') as string
-//                           ),
-//                         }}
-//                       />
-//                     </Text>
-//                   </Card>
-//                 </Box>
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
+  const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
+    useState<boolean>(false);
+  const [humanFeedbackForTemplate, setHumanFeedbackForTemplate] = useState<string>();
 
-//                 <Box sx={{ justifyContent: 'right' }} ml='auto'>
-//                   <Switch
-//                     sx={{ cursor: 'pointer' }}
-//                     checked={template.active}
-//                     onChange={(e) => {
-//                       updateLiTemplate(
-//                         userToken,
-//                         currentProject.id,
-//                         template.id,
-//                         template.title,
-//                         template.message,
-//                         e.target.checked
-//                       ).then((res) => {
-//                         queryClient.invalidateQueries({
-//                           queryKey: [`query-get-li-templates`],
-//                         });
-//                       });
-//                     }}
-//                   />
-//                   <Button
-//                     mt='xs'
-//                     variant='subtle'
-//                     radius='xl'
-//                     size='sm'
-//                     compact
-//                     onClick={() => {
-//                       openContextModal({
-//                         modal: 'liTemplate',
-//                         title: 'Edit Template',
-//                         innerProps: {
-//                           mode: 'EDIT',
-//                           editProps: {
-//                             templateId: template.id,
-//                             title: template.title,
-//                             message: template.message,
-//                             active: template.active,
-//                             humanFeedback: template.additional_instructions,
-//                             researchPoints: template.research_points,
-//                           },
-//                         },
-//                       });
-//                     }}
-//                   >
-//                     Edit
-//                   </Button>
-//                 </Box>
-//               </Paper>
-//             ))}
-//         </Stack>
-//         <Button
-//           onClick={() => {
-//             if (templateActivesShow.length === 1) {
-//               setTemplateActivesShow([true, false]);
-//             } else {
-//               setTemplateActivesShow([true]);
-//             }
-//           }}
-//           color='gray'
-//           variant='subtle'
-//           leftIcon={
-//             <IconChevronDown
-//               size='1rem'
-//               style={{
-//                 transform: templateActivesShow.length === 1 ? '' : 'rotate(180deg)',
-//               }}
-//             />
-//           }
-//         >
-//           Show{' '}
-//           {templateActivesShow.includes(true) ? 'All Templates' : 'Active Templates Only'}
-//         </Button>
-//       </Stack>
-//     )}
+  const [templateActivesShow, setTemplateActivesShow] = useState([true]);
 
-//     <Flex sx={{ justifyContent: 'right' }}>
-//       {/* <Button
-//         onClick={() => setCtaModalOpened(true)}
-//         size='sm'
-//         variant='outline'
-//         color='lime'
-//         mr='sm'
-//         compact
-//       >
-//         Brainstorm Templates
-//       </Button> */}
-//       <InitialMessageTemplateSelector
-//         onSelect={(template: LinkedinInitialMessageTemplate) => {
-//           showNotification({
-//             title: '🤖 Generating...',
-//             message: 'Generating custom "' + template.name + '" template...',
-//             color: 'blue',
-//           });
+  useEffect(() => {
+    if (!selectedTemplateId) return;
+    props.onFoundTemplate(selectedTemplateId);
+  }, [selectedTemplateId]);
 
-//           fetch(`${API_URL}/linkedin_template/adjust_template_for_client`, {
-//             method: 'POST',
-//             headers: {
-//               'Content-Type': 'application/json',
-//               Authorization: `Bearer ${userToken}`,
-//             },
-//             body: JSON.stringify({
-//               template_id: template.id,
-//             }),
-//           })
-//             .then((res) => {
-//               return res.json();
-//             })
-//             .then((res) => {
-//               const adjustedTemplate = res['adjusted_template'];
-//               openContextModal({
-//                 modal: 'liTemplate',
-//                 title: 'Create Template',
-//                 innerProps: {
-//                   mode: 'CREATE',
-//                   editProps: {
-//                     title: template.name,
-//                     message: adjustedTemplate,
-//                     active: true,
-//                     humanFeedback: '',
-//                     researchPoints: [],
-//                   },
-//                 },
-//               });
-//             });
-//         }}
-//       />
-//       <Stack spacing={5}>
-//         <Button
-//           variant='outline'
-//           radius='md'
-//           compact
-//           color='orange'
-//           onClick={() => {
-//             openContextModal({
-//               modal: 'liTemplate',
-//               title: 'Create Template',
-//               innerProps: {
-//                 mode: 'CREATE',
-//               },
-//             });
-//           }}
-//         >
-//           Create New
-//         </Button>
-//       </Stack>
-//     </Flex>
-//   </>
-// )}
+  const { data: templates, isFetching: isFetchingTemplates } = useQuery({
+    queryKey: [`query-get-li-templates`],
+    queryFn: async () => {
+      const response = await getLiTemplates(userToken, currentProject!.id);
+
+      if (response.data?.length > 0) {
+        setSelectedTemplateId(response.data[0].id);
+        setHumanFeedbackForTemplate(response.data[0].additional_instructions);
+      }
+      return response.status === 'success' ? (response.data as Record<string, any>[]) : [];
+    },
+    refetchOnWindowFocus: false,
+    enabled: !!currentProject && !!currentProject.template_mode,
+  });
+
+  return (
+    <>
+      {props.showFeedback && (
+        <>
+          <Card mb='16px'>
+            <Card.Section
+              sx={{
+                backgroundColor: theme.colors.grape[6],
+                flexDirection: 'row',
+                display: 'flex',
+              }}
+              p='xs'
+            >
+              <Text color='white' mt='4px' size='sm'>
+                <IconBulb size='1.2rem' color='white' />
+                <span style={{ marginLeft: '8px' }}>
+                  FINE TUNING: Feel free to give me feedback on improving the message
+                </span>
+              </Text>
+            </Card.Section>
+            <Card.Section
+              sx={{ border: 'solid 2px ' + theme.colors.grape[6] + ' !important' }}
+              p='8px'
+            >
+              <Textarea
+                variant='unstyled'
+                pl={'8px'}
+                pr={'8px'}
+                size='xs'
+                minRows={3}
+                placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                value={humanFeedbackForTemplate}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  setHumanFeedbackForTemplate(value);
+                  setHumanFeedbackForTemplateChanged(true);
+                }}
+              />
+            </Card.Section>
+          </Card>
+          {humanFeedbackForTemplateChanged && (
+            <Box
+              sx={{ justifyContent: 'right', textAlign: 'right' }}
+              onClick={() => {
+                if (!currentProject) return;
+                updateLiTemplate(
+                  userToken,
+                  currentProject.id,
+                  selectedTemplateId || -1,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  undefined,
+                  humanFeedbackForTemplate
+                )
+                  .then((res) => {
+                    queryClient.invalidateQueries({
+                      queryKey: [`query-get-li-templates`],
+                    });
+                  })
+                  .then((res) => {
+                    setHumanFeedbackForTemplateChanged(false);
+                    setHumanFeedbackForTemplate('');
+                    showNotification({
+                      title: 'Success',
+                      message: 'Feedback saved. Try regenerating.',
+                      color: 'green',
+                    });
+                  });
+              }}
+            >
+              <Button color='green'>Save Feedback</Button>
+            </Box>
+          )}
+        </>
+      )}
+      {isFetchingTemplates ? (
+        <Box>
+          <Loader
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+          />
+        </Box>
+      ) : (
+        <Stack>
+          <Stack mt='xs'>
+            {templates
+              ?.filter((t: any) => templateActivesShow.includes(t.active))
+              .sort((a: any, b: any) =>
+                a.active != b.active ? -(a.active - b.active) : a.title - b.title
+              )
+              .map((template, index) => (
+                <Paper
+                  key={index}
+                  p='md'
+                  mih={80}
+                  sx={{
+                    position: 'relative',
+                    cursor: 'pointer',
+                    border:
+                      selectedTemplateId === template.id ? 'solid 1px #339af0 !important' : '',
+                    backgroundColor:
+                      selectedTemplateId === template.id ? '#339af008 !important' : '',
+                    flexDirection: 'row',
+                    display: 'flex',
+                  }}
+                  withBorder
+                  onClick={() => {
+                    setSelectedTemplateId(template.id);
+                    setHumanFeedbackForTemplate(template.additional_instructions);
+                  }}
+                >
+                  <Box
+                    miw='100px'
+                    mah={80}
+                    sx={{
+                      border: 'solid 1px #339af022',
+                      backgroundColor: '#339af022',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      textAlign: 'center',
+                    }}
+                    mt='xl'
+                    mr='md'
+                  >
+                    <Text fw='bold' fz='md' color='blue' mt='xs'>
+                      {Math.round((template.times_accepted / (template.times_used + 0.0001)) * 100)}
+                      % reply
+                    </Text>
+                    <Text color='blue' size='xs'>
+                      {template.times_accepted} / {template.times_used} times
+                    </Text>
+                  </Box>
+
+                  <Box mr={40} w='100%'>
+                    <Flex>
+                      <Text
+                        size='sm'
+                        fw='600'
+                        mb='xs'
+                        sx={{ textTransform: 'uppercase' }}
+                        color='gray'
+                        variant='outline'
+                      >
+                        {template.title}
+                      </Text>
+                      {/* Hovercard for transformers */}
+                      {template.research_points && template.research_points.length > 0 && (
+                        <HoverCard width={280} shadow='md'>
+                          <HoverCard.Target>
+                            <Badge
+                              leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
+                              color='lime'
+                              variant='filled'
+                              ml='xs'
+                              size='xs'
+                            >
+                              {template.research_points.length} Research Points
+                            </Badge>
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown
+                            style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                          >
+                            <Paper
+                              style={{
+                                backgroundColor: 'rgb(34, 37, 41)',
+                                color: 'white',
+                                padding: 10,
+                              }}
+                            >
+                              <TextWithNewline style={{ fontSize: '12px' }}>
+                                {'<b>Active Research Points:</b>\n- ' +
+                                  template.research_points
+                                    .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
+                                    .join('\n- ')}
+                              </TextWithNewline>
+                            </Paper>
+                          </HoverCard.Dropdown>
+                        </HoverCard>
+                      )}
+                      {template.additional_instructions && (
+                        <HoverCard width={280} shadow='md'>
+                          <HoverCard.Target>
+                            <Badge
+                              leftSection={<IconBulb size='0.8rem' />}
+                              color='grape'
+                              variant='filled'
+                              ml='xs'
+                              size='xs'
+                            >
+                              Fine Tuned
+                            </Badge>
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown
+                            style={{ backgroundColor: 'rgb(34, 37, 41)', padding: 0 }}
+                          >
+                            <Paper
+                              style={{
+                                backgroundColor: 'rgb(34, 37, 41)',
+                                color: 'white',
+                                padding: 10,
+                              }}
+                            >
+                              <TextWithNewline style={{ fontSize: '12px' }}>
+                                {'<b>Additional Instructions:</b>\n' +
+                                  template.additional_instructions}
+                              </TextWithNewline>
+                            </Paper>
+                          </HoverCard.Dropdown>
+                        </HoverCard>
+                      )}
+                    </Flex>
+                    <Card
+                      withBorder
+                      w='100%'
+                      sx={{
+                        backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb',
+                      }}
+                    >
+                      <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(
+                              template.message
+                                .replaceAll(
+                                  '[[',
+                                  "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
+                                    theme.colors['blue'][5] +
+                                    "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                )
+                                .replaceAll(']]', '</span>') as string
+                            ),
+                          }}
+                        />
+                      </Text>
+                    </Card>
+                  </Box>
+
+                  <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                    <Switch
+                      sx={{ cursor: 'pointer' }}
+                      checked={template.active}
+                      onChange={(e) => {
+                        if (!currentProject) return;
+                        updateLiTemplate(
+                          userToken,
+                          currentProject.id,
+                          template.id,
+                          template.title,
+                          template.message,
+                          e.target.checked
+                        ).then((res) => {
+                          queryClient.invalidateQueries({
+                            queryKey: [`query-get-li-templates`],
+                          });
+                        });
+                      }}
+                    />
+                    <Button
+                      mt='xs'
+                      variant='subtle'
+                      radius='xl'
+                      size='sm'
+                      compact
+                      onClick={() => {
+                        openContextModal({
+                          modal: 'liTemplate',
+                          title: 'Edit Template',
+                          innerProps: {
+                            mode: 'EDIT',
+                            editProps: {
+                              templateId: template.id,
+                              title: template.title,
+                              message: template.message,
+                              active: template.active,
+                              humanFeedback: template.additional_instructions,
+                              researchPoints: template.research_points,
+                            },
+                          },
+                        });
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Box>
+                </Paper>
+              ))}
+          </Stack>
+          {(templates?.length ?? 0) > 1 && (
+            <Button
+              onClick={() => {
+                if (templateActivesShow.length === 1) {
+                  setTemplateActivesShow([true, false]);
+                } else {
+                  setTemplateActivesShow([true]);
+                }
+              }}
+              color='gray'
+              variant='subtle'
+              leftIcon={
+                <IconChevronDown
+                  size='1rem'
+                  style={{
+                    transform: templateActivesShow.length === 1 ? '' : 'rotate(180deg)',
+                  }}
+                />
+              }
+            >
+              Show {templateActivesShow.includes(true) ? 'All Templates' : 'Active Templates Only'}
+            </Button>
+          )}
+        </Stack>
+      )}
+
+      <Flex pt={15} sx={{ justifyContent: 'right' }}>
+        {/* <Button
+            onClick={() => setCtaModalOpened(true)}
+            size='sm'
+            variant='outline'
+            color='lime'
+            mr='sm'
+            compact
+          >
+            Brainstorm Templates
+          </Button> */}
+        <InitialMessageTemplateSelector
+          onSelect={(template: LinkedinInitialMessageTemplate) => {
+            showNotification({
+              title: '🤖 Generating...',
+              message: 'Generating custom "' + template.name + '" template...',
+              color: 'blue',
+            });
+
+            fetch(`${API_URL}/linkedin_template/adjust_template_for_client`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userToken}`,
+              },
+              body: JSON.stringify({
+                template_id: template.id,
+              }),
+            })
+              .then((res) => {
+                return res.json();
+              })
+              .then((res) => {
+                const adjustedTemplate = res['adjusted_template'];
+                openContextModal({
+                  modal: 'liTemplate',
+                  title: 'Create Template',
+                  innerProps: {
+                    mode: 'CREATE',
+                    editProps: {
+                      title: template.name,
+                      message: adjustedTemplate,
+                      active: true,
+                      humanFeedback: '',
+                      researchPoints: [],
+                    },
+                  },
+                });
+              });
+          }}
+        />
+        <Stack spacing={5}>
+          <Button
+            variant='outline'
+            radius='md'
+            compact
+            color='orange'
+            onClick={() => {
+              openContextModal({
+                modal: 'liTemplate',
+                title: 'Create Template',
+                innerProps: {
+                  mode: 'CREATE',
+                },
+              });
+            }}
+          >
+            Create New
+          </Button>
+        </Stack>
+      </Flex>
+    </>
+  );
+}
 
 export const RESEARCH_POINTS = [
   'LINKEDIN_BIO_SUMMARY',

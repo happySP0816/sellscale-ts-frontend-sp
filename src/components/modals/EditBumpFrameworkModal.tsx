@@ -4,11 +4,14 @@ import { PersonalizationSection } from '@common/sequence/SequenceSection';
 import {
   Button,
   Card,
+  Checkbox,
+  Divider,
   Flex,
   HoverCard,
   LoadingOverlay,
   NumberInput,
   Paper,
+  Select,
   Slider,
   Switch,
   Text,
@@ -134,7 +137,6 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
 
     setBumpLengthValue(length);
   }, []);
-
   return (
     <Paper
       p={0}
@@ -145,57 +147,75 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
       }}
     >
       <LoadingOverlay visible={loading} />
-      <Flex align={'center'} justify={'space-between'}>
-        <TextInput
-          w='50%'
-          mr='xs'
-          label={innerProps.overallStatus?.includes('ACTIVE_CONVO') ? 'Prospect reply' : 'Template nickname'}
-          placeholder={'Sports introduction'}
-          {...form.getInputProps('title')}
-        />
-        <Flex direction='column' align='flex-end'>
-          <Tooltip
-            withArrow
-            withinPortal
-            label={
-              innerProps.default
-                ? 'You cannot unselect this framework because this is the only default framework.'
-                : 'This will disable all other enabled frameworks.'
-            }
-          >
-            <span>
-              <Switch
-                label='Default Framework'
-                labelPosition='left'
-                disabled={innerProps.default}
-                checked={form.values.default}
-                onChange={(e) => {
-                  form.setFieldValue('default', e.currentTarget.checked);
+      <Flex w='100%' justify={'space-between'} gap={'xl'}>
+        <Flex w={'100%'} direction='column' gap={'xl'}>
+          <Flex w='100%' justify={'space-between'} gap={'xl'}>
+            <Flex direction='column' w='100%'>
+              <Text color='gray' fw={600}>
+                REPLY FRAMEWORK TITLE:
+              </Text>
+              <TextInput description=' ' placeholder='reply framework' {...form.getInputProps('title')} w={'100%'} size='md' />
+            </Flex>
+            <Flex direction='column' w='100%'>
+              <Text color='gray' fw={600}>
+                SUB-STATUS
+              </Text>
+              <Select description=' ' placeholder='Pick value' data={[]} w={'100%'} size='md' />
+            </Flex>
+          </Flex>
+          <Flex direction='column'>
+            <Text color='gray' fw={600}>
+              PROMPT INSTRUCTION
+            </Text>
+            <Textarea
+              size='md'
+              description=' '
+              placeholder='These are instructions the AI will read to craft a personalized message.'
+              minRows={6}
+              {...form.getInputProps('description')}
+            />
+          </Flex>
+          <Flex direction={'column'} style={{ border: '1px solid #ced4da', borderRadius: '8px' }}>
+            <label>
+              <Flex align={'center'} px='md' py={'8px'} justify={'space-between'}>
+                <Text color='gray' fw={600}>
+                  USE ACCOUNT RESEARCH:
+                </Text>
+                <Switch
+                  checked={form.values.useAccountResearch}
+                  onChange={(e) => {
+                    form.setFieldValue('useAccountResearch', e.currentTarget.checked);
+                  }}
+                />
+              </Flex>
+            </label>
+            <Divider />
+            {form.values.useAccountResearch && (
+              <PersonalizationSection
+                blocklist={form.values.transformerBlocklist ?? []}
+                onItemsChange={async (items) => {
+                  // Update transformer blocklist
+                  const result = await patchBumpFramework(
+                    userToken,
+                    innerProps.bumpFrameworkID,
+                    innerProps.overallStatus,
+                    form.values.title,
+                    form.values.description,
+                    bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
+                    form.values.bumpedCount,
+                    form.values.bumpDelayDays,
+                    form.values.default,
+                    form.values.useAccountResearch,
+                    items.filter((x) => !x.checked).map((x) => x.id)
+                  );
                 }}
               />
-            </span>
-          </Tooltip>
-          <Tooltip
-            withinPortal
-            withArrow
-            label='Using account research leads to more personalized messages, but may not be the best for straightforward messages.'
-          >
-            <span>
-              <Switch
-                mt='xs'
-                label='Use Account Research'
-                labelPosition='left'
-                checked={form.values.useAccountResearch}
-                onChange={(e) => {
-                  form.setFieldValue('useAccountResearch', e.currentTarget.checked);
-                }}
-              />
-            </span>
-          </Tooltip>
+            )}
+          </Flex>
         </Flex>
       </Flex>
 
-      <Textarea
+      {/* <Textarea
         mt='md'
         label='Prompt Instructions'
         placeholder={'These are instructions the AI will read to craft a personalized message'}
@@ -257,22 +277,24 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
           }}
           min={2}
         />
-      )}
+      )} */}
 
       <Flex>
-        <Flex justify='space-between' w='100%'>
-          <Flex>
+        <Flex justify='space-between' w='100%' gap={'lg'}>
+          <Flex w={'50%'}>
             <Button
               mt='md'
               color='red'
               onClick={() => {
                 triggerPostBumpDeactivate();
               }}
+              w={'100%'}
+              size='lg'
             >
               Deactivate
             </Button>
           </Flex>
-          <Flex>
+          <Flex w={'50%'}>
             {innerProps.title == form.values.title.trim() &&
             innerProps.description == form.values.description.trim() &&
             innerProps.default == form.values.default &&
@@ -287,6 +309,8 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
                 onClick={() => {
                   triggerEditBumpFramework();
                 }}
+                w={'100%'}
+                size='lg'
               >
                 Save
               </Button>
@@ -294,28 +318,6 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
           </Flex>
         </Flex>
       </Flex>
-
-      {form.values.useAccountResearch && (
-        <PersonalizationSection
-          blocklist={form.values.transformerBlocklist ?? []}
-          onItemsChange={async (items) => {
-            // Update transformer blocklist
-            const result = await patchBumpFramework(
-              userToken,
-              innerProps.bumpFrameworkID,
-              innerProps.overallStatus,
-              form.values.title,
-              form.values.description,
-              bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
-              form.values.bumpedCount,
-              form.values.bumpDelayDays,
-              form.values.default,
-              form.values.useAccountResearch,
-              items.filter((x) => !x.checked).map((x) => x.id)
-            );
-          }}
-        />
-      )}
     </Paper>
   );
 }

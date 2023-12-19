@@ -13,13 +13,18 @@ import {
   Grid,
   Card,
   Loader,
+  Radio,
+  Group,
+  ScrollArea,
+  Box,
+  Checkbox,
 } from '@mantine/core';
 
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, EmailSequenceStep, LinkedInMessage, ProspectShallow } from 'src';
+import { BumpFramework, EmailSequenceStep, LinkedInMessage, PersonaOverview, ProspectShallow } from 'src';
 import { showNotification } from '@mantine/notifications';
 import { postBumpGenerateEmailResponse, postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
 import _ from 'lodash';
@@ -30,9 +35,11 @@ import CreateBumpFrameworkModal from '@modals/CreateBumpFrameworkModal';
 import { useQuery } from '@tanstack/react-query';
 import getChannels from '@utils/requests/getChannels';
 import { openContextModal } from '@mantine/modals';
-import { IconEdit } from '@tabler/icons';
+import { IconEdit, IconPencil, IconPlus } from '@tabler/icons';
 import TextWithNewline from '@common/library/TextWithNewlines';
 import { valueToColor } from '@utils/general';
+import { getPersonasOverview } from '@utils/requests/getPersonas';
+import { isLoggedIn } from '@auth/core';
 
 type BumpFrameworkBuckets = {
   ACCEPTED: {
@@ -53,13 +60,12 @@ type BumpFrameworkBuckets = {
 };
 
 export const generateAIFollowup = async (userToken: string, prospectId: number, bumpFramework: BumpFramework | undefined) => {
-
   const result = await postBumpGenerateResponse(
     userToken,
     prospectId,
     bumpFramework?.id,
     bumpFramework?.account_research?.join('\n') || '',
-    bumpFramework?.bump_length || 'MEDIUM',
+    bumpFramework?.bump_length || 'MEDIUM'
   );
 
   if (result.status === 'success') {
@@ -83,16 +89,14 @@ export const generateAIFollowup = async (userToken: string, prospectId: number, 
   }
 };
 
-
 export const generateAIEmailReply = async (userToken: string, prospectId: number, emailThreadID: string, emailSequenceStep: EmailSequenceStep | undefined) => {
-
   const result = await postBumpGenerateEmailResponse(
     userToken,
     prospectId,
     emailThreadID,
     emailSequenceStep?.id,
-    [], // EmailSequenceStep?.account_research?
-  )
+    [] // EmailSequenceStep?.account_research?
+  );
 
   if (result.status === 'success') {
     showNotification({
@@ -113,9 +117,7 @@ export const generateAIEmailReply = async (userToken: string, prospectId: number
     });
     return { message: '', aiGenerated: false };
   }
-
-}
-
+};
 
 export const autoFillBumpFrameworkAccountResearch = (userToken: string, prospectId: number) => {
   return fetch(`${API_URL}/research/personal_research_points?prospect_id=` + prospectId, {
@@ -140,90 +142,53 @@ export const autoFillBumpFrameworkAccountResearch = (userToken: string, prospect
     });
 };
 
-function QuestionObjectionLibraryCard(props: {
-  archetypeID: number | null;
-  bumpFramework: BumpFramework;
-  afterEdit: () => void;
-}) {
-  const theme = useMantineTheme();
-
-  const splitted_substatus = props.bumpFramework?.substatus?.replace('ACTIVE_CONVO_', '');
-
-  return (
-    <>
-      <Card withBorder p='sm' radius='md'>
-        <Card.Section px='md' pt='md'>
-          <Flex justify='space-between' align='center'>
-            <Title order={5}>{props.bumpFramework.title}</Title>
-            <ActionIcon
-              onClick={() => {
-                openContextModal({
-                  modal: 'editBumpFramework',
-                  title: <Title order={3}>Edit: {props.bumpFramework.title}</Title>,
-                  innerProps: {
-                    bumpFrameworkID: props.bumpFramework.id,
-                    overallStatus: props.bumpFramework.overall_status,
-                    title: props.bumpFramework.title,
-                    description: props.bumpFramework.description,
-                    bumpLength: props.bumpFramework.bump_length,
-                    default: props.bumpFramework.default,
-                    onSave: props.afterEdit,
-                    bumpedCount: props.bumpFramework.bumped_count,
-                    bumpDelayDays: props.bumpFramework.bump_delay_days,
-                    useAccountResearch: props.bumpFramework.use_account_research,
-                    transformerBlocklist: props.bumpFramework.transformer_blocklist,
-                  },
-                });
-              }}
-            >
-              <IconEdit size='1.25rem' />
-            </ActionIcon>
-          </Flex>
-        </Card.Section>
-
-        <Card.Section>
-          <Divider my='xs' />
-        </Card.Section>
-        <Flex mih='100px' align='center'>
-          <TextWithNewline>{props.bumpFramework.description}</TextWithNewline>
-        </Flex>
-
-        <Card.Section>
-          <Divider my='xs' />
-        </Card.Section>
-
-
-        <Text fz='xs'>
-          For convos with status labeled:
-        </Text>
-        <Badge color={valueToColor(theme, splitted_substatus || "ACTIVE_CONVO")}>{splitted_substatus || "ACTIVE_CONVO"}</Badge>
-      </Card>
-    </>
-  );
-}
-
-
 export default function InboxProspectConvoBumpFramework(props: {
   prospect: ProspectShallow;
   messages: LinkedInMessage[];
   onClose?: () => void;
   onPopulateBumpFrameworks?: (buckets: BumpFrameworkBuckets) => void;
 }) {
-
+  const theme = useMantineTheme();
   const [open, setOpen] = useRecoilState(openedBumpFameworksState);
 
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
 
   const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(prospectDrawerStatusesState);
 
-
   const [loading, setLoading] = useState(false);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
-  const archetypeID = 8;
+
+  const [data, setData] = useState<any>({} || undefined);
+  const [edit, setEdit] = useState(false);
+  const [blocklist, setBlockList] = useState<any>([]);
+  const [list, setList] = useState<any>([]);
+  const [deactivateState, setDeactivateState] = useState(false);
+  const [projects, setProjects] = useState<PersonaOverview[]>([]);
+
+  const [fetched, setFetched] = useState(false);
+
+  const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] = useDisclosure();
+
+  useEffect(() => {
+    (async () => {
+      if (!isLoggedIn()) return;
+      const response = await getPersonasOverview(userToken);
+      const result =
+        response.status === "success"
+          ? (response.data as PersonaOverview[])
+          : [];
+      setProjects(result);
+    })();
+  }, []);
 
 
-  const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
-    useDisclosure();
+  const unassignedPersona = projects.find(
+    (project) => project.is_unassigned_contact_archetype
+  );
+
+  const archetypeID = unassignedPersona?.id || -1
+
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -244,7 +209,6 @@ export default function InboxProspectConvoBumpFramework(props: {
       frameworks: [],
     },
   } as BumpFrameworkBuckets);
-
 
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
@@ -315,7 +279,13 @@ export default function InboxProspectConvoBumpFramework(props: {
         }
       }
     }
+    const sortedActiveConvo = _.sortBy(newBumpBuckets.ACTIVE_CONVO.frameworks, (obj) => obj.substatus);
+    newBumpBuckets.ACTIVE_CONVO.frameworks = sortedActiveConvo;
+
     bumpBuckets.current = newBumpBuckets;
+
+    setData(bumpBuckets.current?.ACTIVE_CONVO.frameworks[0]);
+    setBlockList(bumpBuckets.current?.ACTIVE_CONVO.frameworks[0].transformer_blocklist);
 
     // BumpFrameworks have been updated, submit event to parent
     if (props.onPopulateBumpFrameworks) {
@@ -335,13 +305,102 @@ export default function InboxProspectConvoBumpFramework(props: {
   //   }
   // }, [open]);
 
+  const handleScroll = (e: any, id: number) => {
+    const element = document.getElementById(`${String(id) + 'co'}`);
+    element?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  function QuestionObjectionLibraryCard(props: { archetypeID: number | null; bumpFramework: BumpFramework; afterEdit: () => void; id: string }) {
+    const theme = useMantineTheme();
+
+    const splitted_substatus = props.bumpFramework?.substatus?.replace('ACTIVE_CONVO_', '');
+
+    return (
+      <>
+        <div id={props.id ? String(props.id + 'co') : undefined}>
+          <Card
+            withBorder
+            p='sm'
+            radius='md'
+            id={props.id}
+            style={{
+              outline: `${props.bumpFramework?.id === data.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
+              borderRadius: '8px',
+              padding: '10px 14px',
+              width: '100%',
+            }}
+          >
+            <Card.Section px='md' pt='md'>
+              <Flex justify='space-between' align='center'>
+                <Title order={5}>{props.bumpFramework.title}</Title>
+                <ActionIcon
+                  onClick={() => {
+                    openContextModal({
+                      modal: 'editBumpFramework',
+                      title: (
+                        <Flex align={'center'} justify={'space-between'}>
+                          <Text
+                            size={'24px'}
+                            fw={600}
+                            color='gray'
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                            }}
+                            mr={'20rem'}
+                          >
+                            Edit Framework
+                          </Text>
+                          <Checkbox label='Default Framework' defaultChecked />
+                        </Flex>
+                      ),
+                      innerProps: {
+                        bumpFrameworkID: props.bumpFramework.id,
+                        overallStatus: props.bumpFramework.overall_status,
+                        title: props.bumpFramework.title,
+                        description: props.bumpFramework.description,
+                        bumpLength: props.bumpFramework.bump_length,
+                        default: props.bumpFramework.default,
+                        onSave: props.afterEdit,
+                        bumpedCount: props.bumpFramework.bumped_count,
+                        bumpDelayDays: props.bumpFramework.bump_delay_days,
+                        useAccountResearch: props.bumpFramework.use_account_research,
+                        transformerBlocklist: props.bumpFramework.transformer_blocklist,
+                      },
+                    });
+                  }}
+                >
+                  <IconPencil size='1.25rem' />
+                </ActionIcon>
+              </Flex>
+            </Card.Section>
+
+            <Card.Section style={{ display: 'flex', justifyContent: 'center' }}>
+              <Divider my='xs' w={'90%'} />
+            </Card.Section>
+            <Flex align='center'>
+              <TextWithNewline>{props.bumpFramework.description}</TextWithNewline>
+            </Flex>
+
+            <Card.Section style={{ display: 'flex', justifyContent: 'center' }}>
+              <Divider my='xs' w={'90%'} />
+            </Card.Section>
+
+            {/* <Text fz='xs'>For convos with status labeled:</Text> */}
+            <Badge color={valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO')}>{splitted_substatus || 'ACTIVE_CONVO'}</Badge>
+          </Card>
+        </div>
+      </>
+    );
+  }
   useEffect(() => {
     triggerGetBumpFrameworks();
   }, [archetypeID]);
-
   return (
     <Modal
-      size="calc(100vw - 3rem)"
+      size='60rem'
+      centered
       opened={open}
       onClose={() => {
         setOpen(false);
@@ -350,15 +409,111 @@ export default function InboxProspectConvoBumpFramework(props: {
       title={<Title order={4}>Message Generation Config</Title>}
     >
       {!loading ? (
-        <Flex direction='column'>
-          <Flex w='100%'>
-            <Text mt='xs'>
+        <Flex w={'100%'} gap={'30px'} h={550}>
+          <Flex w='60%' direction='column' mt={'md'}>
+            {/* <Text mt='xs'>
               Automate your replies by editing the response frameworks below.
             </Text>
             <Button variant='outline' w='30%' mb='md' ml='auto' onClick={openQuestionObjection}>
               Add another reply framework
-            </Button>
+            </Button> */}
+            <Box>
+              <Button
+                variant='outline'
+                mb='md'
+                leftIcon={<IconPlus />}
+                onClick={openQuestionObjection}
+                style={{ borderStyle: 'dashed', fontSize: '16px' }}
+                size='lg'
+                fw={'sm'}
+                w={'100%'}
+              >
+                Create New Framework
+              </Button>
+            </Box>
+            <ScrollArea scrollbarSize={6}>
+              <Box px={10}>
+                <Radio.Group value={data?.id}>
+                  <Group mt='xs'>
+                    {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map((item: any, i: number) => {
+                      const splitted_substatus = item.substatus?.replace('ACTIVE_CONVO_', '');
+
+                      return (
+                        <>
+                          {(!bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1] ||
+                            item.substatus !== bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1].substatus) && (
+                            <Divider
+                              label={
+                                <Flex align={'center'} gap={4}>
+                                  <div
+                                    style={{
+                                      width: '10px',
+                                      height: '10px',
+                                      background: valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO'),
+                                      borderRadius: '100%',
+                                    }}
+                                  ></div>
+                                  <Text color='gray' fw={600}>
+                                    {splitted_substatus || 'ACTIVE_CONVERSATION'}
+                                  </Text>
+                                </Flex>
+                              }
+                              labelPosition='left'
+                              w={'100%'}
+                            />
+                          )}
+
+                          <label
+                            htmlFor={item?.id ? String(item?.id) : undefined}
+                            key={i}
+                            style={{
+                              outline: `${data?.id === item?.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
+                              borderRadius: '8px',
+                              padding: '10px 14px',
+                              width: '100%',
+                            }}
+                          >
+                            <Flex align={'center'} gap={10}>
+                              <Radio
+                                value={item?.id}
+                                id={item?.id ? String(item?.id) : undefined}
+                                size='xs'
+                                onClick={(e) => {
+                                  setData(item);
+                                  setBlockList(item?.transformer_blocklist);
+                                  handleScroll(e, item?.id);
+                                }}
+                              />
+                              <Text fw={600} mt={2}>
+                                {item?.title}
+                              </Text>
+                            </Flex>
+                          </label>
+                        </>
+                      );
+                    })}
+                  </Group>
+                </Radio.Group>
+              </Box>
+            </ScrollArea>
           </Flex>
+
+          <ScrollArea scrollbarSize={6} mt={'sm'}>
+            <Flex w={'100%'} direction='column' gap={'xl'} px={10} mt={'sm'}>
+              {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map((qno: any, index) => {
+                return (
+                  <>
+                    <QuestionObjectionLibraryCard
+                      id={String(qno?.id) + 'co'}
+                      bumpFramework={bumpBuckets.current?.ACTIVE_CONVO.frameworks[index]}
+                      archetypeID={archetypeID}
+                      afterEdit={triggerGetBumpFrameworks}
+                    />
+                  </>
+                );
+              })}
+            </Flex>
+          </ScrollArea>
 
           <CreateBumpFrameworkModal
             modalOpened={addNewQuestionObjectionOpened}
@@ -369,7 +524,7 @@ export default function InboxProspectConvoBumpFramework(props: {
             dataChannels={dataChannels}
             archetypeID={archetypeID}
           />
-          <Grid>
+          {/* <Grid>
             {Object.keys(bumpBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
               return (
                 <Grid.Col span={6}>
@@ -381,7 +536,7 @@ export default function InboxProspectConvoBumpFramework(props: {
                 </Grid.Col>
               );
             })}
-          </Grid>
+          </Grid> */}
         </Flex>
       ) : (
         <Flex justify='center'>

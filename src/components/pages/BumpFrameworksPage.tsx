@@ -635,6 +635,7 @@ export default function BumpFrameworksPage(props: {
     newBumpBuckets.ACTIVE_CONVO.frameworks = sortedActiveConvo;
 
     bumpBuckets.current = newBumpBuckets;
+    setLoading(false);
 
     setData(bumpBuckets.current?.ACTIVE_CONVO.frameworks[0]);
     setBlockList(bumpBuckets.current?.ACTIVE_CONVO.frameworks[0].transformer_blocklist);
@@ -644,7 +645,7 @@ export default function BumpFrameworksPage(props: {
       props.onPopulateBumpFrameworks(newBumpBuckets);
     }
 
-    setLoading(false);
+
   };
 
   const triggerPostBumpDeactivate = async () => {

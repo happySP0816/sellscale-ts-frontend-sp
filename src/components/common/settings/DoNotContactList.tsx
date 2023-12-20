@@ -11,6 +11,7 @@ import {
   Accordion,
   Container,
   Alert,
+  Switch,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 
@@ -29,6 +30,7 @@ import {
 } from "@tabler/icons";
 import { INDUSTRIES, LOCATION, TITLES } from "./DoNotContactListConstants";
 import { openConfirmModal } from "@mantine/modals";
+import { Prospect } from "src";
 
 export default function DoNotContactList(props: { forSDR?: boolean }) {
   const [userToken] = useRecoilState(userTokenState);
@@ -70,6 +72,8 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
   >([
     // { value: "America", label: "america" },
   ]);
+
+  const [isViewRemovedProspects, setIsViewRemovedProspects] = useState<boolean>(false);
 
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
@@ -366,18 +370,28 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
 
   return (
     <Box m="xs" p="md">
-      <Box>
-        <Title order={3}>
-          {props.forSDR
-            ? userData.sdr_name.split(" ")[0] + "'s "
-            : userData.client.company + "'s "}{" "}
-          Do Not Contact Filters
-        </Title>{" "}
-        <Text size="sm">
-          Specify criteria to exclude prospects from all current and future
-          outreach.
-        </Text>
-      </Box>
+      <Flex justify={'space-between'} align={'center'}>
+        <Box>
+          <Title order={3}>
+            {props.forSDR
+              ? userData.sdr_name.split(" ")[0] + "'s "
+              : userData.client.company + "'s "}{" "}
+            Do Not Contact Filters
+          </Title>{" "}
+          <Text size="sm">
+            Specify criteria to exclude prospects from all current and future
+            outreach.
+          </Text>
+        </Box>
+        <Flex gap={'md'}>
+          <Text>View {caughtProspects.filter((prospect: Prospect) => prospect.overall_status === 'REMOVED').length} Removed Prospects</Text>
+          <Switch
+            checked={isViewRemovedProspects}
+            size="md"
+            onClick={() => setIsViewRemovedProspects((prev) => !prev)}
+          />
+        </Flex>
+      </Flex>
 
       <Divider my="md" />
       {!loading && caughtProspects.length === 0 && (
@@ -393,44 +407,45 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
           </Button>
         </Flex>
       )}
-      {!loading && caughtProspects.length > 0 && (
+      {!loading && caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED').length > 0 && (
         <>
-          <Flex justify={"space-between"} align={"center"} gap={"md"}>
-            <Alert
-              w={"100%"}
-              icon={<IconAlertCircle size="1rem" />}
-              title="Warning"
-              color="red"
-              variant="outline"
-              styles={(theme) => ({
-                root: {
-                  backgroundColor: theme.colors.red[0],
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                  height: 36,
-                  display: "flex",
-                  alignItems: "center",
-                },
-                icon: {
-                  marginRight: 0,
-                },
-                title: {
-                  marginBottom: 0,
-                },
-                body: {
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.55rem",
-                },
-              })}
-            >
-              <Text fw={600} fz={"14"}>
-                {caughtProspects.length >= 500
-                  ? caughtProspects.length + "+"
-                  : caughtProspects.length}{" "}
-                prospects caught in these filters
-              </Text>
-            </Alert>
+          <Flex justify={isViewRemovedProspects ? "end" : "space-between"} align={"center"} gap={"md"}>
+            {!isViewRemovedProspects && (
+              <Alert
+                w={"100%"}
+                icon={<IconAlertCircle size="1rem" />}
+                title="Warning"
+                color="red"
+                variant="outline"
+                styles={(theme) => ({
+                  root: {
+                    backgroundColor: theme.colors.red[0],
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                    height: 36,
+                    display: "flex",
+                    alignItems: "center",
+                  },
+                  icon: {
+                    marginRight: 0,
+                  },
+                  title: {
+                    marginBottom: 0,
+                  },
+                  body: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.55rem",
+                  },
+                })}
+              >
+                <Text fw={600} fz={"14"}>
+                  {caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED').length === 0
+                    ? caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED').length + "+"
+                    : caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED').length}{" "}
+                  prospects caught in these filters
+                </Text>
+              </Alert>)}
             <Flex align={"center"} gap={"sm"}>
               <Button
                 leftIcon={<IconRefresh size={14} />}
@@ -438,14 +453,16 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
               >
                 Refresh
               </Button>
-              <Button
-                color="red"
-                onClick={openProspectRemovalModal}
-                disabled={needsSave}
-                leftIcon={<IconTrash size={14} />}
-              >
-                Remove {caughtProspects.length} Prospects
-              </Button>
+              {!isViewRemovedProspects && (
+                <Button
+                  color="red"
+                  onClick={openProspectRemovalModal}
+                  disabled={needsSave}
+                  leftIcon={<IconTrash size={14} />}
+                >
+                  Remove {caughtProspects.length} Prospects
+                </Button>
+              )}
             </Flex>
           </Flex>
         </>
@@ -1154,7 +1171,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
             forSDR={props.forSDR}
             needsSave={needsSave}
             setCaughtProspects={setCaughtProspects}
-            caughtProspects={caughtProspects}
+            caughtProspects={caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED' || isViewRemovedProspects)}
             loading={loading}
             setLoading={setLoading}
           />

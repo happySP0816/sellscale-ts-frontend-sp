@@ -29,34 +29,37 @@ const PulseTabSelector = () => {
     }
   }, []);
 
-  return (
-    <Tabs defaultValue="new_view">
-      <Tabs.List>
-        <Tabs.Tab value="new_view">
-          <IconTarget
-            size="0.8rem"
-            style={{ marginRight: "8px", marginTop: "4px" }}
-          />
-          Prospect Scoring
-        </Tabs.Tab>
-        <Tooltip label="Old View" position="bottom" withArrow withinPortal>
-          <Tabs.Tab value="old_view" ml="auto">
-            <IconWashMachine
-              size="0.8rem"
-              style={{ marginRight: "8px", marginTop: "4px" }}
-            />
-          </Tabs.Tab>
-        </Tooltip>
-      </Tabs.List>
+  // Tab to switch between old view and new view of Prospect Scoring
+  // return (
+  //   <Tabs defaultValue="new_view">
+  //     <Tabs.List>
+  //       <Tabs.Tab value="new_view">
+  //         <IconTarget
+  //           size="0.8rem"
+  //           style={{ marginRight: "8px", marginTop: "4px" }}
+  //         />
+  //         Prospect Scoring
+  //       </Tabs.Tab>
+  //       <Tooltip label="Old View" position="bottom" withArrow withinPortal>
+  //         <Tabs.Tab value="old_view" ml="auto">
+  //           <IconWashMachine
+  //             size="0.8rem"
+  //             style={{ marginRight: "8px", marginTop: "4px" }}
+  //           />
+  //         </Tabs.Tab>
+  //       </Tooltip>
+  //     </Tabs.List>
 
-      <Tabs.Panel value="old_view">
-        <PulseWrapper />
-      </Tabs.Panel>
-      <Tabs.Panel value="new_view">
-        <ICPFilters />
-      </Tabs.Panel>
-    </Tabs>
-  );
+  //     <Tabs.Panel value="old_view">
+  //       <PulseWrapper />
+  //     </Tabs.Panel>
+  //     <Tabs.Panel value="new_view">
+  //       <ICPFilters />
+  //     </Tabs.Panel>
+  //   </Tabs>
+  // );
+
+  return (<ICPFilters />);
 };
 
 export default PulseTabSelector;

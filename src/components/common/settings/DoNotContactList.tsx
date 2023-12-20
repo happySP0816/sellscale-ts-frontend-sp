@@ -384,7 +384,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
           </Text>
         </Box>
         <Flex gap={'md'}>
-          <Text>View Removed Prospects</Text>
+          <Text>View {caughtProspects.filter((prospect: Prospect) => prospect.overall_status === 'REMOVED').length} Removed Prospects</Text>
           <Switch
             checked={isViewRemovedProspects}
             size="md"
@@ -407,7 +407,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
           </Button>
         </Flex>
       )}
-      {!loading && caughtProspects.length > 0 && (
+      {!loading && caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED').length > 0 && (
         <>
           <Flex justify={isViewRemovedProspects ? "end" : "space-between"} align={"center"} gap={"md"}>
             {!isViewRemovedProspects && (
@@ -440,9 +440,9 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                 })}
               >
                 <Text fw={600} fz={"14"}>
-                  {caughtProspects.length >= 500
-                    ? caughtProspects.length + "+"
-                    : caughtProspects.length}{" "}
+                  {caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED').length === 0
+                    ? caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED').length + "+"
+                    : caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED').length}{" "}
                   prospects caught in these filters
                 </Text>
               </Alert>)}

@@ -30,6 +30,7 @@ import {
 } from "@tabler/icons";
 import { INDUSTRIES, LOCATION, TITLES } from "./DoNotContactListConstants";
 import { openConfirmModal } from "@mantine/modals";
+import { Prospect } from "src";
 
 export default function DoNotContactList(props: { forSDR?: boolean }) {
   const [userToken] = useRecoilState(userTokenState);
@@ -1170,7 +1171,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
             forSDR={props.forSDR}
             needsSave={needsSave}
             setCaughtProspects={setCaughtProspects}
-            caughtProspects={caughtProspects}
+            caughtProspects={caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED' || isViewRemovedProspects)}
             loading={loading}
             setLoading={setLoading}
           />

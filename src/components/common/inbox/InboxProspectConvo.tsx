@@ -54,6 +54,7 @@ import {
   IconArrowBackUp,
   IconArrowForwardUp,
   IconClock,
+  IconArrowsDiagonalMinimize2,
 } from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -101,6 +102,7 @@ import RichTextArea from "@common/library/RichTextArea";
 import { JSONContent } from "@tiptap/react";
 import { showNotification } from "@mantine/notifications";
 import postSmartleadReply from "@utils/requests/postSmartleadReply";
+import { IconChevronUp } from "@tabler/icons";
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -273,7 +275,9 @@ export default function ProspectConvo(props: {
   const currentProject = useRecoilValue(currentProjectState);
 
   const [hasGeneratedMessage, setHasGeneratedMessage] = useState(false);
-  const [openedConvoBox, setOpenedConvoBox] = useState(props.openConvoBox);
+  const [openedConvoBox, setOpenedConvoBox] = useState(
+    props.openConvoBox || false
+  );
 
   // This is used to fix a bug with the hacky way we're doing message loading now
   const currentMessagesProspectId = useRef(-1);
@@ -805,7 +809,7 @@ export default function ProspectConvo(props: {
         <ScrollArea
           h={`calc((${INBOX_HEIGHT} - ${HEADER_HEIGHT}px)*1.00)`}
           viewportRef={viewport}
-          sx={{ position: "relative" }}
+          sx={{ position: "relative", paddingBottom: 20 }}
         >
           <div style={{ marginTop: 10, marginBottom: 10 }}>
             <LoadingOverlay
@@ -1140,7 +1144,7 @@ export default function ProspectConvo(props: {
                   value={messageDraftRichRaw.current}
                   height={200}
                 />
-                <Flex justify="flex-end" mt='md'>
+                <Flex justify="flex-end" mt="md">
                   <Button
                     color="blue"
                     disabled={sendingMessage}
@@ -1166,6 +1170,7 @@ export default function ProspectConvo(props: {
           <>
             <Box
               sx={{
+                width: "100%",
                 position: "absolute",
                 bottom: 0,
                 right: 0,
@@ -1192,21 +1197,27 @@ export default function ProspectConvo(props: {
             <Box
               sx={{
                 position: "absolute",
-                bottom: 5,
-                right: 5,
+                bottom: 0,
+                right: 0,
                 visibility: openedConvoBox ? "hidden" : "visible",
+                width: "100%",
               }}
             >
               <Button
                 size="xs"
-                radius="md"
+                w={"100%"}
                 color="dark"
-                rightIcon={<IconArrowsDiagonal size="1rem" />}
+                rightIcon={<IconChevronUp size="1rem" />}
                 onClick={() => {
                   setOpenedConvoBox(true);
                 }}
+                styles={{
+                  inner: {
+                    justifyContent: "space-between",
+                  },
+                }}
               >
-                Send Message
+                {/* Send Message
                 {hasGeneratedMessage && (
                   <Box
                     pt={2}
@@ -1217,7 +1228,35 @@ export default function ProspectConvo(props: {
                   >
                     <IconPointFilled size="0.9rem" />
                   </Box>
-                )}
+                )} */}
+
+                <Flex wrap="nowrap" align="center">
+                  <Text color="white" fz={14} fw={500}>
+                    {openedOutboundChannel === "LINKEDIN"
+                      ? "Message via LinkedIn"
+                      : "Reply via Email"}
+                  </Text>
+                  <Text
+                    size="xs"
+                    fs="italic"
+                    color="gray.3"
+                    component="a"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={
+                      openedOutboundChannel === "LINKEDIN"
+                        ? `https://www.linkedin.com/in/${linkedin_public_id}`
+                        : `mailto:${prospect?.email || ""}`
+                    }
+                  >
+                    {openedOutboundChannel === "LINKEDIN"
+                      ? `linkedin.com/in/${_.truncate(linkedin_public_id, {
+                          length: 20,
+                        })}`
+                      : prospect?.email || ""}{" "}
+                    <IconExternalLink size="0.65rem" />
+                  </Text>
+                </Flex>
               </Button>
             </Box>
           </>

@@ -1,3 +1,4 @@
+import moment from "moment";
 import {
   openedProspectIdState,
   openedBumpFameworksState,
@@ -24,6 +25,7 @@ import {
   Tooltip,
   Select,
   Box,
+  Popover,
 } from "@mantine/core";
 import { getHotkeyHandler } from "@mantine/hooks";
 import { hideNotification, showNotification } from "@mantine/notifications";
@@ -36,6 +38,8 @@ import {
   IconSettings,
   IconArrowsDiagonalMinimize2,
   IconClock,
+  IconArrowUp,
+  IconCalendar,
 } from "@tabler/icons";
 import {
   IconMessage2Cog,
@@ -75,6 +79,7 @@ import { JSONContent } from "@tiptap/react";
 import DOMPurify from "dompurify";
 import { postGenerateFollowupEmail } from "@utils/requests/emailMessageGeneration";
 import { API_URL } from "@constants/data";
+import { Calendar } from "@mantine/dates";
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -156,13 +161,15 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
-
+  const [snoozeDay, setSnoozeDay] = useState(
+    moment(new Date()).add(4, "days").toDate()
+  );
   const openedProspectId = useRecoilValue(openedProspectIdState);
   const openedOutboundChannel = useRecoilValue(currentConvoChannelState);
   const [fetchingProspectId, setFetchingProspectId] = useRecoilState(
     fetchingProspectIdState
   );
-
+  const [showCalendarPopup, setShowCalendarPopup] = useState(false);
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(
     openedBumpFameworksState
   );
@@ -414,7 +421,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
         });
     }
   };
-
+  const calendarRef = useRef<HTMLInputElement>(null);
   return (
     <Paper
       shadow="sm"
@@ -426,8 +433,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
         flexWrap: "nowrap",
         position: "relative",
       }}
-      mx={10}
-      mb={10}
       pb={8}
       mah={500}
     >
@@ -478,7 +483,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 variant="transparent"
                 onClick={props.minimizedSendBox}
               >
-                <IconArrowsDiagonalMinimize2 size="1rem" />
+                <IconChevronDown size="1rem" />
               </ActionIcon>
             </div>
           )}
@@ -492,65 +497,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           paddingRight: 10,
         }}
       >
-        {openedOutboundChannel === "LINKEDIN" ? (
-          <Textarea
-            minRows={5}
-            maxRows={8}
-            mt="xs"
-            color="gray"
-            placeholder="Your message..."
-            value={messageDraft}
-            onChange={(event) => _setMessageDraft(event.currentTarget.value)}
-            onKeyDown={getHotkeyHandler([
-              [
-                "mod+Enter",
-                () => {
-                  sendMessage();
-                },
-              ],
-            ])}
-          />
-        ) : (
-          <Box mt="xs">
-            <RichTextArea
-              onChange={(value, rawValue) => {
-                messageDraftRichRaw.current = rawValue;
-                messageDraftEmail.current = value;
-              }}
-              value={messageDraftRichRaw.current}
-              height={110}
-            />
-          </Box>
-        )}
-
-        <Flex
-          justify="space-between"
-          align="center"
-          mt="xs"
-          direction="row"
-          gap={"xs"}
-        >
-          {openedOutboundChannel === "LINKEDIN" && (
-            <Tooltip withArrow position="bottom" label="Smart Generate with AI">
-              <Button
-                color="grape"
-                size="xs"
-                sx={{ borderRadius: "4px" }}
-                onClick={() => {
-                  showNotification({
-                    id: "generate-linkedin-message",
-                    title: "Generating message ...",
-                    message: "",
-                    color: "blue",
-                    autoClose: 3000,
-                  });
-                  smartGenerate();
-                }}
-              >
-                <IconWand size="0.8rem" />
-              </Button>
-            </Tooltip>
-          )}
+        <Flex justify={"space-between"} mt={10}>
           <Group>
             {/* only show for linkedin */}
 
@@ -722,12 +669,97 @@ export default forwardRef(function InboxProspectConvoSendBox(
               </Tooltip>
             </Button.Group>
           </Group>
-          <Tooltip label={"Snoozed for 3 days"} withArrow>
+          {openedOutboundChannel === "LINKEDIN" && (
+            <Tooltip withArrow position="bottom" label="Smart Generate with AI">
+              <Button
+                leftIcon={<IconWand size="0.8rem" />}
+                color="grape"
+                size="xs"
+                sx={{ borderRadius: "4px" }}
+                onClick={() => {
+                  showNotification({
+                    id: "generate-linkedin-message",
+                    title: "Generating message ...",
+                    message: "",
+                    color: "blue",
+                    autoClose: 3000,
+                  });
+                  smartGenerate();
+                }}
+              >
+                Smart Generate
+              </Button>
+            </Tooltip>
+          )}
+        </Flex>
+
+        <Box pos={"relative"}>
+          {openedOutboundChannel === "LINKEDIN" ? (
+            <Textarea
+              minRows={5}
+              maxRows={8}
+              mt="xs"
+              color="gray"
+              placeholder="Your message..."
+              value={messageDraft}
+              onChange={(event) => _setMessageDraft(event.currentTarget.value)}
+              onKeyDown={getHotkeyHandler([
+                [
+                  "mod+Enter",
+                  () => {
+                    sendMessage();
+                  },
+                ],
+              ])}
+            />
+          ) : (
+            <Box mt="xs">
+              <RichTextArea
+                onChange={(value, rawValue) => {
+                  messageDraftRichRaw.current = rawValue;
+                  messageDraftEmail.current = value;
+                }}
+                value={messageDraftRichRaw.current}
+                height={110}
+              />
+            </Box>
+          )}
+
+          {aiGenerated && (
+            <AutoBumpFrameworkInfo
+              useBumpFramework={selectedBumpFramework !== undefined}
+              bump_title={selectedBumpFramework?.title || "None"}
+              bump_description={
+                selectedBumpFramework?.description || "No framework"
+              }
+              bump_length={selectedBumpFramework?.bump_length || "No length"}
+              account_research_points={
+                selectedBumpFramework?.account_research || []
+              }
+              bump_number_sent={selectedBumpFramework?.etl_num_times_used}
+              bump_number_converted={
+                selectedBumpFramework?.etl_num_times_converted
+              }
+            />
+          )}
+        </Box>
+
+        <Flex align="center" mt="xs" direction="row" justify={"end"}>
+          <Tooltip
+            label={`Snoozed for ${
+              moment(snoozeDay).diff(new Date(), "days") + 1
+            } days`}
+            withArrow
+          >
             <Button
               leftIcon={<IconClock size="1rem" />}
               size="xs"
+              sx={{
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+                borderRight: `1px solid #fff`,
+              }}
               onClick={() => sendMessage()}
-              rightIcon={<IconChevronUp size="1rem" />}
               styles={(theme) => ({
                 rightIcon: {
                   borderLeft: `1px solid ${theme.white}`,
@@ -736,27 +768,41 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 },
               })}
             >
-              Send and Snoozed
+              Send and Snoozed for{" "}
+              {moment(snoozeDay).diff(new Date(), "days") + 1} days
             </Button>
           </Tooltip>
+
+          <Popover
+            position="bottom"
+            withArrow
+            shadow="md"
+            trapFocus
+            opened={showCalendarPopup}
+          >
+            <Popover.Target>
+              <Button
+                onClick={() => setShowCalendarPopup((v) => !v)}
+                size="xs"
+                sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+              >
+                <IconCalendar size={"1rem"} />
+              </Button>
+            </Popover.Target>
+            <Popover.Dropdown>
+              <Calendar
+                minDate={moment(new Date()).add(1, "days").toDate()}
+                getDayProps={(date) => ({
+                  selected: moment(snoozeDay).isSame(date, "day"),
+                  onClick: () => {
+                    setShowCalendarPopup(false);
+                    setSnoozeDay(date);
+                  },
+                })}
+              />
+            </Popover.Dropdown>
+          </Popover>
         </Flex>
-        {aiGenerated && (
-          <AutoBumpFrameworkInfo
-            useBumpFramework={selectedBumpFramework !== undefined}
-            bump_title={selectedBumpFramework?.title || "None"}
-            bump_description={
-              selectedBumpFramework?.description || "No framework"
-            }
-            bump_length={selectedBumpFramework?.bump_length || "No length"}
-            account_research_points={
-              selectedBumpFramework?.account_research || []
-            }
-            bump_number_sent={selectedBumpFramework?.etl_num_times_used}
-            bump_number_converted={
-              selectedBumpFramework?.etl_num_times_converted
-            }
-          />
-        )}
       </div>
     </Paper>
   );

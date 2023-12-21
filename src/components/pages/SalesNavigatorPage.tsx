@@ -15,6 +15,7 @@ import moment, { now } from 'moment';
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { SalesNavigatorLaunch } from "src";
+import { patchSalesNavigatorLaunchAccountFiltersUrl } from "@utils/requests/patchAccountFiltersURL";
 
 export default function SalesNavigatorComponent(props: {
   showPersonaSelect?: boolean
@@ -29,6 +30,85 @@ export default function SalesNavigatorComponent(props: {
   const currentProject = useRecoilValue(currentProjectState);
 
   const [uploadPersonaId, setUploadPersonaId]: any = useState<number>(currentProject?.id || -1)
+
+  const clickAccountFilterURL = (launchId: number, launchAccountFiltersURL: string) => {
+    if(launchAccountFiltersURL) {
+      window.open(launchAccountFiltersURL, '_blank');
+    }
+    else {
+      let tempInputValue = '';
+      
+      openConfirmModal({
+        title: "Set Account Filter URL",
+        children: (
+          <TextInput
+            description='Copy-paste the Account Filter URL below'
+            placeholder="Account Filter URL"
+            onChange={(event) => { tempInputValue = event.currentTarget.value }}
+          />
+        ),
+        labels: { confirm: 'Save', cancel: 'Cancel' },
+        onCancel: () => { },
+        onConfirm: () => { 
+          updateAccountFiltersURL(launchId, tempInputValue);
+        }
+      });
+  
+    }
+  };
+
+  const updateAccountFiltersURL = (launchId: number, newURL: string) => {
+    const updatedLaunches = launches.map(launch => {
+      if (launch.id === launchId) {
+        // Creates a new launch object with the updated URL
+        return { ...launch, account_filters_url: newURL };
+      }
+      return launch;
+    });
+
+    setLaunches(updatedLaunches);
+
+    patchSalesNavigatorLaunchAccountFiltersUrl(userToken, launchId, newURL)
+      .then(response => {
+        if (response) {
+          // Assuming response is true if the update is successful
+          // Update the state with the new launches array
+          // const updatedLaunches = launches.map(launch => {
+          //   if (launch.id === launchId) {
+          //     // Creates a new launch object with the updated URL
+          //     return { ...launch, account_filters_url: newURL };
+          //   }
+          //   return launch;
+          // });
+  
+          // setLaunches(updatedLaunches);
+  
+          //  show a success notification
+          showNotification({
+            title: 'Success',
+            message: 'Account filters URL updated successfully',
+            color: 'green'
+          });
+        } else {
+          // Handle error case
+          showNotification({
+            title: 'Error',
+            message: 'Failed to update account filters URL',
+            color: 'red'
+          });
+        }
+      })
+      .catch(error => {
+        // console.error('Error updating account filters URL:', error);
+        // Handle error case
+        showNotification({
+          title: 'Error',
+          message: 'Failed to update account filters URL',
+          color: 'red'
+        });
+      });
+  };
+  
 
 
   const triggerGetSalesNavigatorLaunches = async () => {
@@ -219,6 +299,7 @@ export default function SalesNavigatorComponent(props: {
             badgeColor = theme.colors.red[6]
           }
 
+
           return (
             <Card mt='lg' p='lg' shadow='sm' withBorder>
               {
@@ -279,8 +360,14 @@ export default function SalesNavigatorComponent(props: {
                   
                 </Flex>
               </Flex>
-              <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">View Original Filters</Anchor>
-
+              <Stack spacing={0}>
+                <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">
+                  View Original Filters
+                </Anchor>
+                <Anchor size='sm' onClick={() => clickAccountFilterURL(launch.id, launch.account_filters_url)}>
+                  {launch.account_filters_url ? "View Account Filters" : "Set Account Filters"}
+                </Anchor>
+              </Stack>
               <Text mt='xs' color='gray' transform='uppercase' fz='xs' fw='bold' align='right'>
                 {
                   launch.status == 'SUCCESS' ? 100 :

@@ -468,6 +468,7 @@ export type SalesNavigatorLaunch = {
   launch_date: Date;
   name: string;
   client_archetype_id: number;
+  account_filters_url: string;
   archetype: string;
 };
 

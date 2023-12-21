@@ -1,6 +1,7 @@
 import {
   mainTabState,
   nurturingModeState,
+  openedBumpFameworksState,
   openedProspectIdState,
 } from "@atoms/inboxAtoms";
 import { currentProjectState } from "@atoms/personaAtoms";
@@ -41,6 +42,7 @@ import {
 import DemoFeedbackDrawer from "@drawers/DemoFeedbackDrawer";
 import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
 import InboxSmartleadPage from "./InboxPageSmartleadPage";
+import InboxProspectConvoBumpFramework from '@common/inbox/InboxProspectConvoBumpFramework';
 
 export const INBOX_PAGE_HEIGHT = `calc(100vh)`;
 
@@ -55,6 +57,9 @@ export default function InboxPage(props: { all?: boolean }) {
   const mainTab = useRecoilValue(mainTabState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(
     openedProspectIdState
+  );
+  const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(
+    openedBumpFameworksState
   );
 
   const { data, isFetching, refetch } = useQuery({
@@ -173,13 +178,20 @@ export default function InboxPage(props: { all?: boolean }) {
                         mt={"md"}
                         className="glow"
                         onClick={() => {
-                          window.location.href = `/setup/email?${prospects[0]?.archetype_id}`;
+                          // window.location.href = `/setup/email?${prospects[0]?.archetype_id}`;
+                          setOpenBumpFrameworks(true);
                         }}
                       >
                         Edit Reply Frameworks
                       </Button>
                     </Flex>
                   </Container>
+                  <InboxProspectConvoBumpFramework 
+                    prospect={Object()}
+                    messages={[]}
+                    onClose={() => {}}
+                    onPopulateBumpFrameworks={() => {}}
+                  />
                 </Grid.Col>
               )}
             </>

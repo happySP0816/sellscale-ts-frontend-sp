@@ -125,7 +125,7 @@ export default function InboxPage(props: { all?: boolean }) {
 
           {mainTab !== "queued" ? (
             <>
-              {prospects.length < 0 ? (
+              {prospects.length > 0 ? (
                 <>
                   <Grid.Col span={46}>
                     <InboxProspectConvo prospects={prospects} />

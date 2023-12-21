@@ -328,6 +328,7 @@ export default function InboxProspectConvoBumpFramework(props: {
               borderRadius: '8px',
               padding: '10px 14px',
               width: '100%',
+              marginBottom: '20px',
             }}
           >
             <Card.Section px='md' pt='md'>
@@ -406,11 +407,11 @@ export default function InboxProspectConvoBumpFramework(props: {
         setOpen(false);
         props.onClose && props.onClose();
       }}
-      title={<Title order={4}>Message Generation Config</Title>}
+      title={<Title order={4}>Change Reply Frameworks</Title>}
     >
       {!loading ? (
-        <Flex w={'100%'} gap={'30px'} h={550}>
-          <Flex w='60%' direction='column' mt={'md'}>
+        <Flex w={'100%'} gap={'30px'}>
+          <Flex w='40%' direction='column' mt={'md'}>
             {/* <Text mt='xs'>
               Automate your replies by editing the response frameworks below.
             </Text>
@@ -498,7 +499,7 @@ export default function InboxProspectConvoBumpFramework(props: {
             </ScrollArea>
           </Flex>
 
-          <ScrollArea scrollbarSize={6} mt={'sm'}>
+          <ScrollArea scrollbarSize={6} mt={'sm'} w={'60%'}>
             <Flex w={'100%'} direction='column' gap={'xl'} px={10} mt={'sm'}>
               {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map((qno: any, index) => {
                 return (

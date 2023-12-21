@@ -278,7 +278,6 @@ const router = sentryCreateBrowserRouter([
         path: "all/inboxes",
         element: <RestrictedRoute page={<InboxPage all />} />,
       },
-
       {
         path: "prospects/:prospectId",
         element: <RestrictedRoute page={<ProspectDetailPage />} />,

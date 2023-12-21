@@ -37,6 +37,7 @@ import { userTokenState } from "@atoms/userAtoms";
 import DOMPurify from "isomorphic-dompurify";
 import moment from "moment";
 import { IconInfoSmall, IconSelector } from "@tabler/icons-react";
+import _ from "lodash";
 
 ChartJS.register(
   CategoryScale,
@@ -55,6 +56,7 @@ const ScrapingReport = () => {
   const itemsPerPage = 10;
   const [sortField, setSortField] = useState("upload date");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [contactScraped, setContactScraped] = useState(0);
 
   const chartOptions: any = {
     responsive: true,
@@ -96,6 +98,7 @@ const ScrapingReport = () => {
       const data = await response.json();
       if (data.message === "Success") {
         setAnalytics(data.analytics);
+        setContactScraped(data.analytics?.top_line_scraped);
       } else {
         console.error("Failed to fetch analytics data:", data.message);
         // Handle error case here
@@ -194,7 +197,8 @@ const ScrapingReport = () => {
         </Card>
         <Card shadow="md" radius={"md"} w={"100%"} p={"xl"}>
           <Text fw={600} size={"xl"} color="green">
-            ${Math.round(142 * 1.5)} <IconInfoCircle size={14} color="gray" />
+            ${Math.round(contactScraped * 1.5)}{" "}
+            <IconInfoCircle size={14} color="gray" />
           </Text>
           <Text fw={600} size={"md"} color="gray">
             Worth of Contacts Scraped
@@ -212,7 +216,7 @@ const ScrapingReport = () => {
           <span
             style={{ color: "black", fontWeight: "600", marginLeft: "10px" }}
           >
-            ${Math.round(142 * 1.5)}
+            {contactScraped}
           </span>
         </Text>
         <Line data={lineChartData} options={chartOptions} />

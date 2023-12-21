@@ -85,7 +85,7 @@ export default function DoNotContactListCaughtProspects(props: {
       setFetchedCaughtProspects(true);
     }
   }, [fetchedCaughtProspects]);
-
+  console.log(paginatedProspects);
   const rows = paginatedProspects.map((p: Prospect) => (
     <tr
       key={p.id}
@@ -109,8 +109,18 @@ export default function DoNotContactListCaughtProspects(props: {
         </Badge>
       </td>
       <td style={{ width: "10%" }}>
-        {p.matched_filter_words?.map((x: string) => (
-          <Badge color={deterministicMantineColor(x)} size="xs">
+        {p.matched_filter_words?.map((x: string, i: number) => (
+          <Badge
+            color={deterministicMantineColor(x)}
+            size="xs"
+            style={{
+              fontFamily: `${
+                p.matched_filters && p.matched_filters[i] === "Title"
+                  ? "intern"
+                  : "tronic"
+              }`,
+            }}
+          >
             {x}
           </Badge>
         ))}

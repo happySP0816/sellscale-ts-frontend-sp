@@ -1200,7 +1200,8 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
             setCaughtProspects={setCaughtProspects}
             caughtProspects={caughtProspects.filter(
               (prospect: Prospect) =>
-                prospect.overall_status !== "REMOVED" || isViewRemovedProspects
+                prospect.overall_status !== "REMOVED" ||
+                isViewRemovedProspects === false
             )}
             loading={loading}
             setLoading={setLoading}

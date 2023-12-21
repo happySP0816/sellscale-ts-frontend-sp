@@ -23,7 +23,6 @@ import {
   Modal,
   rem,
   Accordion,
-  Grid,
 } from "@mantine/core";
 import {
   IconBriefcase,
@@ -110,7 +109,6 @@ const useStyles = createStyles((theme) => ({
 
 export default function ProjectDetails(props: {
   prospects: ProspectShallow[];
-  noProspectResetting?: boolean;
   snoozeProspectEmail?: boolean;
   emailStatuses?: boolean;
   currentEmailStatus?: string;
@@ -162,11 +160,7 @@ export default function ProjectDetails(props: {
   });
 
   let statusValue = data?.details?.linkedin_status || "ACCEPTED";
-  if (
-    props.emailStatuses ||
-    openedOutboundChannel === "EMAIL" ||
-    openedOutboundChannel === "SMARTLEAD"
-  ) {
+  if (props.emailStatuses) {
     statusValue = props.currentEmailStatus || "ACTIVE_CONVO";
   }
 
@@ -229,11 +223,7 @@ export default function ProjectDetails(props: {
 
   // For changing the status of the prospect
   const changeStatus = async (status: string, changeProspect?: boolean) => {
-    if (
-      props.emailStatuses ||
-      openedOutboundChannel === "EMAIL" ||
-      openedOutboundChannel === "SMARTLEAD"
-    ) {
+    if (props.emailStatuses) {
       // HARD CODE IN THE EMAIL FOR NOW
       const response = await updateChannelStatus(
         openedProspectId,
@@ -278,9 +268,7 @@ export default function ProjectDetails(props: {
       queryKey: ["query-dash-get-prospects"],
     });
     if (changeProspect || changeProspect === undefined) {
-      if (!props.noProspectResetting) {
-        setOpenedProspectId(-1);
-      }
+      setOpenedProspectId(-1);
     }
     refetch();
   };
@@ -462,7 +450,7 @@ export default function ProjectDetails(props: {
         />
       </Stack>
       <Divider mt={"sm"} />
-      <Box>
+      <ScrollArea h="60vh">
         {!statusValue.startsWith("DEMO_") &&
           statusValue !== "ACCEPTED" &&
           statusValue !== "RESPONDED" && (
@@ -499,9 +487,7 @@ export default function ProjectDetails(props: {
                       },
                     }}
                     data={
-                      props.emailStatuses ||
-                      openedOutboundChannel === "EMAIL" ||
-                      openedOutboundChannel === "SMARTLEAD"
+                      props.emailStatuses
                         ? prospectEmailStatuses
                         : prospectStatuses
                     }
@@ -569,56 +555,45 @@ export default function ProjectDetails(props: {
                 </Accordion.Control>
                 <Accordion.Panel>
                   {!statusValue.startsWith("DEMO_") ? (
-                    <Grid>
-                      <Grid.Col span={6}>
-                        <StatusBlockButton
-                          title="Snooze"
-                          icon={
-                            <IconAlarm
-                              color={theme.colors.yellow[6]}
-                              size={24}
-                            />
-                          }
-                          onClick={async () => {
-                            setOpenedSnoozeModal(true);
-                          }}
-                        />
-                      </Grid.Col>
-                      <Grid.Col span={6}>
-                        <StatusBlockButton
-                          title="Demo Set"
-                          icon={
-                            <IconCalendarEvent
-                              color={theme.colors.green[6]}
-                              size={24}
-                            />
-                          }
-                          onClick={async () => {
-                            await changeStatus("DEMO_SET", false);
-                          }}
-                        />
-                      </Grid.Col>
-                      <Grid.Col span={6}>
-                        <StatusBlockButton
-                          title="Not Interested"
-                          icon={<IconX color={theme.colors.red[6]} size={24} />}
-                          onClick={async () => {
-                            await changeStatus("NOT_INTERESTED");
-                          }}
-                        />
-                      </Grid.Col>
-                      <Grid.Col span={6}>
-                        <StatusBlockButton
-                          title="Not Qualified"
-                          icon={
-                            <IconTrash color={theme.colors.red[6]} size={24} />
-                          }
-                          onClick={async () => {
-                            await changeStatus("NOT_QUALIFIED");
-                          }}
-                        />
-                      </Grid.Col>
-                    </Grid>
+                    <Flex direction={"column"} gap={"sm"}>
+                      <StatusBlockButton
+                        title="Snooze"
+                        icon={
+                          <IconAlarm color={theme.colors.yellow[6]} size={24} />
+                        }
+                        onClick={async () => {
+                          setOpenedSnoozeModal(true);
+                        }}
+                      />
+                      <StatusBlockButton
+                        title="Demo Set"
+                        icon={
+                          <IconCalendarEvent
+                            color={theme.colors.green[6]}
+                            size={24}
+                          />
+                        }
+                        onClick={async () => {
+                          await changeStatus("DEMO_SET", false);
+                        }}
+                      />
+                      <StatusBlockButton
+                        title="Not Interested"
+                        icon={<IconX color={theme.colors.red[6]} size={24} />}
+                        onClick={async () => {
+                          await changeStatus("NOT_INTERESTED");
+                        }}
+                      />
+                      <StatusBlockButton
+                        title="Not Qualified"
+                        icon={
+                          <IconTrash color={theme.colors.red[6]} size={24} />
+                        }
+                        onClick={async () => {
+                          await changeStatus("NOT_QUALIFIED");
+                        }}
+                      />
+                    </Flex>
                   ) : (
                     <Stack spacing={10}>
                       <Box>
@@ -742,7 +717,7 @@ export default function ProjectDetails(props: {
             </Tabs>
           </div>
         </div>
-      </Box>
+      </ScrollArea>
       <Modal
         opened={openedSnoozeModal}
         onClose={() => setOpenedSnoozeModal(false)}
@@ -786,9 +761,7 @@ export default function ProjectDetails(props: {
                   }
                 );
                 setOpenedSnoozeModal(false);
-                if (!props.noProspectResetting) {
-                  setOpenedProspectId(-1);
-                }
+                setOpenedProspectId(-1);
                 if (props.refetchSmartleadProspects) {
                   props.refetchSmartleadProspects();
                 }
@@ -822,9 +795,7 @@ export default function ProjectDetails(props: {
                 }
               );
               setOpenedSnoozeModal(false);
-              if (!props.noProspectResetting) {
-                setOpenedProspectId(-1);
-              }
+              setOpenedProspectId(-1);
               queryClient.refetchQueries({
                 queryKey: [`query-dash-get-prospects`],
               });

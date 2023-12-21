@@ -9,31 +9,39 @@ import { getProspects } from "./requests/getProspects";
 import { Prospect } from "src";
 
 /**
- * 
- * @param query 
- * @param navigate 
+ *
+ * @param query
+ * @param navigate
  * @returns - SplotlightActions, or null (= loading) or false (= failed to find).
  */
-export async function activateQueryPipeline(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string): Promise<SpotlightAction[] | null | false> {
-
-  const prospects = await checkProspects(query, navigate, theme, userToken)
+export async function activateQueryPipeline(
+  query: string,
+  navigate: NavigateFunction,
+  theme: MantineTheme,
+  userToken: string
+): Promise<SpotlightAction[] | null | false> {
+  const prospects = await checkProspects(query, navigate, theme, userToken);
   //const campaigns = await checkCampaigns(query, navigate, theme, userToken)
 
   // TODO: Add more checks here.
   return [/*...campaigns,*/ ...prospects];
 }
 
-async function checkProspects(query: string, navigate: NavigateFunction, theme: MantineTheme, userToken: string){
-
+async function checkProspects(
+  query: string,
+  navigate: NavigateFunction,
+  theme: MantineTheme,
+  userToken: string
+) {
   const response = await getProspects(
     userToken,
     query,
     undefined,
     30,
     undefined,
-    'ALL',
+    "ALL"
   );
-  if(response.status === 'error'){
+  if (response.status === "error") {
     return [];
   }
 
@@ -42,12 +50,11 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
       title: prospect.full_name,
       description: prospect.title,
       keywords: prospect.company,
-      group: 'Prospects',
+      group: "Prospects",
       onTrigger: () => {
         const url = new URL(window.location.href);
-        const params = url.searchParams;
-        params.set('prospect_id', prospect.id+'');
-        navigateToPage(navigate, url.pathname, params);
+
+        navigateToPage(navigate, `/prospects/${prospect.id}`);
       },
       icon: (
         <Avatar
@@ -56,13 +63,14 @@ async function checkProspects(query: string, navigate: NavigateFunction, theme: 
           color={valueToColor(theme, prospect.full_name)}
           radius="lg"
           size={30}
-        >{nameToInitials(prospect.full_name)}</Avatar>
+        >
+          {nameToInitials(prospect.full_name)}
+        </Avatar>
       ),
       badge: prospect.overall_status,
       badgeColor: valueToColor(theme, prospect.overall_status),
     };
   });
-
 }
 
 /*

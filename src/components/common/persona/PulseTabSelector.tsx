@@ -28,7 +28,8 @@ const PulseTabSelector = () => {
       navigateToPage(navigate, "/contacts", new URLSearchParams({ prospect_id: prospectId+'' }));
     }
   }, []);
-
+  /*
+  Tab to switch between old view and new view of Prospect Scoring
   return (
     <Tabs defaultValue="new_view">
       <Tabs.List>
@@ -57,6 +58,9 @@ const PulseTabSelector = () => {
       </Tabs.Panel>
     </Tabs>
   );
+  */
+
+  return (<ICPFilters />);
 };
 
 export default PulseTabSelector;

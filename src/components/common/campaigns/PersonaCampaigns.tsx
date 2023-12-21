@@ -735,7 +735,7 @@ export function PersonCampaignCard(props: {
                       >
                         <Flex align={"center"} gap={10} mb={8}>
                           <Avatar
-                            src={props.persona.sdr_img_url}
+                            src={item.img_url}
                             radius="xl"
                             size="lg"
                           />

@@ -98,7 +98,8 @@ export default function ProspectDetailsOptionsMenu(props: {
             Add Referred Prospect
           </Menu.Item>
 
-          <Menu.Item closeMenuOnClick={false} icon={<IconAlarm size={14} />}>
+          {/* TODO(Aakash) - Remove if not used after Jan 31, 2024 */}
+          {/* <Menu.Item closeMenuOnClick={false} icon={<IconAlarm size={14} />}>
             <Popover
               width={300}
               trapFocus
@@ -157,9 +158,10 @@ export default function ProspectDetailsOptionsMenu(props: {
                 />
               </Popover.Dropdown>
             </Popover>
-          </Menu.Item>
+          </Menu.Item> */}
 
-          <Menu.Item
+          {/* TODO(Aakash) - remove if not needed after Jan 31, 2024 */}
+          {/* <Menu.Item
             color="red.4"
             icon={<IconTrash size={14} />}
             onClick={async () => {
@@ -196,7 +198,7 @@ export default function ProspectDetailsOptionsMenu(props: {
             }}
           >
             Remove Prospect
-          </Menu.Item>
+          </Menu.Item> */}
         </Menu.Dropdown>
       </Menu>
     </>

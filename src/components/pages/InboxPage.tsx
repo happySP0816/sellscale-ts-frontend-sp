@@ -21,7 +21,7 @@ import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer'
 import LinkedinQueuedMessages from '@common/messages/LinkedinQueuedMessages'
 import InboxSmartleadPage from './InboxPageSmartleadPage'
 
-export const INBOX_PAGE_HEIGHT = `100vh` //`calc(100vh - ${NAV_HEADER_HEIGHT}px)`;
+export const INBOX_PAGE_HEIGHT = `calc(100vh)`
 
 export default function InboxPage(props: { all?: boolean }) {
   setPageTitle('Inbox')

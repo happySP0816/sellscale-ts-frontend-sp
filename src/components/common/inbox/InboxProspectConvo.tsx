@@ -1160,9 +1160,9 @@ export default function ProspectConvo(props: {
               </>
             )}
 
-            {/* <Box
+            <Box
               sx={{ width: "100%", height: openedConvoBox ? "250px" : "50px" }}
-            ></Box> */}
+            ></Box>
           </div>
         </ScrollArea>
 
@@ -1233,13 +1233,14 @@ export default function ProspectConvo(props: {
                 <Flex wrap="nowrap" align="center">
                   <Text color="white" fz={14} fw={500}>
                     {openedOutboundChannel === "LINKEDIN"
-                      ? "Message via LinkedIn"
-                      : "Reply via Email"}
+                      ? "Message via LinkedIn "
+                      : "Reply via Email "}
                   </Text>
                   <Text
                     size="xs"
                     fs="italic"
                     color="gray.3"
+                    ml='xs'
                     component="a"
                     target="_blank"
                     rel="noopener noreferrer"

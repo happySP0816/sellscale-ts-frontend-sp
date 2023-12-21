@@ -97,6 +97,8 @@ export default function InboxSmartleadPage(props: {
   setNumberLeads: (number: number) => void;
   all?: boolean;
 }) {
+  const viewport = useRef<HTMLDivElement>(null);
+
   setPageTitle("Inbox");
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
@@ -280,8 +282,15 @@ export default function InboxSmartleadPage(props: {
     setMessageDraft(automated_reply);
 
     setConversation([conversation]);
-    setFetchingConversation(false);
+    setFetchingConversation(false);    
   };
+
+  useEffect(() => {
+    viewport.current?.scrollTo({
+      top: viewport.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [conversation])
 
   const triggerPostSmartleadReply = async () => {
     setSendingMessage(true);
@@ -668,7 +677,7 @@ export default function InboxSmartleadPage(props: {
                 </Text>
               </Flex>
             ) : (
-              <ScrollArea h="100vh" pb="lg" w="100%">
+              <ScrollArea h="100vh" pb="lg" w="100%" viewportRef={viewport}>
                 {conversation.length > 0 && (
                   <Flex w="100%" direction="column">
                     {conversation.map((item: any, index: any) => (

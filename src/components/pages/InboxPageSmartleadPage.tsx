@@ -234,6 +234,7 @@ export default function InboxSmartleadPage(props: {
 
   const triggerGetSmartleadProspectConvo = async (prospectID?: any, campaignID?: any) => {
     setFetchingConversation(true);
+    setMessageDraft('');
 
     if (!selectedProspect && !prospectID) {
       return;
@@ -255,6 +256,9 @@ export default function InboxSmartleadPage(props: {
 
       return new Date(a.time).getTime() - new Date(b.time).getTime();
     });
+
+    let automated_reply = response?.data?.automated_reply?.email_body;
+    setMessageDraft(automated_reply);
 
     setConversation([conversation]);
     setFetchingConversation(false);
@@ -318,6 +322,7 @@ export default function InboxSmartleadPage(props: {
 
     return formattedDateTime;
   };
+
   useEffect(() => {
     triggerGetSmartleadProspects();
   }, []);
@@ -561,7 +566,7 @@ export default function InboxSmartleadPage(props: {
                         name={prospect.prospect_name}
                         title={prospect.prospect_title}
                         img_url={prospect.prospect_img_url}
-                        latest_msg={''}
+                        latest_msg={prospect.last_message}
                         latest_msg_time={prospect.last_reply_time}
                         icp_fit={prospect.prospect_icp_fit_score}
                         new_msg_count={0}

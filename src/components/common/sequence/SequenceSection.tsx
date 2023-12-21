@@ -2034,53 +2034,53 @@ function FrameworkSection(props: {
 
   const [noProspectsFound, setNoProspectsFound] = useState(false);
   const [uploadDrawerOpened, setUploadDrawerOpened] = useRecoilState(uploadDrawerOpenState);
-  const [humanReadableContext, setHumanReadableContext] = useState<string | undefined>(props.framework.bump_framework_human_readable_prompt);
-  const [contextQuestion, setContextQuestion] = useState(props.framework.bump_framework_human_readable_prompt);
+  const [humanReadableContext, setHumanReadableContext] = useState<string | undefined>(props.framework?.bump_framework_human_readable_prompt);
+  const [contextQuestion, setContextQuestion] = useState(props.framework?.bump_framework_human_readable_prompt);
 
   const [opened, { toggle }] = useDisclosure(false);
 
   const [activeTab, setActiveTab] = useState<string | null>('none');
   const [descriptionEditState, setDescriptionEditState] = useState(false);
   const [personalizationItemsCount, setPersonalizationItemsCount] = useState<number>();
-  const [personalizationItemIds, setPersonalizationItemIds] = useState(props.framework.transformer_blocklist);
-  const [showUserFeedback, setShowUserFeedback] = useState(props.framework.human_feedback !== null);
+  const [personalizationItemIds, setPersonalizationItemIds] = useState(props.framework?.transformer_blocklist);
+  const [showUserFeedback, setShowUserFeedback] = useState(props.framework?.human_feedback !== null);
   const [feedbackChanged, setFeedbackChanged] = useState(false);
 
-  const [initialFrameworkId, setInitialFrameworkId] = useState<number>(props.framework.id);
+  const [initialFrameworkId, setInitialFrameworkId] = useState<number>(props.framework?.id);
 
   let { hovered: hovered, ref: ref } = useHover();
 
   const form = useForm({
     initialValues: {
-      frameworkName: props.framework.title,
-      bumpLength: props.framework.bump_length,
-      delayDays: props.framework.bump_delay_days,
-      promptInstructions: props.framework.description,
-      useAccountResearch: props.framework.use_account_research,
-      additionalContext: props.framework.additional_context,
-      bumpFrameworkTemplateName: props.framework.bump_framework_template_name,
-      bumpFrameworkHumanReadablePrompt: props.framework.bump_framework_human_readable_prompt,
-      humanFeedback: props.framework.human_feedback,
+      frameworkName: props.framework?.title,
+      bumpLength: props.framework?.bump_length,
+      delayDays: props.framework?.bump_delay_days,
+      promptInstructions: props.framework?.description,
+      useAccountResearch: props.framework?.use_account_research,
+      additionalContext: props.framework?.additional_context,
+      bumpFrameworkTemplateName: props.framework?.bump_framework_template_name,
+      bumpFrameworkHumanReadablePrompt: props.framework?.bump_framework_human_readable_prompt,
+      humanFeedback: props.framework?.human_feedback,
     },
   });
 
   useEffect(() => {
-    if (initialFrameworkId !== props.framework.id) {
-      setInitialFrameworkId(props.framework.id);
+    if (initialFrameworkId !== props.framework?.id) {
+      setInitialFrameworkId(props.framework?.id);
       form.setValues({
-        frameworkName: props.framework.title,
-        bumpLength: props.framework.bump_length,
-        delayDays: props.framework.bump_delay_days,
-        promptInstructions: props.framework.description,
-        useAccountResearch: props.framework.use_account_research,
-        additionalContext: props.framework.additional_context,
-        bumpFrameworkTemplateName: props.framework.bump_framework_template_name,
-        bumpFrameworkHumanReadablePrompt: props.framework.bump_framework_human_readable_prompt,
-        humanFeedback: props.framework.human_feedback,
+        frameworkName: props.framework?.title,
+        bumpLength: props.framework?.bump_length,
+        delayDays: props.framework?.bump_delay_days,
+        promptInstructions: props.framework?.description,
+        useAccountResearch: props.framework?.use_account_research,
+        additionalContext: props.framework?.additional_context,
+        bumpFrameworkTemplateName: props.framework?.bump_framework_template_name,
+        bumpFrameworkHumanReadablePrompt: props.framework?.bump_framework_human_readable_prompt,
+        humanFeedback: props.framework?.human_feedback,
       });
-      setPersonalizationItemIds(props.framework.transformer_blocklist);
+      setPersonalizationItemIds(props.framework?.transformer_blocklist);
     }
-  }, [props.framework.id]);
+  }, [props.framework?.id]);
 
   const [debouncedForm] = useDebouncedValue(form.values, 200);
   const prevDebouncedForm = usePrevious(debouncedForm);
@@ -2400,7 +2400,7 @@ function FrameworkSection(props: {
             </Group>
           )}
 
-          {form.values.promptInstructions.includes('Answer:') && (
+          {form.values.promptInstructions?.includes('Answer:') && (
             <Alert icon={<IconBulb size='1rem' />} variant='outline' onClick={toggle} sx={{ cursor: 'pointer' }}>
               <Text color='blue' fz='12px'>
                 Note: This framework requires you fill out additional context in the prompt. Please press 'Advanced Settings'
@@ -2451,7 +2451,7 @@ function FrameworkSection(props: {
                     if (b.default) return -1;
                     return 0;
                   })
-                : [props.frameworks.filter((a) => a.default).find((v) => v.id === props.framework.id)!]
+                : [props.frameworks.filter((a) => a.default).find((v) => v?.id === props.framework?.id)!]
               )
                 .filter((v) => v && v.bumped_count == props.bumpCount)
                 .sort((a, b) => {
@@ -2675,11 +2675,11 @@ function FrameworkSection(props: {
 
           <Modal opened={opened} onClose={toggle} size='lg'>
             <Box w='100%' mb='md'>
-              <Title order={4}>"{form.values.frameworkName}" Research Points</Title>
-              <Text color='gray'>{props.framework.active_transformers.length} research points enabled.</Text>
+              <Title order={4}>"{form.values?.frameworkName}" Research Points</Title>
+              <Text color='gray'>{props.framework?.active_transformers.length} research points enabled.</Text>
               <Divider />
               <PersonalizationSection
-                blocklist={props.framework.transformer_blocklist}
+                blocklist={props.framework?.transformer_blocklist}
                 onItemsChange={async (items) => {
                   setPersonalizationItemsCount(items.filter((x) => x.checked).length);
                   setPersonalizationItemIds(items.filter((x) => !x.checked).map((x) => x.id));

@@ -1,10 +1,14 @@
 import { Flex, createStyles } from "@mantine/core";
 import ICPFiltersDashboard from "./ICPFiltersDashboard";
 
-const ICPFilters = () => {
+type ICPFiltersPropsType = {
+  hideTitleBar?: boolean;
+}
+
+const ICPFilters = (props: ICPFiltersPropsType) => {
   return (
     <Flex h="100%" w={"100%"}>
-      <ICPFiltersDashboard />
+      <ICPFiltersDashboard hideTitleBar={props.hideTitleBar} />
     </Flex>
   );
 };

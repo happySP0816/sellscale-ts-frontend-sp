@@ -22,10 +22,12 @@ import {
   Loader,
 } from "@mantine/core";
 import {
+  IconBrandLinkedin,
   IconBrandTelegram,
   IconGitBranch,
   IconGitCommit,
   IconGitPullRequest,
+  IconMail,
   IconMessage2,
   IconMessageDots,
   IconNotebook,
@@ -40,7 +42,7 @@ import {
   valueToColor,
 } from "@utils/general";
 import displayNotification from "@utils/notificationFlow";
-import { getProspectLiHistory } from "@utils/requests/getProspectHistory";
+import { getProspectHistory } from "@utils/requests/getProspectHistory";
 import { addProspectNote } from "@utils/requests/prospectNotes";
 import _ from "lodash";
 
@@ -52,12 +54,16 @@ type HistoryEvent =
   | "CREATED"
   | "INTRO_MESSAGE"
   | "NOTE"
-  | "MESSAGE"
+  | "LINKEDIN_MESSAGE"
+  | "EMAIL_MESSAGE"
   | "STATUS_CHANGE"
   | "DEMO_FEEDBACK";
+
+type Channel = "LINKEDIN" | "EMAIL";
 interface HistoryItem extends Record<string, string> {
   event: HistoryEvent;
   date: string;
+  channel: Channel
 }
 
 function historyEventToIcon(event: HistoryEvent, size?: number) {
@@ -69,8 +75,10 @@ function historyEventToIcon(event: HistoryEvent, size?: number) {
       return <ThemeIcon color='teal' radius="xl"><IconBrandTelegram size={size} /></ThemeIcon>;
     case "NOTE":
       return <ThemeIcon color='indigo' radius="xl"><IconNotebook size={size} /></ThemeIcon>;
-    case "MESSAGE":
-      return <ThemeIcon color='blue' radius="xl"><IconMessage2 size={size} /></ThemeIcon>;
+    case "LINKEDIN_MESSAGE":
+      return <ThemeIcon color='blue' radius="xl"><IconBrandLinkedin size={size} /></ThemeIcon>;
+    case "EMAIL_MESSAGE":
+      return <ThemeIcon color='blue' radius="xl"><IconMail size={size} /></ThemeIcon>;
     case "STATUS_CHANGE":
       return <ThemeIcon color='yellow' radius="xl"><IconStatusChange size={size} /></ThemeIcon>;
     case "DEMO_FEEDBACK":
@@ -87,11 +95,17 @@ function historyEventToDescription(theme: MantineTheme, item: HistoryItem) {
       return `Sent outreach: "${item.message.trim()}"`;
     case "NOTE":
       return `Updated note: "${item.message.trim()}"`;
-    case "MESSAGE":
+    case "LINKEDIN_MESSAGE":
       if (item.author === "You") {
         return `Sent message: "${item.message.trim()}"`;
       } else {
         return `Received message: "${item.message.trim()}"`;
+      }
+    case "EMAIL_MESSAGE":
+      if (item.from_sdr) {
+        return `Sent email: "${item.email_body}"`;
+      } else {
+        return `Received email: "${item.email_body}"`;
       }
     case "STATUS_CHANGE":
       return (
@@ -116,7 +130,8 @@ function historyEventToDescription(theme: MantineTheme, item: HistoryItem) {
 export default function ProspectDetailsHistory(props: { prospectId: number, forceRefresh: boolean }) {
   const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
-  const [history, setHistory] = useState<any>();
+  const [linkedinHistory, setLinkedInHistory] = useState<any>();
+  const [emailHistory, setEmailHistory] = useState<any>();
   const [historyFetchedForId, setHistoryFetchedForId] = useState<number>(-1);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -124,8 +139,9 @@ export default function ProspectDetailsHistory(props: { prospectId: number, forc
     setHistoryFetchedForId(props.prospectId);
     setLoadingHistory(true);
     (async () => {
-      const response = await getProspectLiHistory(userToken, props.prospectId);
-      setHistory(response.data);
+      const response = await getProspectHistory(userToken, props.prospectId);
+      setLinkedInHistory(response.data.linkedin);
+      setEmailHistory(response.data.email);
       setLoadingHistory(false);
     })();
     
@@ -135,50 +151,76 @@ export default function ProspectDetailsHistory(props: { prospectId: number, forc
     setHistoryFetchedForId(props.prospectId);
     setLoadingHistory(true);
     (async () => {
-      const response = await getProspectLiHistory(userToken, props.prospectId);
-      setHistory(response.data);
+      const response = await getProspectHistory(userToken, props.prospectId);
+      setLinkedInHistory(response.data.linkedin);
+      setEmailHistory(response.data.email);
       setLoadingHistory(false);
     })();
   }, [props.forceRefresh]);
 
   // Format the events into a sortable timeline
   let events: HistoryItem[] = [];
-  if (history) {
+  if (linkedinHistory) {
     events.push({
       event: "CREATED",
-      date: history.creation_date,
+      date: linkedinHistory.creation_date,
+      channel: "LINKEDIN"
     });
-    if (history.demo_feedback) {
+    if (linkedinHistory.demo_feedback) {
       events.push({
         event: "DEMO_FEEDBACK",
-        ...history.demo_feedback,
+        ...linkedinHistory.demo_feedback,
+        channel: "LINKEDIN"
       });
     }
-    if (history.intro_message) {
+    if (linkedinHistory.intro_message) {
       events.push({
         event: "INTRO_MESSAGE",
-        ...history.intro_message,
+        ...linkedinHistory.intro_message,
+        channel: "LINKEDIN"
       });
     }
-    for (const msg of history.convo) {
+    for (const msg of linkedinHistory.convo) {
       events.push({
-        event: "MESSAGE",
+        event: "LINKEDIN_MESSAGE",
         ...msg,
+        channel: "LINKEDIN"
       });
     }
-    for (const note of history.notes) {
+    for (const note of linkedinHistory.notes) {
       events.push({
         event: "NOTE",
         ...note,
+        channel: "LINKEDIN"
       });
     }
-    for (const status of history.statuses) {
+    for (const status of linkedinHistory.statuses) {
       events.push({
         event: "STATUS_CHANGE",
         ...status,
+        channel: "LINKEDIN"
       });
     }
   }
+
+  if (emailHistory) {
+    for (const status of emailHistory.email_statuses) {
+      events.push({
+        event: "STATUS_CHANGE",
+        ...status,
+        channel: "EMAIL"
+      });
+    }
+    for (const msg of emailHistory.emails) {
+      events.push({
+        event: "EMAIL_MESSAGE",
+        ...msg,
+        channel: "EMAIL"
+      });
+    }
+  }
+
+
   // Remove status change dupes that seem to be a bug in the backend
   events = _.uniqWith(events, (obj1, obj2) => {
     return _.isEqual(_.omit(obj1, 'date'), _.omit(obj2, 'date'));

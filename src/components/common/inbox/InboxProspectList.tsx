@@ -625,7 +625,7 @@ export default function ProspectList(props: {
                               if (!openedProspectLoading) {
                                 setOpenedProspectLoading(true);
                                 setOpenedProspectId(prospect.id);
-                                navigate(`/prospects/${prospect.id}`)
+                                // navigate(`/prospects/${prospect.id}`)
                               }
                             }}
                           >

@@ -112,8 +112,8 @@ export default function ProspectConvo(props: Props) {
   const currentProject = useRecoilValue(currentProjectState);
 
   const [hasGeneratedMessage, setHasGeneratedMessage] = useState(false);
-  const [openedConvoBox, setOpenedConvoBox] = useState(
-    props.openConvoBox || false
+  const [openedConvoBox, setOpenedConvoBox]: any = useState(
+    props.openConvoBox || true
   );
 
   // This is used to fix a bug with the hacky way we're doing message loading now

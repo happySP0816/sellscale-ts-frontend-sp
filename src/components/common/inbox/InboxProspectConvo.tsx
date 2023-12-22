@@ -30,6 +30,7 @@ import {
   Skeleton,
   Tooltip,
   Card,
+  Container,
 } from "@mantine/core";
 import {
   IconExternalLink,
@@ -46,11 +47,12 @@ import {
   convertDateToCasualTime,
   convertDateToLocalTime,
   nameToInitials,
+  proxyURL,
   valueToColor,
 } from "@utils/general";
 import { getConversation } from "@utils/requests/getConversation";
 import { getProspectByID } from "@utils/requests/getProspectByID";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
   Channel,
@@ -69,7 +71,7 @@ import _ from "lodash";
 import InboxProspectConvoSendBox from "./InboxProspectConvoSendBox";
 import InboxProspectConvoBumpFramework from "./InboxProspectConvoBumpFramework";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
-import { getBumpFrameworks } from "@utils/requests/getBumpFrameworks";
+import { getBumpFrameworks, getSingleBumpFramework } from "@utils/requests/getBumpFrameworks";
 import { getEmailMessages, getEmailThreads } from "@utils/requests/getEmails";
 import { openComposeEmailModal } from "@common/prospectDetails/ProspectDetailsViewEmails";
 import { currentProjectState } from "@atoms/personaAtoms";
@@ -82,8 +84,156 @@ import { JSONContent } from "@tiptap/react";
 import { showNotification } from "@mantine/notifications";
 import postSmartleadReply from "@utils/requests/postSmartleadReply";
 import { IconArrowLeft, IconChevronUp } from "@tabler/icons";
-import { ProspectConvoMessage } from "./ProspectConvoMessage";
+import { getBumpFrameworksSequence } from "@utils/requests/getBumpFrameworksSequence";
+import TextWithNewlines from "@common/library/TextWithNewlines";
+import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
 import { useNavigate } from "react-router-dom";
+
+export function ProspectConvoMessage(props: {
+  id: number;
+  img_url: string;
+  name: string;
+  message: string;
+  timestamp: string;
+  is_me: boolean;
+  aiGenerated: boolean;
+  bumpFrameworkId?: number;
+  bumpFrameworkTitle?: string;
+  bumpFrameworkDescription?: string;
+  bumpFrameworkLength?: string;
+  accountResearchPoints?: string[];
+  initialMessageId?: number;
+  initialMessageCTAId?: number;
+  initialMessageCTAText?: string;
+  initialMessageResearchPoints?: string[];
+  initialMessageStackRankedConfigID?: number;
+  initialMessageStackRankedConfigName?: string;
+  cta?: string;
+}) {
+  const userToken = useRecoilValue(userTokenState);
+  const theme = useMantineTheme();
+
+  const uniqueId = `prospect-convo-message-${props.id}`;
+  const [finalMessage, setFinalMessage] = useState<string>(props.message);
+
+  const [bumpNumberConverted, setBumpNumberConverted] = useState<
+    number | undefined
+  >(undefined);
+  const [bumpNumberUsed, setBumpNumberUsed] = useState<number | undefined>(
+    undefined
+  );
+
+  const triggerGetSingleBumpFramework = async (id: number) => {
+    const result = await getSingleBumpFramework(userToken, id);
+    if (result) {
+      setBumpNumberConverted(
+        result.data.bump_framework.etl_num_times_converted
+      );
+      setBumpNumberUsed(result.data.bump_framework.etl_num_times_used);
+    }
+  };
+
+  useEffect(() => {
+    if (props.bumpFrameworkId) {
+      triggerGetSingleBumpFramework(props.bumpFrameworkId);
+    }
+  }, []);
+
+  // const replyMatch = props.message.match(/>On .+[AM|PM] .+ wrote:<br>/gm);
+  // let realMessage = props.message;
+  // let replyMessage = "";
+  // if(replyMatch && replyMatch.length > 0){
+  //   const parts = props.message.split(replyMatch[0]);
+  //   realMessage = parts[0];
+  //   replyMessage = parts[1];
+  // }
+  //console.log(realMessage, replyMessage);
+
+  useLayoutEffect(() => {
+    setTimeout(() => {
+      const elements = document.querySelectorAll(`.gmail_quote`);
+      if (elements.length > 0) {
+        const parent = elements[0].parentNode;
+        if (parent) {
+          // TODO: Add collapse button
+          const newElement = document.createElement("div");
+          parent.insertBefore(newElement.cloneNode(true), elements[0]);
+          parent.removeChild(elements[0]);
+        }
+      }
+
+      const element = document.getElementById(uniqueId);
+      if (element) {
+        setFinalMessage(element.innerHTML);
+      }
+    });
+  }, []);
+
+  return (
+    <>
+      {/* Hidden section for dom html parsing */}
+      <div
+        id={uniqueId}
+        style={{ display: "none" }}
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(props.message),
+        }}
+      />
+      <Container py={5} sx={{ flex: 1 }}>
+        <Flex gap={0} wrap="nowrap">
+          <div style={{ flexBasis: "10%" }}>
+            <Avatar size="md" radius="xl" m={5} src={proxyURL(props.img_url)} />
+          </div>
+          <div style={{ flexBasis: "90%" }}>
+            <Stack spacing={5}>
+              <Group position="apart">
+                <Group spacing={10}>
+                  <Title order={6}>{props.name}</Title>
+                  {props.aiGenerated && (
+                    <AiMetaDataBadge
+                      location={{ position: "relative" }}
+                      bumpFrameworkId={props.bumpFrameworkId || 0}
+                      bumpFrameworkTitle={props.bumpFrameworkTitle || ""}
+                      bumpFrameworkDescription={
+                        props.bumpFrameworkDescription || ""
+                      }
+                      bumpFrameworkLength={props.bumpFrameworkLength || ""}
+                      bumpNumberConverted={bumpNumberConverted}
+                      bumpNumberUsed={bumpNumberUsed}
+                      accountResearchPoints={props.accountResearchPoints || []}
+                      initialMessageId={props.initialMessageId || 0}
+                      initialMessageCTAId={props.initialMessageCTAId || 0}
+                      initialMessageCTAText={props.initialMessageCTAText || ""}
+                      initialMessageResearchPoints={
+                        props.initialMessageResearchPoints || []
+                      }
+                      initialMessageStackRankedConfigID={
+                        props.initialMessageStackRankedConfigID || 0
+                      }
+                      initialMessageStackRankedConfigName={
+                        props.initialMessageStackRankedConfigName || ""
+                      }
+                      cta={props.cta || ""}
+                    />
+                  )}
+                </Group>
+                <Text weight={400} size={11} c="dimmed" pr={10}>
+                  {props.timestamp}
+                </Text>
+              </Group>
+              <TextWithNewlines
+                style={{ fontSize: "0.875rem" }}
+                breakheight="12px"
+              >
+                {finalMessage}
+              </TextWithNewlines>
+            </Stack>
+          </div>
+        </Flex>
+      </Container>
+    </>
+  );
+}
 
 export let HEADER_HEIGHT = 190;
 
@@ -142,6 +292,7 @@ export default function ProspectConvo(props: Props) {
   const [currentConvoEmailMessages, setCurrentConvoEmailMessages] =
     useRecoilState(currentConvoEmailMessageState);
   const [emailThread, setEmailThread] = useState<EmailThread>();
+  const [bumpFrameworksSequence, setBumpFrameworksSequence] = useState([]);
 
   const prospect = _.cloneDeep(
     props.prospects.find((p) => p.id === openedProspectId)
@@ -416,6 +567,7 @@ export default function ProspectConvo(props: Props) {
     scrollToBottom();
     if (isFetchingMessages) {
       triggerGetBumpFrameworks();
+      getBumpFrameworkSequence();
     }
   }, [isFetchingMessages]);
 
@@ -472,6 +624,22 @@ export default function ProspectConvo(props: Props) {
         sendBoxRef.current?.setEmailSequenceSteps(result.data.bump_frameworks);
       }
     }
+  };
+
+  const getBumpFrameworkSequence = async () => {
+    if (!prospect) {
+      return;
+    }
+
+    const result = await getBumpFrameworksSequence(
+      userToken,
+      prospect.archetype_id
+    );
+
+    if (result.status === "success") {
+      setBumpFrameworksSequence(result.data.data);
+    }
+    
   };
 
   // // On load we should get the bump frameworks
@@ -787,11 +955,11 @@ export default function ProspectConvo(props: Props) {
                     msg.initial_message_stack_ranked_config_name
                   }
                   cta={""}
-                  isLastMsgInSequent={
-                    !currentConvoLiMessages[i + 1] ||
-                    (currentConvoLiMessages[i + 1] &&
-                      currentConvoLiMessages[i + 1].author !== msg.author)
-                  }
+                  // isLastMsgInSequent={
+                  //   !currentConvoLiMessages[i + 1] ||
+                  //   (currentConvoLiMessages[i + 1] &&
+                  //     currentConvoLiMessages[i + 1].author !== msg.author)
+                  // }
                 />
               ))}
             {openedOutboundChannel === "LINKEDIN" &&
@@ -835,12 +1003,12 @@ export default function ProspectConvo(props: Props) {
                       initialMessageStackRankedConfigID={undefined}
                       initialMessageStackRankedConfigName={undefined}
                       cta={""}
-                      isLastMsgInSequent={
-                        !currentConvoEmailMessages[i + 1] ||
-                        (currentConvoEmailMessages[i + 1] &&
-                          currentConvoEmailMessages[i + 1].client_sdr_id !==
-                            msg.client_sdr_id)
-                      }
+                      // isLastMsgInSequent={
+                      //   !currentConvoEmailMessages[i + 1] ||
+                      //   (currentConvoEmailMessages[i + 1] &&
+                      //     currentConvoEmailMessages[i + 1].client_sdr_id !==
+                      //       msg.client_sdr_id)
+                      // }
                     />
                   </Box>
                 ))}
@@ -1190,6 +1358,7 @@ export default function ProspectConvo(props: Props) {
       {prospect && (
         <InboxProspectConvoBumpFramework
           prospect={prospect}
+          bumpFrameworksSequence={bumpFrameworksSequence}
           messages={currentConvoLiMessages || []}
           onClose={() => {
             triggerGetBumpFrameworks();

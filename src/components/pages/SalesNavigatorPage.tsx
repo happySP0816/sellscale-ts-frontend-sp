@@ -6,7 +6,7 @@ import { Card, Flex, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Butto
 import { useForm } from "@mantine/form";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconAffiliate, IconBrandLinkedin, IconDownload, IconRefresh, IconZoomReset } from "@tabler/icons";
+import { IconAffiliate, IconBrandLinkedin, IconDownload, IconRefresh, IconZoomReset, IconX } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { valueToColor } from "@utils/general";
 import getSalesNavigatorLaunches, { getSalesNavigatorLaunch, resetSalesNavigatorLaunch } from "@utils/requests/getSalesNavigatorLaunches";
@@ -50,14 +50,31 @@ export default function SalesNavigatorComponent(props: {
         labels: { confirm: 'Save', cancel: 'Cancel' },
         onCancel: () => { },
         onConfirm: () => { 
+          if (!isValidUrl(tempInputValue)) {
+            showNotification({
+                title: 'Error',
+                message: 'Invalid URL provided',
+                color: 'red'
+            });
+            return; // Stop execution if URL is invalid
+          }
           updateAccountFiltersURL(launchId, tempInputValue);
         }
       });
   
     }
   };
+  const isValidUrl = (urlString: string) => {
+    try {
+        new URL(urlString);
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
 
   const updateAccountFiltersURL = (launchId: number, newURL: string) => {
+
     const updatedLaunches = launches.map(launch => {
       if (launch.id === launchId) {
         // Creates a new launch object with the updated URL
@@ -72,17 +89,6 @@ export default function SalesNavigatorComponent(props: {
       .then(response => {
         if (response) {
           // Assuming response is true if the update is successful
-          // Update the state with the new launches array
-          // const updatedLaunches = launches.map(launch => {
-          //   if (launch.id === launchId) {
-          //     // Creates a new launch object with the updated URL
-          //     return { ...launch, account_filters_url: newURL };
-          //   }
-          //   return launch;
-          // });
-  
-          // setLaunches(updatedLaunches);
-  
           //  show a success notification
           showNotification({
             title: 'Success',
@@ -364,9 +370,27 @@ export default function SalesNavigatorComponent(props: {
                 <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">
                   View Original Filters
                 </Anchor>
-                <Anchor size='sm' onClick={() => clickAccountFilterURL(launch.id, launch.account_filters_url)}>
-                  {launch.account_filters_url ? "View Account Filters" : "Set Account Filters"}
-                </Anchor>
+                <Group spacing={0}>
+                    <Anchor size='sm' onClick={() => clickAccountFilterURL(launch.id, launch.account_filters_url)}>
+                      {launch.account_filters_url ? "View Account Filters" : "Set Account Filters"}
+                    </Anchor>
+                    {launch.account_filters_url && (
+                      <ActionIcon 
+                        size="sm"
+                        color="red" 
+                        onClick={() => {
+                          openConfirmModal({
+                            title: "Are you sure you want to delete the Account Filters URL?",
+                            labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                            onCancel: () => { },
+                            onConfirm: () => { updateAccountFiltersURL(launch.id, "") }
+                          })
+                        }}
+                        >
+                        <IconX />
+                      </ActionIcon>
+                  )}
+                </Group>
               </Stack>
               <Text mt='xs' color='gray' transform='uppercase' fz='xs' fw='bold' align='right'>
                 {

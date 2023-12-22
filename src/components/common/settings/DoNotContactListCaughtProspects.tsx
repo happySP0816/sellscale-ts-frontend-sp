@@ -111,17 +111,11 @@ export default function DoNotContactListCaughtProspects(props: {
       <td style={{ width: "10%" }}>
         {p.matched_filter_words?.map((x: string, i: number) => (
           <Badge
-            color={deterministicMantineColor(x)}
+            color={'gray'}
+            variant='outline'
             size="xs"
-            style={{
-              fontFamily: `${
-                p.matched_filters && p.matched_filters[i] === "Title"
-                  ? "intern"
-                  : "tronic"
-              }`,
-            }}
           >
-            {x}
+            ⚠️ {x}
           </Badge>
         ))}
       </td>

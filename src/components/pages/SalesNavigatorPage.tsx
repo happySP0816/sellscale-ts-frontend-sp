@@ -6,7 +6,7 @@ import { Card, Flex, Title, Text, TextInput, Anchor, NumberInput, Tooltip, Butto
 import { useForm } from "@mantine/form";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconAffiliate, IconBrandLinkedin, IconDownload, IconRefresh, IconZoomReset } from "@tabler/icons";
+import { IconAffiliate, IconBrandLinkedin, IconDownload, IconRefresh, IconZoomReset, IconX } from "@tabler/icons";
 import { setPageTitle } from "@utils/documentChange";
 import { valueToColor } from "@utils/general";
 import getSalesNavigatorLaunches, { getSalesNavigatorLaunch, resetSalesNavigatorLaunch } from "@utils/requests/getSalesNavigatorLaunches";
@@ -15,6 +15,7 @@ import moment, { now } from 'moment';
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { SalesNavigatorLaunch } from "src";
+import { patchSalesNavigatorLaunchAccountFiltersUrl } from "@utils/requests/patchAccountFiltersURL";
 
 export default function SalesNavigatorComponent(props: {
   showPersonaSelect?: boolean
@@ -29,6 +30,91 @@ export default function SalesNavigatorComponent(props: {
   const currentProject = useRecoilValue(currentProjectState);
 
   const [uploadPersonaId, setUploadPersonaId]: any = useState<number>(currentProject?.id || -1)
+
+  const clickAccountFilterURL = (launchId: number, launchAccountFiltersURL: string) => {
+    if(launchAccountFiltersURL) {
+      window.open(launchAccountFiltersURL, '_blank');
+    }
+    else {
+      let tempInputValue = '';
+      
+      openConfirmModal({
+        title: "Set Account Filter URL",
+        children: (
+          <TextInput
+            description='Copy-paste the Account Filter URL below'
+            placeholder="Account Filter URL"
+            onChange={(event) => { tempInputValue = event.currentTarget.value }}
+          />
+        ),
+        labels: { confirm: 'Save', cancel: 'Cancel' },
+        onCancel: () => { },
+        onConfirm: () => { 
+          if (!isValidUrl(tempInputValue)) {
+            showNotification({
+                title: 'Error',
+                message: 'Invalid URL provided',
+                color: 'red'
+            });
+            return; // Stop execution if URL is invalid
+          }
+          updateAccountFiltersURL(launchId, tempInputValue);
+        }
+      });
+  
+    }
+  };
+  const isValidUrl = (urlString: string) => {
+    try {
+        new URL(urlString);
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+  const updateAccountFiltersURL = (launchId: number, newURL: string) => {
+
+    const updatedLaunches = launches.map(launch => {
+      if (launch.id === launchId) {
+        // Creates a new launch object with the updated URL
+        return { ...launch, account_filters_url: newURL };
+      }
+      return launch;
+    });
+
+    setLaunches(updatedLaunches);
+
+    patchSalesNavigatorLaunchAccountFiltersUrl(userToken, launchId, newURL)
+      .then(response => {
+        if (response) {
+          // Assuming response is true if the update is successful
+          //  show a success notification
+          showNotification({
+            title: 'Success',
+            message: 'Account filters URL updated successfully',
+            color: 'green'
+          });
+        } else {
+          // Handle error case
+          showNotification({
+            title: 'Error',
+            message: 'Failed to update account filters URL',
+            color: 'red'
+          });
+        }
+      })
+      .catch(error => {
+        // console.error('Error updating account filters URL:', error);
+        // Handle error case
+        showNotification({
+          title: 'Error',
+          message: 'Failed to update account filters URL',
+          color: 'red'
+        });
+      });
+  };
+  
 
 
   const triggerGetSalesNavigatorLaunches = async () => {
@@ -219,6 +305,7 @@ export default function SalesNavigatorComponent(props: {
             badgeColor = theme.colors.red[6]
           }
 
+
           return (
             <Card mt='lg' p='lg' shadow='sm' withBorder>
               {
@@ -279,8 +366,32 @@ export default function SalesNavigatorComponent(props: {
                   
                 </Flex>
               </Flex>
-              <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">View Original Filters</Anchor>
-
+              <Stack spacing={0}>
+                <Anchor size='sm' href={launch.sales_navigator_url} target="_blank">
+                  View Original Filters
+                </Anchor>
+                <Group spacing={0}>
+                    <Anchor size='sm' onClick={() => clickAccountFilterURL(launch.id, launch.account_filters_url)}>
+                      {launch.account_filters_url ? "View Account Filters" : "Set Account Filters"}
+                    </Anchor>
+                    {launch.account_filters_url && (
+                      <ActionIcon 
+                        size="sm"
+                        color="red" 
+                        onClick={() => {
+                          openConfirmModal({
+                            title: "Are you sure you want to delete the Account Filters URL?",
+                            labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                            onCancel: () => { },
+                            onConfirm: () => { updateAccountFiltersURL(launch.id, "") }
+                          })
+                        }}
+                        >
+                        <IconX />
+                      </ActionIcon>
+                  )}
+                </Group>
+              </Stack>
               <Text mt='xs' color='gray' transform='uppercase' fz='xs' fw='bold' align='right'>
                 {
                   launch.status == 'SUCCESS' ? 100 :

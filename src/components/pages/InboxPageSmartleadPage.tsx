@@ -278,8 +278,14 @@ export default function InboxSmartleadPage(props: {
       return new Date(a.time).getTime() - new Date(b.time).getTime();
     });
 
-    let automated_reply = response?.data?.automated_reply?.email_body;
-    setMessageDraft(automated_reply);
+    // If the last conversation is from the user, then we should populate with the automated reply
+    const lastMessage = conversation[conversation.length - 1];
+    console.log('lastMessage', lastMessage)
+    if (lastMessage?.type === "REPLY") {
+      const automated_reply = response?.data?.automated_reply?.email_body;
+      setMessageDraft(automated_reply);
+      messageDraftEmail.current = automated_reply;
+    }
 
     setConversation([conversation]);
     setFetchingConversation(false);    

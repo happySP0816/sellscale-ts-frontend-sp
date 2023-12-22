@@ -573,6 +573,10 @@ export default function InboxProspectConvoBumpFramework(props: {
           <ScrollArea scrollbarSize={6} mt={'sm'} w={'60%'}>
             <Flex w={'100%'} direction='column' gap={'xl'} px={10} mt={'sm'}>
               {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map((qno: any, index) => {
+
+                // only show qnos with same stats
+                if (qno.substatus !== data?.substatus && qno?.overall_status === 'ACTIVE_CONVO') return null;
+
                 return (
                   <>
                     <QuestionObjectionLibraryCard

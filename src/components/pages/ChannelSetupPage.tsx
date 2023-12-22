@@ -134,12 +134,13 @@ export default function ChannelSetupPage() {
                 value="filter_contact"
                 icon={<IconUser size={"0.8rem"} />}
               >
-                Filter Contact
+                Filter Contacts
               </Tabs.Tab>
               <Tabs.Tab
                 value="linkedin"
                 icon={<IconBrandLinkedin size={"0.8rem"} />}
-                disabled={!isEnabledLinkedin}
+                // disabled={!isEnabledLinkedin}
+                ml='xs'
               >
                 <Flex align={"center"} gap={"md"}>
                   <Text>Linkedin</Text>
@@ -156,7 +157,8 @@ export default function ChannelSetupPage() {
               <Tabs.Tab
                 value="email"
                 icon={<IconMailOpened size={"0.8rem"} />}
-                disabled={!isEnabledEmail}
+                // disabled={!isEnabledEmail}
+                ml='xs'
               >
                 <Flex align={"center"} gap={"md"}>
                   Email
@@ -172,7 +174,7 @@ export default function ChannelSetupPage() {
             </Tabs.List>
 
             <Tabs.Panel value="filter_contact">
-              <ICPFilters />
+              <ICPFilters hideTitleBar />
             </Tabs.Panel>
             <Tabs.Panel value="linkedin">
               <Box

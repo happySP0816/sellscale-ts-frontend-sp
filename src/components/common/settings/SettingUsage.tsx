@@ -303,7 +303,7 @@ export default function SettingUsage() {
                     style={{ display: "flex", alignItems: "center" }}
                     mt={5}
                   >
-                    {prospectingData?.prospect_created}{" "}
+                    {prospectingData?.prospect_created?.toLocaleString()}{" "}
                     <Badge
                       color="blue"
                       ml={10}
@@ -330,7 +330,7 @@ export default function SettingUsage() {
                     style={{ display: "flex", alignItems: "center" }}
                     mt={5}
                   >
-                    {prospectingData?.prospect_enriched}{" "}
+                    {prospectingData?.prospect_enriched.toLocaleString()}{" "}
                     <Badge
                       color="green"
                       ml={10}
@@ -364,7 +364,7 @@ export default function SettingUsage() {
                     style={{ display: "flex", alignItems: "center" }}
                     mt={5}
                   >
-                    {prospectingData?.total_outreach_sent}{" "}
+                    {prospectingData?.total_outreach_sent.toLocaleString()}{" "}
                     <Badge
                       color="grape"
                       ml={10}
@@ -400,7 +400,7 @@ export default function SettingUsage() {
                     style={{ display: "flex", alignItems: "center" }}
                     mt={5}
                   >
-                    {prospectingData?.ai_replies}{" "}
+                    {prospectingData?.ai_replies.toLocaleString()}{" "}
                     <Badge
                       color="red"
                       ml={10}
@@ -434,7 +434,7 @@ export default function SettingUsage() {
                     style={{ display: "flex", alignItems: "center" }}
                     mt={5}
                   >
-                    {prospectingData?.prospects_snoozed}{" "}
+                    {prospectingData?.prospects_snoozed.toLocaleString()}{" "}
                     <Badge
                       color="orange"
                       ml={10}
@@ -468,7 +468,7 @@ export default function SettingUsage() {
                     style={{ display: "flex", alignItems: "center" }}
                     mt={5}
                   >
-                    {prospectingData?.prospects_removed}{" "}
+                    {prospectingData?.prospects_removed.toLocaleString()}{" "}
                     <Badge
                       color="yellow"
                       ml={10}
@@ -533,7 +533,7 @@ export default function SettingUsage() {
                 <Text size={12} fw={600} color="gray" align="center">
                   You have used{" "}
                   <span style={{ color: "#54a4f9" }}>
-                    {prospectingData?.monthly_touchpoints_used}
+                    {prospectingData?.monthly_touchpoints_used.toLocaleString()}
                   </span>{" "}
                   out of{" "}
                   <span style={{ fontWeight: "700", color: "black" }}>

@@ -59,6 +59,7 @@ import {
   IconSearch,
   IconTool,
   IconTransferIn,
+  IconUser,
   IconWashMachine,
   IconX,
 } from '@tabler/icons';
@@ -83,6 +84,7 @@ import { API_URL } from '@constants/data';
 import { postBumpDeactivate } from '@utils/requests/postBumpDeactivate';
 import { patchBumpFramework } from '@utils/requests/patchBumpFramework';
 import _ from 'lodash';
+import ICPFilters from '@common/persona/ICPFilter/ICPFilters';
 
 type BumpFrameworkBuckets = {
   ACCEPTED: {
@@ -735,6 +737,9 @@ export default function BumpFrameworksPage(props: {
                 {/* <Tabs.Tab value='ctas' icon={<IconList size='0.8rem' />}>
                   CTAs
                 </Tabs.Tab> */}
+                <Tabs.Tab value='contacts' icon={<IconUser size='0.8rem' />}>
+                  Contacts
+                </Tabs.Tab>
                 <Tabs.Tab value='sequence' icon={<IconList size='0.8rem' />}>
                   Sequence
                 </Tabs.Tab>
@@ -751,6 +756,10 @@ export default function BumpFrameworksPage(props: {
                   Analytics
                 </Tabs.Tab> */}
               </Tabs.List>
+
+              <Tabs.Panel value='contacts' pt='xs'>
+                <ICPFilters hideTitleBar={true} />
+              </Tabs.Panel>
 
               <Tabs.Panel value='sequence' pt='xs'>
                 {!loading ? (

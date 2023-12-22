@@ -179,7 +179,7 @@ export default function SpotlightWrapper({
       actions={(queryResult === null) ? [] : (
         (queryResult === false || query === '') ? mainActions : [...queryResult]
       )}
-      actionComponent={CustomAction}
+      actionComponent={                         CustomAction}
       searchIcon={<IconSearch size={18} />}
       searchPlaceholder={"Search everywhere..."}
       searchInputProps={{ autoComplete: "off" }}

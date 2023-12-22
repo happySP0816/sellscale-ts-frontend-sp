@@ -31,6 +31,7 @@ import {
   IconMessages,
   IconPlus,
   IconSearch,
+  IconUser,
   IconWashMachine,
   IconX,
 } from "@tabler/icons";
@@ -51,6 +52,7 @@ import NewUIEmailSequencing from "./EmailSequencing/NewUIEmailSequencing";
 import NylasConnectedCard from "@common/settings/NylasConnectedCard";
 import SmartleadVisualizer from "@common/sequence/SmartleadSequence";
 import { getSmartleadSequence } from "@utils/requests/getSmartleadSequences";
+import ICPFilters from '@common/persona/ICPFilter/ICPFilters';
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -821,6 +823,9 @@ export default function EmailSequencingPage(props: {
               >
                 Conversation
               </Tabs.Tab> */}
+            <Tabs.Tab value='contacts' icon={<IconUser size='0.8rem' />}>
+              Contacts
+            </Tabs.Tab>
             <Tabs.Tab value="sequence" icon={<IconMessages size="0.8rem" />}>
               Email Sequence
             </Tabs.Tab>
@@ -837,6 +842,11 @@ export default function EmailSequencingPage(props: {
               </Tabs.Tab>
             )}
           </Tabs.List>
+
+          <Tabs.Panel value='contacts' pt='xs'>
+            <ICPFilters hideTitleBar={true} />
+          </Tabs.Panel>
+
           <Tabs.Panel value="email_settings">
             <Box maw="800px" ml="auto" mr="auto">
               <NylasConnectedCard

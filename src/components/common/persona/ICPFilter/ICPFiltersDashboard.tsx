@@ -139,7 +139,11 @@ const csvHeaders = [
   { label: "ID", key: "id" },
 ];
 
-const ICPFiltersDashboard: FC = () => {
+type ICPFiltersDashboardPropsType = {
+  hideTitleBar?: boolean;
+};
+
+const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
   const [icpProspects, setIcpProspects] = useRecoilState(filterProspectsState);
@@ -527,6 +531,7 @@ const ICPFiltersDashboard: FC = () => {
           justifyContent: "space-between",
           borderBottom: "1px solid gray",
           borderBottomStyle: "dashed",
+          display: props.hideTitleBar ? "none" : "block",
         }}
         pb={"md"}
       >

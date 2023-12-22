@@ -450,3 +450,22 @@ export function isValidUrl(str: string) {
   );
   return pattern.test(str);
 }
+
+export function generatePassword() {
+  // Something simple that works for now
+  let length = 16,
+    charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    specialset = '!@#$%^&*~',
+    numset = '0123456789',
+    retVal = '';
+  for (let i = 0, n = charset.length; i < length; ++i) {
+    if (i % 4 === 0) {
+      retVal += specialset.charAt(Math.floor(Math.random() * specialset.length));
+    } else if (i % 4 === 1) {
+      retVal += numset.charAt(Math.floor(Math.random() * numset.length));
+    } else {
+      retVal += charset.charAt(Math.floor(Math.random() * n));
+    }
+  }
+  return retVal;
+}

@@ -9,34 +9,47 @@ import {
   selectedEmailThread,
 } from "@atoms/inboxAtoms";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
+import TextWithNewlines from "@common/library/TextWithNewlines";
 import loaderWithText from "@common/library/loaderWithText";
 import {
   Button,
   Flex,
   Group,
+  Paper,
   Title,
   Text,
+  Textarea,
   useMantineTheme,
   Divider,
   Tabs,
   ActionIcon,
   Badge,
+  Container,
   Avatar,
   Stack,
   ScrollArea,
   LoadingOverlay,
   Center,
   Box,
+  Loader,
   Skeleton,
+  Select,
   Tooltip,
   Card,
-  Container,
 } from "@mantine/core";
 import {
   IconExternalLink,
+  IconWriting,
+  IconSend,
   IconBrandLinkedin,
   IconMail,
+  IconDots,
+  IconPointFilled,
+  IconArrowsDiagonal,
+  IconPlus,
   IconArrowBigLeftFilled,
+  IconPencilPlus,
+  IconPencil,
   IconEdit,
   IconArrowBackUp,
   IconArrowForwardUp,
@@ -59,19 +72,23 @@ import {
   EmailMessage,
   EmailThread,
   LinkedInMessage,
+  Prospect,
   ProspectDetails,
   ProspectShallow,
 } from "src";
-import { labelizeConvoSubstatus } from "./utils";
+
 import { readLiMessages } from "@utils/requests/readMessages";
 import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
 import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
 import { getAutoBumpMessage } from "@utils/requests/autoBumpMessage";
-import _ from "lodash";
-import InboxProspectConvoSendBox from "./InboxProspectConvoSendBox";
-import InboxProspectConvoBumpFramework from "./InboxProspectConvoBumpFramework";
+import _, { set } from "lodash";
+
+import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
-import { getBumpFrameworks, getSingleBumpFramework } from "@utils/requests/getBumpFrameworks";
+import {
+  getBumpFrameworks,
+  getSingleBumpFramework,
+} from "@utils/requests/getBumpFrameworks";
 import { getEmailMessages, getEmailThreads } from "@utils/requests/getEmails";
 import { openComposeEmailModal } from "@common/prospectDetails/ProspectDetailsViewEmails";
 import { currentProjectState } from "@atoms/personaAtoms";
@@ -83,11 +100,11 @@ import RichTextArea from "@common/library/RichTextArea";
 import { JSONContent } from "@tiptap/react";
 import { showNotification } from "@mantine/notifications";
 import postSmartleadReply from "@utils/requests/postSmartleadReply";
-import { IconArrowLeft, IconChevronUp } from "@tabler/icons";
-import { getBumpFrameworksSequence } from "@utils/requests/getBumpFrameworksSequence";
-import TextWithNewlines from "@common/library/TextWithNewlines";
-import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
+import { labelizeConvoSubstatus } from "@common/inbox/utils";
+import InboxProspectConvoSendBox from "@common/inbox/InboxProspectConvoSendBox";
+import InboxProspectConvoBumpFramework from "@common/inbox/InboxProspectConvoBumpFramework";
 import { useNavigate } from "react-router-dom";
+import { IconArrowLeft } from "@tabler/icons";
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -111,7 +128,6 @@ export function ProspectConvoMessage(props: {
   cta?: string;
 }) {
   const userToken = useRecoilValue(userTokenState);
-  const theme = useMantineTheme();
 
   const uniqueId = `prospect-convo-message-${props.id}`;
   const [finalMessage, setFinalMessage] = useState<string>(props.message);
@@ -238,15 +254,13 @@ export function ProspectConvoMessage(props: {
 export let HEADER_HEIGHT = 190;
 
 type LiStepProgress = "COMPLETE" | "INCOMPLETE" | "COMING_SOON" | "OPTIONAL";
-type Props = {
+
+export default function ProspectConvo(props: {
   prospects: ProspectShallow[];
   onTabChange?: (tab: string) => void;
   openConvoBox?: boolean;
   hideTitle?: boolean;
-  showBackToInbox?: boolean;
-  currentEmailStatus?: string;
-};
-export default function ProspectConvo(props: Props) {
+}) {
   const [stepThreeComplete, setStepThreeComplete] =
     useState<LiStepProgress>("INCOMPLETE");
   const theme = useMantineTheme();
@@ -254,17 +268,13 @@ export default function ProspectConvo(props: Props) {
 
   const sendBoxRef = useRef<any>();
   // We keep a map of the prospectId to the bump framework ref in order to fix ref bugs for generating messages via btn
-  const bumpFrameworksRef = useRef<Map<number, any>>(new Map());
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const openedProspectId = useRecoilValue(openedProspectIdState);
-  const currentProject = useRecoilValue(currentProjectState);
 
   const [hasGeneratedMessage, setHasGeneratedMessage] = useState(false);
-  const [openedConvoBox, setOpenedConvoBox]: any = useState(
-    props.openConvoBox || true
-  );
+  const [openedConvoBox, setOpenedConvoBox] = useState(props.openConvoBox);
 
   // This is used to fix a bug with the hacky way we're doing message loading now
   const currentMessagesProspectId = useRef(-1);
@@ -292,7 +302,6 @@ export default function ProspectConvo(props: Props) {
   const [currentConvoEmailMessages, setCurrentConvoEmailMessages] =
     useRecoilState(currentConvoEmailMessageState);
   const [emailThread, setEmailThread] = useState<EmailThread>();
-  const [bumpFrameworksSequence, setBumpFrameworksSequence] = useState([]);
 
   const prospect = _.cloneDeep(
     props.prospects.find((p) => p.id === openedProspectId)
@@ -300,8 +309,7 @@ export default function ProspectConvo(props: Props) {
 
   const isConversationOpened =
     openedOutboundChannel === "LINKEDIN" ||
-    (openedOutboundChannel === "EMAIL" && emailThread) ||
-    openedOutboundChannel !== "SMARTLEAD";
+    (openedOutboundChannel === "EMAIL" && emailThread);
 
   const viewport = useRef<HTMLDivElement>(null);
   const scrollToBottom = () =>
@@ -449,7 +457,7 @@ export default function ProspectConvo(props: Props) {
     refetchOnWindowFocus: false,
   });
 
-  let HEADER_HEIGHT = props.hideTitle ? 65 : 110;
+  let HEADER_HEIGHT = 65;
 
   const [conversationdetail, setConversationDetail] = useState<boolean[]>([]);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -526,19 +534,10 @@ export default function ProspectConvo(props: Props) {
 
     triggerGetSmartleadProspectConvo();
   };
-
+  const navigate = useNavigate();
   const handleConvertDate = (date: string) => {
     const timestamp = date;
     const dateObject = new Date(timestamp);
-    const days = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
 
     const options: Intl.DateTimeFormatOptions = {
       month: "short",
@@ -567,7 +566,6 @@ export default function ProspectConvo(props: Props) {
     scrollToBottom();
     if (isFetchingMessages) {
       triggerGetBumpFrameworks();
-      getBumpFrameworkSequence();
     }
   }, [isFetchingMessages]);
 
@@ -626,34 +624,12 @@ export default function ProspectConvo(props: Props) {
     }
   };
 
-  const getBumpFrameworkSequence = async () => {
-    if (!prospect) {
-      return;
-    }
-
-    const result = await getBumpFrameworksSequence(
-      userToken,
-      prospect.archetype_id
-    );
-
-    if (result.status === "success") {
-      setBumpFrameworksSequence(result.data.data);
-    }
-    
-  };
-
   // // On load we should get the bump frameworks
   // useEffect(() => {
   //   triggerGetBumpFrameworks();
   // }, [])
 
-  let statusValue = data?.details?.linkedin_status || "ACTIVE_CONVO";
-  if (
-    openedOutboundChannel === "EMAIL" ||
-    openedOutboundChannel === "SMARTLEAD"
-  ) {
-    statusValue = props.currentEmailStatus || "ACTIVE_CONVO";
-  }
+  const statusValue = data?.details?.linkedin_status || "ACTIVE_CONVO";
 
   const linkedin_public_id =
     data?.li.li_profile?.split("/in/")[1]?.split("/")[0] ?? "";
@@ -680,85 +656,20 @@ export default function ProspectConvo(props: Props) {
       }
     }
   }
-  const navigate = useNavigate();
-  if (!openedProspectId || openedProspectId === -1) {
-    return (
-      <Flex
-        direction="column"
-        align="left"
-        p="sm"
-        mt="lg"
-        h={`calc(${INBOX_HEIGHT} - 100px)`}
-      >
-        <Skeleton height={50} circle mb="xl" />
-        <Skeleton height={8} radius="xl" />
-        <Skeleton height={50} mt={12} />
-        <Skeleton height={50} mt={12} />
-        <Skeleton height={40} w="50%" mt={12} />
-        <Skeleton height={50} mt={12} />
-        <Skeleton height={20} w="80%" mt={12} />
-      </Flex>
-    );
-  }
 
   return (
     <Flex gap={0} direction="column" wrap="nowrap" h={"100%"}>
       <div style={{ height: HEADER_HEIGHT, position: "relative" }}>
-        <></>
-        {!props.hideTitle && (
-          <Group
-            position="apart"
-            p={15}
-            h={66}
-            sx={{ flexWrap: "nowrap" }}
-            bg={"white"}
-          >
-            <div style={{ overflow: "hidden" }}>
-              <Title order={3} truncate>
-                {data?.details.full_name}
-              </Title>
-              <Text weight={300} fs="italic" size={10} c="dimmed" truncate>
-                {prospect &&
-                new Date(prospect.hidden_until).getTime() >
-                  new Date().getTime() ? (
-                  <>
-                    Snoozed Until:{" "}
-                    {convertDateToLocalTime(new Date(prospect.hidden_until))}
-                  </>
-                ) : (
-                  <>Last Updated: {convertDateToCasualTime(new Date())}</>
-                )}
-              </Text>
-            </div>
-            <Group sx={{ flexWrap: "nowrap" }}>
-              <Badge size="lg" color={"blue"}>
-                {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
-              </Badge>
-              <ProspectDetailsOptionsMenu
-                prospectId={openedProspectId}
-                archetypeId={prospect?.archetype_id || -1}
-                aiEnabled={
-                  ai_disabled ? undefined : !prospect?.deactivate_ai_engagement
-                }
-                refetch={refetch}
-              />
-            </Group>
-          </Group>
-        )}
-
         <Tabs
           variant="outline"
           defaultValue="LINKEDIN"
           radius={theme.radius.md}
           value={openedOutboundChannel}
           styles={(theme) => ({
-            root: {
-              backgroundColor: "white",
-            },
             tabsList: {
               paddingLeft: "0 !important",
               paddingRight: "0 !important",
-              // height: HEADER_HEIGHT,
+              height: HEADER_HEIGHT,
               justifyContent: "space-evenly",
             },
             tabLabel: {
@@ -788,7 +699,6 @@ export default function ProspectConvo(props: Props) {
               sendBoxRef.current?.setAiMessage("");
               sendBoxRef.current?.setMessageDraft("");
               setOpenedOutboundChannel(value as Channel);
-              setOpenedConvoBox(value === "LINKEDIN")
 
               // Pretty bad to set timeout, but we need this channel to update
               setTimeout(refetch, 1);
@@ -805,24 +715,22 @@ export default function ProspectConvo(props: Props) {
           }}
         >
           <Tabs.List px={20}>
-            {props.showBackToInbox && (
-              <Tabs.Tab
-                value="back_to"
-                onClick={() => {
-                  navigate("/inbox");
-                }}
-              >
-                <Flex align={"center"}>
-                  <ActionIcon color="blue">
-                    <IconArrowLeft size={"1rem"} />
-                  </ActionIcon>
-                  <Flex>
-                    <Text>Inbox/</Text>
-                    <Text fw={700}>{data?.details.full_name}</Text>
-                  </Flex>
+            <Tabs.Tab
+              value="back_to"
+              onClick={() => {
+                navigate(-1);
+              }}
+            >
+              <Flex align={"center"}>
+                <ActionIcon color="blue">
+                  <IconArrowLeft size={"1rem"} />
+                </ActionIcon>
+                <Flex>
+                  <Text>Inbox/</Text>
+                  <Text fw={700}>{data?.details.full_name}</Text>
                 </Flex>
-              </Tabs.Tab>
-            )}
+              </Flex>
+            </Tabs.Tab>
             {prospect?.li_public_id && (
               <Tabs.Tab
                 value="LINKEDIN"
@@ -875,13 +783,9 @@ export default function ProspectConvo(props: Props) {
             </Badge>
           )}
         <ScrollArea
-          h={`calc((${INBOX_HEIGHT} - ${HEADER_HEIGHT}px)*1.0)`}
+          h={`calc((${INBOX_HEIGHT} - ${HEADER_HEIGHT}px)*1.00)`}
           viewportRef={viewport}
-          sx={{
-            position: "relative",
-            paddingBottom: openedOutboundChannel === "LINKEDIN" ? 20 : 0,
-            paddingTop: 10,
-          }}
+          sx={{ position: "relative" }}
         >
           <div style={{ marginTop: 10, marginBottom: 10 }}>
             <LoadingOverlay
@@ -955,11 +859,6 @@ export default function ProspectConvo(props: Props) {
                     msg.initial_message_stack_ranked_config_name
                   }
                   cta={""}
-                  // isLastMsgInSequent={
-                  //   !currentConvoLiMessages[i + 1] ||
-                  //   (currentConvoLiMessages[i + 1] &&
-                  //     currentConvoLiMessages[i + 1].author !== msg.author)
-                  // }
                 />
               ))}
             {openedOutboundChannel === "LINKEDIN" &&
@@ -1003,12 +902,6 @@ export default function ProspectConvo(props: Props) {
                       initialMessageStackRankedConfigID={undefined}
                       initialMessageStackRankedConfigName={undefined}
                       cta={""}
-                      // isLastMsgInSequent={
-                      //   !currentConvoEmailMessages[i + 1] ||
-                      //   (currentConvoEmailMessages[i + 1] &&
-                      //     currentConvoEmailMessages[i + 1].client_sdr_id !==
-                      //       msg.client_sdr_id)
-                      // }
                     />
                   </Box>
                 ))}
@@ -1190,7 +1083,6 @@ export default function ProspectConvo(props: Props) {
                                 radius="xl"
                                 mt="sm"
                                 size="xs"
-                                w="100px"
                               >
                                 {conversationdetail[index]
                                   ? "Less more"
@@ -1248,9 +1140,9 @@ export default function ProspectConvo(props: Props) {
               </>
             )}
 
-            <Box
+            {/* <Box
               sx={{ width: "100%", height: openedConvoBox ? "250px" : "50px" }}
-            ></Box>
+            ></Box> */}
           </div>
         </ScrollArea>
 
@@ -1258,7 +1150,6 @@ export default function ProspectConvo(props: Props) {
           <>
             <Box
               sx={{
-                width: "100%",
                 position: "absolute",
                 bottom: 0,
                 right: 0,
@@ -1285,31 +1176,21 @@ export default function ProspectConvo(props: Props) {
             <Box
               sx={{
                 position: "absolute",
-                bottom: 0,
-                right: 0,
+                bottom: 5,
+                right: 5,
                 visibility: openedConvoBox ? "hidden" : "visible",
-                width: "100%",
               }}
             >
               <Button
                 size="xs"
-                w={"100%"}
+                radius="md"
                 color="dark"
-                sx={{
-                  borderBottomLeftRadius: 0,
-                  borderBottomRightRadius: 0,
-                }}
-                rightIcon={<IconChevronUp size="1rem" />}
+                rightIcon={<IconArrowsDiagonal size="1rem" />}
                 onClick={() => {
                   setOpenedConvoBox(true);
                 }}
-                styles={{
-                  inner: {
-                    justifyContent: "space-between",
-                  },
-                }}
               >
-                {/* Send Message
+                Send Message
                 {hasGeneratedMessage && (
                   <Box
                     pt={2}
@@ -1320,36 +1201,7 @@ export default function ProspectConvo(props: Props) {
                   >
                     <IconPointFilled size="0.9rem" />
                   </Box>
-                )} */}
-
-                <Flex wrap="nowrap" align="center">
-                  <Text color="white" fz={14} fw={500}>
-                    {openedOutboundChannel === "LINKEDIN"
-                      ? "Message via LinkedIn "
-                      : "Reply via Email "}
-                  </Text>
-                  <Text
-                    size="xs"
-                    fs="italic"
-                    color="gray.3"
-                    ml="xs"
-                    component="a"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={
-                      openedOutboundChannel === "LINKEDIN"
-                        ? `https://www.linkedin.com/in/${linkedin_public_id}`
-                        : `mailto:${prospect?.email || ""}`
-                    }
-                  >
-                    {openedOutboundChannel === "LINKEDIN"
-                      ? `linkedin.com/in/${_.truncate(linkedin_public_id, {
-                          length: 20,
-                        })}`
-                      : prospect?.email || ""}{" "}
-                    <IconExternalLink size="0.65rem" />
-                  </Text>
-                </Flex>
+                )}
               </Button>
             </Box>
           </>
@@ -1358,7 +1210,6 @@ export default function ProspectConvo(props: Props) {
       {prospect && (
         <InboxProspectConvoBumpFramework
           prospect={prospect}
-          bumpFrameworksSequence={bumpFrameworksSequence}
           messages={currentConvoLiMessages || []}
           onClose={() => {
             triggerGetBumpFrameworks();

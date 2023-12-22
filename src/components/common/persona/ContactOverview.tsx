@@ -33,20 +33,20 @@ import PulseTabSelector from './PulseTabSelector';
 
 const ContactOverview = () => {
   return (
-    <Tabs defaultValue='contact_overview' className='min-h-full flex flex-col'>
+    <Tabs defaultValue='prospect_scoring' className='min-h-full flex flex-col'>
       <Tabs.List>
         {/* <Tabs.Tab value='overview'>
           <IconTable size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Upload Overview
         </Tabs.Tab> */}
-        <Tabs.Tab value='contact_overview'>
+        {/* <Tabs.Tab value='contact_overview'>
           <IconWorld size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Overview
-        </Tabs.Tab>
-        <Tabs.Tab value='scrapping_report'>
+        </Tabs.Tab> */}
+        {/* <Tabs.Tab value='scrapping_report'>
           <IconTable size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Scraping Report
-        </Tabs.Tab>
+        </Tabs.Tab> */}
         <Tabs.Tab value='prospect_scoring'>
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Prospect Scoring
@@ -74,9 +74,9 @@ const ContactOverview = () => {
       {/* <Tabs.Panel value='overview'>
         <UploadOverview />
       </Tabs.Panel> */}
-      <Tabs.Panel value='scrapping_report'>
+      {/* <Tabs.Panel value='scrapping_report'>
         <ScrapingReport />
-      </Tabs.Panel>
+      </Tabs.Panel> */}
       <Tabs.Panel value='global_contacts'>
         <GlobalContacts />
       </Tabs.Panel>
@@ -86,9 +86,9 @@ const ContactOverview = () => {
       <Tabs.Panel value='do_not_contact'>
         <DoNotContactList />
       </Tabs.Panel>
-      <Tabs.Panel value='TAM_graph' className='h-0 grow'>
+      {/* <Tabs.Panel value='TAM_graph' className='h-0 grow'>
         <TAMGraph />
-      </Tabs.Panel>
+      </Tabs.Panel> */}
       <Tabs.Panel value='upload_overview'>
         <UploadOverviewV2 />
       </Tabs.Panel>

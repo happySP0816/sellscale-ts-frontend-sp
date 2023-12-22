@@ -823,9 +823,6 @@ export default function EmailSequencingPage(props: {
               >
                 Conversation
               </Tabs.Tab> */}
-            <Tabs.Tab value='contacts' icon={<IconUser size='0.8rem' />}>
-              Contacts
-            </Tabs.Tab>
             <Tabs.Tab value="sequence" icon={<IconMessages size="0.8rem" />}>
               Email Sequence
             </Tabs.Tab>
@@ -842,10 +839,6 @@ export default function EmailSequencingPage(props: {
               </Tabs.Tab>
             )}
           </Tabs.List>
-
-          <Tabs.Panel value='contacts' pt='xs'>
-            <ICPFilters hideTitleBar={true} />
-          </Tabs.Panel>
 
           <Tabs.Panel value="email_settings">
             <Box maw="800px" ml="auto" mr="auto">

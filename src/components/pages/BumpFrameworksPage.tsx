@@ -737,9 +737,6 @@ export default function BumpFrameworksPage(props: {
                 {/* <Tabs.Tab value='ctas' icon={<IconList size='0.8rem' />}>
                   CTAs
                 </Tabs.Tab> */}
-                <Tabs.Tab value='contacts' icon={<IconUser size='0.8rem' />}>
-                  Contacts
-                </Tabs.Tab>
                 <Tabs.Tab value='sequence' icon={<IconList size='0.8rem' />}>
                   Sequence
                 </Tabs.Tab>
@@ -756,10 +753,6 @@ export default function BumpFrameworksPage(props: {
                   Analytics
                 </Tabs.Tab> */}
               </Tabs.List>
-
-              <Tabs.Panel value='contacts' pt='xs'>
-                <ICPFilters hideTitleBar={true} />
-              </Tabs.Panel>
 
               <Tabs.Panel value='sequence' pt='xs'>
                 {!loading ? (

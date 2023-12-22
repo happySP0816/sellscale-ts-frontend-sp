@@ -3,10 +3,9 @@ import { MsgResponse } from "src";
 import { processResponse } from "./utils";
 
 export async function getUsageConnectResponse(
-  userToken: string,
-  client_id: number
+  userToken: string
 ): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/usage/?client_id=${client_id}`, {
+  const response = await fetch(`${API_URL}/usage/`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${userToken}`,

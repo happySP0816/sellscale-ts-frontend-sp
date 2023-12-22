@@ -44,6 +44,7 @@ import { useSearchParams } from "react-router-dom";
 import { getUsageConnectResponse } from "@utils/requests/usageConnect";
 import { useEffect, useState } from "react";
 import moment from "moment";
+import { showNotification } from '@mantine/notifications';
 
 Chart.register(ArcElement);
 
@@ -98,7 +99,7 @@ export default function SettingUsage() {
     "Dec",
   ];
   const update = async () => {
-    await getUsageConnectResponse(userToken, 520)
+    await getUsageConnectResponse(userToken)
       .then((res) => {
         setProspectingData(res.data?.prospecting);
         setCreatedProspect(res.data?.create_prospect);
@@ -162,10 +163,11 @@ export default function SettingUsage() {
         fill: false,
         borderColor: enrichedProspect?.color,
         tension: 0.3,
+        backgroundColor: ["#0287f7"]
       },
     ],
   };
-  const outsentData: any = {
+  const followUpsSent: any = {
     labels: labels,
     datasets: [
       {
@@ -173,6 +175,7 @@ export default function SettingUsage() {
         fill: false,
         borderColor: followSentProspect?.color,
         tension: 0.3,
+        backgroundColor: ["#0287f7"]
       },
     ],
   };
@@ -184,10 +187,11 @@ export default function SettingUsage() {
         fill: false,
         borderColor: repliesProspect?.color,
         tension: 0.3,
+        backgroundColor: ["#0287f7"]
       },
     ],
   };
-  const snoozedData: any = {
+  const removedData: any = {
     labels: labels,
     datasets: [
       {
@@ -195,6 +199,7 @@ export default function SettingUsage() {
         fill: false,
         borderColor: removedProspect?.color,
         tension: 0.3,
+        backgroundColor: ["#0287f7"]
       },
     ],
   };
@@ -245,14 +250,14 @@ export default function SettingUsage() {
           Math.min(
             100,
             Math.floor(
-              (2000 / (prospectingData?.monthly_touchpoints_used || 1)) * 100
+              ((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100
             )
           ),
           100 -
             Math.min(
               100,
               Math.floor(
-                (2000 / (prospectingData?.monthly_touchpoints_used || 1)) * 100
+                ((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100
               )
             ),
         ],
@@ -300,11 +305,11 @@ export default function SettingUsage() {
                   >
                     {prospectingData?.prospect_created}{" "}
                     <Badge
-                      color="green"
+                      color="blue"
                       ml={10}
                       leftSection={<IconArrowUp size={10} stroke={3} />}
                     >
-                      8.5%
+                      100%
                     </Badge>
                   </Text>
                 </Box>
@@ -315,7 +320,7 @@ export default function SettingUsage() {
                 >
                   <Flex justify={"space-between"} w={"100%"} align={"center"}>
                     <Text color="gray" size={12} fw={600}>
-                      Prospects Enriched
+                      # Prospects Enriched
                     </Text>
                     <IconDotsVertical size={10} color="gray" />
                   </Flex>
@@ -331,7 +336,14 @@ export default function SettingUsage() {
                       ml={10}
                       leftSection={<IconArrowUp size={10} stroke={3} />}
                     >
-                      8.5%
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.prospect_enriched /
+                            prospectingData?.prospect_created + 0.0001) *
+                            100
+                        ))
+                      }%
                     </Badge>
                   </Text>
                 </Box>
@@ -354,11 +366,18 @@ export default function SettingUsage() {
                   >
                     {prospectingData?.total_outreach_sent}{" "}
                     <Badge
-                      color="green"
+                      color="grape"
                       ml={10}
                       leftSection={<IconArrowUp size={10} stroke={3} />}
                     >
-                      8.5%
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.total_outreach_sent /
+                            prospectingData?.prospect_created + 0.0001) *
+                            100
+                        ))
+                      }%
                     </Badge>
                   </Text>
                 </Box>
@@ -383,11 +402,18 @@ export default function SettingUsage() {
                   >
                     {prospectingData?.ai_replies}{" "}
                     <Badge
-                      color="green"
+                      color="red"
                       ml={10}
                       leftSection={<IconArrowUp size={10} stroke={3} />}
                     >
-                      8.5%
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.ai_replies /
+                            prospectingData?.total_outreach_sent + 0.0001) *
+                            100
+                        ))
+                      }%
                     </Badge>
                   </Text>
                 </Box>
@@ -410,11 +436,18 @@ export default function SettingUsage() {
                   >
                     {prospectingData?.prospects_snoozed}{" "}
                     <Badge
-                      color="green"
+                      color="orange"
                       ml={10}
                       leftSection={<IconArrowUp size={10} stroke={3} />}
                     >
-                      8.5%
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.prospects_snoozed /
+                            prospectingData?.total_outreach_sent + 0.0001) *
+                            100
+                        ))
+                      }%
                     </Badge>
                   </Text>
                 </Box>
@@ -437,11 +470,18 @@ export default function SettingUsage() {
                   >
                     {prospectingData?.prospects_removed}{" "}
                     <Badge
-                      color="green"
+                      color="yellow"
                       ml={10}
                       leftSection={<IconArrowUp size={10} stroke={3} />}
                     >
-                      8.5%
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          (prospectingData?.prospects_removed /
+                            prospectingData?.total_outreach_sent + 0.0001) *
+                            100
+                        ))
+                      }%
                     </Badge>
                   </Text>
                 </Box>
@@ -480,9 +520,7 @@ export default function SettingUsage() {
                       {Math.min(
                         100,
                         Math.floor(
-                          (2000 /
-                            (prospectingData?.monthly_touchpoints_used || 1)) *
-                            100
+                          ((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100
                         )
                       )}
                       %
@@ -503,7 +541,14 @@ export default function SettingUsage() {
                   </span>{" "}
                   monthly first touches.
                 </Text>
-                <Button w={"100%"} leftIcon={<IconChevronsUp size={16} />}>
+                <Button w={"100%"} leftIcon={<IconChevronsUp size={16} />} onClick={() => {
+                  showNotification({
+                    title: 'Increase Limit',
+                    message: 'This feature is coming soon!',
+                    color: 'red',
+                    icon: <IconChevronsUp size={24} />,
+                  });
+                }}>
                   Increase Limit
                 </Button>
               </Flex>
@@ -517,7 +562,7 @@ export default function SettingUsage() {
             >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
-                  # First Touches Sent:{" "}
+                  # Prospects Created:{" "}
                 </Text>
                 <Text
                   fw={600}
@@ -525,45 +570,23 @@ export default function SettingUsage() {
                 >
                   {prospectingData?.prospect_created}{" "}
                   <Badge
-                    color="green"
+                    color="blue"
                     ml={10}
                     leftSection={<IconArrowUp size={10} stroke={3} />}
                   >
-                    8.5%
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.prospect_created /
+                          prospectingData?.prospect_created + 0.0001) *
+                          100
+                      ))
+                    }%
                   </Badge>
                 </Text>
               </Flex>
               <Box h={230} mt={"sm"}>
                 <Bar data={createdData} options={chartOptions} />
-              </Box>
-            </Box>
-          </Grid.Col>
-          <Grid.Col span={6}>
-            <Box
-              py={30}
-              px={20}
-              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
-            >
-              <Flex align={"center"} gap={"sm"}>
-                <Text color="gray" fw={600}>
-                  First Touches Sent:{" "}
-                </Text>
-                <Text
-                  fw={600}
-                  style={{ display: "flex", alignItems: "center" }}
-                >
-                  {prospectingData?.prospect_created}{" "}
-                  <Badge
-                    color="green"
-                    ml={10}
-                    leftSection={<IconArrowUp size={10} stroke={3} />}
-                  >
-                    8.5%
-                  </Badge>
-                </Text>
-              </Flex>
-              <Box h={230} mt={"lg"}>
-                <Bar data={touchData} options={chartOptions} />
               </Box>
             </Box>
           </Grid.Col>
@@ -587,7 +610,14 @@ export default function SettingUsage() {
                     ml={10}
                     leftSection={<IconArrowUp size={10} stroke={3} />}
                   >
-                    8.5%
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.prospect_enriched /
+                          prospectingData?.prospect_created + 0.0001) *
+                          100
+                      ))
+                    }%
                   </Badge>
                 </Text>
               </Flex>
@@ -604,7 +634,7 @@ export default function SettingUsage() {
             >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
-                  Outreach Sent:{" "}
+                  # First Touches Sent:{" "}
                 </Text>
                 <Text
                   fw={600}
@@ -612,16 +642,59 @@ export default function SettingUsage() {
                 >
                   {prospectingData?.total_outreach_sent}{" "}
                   <Badge
-                    color="green"
+                    color="grape"
                     ml={10}
                     leftSection={<IconArrowUp size={10} stroke={3} />}
                   >
-                    8.5%
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.total_outreach_sent /
+                          prospectingData?.prospect_created + 0.0001) *
+                          100
+                      ))
+                    }%
+                  </Badge>
+                </Text>
+              </Flex>
+              <Box h={230} mt={"lg"}>
+                <Bar data={touchData} options={chartOptions} />
+              </Box>
+            </Box>
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Box
+              py={30}
+              px={20}
+              style={{ border: "2px solid #f6f4f7", borderRadius: "6px" }}
+            >
+              <Flex align={"center"} gap={"sm"}>
+                <Text color="gray" fw={600}>
+                  # Outreach Sent:{" "}
+                </Text>
+                <Text
+                  fw={600}
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  {prospectingData?.total_outreach_sent}{" "}
+                  <Badge
+                    color="grape"
+                    ml={10}
+                    leftSection={<IconArrowUp size={10} stroke={3} />}
+                  >
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.total_outreach_sent /
+                          prospectingData?.prospect_created + 0.0001) *
+                          100
+                      ))
+                    }%
                   </Badge>
                 </Text>
               </Flex>
               <Box h={230} mt={"sm"}>
-                <Bar data={outsentData} options={chartOptions} />
+                <Bar data={followUpsSent} options={chartOptions} />
               </Box>
             </Box>
           </Grid.Col>
@@ -641,16 +714,23 @@ export default function SettingUsage() {
                 >
                   {prospectingData?.ai_replies}{" "}
                   <Badge
-                    color="green"
+                    color="red"
                     ml={10}
                     leftSection={<IconArrowUp size={10} stroke={3} />}
                   >
-                    8.5%
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.ai_replies /
+                          prospectingData?.total_outreach_sent + 0.0001) *
+                          100
+                      ))
+                    }%
                   </Badge>
                 </Text>
               </Flex>
               <Box h={230} mt={"sm"}>
-                <Bar data={replyData} options={chartOptions} />
+                <Bar data={followUpsSent} options={chartOptions} />
               </Box>
             </Box>
           </Grid.Col>
@@ -662,7 +742,7 @@ export default function SettingUsage() {
             >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
-                  Prospects Snoozed:{" "}
+                  # Prospects Snoozed:{" "}
                 </Text>
                 <Text
                   fw={600}
@@ -670,16 +750,23 @@ export default function SettingUsage() {
                 >
                   {prospectingData?.prospects_snoozed}{" "}
                   <Badge
-                    color="green"
+                    color="orange"
                     ml={10}
                     leftSection={<IconArrowUp size={10} stroke={3} />}
                   >
-                    8.5%
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.prospects_snoozed /
+                          prospectingData?.ai_replies + 0.0001) *
+                          100
+                      ))
+                    }%
                   </Badge>
                 </Text>
               </Flex>
               <Box h={230} mt={"sm"}>
-                <Bar data={snoozedData} options={chartOptions} />
+                <Bar data={nurtureData} options={chartOptions} />
               </Box>
             </Box>
           </Grid.Col>
@@ -691,7 +778,7 @@ export default function SettingUsage() {
             >
               <Flex align={"center"} gap={"sm"}>
                 <Text color="gray" fw={600}>
-                  Not Interested / Nurture:{" "}
+                  # Prospects Removed:{" "}
                 </Text>
                 <Text
                   fw={600}
@@ -699,16 +786,23 @@ export default function SettingUsage() {
                 >
                   {prospectingData?.prospects_removed}{" "}
                   <Badge
-                    color="green"
+                    color="yellow"
                     ml={10}
                     leftSection={<IconArrowUp size={10} stroke={3} />}
                   >
-                    8.5%
+                    {Math.min(
+                      100,
+                      Math.floor(
+                        (prospectingData?.prospects_removed /
+                          prospectingData?.ai_replies + 0.0001) *
+                          100
+                      ))
+                    }%
                   </Badge>
                 </Text>
               </Flex>
               <Box h={230} mt={"sm"}>
-                <Bar data={nurtureData} options={chartOptions} />
+                <Bar data={removedData} options={chartOptions} />
               </Box>
             </Box>
           </Grid.Col>

@@ -249,7 +249,7 @@ const UploadOverviewV2 = () => {
 
       {/* Section 2: Line Graph */}
       <Flex justify={"space-between"} mt={"sm"}>
-        <Title order={3}>Doppler Outreach TAM</Title>
+        <Title order={3}>Outreach TAM</Title>
         <Flex align={"center"} gap={"sm"}>
           <Flex gap={"sm"}>
             <Flex align={"center"}>

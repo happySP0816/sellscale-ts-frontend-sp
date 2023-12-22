@@ -190,7 +190,7 @@ export default function TAMGraphV2() {
   return (
     <Box p={'md'}>
       <Flex justify={'space-between'}>
-        <CoreTitle order={2}>Doppler Outreach TAM</CoreTitle>
+        <CoreTitle order={2}>Outreach TAM</CoreTitle>
 
         <Flex gap={'sm'}>
           <Flex align={'center'}>

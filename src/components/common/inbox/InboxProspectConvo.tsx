@@ -593,10 +593,10 @@ export default function ProspectConvo(props: Props) {
   }, [isFetching, isFetchingThreads, isFetchingMessages]);
 
   const triggerGetBumpFrameworks = async () => {
-    if (selectedBumpFramework?.substatus !== prospect?.linkedin_status) {
-      setBumpFramework(undefined);
-      setOpenBumpFrameworksSubstatus(prospect?.linkedin_status);
-    }
+    // if (selectedBumpFramework?.substatus !== prospect?.linkedin_status) {
+    //   setBumpFramework(undefined);
+    //   setOpenBumpFrameworksSubstatus(prospect?.linkedin_status);
+    // }
     
     if (!prospect) {
       return;

@@ -25,7 +25,8 @@ export async function getBumpFrameworks(
   bumpedCount?: number
 ): Promise<MsgResponse> {
   const overall_statuses_string = overallStatuses.join(',');
-  const substatuses_string = substatuses.join(',');
+  // const substatuses_string = substatuses.join(',');
+  const substatuses_string = ''
   const archetype_ids_string = ''
   // const archetype_ids_string = archetype_ids.join(',');
   const exclude_archetype_ids_string = excludeArchetypeIDs ? excludeArchetypeIDs.join(',') : '';

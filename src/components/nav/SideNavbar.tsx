@@ -219,6 +219,11 @@ export default function SideNavbar(props: {}) {
             label='Triggers'
             tabKey={['triggers', 'create-trigger']}
           />
+          <SideNavbarItem
+            icon={<IconChartHistogram size='1.0rem' />}
+            label='Analytics'
+            tabKey={['analytics']}
+          />
           {/* <SideNavbarItem
             icon={<IconChartHistogram size="1.0rem" />}
             label="Analytics"

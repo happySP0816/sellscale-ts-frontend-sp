@@ -59,6 +59,8 @@ import TriggersPage from "@pages/TriggersPage";
 import TriggersList from "@pages/TriggersList";
 import EmailHome from "@common/resend_email/resend_email";
 import ProspectDetailPage from "@pages/ProspectDetail";
+import ComingSoonCard from '@common/library/ComingSoonCard';
+import AnalyticsPageNew from '@pages/AnalyticsPageNew';
 
 const queryClient = new QueryClient();
 
@@ -349,12 +351,24 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: "analytics",
+        path: "analytics-old",
         element: (
           <RestrictedRoute
             page={
               <Box p="md" bg={"gray.1"}>
                 <AnalyticPage />
+              </Box>
+            }
+          />
+        ),
+      },
+      {
+        path: "analytics",
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md" bg={"gray.1"}>
+                <AnalyticsPageNew />
               </Box>
             }
           />

@@ -202,7 +202,7 @@ export default function AdjustPage() {
                     textAlign: 'left',
                     paddingTop: rem(15),
                     paddingBottom: rem(15),
-                    width: '70%',
+                    // width: '70%',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
@@ -213,18 +213,18 @@ export default function AdjustPage() {
                   <IconSelector size={16} />
                 </th>
                 <th
-                  style={{
-                    paddingTop: rem(15),
-                    paddingBottom: rem(15),
-                  }}
+                //   style={{
+                //     paddingTop: rem(15),
+                //     paddingBottom: rem(15),
+                //   }}
                 >
                   <Text fw={700}>Creation Date</Text>
                 </th>
                 <th
-                  style={{
-                    paddingTop: rem(15),
-                    paddingBottom: rem(15),
-                  }}
+                //   style={{
+                //     paddingTop: rem(15),
+                //     paddingBottom: rem(15),
+                //   }}
                 >
                   <Text fw={700}>Status</Text>
                 </th>

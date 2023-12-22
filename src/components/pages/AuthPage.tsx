@@ -81,7 +81,13 @@ export default function AuthPage() {
       } else if(tokenType === 'direct'){
         (async () => {
           await authorize(authToken, setUserToken, setUserData);
-          navigateToPage(navigate, redirect);
+          if (redirect.includes("?")) {
+            const to = redirect.split("?")[0];
+            const params = new URLSearchParams(redirect.split("?")[1]);
+            navigateToPage(navigate, to, params)
+          } else {
+            navigateToPage(navigate, redirect);
+          }
         })();
         
       } else {

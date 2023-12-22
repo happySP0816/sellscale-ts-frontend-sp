@@ -10,6 +10,7 @@ import {
   tempHiddenProspectsState,
   selectedEmailSequenceStepState,
   selectedEmailThread,
+  bumpFrameworkSelectedSubstatusState,
 } from "@atoms/inboxAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import {
@@ -129,16 +130,19 @@ export default forwardRef(function InboxProspectConvoSendBox(
         },
         setBumpFrameworks: (bumpFrameworks: BumpFramework[]) => {
           setBumpFrameworks(bumpFrameworks);
+
           // Set the default bump framework
-          if (bumpFrameworks.length > 0) {
-            setBumpFramework(bumpFrameworks[0]);
-            for (let i = 0; i < bumpFrameworks.length; i++) {
-              if (bumpFrameworks[i].default) {
-                setBumpFramework(bumpFrameworks[i]);
-                break;
-              }
-            }
-          }
+          // if (!selectedBumpFramework?.id) {
+          //   if (bumpFrameworks.length > 0) {
+          //     setBumpFramework(bumpFrameworks[0]);
+          //     for (let i = 0; i < bumpFrameworks.length; i++) {
+          //       if (bumpFrameworks[i].default) {
+          //         setBumpFramework(bumpFrameworks[i]);
+          //         break;
+          //       }
+          //     }
+          //   }
+          // }
         },
         setEmailSequenceSteps: (emailSequenceSteps: EmailSequenceStep[]) => {
           setEmailSequenceSteps(emailSequenceSteps);
@@ -173,6 +177,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(
     openedBumpFameworksState
   );
+  const [setOpenBumpFrameworksSubstatus, setSetOpenBumpFrameworksSubstatus] =
+    useRecoilState(bumpFrameworkSelectedSubstatusState);
   const [selectedBumpFramework, setBumpFramework] = useRecoilState(
     selectedBumpFrameworkState
   ); // LinkedIn
@@ -601,7 +607,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       ? bumpFrameworks.map((bf: BumpFramework) => {
                           return {
                             value: bf.id + "",
-                            label: (bf.default ? "🟢 " : "⚪️ ") + bf.title,
+                            label: (bf.default ? "🟢 " : "⚪️ ") + bf.title + " ",
                           };
                         })
                       : []
@@ -630,6 +636,11 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     if (selected) {
                       setBumpFramework(selected);
                     }
+
+                    const substatus = bumpFrameworks.length > 0 ? bumpFrameworks[0].substatus : undefined
+                    setSetOpenBumpFrameworksSubstatus(
+                      substatus
+                    );
                   } else if (openedOutboundChannel === "EMAIL") {
                     const selected = emailSequenceSteps.find(
                       (step) => step.id === parseInt(value as string)
@@ -644,6 +655,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     ? selectedBumpFramework.id + ""
                     : undefined
                 }
+                
               />
               <Tooltip
                 label={
@@ -658,7 +670,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   color="gray.8"
                   radius={theme.radius.lg}
                   size="xs"
-                  onClick={() => setOpenBumpFrameworks(true)}
+                  onClick={() => {
+                    setOpenBumpFrameworks(true)
+                  }}
                 >
                   {selectedBumpFramework ? (
                     <IconSettingsFilled size="1.225rem" />

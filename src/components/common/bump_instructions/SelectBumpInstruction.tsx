@@ -70,7 +70,7 @@ export default function SelectBumpInstruction(props: PropsType) {
       userToken,
       [prospectDrawerStatuses.overall],
       substatuses,
-      [props.persona_id]
+      []
     );
 
     setBumpFrameworks(result.data.bump_frameworks);

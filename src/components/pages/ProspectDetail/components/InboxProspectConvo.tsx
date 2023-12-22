@@ -586,7 +586,7 @@ export default function ProspectConvo(props: {
   }, [isFetching, isFetchingThreads, isFetchingMessages]);
 
   const triggerGetBumpFrameworks = async () => {
-    setBumpFramework(undefined);
+    // setBumpFramework(undefined);
 
     if (!prospect) {
       return;

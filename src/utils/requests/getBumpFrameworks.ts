@@ -26,7 +26,8 @@ export async function getBumpFrameworks(
 ): Promise<MsgResponse> {
   const overall_statuses_string = overallStatuses.join(',');
   const substatuses_string = substatuses.join(',');
-  const archetype_ids_string = archetype_ids.join(',');
+  const archetype_ids_string = ''
+  // const archetype_ids_string = archetype_ids.join(',');
   const exclude_archetype_ids_string = excludeArchetypeIDs ? excludeArchetypeIDs.join(',') : '';
   const exclude_ss_default = excludeSSDefault ? 'true' : 'false';
   const unique_only = uniqueOnly ? 'true' : 'false';

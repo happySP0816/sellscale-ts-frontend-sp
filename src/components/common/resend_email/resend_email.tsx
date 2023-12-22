@@ -249,7 +249,7 @@ const EmailTemplate = () => {
                       textAlign: "center",
                     }}
                   >
-                    👥 Doppler's Cumulative
+                    👥 Company Cumulative
                   </Text>
                 </Column>
               </Row>

@@ -1,4 +1,5 @@
 import {
+  bumpFrameworkSelectedSubstatusState,
   currentConvoChannelState,
   currentConvoEmailMessageState,
   currentConvoLiMessageState,
@@ -456,6 +457,10 @@ export default function ProspectConvo(props: Props) {
   const [smartleadEmailConversation, setSmartleadEmailConversation] = useState<
     any[]
   >([]);
+
+  const [substatus, setOpenBumpFrameworksSubstatus] =
+    useRecoilState(bumpFrameworkSelectedSubstatusState);
+
   // We use this to store the value of the text area
   const [messageDraft, _setMessageDraft] = useState("");
   // We use this to store the raw value of the rich text editor
@@ -588,8 +593,11 @@ export default function ProspectConvo(props: Props) {
   }, [isFetching, isFetchingThreads, isFetchingMessages]);
 
   const triggerGetBumpFrameworks = async () => {
-    setBumpFramework(undefined);
-
+    if (selectedBumpFramework?.substatus !== prospect?.linkedin_status) {
+      setBumpFramework(undefined);
+      setOpenBumpFrameworksSubstatus(prospect?.linkedin_status);
+    }
+    
     if (!prospect) {
       return;
     }

@@ -387,9 +387,6 @@ export default function InboxSmartleadPage(props: {
         const message = j["message"];
 
         setMessageDraft(message);
-        // setAiMessage(message);
-        // setBumpFramework(j['bump_framework']);
-        // setAiGenerated(true);
 
         showNotification({
           id: "generate-email-message",

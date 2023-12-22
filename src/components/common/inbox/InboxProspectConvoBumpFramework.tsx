@@ -1,4 +1,4 @@
-import { openedBumpFameworksState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
+import { bumpFrameworkSelectedSubstatusState, openedBumpFameworksState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import {
   Button,
@@ -155,6 +155,7 @@ export default function InboxProspectConvoBumpFramework(props: {
 }) {
   const theme = useMantineTheme();
   const [open, setOpen] = useRecoilState(openedBumpFameworksState);
+  const [substatus, setSubstatus] = useRecoilState(bumpFrameworkSelectedSubstatusState);
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
@@ -220,9 +221,13 @@ export default function InboxProspectConvoBumpFramework(props: {
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
 
-    const result = await getBumpFrameworks(userToken, [], [], []);
+    let substatuses = []
+    if (substatus) {
+      substatuses.push(substatus)
+    }
+
+    const result = await getBumpFrameworks(userToken, [], substatuses, []);
     if (result.status !== 'success') {
-      setLoading(false);
       showNotification({
         title: 'Error',
         message: 'Could not get bump frameworks for archetype ID ' + archetypeID,
@@ -231,6 +236,7 @@ export default function InboxProspectConvoBumpFramework(props: {
       });
       return;
     }
+    setLoading(false);
 
     // Populate bump buckets
     let newBumpBuckets = {
@@ -360,7 +366,6 @@ export default function InboxProspectConvoBumpFramework(props: {
                           >
                             Edit Framework
                           </Text>
-                          <Checkbox label='Default Framework' defaultChecked />
                         </Flex>
                       ),
                       innerProps: {
@@ -404,7 +409,12 @@ export default function InboxProspectConvoBumpFramework(props: {
   }
   useEffect(() => {
     triggerGetBumpFrameworks();
-  }, [archetypeID]);
+  }, [archetypeID, substatus]);
+
+  const [selectedBumpFramework, setBumpFramework] = useRecoilState(
+    selectedBumpFrameworkState
+  );
+
   return (
     <Modal
       size='60rem'
@@ -414,7 +424,7 @@ export default function InboxProspectConvoBumpFramework(props: {
         setOpen(false);
         props.onClose && props.onClose();
       }}
-      title={<Title order={4}>Change Reply Frameworks</Title>}
+      title={<Title order={4}>Realtime Response Engine</Title>}
     >
       {!loading ? (
         <Flex w={'100%'} gap={'30px'}>
@@ -490,6 +500,7 @@ export default function InboxProspectConvoBumpFramework(props: {
                                   setData(item);
                                   setBlockList(item?.transformer_blocklist);
                                   handleScroll(e, item?.id);
+                                  setBumpFramework(item);
                                 }}
                               />
                               <Text fw={600} mt={2}>

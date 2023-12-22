@@ -1,4 +1,5 @@
 import { userTokenState } from '@atoms/userAtoms';
+import { prospectStatuses } from '@common/inbox/utils';
 import TextWithNewline from '@common/library/TextWithNewlines';
 import { PersonalizationSection } from '@common/sequence/SequenceSection';
 import {
@@ -160,8 +161,21 @@ export default function EditBumpFrameworkModal({ context, id, innerProps }: Cont
               <Text color='gray' fw={600}>
                 SUB-STATUS
               </Text>
-              <Select description=' ' placeholder='Pick value' data={[]} w={'100%'} size='md' />
+              <Select 
+                description=' ' 
+                placeholder='Pick value' 
+                data={prospectStatuses} 
+                w={'100%'} 
+                size='md'
+                {...form.getInputProps('subStatus')}
+              />
             </Flex>
+
+            <Checkbox 
+              label='Default Framework' 
+              checked={form.values.default}
+              {...form.getInputProps('default')}
+            />
           </Flex>
           <Flex direction='column'>
             <Text color='gray' fw={600}>

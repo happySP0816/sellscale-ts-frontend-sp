@@ -16,6 +16,11 @@ const tempHiddenProspectsState = atom({
   default: [] as number[],// ids of prospects that are temp hidden
 });
 
+const bumpFrameworkSelectedSubstatusState = atom({
+  key: "inbox-bump-framework-selected-substatus",
+  default: undefined as string | undefined,
+});
+
 const openedBumpFameworksState = atom({
   key: "inbox-opened-bump-framework-modal",
   default: false,
@@ -88,4 +93,5 @@ export {
   allEmailSequenceStepsState,
   selectedEmailThread,
   mainTabState,
+  bumpFrameworkSelectedSubstatusState
 };

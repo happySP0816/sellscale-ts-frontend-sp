@@ -235,11 +235,20 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
     });
 
     try {
+      showNotification({
+        id: "prospect-removed",
+        title: "Removing Prospected and Sent Outreach prospects only...",
+        message: `SellScale can only remove prospects that are in the Prospected or Sent Outreach status. SellScale will remove the rest.`,
+        color: "blue",
+        autoClose: 3000,
+      });
+
       const response = await moveToUnassigned(
         userToken,
         currentProject.id,
         prospectIDs
       );
+
       if (response.status === "success") {
         showNotification({
           id: "prospect-removed",
@@ -717,35 +726,45 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
               <Text>
                 Bulk Actions - {Object.keys(selectedRows).length} Selected
               </Text>
-              <Button
-                color="red"
-                leftIcon={<IconTrash size={14} />}
-                size="sm"
-                loading={removeProspectsLoading}
-                onClick={() => {
-                  openConfirmModal({
-                    title: "Remove these prospects?",
-                    children: (
-                      <Text>
-                        Are you sure you want to remove these{" "}
-                        {Object.keys(selectedRows).length} prospects? This will
-                        move them into your Unassigned Contacts list.
-                      </Text>
-                    ),
-                    labels: {
-                      confirm: "Remove",
-                      cancel: "Cancel",
-                    },
-                    confirmProps: { color: "red" },
-                    onCancel: () => {},
-                    onConfirm: () => {
-                      triggerMoveToUnassigned();
-                    },
-                  });
-                }}
-              >
-                Remove
-              </Button>
+              <Tooltip
+                withinPortal
+                label="Remove 'Prospected' or 'Sent Outreach' prospects from this campaign."
+                >
+                <Button
+                  color="red"
+                  leftIcon={<IconTrash size={14} />}
+                  size="sm"
+                  loading={removeProspectsLoading}
+                  onClick={() => {
+                    openConfirmModal({
+                      title: "Remove these prospects?",
+                      children: (
+                        <>
+                        <Text>
+                          Are you sure you want to remove these{" "}
+                          {Object.keys(selectedRows).length} prospects? This will
+                          move them into your Unassigned Contacts list.
+                        </Text>
+                        <Text mt='xs'>
+                          <b>Note: </b>Only "Prospected" and "Sent Outreach" prospects will be removed.
+                        </Text>
+                        </>
+                      ),
+                      labels: {
+                        confirm: "Remove",
+                        cancel: "Cancel",
+                      },
+                      confirmProps: { color: "red" },
+                      onCancel: () => {},
+                      onConfirm: () => {
+                        triggerMoveToUnassigned();
+                      },
+                    });
+                  }}
+                >
+                  Remove
+                </Button>
+              </Tooltip>
               <BulkActions
                 selectedProspects={Object.keys(selectedRows).map((key) => {
                   return displayProspects[parseInt(key)];

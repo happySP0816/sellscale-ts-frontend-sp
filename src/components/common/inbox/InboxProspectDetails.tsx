@@ -24,6 +24,8 @@ import {
   rem,
   Accordion,
   Grid,
+  Switch,
+  Badge,
 } from "@mantine/core";
 import {
   IconBriefcase,
@@ -81,7 +83,11 @@ import {
   snoozeProspectEmail,
 } from "@utils/requests/snoozeProspect";
 import EmailStoreView from "@common/prospectDetails/EmailStoreView";
-import { prospectEmailStatuses, prospectStatuses } from "@common/inbox/utils";
+import {
+  labelizeConvoSubstatus,
+  prospectEmailStatuses,
+  prospectStatuses,
+} from "@common/inbox/utils";
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -162,6 +168,12 @@ export default function ProjectDetails(props: {
   });
 
   let statusValue = data?.details?.linkedin_status || "ACCEPTED";
+
+  const prospect = _.cloneDeep(
+    props.prospects.find((p) => p.id === openedProspectId)
+  );
+  const [deactivateAiEngagementStatus, setDeactivateAiEngagementStatus] =
+    useState(!!prospect?.deactivate_ai_engagement);
   if (
     props.emailStatuses ||
     openedOutboundChannel === "EMAIL" ||
@@ -312,26 +324,51 @@ export default function ProjectDetails(props: {
       sx={{ borderLeft: "0.0625rem solid #dee2e6" }}
     >
       <Stack spacing={0} mt={"md"} px={"md"}>
-        <Flex align={"center"} gap={"sm"}>
-          <Avatar
-            size="xl"
-            src={proxyURL(data?.details.profile_pic)}
-            color={valueToColor(theme, data?.details.full_name)}
-          >
-            {nameToInitials(data?.details.full_name)}
-          </Avatar>
+        <Flex align={"center"} gap={"md"}>
+          <Flex direction={"column"} align={"center"} maw={"8rem"}>
+            <Avatar
+              w="100%"
+              h={"auto"}
+              src={proxyURL(data?.details.profile_pic)}
+              color={valueToColor(theme, data?.details.full_name)}
+            >
+              {nameToInitials(data?.details.full_name)}
+            </Avatar>
 
-          <Box>
-            <Flex gap={"sm"}>
+            <Card
+              withBorder
+              padding={"0.25rem"}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              mt={"sm"}
+            >
+              <Switch
+                checked={deactivateAiEngagementStatus}
+                size="xs"
+                labelPosition="left"
+                label="AI Enabled"
+                onChange={(event) => {
+                  setDeactivateAiEngagementStatus(event.currentTarget.checked);
+                }}
+              />
+            </Card>
+          </Flex>
+
+          <Box maw={"60%"} w={"100%"}>
+            <Flex gap={"sm"} wrap={"wrap"}>
               <Box>
                 <Title order={4}>{data?.details.full_name}</Title>
               </Box>
               <Divider orientation="vertical" />
-              <Flex gap={"xs"} align={"center"}>
-                <Text fw={700} fz={"sm"} color="gray.6">
+              <Flex gap={"xs"} align={"center"} wrap={"wrap"}>
+                <Text fw={700} fz={"xs"} color="gray.6">
                   ICP Score:
                 </Text>
                 <ICPFitPill
+                  size="xs"
                   icp_fit_score={data?.details.icp_fit_score || 0}
                   icp_fit_reason={data?.details.icp_fit_reason || ""}
                   archetype={data?.details.persona || ""}
@@ -523,6 +560,15 @@ export default function ProjectDetails(props: {
         <div>
           <Box style={{ flexBasis: "15%" }} p={10} px={"md"}>
             <Accordion
+              disableChevronRotation
+              chevron={
+                <Badge size="md" color={"blue"}>
+                  {labelizeConvoSubstatus(
+                    statusValue,
+                    data?.details?.bump_count
+                  )}
+                </Badge>
+              }
               defaultValue="customization"
               styles={(theme) => ({
                 content: {
@@ -533,6 +579,7 @@ export default function ProjectDetails(props: {
                 },
                 chevron: {
                   margin: 0,
+                  width: "auto",
                 },
                 label: {
                   fontSize: theme.fontSizes.sm,

@@ -47,7 +47,7 @@ export default function ProspectDetailPage() {
       }
       const res = await response.json();
 
-      console.log
+      console.log;
       const res_channels = await getChannels(userToken);
       const res_valid_channels = await getChannelOptions(prospectId, userToken);
 
@@ -104,10 +104,18 @@ export default function ProspectDetailPage() {
   return (
     <Grid gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: "hidden" }}>
       <Grid.Col span={8}>
-        <InboxProspectConvo prospects={prospects} showBackToInbox currentEmailStatus={prospects[0]['email_status']} />
+        <InboxProspectConvo
+          prospects={prospects}
+          showBackToInbox
+          currentEmailStatus={prospects[0].email_status}
+        />
       </Grid.Col>
       <Grid.Col span={4}>
-        <InboxProspectDetails prospects={prospects} noProspectResetting currentEmailStatus={prospects[0]['email_status']}/>
+        <InboxProspectDetails
+          prospects={prospects}
+          noProspectResetting
+          currentEmailStatus={prospects[0].email_status}
+        />
       </Grid.Col>
     </Grid>
   );

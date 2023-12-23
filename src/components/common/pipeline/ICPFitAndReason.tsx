@@ -7,6 +7,7 @@ import {
   Text,
   Container,
   MantineColor,
+  MantineSize,
 } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import {
@@ -163,6 +164,7 @@ export default function ICPFitPill(props: {
   icp_fit_score: number;
   icp_fit_reason: string;
   archetype?: string;
+  size?: MantineSize;
 }) {
   const { hovered, ref } = useHover();
 
@@ -176,7 +178,10 @@ export default function ICPFitPill(props: {
     >
       <Popover.Target>
         <div ref={ref}>
-          <ICPFitPillOnly icp_fit_score={props.icp_fit_score} />
+          <ICPFitPillOnly
+            icp_fit_score={props.icp_fit_score}
+            size={props.size}
+          />
         </div>
       </Popover.Target>
       <Popover.Dropdown>
@@ -186,10 +191,17 @@ export default function ICPFitPill(props: {
   );
 }
 
-export function ICPFitPillOnly(props: { icp_fit_score: number }) {
+export function ICPFitPillOnly(props: {
+  icp_fit_score: number;
+  size?: MantineSize;
+}) {
   return (
     <div style={{ position: "relative" }}>
-      <Badge color={icpFitToColor(props.icp_fit_score)} fw={800}>
+      <Badge
+        color={icpFitToColor(props.icp_fit_score)}
+        fw={800}
+        size={props.size}
+      >
         {icpFitToLabel(props.icp_fit_score)}
       </Badge>
       {/* <div style={{ position: "absolute", top: -5, left: -5 }}>

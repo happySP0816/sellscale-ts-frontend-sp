@@ -32,6 +32,7 @@ import {
   Tooltip,
   Card,
   Container,
+  Popover,
 } from "@mantine/core";
 import {
   IconExternalLink,
@@ -72,7 +73,10 @@ import _ from "lodash";
 import InboxProspectConvoSendBox from "./InboxProspectConvoSendBox";
 import InboxProspectConvoBumpFramework from "./InboxProspectConvoBumpFramework";
 import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
-import { getBumpFrameworks, getSingleBumpFramework } from "@utils/requests/getBumpFrameworks";
+import {
+  getBumpFrameworks,
+  getSingleBumpFramework,
+} from "@utils/requests/getBumpFrameworks";
 import { getEmailMessages, getEmailThreads } from "@utils/requests/getEmails";
 import { openComposeEmailModal } from "@common/prospectDetails/ProspectDetailsViewEmails";
 import { currentProjectState } from "@atoms/personaAtoms";
@@ -84,7 +88,7 @@ import RichTextArea from "@common/library/RichTextArea";
 import { JSONContent } from "@tiptap/react";
 import { showNotification } from "@mantine/notifications";
 import postSmartleadReply from "@utils/requests/postSmartleadReply";
-import { IconArrowLeft, IconChevronUp } from "@tabler/icons";
+import { IconArrowLeft, IconChevronDown, IconChevronUp } from "@tabler/icons";
 import { getBumpFrameworksSequence } from "@utils/requests/getBumpFrameworksSequence";
 import TextWithNewlines from "@common/library/TextWithNewlines";
 import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
@@ -112,7 +116,6 @@ export function ProspectConvoMessage(props: {
   cta?: string;
 }) {
   const userToken = useRecoilValue(userTokenState);
-  const theme = useMantineTheme();
 
   const uniqueId = `prospect-convo-message-${props.id}`;
   const [finalMessage, setFinalMessage] = useState<string>(props.message);
@@ -255,12 +258,10 @@ export default function ProspectConvo(props: Props) {
 
   const sendBoxRef = useRef<any>();
   // We keep a map of the prospectId to the bump framework ref in order to fix ref bugs for generating messages via btn
-  const bumpFrameworksRef = useRef<Map<number, any>>(new Map());
 
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
   const openedProspectId = useRecoilValue(openedProspectIdState);
-  const currentProject = useRecoilValue(currentProjectState);
 
   const [hasGeneratedMessage, setHasGeneratedMessage] = useState(false);
   const [openedConvoBox, setOpenedConvoBox]: any = useState(
@@ -450,7 +451,7 @@ export default function ProspectConvo(props: Props) {
     refetchOnWindowFocus: false,
   });
 
-  let HEADER_HEIGHT = props.hideTitle ? 65 : 110;
+  let HEADER_HEIGHT = props.hideTitle ? 40 : 110;
 
   const [conversationdetail, setConversationDetail] = useState<boolean[]>([]);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -458,8 +459,9 @@ export default function ProspectConvo(props: Props) {
     any[]
   >([]);
 
-  const [substatus, setOpenBumpFrameworksSubstatus] =
-    useRecoilState(bumpFrameworkSelectedSubstatusState);
+  const [substatus, setOpenBumpFrameworksSubstatus] = useRecoilState(
+    bumpFrameworkSelectedSubstatusState
+  );
 
   // We use this to store the value of the text area
   const [messageDraft, _setMessageDraft] = useState("");
@@ -535,15 +537,6 @@ export default function ProspectConvo(props: Props) {
   const handleConvertDate = (date: string) => {
     const timestamp = date;
     const dateObject = new Date(timestamp);
-    const days = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
 
     const options: Intl.DateTimeFormatOptions = {
       month: "short",
@@ -597,7 +590,7 @@ export default function ProspectConvo(props: Props) {
     //   setBumpFramework(undefined);
     //   setOpenBumpFrameworksSubstatus(prospect?.linkedin_status);
     // }
-    
+
     if (!prospect) {
       return;
     }
@@ -647,7 +640,6 @@ export default function ProspectConvo(props: Props) {
     if (result.status === "success") {
       setBumpFrameworksSequence(result.data.data);
     }
-    
   };
 
   // // On load we should get the bump frameworks
@@ -762,6 +754,8 @@ export default function ProspectConvo(props: Props) {
           styles={(theme) => ({
             root: {
               backgroundColor: "white",
+              padding: 0,
+              height: 40,
             },
             tabsList: {
               paddingLeft: "0 !important",
@@ -773,11 +767,12 @@ export default function ProspectConvo(props: Props) {
               fontWeight: 500,
             },
             tab: {
+              height: 40,
+              padding: 0,
               flex: 1,
-              paddingLeft: 24,
-              paddingRight: 24,
+
               borderRight: `1px solid ${theme.colors.gray[4]}`,
-              borderRadius: 0,
+              borderBottom: `3px solid transparent`,
               "&[data-active]": {
                 borderLeftWidth: 0,
                 borderTopWidth: 0,
@@ -796,7 +791,7 @@ export default function ProspectConvo(props: Props) {
               sendBoxRef.current?.setAiMessage("");
               sendBoxRef.current?.setMessageDraft("");
               setOpenedOutboundChannel(value as Channel);
-              setOpenedConvoBox(value === "LINKEDIN")
+              setOpenedConvoBox(value === "LINKEDIN");
 
               // Pretty bad to set timeout, but we need this channel to update
               setTimeout(refetch, 1);
@@ -849,6 +844,46 @@ export default function ProspectConvo(props: Props) {
                 Email - Beta
               </Tabs.Tab>
             )}
+
+            <Popover width={300} position="bottom" withArrow shadow="md">
+              <Popover.Target>
+                <Button
+                  color="gray"
+                  variant="subtle"
+                  sx={{ flex: 1, height: "auto" }}
+                  rightIcon={<IconChevronDown size={"0.8rem"} />}
+                >
+                  Advance AI Action
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown p={0}>
+                <Button
+                  color="gray.8"
+                  variant="subtle"
+                  w={"100%"}
+                  styles={{
+                    inner: {
+                      justifyContent: "flex-start",
+                    },
+                  }}
+                >
+                  Multithread
+                </Button>
+                <Divider />
+                <Button
+                  w={"100%"}
+                  color="gray.8"
+                  variant="subtle"
+                  styles={{
+                    inner: {
+                      justifyContent: "flex-start",
+                    },
+                  }}
+                >
+                  ComposeEmail
+                </Button>
+              </Popover.Dropdown>
+            </Popover>
           </Tabs.List>
         </Tabs>
         {statusValue === "ACTIVE_CONVO_SCHEDULING" && (

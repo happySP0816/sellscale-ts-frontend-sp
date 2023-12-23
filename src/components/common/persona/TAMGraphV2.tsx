@@ -1,5 +1,5 @@
-import { useRecoilValue } from 'recoil';
-import { userTokenState } from '@atoms/userAtoms';
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
 import {
   Box,
   Flex,
@@ -12,9 +12,22 @@ import {
   Stack,
   Divider,
   Card,
-} from '@mantine/core';
-import { IconCalendar } from '@tabler/icons';
-import { useState } from 'react';
+  Badge,
+  ActionIcon,
+  rem,
+  ThemeIcon,
+  RingProgress,
+  Center,
+  Select,
+  Accordion,
+} from "@mantine/core";
+import {
+  IconArrowUp,
+  IconCalendar,
+  IconDotsVertical,
+  IconInfoCircle,
+} from "@tabler/icons";
+import { useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,13 +36,20 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-import { faker } from '@faker-js/faker';
-import { useQuery } from '@tanstack/react-query';
-import { getTamGraphData } from '@utils/requests/getTamGraphData';
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+import { faker } from "@faker-js/faker";
+import { useQuery } from "@tanstack/react-query";
+import { getTamGraphData } from "@utils/requests/getTamGraphData";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 type TAMGraphData = {
   companies: {
@@ -74,7 +94,7 @@ export const options = {
   plugins: {
     title: {
       display: true,
-      text: 'Chart.js Bar Chart - Stacked',
+      text: "Chart.js Bar Chart - Stacked",
     },
   },
   responsive: true,
@@ -88,102 +108,127 @@ export const options = {
   },
 };
 
-const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-const mocks = [
-  'Devops Engineer',
-  'Security Engineer',
-  'Senior Devops Engineer',
-  'Senior Security Engineer',
-];
 export default function TAMGraphV2() {
   const userToken = useRecoilValue(userTokenState);
-  const [period, setPeriod] = useState('24H');
-  const [filteredBy, setFilteredBy] = useState('COMPANY_SIZE');
+  const [period, setPeriod] = useState("24H");
+  const [filteredBy, setFilteredBy] = useState("COMPANY_SIZE");
   const theme = useMantineTheme();
 
   const { data: graphData } = useQuery({
     queryKey: [`query-get-tam-graph-data`],
     queryFn: async () => {
       const response = await getTamGraphData(userToken);
-      return response.status === 'success' ? (response.data as TAMGraphData) : null;
+      return response.status === "success"
+        ? (response.data as TAMGraphData)
+        : null;
     },
   });
-
-  console.log(graphData);
+  console.log(
+    "🚀 ~ file: TAMGraphV2.tsx:125 ~ TAMGraphV2 ~ graphData:",
+    graphData
+  );
 
   const data = {
-    labels:
-      filteredBy === 'COMPANY_SIZE'
-        ? graphData?.employees.map((i) => i.employee_count_comp) || []
-        : graphData?.industry_breakdown.map((i) => i.industry) || [],
+    labels: (filteredBy === "COMPANY_SIZE"
+      ? graphData?.employees.map((i) => [
+          `${i.employee_count_comp}`,
+          "Employees",
+        ]) || []
+      : graphData?.industry_breakdown.map((i) => i.industry) ||
+        []) as unknown as string[],
     datasets: [
       {
-        label: 'Currently Engaged',
+        label: "Prospected",
         data:
-          filteredBy === 'COMPANY_SIZE'
+          filteredBy === "COMPANY_SIZE"
+            ? graphData?.employees.map((i) => i.num_left) || []
+            : graphData?.industry_breakdown.map((i) => i.num_left) || [],
+        backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
+      },
+      {
+        label: "Currently Engaged",
+        data:
+          filteredBy === "COMPANY_SIZE"
             ? graphData?.employees.map((i) => i.num_contacted) || []
             : graphData?.industry_breakdown.map((i) => i.num_contacted) || [],
         // labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-        backgroundColor: theme.colors.blue[4],
-      },
-      {
-        label: 'Prospected',
-        data:
-          filteredBy === 'COMPANY_SIZE'
-            ? graphData?.employees.map((i) => i.num_left) || []
-            : graphData?.industry_breakdown.map((i) => i.num_left) || [],
-        //labels.map(() => faker.datatype.number({ min: 0, max: 1000 })),
-        backgroundColor: theme.colors.red[4],
+        backgroundColor: theme.colors.grape[4],
       },
     ],
   };
-  const plugin = {
-    id: 'Chart Spacing',
-    beforeInit(chart: any) {
-      console.log('[Test] - be');
-      // reference of original fit function
-      const originalFit = chart.legend.fit;
 
-      // override the fit function
-      chart.legend.fit = function fit() {
-        // call original function and bind scope in order to use `this` correctly inside it
-        originalFit.bind(chart.legend)();
-        // increase the width to add more space
-        console.log('[Test] -', this.height);
-        this.height += 20;
-      };
-    },
-  };
+  const percentage = Math.round(
+    ((graphData?.stats[0].num_engaged || 0) /
+      (graphData?.stats[0].num_contacts || 1)) *
+      100
+  );
 
   const getList = (title: string, data: { title: string; count: number }[]) => {
     return (
-      <Card w={'100%'} sx={{ flex: 1 }} p={'xs'}>
-        <Box bg={'white'}>
-          <Box>
-            <Box py={'xs'}>
-              <Text fw={500} fz={'sm'}>
-                {title}
-              </Text>
-            </Box>
-            <Divider />
-          </Box>
+      <Accordion
+        defaultValue={title}
+        w={"100%"}
+        sx={{ flex: 1 }}
+        p={"xs"}
+        styles={{
+          panel: { backgroundColor: "white" },
+          content: { backgroundColor: "white" },
+          item: {
+            border: 0,
+          },
+        }}
+        bg={"white"}
+      >
+        <Accordion.Item value={title}>
+          <Accordion.Control>
+            <Text fw={500} fz={"sm"}>
+              {title}
+            </Text>
+          </Accordion.Control>
+          <Accordion.Panel>
+            {data.map((i, idx) => (
+              <Box key={idx}>
+                <Divider />
+                <Flex
+                  justify={"space-between"}
+                  py={"sm"}
+                  pt={idx === 0 ? 0 : "xs"}
+                >
+                  <Text fz={"sm"} fw={500}>
+                    {i.title}
+                  </Text>
+                  <Text color="gray.6" fw={500} fz={"sm"}>
+                    {i.count}
+                  </Text>
+                </Flex>
+              </Box>
+            ))}
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    );
+  };
 
-          {data.map((i, idx) => (
-            <Box key={idx}>
-              <Flex justify={'space-between'} py={'sm'} pt={idx === 0 ? 0 : 'xs'}>
-                <Text fz={'sm'} fw={500}>
-                  {i.title}
-                </Text>
-                <Text color='gray.6' fw={500} fz={'sm'}>
-                  {i.count}
-                </Text>
-              </Flex>
-
-              {idx !== data.length - 1 && <Divider />}
-            </Box>
-          ))}
-        </Box>
-      </Card>
+  const renderIncreaseBadge = (percentage: number) => {
+    return (
+      <Badge
+        styles={{
+          leftSection: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          },
+        }}
+        // variant="outline"
+        color="green"
+        leftSection={
+          <ThemeIcon size="xs" color="green" variant="transparent">
+            <IconArrowUp size={rem(14)} />
+          </ThemeIcon>
+        }
+      >
+        {percentage}%
+      </Badge>
     );
   };
 
@@ -192,23 +237,26 @@ export default function TAMGraphV2() {
       <Flex justify={'space-between'}>
         <CoreTitle order={2}>Outreach TAM</CoreTitle>
 
-        <Flex gap={'sm'}>
-          <Flex align={'center'}>
-            <IconCalendar size={'1rem'} color={theme.colors.blue[theme.fn.primaryShade()]} />
-            <Text ml={'xs'} size='md' fw={500}>
-              Period:{' '}
+        {/* <Flex gap={"sm"}>
+          <Flex align={"center"}>
+            <IconCalendar
+              size={"1rem"}
+              color={theme.colors.blue[theme.fn.primaryShade()]}
+            />
+            <Text ml={"xs"} size="md" fw={500}>
+              Period:{" "}
             </Text>
           </Flex>
-          <Group spacing='0' bg={'white'}>
+          <Group spacing="0" bg={"white"}>
             <Button
-              variant='outline'
-              color={period === '24H' ? 'blue' : 'gray'}
-              size='md'
-              onClick={() => setPeriod('24H')}
+              variant="outline"
+              color={period === "24H" ? "blue" : "gray"}
+              size="md"
+              onClick={() => setPeriod("24H")}
               sx={{
                 borderTopRightRadius: 0,
                 borderBottomRightRadius: 0,
-                borderRightWidth: period === '24H' ? 1 : 0,
+                borderRightWidth: period === "24H" ? 1 : 0,
               }}
             >
               24H
@@ -217,66 +265,190 @@ export default function TAMGraphV2() {
               sx={{
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0,
-                borderLeftWidth: period === 'ALL_TIME' ? 1 : 0,
+                borderLeftWidth: period === "ALL_TIME" ? 1 : 0,
               }}
-              variant='outline'
-              size='md'
-              onClick={() => setPeriod('ALL_TIME')}
-              color={period === 'ALL_TIME' ? 'blue' : 'gray'}
+              variant="outline"
+              size="md"
+              onClick={() => setPeriod("ALL_TIME")}
+              color={period === "ALL_TIME" ? "blue" : "gray"}
             >
               All time
             </Button>
           </Group>
-        </Flex>
+        </Flex> */}
       </Flex>
+      <Grid mt={"md"}>
+        <Grid.Col span={6}>
+          <Card>
+            <Flex w={"100%"} align={"center"} justify={"space-evenly"}>
+              <Box pos={"relative"} sx={{ float: "left" }}>
+                <Box
+                  pos={"relative"}
+                  sx={{
+                    overflow: "hidden",
+                    width: 120,
+                    height: 60,
+                    marginBottom: -14,
+                  }}
+                >
+                  <Box
+                    pos={"absolute"}
+                    sx={(theme) => ({
+                      top: 0,
+                      left: 0,
+                      width: 120,
+                      height: 120,
+                      borderRadius: "50%",
+                      border: `10px solid ${theme.colors.gray[3]}`,
+                      borderBottomColor:
+                        theme.colors.green[theme.fn.primaryShade()],
+                      borderRightColor:
+                        theme.colors.green[theme.fn.primaryShade()],
+                      transform: `rotate(${45 + percentage * 1.8}deg)`,
+                    })}
+                  />
 
+                  <Flex align={"flex-end"} justify={"center"} h={"100%"}>
+                    <Box>
+                      <Text align="center" fz={"sm"} fw={700}>
+                        {percentage}%
+                      </Text>
+                      <Text align="center" fz={"sm"}>
+                        Penetrated
+                      </Text>
+                    </Box>
+                  </Flex>
+                </Box>
+              </Box>
+              <Flex direction={"column"}>
+                <Flex align={"center"}>
+                  <Text fw={600} color="gray.8">
+                    <Box
+                      sx={(theme) => ({
+                        borderRadius: 9999,
+                        display: "inline-block",
+                        marginRight: 4,
+                        width: 12,
+                        height: 12,
+                        backgroundColor:
+                          theme.colors.blue[theme.fn.primaryShade()],
+                      })}
+                    />
+                    Cold Outreach TAM
+                  </Text>
+
+                  <ActionIcon>
+                    <IconInfoCircle size={"0.8rem"} />
+                  </ActionIcon>
+                </Flex>
+
+                <Flex align={"center"} gap={"sm"}>
+                  <Text fw={700} fz={32}>
+                    $
+                    {new Intl.NumberFormat("en-US").format(
+                      graphData?.stats[0].num_contacts || 0 * 1.5
+                    )}
+                  </Text>
+                  {renderIncreaseBadge(6.5)}
+                </Flex>
+              </Flex>
+            </Flex>
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <Card>
+            <Flex justify={"space-between"}>
+              <Text fw={600} color="gray.8">
+                Total Contacts
+              </Text>
+              <ActionIcon>
+                <IconDotsVertical size={"0.8rem"} />
+              </ActionIcon>
+            </Flex>
+
+            <Flex align={"center"} gap={"sm"}>
+              <Text fw={700} fz={32}>
+                {Number(graphData?.stats[0].num_contacts).toLocaleString()}
+              </Text>
+
+              {renderIncreaseBadge(100)}
+            </Flex>
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <Card>
+            <Flex justify={"space-between"}>
+              <Text fw={600} color="gray.8">
+                Engaged Contacts
+              </Text>
+              <ActionIcon>
+                <IconDotsVertical size={"0.8rem"} />
+              </ActionIcon>
+            </Flex>
+            <Flex align={"center"} gap={"sm"}>
+              <Text fw={700} fz={32}>
+                {Number(graphData?.stats[0].num_engaged).toLocaleString()}
+              </Text>
+
+              {renderIncreaseBadge(
+                Math.round(
+                  ((graphData?.stats[0].num_engaged || 0) /
+                    (graphData?.stats[0].num_contacts || 1)) *
+                    100
+                )
+              )}
+            </Flex>
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <Card>
+            <Flex>
+              <Text fw={600} color="gray.8">
+                Open Leads
+              </Text>
+              <ActionIcon>
+                <IconInfoCircle size={"0.8rem"} />
+              </ActionIcon>
+            </Flex>
+            <Flex align={"center"} gap={"sm"}>
+              <Text fw={700} fz={32}>
+                {Number(25).toLocaleString()}
+              </Text>
+              <Text color="gray.6"> | </Text>
+              <Text color="gray.6">
+                {" "}
+                ${new Intl.NumberFormat("en-US").format(1200000)}
+              </Text>
+            </Flex>
+          </Card>
+        </Grid.Col>
+      </Grid>
       <Flex
-        mt={'md'}
-        gap={'lg'}
+        mt={"md"}
+        gap={"lg"}
         sx={(theme) => ({
           border: `1px solid ${theme.colors.gray[3]}`,
         })}
       >
-        <Box sx={{ flexBasis: '70%' }} bg={'white'} p={'md'}>
-          <Box pos={'relative'} w={'100%'} h={'100%'}>
+        <Box sx={{ flexBasis: "100%" }} bg={"white"} p={"md"}>
+          <CoreTitle order={5} color="gray.6">
+            TAM SNAPSHOT (ENGAGED TOTAL)
+          </CoreTitle>
+          <Box pos={"relative"} w={"100%"} h={"100%"} mt={"xs"} mah={"40vh"}>
             <Bar
-              width={'100%'}
+              width={"100%"}
               // plugins={[plugin]}
               options={{
                 // maintainAspectRatio: false,
                 plugins: {
                   legend: {
-                    position: 'bottom' as const,
-                    align: 'start',
+                    position: "bottom" as const,
+                    align: "start",
                     labels: {
                       usePointStyle: true,
-                      pointStyle: 'circle',
+                      pointStyle: "circle",
                       padding: 20,
                     },
-                    // onClick: (evt, legendItem, legend) => {
-                    //   const index = legend.chart.data.datasets.indexOf(
-                    //     (s: any) => s.label === legendItem.text
-                    //   ) as number;
-
-                    //   legend.chart.toggleDataVisibility(0);
-                    //   legend.chart.update();
-                    // },
-                    // labels: {
-                    //   useBorderRadius: true,
-                    //   borderRadius: 999,
-                    //   boxWidth: 12,
-                    //   boxHeight: 12,
-                    //   usePointStyle: true,
-                    //   generateLabels: (chart) =>
-                    //     chart.data.datasets?.map((dataset, idx) => {
-                    //       return {
-                    //         text: dataset.label as string,
-                    //         strokeStyle: dataset.borderColor,
-                    //         fillStyle: dataset.backgroundColor,
-                    //         hidden: false,
-                    //       };
-                    //     }) || [],
-                    // },
                   },
 
                   title: {
@@ -292,38 +464,50 @@ export default function TAMGraphV2() {
                     grid: {
                       lineWidth: 0,
                     },
+                    ticks: {
+                      color: theme.colors.gray[6],
+                      font: {
+                        weight: 600,
+                      },
+                    },
                   },
                   y: {
                     stacked: true,
+                    ticks: {
+                      color: theme.colors.gray[6],
+                      font: {
+                        weight: 600,
+                      },
+                    },
                   },
                 },
               }}
               data={data}
             />
-            <Flex pos={'absolute'} bottom={8} right={0}>
-              <Text color='gray' fw={700} fz={'sm'}>
+            <Flex pos={"absolute"} bottom={8} right={0}>
+              <Text color="gray" fw={700} fz={"sm"}>
                 Filter by: &nbsp;
               </Text>
-              <Group spacing='sm'>
+              <Group spacing="sm">
                 <Button
                   px={16}
-                  radius={'12rem'}
-                  variant='outline'
+                  radius={"12rem"}
+                  variant="outline"
                   compact
-                  color={filteredBy === 'COMPANY_SIZE' ? 'blue' : 'gray'}
-                  size='xs'
-                  onClick={() => setFilteredBy('COMPANY_SIZE')}
+                  color={filteredBy === "COMPANY_SIZE" ? "blue" : "gray"}
+                  size="xs"
+                  onClick={() => setFilteredBy("COMPANY_SIZE")}
                 >
                   Company Size
                 </Button>
                 <Button
                   px={16}
-                  radius={'12rem'}
-                  variant='outline'
+                  radius={"12rem"}
+                  variant="outline"
                   compact
-                  color={filteredBy === 'INDUSTRY' ? 'blue' : 'gray'}
-                  size='xs'
-                  onClick={() => setFilteredBy('INDUSTRY')}
+                  color={filteredBy === "INDUSTRY" ? "blue" : "gray"}
+                  size="xs"
+                  onClick={() => setFilteredBy("INDUSTRY")}
                 >
                   Industry
                 </Button>
@@ -331,30 +515,30 @@ export default function TAMGraphV2() {
             </Flex>
           </Box>
         </Box>
-        <Box sx={{ flexBasis: '30%' }}>
-          <Stack sx={(theme) => ({})}>
-            <Box py={'lg'}>
-              <Text fz={'xl'} fw={500}>
+        {/* <Box sx={{ flexBasis: "30%" }}>
+          <Stack sx={() => ({})}>
+            <Box py={"lg"}>
+              <Text fz={"xl"} fw={500}>
                 {graphData?.stats[0].num_companies}+
               </Text>
-              <Text fz={'xl'} fw={500}>
+              <Text fz={"xl"} fw={500}>
                 Companies
               </Text>
-              <Text color='gray.6'># Distinct companies in database</Text>
+              <Text color="gray.6"># Distinct companies in database</Text>
             </Box>
             <Divider />
-            <Box py={'lg'}>
-              <Text fz={'xl'} fw={500}>
+            <Box py={"lg"}>
+              <Text fz={"xl"} fw={500}>
                 {graphData?.stats[0].num_contacts}
               </Text>
-              <Text fz={'xl'} fw={500}>
+              <Text fz={"xl"} fw={500}>
                 Contacts
               </Text>
-              <Text color='gray.6'># Unique contact we in database</Text>
+              <Text color="gray.6"># Unique contact we in database</Text>
             </Box>
             <Divider />
-            <Box py={'lg'}>
-              <Text fz={'xl'} fw={500}>
+            <Box py={"lg"}>
+              <Text fz={"xl"} fw={500}>
                 {Math.round(
                   ((graphData?.stats[0].num_engaged ?? 0) /
                     (graphData?.stats[0].num_contacts ?? 1)) *
@@ -362,22 +546,23 @@ export default function TAMGraphV2() {
                 )}
                 %
               </Text>
-              <Text fz={'xl'} fw={500}>
+              <Text fz={"xl"} fw={500}>
                 Engaged
               </Text>
-              <Text color='gray.6'>
-                % Contacts Contacted at least once
-              </Text>
+              <Text color="gray.6">% Contacts Contacted at least once</Text>
             </Box>
           </Stack>
-        </Box>
+        </Box> */}
       </Flex>
 
-      <Flex mt={'md'} justify={'space-evenly'} gap={'lg'}>
-        {getList('Top titles', graphData?.titles || [])}
+      <Flex mt={"md"} justify={"space-evenly"} gap={"lg"}>
+        {getList("Top titles", graphData?.titles || [])}
         {getList(
-          'Top Companies',
-          (graphData?.companies || []).map((i) => ({ title: i.company, count: i.count }))
+          "Top Companies",
+          (graphData?.companies || []).map((i) => ({
+            title: i.company,
+            count: i.count,
+          }))
         )}
         {/* {getList(
           'Locations',
@@ -387,8 +572,11 @@ export default function TAMGraphV2() {
           }))
         )} */}
         {getList(
-          'Top Industries',
-          (graphData?.industries || []).map((i) => ({ title: i.company, count: i.count }))
+          "Top Industries",
+          (graphData?.industries || []).map((i) => ({
+            title: i.company,
+            count: i.count,
+          }))
         )}
       </Flex>
     </Box>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Text,
@@ -12,10 +12,14 @@ import {
   useMantineTheme,
   Loader,
   Stack,
+  Tooltip as MantineTooltip,
   Flex,
   Avatar,
-} from "@mantine/core";
-import { Line } from "react-chartjs-2";
+  ActionIcon,
+  HoverCard,
+  Group,
+} from '@mantine/core';
+import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -24,38 +28,26 @@ import {
   LineElement,
   Tooltip,
   Legend,
-} from "chart.js";
-import {
-  IconExternalLink,
-  IconSearch,
-  IconCalendar,
-  IconInfoCircle,
-} from "@tabler/icons";
-import { API_URL } from "@constants/data";
-import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
-import DOMPurify from "isomorphic-dompurify";
-import moment from "moment";
-import { IconInfoSmall, IconSelector } from "@tabler/icons-react";
-import _ from "lodash";
+} from 'chart.js';
+import { IconExternalLink, IconSearch, IconCalendar, IconInfoCircle } from '@tabler/icons';
+import { API_URL } from '@constants/data';
+import { useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
+import DOMPurify from 'isomorphic-dompurify';
+import moment from 'moment';
+import { IconInfoSmall, IconSelector } from '@tabler/icons-react';
+import _ from 'lodash';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 const ScrapingReport = () => {
   const [analytics, setAnalytics]: any = useState(null);
   const [currentPage, setCurrentPage]: any = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const userToken = useRecoilValue(userTokenState);
   const itemsPerPage = 10;
-  const [sortField, setSortField] = useState("upload date");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortField, setSortField] = useState('upload date');
+  const [sortOrder, setSortOrder] = useState('desc');
   const [contactScraped, setContactScraped] = useState(0);
 
   const chartOptions: any = {
@@ -74,8 +66,8 @@ const ScrapingReport = () => {
     },
     plugins: {
       legend: {
-        position: "top",
-        align: "end",
+        position: 'top',
+        align: 'end',
         labels: {
           usePointStyle: true,
         },
@@ -85,22 +77,19 @@ const ScrapingReport = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(
-        `${API_URL}/analytics/client_upload_analytics`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + userToken,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_URL}/analytics/client_upload_analytics`, {
+        method: 'GET',
+        headers: {
+          Authorization: 'Bearer ' + userToken,
+          'Content-Type': 'application/json',
+        },
+      });
       const data = await response.json();
-      if (data.message === "Success") {
+      if (data.message === 'Success') {
         setAnalytics(data.analytics);
         setContactScraped(data.analytics?.top_line_scraped);
       } else {
-        console.error("Failed to fetch analytics data:", data.message);
+        console.error('Failed to fetch analytics data:', data.message);
         // Handle error case here
       }
     };
@@ -110,8 +99,8 @@ const ScrapingReport = () => {
 
   if (!analytics) {
     return (
-      <Box w="100%" h="100%" sx={{ textAlign: "center" }}>
-        <Loader ml="auto" mt="100px" mb="100px" />
+      <Box w='100%' h='100%' sx={{ textAlign: 'center' }}>
+        <Loader ml='auto' mt='100px' mb='100px' />
       </Box>
     );
   }
@@ -119,10 +108,10 @@ const ScrapingReport = () => {
   // Sorting logic
   const sortedAnalytics = analytics.uploads.sort((a: any, b: any) => {
     if (a[sortField] < b[sortField]) {
-      return sortOrder === "asc" ? -1 : 1;
+      return sortOrder === 'asc' ? -1 : 1;
     }
     if (a[sortField] > b[sortField]) {
-      return sortOrder === "asc" ? 1 : -1;
+      return sortOrder === 'asc' ? 1 : -1;
     }
     return 0;
   });
@@ -130,7 +119,7 @@ const ScrapingReport = () => {
   // Function to handle sorting
   const handleSort = (field: any) => {
     setSortField(field);
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
   // Pagination logic
@@ -142,9 +131,9 @@ const ScrapingReport = () => {
   // Search filter function
   const totalFilteredItems = sortedAnalytics.filter((item: any) => {
     return (
-      item["upload name"].toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item["upload date"].toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item["account"].toLowerCase().includes(searchQuery.toLowerCase())
+      item['upload name'].toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item['upload date'].toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item['account'].toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
   const filteredItems = totalFilteredItems.slice(startIndex, endIndex);
@@ -153,15 +142,15 @@ const ScrapingReport = () => {
     labels: analytics.contacts_over_time.map((entry: any) => entry.x),
     datasets: [
       {
-        label: "Cumulative Total of Prospects",
+        label: 'Cumulative Total of Prospects',
         data: analytics.contacts_over_time.map((entry: any) => entry.y),
         fill: false,
         borderColor: theme.colors.blue[6],
         tension: 0.3,
       },
       {
-        type: "bar", // Specify 'bar' type for this dataset
-        label: "Number of Uploads",
+        type: 'bar', // Specify 'bar' type for this dataset
+        label: 'Number of Uploads',
         data: analytics.contacts_over_time.map((entry: any) => entry.y), // Your uploads per day data
         backgroundColor: theme.colors.grape[0],
         borderColor: theme.colors.grape[3],
@@ -172,9 +161,8 @@ const ScrapingReport = () => {
 
   function getUploadName(uploadName: any) {
     uploadName = uploadName.replace(
-      new RegExp(searchQuery, "gi"),
-      (match: any) =>
-        `<span style="background-color: ${theme.colors.yellow[1]}">${match}</span>`
+      new RegExp(searchQuery, 'gi'),
+      (match: any) => `<span style="background-color: ${theme.colors.yellow[1]}">${match}</span>`
     );
     return uploadName;
   }
@@ -182,66 +170,74 @@ const ScrapingReport = () => {
   console.log(filteredItems);
 
   return (
-    <Container size="97%" my={"lg"}>
-      <Flex justify={"space-between"} mb={"md"} gap={"md"}>
+    <Container size='97%' my={'lg'}>
+      <Flex justify={'space-between'} mb={'md'} gap={'md'}>
         <Card
-          shadow="md"
-          radius={"md"}
-          w={"100%"}
-          p={"xl"}
-          style={{ display: "flex", alignItems: "center" }}
+          shadow='md'
+          radius={'md'}
+          w={'100%'}
+          p={'xl'}
+          style={{ display: 'flex', alignItems: 'center' }}
         >
-          <Text fw={600} size={"xl"}>
+          <Text fw={600} size={'xl'}>
             Contacts Scraping Report
           </Text>
         </Card>
-        <Card shadow="md" radius={"md"} w={"100%"} p={"xl"}>
-          <Text fw={600} size={"xl"} color="green">
-            ${Math.round(contactScraped * 1.5)}{" "}
-            <IconInfoCircle size={14} color="gray" />
-          </Text>
-          <Text fw={600} size={"md"} color="gray">
+        <Card shadow='md' radius={'md'} w={'100%'} p={'xl'} style={{ position: 'relative' }}>
+          <Group noWrap>
+            <Text fw={600} size={'xl'} color='green'>
+              ${Math.round(contactScraped * 1.5).toLocaleString()}{' '}
+            </Text>
+            <HoverCard width={280} shadow='md' withinPortal>
+              <HoverCard.Target>
+                <ActionIcon size='sm' radius='xl'>
+                  <IconInfoCircle size={14} color='gray' />
+                </ActionIcon>
+              </HoverCard.Target>
+              <HoverCard.Dropdown>
+                <Text size='sm'>
+                  SellScale is constantly scraping, enriching and scoring best fit contacts for your
+                  business. This figure represents the market rate of all the contacts SellScale has
+                  found so far.
+                </Text>
+              </HoverCard.Dropdown>
+            </HoverCard>
+          </Group>
+          <Text fw={600} size={'md'} color='gray'>
             Worth of Contacts Scraped
           </Text>
         </Card>
       </Flex>
-      <Card
-        style={{ width: "100%", height: "500px" }}
-        shadow="md"
-        radius={"md"}
-        pb={60}
-      >
-        <Text fw={600} size={"xl"} color="gray">
-          CONTACTS SCRAPED{" "}
-          <span
-            style={{ color: "black", fontWeight: "600", marginLeft: "10px" }}
-          >
+      <Card style={{ width: '100%', height: '500px' }} shadow='md' radius={'md'} pb={60}>
+        <Text fw={600} size={'xl'} color='gray'>
+          CONTACTS SCRAPED{' '}
+          <span style={{ color: 'black', fontWeight: '600', marginLeft: '10px' }}>
             {contactScraped}
           </span>
         </Text>
         <Line data={lineChartData} options={chartOptions} />
       </Card>
-      <Flex align={"center"} justify={"space-between"} my={"lg"}>
-        <Text fw={600} size={"xl"}>
+      <Flex align={'center'} justify={'space-between'} my={'lg'}>
+        <Text fw={600} size={'xl'}>
           Scraping Report
         </Text>
         <TextInput
-          placeholder="Search"
+          placeholder='Search'
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.currentTarget.value)}
-          rightSection={<IconSearch color="gray" />}
+          rightSection={<IconSearch color='gray' />}
         />
       </Flex>
-      <Table withBorder style={{ borderRadius: "8px" }}>
-        <thead style={{ background: "#f9f9fd", width: "100%" }}>
-          <tr style={{ height: "60px" }}>
-            <th style={{}} onClick={() => handleSort("upload name")}>
+      <Table withBorder style={{ borderRadius: '8px' }}>
+        <thead style={{ background: '#f9f9fd', width: '100%' }}>
+          <tr style={{ height: '60px' }}>
+            <th style={{}} onClick={() => handleSort('upload name')}>
               <div
                 style={{
-                  display: "flex",
-                  alignItems: "center",
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 4,
-                  cursor: "pointer",
+                  cursor: 'pointer',
                 }}
               >
                 Upload Name
@@ -249,15 +245,15 @@ const ScrapingReport = () => {
               </div>
             </th>
             <th>SDR</th>
-            <th onClick={() => handleSort("total prospects")}>Scraped</th>
-            <th style={{ textAlign: "center" }}>Status</th>
-            <th onClick={() => handleSort("upload date")}>
+            <th onClick={() => handleSort('total prospects')}>Scraped</th>
+            <th style={{ textAlign: 'center' }}>Status</th>
+            <th onClick={() => handleSort('upload date')}>
               <div
                 style={{
-                  cursor: "pointer",
-                  justifyContent: "end",
-                  display: "flex",
-                  alignItems: "center",
+                  cursor: 'pointer',
+                  justifyContent: 'end',
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: 4,
                 }}
               >
@@ -267,25 +263,25 @@ const ScrapingReport = () => {
             </th>
           </tr>
         </thead>
-        <tbody style={{ background: "white" }}>
+        <tbody style={{ background: 'white' }}>
           {filteredItems.map((upload: any, index: number) => (
             <tr key={index}>
-              <td style={{ width: "25%" }}>
-                <Flex my={4} align={"center"}>
-                  <Avatar size={"md"} mr="xs" radius={"xl"} />
+              <td style={{ width: '25%' }}>
+                <Flex my={4} align={'center'}>
+                  <Avatar size={'md'} mr='xs' radius={'xl'} />
                   <Stack>
-                    <Text size="sm" className=" line-clamp-1">
-                      {upload["upload name"]}
+                    <Text size='sm' className=' line-clamp-1'>
+                      {upload['upload name']}
                     </Text>
                     <Text
-                      size="xs"
-                      color="blue"
+                      size='xs'
+                      color='blue'
                       mt={-15}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: 3,
-                        cursor: "pointer",
+                        cursor: 'pointer',
                       }}
                     >
                       Associated Campaign
@@ -294,56 +290,46 @@ const ScrapingReport = () => {
                   </Stack>
                 </Flex>
               </td>
-              <td style={{ width: "20%" }}>
-                <Flex align={"center"}>
-                  <Avatar
-                    src={upload?.account_img}
-                    size={"sm"}
-                    radius={"xl"}
-                    mr="xs"
-                  />
+              <td style={{ width: '20%' }}>
+                <Flex align={'center'}>
+                  <Avatar src={upload?.account_img} size={'sm'} radius={'xl'} mr='xs' />
                   <Stack>
                     <Text
-                      size="xs"
+                      size='xs'
                       style={{
-                        display: "flex",
-                        alignItems: "center",
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: 3,
-                        cursor: "pointer",
+                        cursor: 'pointer',
                       }}
                     >
-                      {upload.account}{" "}
-                      <IconExternalLink size={14} color="#478cef" />
+                      {upload.account} <IconExternalLink size={14} color='#478cef' />
                     </Text>
-                    <Text size="xs" color="gray" mt={-20}>
-                      {upload.account_title?.substr(0, 20)}{" "}
-                      {upload.account_title?.length > 20 ? "..." : ""}
+                    <Text size='xs' color='gray' mt={-20}>
+                      {upload.account_title?.substr(0, 20)}{' '}
+                      {upload.account_title?.length > 20 ? '...' : ''}
                     </Text>
                   </Stack>
                 </Flex>
               </td>
-              <td style={{ width: "20%" }}>
-                <Progress value={100} color="green" />
-                <Text size="xs" mt={4}>
-                  {upload.scraped}{" "}
-                  <span style={{ color: "gray" }}>
-                    {" "}
-                    out of {upload.scraped}
-                  </span>
+              <td style={{ width: '20%' }}>
+                <Progress value={100} color='green' />
+                <Text size='xs' mt={4}>
+                  {upload.scraped} <span style={{ color: 'gray' }}> out of {upload.scraped}</span>
                 </Text>
               </td>
-              <td style={{ width: "20%", textAlign: "center" }}>
+              <td style={{ width: '20%', textAlign: 'center' }}>
                 <Badge
-                  color={upload.status === "Complete" ? "green" : "yellow"}
-                  variant="outline"
-                  size="md"
+                  color={upload.status === 'Complete' ? 'green' : 'yellow'}
+                  variant='outline'
+                  size='md'
                 >
                   {upload.status}
                 </Badge>
               </td>
-              <td style={{ width: "20%", textAlign: "right" }}>
-                <IconCalendar size="0.8rem" style={{ marginRight: "4px" }} />{" "}
-                {moment(upload["upload date"]).format("MMM D, YYYY")}
+              <td style={{ width: '20%', textAlign: 'right' }}>
+                <IconCalendar size='0.8rem' style={{ marginRight: '4px' }} />{' '}
+                {moment(upload['upload date']).format('MMM D, YYYY')}
               </td>
             </tr>
           ))}
@@ -354,7 +340,7 @@ const ScrapingReport = () => {
         page={currentPage}
         onChange={setCurrentPage}
         total={Math.ceil(totalFilteredItems.length / itemsPerPage)}
-        style={{ marginTop: "1em" }}
+        style={{ marginTop: '1em' }}
       />
     </Container>
   );

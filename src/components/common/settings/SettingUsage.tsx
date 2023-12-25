@@ -116,13 +116,6 @@ export default function SettingUsage() {
   };
 
   const transformData = (data: Data[]) => {
-    function removeLeadingZeros(arr: number[]) {
-      while (arr.length > 0 && arr[0] === 0) {
-        arr.shift();
-      }
-      return arr;
-    }
-
     if (!data || data.length === 0) {
       return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     }
@@ -134,8 +127,9 @@ export default function SettingUsage() {
       transformedData[month] = value;
     });
 
-    return removeLeadingZeros(transformedData);
+    return transformedData
   };
+
 
   useEffect(() => {
     update();

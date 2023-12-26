@@ -761,7 +761,7 @@ function BumpFrameworkSelect(props: {
                   onClick={() => {
                     openContextModal({
                       modal: 'createBumpFramework',
-                      title: 'Create Bump Framework',
+                      title: 'Create Reply Framework',
                       innerProps: {
                         modalOpened: true,
                         openModal: () => {},

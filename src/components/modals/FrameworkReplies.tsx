@@ -42,7 +42,7 @@ export default function FrameworkReplies({
       <ScrollArea mih={200}>
         <Text
           className='text-gray-500 text-xs'>
-          Here is a couple examples where this framework was used in the past
+          Here is a couple examples where this framework was replied to in the past
         </Text>
         {data?.map((element: any, index: number) => (
           <Paper

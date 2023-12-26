@@ -129,7 +129,7 @@ export default function AdjustPage() {
     <Box px={80} py={30} bg={'white'} mih={'100vh'}>
       <Group mb={'lg'}>
         <Text size={25} fw={600}>
-          Adjust AI
+          Adjust AI (Coming soon! ⚠️)
         </Text>
         <Badge leftSection={<IconRefresh size={10} />}>2 Requests Pending</Badge>
       </Group>

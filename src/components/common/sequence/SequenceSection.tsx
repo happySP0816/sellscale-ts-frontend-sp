@@ -2474,39 +2474,55 @@ function FrameworkSection(props: {
                     }}
                     withBorder
                   >
-                    <Box
-                      miw='100px'
-                      mah={80}
-                      sx={{
-                        border: 'solid 1px #339af022',
-                        backgroundColor: '#339af022',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        textAlign: 'center',
-                      }}
-                      mt='xl'
-                      mr='md'
-                      onClick={() => {
-                        openContextModal({
-                          modal: 'frameworkReplies',
-                          title: 'Past Example Usages',
-                          innerProps: {
-                            bumpId: bf.id,
-                          },
-                        });
-                      }}
-                    >
-                      <Text fw='bold' fz='md' color='blue' mt='xs'>
-                        {bf.etl_num_times_used != null &&
-                          bf.etl_num_times_converted != null &&
-                          Math.round((bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 100)}
-                        % reply
-                      </Text>
-                      <Text size='8px' color='blue' fz={'xs'} fw='500'>
-                        ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
-                      </Text>
-                    </Box>
-
+                    <Flex mr='md' direction={'column'}>
+                      <Box
+                        miw='100px'
+                        mah={80}
+                        sx={{
+                          border: 'solid 1px #339af022',
+                          backgroundColor: '#339af022',
+                          padding: '8px',
+                          borderRadius: '4px',
+                          textAlign: 'center',
+                          cursor: 'pointer'
+                        }}
+                        mt='xl'
+                        onClick={() => {
+                          openContextModal({
+                            modal: 'frameworkReplies',
+                            title: 'Past Example Replies',
+                            innerProps: {
+                              bumpId: bf.id,
+                            },
+                          });
+                        }}
+                      >
+                        <Text fw='bold' fz='md' color='blue' mt='xs'>
+                          {bf.etl_num_times_used != null &&
+                            bf.etl_num_times_converted != null &&
+                            Math.round((bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 100)}
+                          % reply
+                        </Text>
+                        <Text size='8px' color='blue' fz={'xs'} fw='500'>
+                          ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
+                        </Text>
+                      </Box>
+                      <Button
+                        onClick={() => {
+                          openContextModal({
+                            modal: 'frameworkReplies',
+                            title: 'Past Example Usages',
+                            innerProps: {
+                              bumpId: bf.id,
+                            },
+                          });
+                        }}
+                        size='xs'
+                        mt={3}
+                      >
+                        View Replies
+                      </Button>
+                    </Flex>
                     <Box mr={40} w='100%'>
                       <Flex>
                         <Text size='sm' fw='600' mb='xs' sx={{ textTransform: 'uppercase' }} color='gray' variant='outline'>

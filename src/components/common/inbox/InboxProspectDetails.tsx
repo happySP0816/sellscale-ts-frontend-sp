@@ -174,7 +174,7 @@ export default function ProjectDetails(props: {
     props.prospects.find((p) => p.id === openedProspectId)
   );
   const [deactivateAiEngagementStatus, setDeactivateAiEngagementStatus] =
-    useState(!!prospect?.deactivate_ai_engagement);
+    useState(!prospect?.deactivate_ai_engagement);
   if (
     props.emailStatuses ||
     openedOutboundChannel === "EMAIL" ||

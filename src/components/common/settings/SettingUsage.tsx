@@ -1,16 +1,4 @@
-import {
-  Paper,
-  Text,
-  Group,
-  Box,
-  Grid,
-  Flex,
-  Badge,
-  useMantineTheme,
-  Progress,
-  Button,
-  RingProgress,
-} from '@mantine/core';
+import { Paper, Text, Group, Box, Grid, Flex, Badge, useMantineTheme, Progress, Button, RingProgress } from '@mantine/core';
 
 import {
   IconArrowUp,
@@ -25,18 +13,7 @@ import {
   IconSettings,
 } from '@tabler/icons';
 import { Bar, Doughnut, Line, Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  DoughnutController,
-  ArcElement,
-  Chart,
-} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, DoughnutController, ArcElement, Chart } from 'chart.js';
 
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -84,20 +61,7 @@ export default function SettingUsage() {
   const [touchsentProspect, setTouchsentProspect] = useState<any>({});
   const [chartData, setChartData] = useState<any>([]);
 
-  const labels = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
+  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const update = async () => {
     await getUsageConnectResponse(userToken)
       .then((res) => {
@@ -248,15 +212,8 @@ export default function SettingUsage() {
     datasets: [
       {
         data: [
-          Math.min(
-            100,
-            Math.floor(((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100)
-          ),
-          100 -
-            Math.min(
-              100,
-              Math.floor(((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100)
-            ),
+          Math.min(100, Math.floor(((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100)),
+          100 - Math.min(100, Math.floor(((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100)),
         ],
         backgroundColor: ['#fa5352', '#eaecf0'],
         borderWidth: 0,
@@ -307,15 +264,7 @@ export default function SettingUsage() {
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.prospect_enriched.toLocaleString()}{' '}
                     <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                      {Math.min(
-                        100,
-                        Math.floor(
-                          (prospectingData?.prospect_enriched / prospectingData?.prospect_created +
-                            0.0001) *
-                            100
-                        )
-                      )}
-                      %
+                      {Math.min(100, Math.floor((prospectingData?.prospect_enriched / prospectingData?.prospect_created + 0.0001) * 100))}%
                     </Badge>
                   </Text>
                 </Box>
@@ -328,17 +277,8 @@ export default function SettingUsage() {
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.total_outreach_sent.toLocaleString()}{' '}
-                    <Badge color='grape' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                      {Math.min(
-                        100,
-                        Math.floor(
-                          (prospectingData?.total_outreach_sent /
-                            prospectingData?.prospect_created +
-                            0.0001) *
-                            100
-                        )
-                      )}
-                      %
+                    <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                      {Math.min(100, Math.floor((prospectingData?.total_outreach_sent / prospectingData?.prospect_created + 0.0001) * 100))}%
                     </Badge>
                   </Text>
                 </Box>
@@ -353,16 +293,8 @@ export default function SettingUsage() {
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.ai_replies.toLocaleString()}{' '}
-                    <Badge color='red' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                      {Math.min(
-                        100,
-                        Math.floor(
-                          (prospectingData?.ai_replies / prospectingData?.total_outreach_sent +
-                            0.0001) *
-                            100
-                        )
-                      )}
-                      %
+                    <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                      {Math.min(100, Math.floor((prospectingData?.ai_replies / prospectingData?.total_outreach_sent + 0.0001) * 100))}%
                     </Badge>
                   </Text>
                 </Box>
@@ -375,21 +307,8 @@ export default function SettingUsage() {
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.prospects_snoozed.toLocaleString()}{' '}
-                    <Badge
-                      color='orange'
-                      ml={10}
-                      leftSection={<IconArrowUp size={10} stroke={3} />}
-                    >
-                      {Math.min(
-                        100,
-                        Math.floor(
-                          (prospectingData?.prospects_snoozed /
-                            prospectingData?.total_outreach_sent +
-                            0.0001) *
-                            100
-                        )
-                      )}
-                      %
+                    <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                      {Math.min(100, Math.floor((prospectingData?.prospects_snoozed / prospectingData?.total_outreach_sent + 0.0001) * 100))}%
                     </Badge>
                   </Text>
                 </Box>
@@ -402,21 +321,8 @@ export default function SettingUsage() {
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.prospects_removed.toLocaleString()}{' '}
-                    <Badge
-                      color='yellow'
-                      ml={10}
-                      leftSection={<IconArrowUp size={10} stroke={3} />}
-                    >
-                      {Math.min(
-                        100,
-                        Math.floor(
-                          (prospectingData?.prospects_removed /
-                            prospectingData?.total_outreach_sent +
-                            0.0001) *
-                            100
-                        )
-                      )}
-                      %
+                    <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                      {Math.min(100, Math.floor((prospectingData?.prospects_removed / prospectingData?.total_outreach_sent + 0.0001) * 100))}%
                     </Badge>
                   </Text>
                 </Box>
@@ -433,13 +339,7 @@ export default function SettingUsage() {
                 height: '100%',
               }}
             >
-              <Flex
-                direction={'column'}
-                justify={'space-between'}
-                align={'center'}
-                gap={'sm'}
-                h={'100%'}
-              >
+              <Flex direction={'column'} justify={'space-between'} align={'center'} gap={'sm'} h={'100%'}>
                 <div className='w-[140px] m-[-30px] relative'>
                   <Doughnut data={data} options={piechartOptions} />
                   <Flex
@@ -451,25 +351,15 @@ export default function SettingUsage() {
                     }}
                     direction={'column'}
                   >
-                    <Text fw={600}>
-                      {Math.min(
-                        100,
-                        Math.floor(((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100)
-                      )}
-                      %
-                    </Text>{' '}
+                    <Text fw={600}>{Math.min(100, Math.floor(((prospectingData?.monthly_touchpoints_used || 1) / 2000) * 100))}%</Text>{' '}
                     <Text size={12} fw={600}>
                       Limit Utilized
                     </Text>
                   </Flex>
                 </div>
                 <Text size={12} fw={600} color='gray' align='center'>
-                  You have used{' '}
-                  <span style={{ color: '#54a4f9' }}>
-                    {prospectingData?.monthly_touchpoints_used.toLocaleString()}
-                  </span>{' '}
-                  out of <span style={{ fontWeight: '700', color: 'black' }}>2000</span> monthly
-                  first touches.
+                  You have used <span style={{ color: '#54a4f9' }}>{prospectingData?.monthly_touchpoints_used.toLocaleString()}</span> out of{' '}
+                  <span style={{ fontWeight: '700', color: 'black' }}>2000</span> monthly first touches.
                 </Text>
                 <Button
                   w={'100%'}
@@ -497,15 +387,7 @@ export default function SettingUsage() {
                 <Text fw={600} style={{ display: 'flex', alignItems: 'center' }}>
                   {prospectingData?.prospect_created}{' '}
                   <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(
-                      100,
-                      Math.floor(
-                        (prospectingData?.prospect_created / prospectingData?.prospect_created +
-                          0.0001) *
-                          100
-                      )
-                    )}
-                    %
+                    {Math.min(100, Math.floor((prospectingData?.prospect_created / prospectingData?.prospect_created + 0.0001) * 100))}%
                   </Badge>
                 </Text>
               </Flex>
@@ -523,15 +405,7 @@ export default function SettingUsage() {
                 <Text fw={600} style={{ display: 'flex', alignItems: 'center' }}>
                   {prospectingData?.prospect_enriched}{' '}
                   <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(
-                      100,
-                      Math.floor(
-                        (prospectingData?.prospect_enriched / prospectingData?.prospect_created +
-                          0.0001) *
-                          100
-                      )
-                    )}
-                    %
+                    {Math.min(100, Math.floor((prospectingData?.prospect_enriched / prospectingData?.prospect_created + 0.0001) * 100))}%
                   </Badge>
                 </Text>
               </Flex>
@@ -548,16 +422,8 @@ export default function SettingUsage() {
                 </Text>
                 <Text fw={600} style={{ display: 'flex', alignItems: 'center' }}>
                   {prospectingData?.total_outreach_sent}{' '}
-                  <Badge color='grape' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(
-                      100,
-                      Math.floor(
-                        (prospectingData?.total_outreach_sent / prospectingData?.prospect_created +
-                          0.0001) *
-                          100
-                      )
-                    )}
-                    %
+                  <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                    {Math.min(100, Math.floor((prospectingData?.total_outreach_sent / prospectingData?.prospect_created + 0.0001) * 100))}%
                   </Badge>
                 </Text>
               </Flex>
@@ -574,16 +440,8 @@ export default function SettingUsage() {
                 </Text>
                 <Text fw={600} style={{ display: 'flex', alignItems: 'center' }}>
                   {prospectingData?.total_outreach_sent}{' '}
-                  <Badge color='grape' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(
-                      100,
-                      Math.floor(
-                        (prospectingData?.total_outreach_sent / prospectingData?.prospect_created +
-                          0.0001) *
-                          100
-                      )
-                    )}
-                    %
+                  <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                    {Math.min(100, Math.floor((prospectingData?.total_outreach_sent / prospectingData?.prospect_created + 0.0001) * 100))}%
                   </Badge>
                 </Text>
               </Flex>
@@ -600,16 +458,8 @@ export default function SettingUsage() {
                 </Text>
                 <Text fw={600} style={{ display: 'flex', alignItems: 'center' }}>
                   {prospectingData?.ai_replies}{' '}
-                  <Badge color='red' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(
-                      100,
-                      Math.floor(
-                        (prospectingData?.ai_replies / prospectingData?.total_outreach_sent +
-                          0.0001) *
-                          100
-                      )
-                    )}
-                    %
+                  <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                    {Math.min(100, Math.floor((prospectingData?.ai_replies / prospectingData?.total_outreach_sent + 0.0001) * 100))}%
                   </Badge>
                 </Text>
               </Flex>
@@ -626,16 +476,8 @@ export default function SettingUsage() {
                 </Text>
                 <Text fw={600} style={{ display: 'flex', alignItems: 'center' }}>
                   {prospectingData?.prospects_snoozed}{' '}
-                  <Badge color='orange' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(
-                      100,
-                      Math.floor(
-                        (prospectingData?.prospects_snoozed / prospectingData?.ai_replies +
-                          0.0001) *
-                          100
-                      )
-                    )}
-                    %
+                  <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                    {Math.min(100, Math.floor((prospectingData?.prospects_snoozed / prospectingData?.ai_replies + 0.0001) * 100))}%
                   </Badge>
                 </Text>
               </Flex>
@@ -652,16 +494,8 @@ export default function SettingUsage() {
                 </Text>
                 <Text fw={600} style={{ display: 'flex', alignItems: 'center' }}>
                   {prospectingData?.prospects_removed}{' '}
-                  <Badge color='yellow' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
-                    {Math.min(
-                      100,
-                      Math.floor(
-                        (prospectingData?.prospects_removed / prospectingData?.ai_replies +
-                          0.0001) *
-                          100
-                      )
-                    )}
-                    %
+                  <Badge color='green' ml={10} leftSection={<IconArrowUp size={10} stroke={3} />}>
+                    {Math.min(100, Math.floor((prospectingData?.prospects_removed / prospectingData?.ai_replies + 0.0001) * 100))}%
                   </Badge>
                 </Text>
               </Flex>

@@ -54,6 +54,7 @@ import SalesNavURLModal from '@modals/SalesNavURLModal';
 import FrameworkReplies from '@modals/FrameworkReplies';
 
 import { io } from 'socket.io-client';
+import MultiChannelModal from '@modals/MultiChannelModal';
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -216,7 +217,8 @@ export default function App() {
               cloneBumpFramework: CloneBumpFrameworkContextModal,
               liTemplate: LiTemplateModal,
               salesNavURL: SalesNavURLModal,
-              frameworkReplies: FrameworkReplies
+              frameworkReplies: FrameworkReplies,
+              multiChannel: MultiChannelModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

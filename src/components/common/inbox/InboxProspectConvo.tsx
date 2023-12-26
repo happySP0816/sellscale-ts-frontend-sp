@@ -93,6 +93,7 @@ import { getBumpFrameworksSequence } from "@utils/requests/getBumpFrameworksSequ
 import TextWithNewlines from "@common/library/TextWithNewlines";
 import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
 import { useNavigate } from "react-router-dom";
+import { openContextModal } from "@mantine/modals";
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -462,6 +463,8 @@ export default function ProspectConvo(props: Props) {
   const [substatus, setOpenBumpFrameworksSubstatus] = useRecoilState(
     bumpFrameworkSelectedSubstatusState
   );
+
+  const [advancedAIActionsOpened, setAdvancedAIActionsOpened] = useState(false);
 
   // We use this to store the value of the text area
   const [messageDraft, _setMessageDraft] = useState("");
@@ -845,15 +848,16 @@ export default function ProspectConvo(props: Props) {
               </Tabs.Tab>
             )}
 
-            <Popover width={300} position="bottom" withArrow shadow="md">
+            <Popover width={300} position="bottom" withArrow shadow="md" opened={advancedAIActionsOpened} onChange={setAdvancedAIActionsOpened}>
               <Popover.Target>
                 <Button
                   color="gray"
                   variant="subtle"
                   sx={{ flex: 1, height: "auto" }}
                   rightIcon={<IconChevronDown size={"0.8rem"} />}
+                  onClick={() => setAdvancedAIActionsOpened((o) => !o)}
                 >
-                  Advance AI Action
+                  Advanced AI Actions
                 </Button>
               </Popover.Target>
               <Popover.Dropdown p={0}>
@@ -867,7 +871,7 @@ export default function ProspectConvo(props: Props) {
                     },
                   }}
                 >
-                  Multithread
+                  Multi Thread (Referral)
                 </Button>
                 <Divider />
                 <Button
@@ -879,8 +883,18 @@ export default function ProspectConvo(props: Props) {
                       justifyContent: "flex-start",
                     },
                   }}
+                  onClick={() => {
+                    setAdvancedAIActionsOpened(false);
+                    openContextModal({
+                      modal: "multiChannel",
+                      title: <Title order={3}>Continue the conversation on Email</Title>,
+                      innerProps: {
+                        prospect: prospect
+                      },
+                    });
+                  }}
                 >
-                  ComposeEmail
+                  Multi Channel
                 </Button>
               </Popover.Dropdown>
             </Popover>

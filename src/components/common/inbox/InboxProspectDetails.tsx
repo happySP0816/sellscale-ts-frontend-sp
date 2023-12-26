@@ -508,7 +508,7 @@ export default function ProjectDetails(props: {
           variant="light"
           leftIcon={<IconUserEdit size={"1rem"} />}
         >
-          Edit Contact details
+          Edit Contact Details
         </Button>
 
         <EditProspectModal

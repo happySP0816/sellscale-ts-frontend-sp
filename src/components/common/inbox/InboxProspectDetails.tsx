@@ -88,6 +88,7 @@ import {
   prospectEmailStatuses,
   prospectStatuses,
 } from "@common/inbox/utils";
+import { patchProspectAIEnabled } from '@utils/requests/patchProspectAIEnabled';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -352,6 +353,26 @@ export default function ProjectDetails(props: {
                 label="AI Enabled"
                 onChange={(event) => {
                   setDeactivateAiEngagementStatus(event.currentTarget.checked);
+
+                  patchProspectAIEnabled(userToken, openedProspectId).then((result) => {
+                    if (result.status === "success") {
+                      showNotification({
+                        title: "Success",
+                        message: "AI Enabled status updated.",
+                        color: "green",
+                        autoClose: 3000,
+                      });
+                    } else {
+                      showNotification({
+                        title: "Error",
+                        message: "Something went wrong. Please try again later.",
+                        color: "red",
+                        autoClose: 5000,
+                      });
+                    }
+                  })
+
+                  refetch();
                 }}
               />
             </Card>

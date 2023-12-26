@@ -2484,8 +2484,18 @@ function FrameworkSection(props: {
                           padding: '8px',
                           borderRadius: '4px',
                           textAlign: 'center',
+                          cursor: 'pointer'
                         }}
                         mt='xl'
+                        onClick={() => {
+                          openContextModal({
+                            modal: 'frameworkReplies',
+                            title: 'Past Example Usages',
+                            innerProps: {
+                              bumpId: bf.id,
+                            },
+                          });
+                        }}
                       >
                         <Text fw='bold' fz='md' color='blue' mt='xs'>
                           {bf.etl_num_times_used != null &&
@@ -2510,7 +2520,7 @@ function FrameworkSection(props: {
                         size='xs'
                         mt={3}
                       >
-                        View Framework
+                        View Replies
                       </Button>
                     </Flex>
                     <Box mr={40} w='100%'>

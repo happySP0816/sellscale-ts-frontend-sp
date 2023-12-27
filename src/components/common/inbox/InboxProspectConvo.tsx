@@ -88,7 +88,7 @@ import RichTextArea from "@common/library/RichTextArea";
 import { JSONContent } from "@tiptap/react";
 import { showNotification } from "@mantine/notifications";
 import postSmartleadReply from "@utils/requests/postSmartleadReply";
-import { IconArrowLeft, IconChevronDown, IconChevronUp } from "@tabler/icons";
+import { IconArrowLeft, IconChevronDown, IconChevronUp, IconRobot } from "@tabler/icons";
 import { getBumpFrameworksSequence } from "@utils/requests/getBumpFrameworksSequence";
 import TextWithNewlines from "@common/library/TextWithNewlines";
 import { AiMetaDataBadge } from "@common/persona/LinkedInConversationEntry";
@@ -853,11 +853,13 @@ export default function ProspectConvo(props: Props) {
                 <Button
                   color="gray"
                   variant="subtle"
-                  sx={{ flex: 1, height: "auto" }}
+                  size='xs'
+                  sx={{ flex: 0.5, height: "auto" }}
                   rightIcon={<IconChevronDown size={"0.8rem"} />}
                   onClick={() => setAdvancedAIActionsOpened((o) => !o)}
+                  leftIcon={<IconRobot size={"1rem"} />}
                 >
-                  Advanced AI Actions
+                  Other AI Actions
                 </Button>
               </Popover.Target>
               <Popover.Dropdown p={0}>

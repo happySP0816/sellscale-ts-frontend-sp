@@ -346,8 +346,20 @@ export default function InboxProspectConvoBumpFramework(props: {
           >
             <Card.Section px='md' pt='md'>
               <Flex justify='space-between' align='center'>
-                <Title order={5}>{props.bumpFramework.title}</Title>
+                <Box>
+                  <Title order={5}>{props.bumpFramework.title}</Title>
+                  {
+                    !props.bumpFramework.client_archetype_id && props.bumpFramework.default && (
+                      <Badge size='xs' color='gray'>
+                        SellScale Default Framework
+                      </Badge>
+                    )
+                  }
+                </Box>
                 <ActionIcon
+                  disabled={
+                    !props.bumpFramework.client_archetype_id && props.bumpFramework.default
+                  }
                   onClick={() => {
                     openContextModal({
                       modal: 'editBumpFramework',

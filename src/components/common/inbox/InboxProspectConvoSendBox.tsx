@@ -607,7 +607,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       ? bumpFrameworks.map((bf: BumpFramework) => {
                           return {
                             value: bf.id + "",
-                            label: (bf.default ? "🟢 " : "⚪️ ") + bf.title + " ",
+                            // label: (bf.default ? "🟢 " : "⚪️ ") + bf.title + " ",
+                            label: bf.title,
                           };
                         })
                       : []
@@ -615,7 +616,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     ? emailSequenceSteps.map((step: EmailSequenceStep) => {
                         return {
                           value: step.id + "",
-                          label: (step.default ? "🟢 " : "⚪️ ") + step.title,
+                          // label: (step.default ? "🟢 " : "⚪️ ") + step.title,
+                          label: step.title,
                         };
                       })
                     : []
@@ -626,7 +628,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     borderRight: "0",
                     borderLeft: "0",
                   },
-                  dropdown: { minWidth: 150 },
+                  dropdown: { minWidth: 250  },
                 }}
                 onChange={(value) => {
                   if (openedOutboundChannel === "LINKEDIN") {
@@ -655,7 +657,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     ? selectedBumpFramework.id + ""
                     : undefined
                 }
-                
               />
               <Tooltip
                 label={

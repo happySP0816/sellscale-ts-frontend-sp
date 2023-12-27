@@ -325,11 +325,31 @@ export default function ProjectDetails(props: {
       sx={{ borderLeft: "0.0625rem solid #dee2e6" }}
     >
       <Stack spacing={0} mt={"md"} px={"md"}>
+        <Flex>
+          <Box mt='4px'>
+            <Title order={4}>{data?.details.full_name}</Title>
+          </Box>
+
+          <Button
+            radius={"xs"}
+            ml='auto'
+            mt='0'
+            onClick={openProspectModal}
+            color='gray'
+            variant="subtle"
+            rightIcon={<IconPencil size={"1rem"} />}
+          >
+          </Button>
+        </Flex>
+
         <Flex align={"center"} gap={"md"}>
           <Flex direction={"column"} align={"center"} maw={"8rem"}>
             <Avatar
               w="100%"
               h={"auto"}
+              mih={"8rem"}
+              miw={"8rem"}
+              sx={{backgroundColor: theme.colors.gray[0]}}
               src={proxyURL(data?.details.profile_pic)}
               color={valueToColor(theme, data?.details.full_name)}
             >
@@ -380,16 +400,12 @@ export default function ProjectDetails(props: {
 
           <Box maw={"60%"} w={"100%"}>
             <Flex gap={"sm"} wrap={"wrap"}>
-              <Box>
-                <Title order={4}>{data?.details.full_name}</Title>
-              </Box>
-              <Divider orientation="vertical" />
               <Flex gap={"xs"} align={"center"} wrap={"wrap"}>
                 <Text fw={700} fz={"xs"} color="gray.6">
-                  ICP Score:
+                  ICP Score
                 </Text>
                 <ICPFitPill
-                  size="xs"
+                  size="sm"
                   icp_fit_score={data?.details.icp_fit_score || 0}
                   icp_fit_reason={data?.details.icp_fit_reason || ""}
                   archetype={data?.details.persona || ""}
@@ -499,17 +515,6 @@ export default function ProjectDetails(props: {
             )}
           </Box>
         </Flex>
-
-        <Divider variant="dashed" my={"sm"} />
-
-        <Button
-          radius={"xl"}
-          onClick={openProspectModal}
-          variant="light"
-          leftIcon={<IconUserEdit size={"1rem"} />}
-        >
-          Edit Contact Details
-        </Button>
 
         <EditProspectModal
           modalOpened={editProspectModalOpened}

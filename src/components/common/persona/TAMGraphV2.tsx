@@ -356,7 +356,7 @@ export default function TAMGraphV2() {
                   <Text fw={700} fz={32}>
                     $
                     {new Intl.NumberFormat("en-US").format(
-                      graphData?.stats[0].num_companies * (userData.contract_size ? userData.contract_size : 10000)
+                      (graphData?.stats[0].num_companies ? graphData?.stats[0].num_companies : 0) * (userData.contract_size ? userData.contract_size : 10000)
                     )}
                   </Text>
                   {renderIncreaseBadge(6.5)}

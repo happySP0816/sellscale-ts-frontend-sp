@@ -163,7 +163,7 @@ export default function SideNavbar(props: {}) {
           />
           <SideNavbarItem icon={<IconTargetArrow size='1.0rem' />} label='Campaigns' tabKey={['campaigns', 'all/campaigns', '']} />
           <SideNavbarItem icon={<IconUsers size='1.0rem' />} label='Contacts' tabKey={['contacts/overview', 'contacts', 'all/contacts']} />
-          <SideNavbarItem icon={<IconTarget size='1.0rem' />} label='Triggers' tabKey={['triggers', 'create-trigger']} />
+          {/* <SideNavbarItem icon={<IconTarget size='1.0rem' />} label='Triggers' tabKey={['triggers', 'create-trigger']} /> */}
           <SideNavbarItem
             icon={<IconChartHistogram size='1.0rem' />}
             label='Analytics'

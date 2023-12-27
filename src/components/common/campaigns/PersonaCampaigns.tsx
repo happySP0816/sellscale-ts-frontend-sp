@@ -59,6 +59,7 @@ import {
   IconRefresh,
   IconSeeding,
   IconSend,
+  IconTarget,
   IconX,
 } from "@tabler/icons";
 import {
@@ -92,6 +93,7 @@ import { TodayActivityData } from "./OverallPipeline/TodayActivity";
 import UserStatusToggle from "./UserStatusToggle";
 import AllCampaign from "../../PersonaCampaigns/AllCampaign";
 import postSyncSmartleadCampaigns from "@utils/requests/postSyncSmartleadCampaigns";
+import TriggersList from '@pages/TriggersList';
 
 export type CampaignPersona = {
   id: number;
@@ -294,9 +296,6 @@ export default function PersonaCampaigns() {
   return (
     <PageFrame>
       <Stack>
-        <Group position="apart">
-          <Title order={2}>Campaigns</Title>
-        </Group>
         <Tabs defaultValue="overview">
           <Tabs.List mb="md">
             <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />}>
@@ -304,6 +303,9 @@ export default function PersonaCampaigns() {
             </Tabs.Tab>
             <Tabs.Tab value="all-campaigns" icon={<IconClipboard size="0.8rem" />}>
               {userData?.client?.company}'s Campaigns
+            </Tabs.Tab>
+            <Tabs.Tab value='triggers' icon={<IconTarget size='0.8rem' />}>
+              Triggers
             </Tabs.Tab>
             <Tabs.Tab
               value="linkedin"
@@ -316,6 +318,11 @@ export default function PersonaCampaigns() {
               Queued Emails
             </Tabs.Tab>
           </Tabs.List>
+
+          <Tabs.Panel value="triggers" pt="xs">
+            <TriggersList />
+          </Tabs.Panel>
+            
 
           <Tabs.Panel value="all-campaigns" pt="xs">
             {campaignsSectionHeader}

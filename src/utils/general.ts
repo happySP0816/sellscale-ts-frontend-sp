@@ -45,6 +45,9 @@ export function formatDate(date: Date) {
  * @returns - Consistent number between 0 and range
  */
 export function hashString(str: string, range: number): number {
+  if (!str) {
+    return 0;
+  }
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = (hash * 31 + str.charCodeAt(i)) % range;

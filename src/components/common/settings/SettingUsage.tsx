@@ -1,19 +1,19 @@
-import { Paper, Text, Group, Box, Grid, Flex, Badge, useMantineTheme, Progress, Button, RingProgress } from '@mantine/core';
+import { Paper, Text, Group, Box, Grid, Flex, Badge, useMantineTheme, Tooltip, Progress, Button, RingProgress, ActionIcon } from '@mantine/core';
 
 import {
   IconArrowUp,
   IconBrandSuperhuman,
   IconBriefcase,
   IconChevronsUp,
-  IconDotsVertical,
   IconFingerprint,
+  IconInfoCircle,
   IconPackages,
   IconPoint,
   IconSelect,
   IconSettings,
 } from '@tabler/icons';
 import { Bar, Doughnut, Line, Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, DoughnutController, ArcElement, Chart } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Legend, DoughnutController, ArcElement, Chart } from 'chart.js';
 
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -245,7 +245,11 @@ export default function SettingUsage() {
                     <Text color='gray' size={12} fw={600}>
                       Prospects Created
                     </Text>
-                    <IconDotsVertical size={10} color='gray' />
+                    <Tooltip label='Total prospects added on SellScale.' withinPortal>
+                      <ActionIcon>
+                        <IconInfoCircle size={14} color='gray' />
+                      </ActionIcon>
+                    </Tooltip>
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.prospect_created?.toLocaleString()}{' '}
@@ -259,7 +263,11 @@ export default function SettingUsage() {
                     <Text color='gray' size={12} fw={600}>
                       # Prospects Enriched
                     </Text>
-                    <IconDotsVertical size={10} color='gray' />
+                    <Tooltip label='Enrichment includes account research, finding contact details (e.g., emails), and keeping this info up to date.' withinPortal>
+                      <ActionIcon>
+                        <IconInfoCircle size={14} color='gray' />
+                      </ActionIcon>
+                    </Tooltip>
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.prospect_enriched.toLocaleString()}{' '}
@@ -273,7 +281,11 @@ export default function SettingUsage() {
                     <Text color='gray' size={12} fw={600}>
                       Total Outreach Sent
                     </Text>
-                    <IconDotsVertical size={10} color='gray' />
+                    <Tooltip label='SellScale sends through LinkedIn or email.' withinPortal>
+                      <ActionIcon>
+                        <IconInfoCircle size={14} color='gray' />
+                      </ActionIcon>
+                    </Tooltip>
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.total_outreach_sent.toLocaleString()}{' '}
@@ -289,7 +301,11 @@ export default function SettingUsage() {
                     <Text color='gray' size={12} fw={600}>
                       AI Replies
                     </Text>
-                    <IconDotsVertical size={10} color='gray' />
+                    <Tooltip label='Replies conducted through the SellScale platform by our AI.' withinPortal>
+                      <ActionIcon>
+                        <IconInfoCircle size={14} color='gray' />
+                      </ActionIcon>
+                    </Tooltip>
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.ai_replies.toLocaleString()}{' '}
@@ -303,7 +319,11 @@ export default function SettingUsage() {
                     <Text color='gray' size={12} fw={600}>
                       Prospects Snoozed
                     </Text>
-                    <IconDotsVertical size={10} color='gray' />
+                    <Tooltip label='Prospects the AI will engage, but we’re waiting until the next sequence step for.' withinPortal>
+                      <ActionIcon>
+                        <IconInfoCircle size={14} color='gray' />
+                      </ActionIcon>
+                    </Tooltip>
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.prospects_snoozed.toLocaleString()}{' '}
@@ -317,7 +337,11 @@ export default function SettingUsage() {
                     <Text color='gray' size={12} fw={600}>
                       Prospects removed
                     </Text>
-                    <IconDotsVertical size={10} color='gray' />
+                    <Tooltip label='Prospects who were marked as not interested or not qualified. ' withinPortal>
+                      <ActionIcon>
+                        <IconInfoCircle size={14} color='gray' />
+                      </ActionIcon>
+                    </Tooltip>
                   </Flex>
                   <Text fw={600} size={20} style={{ display: 'flex', alignItems: 'center' }} mt={5}>
                     {prospectingData?.prospects_removed.toLocaleString()}{' '}

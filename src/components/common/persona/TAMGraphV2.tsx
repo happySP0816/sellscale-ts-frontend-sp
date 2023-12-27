@@ -1,5 +1,5 @@
 import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
 import {
   Box,
   Flex,
@@ -20,6 +20,7 @@ import {
   Center,
   Select,
   Accordion,
+  Tooltip as MantineTooltip,
 } from "@mantine/core";
 import {
   IconArrowUp,
@@ -34,13 +35,15 @@ import {
   LinearScale,
   BarElement,
   Title,
-  Tooltip,
   Legend,
+  Tooltip,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import { faker } from "@faker-js/faker";
 import { useQuery } from "@tanstack/react-query";
 import { getTamGraphData } from "@utils/requests/getTamGraphData";
+import { navigateToPage } from '@utils/documentChange';
+import { useNavigate } from 'react-router-dom';
 
 ChartJS.register(
   CategoryScale,
@@ -113,6 +116,9 @@ export default function TAMGraphV2() {
   const [period, setPeriod] = useState("24H");
   const [filteredBy, setFilteredBy] = useState("COMPANY_SIZE");
   const theme = useMantineTheme();
+  const navigate = useNavigate();
+
+  const userData = useRecoilValue(userDataState)
 
   const { data: graphData } = useQuery({
     queryKey: [`query-get-tam-graph-data`],
@@ -322,7 +328,7 @@ export default function TAMGraphV2() {
               </Box>
               <Flex direction={"column"}>
                 <Flex align={"center"}>
-                  <Text fw={600} color="gray.8">
+                  <Text fw={600} color="gray.8" fz='sm'>
                     <Box
                       sx={(theme) => ({
                         borderRadius: 9999,
@@ -337,16 +343,20 @@ export default function TAMGraphV2() {
                     Cold Outreach TAM
                   </Text>
 
-                  <ActionIcon>
-                    <IconInfoCircle size={"0.8rem"} />
-                  </ActionIcon>
+                  <MantineTooltip label="Total companies scraped by SellScale multipled by the average ACV" withinPortal>
+                    <ActionIcon onClick={() => {
+                      navigateToPage(navigate, '/settings');
+                    }} ml={"xs"}>
+                      <IconInfoCircle size={"0.8rem"} />
+                    </ActionIcon>
+                  </MantineTooltip>
                 </Flex>
 
                 <Flex align={"center"} gap={"sm"}>
                   <Text fw={700} fz={32}>
                     $
                     {new Intl.NumberFormat("en-US").format(
-                      graphData?.stats[0].num_contacts || 0 * 1.5
+                      graphData?.stats[0].num_companies * (userData.contract_size ? userData.contract_size : 10000)
                     )}
                   </Text>
                   {renderIncreaseBadge(6.5)}
@@ -358,7 +368,7 @@ export default function TAMGraphV2() {
         <Grid.Col span={2}>
           <Card>
             <Flex justify={"space-between"}>
-              <Text fw={600} color="gray.8">
+              <Text fw={600} color="gray.8" fz='sm'>
                 Total Contacts
               </Text>
               <ActionIcon>
@@ -378,7 +388,7 @@ export default function TAMGraphV2() {
         <Grid.Col span={2}>
           <Card>
             <Flex justify={"space-between"}>
-              <Text fw={600} color="gray.8">
+              <Text fw={600} color="gray.8" fz='sm'>
                 Engaged Contacts
               </Text>
               <ActionIcon>
@@ -403,12 +413,14 @@ export default function TAMGraphV2() {
         <Grid.Col span={2}>
           <Card>
             <Flex>
-              <Text fw={600} color="gray.8">
+              <Text fw={600} color="gray.8" fz='sm'>
                 Open Leads
               </Text>
-              <ActionIcon>
-                <IconInfoCircle size={"0.8rem"} />
-              </ActionIcon>
+              <MantineTooltip label="Open convos times average ACV. Note: Does not include not interested or not qualified conversations." withinPortal>
+                <ActionIcon>
+                  <IconInfoCircle size={"0.8rem"} />
+                </ActionIcon>
+              </MantineTooltip>
             </Flex>
             <Flex align={"center"} gap={"sm"}>
               <Text fw={700} fz={32}>

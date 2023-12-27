@@ -119,6 +119,7 @@ export default function ProspectDemoDateSelector(props: { prospectId: number }) 
         classNames={classes}
         value={demoDate}
         mt='-24px'
+        firstDayOfWeek={0}
         onChange={async (value) => {
 
           const date = new Date(value?.toISOString() || '');

@@ -60,17 +60,17 @@ export default function ProspectDetailsOptionsMenu(props: {
 
   return (
     <>
-      <Menu shadow="md" width={200} withArrow>
+      {/* <Menu shadow="md" width={200} withArrow>
         <Menu.Target>
           <ActionIcon color="gray.8" radius="xl" variant="default">
             <IconDots size="1.125rem" />
           </ActionIcon>
-        </Menu.Target>
+        </Menu.Target> */}
 
-        <Menu.Dropdown>
-          <Menu.Label>Settings</Menu.Label>
+        {/* <Menu.Dropdown>
+          <Menu.Label>Settings</Menu.Label> */}
 
-          {props.aiEnabled !== undefined && (
+          {/* {props.aiEnabled !== undefined && (
             <Menu.Item
               icon={<IconRobot size={14} />}
               onClick={async () => {
@@ -79,10 +79,10 @@ export default function ProspectDetailsOptionsMenu(props: {
               }}
             >
               {aiEnabled ? "Disable AI" : "Enable AI"}
-            </Menu.Item>
-          )}
+            </Menu.Item> */}
+          {/* )} */}
 
-          <Menu.Item
+          {/* <Menu.Item
             icon={<IconUserPlus size={14} />}
             onClick={async () => {
               openContextModal({
@@ -96,7 +96,7 @@ export default function ProspectDetailsOptionsMenu(props: {
             }}
           >
             Add Referred Prospect
-          </Menu.Item>
+          </Menu.Item> */}
 
           {/* TODO(Aakash) - Remove if not used after Jan 31, 2024 */}
           {/* <Menu.Item closeMenuOnClick={false} icon={<IconAlarm size={14} />}>
@@ -199,8 +199,8 @@ export default function ProspectDetailsOptionsMenu(props: {
           >
             Remove Prospect
           </Menu.Item> */}
-        </Menu.Dropdown>
-      </Menu>
+        {/* </Menu.Dropdown>
+      </Menu> */}
     </>
   );
 }

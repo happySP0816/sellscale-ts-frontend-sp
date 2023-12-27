@@ -872,8 +872,18 @@ export default function ProspectConvo(props: Props) {
                       justifyContent: "flex-start",
                     },
                   }}
+                  onClick={() => {
+                    openContextModal({
+                      modal: "addProspect",
+                      title: <Title order={3}>Add Referred Prospect</Title>,
+                      innerProps: {
+                        archetypeId: prospect?.archetype_id,
+                        sourceProspectId: prospect?.id,
+                      },
+                    });
+                  }}
                 >
-                  Multi Thread (Referral)
+                  Add Referral (multi-thread)
                 </Button>
                 <Divider />
                 <Button
@@ -889,14 +899,14 @@ export default function ProspectConvo(props: Props) {
                     setAdvancedAIActionsOpened(false);
                     openContextModal({
                       modal: "multiChannel",
-                      title: <Title order={3}>Continue the conversation on Email</Title>,
+                      title: <Title order={3}>Continue via Email</Title>,
                       innerProps: {
                         prospect: prospect
                       },
                     });
                   }}
                 >
-                  Multi Channel
+                  Continue via Email
                 </Button>
               </Popover.Dropdown>
             </Popover>

@@ -73,7 +73,7 @@ const EmailTemplate = () => {
                 lineHeight: "normal",
               }}
             >
-              Hristina Bell's Weekly Report
+              Jennifer Bell's Weekly Report
             </Text>
 
             {/* DATE SECTION */}
@@ -759,7 +759,7 @@ const EmailTemplate = () => {
                         @ OwnBackup
                       </span>
                       <span style={{ fontWeight: "700", fontSize: "14px" }}>
-                        - Hristina Bell
+                        - Jennifer Bell
                       </span>
                     </Text>
                   </Column>

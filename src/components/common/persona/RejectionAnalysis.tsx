@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Avatar, Badge, Box, Button, Container, Flex, RingProgress, Select, Stack, Table, Text, TextInput, rem } from '@mantine/core';
+import { Avatar, Badge, Box, Button, Container, Flex, RingProgress, Select, Stack, Table, Text, TextInput, rem, Title } from '@mantine/core';
 import { IconArrowUp, IconChevronLeft, IconChevronRight, IconExternalLink, IconSearch, IconSelector } from '@tabler/icons';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, DoughnutController, ArcElement, Chart } from 'chart.js';
@@ -10,7 +10,7 @@ const RejectionAnalysis = () => {
   const [page, setPage] = useState(1);
   const [row, setRow] = useState([
     {
-      contactName: 'Hristina Bell',
+      contactName: 'Jennifer Bell',
       contact_content: `"We already have a solution"`,
       company: 'Apple',
       avatar: '',
@@ -20,11 +20,11 @@ const RejectionAnalysis = () => {
       color: 'orange',
     },
     {
-      contactName: 'Adam Maheen',
+      contactName: 'Rudolph Smith',
       contact_content: `"I am not capable of making this decision i..."`,
       company: 'Microsoft',
       avatar: '',
-      campaign: 'DevOps Engineers',
+      campaign: 'Senior Engineers',
       reason: `Not a decision maker`,
       campaignImage: '',
       color: 'red',
@@ -40,7 +40,7 @@ const RejectionAnalysis = () => {
       color: 'red',
     },
     {
-      contactName: 'Hristina Bell',
+      contactName: 'Jennifer Bell',
       contact_content: `"I'm looking for opportunities so I might not..."`,
       company: 'Amazon',
       avatar: '',
@@ -50,7 +50,7 @@ const RejectionAnalysis = () => {
       color: 'red',
     },
     {
-      contactName: 'Adam Maheen',
+      contactName: 'Rudolph Smith',
       contact_content: `"Not interested right now, maybe later!"`,
       company: 'Netflix',
       avatar: '',
@@ -70,7 +70,7 @@ const RejectionAnalysis = () => {
       color: 'orange',
     },
     {
-      contactName: 'Hristina Bell',
+      contactName: 'Jennifer Bell',
       contact_content: `"We already have a solution"`,
       company: 'IBM',
       avatar: '',
@@ -80,11 +80,11 @@ const RejectionAnalysis = () => {
       color: 'orange',
     },
     {
-      contactName: 'Adam Maheen',
+      contactName: 'Rudolph Smith',
       contact_content: `"I am not capable of making this decision i..."`,
       company: 'Intel',
       avatar: '',
-      campaign: 'DevOps Engineers',
+      campaign: 'Senior Engineers',
       reason: `Not a decision maker`,
       campaignImage: '',
       color: 'red',
@@ -100,7 +100,7 @@ const RejectionAnalysis = () => {
       color: 'red',
     },
     {
-      contactName: 'Hristina Bell',
+      contactName: 'Jennifer Bell',
       contact_content: `"I'm looking for opportunities so I might not..."`,
       company: 'Sony',
       avatar: '',
@@ -211,6 +211,7 @@ const RejectionAnalysis = () => {
   };
   return (
     <Container size='97%' my={'lg'}>
+      <Title order={3} mt={0} mb='xs'>Rejection Analysis</Title>
       <Flex gap={'md'}>
         <Box style={{ border: '2px solid #DBDBDB', borderRadius: '10px' }} w={'100%'} p={'xl'}>
           <Flex align={'center'} gap={'sm'}>

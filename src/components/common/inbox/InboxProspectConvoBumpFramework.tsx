@@ -600,7 +600,8 @@ export default function InboxProspectConvoBumpFramework(props: {
                   </>
                 );
               })}
-              {props.bumpFrameworksSequence?.map((sequence) => (
+              {/* TODO(Aakash) - Bring this back on Jan 5th, 2024 */}
+              {/* {props.bumpFrameworksSequence?.map((sequence) => (
                 <div>
                   <Card
                     withBorder
@@ -634,7 +635,7 @@ export default function InboxProspectConvoBumpFramework(props: {
                     <Badge color={valueToColor(theme, 'ACTIVE_CONVO')}>CONTINUE THE SEQUENCE</Badge>
                   </Card>
                 </div>
-              ))}
+              ))} */}
             </Flex>
           </ScrollArea>
 

@@ -604,7 +604,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 data={
                   openedOutboundChannel === "LINKEDIN"
                     ? bumpFrameworks.length > 0
-                      ? bumpFrameworks.map((bf: BumpFramework) => {
+                      ? bumpFrameworks.sort((a: BumpFramework, b: BumpFramework) => {
+                        return a.title.localeCompare(b.title);
+                      }).map((bf: BumpFramework) => {
                           return {
                             value: bf.id + "",
                             // label: (bf.default ? "🟢 " : "⚪️ ") + bf.title + " ",

@@ -151,6 +151,9 @@ export default function ProjectDetails(props: {
     statusValue = props.currentEmailStatus || 'ACTIVE_CONVO';
   }
 
+  const [notInterestedDisqualificationReason, setNotInterestedDisqualificationReason] = useState('');
+  const [notQualifiedDisqualificationReason, setNotQualifiedDisqualificationReason] = useState('');
+
   const [editProspectModalOpened, { open: openProspectModal, close: closeProspectModal }] = useDisclosure();
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
@@ -200,7 +203,7 @@ export default function ProjectDetails(props: {
   };
 
   // For changing the status of the prospect
-  const changeStatus = async (status: string, changeProspect?: boolean) => {
+  const changeStatus = async (status: string, changeProspect?: boolean, disqualification_reason?: string | null) => {
     if (props.emailStatuses || openedOutboundChannel === 'EMAIL' || openedOutboundChannel === 'SMARTLEAD') {
       // HARD CODE IN THE EMAIL FOR NOW
       const response = await updateChannelStatus(openedProspectId, userToken, 'EMAIL', status);
@@ -230,7 +233,15 @@ export default function ProjectDetails(props: {
         props.refetchSmartleadProspects();
       }
     } else {
-      await updateChannelStatus(openedProspectId, userToken, openedOutboundChannel.toUpperCase() as Channel, status);
+      await updateChannelStatus(
+        openedProspectId, 
+        userToken, 
+        openedOutboundChannel.toUpperCase() as Channel, 
+        status,
+        false,
+        false,
+        disqualification_reason
+      );
     }
     queryClient.invalidateQueries({
       queryKey: ['query-dash-get-prospects'],
@@ -545,22 +556,27 @@ export default function ProjectDetails(props: {
                             <Text size='sm' fw={600}>
                               Select reason for disinterest:
                             </Text>
-                            <Radio.Group withAsterisk>
+                            <Radio.Group withAsterisk onChange={(value) => {setNotInterestedDisqualificationReason(value)}}>
                               <Flex direction={'column'} gap={'sm'}>
-                                <Radio value='unconvinced' label='Unconvinced' size='xs' />
-                                <Radio value='not_timing' label='Timing not right' size='xs' />
-                                <Radio value='unresponsive' label='Unresponsive' size='xs' />
-                                <Radio value='competitor' label='Using a competitor' size='xs' />
-                                <Radio value='other' label='Other' size='xs' checked />
+                                <Radio value='Unconvinced' label='Unconvinced' size='xs' checked={notInterestedDisqualificationReason === 'Unconvinced'} />
+                                <Radio value='Timing not right' label='Timing not right' size='xs' checked={notInterestedDisqualificationReason === 'Timing not right'} />
+                                <Radio value='Unresponsive' label='Unresponsive' size='xs' checked={notInterestedDisqualificationReason === 'Unresponsive'} />
+                                <Radio value='Competitor' label='Using a competitor' size='xs' checked={notInterestedDisqualificationReason === 'Competitor'} />
+                                <Radio value='OTHER -' label='Other' size='xs' checked={notInterestedDisqualificationReason.includes('OTHER -')} />
                               </Flex>
                             </Radio.Group>
-                            <TextInput placeholder='Enter reason here' radius={'md'} />
+                            {
+                              notInterestedDisqualificationReason?.includes("OTHER") && (
+                                <TextInput placeholder='Enter reason here' radius={'md'} onChange={(event) => {setNotInterestedDisqualificationReason("OTHER - " + event.currentTarget.value)}}/>
+                              )
+                            }
+                            
                             <Button
-                              color='gray'
+                              color={notInterestedDisqualificationReason ? 'red' : 'gray'}
                               leftIcon={<IconTrash size={24} />}
                               radius={'md'}
                               onClick={async () => {
-                                await changeStatus('NOT_INTERESTED');
+                                await changeStatus('NOT_INTERESTED', true, notInterestedDisqualificationReason);
                               }}
                             >
                               Disqualify
@@ -579,22 +595,28 @@ export default function ProjectDetails(props: {
                             <Text size='sm' fw={600}>
                               Select reason for disqualification:
                             </Text>
-                            <Radio.Group withAsterisk>
+                            <Radio.Group withAsterisk onChange={(value) => {setNotQualifiedDisqualificationReason(value)}}>
                               <Flex direction={'column'} gap={'sm'}>
-                                <Radio value='decision_maker' label='Not a decision maker' size='xs' />
-                                <Radio value='account_fit' label='Poor account fit' size='xs' />
-                                <Radio value='contact' label='Contact is "open to work"' size='xs' />
-                                <Radio value='competitor' label='Competitor' size='xs' />
-                                <Radio value='other' label='Other' size='xs' checked />
+                                <Radio value='Not a decision maker.' label='Not a decision maker' size='xs' />
+                                <Radio value='Poor account fit' label='Poor account fit' size='xs' />
+                                <Radio value='Contact is "open to work"' label='Contact is "open to work"' size='xs' />
+                                <Radio value='Competitor' label='Competitor' size='xs' />
+                                <Radio value='OTHER -' label='Other' size='xs' checked />
                               </Flex>
                             </Radio.Group>
-                            <TextInput placeholder='Enter reason here' radius={'md'} />
+
+                            {
+                              notQualifiedDisqualificationReason?.includes("OTHER") && (
+                                <TextInput placeholder='Enter reason here' radius={'md'} onChange={(event) => {setNotQualifiedDisqualificationReason("OTHER - " + event.currentTarget.value)}}/>
+                              )
+                            }
+
                             <Button
-                              color='gray'
+                              color={notQualifiedDisqualificationReason ? 'red' : 'gray'}
                               leftIcon={<IconTrash size={24} />}
                               radius={'md'}
                               onClick={async () => {
-                                await changeStatus('NOT_QUALIFIED');
+                                await changeStatus('NOT_QUALIFIED', true, notQualifiedDisqualificationReason);
                               }}
                             >
                               Disqualify

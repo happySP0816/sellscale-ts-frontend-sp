@@ -298,7 +298,8 @@ export async function updateChannelStatus(
   channelType: Channel,
   newStatus: string,
   override: boolean = false,
-  quietly: boolean = false
+  quietly: boolean = false,
+  disqualification_reason: null | string = null
 ) {
   return await fetch(
     `${API_URL}/prospect/${prospectId}`,
@@ -313,6 +314,7 @@ export async function updateChannelStatus(
       channel_type: channelType,
       override_status: override,
       quietly: quietly,
+      disqualification_reason: disqualification_reason,
     }),
   })
     .then(async (r) => {

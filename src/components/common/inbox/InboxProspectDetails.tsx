@@ -664,10 +664,12 @@ export default function ProjectDetails(props: {
 
           <div style={{ flexBasis: '55%' }}>
             <Divider />
-            <Tabs variant='pills' defaultValue='history' radius={theme.radius.lg} m={10}>
+            <Tabs variant='subtle' defaultValue='history' radius={theme.radius.lg} m={10}>
               <Tabs.List>
-                <Tabs.Tab value='history' icon={<IconWriting size='0.8rem' />}>
-                  AI History
+                <Tabs.Tab value='history' icon={<IconWriting size='0.8rem' />} mb='0px'>
+                  <Text fw='bold' mb='0px'>
+                    AI History
+                  </Text>
                 </Tabs.Tab>
                 {/* <Tabs.Tab value="notes" icon={<IconWriting size="0.8rem" />}>
                   Notes
@@ -680,7 +682,7 @@ export default function ProjectDetails(props: {
 
               <Tabs.Panel value='history' pt='xs' h={`calc(${INBOX_PAGE_HEIGHT} - 400px)`}>
                 <ScrollArea h={'100%'}>
-                  <Card withBorder pb='100px'>
+                  <Card withBorder p='0px'>
                     {openedProspectId !== -1 && <ProspectDetailsHistory prospectId={openedProspectId} forceRefresh={forcedHistoryRefresh} />}
                   </Card>
                 </ScrollArea>

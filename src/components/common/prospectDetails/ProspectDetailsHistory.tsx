@@ -20,13 +20,19 @@ import {
   Box,
   ThemeIcon,
   Loader,
+  Divider,
+  ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconBrandLinkedin,
   IconBrandTelegram,
+  IconClock,
+  IconDeviceWatch,
   IconGitBranch,
   IconGitCommit,
   IconGitPullRequest,
+  IconInfoCircle,
   IconMail,
   IconMessage2,
   IconMessageDots,
@@ -35,6 +41,7 @@ import {
   IconStatusChange,
   IconUserPlus,
 } from "@tabler/icons";
+import { IconClockBolt } from '@tabler/icons-react';
 import {
   convertDateToCasualTime,
   formatToLabel,
@@ -87,6 +94,28 @@ function historyEventToIcon(event: HistoryEvent, size?: number) {
       return <></>;
   }
 }
+
+function historyEventToTimeSavedMinutes(event: HistoryEvent) {
+  switch (event) {
+    case "CREATED":
+      return 1
+    case "INTRO_MESSAGE":
+      return 5
+    case "NOTE":
+      return 3
+    case "LINKEDIN_MESSAGE":
+      return 2
+    case "EMAIL_MESSAGE":
+      return 5
+    case "STATUS_CHANGE":
+      return 1.5
+    case "DEMO_FEEDBACK":
+      return 5
+    default:
+      return 0.5
+  }
+}
+
 function historyEventToDescription(theme: MantineTheme, item: HistoryItem) {
   switch (item.event) {
     case "CREATED":
@@ -238,24 +267,52 @@ export default function ProspectDetailsHistory(props: { prospectId: number, forc
   }
 
   return (
-    <Box p='xs'>
-      <Timeline bulletSize={24} lineWidth={2}>
-        {events?.map((item, i) => (
-          <Timeline.Item
-            key={i}
-            title={_.startCase(item.event.toLowerCase())}
-            bullet={historyEventToIcon(item.event)}
-            lineVariant="dashed"
-          >
-            <Text color="dimmed" size="xs">
-              {historyEventToDescription(theme, item)}
-            </Text>
-            <Text size="xs" mt={4}>
-              {convertDateToCasualTime(new Date(item.date))}
-            </Text>
-          </Timeline.Item>
-        ))}
-      </Timeline>
+    <Box p='0'>
+      <Box sx={{display: 'flex', flexDirection: 'row'}} mt='0px' mb='sm' pl='md' pr='md' pt='xs'>
+        <ActionIcon>
+          <IconClockBolt color={theme.colors.blue[6]} size={16} />
+        </ActionIcon>
+        <Text size='sm' color='blue' ml='xs' fw='bold' mt='4px'>Prospect AI Runtime: </Text>
+        <Text size='sm' color='black' ml='xs' fw='bold' mt='4px'>{events?.map((item, i) => historyEventToTimeSavedMinutes(item.event)).reduce((a, b) => a + b, 0)} min</Text>
+
+        <Tooltip label="The total amount of AI runtime SellScale saved you on nurturing this prospect." withinPortal>
+          <ActionIcon ml='xs' mt='0px'>
+            <IconInfoCircle color={theme.colors.gray[6]} size={16}  mt='0' />
+          </ActionIcon>
+        </Tooltip>
+      </Box>
+      <Divider/>
+      <Box p='md'>
+        <Timeline bulletSize={24} lineWidth={2}>
+          {events?.map((item, i) => (
+            <Timeline.Item
+              key={i}
+              title={<Text size="sm" weight={500}>
+                  {_.startCase(item.event.toLowerCase())} 
+                  <Badge 
+                    size='xs' 
+                    variant='outline' 
+                    color={'gray'} 
+                    mt='-8px' 
+                    ml='sm' 
+                    leftSection={<IconClock size={12} style={{marginTop: '4px'}} color={theme.colors.blue[6]} />}
+                  >
+                    {historyEventToTimeSavedMinutes(item.event)} min
+                  </Badge>
+                </Text>}
+              bullet={historyEventToIcon(item.event)}
+              lineVariant="dashed"
+            >
+              <Text color="dimmed" size="xs">
+                {historyEventToDescription(theme, item)}
+              </Text>
+              <Text size="xs" mt={4}>
+                {convertDateToCasualTime(new Date(item.date))}
+              </Text>
+            </Timeline.Item>
+          ))}
+        </Timeline>
+      </Box>
     </Box>
   );
 }

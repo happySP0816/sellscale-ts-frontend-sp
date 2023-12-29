@@ -159,7 +159,7 @@ export default function SequenceSection() {
     queryKey: [`query-get-bump-frameworks`],
     queryFn: async () => {
       if (!currentProject) return [];
-      const result = await getBumpFrameworks(userToken, [], [], [currentProject?.id]);
+      const result = await getBumpFrameworks(userToken, ['ACCEPTED', 'BUMPED'], [], [currentProject?.id]);
       if (result.status !== 'success') return [];
       return result.data.bump_frameworks as BumpFramework[];
     },
@@ -2680,7 +2680,7 @@ function FrameworkSection(props: {
                     <Text color='white' mt='4px' size='sm'>
                       <IconBulb size='1.2rem' color='white' />
                       <span style={{ marginLeft: '8px' }}>
-                        FINE TUNING: Feel free to give me feedback on improving the message.
+                        FINE TUNING: Feel free to give me feedback on improving the message!
                       </span>
                     </Text>
                   </Card.Section>
@@ -2717,6 +2717,7 @@ function FrameworkSection(props: {
                   ]
               )
                 .filter((v) => v && v.bumped_count == props.bumpCount)
+                .filter((v) => v.overall_status === 'ACCEPTED' || v.overall_status === 'BUMPED')
                 .sort((a, b) => {
                   if (a.default) return -1;
                   if (b.default) return 1;
@@ -3132,7 +3133,7 @@ function TemplateSection(props: {
               <Text color='white' mt='4px' size='sm'>
                 <IconBulb size='1.2rem' color='white' />
                 <span style={{ marginLeft: '8px' }}>
-                  FINE TUNING: Feel free to give me feedback on improving the message
+                  FINE TUNING: Feel free to give me feedback on improving the message.
                 </span>
               </Text>
             </Card.Section>

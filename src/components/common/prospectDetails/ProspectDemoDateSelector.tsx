@@ -112,7 +112,6 @@ export default function ProspectDemoDateSelector(props: { prospectId: number }) 
     <div>
       <DatePickerInput
         label="Demo Scheduled For"
-        placeholder="Select date and time"
         size="xs"
         radius="md"
         dropdownType="modal"

@@ -146,6 +146,7 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
                 <>
                   <>
                     <DateTimePicker
+                      placeholder={formattedDate}
                       value={value}
                       onChange={(value) => {
                         if (!value) {

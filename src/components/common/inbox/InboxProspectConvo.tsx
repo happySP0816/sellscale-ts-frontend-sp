@@ -734,9 +734,20 @@ export default function ProspectConvo(props: Props) {
               </Text>
             </div>
             <Group sx={{ flexWrap: "nowrap" }}>
-              <Badge size="lg" color={"blue"}>
-                {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
-              </Badge>
+              <Box sx={{'textAlign': 'right'}}>
+                <Badge size="lg" color={"blue"}>
+                  {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
+                </Badge>
+                {
+                  statusValue === 'ACTIVE_CONVO_REVIVAL' &&
+                  <>
+                    <br/>
+                    <Badge size='xs' color='gray' variant='outline'>
+                      Previously: {data?.details?.previous_status?.replaceAll("ACTIVE_CONVO_", "").replaceAll("_", " ")}
+                    </Badge>
+                  </>
+                }
+              </Box>
               <ProspectDetailsOptionsMenu
                 prospectId={openedProspectId}
                 archetypeId={prospect?.archetype_id || -1}

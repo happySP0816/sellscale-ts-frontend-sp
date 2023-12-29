@@ -166,6 +166,7 @@ export interface ProspectDetails {
     overall_status: string;
     linkedin_status: string;
     bump_count: number;
+    previous_status?: string;
     icp_fit_score: number;
     icp_fit_reason: string;
     email_status: string;

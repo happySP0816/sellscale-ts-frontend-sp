@@ -1,4 +1,4 @@
-import { userTokenState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
 import {
   Box,
   Group,

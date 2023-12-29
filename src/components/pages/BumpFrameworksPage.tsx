@@ -563,7 +563,7 @@ export default function BumpFrameworksPage(props: {
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
 
-    const result = await getBumpFrameworks(userToken, [], [], [archetypeID]);
+    const result = await getBumpFrameworks(userToken, [], [], []);
 
     if (result.status !== 'success') {
       setLoading(false);

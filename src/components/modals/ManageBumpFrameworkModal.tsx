@@ -70,7 +70,7 @@ export default function ManageBumpFramework({
       substatus.push(innerProps.linkedinStatus);
     };
 
-    const result = await getBumpFrameworks(userToken, [innerProps.overallStatus], substatus, [innerProps.archetypeId]);
+    const result = await getBumpFrameworks(userToken, [innerProps.overallStatus], substatus, []);
 
     let bumpFrameworkArray = [] as BumpFramework[];
     for (const bumpFramework of result.data.bump_frameworks as BumpFramework[]) {

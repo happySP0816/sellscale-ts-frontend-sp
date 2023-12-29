@@ -127,7 +127,6 @@ export default function CustomResearchPointCard(props: {}) {
 
         <FileInput
           label='Upload File'
-          placeholder='Any Excel, CSV or TSV file works'
           icon={<IconUpload size={rem(14)} />}
           accept={[MIME_TYPES.csv, MIME_TYPES.xls, MIME_TYPES.xlsx, 'text/tsv', 'text/tab-separated-values'].join()}
           withAsterisk

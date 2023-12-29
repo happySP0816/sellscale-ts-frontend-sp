@@ -801,6 +801,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
             </Popover.Target>
             <Popover.Dropdown>
               <Calendar
+                placeholder={"Select a date"}
                 minDate={moment(new Date()).add(1, "days").toDate()}
                 getDayProps={(date) => ({
                   selected: moment(snoozeDay).isSame(date, "day"),
@@ -862,6 +863,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
             <Popover.Dropdown>
               <Calendar
+                placeholder={"Select a date"}
                 minDate={moment(new Date()).add(1, "days").toDate()}
                 getDayProps={(date) => ({
                   selected: moment(scheduleDay).isSame(date, "day"),

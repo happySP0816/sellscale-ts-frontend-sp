@@ -41,8 +41,12 @@ import {
   IconClock,
   IconArrowUp,
   IconCalendar,
+  IconZzz,
+  IconHourglass,
+  IconX,
 } from "@tabler/icons";
 import {
+  IconClock24,
   IconMessage2Cog,
   IconSettingsFilled,
   IconWand,
@@ -80,7 +84,7 @@ import { JSONContent } from "@tiptap/react";
 import DOMPurify from "dompurify";
 import { postGenerateFollowupEmail } from "@utils/requests/emailMessageGeneration";
 import { API_URL } from "@constants/data";
-import { Calendar } from "@mantine/dates";
+import { Calendar, DateTimePicker, TimeInput } from "@mantine/dates";
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -165,6 +169,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
+  const [scheduleDay, setScheduleDay] = useState<Date | undefined>(undefined);
+  const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [snoozeDay, setSnoozeDay] = useState(
     moment(new Date()).add(4, "days").toDate()
   );
@@ -233,7 +239,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       setMessageDraft("");
       showNotification({
         id: "send-linkedin-message",
-        title: "Sending message ...",
+        title: scheduleDay ? "Scheduling message..." : "Sending message ...",
         message: "",
         color: "green",
         autoClose: 3000,
@@ -251,7 +257,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
         selectedBumpFramework?.title,
         selectedBumpFramework?.description,
         selectedBumpFramework?.bump_length,
-        selectedBumpFramework?.account_research
+        selectedBumpFramework?.account_research,
+        snoozeDay,
+        scheduleDay
       ).then(() => {
         queryClient.refetchQueries({
           queryKey: [
@@ -278,6 +286,12 @@ export default forwardRef(function InboxProspectConvoSendBox(
             ],
           });
         }
+        showNotification({
+          id: "send-linkedin-message",
+          title: scheduleDay ? "Message Scheduled" : "Message Sent",
+          message: "",
+          color: "green",
+        })
       } else {
         showNotification({
           id: "send-linkedin-message-error",
@@ -604,15 +618,17 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 data={
                   openedOutboundChannel === "LINKEDIN"
                     ? bumpFrameworks.length > 0
-                      ? bumpFrameworks.sort((a: BumpFramework, b: BumpFramework) => {
-                        return a.title.localeCompare(b.title);
-                      }).map((bf: BumpFramework) => {
-                          return {
-                            value: bf.id + "",
-                            // label: (bf.default ? "🟢 " : "⚪️ ") + bf.title + " ",
-                            label: bf.title,
-                          };
-                        })
+                      ? bumpFrameworks
+                          .sort((a: BumpFramework, b: BumpFramework) => {
+                            return a.title.localeCompare(b.title);
+                          })
+                          .map((bf: BumpFramework) => {
+                            return {
+                              value: bf.id + "",
+                              // label: (bf.default ? "🟢 " : "⚪️ ") + bf.title + " ",
+                              label: bf.title,
+                            };
+                          })
                       : []
                     : emailSequenceSteps?.length > 0
                     ? emailSequenceSteps.map((step: EmailSequenceStep) => {
@@ -630,7 +646,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     borderRight: "0",
                     borderLeft: "0",
                   },
-                  dropdown: { minWidth: 250  },
+                  dropdown: { minWidth: 250 },
                 }}
                 onChange={(value) => {
                   if (openedOutboundChannel === "LINKEDIN") {
@@ -641,10 +657,11 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       setBumpFramework(selected);
                     }
 
-                    const substatus = bumpFrameworks.length > 0 ? bumpFrameworks[0].substatus : undefined
-                    setSetOpenBumpFrameworksSubstatus(
-                      substatus
-                    );
+                    const substatus =
+                      bumpFrameworks.length > 0
+                        ? bumpFrameworks[0].substatus
+                        : undefined;
+                    setSetOpenBumpFrameworksSubstatus(substatus);
                   } else if (openedOutboundChannel === "EMAIL") {
                     const selected = emailSequenceSteps.find(
                       (step) => step.id === parseInt(value as string)
@@ -674,7 +691,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   radius={theme.radius.lg}
                   size="xs"
                   onClick={() => {
-                    setOpenBumpFrameworks(true)
+                    setOpenBumpFrameworks(true);
                   }}
                 >
                   {selectedBumpFramework ? (
@@ -762,34 +779,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
         </Box>
 
         <Flex align="center" mt="xs" direction="row" justify={"end"}>
-          <Tooltip
-            label={`Snoozed for ${
-              moment(snoozeDay).diff(new Date(), "days") + 1
-            } days`}
-            withArrow
-          >
-            <Button
-              leftIcon={<IconClock size="1rem" />}
-              size="xs"
-              sx={{
-                borderTopRightRadius: 0,
-                borderBottomRightRadius: 0,
-                borderRight: `1px solid #fff`,
-              }}
-              onClick={() => sendMessage()}
-              styles={(theme) => ({
-                rightIcon: {
-                  borderLeft: `1px solid ${theme.white}`,
-                  marginLeft: "0.5rem",
-                  paddingLeft: "0.25rem",
-                },
-              })}
-            >
-              Send and Snoozed for{" "}
-              {moment(snoozeDay).diff(new Date(), "days") + 1} days
-            </Button>
-          </Tooltip>
-
           <Popover
             position="bottom"
             withArrow
@@ -798,13 +787,17 @@ export default forwardRef(function InboxProspectConvoSendBox(
             opened={showCalendarPopup}
           >
             <Popover.Target>
-              <Button
-                onClick={() => setShowCalendarPopup((v) => !v)}
-                size="xs"
-                sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-              >
-                <IconCalendar size={"1rem"} />
-              </Button>
+              <Tooltip label="Set a custom snooze day" withArrow withinPortal>
+                <Flex>
+                  <Button
+                    onClick={() => setShowCalendarPopup((v) => !v)}
+                    size="xs"
+                    sx={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+                  >
+                    <IconZzz size={"1rem"} />
+                  </Button>
+                </Flex>
+              </Tooltip>
             </Popover.Target>
             <Popover.Dropdown>
               <Calendar
@@ -817,6 +810,113 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   },
                 })}
               />
+            </Popover.Dropdown>
+          </Popover>
+
+          <Button
+            size="xs"
+            sx={{
+              borderTopRightRadius: 0,
+              borderBottomRightRadius: 0,
+              borderTopLeftRadius: 0,
+              borderBottomLeftRadius: 0,
+              borderLeft: `1px solid #fff`,
+              borderRight: `1px solid #fff`,
+            }}
+            onClick={() => sendMessage()}
+            styles={(theme) => ({
+              rightIcon: {
+                borderLeft: `1px solid ${theme.white}`,
+                marginLeft: "0.5rem",
+                paddingLeft: "0.25rem",
+              },
+            })}
+          >
+            {scheduleDay ? ("Schedule for [" + moment(scheduleDay).format('MMM Do h:mmA') + "] ") : "Send"} and Snooze for {moment(snoozeDay).diff(new Date(), "days") + 1}{" "}
+            days
+          </Button>
+          <Popover
+            position="bottom"
+            withArrow
+            shadow="md"
+            trapFocus
+            opened={showSchedulePopup}
+          >
+            <Popover.Target>
+              <Tooltip
+                label="Schedule a send time into the future"
+                withArrow
+                withinPortal
+              >
+                <Flex>
+                  <Button
+                    onClick={() => setShowSchedulePopup((v) => !v)}
+                    size="xs"
+                    sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                  >
+                    <IconClock24 size={"1rem"} />
+                  </Button>
+                </Flex>
+              </Tooltip>
+            </Popover.Target>
+
+            <Popover.Dropdown>
+              <Calendar
+                minDate={moment(new Date()).add(1, "days").toDate()}
+                getDayProps={(date) => ({
+                  selected: moment(scheduleDay).isSame(date, "day"),
+                  onClick: () => {
+                    // Preserve the time
+                    const hour = moment(scheduleDay).hour();
+                    const minute = moment(scheduleDay).minute();
+                    const newDate = moment(date)
+                      .set("hour", hour)
+                      .set("minute", minute)
+                      .toDate();
+                    setScheduleDay(newDate);
+                  },
+                })}
+              />
+              <Flex
+                mt="xs"
+                direction="row"
+                justify={"space-between"}
+                align="flex-end"
+              >
+                <TimeInput
+                  w="100%"
+                  label="Custom Time"
+                  size="sm"
+                  value={moment(scheduleDay).format("HH:mm")}
+                  onChange={(event) => {
+                    const value = event.currentTarget.value; // Format is HH:MM
+                    const hour = parseInt(value.split(":")[0]);
+                    const minute = parseInt(value.split(":")[1]);
+                    const newDate = moment(scheduleDay)
+                      .set("hour", hour)
+                      .set("minute", minute)
+                      .toDate();
+                    setScheduleDay(newDate);
+                  }}
+                />
+                <Tooltip label="Schedule for now" withArrow withinPortal>
+                  <Flex>
+                    <Button
+                      size="xs"
+                      mb="xs"
+                      ml="sm"
+                      variant="transparent"
+                      color="red"
+                      onClick={() => {
+                        setShowSchedulePopup(false);
+                        setScheduleDay(undefined);
+                      }}
+                    >
+                      <IconX size="1rem" />
+                    </Button>
+                  </Flex>
+                </Tooltip>
+              </Flex>
             </Popover.Dropdown>
           </Popover>
         </Flex>

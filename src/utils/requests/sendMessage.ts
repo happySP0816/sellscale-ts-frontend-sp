@@ -21,7 +21,9 @@ export async function sendLinkedInMessage(
   bump_framework_title?: string,
   bump_framework_description?: string,
   bump_framework_length?: string,
-  account_research_points?: string[]
+  account_research_points?: string[],
+  purgatory_date?: Date,
+  scheduled_send_date?: Date,
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/voyager/send_message`, {
     method: "POST",
@@ -39,6 +41,8 @@ export async function sendLinkedInMessage(
       bump_framework_description: bump_framework_description,
       bump_framework_length: bump_framework_length,
       account_research_points: account_research_points,
+      purgatory_date: purgatory_date,
+      scheduled_send_date: scheduled_send_date,
     }),
   });
   return await processResponse(response);

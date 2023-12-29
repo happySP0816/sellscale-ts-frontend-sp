@@ -31,6 +31,10 @@ export const prospectStatuses = [
     value: "ACTIVE_CONVO_REVIVAL",
   },
   {
+    label: "Queued for Snooze",
+    value: "ACTIVE_CONVO_QUEUED_FOR_SNOOZE",
+  },
+  {
     label: "Demoing",
     value: "DEMO_SET",
   },

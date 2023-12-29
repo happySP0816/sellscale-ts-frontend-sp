@@ -739,7 +739,7 @@ export default function ProspectConvo(props: Props) {
                   {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
                 </Badge>
                 {
-                  statusValue === 'ACTIVE_CONVO_REVIVAL' &&
+                  (statusValue === 'ACTIVE_CONVO_REVIVAL' || statusValue === 'ACTIVE_CONVO_QUEUED_FOR_SNOOZE') &&
                   <>
                     <br/>
                     <Badge size='xs' color='gray' variant='outline'>

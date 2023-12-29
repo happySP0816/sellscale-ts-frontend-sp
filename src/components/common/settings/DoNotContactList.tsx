@@ -329,37 +329,38 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
   // File Import / Export
   const handleFileImport = async (payload: File | null) => {
     if (!payload) return;
-    let record: Record<string, string[]> = {};
+    let records: Record<string, string>[] = [];
     try {
-      const json = (await convertFileToJSON(payload)) as any[];
-      record = json[0] as Record<string, string[]>;
+      records = (await convertFileToJSON(payload)) as Record<string, string>[];
 
       // For each key in the record, run csvStringToArray on the value
-      Object.keys(record).forEach((key) => {
-        record[key] = csvStringToArray(record[key] as unknown as string) as string[];
-      });
+      // Object.keys(record).forEach((key) => {
+      //   record[key] = csvStringToArray(record[key] as unknown as string) as string[];
+      // });
     } catch (e) {
       console.error(e);
     }
 
-    if (record?.company_names) {
-      setSelectedCompanies(record?.company_names);
-    }
-    if (record?.keywords_in_company_names) {
-      setSelectedKeywords(record?.keywords_in_company_names);
-    }
-    if (record?.industries) {
-      setSelectedCompanyIndustries(record?.industries);
-    }
-    if (record?.location_keywords) {
-      setSelectedCompanyLocations(record?.location_keywords);
-    }
-    if (record?.titles) {
-      setSelectedProspectTitles(record?.titles);
-    }
-    if (record?.prospect_location_keywords) {
-      setSelectedProspectLocations(record?.prospect_location_keywords);
-    }
+    setSelectedCompanies(records.map((x) => x.company));
+
+    // if (record?.company_names) {
+    //   setSelectedCompanies(record?.company_names);
+    // }
+    // if (record?.keywords_in_company_names) {
+    //   setSelectedKeywords(record?.keywords_in_company_names);
+    // }
+    // if (record?.industries) {
+    //   setSelectedCompanyIndustries(record?.industries);
+    // }
+    // if (record?.location_keywords) {
+    //   setSelectedCompanyLocations(record?.location_keywords);
+    // }
+    // if (record?.titles) {
+    //   setSelectedProspectTitles(record?.titles);
+    // }
+    // if (record?.prospect_location_keywords) {
+    //   setSelectedProspectLocations(record?.prospect_location_keywords);
+    // }
     await saveFilters();
   };
 
@@ -400,16 +401,19 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
           <Button>
             <CSVLink
               style={{ textDecoration: 'none', color: 'white' }}
-              data={[
-                {
-                  company_names: selectedCompanies,
-                  keywords_in_company_names: selectedKeywords,
-                  industries: selectedCompanyIndustries,
-                  location_keywords: selectedCompanyLocations,
-                  titles: selectedProspectTitles,
-                  prospect_location_keywords: selectedProspectLocations,
-                },
-              ]}
+              data={selectedCompanies.map((company) => ({
+                company: company,
+              }))}
+              // data={[
+              //   {
+              //     company_names: selectedCompanies,
+              //     keywords_in_company_names: selectedKeywords,
+              //     industries: selectedCompanyIndustries,
+              //     location_keywords: selectedCompanyLocations,
+              //     titles: selectedProspectTitles,
+              //     prospect_location_keywords: selectedProspectLocations,
+              //   },
+              // ]}
               filename={'do-not-contact-filters.csv'}
             >
               Export to CSV

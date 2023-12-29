@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { userTokenState } from "@atoms/userAtoms";
 import {
   Badge,
   Box,
@@ -20,12 +21,115 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { IconChevronLeft, IconChevronRight, IconExternalLink, IconRefresh, IconSearch, IconSelector } from '@tabler/icons';
 import { IconSparkles } from '@tabler/icons-react';
+import { showNotification } from "@mantine/notifications";
+import { useRecoilValue } from "recoil";
+import { postAIRequest } from '@utils/requests/postAIRequest'; 
+import { getAIRequests } from '@utils/requests/getAIRequests';
+
+interface AIRequestData {
+  id: number;
+  title: string;
+  description: string;
+  percent_complete: number;
+  creation_date: string;
+  due_date: string;
+  status: string;
+}
+
+interface TableRow {
+  request_name: string;
+  request_content: string;
+  percentage: number;
+  create_date: string;
+  create_time: string;
+  status: string;
+}
+
 
 export default function AdjustPage() {
+  
+  
+  const userToken = useRecoilValue(userTokenState);
   const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
   const [page, setPage] = useState(1);
-  const [row, setRow] = useState([
+  // State for the textarea content
+  const [textareaContent, setTextareaContent] = useState('');
+
+  // Function to handle badge clicks
+  const handleBadgeClick = (content: string) => {
+    setTextareaContent(content);
+  };
+
+  // Function to handle AI request submission
+  const handleSubmit = async () => {
+    if (!textareaContent.trim()) {
+      // Show notification if the text box is empty
+      showNotification({
+        title: 'Error',
+        message: 'The text box is empty. Please enter some content before submitting.',
+        color: 'red',
+      });
+      close();
+      return; 
+    }
+
+    try {
+      await postAIRequest(userToken, textareaContent);
+      // Assuming response is true if the submission is successful
+      // Show a success notification
+      showNotification({
+        title: 'Success',
+        message: 'Your request has been submitted! Please give us 24 hours or less to get back to you.',
+        color: 'green'
+      });
+
+      // Reset textareaContent to empty and close the modal
+      setTextareaContent('');
+      close();
+      // Refetch AI requests after successful submission
+      await fetchAIRequests();
+    } catch (error) {
+      // Log and handle the error case
+      console.error('AI Request Submission failed:', error);
+      close();    
+      showNotification({
+        title: 'Error',
+        message: 'Failed to submit AI request',
+        color: 'red'
+      });
+    }
+  };
+
+  const [row, setRow] = useState<TableRow[]>([]);
+
+  const fetchAIRequests = async () => {
+    try {
+      const response = await getAIRequests(userToken);
+      if (response && Array.isArray(response.data)) {
+        const formattedRows: TableRow[] = response.data.map((req: AIRequestData) => ({
+          request_name: req.title,
+          request_content: req.description,
+          percentage: req.percent_complete,
+          create_date: new Date(req.creation_date).toLocaleDateString(),
+          create_time: new Date(req.creation_date).toLocaleTimeString(),
+          status: req.status
+        }));
+        setRow(formattedRows);
+      } else {
+        setRow([]);
+      }
+    } catch (error) {
+      console.error('Error fetching AI requests:', error);
+      setRow([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchAIRequests();
+  }, []); 
+    
+  /* const [row, setRow] = useState([
     {
       request_name: 'Launch new campaign: Devops managers',
       request_content: 'Launch a new campaign targetting devops managers that will outreach to mid tier managers only',
@@ -74,7 +178,7 @@ export default function AdjustPage() {
       create_time: '01:02:04 GMT',
       status: 'Completed',
     },
-  ]);
+  ]); */
   const rows = row.map((element, idx) => (
     <tr key={idx}>
       <td
@@ -124,12 +228,12 @@ export default function AdjustPage() {
         </Badge>
       </td>
     </tr>
-  ));
+  )); 
   return (
     <Box px={80} py={30} bg={'white'} mih={'100vh'}>
       <Group mb={'lg'}>
         <Text size={25} fw={600}>
-          Adjust AI (Coming soon! ⚠️)
+          Adjust AI
         </Text>
         <Badge leftSection={<IconRefresh size={10} />}>2 Requests Pending</Badge>
       </Group>
@@ -147,19 +251,45 @@ export default function AdjustPage() {
             SUGGESTIONS:
           </Text>
           <Box>
-            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }}>
+            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }} 
+            onClick={() => handleBadgeClick(
+              "I noticed that I reached out to a prospect named [prospect name]\n\n" +
+              "This prospect is not qualified for [XYZ reasons].\n\n" +
+              "I want to adjust my filters for the future so I no longer contact prospects like them."
+            )}>
               ADJUST PROJECT FILTERS
             </Badge>
-            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }}>
+            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }} 
+            onClick={() => handleBadgeClick(
+              "I just saw messaging go out that said: '[copy paste messaging here]' sent to a prospect named [prospect name].\n\n" +
+              "I want to adjust this messaging for the future. Here are the edits I would make:\n" +
+              "- [edit 1]\n" +
+              "- [edit 2]"            
+              )}>
               ADJUST MESSAGING
             </Badge>
-            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }}>
+            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }} 
+            onClick={() => handleBadgeClick(
+              "I would like to pull a list of [number] prospects who match the following criteria:\n" +
+              "- [criteria 1]\n" +
+              "- [criteria 2]\n" +
+              "- [criteria 3]"
+              )}>
               PULL PROSPECT LIST
             </Badge>
-            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }}>
+            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }} 
+            onClick={() => handleBadgeClick(
+              "I want to add a colleague named [name] to my SellScale organization. Please help me add them!"
+              )}>
               ADD A SEAT
             </Badge>
-            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }}>
+            <Badge variant='outline' px={6} py={0} size='sm' radius={'lg'} mr={'sm'} style={{ cursor: 'pointer' }} 
+            onClick={() => handleBadgeClick(
+              "I want to launch a new outreach strategy called [strategy name].\n" +
+              "I would be targeting [customer profile]. Here are some relevant details about this profile type:\n" +
+              "- [item 1]\n" +
+              "- [item 2]"
+              )}>
               NEW OUTREACH STRATEGY
             </Badge>
           </Box>
@@ -173,8 +303,15 @@ export default function AdjustPage() {
             </Text>
           </Flex>
           <Divider />
-          <Textarea variant='unstyled' minRows={3} placeholder='I want to launch a new campaign ...' px={'md'}></Textarea>
-          <Flex w={'100%'} justify={'end'} p={'md'}>
+            <Textarea 
+              variant='unstyled' 
+              minRows={3} 
+              placeholder='I want to launch a new campaign ...' 
+              px={'md'} 
+              value={textareaContent}
+              onChange={(event) => setTextareaContent(event.currentTarget.value)} // Add this line
+            />          
+            <Flex w={'100%'} justify={'end'} p={'md'}>
             <Button radius={'xl'} px={30} left={0} onClick={open}>
               Send Request
             </Button>
@@ -279,8 +416,16 @@ export default function AdjustPage() {
           </Flex>
         </Flex>
       </Box>
-      <Modal opened={opened} onClose={close} title='Comming Soon'>
-        {/* Modal content */}
+      <Modal opened={opened} onClose={close} title='Please review your request before submitting:'>
+        <div>
+          {/* Display the text content for review */}
+          <Box mb="xs" p="sm">
+            <Text>{textareaContent}</Text>
+          </Box>
+
+          {/* Button to confirm submission */}
+          <Button onClick={handleSubmit}>Confirm and Submit</Button>
+        </div>
       </Modal>
     </Box>
   );

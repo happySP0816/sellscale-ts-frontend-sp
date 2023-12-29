@@ -2175,16 +2175,25 @@ function FrameworkSectionShell(props: {
   };
 }) {
   const frameworks = props.frameworks.sort((a, b) => {
-    if (a.default) return 1;
-    if (b.default) return -1;
+    // Sort by default then by id
+    if (a.default && !b.default) return -1;
+    if (!a.default && b.default) return 1;
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
     return 0;
   });
 
   const [activeFramework, setActiveFramework] = useState<BumpFramework>(
     props.framework ?? frameworks[0]
   );
-  const [displayFrameworkSection, refreshFrameworkSection] = useRefresh();
 
+  console.log(activeFramework);
+
+  useEffect(() => {
+    setActiveFramework(props.framework ?? frameworks[0]);
+  }, [props.frameworks]);
+
+  const [displayFrameworkSection, refreshFrameworkSection] = useRefresh();
   return (
     <>
       {displayFrameworkSection && (
@@ -2694,7 +2703,8 @@ function FrameworkSection(props: {
             )}
 
             <Stack spacing={10}>
-              {(templateShowAll
+              {
+                /* {(templateShowAll
                 ? props.frameworks.sort((a, b) => {
                     if (a.default) return 1;
                     if (b.default) return -1;
@@ -2711,8 +2721,11 @@ function FrameworkSection(props: {
                   if (a.default) return -1;
                   if (b.default) return 1;
                   return 0;
-                })
-                .map((bf, index) => (
+                }) */
+                (templateShowAll
+                  ? props.frameworks
+                  : [props.frameworks.find((bf) => bf.id === props.framework.id)!]
+                ).map((bf, index) => (
                   <Paper
                     key={index}
                     p='md'
@@ -2962,16 +2975,33 @@ function FrameworkSection(props: {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setEditing(true);
+                          // setEditing(true);
                           openContextModal({
-                            modal: 'liTemplate',
+                            modal: 'liBfTemplate',
                             title: 'Edit Template',
                             innerProps: {
                               message: bf.description,
-                              handleSubmit: (message: string) => {
+                              handleSubmit: async (message: string) => {
                                 form.setFieldValue('promptInstructions', message);
-                                setChanged(true);
-                                setEditing(false);
+                                // setChanged(true);
+                                // setEditing(false);
+                                const result = await patchBumpFramework(
+                                  userToken,
+                                  bf.id,
+                                  bf.overall_status,
+                                  bf.title,
+                                  message,
+                                  bf.bump_length,
+                                  bf.bumped_count,
+                                  bf.bump_delay_days,
+                                  bf.default,
+                                  bf.use_account_research,
+                                  bf.transformer_blocklist
+                                );
+
+                                await queryClient.refetchQueries({
+                                  queryKey: [`query-get-bump-frameworks`],
+                                });
                               },
                             },
                           });
@@ -2981,7 +3011,8 @@ function FrameworkSection(props: {
                       </Button>
                     </Box>
                   </Paper>
-                ))}
+                ))
+              }
             </Stack>
           </form>
 

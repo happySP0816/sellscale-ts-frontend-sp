@@ -55,6 +55,7 @@ export default function AdjustPage() {
   const [page, setPage] = useState(1);
   // State for the textarea content
   const [textareaContent, setTextareaContent] = useState('');
+  const [submittingRequest, setSubmittingRequest] = useState(false);
 
   // Function to handle badge clicks
   const handleBadgeClick = (content: string) => {
@@ -63,6 +64,7 @@ export default function AdjustPage() {
 
   // Function to handle AI request submission
   const handleSubmit = async () => {
+    setSubmittingRequest(true);
     if (!textareaContent.trim()) {
       // Show notification if the text box is empty
       showNotification({
@@ -71,6 +73,7 @@ export default function AdjustPage() {
         color: 'red',
       });
       close();
+      setSubmittingRequest(false);
       return; 
     }
 
@@ -83,6 +86,7 @@ export default function AdjustPage() {
         message: 'Your request has been submitted! Please give us 24 hours or less to get back to you.',
         color: 'green'
       });
+      setSubmittingRequest(false);
 
       // Reset textareaContent to empty and close the modal
       setTextareaContent('');
@@ -98,6 +102,7 @@ export default function AdjustPage() {
         message: 'Failed to submit AI request',
         color: 'red'
       });
+      setSubmittingRequest(false);
     }
   };
 
@@ -129,56 +134,7 @@ export default function AdjustPage() {
     fetchAIRequests();
   }, []); 
     
-  /* const [row, setRow] = useState([
-    {
-      request_name: 'Launch new campaign: Devops managers',
-      request_content: 'Launch a new campaign targetting devops managers that will outreach to mid tier managers only',
-      percentage: 63,
-      create_date: 'Fri, 03, Nov 2023',
-      create_time: '01:02:04 GMT',
-      status: 'In Progress',
-    },
-    {
-      request_name: 'Pull 4,000 New DevOps Prospects',
-      request_content: 'Pull 4,000 new contacts to put into my DevOps campaign so I can reach out to way more people there!',
-      percentage: 0,
-      create_date: 'Fri, 03, Nov 2023',
-      create_time: '01:02:04 GMT',
-      status: 'Queued',
-    },
-    {
-      request_name: 'Adjust prospect filtering',
-      request_content: 'Can you make sure we dont reach out to `heads of marketing` anymore?',
-      percentage: 100,
-      create_date: 'Fri, 03, Nov 2023',
-      create_time: '01:02:04 GMT',
-      status: 'Completed',
-    },
-    {
-      request_name: 'Copy changes',
-      request_content: 'this follow up sucks. can you make it way more `concise`?',
-      percentage: 100,
-      create_date: 'Fri, 03, Nov 2023',
-      create_time: '01:02:04 GMT',
-      status: 'Completed',
-    },
-    {
-      request_name: 'Launch new campaign: New York Region',
-      request_content: 'I want to target the NY region instead of California only',
-      percentage: 100,
-      create_date: 'Fri, 03, Nov 2023',
-      create_time: '01:02:04 GMT',
-      status: 'Completed',
-    },
-    {
-      request_name: 'Pull prospect list',
-      request_content: 'can you pull more prospects for me?',
-      percentage: 100,
-      create_date: 'Fri, 03, Nov 2023',
-      create_time: '01:02:04 GMT',
-      status: 'Completed',
-    },
-  ]); */
+  const numQueuedTasks = row.filter((element) => element.status === 'QUEUED').length;
   const rows = row.map((element, idx) => (
     <tr key={idx}>
       <td
@@ -235,7 +191,7 @@ export default function AdjustPage() {
         <Text size={25} fw={600}>
           Adjust AI
         </Text>
-        <Badge leftSection={<IconRefresh size={10} />}>2 Requests Pending</Badge>
+        <Badge leftSection={<IconRefresh size={10} />}>{numQueuedTasks} Requests Pending</Badge>
       </Group>
       <Divider />
       <Flex gap={50} my={'lg'}>
@@ -323,99 +279,117 @@ export default function AdjustPage() {
         <Text size={20} fw={600}>
           Request History
         </Text>
-        <TextInput rightSection={<IconSearch size={16} color='gray' />} placeholder='Search' />
+        {
+          rows.length > 0 && <TextInput rightSection={<IconSearch size={16} color='gray' />} placeholder='Search' />
+        }
       </Flex>
-      <Box mt={'md'}>
-        <Stack style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', border: '1px solid #dee2e6' }}>
-          <Table>
-            <thead>
-              <tr
-                style={{
-                  background: '#f9f9fd',
-                }}
-              >
-                <th
+      {rows.length > 0 && (
+        <Box mt={'md'}>
+          <Stack style={{ borderTopLeftRadius: '8px', borderTopRightRadius: '8px', border: '1px solid #dee2e6' }}>
+            <Table>
+              <thead>
+                <tr
                   style={{
-                    textAlign: 'left',
-                    paddingTop: rem(15),
-                    paddingBottom: rem(15),
-                    // width: '70%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    cursor: 'pointer',
+                    background: '#f9f9fd',
                   }}
                 >
-                  <Text fw={700}>Request Name</Text>
-                  <IconSelector size={16} />
-                </th>
-                <th
-                //   style={{
-                //     paddingTop: rem(15),
-                //     paddingBottom: rem(15),
-                //   }}
-                >
-                  <Text fw={700}>Creation Date</Text>
-                </th>
-                <th
-                //   style={{
-                //     paddingTop: rem(15),
-                //     paddingBottom: rem(15),
-                //   }}
-                >
-                  <Text fw={700}>Status</Text>
-                </th>
-              </tr>
-            </thead>
-            <tbody>{rows}</tbody>
-          </Table>
-        </Stack>
-        <Flex
-          w={'100%'}
-          justify={'space-between'}
-          p={20}
-          style={{
-            border: '1px solid #dee2e6',
-            borderBottomLeftRadius: '10px',
-            borderBottomRightRadius: '10px',
-          }}
-        >
-          <Flex align={'center'} gap={'sm'}>
-            <Text color='gray'>Show</Text>
-            <Select style={{ width: '150px' }} data={['Show 25 rows', 'Show 5 rows', 'Show 10 rows']} defaultValue='Show 25 rows' />
-            <Text color='gray'>of 10</Text>
-          </Flex>
-          <Flex>
-            <Select
-              style={{
-                width: '80px',
-              }}
-              data={['01', '02', '03', '04', '05', '06', '071']}
-              defaultValue='01'
-              radius={0}
-            />
-            <Text
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
+                  <th
+                    style={{
+                      paddingTop: rem(16),
+                      paddingBottom: rem(16),
+                    }}
+                  >
+                    <Flex align={'center'} gap={'sm'}>
+                      <IconSelector size={20} color='gray' />
+                      <Text color='gray.8' fw={600} size={'md'}>
+                        Request Name
+                      </Text>
+                    </Flex>
+                  </th>
+                  <th
+                    style={{
+                      paddingTop: rem(16),
+                      paddingBottom: rem(16),
+                    }}
+                  >
+                    <Text color='gray.8' fw={600}>
+                      Date Created
+                    </Text>
+                  </th>
+                  <th
+                    style={{
+                      paddingTop: rem(16),
+                      paddingBottom: rem(16),
+                    }}
+                  >
+                    <Text color='gray.8' fw={600}>
+                      Status
+                    </Text>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>{rows}</tbody>
+            </Table>
+          </Stack>
+          <Flex
+            w={'100%'}
+            justify={'space-between'}
+            p={20}
+            style={{
+              border: '1px solid #dee2e6',
+              borderBottomLeftRadius: '10px',
+              borderBottomRightRadius: '10px',
+            }}
+          >
+            <Flex align={'center'} gap={'sm'}>
+              <Text color='gray'>Show</Text>
+              <Select style={{ width: '150px' }} data={['Show 25 rows', 'Show 5 rows', 'Show 10 rows']} defaultValue='Show 25 rows' />
+              <Text color='gray'>of 10</Text>
+            </Flex>
+            <Flex>
+              <Select
+                style={{
+                  width: '80px',
+                }}
+                data={['01', '02', '03', '04', '05', '06', '071']}
+                defaultValue='01'
+                radius={0}
+              />
+              <Text
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
 
-                border: '1px solid #ced4da',
-                alignItems: 'center',
-              }}
-              size={'sm'}
-              px={10}
-            >
-              of {page} pages
-            </Text>
-            <Button variant='default' px={5} radius={0}>
-              <IconChevronLeft color='gray' />
-            </Button>
-            <Button variant='default' px={5} radius={0}>
-              <IconChevronRight color='gray' />
-            </Button>
+                  border: '1px solid #ced4da',
+                  alignItems: 'center',
+                }}
+                size={'sm'}
+                px={10}
+              >
+                of {page} pages
+              </Text>
+              <Button variant='default' px={5} radius={0}>
+                <IconChevronLeft color='gray' />
+              </Button>
+              <Button variant='default' px={5} radius={0}>
+                <IconChevronRight color='gray' />
+              </Button>
+            </Flex>
           </Flex>
-        </Flex>
-      </Box>
+        </Box>
+      )}
+
+      {
+        // If there are no rows, show this message instead
+        rows.length === 0 && (
+          <Box mt={'md'}>
+            <Text color='gray' style={{ textAlign: 'center' }}>
+              No AI requests found
+            </Text>
+          </Box>
+        )
+      }
+
       <Modal opened={opened} onClose={close} title='Please review your request before submitting:'>
         <div>
           {/* Display the text content for review */}
@@ -424,7 +398,9 @@ export default function AdjustPage() {
           </Box>
 
           {/* Button to confirm submission */}
-          <Button onClick={handleSubmit}>Confirm and Submit</Button>
+          <Button onClick={handleSubmit} loading={submittingRequest} radius="xl" color="green">
+            Confirm and Submit
+          </Button>
         </div>
       </Modal>
     </Box>

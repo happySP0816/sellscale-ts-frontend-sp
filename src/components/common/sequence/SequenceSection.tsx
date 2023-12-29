@@ -2196,7 +2196,7 @@ function FrameworkSectionShell(props: {
   const [displayFrameworkSection, refreshFrameworkSection] = useRefresh();
   return (
     <>
-      {displayFrameworkSection && (
+      {displayFrameworkSection && activeFramework && (
         <FrameworkSection
           frameworks={frameworks}
           framework={_.cloneDeep(activeFramework)}

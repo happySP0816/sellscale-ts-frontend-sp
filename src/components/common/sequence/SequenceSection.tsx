@@ -2704,7 +2704,7 @@ function FrameworkSection(props: {
 
             <Stack spacing={10}>
               {
-                /* {(templateShowAll
+                (templateShowAll
                 ? props.frameworks.sort((a, b) => {
                     if (a.default) return 1;
                     if (b.default) return -1;
@@ -2722,11 +2722,7 @@ function FrameworkSection(props: {
                   if (a.default) return -1;
                   if (b.default) return 1;
                   return 0;
-                }) */
-                (templateShowAll
-                  ? props.frameworks
-                  : [props.frameworks.find((bf) => bf.id === props.framework.id)!]
-                ).map((bf, index) => (
+                }).map((bf, index) => (
                   <Paper
                     key={index}
                     p='md'

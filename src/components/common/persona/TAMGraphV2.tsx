@@ -120,6 +120,8 @@ export default function TAMGraphV2() {
 
   const userData = useRecoilValue(userDataState)
 
+  console.log(userData)
+
   const { data: graphData } = useQuery({
     queryKey: [`query-get-tam-graph-data`],
     queryFn: async () => {
@@ -340,10 +342,10 @@ export default function TAMGraphV2() {
                           theme.colors.blue[theme.fn.primaryShade()],
                       })}
                     />
-                    Cold Outreach TAM
+                    Cold Outreach TAM: 
                   </Text>
 
-                  <MantineTooltip label="Total companies scraped by SellScale multipled by the average ACV" withinPortal>
+                  <MantineTooltip label={"Total companies scraped by SellScale multipled by the average ACV for your company. Currently set to $" + (userData.avg_contract_size ? userData.avg_contract_size : 10000).toLocaleString()} withinPortal>
                     <ActionIcon onClick={() => {
                       navigateToPage(navigate, '/settings');
                     }} ml={"xs"}>
@@ -356,7 +358,7 @@ export default function TAMGraphV2() {
                   <Text fw={700} fz={32}>
                     $
                     {new Intl.NumberFormat("en-US").format(
-                      (graphData?.stats[0].num_companies ? graphData?.stats[0].num_companies : 0) * (userData.contract_size ? userData.contract_size : 10000)
+                      (graphData?.stats[0].num_companies ? graphData?.stats[0].num_companies : 0) * (userData.avg_contract_size ? userData.avg_contract_size : 10000)
                     )}
                   </Text>
                   {renderIncreaseBadge(6.5)}

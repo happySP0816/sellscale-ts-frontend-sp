@@ -277,7 +277,7 @@ export default function ProspectDetailsHistory(props: { prospectId: number, forc
 
         <Tooltip label="The total amount of AI runtime SellScale saved you on nurturing this prospect." withinPortal>
           <ActionIcon ml='xs' mt='0px'>
-            <IconInfoCircle color={theme.colors.gray[6]} size={16}  mt='0' />
+            <IconInfoCircle color={theme.colors.gray[6]} size={16} />
           </ActionIcon>
         </Tooltip>
       </Box>

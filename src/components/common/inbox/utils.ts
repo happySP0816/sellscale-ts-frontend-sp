@@ -35,6 +35,10 @@ export const prospectStatuses = [
     value: "ACTIVE_CONVO_QUEUED_FOR_SNOOZE",
   },
   {
+    label: "Continue the Sequence",
+    value: "ACTIVE_CONVO_CONTINUE_SEQUENCE",
+  },
+  {
     label: "Demoing",
     value: "DEMO_SET",
   },

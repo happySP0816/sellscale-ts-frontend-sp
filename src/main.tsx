@@ -63,13 +63,14 @@ import ComingSoonCard from '@common/library/ComingSoonCard';
 import AnalyticsPageNew from '@pages/AnalyticsPageNew';
 import AdjustPage from '@pages/AdjustAIPage';
 import SlackAuthPage from '@pages/SlackAuthPage';
+import { CampaignDetail } from "@pages/CampaignDetail";
 
 const queryClient = new QueryClient();
 
 // Set Sentry up and wrap the router
 if (import.meta.env.PROD) {
   Sentry.init({
-    dsn: 'https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376',
+    dsn: "https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376",
     integrations: [
       new BrowserTracing({
         routingInstrumentation: Sentry.reactRouterV6Instrumentation(
@@ -87,7 +88,8 @@ if (import.meta.env.PROD) {
     tracesSampleRate: 1.0,
   });
 }
-const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(createBrowserRouter);
+const sentryCreateBrowserRouter =
+  Sentry.wrapCreateBrowserRouter(createBrowserRouter);
 
 // Fixes cache issues on refresh
 (async () => {
@@ -98,7 +100,7 @@ const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(createBrowserRo
   }
 
   // Unregister our service worker
-  if ('serviceWorker' in navigator) {
+  if ("serviceWorker" in navigator) {
     navigator.serviceWorker.ready.then(async (registration) => {
       const result = await registration.unregister();
     });
@@ -108,39 +110,39 @@ const sentryCreateBrowserRouter = Sentry.wrapCreateBrowserRouter(createBrowserRo
 // The DOM router for determining what pages are rendered at which paths
 const router = sentryCreateBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
       {
-        path: '',
+        path: "",
         element: <RestrictedRoute page={<PersonaCampaigns />} />,
         loader: async ({ params }: { params: any }) => {
-          return { prospectId: '' };
+          return { prospectId: "" };
         },
       },
       {
-        path: 'dashboard',
+        path: "dashboard",
         element: <RestrictedRoute page={<InboxPage />} />,
       },
       {
-        path: 'inbox',
+        path: "inbox",
         element: <RestrictedRoute page={<InboxPage />} />,
       },
       {
-        path: 'Overview',
+        path: "Overview",
         element: <RestrictedRoute page={<OverviewPage />} />,
       },
       {
-        path: 'teach',
+        path: "teach",
         element: <RestrictedRoute page={<PersonaBrain />} />,
       },
       {
-        path: 'prioritize/:archetypeId?',
+        path: "prioritize/:archetypeId?",
         element: (
           <RestrictedRoute
             page={
-              <Box bg={'white'}>
+              <Box bg={"white"}>
                 <PulseTabSelector />
               </Box>
             }
@@ -151,27 +153,27 @@ const router = sentryCreateBrowserRouter([
         },
       },
       {
-        path: 'contacts/overview',
+        path: "contacts/overview",
         element: <RestrictedRoute page={<ContactOverview />} />,
       },
       {
-        path: 'contacts/find',
+        path: "contacts/find",
         element: <RestrictedRoute page={<FindContactsPage />} />,
       },
       {
-        path: 'tools/contacts-clean',
+        path: "tools/contacts-clean",
         element: <RestrictedRoute page={<CleanContactsPage />} />,
       },
       {
-        path: 'persona/settings',
+        path: "persona/settings",
         element: <RestrictedRoute page={<PersonaSettingsPage />} />,
       },
       {
-        path: 'contacts/view/:prospectId?',
+        path: "contacts/view/:prospectId?",
         element: (
           <RestrictedRoute
             page={
-              <Box bg={'white'}>
+              <Box bg={"white"}>
                 <PulseTabSelector />
               </Box>
             }
@@ -182,55 +184,55 @@ const router = sentryCreateBrowserRouter([
         },
       },
       {
-        path: '/linkedin/simulate',
+        path: "/linkedin/simulate",
         element: <RestrictedRoute page={<LinkedinConvoSimulatorPage />} />,
       },
       {
-        path: 'setup/:channelType?/:tabId?',
+        path: "setup/:channelType?/:tabId?",
         element: <RestrictedRoute page={<ChannelSetupPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { channelType: params.channelType, tabId: params.tabId };
         },
       },
       {
-        path: 'linkedin/:tabId?',
+        path: "linkedin/:tabId?",
         element: <RestrictedRoute page={<LinkedInPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { tabId: params.tabId };
         },
       },
       {
-        path: 'email/:tabId?',
+        path: "email/:tabId?",
         element: <RestrictedRoute page={<EmailPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { tabId: params.tabId };
         },
       },
       {
-        path: 'email/blocks',
+        path: "email/blocks",
         element: <RestrictedRoute page={<EmailBlocksPage />} />,
       },
       {
-        path: 'email/simulate',
+        path: "email/simulate",
         element: <RestrictedRoute page={<EmailSimulatePage />} />,
       },
       {
-        path: 'tools/email-scraper',
+        path: "tools/email-scraper",
         element: <RestrictedRoute page={<PullProspectEmailsCardPage />} />,
       },
       {
-        path: 'tools/:tabId?',
+        path: "tools/:tabId?",
         element: <RestrictedRoute page={<ToolsPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { tabId: params.tabId };
         },
       },
       {
-        path: 'personas',
+        path: "personas",
         element: <RestrictedRoute page={<PersonaPage />} />,
       },
       {
-        path: 'personas/:personaId?',
+        path: "personas/:personaId?",
         element: <RestrictedRoute page={<PersonaPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { personaId: params.personaId };
@@ -246,51 +248,51 @@ const router = sentryCreateBrowserRouter([
       },
       */
       {
-        path: 'settings/:tabId?',
+        path: "settings/:tabId?",
         element: <RestrictedRoute page={<SettingsPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { tabId: params.tabId };
         },
       },
       {
-        path: 'onboarding',
+        path: "onboarding",
         element: <RestrictedRoute page={<PersonaOnboarding />} />,
       },
       {
-        path: 'setup',
+        path: "setup",
         element: <RestrictedRoute page={<SetupPage />} />,
       },
       {
-        path: 'authenticate',
+        path: "authenticate",
         element: <AuthPage />,
       },
       {
-        path: 'authcalendly',
+        path: "authcalendly",
         element: <AuthCalendlyPage />,
       },
       {
-        path: 'login',
+        path: "login",
         element: <LoginPage />,
       },
       {
-        path: 'projectsetup',
+        path: "projectsetup",
         element: <SetupPersonaCard />,
       },
 
       {
-        path: 'all/inboxes',
+        path: "all/inboxes",
         element: <RestrictedRoute page={<InboxPage all />} />,
       },
       {
-        path: 'prospects/:prospectId',
+        path: "prospects/:prospectId",
         element: <RestrictedRoute page={<ProspectDetailPage />} />,
       },
       {
-        path: 'all/contacts/:prospectId?',
+        path: "all/contacts/:prospectId?",
         element: (
           <RestrictedRoute
             page={
-              <Box p='md'>
+              <Box p="md">
                 <AllContactsSection all />
               </Box>
             }
@@ -301,11 +303,11 @@ const router = sentryCreateBrowserRouter([
         },
       },
       {
-        path: 'contacts/:prospectId?',
+        path: "contacts/:prospectId?",
         element: (
           <RestrictedRoute
             page={
-              <Box bg={'white'}>
+              <Box bg={"white"}>
                 <PulseTabSelector />
               </Box>
             }
@@ -316,11 +318,11 @@ const router = sentryCreateBrowserRouter([
         },
       },
       {
-        path: 'all/recent-activity',
+        path: "all/recent-activity",
         element: (
           <RestrictedRoute
             page={
-              <Box p='md'>
+              <Box p="md">
                 <RecentActivitySection all />
               </Box>
             }
@@ -328,11 +330,11 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: 'notifications',
+        path: "notifications",
         element: (
           <RestrictedRoute
             page={
-              <Box p='md'>
+              <Box p="md">
                 <RecentActivitySection all />
               </Box>
             }
@@ -340,11 +342,11 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: 'all/pipeline',
+        path: "all/pipeline",
         element: (
           <RestrictedRoute
             page={
-              <Box p='md' bg={'white'}>
+              <Box p="md" bg={"white"}>
                 <PipelineSection />
               </Box>
             }
@@ -356,7 +358,7 @@ const router = sentryCreateBrowserRouter([
         element: (
           <RestrictedRoute
             page={
-              <Box p='md' bg={'gray.1'}>
+              <Box p="md" bg={"gray.1"}>
                 <AnalyticPage />
               </Box>
             }
@@ -380,7 +382,7 @@ const router = sentryCreateBrowserRouter([
         element: (
           <RestrictedRoute
             page={
-              <Box p='md'>
+              <Box p="md">
                 <EmailQueuedMessages all />
               </Box>
             }
@@ -388,11 +390,11 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: 'all/campaigns',
+        path: "all/campaigns",
         element: (
           <RestrictedRoute
             page={
-              <Box p='md'>
+              <Box p="md">
                 <PersonaCampaigns />
               </Box>
             }
@@ -400,11 +402,11 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: 'campaigns',
+        path: "campaigns",
         element: (
           <RestrictedRoute
             page={
-              <Box p='md'>
+              <Box p="md">
                 <PersonaCampaigns />
               </Box>
             }
@@ -412,11 +414,23 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: 'all/linkedin-messages',
+        path: "campaigns/:id",
         element: (
           <RestrictedRoute
             page={
-              <Box p='md'>
+              <Box p="md">
+                <CampaignDetail />
+              </Box>
+            }
+          />
+        ),
+      },
+      {
+        path: "all/linkedin-messages",
+        element: (
+          <RestrictedRoute
+            page={
+              <Box p="md">
                 <LinkedinQueuedMessages all />
               </Box>
             }
@@ -424,23 +438,23 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: '/split/contacts',
+        path: "/split/contacts",
         element: <RestrictedRoute page={<PersonaSplitPage />} />,
       },
       {
-        path: '/advanced',
+        path: "/advanced",
         element: <RestrictedRoute page={<AdvancedPage />} />,
       },
       {
-        path: '/create-trigger',
+        path: "/create-trigger",
         element: <RestrictedRoute page={<TriggersPage />} />,
       },
       {
-        path: '/triggers',
+        path: "/triggers",
         element: <RestrictedRoute page={<TriggersList />} />,
       },
       {
-        path: '/weekly-update',
+        path: "/weekly-update",
         element: <RestrictedRoute page={<EmailHome />} />,
       },
       {
@@ -452,19 +466,24 @@ const router = sentryCreateBrowserRouter([
         element: <MissingPage />,
       },
       {
-        path: '/ai-request',
+        path: "/ai-request",
         element: <AdjustPage />,
       },
     ],
   },
 ]);
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement
+);
 root.render(
   // <React.StrictMode>
   <QueryClientProvider client={queryClient}>
     <RecoilRoot>
-      <Sentry.ErrorBoundary fallback={<div>An error has occurred</div>} showDialog>
+      <Sentry.ErrorBoundary
+        fallback={<div>An error has occurred</div>}
+        showDialog
+      >
         <RouterProvider router={router} />
       </Sentry.ErrorBoundary>
     </RecoilRoot>

@@ -39,6 +39,7 @@ import {
   Badge,
   Modal,
   CloseButton,
+  Anchor,
 } from "@mantine/core";
 import { useDisclosure, useHover } from "@mantine/hooks";
 import { openContextModal } from "@mantine/modals";
@@ -93,7 +94,7 @@ import { TodayActivityData } from "./OverallPipeline/TodayActivity";
 import UserStatusToggle from "./UserStatusToggle";
 import AllCampaign from "../../PersonaCampaigns/AllCampaign";
 import postSyncSmartleadCampaigns from "@utils/requests/postSyncSmartleadCampaigns";
-import TriggersList from '@pages/TriggersList';
+import TriggersList from "@pages/TriggersList";
 
 export type CampaignPersona = {
   id: number;
@@ -170,7 +171,6 @@ export default function PersonaCampaigns() {
     const result =
       response.status === "success" ? (response.data as CampaignPersona[]) : [];
 
-    console.log({ result });
     // Aggregate campaign analytics
     let analytics = {
       sentOutreach: 0,
@@ -210,7 +210,6 @@ export default function PersonaCampaigns() {
         : [];
     setProjects(result2);
 
-    console.log({ result2 });
     // Get AI Activity
     const response3 = await getPersonasActivity(userToken);
     const result3 = response3.status === "success" ? response3.data : [];
@@ -242,8 +241,9 @@ export default function PersonaCampaigns() {
     return 0;
   });
 
-  const campaignsSectionHeader = <>
-      <Group position="apart" mb='xs'>
+  const campaignsSectionHeader = (
+    <>
+      <Group position="apart" mb="xs">
         <Group>
           <Button
             radius="md"
@@ -280,10 +280,7 @@ export default function PersonaCampaigns() {
               variant="outline"
               radius="md"
               onClick={() => {
-                navigateToPage(
-                  navigate,
-                  `/settings/linkedinConnection`
-                );
+                navigateToPage(navigate, `/settings/linkedinConnection`);
               }}
             >
               {`LinkedIn Warming Up (per week): ${currentLinkedInSLA}`}
@@ -292,6 +289,7 @@ export default function PersonaCampaigns() {
         )}
       </Group>
     </>
+  );
 
   return (
     <PageFrame>
@@ -301,10 +299,13 @@ export default function PersonaCampaigns() {
             <Tabs.Tab value="overview" icon={<IconClipboard size="0.8rem" />}>
               {userData?.sdr_name.split(" ")[0]}'s Campaigns
             </Tabs.Tab>
-            <Tabs.Tab value="all-campaigns" icon={<IconClipboard size="0.8rem" />}>
+            <Tabs.Tab
+              value="all-campaigns"
+              icon={<IconClipboard size="0.8rem" />}
+            >
               {userData?.client?.company}'s Campaigns
             </Tabs.Tab>
-            <Tabs.Tab value='triggers' icon={<IconTarget size='0.8rem' />}>
+            <Tabs.Tab value="triggers" icon={<IconTarget size="0.8rem" />}>
               Triggers
             </Tabs.Tab>
             <Tabs.Tab
@@ -322,7 +323,6 @@ export default function PersonaCampaigns() {
           <Tabs.Panel value="triggers" pt="xs">
             <TriggersList />
           </Tabs.Panel>
-            
 
           <Tabs.Panel value="all-campaigns" pt="xs">
             {campaignsSectionHeader}
@@ -741,11 +741,7 @@ export function PersonCampaignCard(props: {
                         w={"30rem"}
                       >
                         <Flex align={"center"} gap={10} mb={8}>
-                          <Avatar
-                            src={item.img_url}
-                            radius="xl"
-                            size="lg"
-                          />
+                          <Avatar src={item.img_url} radius="xl" size="lg" />
                           <Box>
                             <Flex align={"center"} gap={10}>
                               <Text fw={600}>{item.prospect_name}</Text>
@@ -1063,126 +1059,139 @@ export function PersonCampaignCard(props: {
           </Group>
           <Divider orientation="vertical" ml="xs" mr="xs" color="white" />
           <Group sx={{ flex: "27%" }}>
-            <Flex gap={"xs"}>
-              <Popover position="bottom" withArrow shadow="md">
-                <Popover.Target>
-                  <Avatar
-                    variant="transparent"
-                    color={"gray"}
-                    radius="xl"
-                    size="sm"
-                    sx={{
-                      backgroundColor: "#ffffff22",
-                      marginTop: "auto",
-                      marginBottom: "auto",
-                    }}
-                  >
-                    <Text fz="lg">{emoji}</Text>
-                  </Avatar>
-                </Popover.Target>
-                <Popover.Dropdown>
-                  <EmojiPicker
-                    onEmojiClick={(event: any, _: any) => {
-                      const emoji = event.emoji;
-                      setEmoji(emoji);
-                    }}
-                  />
-                </Popover.Dropdown>
-              </Popover>
-              <Box>
-                <Flex>
-                  {props.persona.li_sent > 0 && (
-                    <ActionIcon
-                      variant="subtle"
-                      radius="md"
-                      color={props.persona.active ? "bliue" : "gray"}
-                      onClick={() => {
-                        if (props.project == undefined) return;
-                        setOpenedProspectId(-1);
-                        setCurrentProject(props.project);
-                        navigateToPage(
-                          navigate,
-                          `/setup/linkedin`,
-                          new URLSearchParams(
-                            `?campaign_id=${props.persona.id}`
-                          )
-                        );
+            <Flex direction={"column"}>
+              <Flex gap={"xs"}>
+                <Popover position="bottom" withArrow shadow="md">
+                  <Popover.Target>
+                    <Avatar
+                      variant="transparent"
+                      color={"gray"}
+                      radius="xl"
+                      size="sm"
+                      sx={{
+                        backgroundColor: "#ffffff22",
+                        marginTop: "auto",
+                        marginBottom: "auto",
                       }}
                     >
-                      <IconBrandLinkedin
-                        size="1rem"
-                        color={
-                          props.persona.active ? theme.colors.blue[6] : "gray"
-                        }
-                      />
-                    </ActionIcon>
-                  )}
-                  {props.persona.email_sent > 0 && (
-                    <ActionIcon
-                      variant="subtle"
-                      radius="md"
-                      color={props.persona.active ? "yellow" : "gray"}
-                      onClick={() => {
-                        if (props.project == undefined) return;
-                        setOpenedProspectId(-1);
-                        setCurrentProject(props.project);
-                        navigateToPage(
-                          navigate,
-                          `/setup/email`,
-                          new URLSearchParams(
-                            `?campaign_id=${props.persona.id}`
-                          )
-                        );
+                      <Text fz="lg">{emoji}</Text>
+                    </Avatar>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <EmojiPicker
+                      onEmojiClick={(event: any, _: any) => {
+                        const emoji = event.emoji;
+                        setEmoji(emoji);
                       }}
-                    >
-                      <IconMail
-                        size="1rem"
-                        color={
-                          props.persona.active ? theme.colors.yellow[6] : "gray"
-                        }
-                      />
-                    </ActionIcon>
-                  )}
-                </Flex>
-                
-                <Flex>
-                  <Tooltip
-                    label={
-                      props.persona.name +
-                      " - " +
-                      +total_sent +
-                      " / " +
-                      props.persona.total_prospects +
-                      " prospects sent"
-                    }
-                    withArrow
-                  >
-                    <Text 
-                      fz={"sm"} c={"gray.7"} fw={700}
-                      onClick={() => {
-                      if (props.persona.sdr_id != userData?.id) return;
+                    />
+                  </Popover.Dropdown>
+                </Popover>
+                <Box>
+                  <Flex>
+                    {props.persona.li_sent > 0 && (
+                      <ActionIcon
+                        variant="subtle"
+                        radius="md"
+                        color={props.persona.active ? "bliue" : "gray"}
+                        onClick={() => {
+                          if (props.project == undefined) return;
+                          setOpenedProspectId(-1);
+                          setCurrentProject(props.project);
+                          navigateToPage(
+                            navigate,
+                            `/setup/linkedin`,
+                            new URLSearchParams(
+                              `?campaign_id=${props.persona.id}`
+                            )
+                          );
+                        }}
+                      >
+                        <IconBrandLinkedin
+                          size="1rem"
+                          color={
+                            props.persona.active ? theme.colors.blue[6] : "gray"
+                          }
+                        />
+                      </ActionIcon>
+                    )}
+                    {props.persona.email_sent > 0 && (
+                      <ActionIcon
+                        variant="subtle"
+                        radius="md"
+                        color={props.persona.active ? "yellow" : "gray"}
+                        onClick={() => {
+                          if (props.project == undefined) return;
+                          setOpenedProspectId(-1);
+                          setCurrentProject(props.project);
+                          navigateToPage(
+                            navigate,
+                            `/setup/email`,
+                            new URLSearchParams(
+                              `?campaign_id=${props.persona.id}`
+                            )
+                          );
+                        }}
+                      >
+                        <IconMail
+                          size="1rem"
+                          color={
+                            props.persona.active
+                              ? theme.colors.yellow[6]
+                              : "gray"
+                          }
+                        />
+                      </ActionIcon>
+                    )}
+                  </Flex>
 
-                      if (props.persona.email_sent > props.persona.li_sent) {
-                        window.location.href = `/setup/email?campaign_id=${props.persona.id}`;
-                      } else {
-                        window.location.href = `/setup/linkedin?campaign_id=${props.persona.id}`;
+                  <Flex>
+                    <Tooltip
+                      label={
+                        props.persona.name +
+                        " - " +
+                        +total_sent +
+                        " / " +
+                        props.persona.total_prospects +
+                        " prospects sent"
                       }
-                    }}>
-                      {props.persona.name}
-                    </Text>
-                  </Tooltip>
-                  {props.persona.sdr_id == userData?.id && (
-                    <Box ml="xs" onClick={() => {
-                      if (props.project == undefined) return;
-                      setOpenedProspectId(-1);
-                      setCurrentProject(props.project);
-                      window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
-                    }}>
-                      <IconPencil size="0.9rem" color="gray" />
-                    </Box>
-                  )}
-                </Flex>
-              </Box>
+                      withArrow
+                    >
+                      <Text
+                        fz={"sm"}
+                        c={"gray.7"}
+                        fw={700}
+                        onClick={() => {
+                          if (props.persona.sdr_id != userData?.id) return;
+
+                          if (
+                            props.persona.email_sent > props.persona.li_sent
+                          ) {
+                            window.location.href = `/setup/email?campaign_id=${props.persona.id}`;
+                          } else {
+                            window.location.href = `/setup/linkedin?campaign_id=${props.persona.id}`;
+                          }
+                        }}
+                      >
+                        {props.persona.name}
+                      </Text>
+                    </Tooltip>
+                    {props.persona.sdr_id == userData?.id && (
+                      <Box
+                        ml="xs"
+                        onClick={() => {
+                          if (props.project == undefined) return;
+                          setOpenedProspectId(-1);
+                          setCurrentProject(props.project);
+                          window.location.href = `/persona/settings?campaign_id=${props.persona.id}`;
+                        }}
+                      >
+                        <IconPencil size="0.9rem" color="gray" />
+                      </Box>
+                    )}
+                  </Flex>
+                </Box>
+              </Flex>
+              <Anchor href={`/campaigns/${props.persona.id}`}>Detail</Anchor>
             </Flex>
           </Group>
           <Divider orientation="vertical" ml="xs" mr="xs" color="white" />

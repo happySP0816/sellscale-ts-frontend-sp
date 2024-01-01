@@ -176,7 +176,7 @@ export default function DemoFeedbackChartV2() {
     return tableData.filter((i) =>
       i.prospect_name.toLowerCase().includes(searchItem.toLowerCase())
     );
-  }, [searchItem]);
+  }, [searchItem, tableData]);
 
   if (!data || isFetching) {
     return (

@@ -103,7 +103,8 @@ export default function DemoFeedbackLineChartV2(props: PropsType) {
           legendPosition: "middle",
         }}
         pointSize={15}
-        colors={{ scheme: "spectral" }}
+        // all colors are purple but line is green
+        colors={{ scheme: "purple_red" }}
         pointBorderWidth={2}
         pointBorderColor={{ from: "serieColor" }}
         useMesh={true}

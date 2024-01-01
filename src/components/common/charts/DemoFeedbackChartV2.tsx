@@ -310,7 +310,7 @@ export default function DemoFeedbackChartV2() {
 
             {
               accessor: "client_id",
-              title: "Contact Name",
+              title: "Prospect Name",
               render: ({ prospect_img_url, prospect_name }) => (
                 <Flex align={"center"} gap={"sm"}>
                   <Avatar

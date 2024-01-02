@@ -17,7 +17,7 @@ import {
   Group,
   ScrollArea,
   Box,
-  Checkbox,
+  Container,
 } from '@mantine/core';
 import {
   IconLock,
@@ -535,11 +535,17 @@ export default function InboxProspectConvoBumpFramework(props: {
                     })}
                   </Group>
                   {!!props.bumpFrameworksSequence?.length && (
-                  <>
+                  <Box sx={{
+                    marginTop: '16px',
+                    marginBottom: '16px'}}
+                  >
                     <Flex
                       justify={'space-between'}
                       align={'center'}
                       gap={4}
+                      sx={{
+                        marginBottom: '8px'
+                      }}
                     >
                       <Divider
                         label={
@@ -567,10 +573,9 @@ export default function InboxProspectConvoBumpFramework(props: {
                         <IconExternalLink width={15} style={{ color: 'blue' }} />
                       </Flex>
                     </Flex>
-                    <>
+                    <Box>
                       {props.bumpFrameworksSequence?.map((sequence) => (
-                          <label
-                            htmlFor={sequence.id ? String(sequence.id) : undefined}
+                          <Box
                             key={sequence.id}
                             style={{
                               outline: `${data?.id === sequence.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
@@ -595,10 +600,10 @@ export default function InboxProspectConvoBumpFramework(props: {
                                 {sequence?.Title}
                               </Text>
                             </Flex>
-                          </label>
+                          </Box>
                       ))}
-                    </>
-                  </>
+                    </Box>
+                  </Box>
                 )}
                 </Radio.Group>
               </Box>

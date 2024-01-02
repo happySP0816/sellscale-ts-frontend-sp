@@ -1188,10 +1188,20 @@ export function PersonCampaignCard(props: {
                         <IconPencil size="0.9rem" color="gray" />
                       </Box>
                     )}
+                    {
+                      <Anchor 
+                        href={`/campaigns/${props.persona.id}`}
+                        sx={{
+                          fontSize: '10px',
+                          marginLeft: '8px'
+                        }}
+                      >
+                        🔎
+                      </Anchor>
+                    }
                   </Flex>
                 </Box>
               </Flex>
-              <Anchor href={`/campaigns/${props.persona.id}`}>Detail</Anchor>
             </Flex>
           </Group>
           <Divider orientation="vertical" ml="xs" mr="xs" color="white" />

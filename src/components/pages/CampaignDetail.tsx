@@ -11,6 +11,8 @@ import {
   Badge,
   useMantineTheme,
   Tabs,
+  Button,
+  Title,
 } from "@mantine/core";
 import {
   IconArrowLeft,
@@ -37,26 +39,29 @@ export const CampaignDetail = () => {
   const [activeTab, setActiveTab] = useState<string | null>("contacts");
   return (
     <Box bg={"white"} mih={"100vh"}>
-      <Container>
-        <Box>
+      <Container pt='xl'>
+        <Box pb='xl'>
           <Anchor
             href="/campaigns"
             style={{ display: "inline-flex", gap: "0.25rem" }}
           >
             <IconArrowLeft />
 
-            <Text c={"black"} fw={700}>
+            <Text c={"black"} fw={500} fz='sm' mt='2px'>
               Campaigns
             </Text>
           </Anchor>
         </Box>
 
-        <Text fw={700}>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dolores
-          aliquid provident sapiente numquam nobis, quaerat, doloribus illo,
-          delectus veritatis quos excepturi architecto? Blanditiis ut autem
-          accusantium nesciunt nemo omnis impedit.
-        </Text>
+        <Flex>
+          {/* circle button */}
+          <Button size='lg' variant='subtle' radius='xl' color='blue'>
+            🐍
+          </Button>
+          <Title order={3} mt='10px' ml='4px'>
+            H1 Leaders in HR in the EMEA Region
+          </Title>
+        </Flex>
 
         <Flex align={"center"} mt={"sm"} gap={"md"}>
           <Flex gap={"sm"} align={"center"}>
@@ -215,7 +220,9 @@ export const CampaignDetail = () => {
                     activeTab === "linkedin" || activeTab === "email"
                       ? theme.colors.blue[6]
                       : theme.colors.gray[6],
+                  cursor: 'pointer'
                 })}
+                onClick={() => setActiveTab("linkedin")}
               >
                 <Flex align={"center"} justify={"center"}>
                   <IconTargetArrow size={"1rem"} />

@@ -418,7 +418,7 @@ const router = sentryCreateBrowserRouter([
         element: (
           <RestrictedRoute
             page={
-              <Box p="md">
+              <Box>
                 <CampaignDetail />
               </Box>
             }

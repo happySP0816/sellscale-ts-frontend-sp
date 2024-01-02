@@ -159,7 +159,12 @@ export default function SequenceSection() {
     queryKey: [`query-get-bump-frameworks`],
     queryFn: async () => {
       if (!currentProject) return [];
-      const result = await getBumpFrameworks(userToken, ['ACCEPTED', 'BUMPED'], [], [currentProject?.id]);
+      const result = await getBumpFrameworks(
+        userToken, 
+        ['ACCEPTED', 'BUMPED'], 
+        [], 
+        [currentProject?.id]
+      );
       if (result.status !== 'success') return [];
       return result.data.bump_frameworks as BumpFramework[];
     },

@@ -1,9 +1,9 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./components/App";
-import reportWebVitals from "./reportWebVitals";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './components/App';
+import reportWebVitals from './reportWebVitals';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   createBrowserRouter,
   createRoutesFromChildren,
@@ -11,57 +11,58 @@ import {
   RouterProvider,
   useLocation,
   useNavigationType,
-} from "react-router-dom";
-import ErrorPage from "./components/pages/ErrorPage";
-import PersonaPage from "./components/pages/PersonaPage";
-import MissingPage from "./components/pages/MissingPage";
-import { RecoilRoot } from "recoil";
-import AuthPage from "@pages/AuthPage";
-import RestrictedRoute from "./auth/RestrictedRoute";
-import SettingsPage from "@pages/SettingsPage";
-import LoginPage from "@pages/LoginPage";
-import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
-import LinkedInPage from "@pages/LinkedInPage";
-import EmailPage from "@pages/EmailPage";
-import OnboardingModalPage from "@pages/OnboardingModalPage";
-import AuthCalendlyPage from "@pages/AuthCalendlyPage";
-import SetupPage, { OnboardingTable } from "@pages/SetupPage";
-import InboxPage from "@pages/InboxPage";
-import AllContactsSection from "@common/home/AllContactsSection";
-import { Box } from "@mantine/core";
-import RecentActivitySection from "@common/home/RecentActivitySection";
-import LinkedinQueuedMessages from "@common/messages/LinkedinQueuedMessages";
-import EmailQueuedMessages from "@common/emails/EmailQueuedMessages";
-import ContactsPage from "@pages/ContactsPage";
-import ToolsPage from "@pages/ToolsPage";
-import SetupPersonaCard from "@common/persona/SetupPersonaCard";
-import PersonaBrain from "@common/persona/PersonaBrain";
-import { PulseWrapper } from "@common/persona/PulseWrapper";
-import { LinkedinConvoSimulatorPage } from "@common/simulators/linkedin/LinkedinConvoSimulatorPage";
-import { PullProspectEmailsCardPage } from "@common/credits/PullProspectEmailsCardPage";
-import EmailBlocksPage from "@pages/EmailBlocksPage";
-import FindContactsPage from "@pages/FindContactsPage";
-import { PersonaSplitPage } from "@common/persona/PersonaSplitPage";
-import CleanContactsPage from "@pages/CleanContactsPage";
-import PersonaSettingsPage from "@pages/PersonaSettingsPage";
-import EmailSimulatePage from "@pages/EmailSimulatePage";
-import PipelineSection from "@common/home/PipelineSection";
-import PersonaCampaigns from "@common/campaigns/PersonaCampaigns";
-import AdvancedPage from "@pages/AdvancedPage";
-import ChannelSetupPage from "@pages/ChannelSetupPage";
-import PulseTabSelector from "@common/persona/PulseTabSelector";
-import PersonaOnboarding from "@pages/PreOnboarding";
-import AnalyticPage from "@pages/AnalyticPage";
-import OverviewPage from "@pages/OverviewPage";
-import ContactOverview from "@common/persona/ContactOverview";
-import TriggersPage from "@pages/TriggersPage";
-import TriggersList from "@pages/TriggersList";
-import EmailHome from "@common/resend_email/resend_email";
-import ProspectDetailPage from "@pages/ProspectDetail";
+} from 'react-router-dom';
+import ErrorPage from './components/pages/ErrorPage';
+import PersonaPage from './components/pages/PersonaPage';
+import MissingPage from './components/pages/MissingPage';
+import { RecoilRoot } from 'recoil';
+import AuthPage from '@pages/AuthPage';
+import RestrictedRoute from './auth/RestrictedRoute';
+import SettingsPage from '@pages/SettingsPage';
+import LoginPage from '@pages/LoginPage';
+import * as Sentry from '@sentry/react';
+import { BrowserTracing } from '@sentry/tracing';
+import LinkedInPage from '@pages/LinkedInPage';
+import EmailPage from '@pages/EmailPage';
+import OnboardingModalPage from '@pages/OnboardingModalPage';
+import AuthCalendlyPage from '@pages/AuthCalendlyPage';
+import SetupPage, { OnboardingTable } from '@pages/SetupPage';
+import InboxPage from '@pages/InboxPage';
+import AllContactsSection from '@common/home/AllContactsSection';
+import { Box } from '@mantine/core';
+import RecentActivitySection from '@common/home/RecentActivitySection';
+import LinkedinQueuedMessages from '@common/messages/LinkedinQueuedMessages';
+import EmailQueuedMessages from '@common/emails/EmailQueuedMessages';
+import ContactsPage from '@pages/ContactsPage';
+import ToolsPage from '@pages/ToolsPage';
+import SetupPersonaCard from '@common/persona/SetupPersonaCard';
+import PersonaBrain from '@common/persona/PersonaBrain';
+import { PulseWrapper } from '@common/persona/PulseWrapper';
+import { LinkedinConvoSimulatorPage } from '@common/simulators/linkedin/LinkedinConvoSimulatorPage';
+import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
+import EmailBlocksPage from '@pages/EmailBlocksPage';
+import FindContactsPage from '@pages/FindContactsPage';
+import { PersonaSplitPage } from '@common/persona/PersonaSplitPage';
+import CleanContactsPage from '@pages/CleanContactsPage';
+import PersonaSettingsPage from '@pages/PersonaSettingsPage';
+import EmailSimulatePage from '@pages/EmailSimulatePage';
+import PipelineSection from '@common/home/PipelineSection';
+import PersonaCampaigns from '@common/campaigns/PersonaCampaigns';
+import AdvancedPage from '@pages/AdvancedPage';
+import ChannelSetupPage from '@pages/ChannelSetupPage';
+import PulseTabSelector from '@common/persona/PulseTabSelector';
+import PersonaOnboarding from '@pages/PreOnboarding';
+import AnalyticPage from '@pages/AnalyticPage';
+import OverviewPage from '@pages/OverviewPage';
+import ContactOverview from '@common/persona/ContactOverview';
+import TriggersPage from '@pages/TriggersPage';
+import TriggersList from '@pages/TriggersList';
+import EmailHome from '@common/resend_email/resend_email';
+import ProspectDetailPage from '@pages/ProspectDetail';
 import ComingSoonCard from '@common/library/ComingSoonCard';
 import AnalyticsPageNew from '@pages/AnalyticsPageNew';
 import AdjustPage from '@pages/AdjustAIPage';
+import SlackAuthPage from '@pages/SlackAuthPage';
 
 const queryClient = new QueryClient();
 
@@ -71,7 +72,13 @@ if (import.meta.env.PROD) {
     dsn: 'https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376',
     integrations: [
       new BrowserTracing({
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(React.useEffect, useLocation, useNavigationType, createRoutesFromChildren, matchRoutes),
+        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+          React.useEffect,
+          useLocation,
+          useNavigationType,
+          createRoutesFromChildren,
+          matchRoutes
+        ),
       }),
     ],
 
@@ -345,7 +352,7 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: "analytics-old",
+        path: 'analytics-old',
         element: (
           <RestrictedRoute
             page={
@@ -357,11 +364,11 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: "analytics",
+        path: 'analytics',
         element: (
           <RestrictedRoute
             page={
-              <Box p="md" bg={"gray.1"}>
+              <Box p='md' bg={'gray.1'}>
                 <AnalyticsPageNew />
               </Box>
             }
@@ -369,7 +376,7 @@ const router = sentryCreateBrowserRouter([
         ),
       },
       {
-        path: "all/email-messages",
+        path: 'all/email-messages',
         element: (
           <RestrictedRoute
             page={
@@ -435,6 +442,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: '/weekly-update',
         element: <RestrictedRoute page={<EmailHome />} />,
+      },
+      {
+        path: '/slack-auth',
+        element: <SlackAuthPage />,
       },
       {
         path: '*',

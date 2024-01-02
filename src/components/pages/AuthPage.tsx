@@ -1,29 +1,26 @@
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { authorize } from "@auth/core";
-import {
-  LoadingOverlay,
-} from "@mantine/core";
-import { showNotification } from "@mantine/notifications";
-import { navigateToPage } from "@utils/documentChange";
-import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useRecoilState, useRecoilValue } from "recoil";
-import PageFrame from "../common/PageFrame";
-import { API_URL } from "@constants/data";
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { authorize } from '@auth/core';
+import { LoadingOverlay } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
+import { navigateToPage } from '@utils/documentChange';
+import { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import PageFrame from '../common/PageFrame';
+import { API_URL } from '@constants/data';
 
 async function sendAuthToken(authToken: string, email: string) {
-
   const response = await fetch(`${API_URL}/client/approve_auth_token`, {
     method: 'POST',
     headers: {
-        'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      'client_sdr_email': email,
-      'token': authToken,
-    })
+      client_sdr_email: email,
+      token: authToken,
+    }),
   });
-  if(response.status !== 200){
+  if (response.status !== 200) {
     showNotification({
       id: 'auth-not-okay',
       title: 'Error',
@@ -42,11 +39,9 @@ async function sendAuthToken(authToken: string, email: string) {
       autoClose: false,
     });
   });
-
 }
 
 export default function AuthPage() {
-
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [userData, setUserData] = useRecoilState(userDataState);
@@ -60,7 +55,7 @@ export default function AuthPage() {
 
       const redirect = searchParams.get('redirect') ? `/${searchParams.get('redirect')}` : '/';
 
-      if (!authToken){
+      if (!authToken) {
         showNotification({
           id: 'auth-invalid-token',
           title: 'Invalid token',
@@ -71,25 +66,23 @@ export default function AuthPage() {
         console.error('Invalid token', tokenType);
         return;
       }
-      
-      if(tokenType === 'magic_links'){
+
+      if (tokenType === 'magic_links') {
         sendAuthToken(authToken, email).then(async (response) => {
           await authorize(response.token, setUserToken, setUserData);
           navigateToPage(navigate, redirect);
         });
-        
-      } else if(tokenType === 'direct'){
+      } else if (tokenType === 'direct') {
         (async () => {
           await authorize(authToken, setUserToken, setUserData);
-          if (redirect.includes("?")) {
-            const to = redirect.split("?")[0];
-            const params = new URLSearchParams(redirect.split("?")[1]);
-            navigateToPage(navigate, to, params)
+          if (redirect.includes('?')) {
+            const to = redirect.split('?')[0];
+            const params = new URLSearchParams(redirect.split('?')[1]);
+            navigateToPage(navigate, to, params);
           } else {
             navigateToPage(navigate, redirect);
           }
         })();
-        
       } else {
         showNotification({
           id: 'auth-invalid-token-type',

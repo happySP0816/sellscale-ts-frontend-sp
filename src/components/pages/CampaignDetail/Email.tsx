@@ -13,11 +13,11 @@ import {
 import React from "react";
 import { IconArrowRight, IconMessages } from "@tabler/icons";
 
-const Linkedin = () => {
+const Email = () => {
   return (
     <Card withBorder px={0} pb={0}>
       <Flex justify={"space-between"} px={"sm"}>
-        <Text fw={600} fz={'lg'}>3-Step LinkedIn Sequence</Text>
+        <Text fw={600} fz={'lg'}>3-Step Email Sequence</Text>
 
         <Button compact rightIcon={<IconArrowRight />} radius={"xl"}>
           GO TO SEQUENCE
@@ -184,4 +184,4 @@ const Linkedin = () => {
   );
 };
 
-export default Linkedin;
+export default Email;

@@ -33,6 +33,7 @@ import StatDisplay from "./CampaignDetail/StatDisplay";
 import { FaLinkedin } from "@react-icons/all-files/fa/FaLinkedin";
 import Contacts from "./CampaignDetail/Contacts";
 import Linkedin from "./CampaignDetail/Linkedin";
+import Email from './CampaignDetail/Email';
 
 export const CampaignDetail = () => {
   const theme = useMantineTheme();
@@ -248,14 +249,10 @@ export const CampaignDetail = () => {
                 sx={{
                   background: "transparent !important",
                 }}
-                disabled
               >
                 Email
               </Tabs.Tab>
             </Box>
-            <Tabs.Tab value="configure" icon={<IconSettings size={"1rem"} />}>
-              Configure
-            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="contacts">
@@ -264,8 +261,9 @@ export const CampaignDetail = () => {
           <Tabs.Panel value="linkedin">
             <Linkedin />
           </Tabs.Panel>
-          <Tabs.Panel value="email">Settings tab content</Tabs.Panel>
-          <Tabs.Panel value="configure">Settings tab content</Tabs.Panel>
+          <Tabs.Panel value="email">
+            <Email />
+          </Tabs.Panel>
         </Tabs>
       </Container>
     </Box>

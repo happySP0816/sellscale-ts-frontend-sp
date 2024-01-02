@@ -14,6 +14,7 @@ import {
   Switch,
   Select,
   TextInput,
+  Notification,
 } from "@mantine/core";
 import { ContextModalProps, openContextModal } from "@mantine/modals";
 import { useEffect, useRef, useState } from "react";
@@ -27,7 +28,7 @@ import { DateInput } from "@mantine/dates";
 import { API_URL } from "@constants/data";
 import RichTextArea from "@common/library/RichTextArea";
 import { JSONContent } from "@tiptap/react";
-import { IconSend, IconWand } from "@tabler/icons";
+import { IconAlertTriangle, IconSend, IconWand } from "@tabler/icons";
 import { sendEmail } from "@utils/requests/sendEmail";
 
 export default function MultiChannelModal({
@@ -39,7 +40,9 @@ export default function MultiChannelModal({
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
 
-  const [subjectLine, setSubjectLine] = useState("");
+  const [subjectLine, setSubjectLine] = useState(
+    "Following up on our LI conversation"
+  );
   // We use this to store the value of the text area
   const [messageDraft, _setMessageDraft] = useState("");
   // We use this to store the raw value of the rich text editor
@@ -56,11 +59,17 @@ export default function MultiChannelModal({
 
   const triggerSendEmail = async () => {
     if (loading) return;
-    if (subjectLine.length === 0 || messageDraftEmail.length === 0 || messageDraftEmail === "<p></p>") return;
+    if (
+      subjectLine.length === 0 ||
+      messageDraftEmail.length === 0 ||
+      messageDraftEmail === "<p></p>"
+    )
+      return;
     if (userData.nylas_connected === false) {
       showNotification({
         title: "Error Sending Email",
-        message: "You must connect your email account before sending emails. Please do so in Settings.",
+        message:
+          "You must connect your email account before sending emails. Please do so in Settings.",
         color: "red",
       });
       return;
@@ -77,7 +86,7 @@ export default function MultiChannelModal({
       undefined,
       true
     );
-    if (response.status === 'success') {
+    if (response.status === "success") {
       showNotification({
         title: "Email Sent",
         message: "Your email has been sent to the prospect.",
@@ -93,7 +102,7 @@ export default function MultiChannelModal({
       });
     }
 
-    setLoading(false)
+    setLoading(false);
   };
 
   return (
@@ -110,6 +119,21 @@ export default function MultiChannelModal({
           Prospect asked you to reach out to them on email? Verify the email
           address and send them an email of your crafting!
         </Text>
+        {!userData.nylas_connected && (
+          <Notification
+            mt="xs"
+            closeButtonProps={{ opacity: 0 }}
+            icon={<IconAlertTriangle size="1rem" />}
+            color={"red"}
+            title="Email not connected"
+            withBorder
+          >
+            <Text>
+              Please connect your email account in Settings before sending
+              emails.
+            </Text>
+          </Notification>
+        )}
         <TextInput
           mt="md"
           label="Email Address"

@@ -582,6 +582,7 @@ export default function InboxProspectConvoBumpFramework(props: {
                               borderRadius: '8px',
                               padding: '10px 14px',
                               width: '100%',
+                              marginBottom: '16px'
                             }}
                           >
                             <Flex align={'center'} gap={10} sx={{width: '100%'}}>

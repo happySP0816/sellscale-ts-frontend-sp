@@ -603,7 +603,12 @@ export default function ProspectConvo(props: {
         userToken,
         [prospect.overall_status],
         substatuses,
-        []
+        [],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        prospect.archetype_id
       );
 
       if (result.status === "success") {

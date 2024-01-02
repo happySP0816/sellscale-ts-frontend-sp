@@ -61,7 +61,7 @@ export default function SettingUsage() {
   const [touchsentProspect, setTouchsentProspect] = useState<any>({});
   const [chartData, setChartData] = useState<any>([]);
 
-  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const update = async () => {
     await getUsageConnectResponse(userToken)
       .then((res) => {
@@ -79,19 +79,20 @@ export default function SettingUsage() {
       });
   };
 
-  const transformData = (data: Data[]) => {
+  const labelsFromDataDates = (data: Data[]) => {
     if (!data || data.length === 0) {
-      return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      return [];
     }
 
-    const transformedData: number[] = new Array(12).fill(0);
+    return data.map(({ date }) => moment(date, 'YYYY-MM').format('MMM'))
+  }
 
-    data.forEach(({ date, value }) => {
-      const month = moment(date, 'YYYY-MM').month();
-      transformedData[month] = value;
-    });
+  const transformData = (data: Data[]) => {
+    if (!data || data.length === 0) {
+      return []
+    }
 
-    return transformedData
+    return data.map(({ value }) => value)
   };
 
 
@@ -99,7 +100,7 @@ export default function SettingUsage() {
     update();
   }, []);
   const createdData: any = {
-    labels: labels,
+    labels: labelsFromDataDates(createProspect?.data),
     datasets: [
       {
         data: transformData(createProspect?.data),
@@ -110,7 +111,7 @@ export default function SettingUsage() {
     ],
   };
   const touchData: any = {
-    labels: labels,
+    labels: labelsFromDataDates(touchsentProspect?.data),
     datasets: [
       {
         data: transformData(touchsentProspect?.data),
@@ -121,7 +122,7 @@ export default function SettingUsage() {
     ],
   };
   const enrichData: any = {
-    labels: labels,
+    labels: labelsFromDataDates(enrichedProspect?.data),
     datasets: [
       {
         data: transformData(enrichedProspect?.data),
@@ -133,7 +134,7 @@ export default function SettingUsage() {
     ],
   };
   const followUpsSent: any = {
-    labels: labels,
+    labels: labelsFromDataDates(followSentProspect?.data),
     datasets: [
       {
         data: transformData(followSentProspect?.data),
@@ -145,7 +146,7 @@ export default function SettingUsage() {
     ],
   };
   const replyData: any = {
-    labels: labels,
+    labels: labelsFromDataDates(repliesProspect?.data),
     datasets: [
       {
         data: transformData(repliesProspect?.data),
@@ -157,7 +158,7 @@ export default function SettingUsage() {
     ],
   };
   const removedData: any = {
-    labels: labels,
+    labels: labelsFromDataDates(removedProspect?.data),
     datasets: [
       {
         data: transformData(removedProspect?.data),
@@ -169,7 +170,7 @@ export default function SettingUsage() {
     ],
   };
   const nurtureData: any = {
-    labels: labels,
+    labels: labelsFromDataDates(nurtureProspect?.data),
     datasets: [
       {
         data: transformData(nurtureProspect?.data),

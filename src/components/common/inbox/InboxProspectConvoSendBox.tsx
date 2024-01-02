@@ -623,10 +623,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
                             return a.title.localeCompare(b.title);
                           })
                           .map((bf: BumpFramework) => {
+                            let title = bf.title
+                            if (bf.overall_status === 'ACCEPTED' || bf.overall_status === 'BUMPED') {
+                              title = "🟨 (seq): " + title
+                            }
+
                             return {
                               value: bf.id + "",
-                              // label: (bf.default ? "🟢 " : "⚪️ ") + bf.title + " ",
-                              label: bf.title,
+                              label: title,
                             };
                           })
                       : []

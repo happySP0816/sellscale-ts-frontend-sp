@@ -1140,7 +1140,7 @@ const SubjectLineItem: React.FC<{
   );
 };
 
-const EmailBodyItem: React.FC<{
+export const EmailBodyItem: React.FC<{
   template: EmailSequenceStep;
   refetch: () => Promise<void>;
   hideHeader?: boolean;

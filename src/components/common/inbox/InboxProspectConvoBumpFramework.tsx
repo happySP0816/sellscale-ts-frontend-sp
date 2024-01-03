@@ -17,7 +17,7 @@ import {
   Group,
   ScrollArea,
   Box,
-  Checkbox,
+  Container,
 } from '@mantine/core';
 import {
   IconLock,
@@ -149,7 +149,7 @@ export const autoFillBumpFrameworkAccountResearch = (userToken: string, prospect
 export default function InboxProspectConvoBumpFramework(props: {
   prospect: ProspectShallow;
   messages: LinkedInMessage[];
-  bumpFrameworksSequence?: { Description: string; Title: string; project_id: string }[]
+  bumpFrameworksSequence?: BumpFramework[]
   onClose?: () => void;
   onPopulateBumpFrameworks?: (buckets: BumpFrameworkBuckets) => void;
 }) {
@@ -226,7 +226,17 @@ export default function InboxProspectConvoBumpFramework(props: {
       substatuses.push(substatus)
     }
 
-    const result = await getBumpFrameworks(userToken, [], substatuses, []);
+    const result = await getBumpFrameworks(
+      userToken, 
+      [], 
+      substatuses, 
+      [],
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      archetypeID
+    );
     if (result.status !== 'success') {
       showNotification({
         title: 'Error',
@@ -524,15 +534,18 @@ export default function InboxProspectConvoBumpFramework(props: {
                       );
                     })}
                   </Group>
-                </Radio.Group>
-              </Box>
-              <Box px={10} mt={10}>
-                {!!props.bumpFrameworksSequence?.length && (
-                  <>
+                  {!!props.bumpFrameworksSequence?.length && (
+                  <Box sx={{
+                    marginTop: '16px',
+                    marginBottom: '16px'}}
+                  >
                     <Flex
                       justify={'space-between'}
                       align={'center'}
                       gap={4}
+                      sx={{
+                        marginBottom: '8px'
+                      }}
                     >
                       <Divider
                         label={
@@ -560,24 +573,40 @@ export default function InboxProspectConvoBumpFramework(props: {
                         <IconExternalLink width={15} style={{ color: 'blue' }} />
                       </Flex>
                     </Flex>
-                    {props.bumpFrameworksSequence?.map((sequence) => (
-                      <Flex
-                        p={'10px 14px'}
-                        my={'10px'}
-                        fz={12}
-                        justify={'space-between'}
-                        align={'center'}
-                        bg={'#edf1f7'}
-                        style={{
-                          outline: '0.0625rem solid #ced4da',
-                          borderRadius: '8px',
-                        }}
-                      >{sequence.Title}
-                        <IconLock width={13} color='grey' />
-                      </Flex>
-                    ))}
-                  </>
+                    <Box>
+                      {props.bumpFrameworksSequence?.map((sequence) => (
+                          <Box
+                            key={sequence.id}
+                            style={{
+                              outline: `${data?.id === sequence.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
+                              borderRadius: '8px',
+                              padding: '10px 14px',
+                              width: '100%',
+                              marginBottom: '16px'
+                            }}
+                          >
+                            <Flex align={'center'} gap={10} sx={{width: '100%'}}>
+                              <Radio
+                                value={sequence.id}
+                                id={sequence.id ? String(sequence.id) : undefined}
+                                size='xs'
+                                onClick={(e) => {
+                                  setData(sequence);
+                                  setBlockList(sequence.transformer_blocklist);
+                                  handleScroll(e, sequence.id);
+                                  setBumpFramework(sequence); 
+                                }}
+                              />
+                              <Text fw={600} mt={2}>
+                                {sequence?.Title}
+                              </Text>
+                            </Flex>
+                          </Box>
+                      ))}
+                    </Box>
+                  </Box>
                 )}
+                </Radio.Group>
               </Box>
             </ScrollArea>
           </Flex>
@@ -600,8 +629,9 @@ export default function InboxProspectConvoBumpFramework(props: {
                   </>
                 );
               })}
-              {/* TODO(Aakash) - Bring this back on Jan 5th, 2024 */}
-              {/* {props.bumpFrameworksSequence?.map((sequence) => (
+              {
+                (data?.overall_status === 'ACCEPTED' || data?.overall_status === 'BUMPED') && 
+                props.bumpFrameworksSequence?.map((sequence) => (
                 <div>
                   <Card
                     withBorder
@@ -635,7 +665,7 @@ export default function InboxProspectConvoBumpFramework(props: {
                     <Badge color={valueToColor(theme, 'ACTIVE_CONVO')}>CONTINUE THE SEQUENCE</Badge>
                   </Card>
                 </div>
-              ))} */}
+              ))}
             </Flex>
           </ScrollArea>
 

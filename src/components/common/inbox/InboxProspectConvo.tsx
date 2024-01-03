@@ -609,7 +609,12 @@ export default function ProspectConvo(props: Props) {
         userToken,
         [prospect.overall_status],
         substatuses,
-        [], // [prospect.archetype_id]
+        [], // [prospect.archetype_id],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        prospect.archetype_id
       );
 
       if (result.status === "success") {
@@ -734,6 +739,12 @@ export default function ProspectConvo(props: Props) {
               </Text>
             </div>
             <Group sx={{ flexWrap: "nowrap" }}>
+              {statusValue === "ACTIVE_CONVO_SCHEDULING" && (
+                <ProspectDetailsCalendarLink
+                  calendarLink={userData.scheduling_link}
+                  width="250px"
+                />
+              )}
               <Box sx={{'textAlign': 'right'}}>
                 <Badge size="lg" color={"blue"}>
                   {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
@@ -748,6 +759,7 @@ export default function ProspectConvo(props: Props) {
                   </>
                 }
               </Box>
+              
               <ProspectDetailsOptionsMenu
                 prospectId={openedProspectId}
                 archetypeId={prospect?.archetype_id || -1}
@@ -923,14 +935,6 @@ export default function ProspectConvo(props: Props) {
             </Popover>
           </Tabs.List>
         </Tabs>
-        {statusValue === "ACTIVE_CONVO_SCHEDULING" && (
-          <div style={{ position: "absolute", bottom: 7, right: 15 }}>
-            <ProspectDetailsCalendarLink
-              calendarLink={userData.scheduling_link}
-              width="250px"
-            />
-          </div>
-        )}
       </div>
       <div
         style={{

@@ -422,6 +422,9 @@ export type BumpFramework = {
   bump_framework_template_name?: string;
   bump_framework_human_readable_prompt?: string;
   human_feedback?: string;
+  Title?: string;
+  Description?: string;
+  bump_id?: number;
 };
 
 export type EmailSequenceStep = {

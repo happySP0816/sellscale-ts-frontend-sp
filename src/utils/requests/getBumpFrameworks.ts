@@ -22,7 +22,8 @@ export async function getBumpFrameworks(
   excludeArchetypeIDs?: number[],
   excludeSSDefault?: boolean,
   uniqueOnly?: boolean,
-  bumpedCount?: number
+  bumpedCount?: number,
+  include_archetype_sequence_id?: number,
 ): Promise<MsgResponse> {
   const overall_statuses_string = overallStatuses.join(',');
   // const substatuses_string = substatuses.join(',');
@@ -34,7 +35,7 @@ export async function getBumpFrameworks(
   const unique_only = uniqueOnly ? 'true' : 'false';
 
   const response = await fetch(
-    `${API_URL}/bump_framework/bump?overall_statuses=${overall_statuses_string}&substatuses=${substatuses_string}&archetype_ids=${archetype_ids_string}&exclude_client_archetype_ids=${exclude_archetype_ids_string}&exclude_ss_default=${exclude_ss_default}&unique_only=${unique_only}` + (bumpedCount ? `&bumped_count=${bumpedCount}` : ''),
+    `${API_URL}/bump_framework/bump?overall_statuses=${overall_statuses_string}&substatuses=${substatuses_string}&archetype_ids=${archetype_ids_string}&exclude_client_archetype_ids=${exclude_archetype_ids_string}&exclude_ss_default=${exclude_ss_default}&unique_only=${unique_only}` + (bumpedCount ? `&bumped_count=${bumpedCount}` : '' ) + (include_archetype_sequence_id ? `&include_archetype_sequence_id=${include_archetype_sequence_id}` : ''),
     {
       method: "GET",
       headers: {

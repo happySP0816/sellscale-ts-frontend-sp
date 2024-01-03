@@ -453,12 +453,65 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   console.log({ bumpFrameworks });
   const replyLabels = useMemo(() => {
-    const labels = new Set<string>();
-
-    bumpFrameworks.forEach((i) => labels.add(i.substatus));
+    const labels = [
+      "ACTIVE_CONVO_QUESTION",
+      "ACTIVE_CONVO_QUAL_NEEDED",
+      "ACTIVE_CONVO_OBJECTION",
+      "ACTIVE_CONVO_SCHEDULING",
+      "ACTIVE_CONVO_NEXT_STEPS",
+      "ACTIVE_CONVO_REVIVAL",
+      "ACTIVE_CONVO_CIRCLE_BACK",
+      "ACTIVE_CONVO_REFERRAL",
+      "ACTIVE_CONVO_QUEUED_FOR_SNOOZE",
+      "ACTIVE_CONVO_CONTINUE_SEQUENCE",
+    ]
 
     return Array.from(labels);
   }, [bumpFrameworks]);
+
+
+  const filteredFrameworkData = openedOutboundChannel === "LINKEDIN"
+      ? bumpFrameworks.length > 0
+        ? bumpFrameworks
+            .sort((a: BumpFramework, b: BumpFramework) => {
+              return a.title.localeCompare(b.title);
+            })
+            .filter((i) => {
+              if (!replyLabel && replyLabel !== 'ACTIVE_CONVO_CONTINUE_SEQUENCE') {
+                return i;
+              }
+
+              if (replyLabel === 'ACTIVE_CONVO_CONTINUE_SEQUENCE') {
+                return i.overall_status === 'ACCEPTED' || i.overall_status === 'BUMPED';
+              }
+
+              return i.substatus === replyLabel;
+            })
+            .map((bf: BumpFramework) => {
+              let title = bf.title;
+              if (
+                bf.overall_status === "ACCEPTED" ||
+                bf.overall_status === "BUMPED"
+              ) {
+                title = "🟨 (seq): " + title;
+              }
+
+              return {
+                value: bf.id + "",
+                label: title,
+              };
+            })
+        : []
+      : emailSequenceSteps?.length > 0
+      ? emailSequenceSteps.map((step: EmailSequenceStep) => {
+          return {
+            value: step.id + "",
+            // label: (step.default ? "🟢 " : "⚪️ ") + step.title,
+            label: step.title,
+          };
+        })
+      : [];
+
   return (
     <Paper
       shadow="sm"
@@ -606,44 +659,9 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     (emailSequenceSteps === undefined ||
                       emailSequenceSteps?.length === 0))
                 }
+                defaultValue={filteredFrameworkData.length > 0 ? filteredFrameworkData[0] + "" : undefined}
                 data={
-                  openedOutboundChannel === "LINKEDIN"
-                    ? bumpFrameworks.length > 0
-                      ? bumpFrameworks
-                          .sort((a: BumpFramework, b: BumpFramework) => {
-                            return a.title.localeCompare(b.title);
-                          })
-                          .filter((i) => {
-                            if (!replyLabel) {
-                              return i;
-                            }
-
-                            return i.substatus === replyLabel;
-                          })
-                          .map((bf: BumpFramework) => {
-                            let title = bf.title;
-                            if (
-                              bf.overall_status === "ACCEPTED" ||
-                              bf.overall_status === "BUMPED"
-                            ) {
-                              title = "🟨 (seq): " + title;
-                            }
-
-                            return {
-                              value: bf.id + "",
-                              label: title,
-                            };
-                          })
-                      : []
-                    : emailSequenceSteps?.length > 0
-                    ? emailSequenceSteps.map((step: EmailSequenceStep) => {
-                        return {
-                          value: step.id + "",
-                          // label: (step.default ? "🟢 " : "⚪️ ") + step.title,
-                          label: step.title,
-                        };
-                      })
-                    : []
+                  filteredFrameworkData
                 }
                 // styles={{
                 //   input: {
@@ -660,7 +678,10 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     );
                     if (selected) {
                       setBumpFramework(selected);
-                      setReplyLabel(selected.substatus);
+                      if (selected.substatus) {
+                        setReplyLabel(selected.substatus);
+                      }
+                      
                     }
 
                     const substatus =

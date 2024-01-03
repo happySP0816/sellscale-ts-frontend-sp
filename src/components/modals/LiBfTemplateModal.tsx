@@ -208,9 +208,9 @@ export default function LiBfTemplateModal({
                 ) : (
                   <PersonalizationSection
                     title='Enabled Research Points'
-                    blocklist={_.difference(RESEARCH_POINTS, researchPoints)}
+                    blocklist={researchPoints}
                     onItemsChange={async (items) => {
-                      const newItems = items.filter((x) => x.checked).map((x) => x.id);
+                      const newItems = items.filter((x) => !x.checked).map((x) => x.id);
                       setResearchPoints(newItems);
                     }}
                     onChanged={() => {}}

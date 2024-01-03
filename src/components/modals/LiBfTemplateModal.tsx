@@ -24,7 +24,7 @@ import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
-import { Archetype, PersonaOverview } from 'src';
+import { Archetype, BumpFramework, PersonaOverview } from 'src';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
 import createCTA from '@utils/requests/createCTA';
@@ -50,29 +50,99 @@ import {
   IconWashMachine,
 } from '@tabler/icons';
 import { IconRobot } from '@tabler/icons';
+import { patchBumpFramework } from '@utils/requests/patchBumpFramework';
 
 export default function LiBfTemplateModal({
   context,
   id,
   innerProps,
 }: ContextModalProps<{
-  message: string;
-  handleSubmit: (message: string) => void;
+  mode: 'CREATE' | 'EDIT';
+  editProps?: {
+    templateId: number;
+    bf: BumpFramework;
+    title: string;
+    message: string;
+    active: boolean;
+    humanFeedback: string;
+    blockList: string[];
+  };
 }>) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
+  const [opened, { toggle, open }] = useDisclosure(false);
+
+  const [loadingResearch, setLoadingResearch] = useState(false);
+  const [blockList, setBlockList] = useState<string[]>(innerProps.editProps?.blockList ?? []);
+
+  const showUserFeedback = true;
 
   const form = useForm({
     initialValues: {
-      message: innerProps.message ?? '',
+      title: innerProps.editProps?.title ?? '',
+      message: innerProps.editProps?.message ?? '',
+      active: innerProps.editProps?.active === undefined ? true : innerProps.editProps.active,
+      humanFeedback: innerProps.editProps?.humanFeedback ?? '',
     },
   });
 
+  const autoDetectResearchPoints = async () => {
+    if (!currentProject) return;
+    setLoadingResearch(true);
+    const response = await detectLiTemplateResearch(
+      userToken,
+      currentProject.id,
+      undefined,
+      form.values.message
+    );
+    if (response.status === 'success') {
+      console.log(response.data);
+      setBlockList(response.data);
+      open();
+    }
+    setLoadingResearch(false);
+  };
+
   const handleSubmit = async (values: typeof form.values) => {
-    setLoading(true);
-    await innerProps.handleSubmit(values.message);
-    setLoading(false);
+    if (innerProps.mode === 'CREATE') {
+      await createTemplate(values);
+    } else {
+      await updateTemplate(values);
+    }
+  };
+
+  const createTemplate = async (values: typeof form.values) => {
+    if (!currentProject) return;
+
+    await queryClient.refetchQueries({
+      queryKey: [`query-get-bump-frameworks`],
+    });
+    context.closeModal(id);
+  };
+
+  const updateTemplate = async (values: typeof form.values) => {
+    if (!currentProject) return;
+
+    const result = await patchBumpFramework(
+      userToken,
+      innerProps.editProps?.templateId ?? -1,
+      innerProps.editProps?.bf.overall_status ?? '',
+      values.title,
+      values.message,
+      innerProps.editProps?.bf.bump_length ?? '',
+      innerProps.editProps?.bf.bumped_count ?? -1,
+      innerProps.editProps?.bf.bump_delay_days ?? -1,
+      values.active,
+      true,
+      blockList
+    );
+    await queryClient.refetchQueries({
+      queryKey: [`query-get-bump-frameworks`],
+    });
     context.closeModal(id);
   };
 
@@ -88,31 +158,97 @@ export default function LiBfTemplateModal({
 
         <Card withBorder>
           <Stack>
+            <TextInput label='Name' placeholder='Name' required {...form.getInputProps('title')} />
+
             <Box style={{ position: 'relative' }}>
               <Textarea
-                placeholder='Instructions'
-                minRows={3}
-                autosize
-                variant='filled'
-                // defaultValue={bf.description}
-                // onChange={(e) => {
-                //   form.setFieldValue('promptInstructions', e.target.value);
-                //   setChanged(true);
-                // }}
-                // onBlur={() => {
-                //   setEditing(false);
-                // }}
-                // onClick={(e) => {
-                //   e.preventDefault();
-                //   e.stopPropagation();
-                // }}
+                label='Template'
+                required
+                description='Use [[personalization]] to add personalization into your message.'
+                minRows={4}
+                placeholder='Template outline'
                 {...form.getInputProps('message')}
               />
+              {form.values['message'].length > 300 && (
+                <Text color='red' mt='0px' fz='xs' align='right'>
+                  Message is too long ({form.values['message'].length} / 300 characters)
+                </Text>
+              )}
+              <Button
+                loading={loadingResearch}
+                variant='light'
+                size='xs'
+                compact
+                style={{
+                  position: 'absolute',
+                  top: 15,
+                  right: 0,
+                }}
+                leftIcon={<IconRotateRectangle size='0.9rem' />}
+                onClick={() => {
+                  autoDetectResearchPoints();
+                }}
+              >
+                Autodetect Research Points
+              </Button>
             </Box>
 
+            <Collapse in={opened}>
+              <Box mih={500} sx={{ position: 'relative' }}>
+                {loadingResearch ? (
+                  <LoadingOverlay visible />
+                ) : (
+                  <PersonalizationSection
+                    title='Enabled Research Points'
+                    blocklist={blockList}
+                    onItemsChange={async (items) => {
+                      setBlockList(items.filter((x) => x.checked).map((x) => x.id));
+                    }}
+                    onChanged={() => {}}
+                  />
+                )}
+              </Box>
+              {showUserFeedback && (
+                <Card mb='16px'>
+                  <Card.Section
+                    sx={{
+                      backgroundColor: '#59a74f',
+                      flexDirection: 'row',
+                      display: 'flex',
+                    }}
+                    p='sm'
+                  >
+                    <Text color='white' mt='4px'>
+                      Feel free to give me feedback on improving the message
+                    </Text>
+                  </Card.Section>
+                  <Card.Section sx={{ border: 'solid 2px #59a74f !important' }} p='8px'>
+                    <Textarea
+                      variant='unstyled'
+                      pl={'8px'}
+                      pr={'8px'}
+                      minRows={3}
+                      placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                      {...form.getInputProps('humanFeedback')}
+                    />
+                  </Card.Section>
+                </Card>
+              )}
+            </Collapse>
+            <Button
+              variant='light'
+              color='gray'
+              leftIcon={
+                opened ? <IconChevronUp size={'0.9rem'} /> : <IconChevronDown size={'0.9rem'} />
+              }
+              onClick={() => toggle()}
+            >
+              {opened ? 'Hide' : 'Show'} Settings
+            </Button>
+
             <Box>
-              <Button disabled={loading} type='submit'>
-                Update
+              <Button disabled={loading || form.values['message'].length > 300} type='submit'>
+                {innerProps.mode === 'CREATE' ? 'Create' : 'Update'}
               </Button>
             </Box>
           </Stack>

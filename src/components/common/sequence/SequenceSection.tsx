@@ -159,7 +159,12 @@ export default function SequenceSection() {
     queryKey: [`query-get-bump-frameworks`],
     queryFn: async () => {
       if (!currentProject) return [];
-      const result = await getBumpFrameworks(userToken, ['ACCEPTED', 'BUMPED'], [], [currentProject?.id]);
+      const result = await getBumpFrameworks(
+        userToken,
+        ['ACCEPTED', 'BUMPED'],
+        [],
+        [currentProject?.id]
+      );
       if (result.status !== 'success') return [];
       return result.data.bump_frameworks as BumpFramework[];
     },
@@ -2703,8 +2708,7 @@ function FrameworkSection(props: {
             )}
 
             <Stack spacing={10}>
-              {
-                (templateShowAll
+              {(templateShowAll
                 ? props.frameworks.sort((a, b) => {
                     if (a.default) return 1;
                     if (b.default) return -1;
@@ -2722,7 +2726,8 @@ function FrameworkSection(props: {
                   if (a.default) return -1;
                   if (b.default) return 1;
                   return 0;
-                }).map((bf, index) => (
+                })
+                .map((bf, index) => (
                   <Paper
                     key={index}
                     p='md'
@@ -2975,31 +2980,40 @@ function FrameworkSection(props: {
                           // setEditing(true);
                           openContextModal({
                             modal: 'liBfTemplate',
-                            title: 'Edit Template',
+                            title: 'Edit Bf Template',
                             innerProps: {
-                              message: bf.description,
-                              handleSubmit: async (message: string) => {
-                                form.setFieldValue('promptInstructions', message);
-                                // setChanged(true);
-                                // setEditing(false);
-                                const result = await patchBumpFramework(
-                                  userToken,
-                                  bf.id,
-                                  bf.overall_status,
-                                  bf.title,
-                                  message,
-                                  bf.bump_length,
-                                  bf.bumped_count,
-                                  bf.bump_delay_days,
-                                  bf.default,
-                                  bf.use_account_research,
-                                  bf.transformer_blocklist
-                                );
-
-                                await queryClient.refetchQueries({
-                                  queryKey: [`query-get-bump-frameworks`],
-                                });
+                              mode: 'EDIT',
+                              editProps: {
+                                bf: bf,
+                                templateId: bf.id,
+                                title: bf.title,
+                                message: bf.description,
+                                active: bf.default,
+                                humanFeedback: bf.human_feedback,
+                                researchPoints: bf.transformer_blocklist,
                               },
+                              // message: bf.description,
+                              // handleSubmit: async (message: string) => {
+                              //   form.setFieldValue('promptInstructions', message);
+                              //   // setChanged(true);
+                              //   // setEditing(false);
+                              //   const result = await patchBumpFramework(
+                              //     userToken,
+                              //     bf.id,
+                              //     bf.overall_status,
+                              //     bf.title,
+                              //     message,
+                              //     bf.bump_length,
+                              //     bf.bumped_count,
+                              //     bf.bump_delay_days,
+                              //     bf.default,
+                              //     bf.use_account_research,
+                              //     bf.transformer_blocklist
+                              //   );
+                              //   await queryClient.refetchQueries({
+                              //     queryKey: [`query-get-bump-frameworks`],
+                              //   });
+                              // },
                             },
                           });
                         }}
@@ -3008,8 +3022,7 @@ function FrameworkSection(props: {
                       </Button>
                     </Box>
                   </Paper>
-                ))
-              }
+                ))}
             </Stack>
           </form>
 

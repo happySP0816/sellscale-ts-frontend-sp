@@ -56,6 +56,7 @@ import FrameworkReplies from '@modals/FrameworkReplies';
 import { io } from 'socket.io-client';
 import MultiChannelModal from '@modals/MultiChannelModal';
 import LiBfTemplateModal from '@modals/LiBfTemplateModal';
+import EditTriggerModal from '@modals/EditTriggerModal';
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -221,6 +222,7 @@ export default function App() {
               salesNavURL: SalesNavURLModal,
               frameworkReplies: FrameworkReplies,
               multiChannel: MultiChannelModal,
+              editTrigger: EditTriggerModal,
             }}
             modalProps={{
               closeOnClickOutside: false,

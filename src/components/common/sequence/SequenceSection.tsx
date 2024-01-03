@@ -2996,7 +2996,7 @@ function FrameworkSection(props: {
                                 message: bf.description,
                                 active: bf.default,
                                 humanFeedback: bf.human_feedback,
-                                researchPoints: bf.transformer_blocklist,
+                                blockList: bf.transformer_blocklist,
                               },
                               // message: bf.description,
                               // handleSubmit: async (message: string) => {

@@ -189,7 +189,7 @@ export default function TAMGraphV2() {
       >
         <Accordion.Item value={title}>
           <Accordion.Control>
-            <Text fw={500} fz={"sm"}>
+            <Text fw={500} fz={"xs"}>
               {title}
             </Text>
           </Accordion.Control>
@@ -199,13 +199,13 @@ export default function TAMGraphV2() {
                 <Divider />
                 <Flex
                   justify={"space-between"}
-                  py={"sm"}
+                  py={"xs"}
                   pt={idx === 0 ? 0 : "xs"}
                 >
-                  <Text fz={"sm"} fw={500}>
+                  <Text fz={"xs"} fw={500}>
                     {i.title}
                   </Text>
-                  <Text color="gray.6" fw={500} fz={"sm"}>
+                  <Text color="gray.6" fw={500} fz={"xs"}>
                     {i.count}
                   </Text>
                 </Flex>
@@ -245,7 +245,7 @@ export default function TAMGraphV2() {
       <Flex justify={'space-between'}>
         <CoreTitle order={2}>Outreach TAM</CoreTitle>
 
-        {/* <Flex gap={"sm"}>
+        {/* <Flex gap={"xs"}>
           <Flex align={"center"}>
             <IconCalendar
               size={"1rem"}
@@ -318,10 +318,10 @@ export default function TAMGraphV2() {
 
                   <Flex align={"flex-end"} justify={"center"} h={"100%"}>
                     <Box>
-                      <Text align="center" fz={"sm"} fw={700}>
+                      <Text align="center" fz={"xs"} fw={700}>
                         {percentage}%
                       </Text>
-                      <Text align="center" fz={"sm"}>
+                      <Text align="center" fz={"xs"}>
                         Penetrated
                       </Text>
                     </Box>
@@ -330,7 +330,7 @@ export default function TAMGraphV2() {
               </Box>
               <Flex direction={"column"}>
                 <Flex align={"center"}>
-                  <Text fw={600} color="gray.8" fz='sm'>
+                  <Text fw={600} color="gray.8" fz='xs'>
                     <Box
                       sx={(theme) => ({
                         borderRadius: 9999,
@@ -354,8 +354,8 @@ export default function TAMGraphV2() {
                   </MantineTooltip>
                 </Flex>
 
-                <Flex align={"center"} gap={"sm"}>
-                  <Text fw={700} fz={32}>
+                <Flex align={"center"} gap={"xs"}>
+                  <Text fw={700} fz={24}>
                     $
                     {new Intl.NumberFormat("en-US").format(
                       (graphData?.stats[0].num_companies ? graphData?.stats[0].num_companies : 0) * (userData.avg_contract_size ? userData.avg_contract_size : 10000)
@@ -370,7 +370,7 @@ export default function TAMGraphV2() {
         <Grid.Col span={2}>
           <Card>
             <Flex justify={"space-between"}>
-              <Text fw={600} color="gray.8" fz='sm'>
+              <Text fw={600} color="gray.8" fz='xs'>
                 Total Contacts
               </Text>
               <ActionIcon>
@@ -378,8 +378,8 @@ export default function TAMGraphV2() {
               </ActionIcon>
             </Flex>
 
-            <Flex align={"center"} gap={"sm"}>
-              <Text fw={700} fz={32}>
+            <Flex align={"center"} gap={"xs"}>
+              <Text fw={700} fz={24}>
                 {Number(graphData?.stats[0].num_contacts).toLocaleString()}
               </Text>
 
@@ -390,15 +390,15 @@ export default function TAMGraphV2() {
         <Grid.Col span={2}>
           <Card>
             <Flex justify={"space-between"}>
-              <Text fw={600} color="gray.8" fz='sm'>
+              <Text fw={600} color="gray.8" fz='xs'>
                 Engaged Contacts
               </Text>
               <ActionIcon>
                 <IconDotsVertical size={"0.8rem"} />
               </ActionIcon>
             </Flex>
-            <Flex align={"center"} gap={"sm"}>
-              <Text fw={700} fz={32}>
+            <Flex align={"center"} gap={"xs"}>
+              <Text fw={700} fz={24}>
                 {Number(graphData?.stats[0].num_engaged).toLocaleString()}
               </Text>
 
@@ -415,7 +415,7 @@ export default function TAMGraphV2() {
         <Grid.Col span={2}>
           <Card>
             <Flex>
-              <Text fw={600} color="gray.8" fz='sm'>
+              <Text fw={600} color="gray.8" fz='xs'>
                 Open Leads
               </Text>
               <MantineTooltip label="Open convos times average ACV. Note: Does not include not interested or not qualified conversations." withinPortal>
@@ -424,8 +424,8 @@ export default function TAMGraphV2() {
                 </ActionIcon>
               </MantineTooltip>
             </Flex>
-            <Flex align={"center"} gap={"sm"}>
-              <Text fw={700} fz={32}>
+            <Flex align={"center"} gap={"xs"}>
+              <Text fw={700} fz={24}>
                 {Number(25).toLocaleString()}
               </Text>
               <Text color="gray.6"> | </Text>
@@ -499,10 +499,10 @@ export default function TAMGraphV2() {
               data={data}
             />
             <Flex pos={"absolute"} bottom={8} right={0}>
-              <Text color="gray" fw={700} fz={"sm"}>
+              <Text color="gray" fw={700} fz={"xs"}>
                 Filter by: &nbsp;
               </Text>
-              <Group spacing="sm">
+              <Group spacing="xs">
                 <Button
                   px={16}
                   radius={"12rem"}

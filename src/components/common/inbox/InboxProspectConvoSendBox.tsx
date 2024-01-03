@@ -97,6 +97,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
     scrollToBottom?: () => void;
     msgLoading?: boolean;
     minimizedSendBox: () => void;
+    currentSubstatus?: string;
   },
   ref
 ) {
@@ -209,7 +210,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [emailSequenceSteps, setEmailSequenceSteps] = useState<
     EmailSequenceStep[]
   >([]);
-  const [replyLabel, setReplyLabel] = useState("");
+  const [replyLabel, setReplyLabel] = useState(props.currentSubstatus);
   // We use this to store the value of the text area
   const [messageDraft, _setMessageDraft] = useState("");
   // We use this to store the raw value of the rich text editor
@@ -444,6 +445,12 @@ export default forwardRef(function InboxProspectConvoSendBox(
     }
   };
 
+  useEffect(() => {
+    if (replyLabel !== props.currentSubstatus) {
+      setReplyLabel(props.currentSubstatus);
+    }
+  }, [props.currentSubstatus]);
+
   console.log({ bumpFrameworks });
   const replyLabels = useMemo(() => {
     const labels = new Set<string>();
@@ -527,27 +534,29 @@ export default forwardRef(function InboxProspectConvoSendBox(
           paddingRight: 10,
         }}
       >
-        <Flex justify={"space-between"} mt={10} gap={"xs"}>
-          <Flex align={"center"} gap={"xs"}>
-            <Text fw={700} fz={"xs"} color="gray.6">
+        <Flex justify={"space-between"} mt={10} gap={"xs"} >
+          <Flex align={"center"} gap={"xs"} w='35%'>
+            <Text fw={700} fz={"10px"} color="gray.6" w='35%'>
               Reply label
             </Text>
             <Select
+              w='65%'
               size="xs"
               onChange={(val) => setReplyLabel(val || "")}
+              value={replyLabel}
               withinPortal
-              data={replyLabels.map((label) => ({
+              data={replyLabels.filter(label => label).map((label) => ({
                 value: label,
-                label: label,
+                label: label?.replaceAll("ACTIVE_CONVO_", "").replaceAll("_", " ").toLowerCase(),
               }))}
             />
           </Flex>
-          <Flex gap={"xs"} align={"center"}>
+          <Flex gap={"xs"} align={"center"} w='70%'>
             {/* only show for linkedin */}
-            <Text fw={700} fz={"xs"} color="gray.6">
+            <Text fw={700} fz={"10px"} color="gray.6" w="25%">
               AI Response
             </Text>
-            <Flex align={"center"} pos={"relative"}>
+            <Flex align={"center"} pos={"relative"} w='75%'>
               <Select
                 rightSection={
                   <Tooltip

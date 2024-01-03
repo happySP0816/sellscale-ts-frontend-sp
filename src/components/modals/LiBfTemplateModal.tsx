@@ -79,6 +79,8 @@ export default function LiBfTemplateModal({
   const [loadingResearch, setLoadingResearch] = useState(false);
   const [blockList, setBlockList] = useState<string[]>(innerProps.editProps?.blockList ?? []);
 
+  console.log(blockList);
+
   const showUserFeedback = true;
 
   const form = useForm({
@@ -200,7 +202,7 @@ export default function LiBfTemplateModal({
                 ) : (
                   <PersonalizationSection
                     title='Enabled Research Points'
-                    blocklist={blockList}
+                    blocklist={_.cloneDeep(blockList)}
                     onItemsChange={async (items) => {
                       setBlockList(items.filter((x) => x.checked).map((x) => x.id));
                     }}

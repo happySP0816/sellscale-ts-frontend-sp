@@ -2192,7 +2192,7 @@ function FrameworkSectionShell(props: {
     props.framework ?? frameworks[0]
   );
 
-  console.log(activeFramework);
+  console.log(activeFramework, props.framework);
 
   useEffect(() => {
     setActiveFramework(props.framework ?? frameworks[0]);

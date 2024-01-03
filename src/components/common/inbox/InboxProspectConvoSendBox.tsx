@@ -493,7 +493,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 bf.overall_status === "ACCEPTED" ||
                 bf.overall_status === "BUMPED"
               ) {
-                title = "🟨 (seq): " + title;
+                title = "(step #" + (bf.bumped_count ? bf.bumped_count + 1 : 1) + ") " + bf.title
               }
 
               return {

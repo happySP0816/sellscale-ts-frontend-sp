@@ -44,6 +44,7 @@ import {
   IconZzz,
   IconHourglass,
   IconX,
+  IconPencil,
 } from "@tabler/icons";
 import {
   IconClock24,
@@ -60,6 +61,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -207,7 +209,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [emailSequenceSteps, setEmailSequenceSteps] = useState<
     EmailSequenceStep[]
   >([]);
-
+  const [replyLabel, setReplyLabel] = useState("");
   // We use this to store the value of the text area
   const [messageDraft, _setMessageDraft] = useState("");
   // We use this to store the raw value of the rich text editor
@@ -291,7 +293,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           title: scheduleDay ? "Message Scheduled" : "Message Sent",
           message: "",
           color: "green",
-        })
+        });
       } else {
         showNotification({
           id: "send-linkedin-message-error",
@@ -441,7 +443,15 @@ export default forwardRef(function InboxProspectConvoSendBox(
         });
     }
   };
-  const calendarRef = useRef<HTMLInputElement>(null);
+
+  console.log({ bumpFrameworks });
+  const replyLabels = useMemo(() => {
+    const labels = new Set<string>();
+
+    bumpFrameworks.forEach((i) => labels.add(i.substatus));
+
+    return Array.from(labels);
+  }, [bumpFrameworks]);
   return (
     <Paper
       shadow="sm"
@@ -517,95 +527,67 @@ export default forwardRef(function InboxProspectConvoSendBox(
           paddingRight: 10,
         }}
       >
-        <Flex justify={"space-between"} mt={10}>
-          <Group>
+        <Flex justify={"space-between"} mt={10} gap={"xs"}>
+          <Flex align={"center"} gap={"xs"}>
+            <Text fw={700} fz={"xs"} color="gray.6">
+              Reply label
+            </Text>
+            <Select
+              size="xs"
+              onChange={(val) => setReplyLabel(val || "")}
+              withinPortal
+              data={replyLabels.map((label) => ({
+                value: label,
+                label: label,
+              }))}
+            />
+          </Flex>
+          <Flex gap={"xs"} align={"center"}>
             {/* only show for linkedin */}
-
-            <Button.Group>
-              <Button
-                leftIcon={<IconWriting size="1rem" />}
-                variant="outline"
-                color="gray.8"
-                radius={theme.radius.lg}
-                sx={{
-                  "&[data-disabled]": {
-                    backgroundColor: "white",
-                    border: "1px solid black",
-                    pointerEvents: "all",
-                  },
-                }}
-                size="xs"
-                disabled={
-                  (openedOutboundChannel === "LINKEDIN" &&
-                    (bumpFrameworks === undefined ||
-                      bumpFrameworks?.length === 0)) ||
-                  (openedOutboundChannel != "LINKEDIN" &&
-                    (emailSequenceSteps === undefined ||
-                      emailSequenceSteps?.length === 0))
-                }
-                onClick={async () => {
-                  setMsgLoading(true);
-                  if (openedOutboundChannel === "LINKEDIN") {
-                    const result = await generateAIFollowup(
-                      userToken,
-                      props.prospectId,
-                      selectedBumpFramework
-                    );
-                    setMessageDraft(result.msg);
-                    setAiMessage(result.msg);
-                    setAiGenerated(result.aiGenerated);
-                  } else if (openedOutboundChannel === "EMAIL") {
-                    if (!currentConvoEmailThread) {
-                      showNotification({
-                        id: "send-email-message-error",
-                        title: "Error",
-                        message: "Please select an email thread",
-                        color: "red",
-                        autoClose: false,
-                      });
-                      setMsgLoading(false);
-                      return;
-                    }
-                    const result = await postGenerateFollowupEmail(
-                      userToken,
-                      props.prospectId,
-                      currentConvoEmailThread.nylas_thread_id,
-                      selectedEmailSequenceStep?.id || null,
-                      null
-                    );
-                    // Clean the result
-                    const email_body = result.data.email_body;
-                    if (!email_body) {
-                      showNotification({
-                        id: "generate-email-message-error",
-                        title: "Error",
-                        message:
-                          "Failed to generate message. Please try again.",
-                        color: "red",
-                        autoClose: false,
-                      });
-                      setMsgLoading(false);
-                      return;
-                    }
-                    const message = email_body.completion;
-                    messageDraftEmail.current = message;
-                    setMessageDraft(message);
-                    setAiMessage(message);
-                    setAiGenerated(true);
-                  }
-                  setMsgLoading(false);
-                }}
-              >
-                Generate {openedOutboundChannel === "LINKEDIN" ? "" : "Email"}
-              </Button>
+            <Text fw={700} fz={"xs"} color="gray.6">
+              AI Response
+            </Text>
+            <Flex align={"center"} pos={"relative"}>
               <Select
+                rightSection={
+                  <Tooltip
+                    label={
+                      selectedBumpFramework
+                        ? `Manage '${selectedBumpFramework.title}'`
+                        : `Configure Msg Gen`
+                    }
+                    withArrow
+                  >
+                    <Button
+                      variant="outline"
+                      color="gray.8"
+                      size="xs"
+                      w={'100%'}
+                      radius={0}
+                      sx={(theme) => ({
+                        border: "none",
+                        borderLeft: `1px solid ${theme.colors.gray[4]}`,
+                        paddingLeft: 4,
+                        paddingRight: 4,
+                      })}
+                      onClick={() => {
+                        setOpenBumpFrameworks(true);
+                      }}
+                    >
+                      {selectedBumpFramework ? (
+                        <IconSettingsFilled size="0.8rem" />
+                      ) : (
+                        <IconSettings size="0.8rem" />
+                      )}
+                    </Button>
+                  </Tooltip>
+                }
                 withinPortal
                 placeholder={
                   bumpFrameworks.length > 0
                     ? "Select Framework"
                     : "No Frameworks"
                 }
-                radius={0}
                 size="xs"
                 disabled={
                   (openedOutboundChannel === "LINKEDIN" &&
@@ -622,10 +604,20 @@ export default forwardRef(function InboxProspectConvoSendBox(
                           .sort((a: BumpFramework, b: BumpFramework) => {
                             return a.title.localeCompare(b.title);
                           })
+                          .filter((i) => {
+                            if (!replyLabel) {
+                              return i;
+                            }
+
+                            return i.substatus === replyLabel;
+                          })
                           .map((bf: BumpFramework) => {
-                            let title = bf.title
-                            if (bf.overall_status === 'ACCEPTED' || bf.overall_status === 'BUMPED') {
-                              title = "🟨 (seq): " + title
+                            let title = bf.title;
+                            if (
+                              bf.overall_status === "ACCEPTED" ||
+                              bf.overall_status === "BUMPED"
+                            ) {
+                              title = "🟨 (seq): " + title;
                             }
 
                             return {
@@ -644,14 +636,14 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       })
                     : []
                 }
-                styles={{
-                  input: {
-                    borderColor: "black",
-                    borderRight: "0",
-                    borderLeft: "0",
-                  },
-                  dropdown: { minWidth: 250 },
-                }}
+                // styles={{
+                //   input: {
+                //     borderColor: "black",
+                //     borderRight: "0",
+                //     borderLeft: "0",
+                //   },
+                //   dropdown: { minWidth: 250 },
+                // }}
                 onChange={(value) => {
                   if (openedOutboundChannel === "LINKEDIN") {
                     const selected = bumpFrameworks.find(
@@ -659,6 +651,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     );
                     if (selected) {
                       setBumpFramework(selected);
+                      setReplyLabel(selected.substatus);
                     }
 
                     const substatus =
@@ -681,54 +674,83 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     : undefined
                 }
               />
-              <Tooltip
-                label={
-                  selectedBumpFramework
-                    ? `Manage '${selectedBumpFramework.title}'`
-                    : `Configure Msg Gen`
+            </Flex>
+
+            <Button
+              leftIcon={<IconPencil size="1rem" />}
+              variant="outline"
+              color="gray.6"
+              sx={{
+                "&[data-disabled]": {
+                  backgroundColor: "white",
+                  border: "1px solid black",
+                  pointerEvents: "all",
+                },
+              }}
+              size="xs"
+              disabled={
+                (openedOutboundChannel === "LINKEDIN" &&
+                  (bumpFrameworks === undefined ||
+                    bumpFrameworks?.length === 0)) ||
+                (openedOutboundChannel != "LINKEDIN" &&
+                  (emailSequenceSteps === undefined ||
+                    emailSequenceSteps?.length === 0))
+              }
+              onClick={async () => {
+                setMsgLoading(true);
+                if (openedOutboundChannel === "LINKEDIN") {
+                  const result = await generateAIFollowup(
+                    userToken,
+                    props.prospectId,
+                    selectedBumpFramework
+                  );
+                  setMessageDraft(result.msg);
+                  setAiMessage(result.msg);
+                  setAiGenerated(result.aiGenerated);
+                } else if (openedOutboundChannel === "EMAIL") {
+                  if (!currentConvoEmailThread) {
+                    showNotification({
+                      id: "send-email-message-error",
+                      title: "Error",
+                      message: "Please select an email thread",
+                      color: "red",
+                      autoClose: false,
+                    });
+                    setMsgLoading(false);
+                    return;
+                  }
+                  const result = await postGenerateFollowupEmail(
+                    userToken,
+                    props.prospectId,
+                    currentConvoEmailThread.nylas_thread_id,
+                    selectedEmailSequenceStep?.id || null,
+                    null
+                  );
+                  // Clean the result
+                  const email_body = result.data.email_body;
+                  if (!email_body) {
+                    showNotification({
+                      id: "generate-email-message-error",
+                      title: "Error",
+                      message: "Failed to generate message. Please try again.",
+                      color: "red",
+                      autoClose: false,
+                    });
+                    setMsgLoading(false);
+                    return;
+                  }
+                  const message = email_body.completion;
+                  messageDraftEmail.current = message;
+                  setMessageDraft(message);
+                  setAiMessage(message);
+                  setAiGenerated(true);
                 }
-                withArrow
-              >
-                <Button
-                  variant="outline"
-                  color="gray.8"
-                  radius={theme.radius.lg}
-                  size="xs"
-                  onClick={() => {
-                    setOpenBumpFrameworks(true);
-                  }}
-                >
-                  {selectedBumpFramework ? (
-                    <IconSettingsFilled size="1.225rem" />
-                  ) : (
-                    <IconSettings size="1.225rem" />
-                  )}
-                </Button>
-              </Tooltip>
-            </Button.Group>
-          </Group>
-          {openedOutboundChannel === "LINKEDIN" && (
-            <Tooltip withArrow position="bottom" label="Smart Generate with AI">
-              <Button
-                leftIcon={<IconWand size="0.8rem" />}
-                color="grape"
-                size="xs"
-                sx={{ borderRadius: "4px" }}
-                onClick={() => {
-                  showNotification({
-                    id: "generate-linkedin-message",
-                    title: "Generating message ...",
-                    message: "",
-                    color: "blue",
-                    autoClose: 3000,
-                  });
-                  smartGenerate();
-                }}
-              >
-                Smart Generate
-              </Button>
-            </Tooltip>
-          )}
+                setMsgLoading(false);
+              }}
+            >
+              Generate {openedOutboundChannel === "LINKEDIN" ? "" : "Email"}
+            </Button>
+          </Flex>
         </Flex>
 
         <Box pos={"relative"}>
@@ -782,149 +804,181 @@ export default forwardRef(function InboxProspectConvoSendBox(
           )}
         </Box>
 
-        <Flex align="center" mt="xs" direction="row" justify={"end"}>
-          <Popover
-            position="bottom"
-            withArrow
-            shadow="md"
-            trapFocus
-            opened={showCalendarPopup}
-          >
-            <Popover.Target>
-              <Tooltip label="Set a custom snooze day" withArrow withinPortal>
-                <Flex>
-                  <Button
-                    onClick={() => setShowCalendarPopup((v) => !v)}
-                    size="xs"
-                    sx={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-                  >
-                    <IconZzz size={"1rem"} />
-                  </Button>
-                </Flex>
-              </Tooltip>
-            </Popover.Target>
-            <Popover.Dropdown>
-              <Calendar
-                placeholder={"Select a date"}
-                minDate={moment(new Date()).add(1, "days").toDate()}
-                getDayProps={(date) => ({
-                  selected: moment(snoozeDay).isSame(date, "day"),
-                  onClick: () => {
-                    setShowCalendarPopup(false);
-                    setSnoozeDay(date);
-                  },
-                })}
-              />
-            </Popover.Dropdown>
-          </Popover>
-
-          <Button
-            size="xs"
-            sx={{
-              borderTopRightRadius: 0,
-              borderBottomRightRadius: 0,
-              borderTopLeftRadius: 0,
-              borderBottomLeftRadius: 0,
-              borderLeft: `1px solid #fff`,
-              borderRight: `1px solid #fff`,
-            }}
-            onClick={() => sendMessage()}
-            styles={(theme) => ({
-              rightIcon: {
-                borderLeft: `1px solid ${theme.white}`,
-                marginLeft: "0.5rem",
-                paddingLeft: "0.25rem",
-              },
-            })}
-          >
-            {scheduleDay ? ("Schedule for [" + moment(scheduleDay).format('MMM Do h:mmA') + "] ") : "Send"} and Snooze for {moment(snoozeDay).diff(new Date(), "days") + 1}{" "}
-            days
-          </Button>
-          <Popover
-            position="bottom"
-            withArrow
-            shadow="md"
-            trapFocus
-            opened={showSchedulePopup}
-          >
-            <Popover.Target>
-              <Tooltip
-                label="Schedule a send time into the future"
-                withArrow
-                withinPortal
+        <Flex align="center" mt="xs" direction="row" justify={"space-between"}>
+          {openedOutboundChannel === "LINKEDIN" && (
+            <Tooltip withArrow position="bottom" label="Smart Generate with AI">
+              <Button
+                leftIcon={<IconWand size="0.8rem" />}
+                color="grape"
+                size="xs"
+                sx={{ borderRadius: "4px" }}
+                onClick={() => {
+                  showNotification({
+                    id: "generate-linkedin-message",
+                    title: "Generating message ...",
+                    message: "",
+                    color: "blue",
+                    autoClose: 3000,
+                  });
+                  smartGenerate();
+                }}
               >
-                <Flex>
-                  <Button
-                    onClick={() => setShowSchedulePopup((v) => !v)}
-                    size="xs"
-                    sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-                  >
-                    <IconClock24 size={"1rem"} />
-                  </Button>
-                </Flex>
-              </Tooltip>
-            </Popover.Target>
-
-            <Popover.Dropdown>
-              <Calendar
-                placeholder={"Select a date"}
-                minDate={moment(new Date()).add(1, "days").toDate()}
-                getDayProps={(date) => ({
-                  selected: moment(scheduleDay).isSame(date, "day"),
-                  onClick: () => {
-                    // Preserve the time
-                    const hour = moment(scheduleDay).hour();
-                    const minute = moment(scheduleDay).minute();
-                    const newDate = moment(date)
-                      .set("hour", hour)
-                      .set("minute", minute)
-                      .toDate();
-                    setScheduleDay(newDate);
-                  },
-                })}
-              />
-              <Flex
-                mt="xs"
-                direction="row"
-                justify={"space-between"}
-                align="flex-end"
-              >
-                <TimeInput
-                  w="100%"
-                  label="Custom Time"
-                  size="sm"
-                  value={moment(scheduleDay).format("HH:mm")}
-                  onChange={(event) => {
-                    const value = event.currentTarget.value; // Format is HH:MM
-                    const hour = parseInt(value.split(":")[0]);
-                    const minute = parseInt(value.split(":")[1]);
-                    const newDate = moment(scheduleDay)
-                      .set("hour", hour)
-                      .set("minute", minute)
-                      .toDate();
-                    setScheduleDay(newDate);
-                  }}
-                />
-                <Tooltip label="Schedule for now" withArrow withinPortal>
+                Smart Generate
+              </Button>
+            </Tooltip>
+          )}
+          <Flex align="center" mt="xs" direction="row" justify={"end"}>
+            <Popover
+              position="bottom"
+              withArrow
+              shadow="md"
+              trapFocus
+              opened={showCalendarPopup}
+            >
+              <Popover.Target>
+                <Tooltip label="Set a custom snooze day" withArrow withinPortal>
                   <Flex>
                     <Button
+                      onClick={() => setShowCalendarPopup((v) => !v)}
                       size="xs"
-                      mb="xs"
-                      ml="sm"
-                      variant="transparent"
-                      color="red"
-                      onClick={() => {
-                        setShowSchedulePopup(false);
-                        setScheduleDay(undefined);
+                      sx={{
+                        borderTopRightRadius: 0,
+                        borderBottomRightRadius: 0,
                       }}
                     >
-                      <IconX size="1rem" />
+                      <IconZzz size={"1rem"} />
                     </Button>
                   </Flex>
                 </Tooltip>
-              </Flex>
-            </Popover.Dropdown>
-          </Popover>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Calendar
+                  placeholder={"Select a date"}
+                  minDate={moment(new Date()).add(1, "days").toDate()}
+                  getDayProps={(date) => ({
+                    selected: moment(snoozeDay).isSame(date, "day"),
+                    onClick: () => {
+                      setShowCalendarPopup(false);
+                      setSnoozeDay(date);
+                    },
+                  })}
+                />
+              </Popover.Dropdown>
+            </Popover>
+
+            <Button
+              size="xs"
+              sx={{
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+                borderLeft: `1px solid #fff`,
+                borderRight: `1px solid #fff`,
+              }}
+              onClick={() => sendMessage()}
+              styles={(theme) => ({
+                rightIcon: {
+                  borderLeft: `1px solid ${theme.white}`,
+                  marginLeft: "0.5rem",
+                  paddingLeft: "0.25rem",
+                },
+              })}
+            >
+              {scheduleDay
+                ? "Schedule for [" +
+                  moment(scheduleDay).format("MMM Do h:mmA") +
+                  "] "
+                : "Send"}{" "}
+              and Snooze for {moment(snoozeDay).diff(new Date(), "days") + 1}{" "}
+              days
+            </Button>
+            <Popover
+              position="bottom"
+              withArrow
+              shadow="md"
+              trapFocus
+              opened={showSchedulePopup}
+            >
+              <Popover.Target>
+                <Tooltip
+                  label="Schedule a send time into the future"
+                  withArrow
+                  withinPortal
+                >
+                  <Flex>
+                    <Button
+                      onClick={() => setShowSchedulePopup((v) => !v)}
+                      size="xs"
+                      sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                    >
+                      <IconClock24 size={"1rem"} />
+                    </Button>
+                  </Flex>
+                </Tooltip>
+              </Popover.Target>
+
+              <Popover.Dropdown>
+                <Calendar
+                  placeholder={"Select a date"}
+                  minDate={moment(new Date()).add(1, "days").toDate()}
+                  getDayProps={(date) => ({
+                    selected: moment(scheduleDay).isSame(date, "day"),
+                    onClick: () => {
+                      // Preserve the time
+                      const hour = moment(scheduleDay).hour();
+                      const minute = moment(scheduleDay).minute();
+                      const newDate = moment(date)
+                        .set("hour", hour)
+                        .set("minute", minute)
+                        .toDate();
+                      setScheduleDay(newDate);
+                    },
+                  })}
+                />
+                <Flex
+                  mt="xs"
+                  direction="row"
+                  justify={"space-between"}
+                  align="flex-end"
+                >
+                  <TimeInput
+                    w="100%"
+                    label="Custom Time"
+                    size="sm"
+                    value={moment(scheduleDay).format("HH:mm")}
+                    onChange={(event) => {
+                      const value = event.currentTarget.value; // Format is HH:MM
+                      const hour = parseInt(value.split(":")[0]);
+                      const minute = parseInt(value.split(":")[1]);
+                      const newDate = moment(scheduleDay)
+                        .set("hour", hour)
+                        .set("minute", minute)
+                        .toDate();
+                      setScheduleDay(newDate);
+                    }}
+                  />
+                  <Tooltip label="Schedule for now" withArrow withinPortal>
+                    <Flex>
+                      <Button
+                        size="xs"
+                        mb="xs"
+                        ml="sm"
+                        variant="transparent"
+                        color="red"
+                        onClick={() => {
+                          setShowSchedulePopup(false);
+                          setScheduleDay(undefined);
+                        }}
+                      >
+                        <IconX size="1rem" />
+                      </Button>
+                    </Flex>
+                  </Tooltip>
+                </Flex>
+              </Popover.Dropdown>
+            </Popover>
+          </Flex>
         </Flex>
       </div>
     </Paper>

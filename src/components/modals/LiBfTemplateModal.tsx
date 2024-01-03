@@ -40,7 +40,7 @@ import { currentProjectState } from '@atoms/personaAtoms';
 import { PersonalizationSection, RESEARCH_POINTS } from '@common/sequence/SequenceSection';
 import { TypeAnimation } from 'react-type-animation';
 import sellScaleLogo from '../common/sequence/assets/logo.jpg';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import { useDebouncedValue, useDidUpdate, useDisclosure, useTimeout } from '@mantine/hooks';
 import {
   IconChevronDown,
@@ -77,9 +77,11 @@ export default function LiBfTemplateModal({
   const [opened, { toggle, open }] = useDisclosure(false);
 
   const [loadingResearch, setLoadingResearch] = useState(false);
-  const [blockList, setBlockList] = useState<string[]>(innerProps.editProps?.blockList ?? []);
+  const [researchPoints, setResearchPoints] = useState<string[]>(
+    innerProps.editProps?.blockList ?? []
+  );
 
-  console.log(blockList);
+  console.log(researchPoints);
 
   const showUserFeedback = true;
 
@@ -103,7 +105,7 @@ export default function LiBfTemplateModal({
     );
     if (response.status === 'success') {
       console.log(response.data);
-      setBlockList(response.data);
+      setResearchPoints(response.data);
       open();
     }
     setLoadingResearch(false);
@@ -140,7 +142,11 @@ export default function LiBfTemplateModal({
       innerProps.editProps?.bf.bump_delay_days ?? -1,
       values.active,
       true,
-      blockList
+      researchPoints,
+      null,
+      null,
+      null,
+      values.humanFeedback ?? ''
     );
     await queryClient.refetchQueries({
       queryKey: [`query-get-bump-frameworks`],
@@ -202,9 +208,10 @@ export default function LiBfTemplateModal({
                 ) : (
                   <PersonalizationSection
                     title='Enabled Research Points'
-                    blocklist={_.cloneDeep(blockList)}
+                    blocklist={_.difference(RESEARCH_POINTS, researchPoints)}
                     onItemsChange={async (items) => {
-                      setBlockList(items.filter((x) => x.checked).map((x) => x.id));
+                      const newItems = items.filter((x) => x.checked).map((x) => x.id);
+                      setResearchPoints(newItems);
                     }}
                     onChanged={() => {}}
                   />

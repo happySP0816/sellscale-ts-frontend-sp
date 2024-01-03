@@ -53,7 +53,13 @@ import {
   List,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useDebouncedValue, useDisclosure, useHover, usePrevious } from '@mantine/hooks';
+import {
+  useDebouncedValue,
+  useDidUpdate,
+  useDisclosure,
+  useHover,
+  usePrevious,
+} from '@mantine/hooks';
 import sellScaleLogo from './assets/logo.jpg';
 import { modals, openConfirmModal, openContextModal } from '@mantine/modals';
 import {
@@ -3811,7 +3817,7 @@ export const PersonalizationSection = (props: {
     setProspectItems(newPectList);
     setCompanyItems(newCompanyList);
     // setAllItems(newAllItems);
-    props.onItemsChange(allItems);
+    //props.onItemsChange(allItems);
   }, [props.blocklist]);
 
   const markAll = (newLabel: boolean) => {

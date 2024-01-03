@@ -65,7 +65,7 @@ export default function LiBfTemplateModal({
     message: string;
     active: boolean;
     humanFeedback: string;
-    blockList: string[];
+    researchPoints: string[];
   };
 }>) {
   const theme = useMantineTheme();
@@ -78,10 +78,10 @@ export default function LiBfTemplateModal({
 
   const [loadingResearch, setLoadingResearch] = useState(false);
   const [researchPoints, setResearchPoints] = useState<string[]>(
-    innerProps.editProps?.blockList ?? []
+    innerProps.editProps?.researchPoints ?? []
   );
 
-  console.log(researchPoints);
+  console.log(researchPoints, innerProps.editProps?.researchPoints);
 
   const showUserFeedback = true;
 

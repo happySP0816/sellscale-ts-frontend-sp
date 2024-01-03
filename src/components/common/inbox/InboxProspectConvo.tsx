@@ -1364,6 +1364,7 @@ export default function ProspectConvo(props: Props) {
                 }
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
+                currentSubstatus={statusValue}
               />
             </Box>
             <Box

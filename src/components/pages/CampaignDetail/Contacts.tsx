@@ -27,7 +27,7 @@ type PropsType = {
 
 const Contacts = (props: PropsType) => {
   const [topStatus, setTopStatus] = useState("");
-  const [topAttributeArray, setTopAttributeArray] = useState([]);
+  const [topAttributeArray, setTopAttributeArray]: any = useState([]);
 
   return (
     <Card withBorder px={0}>

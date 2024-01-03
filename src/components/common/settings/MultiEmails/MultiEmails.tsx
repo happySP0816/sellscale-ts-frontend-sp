@@ -182,7 +182,7 @@ const MultiEmails = () => {
                         <Badge
                           color={reputation > 80 ? "green" : reputation > 60 ? "yellow" : "red"}
                         >
-                          {reputation}%
+                          {reputation || 'N/A'}%
                         </Badge>
                       )
                     }

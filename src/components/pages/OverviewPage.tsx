@@ -24,6 +24,7 @@ import {
   Checkbox,
   Switch,
   Tabs,
+  ActionIcon,
 } from "@mantine/core";
 import { Bar, Line } from "react-chartjs-2";
 import {
@@ -362,6 +363,7 @@ interface DomainHealth {
   spf: boolean;
   dmarc: boolean;
   dkim: boolean;
+  forwarding: boolean;
   inboxes?: any[];
 }
 
@@ -375,6 +377,8 @@ export function ActiveChannels() {
   const [opened, { toggle }] = useDisclosure(true);
 
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
+  console.log('userdata', userData)
 
   useEffect(() => {
     if (!fetchedChannels) {
@@ -383,7 +387,29 @@ export function ActiveChannels() {
     }
   }, [setFetchedChannels]);
 
+  const triggerPostTriggerSnapshot = async () => {
+    setDomainRefreshing(true);
+    const result = await postTriggerSnapshot(userToken);
+    if (result.status == "success") {
+      showNotification({
+        title: "Success",
+        message: "Snapshot triggered",
+        color: "green",
+      });
+      fetchSnapshots();
+    } else {
+      showNotification({
+        title: "Error",
+        message: "Snapshot failed",
+        color: "red",
+      });
+    }
+    setDomainRefreshing(false);
+  };
+
   const fetchSnapshots = async () => {
+    setLoading(true);
+
     fetch(`${API_URL}/email/warmup/snapshots`, {
       method: "GET",
       headers: {
@@ -446,13 +472,13 @@ export function ActiveChannels() {
             spf: snapshot.spf_record_valid,
             dmarc: snapshot.dmarc_record_valid,
             dkim: snapshot.dkim_record_valid,
+            forwarding: snapshot.forwarding_enabled,
           });
         }
       }
     }
 
     setDomains(domains);
-    console.log("domains", domains);
     return domains;
   };
 
@@ -493,6 +519,7 @@ export function ActiveChannels() {
           pr="md"
           p="xs"
           sx={{ backgroundColor: theme.colors.blue[6] }}
+          align="center"
         >
           <Title
             order={3}
@@ -512,11 +539,22 @@ export function ActiveChannels() {
             🔥 Warmup ENABLED
           </Badge>
 
+          <ActionIcon
+            style={{ marginLeft: "auto", cursor: "pointer" }}
+            variant="filled"
+            color="white"
+            loaderProps={{ type: 'dots' }}
+            loading={domainRefreshing}
+            onClick={() => triggerPostTriggerSnapshot()}
+          >
+            <IconRefresh size="1rem" />
+          </ActionIcon>
+
           {opened ? (
             <IconChevronDown
               color="white"
               size="2rem"
-              style={{ marginLeft: "auto", cursor: "pointer" }}
+              style={{ marginLeft: "8px", cursor: "pointer" }}
               onClick={() => toggle()}
             />
           ) : (
@@ -779,7 +817,9 @@ export function ActiveChannels() {
                                                               : "yellow"
                                                           }
                                                         >
-                                                          {snapshot.reputation}%
+                                                          {snapshot.reputation ||
+                                                            "N/A"}
+                                                          %
                                                         </Badge>
                                                       </td>
                                                     </tr>
@@ -799,7 +839,7 @@ export function ActiveChannels() {
 
                             {email_snapshots.map((snapshot: any) => {
                               console.log("snapshot", snapshot);
-                              const warmed = snapshot.total_sent_count > 180;
+                              const warmed = snapshot.total_sent_count > 100;
                               const days_left =
                                 (180 - snapshot.total_sent_count) /
                                 snapshot.daily_limit;
@@ -814,13 +854,13 @@ export function ActiveChannels() {
                                     <Badge
                                       size="xs"
                                       color={
-                                        snapshot.total_sent_count > 180
+                                        snapshot.total_sent_count > 100
                                           ? "green"
                                           : "yellow"
                                       }
                                       variant="dot"
                                     >
-                                      {snapshot.total_sent_count > 180
+                                      {snapshot.total_sent_count > 100
                                         ? "WARMED -"
                                         : "WARMING -"}
                                       <span
@@ -872,7 +912,7 @@ export function ActiveChannels() {
                                                   : "yellow"
                                               }
                                             >
-                                              {snapshot.reputation}%
+                                              {snapshot.reputation || "N/A"}%
                                             </Badge>
                                           </td>
                                         </tr>
@@ -941,8 +981,8 @@ export function ActiveChannels() {
                     {
                       accessor: "forwarding",
                       title: "Forwarding",
-                      render: ({}) => {
-                        return <Text>{"❌"}</Text>;
+                      render: ({ forwarding }) => {
+                        return <Text>{forwarding ? "✅" : "❌"}</Text>;
                       },
                     },
                     {
@@ -1004,9 +1044,8 @@ export function ActiveChannels() {
                                           }) => {
                                             return (
                                               <Badge color="gray">
-                                                {
-                                                  email_warmup_details.warmup_reputation
-                                                }
+                                                {email_warmup_details.warmup_reputation ||
+                                                  "N/A"}
                                               </Badge>
                                             );
                                           },

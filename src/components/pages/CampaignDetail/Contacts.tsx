@@ -283,7 +283,7 @@ const Contacts = (props: PropsType) => {
             })}
           >
             <Stack mt={"sm"}>
-              {topAttributeArray?.map((entry, idx) => {
+              {topAttributeArray?.map((entry: any, idx: number) => {
                   let i = entry['attribute']
                   let j = entry['count']
                   return <Fragment key={i}>

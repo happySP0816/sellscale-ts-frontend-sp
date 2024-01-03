@@ -1,44 +1,58 @@
-import { Alert, Card, Tabs } from '@mantine/core'
-import { IconAlertCircle, IconBuilding, IconGenderAgender } from '@tabler/icons'
-import { Icon3dRotate, IconLifebuoy, IconPlusEqual } from '@tabler/icons-react'
-import React from 'react'
-import DoNotContactList from './DoNotContactList'
+import { Alert, Tabs, rem, useMantineTheme } from "@mantine/core";
+import { IconAlertCircle, IconBuilding } from "@tabler/icons";
+import { IconLifebuoy } from "@tabler/icons-react";
+import React from "react";
+import DoNotContactListV2 from "./DoNotContactListV2";
 
 export default function DoNotContactFiltersPage() {
-  const [selectedTab, setSelectedTab] = React.useState('company-dnc')
+  const [selectedTab, setSelectedTab] = React.useState("company-dnc");
 
-    return (
-        <Tabs
-          value={selectedTab}
-          onTabChange={(value: any) => setSelectedTab(value)}
-        >
-          <Tabs.List>
-            <Tabs.Tab
-              value="company-dnc"
-              icon={<IconBuilding size="0.8rem" />}
-            >
-              Company-Wide Filter
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="sdr-dnc"
-              icon={<IconLifebuoy size="0.8rem" />}
-            >
-              SDR Filter
-            </Tabs.Tab>
-          </Tabs.List>
+  return (
+    <Tabs
+      value={selectedTab}
+      onTabChange={(value: any) => setSelectedTab(value)}
+      styles={(theme) => ({
+        tab: {
+          borderBottom: `2px solid transparent`,
+          "&[data-active]": {
+            borderBottom: `2px solid ${
+              theme.colors.blue[theme.fn.primaryShade()]
+            }`,
+            color: theme.colors.blue[theme.fn.primaryShade()],
+          },
+          paddingTop: rem(16),
+          paddingBottom: rem(16),
 
-          <Tabs.Panel value="sdr-dnc" pt="xs">
-           {selectedTab === 'sdr-dnc' && <DoNotContactList forSDR />}
-          </Tabs.Panel>
+          color: theme.colors.gray[6],
+        },
+        panel: {
+          marginTop: rem(16),
+          paddingLeft: `${rem(0)} !important`,
+        },
+        tabLabel: {
+          fontWeight: 600,
+        },
+        root: {
+          width: "100%",
+        },
+      })}
+    >
+      <Tabs.List>
+        <Tabs.Tab value="company-dnc" icon={<IconBuilding size="0.8rem" />}>
+          Company-Wide Filter
+        </Tabs.Tab>
+        <Tabs.Tab value="sdr-dnc" icon={<IconLifebuoy size="0.8rem" />}>
+          SDR Filter
+        </Tabs.Tab>
+      </Tabs.List>
 
-          <Tabs.Panel value="company-dnc" pt="xs">
-            <Card withBorder>
-                <Alert icon={<IconAlertCircle size="1rem" />} title="Warning" color="orange">
-                    This is your entire organizations' Do Not Contact list. This will affect other users.
-                </Alert>
-            </Card>
-            {selectedTab === 'company-dnc' && <DoNotContactList />}
-          </Tabs.Panel>
-        </Tabs>
-    )
+      <Tabs.Panel value="sdr-dnc" pt="xs">
+        {selectedTab === "sdr-dnc" && <DoNotContactListV2 forSDR />}
+      </Tabs.Panel>
+
+      <Tabs.Panel value="company-dnc" pt="xs">
+        {selectedTab === "company-dnc" && <DoNotContactListV2 />}
+      </Tabs.Panel>
+    </Tabs>
+  );
 }

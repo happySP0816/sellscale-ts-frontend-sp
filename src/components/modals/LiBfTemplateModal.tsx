@@ -65,7 +65,7 @@ export default function LiBfTemplateModal({
     message: string;
     active: boolean;
     humanFeedback: string;
-    researchPoints: string[];
+    blockList: string[];
   };
 }>) {
   const theme = useMantineTheme();
@@ -77,11 +77,9 @@ export default function LiBfTemplateModal({
   const [opened, { toggle, open }] = useDisclosure(false);
 
   const [loadingResearch, setLoadingResearch] = useState(false);
-  const [researchPoints, setResearchPoints] = useState<string[]>(
-    innerProps.editProps?.researchPoints ?? []
-  );
+  const [blockList, setBlockList] = useState<string[]>(innerProps.editProps?.blockList ?? []);
 
-  console.log(researchPoints, innerProps.editProps?.researchPoints);
+  console.log(blockList, innerProps.editProps?.blockList);
 
   const showUserFeedback = true;
 
@@ -105,7 +103,7 @@ export default function LiBfTemplateModal({
     );
     if (response.status === 'success') {
       console.log(response.data);
-      setResearchPoints(response.data);
+      setBlockList(response.data);
       open();
     }
     setLoadingResearch(false);
@@ -142,7 +140,7 @@ export default function LiBfTemplateModal({
       innerProps.editProps?.bf.bump_delay_days ?? -1,
       values.active,
       true,
-      researchPoints,
+      blockList,
       null,
       null,
       null,
@@ -208,10 +206,10 @@ export default function LiBfTemplateModal({
                 ) : (
                   <PersonalizationSection
                     title='Enabled Research Points'
-                    blocklist={researchPoints}
+                    blocklist={blockList}
                     onItemsChange={async (items) => {
                       const newItems = items.filter((x) => !x.checked).map((x) => x.id);
-                      setResearchPoints(newItems);
+                      setBlockList(newItems);
                     }}
                     onChanged={() => {}}
                   />

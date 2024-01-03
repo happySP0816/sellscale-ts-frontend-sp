@@ -3817,7 +3817,7 @@ export const PersonalizationSection = (props: {
     setProspectItems(newPectList);
     setCompanyItems(newCompanyList);
     // setAllItems(newAllItems);
-    //props.onItemsChange(allItems);
+    props.onItemsChange(allItems);
   }, [props.blocklist]);
 
   const markAll = (newLabel: boolean) => {

@@ -113,7 +113,7 @@ export default function DoNotContactListCaughtProspects(props: {
                 return (
                   <Flex align={"center"} gap="sm">
                     <Avatar src={proxyURL(row.image_url)} />
-                    <Text fw={700} size={"sm"}>
+                    <Text fw={500} size={"sm"}>
                       {row.full_name}
                     </Text>
                   </Flex>
@@ -130,7 +130,7 @@ export default function DoNotContactListCaughtProspects(props: {
 
                 return (
                   <Flex align={"center"} h={"100%"}>
-                    <Text fw={700} size={"sm"}>
+                    <Text fw={500} size={"sm"}>
                       {text}
                     </Text>
                   </Flex>
@@ -150,7 +150,7 @@ export default function DoNotContactListCaughtProspects(props: {
 
                 return (
                   <Flex align={"center"} h={"100%"}>
-                    <Text fw={700} size={"sm"}>
+                    <Text fw={500} size={"sm"}>
                       {text}
                     </Text>
                   </Flex>
@@ -168,7 +168,7 @@ export default function DoNotContactListCaughtProspects(props: {
 
                 return (
                   <Flex align={"center"} h={"100%"}>
-                    <Text fw={700} size={"sm"}>
+                    <Text fw={500} size={"sm"}>
                       {text}
                     </Text>
                   </Flex>
@@ -186,7 +186,7 @@ export default function DoNotContactListCaughtProspects(props: {
 
                 return (
                   <Flex align={"center"} h={"100%"}>
-                    <Badge fw={700} size={"sm"}>
+                    <Badge fw={500} size={"sm"}>
                       {text}
                     </Badge>
                   </Flex>
@@ -238,7 +238,7 @@ export default function DoNotContactListCaughtProspects(props: {
                 })}
               >
                 <Flex align={"center"} gap={"sm"}>
-                  <Text fw={700} size={"sm"} color="gray.6">
+                  <Text fw={500} size={"sm"} color="gray.6">
                     Show
                   </Text>
 
@@ -266,7 +266,7 @@ export default function DoNotContactListCaughtProspects(props: {
                       })}
                       h={36}
                     >
-                      <Text color="gray.5" fw={700} fz={14}>
+                      <Text color="gray.5" fw={500} fz={14}>
                         of {table.getPrePaginationRowModel().rows.length}
                       </Text>
                     </Flex>
@@ -302,7 +302,7 @@ export default function DoNotContactListCaughtProspects(props: {
                       })}
                       h={36}
                     >
-                      <Text color="gray.5" fw={700} fz={14}>
+                      <Text color="gray.5" fw={500} fz={14}>
                         of {table.getPageCount()} pages
                       </Text>
                     </Flex>

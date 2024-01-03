@@ -512,81 +512,6 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
           </Flex>
         )}
 
-        {!loading &&
-          caughtProspects.filter(
-            (prospect: Prospect) => prospect.overall_status !== "REMOVED"
-          ).length > 0 && (
-            <Flex
-              justify={isViewRemovedProspects ? "end" : "space-between"}
-              align={"center"}
-              gap={"md"}
-            >
-              {!isViewRemovedProspects && (
-                <Alert
-                  w={"100%"}
-                  icon={<IconAlertCircle size="1rem" />}
-                  title="Warning"
-                  color="red"
-                  variant="outline"
-                  styles={(theme) => ({
-                    root: {
-                      backgroundColor: theme.colors.red[0],
-                      paddingTop: 0,
-                      paddingBottom: 0,
-                      height: 36,
-                      display: "flex",
-                      alignItems: "center",
-                    },
-                    icon: {
-                      marginRight: 0,
-                    },
-                    title: {
-                      marginBottom: 0,
-                    },
-                    body: {
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.55rem",
-                    },
-                  })}
-                >
-                  <Text fw={600} fz={"14"}>
-                    {caughtProspects.filter(
-                      (prospect: Prospect) =>
-                        prospect.overall_status !== "REMOVED"
-                    ).length === 0
-                      ? caughtProspects.filter(
-                          (prospect: Prospect) =>
-                            prospect.overall_status !== "REMOVED"
-                        ).length + "+"
-                      : caughtProspects.filter(
-                          (prospect: Prospect) =>
-                            prospect.overall_status !== "REMOVED"
-                        ).length}{" "}
-                    prospects caught in these filters
-                  </Text>
-                </Alert>
-              )}
-              <Flex align={"center"} gap={"sm"}>
-                <Button
-                  leftIcon={<IconRefresh size={14} />}
-                  onClick={fetchCaughtProspects}
-                >
-                  Refresh
-                </Button>
-                {!isViewRemovedProspects && (
-                  <Button
-                    color="red"
-                    onClick={openProspectRemovalModal}
-                    disabled={needsSave}
-                    leftIcon={<IconTrash size={14} />}
-                  >
-                    Remove {caughtProspects.length} Prospects
-                  </Button>
-                )}
-              </Flex>
-            </Flex>
-          )}
         <Box mt={"md"}>
           <Box
             sx={{
@@ -623,6 +548,26 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
                 },
               })}
             >
+              <Flex mt={"md"} mb={"md"} align={"center"} justify={"end"} gap={"sm"}>
+                <Button
+                  variant="subtle"
+                  color="gray"
+                  fw={700}
+                  onClick={handleRemoveFilter}
+                >
+                  Clear Filters
+                </Button>
+
+                <Button
+                  fw={700}
+                  onClick={async () => {
+                    await saveFilters();
+                  }}
+                  disabled={!needsSave}
+                >
+                  {saveAsNothing ? "Save with no filters" : "Save filters"}
+                </Button>
+              </Flex>
               <Flex gap={"md"}>
                 <Accordion.Item
                   value="accountData"
@@ -633,6 +578,7 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
                     sx={{ borderRadius: 12 }}
                     onClick={() => handleAccordion("account")}
                   >
+                    
                     <Flex justify={"space-between"} align={"center"}>
                       <Title order={4}>Account Data</Title>
                       <Title
@@ -1280,11 +1226,100 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
               </Flex>
             </Accordion>
           </Box>
+          <Flex sx={{
+            display: caughtProspects.filter(
+                        (prospect: Prospect) =>
+                          prospect.overall_status !== "REMOVED"
+                      ).length === 0 ? "none" : "flex"
+          }}>
+            {!isViewRemovedProspects && (
+                  <Alert
+                    w={"100%"}
+                    icon={<IconAlertCircle size="1rem" />}
+                    title="Warning"
+                    color="red"
+                    mt='md'
+                    variant="outline"
+                    styles={(theme) => ({
+                      root: {
+                        backgroundColor: theme.colors.red[0],
+                        paddingTop: 0,
+                        paddingBottom: 0,
+                        height: 36,
+                        display: "flex",
+                        alignItems: "center",
+                      },
+                      icon: {
+                        marginRight: 0,
+                      },
+                      title: {
+                        marginBottom: 0,
+                      },
+                      body: {
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.55rem",
+                      },
+                    })}
+                  >
+                    <Text fw={600} fz={"14"}>
+                      {caughtProspects.filter(
+                        (prospect: Prospect) =>
+                          prospect.overall_status !== "REMOVED"
+                      ).length === 0
+                        ? caughtProspects.filter(
+                            (prospect: Prospect) =>
+                              prospect.overall_status !== "REMOVED"
+                          ).length + "+"
+                        : caughtProspects.filter(
+                            (prospect: Prospect) =>
+                              prospect.overall_status !== "REMOVED"
+                          ).length}{" "}
+                      prospects caught in these filters
+                    </Text>
+                  </Alert>
+                )}
+
+                {!loading &&
+            caughtProspects.filter(
+              (prospect: Prospect) => prospect.overall_status !== "REMOVED"
+            ).length > 0 && (
+              <Flex
+                justify={isViewRemovedProspects ? "end" : "space-between"}
+                align={"center"}
+                gap={"md"}
+                ml='xs'
+                mt='sm'
+              >
+                <Flex align={"center"} gap={"sm"}>
+                  <Button
+                    leftIcon={<IconRefresh size={14} />}
+                    onClick={fetchCaughtProspects}
+                  >
+                    Refresh
+                  </Button>
+                  {!isViewRemovedProspects && (
+                    <Button
+                      color="red"
+                      onClick={openProspectRemovalModal}
+                      disabled={needsSave}
+                      leftIcon={<IconTrash size={14} />}
+                    >
+                      Remove {caughtProspects.length} Prospects
+                    </Button>
+                  )}
+                </Flex>
+              </Flex>
+            )}
+          </Flex>
           <Box mt={"md"}>
             <Alert
               icon={<IconAlertCircle size="1rem" />}
               title="Warning"
               color="red"
+              display={
+                !needsSave && caughtProspects.length > 0 ? "none" : "block"
+              }
               styles={{
                 body: {
                   display: "flex",
@@ -1315,27 +1350,6 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
               setLoading={setLoading}
             />
           </Box>
-
-          <Flex mt={"md"} mb={"md"} align={"center"} justify={"end"} gap={"sm"}>
-            <Button
-              variant="subtle"
-              color="gray"
-              fw={700}
-              onClick={handleRemoveFilter}
-            >
-              Clear Filters
-            </Button>
-
-            <Button
-              fw={700}
-              onClick={async () => {
-                await saveFilters();
-              }}
-              disabled={!needsSave}
-            >
-              {saveAsNothing ? "Save with no filters" : "Save filters"}
-            </Button>
-          </Flex>
         </Box>
       </Box>
       <Divider mt={"md"} />

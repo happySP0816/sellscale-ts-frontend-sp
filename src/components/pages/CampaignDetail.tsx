@@ -13,6 +13,7 @@ import {
   Tabs,
   Button,
   Title,
+  Loader,
 } from "@mantine/core";
 import {
   IconArrowLeft,
@@ -26,7 +27,7 @@ import {
   IconSettings,
   IconTargetArrow,
 } from "@tabler/icons";
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { ReactNode } from "react";
 import { IconMessage } from "@tabler/icons-react";
 import StatDisplay from "./CampaignDetail/StatDisplay";
@@ -34,12 +35,121 @@ import { FaLinkedin } from "@react-icons/all-files/fa/FaLinkedin";
 import Contacts from "./CampaignDetail/Contacts";
 import Linkedin from "./CampaignDetail/Linkedin";
 import Email from './CampaignDetail/Email';
+import { useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
+import { API_URL } from '@constants/data';
+
+interface EmailSequence {
+    bumped_count: number;
+    description: string;
+    overall_status: string;
+    title: string;
+}
+
+interface LinkedInSequence {
+    bumped_count: number;
+    description: string;
+    title: string;
+}
+
+interface TopCompanies {
+    company: string;
+    count: number;
+}
+
+interface TopIndustries {
+    count: number;
+    industry: string;
+}
+
+interface TopTitles {
+    count: number;
+    title: string;
+}
+
+export interface CampaignEntityData {
+    contacts: {
+        included_company_generalized_keywords: string[];
+        included_company_industries_keywords: string[];
+        included_company_locations_keywords: string[];
+        included_company_name_keywords: string[];
+        included_individual_generalized_keywords: string[]; 
+        included_individual_industry_keywords: string[]; //
+        included_individual_locations_keywords: string[]; //
+        included_individual_skills_keywords: string[]; //
+        included_individual_title_keywords: string[];   //
+    };
+    email: {
+        sequence: EmailSequence[];
+    };
+    linkedin: {
+        sequence: LinkedInSequence[];
+    };
+    overview: {
+        archetype_name: string;
+        emoji: string;
+        num_demos: number;
+        num_opens: number;
+        num_replies: number;
+        num_sent: number;
+        sdr_name: string;
+    };
+    top_attributes: {
+        top_companies: TopCompanies[];
+        top_industries: TopIndustries[];
+        top_titles: TopTitles[];
+    };
+}
 
 export const CampaignDetail = () => {
   const theme = useMantineTheme();
   const [activeTab, setActiveTab] = useState<string | null>("contacts");
+  const [apiData, setApiData] = useState<CampaignEntityData | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const userToken = useRecoilValue(userTokenState)
+  const archetype_id = window.location.pathname.split('/')[2];
+
+  useEffect(() => {
+      const fetchData = async () => {
+          try {
+              const response = await fetch(`${API_URL}/client/campaign_overview?client_archetype_id=${archetype_id}`, {
+                  headers: {
+                      'Authorization': 'Bearer ' + userToken,
+                      'Content-Type': 'application/json'
+                  }
+              });
+
+              if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              const data: CampaignEntityData = await response.json();
+              setApiData(data);
+          } catch (error) {
+              console.error('Error fetching API data', error);
+          } finally {
+              setIsLoading(false);
+          }
+      };
+
+      fetchData();
+  }, []);
+
+  if (isLoading) {
+      return <Container
+        sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingTop: '50px'
+        }}>
+          <Loader />
+      </Container>
+  }
+
   return (
-    <Box bg={"white"} mih={"100vh"}>
+    <Box bg={"white"} mih={"100vh"} pb='xl'>
       <Container pt='xl'>
         <Box pb='xl'>
           <Anchor
@@ -56,11 +166,11 @@ export const CampaignDetail = () => {
 
         <Flex>
           {/* circle button */}
-          <Button size='lg' variant='subtle' radius='xl' color='blue'>
-            🐍
+          <Button size='lg' variant='subtle' radius='xl' color='blue' fz={'xl'}>
+            {apiData?.overview.emoji}
           </Button>
           <Title order={3} mt='10px' ml='4px'>
-            H1 Leaders in HR in the EMEA Region
+            {apiData?.overview.archetype_name}
           </Title>
         </Flex>
 
@@ -80,7 +190,7 @@ export const CampaignDetail = () => {
             >
               <Avatar size={"sm"} />
               <Text fw={500} fz={"sm"}>
-                Adam Meehan
+                {apiData?.overview.sdr_name}
               </Text>
               <Anchor
                 href="/"
@@ -112,9 +222,9 @@ export const CampaignDetail = () => {
               color="#228be6"
               icon={<IconSend color={theme.colors.blue[6]} size="20" />}
               label="Sent"
-              total={52}
+              total={apiData?.overview.num_sent || 0}
               percentageColor="#eaf3ff"
-              percentage="50%"
+              percentage='100%'
             />
 
             <Divider orientation="vertical"></Divider>
@@ -123,8 +233,8 @@ export const CampaignDetail = () => {
               color="#fd4efe"
               icon={<IconChecks color={"#fd4efe"} size="20" />}
               label="Open"
-              total={52}
-              percentage="50%"
+              total={apiData?.overview.num_opens || 0}
+              percentage={apiData?.overview.num_opens ? `${Math.round(apiData?.overview.num_opens / (apiData?.overview.num_sent + 0.00001) * 100)}%` : '0%' }
               percentageColor="#ffeeff"
             />
 
@@ -134,8 +244,8 @@ export const CampaignDetail = () => {
               color="#fd7e14"
               icon={<IconMessage color={theme.colors.orange[6]} size="20" />}
               label="Reply"
-              total={52}
-              percentage="50%"
+              total={apiData?.overview.num_replies || 0}
+              percentage={apiData?.overview.num_replies ? `${Math.round(apiData?.overview.num_replies / (apiData?.overview.num_opens + 0.0001) * 100)}%` : '0%' }
               percentageColor="#f9e7dc"
             />
 
@@ -145,9 +255,9 @@ export const CampaignDetail = () => {
               color="#40c057"
               icon={<IconCalendar color={theme.colors.green[6]} size="20" />}
               label="Demo"
-              total={52}
+              total={apiData?.overview.num_demos || 0}
               percentageColor="#e2f6e7"
-              percentage="50%"
+              percentage={apiData?.overview.num_demos ? `${Math.round(apiData?.overview.num_demos / (apiData?.overview.num_replies + 0.0001) * 100)}%` : '0%' }
             />
           </Flex>
         </Flex>
@@ -239,6 +349,7 @@ export const CampaignDetail = () => {
                 sx={{
                   background: "transparent !important",
                 }}
+                disabled={apiData?.linkedin.sequence.length === 0}
               >
                 Linkedin
               </Tabs.Tab>
@@ -249,6 +360,7 @@ export const CampaignDetail = () => {
                 sx={{
                   background: "transparent !important",
                 }}
+                disabled={apiData?.email.sequence.length === 0}
               >
                 Email
               </Tabs.Tab>
@@ -256,13 +368,13 @@ export const CampaignDetail = () => {
           </Tabs.List>
 
           <Tabs.Panel value="contacts">
-            <Contacts />
+            <Contacts data={apiData} />
           </Tabs.Panel>
           <Tabs.Panel value="linkedin">
-            <Linkedin />
+            <Linkedin data={apiData} />
           </Tabs.Panel>
           <Tabs.Panel value="email">
-            <Email />
+            <Email data={apiData} />
           </Tabs.Panel>
         </Tabs>
       </Container>

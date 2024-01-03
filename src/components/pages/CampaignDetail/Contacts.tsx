@@ -9,6 +9,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
+import { CampaignEntityData } from '@pages/CampaignDetail';
 import { IconArrowRight } from "@tabler/icons";
 import React, { Fragment, useState } from "react";
 const mocksData = [
@@ -19,8 +20,15 @@ const mocksData = [
   "Security Engineer 3",
   "Security Engineer 4",
 ];
-const Contacts = () => {
+
+type PropsType = {
+  data: CampaignEntityData | undefined
+};
+
+const Contacts = (props: PropsType) => {
   const [topStatus, setTopStatus] = useState("");
+  const [topAttributeArray, setTopAttributeArray]: any = useState([]);
+
   return (
     <Card withBorder px={0}>
       <Flex justify={"space-between"} px={"sm"}>
@@ -38,13 +46,13 @@ const Contacts = () => {
         <Text fw={600}>Selected Filters</Text>
 
         <Stack mt={"sm"}>
-          <Box>
+          <Box display={props.data?.contacts.included_individual_title_keywords.length ? "block" : "none"}>
             <Text c={"gray.6"} fz={"sm"}>
               JOB TITLE
             </Text>
 
             <Flex wrap={"wrap"} gap={"xs"} mt="xs">
-              {mocksData.map((i) => (
+              {props.data?.contacts.included_individual_title_keywords.map((i) => (
                 <Button
                   color="green.2"
                   sx={{ color: "black", fontWeight: 500 }}
@@ -59,13 +67,13 @@ const Contacts = () => {
             </Flex>
           </Box>
 
-          <Box>
+          <Box display={props.data?.contacts.included_individual_industry_keywords.length ? "block" : "none"}>
             <Text c={"gray.6"} fz={"sm"}>
               INDUSTRY
             </Text>
 
             <Flex wrap={"wrap"} gap={"xs"} mt="xs">
-              {mocksData.map((i) => (
+              {props.data?.contacts.included_individual_industry_keywords.map((i) => (
                 <Button
                   color="pink.2"
                   sx={{ color: "black", fontWeight: 500 }}
@@ -80,13 +88,13 @@ const Contacts = () => {
             </Flex>
           </Box>
 
-          <Box>
+          <Box display={props.data?.contacts.included_individual_skills_keywords.length ? "block" : "none"}>
             <Text c={"gray.6"} fz={"sm"}>
-              EXPERIENCE
+              SKILLS
             </Text>
 
             <Flex wrap={"wrap"} gap={"xs"} mt="xs">
-              {mocksData.map((i) => (
+              {props.data?.contacts.included_individual_skills_keywords.map((i) => (
                 <Button
                   color="orange.2"
                   sx={{ color: "black", fontWeight: 500 }}
@@ -101,13 +109,13 @@ const Contacts = () => {
             </Flex>
           </Box>
 
-          <Box>
+          <Box display={props.data?.contacts.included_individual_locations_keywords.length ? "block" : "none"}>
             <Text c={"gray.6"} fz={"sm"}>
-              INDUSTRY
+              LOCATION
             </Text>
 
             <Flex wrap={"wrap"} gap={"xs"} mt="xs">
-              {mocksData.map((i) => (
+              {props.data?.contacts.included_individual_locations_keywords.map((i) => (
                 <Button
                   color="blue.2"
                   compact
@@ -121,6 +129,92 @@ const Contacts = () => {
               ))}
             </Flex>
           </Box>
+
+          <Box display={props.data?.contacts.included_company_generalized_keywords.length ? "block" : "none"}>
+            <Text c={"gray.6"} fz={"sm"}>
+              COMPANY
+            </Text>
+
+            <Flex wrap={"wrap"} gap={"xs"} mt="xs">
+              {props.data?.contacts.included_company_generalized_keywords.map((i) => (
+                <Button
+                  color="blue.2"
+                  compact
+                  key={i}
+                  radius={"xl"}
+                  size="xs"
+                  sx={{ color: "black", fontWeight: 500 }}
+                >
+                  {i}
+                </Button>
+              ))}
+            </Flex>
+          </Box>
+
+          <Box display={props.data?.contacts.included_company_industries_keywords.length ? "block" : "none"}>
+            <Text c={"gray.6"} fz={"sm"}>
+              COMPANY INDUSTRY
+            </Text>
+
+            <Flex wrap={"wrap"} gap={"xs"} mt="xs">
+              {props.data?.contacts.included_company_industries_keywords.map((i) => (
+                <Button
+                  color="pink.2"
+                  sx={{ color: "black", fontWeight: 500 }}
+                  compact
+                  key={i}
+                  radius={"xl"}
+                  size="xs"
+                >
+                  {i}
+                </Button>
+              ))}
+            </Flex>
+          </Box>
+
+          <Box display={props.data?.contacts.included_company_locations_keywords.length ? "block" : "none"}>
+            <Text c={"gray.6"} fz={"sm"}>
+              COMPANY LOCATION
+            </Text>
+
+            <Flex wrap={"wrap"} gap={"xs"} mt="xs">
+              {props.data?.contacts.included_company_locations_keywords.map((i) => (
+                <Button
+                  color="blue.2"
+                  compact
+                  key={i}
+                  radius={"xl"}
+                  size="xs"
+                  sx={{ color: "black", fontWeight: 500 }}
+                >
+                  {i}
+                </Button>
+              ))}
+            </Flex>
+          </Box>
+
+          <Box display={props.data?.contacts.included_company_name_keywords.length ? "block" : "none"}>
+            <Text c={"gray.6"} fz={"sm"}>
+              COMPANY NAME
+            </Text>
+
+            <Flex wrap={"wrap"} gap={"xs"} mt="xs">
+              {props.data?.contacts.included_company_name_keywords.map((i) => (
+                <Button
+                  color="blue.2"
+                  compact
+                  key={i}
+                  radius={"xl"}
+                  size="xs"
+                  sx={{ color: "black", fontWeight: 500 }}
+                >
+                  {i}
+                </Button>
+              ))}
+            </Flex>
+          </Box>
+
+
         </Stack>
       </Box>
 
@@ -129,25 +223,34 @@ const Contacts = () => {
       <Box px={"sm"}>
         <Flex gap={"md"}>
           <Button
-            onClick={() => setTopStatus("title")}
+            onClick={() => {
+              setTopAttributeArray(props.data?.top_attributes.top_titles);
+              setTopStatus("title");
+            }}
             style={{ flex: 1 }}
             variant={topStatus === "title" ? "filled" : "outline"}
           >
             Top Titles
           </Button>
           <Button
-            onClick={() => setTopStatus("category")}
-            style={{ flex: 1 }}
-            variant={topStatus === "category" ? "filled" : "outline"}
-          >
-            Top Categories
-          </Button>
-          <Button
-            onClick={() => setTopStatus("industry")}
+            onClick={() => {
+              setTopAttributeArray(props.data?.top_attributes.top_industries);
+              setTopStatus("industry");
+            }}
             style={{ flex: 1 }}
             variant={topStatus === "industry" ? "filled" : "outline"}
           >
-            Top Industry
+            Top Industries
+          </Button>
+          <Button
+            onClick={() => {
+              setTopAttributeArray(props.data?.top_attributes.top_companies);
+              setTopStatus("company");
+            }}
+            style={{ flex: 1 }}
+            variant={topStatus === "company" ? "filled" : "outline"}
+          >
+            Top Companies
           </Button>
         </Flex>
 
@@ -180,21 +283,24 @@ const Contacts = () => {
             })}
           >
             <Stack mt={"sm"}>
-              {mocksData.map((i, idx) => (
-                <Fragment key={i}>
-                  <Box key={i}>
-                    <Flex align={"center"} justify={"space-between"}>
-                      <Text fw={600} color="gray.8">
-                        {i}
-                      </Text>
-                      <Text fw={600} color="gray.6">
-                        100
-                      </Text>
-                    </Flex>
-                    {mocksData.length - 1 !== idx && <Divider mt={"sm"} />}
-                  </Box>
-                </Fragment>
-              ))}
+              {topAttributeArray?.map((entry: any, idx: number) => {
+                  let i = entry['attribute']
+                  let j = entry['count']
+                  return <Fragment key={i}>
+                    <Box key={i}>
+                      <Flex align={"center"} justify={"space-between"}>
+                        <Text fw={600} color="gray.8">
+                          {i}
+                        </Text>
+                        <Text fw={600} color="gray.6">
+                          {j}
+                        </Text>
+                      </Flex>
+                      {mocksData.length - 1 !== idx && <Divider mt={"sm"} />}
+                    </Box>
+                  </Fragment>
+                }
+              )}
             </Stack>
           </ScrollArea>
         )}

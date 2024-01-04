@@ -214,6 +214,8 @@ const dontShowStatuses = [
   "ACTIVE_CONVO_QUESTION",
   "ACTIVE_CONVO_SCHEDULING",
   "ACTIVE_CONVO_REVIVAL",
+  "ACTIVE_CONVO_CONTINUE_SEQUENCE",
+  "ACTIVE_CONVO_QUEUED_FOR_SNOOZE",
 ];
 
 const useStyles = createStyles((theme) => ({
@@ -439,6 +441,7 @@ export default function ProspectDetailsChangeStatus(
         status: statusValue,
       };
     }
+
     items.push(
       <UnstyledButton
         key={status.status}
@@ -609,6 +612,8 @@ export default function ProspectDetailsChangeStatus(
             { value: "ACTIVE_CONVO_SCHEDULING", label: "Scheduling" },
             { value: "ACTIVE_CONVO_NEXT_STEPS", label: "Next Steps" },
             { value: "ACTIVE_CONVO_REVIVAL", label: "Queued for AI Revival" },
+            { value: "ACTIVE_CONVO_CONTINUE_SEQUENCE", label: "Continue Convo" },
+            { value: "ACTIVE_CONVO_QUEUED_FOR_SNOOZE", label: "Queue for Snooze" },
           ]}
           defaultValue={props.channelData.currentStatus}
           onChange={async (value) => {

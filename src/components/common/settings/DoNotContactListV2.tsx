@@ -295,7 +295,9 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
         <>
           <Text>
             By clicking confirm, you will automatically remove{" "}
-            {caughtProspects.length} prospects from your SellScale pipeline.
+            {caughtProspects.filter(
+              (prospect: Prospect) => prospect.overall_status !== "REMOVED"
+            ).length}{" "} prospects
           </Text>
           <Text mt="md">This action is not reversible.</Text>
         </>
@@ -562,6 +564,7 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
                   fw={700}
                   onClick={async () => {
                     await saveFilters();
+                    await fetchCaughtProspects();
                   }}
                   disabled={!needsSave}
                 >
@@ -1266,16 +1269,7 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
                       {caughtProspects.filter(
                         (prospect: Prospect) =>
                           prospect.overall_status !== "REMOVED"
-                      ).length === 0
-                        ? caughtProspects.filter(
-                            (prospect: Prospect) =>
-                              prospect.overall_status !== "REMOVED"
-                          ).length + "+"
-                        : caughtProspects.filter(
-                            (prospect: Prospect) =>
-                              prospect.overall_status !== "REMOVED"
-                          ).length}{" "}
-                      prospects caught in these filters
+                      ).length} prospects caught in these filters
                     </Text>
                   </Alert>
                 )}
@@ -1305,7 +1299,10 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
                       disabled={needsSave}
                       leftIcon={<IconTrash size={14} />}
                     >
-                      Remove {caughtProspects.length} Prospects
+                      Remove {caughtProspects.filter(
+                        (prospect: Prospect) =>
+                          prospect.overall_status !== "REMOVED"
+                      ).length}{" "} prospects
                     </Button>
                   )}
                 </Flex>

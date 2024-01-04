@@ -254,7 +254,9 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
       children: (
         <>
           <Text>
-            By clicking confirm, you will automatically remove {caughtProspects.length} prospects
+            By clicking confirm, you will automatically remove {caughtProspects.filter(
+              (prospect: Prospect) => prospect.overall_status !== 'REMOVED'
+            ).length} prospects
             from your SellScale pipeline.
           </Text>
           <Text mt='md'>This action is not reversible.</Text>
@@ -440,7 +442,7 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
               align={'center'}
               gap={'md'}
             >
-              {!isViewRemovedProspects && (
+              {isViewRemovedProspects && (
                 <Alert
                   w={'100%'}
                   icon={<IconAlertCircle size='1rem' />}
@@ -483,20 +485,21 @@ export default function DoNotContactList(props: { forSDR?: boolean }) {
                   </Text>
                 </Alert>
               )}
-              <Flex align={'center'} gap={'sm'}>
-                <Button leftIcon={<IconRefresh size={14} />} onClick={fetchCaughtProspects}>
-                  Refresh
-                </Button>
-                {!isViewRemovedProspects && (
+              <Flex align={'center'} gap={'sm'} ml='auto'>
+                
+                {isViewRemovedProspects && (
                   <Button
                     color='red'
                     onClick={openProspectRemovalModal}
                     disabled={needsSave}
                     leftIcon={<IconTrash size={14} />}
                   >
-                    Remove {caughtProspects.length} Prospects
+                    Remove {caughtProspects.filter((prospect: Prospect) => prospect.overall_status !== 'REMOVED').length} Prospects
                   </Button>
                 )}
+                <Button leftIcon={<IconRefresh size={14} />} onClick={fetchCaughtProspects}>
+                  Refresh
+                </Button>
               </Flex>
             </Flex>
           </>

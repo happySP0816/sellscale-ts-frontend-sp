@@ -39,6 +39,7 @@ import { truncate } from "lodash";
 import { deterministicMantineColor } from "@utils/requests/utils";
 import { DataGrid, stringFilterFn } from "mantine-data-grid";
 import { proxyURL } from "@utils/general";
+import moment from 'moment';
 
 export default function DoNotContactListCaughtProspects(props: {
   forSDR?: boolean;
@@ -215,6 +216,26 @@ export default function DoNotContactListCaughtProspects(props: {
                         ⚠️ {x}
                       </Badge>
                     ))}
+                  </Flex>
+                );
+              },
+              filterFn: stringFilterFn,
+            },
+
+            {
+              accessorKey: "matched_filter_words",
+              header: "Date Added",
+              enableSorting: false,
+              cell: (cell) => {
+                return (
+                  <Flex
+                    h={"100%"}
+                    gap={"xs"}
+                    wrap={"wrap"}
+                    my={"auto"}
+                    align={"center"}
+                  >
+                    {moment().format("MMM Do")}
                   </Flex>
                 );
               },

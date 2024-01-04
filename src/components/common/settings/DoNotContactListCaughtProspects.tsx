@@ -24,6 +24,7 @@ import { openConfirmModal } from "@mantine/modals";
 import displayNotification from "@utils/notificationFlow";
 import { truncate } from "lodash";
 import { deterministicMantineColor } from "@utils/requests/utils";
+import moment from 'moment';
 
 export default function DoNotContactListCaughtProspects(props: {
   forSDR?: boolean;

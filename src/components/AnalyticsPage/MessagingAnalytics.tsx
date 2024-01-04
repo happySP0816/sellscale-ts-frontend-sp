@@ -88,8 +88,8 @@ const MessagingAnalytics = () => {
       <EditSlaModal opened={opened} onClose={close} />
       <Box bg={"white"} p={"lg"}>
         <Flex align={"center"} justify={"space-between"}>
-          <Text fw={700} fz={"lg"}>
-            Messaging Center
+          <Text fw={600} fz={"xl"}>
+            Messaging Center - ⚠️ Coming Soon
           </Text>
 
           <Group>
@@ -210,7 +210,7 @@ const MessagingAnalytics = () => {
                       {Math.round((rate / totalRate) * 100)}%
                     </Badge>
 
-                    <Text c={"gray.6"} size={"xs"} fw={700}>
+                    <Text c={"gray.6"} size={"xs"} fw={500}>
                       {rate}/{totalRate}
                     </Text>
                   </Flex>
@@ -234,7 +234,7 @@ const MessagingAnalytics = () => {
 
                     <Box>
                       <Flex align={"center"} gap={4}>
-                        <Text fw={700} size={"sm"}>
+                        <Text fw={500} size={"sm"}>
                           {campaign}
                         </Text>
 
@@ -249,7 +249,7 @@ const MessagingAnalytics = () => {
 
                       <Text display={"flex"} fw={500} c={"gray.6"}>
                         Step:&nbsp;
-                        <Text fw={700} c={"black"}>
+                        <Text fw={500} c={"black"}>
                           {step}
                         </Text>
                       </Text>
@@ -269,7 +269,7 @@ const MessagingAnalytics = () => {
 
                 return (
                   <Flex align={"center"} h={"100%"}>
-                    <Text fw={700}>{title}</Text>
+                    <Text fw={500}>{title}</Text>
                   </Flex>
                 );
               },
@@ -318,7 +318,7 @@ const MessagingAnalytics = () => {
                 })}
               >
                 <Flex align={"center"} gap={"sm"}>
-                  <Text fw={700} color="gray.6">
+                  <Text fw={500} color="gray.6">
                     Show
                   </Text>
 
@@ -346,7 +346,7 @@ const MessagingAnalytics = () => {
                       })}
                       h={36}
                     >
-                      <Text color="gray.5" fw={700} fz={14}>
+                      <Text color="gray.5" fw={500} fz={14}>
                         of {table.getPrePaginationRowModel().rows.length}
                       </Text>
                     </Flex>
@@ -382,7 +382,7 @@ const MessagingAnalytics = () => {
                       })}
                       h={36}
                     >
-                      <Text color="gray.5" fw={700} fz={14}>
+                      <Text color="gray.5" fw={500} fz={14}>
                         of {table.getPageCount()} pages
                       </Text>
                     </Flex>

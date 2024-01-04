@@ -591,7 +591,7 @@ export default function ProjectDetails(props: {
                                 await changeStatus('NOT_INTERESTED', true, notInterestedDisqualificationReason);
                               }}
                             >
-                              Disqualify
+                              Mark Not Interested
                             </Button>
                           </Flex>
                         </Popover.Dropdown>

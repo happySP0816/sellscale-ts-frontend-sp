@@ -4,6 +4,7 @@ import React from "react";
 import HighPriority from "./Operation/HighPriority";
 import Operation, { Priority } from "./Operation/Operation";
 import { OperatorNotification } from '.';
+import { IconAlarm } from '@tabler/icons';
 
 type PropsType = {
   notifications: OperatorNotification[]
@@ -42,8 +43,8 @@ const HighPriorityStack = (props: PropsType) => {
           }
           renderContent={<HighPriority notification={notification} />}
           renderRight={
-            <Button size="xs" variant="outline" radius={"xl"} compact display={notification.cta}>
-              {notification.cta}
+            <Button size="xs" variant="outline" radius={"xl"} compact color='red' leftIcon={<IconAlarm size='0.9rem' />}>
+              Due on {moment().format("MMM D")}
             </Button>
           }
         />

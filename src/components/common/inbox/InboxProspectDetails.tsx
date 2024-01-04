@@ -158,6 +158,10 @@ export default function ProjectDetails(props: {
 
   const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
 
+  useEffect(() => {
+    setDeactivateAiEngagementStatus(!prospect?.deactivate_ai_engagement);
+  }, [prospect?.deactivate_ai_engagement]);
+
   // Set the notes in the input box when the data is loaded in
   useEffect(() => {
     if (notesRef.current) {
@@ -330,7 +334,15 @@ export default function ProjectDetails(props: {
                 }}
               />
             </Card>
+            {
+              !deactivateAiEngagementStatus && (
+                <Badge color='red' variant='filled' ml={5} mt='xs'>
+                  AI Disabled
+                </Badge>
+              )
+            }
           </Flex>
+          
 
           <Box maw={'60%'} w={'100%'}>
             <Flex gap={'sm'} wrap={'wrap'}>

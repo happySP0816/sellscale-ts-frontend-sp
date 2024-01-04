@@ -909,20 +909,6 @@ export default function ProspectConvo(props: Props) {
           position: 'relative',
         }}
       >
-        {isConversationOpened && (ai_disabled || prospect?.deactivate_ai_engagement) && (
-          <Badge
-            variant='filled'
-            sx={{
-              position: 'absolute',
-              top: 10,
-              right: 10,
-              zIndex: 100,
-            }}
-            color='red'
-          >
-            AI Disabled
-          </Badge>
-        )}
         <ScrollArea
           h={`calc((${INBOX_HEIGHT} - ${HEADER_HEIGHT}px)*1.0)`}
           viewportRef={viewport}

@@ -46,6 +46,8 @@ export default function PersonFilterDrawer(props: { onClickSearch?: () => void }
       globalRuleSetData.excluded_company_generalized_keywords,
       globalRuleSetData.included_individual_education_keywords,
       globalRuleSetData.excluded_individual_education_keywords,
+      globalRuleSetData.included_individual_seniority_keywords,
+      globalRuleSetData.excluded_individual_seniority_keywords,
     );
   };
 

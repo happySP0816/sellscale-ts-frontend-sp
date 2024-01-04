@@ -182,7 +182,9 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
                 globalRuleSetData.included_company_generalized_keywords,
                 globalRuleSetData.excluded_company_generalized_keywords,
                 globalRuleSetData.included_individual_education_keywords,
-                globalRuleSetData.excluded_individual_education_keywords
+                globalRuleSetData.excluded_individual_education_keywords,
+                globalRuleSetData.included_individual_seniority_keywords,
+                globalRuleSetData.excluded_individual_seniority_keywords
               )
               console.log('response', response)
               console.log('running scoring')

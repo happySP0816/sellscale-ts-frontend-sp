@@ -23,6 +23,8 @@ function Filters(props: { isTesting: boolean; selectOptions: { value: string; la
 
   const [included_individual_title_keywords, setIncludedIndividualTitleKeywords] = useState<string[]>([])
   const [excluded_individual_title_keywords, setExcludedIndividualTitleKeywords] = useState<string[]>([])
+  const [included_individual_seniority_keywords, setIncludedIndividualSeniorityKeywords] = useState<string[]>([])
+  const [excluded_individual_seniority_keywords, setExcludedIndividualSeniorityKeywords] = useState<string[]>([])
   const [included_individual_industry_keywords, setIncludedIndividualIndustryKeywords] = useState<string[]>([])
   const [excluded_individual_industry_keywords, setExcludedIndividualIndustryKeywords] = useState<string[]>([])
   const [individual_years_of_experience_start, setIndividualYearsOfExperienceStart] = useState<number>(0)
@@ -60,6 +62,8 @@ function Filters(props: { isTesting: boolean; selectOptions: { value: string; la
       if (response.status === 'success') {
         setIncludedIndividualTitleKeywords(response.data.included_individual_title_keywords ?? [])
         setExcludedIndividualTitleKeywords(response.data.excluded_individual_title_keywords ?? [])
+        setIncludedIndividualSeniorityKeywords(response.data.included_individual_seniority_keywords ?? [])
+        setExcludedIndividualSeniorityKeywords(response.data.excluded_individual_seniority_keywords ?? [])
         setIncludedIndividualIndustryKeywords(response.data.included_individual_industry_keywords ?? [])
         setExcludedIndividualIndustryKeywords(response.data.excluded_individual_industry_keywords ?? [])
         setIndividualYearsOfExperienceStart(response.data.individual_years_of_experience_start ?? 0)
@@ -92,6 +96,8 @@ function Filters(props: { isTesting: boolean; selectOptions: { value: string; la
     setGlobalRuleSetData({
       included_individual_title_keywords,
       excluded_individual_title_keywords,
+      included_individual_seniority_keywords,
+      excluded_individual_seniority_keywords,
       included_individual_industry_keywords,
       excluded_individual_industry_keywords,
       individual_years_of_experience_start,
@@ -118,6 +124,8 @@ function Filters(props: { isTesting: boolean; selectOptions: { value: string; la
   }, [
     included_individual_title_keywords,
     excluded_individual_title_keywords,
+    included_individual_seniority_keywords,
+    excluded_individual_seniority_keywords,
     included_individual_industry_keywords,
     excluded_individual_industry_keywords,
     individual_years_of_experience_start,
@@ -212,6 +220,24 @@ function Filters(props: { isTesting: boolean; selectOptions: { value: string; la
                 setValue={setExcludedIndividualTitleKeywords}
                 data={excluded_individual_title_keywords.concat(titleOptions)}
                 setData={setExcludedIndividualTitleKeywords}
+              />
+              <CustomSelect
+                maxWidth='30vw'
+                value={included_individual_seniority_keywords}
+                label='Seniority (Included)'
+                placeholder='Select options'
+                setValue={setIncludedIndividualSeniorityKeywords}
+                data={included_individual_seniority_keywords}
+                setData={setIncludedIndividualSeniorityKeywords}
+              />
+              <CustomSelect
+                maxWidth='30vw'
+                value={excluded_individual_seniority_keywords}
+                label='Seniority (Excluded)'
+                placeholder='Select options'
+                setValue={setExcludedIndividualSeniorityKeywords}
+                data={excluded_individual_seniority_keywords}
+                setData={setExcludedIndividualSeniorityKeywords}
               />
               <CustomSelect
                 maxWidth='30vw'

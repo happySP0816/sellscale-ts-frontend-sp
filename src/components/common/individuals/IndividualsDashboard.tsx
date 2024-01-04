@@ -133,39 +133,6 @@ const IndividualsDashboard: FC<{
     return result;
   };
 
-  // useEffect(() => {
-  //   (async () => {
-  //     if (!currentProject) return;
-  //     // Auto save ICP rule set
-  //     const response = await updateICPRuleSet(
-  //       userToken,
-  //       currentProject.id,
-  //       globalRuleSetData.included_individual_title_keywords,
-  //       globalRuleSetData.excluded_individual_title_keywords,
-  //       globalRuleSetData.included_individual_industry_keywords,
-  //       globalRuleSetData.individual_years_of_experience_start,
-  //       globalRuleSetData.individual_years_of_experience_end,
-  //       globalRuleSetData.included_individual_skills_keywords,
-  //       globalRuleSetData.excluded_individual_skills_keywords,
-  //       globalRuleSetData.included_individual_locations_keywords,
-  //       globalRuleSetData.excluded_individual_locations_keywords,
-  //       globalRuleSetData.included_individual_generalized_keywords,
-  //       globalRuleSetData.excluded_individual_generalized_keywords,
-  //       globalRuleSetData.included_company_name_keywords,
-  //       globalRuleSetData.excluded_company_name_keywords,
-  //       globalRuleSetData.included_company_locations_keywords,
-  //       globalRuleSetData.excluded_company_locations_keywords,
-  //       globalRuleSetData.company_size_start,
-  //       globalRuleSetData.company_size_end,
-  //       globalRuleSetData.included_company_industries_keywords,
-  //       globalRuleSetData.excluded_company_industries_keywords,
-  //       globalRuleSetData.included_company_generalized_keywords,
-  //       globalRuleSetData.excluded_company_generalized_keywords
-  //     );
-  //     refetch();
-  //   })();
-  // }, [globalRuleSetData]);
-
   // Make extra columns show up if filtering
   const extraColumns = [];
   const getColumnTemplate = (key: string) => {

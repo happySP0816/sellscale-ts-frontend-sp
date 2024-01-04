@@ -416,7 +416,7 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
   };
 
   return (
-    <Box>
+    <Box maw='93%'>
       <Box p="md" pb={0}>
         <Flex justify={"space-between"} align={"center"}>
           <Box>

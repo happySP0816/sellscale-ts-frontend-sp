@@ -1,10 +1,16 @@
-import { Stack, Flex, Button, Text } from "@mantine/core";
+import { Stack, Flex, Button, Text, Box, Badge } from "@mantine/core";
 import moment from "moment";
 import React from "react";
 import HighPriority from "./Operation/HighPriority";
 import Operation, { Priority } from "./Operation/Operation";
+import { OperatorNotification } from '.';
+import { deterministicMantineColor } from '@utils/requests/utils';
 
-const PreviouslyCompletedTask = () => {
+type PropsType = {
+  notifications: OperatorNotification[]
+}
+
+const PreviouslyCompletedTask = (props: PropsType) => {
   return (
     <Stack>
       <Flex>
@@ -13,20 +19,24 @@ const PreviouslyCompletedTask = () => {
         </Text>
       </Flex>
 
-      {new Array(2).fill(0).map((i, idx) => (
+      {props.notifications.map((entry: OperatorNotification, idx: number) => (
         <Operation
-          priority={Priority.High}
+          priority={Priority.Complete}
           renderLeft={
-            <Flex align={"center"}>
-              <Text fw={500} fz={"sm"}>
-                Review New Campaign&nbsp;
-              </Text>
-              <Text fw={500} fz={"sm"} c={"gray.6"}>
-                Launched {moment(new Date()).format("MMM d,yyyy")}
-              </Text>
-            </Flex>
+            <Box>
+              <Flex align={"center"}>
+                <Text fw={500} fz={"sm"}>
+                  {entry?.title}
+                </Text>
+                <Text fw={500} fz={"sm"} c={"gray.6"} ml='xs'>
+                  {entry?.subtitle}
+                </Text>
+                <Badge size='xs' color={'grape'} ml='xs' variant='outline'>
+                  type: {entry?.notification_type.replaceAll("_", " ")}
+                </Badge>
+              </Flex> 
+            </Box>
           }
-          renderContent={<HighPriority />}
         />
       ))}
     </Stack>

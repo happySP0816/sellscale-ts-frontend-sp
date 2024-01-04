@@ -10,6 +10,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconCalendar,
+  IconCheck,
   IconChevronDown,
   IconClock,
   IconTargetArrow,
@@ -20,12 +21,13 @@ export enum Priority {
   High = "High",
   Medium = "Medium",
   Low = "Low",
+  Complete = "Complete",
 }
 type Props = {
   priority: Priority;
-  renderLeft: React.ReactNode;
+  renderLeft?: React.ReactNode;
   renderRight?: React.ReactNode;
-  renderContent: React.ReactNode;
+  renderContent?: React.ReactNode;
 };
 const Operation: FC<Props> = ({
   priority,
@@ -56,6 +58,14 @@ const Operation: FC<Props> = ({
             <IconCalendar />
           </ThemeIcon>
         );
+
+      case Priority.Complete:
+        return (
+          <ThemeIcon color="grape" radius="xl" variant="light" size="xs">
+            <IconCheck />
+          </ThemeIcon>
+        );
+      
       default:
         return null;
     }

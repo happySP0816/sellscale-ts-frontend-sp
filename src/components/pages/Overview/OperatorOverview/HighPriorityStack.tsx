@@ -3,8 +3,18 @@ import moment from "moment";
 import React from "react";
 import HighPriority from "./Operation/HighPriority";
 import Operation, { Priority } from "./Operation/Operation";
+import { OperatorNotification } from '.';
 
-const HighPriorityStack = () => {
+type PropsType = {
+  notifications: OperatorNotification[]
+}
+
+const HighPriorityStack = (props: PropsType) => {
+
+  if (!props.notifications || props.notifications.length === 0) {
+    return null;
+  }
+
   return (
     <Stack>
       <Flex>
@@ -17,23 +27,23 @@ const HighPriorityStack = () => {
         </Text>
       </Flex>
 
-      {new Array(2).fill(0).map((i, idx) => (
+      {props.notifications.map((notification: OperatorNotification, idx: number) => (
         <Operation
           priority={Priority.High}
           renderLeft={
             <Flex align={"center"}>
               <Text fw={500} fz={"sm"}>
-                Review New Campaign&nbsp;
+                {notification.title}{" "}
               </Text>
-              <Text fw={500} fz={"sm"} c={"gray.6"}>
-                Launched {moment(new Date()).format("MMM d,yyyy")}
+              <Text fw={500} fz={"sm"} c={"gray.6"} ml='xs'>
+                {notification.subtitle}
               </Text>
             </Flex>
           }
-          renderContent={<HighPriority />}
+          renderContent={<HighPriority notification={notification} />}
           renderRight={
-            <Button size="xs" variant="outline" radius={"xl"} compact>
-              View And Mark Complete
+            <Button size="xs" variant="outline" radius={"xl"} compact display={notification.cta}>
+              {notification.cta}
             </Button>
           }
         />

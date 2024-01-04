@@ -87,6 +87,7 @@ import DOMPurify from "dompurify";
 import { postGenerateFollowupEmail } from "@utils/requests/emailMessageGeneration";
 import { API_URL } from "@constants/data";
 import { Calendar, DateTimePicker, TimeInput } from "@mantine/dates";
+import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChangeStatus';
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -621,7 +622,28 @@ export default forwardRef(function InboxProspectConvoSendBox(
             <Select
               w='65%'
               size="xs"
-              onChange={(val) => setReplyLabel(val || "")}
+              onChange={(val) => {
+                setReplyLabel(val || "")
+                setBumpFramework(bumpFrameworks.find((bf) => bf.substatus === val) || bumpFrameworks[0]);
+
+                updateChannelStatus(openedProspectId, userToken, 'LINKEDIN', val || "", false, true).then((res) => {
+                  showNotification({
+                    id: "update-channel-status",
+                    title: "Status updated",
+                    message: "",
+                    color: "green",
+                    autoClose: 3000,
+                  });
+
+                  queryClient.refetchQueries({
+                    queryKey: [
+                      `query-get-dashboard-prospect-${openedProspectId}`,
+                    ],
+                  });
+                })
+
+                
+              }}
               value={replyLabel}
               withinPortal
               data={replyLabels.filter(label => label).map((label) => ({

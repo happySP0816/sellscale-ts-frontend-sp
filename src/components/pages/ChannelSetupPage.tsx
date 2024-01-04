@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BumpFrameworksPage from "./BumpFrameworksPage";
-import { Box, Flex, Tabs, rem, Text, Switch, Divider } from "@mantine/core";
+import { Box, Flex, Tabs, rem, Text, Switch, Divider, LoadingOverlay, Tooltip } from "@mantine/core";
 import ChannelsSetupSelector from "./channels";
 import EmailSequencingPage from "./EmailSequencingPage";
 import { currentProjectState } from "@atoms/personaAtoms";
@@ -11,6 +11,7 @@ import ICPFilters from "@common/persona/ICPFilter/ICPFilters";
 import { IconBrandLinkedin, IconMailOpened, IconUser } from "@tabler/icons";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { showNotification } from "@mantine/notifications";
+import { openConfirmModal } from '@mantine/modals';
 
 export default function ChannelSetupPage() {
   const { channelType, tabId } = useLoaderData() as {
@@ -28,13 +29,34 @@ export default function ChannelSetupPage() {
     currentProject?.linkedin_active
   );
 
+  const [togglingLinkedin, setTogglingLinkedin] = useState(false);
+  const [togglingEmail, setTogglingEmail] = useState(false);
+
+  useEffect(() => {
+    setEnabledEmail(currentProject?.email_active);
+    setEnabledLinkedin(currentProject?.linkedin_active);
+  }, [currentProject?.linkedin_active, currentProject?.email_active])
+
   const onToggleEmail = async () => {
+    openConfirmModal({
+      title: "Are you sure?",
+      children: "Are you sure you want to " + (isEnabledEmail ? "🔴 disable" : "✅ enable") + " email outbound for this campaign?",
+      labels: { confirm: 'Confirm', cancel: 'Cancel' },
+      onCancel: () => { },
+      onConfirm: () => { toggleEmail() }
+    });
+  }
+
+  const toggleEmail = async () => {
+    setTogglingEmail(true);
     const result = await postTogglePersonaActive(
       userToken,
       Number(currentProject?.id),
       "email",
       !isEnabledEmail
     );
+
+    setTogglingEmail(false);
 
     if (result.status == "success") {
       setEnabledEmail(!isEnabledEmail);
@@ -55,12 +77,25 @@ export default function ChannelSetupPage() {
   };
 
   const onToggleLinkedin = async () => {
+    openConfirmModal({
+      title: "Are you sure?",
+      children: "Are you sure you want to " + (isEnabledLinkedin ? "🔴 disable" : "✅ enable") + " LinkedIn outbound for this campaign?",
+      labels: { confirm: 'Confirm', cancel: 'Cancel' },
+      onCancel: () => { },
+      onConfirm: () => { toggleLinkedin() }
+    });
+  }
+
+  const toggleLinkedin = async () => {
+    setTogglingLinkedin(true);
     const result = await postTogglePersonaActive(
       userToken,
       Number(currentProject?.id),
       "linkedin",
       !isEnabledLinkedin
     );
+
+    setTogglingLinkedin(false);
 
     if (result.status == "success") {
       setEnabledLinkedin(!isEnabledLinkedin);
@@ -145,13 +180,24 @@ export default function ChannelSetupPage() {
                 <Flex align={"center"} gap={"md"}>
                   <Text>Linkedin</Text>
 
-                  <Switch
-                    size="xs"
-                    sx={{ zIndex: 200 }}
-                    color={activeTab === "linkedin" ? "green" : "blue"}
-                    checked={isEnabledLinkedin}
-                    onChange={onToggleLinkedin}
-                  />
+                  <LoadingOverlay visible={togglingLinkedin} />
+
+                  <Tooltip 
+                    label={isEnabledLinkedin ? "Disable Linkedin" : "Enable Linkedin"}
+                    position="bottom"
+                    withArrow
+                    withinPortal
+                    >
+                    <Box>
+                      <Switch
+                        size="xs"
+                        sx={{ zIndex: 200, cursor: 'pointer'}}
+                        color={activeTab === "linkedin" ? "green" : "blue"}
+                        checked={isEnabledLinkedin}
+                        onChange={onToggleLinkedin}
+                      />
+                    </Box>
+                  </Tooltip>
                 </Flex>
               </Tabs.Tab>
               <Tabs.Tab
@@ -161,14 +207,26 @@ export default function ChannelSetupPage() {
                 ml='xs'
               >
                 <Flex align={"center"} gap={"md"}>
-                  Email
-                  <Switch
-                    size="xs"
-                    sx={{ zIndex: 200 }}
-                    color={activeTab === "email" ? "green" : "blue"}
-                    checked={isEnabledEmail}
-                    onChange={onToggleEmail}
-                  />
+                  <Text>Email</Text>
+
+                  <LoadingOverlay visible={togglingEmail} />
+
+                  <Tooltip 
+                    label={isEnabledLinkedin ? "Disable Email" : "Enable Email"}
+                    position="bottom"
+                    withArrow
+                    withinPortal
+                    >
+                    <Box>
+                      <Switch
+                        size="xs"
+                        sx={{ zIndex: 200 }}
+                        color={activeTab === "email" ? "green" : "blue"}
+                        checked={isEnabledEmail}
+                        onChange={onToggleEmail}
+                      />
+                    </Box>
+                  </Tooltip>
                 </Flex>
               </Tabs.Tab>
             </Tabs.List>

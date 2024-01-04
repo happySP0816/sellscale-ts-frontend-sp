@@ -55,7 +55,9 @@ export async function updateICPRuleSet(
   included_company_generalized_keywords: string[],
   excluded_company_generalized_keywords: string[],
   included_individual_education_keywords: string[],
-  excluded_individual_education_keywords: string[]
+  excluded_individual_education_keywords: string[],
+  included_individual_seniority_keywords: string[],
+  excluded_individual_seniority_keywords: string[]
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/icp_scoring/update_ruleset`, {
     method: 'POST',
@@ -88,6 +90,8 @@ export async function updateICPRuleSet(
       excluded_company_generalized_keywords,
       included_individual_education_keywords,
       excluded_individual_education_keywords,
+      included_individual_seniority_keywords,
+      excluded_individual_seniority_keywords,
     }),
   });
   return await processResponse(response);

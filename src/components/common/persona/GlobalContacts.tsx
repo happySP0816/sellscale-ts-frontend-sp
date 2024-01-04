@@ -55,6 +55,9 @@ const GlobalContacts = () => {
   const [prospectPersonas, setProspectPersonas]: any = useState([]);
   const [prospectTitles, setProspectTitles]: any = useState([]);
   const [prospectExcludedTitles, setProspectExcludedTitles]: any = useState([]);
+  const [prospectSeniority, setProspectSeniority]: any = useState([]);
+  const [prospectExcludedSeniority, setProspectExcludedSeniority]: any =
+    useState([]);
   const [prospectEducations, setProspectEducations]: any = useState([]);
   const [prospectExcludeEducations, setProspectExcludeEducations]: any =
     useState([]);
@@ -83,6 +86,9 @@ const GlobalContacts = () => {
 
     title: [],
     excluded_titles: [],
+
+    seniority: [],
+    excluded_seniority: [],
 
     education: [],
     excluded_education: [],
@@ -256,6 +262,16 @@ const GlobalContacts = () => {
           search.excluded_titles,
           contact.prospect_title
         )) &&
+      (
+        search.excluded_seniority.length === 0 ||
+        isSearchTermDiscluded(
+          search.excluded_seniority,
+          contact.prospect_title
+        )
+      ) &&
+      (search.seniority.length === 0 ||
+        isSearchTermIncluded(search.seniority, contact.prospect_title)) 
+      &&
       (search.education.length === 0 ||
         isSearchTermIncluded(search.education, contact.education_1) ||
         search.education.length === 0 ||
@@ -319,6 +335,22 @@ const GlobalContacts = () => {
             .includes(search.title[i]?.toLowerCase())
         ) {
           mapping += `✅ title: ${search.title[i]}, `;
+          break;
+        }
+      }
+    }
+
+    if (
+      search.seniority.length > 0 ||
+      isSearchTermIncluded(search.seniority, contact.prospect_title)
+    ) {
+      for (let i = 0; i < search.seniority.length; i++) {
+        if (
+          contact.prospect_title
+            ?.toLowerCase()
+            .includes(search.seniority[i]?.toLowerCase())
+        ) {
+          mapping += `✅ seniority: ${search.seniority[i]}, `;
           break;
         }
       }
@@ -746,6 +778,50 @@ const GlobalContacts = () => {
                   }
                   label="Title (Excluded)"
                   placeholder="Search by Title"
+                />
+
+                <MultiSelect
+                  withinPortal
+                  data={prospectSeniority}
+                  creatable
+                  searchable
+                  getCreateLabel={(query) => `+ Add a filter for ${query}`}
+                  onCreate={(query: any) => {
+                    const item: any = { value: query, label: query };
+                    setProspectSeniority((current: any) => [
+                      ...current,
+                      item,
+                    ]);
+                    return item;
+                  }}
+                  value={search.seniority}
+                  onChange={(value) =>
+                    setSearch({ ...search, seniority: value })
+                  }
+                  label="Seniority (Included)"
+                  placeholder="Search by Seniority"
+                />
+
+                <MultiSelect
+                  withinPortal
+                  data={prospectExcludedSeniority}
+                  creatable
+                  searchable
+                  getCreateLabel={(query) => `+ Add a filter for ${query}`}
+                  onCreate={(query: any) => {
+                    const item: any = { value: query, label: query };
+                    setProspectExcludedSeniority((current: any) => [
+                      ...current,
+                      item,
+                    ]);
+                    return item;
+                  }}
+                  value={search.excluded_seniority}
+                  onChange={(value) =>
+                    setSearch({ ...search, excluded_seniority: value })
+                  }
+                  label="Seniority (Excluded)"
+                  placeholder="Search by Seniority"
                 />
 
                 <MultiSelect

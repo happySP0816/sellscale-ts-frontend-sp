@@ -469,6 +469,32 @@ export default forwardRef(function InboxProspectConvoSendBox(
     return Array.from(labels);
   }, [bumpFrameworks]);
 
+  const labelEmoji = (label: string) => {
+    switch (label) {
+      case "ACTIVE_CONVO_QUESTION":
+        return "❓";
+      case "ACTIVE_CONVO_QUAL_NEEDED":
+        return "👍";
+      case "ACTIVE_CONVO_OBJECTION":
+        return "👆";
+      case "ACTIVE_CONVO_SCHEDULING":
+        return "📆";
+      case "ACTIVE_CONVO_NEXT_STEPS":
+        return "➡️";
+      case "ACTIVE_CONVO_REVIVAL":
+        return "🏥";
+      case "ACTIVE_CONVO_CIRCLE_BACK":
+        return "🔄";
+      case "ACTIVE_CONVO_REFERRAL":
+        return "👥";
+      case "ACTIVE_CONVO_QUEUED_FOR_SNOOZE":
+        return "💤";
+      case "ACTIVE_CONVO_CONTINUE_SEQUENCE":
+        return "";
+      default:
+        return "";
+    }
+  }
 
   const filteredFrameworkData = openedOutboundChannel === "LINKEDIN"
       ? bumpFrameworks.length > 0
@@ -600,7 +626,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
               withinPortal
               data={replyLabels.filter(label => label).map((label) => ({
                 value: label,
-                label: label?.replaceAll("ACTIVE_CONVO_", "").replaceAll("_", " ").toLowerCase(),
+                label: labelEmoji(label) + ' ' + label?.replaceAll("ACTIVE_CONVO_", "").replaceAll("_", " ").toLowerCase(),
               }))}
             />
           </Flex>

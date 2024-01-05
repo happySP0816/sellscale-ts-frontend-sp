@@ -570,6 +570,7 @@ export default function ProjectDetails(props: {
                             </Text>
                             <Radio.Group withAsterisk onChange={(value) => {setNotInterestedDisqualificationReason(value)}}>
                               <Flex direction={'column'} gap={'sm'}>
+                                <Radio value="No Need" label='No Need' size='xs' checked={notInterestedDisqualificationReason === 'No Need'} />
                                 <Radio value='Unconvinced' label='Unconvinced' size='xs' checked={notInterestedDisqualificationReason === 'Unconvinced'} />
                                 <Radio value='Timing not right' label='Timing not right' size='xs' checked={notInterestedDisqualificationReason === 'Timing not right'} />
                                 <Radio value='Unresponsive' label='Unresponsive' size='xs' checked={notInterestedDisqualificationReason === 'Unresponsive'} />

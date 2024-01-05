@@ -280,7 +280,6 @@ export default function InboxSmartleadPage(props: {
 
     // If the last conversation is from the user, then we should populate with the automated reply
     const lastMessage = conversation[conversation.length - 1];
-    console.log('lastMessage', lastMessage)
     if (lastMessage?.type === "REPLY") {
       const automated_reply = response?.data?.automated_reply?.email_body;
       setMessageDraft(automated_reply);
@@ -331,6 +330,7 @@ export default function InboxSmartleadPage(props: {
 
     setSendingMessage(false);
 
+    triggerGetSmartleadProspects();
     triggerGetSmartleadProspectConvo();
   };
 
@@ -375,7 +375,6 @@ export default function InboxSmartleadPage(props: {
   }, []);
 
   const smartGenerate = async () => {
-    console.log(conversation, openedProspectId);
     setSendingMessage(true);
     const result = fetch(`${API_URL}/smartlead/generate_smart_response`, {
       method: "POST",

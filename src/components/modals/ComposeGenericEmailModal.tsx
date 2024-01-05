@@ -20,6 +20,7 @@ import {
   Tooltip,
   Box,
   Stack,
+  MultiSelect,
 } from '@mantine/core';
 import { ContextModalProps, closeAllModals, openConfirmModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
@@ -69,6 +70,13 @@ export default function ComposeGenericEmailModal({
     _setBody(value);
   };
 
+  const [fromEmail, setFromEmail] = useState(innerProps.from);
+  const [toEmails, setToEmails] = useState(innerProps.to);
+  const [bccEmails, setBccEmails] = useState(innerProps.bcc);
+
+  const [toEmailsData, setToEmailsData] = useState<string[]>(innerProps.to);
+  const [bccEmailsData, setBccEmailsData] = useState<string[]>(innerProps.bcc);
+
   const triggerSendEmail = async () => {
     setSending(true);
 
@@ -117,24 +125,56 @@ export default function ComposeGenericEmailModal({
       }}
     >
       <Stack>
-        <Text fz='sm'>
+        <Group noWrap>
           <Text c='gray.6' fz='sm' fw={500} span>
             FROM:
           </Text>{' '}
-          {innerProps.from}
-        </Text>
-        <Text fz='sm'>
+          <TextInput variant='unstyled' placeholder='Email' value={innerProps.from} />
+        </Group>
+        <Group noWrap>
           <Text c='gray.6' fz='sm' fw={500} span>
             TO:
           </Text>{' '}
-          {innerProps.to.join(', ')}
-        </Text>
-        <Text fz='sm'>
+          <MultiSelect
+            value={toEmails}
+            onChange={(value) => {
+              setToEmails(value);
+            }}
+            data={toEmailsData}
+            placeholder='Emails'
+            searchable
+            creatable
+            getCreateLabel={(query) => `+ Add ${query}`}
+            onCreate={(query) => {
+              const item = { value: query, label: query };
+              // @ts-ignore
+              setToEmailsData((current) => [...current, item]);
+              return item;
+            }}
+          />
+        </Group>
+        <Group noWrap>
           <Text c='gray.6' fz='sm' fw={500} span>
             BCC:
           </Text>{' '}
-          {innerProps.bcc.join(', ')}
-        </Text>
+          <MultiSelect
+            value={bccEmails}
+            onChange={(value) => {
+              setBccEmails(value);
+            }}
+            data={bccEmailsData}
+            placeholder='Emails'
+            searchable
+            creatable
+            getCreateLabel={(query) => `+ Add ${query}`}
+            onCreate={(query) => {
+              const item = { value: query, label: query };
+              // @ts-ignore
+              setBccEmailsData((current) => [...current, item]);
+              return item;
+            }}
+          />
+        </Group>
       </Stack>
 
       <Flex mt='xs' direction='column'>

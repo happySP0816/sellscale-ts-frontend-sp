@@ -13,6 +13,7 @@ import {
   bumpFrameworkSelectedSubstatusState,
 } from "@atoms/inboxAtoms";
 import { userTokenState } from "@atoms/userAtoms";
+import { openConfirmModal } from "@mantine/modals";
 import {
   Paper,
   Flex,
@@ -51,6 +52,7 @@ import {
   IconMessage2Cog,
   IconSettingsFilled,
   IconWand,
+  IconMessageDots,
 } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { deleteAutoBumpMessage } from "@utils/requests/autoBumpMessage";
@@ -398,7 +400,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
     []
   );
 
-  const smartGenerate = async () => {
+  const smartGenerate = async (additional_instructions: string) => {
     setMsgLoading(true);
     if (openedOutboundChannel === "LINKEDIN") {
       const result = fetch(
@@ -411,6 +413,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           },
           body: JSON.stringify({
             prospect_id: props.prospectId,
+            additional_instructions: additional_instructions, 
           }),
         }
       )
@@ -882,30 +885,75 @@ export default forwardRef(function InboxProspectConvoSendBox(
           )}
         </Box>
 
-        <Flex align="center" mt="xs" direction="row" justify={"space-between"}>
-          {openedOutboundChannel === "LINKEDIN" && (
-            <Tooltip withArrow position="bottom" label="Smart Generate with AI">
+        <Flex align="center" direction="row" justify={"space-between"} wrap="wrap">
+          <Flex  mt="xs" align="center">
+            {openedOutboundChannel === "LINKEDIN" && (
+              <Tooltip withArrow position="bottom" label="Smart Generate with AI">
+                <Button
+                  leftIcon={<IconWand size="0.8rem" />}
+                  color="grape"
+                  size="xs"
+                  sx={{ borderRadius: '4px 0px 0px 4px' }}
+                  onClick={() => {
+                    showNotification({
+                      id: "generate-linkedin-message",
+                      title: "Generating message ...",
+                      message: "",
+                      color: "blue",
+                      autoClose: 3000,
+                    });
+                    smartGenerate("");
+                  }}
+                >
+                  Smart Generate
+                </Button>
+              </Tooltip>
+              
+            )}
+            <Tooltip label="Co-pilot a response by providing feedback" withArrow position="bottom">
               <Button
-                leftIcon={<IconWand size="0.8rem" />}
+                variant="outline"
                 color="grape"
                 size="xs"
-                sx={{ borderRadius: "4px" }}
-                onClick={() => {
-                  showNotification({
-                    id: "generate-linkedin-message",
-                    title: "Generating message ...",
-                    message: "",
-                    color: "blue",
-                    autoClose: 3000,
-                  });
-                  smartGenerate();
+                sx={{
+                  width: 'auto',
+                  borderLeft: 'none',
+                  borderRadius: '0px 4px 4px 0px',
                 }}
-              >
-                Smart Generate
+            
+                onClick={() => {
+                  let tempInputValue = '';
+                  openConfirmModal({
+                    title: "Co-pilot a response",
+                    children: (
+                      <Textarea
+                        description='Give feedback on how to respond and a draft will be created'
+                        placeholder="Describe how you want to form the generated text"
+                        onChange={(event) => { tempInputValue = event.currentTarget.value }}
+                      />
+                    ),
+                    labels: { confirm: 'Generate with feedback', cancel: 'Cancel' },
+                    onCancel: () => { },
+                    onConfirm: () => { 
+                      showNotification({
+                        id: "generate-linkedin-message",
+                        title: "Generating message ...",
+                        message: "",
+                        color: "blue",
+                        autoClose: 3000,
+                      });
+                      smartGenerate(tempInputValue);
+                    }
+                  })
+                }}
+                >
+                <IconMessageDots size="1rem"  />
               </Button>
             </Tooltip>
-          )}
-          <Flex align="center" mt="xs" direction="row" justify={"end"}>
+
+          </Flex>
+
+          <Flex  mt="xs" align="center"  direction="row" justify={"end"}>
             <Popover
               position="bottom"
               withArrow

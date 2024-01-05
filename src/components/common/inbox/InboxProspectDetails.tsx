@@ -573,7 +573,8 @@ export default function ProjectDetails(props: {
                                 <Radio value='Unconvinced' label='Unconvinced' size='xs' checked={notInterestedDisqualificationReason === 'Unconvinced'} />
                                 <Radio value='Timing not right' label='Timing not right' size='xs' checked={notInterestedDisqualificationReason === 'Timing not right'} />
                                 <Radio value='Unresponsive' label='Unresponsive' size='xs' checked={notInterestedDisqualificationReason === 'Unresponsive'} />
-                                <Radio value='Competitor' label='Using a competitor' size='xs' checked={notInterestedDisqualificationReason === 'Competitor'} />
+                                <Radio value='Using a competitor' label='Using a competitor' size='xs' checked={notInterestedDisqualificationReason === 'Competitor'} />
+                                <Radio value='Unsubscribe' label='Unsubscribe' size='xs' checked={notInterestedDisqualificationReason === 'Unsubscribe'} />
                                 <Radio value='OTHER -' label='Other' size='xs' checked={notInterestedDisqualificationReason.includes('OTHER -')} />
                               </Flex>
                             </Radio.Group>

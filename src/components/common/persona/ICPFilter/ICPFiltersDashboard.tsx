@@ -555,25 +555,38 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
           />
           <Divider orientation="vertical" h={"60%"} m={"auto"} />
           <Flex align={"center"} gap={10}>
-            <Text
-              bg={"#e2ecf8"}
-              color="blue"
-              px={"sm"}
-              style={{ borderRadius: "12px" }}
+            <Badge
+              color={
+                currentProject?.active
+                  ? currentProject?.num_prospects > 0
+                    ? "blue"
+                    : "yellow"
+                  : "green"
+              }
+              variant='filled'
+              size='lg'
             >
               {currentProject?.active
                 ? currentProject?.num_prospects > 0
                   ? "Active"
                   : "Setup"
                 : "Complete"}
-            </Text>
+            </Badge>
             {currentProject?.linkedin_active ? (
-              <IconBrandLinkedin color="white" fill="#228be8" />
+              <ActionIcon onClick={() => {
+                window.location.href = `/setup/linkedin?campaign_id=${currentProject?.id}`;
+              }}>
+                <IconBrandLinkedin color="white" fill="#228be8" size={24} />
+              </ActionIcon>
             ) : (
               <></>
             )}
             {currentProject?.email_active ? (
-              <IconMail color="white" fill="#228be8" />
+              <ActionIcon onClick={() => {
+                window.location.href = `/setup/email?campaign_id=${currentProject?.id}`;
+              }}>
+                <IconMail color="white" fill="#228be8" size={24} />
+              </ActionIcon>
             ) : (
               <></>
             )}
@@ -618,10 +631,11 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
               </span>
             </Flex>
           </Tooltip>
-        </Flex>
-        <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>
+          <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>
           Add Prospects
         </Button>
+        </Flex>
+        
       </Flex>
 
       <Flex justify={"space-between"} mt={"sm"}>

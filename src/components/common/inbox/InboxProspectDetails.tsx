@@ -642,6 +642,12 @@ export default function ProjectDetails(props: {
                   ) : (
                     <Stack spacing={10}>
                       <Box>
+                        {(!demoFeedbacks || demoFeedbacks.length === 0) && (
+                          <Box mb={10} mt={10}>
+                            <ProspectDemoDateSelector prospectId={openedProspectId} />
+                          </Box>
+                        )}
+                        
                         {data && demoFeedbacks && demoFeedbacks.length > 0 && (
                           <ScrollArea h='250px'>
                             {demoFeedbacks?.map((feedback, index) => (
@@ -662,11 +668,7 @@ export default function ProjectDetails(props: {
                         >
                           {demoFeedbacks && demoFeedbacks.length > 0 ? 'Add' : 'Give'} Demo Feedback
                         </Button>
-                        {(!demoFeedbacks || demoFeedbacks.length === 0) && (
-                          <Box mb={10} mt={10}>
-                            <ProspectDemoDateSelector prospectId={openedProspectId} />
-                          </Box>
-                        )}
+                        
                         <DemoFeedbackDrawer refetch={refetch} />
                       </Box>
                     </Stack>

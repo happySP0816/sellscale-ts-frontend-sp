@@ -42,7 +42,7 @@ interface ComposeEmail extends Record<string, unknown> {
   bcc: string[];
   subject: string;
   body: string;
-  onSend: () => void;
+  onSend: (subject: string, body: string) => void;
   onDiscard: () => void;
 }
 
@@ -93,6 +93,8 @@ export default function ComposeGenericEmailModal({
       subject,
       body
     );
+
+    innerProps.onSend(subject, body);
 
     if (response.status !== 'success') {
       showNotification({

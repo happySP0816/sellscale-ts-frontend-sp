@@ -91,6 +91,7 @@ import TextWithNewlines from '@common/library/TextWithNewlines';
 import { AiMetaDataBadge } from '@common/persona/LinkedInConversationEntry';
 import { useNavigate } from 'react-router-dom';
 import { openContextModal } from '@mantine/modals';
+import { sendAskAE } from '@utils/requests/askAE';
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -889,7 +890,10 @@ export default function ProspectConvo(props: Props) {
                         bcc: ['csm@sellscale.com'],
                         subject: 'Did you schedule?',
                         body: `Hi ${userData.sdr_name},\nDid you end up scheduling with the prospect?`,
-                        onSend: () => {},
+                        onSend: async (subject: string, body: string) => {
+                          if (!prospect) return;
+                          await sendAskAE(userToken, prospect.id, body);
+                        },
                         onDiscard: () => {},
                       },
                     });

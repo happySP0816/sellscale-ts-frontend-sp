@@ -170,6 +170,7 @@ type FileDropAndPreviewProps = {
   };
   onUploadSuccess?: (archetypeId: number) => void;
   onUploadFailure?: () => void;
+  segmentId?: number | null;
 };
 
 // personaId is null if creating a new persona
@@ -276,7 +277,8 @@ export default function FileDropAndPreview(props: FileDropAndPreviewProps) {
     const result = await uploadProspects(
       +(archetype_id as string),
       userToken,
-      uploadJSON
+      uploadJSON,
+      props.segmentId
     );
     if (result.status === "error") {
       console.error("Failed to start prospects upload");

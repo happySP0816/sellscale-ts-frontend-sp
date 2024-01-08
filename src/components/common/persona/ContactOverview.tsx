@@ -32,6 +32,8 @@ import TAMGraphV2 from './TAMGraphV2';
 import PulseTabSelector from './PulseTabSelector';
 
 const ContactOverview = () => {
+  const userToken = useRecoilValue(userTokenState)
+
   return (
     <Tabs defaultValue='prospect_scoring' className='min-h-full flex flex-col'>
       <Tabs.List>
@@ -59,7 +61,10 @@ const ContactOverview = () => {
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Do Not Contact
         </Tabs.Tab>
-
+        <Tabs.Tab value='segments'>
+          <IconChartArcs size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
+          Segments
+        </Tabs.Tab>
         
         {/* <Tabs.Tab value='TAM_graph' style={{ marginRight: '8px' }}>
           TAM Graph
@@ -94,6 +99,18 @@ const ContactOverview = () => {
       </Tabs.Panel>
       <Tabs.Panel value='contact_overview' className='h-0 grow'>
         <TAMGraphV2 />
+      </Tabs.Panel>
+
+      <Tabs.Panel value='segments' className='h-0 grow'>
+        <iframe 
+          src={'https://sellscale.retool.com/embedded/public/93860ed4-1e1f-442a-a00e-c4ea46a2865b#authToken=' + userToken}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            borderRadius: '8px',
+          }}
+        />
       </Tabs.Panel>
     </Tabs>
   );

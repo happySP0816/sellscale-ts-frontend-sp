@@ -48,6 +48,7 @@ import { useQuery } from '@tanstack/react-query'
 import { DataTable, DataTableSortStatus } from 'mantine-datatable'
 import _ from 'lodash'
 import FileDropAndPreviewV2 from '@modals/upload-prospects/FileDropAndPreviewV2'
+import { API_URL } from '@constants/data'
 
 type UploadDetailType = {
   process: number
@@ -147,6 +148,13 @@ const test_data = [
   },
 ]
 
+type Segment = {
+  id: number
+  client_sdr_id: number
+  segment_title: string
+  filters: any
+}
+
 export default function FindContactsPage() {
   setPageTitle('Find Contacts')
 
@@ -166,6 +174,20 @@ export default function FindContactsPage() {
 
   const [records, setRecords] = useState(test_data)
 
+  const [segments, setSegments]: any = useState<Segment[]>([])
+  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null)
+
+  const fetchSegments = async () => {
+    const response = await fetch(`${API_URL}/segment/all`, {
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    })
+    const data = await response.json()
+    const segments = data.segments as Segment[]
+    setSegments(segments)
+  }
+
   const handleSortStatusChange = (status: DataTableSortStatus) => {
     // setPage(1)
     console.log(status)
@@ -184,6 +206,10 @@ export default function FindContactsPage() {
     },
     enabled: !!activePersona,
   })
+
+  useEffect(() => {
+    fetchSegments()
+  }, [])
 
   return (
     <Flex p='lg' direction='column' h='100%'>
@@ -252,7 +278,7 @@ export default function FindContactsPage() {
           <Card maw='600px' ml='auto' mr='auto'>
             <Title order={3}>Upload CSV</Title>
             <Text mb='md' color='gray'>
-              Upload a CSV file with the following columns:
+              Upload a CSV file with the following columns
               <ul>
                 <li>linkedin_url (required; if no email)</li>
                 <li>first_name (optional; required if no linkedin_url)</li>
@@ -262,7 +288,30 @@ export default function FindContactsPage() {
                 <li>custom_data (optional)</li>
               </ul>
             </Text>
+
+            {/* Segment Selector */}
+            <Select 
+              mb='md'
+              mt='md' 
+              placeholder='Select Segment' 
+              label='(optional) Select Segment'
+              description='Select a segment to add these prospects to'
+              value={selectedSegmentId + ''} 
+              onChange={
+                (value: any) => {
+                  setSelectedSegmentId(value)
+                }
+              }
+              data={
+                segments?.map((segment: Segment) => ({
+                  value: segment.id,
+                  label: segment.segment_title,
+                })) ?? []
+              } 
+            />
+
             <FileDropAndPreview
+              segmentId={selectedSegmentId}
               personaId={activePersona + ''}
               onUploadSuccess={() => {
                 showNotification({
@@ -273,6 +322,9 @@ export default function FindContactsPage() {
               }}
             />
           </Card>
+
+         
+
           {uploads && uploads.length > 0 && (
             <Select
               style={{

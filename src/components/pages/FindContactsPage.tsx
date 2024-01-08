@@ -175,7 +175,7 @@ export default function FindContactsPage() {
   const [records, setRecords] = useState(test_data)
 
   const [segments, setSegments]: any = useState<Segment[]>([])
-  const [selectedSegmentId, setSelectedSegmentId] = useState<number | null>(null)
+  const [selectedSegmentId, setSelectedSegmentId]: any = useState<number | null>(null)
 
   const fetchSegments = async () => {
     const response = await fetch(`${API_URL}/segment/all`, {
@@ -296,7 +296,7 @@ export default function FindContactsPage() {
               placeholder='Select Segment' 
               label='(optional) Select Segment'
               description='Select a segment to add these prospects to'
-              value={selectedSegmentId + ''} 
+              value={selectedSegmentId} 
               onChange={
                 (value: any) => {
                   setSelectedSegmentId(value)

@@ -2,7 +2,7 @@ import { MsgResponse } from "src";
 import { isMsgResponse, processResponse } from "./utils";
 import { API_URL } from "@constants/data";
 
-export default async function uploadProspects(archetype_id: number, userToken: string, json: any[]): Promise<MsgResponse> {
+export default async function uploadProspects(archetype_id: number, userToken: string, json: any[], segmentId?: number | null): Promise<MsgResponse> {
 
   return await fetch(
     `${API_URL}/prospect/add_prospect_from_csv_payload`,
@@ -15,6 +15,7 @@ export default async function uploadProspects(archetype_id: number, userToken: s
       body: JSON.stringify({
         archetype_id: archetype_id,
         csv_payload: json,
+        segment_id: segmentId
       }),
     }
   ).then(async (r) => {

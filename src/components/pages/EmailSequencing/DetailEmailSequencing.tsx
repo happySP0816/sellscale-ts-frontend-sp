@@ -3,7 +3,7 @@ import { userTokenState } from '@atoms/userAtoms';
 import DynamicRichTextArea from '@common/library/DynamicRichTextArea';
 import ProspectSelect from '@common/library/ProspectSelect';
 import { PersonalizationSection } from '@common/sequence/SequenceSection';
-import { SCREEN_SIZES } from '@constants/data';
+import { API_URL, SCREEN_SIZES } from '@constants/data';
 import {
   Badge,
   Box,
@@ -65,9 +65,10 @@ let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
 
 const SpamScorePopover: FC<{
-  subjectSpamScoreDetails: SpamScoreResults | undefined;
-  bodySpamScoreDetails: SpamScoreResults | undefined;
-}> = ({ subjectSpamScoreDetails, bodySpamScoreDetails }) => {
+  subjectSpamScoreDetails?: SpamScoreResults | undefined | null;
+  bodySpamScoreDetails: SpamScoreResults | undefined | null;
+  hideSubjectLineScore?: boolean;
+}> = ({ subjectSpamScoreDetails, bodySpamScoreDetails, hideSubjectLineScore }) => {
   if (!subjectSpamScoreDetails && !bodySpamScoreDetails) {
     return <></>;
   }
@@ -112,7 +113,7 @@ const SpamScorePopover: FC<{
               {totalScore}
             </Text>
           </Flex>
-          {subjectSpamScoreDetails && (
+          {subjectSpamScoreDetails && !hideSubjectLineScore && (
             <>
               <Divider my='xs' />
               <Flex align='center'>
@@ -233,6 +234,39 @@ const DetailEmailSequencing: FC<{
   // Spam Score
   const [subjectSpamScoreDetails, setSubjectSpamScoreDetails] = React.useState<SpamScoreResults>();
   const [bodySpamScoreDetails, setBodySpamScoreDetails] = React.useState<SpamScoreResults>();
+
+  const [fetchedTemplateSpamScore, setFetchedTemplateSpamScore] = React.useState<boolean>(false);
+  const [spamScore, setSpamScore] = React.useState<SpamScore | null>(null);
+
+  useEffect(() => {
+    if (fetchedTemplateSpamScore && !activeTemplate?.template) {
+      return
+    }
+    
+    fetch(`${API_URL}/ml/email/body-spam-score`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`,
+      },
+      body: JSON.stringify({
+        email_body: activeTemplate?.template
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log("YEEE")
+        console.log(res)
+        setSpamScore(res.score);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+
+      });
+      setFetchedTemplateSpamScore(true);
+    }, [fetchedTemplateSpamScore]);
 
   // Trigger Generate Initial Email
   const triggerPostGenerateInitialEmail = async () => {
@@ -575,6 +609,7 @@ const DetailEmailSequencing: FC<{
           refetch={async () => {
             await refetch();
           }}
+          spamScore={spamScore}
         />
       )}
 
@@ -1140,11 +1175,20 @@ const SubjectLineItem: React.FC<{
   );
 };
 
+type SpamScore = {
+  spam_words: string[];
+  read_minutes: number;
+  spam_word_score: number;
+  read_minutes_score: number;
+  total_score: number;
+}
+
 export const EmailBodyItem: React.FC<{
   template: EmailSequenceStep;
   refetch: () => Promise<void>;
   hideHeader?: boolean;
-}> = ({ template, refetch, hideHeader }) => {
+  spamScore?: SpamScore | null;
+}> = ({ template, refetch, hideHeader, spamScore }) => {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
@@ -1371,6 +1415,7 @@ export const EmailBodyItem: React.FC<{
     _setSequence(templateBody);
     sequenceRichRaw.current = template.template || '';
   }, [template]);
+
   const theme = useMantineTheme();
   const formatedSequence = useMemo(() => {
     let newText = sequence;
@@ -1504,6 +1549,13 @@ export const EmailBodyItem: React.FC<{
               )}
             </Flex>
             <Flex align='center'>
+              <Box mr='xs'>
+                <SpamScorePopover
+                  subjectSpamScoreDetails={spamScore}
+                  bodySpamScoreDetails={spamScore}
+                  hideSubjectLineScore
+                />
+              </Box>
               <Tooltip label='Coming Soon' withArrow withinPortal>
                 <Text fz='sm' mr='md'>
                   Open %: <b>TBD</b>

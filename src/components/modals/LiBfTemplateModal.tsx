@@ -175,11 +175,11 @@ export default function LiBfTemplateModal({
                 placeholder='Template outline'
                 {...form.getInputProps('message')}
               />
-              {form.values['message'].length > 300 && (
+              {/* {form.values['message'].length > 300 && (
                 <Text color='red' mt='0px' fz='xs' align='right'>
                   Message is too long ({form.values['message'].length} / 300 characters)
                 </Text>
-              )}
+              )} */}
               <Button
                 loading={loadingResearch}
                 variant='light'

@@ -44,6 +44,8 @@ type DateType = {
   step: string;
   rate: number;
   totalRate: number;
+  etl_num_times_used: number;
+  etl_num_times_converted: number;
 };
 
 const MessagingAnalytics = () => {
@@ -57,7 +59,7 @@ const MessagingAnalytics = () => {
   const currentProject = useRecoilValue(currentProjectState);
 
   const [rangeValue, setRangeValue] = useState<[number, number]>([20, 80]);
-  const [significance, setSignificance] = useState<number>(0);
+  const [significance, setSignificance] = useState<number>(15);
 
   const {
     data: rawData,
@@ -76,10 +78,13 @@ const MessagingAnalytics = () => {
     return {
       active: r.Active,
       campaign: r.Campaign,
+      campaign_id: r.CampaignID,
       totalRate: conv,
       rate: conv,
       step: r.Step,
       title: r.Title,
+      etl_num_times_converted: r.etl_num_times_converted,
+      etl_num_times_used: r.etl_num_times_used,
       health:
         r.etl_num_times_used >= significance
           ? conv >= rangeValue[1]
@@ -202,7 +207,9 @@ const MessagingAnalytics = () => {
               enableSorting: false,
               maxSize: 140,
               cell: (cell) => {
-                const { rate, totalRate, health } = cell.row.original;
+                const { rate, totalRate, health, etl_num_times_used, etl_num_times_converted } = cell.row.original;
+
+                console.log(cell.row.original)
 
                 let color = '';
 
@@ -229,10 +236,10 @@ const MessagingAnalytics = () => {
                     w={'100%'}
                     h={'100%'}
                   >
-                    <Badge color={color}>{Math.round((rate / totalRate) * 100)}%</Badge>
+                    <Badge color={color}>{Math.round((etl_num_times_converted / etl_num_times_used + 0.001) * 100)}%</Badge>
 
                     <Text c={'gray.6'} size={'xs'} fw={500}>
-                      {rate}/{totalRate}
+                      {etl_num_times_converted}/{etl_num_times_used}
                     </Text>
                   </Flex>
                 );
@@ -308,7 +315,7 @@ const MessagingAnalytics = () => {
                       variant='light'
                       radius='lg'
                       onClick={() => {
-                        navigate(`/setup/linkedin?campaign_id=${currentProject?.id}`);
+                        navigate(`/setup/linkedin?campaign_id=${cell.row.original.campaign_id}`);
                       }}
                     >
                       Change Wording / Framework

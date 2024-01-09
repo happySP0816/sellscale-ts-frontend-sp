@@ -5,22 +5,18 @@ import { processResponse } from "./utils";
 /**
  * Toggles the snapshot trigger
  * @param userToken
- * @param clientID
  * @returns - MsgResponse
  */
-export default async function postTriggerSnapshot(userToken: string, clientID?: number): Promise<MsgResponse> {
+export default async function postRefreshEmailStatistics(userToken: string): Promise<MsgResponse> {
 
   const response = await fetch(
-    `${API_URL}/warmup/snapshots`,
+    `${API_URL}/client/sdr/email/statistics`,
     {
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        client_id: clientID,
-      }),
     }
   );
   return await processResponse(response);

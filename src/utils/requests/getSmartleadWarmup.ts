@@ -8,7 +8,7 @@ import { API_URL } from '@constants/data';
  * @returns - MsgResponse
  */
 export async function getSmartleadWarmup(userToken: string): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/email/warmup/smartlead`, {
+  const response = await fetch(`${API_URL}/warmup/smartlead`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${userToken}`,

@@ -70,11 +70,12 @@ import { CampaignAnalyticsData } from "@common/campaigns/CampaignAnalytics";
 import { isLoggedIn } from "@auth/core";
 import { TodayActivityData } from "@common/campaigns/OverallPipeline/TodayActivity";
 import { useDisclosure } from "@mantine/hooks";
-import postTriggerSnapshot from "@utils/requests/postTriggerSnapshot";
 import { DataTable } from "mantine-datatable";
 import OperatorOverview from "./Overview/OperatorOverview";
 import getDomainDetails from "@utils/requests/getDomainDetails";
 import { getSDRGeneralInfo } from "@utils/requests/getClientSDR";
+import postRefreshEmailStatistics from "@utils/requests/postRefreshEmailStatistics";
+import { getLIWarmupSnapshots } from "@utils/requests/getLIWarmupSnapshots";
 
 const options = {
   scales: {
@@ -368,6 +369,7 @@ interface DomainHealth {
 export function ActiveChannels() {
   const [sdrs, setSDRs] = useState([]);
   const [domains, setDomains] = useState<DomainHealth[]>([]);
+  const [linkedinSeats, setLinkedinSeats] = useState<any[]>([]);
   const [fetchedChannels, setFetchedChannels] = useState(false);
   const [loading, setLoading] = useState(false);
   const [domainRefreshing, setDomainRefreshing] = useState(false);
@@ -379,50 +381,35 @@ export function ActiveChannels() {
   useEffect(() => {
     if (!fetchedChannels) {
       setLoading(true);
-      fetchSnapshots();
+      fetchEmailDetails();
+      fetchLinkedInSnapshot();
     }
   }, [setFetchedChannels]);
 
-  const triggerPostTriggerSnapshot = async () => {
+  const triggerPostRefreshEmailStatistics = async () => {
     setDomainRefreshing(true);
-    const result = await postTriggerSnapshot(userToken);
+    const result = await postRefreshEmailStatistics(userToken);
     if (result.status == "success") {
       showNotification({
         title: "Success",
-        message: "Snapshot triggered",
+        message:
+          "Email statistics are being refreshed. Please allow 5-10 minutes for this to complete.",
         color: "green",
       });
-      fetchSnapshots();
+      fetchEmailDetails();
     } else {
       showNotification({
         title: "Error",
-        message: "Snapshot failed",
+        message:
+          "There was an error refreshing email statistics. Please try again.",
         color: "red",
       });
     }
     setDomainRefreshing(false);
   };
 
-  const fetchSnapshots = async () => {
+  const fetchEmailDetails = async () => {
     setLoading(true);
-
-    // fetch(`${API_URL}/email/warmup/snapshots`, {
-    //   method: "GET",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${userToken}`,
-    //   },
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     console.log('data old', data)
-    //     setSDRs(data.sdrs || []);
-    //     calculateDomainStatuses(data.sdrs);
-    //   })
-    //   .finally(() => {
-    //     setFetchedChannels(true);
-    //     setLoading(false);
-    //   });
 
     const result = await getDomainDetails(userToken);
     const data = result.data;
@@ -445,8 +432,8 @@ export function ActiveChannels() {
         inboxes: sorted_inboxes,
       });
     }
-    formatted_domains = formatted_domains.sort(
-      (a: any, b: any) => a.domain.localeCompare(b.domain)
+    formatted_domains = formatted_domains.sort((a: any, b: any) =>
+      a.domain.localeCompare(b.domain)
     );
     setDomains(formatted_domains);
 
@@ -454,36 +441,21 @@ export function ActiveChannels() {
     setLoading(false);
   };
 
-  // const calculateDomainStatuses = (sdrs: any) => {
-  //   let domains: DomainHealth[] = [];
-  //   let seenDomains: string[] = [];
-  //   for (const sdr of sdrs) {
-  //     const snapshots = sdr.snapshots;
-  //     for (const snapshot of snapshots) {
-  //       if (snapshot.channel_type != "EMAIL") {
-  //         continue;
-  //       }
-  //       const account_name = snapshot.account_name;
-  //       const domain = account_name.split("@")[1];
+  const fetchLinkedInSnapshot = async () => {
+    setLoading(true);
 
-  //       // If we haven't seen this domain (it's new!) add to the list
-  //       if (!seenDomains.includes(domain)) {
-  //         seenDomains.push(domain);
-  //         domains.push({
-  //           domain: domain,
-  //           spf: snapshot.spf_record_valid,
-  //           dmarc: snapshot.dmarc_record_valid,
-  //           dkim: snapshot.dkim_record_valid,
-  //           forwarding: snapshot.forwarding_enabled,
-  //         });
-  //       }
-  //     }
-  //   }
+    const result = await getLIWarmupSnapshots(userToken);
+    const data = result.data;
+    let linkedin_snapshots: any[] = [];
+    for (const sdr of data) {
+      linkedin_snapshots = linkedin_snapshots.concat(
+        sdr.snapshots.filter((x: any) => x.channel_type == "LINKEDIN")
+      );
+    }
+    setLinkedinSeats(linkedin_snapshots || []);
 
-  //   setDomains(domains);
-  //   console.log('domains', domains)
-  //   return domains;
-  // };
+    setLoading(false);
+  };
 
   if (loading) {
     return (
@@ -502,15 +474,15 @@ export function ActiveChannels() {
   let totalEmailWarmup = 0;
   for (const x of sdrs) {
     const sdr: any = x;
-    if (sdr.snapshots) {
-      for (const channel of sdr.snapshots) {
-        if (channel.channel_type == "LINKEDIN") {
-          totalLinkedInWarmup += channel.daily_limit;
-        } else if (channel.channel_type == "EMAIL") {
-          totalEmailWarmup += channel.daily_limit;
-        }
+    if (sdr.emails) {
+      for (const inbox of sdr.emails) {
+        totalEmailWarmup += inbox.daily_limit;
       }
     }
+  }
+  for (const x of linkedinSeats) {
+    const seat: any = x;
+    totalLinkedInWarmup += seat.daily_limit;
   }
 
   return (
@@ -548,7 +520,7 @@ export function ActiveChannels() {
             color="white"
             loaderProps={{ type: "dots" }}
             loading={domainRefreshing}
-            onClick={() => triggerPostTriggerSnapshot()}
+            onClick={() => triggerPostRefreshEmailStatistics()}
           >
             <IconRefresh size="1rem" />
           </ActionIcon>
@@ -651,7 +623,7 @@ export function ActiveChannels() {
                         }
                       }
 
-                      const inboxes = sdr.emails
+                      let inboxes = sdr.emails
                         .filter(
                           (inbox: any) => inbox.smartlead_account_id != null
                         )
@@ -711,14 +683,32 @@ export function ActiveChannels() {
                                   );
                                 }
 
+                                if (channel == "LINKEDIN") {
+                                  inboxes = linkedinSeats.filter(
+                                    (inbox: any) =>
+                                      inbox.client_sdr_id == sdr.id
+                                  );
+                                } else {
+                                  inboxes = sdr.emails
+                                    .filter(
+                                      (inbox: any) =>
+                                        inbox.smartlead_account_id != null
+                                    )
+                                    .sort(
+                                      (a: any, b: any) =>
+                                        b.total_sent_count - a.total_sent_count
+                                    );
+                                }
+
                                 let unit = "seat";
                                 if (channel == "EMAIL") {
                                   unit = "inboxes";
                                 }
 
-                                const numUnits = sdr.snapshots?.filter(
-                                  (x: any) => x.channel_type == channel
-                                ).length;
+                                let numUnits = 1;
+                                if (channel == "EMAIL") {
+                                  numUnits = inboxes.length;
+                                }
 
                                 return (
                                   <Flex>
@@ -761,76 +751,88 @@ export function ActiveChannels() {
                                           <Table>
                                             <thead>
                                               <tr>
-                                                <th>Channel</th>
+                                                <th>
+                                                  {channel == "EMAIL"
+                                                    ? "Inbox"
+                                                    : "Account"}
+                                                </th>
                                                 <th>Daily Limit</th>
                                                 <th>Warmup</th>
                                                 <th>Reputation</th>
                                               </tr>
                                             </thead>
                                             <tbody>
-                                              {inboxes
-                                                ?.filter(
-                                                  (x: any) =>
-                                                    x.channel_type == channel
-                                                )
-                                                .map((snapshot: any) => {
-                                                  const warmed =
-                                                    snapshot.total_sent_count >
-                                                    180;
-                                                  const days_left =
-                                                    (180 -
-                                                      snapshot.total_sent_count) /
-                                                    snapshot.daily_limit;
+                                              {inboxes.map((inbox: any) => {
+                                                let warmed =
+                                                  inbox.total_sent_count > 100;
+                                                let days_left =
+                                                  (100 -
+                                                    inbox.total_sent_count) /
+                                                  inbox.daily_limit;
+                                                let reputable =
+                                                  inbox.smartlead_reputation ==
+                                                  100;
+                                                let reputation =
+                                                  inbox.smartlead_reputation;
 
-                                                  return (
-                                                    <tr>
-                                                      <td>
-                                                        {snapshot.channel_type ==
-                                                        "LINKEDIN" ? (
-                                                          <IconBrandLinkedin size="0.9rem" />
-                                                        ) : (
-                                                          <IconMail size="0.9rem" />
-                                                        )}{" "}
-                                                        {snapshot.account_name}
-                                                      </td>
-                                                      <td>
-                                                        {snapshot.daily_limit}{" "}
-                                                        per day
-                                                      </td>
-                                                      <td>
-                                                        <Badge
-                                                          size="xs"
-                                                          color={
-                                                            warmed
-                                                              ? "green"
-                                                              : "orange"
-                                                          }
-                                                        >
-                                                          {warmed
-                                                            ? "Warm"
-                                                            : `${Math.ceil(
-                                                                days_left
-                                                              )} Days left`}
-                                                        </Badge>
-                                                      </td>
-                                                      <td>
-                                                        <Badge
-                                                          size="xs"
-                                                          color={
-                                                            snapshot.reputation >
-                                                            80
-                                                              ? "green"
-                                                              : "yellow"
-                                                          }
-                                                        >
-                                                          {snapshot.reputation ||
-                                                            "N/A"}
-                                                          %
-                                                        </Badge>
-                                                      </td>
-                                                    </tr>
-                                                  );
-                                                })}
+                                                if (channel == "LINKEDIN") {
+                                                  warmed =
+                                                    inbox.daily_limit > 15;
+                                                  days_left =
+                                                    (15 - inbox.daily_limit) /
+                                                    inbox.daily_limit;
+                                                  reputable =
+                                                    inbox.reputation == 100;
+                                                  reputation = inbox.reputation;
+                                                }
+
+                                                return (
+                                                  <tr>
+                                                    <td>
+                                                      {inbox.channel_type ==
+                                                      "LINKEDIN" ? (
+                                                        <IconBrandLinkedin size="0.9rem" />
+                                                      ) : (
+                                                        <IconMail size="0.9rem" />
+                                                      )}{" "}
+                                                      {inbox.email_address ||
+                                                        inbox.account_name}
+                                                    </td>
+                                                    <td>
+                                                      {inbox.daily_limit} per
+                                                      day
+                                                    </td>
+                                                    <td>
+                                                      <Badge
+                                                        size="xs"
+                                                        color={
+                                                          warmed
+                                                            ? "green"
+                                                            : "orange"
+                                                        }
+                                                      >
+                                                        {warmed
+                                                          ? "Warm"
+                                                          : `${Math.ceil(
+                                                              days_left
+                                                            )} Days left`}
+                                                      </Badge>
+                                                    </td>
+                                                    <td>
+                                                      <Badge
+                                                        size="xs"
+                                                        color={
+                                                          reputable
+                                                            ? "green"
+                                                            : "yellow"
+                                                        }
+                                                      >
+                                                        {reputation || "N/A"}%
+                                                      </Badge>
+                                                    </td>
+                                                  </tr>
+                                                );
+                                              })}
                                             </tbody>
                                           </Table>
                                         </HoverCard.Dropdown>

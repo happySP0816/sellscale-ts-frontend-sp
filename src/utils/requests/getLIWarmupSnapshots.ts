@@ -7,8 +7,8 @@ import { API_URL } from '@constants/data';
  * @param userToken
  * @returns - MsgResponse
  */
-export async function getEmailWarmupSnapshots(userToken: string): Promise<MsgResponse> {
-  const response = await fetch(`${API_URL}/email/warmup/snapshots`, {
+export async function getLIWarmupSnapshots(userToken: string): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/warmup/snapshots`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${userToken}`,

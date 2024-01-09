@@ -66,17 +66,15 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { showNotification } from "@mantine/notifications";
 import OverallPipeline from "@common/campaigns/OverallPipeline";
 import { getPersonasActivity } from "@utils/requests/getPersonas";
-import { EmailWarming } from "src";
 import { CampaignAnalyticsData } from "@common/campaigns/CampaignAnalytics";
 import { isLoggedIn } from "@auth/core";
 import { TodayActivityData } from "@common/campaigns/OverallPipeline/TodayActivity";
 import { useDisclosure } from "@mantine/hooks";
 import postTriggerSnapshot from "@utils/requests/postTriggerSnapshot";
 import { DataTable } from "mantine-datatable";
-import { getSmartleadWarmup } from "@utils/requests/getSmartleadWarmup";
-import { getEmailWarmupSnapshots } from "@utils/requests/getEmailWarmupSnapshots";
-import { useQuery } from "@tanstack/react-query";
 import OperatorOverview from "./Overview/OperatorOverview";
+import getDomainDetails from "@utils/requests/getDomainDetails";
+import { getSDRGeneralInfo } from "@utils/requests/getClientSDR";
 
 const options = {
   scales: {
@@ -377,8 +375,6 @@ export function ActiveChannels() {
   const [opened, { toggle }] = useDisclosure(true);
 
   const userToken = useRecoilValue(userTokenState);
-  const userData = useRecoilValue(userDataState);
-  console.log('userdata', userData)
 
   useEffect(() => {
     if (!fetchedChannels) {
@@ -410,77 +406,84 @@ export function ActiveChannels() {
   const fetchSnapshots = async () => {
     setLoading(true);
 
-    fetch(`${API_URL}/email/warmup/snapshots`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setSDRs(data.sdrs || []);
-        calculateDomainStatuses(data.sdrs);
-      })
-      .finally(() => {
-        setFetchedChannels(true);
-        setLoading(false);
+    // fetch(`${API_URL}/email/warmup/snapshots`, {
+    //   method: "GET",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${userToken}`,
+    //   },
+    // })
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     console.log('data old', data)
+    //     setSDRs(data.sdrs || []);
+    //     calculateDomainStatuses(data.sdrs);
+    //   })
+    //   .finally(() => {
+    //     setFetchedChannels(true);
+    //     setLoading(false);
+    //   });
+
+    const result = await getDomainDetails(userToken);
+    const data = result.data;
+    setSDRs(data.sdr_inbox_details || []);
+
+    let formatted_domains = [];
+    for (const domain of data.domain_details || []) {
+      let sorted_inboxes = domain.inboxes || [];
+      // Sort in alphabetical order of the email address
+      sorted_inboxes = sorted_inboxes.sort((a: any, b: any) =>
+        a.email_address.localeCompare(b.email_address)
+      );
+
+      formatted_domains.push({
+        domain: domain.domain,
+        spf: domain.spf_record_valid,
+        dmarc: domain.dmarc_record_valid,
+        dkim: domain.dkim_record_valid,
+        forwarding: domain.forwarding_enabled,
+        inboxes: sorted_inboxes,
       });
-  };
-
-  const { data, isFetching, refetch } = useQuery({
-    queryKey: [`query-domain-details`],
-    queryFn: async () => {
-      const warmupResult = await getSmartleadWarmup(userToken);
-      const inboxes =
-        warmupResult.status === "success" ? warmupResult.data : [];
-
-      const snapshotResult = await getEmailWarmupSnapshots(userToken);
-      const sdrs =
-        snapshotResult.status === "success" ? snapshotResult.data : [];
-
-      const snapshots = calculateDomainStatuses(sdrs);
-      for (const snapshot of snapshots) {
-        // Find all inboxes that match this domain
-        const correctInboxes = inboxes.filter((x: any) =>
-          x.from_email.endsWith(`@${snapshot.domain}`)
-        );
-        snapshot.inboxes = correctInboxes;
-      }
-
-      return snapshots;
-    },
-  });
-
-  const calculateDomainStatuses = (sdrs: any) => {
-    let domains: DomainHealth[] = [];
-    let seenDomains: string[] = [];
-    for (const sdr of sdrs) {
-      const snapshots = sdr.snapshots;
-      for (const snapshot of snapshots) {
-        if (snapshot.channel_type != "EMAIL") {
-          continue;
-        }
-        const account_name = snapshot.account_name;
-        const domain = account_name.split("@")[1];
-
-        // If we haven't seen this domain (it's new!) add to the list
-        if (!seenDomains.includes(domain)) {
-          seenDomains.push(domain);
-          domains.push({
-            domain: domain,
-            spf: snapshot.spf_record_valid,
-            dmarc: snapshot.dmarc_record_valid,
-            dkim: snapshot.dkim_record_valid,
-            forwarding: snapshot.forwarding_enabled,
-          });
-        }
-      }
     }
+    formatted_domains = formatted_domains.sort(
+      (a: any, b: any) => a.domain.localeCompare(b.domain)
+    );
+    setDomains(formatted_domains);
 
-    setDomains(domains);
-    return domains;
+    setFetchedChannels(true);
+    setLoading(false);
   };
+
+  // const calculateDomainStatuses = (sdrs: any) => {
+  //   let domains: DomainHealth[] = [];
+  //   let seenDomains: string[] = [];
+  //   for (const sdr of sdrs) {
+  //     const snapshots = sdr.snapshots;
+  //     for (const snapshot of snapshots) {
+  //       if (snapshot.channel_type != "EMAIL") {
+  //         continue;
+  //       }
+  //       const account_name = snapshot.account_name;
+  //       const domain = account_name.split("@")[1];
+
+  //       // If we haven't seen this domain (it's new!) add to the list
+  //       if (!seenDomains.includes(domain)) {
+  //         seenDomains.push(domain);
+  //         domains.push({
+  //           domain: domain,
+  //           spf: snapshot.spf_record_valid,
+  //           dmarc: snapshot.dmarc_record_valid,
+  //           dkim: snapshot.dkim_record_valid,
+  //           forwarding: snapshot.forwarding_enabled,
+  //         });
+  //       }
+  //     }
+  //   }
+
+  //   setDomains(domains);
+  //   console.log('domains', domains)
+  //   return domains;
+  // };
 
   if (loading) {
     return (
@@ -543,7 +546,7 @@ export function ActiveChannels() {
             style={{ marginLeft: "auto", cursor: "pointer" }}
             variant="filled"
             color="white"
-            loaderProps={{ type: 'dots' }}
+            loaderProps={{ type: "dots" }}
             loading={domainRefreshing}
             onClick={() => triggerPostTriggerSnapshot()}
           >
@@ -634,24 +637,27 @@ export function ActiveChannels() {
                 </Flex>
                 <Grid>
                   {sdrs
-                    .sort((a: any, b: any) => -(a.active - b.active))
-                    .filter((x: any) => x.active)
-                    .map((x: any) => {
-                      // reduce `x.snapshots` based on daily_limit
+                    .sort(
+                      (sdr_a: any, sdr_b: any) => -(sdr_a.active - sdr_b.active)
+                    )
+                    .filter((sdr: any) => sdr.active)
+                    .map((sdr: any) => {
                       let totalSendVolume = 0;
                       let totalSentVolume = 0;
-                      if (x.snapshots) {
-                        for (const channel of x.snapshots) {
-                          totalSendVolume += channel.daily_limit;
-                          totalSentVolume += channel.daily_sent_count;
+                      if (sdr.emails) {
+                        for (const email of sdr.emails) {
+                          totalSendVolume += email.daily_limit;
+                          totalSentVolume += email.daily_sent_count;
                         }
                       }
 
-                      let email_snapshots = x.snapshots
-                        ?.filter((x: any) => x.channel_type == "EMAIL")
+                      const inboxes = sdr.emails
+                        .filter(
+                          (inbox: any) => inbox.smartlead_account_id != null
+                        )
                         .sort(
                           (a: any, b: any) =>
-                            -(a.total_sent_count - b.total_sent_count)
+                            b.total_sent_count - a.total_sent_count
                         );
 
                       return (
@@ -661,8 +667,8 @@ export function ActiveChannels() {
                               <Box sx={{ borderRadius: 10 }} pt="0">
                                 <Image
                                   src={
-                                    x.img_url
-                                      ? x.img_url
+                                    sdr.img_url
+                                      ? sdr.img_url
                                       : "https://images.squarespace-cdn.com/content/v1/56031d09e4b0dc68f6197723/1469030770980-URDU63CK3Q4RODZYH0S1/Grey+Box.jpg?format=1500w"
                                   }
                                   width={40}
@@ -673,12 +679,12 @@ export function ActiveChannels() {
                               <Box ml="xs" mt="0">
                                 <Badge
                                   size="xs"
-                                  color={x.active ? "green" : "gray"}
+                                  color={sdr.active ? "green" : "gray"}
                                 >
-                                  {x.active ? "Active" : "Inactive"}
+                                  {sdr.active ? "Active" : "Inactive"}
                                 </Badge>
                                 <Text fw={500} fz={16}>
-                                  {x.sdr_name}
+                                  {sdr.sdr_name}
                                 </Text>
                               </Box>
                             </Flex>
@@ -710,7 +716,7 @@ export function ActiveChannels() {
                                   unit = "inboxes";
                                 }
 
-                                const numUnits = x.snapshots?.filter(
+                                const numUnits = sdr.snapshots?.filter(
                                   (x: any) => x.channel_type == channel
                                 ).length;
 
@@ -745,7 +751,7 @@ export function ActiveChannels() {
                                                   mr="md"
                                                   mt="4px"
                                                 >
-                                                  {numUnits} {unit}
+                                                  {numUnits || 1} {unit}
                                                 </Badge>
                                               </Flex>
                                             </Box>
@@ -762,7 +768,7 @@ export function ActiveChannels() {
                                               </tr>
                                             </thead>
                                             <tbody>
-                                              {x.snapshots
+                                              {inboxes
                                                 ?.filter(
                                                   (x: any) =>
                                                     x.channel_type == channel
@@ -835,14 +841,13 @@ export function ActiveChannels() {
                               })}
                             </Box>
 
-                            {email_snapshots.length > 0 && <Divider mt="md" />}
+                            {inboxes.length > 0 && <Divider mt="md" />}
 
-                            {email_snapshots.map((snapshot: any) => {
-                              console.log("snapshot", snapshot);
-                              const warmed = snapshot.total_sent_count > 100;
+                            {inboxes.map((inbox: any) => {
+                              const warmed = inbox.total_sent_count > 100;
                               const days_left =
-                                (180 - snapshot.total_sent_count) /
-                                snapshot.daily_limit;
+                                (180 - inbox.total_sent_count) /
+                                inbox.daily_limit;
 
                               return (
                                 <HoverCard
@@ -854,19 +859,19 @@ export function ActiveChannels() {
                                     <Badge
                                       size="xs"
                                       color={
-                                        snapshot.total_sent_count > 100
+                                        inbox.total_sent_count > 100
                                           ? "green"
                                           : "yellow"
                                       }
                                       variant="dot"
                                     >
-                                      {snapshot.total_sent_count > 100
+                                      {inbox.total_sent_count > 100
                                         ? "WARMED -"
                                         : "WARMING -"}
                                       <span
                                         style={{ textTransform: "lowercase" }}
                                       >
-                                        {snapshot.account_name}
+                                        {inbox.email_address}
                                       </span>
                                     </Badge>
                                   </HoverCard.Target>
@@ -874,7 +879,7 @@ export function ActiveChannels() {
                                     <Table>
                                       <thead>
                                         <tr>
-                                          <th>Channel</th>
+                                          <th>Inbox</th>
                                           <th>Daily Limit</th>
                                           <th>Warmup</th>
                                           <th>Reputation</th>
@@ -884,11 +889,9 @@ export function ActiveChannels() {
                                         <tr>
                                           <td>
                                             <IconMail size="0.9rem" />{" "}
-                                            {snapshot.account_name}
+                                            {inbox.email_address}
                                           </td>
-                                          <td>
-                                            {snapshot.daily_limit} per day
-                                          </td>
+                                          <td>{inbox.daily_limit} per day</td>
                                           <td>
                                             <Badge
                                               size="xs"
@@ -907,12 +910,14 @@ export function ActiveChannels() {
                                             <Badge
                                               size="xs"
                                               color={
-                                                snapshot.reputation > 80
+                                                inbox.smartlead_reputation > 80
                                                   ? "green"
                                                   : "yellow"
                                               }
                                             >
-                                              {snapshot.reputation || "N/A"}%
+                                              {inbox.smartlead_reputation ||
+                                                "N/A"}
+                                              %
                                             </Badge>
                                           </td>
                                         </tr>
@@ -937,22 +942,20 @@ export function ActiveChannels() {
                       },
                     },
                     {
-                      accessor: "avg_reputation",
-                      title: "Avg. Health",
+                      accessor: "inboxes",
+                      title: "Health",
                       render: ({ inboxes }) => {
                         // Calculate average reputation
                         inboxes = inboxes || [];
                         const avg =
                           inboxes.reduce(
                             (sum, inbox) =>
-                              sum +
-                              (inbox?.email_warmup_details?.warmup_reputation ||
-                                0),
+                              sum + (inbox?.smartlead_reputation || 0),
                             0
                           ) / inboxes.length;
                         return (
                           <Text>
-                            {avg}% {avg === 100 ? "🟩" : "🟥"}
+                            {avg.toFixed(0)}% {avg === 100 ? "🟩" : "🟥"}
                           </Text>
                         );
                       },
@@ -996,42 +999,47 @@ export function ActiveChannels() {
                                 <HoverCard shadow="md" withinPortal>
                                   <HoverCard.Target>
                                     <Text style={{ cursor: "pointer" }}>
-                                      {inbox?.email_warmup_details
-                                        .warmup_reputation >= 100
+                                      {inbox.smartlead_reputation >= 100
                                         ? "✅"
-                                        : "🟨"}
+                                        : "🟥"}
                                     </Text>
                                   </HoverCard.Target>
                                   <HoverCard.Dropdown>
                                     <DataTable
                                       columns={[
                                         {
-                                          accessor: "from_email",
-                                          title: "Channel",
-                                          render: ({ from_email }) => {
-                                            return <Text>{from_email}</Text>;
+                                          accessor: "email_address",
+                                          title: "Inbox",
+                                          render: ({ email_address }) => {
+                                            return <Text>{email_address}</Text>;
                                           },
                                         },
                                         {
-                                          accessor: "message_per_day",
+                                          accessor: "daily_limit",
                                           title: "Daily Limit",
-                                          render: ({ message_per_day }) => {
+                                          render: ({ daily_limit }) => {
                                             return (
-                                              <Text>
-                                                {message_per_day} per day
-                                              </Text>
+                                              <Text>{daily_limit} per day</Text>
                                             );
                                           },
                                         },
                                         {
-                                          accessor: "is_imap_success",
+                                          accessor: "smartlead_warmup_enabled",
                                           title: "Warmup",
                                           render: ({
-                                            email_warmup_details,
+                                            smartlead_warmup_enabled,
                                           }) => {
                                             return (
-                                              <Badge color="gray">
-                                                {email_warmup_details.status}
+                                              <Badge
+                                                color={
+                                                  smartlead_warmup_enabled
+                                                    ? "green"
+                                                    : "red"
+                                                }
+                                              >
+                                                {smartlead_warmup_enabled
+                                                  ? "TRUE"
+                                                  : "FALSE"}
                                               </Badge>
                                             );
                                           },
@@ -1040,12 +1048,17 @@ export function ActiveChannels() {
                                           accessor: "is_smtp_success",
                                           title: "Reputation",
                                           render: ({
-                                            email_warmup_details,
+                                            smartlead_reputation,
                                           }) => {
                                             return (
-                                              <Badge color="gray">
-                                                {email_warmup_details.warmup_reputation ||
-                                                  "N/A"}
+                                              <Badge
+                                                color={
+                                                  smartlead_reputation == 100
+                                                    ? "green"
+                                                    : "red"
+                                                }
+                                              >
+                                                {smartlead_reputation || "N/A"}
                                               </Badge>
                                             );
                                           },
@@ -1213,7 +1226,6 @@ export function ActiveCampaigns() {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log(data.pipeline_data);
           setActiveCampaigns(data.pipeline_data || []);
         })
         .finally(() => {

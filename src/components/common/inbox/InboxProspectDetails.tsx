@@ -210,7 +210,15 @@ export default function ProjectDetails(props: {
   const changeStatus = async (status: string, changeProspect?: boolean, disqualification_reason?: string | null) => {
     if (props.emailStatuses || openedOutboundChannel === 'EMAIL' || openedOutboundChannel === 'SMARTLEAD') {
       // HARD CODE IN THE EMAIL FOR NOW
-      const response = await updateChannelStatus(openedProspectId, userToken, 'EMAIL', status);
+      const response = await updateChannelStatus(
+        openedProspectId,
+        userToken,
+        'EMAIL',
+        status,
+        false,
+        false,
+        disqualification_reason
+      );
       if (response.status !== 'success') {
         showNotification({
           title: 'Error',

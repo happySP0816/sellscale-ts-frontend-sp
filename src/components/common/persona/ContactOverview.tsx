@@ -103,7 +103,7 @@ const ContactOverview = () => {
       </Tabs.Panel>
 
       <Tabs.Panel value='segments' className='h-0 grow'>
-        <Box pl='md' pr='md' mt='xs' pb='4px' w='100%' justifyContent='space-between' alignItems='center' display='flex'>
+        <Box pl='md' pr='md' mt='xs' pb='4px' w='100%' display='flex'>
           <Button
             ml='auto'
             onClick={() => window.location.href = '/contacts/find?campaign_id=' + userData?.unassigned_persona_id}  

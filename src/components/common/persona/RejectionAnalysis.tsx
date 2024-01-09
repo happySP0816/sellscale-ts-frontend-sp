@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState, useMemo, useRef, } from "react";
 import {
   Avatar,
   Badge,
@@ -16,7 +16,10 @@ import {
   Title,
   useMantineTheme,
   ActionIcon,
+  Loader,
+  Center,
 } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
 import {
   IconArrowUp,
   IconChevronLeft,
@@ -39,76 +42,62 @@ import {
   ArcElement,
   Chart,
 } from "chart.js";
-import { useRef } from "react";
 import { Bar, getElementsAtEvent } from "react-chartjs-2";
-import { faker } from "@faker-js/faker";
-ChartJS.register(ArcElement, Tooltip, Legend);
-const DisqualifiedData = [
-  { category: "Not a decision maker", value: 30 },
-  { category: "Poor account fit", value: 70 },
-  { category: 'Contact is "open to work"', value: 50 },
-  { category: "Competitor", value: 50 },
-  { category: "Others", value: 50 },
-];
-const NotInterestedData = [
-  { category: "Unconvinced", value: 30 },
-  { category: "Timing not right", value: 70 },
-  { category: "Unreponsive", value: 50 },
-  { category: "Using a competitor", value: 50 },
-  { category: "Others", value: 50 },
-];
+import { getRejectionAnalysisData } from '@utils/requests/getRejectionAnalysisData';
+import { getRejectionReportData } from '@utils/requests/getRejectionReportData';
+import { useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
 
-export function createRandomData(): Data {
-  return {
-    contactName: faker.name.fullName(),
-    avatar: "",
-    companyAvatar: "",
-    company: faker.company.name(),
-    category: faker.helpers.arrayElement([
-      ...DisqualifiedData.map((i) => i.category),
-      ...NotInterestedData.map((i) => i.category),
-    ]),
-    contact_content: faker.lorem.sentence(),
-    campaign: faker.company.catchPhrase(),
-    reason: faker.company.catchPhrase(),
-    campaignImage: "",
-    color: "orange",
-  };
-}
+ChartJS.register(ArcElement, Tooltip, Legend);
+
 
 export interface Data {
   contactName: string;
-  contact_content: string;
+  contactContent: string;
   company: string;
-  companyAvatar: string;
   avatar: string;
   campaign: string;
   reason: string;
   campaignImage: string;
   color: string;
   category: string;
+  campaignID:string;
+  linkedinURL:string;
 }
 
-const mockData: Array<Data> = [];
-
-Array.from({ length: 50 }).forEach(() => {
-  mockData.push(createRandomData());
-});
+interface ChartDataItem {
+  category: string;
+  value: number;
+}
 
 const RejectionAnalysis = () => {
+  const userToken = useRecoilValue(userTokenState);
   const [page, setPage] = useState(1);
   const disqualifiedDataChartRef = useRef(null);
   const notInterestedDataChartRef = useRef(null);
   const theme = useMantineTheme();
   const [filterContact, setFilterContact] = useState("");
-  const rows = useMemo(() => {
-    return mockData
-      .filter((d) => {
-        if (filterContact) {
-          return d.category === filterContact;
-        }
+  const [searchQuery, setSearchQuery] = useState(""); 
+  const [disqualifiedData, setDisqualifiedData] = useState<ChartDataItem[]>([]);
+  const [notInterestedData, setNotInterestedData] = useState<ChartDataItem[]>([]);
+  const [rejectionReportData, setRejectionReportData] = useState<Data[]>([]);
+  const totalDisqualified = useMemo(() => {
+    return disqualifiedData.reduce((total, item) => total + item.value, 0);
+  }, [disqualifiedData]);
+  const totalNotInterested = useMemo(() => {
+    return notInterestedData.reduce((total, item) => total + item.value, 0);
+  }, [notInterestedData]);
+  const totalRejectionData = useMemo(() => {
+    return rejectionReportData.reduce((total, item) => total + 1, 0);
+  }, [rejectionReportData]);
 
-        return true;
+  const rows = useMemo(() => {
+    return rejectionReportData
+      .filter((d) => {
+        return (!filterContact || d.category === filterContact) &&
+               (!searchQuery ||
+                d.contactName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                d.reason.toLowerCase().includes(searchQuery.toLowerCase()));
       })
       .map((element, idx) => (
         <tr key={idx} className="bg-white">
@@ -119,7 +108,6 @@ const RejectionAnalysis = () => {
             }}
           >
             <Flex align={"center"}>
-              <Avatar src={element.companyAvatar} size={40} radius={"xl"} />
               <Text color="gray.8" fw={600}>
                 {element.company}
               </Text>
@@ -138,23 +126,25 @@ const RejectionAnalysis = () => {
                   <Text color="gray.8" fw={600} size={"md"}>
                     {element.contactName}
                   </Text>
-                  <IconExternalLink size={18} color="#478cef" />
+                  <a href={`https://${element.linkedinURL}`} target="_blank" rel="noopener noreferrer"><IconExternalLink size={18} color="#478cef" /></a>
                 </Flex>
-                <Text color="gray">{element.contact_content}</Text>
+                <Text color="gray">{element.contactContent}</Text>
               </Box>
             </Flex>
           </td>
 
-          <td
-            style={{
-              paddingTop: rem(16),
-              paddingBottom: rem(16),
-            }}
-          >
+            <td
+              style={{
+                paddingTop: rem(16),
+                paddingBottom: rem(16),
+              }}
+            >
             <Flex align={"center"} gap={"sm"}>
-              <Avatar src={element.campaignImage} radius={"xl"} />
-              <Text fw={600}>{element.campaign}</Text>
-              <IconExternalLink size={18} color="#478cef" />
+              <Text fw={600}>{element.campaignImage}</Text>
+              <Flex align={"center"} gap={3}>
+                <Text fw={600}>{element.campaign}</Text>
+                <a href={`/setup/linkedin?campaign_id=${element.campaignID}`} target="_blank" rel="noopener noreferrer"><IconExternalLink size={18} color="#478cef" /></a>
+              </Flex>
             </Flex>
           </td>
           <td>
@@ -164,13 +154,63 @@ const RejectionAnalysis = () => {
           </td>
         </tr>
       ));
-  }, [filterContact, mockData]);
+  }, [filterContact, rejectionReportData, searchQuery]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        setIsLoading(true);
+        const [disqualifiedResponse, notInterestedResponse, rejectionReportResponse] = await Promise.all([
+          getRejectionAnalysisData(userToken, 'NOT_QUALIFIED'),
+          getRejectionAnalysisData(userToken, 'NOT_INTERESTED'),
+          getRejectionReportData(userToken),
+        ]);
+        const transformedData = rejectionReportResponse.data.map((item: any) => ({
+          contactName: item["Full Name"],
+          contactContent: item["Title"],
+          company: item.Company,
+          avatar: item["Prospect Img"],
+          campaign: item.Campaign,
+          reason: item["Disqualification Reason"],
+          campaignImage: item.Emoji, 
+          color: "orange", 
+          category: item["Disqualification Reason"].includes("OTHER") ? "Other": item["Disqualification Reason"], 
+          campaignID: item["Campaign ID"], 
+          linkedinURL: item["Linkedin URL"], 
+        }));
+        console.log(transformedData)
+        setDisqualifiedData(disqualifiedResponse.data);
+        setNotInterestedData(notInterestedResponse.data);
+        setRejectionReportData(transformedData);
+
+      } catch (error) {
+        console.error('Error fetching chart data:', error);
+        showNotification({
+          title: 'Error',
+          message: 'Error fetching chart data',
+          color: 'red'
+      });        
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    if (userToken) {
+      fetchChartData();
+    }
+  }, [userToken]);
 
   const chartDisqualifiedData = {
-    labels: DisqualifiedData.map((item) => item.category),
+    labels: disqualifiedData.map((item) => item.category),
     datasets: [
       {
-        data: DisqualifiedData.map((item) => item.value),
+        data: disqualifiedData.map((item) => item.value),
         backgroundColor: [
           theme.colors.orange[6],
           theme.colors.blue[6],
@@ -182,10 +222,10 @@ const RejectionAnalysis = () => {
     ],
   };
   const chartNotInterestedData = {
-    labels: NotInterestedData.map((item) => item.category),
+    labels: notInterestedData.map((item) => item.category),
     datasets: [
       {
-        data: NotInterestedData.map((item) => item.value),
+        data: notInterestedData.map((item) => item.value),
         backgroundColor: [
           theme.colors.orange[6],
           theme.colors.green[6],
@@ -213,6 +253,17 @@ const RejectionAnalysis = () => {
       animateRotate: true,
     },
   };
+
+
+  if (isLoading) {
+    return (
+      <Center>
+        <Loader size="xl" /> 
+      </Center>
+    );
+  }
+
+
   return (
     <Container size="97%" my={"lg"}>
       <Title order={3} mt={0} mb="xs">
@@ -228,30 +279,23 @@ const RejectionAnalysis = () => {
             <Text color="gray" fw={500}>
               # Contacts Disqualified:{" "}
             </Text>
-            <Text fw={600}>{256}</Text>
-            <Badge
-              color="green"
-              leftSection={<IconArrowUp size={10} stroke={3} />}
-            >
-              8.5%
-            </Badge>
+            <Text fw={600}>{totalDisqualified}</Text>
           </Flex>
           <Flex mt={"sm"}>
-            <Pie
-              data={chartDisqualifiedData}
-              options={options}
-              ref={disqualifiedDataChartRef}
-              onClick={(e) => {
-                setFilterContact(
-                  chartNotInterestedData.labels[
-                    getElementAtEvent(
-                      disqualifiedDataChartRef?.current as any,
-                      e
-                    )[0].index
-                  ]
-                );
-              }}
-            />
+          <Pie
+            data={chartDisqualifiedData}
+            options={options}
+            ref={disqualifiedDataChartRef}
+            onClick={(e) => {
+              if (disqualifiedDataChartRef.current) {
+                const elementIndex = getElementAtEvent(disqualifiedDataChartRef.current, e)[0]?.index;
+                if (elementIndex !== undefined) {
+                  setFilterContact(chartDisqualifiedData.labels[elementIndex]);
+                }
+              }
+            }}
+          />
+
           </Flex>
         </Box>
         <Box
@@ -263,30 +307,23 @@ const RejectionAnalysis = () => {
             <Text color="gray" fw={500}>
               # Contacts Not Interested:{" "}
             </Text>
-            <Text fw={600}>{127}</Text>
-            <Badge
-              color="green"
-              leftSection={<IconArrowUp size={10} stroke={3} />}
-            >
-              8.5%
-            </Badge>
+            <Text fw={600}>{totalNotInterested}</Text>
           </Flex>
           <Flex mt={"sm"}>
-            <Pie
-              data={chartNotInterestedData}
-              options={options}
-              ref={notInterestedDataChartRef}
-              onClick={(e) => {
-                setFilterContact(
-                  chartNotInterestedData.labels[
-                    getElementAtEvent(
-                      notInterestedDataChartRef?.current as any,
-                      e
-                    )[0].index
-                  ]
-                );
-              }}
-            />
+          <Pie
+            data={chartNotInterestedData}
+            options={options}
+            ref={notInterestedDataChartRef}
+            onClick={(e) => {
+              if (notInterestedDataChartRef.current) {
+                const elementIndex = getElementAtEvent(notInterestedDataChartRef.current, e)[0]?.index;
+                if (elementIndex !== undefined) {
+                  setFilterContact(chartNotInterestedData.labels[elementIndex]);
+                }
+              }
+            }}
+          />
+
           </Flex>
         </Box>
       </Flex>
@@ -314,6 +351,8 @@ const RejectionAnalysis = () => {
           )}
         </Flex>
         <TextInput
+          value={searchQuery} 
+          onChange={handleSearchChange}
           rightSection={<IconSearch size={16} color="gray" />}
           placeholder="Search"
         />
@@ -383,7 +422,7 @@ const RejectionAnalysis = () => {
               defaultValue="Show 25 rows"
             />
             <Text color="gray" fw={500}>
-              of 126
+              of {totalRejectionData}
             </Text>
           </Flex>
           <Flex>

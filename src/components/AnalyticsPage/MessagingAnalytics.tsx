@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -13,10 +13,15 @@ import {
   useMantineTheme,
   Avatar,
   Modal,
+  Switch,
+  Accordion,
+  Collapse,
+  Stack,
+  Divider,
 } from '@mantine/core';
 import { IconExternalLink } from '@tabler/icons-react';
 import { DataGrid, stringFilterFn, DataGridFiltersState } from 'mantine-data-grid';
-import { IconAlertTriangle, IconChevronLeft, IconChevronRight } from '@tabler/icons';
+import { IconAlertTriangle, IconChevronDown, IconChevronLeft, IconChevronRight, IconChevronUp, IconCircuitGroundDigital } from '@tabler/icons';
 import { useState } from 'react';
 import { faker } from '@faker-js/faker';
 import { useDisclosure } from '@mantine/hooks';
@@ -28,6 +33,7 @@ import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { useNavigate } from 'react-router-dom';
+import _ from 'lodash';
 
 enum Health {
   LOW = 'LOW',
@@ -53,10 +59,14 @@ const MessagingAnalytics = () => {
   const navigate = useNavigate();
 
   const [opened, { close, toggle }] = useDisclosure(false);
+  const [groupOpened, { open: openGroup, close: closeGroup, toggle: toggleGroup }] = useDisclosure(false);
   const theme = useMantineTheme();
   const [columnFilters, setColumnFilters] = useState<DataGridFiltersState>([]);
   const [selectedHealth, setSelectedHealth] = useState<'low' | 'all'>('low');
   const currentProject = useRecoilValue(currentProjectState);
+
+  const [groupby, setGroupby] = useState(false);
+  const [groupid, setGroupId] = useState('');
 
   const [rangeValue, setRangeValue] = useState<[number, number]>([20, 80]);
   const [significance, setSignificance] = useState<number>(15);
@@ -98,6 +108,13 @@ const MessagingAnalytics = () => {
 
   const displayData = selectedHealth === 'all' ? data : data.filter((i) => i.health === Health.LOW);
 
+  const handleToggleGroup = (campaign: string, groupid: string) => {
+    if (campaign === groupid || !groupOpened) toggleGroup();
+    setGroupId(campaign);
+  };
+  const newData = _.groupBy(displayData, 'campaign');
+  const groupedArray = Object.entries(newData);
+
   return (
     <>
       <EditSlaModal
@@ -121,21 +138,16 @@ const MessagingAnalytics = () => {
           </Text>
 
           <Group>
-            <Button
-              color={'red'}
-              onClick={() => setSelectedHealth('low')}
-              variant={selectedHealth === 'low' ? 'filled' : 'outline'}
-            >
+            <Button variant='outline' color='gray'>
+              Group by Campaign: <Switch ml={'sm'} size='sm' onChange={() => setGroupby(!groupby)} />
+            </Button>
+            <Button color={'red'} onClick={() => setSelectedHealth('low')} variant={selectedHealth === 'low' ? 'filled' : 'outline'}>
               Head Attention
               <Badge ml={4} color='red'>
                 {(data ?? []).filter((i) => i.health === Health.LOW).length - 1}
               </Badge>
             </Button>
-            <Button
-              variant={selectedHealth === 'all' ? 'filled' : 'outline'}
-              color='dark'
-              onClick={() => setSelectedHealth('all')}
-            >
+            <Button variant={selectedHealth === 'all' ? 'filled' : 'outline'} color='dark' onClick={() => setSelectedHealth('all')}>
               All{' '}
               <Badge ml={4} color='dark'>
                 {(data ?? []).length - 1}
@@ -144,324 +156,571 @@ const MessagingAnalytics = () => {
             <Button onClick={toggle}>Edit SLAs</Button>
           </Group>
         </Flex>
+        {!groupby ? (
+          <DataGrid
+            data={displayData}
+            highlightOnHover
+            withPagination
+            withSorting
+            withBorder
+            sx={{ cursor: 'pointer' }}
+            mt={'lg'}
+            columns={[
+              {
+                accessorKey: 'health',
+                header: 'HEALTH',
+                maxSize: 120,
+                cell: (cell) => {
+                  const score = cell.cell.getValue<Health>();
+                  let readable_score = '';
+                  let color = '';
+                  let leftSection = null;
+                  switch (score) {
+                    case Health.LOW:
+                      readable_score = 'Low';
+                      color = 'red';
+                      leftSection = <IconAlertTriangle size={'0.8rem'} />;
+                      break;
+                    case Health.MEDIUM:
+                      readable_score = 'Medium';
+                      color = 'yellow';
+                      break;
+                    case Health.HIGH:
+                      readable_score = 'High';
+                      color = 'green';
+                      break;
+                    default:
+                      readable_score = 'N/A';
+                      color = 'gray';
+                      break;
+                  }
 
-        <DataGrid
-          data={displayData}
-          highlightOnHover
-          withPagination
-          withSorting
-          withBorder
-          sx={{ cursor: 'pointer' }}
-          mt={'lg'}
-          columns={[
-            {
-              accessorKey: 'health',
-              header: 'HEALTH',
-              maxSize: 120,
-              cell: (cell) => {
-                const score = cell.cell.getValue<Health>();
-                let readable_score = '';
-                let color = '';
-                let leftSection = null;
-                switch (score) {
-                  case Health.LOW:
-                    readable_score = 'Low';
-                    color = 'red';
-                    leftSection = <IconAlertTriangle size={'0.8rem'} />;
-                    break;
-                  case Health.MEDIUM:
-                    readable_score = 'Medium';
-                    color = 'yellow';
-                    break;
-                  case Health.HIGH:
-                    readable_score = 'High';
-                    color = 'green';
-                    break;
-                  default:
-                    readable_score = 'N/A';
-                    color = 'gray';
-                    break;
-                }
-
-                return (
-                  <Badge
-                    color={color}
-                    leftSection={leftSection}
-                    styles={{
-                      leftSection: {
-                        display: 'flex',
-                        alignItems: 'center',
-                        // justifyContent:'center'
-                      },
-                    }}
-                  >
-                    {readable_score}
-                  </Badge>
-                );
+                  return (
+                    <Badge
+                      color={color}
+                      leftSection={leftSection}
+                      styles={{
+                        leftSection: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          // justifyContent:'center'
+                        },
+                      }}
+                    >
+                      {readable_score}
+                    </Badge>
+                  );
+                },
+                filterFn: stringFilterFn,
               },
-              filterFn: stringFilterFn,
-            },
-            {
-              accessorKey: 'totalRate',
-              header: 'Conversion Rate',
-              enableSorting: false,
-              maxSize: 140,
-              cell: (cell) => {
-                const { rate, totalRate, health, etl_num_times_used, etl_num_times_converted } = cell.row.original;
+              {
+                accessorKey: 'totalRate',
+                header: 'Conversion Rate',
+                enableSorting: false,
+                maxSize: 140,
+                cell: (cell) => {
+                  const { rate, totalRate, health, etl_num_times_used, etl_num_times_converted } = cell.row.original;
 
-                console.log(cell.row.original)
+                  let color = '';
 
-                let color = '';
+                  switch (health) {
+                    case Health.LOW:
+                      color = 'red';
+                      break;
+                    case Health.MEDIUM:
+                      color = 'yellow';
+                      break;
+                    case Health.HIGH:
+                      color = 'green';
+                      break;
+                    default:
+                      color = 'gray';
+                      break;
+                  }
+                  return (
+                    <Flex justify={'center'} align={'center'} direction={'column'} gap={4} w={'100%'} h={'100%'}>
+                      <Badge color={color}>{Math.round((etl_num_times_converted / etl_num_times_used + 0.001) * 100)}%</Badge>
 
-                switch (health) {
-                  case Health.LOW:
-                    color = 'red';
-                    break;
-                  case Health.MEDIUM:
-                    color = 'yellow';
-                    break;
-                  case Health.HIGH:
-                    color = 'green';
-                    break;
-                  default:
-                    color = 'gray';
-                    break;
-                }
-                return (
-                  <Flex
-                    justify={'center'}
-                    align={'center'}
-                    direction={'column'}
-                    gap={4}
-                    w={'100%'}
-                    h={'100%'}
-                  >
-                    <Badge color={color}>{Math.round((etl_num_times_converted / etl_num_times_used + 0.001) * 100)}%</Badge>
+                      <Text c={'gray.6'} size={'xs'} fw={500}>
+                        {etl_num_times_converted}/{etl_num_times_used}
+                      </Text>
+                    </Flex>
+                  );
+                },
+                filterFn: stringFilterFn,
+              },
 
-                    <Text c={'gray.6'} size={'xs'} fw={500}>
-                      {etl_num_times_converted}/{etl_num_times_used}
+              {
+                accessorKey: 'campaign',
+                header: 'Campaign',
+                enableSorting: false,
+                maxSize: 600,
+                enableResizing: true,
+                cell: (cell) => {
+                  const { campaign, step } = cell.row.original as DateType;
+
+                  return (
+                    <Flex align={'center'} gap={'xs'} w={'100%'}>
+                      <Avatar size={'sm'} />
+
+                      <Box>
+                        <Flex align={'center'} gap={4}>
+                          <Text fw={500} size={'sm'}>
+                            {campaign}
+                          </Text>
+
+                          <Anchor href='/' size={'sm'} sx={{ display: 'flex', alignItems: 'center' }}>
+                            <IconExternalLink size={'0.8rem'} />
+                          </Anchor>
+                        </Flex>
+
+                        <Text display={'flex'} fw={500} c={'gray.6'}>
+                          Step:&nbsp;
+                          <Text fw={500} c={'black'}>
+                            {step}
+                          </Text>
+                        </Text>
+                      </Box>
+                    </Flex>
+                  );
+                },
+                filterFn: stringFilterFn,
+              },
+
+              {
+                accessorKey: 'title',
+                header: 'Framework TItle',
+                enableSorting: false,
+                cell: (cell) => {
+                  const { title } = cell.row.original as DateType;
+
+                  return (
+                    <Flex align={'center'} h={'100%'}>
+                      <Text fw={500}>{title}</Text>
+                    </Flex>
+                  );
+                },
+                filterFn: stringFilterFn,
+              },
+
+              {
+                accessorKey: '',
+                header: '',
+                enableSorting: false,
+                id: 'action',
+                cell: (cell) => {
+                  return (
+                    <Flex align={'center'} h={'100%'}>
+                      <Button
+                        size='xs'
+                        compact
+                        rightIcon={<IconExternalLink size={'0.9rem'} />}
+                        variant='light'
+                        radius='lg'
+                        onClick={() => {
+                          navigate(`/setup/linkedin?campaign_id=${cell.row.original.campaign_id}`);
+                        }}
+                      >
+                        Change Wording / Framework
+                      </Button>
+                    </Flex>
+                  );
+                },
+                filterFn: stringFilterFn,
+              },
+            ]}
+            options={{
+              enableFilters: true,
+            }}
+            state={{
+              columnFilters,
+            }}
+            components={{
+              pagination: ({ table }) => (
+                <Flex
+                  justify={'space-between'}
+                  align={'center'}
+                  px={'sm'}
+                  py={'1.25rem'}
+                  sx={(theme) => ({
+                    border: `1px solid ${theme.colors.gray[4]}`,
+                    borderTopWidth: 0,
+                  })}
+                >
+                  <Flex align={'center'} gap={'sm'}>
+                    <Text fw={500} color='gray.6'>
+                      Show
                     </Text>
-                  </Flex>
-                );
-              },
-              filterFn: stringFilterFn,
-            },
 
-            {
-              accessorKey: 'campaign',
-              header: 'Campaign',
-              enableSorting: false,
-              maxSize: 600,
-              enableResizing: true,
-              cell: (cell) => {
-                const { campaign, step } = cell.row.original as DateType;
-
-                return (
-                  <Flex align={'center'} gap={'xs'} w={'100%'}>
-                    <Avatar size={'sm'} />
-
-                    <Box>
-                      <Flex align={'center'} gap={4}>
-                        <Text fw={500} size={'sm'}>
-                          {campaign}
+                    <Flex align={'center'}>
+                      <NumberInput
+                        maw={100}
+                        value={table.getState().pagination.pageSize}
+                        onChange={(v) => {
+                          if (v) {
+                            table.setPageSize(v);
+                          }
+                        }}
+                      />
+                      <Flex
+                        sx={(theme) => ({
+                          borderTop: `1px solid ${theme.colors.gray[4]}`,
+                          borderRight: `1px solid ${theme.colors.gray[4]}`,
+                          borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                          marginLeft: '-2px',
+                          paddingLeft: '1rem',
+                          paddingRight: '1rem',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '0.25rem',
+                        })}
+                        h={36}
+                      >
+                        <Text color='gray.5' fw={500} fz={14}>
+                          of {table.getPrePaginationRowModel().rows.length}
                         </Text>
-
-                        <Anchor href='/' size={'sm'} sx={{ display: 'flex', alignItems: 'center' }}>
-                          <IconExternalLink size={'0.8rem'} />
-                        </Anchor>
                       </Flex>
+                    </Flex>
+                  </Flex>
 
-                      <Text display={'flex'} fw={500} c={'gray.6'}>
-                        Step:&nbsp;
-                        <Text fw={500} c={'black'}>
-                          {step}
+                  <Flex align={'center'} gap={'sm'}>
+                    <Flex align={'center'}>
+                      <Select
+                        maw={100}
+                        value={`${table.getState().pagination.pageIndex + 1}`}
+                        data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
+                          label: String(idx + 1),
+                          value: String(idx + 1),
+                        }))}
+                        onChange={(v) => {
+                          table.setPageIndex(Number(v) - 1);
+                        }}
+                      />
+                      <Flex
+                        sx={(theme) => ({
+                          borderTop: `1px solid ${theme.colors.gray[4]}`,
+                          borderRight: `1px solid ${theme.colors.gray[4]}`,
+                          borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                          marginLeft: '-2px',
+                          paddingLeft: '1rem',
+                          paddingRight: '1rem',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '0.25rem',
+                        })}
+                        h={36}
+                      >
+                        <Text color='gray.5' fw={500} fz={14}>
+                          of {table.getPageCount()} pages
                         </Text>
-                      </Text>
-                    </Box>
-                  </Flex>
-                );
-              },
-              filterFn: stringFilterFn,
-            },
-
-            {
-              accessorKey: 'title',
-              header: 'Framework TItle',
-              enableSorting: false,
-              cell: (cell) => {
-                const { title } = cell.row.original as DateType;
-
-                return (
-                  <Flex align={'center'} h={'100%'}>
-                    <Text fw={500}>{title}</Text>
-                  </Flex>
-                );
-              },
-              filterFn: stringFilterFn,
-            },
-
-            {
-              accessorKey: '',
-              header: '',
-              enableSorting: false,
-              id: 'action',
-              cell: (cell) => {
-                return (
-                  <Flex align={'center'} h={'100%'}>
-                    <Button
-                      size='xs'
-                      compact
-                      rightIcon={<IconExternalLink size={'0.9rem'} />}
-                      variant='light'
-                      radius='lg'
-                      onClick={() => {
-                        navigate(`/setup/linkedin?campaign_id=${cell.row.original.campaign_id}`);
-                      }}
-                    >
-                      Change Wording / Framework
-                    </Button>
-                  </Flex>
-                );
-              },
-              filterFn: stringFilterFn,
-            },
-          ]}
-          options={{
-            enableFilters: true,
-          }}
-          state={{
-            columnFilters,
-          }}
-          components={{
-            pagination: ({ table }) => (
-              <Flex
-                justify={'space-between'}
-                align={'center'}
-                px={'sm'}
-                py={'1.25rem'}
-                sx={(theme) => ({
-                  border: `1px solid ${theme.colors.gray[4]}`,
-                  borderTopWidth: 0,
-                })}
-              >
-                <Flex align={'center'} gap={'sm'}>
-                  <Text fw={500} color='gray.6'>
-                    Show
-                  </Text>
-
-                  <Flex align={'center'}>
-                    <NumberInput
-                      maw={100}
-                      value={table.getState().pagination.pageSize}
-                      onChange={(v) => {
-                        if (v) {
-                          table.setPageSize(v);
-                        }
-                      }}
-                    />
-                    <Flex
-                      sx={(theme) => ({
-                        borderTop: `1px solid ${theme.colors.gray[4]}`,
-                        borderRight: `1px solid ${theme.colors.gray[4]}`,
-                        borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                        marginLeft: '-2px',
-                        paddingLeft: '1rem',
-                        paddingRight: '1rem',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '0.25rem',
-                      })}
-                      h={36}
-                    >
-                      <Text color='gray.5' fw={500} fz={14}>
-                        of {table.getPrePaginationRowModel().rows.length}
-                      </Text>
+                      </Flex>
+                      <ActionIcon
+                        variant='default'
+                        color='gray.4'
+                        h={36}
+                        disabled={table.getState().pagination.pageIndex === 0}
+                        onClick={() => {
+                          table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                        }}
+                      >
+                        <IconChevronLeft stroke={theme.colors.gray[4]} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant='default'
+                        color='gray.4'
+                        h={36}
+                        disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                        onClick={() => {
+                          table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                        }}
+                      >
+                        <IconChevronRight stroke={theme.colors.gray[4]} />
+                      </ActionIcon>
                     </Flex>
                   </Flex>
                 </Flex>
-
-                <Flex align={'center'} gap={'sm'}>
-                  <Flex align={'center'}>
-                    <Select
-                      maw={100}
-                      value={`${table.getState().pagination.pageIndex + 1}`}
-                      data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                        label: String(idx + 1),
-                        value: String(idx + 1),
-                      }))}
-                      onChange={(v) => {
-                        table.setPageIndex(Number(v) - 1);
-                      }}
-                    />
-                    <Flex
-                      sx={(theme) => ({
-                        borderTop: `1px solid ${theme.colors.gray[4]}`,
-                        borderRight: `1px solid ${theme.colors.gray[4]}`,
-                        borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                        marginLeft: '-2px',
-                        paddingLeft: '1rem',
-                        paddingRight: '1rem',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '0.25rem',
-                      })}
-                      h={36}
-                    >
-                      <Text color='gray.5' fw={500} fz={14}>
-                        of {table.getPageCount()} pages
-                      </Text>
-                    </Flex>
-                    <ActionIcon
-                      variant='default'
-                      color='gray.4'
-                      h={36}
-                      disabled={table.getState().pagination.pageIndex === 0}
-                      onClick={() => {
-                        table.setPageIndex(table.getState().pagination.pageIndex - 1);
-                      }}
-                    >
-                      <IconChevronLeft stroke={theme.colors.gray[4]} />
-                    </ActionIcon>
-                    <ActionIcon
-                      variant='default'
-                      color='gray.4'
-                      h={36}
-                      disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
-                      onClick={() => {
-                        table.setPageIndex(table.getState().pagination.pageIndex + 1);
-                      }}
-                    >
-                      <IconChevronRight stroke={theme.colors.gray[4]} />
-                    </ActionIcon>
-                  </Flex>
-                </Flex>
-              </Flex>
-            ),
-          }}
-          w={'100%'}
-          pageSizes={['20']}
-          styles={(theme) => ({
-            thead: {
-              height: '44px',
-              backgroundColor: theme.colors.gray[0],
-              '::after': {
-                backgroundColor: 'transparent',
+              ),
+            }}
+            w={'100%'}
+            pageSizes={['20']}
+            styles={(theme) => ({
+              thead: {
+                height: '44px',
+                backgroundColor: theme.colors.gray[0],
+                '::after': {
+                  backgroundColor: 'transparent',
+                },
               },
-            },
 
-            wrapper: {
-              gap: 0,
-            },
-            scrollArea: {
-              paddingBottom: 0,
-              gap: 0,
-            },
+              wrapper: {
+                gap: 0,
+              },
+              scrollArea: {
+                paddingBottom: 0,
+                gap: 0,
+              },
 
-            dataCellContent: {
-              width: '100%',
-            },
-          })}
-        />
+              dataCellContent: {
+                width: '100%',
+              },
+            })}
+          />
+        ) : (
+          <Flex direction={'column'} style={{ border: '1px solid gray', borderRadius: '6px' }} mt={'md'}>
+            {groupedArray.map(([campaign, data], index) => {
+              return (
+                <>
+                  <Flex justify={'space-between'} align={'center'} p={'lg'} bg={groupOpened && campaign === groupid ? '#3178ea' : ''}>
+                    <Flex align={'center'} gap={'xs'}>
+                      <Avatar size={'sm'} />
+                      <Box>
+                        <Flex align={'center'} gap={4}>
+                          <Text fw={500} size={'sm'} color={groupOpened && campaign === groupid ? 'white' : ''}>
+                            {campaign}
+                          </Text>
+
+                          <Anchor href='/' size={'sm'} sx={{ display: 'flex', alignItems: 'center' }}>
+                            <IconExternalLink size={'0.8rem'} color={groupOpened && campaign === groupid ? 'white' : ''} />
+                          </Anchor>
+                        </Flex>
+                      </Box>
+                    </Flex>
+                    <Flex align={'center'} gap={'sm'}>
+                      {data.find((item) => item.health.includes('LOW')) && !groupOpened && (
+                        <Text color='red' display='flex' style={{ alignItems: 'center', gap: '8px' }}>
+                          <IconAlertTriangle size='1.2rem' color='red' />
+                          Need Attention
+                        </Text>
+                      )}
+
+                      <Button
+                        variant={groupOpened && campaign === groupid ? 'default' : 'outline'}
+                        radius={'lg'}
+                        style={{
+                          color: groupOpened && campaign === groupid ? 'white' : '',
+                          backgroundColor: groupOpened && campaign === groupid ? '#5f96f1' : '',
+                        }}
+                        size='xs'
+                        rightIcon={groupOpened && campaign === groupid ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+                        onClick={() => {
+                          handleToggleGroup(campaign, groupid);
+                        }}
+                      >
+                        View {data.length} steps
+                      </Button>
+                    </Flex>
+                  </Flex>
+                  {campaign === groupid && (
+                    <Collapse in={groupOpened} transitionTimingFunction='linear'>
+                      <>
+                        <DataGrid
+                          data={data}
+                          highlightOnHover
+                          withSorting
+                          withBorder
+                          sx={{ cursor: 'pointer' }}
+                          columns={[
+                            {
+                              accessorKey: 'health',
+                              header: 'HEALTH',
+                              maxSize: 120,
+                              cell: (cell) => {
+                                const score = cell.cell.getValue<Health>();
+                                let readable_score = '';
+                                let color = '';
+                                let leftSection = null;
+                                switch (score) {
+                                  case Health.LOW:
+                                    readable_score = 'Low';
+                                    color = 'red';
+                                    leftSection = <IconAlertTriangle size={'0.8rem'} />;
+                                    break;
+                                  case Health.MEDIUM:
+                                    readable_score = 'Medium';
+                                    color = 'yellow';
+                                    break;
+                                  case Health.HIGH:
+                                    readable_score = 'High';
+                                    color = 'green';
+                                    break;
+                                  default:
+                                    readable_score = 'N/A';
+                                    color = 'gray';
+                                    break;
+                                }
+
+                                return (
+                                  <Badge
+                                    color={color}
+                                    leftSection={leftSection}
+                                    styles={{
+                                      leftSection: {
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        // justifyContent:'center'
+                                      },
+                                    }}
+                                  >
+                                    {readable_score}
+                                  </Badge>
+                                );
+                              },
+                              filterFn: stringFilterFn,
+                            },
+                            {
+                              accessorKey: 'totalRate',
+                              header: 'Conversion Rate',
+                              enableSorting: false,
+                              maxSize: 140,
+                              cell: (cell) => {
+                                const { rate, totalRate, health, etl_num_times_used, etl_num_times_converted } = cell.row.original;
+
+                                let color = '';
+
+                                switch (health) {
+                                  case Health.LOW:
+                                    color = 'red';
+                                    break;
+                                  case Health.MEDIUM:
+                                    color = 'yellow';
+                                    break;
+                                  case Health.HIGH:
+                                    color = 'green';
+                                    break;
+                                  default:
+                                    color = 'gray';
+                                    break;
+                                }
+                                return (
+                                  <Flex justify={'center'} align={'center'} direction={'column'} gap={4} w={'100%'} h={'100%'}>
+                                    <Badge color={color}>{Math.round((etl_num_times_converted / etl_num_times_used + 0.001) * 100)}%</Badge>
+
+                                    <Text c={'gray.6'} size={'xs'} fw={500}>
+                                      {etl_num_times_converted}/{etl_num_times_used}
+                                    </Text>
+                                  </Flex>
+                                );
+                              },
+                              filterFn: stringFilterFn,
+                            },
+
+                            {
+                              accessorKey: 'campaign',
+                              header: 'Campaign',
+                              enableSorting: false,
+                              maxSize: 600,
+                              enableResizing: true,
+                              cell: (cell) => {
+                                const { campaign, step } = cell.row.original as DateType;
+
+                                return (
+                                  <Flex align={'center'} gap={'xs'} w={'100%'}>
+                                    <Avatar size={'sm'} />
+
+                                    <Box>
+                                      <Flex align={'center'} gap={4}>
+                                        <Text fw={500} size={'sm'}>
+                                          {campaign}
+                                        </Text>
+
+                                        <Anchor href='/' size={'sm'} sx={{ display: 'flex', alignItems: 'center' }}>
+                                          <IconExternalLink size={'0.8rem'} />
+                                        </Anchor>
+                                      </Flex>
+
+                                      <Text display={'flex'} fw={500} c={'gray.6'}>
+                                        Step:&nbsp;
+                                        <Text fw={500} c={'black'}>
+                                          {step}
+                                        </Text>
+                                      </Text>
+                                    </Box>
+                                  </Flex>
+                                );
+                              },
+                              filterFn: stringFilterFn,
+                            },
+
+                            {
+                              accessorKey: 'title',
+                              header: 'Framework TItle',
+                              enableSorting: false,
+                              cell: (cell) => {
+                                const { title } = cell.row.original as DateType;
+
+                                return (
+                                  <Flex align={'center'} h={'100%'}>
+                                    <Text fw={500}>{title}</Text>
+                                  </Flex>
+                                );
+                              },
+                              filterFn: stringFilterFn,
+                            },
+
+                            {
+                              accessorKey: '',
+                              header: '',
+                              enableSorting: false,
+                              id: 'action',
+                              cell: (cell) => {
+                                return (
+                                  <Flex align={'center'} h={'100%'}>
+                                    <Button
+                                      size='xs'
+                                      compact
+                                      rightIcon={<IconExternalLink size={'0.9rem'} />}
+                                      variant='light'
+                                      radius='lg'
+                                      onClick={() => {
+                                        navigate(`/setup/linkedin?campaign_id=${cell.row.original.campaign_id}`);
+                                      }}
+                                    >
+                                      Change Wording / Framework
+                                    </Button>
+                                  </Flex>
+                                );
+                              },
+                              filterFn: stringFilterFn,
+                            },
+                          ]}
+                          options={{
+                            enableFilters: true,
+                          }}
+                          state={{
+                            columnFilters,
+                          }}
+                          w={'100%'}
+                          styles={(theme) => ({
+                            thead: {
+                              height: '44px',
+                              backgroundColor: theme.colors.gray[0],
+                              '::after': {
+                                backgroundColor: 'transparent',
+                              },
+                            },
+
+                            wrapper: {
+                              gap: 0,
+                            },
+                            scrollArea: {
+                              paddingBottom: 0,
+                              gap: 0,
+                            },
+
+                            dataCellContent: {
+                              width: '100%',
+                            },
+                          })}
+                        />
+                      </>
+                    </Collapse>
+                  )}
+                  {index !== groupedArray.length - 1 && <Divider />}
+                </>
+              );
+            })}
+          </Flex>
+        )}
       </Box>
     </>
   );

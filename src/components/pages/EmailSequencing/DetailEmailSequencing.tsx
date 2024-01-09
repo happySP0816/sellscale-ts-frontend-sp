@@ -266,7 +266,7 @@ const DetailEmailSequencing: FC<{
 
       });
       setFetchedTemplateSpamScore(true);
-    }, [fetchedTemplateSpamScore]);
+    }, [fetchedTemplateSpamScore, activeTemplate?.template]);
 
   // Trigger Generate Initial Email
   const triggerPostGenerateInitialEmail = async () => {

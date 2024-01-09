@@ -1,11 +1,11 @@
-import { Tabs, Tooltip } from '@mantine/core';
+import { Box, Button, Tabs, Tooltip } from '@mantine/core';
 import { PulseWrapper } from './PulseWrapper';
 import ICPFilters from './ICPFilter/ICPFilters';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { getCurrentPersonaId, getFreshCurrentProject } from '@auth/core';
 import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { userTokenState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { PersonaOverview } from 'src';
 import { getPersonasOverview } from '@utils/requests/getPersonas';
@@ -33,6 +33,7 @@ import PulseTabSelector from './PulseTabSelector';
 
 const ContactOverview = () => {
   const userToken = useRecoilValue(userTokenState)
+  const userData = useRecoilValue(userDataState)
 
   return (
     <Tabs defaultValue='prospect_scoring' className='min-h-full flex flex-col'>
@@ -102,6 +103,14 @@ const ContactOverview = () => {
       </Tabs.Panel>
 
       <Tabs.Panel value='segments' className='h-0 grow'>
+        <Box pl='md' pr='md' mt='xs' pb='4px' w='100%' justifyContent='space-between' alignItems='center' display='flex'>
+          <Button
+            ml='auto'
+            onClick={() => window.location.href = '/contacts/find?campaign_id=' + userData?.unassigned_persona_id}  
+          >
+            Add Contacts
+          </Button>
+        </Box>
         <iframe 
           src={'https://sellscale.retool.com/embedded/public/93860ed4-1e1f-442a-a00e-c4ea46a2865b#authToken=' + userToken}
           style={{

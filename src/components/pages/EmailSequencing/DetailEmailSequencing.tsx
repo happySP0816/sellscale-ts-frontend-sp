@@ -255,8 +255,6 @@ const DetailEmailSequencing: FC<{
     })
       .then((res) => res.json())
       .then((res) => {
-        console.log("YEEE")
-        console.log(res)
         setSpamScore(res.score);
       })
       .catch((err) => {

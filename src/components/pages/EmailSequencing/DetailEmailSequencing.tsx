@@ -1047,25 +1047,6 @@ const SubjectLineItem: React.FC<{
           </Flex>
 
           <Flex wrap={'wrap'} gap={'1rem'} align={'center'}>
-            {/* <Menu shadow="md" width={200} withinPortal withArrow>
-                <Menu.Target>
-                  <ActionIcon radius="xl" size="sm">
-                    <IconPencil size="1.0rem" />
-                  </ActionIcon>
-                </Menu.Target>
-
-                <Menu.Dropdown>
-                  <Menu.Item icon={<IconEdit size={14} />} onClick={onClickEdit}>
-                    Edit
-                  </Menu.Item>
-                  <Menu.Item
-                    icon={<IconTrash size={14} />}
-                    onClick={onClickDelete}
-                  >
-                    Delete
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu> */}
             <Tooltip
               label={
                 subjectLine.times_used > 0
@@ -1161,11 +1142,7 @@ const SubjectLineItem: React.FC<{
           />
         ) : (
           <Text fw={'400'} fz={'0.9rem'} color={'gray.8'}>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(editedSubjectLine.replace(/\]\]/g, '</span>')),
-              }}
-            />
+            {editedSubjectLine}
           </Text>
         )}
       </Flex>

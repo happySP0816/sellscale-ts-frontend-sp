@@ -113,6 +113,7 @@ export type CampaignPersona = {
   total_sent: number;
   total_opened: number;
   total_replied: number;
+  total_pos_replied: number;
   total_demo: number;
   total_prospects: number;
   sdr_name: string;
@@ -513,6 +514,7 @@ export function PersonCampaignCard(props: {
   );
 
   let total_replied = props.persona.total_replied;
+  let total_pos_replied = props.persona.total_pos_replied;
   let total_opened = props.persona.total_opened;
   let total_sent = props.persona.total_sent;
 
@@ -600,6 +602,8 @@ export function PersonCampaignCard(props: {
               ? "orange"
               : value === "demo"
               ? "green"
+              : value === "pos_reply"
+              ? "purple"
               : ""
           }
         >
@@ -696,6 +700,24 @@ export function PersonCampaignCard(props: {
             <Box
               w={"100%"}
               onClick={() => {
+                setValue("pos_reply");
+              }}
+            >
+              <StatModalDisplay
+                color="#BE4BDB"
+                icon={<IconMessage color={theme.colors.grape[6]} size="20" />}
+                label="+Reply"
+                percentcolor="#F6E4FF"
+                border={value === "total_pos_replied" ? "#fd7e14" : ""}
+                total={total_pos_replied ?? 0}
+                percentage={Math.floor(
+                  ((total_pos_replied ?? 0) / (total_replied || 1)) * 100
+                )}
+              />
+            </Box>
+            <Box
+              w={"100%"}
+              onClick={() => {
                 setValue("demo");
               }}
             >
@@ -707,7 +729,7 @@ export function PersonCampaignCard(props: {
                 border={value === "demo" ? "#40c057" : ""}
                 total={props.persona.total_demo ?? 0}
                 percentage={Math.floor(
-                  ((props.persona.total_demo ?? 0) / (total_replied || 1)) * 100
+                  ((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100
                 )}
               />
             </Box>
@@ -811,6 +833,8 @@ export function PersonCampaignCard(props: {
                               ? "#ffedff"
                               : value === "reply"
                               ? "#fff5ee"
+                              : value === "pos_reply"
+                              ? "#F6E4FF"
                               : "#e2f6e7"
                           }
                           p={20}
@@ -876,6 +900,10 @@ export function PersonCampaignCard(props: {
       );
     } else if (value === "demo") {
       return campaignList?.filter((item: any) => item.to_status === "DEMO_SET");
+    } else if (value === "pos_reply") {
+      return campaignList?.filter(
+        (item: any) => ["ACTIVE_CONVO_SCHEDULING", "ACTIVE_CONVO_NEXT_STEPS", "ACTIVE_CONVO_QUESTION"].includes(item.to_status)
+      );
     }
   }, [value, campaignList]);
 
@@ -1205,7 +1233,7 @@ export function PersonCampaignCard(props: {
             </Flex>
           </Group>
           <Divider orientation="vertical" ml="xs" mr="xs" color="white" />
-          <Group sx={{ flex: "10%" }}>
+          <Group sx={{ flex: "6%" }}>
             <Flex>
               <Avatar src={props.persona.sdr_img_url} radius="xl" size="sm" />
               <Text size="xs" fw="450" mt="2px" ml="xs">
@@ -1214,9 +1242,9 @@ export function PersonCampaignCard(props: {
             </Flex>
           </Group>
           <Divider orientation="vertical" ml="xs" mr="xs" color="white" />
-          <Group sx={{ flex: "30%" }}>
+          <Group sx={{ flex: "37%" }}>
             <Box
-              w={"20%"}
+              w={"15%"}
               onClick={() => {
                 handleChannelOpen("sent", props.persona.id, props.persona.name);
               }}
@@ -1235,7 +1263,7 @@ export function PersonCampaignCard(props: {
             </Box>
 
             <Box
-              w={"20%"}
+              w={"15%"}
               onClick={() => {
                 handleChannelOpen("open", props.persona.id, props.persona.name);
               }}
@@ -1252,8 +1280,9 @@ export function PersonCampaignCard(props: {
                 hoverColor="hover:bg-[#fbdefb]"
               />
             </Box>
+            
             <Box
-              w={"20%"}
+              w={"15%"}
               onClick={() => {
                 handleChannelOpen(
                   "reply",
@@ -1276,8 +1305,34 @@ export function PersonCampaignCard(props: {
                 hoverColor="hover:bg-[#f8f3f0]"
               />
             </Box>
+
             <Box
-              w={"20%"}
+              w={"15%"}
+              onClick={() => {
+                handleChannelOpen(
+                  "pos_reply",
+                  props.persona.id,
+                  props.persona.name
+                );
+              }}
+            >
+              <StatDisplay
+                color="grape"
+                icon={
+                  <IconMessage color={theme.colors.grape[6]} size="0.9rem" />
+                }
+                label="+Reply"
+                total={total_pos_replied ?? 0}
+                percentage={Math.floor(
+                  ((total_pos_replied ?? 0) / (total_replied || 1)) * 100
+                )}
+                percentColor="#F6E4FF"
+                hoverColor="hover:bg-[#FBF1FF]"
+              />
+            </Box>
+
+            <Box
+              w={"15%"}
               onClick={() => {
                 handleChannelOpen("demo", props.persona.id, props.persona.name);
               }}
@@ -1290,7 +1345,7 @@ export function PersonCampaignCard(props: {
                 label="Demo"
                 total={props.persona.total_demo ?? 0}
                 percentage={Math.floor(
-                  ((props.persona.total_demo ?? 0) / (total_replied || 1)) * 100
+                  ((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100
                 )}
                 percentColor="#e2f6e7"
                 hoverColor="hover:bg-[#d9f5e0]"
@@ -1300,7 +1355,7 @@ export function PersonCampaignCard(props: {
           <Divider orientation="vertical" ml="xs" mr="xs" color="white" />
           <Group
             sx={{
-              flex: "15%",
+              flex: "11%",
             }}
           >
             <Flex gap={"sm"}>
@@ -1630,10 +1685,10 @@ function StatModalDisplay(props: {
         >
           <Flex gap={8} align={"center"}>
             {props.icon}
-            <Text c="gray.7" fz={"22px"}>
+            <Text c="gray.7" fz={"16px"}>
               {props.label}:
             </Text>
-            <Text color={props.color} fz={"22px"} fw={500}>
+            <Text color={props.color} fz={"16px"} fw={500}>
               {props.total.toLocaleString()}
             </Text>
             <Text
@@ -1672,7 +1727,7 @@ function StatDisplay(props: {
             withinPortal
           >
             <Flex align={"center"} gap={4}>
-              <Text color={props.color} fz="lg" fw={500}>
+              <Text color={props.color} fz="md" fw={500}>
                 {props.total.toLocaleString()}
               </Text>
               <Text
@@ -1776,7 +1831,7 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation="vertical" ml="xs" mr="xs" />
 
-          <Group sx={{ flex: "10%" }} grow>
+          <Group sx={{ flex: "7%" }} grow>
             <Text fw={600} color="gray.8" fz="sm">
               SDR
             </Text>
@@ -1784,7 +1839,7 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation="vertical" ml="xs" mr="xs" />
 
-          <Group sx={{ flex: "30%" }}>
+          <Group sx={{ flex: "37%" }}>
             <Text fw={600} color="gray.8" fz="sm">
               Overall Report
             </Text>
@@ -1819,7 +1874,7 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation="vertical" ml="xs" mr="xs" />
 
-          <Group sx={{ flex: "15%" }} grow>
+          <Group sx={{ flex: "11%" }} grow>
             <Text fw={600} color="gray.8" fz="sm">
               Details
             </Text>

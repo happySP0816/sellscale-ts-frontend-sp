@@ -636,7 +636,7 @@ const MessagingAnalytics = () => {
                                   <Flex align={'center'} gap={'xs'} w={'100%'} h={'100%'}>
                                     <Box>
                                       <Text display={'flex'} fw={500} c={'gray.6'}>
-                                        Step {step}:&nbsp;
+                                        Step #{step.replaceAll("Follow Up #", "")}:&nbsp;
                                         <Text fw={500} c={'black'}>
                                           {title}
                                         </Text>

@@ -65,7 +65,7 @@ const MessagingAnalytics = () => {
   const [selectedHealth, setSelectedHealth] = useState<'low' | 'all'>('low');
   const currentProject = useRecoilValue(currentProjectState);
 
-  const [groupby, setGroupby] = useState(false);
+  const [groupby, setGroupby] = useState(true);
   const [groupid, setGroupId] = useState('');
 
   const [rangeValue, setRangeValue] = useState<[number, number]>([20, 80]);
@@ -139,7 +139,7 @@ const MessagingAnalytics = () => {
 
           <Group>
             <Button variant='outline' color='gray'>
-              Group by Campaign: <Switch ml={'sm'} size='sm' onChange={() => setGroupby(!groupby)} />
+              Group by Campaign: <Switch ml={'sm'} defaultChecked size='sm' onChange={() => setGroupby(!groupby)} />
             </Button>
             <Button color={'red'} onClick={() => setSelectedHealth('low')} variant={selectedHealth === 'low' ? 'filled' : 'outline'}>
               Head Attention
@@ -492,7 +492,24 @@ const MessagingAnalytics = () => {
                           Need Attention
                         </Text>
                       )}
-
+                      {(() => {
+                        let needAttentionCount = 0;
+                        data.forEach((item) => {
+                          if (item.health.includes('LOW')) {
+                            needAttentionCount++;
+                          }
+                        });
+                        return (
+                          <Badge
+                            style={{
+                              color: groupOpened && campaign === groupid ? 'white' : '',
+                              backgroundColor: groupOpened && campaign === groupid ? '#5f96f1' : '',
+                            }}
+                          >
+                            {needAttentionCount}
+                          </Badge>
+                        );
+                      })()}
                       <Button
                         variant={groupOpened && campaign === groupid ? 'default' : 'outline'}
                         radius={'lg'}
@@ -506,12 +523,12 @@ const MessagingAnalytics = () => {
                           handleToggleGroup(campaign, groupid);
                         }}
                       >
-                        View {data.length} steps
+                        {groupOpened && campaign === groupid ? 'Hide' : 'View'} {data.length} steps
                       </Button>
                     </Flex>
                   </Flex>
                   {campaign === groupid && (
-                    <Collapse in={groupOpened} transitionTimingFunction='linear'>
+                    <Collapse in={groupOpened} transitionTimingFunction='linear' style={{ border: '1px solid #3178ea' }}>
                       <>
                         <DataGrid
                           data={data}
@@ -550,19 +567,21 @@ const MessagingAnalytics = () => {
                                 }
 
                                 return (
-                                  <Badge
-                                    color={color}
-                                    leftSection={leftSection}
-                                    styles={{
-                                      leftSection: {
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        // justifyContent:'center'
-                                      },
-                                    }}
-                                  >
-                                    {readable_score}
-                                  </Badge>
+                                  <Flex h={'100%'} align={'center'}>
+                                    <Badge
+                                      color={color}
+                                      leftSection={leftSection}
+                                      styles={{
+                                        leftSection: {
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          // justifyContent:'center'
+                                        },
+                                      }}
+                                    >
+                                      {readable_score}
+                                    </Badge>
+                                  </Flex>
                                 );
                               },
                               filterFn: stringFilterFn,
@@ -605,33 +624,21 @@ const MessagingAnalytics = () => {
                             },
 
                             {
-                              accessorKey: 'campaign',
-                              header: 'Campaign',
+                              accessorKey: 'step',
+                              header: 'Step',
                               enableSorting: false,
                               maxSize: 600,
                               enableResizing: true,
                               cell: (cell) => {
                                 const { campaign, step } = cell.row.original as DateType;
-
+                                const { title } = cell.row.original as DateType;
                                 return (
-                                  <Flex align={'center'} gap={'xs'} w={'100%'}>
-                                    <Avatar size={'sm'} />
-
+                                  <Flex align={'center'} gap={'xs'} w={'100%'} h={'100%'}>
                                     <Box>
-                                      <Flex align={'center'} gap={4}>
-                                        <Text fw={500} size={'sm'}>
-                                          {campaign}
-                                        </Text>
-
-                                        <Anchor href='/' size={'sm'} sx={{ display: 'flex', alignItems: 'center' }}>
-                                          <IconExternalLink size={'0.8rem'} />
-                                        </Anchor>
-                                      </Flex>
-
                                       <Text display={'flex'} fw={500} c={'gray.6'}>
-                                        Step:&nbsp;
+                                        Step {step}:&nbsp;
                                         <Text fw={500} c={'black'}>
-                                          {step}
+                                          {title}
                                         </Text>
                                       </Text>
                                     </Box>
@@ -642,31 +649,15 @@ const MessagingAnalytics = () => {
                             },
 
                             {
-                              accessorKey: 'title',
-                              header: 'Framework TItle',
-                              enableSorting: false,
-                              cell: (cell) => {
-                                const { title } = cell.row.original as DateType;
-
-                                return (
-                                  <Flex align={'center'} h={'100%'}>
-                                    <Text fw={500}>{title}</Text>
-                                  </Flex>
-                                );
-                              },
-                              filterFn: stringFilterFn,
-                            },
-
-                            {
-                              accessorKey: '',
-                              header: '',
+                              accessorKey: 'action',
+                              header: 'Action',
                               enableSorting: false,
                               id: 'action',
                               cell: (cell) => {
                                 return (
                                   <Flex align={'center'} h={'100%'}>
                                     <Button
-                                      size='xs'
+                                      size='sm'
                                       compact
                                       rightIcon={<IconExternalLink size={'0.9rem'} />}
                                       variant='light'

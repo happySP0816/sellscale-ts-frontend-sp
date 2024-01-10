@@ -756,7 +756,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                       cell: (cell) => {
                         const prospectId = cell.row.original.id;
                         return (
-                          <Text size='xs' style={{ display: 'flex', alignItems: 'center' }}>
+                          <Text size='xs' style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             {cell.cell?.getValue<string>()}
 
                             <ProspectDetailsTooltip prospectId={prospectId} />

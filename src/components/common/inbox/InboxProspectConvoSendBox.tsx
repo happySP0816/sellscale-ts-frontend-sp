@@ -90,6 +90,7 @@ import { postGenerateFollowupEmail } from "@utils/requests/emailMessageGeneratio
 import { API_URL } from "@constants/data";
 import { Calendar, DateTimePicker, TimeInput } from "@mantine/dates";
 import { updateChannelStatus } from '@common/prospectDetails/ProspectDetailsChangeStatus';
+import postSmartleadReply from '@utils/requests/postSmartleadReply';
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -101,6 +102,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
     msgLoading?: boolean;
     minimizedSendBox: () => void;
     currentSubstatus?: string;
+    triggerGetSmartleadProspectConvo?: () => void
   },
   ref
 ) {
@@ -307,6 +309,29 @@ export default forwardRef(function InboxProspectConvoSendBox(
           autoClose: false,
         });
       }
+    }
+    else if (openedOutboundChannel === 'SMARTLEAD') {
+      const prospectid = props.prospectId;
+      const response = await postSmartleadReply(userToken, prospectid, messageDraftEmail.current);
+      if (response.status !== 'success') {
+        showNotification({
+          title: 'Error',
+          message: 'Failed to send email',
+          color: 'red',
+        });
+      } else {
+        showNotification({
+          title: 'Success',
+          message: 'Email sent. It may take a few minutes to appear in your inbox.',
+          color: 'green',
+        });
+
+        setMessageDraft('');
+      }
+      if (props?.triggerGetSmartleadProspectConvo) {
+        props?.triggerGetSmartleadProspectConvo()
+      }
+
     } else {
       if (
         currentConvoEmailMessages === undefined ||
@@ -413,7 +438,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
           },
           body: JSON.stringify({
             prospect_id: props.prospectId,
-            additional_instructions: additional_instructions, 
+            additional_instructions: additional_instructions,
           }),
         }
       )
@@ -645,7 +670,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   });
                 })
 
-                
+
               }}
               value={replyLabel}
               withinPortal
@@ -732,7 +757,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                       if (selected.substatus) {
                         setReplyLabel(selected.substatus);
                       }
-                      
+
                     }
 
                     const substatus =
@@ -908,7 +933,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   Smart Generate
                 </Button>
               </Tooltip>
-              
+
             )}
             <Tooltip label="Co-pilot a response by providing feedback" withArrow position="bottom">
               <Button
@@ -920,7 +945,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   borderLeft: 'none',
                   borderRadius: '0px 4px 4px 0px',
                 }}
-            
+
                 onClick={() => {
                   let tempInputValue = '';
                   openConfirmModal({
@@ -934,7 +959,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     ),
                     labels: { confirm: 'Generate with feedback', cancel: 'Cancel' },
                     onCancel: () => { },
-                    onConfirm: () => { 
+                    onConfirm: () => {
                       showNotification({
                         id: "generate-linkedin-message",
                         title: "Generating message ...",

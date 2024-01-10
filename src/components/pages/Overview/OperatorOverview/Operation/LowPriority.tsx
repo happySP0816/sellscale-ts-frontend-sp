@@ -34,7 +34,6 @@ const LowPriority = () => {
   const { classes } = useStyles();
   return (
     <Box>
-      {" "}
       <Card withBorder p={"sm"} py={0}>
         <Grid>
           <Grid.Col span={4} py={"sm"}>

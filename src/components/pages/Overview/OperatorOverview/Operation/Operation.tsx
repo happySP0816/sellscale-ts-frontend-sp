@@ -13,22 +13,26 @@ import {
   IconCheck,
   IconChevronDown,
   IconClock,
+  IconMessage,
   IconTargetArrow,
 } from "@tabler/icons";
 import React, { FC } from "react";
-import HighPriority from "./HighPriority";
+
 export enum Priority {
   High = "High",
   Medium = "Medium",
   Low = "Low",
   Complete = "Complete",
+  ChangingMessage = "ChangingMessage",
 }
+
 type Props = {
   priority: Priority;
   renderLeft?: React.ReactNode;
   renderRight?: React.ReactNode;
   renderContent?: React.ReactNode;
 };
+
 const Operation: FC<Props> = ({
   priority,
   renderLeft,
@@ -65,7 +69,12 @@ const Operation: FC<Props> = ({
             <IconCheck />
           </ThemeIcon>
         );
-      
+      case Priority.ChangingMessage:
+        return (
+          <ThemeIcon color="blue" radius="xl" variant="light" size="xs">
+            <IconMessage />
+          </ThemeIcon>
+        );
       default:
         return null;
     }

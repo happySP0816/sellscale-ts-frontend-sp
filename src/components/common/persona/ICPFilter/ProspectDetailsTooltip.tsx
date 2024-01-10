@@ -1,8 +1,12 @@
-import { Avatar, Badge, Button, Divider, Flex, Popover, Select, Text, useMantineTheme } from '@mantine/core';
+import { userTokenState } from '@atoms/userAtoms';
+import { API_URL } from '@constants/data';
+import { ActionIcon, Avatar, Badge, Button, Card, Divider, Flex, Loader, Popover, Select, Text, useMantineTheme } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { IconArrowRight, IconBrandLinkedin, IconBriefcase, IconBuildingCommunity, IconBuildingEstate, IconMail, IconUser } from '@tabler/icons';
 import { IconBuildingArch, IconUserSquare } from '@tabler/icons-react';
 import { formatToLabel, valueToColor } from '@utils/general';
+import { useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 
 type ProspectDetailsTooltipPropsType = {
   prospectId?: number;
@@ -17,71 +21,146 @@ const popoverStyles = {
 export default function ProspectDetailsTooltip(props: ProspectDetailsTooltipPropsType) {
   const theme = useMantineTheme();
   const id = props.prospectId;
+  const userToken = useRecoilValue(userTokenState)
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [prospectData, setProspectData] = useState({} as any);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const togglePopover = () => {
+    if (!isPopoverOpen) {
+      console.log(`Popover opened for prospect ID: ${id}`);
+      fetchProspectDetails();
+    }
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  const fetchProspectDetails = async () => {
+    setIsLoading(true);
+    const response = await fetch(`${API_URL}/prospect/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+
+    const data = await response.json();
+    console.log(data?.prospect_info);
+    setProspectData(data?.prospect_info);
+    setIsLoading(false);
+  }
+
   return (
-    <Popover width={300} position='bottom' withArrow arrowOffset={5} arrowSize={12} styles={popoverStyles}>
+    <Popover 
+      width={300}
+      position='bottom' 
+      withArrow 
+      arrowOffset={5} 
+      arrowSize={12} 
+      styles={popoverStyles} 
+      withinPortal
+      opened={isPopoverOpen}
+      onOpen={() => setIsPopoverOpen(true)}
+      onClose={() => setIsPopoverOpen(false)}
+    >
       <Popover.Target>
-        <IconUserSquare size={'0.8rem'} color='#228be6' />
+        <ActionIcon onClick={togglePopover}>
+          <IconUserSquare size={'0.8rem'} color='#228be6' />
+        </ActionIcon>
       </Popover.Target>
       <Popover.Dropdown style={{ padding: '0px' }}>
-        <Flex direction={'column'} p={'sm'} gap={'3px'}>
-          <Flex gap={'sm'} align={'center'}>
-            <Avatar size={'lg'} radius={'xl'} />
-            <Flex direction={'column'}>
-              <Text fw={600} size={'sm'}>
-                Donald Bryant
+        {!isLoading && (
+          <>
+            <Flex direction={'column'} p={'sm'} gap={'3px'}>
+              <Flex gap={'sm'} align={'center'}>
+                <Avatar size={'lg'} radius={'xl'} 
+                  src={prospectData?.data?.img_url}
+                />
+                <Flex direction={'column'}>
+                  <Text fw={600} size={'sm'}>
+                    {prospectData?.details?.full_name}
+                  </Text>
+                  <Text color='gray'>
+                    ICP SCORE: {''}
+                    <Badge color={
+                      prospectData?.details?.icp_fit_score == 4 ? 'green' :
+                      prospectData?.details?.icp_fit_score == 3 ? 'blue' :
+                      prospectData?.details?.icp_fit_score == 2 ? 'yellow' :
+                      prospectData?.details?.icp_fit_score == 1 ? 'orange' :
+                      prospectData?.details?.icp_fit_score == 0 ? 'red' :
+                      'gray'
+                    }>{
+                      prospectData?.details?.icp_fit_score == 4 ? 'Very High' :
+                      prospectData?.details?.icp_fit_score == 3 ? 'High' :
+                      prospectData?.details?.icp_fit_score == 2 ? 'Medium' :
+                      prospectData?.details?.icp_fit_score == 1 ? 'Low' :
+                      prospectData?.details?.icp_fit_score == 0 ? 'Very Low' :
+                      'Unknown'
+                    }</Badge>
+                  </Text>
+                </Flex>
+              </Flex>
+              <Divider
+                label={
+                  <Flex align={'center'} gap={4}>
+                    <div
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        background: valueToColor(theme, 'SCHEDULING' || 'ACTIVE_CONVO'),
+                        borderRadius: '100%',
+                      }}
+                    ></div>
+                    <Text color='gray' fw={600}>
+                      {prospectData?.details?.overall_status.replaceAll("_", " ")}
+                    </Text>
+                  </Flex>
+                }
+                labelPosition='left'
+                w={'100%'}
+                my={'sm'}
+                ml={'1px'}
+              />
+              <Text color='gray' fz='sm' display={'flex'} style={{ alignItems: 'center', gap: '5px' }} ml={'3px'}>
+                <IconBriefcase size={'1rem'} />
+                {prospectData?.details?.title}
               </Text>
-              <Text color='gray'>
-                ICP SCORE: {''}
-                <Badge color='blue'>very high</Badge>
+              <Text color='gray' fz='sm' display={'flex'} style={{ alignItems: 'center', gap: '5px' }} ml={'3px'}>
+                <IconBuildingCommunity size={'1rem'} />
+                {prospectData?.details?.company}
+              </Text>
+              <Text color='gray' fz='sm' display={'flex'} style={{ alignItems: 'center', gap: '5px' }} ml={'3px'}>
+                <IconUser size={'1rem'} />
+                {prospectData?.data?.archetype_name}
+              </Text>
+              <Text color='gray' fz='sm' display={'flex'} mt={'xs'} style={{ alignItems: 'center', gap: '3px' }}>
+                <IconMail fill='gray' color='white' size={'1.3rem'} />
+                {prospectData?.data?.email}
+              </Text>
+              <Text color='gray' fz='sm' display={'flex'} style={{ alignItems: 'center', gap: '3px' }} 
+                onClick={() => window.open('https://' + prospectData?.data?.linkedin_url, '_blank')}
+                >
+                <IconBrandLinkedin fill='gray' color='white' size={'1.3rem'} />
+                {prospectData?.data?.linkedin_url}
               </Text>
             </Flex>
-          </Flex>
-          <Divider
-            label={
-              <Flex align={'center'} gap={4}>
-                <div
-                  style={{
-                    width: '10px',
-                    height: '10px',
-                    background: valueToColor(theme, 'SCHEDULING' || 'ACTIVE_CONVO'),
-                    borderRadius: '100%',
-                  }}
-                ></div>
-                <Text color='gray' fw={600}>
-                  {'SCHEDULING' || 'ACTIVE_CONVERSATION'}
-                </Text>
-              </Flex>
-            }
-            labelPosition='left'
-            w={'100%'}
-            my={'sm'}
-            ml={'1px'}
-          />
-          <Text color='gray' display={'flex'} style={{ alignItems: 'center', gap: '5px' }} ml={'3px'}>
-            <IconBriefcase size={'1rem'} />
-            Field Chief Technology Officer
-          </Text>
-          <Text color='gray' display={'flex'} style={{ alignItems: 'center', gap: '5px' }} ml={'3px'}>
-            <IconBuildingCommunity size={'1rem'} />
-            CloudBees
-          </Text>
-          <Text color='gray' display={'flex'} style={{ alignItems: 'center', gap: '5px' }} ml={'3px'}>
-            <IconUser size={'1rem'} />
-            Senior Engineering Hiring
-          </Text>
-          <Text color='gray' display={'flex'} mt={'xs'} style={{ alignItems: 'center', gap: '3px' }}>
-            <IconMail fill='gray' color='white' size={'1.3rem'} />
-            donald@cloudbees.com
-          </Text>
-          <Text color='gray' display={'flex'} style={{ alignItems: 'center', gap: '3px' }}>
-            <IconBrandLinkedin fill='gray' color='white' size={'1.3rem'} />
-            linkedin.com/in/donaldb
-          </Text>
-        </Flex>
 
-        <Button w={'100%'} rightIcon={<IconArrowRight size={'1rem'} />} style={{ borderTopLeftRadius: '0px', borderTopRightRadius: '0px' }}>
-          View Details
-        </Button>
+            <Button w={'100%'} rightIcon={<IconArrowRight size={'1rem'} />} style={{ borderTopLeftRadius: '0px', borderTopRightRadius: '0px' }}
+              onClick={() => {
+                window.open(`/prospects/${id}`, '_blank');
+              }}>
+              View Details
+            </Button>
+          </>
+        )}
+        {
+          isLoading && (
+            <Card sx={{ width: '300px', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Loader />
+            </Card>
+          )
+        }
       </Popover.Dropdown>
     </Popover>
   );

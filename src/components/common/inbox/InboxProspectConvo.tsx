@@ -1082,7 +1082,9 @@ export default function ProspectConvo(props: Props) {
             )}
 
             {openedOutboundChannel === 'SMARTLEAD' && (
-              <>
+              <Box pb={
+                isConversationOpened ? 200 : 0
+              }>
                 {smartleadEmailConversation.map((message, index) => (
                   <Box key={index} sx={{ display: 'flex', overflowX: 'hidden' }}>
                     <Flex p='sm' justify={message.type === 'SENT' ? 'end' : 'start'} w='100%'>
@@ -1336,7 +1338,7 @@ export default function ProspectConvo(props: Props) {
                     </Flex>
                   </Button>
                 </Box>
-              </>
+              </Box>
             )}
             <Box sx={{ width: '100%', height: openedConvoBox ? '250px' : '50px' }}></Box>
           </div>

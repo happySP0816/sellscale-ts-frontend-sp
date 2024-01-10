@@ -704,11 +704,11 @@ export function PersonCampaignCard(props: {
               }}
             >
               <StatModalDisplay
-                color="#BE4BDB"
-                icon={<IconMessage color={theme.colors.grape[6]} size="20" />}
-                label="+Reply"
-                percentcolor="#F6E4FF"
-                border={value === "total_pos_replied" ? "#fd7e14" : ""}
+                color="#14B887"
+                icon={<IconMessage color={theme.colors.teal[6]} size="20" />}
+                label="(+)Reply"
+                percentcolor="#E8F6F2"
+                border={value === "total_pos_replied" ? "#CFF1E7" : ""}
                 total={total_pos_replied ?? 0}
                 percentage={Math.floor(
                   ((total_pos_replied ?? 0) / (total_replied || 1)) * 100
@@ -1317,17 +1317,17 @@ export function PersonCampaignCard(props: {
               }}
             >
               <StatDisplay
-                color="grape"
+                color="#14B887"
                 icon={
-                  <IconMessage color={theme.colors.grape[6]} size="0.9rem" />
+                  <IconMessage color={theme.colors.teal[6]} size="0.9rem" />
                 }
-                label="+Reply"
+                label="(+)Reply"
                 total={total_pos_replied ?? 0}
                 percentage={Math.floor(
                   ((total_pos_replied ?? 0) / (total_replied || 1)) * 100
                 )}
-                percentColor="#F6E4FF"
-                hoverColor="hover:bg-[#FBF1FF]"
+                percentColor="#CFF1E7"
+                hoverColor="hover:bg-[#E8F6F2]"
               />
             </Box>
 
@@ -1746,7 +1746,7 @@ function StatDisplay(props: {
         </Flex>
         <Flex>
           <Box mt="1px">{props.icon}</Box>
-          <Text c="gray.7" fz="sm" ml="4px">
+          <Text c="gray.7" fz="xs" ml="4px">
             {props.label}
           </Text>
         </Flex>

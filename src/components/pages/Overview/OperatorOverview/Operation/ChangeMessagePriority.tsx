@@ -37,7 +37,7 @@ const ChangeMessagePriority = () => {
             <Text color="gray.6" fw={600} display={"inline-flex"}>
               Campaign &nbsp;
               <Text color="gray.8" fw={600} component="span">
-                DevOps Engineers
+                Software Engineers
               </Text>
             </Text>
 

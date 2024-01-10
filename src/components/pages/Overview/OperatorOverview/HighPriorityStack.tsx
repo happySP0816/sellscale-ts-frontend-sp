@@ -64,10 +64,10 @@ const HighPriorityStack = (props: PropsType) => {
         renderLeft={
           <Flex align={"center"}>
             <Text fw={500} fz={"sm"}>
-              Changing Messing
+              Change Messaging
             </Text>
             <Text fw={500} fz={"sm"} c={"gray.6"} ml="xs">
-              2 Errors Found
+              2 Errors Found (⚠️ Beta - Coming Soon ⚠️ )
             </Text>
           </Flex>
         }

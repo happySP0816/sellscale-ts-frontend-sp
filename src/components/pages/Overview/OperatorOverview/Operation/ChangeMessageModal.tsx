@@ -62,7 +62,7 @@ const ChangeMessageModal: FC<ModalProps> = (props) => {
               <Flex align={"center"}>
                 <Avatar size={"sm"} />
                 <Text size={"sm"} fw={600}>
-                  Adam Meehan
+                  George Smith
                 </Text>
               </Flex>
 

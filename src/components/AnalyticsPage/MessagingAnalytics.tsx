@@ -499,14 +499,14 @@ const MessagingAnalytics = () => {
                             needAttentionCount++;
                           }
                         });
+                        if (needAttentionCount === 0) {
+                          return null;
+                        }
                         return (
                           <Badge
-                            style={{
-                              color: groupOpened && campaign === groupid ? 'white' : '',
-                              backgroundColor: groupOpened && campaign === groupid ? '#5f96f1' : '',
-                            }}
+                            color='red'
                           >
-                            {needAttentionCount}
+                            {needAttentionCount} frameworks
                           </Badge>
                         );
                       })()}

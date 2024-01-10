@@ -29,6 +29,7 @@ export default function AutoBumpFrameworkInfo(props: {
         position: 'absolute',
         top: -12,
         left: -12,
+        zIndex: 10
       }}
     >
       <HoverCard withinPortal width={320} shadow='md' withArrow openDelay={200} closeDelay={400}>
@@ -69,6 +70,7 @@ export default function AutoBumpFrameworkInfo(props: {
         position: 'absolute',
         top: -12,
         left: -12,
+        zIndex: 10
       }}
     >
       <HoverCard withinPortal width={320} shadow='md' withArrow openDelay={200} closeDelay={400}>

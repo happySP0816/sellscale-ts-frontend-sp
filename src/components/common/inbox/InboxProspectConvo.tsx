@@ -747,7 +747,7 @@ export default function ProspectConvo(props: Props) {
               sendBoxRef.current?.setAiMessage('');
               sendBoxRef.current?.setMessageDraft('');
               setOpenedOutboundChannel(value as Channel);
-              setOpenedConvoBox(value === 'LINKEDIN');
+              setOpenedConvoBox(value === 'LINKEDIN' || value === 'SMARTLEAD');
 
               // Pretty bad to set timeout, but we need this channel to update
               setTimeout(refetch, 1);
@@ -1229,7 +1229,7 @@ export default function ProspectConvo(props: Props) {
                     </Flex>
                   </Box>
                 ))}
-                <RichTextArea
+                {/* <RichTextArea
                   onChange={(value, rawValue) => {
                     messageDraftRichRaw.current = rawValue;
                     messageDraftEmail.current = value;
@@ -1249,10 +1249,95 @@ export default function ProspectConvo(props: Props) {
                   >
                     Send and Snooze
                   </Button>
-                </Flex>
+                </Flex> */}
+                <Box
+                  sx={{
+                    width: '100%',
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    visibility: openedConvoBox ? 'visible' : 'hidden',
+                  }}
+                >
+                  <InboxProspectConvoSendBox
+                    ref={sendBoxRef}
+                    email={prospect?.email || ''}
+                    linkedin_public_id={linkedin_public_id}
+                    prospectId={openedProspectId}
+                    nylasMessageId={
+                      currentConvoEmailMessages && currentConvoEmailMessages?.length > 0
+                        ? currentConvoEmailMessages[currentConvoEmailMessages.length - 1]
+                            .nylas_message_id
+                        : undefined
+                    }
+                    scrollToBottom={scrollToBottom}
+                    minimizedSendBox={() => setOpenedConvoBox(false)}
+                    currentSubstatus={statusValue}
+                    triggerGetSmartleadProspectConvo={triggerGetSmartleadProspectConvo}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    visibility: openedConvoBox ? 'hidden' : 'visible',
+                    width: '100%',
+                  }}
+                >
+                  <Button
+                    size='xs'
+                    w={'100%'}
+                    color='dark'
+                    sx={{
+                      borderBottomLeftRadius: 0,
+                      borderBottomRightRadius: 0,
+                    }}
+                    rightIcon={<IconChevronUp size='1rem' />}
+                    onClick={() => {
+                      setOpenedConvoBox(true);
+                    }}
+                    styles={{
+                      inner: {
+                        justifyContent: 'space-between',
+                      },
+                    }}
+                  >
+                    {/* Send Message
+                    {hasGeneratedMessage && (
+                      <Box
+                        pt={2}
+                        px={2}
+                        sx={(theme) => ({
+                          color: theme.colors.blue[4],
+                        })}
+                      >
+                        <IconPointFilled size="0.9rem" />
+                      </Box>
+                    )} */}
+
+                    <Flex wrap='nowrap' align='center'>
+                      <Text color='white' fz={14} fw={500}>
+                        {'Reply via Email '}
+                      </Text>
+                      <Text
+                        size='xs'
+                        fs='italic'
+                        color='gray.3'
+                        ml='xs'
+                        component='a'
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        href={`mailto:${prospect?.email || ''}`}
+                      >
+                        {prospect?.email || ''}{' '}
+                        <IconExternalLink size='0.65rem' />
+                      </Text>
+                    </Flex>
+                  </Button>
+                </Box>
               </>
             )}
-
             <Box sx={{ width: '100%', height: openedConvoBox ? '250px' : '50px' }}></Box>
           </div>
         </ScrollArea>
@@ -1282,6 +1367,7 @@ export default function ProspectConvo(props: Props) {
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
                 currentSubstatus={statusValue}
+
               />
             </Box>
             <Box

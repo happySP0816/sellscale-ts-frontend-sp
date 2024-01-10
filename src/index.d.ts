@@ -176,6 +176,7 @@ export interface ProspectDetails {
     persona: string;
     persona_id: number;
     demo_date: string;
+    disqualification_reason?: string;
   };
   data: Prospect;
   li: {

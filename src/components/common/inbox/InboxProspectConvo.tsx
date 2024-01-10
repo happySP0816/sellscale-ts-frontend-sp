@@ -682,6 +682,16 @@ export default function ProspectConvo(props: Props) {
                     </Badge>
                   </>
                 )}
+                {
+                  data?.details?.disqualification_reason && (
+                    <>
+                      <br />
+                      <Badge size='xs' color='red' variant='outline'>
+                        Reason: {data?.details?.disqualification_reason}
+                      </Badge>
+                    </>
+                  )
+                }
               </Box>
 
               <ProspectDetailsOptionsMenu

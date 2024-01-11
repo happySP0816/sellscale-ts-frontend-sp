@@ -105,6 +105,7 @@ import InboxProspectConvoSendBox from "@common/inbox/InboxProspectConvoSendBox";
 import InboxProspectConvoBumpFramework from "@common/inbox/InboxProspectConvoBumpFramework";
 import { useNavigate } from "react-router-dom";
 import { IconArrowLeft } from "@tabler/icons";
+import { getEmailReplyFrameworks } from "@utils/requests/emailReplies";
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -616,15 +617,13 @@ export default function ProspectConvo(props: {
       }
     } else {
       // TODO: In the future need to add substatuses for Objection Library
-      const result = await getEmailSequenceSteps(
+      const result = await getEmailReplyFrameworks(
         userToken,
-        [prospect.overall_status],
         [],
-        [prospect.archetype_id]
       );
 
       if (result.status === "success") {
-        sendBoxRef.current?.setEmailSequenceSteps(result.data.bump_frameworks);
+        sendBoxRef.current?.setEmailReplyFrameworks(result.data.data);
       }
     }
   };

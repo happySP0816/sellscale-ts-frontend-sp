@@ -449,7 +449,7 @@ export default function ProjectDetails(props: {
               <Flex gap={'md'} align={'center'} px={'md'}>
                 <div>
                   <Text fw={700} fz={'sm'}>
-                    Reply label
+                    Reply Label
                   </Text>
                 </div>
                 <Select

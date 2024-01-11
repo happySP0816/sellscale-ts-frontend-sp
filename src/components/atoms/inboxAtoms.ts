@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { BumpFramework, Channel, EmailSequenceStep, EmailMessage, EmailThread, LinkedInMessage, ProspectEmail } from "src";
+import { BumpFramework, Channel, EmailSequenceStep, EmailMessage, EmailThread, LinkedInMessage, ProspectEmail, EmailReplyFramework } from "src";
 
 const openedProspectIdState = atom({
   key: "inbox-opened-prospect-id",
@@ -59,6 +59,16 @@ const allEmailSequenceStepsState = atom({
   default: [] as EmailSequenceStep[] | undefined,
 });
 
+const selectedEmailReplyFrameworkState = atom({
+  key: "inbox-selected-email-reply-framework",
+  default: undefined as EmailReplyFramework | undefined,
+});
+const allEmailReplyFrameworksState = atom({
+  key: "inbox-all-email-reply-frameworks",
+  default: [] as EmailReplyFramework[] | undefined,
+});
+
+
 const selectedEmailThread = atom({
   key: "inbox-selected-email-thread",
   default: undefined as EmailThread | undefined,
@@ -93,5 +103,7 @@ export {
   allEmailSequenceStepsState,
   selectedEmailThread,
   mainTabState,
-  bumpFrameworkSelectedSubstatusState
+  bumpFrameworkSelectedSubstatusState,
+  selectedEmailReplyFrameworkState,
+  allEmailReplyFrameworksState,
 };

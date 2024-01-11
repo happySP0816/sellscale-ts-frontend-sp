@@ -92,6 +92,7 @@ import { AiMetaDataBadge } from '@common/persona/LinkedInConversationEntry';
 import { useNavigate } from 'react-router-dom';
 import { openContextModal } from '@mantine/modals';
 import { sendAskAE } from '@utils/requests/askAE';
+import { getEmailReplyFrameworks } from '@utils/requests/emailReplies';
 
 export function ProspectConvoMessage(props: {
   id: number;
@@ -568,15 +569,13 @@ export default function ProspectConvo(props: Props) {
       }
     } else {
       // TODO: In the future need to add substatuses for Objection Library
-      const result = await getEmailSequenceSteps(
+      const result = await getEmailReplyFrameworks(
         userToken,
-        [prospect.overall_status],
-        [],
-        [prospect.archetype_id]
+        []
       );
 
       if (result.status === 'success') {
-        sendBoxRef.current?.setEmailSequenceSteps(result.data.bump_frameworks);
+        sendBoxRef.current?.setEmailReplyFrameworks(result.data.data);
       }
     }
   };

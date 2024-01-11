@@ -442,6 +442,23 @@ export type EmailSequenceStep = {
   // TODO: MISSING A LOT OF FIELDS
 };
 
+export type EmailReplyFramework = {
+  id: number;
+  title: string;
+  description: string;
+  client_sdr_id: number;
+  client_archetype_id: number;
+  overall_status: string;
+  substatus: string;
+  template: string;
+  additional_instructions: string;
+  times_used: number;
+  times_accepted: number;
+  active: boolean;
+  research_blocklist: string[];
+  use_account_research: boolean;
+}
+
 export type SubjectLineTemplate = {
   id: number;
   subject_line: string;

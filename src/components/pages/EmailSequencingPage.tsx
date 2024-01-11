@@ -26,8 +26,10 @@ import { showNotification } from "@mantine/notifications";
 import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
 import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
 import {
+  IconBook,
   IconCheck,
   IconEdit,
+  IconList,
   IconMessages,
   IconPlus,
   IconSearch,
@@ -52,7 +54,7 @@ import NewUIEmailSequencing from "./EmailSequencing/NewUIEmailSequencing";
 import NylasConnectedCard from "@common/settings/NylasConnectedCard";
 import SmartleadVisualizer from "@common/sequence/SmartleadSequence";
 import { getSmartleadSequence } from "@utils/requests/getSmartleadSequences";
-import ICPFilters from '@common/persona/ICPFilter/ICPFilters';
+import ICPFilters from "@common/persona/ICPFilter/ICPFilters";
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -817,37 +819,43 @@ export default function EmailSequencingPage(props: {
           orientation="horizontal"
         >
           <Tabs.List>
-            {/* <Tabs.Tab
-                value="qnolibrary"
-                icon={<IconMessages size="0.8rem" />}
-              >
-                Conversation
-              </Tabs.Tab> */}
-            <Tabs.Tab value="sequence" icon={<IconMessages size="0.8rem" />}>
-              Email Sequence
+            <Tabs.Tab value="sequence" icon={<IconList size="0.8rem" />}>
+              Sequence
+            </Tabs.Tab>
+            <Tabs.Tab value="replies" icon={<IconBook size="0.8rem" />}>
+              Replies
             </Tabs.Tab>
             <Tabs.Tab
-              value="email_settings"
+              value="settings"
               icon={<IconWashMachine size="0.8rem" />}
             >
               Settings
             </Tabs.Tab>
 
-            {currentProject.smartlead_campaign_id && (
+            {/* {currentProject.smartlead_campaign_id && (
               <Tabs.Tab value="smartlead" icon={<IconMessages size="0.8rem" />}>
                 Beta - Variants
               </Tabs.Tab>
-            )}
+            )} */}
           </Tabs.List>
 
-          <Tabs.Panel value="email_settings">
-            <Box maw="800px" ml="auto" mr="auto">
-              <NylasConnectedCard
-                connected={userData ? userData.nylas_connected : false}
-              />
-            </Box>
+          <Tabs.Panel value="sequence">
+            <NewUIEmailSequencing
+              userToken={userToken}
+              archetypeID={archetypeID}
+              templateBuckets={sequenceBucketsState}
+              subjectLines={subjectLineTemplates}
+              refetch={async () => {
+                await triggerGetEmailSequenceSteps();
+                await triggerGetEmailSubjectLineTemplates();
+              }}
+              loading={loading}
+              addNewSequenceStepOpened={addNewSequenceStepOpened}
+              closeSequenceStep={closeSequenceStep}
+              openSequenceStep={openSequenceStep}
+            />
           </Tabs.Panel>
-          <Tabs.Panel value="qnolibrary">
+          <Tabs.Panel value="replies">
             <Card withBorder shadow="xs" mt="md">
               <Flex w="100%" align="center" justify="center">
                 Coming soon!
@@ -890,27 +898,19 @@ export default function EmailSequencingPage(props: {
               </Flex>
             )} */}
           </Tabs.Panel>{" "}
-          <Tabs.Panel value="sequence">
-            <NewUIEmailSequencing
-              userToken={userToken}
-              archetypeID={archetypeID}
-              templateBuckets={sequenceBucketsState}
-              subjectLines={subjectLineTemplates}
-              refetch={async () => {
-                await triggerGetEmailSequenceSteps();
-                await triggerGetEmailSubjectLineTemplates();
-              }}
-              loading={loading}
-              addNewSequenceStepOpened={addNewSequenceStepOpened}
-              closeSequenceStep={closeSequenceStep}
-              openSequenceStep={openSequenceStep}
-            />
+          <Tabs.Panel value="settings">
+            <Box maw="800px" ml="auto" mr="auto">
+              <NylasConnectedCard
+                connected={userData ? userData.nylas_connected : false}
+              />
+            </Box>
           </Tabs.Panel>
-          {currentProject.smartlead_campaign_id && (
+          
+          {/* {currentProject.smartlead_campaign_id && (
             <Tabs.Panel value="smartlead">
               <SmartleadVisualizer data={smartleadSequence} />
             </Tabs.Panel>
-          )}
+          )} */}
         </Tabs>
       </Card.Section>
     </Flex>

@@ -221,7 +221,7 @@ export default function FindContactsPage() {
       <Tabs defaultValue='individuals' mt='md' keepMounted={false} h='100%'>
         <Tabs.List>
           <Tabs.Tab value='individuals' icon={<IconDatabase size='0.9rem' />}>
-            SellScale Database
+            SellScale Chat
           </Tabs.Tab>
           <Tabs.Tab value='linkedin-sales-navigator' icon={<IconBrandLinkedin size='0.9rem' />}>
             Sales Navigator Link
@@ -238,6 +238,9 @@ export default function FindContactsPage() {
           <Tabs.Tab value='csv-beta' icon={<IconSparkles size='0.9rem' />} ml='auto'>
             CSV (BETA)
           </Tabs.Tab>
+          <Tooltip label='Advanced - SellScale Database' position='bottom'>
+            <Tabs.Tab value='sellscale-db' icon={<IconDatabase size='0.9rem' />}></Tabs.Tab>
+          </Tooltip>
           <Tooltip label='Advanced - Linkedin Network' position='bottom'>
             <Tabs.Tab value='your-network' icon={<IconAffiliate size='0.9rem' />}></Tabs.Tab>
           </Tooltip>
@@ -348,6 +351,15 @@ export default function FindContactsPage() {
             />
           )}
         </Tabs.Panel>
+      
+        <Tabs.Panel value='sellscale-db' pt='xs' style={{ position: 'relative' }}>
+          <iframe 
+            src='https://sellscale.retool.com/embedded/public/e46c729a-2063-45c4-9f63-6153a39f985f'
+            style={{ width: '100%', height: window.innerHeight + 120 }}
+            frameBorder={0}
+          />
+        </Tabs.Panel>
+
         <Tabs.Panel value='csv-beta' pt='xs' style={{ position: 'relative' }}>
           <Card ml='auto' mr='auto'>
             <FileDropAndPreviewV2

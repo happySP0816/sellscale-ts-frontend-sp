@@ -24,7 +24,7 @@ const LowPriorityStack = () => {
           renderLeft={
             <Flex align={"center"}>
               <Text fw={500} fz={"sm"}>
-                Schedule Meeting&nbsp;
+                Schedule Meeting - In Development&nbsp;
               </Text>
               <Text fw={500} fz={"sm"} c={"gray.6"}>
                 Schedule For {moment(new Date()).format("MMM d,yyyy hh:mm A")}

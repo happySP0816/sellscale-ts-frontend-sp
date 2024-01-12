@@ -20,7 +20,7 @@ import {
   Tooltip,
   rem,
   useMantineTheme,
-} from "@mantine/core";
+} from '@mantine/core';
 import {
   IconSearch,
   IconAdjustmentsFilled,
@@ -28,10 +28,10 @@ import {
   IconClock,
   IconStar,
   IconBellOff,
-} from "@tabler/icons-react";
-import _ from "lodash";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+} from '@tabler/icons-react';
+import _ from 'lodash';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
 import {
   fetchingProspectIdState,
   mainTabState,
@@ -39,20 +39,20 @@ import {
   openedProspectIdState,
   openedProspectLoadingState,
   tempHiddenProspectsState,
-} from "@atoms/inboxAtoms";
-import { ProspectShallow } from "src";
-import { forwardRef, useEffect, useState } from "react";
-import { HEADER_HEIGHT } from "./InboxProspectConvo";
+} from '@atoms/inboxAtoms';
+import { ProspectShallow } from 'src';
+import { forwardRef, useEffect, useState } from 'react';
+import { HEADER_HEIGHT } from './InboxProspectConvo';
 import {
   labelizeConvoSubstatus,
   prospectStatuses,
   nurturingProspectStatuses,
   getStatusDetails,
-} from "./utils";
+} from './utils';
 import InboxProspectListFilter, {
   InboxProspectListFilterState,
   defaultInboxProspectListFilterState,
-} from "./InboxProspectListFilter";
+} from './InboxProspectListFilter';
 import {
   convertDateToCasualTime,
   convertDateToLocalTime,
@@ -62,31 +62,28 @@ import {
   removeHTML,
   valueToColor,
   nameToInitials,
-} from "@utils/general";
-import loaderWithText from "@common/library/loaderWithText";
-import { icpFitToIcon } from "@common/pipeline/ICPFitAndReason";
-import { INBOX_PAGE_HEIGHT } from "@pages/InboxPage";
-import {
-  currentInboxCountState,
-  currentProjectState,
-} from "@atoms/personaAtoms";
-import { ProjectSelect } from "@common/library/ProjectSelect";
-import { IconChevronUp } from "@tabler/icons";
-import { useNavigate } from "react-router-dom";
+} from '@utils/general';
+import loaderWithText from '@common/library/loaderWithText';
+import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
+import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
+import { currentInboxCountState, currentProjectState } from '@atoms/personaAtoms';
+import { ProjectSelect } from '@common/library/ProjectSelect';
+import { IconChevronUp } from '@tabler/icons';
+import { useNavigate } from 'react-router-dom';
 
-interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<"div"> {
+interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   count: number;
   label: string;
 }
 const StatusSelectItem = forwardRef<HTMLDivElement, StatusSelectItemProps>(
   ({ count, label, ...others }: StatusSelectItemProps, ref) => (
     <div ref={ref} {...others}>
-      <Group spacing={0} position="apart" noWrap>
-        <Text size="xs" sx={{ whiteSpace: "nowrap" }}>
+      <Group spacing={0} position='apart' noWrap>
+        <Text size='xs' sx={{ whiteSpace: 'nowrap' }}>
           {label}
         </Text>
         {count >= 0 && (
-          <Text size="xs" fw={600}>
+          <Text size='xs' fw={600}>
             {count}
           </Text>
         )}
@@ -114,12 +111,12 @@ export function ProspectConvoCard(props: {
     <>
       <Flex
         p={10}
-        w="100%"
-        wrap="nowrap"
+        w='100%'
+        wrap='nowrap'
         sx={(theme) => ({
-          overflow: "hidden",
-          cursor: "pointer",
-          backgroundColor: "white",
+          overflow: 'hidden',
+          cursor: 'pointer',
+          backgroundColor: 'white',
           borderRight: props.opened
             ? `2px solid ${theme.colors.blue[theme.fn.primaryShade()]}`
             : `2px solid ${theme.white}`,
@@ -127,7 +124,7 @@ export function ProspectConvoCard(props: {
       >
         <div style={{ flex: 0 }}>
           <Indicator
-            position="top-start"
+            position='top-start'
             offset={5}
             inline
             label={icpFitToIcon(props.icp_fit)}
@@ -135,8 +132,8 @@ export function ProspectConvoCard(props: {
             m={5}
           >
             <Avatar
-              size="md"
-              radius="xl"
+              size='md'
+              radius='xl'
               src={proxyURL(props.img_url)}
               color={valueToColor(theme, props.name)}
             >
@@ -146,35 +143,26 @@ export function ProspectConvoCard(props: {
         </div>
         <div style={{ flexGrow: 1 }}>
           <Stack spacing={0}>
-            <Group position="apart" sx={{ flexWrap: "nowrap" }}>
+            <Group position='apart' sx={{ flexWrap: 'nowrap' }}>
               <Title size={13} fw={500}>
                 {props.name}
               </Title>
-              <Text c="dimmed" size={10}>
+              <Text c='dimmed' size={10}>
                 {props.latest_msg_time}
               </Text>
             </Group>
-            <Group position="apart" sx={{ flexWrap: "nowrap" }}>
-              <Text
-                size={12}
-                truncate
-                fw={!props.opened && !props.latest_msg_from_sdr ? 600 : 300}
-              >
+            <Group position='apart' sx={{ flexWrap: 'nowrap' }}>
+              <Text size={12} truncate fw={!props.opened && !props.latest_msg_from_sdr ? 600 : 300}>
                 {_.truncate(props.latest_msg, { length: 30 })}
               </Text>
               {fetchingProspectId === props.id && (
-                <Tooltip label="Sending message..." position="top">
-                  <Loader size="xs" variant="dots" />
+                <Tooltip label='Sending message...' position='top'>
+                  <Loader size='xs' variant='dots' />
                 </Tooltip>
               )}
               {/* {!props.opened && !props.latest_msg_from_sdr && props.new_msg_count > 0 && <Badge variant='filled'>{props.new_msg_count}</Badge>} */}
             </Group>
-            <Text
-              size={10}
-              c="dimmed"
-              fs="italic"
-              fw={!props.opened ? 700 : 300}
-            >
+            <Text size={10} c='dimmed' fs='italic' fw={!props.opened ? 700 : 300}>
               {props.title}
             </Text>
           </Stack>
@@ -192,15 +180,10 @@ export default function ProspectList(props: {
 }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
-  const [openedProspectId, setOpenedProspectId] = useRecoilState(
-    openedProspectIdState
-  );
+  const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const [showPurgatorySection, setShowPurgatorySection] = useState(true);
-  const [currentProject, setCurrentProject] =
-    useRecoilState(currentProjectState);
-  const [currentInboxCount, setCurrentInboxCount] = useRecoilState(
-    currentInboxCountState
-  );
+  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentInboxCount, setCurrentInboxCount] = useRecoilState(currentInboxCountState);
   const [openedProspectLoading, setOpenedProspectLoading] = useRecoilState(
     openedProspectLoadingState
   );
@@ -208,29 +191,26 @@ export default function ProspectList(props: {
 
   const nurturingMode = useRecoilValue(nurturingModeState);
 
-  const filterSelectOptions = (
-    nurturingMode ? nurturingProspectStatuses : prospectStatuses
-  ).map((status) => ({
-    ...status,
-    count: -1,
-  }));
-  filterSelectOptions.unshift({ label: "All Convos", value: "ALL", count: -1 });
-
-  const [segmentedSection, setSegmentedSection] = useState("RECOMMENDED");
-  const [filterSelectValue, setFilterSelectValue] = useState(
-    filterSelectOptions[0].value
+  const filterSelectOptions = (nurturingMode ? nurturingProspectStatuses : prospectStatuses).map(
+    (status) => ({
+      ...status,
+      count: -1,
+    })
   );
-  const [searchFilter, setSearchFilter] = useState("");
+  filterSelectOptions.unshift({ label: 'All Convos', value: 'ALL', count: -1 });
+
+  const [segmentedSection, setSegmentedSection] = useState('RECOMMENDED');
+  const [filterSelectValue, setFilterSelectValue] = useState(filterSelectOptions[0].value);
+  const [searchFilter, setSearchFilter] = useState('');
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [filtersState, setFiltersState] =
-    useState<InboxProspectListFilterState>({
-      recentlyContacted: "ALL",
-      respondedLast: "ALL",
-      channel: "SELLSCALE",
-    });
+  const [filtersState, setFiltersState] = useState<InboxProspectListFilterState>({
+    recentlyContacted: 'ALL',
+    respondedLast: 'ALL',
+    channel: 'SELLSCALE',
+  });
 
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
-  const [sectionTab, setSectionTab] = useState<string | null>("active");
+  const [sectionTab, setSectionTab] = useState<string | null>('active');
 
   useEffect(() => {
     setCurrentProject(null);
@@ -241,9 +221,7 @@ export default function ProspectList(props: {
     props.prospects
       ?.filter((p) => {
         // Only show prospects that are of a status we can filter/sort by
-        return filterSelectOptions.find(
-          (option) => option.value === p.linkedin_status
-        );
+        return filterSelectOptions.find((option) => option.value === p.linkedin_status);
       })
       .map((p) => {
         const li_soonest =
@@ -261,9 +239,7 @@ export default function ProspectList(props: {
         const last_message_timestamp = li_soonest
           ? p.li_last_message_timestamp
           : p.email_last_message_timestamp;
-        const unread_messages = li_soonest
-          ? p.li_unread_messages
-          : p.email_unread_messages;
+        const unread_messages = li_soonest ? p.li_unread_messages : p.email_unread_messages;
 
         // Hack to temp hide prospect when we send a message
         let is_purgatory = p.hidden_until
@@ -277,24 +253,20 @@ export default function ProspectList(props: {
           id: p.id,
           name: _.truncate(p.full_name, {
             length: 48,
-            separator: " ",
+            separator: ' ',
           }),
           img_url: p.img_url,
           icp_fit: p.icp_fit_score,
           latest_msg:
             is_last_message_from_sdr || nurturingMode
-              ? `You: ${last_message_from_sdr || "..."}`
-              : `${p.first_name}: ${
-                  last_message_from_prospect || "No message found"
-                }`,
-          latest_msg_time: convertDateToCasualTime(
-            new Date(last_message_timestamp || -1)
-          ),
+              ? `You: ${last_message_from_sdr || '...'}`
+              : `${p.first_name}: ${last_message_from_prospect || 'No message found'}`,
+          latest_msg_time: convertDateToCasualTime(new Date(last_message_timestamp || -1)),
           latest_msg_datetime: new Date(last_message_timestamp || -1),
           latest_msg_from_sdr: is_last_message_from_sdr || nurturingMode,
           title: _.truncate(p.title, {
             length: 48,
-            separator: " ",
+            separator: ' ',
           }),
           new_msg_count: unread_messages,
           persona_id: p.archetype_id,
@@ -307,20 +279,12 @@ export default function ProspectList(props: {
       })
       .sort(
         (a, b) =>
-          _.findIndex(
-            filterSelectOptions,
-            (o) => o.value === a.linkedin_status
-          ) -
-            _.findIndex(
-              filterSelectOptions,
-              (o) => o.value === b.linkedin_status
-            ) ||
+          _.findIndex(filterSelectOptions, (o) => o.value === a.linkedin_status) -
+            _.findIndex(filterSelectOptions, (o) => o.value === b.linkedin_status) ||
           (!b.latest_msg_from_sdr && b.new_msg_count ? 1 : 0) -
             (!a.latest_msg_from_sdr && a.new_msg_count ? 1 : 0) ||
           b.icp_fit - a.icp_fit ||
-          removeExtraCharacters(a.name).localeCompare(
-            removeExtraCharacters(b.name)
-          )
+          removeExtraCharacters(a.name).localeCompare(removeExtraCharacters(b.name))
       ) ?? [];
 
   // Filter by search
@@ -333,39 +297,37 @@ export default function ProspectList(props: {
   //   });
   // }
   // Filter by status
-  if (filterSelectValue !== "ALL") {
+  if (filterSelectValue !== 'ALL') {
     prospects = prospects.filter((p) => {
       return p.linkedin_status === filterSelectValue;
     });
   }
   // Advanced filters
   if (filtersState) {
-    if (filtersState.recentlyContacted === "HIDE") {
+    if (filtersState.recentlyContacted === 'HIDE') {
       prospects = prospects.filter((p) => !p.in_purgatory);
-    } else if (filtersState.recentlyContacted === "SHOW") {
+    } else if (filtersState.recentlyContacted === 'SHOW') {
       prospects = prospects.filter((p) => p.in_purgatory);
     }
 
-    if (filtersState.channel === "LINKEDIN") {
+    if (filtersState.channel === 'LINKEDIN') {
       prospects = prospects.filter((p) => p.linkedin_status);
-    } else if (filtersState.channel === "EMAIL") {
+    } else if (filtersState.channel === 'EMAIL') {
       prospects = prospects.filter((p) => p.email_status);
     }
 
     if (currentProject?.id) {
-      prospects = prospects.filter(
-        (p) => p.persona_id + "" === currentProject?.id + ""
-      );
+      prospects = prospects.filter((p) => p.persona_id + '' === currentProject?.id + '');
     }
 
-    if (filtersState.respondedLast === "THEM") {
+    if (filtersState.respondedLast === 'THEM') {
       prospects = prospects.filter((p) => !p.latest_msg_from_sdr);
-    } else if (filtersState.respondedLast === "YOU") {
+    } else if (filtersState.respondedLast === 'YOU') {
       prospects = prospects.filter((p) => p.latest_msg_from_sdr);
     }
   }
   // Recommended Filter
-  if (segmentedSection === "RECOMMENDED") {
+  if (segmentedSection === 'RECOMMENDED') {
     if (!nurturingMode) {
       //prospects = prospects.filter((p) => p.overall_status === 'ACTIVE_CONVO');
     }
@@ -374,9 +336,7 @@ export default function ProspectList(props: {
   }
 
   // sort by if in purgatory
-  prospects = prospects.sort(
-    (a, b) => (a.in_purgatory ? 1 : 0) - (b.in_purgatory ? 1 : 0)
-  );
+  prospects = prospects.sort((a, b) => (a.in_purgatory ? 1 : 0) - (b.in_purgatory ? 1 : 0));
 
   // useEffect(() => {
   //   if (prospects.length > 0 && (!openedProspectId || openedProspectId === -1)) {
@@ -385,40 +345,52 @@ export default function ProspectList(props: {
   // }, [props.prospects]);
 
   useEffect(() => {
-    if (segmentedSection === "RECOMMENDED") {
-      setFilterSelectValue("ALL");
+    if (segmentedSection === 'RECOMMENDED') {
+      setFilterSelectValue('ALL');
     }
   }, [segmentedSection]);
 
   const activeProspects = prospects
     .filter((p) => !p.in_purgatory)
-    .filter((p) => p.overall_status !== "DEMO");
+    .filter((p) => p.overall_status !== 'DEMO');
   const snoozedProspects = prospects.filter((p) => p.in_purgatory);
-  const demoProspects = prospects.filter((p) => p.overall_status === "DEMO");
+  const demoProspects = prospects.filter((p) => p.overall_status === 'DEMO');
 
-  localStorage.setItem("inbox-count", `${activeProspects.length}`);
+  localStorage.setItem('inbox-count', `${activeProspects.length}`);
 
   let displayProspects = activeProspects;
-  if (sectionTab === "snoozed") {
+  if (sectionTab === 'snoozed') {
     displayProspects = snoozedProspects;
-  } else if (sectionTab === "demos") {
+  } else if (sectionTab === 'demos') {
     displayProspects = demoProspects;
   }
+
+  useEffect(() => {
+    if (displayProspects.length > 0) {
+      if (
+        !openedProspectId ||
+        openedProspectId === -1 ||
+        !displayProspects.find((p) => p.id === openedProspectId)
+      ) {
+        setOpenedProspectId(displayProspects[0].id);
+      }
+    }
+  }, [sectionTab, displayProspects]);
 
   setCurrentInboxCount(displayProspects.length);
   const navigate = useNavigate();
   return (
     <div>
       <LoadingOverlay
-        loader={loaderWithText("")}
+        loader={loaderWithText('')}
         visible={props.isFetching && props.prospects.length === 0}
       />
       <Stack
         spacing={0}
-        h={"100%"}
+        h={'100%'}
         sx={(theme) => ({
           backgroundColor: theme.colors.gray[1],
-          position: "relative",
+          position: 'relative',
         })}
       >
         <ProjectSelect allOnNone />
@@ -434,7 +406,7 @@ export default function ProspectList(props: {
               ...theme.fn.focusStyles(),
               fontWeight: 600,
               color: theme.colors.gray[5],
-              "&[data-active]": {
+              '&[data-active]': {
                 color: theme.colors.blue[theme.fn.primaryShade()],
               },
               paddingTop: rem(16),
@@ -444,13 +416,13 @@ export default function ProspectList(props: {
         >
           <Tabs.List grow>
             <Tabs.Tab
-              value="inbox"
+              value='inbox'
               rightSection={
                 <Badge
-                  sx={{ pointerEvents: "none" }}
-                  variant="filled"
-                  size="xs"
-                  color={mainTab === "inbox" ? "blue" : "gray"}
+                  sx={{ pointerEvents: 'none' }}
+                  variant='filled'
+                  size='xs'
+                  color={mainTab === 'inbox' ? 'blue' : 'gray'}
                 >
                   {activeProspects.length}
                 </Badge>
@@ -459,13 +431,13 @@ export default function ProspectList(props: {
               Inbox
             </Tabs.Tab>
             <Tabs.Tab
-              value="snoozed"
+              value='snoozed'
               rightSection={
                 <Badge
-                  sx={{ pointerEvents: "none" }}
-                  variant="filled"
-                  size="xs"
-                  color={mainTab === "inbox" ? "blue" : "gray"}
+                  sx={{ pointerEvents: 'none' }}
+                  variant='filled'
+                  size='xs'
+                  color={mainTab === 'inbox' ? 'blue' : 'gray'}
                 >
                   {snoozedProspects.length}
                 </Badge>
@@ -474,14 +446,14 @@ export default function ProspectList(props: {
               Snoozed
             </Tabs.Tab>
             <Tabs.Tab
-              value="demos"
+              value='demos'
               rightSection={
                 <Badge
                   w={16}
                   h={16}
-                  sx={{ pointerEvents: "none" }}
-                  variant="filled"
-                  size="xs"
+                  sx={{ pointerEvents: 'none' }}
+                  variant='filled'
+                  size='xs'
                   p={0}
                 >
                   {demoProspects.length}
@@ -498,7 +470,7 @@ export default function ProspectList(props: {
           </Tabs.List>
         </Tabs>
 
-        {mainTab !== "queued" && (
+        {mainTab !== 'queued' && (
           <>
             <Group pt={20} pb={10} px={20} m={0} noWrap>
               <Input
@@ -507,101 +479,87 @@ export default function ProspectList(props: {
                   input: {
                     backgroundColor: theme.colors.gray[2],
                     border: `1px solid ${theme.colors.gray[2]}`,
-                    "&:focus-within": {
+                    '&:focus-within': {
                       borderColor: theme.colors.gray[4],
                     },
-                    "&::placeholder": {
+                    '&::placeholder': {
                       color: theme.colors.gray[6],
                       fontWeight: 500,
                     },
                   },
                 }}
-                icon={<IconSearch size="1.0rem" />}
+                icon={<IconSearch size='1.0rem' />}
                 value={searchFilter}
                 onChange={(event) => setSearchFilter(event.currentTarget.value)}
                 radius={theme.radius.md}
-                placeholder="Search..."
+                placeholder='Search...'
               />
               <ActionIcon
-                variant="transparent"
+                variant='transparent'
                 color={
-                  _.isEqual(
-                    filtersState,
-                    defaultInboxProspectListFilterState
-                  ) || !filtersState
-                    ? "gray.6"
-                    : "blue.6"
+                  _.isEqual(filtersState, defaultInboxProspectListFilterState) || !filtersState
+                    ? 'gray.6'
+                    : 'blue.6'
                 }
                 onClick={() => setFilterModalOpen(true)}
               >
-                <IconAdjustmentsFilled size="1.125rem" />
+                <IconAdjustmentsFilled size='1.125rem' />
               </ActionIcon>
             </Group>
 
             <ScrollArea
               h={`calc(${INBOX_PAGE_HEIGHT} - ${HEADER_HEIGHT}px)`}
-              sx={{ overflowX: "hidden" }}
+              sx={{ overflowX: 'hidden' }}
             >
               {[false].map((in_purgatory_section, i) => {
                 return (
                   <div key={i}>
                     {in_purgatory_section && (
-                      <Container pt="24px" pb="24px">
+                      <Container pt='24px' pb='24px'>
                         <Divider
-                          ta="center"
+                          ta='center'
                           fz={7}
                           fw={500}
-                          color="gray"
-                          labelPosition="center"
+                          color='gray'
+                          labelPosition='center'
                           label={
                             prospects.filter((p) => p.in_purgatory).length +
-                            " Prospect" +
-                            (prospects.filter((p) => p.in_purgatory).length > 1
-                              ? "s"
-                              : "") +
-                            " Snoozed"
+                            ' Prospect' +
+                            (prospects.filter((p) => p.in_purgatory).length > 1 ? 's' : '') +
+                            ' Snoozed'
                           }
                         />
                         <Text
-                          color="blue"
-                          align="center"
+                          color='blue'
+                          align='center'
                           fw={600}
                           fz={12}
-                          sx={{ cursor: "pointer" }}
-                          onClick={() =>
-                            setShowPurgatorySection(!showPurgatorySection)
-                          }
+                          sx={{ cursor: 'pointer' }}
+                          onClick={() => setShowPurgatorySection(!showPurgatorySection)}
                         >
-                          {showPurgatorySection ? "View" : "Hide"} Prospect
-                          {prospects.filter((p) => p.in_purgatory).length > 1
-                            ? "s"
-                            : ""}
+                          {showPurgatorySection ? 'View' : 'Hide'} Prospect
+                          {prospects.filter((p) => p.in_purgatory).length > 1 ? 's' : ''}
                         </Text>
                       </Container>
                     )}
                     {displayProspects.map((prospect, i: number) => (
                       <div key={i}>
-                        {filterSelectValue === "ALL" &&
+                        {filterSelectValue === 'ALL' &&
                           (!displayProspects[i - 1] ||
                             prospect.linkedin_status !==
                               displayProspects[i - 1].linkedin_status) && (
-                            <Box bg="blue.1" py={"sm"} px={"md"} color="blue">
-                              <Flex w="100%">
-                                <Text color="blue" ta="center" fz={14} fw={700}>
-                                  {labelizeConvoSubstatus(
-                                    prospect.linkedin_status
-                                  )}
+                            <Box bg='blue.1' py={'sm'} px={'md'} color='blue'>
+                              <Flex w='100%'>
+                                <Text color='blue' ta='center' fz={14} fw={700}>
+                                  {labelizeConvoSubstatus(prospect.linkedin_status)}
                                 </Text>
-                                <Badge color="blue" size="xs" ml="xs" mt="2px">
+                                <Badge color='blue' size='xs' ml='xs' mt='2px'>
                                   {
                                     prospects.filter(
                                       (p) =>
-                                        p.linkedin_status ===
-                                          prospect.linkedin_status &&
+                                        p.linkedin_status === prospect.linkedin_status &&
                                         // if snoozed, check hidden until other wise not
-                                        (sectionTab == "snoozed"
-                                          ? p.in_purgatory
-                                          : !p.in_purgatory)
+                                        (sectionTab == 'snoozed' ? p.in_purgatory : !p.in_purgatory)
                                     ).length
                                   }
                                 </Badge>
@@ -610,12 +568,12 @@ export default function ProspectList(props: {
                           )}
                         <Box
                           sx={{
-                            position: "relative",
+                            position: 'relative',
                             display: prospect.name
                               .toLowerCase()
                               .includes(searchFilter.toLowerCase())
-                              ? "visible"
-                              : "none",
+                              ? 'visible'
+                              : 'none',
                           }}
                         >
                           <Container
@@ -651,21 +609,19 @@ export default function ProspectList(props: {
                               withinPortal
                             >
                               <Flex
-                                align={"center"}
-                                gap={"0.25rem"}
+                                align={'center'}
+                                gap={'0.25rem'}
                                 sx={{
-                                  position: "absolute",
+                                  position: 'absolute',
                                   right: 10,
                                   top: 30,
                                 }}
                               >
-                                <Text fz="0.75rem" fw={500} color="gray">
-                                  {convertDateToMMMDD(
-                                    new Date(prospect.purgatory_until)
-                                  )}
+                                <Text fz='0.75rem' fw={500} color='gray'>
+                                  {convertDateToMMMDD(new Date(prospect.purgatory_until))}
                                 </Text>
 
-                                <IconClock size="0.875rem" color="gray" />
+                                <IconClock size='0.875rem' color='gray' />
                               </Flex>
                             </Tooltip>
                           )}
@@ -676,12 +632,12 @@ export default function ProspectList(props: {
                 );
               })}
               {displayProspects.length === 0 && (
-                <Text mt={20} fz="sm" ta="center" c="dimmed" fs="italic">
+                <Text mt={20} fz='sm' ta='center' c='dimmed' fs='italic'>
                   No conversations found.
                 </Text>
               )}
 
-              <Box h="50px"></Box>
+              <Box h='50px'></Box>
             </ScrollArea>
             {/* <Text
           sx={{

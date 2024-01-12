@@ -1399,7 +1399,7 @@ function IntroMessageSection(props: {
                 />
               )}
             </Box>
-            {messageMetaData && (
+            {messageMetaData && !currentProject.template_mode && (
               <Group py='xs' noWrap>
                 <HoverCard width={280} shadow='md'>
                   <HoverCard.Target>
@@ -1473,6 +1473,7 @@ function IntroMessageSection(props: {
               onFoundTemplate={(id) => {
                 setSelectedTemplateId(id);
               }}
+              messageMetaData={messageMetaData}
             />
           </>
         ) : (
@@ -3099,6 +3100,7 @@ function FrameworkSection(props: {
 function TemplateSection(props: {
   showFeedback: boolean;
   onFoundTemplate: (templateId: number) => void;
+  messageMetaData: any; // Whoever made this for some reason made its type any
 }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
@@ -3286,6 +3288,27 @@ function TemplateSection(props: {
                         {template.title}
                       </Text>
                       {/* Hovercard for transformers */}
+
+                      <HoverCard width={280} shadow='md'>
+                        <HoverCard.Target>
+                          <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
+                            Personalizations:{' '}
+                            <Text fw={500} span>
+                              {props.messageMetaData.notes?.length}
+                            </Text>
+                          </Badge>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown>
+                          <List>
+                            {props.messageMetaData.notes?.map((note: any, index: number) => (
+                              <List.Item key={index}>
+                                <Text fz='sm'>{note}</Text>
+                              </List.Item>
+                            ))}
+                          </List>
+                        </HoverCard.Dropdown>
+                      </HoverCard>
+
                       {template.research_points && template.research_points.length > 0 && (
                         <HoverCard width={280} shadow='md'>
                           <HoverCard.Target>

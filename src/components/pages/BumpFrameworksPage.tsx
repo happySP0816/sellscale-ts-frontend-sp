@@ -1032,14 +1032,11 @@ export default function BumpFrameworksPage(props: {
                         <Select
                           description=' '
                           placeholder='Pick value'
-                          data={data?.active_transformers ? data?.active_transformers : []}
-                          defaultValue={data?.active_transformers && data?.active_transformers[0]}
-                          // onChange={(e) => setData({
-                          //   ...data,
-
-                          // })}
+                          data={[data?.substatus || 'ACTIVE_CONVO']}
+                          defaultValue={data?.substatus || 'ACTIVE_CONVO'}
                           w={'100%'}
                           size='md'
+                          disabled
                         />
                       </Flex>
                     </Flex>

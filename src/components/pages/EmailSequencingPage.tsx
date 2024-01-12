@@ -20,19 +20,27 @@ import {
   Center,
   Group,
   NumberInput,
-} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { showNotification } from '@mantine/notifications';
-import EmailSequenceStepModal from '@modals/EmailSequenceStepModal';
-import ManageEmailSubjectLineTemplatesModal from '@modals/ManageEmailSubjectLineTemplatesModal';
+  Radio,
+  TextInput,
+  Checkbox,
+  Select,
+  Textarea,
+  Accordion,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { showNotification } from "@mantine/notifications";
+import EmailSequenceStepModal from "@modals/EmailSequenceStepModal";
+import ManageEmailSubjectLineTemplatesModal from "@modals/ManageEmailSubjectLineTemplatesModal";
 import {
   IconBook,
   IconCheck,
   IconEdit,
   IconList,
   IconMessages,
+  IconPencil,
   IconPlus,
   IconSearch,
+  IconSettings,
   IconUser,
   IconWashMachine,
   IconX,
@@ -43,18 +51,33 @@ import {
   createEmailSequenceStep,
   getEmailSequenceSteps,
   patchSequenceStep,
-} from '@utils/requests/emailSequencing';
-import { getEmailSubjectLineTemplates } from '@utils/requests/emailSubjectLines';
-import getChannels from '@utils/requests/getChannels';
-import { useEffect, useRef, useState } from 'react';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { EmailSequenceStep, MsgResponse, SubjectLineTemplate } from 'src';
-import DOMPurify from 'dompurify';
-import NewUIEmailSequencing from './EmailSequencing/NewUIEmailSequencing';
-import NylasConnectedCard from '@common/settings/NylasConnectedCard';
-import SmartleadVisualizer from '@common/sequence/SmartleadSequence';
-import { getSmartleadSequence } from '@utils/requests/getSmartleadSequences';
-import ICPFilters from '@common/persona/ICPFilter/ICPFilters';
+} from "@utils/requests/emailSequencing";
+import { getEmailSubjectLineTemplates } from "@utils/requests/emailSubjectLines";
+import getChannels from "@utils/requests/getChannels";
+import { useEffect, useRef, useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  EmailReplyFramework,
+  EmailSequenceStep,
+  MsgResponse,
+  SubjectLineTemplate,
+} from "src";
+import DOMPurify from "dompurify";
+import NewUIEmailSequencing from "./EmailSequencing/NewUIEmailSequencing";
+import NylasConnectedCard from "@common/settings/NylasConnectedCard";
+import SmartleadVisualizer from "@common/sequence/SmartleadSequence";
+import { getSmartleadSequence } from "@utils/requests/getSmartleadSequences";
+import ICPFilters from "@common/persona/ICPFilter/ICPFilters";
+import {
+  getEmailReplyFrameworks,
+  patchEmailReplyFrameworks,
+} from "@utils/requests/emailReplies";
+import { valueToColor } from "@utils/general";
+import { PersonalizationSection } from "@common/sequence/SequenceSection";
+import React from "react";
+import { JSONContent } from "@tiptap/react";
+import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
+import CreateEmailReplyFrameworkModal from "@modals/CreateEmailReplyFrameworkModal";
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -496,60 +519,6 @@ function EmailSequenceStepView(props: {
   );
 }
 
-// function QuestionObjectionLibraryCard(props: {
-//   archetypeID: number | null;
-//   bumpFramework: EmailSequenceStep;
-//   afterEdit: () => void;
-// }) {
-//   const theme = useMantineTheme();
-
-//   const splitted_substatus = props.bumpFramework.substatus.split('ACTIVE_CONVO_')[1];
-
-//   return (
-//     <>
-//       <Card withBorder p='sm' radius='md'>
-//         <Card.Section px='md' pt='md'>
-//           <Flex justify='space-between' align='center'>
-//             <Title order={5}>{props.bumpFramework.title}</Title>
-//             <ActionIcon
-//               onClick={() => {
-//                 openContextModal({
-//                   modal: 'editBumpFramework',
-//                   title: <Title order={3}>Edit: {props.bumpFramework.title}</Title>,
-//                   innerProps: {
-//                     bumpFrameworkID: props.bumpFramework.id,
-//                     overallStatus: props.bumpFramework.overall_status,
-//                     title: props.bumpFramework.title,
-//                     description: props.bumpFramework.description,
-//                     bumpLength: props.bumpFramework.bump_length,
-//                     default: props.bumpFramework.default,
-//                     onSave: props.afterEdit,
-//                     bumpedCount: props.bumpFramework.bumped_count,
-//                   },
-//                 });
-//               }}
-//             >
-//               <IconEdit size='1.25rem' />
-//             </ActionIcon>
-//           </Flex>
-//         </Card.Section>
-
-//         <Card.Section>
-//           <Divider my='xs' />
-//         </Card.Section>
-//         <Flex mih='100px' align='center'>
-//           <Text>{props.bumpFramework.description}</Text>
-//         </Flex>
-
-//         <Card.Section>
-//           <Divider my='xs' />
-//         </Card.Section>
-//         <Badge color={valueToColor(theme, splitted_substatus)}>{splitted_substatus}</Badge>
-//       </Card>
-//     </>
-//   );
-// }
-
 export default function EmailSequencingPage(props: {
   predefinedPersonaId?: number;
   onPopulateSequenceSteps?: (buckets: EmailSequenceStepBuckets) => void;
@@ -562,10 +531,11 @@ export default function EmailSequencingPage(props: {
   const archetypeID = currentProject?.id || -1;
   const [userData, setUserData] = useRecoilState(userDataState);
 
-  const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] =
-    useDisclosure();
-  // const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] =
-  //   useDisclosure();
+  const [
+    addNewSequenceStepOpened,
+    { open: openSequenceStep, close: closeSequenceStep },
+  ] = useDisclosure();
+
 
   if (currentProject === undefined || currentProject === null) {
     return <></>;
@@ -702,40 +672,9 @@ export default function EmailSequencingPage(props: {
     setLoading(false);
   };
 
-  const [smartleadSequence, setSmartleadSequence] = useState<any[]>([]);
-  const triggerGetSmartleadSequenceSteps = async () => {
-    if (!currentProject.smartlead_campaign_id) {
-      return;
-    }
-    setLoading(true);
-
-    const result = await getSmartleadSequence(userToken, currentProject.smartlead_campaign_id);
-
-    if (result.status !== 'success') {
-      setLoading(false);
-      showNotification({
-        title: 'Error',
-        message: 'Could not get beta sequence variants.',
-        color: 'red',
-        autoClose: false,
-      });
-      return;
-    } else {
-      setSmartleadSequence(result.data.sequence);
-    }
-  };
-
-  useEffect(() => {
-    triggerGetEmailSequenceSteps();
-  }, [archetypeID]);
-
   useEffect(() => {
     triggerGetEmailSubjectLineTemplates();
     triggerGetEmailSequenceSteps();
-
-    if (currentProject.smartlead_campaign_id) {
-      triggerGetSmartleadSequenceSteps();
-    }
   }, []);
 
   return (
@@ -755,7 +694,10 @@ export default function EmailSequencingPage(props: {
             <Tabs.Tab value='sequence' icon={<IconMessages size='0.8rem' />}>
               Email Sequence
             </Tabs.Tab>
-            <Tabs.Tab value='email_settings' icon={<IconWashMachine size='0.8rem' />}>
+            <Tabs.Tab value="replies" icon={<IconBook size="0.8rem" />}>
+              Replies
+            </Tabs.Tab>
+            <Tabs.Tab value="settings" icon={<IconWashMachine size="0.8rem" />}>
               Settings
             </Tabs.Tab>
 
@@ -765,55 +707,7 @@ export default function EmailSequencingPage(props: {
               </Tabs.Tab>
             )}
           </Tabs.List>
-          <Tabs.Panel value='email_settings'>
-            <Box maw='800px' ml='auto' mr='auto'>
-              <NylasConnectedCard connected={userData ? userData.nylas_connected : false} />
-            </Box>
-          </Tabs.Panel>
-          <Tabs.Panel value='qnolibrary'>
-            <Card withBorder shadow='xs' mt='md'>
-              <Flex w='100%' align='center' justify='center'>
-                Coming soon!
-              </Flex>
-            </Card>
-            {/* {!loading ? (
-              <Flex direction='column' ml='xs'>
-                <Flex align='center' w='100%' justify='center'>
-                  <Button variant='outline' mb='md' w='50%' onClick={openQuestionObjection}>
-                    Add another type of reply
-                  </Button>
-                </Flex>
-
-                <CreateBumpFrameworkModal
-                  modalOpened={addNewQuestionObjectionOpened}
-                  openModal={openQuestionObjection}
-                  closeModal={closeQuestionObjection}
-                  backFunction={triggerGetBumpFrameworks}
-                  status='ACTIVE_CONVO'
-                  dataChannels={dataChannels}
-                  archetypeID={archetypeID}
-                />
-                <Grid>
-                  {Object.keys(sequenceBuckets.current?.ACTIVE_CONVO.frameworks).map((qno, index) => {
-                    return (
-                      <Grid.Col span={6}>
-                        <QuestionObjectionLibraryCard
-                          bumpFramework={sequenceBuckets.current?.ACTIVE_CONVO.frameworks[index]}
-                          archetypeID={archetypeID}
-                          afterEdit={triggerGetBumpFrameworks}
-                        />
-                      </Grid.Col>
-                    );
-                  })}
-                </Grid>
-              </Flex>
-            ) : (
-              <Flex justify='center'>
-                <Loader />
-              </Flex>
-            )} */}
-          </Tabs.Panel>{' '}
-          <Tabs.Panel value='sequence'>
+          <Tabs.Panel value="sequence">
             <NewUIEmailSequencing
               userToken={userToken}
               archetypeID={archetypeID}
@@ -829,13 +723,417 @@ export default function EmailSequencingPage(props: {
               openSequenceStep={openSequenceStep}
             />
           </Tabs.Panel>
-          {currentProject.smartlead_campaign_id && (
-            <Tabs.Panel value='smartlead'>
-              <SmartleadVisualizer data={smartleadSequence} />
-            </Tabs.Panel>
-          )}
+          <Tabs.Panel value="replies">
+            <EmailReplyFrameworkView
+              userToken={userToken}
+              archetypeID={archetypeID}
+            />
+          </Tabs.Panel>{" "}
+          <Tabs.Panel value="settings">
+            <Box maw="800px" ml="auto" mr="auto">
+              <NylasConnectedCard
+                connected={userData ? userData.nylas_connected : false}
+              />
+            </Box>
+          </Tabs.Panel>
         </Tabs>
       </Card.Section>
     </Flex>
   );
 }
+
+const EmailReplyFrameworkView = (props: {
+  userToken: string;
+  archetypeID: number | null;
+}) => {
+  const theme = useMantineTheme();
+
+  const [fetchingReplyFrameworks, setFetchingReplyFrameworks] = useState(false);
+  const [replyFrameworks, setReplyFrameworks] = useState<EmailReplyFramework[]>(
+    []
+  );
+  const [selectedFramework, setSelectedFramework] =
+    useState<EmailReplyFramework>();
+
+  const [createFrameworkOpened, { open: openCreateFramework, close: closeCreateFramework, toggle: toggleCreateFramework }] = useDisclosure(false);
+
+  const [editTitle, setEditTitle] = useState(false);
+  const [editTemplate, setEditTemplate] = useState(false);
+  const [editAdditionalInfo, setEditAdditionalInfo] = useState(false);
+
+  let templateBody = "";
+  const [template, _setTemplate] = React.useState<string>(templateBody);
+  const templateRichRaw = React.useRef<JSONContent | string>("");
+  const [patchingTemplate, setPatchingTemplate] = useState(false);
+
+  const triggerPatchTemplate = async () => {
+    setPatchingTemplate(true);
+
+    if (!selectedFramework) {
+      showNotification({
+        title: "Error",
+        message: "No framework selected.",
+        color: "red",
+        autoClose: false,
+      });
+      return;
+    }
+
+    const result = await patchEmailReplyFrameworks(
+      props.userToken,
+      selectedFramework?.id as number,
+      null,
+      null,
+      null,
+      template,
+      null,
+      null
+    );
+    if (result.status !== "success") {
+      showNotification({
+        title: "Error",
+        message: "Could not patch template.",
+        color: "red",
+        autoClose: false,
+      });
+    } else {
+      showNotification({
+        title: "Success",
+        message: "Template patched.",
+        color: "green",
+        autoClose: true,
+      });
+      setSelectedFramework({
+        ...selectedFramework,
+        template: template,
+      });
+    }
+
+    setPatchingTemplate(false);
+  };
+
+  const triggerGetEmailReplyFrameworks = async () => {
+    setFetchingReplyFrameworks(true);
+
+    const result = await getEmailReplyFrameworks(props.userToken, []);
+
+    if (result.status !== "success") {
+      showNotification({
+        title: "Error",
+        message: "Could not get reply frameworks.",
+        color: "red",
+        autoClose: false,
+      });
+    } else {
+      setReplyFrameworks(result.data.data as EmailReplyFramework[]);
+      setSelectedFramework(result.data.data[0] as EmailReplyFramework);
+      _setTemplate(result.data.data[0].template);
+      templateRichRaw.current = result.data.data[0].template;
+    }
+
+    setFetchingReplyFrameworks(false);
+  };
+
+  useEffect(() => {
+    triggerGetEmailReplyFrameworks();
+  }, []);
+
+  return (
+    <Flex mt="md" w={"100%"} gap={"50px"}>
+      <Flex w="40%" direction="column">
+        <Button
+          variant="outline"
+          mb="md"
+          leftIcon={<IconPlus />}
+          onClick={openCreateFramework}
+          style={{ borderStyle: "dashed", fontSize: "16px" }}
+          size="lg"
+          fw={"sm"}
+        >
+          Create New Framework
+        </Button>
+        <Radio.Group value={selectedFramework?.id + ""}>
+          <LoadingOverlay visible={fetchingReplyFrameworks} />
+          <Group mt="xs">
+            {replyFrameworks.map((item: any, i: number) => {
+              const splitted_substatus = item.substatus?.replace(
+                "ACTIVE_CONVO_",
+                ""
+              );
+
+              return (
+                <>
+                  {(!replyFrameworks[i - 1] ||
+                    item.substatus !== replyFrameworks[i - 1].substatus) && (
+                    <Divider
+                      label={
+                        <Flex align={"center"} gap={4}>
+                          <div
+                            style={{
+                              width: "10px",
+                              height: "10px",
+                              background: valueToColor(
+                                theme,
+                                splitted_substatus || "ACTIVE_CONVO"
+                              ),
+                              borderRadius: "100%",
+                            }}
+                          ></div>
+                          <Text color="gray" fw={600}>
+                            {splitted_substatus || "ACTIVE_CONVERSATION"}
+                          </Text>
+                        </Flex>
+                      }
+                      labelPosition="left"
+                      w={"100%"}
+                    />
+                  )}
+
+                  <label
+                    htmlFor={item?.title}
+                    style={{
+                      outline: `${
+                        selectedFramework?.id === item?.id
+                          ? " 0.125rem solid #228be6"
+                          : " 0.0625rem solid #ced4da"
+                      }`,
+                      borderRadius: "8px",
+                      padding: "10px 14px",
+                      width: "100%",
+                    }}
+                  >
+                    <Flex align={"center"} gap={10}>
+                      <Radio
+                        value={item?.id + ""}
+                        id={item?.title}
+                        size="xs"
+                        onClick={() => {
+                          setSelectedFramework(item);
+                          // setBlockList(item?.transformer_blocklist);
+                        }}
+                      />
+                      <Text fw={600} mt={2}>
+                        {item?.title}
+                      </Text>
+                    </Flex>
+                  </label>
+                </>
+              );
+            })}
+          </Group>
+        </Radio.Group>
+      </Flex>
+
+      <Flex w={"100%"} direction="column" gap={"xl"}>
+        <Flex w={"100%"} justify={"space-between"} align={"center"} mt="md">
+          <Text
+            size={"24px"}
+            fw={600}
+            color="gray"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+            inline
+            mr="md"
+          >
+            {editTitle ? (
+              <TextInput
+                size="md"
+                value={selectedFramework?.title}
+                onChange={(e) => {
+                  if (!selectedFramework) {
+                    return;
+                  }
+                  setSelectedFramework({
+                    ...selectedFramework,
+                    title: e.target.value,
+                  });
+                }}
+                w="400px"
+              />
+            ) : (
+              <span style={{ color: "black" }}>{selectedFramework?.title}</span>
+            )}
+            <IconPencil
+              onClick={() => setEditTitle(!editTitle)}
+              style={{ cursor: "pointer" }}
+              size={"1rem"}
+            />
+          </Text>
+          <Checkbox label="Default Framework" defaultChecked mr="20px" />
+        </Flex>
+        <Flex w="100%" gap={"xl"}>
+          <Flex direction="column" w="100%">
+            <Text color="gray" fw={600}>
+              SUB-STATUS
+            </Text>
+            <Select
+              description=" "
+              placeholder=" "
+              data={[selectedFramework?.substatus || "ACTIVE_CONVO"]}
+              defaultValue={selectedFramework?.substatus}
+              disabled
+              maw="300px"
+            />
+          </Flex>
+        </Flex>
+        <Flex direction="column">
+          <Text fw={600}>TEMPLATE</Text>
+          <Text fw={400} fz="xs" mb="2px">
+            Template to be fed to GPT. Include [[brackets]] for AI instructions.
+            Everything else will be followed exactly.
+          </Text>
+          {editTemplate ? (
+            <>
+              <Box>
+                <DynamicRichTextArea
+                  height={400}
+                  onChange={(value, rawValue) => {
+                    templateRichRaw.current = rawValue;
+                    _setTemplate(value);
+                  }}
+                  value={templateRichRaw.current}
+                  signifyCustomInsert={false}
+                  inserts={[]}
+                />
+              </Box>
+              <Flex mt="sm" justify={"flex-end"}>
+                <Button
+                  mr="sm"
+                  color="red"
+                  onClick={() => {
+                    _setTemplate(templateBody || "");
+                    templateRichRaw.current = selectedFramework?.template || "";
+                    setEditTemplate(false);
+                  }}
+                  disabled={patchingTemplate}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="green"
+                  onClick={() => {
+                    triggerPatchTemplate();
+                    setEditTemplate(false);
+                  }}
+                  loading={patchingTemplate}
+                >
+                  Save
+                </Button>
+              </Flex>
+            </>
+          ) : (
+            // <Textarea
+            //   size="md"
+            //   description="Template to be fed to GPT. Include [[brackets]] for AI instructions. Everything else will be followed exactly."
+            //   placeholder="These are instructions the AI will read to craft a personalized message."
+            //   minRows={6}
+            //   value={selectedFramework?.template}
+            //   onChange={(e) =>
+            //     setSelectedFramework({
+            //       ...selectedFramework,
+            //       template: e.target.value,
+            //     })
+            //   }
+            // />
+            <Box
+              sx={() => ({
+                border: "1px solid #E0E0E0",
+                borderRadius: "8px",
+                backgroundColor: "#F5F5F5",
+              })}
+              px="md"
+              py="xs"
+              onClick={() => {
+                setEditTemplate(true);
+              }}
+            >
+              <Text fz="sm">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(
+                      selectedFramework?.template as string
+                    ),
+                  }}
+                />
+              </Text>
+              <Flex h="0px" w="100%" mt="40px">
+                <Button
+                  leftIcon={<IconEdit size="1.0rem" />}
+                  variant="outline"
+                  pos="relative"
+                  bottom="40px"
+                  left="88%"
+                  h="32px"
+                  onClick={() => {
+                    setEditTemplate(true);
+                  }}
+                >
+                  Edit
+                </Button>
+              </Flex>
+            </Box>
+          )}
+        </Flex>
+
+        <Accordion defaultValue="additional-information">
+          <Accordion.Item
+            key="additional-information"
+            value="additional-information"
+          >
+            <Accordion.Control icon={<IconSettings size="1rem" />}>
+              Advanced Controls - Coming Soon
+            </Accordion.Control>
+            <Accordion.Panel>
+              <Flex
+                style={{
+                  border: "0.0625rem solid #ced4da",
+                  borderRadius: "8px",
+                }}
+                align={"center"}
+                px="md"
+                py={"8px"}
+                justify={"space-between"}
+              >
+                <Text color="gray" fw={600}>
+                  USER ACCOUNT RESEARCH:
+                </Text>
+                <Switch
+                  checked={selectedFramework?.use_account_research}
+                  onChange={(e) => {
+                    if (!selectedFramework) {
+                      return;
+                    }
+                    setSelectedFramework({
+                      ...selectedFramework,
+                      use_account_research: e.currentTarget.checked,
+                    });
+                  }}
+                />
+              </Flex>
+              {selectedFramework?.use_account_research && (
+                <PersonalizationSection
+                  blocklist={selectedFramework?.research_blocklist}
+                  onItemsChange={async (items) => {
+                    setList(items.filter((x) => !x.checked).map((x) => x.id));
+                    // Update transformer blocklist
+                    // const result = await patchBumpFramework(
+                  }}
+                />
+              )}
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
+      </Flex>
+      <CreateEmailReplyFrameworkModal
+        modalOpened={createFrameworkOpened}
+        openModal={openCreateFramework}
+        closeModal={closeCreateFramework}
+        backFunction={triggerGetEmailReplyFrameworks}
+        archetypeID={props.archetypeID || -1}
+      />
+    </Flex>
+  );
+};

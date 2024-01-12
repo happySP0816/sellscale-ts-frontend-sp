@@ -58,6 +58,7 @@ import MultiChannelModal from '@modals/MultiChannelModal';
 import LiBfTemplateModal from '@modals/LiBfTemplateModal';
 import EditTriggerModal from '@modals/EditTriggerModal';
 import ComposeGenericEmailModal from '@modals/ComposeGenericEmailModal';
+import { CreateEmailReplyFrameworkContextModal } from '@modals/CreateEmailReplyFrameworkModal';
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -218,6 +219,7 @@ export default function App() {
               clonePersona: ClonePersonaModal,
               confirm: ConfirmModal,
               createBumpFramework: CreateBumpFrameworkContextModal,
+              createEmailReplyFramework: CreateEmailReplyFrameworkContextModal,
               cloneBumpFramework: CloneBumpFrameworkContextModal,
               liTemplate: LiTemplateModal,
               liBfTemplate: LiBfTemplateModal,

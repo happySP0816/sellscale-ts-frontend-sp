@@ -51,7 +51,7 @@ import {
 import { createEmailSequenceStep, patchSequenceStep } from '@utils/requests/emailSequencing';
 import { patchEmailSubjectLineTemplate } from '@utils/requests/emailSubjectLines';
 import DOMPurify from 'dompurify';
-import React, { FC, useEffect, useMemo } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { EmailSequenceStep, EmailTemplate, SpamScoreResults, SubjectLineTemplate } from 'src';
 import ReactDOMServer from 'react-dom/server';
@@ -60,6 +60,7 @@ import EmailTemplateLibraryModal from '@modals/EmailTemplateLibraryModal';
 import { openConfirmModal } from '@mantine/modals';
 import postCopyEmailPoolEntry from '@utils/requests/postCopyEmailLibraryItem';
 import { isValidUrl } from '@utils/general';
+import useRefresh from '@common/library/use-refresh';
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
@@ -238,11 +239,13 @@ const DetailEmailSequencing: FC<{
   const [fetchedTemplateSpamScore, setFetchedTemplateSpamScore] = React.useState<boolean>(false);
   const [spamScore, setSpamScore] = React.useState<SpamScore | null>(null);
 
+  const [openedTemplate, setOpenedTemplate] = useState<string | null>(null);
+
   useEffect(() => {
     if (fetchedTemplateSpamScore && !activeTemplate?.template) {
-      return
+      return;
     }
-    
+
     fetch(`${API_URL}/ml/email/body-spam-score`, {
       method: 'POST',
       headers: {
@@ -250,21 +253,21 @@ const DetailEmailSequencing: FC<{
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
-        email_body: activeTemplate?.template
+        email_body: activeTemplate?.template,
       }),
     })
       .then((res) => res.json())
       .then((res) => {
+        console.log('YEEE');
+        console.log(res);
         setSpamScore(res.score);
       })
       .catch((err) => {
         console.log(err);
       })
-      .finally(() => {
-
-      });
-      setFetchedTemplateSpamScore(true);
-    }, [fetchedTemplateSpamScore, activeTemplate?.template]);
+      .finally(() => {});
+    setFetchedTemplateSpamScore(true);
+  }, [fetchedTemplateSpamScore]);
 
   // Trigger Generate Initial Email
   const triggerPostGenerateInitialEmail = async () => {
@@ -614,10 +617,10 @@ const DetailEmailSequencing: FC<{
       {/* INACTIVE TEMPLATES */}
       {inactiveTemplates && inactiveTemplates.length > 0 && (
         <Flex mt='md' w='100%'>
-          <Accordion w='100%'>
-            {inactiveTemplates.map((template: EmailSequenceStep, index: any) => {
+          <Accordion w='100%' value={openedTemplate} onChange={setOpenedTemplate}>
+            {inactiveTemplates.map((template: EmailSequenceStep, index) => {
               return (
-                <Accordion.Item value={'test'}>
+                <Accordion.Item value={`${index}`}>
                   <Accordion.Control>
                     <Flex direction='row' w='100%' justify={'space-between'}>
                       <Flex direction='row' align='center'>
@@ -1156,7 +1159,7 @@ type SpamScore = {
   spam_word_score: number;
   read_minutes_score: number;
   total_score: number;
-}
+};
 
 export const EmailBodyItem: React.FC<{
   template: EmailSequenceStep;
@@ -1173,105 +1176,6 @@ export const EmailBodyItem: React.FC<{
   const [editing, setEditing] = React.useState(false);
   const [editingPersonalization, setEditingPersonalization] = React.useState(false);
 
-  // Transformer items
-  const [prospectItems, setProspectItems] = React.useState([
-    {
-      title: 'Personal Bio',
-      id: 'LINKEDIN_BIO_SUMMARY',
-      checked: !template.transformer_blocklist.includes('LINKEDIN_BIO_SUMMARY'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('LINKEDIN_BIO_SUMMARY'),
-    },
-    {
-      title: 'List Of Past Jobs',
-      id: 'LIST_OF_PAST_JOBS',
-      checked: !template.transformer_blocklist.includes('LIST_OF_PAST_JOBS'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('LIST_OF_PAST_JOBS'),
-    },
-    {
-      title: 'Years of Experience',
-      id: 'YEARS_OF_EXPERIENCE',
-      checked: !template.transformer_blocklist.includes('YEARS_OF_EXPERIENCE'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('YEARS_OF_EXPERIENCE'),
-    },
-    {
-      title: 'Current Experience',
-      id: 'CURRENT_EXPERIENCE_DESCRIPTION',
-      checked: !template.transformer_blocklist.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
-    },
-    {
-      title: 'Education History',
-      id: 'COMMON_EDUCATION',
-      checked: !template.transformer_blocklist.includes('COMMON_EDUCATION'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('COMMON_EDUCATION'),
-    },
-    {
-      title: 'Recommendations',
-      id: 'RECENT_RECOMMENDATIONS',
-      checked: !template.transformer_blocklist.includes('RECENT_RECOMMENDATIONS'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_RECOMMENDATIONS'),
-    },
-    {
-      title: 'Patents',
-      id: 'RECENT_PATENTS',
-      checked: !template.transformer_blocklist.includes('RECENT_PATENTS'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_PATENTS'),
-    },
-    {
-      title: 'Years at Current Job',
-      id: 'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB',
-      checked: !template.transformer_blocklist.includes('YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'),
-      disabled: !!currentProject?.transformer_blocklist?.includes(
-        'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'
-      ),
-    },
-    {
-      title: 'Custom Data Points',
-      id: 'CUSTOM',
-      checked: !template.transformer_blocklist.includes('CUSTOM'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CUSTOM'),
-    },
-  ]);
-
-  const [companyItems, setCompanyItems] = React.useState([
-    {
-      title: 'Company Description',
-      id: 'CURRENT_JOB_DESCRIPTION',
-      checked: !template.transformer_blocklist.includes('CURRENT_JOB_DESCRIPTION'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_DESCRIPTION'),
-    },
-    {
-      title: 'Company Specialites',
-      id: 'CURRENT_JOB_SPECIALTIES',
-      checked: !template.transformer_blocklist.includes('CURRENT_JOB_SPECIALTIES'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_SPECIALTIES'),
-    },
-    {
-      title: 'Company Industry',
-      id: 'CURRENT_JOB_INDUSTRY',
-      checked: !template.transformer_blocklist.includes('CURRENT_JOB_INDUSTRY'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_INDUSTRY'),
-    },
-    {
-      title: 'General Company News',
-      id: 'SERP_NEWS_SUMMARY',
-      checked: !template.transformer_blocklist.includes('SERP_NEWS_SUMMARY'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY'),
-    },
-    {
-      title: 'Negative Company News',
-      id: 'SERP_NEWS_SUMMARY_NEGATIVE',
-      checked: !template.transformer_blocklist.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
-    },
-    {
-      title: 'Website Info',
-      id: 'GENERAL_WEBSITE_TRANSFORMER',
-      checked: !template.transformer_blocklist.includes('GENERAL_WEBSITE_TRANSFORMER'),
-      disabled: !!currentProject?.transformer_blocklist?.includes('GENERAL_WEBSITE_TRANSFORMER'),
-    },
-  ]);
-
   // Span magic on the template.template
   // Replace all [[ and ]] with span tags
   let templateBody = template.template || '';
@@ -1282,9 +1186,7 @@ export const EmailBodyItem: React.FC<{
   const [title, setTitle] = React.useState<string>(template.title || '');
   const [editingTitle, setEditingTitle] = React.useState<boolean>(false);
 
-  const [personalizationItemsCount, setPersonalizationItemsCount] = React.useState<number>(
-    prospectItems.length + companyItems.length - template.transformer_blocklist?.length
-  );
+  const [displayPersonalization, refreshPersonalization] = useRefresh();
 
   const triggerPatchEmailBodyTemplateTitle = async () => {
     setLoading(true);
@@ -1434,6 +1336,9 @@ export const EmailBodyItem: React.FC<{
 
     return newText;
   }, []);
+
+  console.log('go hereeeeee', template.transformer_blocklist);
+
   return (
     <Flex w='100%'>
       <LoadingOverlay visible={loading} />
@@ -1656,7 +1561,7 @@ export const EmailBodyItem: React.FC<{
             </Flex>
           </Box>
         )}
-        <Tabs
+        {/* <Tabs
           value={editingPersonalization ? 'personalization' : ''}
           pt='sm'
           variant='pills'
@@ -1671,25 +1576,6 @@ export const EmailBodyItem: React.FC<{
             onClick={() => {
               setEditingPersonalization(!editingPersonalization);
             }}
-            rightSection={
-              <>
-                {personalizationItemsCount ? (
-                  <Badge
-                    w={16}
-                    h={16}
-                    sx={{ pointerEvents: 'none' }}
-                    variant='filled'
-                    size='xs'
-                    p={0}
-                    color='teal.6'
-                  >
-                    {personalizationItemsCount}
-                  </Badge>
-                ) : (
-                  <></>
-                )}
-              </>
-            }
             sx={(theme) => ({
               '&[data-active]': {
                 backgroundColor: theme.colors.teal[0] + '!important',
@@ -1701,54 +1587,48 @@ export const EmailBodyItem: React.FC<{
           >
             Edit Personalization
           </Tabs.Tab>
-          <Tabs.Panel value='personalization'>
-            <PersonalizationSection
-              blocklist={
-                currentProject.transformer_blocklist_initial?.concat(
-                  template.transformer_blocklist
-                ) ||
-                template.transformer_blocklist ||
-                []
+          <Tabs.Panel value='personalization'> */}
+
+        {displayPersonalization && (
+          <PersonalizationSection
+            title='Enabled Research Points'
+            blocklist={template.transformer_blocklist ?? []}
+            onItemsChange={async (items) => {
+              // Update transformer blocklist
+
+              const result = await patchSequenceStep(
+                userToken,
+                template.id,
+                template.overall_status,
+                template.title,
+                template.template,
+                template.bumped_count,
+                template.default,
+                template.sequence_delay_days,
+                items.filter((x) => !x.checked).map((x) => x.id)
+              );
+              if (result.status != 'success') {
+                showNotification({
+                  title: 'Error',
+                  message: result.message,
+                  color: 'red',
+                });
+                return;
+              } else {
+                showNotification({
+                  title: 'Success',
+                  message: 'Successfully updated research used',
+                  color: 'green',
+                });
+                refetch();
+                refreshPersonalization();
               }
-              onItemsChange={async (items) => {
-                const checked = items.filter((x: any) => x.checked).map((x: any) => x.id);
-                setPersonalizationItemsCount(checked.length);
-
-                const unchecked = items.filter((x: any) => !x.checked).map((x: any) => x.id);
-
-                // Update transformer blocklist
-                const result = await patchSequenceStep(
-                  userToken,
-                  template.id,
-                  template.overall_status,
-                  template.title,
-                  template.template,
-                  template.bumped_count,
-                  template.default,
-                  template.sequence_delay_days,
-                  unchecked
-                );
-                if (result.status != 'success') {
-                  showNotification({
-                    title: 'Error',
-                    message: result.message,
-                    color: 'red',
-                  });
-                  return;
-                } else {
-                  showNotification({
-                    title: 'Success',
-                    message: 'Successfully updated research used',
-                    color: 'green',
-                  });
-                  refetch();
-                }
-                // setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
-              }}
-              hideAnalytics
-            />
-          </Tabs.Panel>
-        </Tabs>
+              // setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
+            }}
+          />
+        )}
+        {/* </Tabs.Panel>
+        </Tabs> */}
       </Flex>
     </Flex>
   );

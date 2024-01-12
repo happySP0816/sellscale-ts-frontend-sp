@@ -3565,173 +3565,169 @@ export const PersonalizationSection = (props: {
     disabled?: boolean;
   }
 
-  const pectItemList: PectItem[] = [
-    {
-      title: 'Personal Bio',
-      id: 'LINKEDIN_BIO_SUMMARY',
-    },
-    {
-      title: 'List Of Past Jobs',
-      id: 'LIST_OF_PAST_JOBS',
-    },
-    {
-      title: 'Years of Experience',
-      id: 'YEARS_OF_EXPERIENCE',
-    },
-    {
-      title: 'Current Experience',
-      id: 'CURRENT_EXPERIENCE_DESCRIPTION',
-    },
-    {
-      title: 'Education History',
-      id: 'COMMON_EDUCATION',
-    },
-    {
-      title: 'Recommendations',
-      id: 'RECENT_RECOMMENDATIONS',
-    },
-    {
-      title: 'Patents',
-      id: 'RECENT_PATENTS',
-    },
-    {
-      title: 'Years at Current Job',
-      id: 'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB',
-    },
-    {
-      title: 'Custom Data Points',
-      id: 'CUSTOM',
-    },
-  ];
-
-  const companyItemList: PectItem[] = [
-    {
-      title: 'Company Description',
-      id: 'CURRENT_JOB_DESCRIPTION',
-    },
-    {
-      title: 'Company Specialites',
-      id: 'CURRENT_JOB_SPECIALTIES',
-    },
-    {
-      title: 'Company Industry',
-      id: 'CURRENT_JOB_INDUSTRY',
-    },
-    {
-      title: 'General Company News',
-      id: 'SERP_NEWS_SUMMARY',
-    },
-    {
-      title: 'Negative Company News',
-      id: 'SERP_NEWS_SUMMARY_NEGATIVE',
-    },
-    {
-      title: 'Website Info',
-      id: 'GENERAL_WEBSITE_TRANSFORMER',
-    },
-  ];
-
-  const [prospectItems, setProspectItems] = useState<PectItem[]>([]);
-
-  const [companyItems, setCompanyItems] = useState<PectItem[]>([]);
-
-  // const [allItems, setAllItems] = useState<any>([]);
-
-  // const [prospectItems, setProspectItems] = useState([
+  // const pectItemList: PectItem[] = [
   //   {
   //     title: 'Personal Bio',
   //     id: 'LINKEDIN_BIO_SUMMARY',
-  //     checked: !props.blocklist.includes('LINKEDIN_BIO_SUMMARY'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('LINKEDIN_BIO_SUMMARY'),
   //   },
   //   {
   //     title: 'List Of Past Jobs',
   //     id: 'LIST_OF_PAST_JOBS',
-  //     checked: !props.blocklist.includes('LIST_OF_PAST_JOBS'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('LIST_OF_PAST_JOBS'),
   //   },
   //   {
   //     title: 'Years of Experience',
   //     id: 'YEARS_OF_EXPERIENCE',
-  //     checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('YEARS_OF_EXPERIENCE'),
   //   },
   //   {
   //     title: 'Current Experience',
   //     id: 'CURRENT_EXPERIENCE_DESCRIPTION',
-  //     checked: !props.blocklist.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
   //   },
   //   {
   //     title: 'Education History',
   //     id: 'COMMON_EDUCATION',
-  //     checked: !props.blocklist.includes('COMMON_EDUCATION'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('COMMON_EDUCATION'),
   //   },
   //   {
   //     title: 'Recommendations',
   //     id: 'RECENT_RECOMMENDATIONS',
-  //     checked: !props.blocklist.includes('RECENT_RECOMMENDATIONS'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_RECOMMENDATIONS'),
   //   },
   //   {
   //     title: 'Patents',
   //     id: 'RECENT_PATENTS',
-  //     checked: !props.blocklist.includes('RECENT_PATENTS'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_PATENTS'),
   //   },
   //   {
   //     title: 'Years at Current Job',
   //     id: 'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB',
-  //     checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'),
   //   },
   //   {
   //     title: 'Custom Data Points',
   //     id: 'CUSTOM',
-  //     checked: !props.blocklist.includes('CUSTOM'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('CUSTOM'),
   //   },
-  // ]);
+  // ];
 
-  // const [companyItems, setCompanyItems] = useState([
+  // const companyItemList: PectItem[] = [
   //   {
   //     title: 'Company Description',
   //     id: 'CURRENT_JOB_DESCRIPTION',
-  //     checked: !props.blocklist.includes('CURRENT_JOB_DESCRIPTION'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_DESCRIPTION'),
   //   },
   //   {
   //     title: 'Company Specialites',
   //     id: 'CURRENT_JOB_SPECIALTIES',
-  //     checked: !props.blocklist.includes('CURRENT_JOB_SPECIALTIES'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_SPECIALTIES'),
   //   },
   //   {
   //     title: 'Company Industry',
   //     id: 'CURRENT_JOB_INDUSTRY',
-  //     checked: !props.blocklist.includes('CURRENT_JOB_INDUSTRY'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_INDUSTRY'),
   //   },
   //   {
   //     title: 'General Company News',
   //     id: 'SERP_NEWS_SUMMARY',
-  //     checked: !props.blocklist.includes('SERP_NEWS_SUMMARY'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY'),
   //   },
   //   {
   //     title: 'Negative Company News',
   //     id: 'SERP_NEWS_SUMMARY_NEGATIVE',
-  //     checked: !props.blocklist.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
   //   },
   //   {
   //     title: 'Website Info',
   //     id: 'GENERAL_WEBSITE_TRANSFORMER',
-  //     checked: !props.blocklist.includes('GENERAL_WEBSITE_TRANSFORMER'),
-  //     disabled: !!currentProject?.transformer_blocklist?.includes('GENERAL_WEBSITE_TRANSFORMER'),
   //   },
-  // ]);
+  // ];
+
+  const [prospectItems, setProspectItems] = useState([
+    {
+      title: 'Personal Bio',
+      id: 'LINKEDIN_BIO_SUMMARY',
+      checked: !props.blocklist.includes('LINKEDIN_BIO_SUMMARY'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('LINKEDIN_BIO_SUMMARY'),
+    },
+    {
+      title: 'List Of Past Jobs',
+      id: 'LIST_OF_PAST_JOBS',
+      checked: !props.blocklist.includes('LIST_OF_PAST_JOBS'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('LIST_OF_PAST_JOBS'),
+    },
+    {
+      title: 'Years of Experience',
+      id: 'YEARS_OF_EXPERIENCE',
+      checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('YEARS_OF_EXPERIENCE'),
+    },
+    {
+      title: 'Current Experience',
+      id: 'CURRENT_EXPERIENCE_DESCRIPTION',
+      checked: !props.blocklist.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_EXPERIENCE_DESCRIPTION'),
+    },
+    {
+      title: 'Education History',
+      id: 'COMMON_EDUCATION',
+      checked: !props.blocklist.includes('COMMON_EDUCATION'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('COMMON_EDUCATION'),
+    },
+    {
+      title: 'Recommendations',
+      id: 'RECENT_RECOMMENDATIONS',
+      checked: !props.blocklist.includes('RECENT_RECOMMENDATIONS'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_RECOMMENDATIONS'),
+    },
+    {
+      title: 'Patents',
+      id: 'RECENT_PATENTS',
+      checked: !props.blocklist.includes('RECENT_PATENTS'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('RECENT_PATENTS'),
+    },
+    {
+      title: 'Years at Current Job',
+      id: 'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB',
+      checked: !props.blocklist.includes('YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'),
+      disabled: !!currentProject?.transformer_blocklist?.includes(
+        'YEARS_OF_EXPERIENCE_AT_CURRENT_JOB'
+      ),
+    },
+    {
+      title: 'Custom Data Points',
+      id: 'CUSTOM',
+      checked: !props.blocklist.includes('CUSTOM'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CUSTOM'),
+    },
+  ]);
+
+  const [companyItems, setCompanyItems] = useState([
+    {
+      title: 'Company Description',
+      id: 'CURRENT_JOB_DESCRIPTION',
+      checked: !props.blocklist.includes('CURRENT_JOB_DESCRIPTION'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_DESCRIPTION'),
+    },
+    {
+      title: 'Company Specialites',
+      id: 'CURRENT_JOB_SPECIALTIES',
+      checked: !props.blocklist.includes('CURRENT_JOB_SPECIALTIES'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_SPECIALTIES'),
+    },
+    {
+      title: 'Company Industry',
+      id: 'CURRENT_JOB_INDUSTRY',
+      checked: !props.blocklist.includes('CURRENT_JOB_INDUSTRY'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('CURRENT_JOB_INDUSTRY'),
+    },
+    {
+      title: 'General Company News',
+      id: 'SERP_NEWS_SUMMARY',
+      checked: !props.blocklist.includes('SERP_NEWS_SUMMARY'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY'),
+    },
+    {
+      title: 'Negative Company News',
+      id: 'SERP_NEWS_SUMMARY_NEGATIVE',
+      checked: !props.blocklist.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('SERP_NEWS_SUMMARY_NEGATIVE'),
+    },
+    {
+      title: 'Website Info',
+      id: 'GENERAL_WEBSITE_TRANSFORMER',
+      checked: !props.blocklist.includes('GENERAL_WEBSITE_TRANSFORMER'),
+      disabled: !!currentProject?.transformer_blocklist?.includes('GENERAL_WEBSITE_TRANSFORMER'),
+    },
+  ]);
 
   const { data, isFetching } = useQuery({
     queryKey: [`query-get-acceptance-rates`],
@@ -3741,34 +3737,47 @@ export const PersonalizationSection = (props: {
     },
   });
 
-  const allItems = prospectItems
-    .map((x) => {
-      return {
-        ...x,
-        type: 'PROSPECT',
-        accepted: getAcceptanceRate(x.id),
-      };
-    })
-    .concat(
-      companyItems.map((x) => {
-        return {
-          ...x,
-          type: 'COMPANY',
-          accepted: getAcceptanceRate(x.id),
-        };
-      })
-    )
-    .sort((a, b) => {
-      if (a.accepted === null && b.accepted === null) return 0;
-      if (a.accepted === null) return 1;
-      if (b.accepted === null) return -1;
-      return b.accepted - a.accepted;
-    });
+  const [allItems, setAllItems] = useState<
+    {
+      title: string;
+      id: string;
+      checked: boolean;
+      disabled: boolean;
+      type: string;
+      accepted: number | null;
+    }[]
+  >([]);
+  useEffect(() => {
+    setAllItems(
+      prospectItems
+        .map((x) => {
+          return {
+            ...x,
+            type: 'PROSPECT',
+            accepted: getAcceptanceRate(x.id),
+          };
+        })
+        .concat(
+          companyItems.map((x) => {
+            return {
+              ...x,
+              type: 'COMPANY',
+              accepted: getAcceptanceRate(x.id),
+            };
+          })
+        )
+        .sort((a, b) => {
+          if (a.accepted === null && b.accepted === null) return 0;
+          if (a.accepted === null) return 1;
+          if (b.accepted === null) return -1;
+          return b.accepted - a.accepted;
+        })
+    );
+  }, [prospectItems, companyItems, data]);
 
   function getAcceptanceRate(itemId: string) {
-    if (!data) return null;
     if (props.hideAnalytics) return null;
-    for (const d of data) {
+    for (const d of data ?? []) {
       if (d.research_point_type === itemId) {
         return Math.round(d['avg. acceptance %'] * 100) as number;
       }
@@ -3776,52 +3785,47 @@ export const PersonalizationSection = (props: {
     return null;
   }
 
-  useEffect(() => {
-    if (props.hideAnalytics) return;
-    const newPectList: PectItem[] = pectItemList.map((item) => ({
-      ...item,
-      checked: !props.blocklist.includes(item.id),
-      disabled: !!currentProject?.transformer_blocklist?.includes(item.id),
-    }));
+  // useEffect(() => {
+  //   if (props.hideAnalytics) return;
+  //   const newPectList: PectItem[] = pectItemList.map((item) => ({
+  //     ...item,
+  //     checked: !props.blocklist.includes(item.id),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes(item.id),
+  //   }));
 
-    const newCompanyList: PectItem[] = companyItemList.map((item) => ({
-      ...item,
-      checked: !props.blocklist.includes(item.id),
-      disabled: !!currentProject?.transformer_blocklist?.includes(item.id),
-    }));
-    const allItems = [...newPectList, ...newCompanyList];
-    // const newAllItems = newPectList
-    //   .map((x) => {
-    //     return {
-    //       ...x,
-    //       type: 'PROSPECT',
-    //       accepted: getAcceptanceRate(x.id),
-    //     };
-    //   })
-    //   .concat(
-    //     newCompanyList.map((x) => {
-    //       return {
-    //         ...x,
-    //         type: 'COMPANY',
-    //         accepted: getAcceptanceRate(x.id),
-    //       };
-    //     })
-    //   )
-    //   .sort((a, b) => {
-    //     if (a.accepted === null && b.accepted === null) return 0;
-    //     if (a.accepted === null) return 1;
-    //     if (b.accepted === null) return -1;
-    //     return b.accepted - a.accepted;
-    //   });
+  //   const newCompanyList: PectItem[] = companyItemList.map((item) => ({
+  //     ...item,
+  //     checked: !props.blocklist.includes(item.id),
+  //     disabled: !!currentProject?.transformer_blocklist?.includes(item.id),
+  //   }));
+  //   // const newAllItems = newPectList
+  //   //   .map((x) => {
+  //   //     return {
+  //   //       ...x,
+  //   //       type: 'PROSPECT',
+  //   //       accepted: getAcceptanceRate(x.id),
+  //   //     };
+  //   //   })
+  //   //   .concat(
+  //   //     newCompanyList.map((x) => {
+  //   //       return {
+  //   //         ...x,
+  //   //         type: 'COMPANY',
+  //   //         accepted: getAcceptanceRate(x.id),
+  //   //       };
+  //   //     })
+  //   //   )
+  //   //   .sort((a, b) => {
+  //   //     if (a.accepted === null && b.accepted === null) return 0;
+  //   //     if (a.accepted === null) return 1;
+  //   //     if (b.accepted === null) return -1;
+  //   //     return b.accepted - a.accepted;
+  //   //   });
 
-    setProspectItems(newPectList);
-    setCompanyItems(newCompanyList);
-
-    if (props.onItemsChange && props.onChanged) {
-      props.onItemsChange(allItems);
-      props.onChanged();
-    }
-  }, [props.blocklist]);
+  //   setProspectItems(newPectList);
+  //   setCompanyItems(newCompanyList);
+  //   props.onItemsChange(allItems);
+  // }, []);
 
   const markAll = (newLabel: boolean) => {
     setProspectItems((prev) => {
@@ -3904,11 +3908,11 @@ export const PersonalizationSection = (props: {
           onChange={(event) => markAll(event.currentTarget.checked)}
         />
         <Flex direction={'column'} gap={'0.5rem'}>
-          {allItems.map((item: any) => (
+          {allItems.map((item) => (
             <ProcessBar
               id={item.id}
               title={item.title}
-              percent={item.accepted || 0}
+              percent={item.accepted ?? 0}
               checked={item.checked}
               onPressItem={item.type === 'PROSPECT' ? setProfileChecked : setCompanyChecked}
               color={item.type === 'PROSPECT' ? 'teal' : 'grape'}

@@ -763,7 +763,7 @@ export default function EmailSequencingPage(props: {
               <Tabs.Tab value='smartlead' icon={<IconMessages size='0.8rem' />}>
                 Beta - Variants
               </Tabs.Tab>
-            )} */}
+            )}
           </Tabs.List>
           <Tabs.Panel value='email_settings'>
             <Box maw='800px' ml='auto' mr='auto'>
@@ -833,7 +833,7 @@ export default function EmailSequencingPage(props: {
             <Tabs.Panel value='smartlead'>
               <SmartleadVisualizer data={smartleadSequence} />
             </Tabs.Panel>
-          )} */}
+          )}
         </Tabs>
       </Card.Section>
     </Flex>

@@ -1113,7 +1113,7 @@ const EmailReplyFrameworkView = (props: {
                   }}
                 />
               </Flex>
-              {selectedFramework?.use_account_research && (
+              {/* {selectedFramework?.use_account_research && (
                 <PersonalizationSection
                   blocklist={selectedFramework?.research_blocklist}
                   onItemsChange={async (items) => {
@@ -1122,7 +1122,7 @@ const EmailReplyFrameworkView = (props: {
                     // const result = await patchBumpFramework(
                   }}
                 />
-              )}
+              )} */}
             </Accordion.Panel>
           </Accordion.Item>
         </Accordion>

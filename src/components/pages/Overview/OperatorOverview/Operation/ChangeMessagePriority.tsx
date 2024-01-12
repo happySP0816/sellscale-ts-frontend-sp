@@ -1,29 +1,7 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Card,
-  Text,
-  Flex,
-  Badge,
-  Stack,
-  Button,
-  Modal,
-  Avatar,
-  Divider,
-  rem,
-  Title,
-  ActionIcon,
-} from "@mantine/core";
-import {
-  IconAlertTriangle,
-  IconCheck,
-  IconChevronLeft,
-  IconChevronRight,
-  IconExternalLink,
-  IconMessages,
-  IconX,
-} from "@tabler/icons";
+import { Box, Card, Text, Flex, Badge, Stack, Button } from "@mantine/core";
+import { IconAlertTriangle, IconExternalLink } from "@tabler/icons";
 import { useDisclosure } from "@mantine/hooks";
+import CampaignReviewModal from "./CampaignReviewModal/CampaignReviewModal";
 import ChangeMessageModal from "./ChangeMessageModal";
 
 const ChangeMessagePriority = () => {

@@ -111,8 +111,6 @@ const OperatorOverview = () => {
             }
         });
 
-        console.log('categorized', categorized)
-
         setNotifications(categorized);
     };
 

@@ -1406,13 +1406,13 @@ function IntroMessageSection(props: {
                     <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
                       Personalizations:{' '}
                       <Text fw={500} span>
-                        {messageMetaData.notes?.length}
+                        {messageMetaData?.notes?.length}
                       </Text>
                     </Badge>
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
                     <List>
-                      {messageMetaData.notes?.map((note: any, index: number) => (
+                      {messageMetaData?.notes?.map((note: any, index: number) => (
                         <List.Item key={index}>
                           <Text fz='sm'>{note}</Text>
                         </List.Item>
@@ -3294,13 +3294,13 @@ function TemplateSection(props: {
                           <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
                             Personalizations:{' '}
                             <Text fw={500} span>
-                              {props.messageMetaData.notes?.length}
+                              {props.messageMetaData?.notes?.length}
                             </Text>
                           </Badge>
                         </HoverCard.Target>
                         <HoverCard.Dropdown>
                           <List>
-                            {props.messageMetaData.notes?.map((note: any, index: number) => (
+                            {props.messageMetaData?.notes?.map((note: any, index: number) => (
                               <List.Item key={index}>
                                 <Text fz='sm'>{note}</Text>
                               </List.Item>

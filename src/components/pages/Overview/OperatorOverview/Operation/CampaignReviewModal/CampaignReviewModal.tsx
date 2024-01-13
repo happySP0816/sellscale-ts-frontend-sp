@@ -22,6 +22,7 @@ import {
   IconCheck,
   IconClock,
   IconExternalLink,
+  IconMail,
   IconMessages,
   IconUsers,
   IconX,
@@ -35,15 +36,20 @@ import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import getPersonas, { getPersonasOverview } from '@utils/requests/getPersonas';
-import { Archetype, BumpFramework, PersonaOverview } from 'src';
+import { Archetype, BumpFramework, EmailSequenceStep, PersonaOverview } from 'src';
 import { API_URL } from '@constants/data';
+import DOMPurify from "dompurify";
 import { showNotification } from '@mantine/notifications';
+import { getEmailSequenceSteps } from '@utils/requests/emailSequencing';
+import { valueToColor } from '@utils/general';
 
-type Props = { notifId: number; archetypeId: number } & ModalProps;
+type Props = { notifId: number; archetypeId: number; data: any } & ModalProps;
 
 const CampaignReviewModal: FC<Props> = (props) => {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
+
+  const isEmail = !!props.data?.email_active;
 
   const { data, isFetching } = useQuery({
     queryKey: [`query-campaign-review-details`, { archetypeId: props.archetypeId }],
@@ -55,27 +61,35 @@ const CampaignReviewModal: FC<Props> = (props) => {
       const filterRes = await getICPRuleSet(userToken, archetypeId);
       const filters = filterRes.status === 'success' ? filterRes.data : null;
 
-      console.log(archetypeId, { filters });
-
-      const frameworksRes = await getBumpFrameworks(userToken, [], [], [archetypeId]);
-      const allFrameworks =
-        frameworksRes.status === 'success'
-          ? (frameworksRes.data.bump_frameworks as BumpFramework[])
-          : [];
-      const frameworks = allFrameworks.filter((f) => f.client_archetype_id === archetypeId);
-
-      console.log({ filters, frameworks });
+      let email_templates: EmailSequenceStep[] = [];
+      let li_templates: BumpFramework[] = [];
+      if (isEmail) {
+        const stepsRes = await getEmailSequenceSteps(userToken, [], [], [archetypeId]);
+        const allFrameworks =
+          stepsRes.status === 'success'
+            ? (stepsRes.data.sequence_steps as EmailSequenceStep[])
+            : [];
+        email_templates = allFrameworks.filter((f) => f.default);
+      } else {
+        const frameworksRes = await getBumpFrameworks(userToken, [], [], [archetypeId]);
+        const allFrameworks =
+          frameworksRes.status === 'success'
+            ? (frameworksRes.data.bump_frameworks as BumpFramework[])
+            : [];
+        li_templates = allFrameworks
+          .filter((f) => f.client_archetype_id === archetypeId && f.default)
+          .sort((a, b) => (a.bumped_count ?? 0) - (b.bumped_count ?? 0));
+      }
 
       const personasRes = await getPersonasOverview(userToken);
       const personas =
         personasRes.status === 'success' ? (personasRes.data as PersonaOverview[]) : [];
       const persona = personas.find((p) => p.id === archetypeId);
 
-      console.log({ filters, frameworks, persona });
-
       return {
         filters,
-        frameworks,
+        email_templates,
+        li_templates,
         persona,
       };
     },
@@ -83,79 +97,52 @@ const CampaignReviewModal: FC<Props> = (props) => {
     enabled: props.archetypeId !== -1,
   });
 
-  console.log(data);
+  const templates: {
+    title: string;
+    description: string;
+  }[] = isEmail
+    ? (data?.email_templates ?? []).map((t) => ({
+        title: t.title,
+        description: t.template,
+      }))
+    : (data?.li_templates ?? []).map((t) => ({
+        title: t.title,
+        description: t.description,
+      }));
 
   const renderContactFilter = () => {
     return (
       <Grid gutter={'sm'}>
-        <Grid.Col xs={12} lg={6}>
-          <Text fw={700} fz={'sm'} color='gray.6'>
-            JOB TITLE
-          </Text>
+        {[
+          { title: 'title', key: 'included_individual_title_keywords' },
+          { title: 'keywords', key: 'included_individual_generalized_keywords' },
+          { title: 'skills', key: 'included_individual_skills_keywords' },
+          { title: 'location', key: 'included_individual_locations_keywords' },
+          { title: 'eduction', key: 'included_individual_education_keywords' },
+          { title: 'company name', key: 'included_company_name_keywords' },
+          { title: 'company location', key: 'included_company_locations_keywords' },
+          { title: 'company keywords', key: 'included_company_generalized_keywords' },
+        ].map((template, i) => (
+          <Grid.Col xs={12} lg={6} key={i} span={6}>
+            {((data?.filters && data?.filters[template.key]) ?? []).length > 0 && (
+              <>
+                <Text fw={700} fz={'sm'} color='gray.6' tt='uppercase'>
+                  {template.title}
+                </Text>
 
-          <Flex wrap={'wrap'} gap={'xs'} mt={'sm'}>
-            {(data?.filters?.included_individual_title_keywords ?? []).map(
-              (t: string, i: number) => (
-                <Badge color='green' variant='light' key={i}>
-                  <Text color='gray.8'>{t}</Text>
-                </Badge>
-              )
+                <Flex wrap={'wrap'} gap={'xs'} mt={'sm'}>
+                  {((data?.filters && data?.filters[template.key]) ?? []).map(
+                    (t: string, i: number) => (
+                      <Badge color={valueToColor(theme, template.title)} variant='light' key={i}>
+                        <Text color='gray.8'>{t}</Text>
+                      </Badge>
+                    )
+                  )}
+                </Flex>
+              </>
             )}
-          </Flex>
-        </Grid.Col>
-        <Grid.Col xs={12} lg={6}>
-          <Stack spacing={'sm'}>
-            <Box>
-              <Text fw={700} fz={'sm'} color='gray.6'>
-                INDUSTRY
-              </Text>
-              <Flex wrap={'wrap'} gap={'xs'} mt={'sm'}>
-                {(data?.filters?.included_individual_industry_keywords ?? []).map(
-                  (t: string, i: number) => (
-                    <Badge color='violet' variant='light' key={i}>
-                      <Text color='gray.8'>{t}</Text>
-                    </Badge>
-                  )
-                )}
-              </Flex>
-            </Box>
-
-            <Box>
-              <Text fw={700} fz={'sm'} color='gray.6'>
-                EXPERIENCE
-              </Text>
-              <Flex wrap={'wrap'} gap={'xs'} mt={'sm'}>
-                {new Array(2).fill(faker.word.noun(10)).map((j, idx) => (
-                  <Badge color='orange' variant='light' key={j + idx}>
-                    <Text color='gray.8'>{faker.word.noun(10)}</Text>
-                  </Badge>
-                ))}
-                {(data?.filters?.included_individual_education_keywords ?? []).map(
-                  (t: string, i: number) => (
-                    <Badge color='orange' variant='light' key={i}>
-                      <Text color='gray.8'>{t}</Text>
-                    </Badge>
-                  )
-                )}
-              </Flex>
-            </Box>
-
-            <Box>
-              <Text fw={700} fz={'sm'} color='gray.6'>
-                BIO AND JOB DESCRIPTION
-              </Text>
-              <Flex wrap={'wrap'} gap={'xs'} mt={'sm'}>
-                {(data?.filters?.included_individual_generalized_keywords ?? []).map(
-                  (t: string, i: number) => (
-                    <Badge color='blue' variant='light' key={i}>
-                      <Text color='gray.8'>{t}</Text>
-                    </Badge>
-                  )
-                )}
-              </Flex>
-            </Box>
-          </Stack>
-        </Grid.Col>
+          </Grid.Col>
+        ))}
       </Grid>
     );
   };
@@ -202,9 +189,13 @@ const CampaignReviewModal: FC<Props> = (props) => {
               <Divider orientation='vertical' />
 
               <Flex align={'center'}>
-                <FaLinkedin fill={theme.colors.blue[6]} />
+                {isEmail ? (
+                  <IconMail fill={theme.colors.yellow[6]} />
+                ) : (
+                  <FaLinkedin fill={theme.colors.blue[6]} />
+                )}
                 <Text size={'sm'} fw={600} color='gray.6'>
-                  &nbsp; {data?.frameworks.length} Steps
+                  &nbsp; {templates.length} Steps
                 </Text>
               </Flex>
 
@@ -225,8 +216,7 @@ const CampaignReviewModal: FC<Props> = (props) => {
 
                 <Badge>
                   {Math.round(
-                    (((data?.persona?.num_prospects ?? 0) / 100) * (data?.frameworks.length ?? 0)) /
-                      7
+                    (((data?.persona?.num_prospects ?? 0) / 100) * (templates.length ?? 0)) / 7
                   )}{' '}
                   WEEKS
                 </Badge>
@@ -245,7 +235,7 @@ const CampaignReviewModal: FC<Props> = (props) => {
             }
             content={<>{renderContactFilter()}</>}
           />
-          {(data?.frameworks ?? []).map((s, idx) => (
+          {templates.map((s, idx) => (
             <CollapseItem
               key={s.title}
               defaultOpen={false}
@@ -268,7 +258,13 @@ const CampaignReviewModal: FC<Props> = (props) => {
                   })}
                 >
                   <Text fz={'sm'} fw={500}>
-                    {s.description}
+                    <Text fz='sm'>
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(s.description),
+                        }}
+                      />
+                    </Text>
                   </Text>
                 </Box>
               }

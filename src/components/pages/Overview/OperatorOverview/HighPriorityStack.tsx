@@ -124,6 +124,7 @@ const HighPriorityStack = (props: PropsType) => {
         onClose={close}
         notifId={selectItem?.id ?? -1}
         archetypeId={selectItem?.data?.archetype_id ?? -1}
+        data={selectItem?.data}
       />
     </>
   );

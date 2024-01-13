@@ -8,6 +8,7 @@ import { IconAlarm } from '@tabler/icons';
 import ChangeMessagePriority from './Operation/ChangeMessagePriority';
 import CampaignReviewModal from './Operation/CampaignReviewModal/CampaignReviewModal';
 import { useDisclosure } from '@mantine/hooks';
+import ScheduleMeeting from './Operation/ScheduleMeeting';
 
 type PropsType = {
   notifications: OperatorNotification[];
@@ -118,6 +119,19 @@ const HighPriorityStack = (props: PropsType) => {
           }
         />
       </Stack>
+      
+      <Operation
+        priority={Priority.ScheduleMeeting}
+        renderLeft={
+          <Flex align={'center'}>
+            <Text fw={500} fz={'sm'}>
+              Schedule Meeting - In Development
+            </Text>
+          </Flex>
+        }
+        renderContent={<ScheduleMeeting />}
+        renderRight={<></>}
+      />
 
       <CampaignReviewModal
         opened={opened}

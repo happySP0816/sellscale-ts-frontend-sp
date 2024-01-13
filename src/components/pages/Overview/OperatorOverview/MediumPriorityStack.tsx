@@ -25,7 +25,7 @@ const MediumPriorityStack = () => {
         undefined,
         undefined,
         100,
-        ['ACTIVE_CONVO_SCHEDULING'],
+        ['DEMO_SET'],
         'ALL',
         undefined,
         true
@@ -49,9 +49,11 @@ const MediumPriorityStack = () => {
         </Text>
       </Flex>
 
-      {(data ?? []).map((i, idx) => (
-        <DemoFeedbackWrapper key={idx} prospect={i} />
-      ))}
+      {(data ?? [])
+        .filter((p) => p.demo_date)
+        .map((i, idx) => (
+          <DemoFeedbackWrapper key={idx} prospect={i} />
+        ))}
     </Stack>
   );
 };

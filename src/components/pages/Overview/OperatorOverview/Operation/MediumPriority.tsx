@@ -24,7 +24,7 @@ import { useState } from 'react';
 import postSubmitDemoFeedback from '@utils/requests/postSubmitDemoFeedback';
 import { userTokenState } from '@atoms/userAtoms';
 import { useRecoilValue } from 'recoil';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import getDemoFeedback from '@utils/requests/getDemoFeedback';
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -34,6 +34,7 @@ const useStyles = createStyles((theme) => ({
 const MediumPriority = (props: { prospect: Prospect }) => {
   const { classes } = useStyles();
   const userToken = useRecoilValue(userTokenState);
+  const queryClient = useQueryClient();
 
   const [feedback, setFeedback] = useState('');
   const [rating, setRating] = useState(0);
@@ -135,6 +136,10 @@ const MediumPriority = (props: { prospect: Prospect }) => {
                     undefined,
                     undefined
                   );
+
+                  queryClient.refetchQueries({
+                    queryKey: [`query-feedback-prospects`],
+                  });
                 }}
               >
                 Add Demo Feedback

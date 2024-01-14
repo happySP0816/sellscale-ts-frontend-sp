@@ -354,7 +354,7 @@ export default function FindContactsPage() {
       
         <Tabs.Panel value='sellscale-db' pt='xs' style={{ position: 'relative' }}>
           <iframe 
-            src='https://sellscale.retool.com/embedded/public/e46c729a-2063-45c4-9f63-6153a39f985f'
+            src={'https://sellscale.retool.com/embedded/public/e46c729a-2063-45c4-9f63-6153a39f985f#authToken=' + userToken}
             style={{ width: '100%', height: window.innerHeight + 120 }}
             frameBorder={0}
           />

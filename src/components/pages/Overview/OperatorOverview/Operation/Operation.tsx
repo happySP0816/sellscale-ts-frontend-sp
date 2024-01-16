@@ -17,9 +17,16 @@ type Props = {
   renderLeft?: React.ReactNode;
   renderRight?: React.ReactNode;
   renderContent?: React.ReactNode;
+  collapsible?: boolean;
 };
 
-const Operation: FC<Props> = ({ priority, renderLeft, renderContent, renderRight }) => {
+const Operation: FC<Props> = ({
+  priority,
+  renderLeft,
+  renderContent,
+  renderRight,
+  collapsible = true,
+}) => {
   const [opened, { toggle }] = useDisclosure(false);
 
   const renderIcon = () => {
@@ -84,22 +91,26 @@ const Operation: FC<Props> = ({ priority, renderLeft, renderContent, renderRight
 
         <Flex align={'center'} gap={'xs'}>
           {opened || <>{renderRight}</>}
-          <ActionIcon onClick={toggle}>
-            <IconChevronDown
-              style={{
-                transitionDuration: '150ms',
-                transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-                transform: opened ? `rotate(${opened ? 180 : 0}deg)` : 'none',
-              }}
-            />
-          </ActionIcon>
+          {collapsible && (
+            <ActionIcon onClick={toggle}>
+              <IconChevronDown
+                style={{
+                  transitionDuration: "150ms",
+                  transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
+                  transform: opened ? `rotate(${opened ? 180 : 0}deg)` : "none",
+                }}
+              />
+            </ActionIcon>
+          )}
         </Flex>
       </Flex>
 
-      <Collapse in={opened}>
-        <Divider color='gray.4' my={'sm'} />
-        {renderContent}
-      </Collapse>
+      {collapsible && (
+        <Collapse in={opened}>
+          <Divider color="gray.4" my={"sm"} />
+          {renderContent}
+        </Collapse>
+      )}
     </Box>
   );
 };

@@ -178,6 +178,8 @@ export interface ProspectDetails {
     persona_id: number;
     demo_date: string;
     disqualification_reason?: string;
+    last_message_from_prospect?: string;
+    segment_title?: string;
   };
   data: Prospect;
   li: {

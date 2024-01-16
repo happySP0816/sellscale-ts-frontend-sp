@@ -166,43 +166,45 @@ export default function ProspectDetailsTooltip(props: ProspectDetailsTooltipProp
                 <IconUser size={'1.1rem'} color='gray' style={{ marginTop: '2px' }} />
                 <Text color='gray' fz='sm'>
                   {prospectData?.data?.archetype_name}
-                  <Flex gap={'5px'}>
+                  {prospectData?.data?.segment_title && <Flex gap={'5px'}>
                     <Text color='lightgray'>Segment:</Text>
-                    <Text>{'Prospect Segement Data'}</Text>
-                  </Flex>
+                    <Text>{prospectData?.data?.segment_title}</Text>
+                  </Flex>}
                 </Text>
               </Flex>
-              <Flex gap={'5px'}>
+              {prospectData?.data?.email && <Flex gap={'5px'}>
                 <IconMail fill='gray' color='white' size={'1.3rem'} />
                 <Text color='gray' fz='sm'>
                   {prospectData?.data?.email}
                 </Text>
-              </Flex>
+              </Flex>}
               <Flex gap={'5px'}>
                 <IconBrandLinkedin fill='gray' color='white' size={'1.3rem'} />
                 <Text color='gray' fz='sm' onClick={() => window.open('https://' + prospectData?.data?.linkedin_url, '_blank')}>
                   {prospectData?.data?.linkedin_url}
                 </Text>
               </Flex>
-              <Divider
-                label={
-                  <Flex align={'center'} gap={4}>
-                    <Text color='gray' fw={600} size={'md'} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      LAST MESSAGE <IconBrandLinkedin fill='#228be6' color='white' />
-                    </Text>
-                  </Flex>
-                }
-                labelPosition='left'
-                w={'100%'}
-                my={'sm'}
-              />
-              <Stack bg={'#f4f9ff'} p={'sm'}>
-                <Text lineClamp={4} component='div' fs={'italic'} size={'sm'}>
-                  <TypographyStylesProvider>
-                    <p style={{ margin: '0px' }}> {'Prospect Linkedin Last Message Data'}</p>
-                  </TypographyStylesProvider>
-                </Text>
-              </Stack>
+              {prospectData?.data?.li_last_message_from_prospect && <>
+                <Divider
+                  label={
+                    <Flex align={'center'} gap={4}>
+                      <Text color='gray' fw={600} size={'md'} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        LAST MESSAGE <IconBrandLinkedin fill='#228be6' color='white' />
+                      </Text>
+                    </Flex>
+                  }
+                  labelPosition='left'
+                  w={'100%'}
+                  my={'sm'}
+                />
+                <Stack bg={'#f4f9ff'} p={'sm'}>
+                  <Text lineClamp={4} component='div' fs={'italic'} size={'sm'}>
+                    <TypographyStylesProvider>
+                      <p style={{ margin: '0px' }}>"{prospectData?.data?.li_last_message_from_prospect}"</p>
+                    </TypographyStylesProvider>
+                  </Text>
+                </Stack>
+              </>}
             </Flex>
 
             <Button

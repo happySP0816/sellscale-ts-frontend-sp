@@ -155,6 +155,7 @@ import LinkedinInitialMessageTemplate from "./LinkedinInitialMessageTemplate";
 import { CTAGeneratorSuggestedModal } from "@modals/CTAGeneratorSuggestedModal";
 import { createBumpFramework } from "@utils/requests/createBumpFramework";
 import useRefresh from "@common/library/use-refresh";
+import AIBrainPill from "@common/persona/ICPFilter/AiBrainPill";
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -3084,6 +3085,8 @@ function FrameworkSection(props: {
                           </HoverCard.Dropdown>
                         </HoverCard>
 
+                        <AIBrainPill clientSdrID={bf.client_sdr_id} />
+
                         {bf.human_feedback && (
                           <HoverCard width={280} shadow="md">
                             <HoverCard.Target>
@@ -3350,34 +3353,6 @@ function TemplateSection(props: {
     useState<string>();
 
   const [templateActivesShow, setTemplateActivesShow] = useState([true]);
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [aibrainData, setAiBrainData] = useState({} as any);
-
-  const togglePopover = (client_sdr_id: number) => {
-    if (!isPopoverOpen) {
-      fetchAIBrain(client_sdr_id);
-    }
-    setIsPopoverOpen(!isPopoverOpen);
-  };
-  const fetchAIBrain = async (client_sdr_id: number) => {
-    setIsLoading(true);
-    const response = await fetch(
-      `${API_URL}/client/brain?client_sdr_id=${client_sdr_id}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      }
-    );
-
-    const data = await response.json();
-    setAiBrainData(data);
-    setIsLoading(false);
-  };
-
   useEffect(() => {
     if (!selectedTemplateId) return;
     props.onFoundTemplate(selectedTemplateId);
@@ -3595,106 +3570,7 @@ function TemplateSection(props: {
                         </HoverCard.Dropdown>
                       </HoverCard>
 
-                      <Popover
-                        width={500}
-                        position="bottom"
-                        withArrow
-                        shadow="md"
-                        opened={isPopoverOpen}
-                        onOpen={() => setIsPopoverOpen(true)}
-                        onClose={() => setIsPopoverOpen(false)}
-                      >
-                        <Popover.Target>
-                          <Badge
-                            color="pink"
-                            styles={{ root: { textTransform: "initial" } }}
-                            style={{ display: "flex", alignItems: "center" }}
-                            leftSection={<IconBrain size={"0.5rem"} />}
-                            onClick={() =>
-                              togglePopover(template.client_sdr_id)
-                            }
-                          >
-                            AI BRAIN
-                          </Badge>
-                        </Popover.Target>
-                        <Popover.Dropdown
-                          style={{
-                            padding: "0px",
-                            border: "1px solid #be4bdb",
-                          }}
-                        >
-                          {!isLoading && (
-                            <>
-                              <Flex bg={"#be4bdb"} align={"center"} p={"sm"}>
-                                <Flex gap={2} w={"100%"} align={"center"}>
-                                  <IconBrain size={"0.8rem"} color="white" />
-                                  <Text color="white">AI BRAIN</Text>
-                                </Flex>
-                                <Button variant="transparent">
-                                  <IconX
-                                    color="white"
-                                    size={"1rem"}
-                                    style={{ cursor: "pointer" }}
-                                    onClick={() => setIsPopoverOpen(false)}
-                                  />
-                                </Button>
-                              </Flex>
-                              <Flex direction={"column"} p={"sm"} gap={"sm"}>
-                                <Text color="gray" size={"sm"}>
-                                  This is the AI's context on your business,
-                                  which is used to inform your AI on writing.
-                                </Text>
-                                <Flex gap={"xs"} align={"center"}>
-                                  <Text color="#be4bdb">Edit in Settings</Text>
-                                  <IconExternalLink
-                                    size={"0.8rem"}
-                                    color="#be4bdb"
-                                  />
-                                </Flex>
-                                <Divider color="#be4bdb" variant="dashed" />
-                                <Text fw={500} size={"sm"}>
-                                  Company Name:{" "}
-                                  <span className="text-[#868e96] text-[14px]">
-                                    {aibrainData?.name}
-                                  </span>
-                                </Text>
-                                <Divider />
-                                <Flex>
-                                  <Text fw={500} size={"sm"} w={"100%"}>
-                                    Company Tagline:{" "}
-                                    <span className="text-[#868e96] text-[14px]">
-                                      {aibrainData?.tagline}
-                                    </span>
-                                  </Text>
-                                </Flex>
-                                <Divider />
-                                <Flex>
-                                  <Text fw={500} size={"sm"} w={"100%"}>
-                                    Company Description:{" "}
-                                    <span className="text-[#868e96] text-[14px]">
-                                      {" "}
-                                      {aibrainData?.description}
-                                    </span>
-                                  </Text>
-                                </Flex>
-                              </Flex>
-                            </>
-                          )}
-                          {isLoading && (
-                            <Card
-                              sx={{
-                                width: "100%",
-                                height: "300px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              <Loader />
-                            </Card>
-                          )}
-                        </Popover.Dropdown>
-                      </Popover>
+                      <AIBrainPill clientSdrID={template.client_sdr_id} />
 
                       {template.research_points &&
                         template.research_points.length > 0 && (

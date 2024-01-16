@@ -1337,8 +1337,6 @@ export const EmailBodyItem: React.FC<{
     return newText;
   }, []);
 
-  console.log('go hereeeeee', template.transformer_blocklist);
-
   return (
     <Flex w='100%'>
       <LoadingOverlay visible={loading} />

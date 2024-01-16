@@ -321,7 +321,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
       const response = await postSmartleadReply(
         userToken,
         prospectid,
-        messageDraftEmail.current
+        messageDraftEmail.current,
+        scheduleDay
       );
       if (response.status !== "success") {
         showNotification({
@@ -330,18 +331,27 @@ export default forwardRef(function InboxProspectConvoSendBox(
           color: "red",
         });
       } else {
-        showNotification({
-          title: "Success",
-          message:
-            "Email sent. It may take a few minutes to appear in your inbox.",
-          color: "green",
-        });
+        if (scheduleDay) {
+          showNotification({
+            title: "Success",
+            message: "Email scheduled to send.",
+            color: "green",
+          });
+        } else {
+          showNotification({
+            title: "Success",
+            message:
+              "Email sent. It may take a few minutes to appear in your inbox.",
+            color: "green",
+          });
+        }
 
         setMessageDraft("");
       }
       if (props?.triggerGetSmartleadProspectConvo) {
         props?.triggerGetSmartleadProspectConvo();
       }
+      setScheduleDay(undefined);
     } else {
       if (
         currentConvoEmailMessages === undefined ||

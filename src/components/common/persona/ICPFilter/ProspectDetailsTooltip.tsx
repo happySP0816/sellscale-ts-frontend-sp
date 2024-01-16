@@ -65,7 +65,6 @@ export default function ProspectDetailsTooltip(props: ProspectDetailsTooltipProp
     setProspectData(data?.prospect_info);
     setIsLoading(false);
   };
-  console.log('11111111111111111', prospectData);
   return (
     <Popover
       width={380}

@@ -3085,7 +3085,7 @@ function FrameworkSection(props: {
                           </HoverCard.Dropdown>
                         </HoverCard>
 
-                        <AIBrainPill clientSdrID={bf.client_sdr_id} />
+                        <AIBrainPill />
 
                         {bf.human_feedback && (
                           <HoverCard width={280} shadow="md">
@@ -3570,7 +3570,7 @@ function TemplateSection(props: {
                         </HoverCard.Dropdown>
                       </HoverCard>
 
-                      <AIBrainPill clientSdrID={template.client_sdr_id} />
+                      <AIBrainPill />
 
                       {template.research_points &&
                         template.research_points.length > 0 && (

@@ -14,9 +14,7 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { IconBrain, IconExternalLink, IconX } from "@tabler/icons";
 
-type AIBrainPillPropsType = {
-  clientSdrID?: number;
-};
+type AIBrainPillPropsType = {};
 
 export default function AIBrainPill(props: AIBrainPillPropsType) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -24,16 +22,16 @@ export default function AIBrainPill(props: AIBrainPillPropsType) {
   const [isLoading, setIsLoading] = useState(false);
   const [aibrainData, setAiBrainData] = useState({} as any);
 
-  const togglePopover = (clientSdrID: number) => {
+  const togglePopover = () => {
     if (!isPopoverOpen) {
-      fetchAIBrain(clientSdrID);
+      fetchAIBrain();
     }
     setIsPopoverOpen(!isPopoverOpen);
   };
-  const fetchAIBrain = async (clientSdrID: number) => {
+  const fetchAIBrain = async () => {
     setIsLoading(true);
     const response = await fetch(
-      `${API_URL}/client/brain?client_sdr_id=${clientSdrID}`,
+      `${API_URL}/client/brain`,
       {
         method: "GET",
         headers: {
@@ -62,7 +60,7 @@ export default function AIBrainPill(props: AIBrainPillPropsType) {
           styles={{ root: { textTransform: "initial" } }}
           style={{ display: "flex", alignItems: "center" }}
           leftSection={<IconBrain size={"0.5rem"} />}
-          onClick={() => togglePopover(props.clientSdrID!)}
+          onClick={() => togglePopover()}
           size='xs'
           ml='xs'
         >

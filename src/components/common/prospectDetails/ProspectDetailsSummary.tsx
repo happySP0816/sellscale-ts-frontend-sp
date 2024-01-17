@@ -191,6 +191,7 @@ export default function ProspectDetailsSummary(
               <EmailStoreView
                 email={props.email}
                 emailStore={props.email_store as EmailStore}
+                isValid={true}
               />
             )}
 

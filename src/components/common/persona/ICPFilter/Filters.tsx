@@ -1,96 +1,239 @@
-import { useEffect, useState } from 'react'
-import { InputBase, Box, Title, Select, Tabs, Button, Flex, Progress, NumberInput, Center, Text } from '@mantine/core'
-import CustomSelect from './CustomSelect'
-import { IconBuildingCommunity, IconPhoto, IconUser } from '@tabler/icons'
-import { useForm } from '@mantine/form'
-import { set } from 'lodash'
-import { useRecoilState, useRecoilValue } from 'recoil'
-import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms'
-import { getICPRuleSet, updateICPFiltersBySalesNavURL } from '@utils/requests/icpScoring'
-import { userTokenState } from '@atoms/userAtoms'
-import { currentProjectState } from '@atoms/personaAtoms'
-import { getFiltersAutofill } from '@utils/requests/getFiltersAutofill'
-import { openConfirmModal, openContextModal } from '@mantine/modals'
-import { showNotification } from '@mantine/notifications'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useState } from "react";
+import {
+  InputBase,
+  Box,
+  Title,
+  Select,
+  Tabs,
+  Button,
+  Flex,
+  Progress,
+  NumberInput,
+  Center,
+  Text,
+  Accordion,
+  useMantineTheme,
+  rem,
+} from "@mantine/core";
+import CustomSelect from "./CustomSelect";
+import { IconBuildingCommunity, IconPhoto, IconUser } from "@tabler/icons";
+import { useForm } from "@mantine/form";
+import { set } from "lodash";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  filterProspectsState,
+  filterRuleSetState,
+} from "@atoms/icpFilterAtoms";
+import {
+  getICPRuleSet,
+  updateICPFiltersBySalesNavURL,
+} from "@utils/requests/icpScoring";
+import { userTokenState } from "@atoms/userAtoms";
+import { currentProjectState } from "@atoms/personaAtoms";
+import { getFiltersAutofill } from "@utils/requests/getFiltersAutofill";
+import { openConfirmModal, openContextModal } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
+import { useQuery } from "@tanstack/react-query";
+import ItemCollapse from "./Filters/ItemCollapse";
 
-function Filters(props: { isTesting: boolean; selectOptions: { value: string; label: string }[]; autofill: boolean }) {
-  const [loading, setLoading] = useState(false)
-  const userToken = useRecoilValue(userTokenState)
-  const currentProject = useRecoilValue(currentProjectState)
-  const [globalRuleSetData, setGlobalRuleSetData] = useRecoilState(filterRuleSetState)
-  const icpProspects = useRecoilValue(filterProspectsState)
+function Filters(props: {
+  isTesting: boolean;
+  selectOptions: { value: string; label: string }[];
+  autofill: boolean;
+}) {
+  const [loading, setLoading] = useState(false);
+  const userToken = useRecoilValue(userTokenState);
+  const currentProject = useRecoilValue(currentProjectState);
+  const [globalRuleSetData, setGlobalRuleSetData] =
+    useRecoilState(filterRuleSetState);
+  const icpProspects = useRecoilValue(filterProspectsState);
 
-  const [included_individual_title_keywords, setIncludedIndividualTitleKeywords] = useState<string[]>([])
-  const [excluded_individual_title_keywords, setExcludedIndividualTitleKeywords] = useState<string[]>([])
-  const [included_individual_seniority_keywords, setIncludedIndividualSeniorityKeywords] = useState<string[]>([])
-  const [excluded_individual_seniority_keywords, setExcludedIndividualSeniorityKeywords] = useState<string[]>([])
-  const [included_individual_industry_keywords, setIncludedIndividualIndustryKeywords] = useState<string[]>([])
-  const [excluded_individual_industry_keywords, setExcludedIndividualIndustryKeywords] = useState<string[]>([])
-  const [individual_years_of_experience_start, setIndividualYearsOfExperienceStart] = useState<number>(0)
-  const [individual_years_of_experience_end, setIndividualYearsOfExperienceEnd] = useState<number>(0)
-  const [included_individual_skills_keywords, setIncludedIndividualSkillsKeywords] = useState<string[]>([])
-  const [excluded_individual_skills_keywords, setExcludedIndividualSkillsKeywords] = useState<string[]>([])
-  const [included_individual_locations_keywords, setIncludedIndividualLocationsKeywords] = useState<string[]>([])
-  const [excluded_individual_locations_keywords, setExcludedIndividualLocationsKeywords] = useState<string[]>([])
-  const [included_individual_generalized_keywords, setIncludedIndividualGeneralizedKeywords] = useState<string[]>([])
-  const [excluded_individual_generalized_keywords, setExcludedIndividualGeneralizedKeywords] = useState<string[]>([])
-  const [included_individual_education_keywords, setIncludedIndividualEducationKeywords] = useState<string[]>([])
-  const [excluded_individual_education_keywords, setExcludedIndividualEducationKeywords] = useState<string[]>([])
-  const [included_company_name_keywords, setIncludedCompanyNameKeywords] = useState<string[]>([])
-  const [excluded_company_name_keywords, setExcludedCompanyNameKeywords] = useState<string[]>([])
-  const [included_company_locations_keywords, setIncludedCompanyLocationsKeywords] = useState<string[]>([])
-  const [excluded_company_locations_keywords, setExcludedCompanyLocationsKeywords] = useState<string[]>([])
-  const [company_size_start, setCompanySizeStart] = useState<number>(0)
-  const [company_size_end, setCompanySizeEnd] = useState<number>(0)
-  const [included_company_industries_keywords, setIncludedCompanyIndustriesKeywords] = useState<string[]>([])
-  const [excluded_company_industries_keywords, setExcludedCompanyIndustriesKeywords] = useState<string[]>([])
-  const [included_company_generalized_keywords, setIncludedCompanyGeneralizedKeywords] = useState<string[]>([])
-  const [excluded_company_generalized_keywords, setExcludedCompanyGeneralizedKeywords] = useState<string[]>([])
+  const [
+    included_individual_title_keywords,
+    setIncludedIndividualTitleKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_individual_title_keywords,
+    setExcludedIndividualTitleKeywords,
+  ] = useState<string[]>([]);
+  const [
+    included_individual_seniority_keywords,
+    setIncludedIndividualSeniorityKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_individual_seniority_keywords,
+    setExcludedIndividualSeniorityKeywords,
+  ] = useState<string[]>([]);
+  const [
+    included_individual_industry_keywords,
+    setIncludedIndividualIndustryKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_individual_industry_keywords,
+    setExcludedIndividualIndustryKeywords,
+  ] = useState<string[]>([]);
+  const [
+    individual_years_of_experience_start,
+    setIndividualYearsOfExperienceStart,
+  ] = useState<number>(0);
+  const [
+    individual_years_of_experience_end,
+    setIndividualYearsOfExperienceEnd,
+  ] = useState<number>(0);
+  const [
+    included_individual_skills_keywords,
+    setIncludedIndividualSkillsKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_individual_skills_keywords,
+    setExcludedIndividualSkillsKeywords,
+  ] = useState<string[]>([]);
+  const [
+    included_individual_locations_keywords,
+    setIncludedIndividualLocationsKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_individual_locations_keywords,
+    setExcludedIndividualLocationsKeywords,
+  ] = useState<string[]>([]);
+  const [
+    included_individual_generalized_keywords,
+    setIncludedIndividualGeneralizedKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_individual_generalized_keywords,
+    setExcludedIndividualGeneralizedKeywords,
+  ] = useState<string[]>([]);
+  const [
+    included_individual_education_keywords,
+    setIncludedIndividualEducationKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_individual_education_keywords,
+    setExcludedIndividualEducationKeywords,
+  ] = useState<string[]>([]);
+  const [included_company_name_keywords, setIncludedCompanyNameKeywords] =
+    useState<string[]>([]);
+  const [excluded_company_name_keywords, setExcludedCompanyNameKeywords] =
+    useState<string[]>([]);
+  const [
+    included_company_locations_keywords,
+    setIncludedCompanyLocationsKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_company_locations_keywords,
+    setExcludedCompanyLocationsKeywords,
+  ] = useState<string[]>([]);
+  const [company_size_start, setCompanySizeStart] = useState<number>(0);
+  const [company_size_end, setCompanySizeEnd] = useState<number>(0);
+  const [
+    included_company_industries_keywords,
+    setIncludedCompanyIndustriesKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_company_industries_keywords,
+    setExcludedCompanyIndustriesKeywords,
+  ] = useState<string[]>([]);
+  const [
+    included_company_generalized_keywords,
+    setIncludedCompanyGeneralizedKeywords,
+  ] = useState<string[]>([]);
+  const [
+    excluded_company_generalized_keywords,
+    setExcludedCompanyGeneralizedKeywords,
+  ] = useState<string[]>([]);
 
   useQuery({
     queryKey: [`get-icp-filters`, { currentProject }],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { currentProject }] = queryKey
+      const [_key, { currentProject }] = queryKey;
 
-      if (!currentProject) return null
+      if (!currentProject) return null;
 
-      const response = await getICPRuleSet(userToken, currentProject.id)
+      const response = await getICPRuleSet(userToken, currentProject.id);
 
-      if (response.status === 'success') {
-        setIncludedIndividualTitleKeywords(response.data.included_individual_title_keywords ?? [])
-        setExcludedIndividualTitleKeywords(response.data.excluded_individual_title_keywords ?? [])
-        setIncludedIndividualSeniorityKeywords(response.data.included_individual_seniority_keywords ?? [])
-        setExcludedIndividualSeniorityKeywords(response.data.excluded_individual_seniority_keywords ?? [])
-        setIncludedIndividualIndustryKeywords(response.data.included_individual_industry_keywords ?? [])
-        setExcludedIndividualIndustryKeywords(response.data.excluded_individual_industry_keywords ?? [])
-        setIndividualYearsOfExperienceStart(response.data.individual_years_of_experience_start ?? 0)
-        setIndividualYearsOfExperienceEnd(response.data.individual_years_of_experience_end ?? 0)
-        setIncludedIndividualSkillsKeywords(response.data.included_individual_skills_keywords ?? [])
-        setExcludedIndividualSkillsKeywords(response.data.excluded_individual_skills_keywords ?? [])
-        setIncludedIndividualLocationsKeywords(response.data.included_individual_locations_keywords ?? [])
-        setExcludedIndividualLocationsKeywords(response.data.excluded_individual_locations_keywords ?? [])
-        setIncludedIndividualGeneralizedKeywords(response.data.included_individual_generalized_keywords ?? [])
-        setExcludedIndividualGeneralizedKeywords(response.data.excluded_individual_generalized_keywords ?? [])
-        setIncludedIndividualEducationKeywords(response.data.included_individual_education_keywords ?? [])
-        setExcludedIndividualEducationKeywords(response.data.excluded_individual_education_keywords ?? [])
-        setIncludedCompanyNameKeywords(response.data.included_company_name_keywords ?? [])
-        setExcludedCompanyNameKeywords(response.data.excluded_company_name_keywords ?? [])
-        setIncludedCompanyLocationsKeywords(response.data.included_company_locations_keywords ?? [])
-        setExcludedCompanyLocationsKeywords(response.data.excluded_company_locations_keywords ?? [])
-        setCompanySizeStart(response.data.company_size_start ?? 0)
-        setCompanySizeEnd(response.data.company_size_end ?? 0)
-        setIncludedCompanyIndustriesKeywords(response.data.included_company_industries_keywords ?? [])
-        setExcludedCompanyIndustriesKeywords(response.data.excluded_company_industries_keywords ?? [])
-        setIncludedCompanyGeneralizedKeywords(response.data.included_company_generalized_keywords ?? [])
-        setExcludedCompanyGeneralizedKeywords(response.data.excluded_company_generalized_keywords ?? [])
+      if (response.status === "success") {
+        setIncludedIndividualTitleKeywords(
+          response.data.included_individual_title_keywords ?? []
+        );
+        setExcludedIndividualTitleKeywords(
+          response.data.excluded_individual_title_keywords ?? []
+        );
+        setIncludedIndividualSeniorityKeywords(
+          response.data.included_individual_seniority_keywords ?? []
+        );
+        setExcludedIndividualSeniorityKeywords(
+          response.data.excluded_individual_seniority_keywords ?? []
+        );
+        setIncludedIndividualIndustryKeywords(
+          response.data.included_individual_industry_keywords ?? []
+        );
+        setExcludedIndividualIndustryKeywords(
+          response.data.excluded_individual_industry_keywords ?? []
+        );
+        setIndividualYearsOfExperienceStart(
+          response.data.individual_years_of_experience_start ?? 0
+        );
+        setIndividualYearsOfExperienceEnd(
+          response.data.individual_years_of_experience_end ?? 0
+        );
+        setIncludedIndividualSkillsKeywords(
+          response.data.included_individual_skills_keywords ?? []
+        );
+        setExcludedIndividualSkillsKeywords(
+          response.data.excluded_individual_skills_keywords ?? []
+        );
+        setIncludedIndividualLocationsKeywords(
+          response.data.included_individual_locations_keywords ?? []
+        );
+        setExcludedIndividualLocationsKeywords(
+          response.data.excluded_individual_locations_keywords ?? []
+        );
+        setIncludedIndividualGeneralizedKeywords(
+          response.data.included_individual_generalized_keywords ?? []
+        );
+        setExcludedIndividualGeneralizedKeywords(
+          response.data.excluded_individual_generalized_keywords ?? []
+        );
+        setIncludedIndividualEducationKeywords(
+          response.data.included_individual_education_keywords ?? []
+        );
+        setExcludedIndividualEducationKeywords(
+          response.data.excluded_individual_education_keywords ?? []
+        );
+        setIncludedCompanyNameKeywords(
+          response.data.included_company_name_keywords ?? []
+        );
+        setExcludedCompanyNameKeywords(
+          response.data.excluded_company_name_keywords ?? []
+        );
+        setIncludedCompanyLocationsKeywords(
+          response.data.included_company_locations_keywords ?? []
+        );
+        setExcludedCompanyLocationsKeywords(
+          response.data.excluded_company_locations_keywords ?? []
+        );
+        setCompanySizeStart(response.data.company_size_start ?? 0);
+        setCompanySizeEnd(response.data.company_size_end ?? 0);
+        setIncludedCompanyIndustriesKeywords(
+          response.data.included_company_industries_keywords ?? []
+        );
+        setExcludedCompanyIndustriesKeywords(
+          response.data.excluded_company_industries_keywords ?? []
+        );
+        setIncludedCompanyGeneralizedKeywords(
+          response.data.included_company_generalized_keywords ?? []
+        );
+        setExcludedCompanyGeneralizedKeywords(
+          response.data.excluded_company_generalized_keywords ?? []
+        );
       }
-      return null
+      return null;
     },
     refetchOnWindowFocus: false,
-  })
+  });
 
   useEffect(() => {
     setGlobalRuleSetData({
@@ -120,7 +263,7 @@ function Filters(props: { isTesting: boolean; selectOptions: { value: string; la
       excluded_company_generalized_keywords,
       included_individual_education_keywords,
       excluded_individual_education_keywords,
-    })
+    });
   }, [
     included_individual_title_keywords,
     excluded_individual_title_keywords,
@@ -148,353 +291,525 @@ function Filters(props: { isTesting: boolean; selectOptions: { value: string; la
     excluded_company_generalized_keywords,
     included_individual_education_keywords,
     excluded_individual_education_keywords,
-  ])
+  ]);
 
-  const titleOptions = [...new Set(icpProspects.map((x) => (x.title ? x.title : '')))].filter((x) => x)
-  const industryOptions = [...new Set(icpProspects.map((x) => x.industry))].filter((x) => x)
-  const companyOptions = [...new Set(icpProspects.map((x) => x.company))].filter((x) => x)
-
+  const titleOptions = [
+    ...new Set(icpProspects.map((x) => (x.title ? x.title : ""))),
+  ].filter((x) => x);
+  const industryOptions = [
+    ...new Set(icpProspects.map((x) => x.industry)),
+  ].filter((x) => x);
+  const companyOptions = [
+    ...new Set(icpProspects.map((x) => x.company)),
+  ].filter((x) => x);
+  const theme = useMantineTheme();
   return (
     <>
-      <Tabs
-        defaultValue='personal'
-        styles={(theme) => ({
-          tabsList: {
-            backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
-            paddingLeft: '0.5rem',
-            paddingRight: '0.5rem',
-            height: '44px',
-          },
+      <Accordion
+        defaultValue="personal"
+        styles={{
           panel: {
-            padding: '0.5rem',
+            backgroundColor: "transparent",
           },
-          tab: {
-            ...theme.fn.focusStyles(),
-            color: theme.white,
-            marginBottom: 0,
-            '&:hover': {
-              backgroundColor: theme.colors.blue[theme.fn.primaryShade()],
-              color: theme.white,
-            },
-            '&[data-active]': {
-              borderBottomColor: theme.white,
-              color: theme.white,
-            },
-          },
-        })}
-      >
-        <Tabs.List>
-          <Tabs.Tab value='personal'>Person</Tabs.Tab>
-          <Tabs.Tab value='company'>Company</Tabs.Tab>
-        </Tabs.List>
 
-        <Box
-          sx={{
-            maxHeight: '50vh',
-            overflowY: 'scroll',
-            paddingBottom: '1rem',
-          }}
-        >
-          <Tabs.Panel value='personal'>
+          item: {
+            marginBottom: rem(12),
+            border: `1px solid ${theme.colors.gray[2]}`,
+            borderRadius: 12,
+
+            "&[data-active]": {
+              borderColor: theme.colors.blue[4],
+              "& > button": {
+                backgroundColor: theme.colors.blue[4],
+                color: theme.white,
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 0,
+              },
+            },
+
+            "&:last-of-type": {
+              marginBottom: 0,
+            },
+          },
+          control: {
+            borderRadius: 12,
+
+            background: "transparent",
+            "&:hover": {
+              backgroundColor: theme.colors.gray[2],
+
+              "& > span": {
+                color: theme.black,
+              },
+            },
+
+            "& > span": {
+              fontWeight: 600,
+            },
+          },
+          content: {
+            paddingLeft: theme.spacing.xs,
+            paddingRight: theme.spacing.xs,
+            paddingTop: theme.spacing.sm,
+            paddingBottom: theme.spacing.sm,
+          },
+        }}
+        mt={"md"}
+        bg={"white"}
+      >
+        <Accordion.Item value="Person">
+          <Accordion.Control>Personal</Accordion.Control>
+          <Accordion.Panel>
             <Box
               style={{
-                display: 'flex',
-                gap: '1rem',
-                flexDirection: 'column',
+                display: "flex",
+                gap: "1rem",
+                flexDirection: "column",
               }}
             >
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_individual_title_keywords}
-                label='Titles (Included)'
-                placeholder='Select options'
-                setValue={setIncludedIndividualTitleKeywords}
-                data={included_individual_title_keywords.concat(titleOptions)}
-                setData={setIncludedIndividualTitleKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_individual_title_keywords}
-                label='Titles (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedIndividualTitleKeywords}
-                data={excluded_individual_title_keywords.concat(titleOptions)}
-                setData={setExcludedIndividualTitleKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_individual_seniority_keywords}
-                label='Seniority (Included)'
-                placeholder='Select options'
-                setValue={setIncludedIndividualSeniorityKeywords}
-                data={included_individual_seniority_keywords}
-                setData={setIncludedIndividualSeniorityKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_individual_seniority_keywords}
-                label='Seniority (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedIndividualSeniorityKeywords}
-                data={excluded_individual_seniority_keywords}
-                setData={setExcludedIndividualSeniorityKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_individual_industry_keywords}
-                label='Industry Keywords (Included)'
-                placeholder='Select options'
-                setValue={setIncludedIndividualIndustryKeywords}
-                data={included_individual_industry_keywords.concat(industryOptions)}
-                setData={setIncludedIndividualIndustryKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_individual_industry_keywords}
-                label='Industry Keywords (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedIndividualIndustryKeywords}
-                data={excluded_individual_industry_keywords.concat(industryOptions)}
-                setData={setExcludedIndividualIndustryKeywords}
-              />
-              <Flex direction='column'>
-                <Title size={'14px'} fw={'500'}>
-                  Years of Experience
-                </Title>
-                <Flex justify={'space-between'} align={'center'} mt={'0.2rem'} w={'100%'} gap={'xs'} maw={'30vw'}>
-                  <NumberInput
-                    value={individual_years_of_experience_start}
-                    placeholder='Min'
-                    hideControls
-                    onChange={(value) => setIndividualYearsOfExperienceStart(value || 0)}
-                  />
-                  <NumberInput
-                    value={individual_years_of_experience_end}
-                    placeholder='Max'
-                    hideControls
-                    onChange={(value) => setIndividualYearsOfExperienceEnd(value || 0)}
-                  />
+              <ItemCollapse
+                title={"Title"}
+                defaultOpened={
+                  included_individual_title_keywords.length > 0 ||
+                  excluded_individual_title_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_individual_title_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedIndividualTitleKeywords}
+                  data={included_individual_title_keywords.concat(titleOptions)}
+                  setData={setIncludedIndividualTitleKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_individual_title_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedIndividualTitleKeywords}
+                  data={excluded_individual_title_keywords.concat(titleOptions)}
+                  setData={setExcludedIndividualTitleKeywords}
+                />
+              </ItemCollapse>
+              <ItemCollapse
+                title={"Seniority"}
+                defaultOpened={
+                  included_individual_seniority_keywords.length > 0 ||
+                  excluded_individual_seniority_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_individual_seniority_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedIndividualSeniorityKeywords}
+                  data={included_individual_seniority_keywords}
+                  setData={setIncludedIndividualSeniorityKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_individual_seniority_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedIndividualSeniorityKeywords}
+                  data={excluded_individual_seniority_keywords}
+                  setData={setExcludedIndividualSeniorityKeywords}
+                />
+              </ItemCollapse>
+
+              <ItemCollapse
+                title={"Industry"}
+                defaultOpened={
+                  included_individual_industry_keywords.length > 0 ||
+                  excluded_individual_industry_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_individual_industry_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedIndividualIndustryKeywords}
+                  data={included_individual_industry_keywords.concat(
+                    industryOptions
+                  )}
+                  setData={setIncludedIndividualIndustryKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_individual_industry_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedIndividualIndustryKeywords}
+                  data={excluded_individual_industry_keywords.concat(
+                    industryOptions
+                  )}
+                  setData={setExcludedIndividualIndustryKeywords}
+                />
+              </ItemCollapse>
+
+              <ItemCollapse
+                title={"Skills"}
+                defaultOpened={
+                  included_individual_skills_keywords.length > 0 ||
+                  excluded_individual_skills_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_individual_skills_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedIndividualSkillsKeywords}
+                  data={included_individual_skills_keywords}
+                  setData={setIncludedIndividualSkillsKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_individual_skills_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedIndividualSkillsKeywords}
+                  data={excluded_individual_skills_keywords}
+                  setData={setExcludedIndividualSkillsKeywords}
+                />
+              </ItemCollapse>
+              <ItemCollapse
+                title={"Location"}
+                defaultOpened={
+                  included_individual_locations_keywords.length > 0 ||
+                  excluded_individual_locations_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_individual_locations_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedIndividualLocationsKeywords}
+                  data={included_individual_locations_keywords.concat([
+                    "United States",
+                  ])}
+                  setData={setIncludedIndividualLocationsKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_individual_locations_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedIndividualLocationsKeywords}
+                  data={excluded_individual_locations_keywords.concat([
+                    "United States",
+                  ])}
+                  setData={setExcludedIndividualLocationsKeywords}
+                />
+              </ItemCollapse>
+              <ItemCollapse
+                title={"Bio & Jobs Description"}
+                defaultOpened={
+                  included_individual_generalized_keywords.length > 0 ||
+                  excluded_individual_generalized_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_individual_generalized_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedIndividualGeneralizedKeywords}
+                  data={included_individual_generalized_keywords}
+                  setData={setIncludedIndividualGeneralizedKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_individual_generalized_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedIndividualGeneralizedKeywords}
+                  data={excluded_individual_generalized_keywords}
+                  setData={setExcludedIndividualGeneralizedKeywords}
+                />
+              </ItemCollapse>
+
+              <ItemCollapse
+                title={"University / College"}
+                defaultOpened={
+                  included_individual_education_keywords.length > 0 ||
+                  excluded_individual_education_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_individual_education_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedIndividualEducationKeywords}
+                  data={included_individual_education_keywords}
+                  setData={setIncludedIndividualEducationKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_individual_education_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedIndividualEducationKeywords}
+                  data={excluded_individual_education_keywords}
+                  setData={setExcludedIndividualEducationKeywords}
+                />
+              </ItemCollapse>
+              <ItemCollapse
+                title={"Experience"}
+                defaultOpened={
+                  individual_years_of_experience_end !== 0 ||
+                  individual_years_of_experience_start !== 0
+                }
+              >
+                <Flex direction="column">
+                  <Title size={"14px"} fw={"500"}>
+                    Years of Experience
+                  </Title>
+                  <Flex
+                    justify={"space-between"}
+                    align={"center"}
+                    mt={"0.2rem"}
+                    w={"100%"}
+                    gap={"xs"}
+                    maw={"30vw"}
+                  >
+                    <NumberInput
+                      value={individual_years_of_experience_start}
+                      placeholder="Min"
+                      hideControls
+                      onChange={(value) =>
+                        setIndividualYearsOfExperienceStart(value || 0)
+                      }
+                    />
+                    <NumberInput
+                      value={individual_years_of_experience_end}
+                      placeholder="Max"
+                      hideControls
+                      onChange={(value) =>
+                        setIndividualYearsOfExperienceEnd(value || 0)
+                      }
+                    />
+                  </Flex>
+                  <Button
+                    mt={"0.5rem"}
+                    size="sm"
+                    ml={"auto"}
+                    onClick={() => setIndividualYearsOfExperienceEnd(100)}
+                  >
+                    Max
+                  </Button>
                 </Flex>
-                <Button mt={'0.5rem'} size='sm' ml={'auto'} onClick={() => setIndividualYearsOfExperienceEnd(100)}>
-                  Max
-                </Button>
-              </Flex>
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_individual_skills_keywords}
-                label='Skills Keywords (Included)'
-                placeholder='Select options'
-                setValue={setIncludedIndividualSkillsKeywords}
-                data={included_individual_skills_keywords}
-                setData={setIncludedIndividualSkillsKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_individual_skills_keywords}
-                label='Skills Keywords (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedIndividualSkillsKeywords}
-                data={excluded_individual_skills_keywords}
-                setData={setExcludedIndividualSkillsKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_individual_locations_keywords}
-                label='Location Keywords (Included)'
-                placeholder='Select options'
-                setValue={setIncludedIndividualLocationsKeywords}
-                data={included_individual_locations_keywords.concat(['United States'])}
-                setData={setIncludedIndividualLocationsKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_individual_locations_keywords}
-                label='Location Keywords (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedIndividualLocationsKeywords}
-                data={excluded_individual_locations_keywords.concat(['United States'])}
-                setData={setExcludedIndividualLocationsKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_individual_generalized_keywords}
-                label='Bio & Jobs Description (Included)'
-                placeholder='Select options'
-                setValue={setIncludedIndividualGeneralizedKeywords}
-                data={included_individual_generalized_keywords}
-                setData={setIncludedIndividualGeneralizedKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_individual_generalized_keywords}
-                label='Bio & Jobs Description (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedIndividualGeneralizedKeywords}
-                data={excluded_individual_generalized_keywords}
-                setData={setExcludedIndividualGeneralizedKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_individual_education_keywords}
-                label='University / College (Included)'
-                placeholder='Select options'
-                setValue={setIncludedIndividualEducationKeywords}
-                data={included_individual_education_keywords}
-                setData={setIncludedIndividualEducationKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_individual_education_keywords}
-                label='University / College (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedIndividualEducationKeywords}
-                data={excluded_individual_education_keywords}
-                setData={setExcludedIndividualEducationKeywords}
-              />
+              </ItemCollapse>
             </Box>
-          </Tabs.Panel>
-          <Tabs.Panel value='company'>
-            <Box style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_company_name_keywords}
-                label='Companies Keywords (Included)'
-                placeholder='Select options'
-                setValue={setIncludedCompanyNameKeywords}
-                data={included_company_name_keywords.concat(companyOptions)}
-                setData={setIncludedCompanyNameKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_company_name_keywords}
-                label='Companies Keywords (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedCompanyNameKeywords}
-                data={excluded_company_name_keywords.concat(companyOptions)}
-                setData={setExcludedCompanyNameKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_company_locations_keywords}
-                label='Location Keywords (Included)'
-                placeholder='Select options'
-                setValue={setIncludedCompanyLocationsKeywords}
-                data={included_company_locations_keywords.concat(['United States'])}
-                setData={setIncludedCompanyLocationsKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_company_locations_keywords}
-                label='Location Keywords (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedCompanyLocationsKeywords}
-                data={excluded_company_locations_keywords.concat(['United States'])}
-                setData={setExcludedCompanyLocationsKeywords}
-              />
-              <Flex direction='column' maw={'30vw'}>
-                <Title size={'14px'} fw={'500'}>
-                  Employee Count
-                </Title>
-                <Box
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: '1rem',
-                    alignItems: 'center',
-                    marginTop: '0.2rem',
-                  }}
-                >
-                  <NumberInput
-                    value={company_size_start}
-                    placeholder='Min'
-                    hideControls
-                    onChange={(value) => setCompanySizeStart(value || 0)}
-                  />
-                  <NumberInput
-                    value={company_size_end}
-                    placeholder='Max'
-                    hideControls
-                    onChange={(value) => setCompanySizeEnd(value || 0)}
-                  />
-                </Box>
-                <Button mt={'0.5rem'} size='sm' ml={'auto'} onClick={() => setCompanySizeEnd(100_000)}>
-                  Max
-                </Button>
-              </Flex>
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_company_industries_keywords}
-                label='Industries Keywords (Included)'
-                placeholder='Select options'
-                setValue={setIncludedCompanyIndustriesKeywords}
-                data={included_company_industries_keywords.concat(industryOptions)}
-                setData={setIncludedCompanyIndustriesKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_company_industries_keywords}
-                label='Industries Keywords (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedCompanyIndustriesKeywords}
-                data={excluded_company_industries_keywords.concat(industryOptions)}
-                setData={setExcludedCompanyIndustriesKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={included_company_generalized_keywords}
-                label='Company Description (Included)'
-                placeholder='Select options'
-                setValue={setIncludedCompanyGeneralizedKeywords}
-                data={included_company_generalized_keywords}
-                setData={setIncludedCompanyGeneralizedKeywords}
-              />
-              <CustomSelect
-                maxWidth='30vw'
-                value={excluded_company_generalized_keywords}
-                label='Company Description (Excluded)'
-                placeholder='Select options'
-                setValue={setExcludedCompanyGeneralizedKeywords}
-                data={excluded_company_generalized_keywords}
-                setData={setExcludedCompanyGeneralizedKeywords}
-              />
+          </Accordion.Panel>
+        </Accordion.Item>
+
+        <Accordion.Item value="company">
+          <Accordion.Control>Company</Accordion.Control>
+          <Accordion.Panel>
+            <Box
+              style={{ display: "flex", gap: "1rem", flexDirection: "column" }}
+            >
+              <ItemCollapse
+                title={"Companies Keywords"}
+                defaultOpened={
+                  included_company_name_keywords.length > 0 ||
+                  excluded_company_name_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_company_name_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedCompanyNameKeywords}
+                  data={included_company_name_keywords.concat(companyOptions)}
+                  setData={setIncludedCompanyNameKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_company_name_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedCompanyNameKeywords}
+                  data={excluded_company_name_keywords.concat(companyOptions)}
+                  setData={setExcludedCompanyNameKeywords}
+                />
+              </ItemCollapse>
+              <ItemCollapse
+                title={"Location"}
+                defaultOpened={
+                  included_company_locations_keywords.length > 0 ||
+                  excluded_company_locations_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_company_locations_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedCompanyLocationsKeywords}
+                  data={included_company_locations_keywords.concat([
+                    "United States",
+                  ])}
+                  setData={setIncludedCompanyLocationsKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_company_locations_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedCompanyLocationsKeywords}
+                  data={excluded_company_locations_keywords.concat([
+                    "United States",
+                  ])}
+                  setData={setExcludedCompanyLocationsKeywords}
+                />
+              </ItemCollapse>
+              <ItemCollapse title="Employee Count" defaultOpened={
+                  company_size_start !== 0 ||
+                  company_size_end !== 0
+                }>
+                <Flex direction="column" maw={"30vw"}>
+                  <Box
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: "1rem",
+                      alignItems: "center",
+                      marginTop: "0.2rem",
+                    }}
+                  >
+                    <NumberInput
+                      value={company_size_start}
+                      placeholder="Min"
+                      hideControls
+                      onChange={(value) => setCompanySizeStart(value || 0)}
+                    />
+                    <NumberInput
+                      value={company_size_end}
+                      placeholder="Max"
+                      hideControls
+                      onChange={(value) => setCompanySizeEnd(value || 0)}
+                    />
+                  </Box>
+                  <Button
+                    mt={"0.5rem"}
+                    size="sm"
+                    ml={"auto"}
+                    onClick={() => setCompanySizeEnd(100_000)}
+                  >
+                    Max
+                  </Button>
+                </Flex>
+              </ItemCollapse>
+              <ItemCollapse
+                title="Industries"
+                defaultOpened={
+                  included_company_industries_keywords.length > 0 ||
+                  excluded_company_industries_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_company_industries_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedCompanyIndustriesKeywords}
+                  data={included_company_industries_keywords.concat(
+                    industryOptions
+                  )}
+                  setData={setIncludedCompanyIndustriesKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_company_industries_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedCompanyIndustriesKeywords}
+                  data={excluded_company_industries_keywords.concat(
+                    industryOptions
+                  )}
+                  setData={setExcludedCompanyIndustriesKeywords}
+                />
+              </ItemCollapse>
+              <ItemCollapse
+                title="Company Description"
+                defaultOpened={
+                  included_company_generalized_keywords.length > 0 ||
+                  excluded_company_generalized_keywords.length > 0
+                }
+              >
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={included_company_generalized_keywords}
+                  label="Included"
+                  placeholder="Select options"
+                  setValue={setIncludedCompanyGeneralizedKeywords}
+                  data={included_company_generalized_keywords}
+                  setData={setIncludedCompanyGeneralizedKeywords}
+                />
+                <CustomSelect
+                  maxWidth="30vw"
+                  value={excluded_company_generalized_keywords}
+                  label="Excluded"
+                  placeholder="Select options"
+                  setValue={setExcludedCompanyGeneralizedKeywords}
+                  data={excluded_company_generalized_keywords}
+                  setData={setExcludedCompanyGeneralizedKeywords}
+                />
+              </ItemCollapse>
             </Box>
-          </Tabs.Panel>
-        </Box>
-      </Tabs>
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
       {props.autofill && (
-        <Flex align={'center'} justify={'space-between'}>
+        <Flex align={"center"} justify={"space-between"}>
           <Button
             // mt='xs'
-            variant='light'
+            variant="light"
             loading={loading}
             onClick={async () => {
               openConfirmModal({
-                title: 'Override existing filters?',
+                title: "Override existing filters?",
                 children: (
-                  <Text>Are you sure you want to override existing filters? This action cannot be undone.</Text>
+                  <Text>
+                    Are you sure you want to override existing filters? This
+                    action cannot be undone.
+                  </Text>
                 ),
-                labels: { confirm: 'Confirm', cancel: 'Cancel' },
+                labels: { confirm: "Confirm", cancel: "Cancel" },
                 onCancel: () => {},
                 onConfirm: () => {
-                  ;(async () => {
-                    if (!currentProject) return
-                    setLoading(true)
-                    const response = await getFiltersAutofill(userToken, currentProject.id)
-                    const results = response.data
-                    console.log(results)
-                    setIncludedIndividualTitleKeywords(results.job_titles)
-                    setIncludedIndividualIndustryKeywords(results.industries)
-                    setCompanySizeStart(results.yoe.min)
-                    setCompanySizeEnd(results.yoe.max)
-                    setLoading(false)
+                  (async () => {
+                    if (!currentProject) return;
+                    setLoading(true);
+                    const response = await getFiltersAutofill(
+                      userToken,
+                      currentProject.id
+                    );
+                    const results = response.data;
+                    console.log(results);
+                    setIncludedIndividualTitleKeywords(results.job_titles);
+                    setIncludedIndividualIndustryKeywords(results.industries);
+                    setCompanySizeStart(results.yoe.min);
+                    setCompanySizeEnd(results.yoe.max);
+                    setLoading(false);
 
                     showNotification({
-                      title: 'Filters autofilled',
-                      message: 'Filters have been autofilled based on your prospects',
-                    })
-                  })()
+                      title: "Filters autofilled",
+                      message:
+                        "Filters have been autofilled based on your prospects",
+                    });
+                  })();
                 },
-              })
+              });
             }}
           >
             AI Autofill
@@ -502,12 +817,12 @@ function Filters(props: { isTesting: boolean; selectOptions: { value: string; la
           <Button
             onClick={async () => {
               openContextModal({
-                modal: 'salesNavURL',
-                title: 'Improt Filters from Sales Nav URL',
+                modal: "salesNavURL",
+                title: "Improt Filters from Sales Nav URL",
                 innerProps: {},
-              })
+              });
             }}
-            size='md'
+            size="md"
             compact
           >
             Import from Sales Nav URL
@@ -515,7 +830,7 @@ function Filters(props: { isTesting: boolean; selectOptions: { value: string; la
         </Flex>
       )}
     </>
-  )
+  );
 }
 
-export default Filters
+export default Filters;

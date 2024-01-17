@@ -26,7 +26,7 @@ import {
 import { useForm } from '@mantine/form'
 import { openConfirmModal } from '@mantine/modals'
 import { showNotification } from '@mantine/notifications'
-import { IconAffiliate, IconBrandLinkedin, IconDatabase, IconDownload, IconFile } from '@tabler/icons'
+import { IconAffiliate, IconBrandLinkedin, IconDatabase, IconDownload, IconFile, IconUpload } from '@tabler/icons'
 import { setPageTitle } from '@utils/documentChange'
 import { valueToColor } from '@utils/general'
 import getSalesNavigatorLaunches, { getSalesNavigatorLaunch } from '@utils/requests/getSalesNavigatorLaunches'
@@ -218,29 +218,28 @@ export default function FindContactsPage() {
           Find Contacts: {activePersonaEmoji} {activePersonaName}
         </Text>
       </Title>
-      <Tabs defaultValue='individuals' mt='md' keepMounted={false} h='100%'>
+      <Tabs defaultValue='sellscale-db' mt='md' keepMounted={false} h='100%'>
         <Tabs.List>
-          <Tabs.Tab value='individuals' icon={<IconDatabase size='0.9rem' />}>
-            SellScale Chat
+          <Tooltip label='Advanced - SellScale Database' position='bottom'>
+            <Tabs.Tab value='sellscale-db' icon={<IconDatabase size='0.9rem' />}>
+              Contact Database
+            </Tabs.Tab>
+          </Tooltip>
+          <Tabs.Tab value='by-csv' icon={<IconUpload size='0.9rem' />}>
+            Upload CSV
           </Tabs.Tab>
-          <Tabs.Tab value='linkedin-sales-navigator' icon={<IconBrandLinkedin size='0.9rem' />}>
-            Sales Navigator Link
+
+          <Tabs.Tab value='linkedin-sales-navigator' icon={<IconBrandLinkedin size='0.9rem' />} ml='auto'>
+            SalesNav Search
           </Tabs.Tab>
           <Tabs.Tab value='linkedin-url' icon={<IconBrandLinkedin size='0.9rem' />}>
             LinkedIn URL
           </Tabs.Tab>
-          {/* <Tabs.Tab value='by-csv' icon={<IconFile size='0.9rem' />}>
-            CSV
-          </Tabs.Tab> */}
-          <Tabs.Tab value='by-csv' icon={<IconFile size='0.9rem' />}>
-            Upload CSV
+          <Tabs.Tab value='individuals' icon={<IconDatabase size='0.9rem' />} >
+            Chat
           </Tabs.Tab>
-          <Tabs.Tab value='csv-beta' icon={<IconSparkles size='0.9rem' />} ml='auto'>
-            CSV (BETA)
-          </Tabs.Tab>
-          <Tooltip label='Advanced - SellScale Database' position='bottom'>
-            <Tabs.Tab value='sellscale-db' icon={<IconDatabase size='0.9rem' />}></Tabs.Tab>
-          </Tooltip>
+          <Tabs.Tab value='csv-beta' icon={<IconSparkles size='0.9rem' />}></Tabs.Tab>
+          
           <Tooltip label='Advanced - Linkedin Network' position='bottom'>
             <Tabs.Tab value='your-network' icon={<IconAffiliate size='0.9rem' />}></Tabs.Tab>
           </Tooltip>

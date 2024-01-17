@@ -1665,7 +1665,7 @@ export function ActiveCampaigns() {
                               Send:
                             </Text>
                             <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                              {x.sent_percent}%
+                              100%
                             </Text>
                           </Flex>
                         </Tooltip>
@@ -1691,7 +1691,7 @@ export function ActiveCampaigns() {
                               Opens:
                             </Text>
                             <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                              {Math.round(x.open_percent * 100)}%
+                              {Math.round(x.num_opens / (x.num_sent + 0.0001) * 100)}%
                             </Text>
                           </Flex>
                         </Tooltip>
@@ -1702,8 +1702,8 @@ export function ActiveCampaigns() {
                           label={
                             x.num_replies.toLocaleString() +
                             " Replies / " +
-                            x.num_sent.toLocaleString() +
-                            " Sent"
+                            x.num_opens.toLocaleString() +
+                            " Opens"
                           }
                           withinPortal
                         >
@@ -1717,7 +1717,7 @@ export function ActiveCampaigns() {
                               Replies:
                             </Text>
                             <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                              {Math.round(x.reply_percent * 100)}%
+                              {Math.round(x.num_replies / (x.num_opens + 0.0001) * 100)}%
                             </Text>
                           </Flex>
                         </Tooltip>
@@ -1728,8 +1728,8 @@ export function ActiveCampaigns() {
                           label={
                             x.num_demos.toLocaleString() +
                             " Demos / " +
-                            x.num_sent.toLocaleString() +
-                            " Sent"
+                            x.num_replies.toLocaleString() +
+                            " Replies"
                           }
                           withinPortal
                         >
@@ -1743,7 +1743,7 @@ export function ActiveCampaigns() {
                               Demos:
                             </Text>
                             <Text fw={"600"} fz={"0.7rem"} color="gray.8">
-                              {Math.round(x.demo_percent * 100)}%
+                              {Math.round(x.num_demos / (x.num_replies + 0.0001) * 100)}%
                             </Text>
                           </Flex>
                         </Tooltip>

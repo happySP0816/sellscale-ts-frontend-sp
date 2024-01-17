@@ -170,7 +170,7 @@ export default function MultiChannelModal({
               onCreate={(query) => {
                 const item = { value: query, label: query };
                 // @ts-ignore
-                setCcEmailsData((current) => [...current, item]);
+                setBccEmailsData((current) => [...current, item]);
                 return item;
               }}
             />
@@ -193,7 +193,7 @@ export default function MultiChannelModal({
               onCreate={(query) => {
                 const item = { value: query, label: query };
                 // @ts-ignore
-                setBccEmailsData((current) => [...current, item]);
+                setCcEmailsData((current) => [...current, item]);
                 return item;
               }}
             />

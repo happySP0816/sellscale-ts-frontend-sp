@@ -998,7 +998,7 @@ const EmailReplyFrameworkView = (props: {
                         </Text>
                       </Flex>
                       {!item.client_archetype_id && !item.client_sdr_id && (
-                        <Tooltip label="Free framework from SellScale">
+                        <Tooltip label="SellScale AI Default Framework">
                           <Image
                             width={10}
                             fit="contain"

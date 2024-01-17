@@ -15,6 +15,8 @@ import {
   Select,
   TextInput,
   Notification,
+  MultiSelect,
+  Stack,
 } from '@mantine/core';
 import { ContextModalProps, openContextModal } from '@mantine/modals';
 import { useEffect, useRef, useState } from 'react';
@@ -39,6 +41,12 @@ export default function MultiChannelModal({
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
+
+  const [ccEmails, setCcEmails] = useState<string[]>([]);
+  const [bccEmails, setBccEmails] = useState<string[]>([]);
+
+  const [ccEmailsData, setCcEmailsData] = useState<string[]>([]);
+  const [bccEmailsData, setBccEmailsData] = useState<string[]>([]);
 
   const [subjectLine, setSubjectLine] = useState('Following up on our LI conversation');
 
@@ -84,7 +92,9 @@ export default function MultiChannelModal({
       messageDraftEmail.current,
       aiGenerated,
       undefined,
-      true
+      true,
+      bccEmails,
+      ccEmails
     );
     if (response.status === 'success') {
       showNotification({
@@ -141,6 +151,55 @@ export default function MultiChannelModal({
         <Text fz='xs' color='grey' mt='2px'>
           Email does not look correct? 'Edit Contact Details' first.
         </Text>
+
+        <Stack pt={5} spacing={5}>
+          <Group noWrap>
+            <Text c='gray.6' fz='sm' fw={500} span>
+              BCC:
+            </Text>{' '}
+            <MultiSelect
+              value={bccEmails}
+              onChange={(value) => {
+                setBccEmails(value);
+              }}
+              data={bccEmailsData}
+              placeholder='Emails'
+              searchable
+              creatable
+              getCreateLabel={(query) => `+ Add ${query}`}
+              onCreate={(query) => {
+                const item = { value: query, label: query };
+                // @ts-ignore
+                setCcEmailsData((current) => [...current, item]);
+                return item;
+              }}
+            />
+          </Group>
+
+          <Group noWrap>
+            <Text c='gray.6' fz='sm' fw={500} span>
+              CC:
+            </Text>{' '}
+            <MultiSelect
+              value={ccEmails}
+              onChange={(value) => {
+                setCcEmails(value);
+              }}
+              data={ccEmailsData}
+              placeholder='Emails'
+              searchable
+              creatable
+              getCreateLabel={(query) => `+ Add ${query}`}
+              onCreate={(query) => {
+                const item = { value: query, label: query };
+                // @ts-ignore
+                setBccEmailsData((current) => [...current, item]);
+                return item;
+              }}
+            />
+          </Group>
+        </Stack>
+
         <TextInput
           mt='lg'
           label='Subject'
@@ -148,6 +207,7 @@ export default function MultiChannelModal({
           value={subjectLine}
           onChange={(event) => setSubjectLine(event.currentTarget.value)}
         />
+
         <Text mt='lg'>Message</Text>
         <RichTextArea
           onChange={(value, rawValue) => {

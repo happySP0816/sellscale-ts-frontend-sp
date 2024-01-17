@@ -9,7 +9,9 @@ export async function sendEmail(
   body: string,
   aiGenerated: boolean,
   reply_to_message_id?: string,
-  is_multichannel_action?: boolean
+  is_multichannel_action?: boolean,
+  bcc?: string[],
+  cc?: string[]
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/prospect/${prospectId}/email`, {
     method: 'POST',
@@ -23,6 +25,8 @@ export async function sendEmail(
       ai_generated: aiGenerated,
       reply_to_message_id: reply_to_message_id,
       is_multichannel_action: is_multichannel_action,
+      bcc,
+      cc,
     }),
   });
   return await processResponse(response, 'data');

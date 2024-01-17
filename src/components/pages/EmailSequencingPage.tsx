@@ -1050,7 +1050,7 @@ const EmailReplyFrameworkView = (props: {
             )}
             <Flex ml="4px">
               {isSellScaleFramework ? (
-                <Tooltip label="SellScale Frameworks cannot be edited. Please create a new framework to edit.">
+                <Tooltip label="SellScale frameworks are AI trained over time and can't be edited. Please create a new framework to edit.">
                   <Image
                     width={20}
                     fit="contain"

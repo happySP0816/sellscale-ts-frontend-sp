@@ -340,7 +340,7 @@ export default function ProjectDetails(props: {
             )}
 
             {data?.email.email && (
-              <EmailStoreView email={data.email.email} emailStore={data.data.email_store} />
+              <EmailStoreView email={data.email.email} emailStore={data.data.email_store} isValid />
               // <Group noWrap spacing={10} mt={5}>
               //   <IconMail stroke={1.5} size={18} className={classes.icon} />
               //   <Text

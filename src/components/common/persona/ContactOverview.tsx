@@ -36,7 +36,7 @@ const ContactOverview = () => {
   const userData = useRecoilValue(userDataState)
 
   return (
-    <Tabs defaultValue='prospect_scoring' className='min-h-full flex flex-col'>
+    <Tabs defaultValue='segments' className='min-h-full flex flex-col'>
       <Tabs.List>
         {/* <Tabs.Tab value='overview'>
           <IconTable size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
@@ -50,9 +50,14 @@ const ContactOverview = () => {
           <IconTable size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Scraping Report
         </Tabs.Tab> */}
-        <Tabs.Tab value='prospect_scoring'>
+        {/* <Tabs.Tab value='prospect_scoring'>
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Prospect Scoring
+        </Tabs.Tab> */}
+
+        <Tabs.Tab value='segments'>
+          <IconChartArcs size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
+          Segments
         </Tabs.Tab>
         <Tabs.Tab value='global_contacts'>
           <IconList size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
@@ -61,10 +66,6 @@ const ContactOverview = () => {
         <Tabs.Tab value='do_not_contact'>
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Do Not Contact
-        </Tabs.Tab>
-        <Tabs.Tab value='segments'>
-          <IconChartArcs size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
-          Segments
         </Tabs.Tab>
         
         {/* <Tabs.Tab value='TAM_graph' style={{ marginRight: '8px' }}>
@@ -86,9 +87,9 @@ const ContactOverview = () => {
       <Tabs.Panel value='global_contacts'>
         <GlobalContacts />
       </Tabs.Panel>
-      <Tabs.Panel value='prospect_scoring'>
+      {/* <Tabs.Panel value='prospect_scoring'>
           <ICPFilters />
-      </Tabs.Panel>
+      </Tabs.Panel> */}
       <Tabs.Panel value='do_not_contact'>
         <DoNotContactList />
       </Tabs.Panel>

@@ -1,4 +1,4 @@
-import DOMPurify from "dompurify";
+import DOMPurify from 'dompurify';
 
 export default function TextWithNewline(props: {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ export default function TextWithNewline(props: {
       style={props.style}
       dangerouslySetInnerHTML={{
         __html: DOMPurify.sanitize(
-          (props.children as string)?.replaceAll(
+          ((props.children as string) || '').replaceAll(
             '\n',
             `<br style="display: block; content: ' '; margin: ${props.breakheight || 0} 0 "/>`
           )

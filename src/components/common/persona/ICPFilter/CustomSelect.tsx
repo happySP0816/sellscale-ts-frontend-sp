@@ -12,17 +12,9 @@ interface ICustomSelect {
   allowExclude?: boolean;
   color?: "green" | "red";
   maxWidth?: string;
-  setData: React.Dispatch<
-    React.SetStateAction<
-      string[]
-    >
-  >;
+  setData: React.Dispatch<React.SetStateAction<string[]>>;
   value: string[];
-  setValue: React.Dispatch<
-    React.SetStateAction<
-      string[]
-    >
-  >;
+  setValue: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const CustomSelect = ({
@@ -60,7 +52,12 @@ const CustomSelect = ({
                 width: "100%",
               }}
             >
-              <Title size={"14px"} fw={"500"}>
+              <Title
+                size={"14px"}
+                fw={"500"}
+                color="gray.6"
+                transform="uppercase"
+              >
                 {label}
               </Title>
 

@@ -32,6 +32,7 @@ import RichTextArea from '@common/library/RichTextArea';
 import { JSONContent } from '@tiptap/react';
 import { IconAlertTriangle, IconSend, IconWand } from '@tabler/icons';
 import { sendEmail } from '@utils/requests/sendEmail';
+import { postGenerateMultichannelEmail } from '@utils/requests/postGenerateMultichannelEmail';
 
 export default function MultiChannelModal({
   context,
@@ -50,16 +51,8 @@ export default function MultiChannelModal({
 
   const [subjectLine, setSubjectLine] = useState('Following up on our LI conversation');
 
-  // We use this to store the value of the text area
-  const [messageDraft, _setMessageDraft] = useState('');
-  // We use this to store the raw value of the rich text editor
-  const messageDraftRichRaw = useRef<JSONContent | string>();
-
-  // We use this to set the value of the text area (for both rich text and normal text)
-  const setMessageDraft = (value: string) => {
-    messageDraftRichRaw.current = value;
-    _setMessageDraft(value);
-  };
+  const [generatingEmail, setGeneratingEmail] = useState(false);
+  const messageDraftRichRaw = useRef<JSONContent | string>('Generating email...');
   // For email we have to use this ref instead, otherwise the textbox does a weird refocusing.
   const messageDraftEmail = useRef('');
 
@@ -114,6 +107,35 @@ export default function MultiChannelModal({
 
     setLoading(false);
   };
+
+  const triggerGenerateMultichannelEmail = async () => {
+    if (loading || generatingEmail) return;
+    setGeneratingEmail(true);
+
+    const result = await postGenerateMultichannelEmail(
+      userToken,
+      innerProps.prospect.id,
+    )
+    if (result.status === 'success') {
+      setAiGenerated(true);
+      messageDraftRichRaw.current = result.data.email_body.completion;
+      messageDraftEmail.current = result.data.email_body.completion;
+    } else {
+      showNotification({
+        title: 'Error Generating Email',
+        message: result.message,
+        color: 'red',
+      });
+    }
+
+    setGeneratingEmail(false);
+  };
+
+  useEffect(() => {
+    if (innerProps.prospect) {
+      triggerGenerateMultichannelEmail();
+    }
+  }, []);
 
   return (
     <Paper
@@ -223,9 +245,12 @@ export default function MultiChannelModal({
             color='grape'
             size='xs'
             sx={{ borderRadius: '4px' }}
-            disabled
+            onClick={() => {
+              triggerGenerateMultichannelEmail();
+            }}
+            loading={generatingEmail}
           >
-            Smart Generate - Coming Soon!
+            Smart Generate
           </Button>
           <Button
             leftIcon={<IconSend size='0.8rem' />}

@@ -1956,6 +1956,8 @@ function LiExampleMessage(props: {
     });
   }
 
+  console.log(message);
+
   return (
     <Group spacing={10} sx={{ alignItems: 'flex-start' }} noWrap>
       <Box w={55}>
@@ -1978,7 +1980,7 @@ function LiExampleMessage(props: {
         <Box>
           {animationPlaying.current ? (
             <Text fz='xs'>
-              <Text
+              {/* <Text
                 ref={ref}
                 span
                 sx={{
@@ -1989,11 +1991,12 @@ function LiExampleMessage(props: {
                 }}
               >
                 {message}
-              </Text>
+              </Text> */}
+              <TextWithNewline>{message}</TextWithNewline>
             </Text>
           ) : (
             <Text fz='xs'>
-              <Text
+              {/* <Text
                 ref={ref}
                 span
                 sx={{
@@ -2004,7 +2007,8 @@ function LiExampleMessage(props: {
                 onClick={props.onClick}
               >
                 {message}
-              </Text>
+              </Text> */}
+              <TextWithNewline>{message}</TextWithNewline>
             </Text>
           )}
         </Box>

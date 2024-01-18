@@ -64,6 +64,7 @@ import AnalyticsPageNew from '@pages/AnalyticsPageNew';
 import AdjustPage from '@pages/AdjustAIPage';
 import SlackAuthPage from '@pages/SlackAuthPage';
 import { CampaignDetail } from "@pages/CampaignDetail";
+import EmailGrader from '@pages/EmailGrader/EmailGrader';
 
 const queryClient = new QueryClient();
 
@@ -460,6 +461,11 @@ const router = sentryCreateBrowserRouter([
       {
         path: '/slack-auth',
         element: <SlackAuthPage />,
+      },
+
+       {
+        path: '/emailgrader',
+        element: <EmailGrader />,
       },
       {
         path: '*',

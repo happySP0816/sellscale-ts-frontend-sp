@@ -315,9 +315,10 @@ export default function ProjectDetails(props: {
     >
       <Stack spacing={0} mt={'md'} px={'md'}>
         <Flex>
-          <Box mt='4px'>
-            <Title order={4}>{data?.details.full_name}</Title>
-          </Box>
+          {/* make the badge a box with border radius 0px */}
+          <Badge color='blue' variant='outline' sx={{borderRadius: 0}} w='100%'>
+            {data?.data.archetype_name.substring(0, 50)} {data?.data.archetype_name.length > 50 && '...'}
+          </Badge>
 
           <Button
             radius={'xs'}

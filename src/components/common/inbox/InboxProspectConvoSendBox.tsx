@@ -449,13 +449,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   useEffect(() => {
     (async () => {
-      showNotification({
-        id: "get-bump-frameworks",
-        title: "Getting bump frameworks ...",
-        message: "",
-        color: "blue",
-        autoClose: 3000,
-      })
       const result = await getBumpFrameworks(
         userToken, 
         ['ACTIVE_CONVO'],

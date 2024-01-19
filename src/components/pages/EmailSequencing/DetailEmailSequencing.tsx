@@ -1439,7 +1439,7 @@ export const EmailBodyItem: React.FC<{
                           size='xs' 
                           styles={{ root: { textTransform: 'initial', cursor: 'pointer' } }} 
                           variant='outline' 
-                          leftSection={<IconSearch sx={{marginTop: '2px'}} size={'0.7rem'}/>}
+                          leftSection={<IconSearch style={{marginTop: '2px'}} size={'0.7rem'}/>}
                           onClick={open}
                         >                          
                           <Text fw={700} span>

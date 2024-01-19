@@ -77,7 +77,7 @@ export default function InboxPage(props: { all?: boolean }) {
   const prospects = data ?? [];
 
   useEffect(() => {
-    if (prospects.length > 0 && (!openedProspectId || openedProspectId === -1)) {
+    if (prospects.length > 0 && (!openedProspectId || openedProspectId < 0)) {
       setOpenedProspectId(prospects[0].id);
     }
   }, [prospects]);

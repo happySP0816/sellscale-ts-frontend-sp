@@ -21,7 +21,7 @@ const openedProspectLoadingState = atom({
 
 const openedProspectListState = atom({
   key: 'inbox-opened-prospect-list',
-  default: false,
+  default: true,
 });
 
 // Hacky solution to temp hiding prospects

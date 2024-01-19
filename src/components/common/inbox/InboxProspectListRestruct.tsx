@@ -73,7 +73,7 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
     );
 
   const prospectGroups = Object.entries(_.groupBy(prospects, (p) => p.status)).sort((a, b) => {
-    return a[0].localeCompare(b[0]);
+    return b[0].localeCompare(a[0]);
   });
 
   return (

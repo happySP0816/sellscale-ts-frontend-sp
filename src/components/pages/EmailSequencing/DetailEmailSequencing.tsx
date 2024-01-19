@@ -63,6 +63,7 @@ import { openConfirmModal } from '@mantine/modals';
 import postCopyEmailPoolEntry from '@utils/requests/postCopyEmailLibraryItem';
 import { isValidUrl } from '@utils/general';
 import useRefresh from '@common/library/use-refresh';
+import _ from 'lodash';
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
@@ -1426,31 +1427,35 @@ export const EmailBodyItem: React.FC<{
                     <IconPencil size={'0.9rem'} />
                   </ActionIcon>
 
-                  <HoverCard width={280} shadow='md'>
-                    <HoverCard.Target>
-                      <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
-                        Personalizations:{' '}
-                        <Text fw={500} span>
-                          {
-                            RESEARCH_POINTS.filter(
-                              (p) => !template.transformer_blocklist.includes(p)
-                            ).length
-                          }
-                        </Text>
-                      </Badge>
-                    </HoverCard.Target>
-                    <HoverCard.Dropdown>
-                      <List>
-                        {RESEARCH_POINTS.filter(
-                          (p) => !template.transformer_blocklist.includes(p)
-                        ).map((note: any, index: number) => (
-                          <List.Item key={index}>
-                            <Text fz='sm'>{note}</Text>
-                          </List.Item>
-                        ))}
-                      </List>
-                    </HoverCard.Dropdown>
-                  </HoverCard>
+                  {displayPersonalization && (
+                    <HoverCard width={280} shadow='md'>
+                      <HoverCard.Target>
+                        <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
+                          Personalizations:{' '}
+                          <Text fw={500} span>
+                            {
+                              RESEARCH_POINTS.filter(
+                                (p) => !template.transformer_blocklist.includes(p)
+                              ).length
+                            }
+                          </Text>
+                        </Badge>
+                      </HoverCard.Target>
+                      <HoverCard.Dropdown>
+                        <List>
+                          {RESEARCH_POINTS.filter(
+                            (p) => !template.transformer_blocklist.includes(p)
+                          ).map((note, index) => (
+                            <List.Item key={index}>
+                              <Text fz='sm'>
+                                {_.capitalize(note.replace(/_/g, ' ').toLowerCase())}
+                              </Text>
+                            </List.Item>
+                          ))}
+                        </List>
+                      </HoverCard.Dropdown>
+                    </HoverCard>
+                  )}
                 </>
               )}
             </Flex>
@@ -1614,7 +1619,7 @@ export const EmailBodyItem: React.FC<{
             Edit Personalization
           </Tabs.Tab>
           <Tabs.Panel value='personalization'> */}
-        {displayPersonalization && (
+        {/* {displayPersonalization && (
           <PersonalizationSection
             title='Enabled Research Points'
             blocklist={template.transformer_blocklist ?? []}
@@ -1651,7 +1656,7 @@ export const EmailBodyItem: React.FC<{
               // setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
             }}
           />
-        )}
+        )} */}
         {/* </Tabs.Panel>
         </Tabs> */}
       </Flex>

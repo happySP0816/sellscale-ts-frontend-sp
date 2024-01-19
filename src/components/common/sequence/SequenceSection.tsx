@@ -3174,7 +3174,7 @@ function TemplateSection(props: {
                       </Text>
                       {/* Hovercard for transformers */}
 
-                      <HoverCard width={280} shadow='md'>
+                      {/* <HoverCard width={280} shadow='md'>
                         <HoverCard.Target>
                           <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
                             Personalizations:{' '}
@@ -3192,7 +3192,7 @@ function TemplateSection(props: {
                             ))}
                           </List>
                         </HoverCard.Dropdown>
-                      </HoverCard>
+                      </HoverCard> */}
 
                       <AIBrainPill />
 

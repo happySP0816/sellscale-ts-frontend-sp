@@ -112,6 +112,7 @@ import {
   IconChevronRight,
   IconCircle,
   IconCircleMinus,
+  IconCirclePlus,
   IconExternalLink,
   IconQuestionMark,
   IconRobot,
@@ -834,6 +835,7 @@ function BumpFrameworkSelect(props: {
 
   return (
     <>
+      {/* Create New Framework */}
       <ModalSelector
         selector={{
           override: (
@@ -843,191 +845,7 @@ function BumpFrameworkSelect(props: {
           ),
         }}
         title={{
-          name: props.title,
-          rightSection: (
-            <Menu shadow='md' width={200} withArrow>
-              <Menu.Target>
-                <Button variant='subtle' compact>
-                  New Framework
-                </Button>
-              </Menu.Target>
-
-              <Menu.Dropdown>
-                <Menu.Item
-                  icon={<IconPlus size={14} />}
-                  onClick={() => {
-                    openContextModal({
-                      modal: 'createBumpFramework',
-                      title: 'Create Reply Framework',
-                      innerProps: {
-                        modalOpened: true,
-                        openModal: () => {},
-                        closeModal: () => {},
-                        backFunction: () => {},
-                        dataChannels: dataChannels,
-                        status: props.overallStatus,
-                        archetypeID: currentProject?.id,
-                        bumpedCount: props.bumpedCount,
-                      },
-                    });
-                  }}
-                >
-                  Create New
-                </Menu.Item>
-                <Menu.Item
-                  icon={<IconCopy size={14} />}
-                  onClick={() => {
-                    openContextModal({
-                      modal: 'cloneBumpFramework',
-                      title: 'Clone Bump Framework',
-                      innerProps: {
-                        openModal: () => {},
-                        closeModal: () => {},
-                        backFunction: () => {},
-                        status: props.bumpedFrameworks.find(
-                          (bf) => bf.id === props.activeBumpFrameworkId
-                        )?.overall_status,
-                        archetypeID: currentProject?.id,
-                        bumpedCount: props.bumpedCount,
-                        showStatus: true,
-                      },
-                    });
-                  }}
-                >
-                  Copy from Existing
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
-          ),
-        }}
-        loading={false}
-        items={props.bumpedFrameworks.map((bf) => ({
-          id: bf.id,
-          name: bf.title,
-          onClick: () => {},
-          leftSection: (
-            <Box w='100px' sx={{ justifyContent: 'center', textAlign: 'center' }}>
-              <Badge size='sm' variant='filled' ml='6px'>
-                {bf.etl_num_times_converted !== undefined && bf.etl_num_times_used !== undefined
-                  ? Math.round(
-                      (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 1000
-                    ) /
-                      10 +
-                    '%'
-                  : ''}
-              </Badge>
-              <Text mt='xs' fz='xs'>
-                {bf.etl_num_times_converted + ' / ' + bf.etl_num_times_used + ' times'}
-              </Text>
-              <Text fz='xs' color='gray'>
-                {moment(bf.created_at).format('MMM DD, YYYY')}
-              </Text>
-            </Box>
-          ),
-          content: (
-            <Box>
-              <Text fz='sm' fw={500}>
-                {bf.title}
-              </Text>
-              <Text fz='xs' c='dimmed'>
-                {bf.description}
-              </Text>
-            </Box>
-          ),
-          rightSection: (
-            <Box ml='auto'>
-              <Switch
-                checked={bf.default}
-                onChange={(checked) => {
-                  setLoading(true);
-                  const result = patchBumpFramework(
-                    userToken,
-                    bf.id,
-                    bf.overall_status,
-                    bf.title,
-                    bf.description,
-                    bf.bump_length,
-                    bf.bumped_count,
-                    bf.bump_delay_days,
-                    !bf.default,
-                    bf.use_account_research,
-                    bf.transformer_blocklist
-                  )
-                    .then(() => {
-                      showNotification({
-                        title: 'Success',
-                        message: 'Bump Framework enabled',
-                        color: 'green',
-                      });
-                    })
-                    .finally(() => {
-                      (async () => {
-                        await queryClient.refetchQueries({
-                          queryKey: [`query-get-bump-frameworks`],
-                        });
-                        setLoading(false);
-                      })();
-                    });
-                }}
-              />
-              {loading && <Loader size='xs' mt='xs' />}
-            </Box>
-          ),
-        }))}
-        size={800}
-        activeItemId={props.activeBumpFrameworkId}
-      />
-      {/* Create New Framework */}
-      <ModalSelector
-        selector={{
-          override: (
-            <Button variant='outline' radius='md' compact color='orange'>
-              Create New
-            </Button>
-          ),
-        }}
-        title={{
           name: 'Choose a Template',
-          rightSection: (
-            <Button
-              variant='outline'
-              radius='md'
-              size='xs'
-              leftIcon={<IconTool size='1rem' />}
-              onClick={() => {
-                openContextModal({
-                  modal: 'createBumpFramework',
-                  title: 'Make your own framework',
-                  innerProps: {
-                    modalOpened: true,
-                    openModal: () => {},
-                    closeModal: () => {
-                      queryClient.refetchQueries({
-                        queryKey: [`query-get-bump-frameworks`],
-                      });
-                      modals.closeAll();
-                    },
-                    backFunction: () => {},
-                    dataChannels: dataChannels,
-                    status: props.overallStatus,
-                    archetypeID: currentProject?.id,
-                    bumpedCount: props.bumpedCount,
-                    initialValues: {
-                      title: '',
-                      description: '',
-                      default: false,
-                      bumpDelayDays: 2,
-                      useAccountResearch: true,
-                      bumpLength: '1 week',
-                      human_readable_prompt: '',
-                    },
-                  },
-                });
-              }}
-            >
-              Make a Custom Framework
-            </Button>
-          ),
         }}
         showSearchbar
         size={600}
@@ -1075,35 +893,6 @@ function BumpFrameworkSelect(props: {
                   </Flex>
                 ),
                 onClick: async () => {
-                  // openContextModal({
-                  //   modal: 'createBumpFramework',
-                  //   title: 'Create Bump Framework',
-                  //   innerProps: {
-                  //     modalOpened: true,
-                  //     openModal: () => {},
-                  //     closeModal: () => {
-                  //       queryClient.refetchQueries({
-                  //         queryKey: [`query-get-bump-frameworks`],
-                  //       });
-                  //       modals.closeAll();
-                  //     },
-                  //     backFunction: () => {},
-                  //     dataChannels: dataChannels,
-                  //     status: props.overallStatus,
-                  //     archetypeID: currentProject?.id,
-                  //     bumpedCount: props.bumpedCount,
-                  //     initialValues: {
-                  //       title: template.name,
-                  //       description: template.prompt,
-                  //       default: true,
-                  //       bumpDelayDays: 2,
-                  //       useAccountResearch: true,
-                  //       bumpLength: template.length,
-                  //       human_readable_prompt: template.human_readable_prompt,
-                  //       transformerBlocklist: template.transformer_blocklist,
-                  //     },
-                  //   },
-                  // });
                   const result = await createBumpFramework(
                     userToken,
                     currentProject?.id ?? -1,
@@ -1142,6 +931,47 @@ function BumpFrameworkSelect(props: {
             }) ?? []
         }
       />
+
+      <Button
+        variant='outline' 
+        radius='md' 
+        compact 
+        color='orange'
+        mr='xs'
+        onClick={() => {
+          openContextModal({
+            modal: 'createBumpFramework',
+            title: 'Make your own framework',
+            innerProps: {
+              modalOpened: true,
+              openModal: () => {},
+              closeModal: () => {
+                queryClient.refetchQueries({
+                  queryKey: [`query-get-bump-frameworks`],
+                });
+                modals.closeAll();
+              },
+              backFunction: () => {},
+              dataChannels: dataChannels,
+              status: props.overallStatus,
+              archetypeID: currentProject?.id,
+              bumpedCount: props.bumpedCount,
+              initialValues: {
+                title: '',
+                description: '',
+                default: false,
+                bumpDelayDays: 2,
+                useAccountResearch: true,
+                bumpLength: '1 week',
+                human_readable_prompt: '',
+              },
+            },
+          });
+        }}
+      >
+        Create New
+      </Button>
+      
     </>
   );
 }
@@ -2397,7 +2227,7 @@ function FrameworkSection(props: {
     const result = await generateBumpLiMessage(
       userToken,
       prospectId,
-      props.framework.id,
+      props.framework?.id,
       props.bumpCount,
       useCache
     );
@@ -2447,674 +2277,701 @@ function FrameworkSection(props: {
 
   if (!currentProject) return <></>;
 
+
   return (
     <>
       <Stack ml='xl' spacing={0}>
-        <Group position='apart'>
-          <Group></Group>
-        </Group>
-        <Card padding='lg' radius='md'>
-          <Card.Section
-            sx={{
-              flexDirection: 'row',
-              display: 'flex',
-              gap: '1rem',
-            }}
-            w='100%'
-          >
-            <Box mt='4px' w='100%' sx={{}}>
-              <Title order={5} color='gray' mr='xs' fw='400'>
-                Follow-Up {props.bumpCount + 1}:
-              </Title>
-
-              <Flex direction='row'>
-                {!titleInEditingMode ? (
-                  <Title order={3} onClick={() => setTitleInEditingMode((p) => !p)}>
-                    <span style={{ color: 'black', cursor: 'pointer' }}>
-                      {form.values.frameworkName}
-                    </span>
-                  </Title>
-                ) : (
-                  <TextInput
-                    w='75%'
-                    placeholder='Name'
-                    variant='filled'
-                    {...form.getInputProps('frameworkName')}
-                    onChange={(e) => {
-                      form.setFieldValue('frameworkName', e.target.value);
-                      setChanged(true);
-                    }}
-                  />
-                )}
-                <ActionIcon
-                  ml='8px'
-                  mt='8px'
-                  size='1rem'
-                  sx={{ zIndex: 10, opacity: 0.7 }}
-                  onClick={() => setTitleInEditingMode((p) => !p)}
-                >
-                  <IconEdit />
-                </ActionIcon>
-              </Flex>
-            </Box>
-          </Card.Section>
-
-          <Card.Section mt='xs' w='100%'>
-            <Flex direction='row'>
-              {descriptionEditState ? (
-                <Textarea
-                  w='100%'
-                  fz='xs'
-                  {...form.getInputProps('bumpFrameworkHumanReadablePrompt')}
-                  onChange={(e) => {
-                    form.setFieldValue('bumpFrameworkHumanReadablePrompt', e.target.value);
-                    setChanged(true);
-                  }}
-                />
-              ) : (
-                <Text
-                  fz='xs'
-                  c='dimmed'
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => setDescriptionEditState((p) => !p)}
-                >
-                  <span style={{ fontWeight: 'bold' }}>Goal:</span>{' '}
-                  {form.values.bumpFrameworkHumanReadablePrompt}
+        {!props.framework?.id &&
+        <>
+          <Card withBorder>
+            <Card.Section
+              sx={{
+                flexDirection: 'row',
+                display: 'flex',
+                gap: '1rem',
+                textAlign: 'center',
+                justifyContent: 'center',
+              }}
+              w='100%'
+            >
+              <Box m='md' w='100%' sx={{}}>
+                <IconCirclePlus size='1.5rem' color='gray' />
+                <Text color='gray' mr='xs' fw='400' mb='xs'>
+                  Create your first framework by clicking the buttons below.
                 </Text>
-              )}
-              <ActionIcon
-                size='1rem'
-                ml='8px'
-                sx={{ zIndex: 10, opacity: 0.7 }}
-                onClick={() => setDescriptionEditState((p) => !p)}
-              >
-                <IconEdit />
-              </ActionIcon>
-            </Flex>
-          </Card.Section>
-        </Card>
-        <Stack pt={20} spacing={15}>
-          <Box sx={{ position: 'relative' }}>
-            <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
-            {noProspectsFound ? (
-              <Box
-                sx={{
-                  border: '1px dashed #339af0',
-                  borderRadius: '0.5rem',
-                }}
-                p='sm'
-                mih={100}
-              >
-                <Center h={100}>
-                  <Stack>
-                    <Text ta='center' c='dimmed' fs='italic' fz='sm'>
-                      No prospects found to show example message.
-                    </Text>
-                    <Center>
-                      <Box>
-                        <Button
-                          variant='filled'
-                          color='teal'
-                          radius='md'
-                          ml='auto'
-                          mr='0'
-                          size='xs'
-                          rightIcon={<IconUpload size={14} />}
-                          onClick={() => setUploadDrawerOpened(true)}
-                        >
-                          Upload New Prospects
-                        </Button>
-                      </Box>
-                    </Center>
-                  </Stack>
-                </Center>
               </Box>
-            ) : (
-              <Box>
-                <Group position='apart' pb='0.3125rem'>
-                  <Text fz='xs' fw={500} c='dimmed' sx={{ opacity: 0.8 }}>
-                    EXAMPLE GENERATION:
-                  </Text>
-                  <Group>
-                    <Button
-                      size='xs'
-                      variant='subtle'
-                      compact
-                      leftIcon={<IconReload size='0.75rem' />}
-                      onClick={() => {
-                        if (prospectId) {
-                          getFollowUpMessage(prospectId, false).then((msg) => {
-                            if (msg) {
-                              setMessage(msg);
+            </Card.Section>
+
+          </Card>
+        </>
+        }
+
+        {props.framework?.id &&
+          <>
+            <Card padding='lg' radius='md'>
+              <Card.Section
+                sx={{
+                  flexDirection: 'row',
+                  display: 'flex',
+                  gap: '1rem',
+                }}
+                w='100%'
+              >
+                <Box mt='4px' w='100%' sx={{}}>
+                  <Title order={5} color='gray' mr='xs' fw='400'>
+                    Follow-Up {props.bumpCount + 1}:
+                  </Title>
+
+                  <Flex direction='row'>
+                    {!titleInEditingMode ? (
+                      <Title order={3} onClick={() => setTitleInEditingMode((p) => !p)}>
+                        <span style={{ color: 'black', cursor: 'pointer' }}>
+                          {form.values.frameworkName}
+                        </span>
+                      </Title>
+                    ) : (
+                      <TextInput
+                        w='75%'
+                        placeholder='Name'
+                        variant='filled'
+                        {...form.getInputProps('frameworkName')}
+                        onChange={(e) => {
+                          form.setFieldValue('frameworkName', e.target.value);
+                          setChanged(true);
+                        }}
+                      />
+                    )}
+                    <ActionIcon
+                      ml='8px'
+                      mt='8px'
+                      size='1rem'
+                      sx={{ zIndex: 10, opacity: 0.7 }}
+                      onClick={() => setTitleInEditingMode((p) => !p)}
+                    >
+                      <IconEdit />
+                    </ActionIcon>
+                  </Flex>
+                </Box>
+              </Card.Section>
+
+              <Card.Section mt='xs' w='100%'>
+                <Flex direction='row'>
+                  {descriptionEditState ? (
+                    <Textarea
+                      w='100%'
+                      fz='xs'
+                      {...form.getInputProps('bumpFrameworkHumanReadablePrompt')}
+                      onChange={(e) => {
+                        form.setFieldValue('bumpFrameworkHumanReadablePrompt', e.target.value);
+                        setChanged(true);
+                      }}
+                    />
+                  ) : (
+                    <Text
+                      fz='xs'
+                      c='dimmed'
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => setDescriptionEditState((p) => !p)}
+                    >
+                      <span style={{ fontWeight: 'bold' }}>Goal:</span>{' '}
+                      {form.values.bumpFrameworkHumanReadablePrompt}
+                    </Text>
+                  )}
+                  <ActionIcon
+                    size='1rem'
+                    ml='8px'
+                    sx={{ zIndex: 10, opacity: 0.7 }}
+                    onClick={() => setDescriptionEditState((p) => !p)}
+                  >
+                    <IconEdit />
+                  </ActionIcon>
+                </Flex>
+              </Card.Section>
+            </Card>
+            <Stack pt={20} spacing={15}>
+              <Box sx={{ position: 'relative' }}>
+                <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
+                {noProspectsFound ? (
+                  <Box
+                    sx={{
+                      border: '1px dashed #339af0',
+                      borderRadius: '0.5rem',
+                    }}
+                    p='sm'
+                    mih={100}
+                  >
+                    <Center h={100}>
+                      <Stack>
+                        <Text ta='center' c='dimmed' fs='italic' fz='sm'>
+                          No prospects found to show example message.
+                        </Text>
+                        <Center>
+                          <Box>
+                            <Button
+                              variant='filled'
+                              color='teal'
+                              radius='md'
+                              ml='auto'
+                              mr='0'
+                              size='xs'
+                              rightIcon={<IconUpload size={14} />}
+                              onClick={() => setUploadDrawerOpened(true)}
+                            >
+                              Upload New Prospects
+                            </Button>
+                          </Box>
+                        </Center>
+                      </Stack>
+                    </Center>
+                  </Box>
+                ) : (
+                  <Box>
+                    <Group position='apart' pb='0.3125rem'>
+                      <Text fz='xs' fw={500} c='dimmed' sx={{ opacity: 0.8 }}>
+                        EXAMPLE GENERATION:
+                      </Text>
+                      <Group>
+                        <Button
+                          size='xs'
+                          variant='subtle'
+                          compact
+                          leftIcon={<IconReload size='0.75rem' />}
+                          onClick={() => {
+                            if (prospectId) {
+                              getFollowUpMessage(prospectId, false).then((msg) => {
+                                if (msg) {
+                                  setMessage(msg);
+                                }
+                              });
                             }
-                          });
+                          }}
+                        >
+                          Regenerate
+                        </Button>
+                        <ProspectSelect
+                          personaId={currentProject.id}
+                          onChange={(prospect) => {
+                            if (prospect) {
+                              setProspectId(prospect.id);
+                            }
+                          }}
+                          onFinishLoading={(prospects) => {
+                            setProspectsLoading(false);
+                            if (prospects.length === 0) setNoProspectsFound(true);
+                          }}
+                          selectedProspect={prospectId}
+                          autoSelect
+                          includeDrawer
+                        />
+                      </Group>
+                    </Group>
+                    <Box
+                      sx={{
+                        border: '1px dashed #339af0',
+                        borderRadius: '0.5rem',
+                      }}
+                      p='sm'
+                      mih={150}
+                    >
+                      {message && (
+                        <LiExampleMessage
+                          message={message}
+                          hovered={hovered || activeTab === 'personalization' ? true : undefined}
+                          onClick={openPersonalizationSettings}
+                          onAnimatonComplete={onAnimatonComplete}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                )}
+              </Box>
+
+              {changed && (
+                <Group position='right'>
+                  <Center>
+                    <Button
+                      variant='default'
+                      w='200px'
+                      ml='auto'
+                      loading={savingSettings}
+                      disabled={!changed}
+                      onClick={() => {
+                        form.reset();
+                        setChanged(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </Center>
+                  <Center>
+                    <Button
+                      color='green'
+                      w='200px'
+                      ml='auto'
+                      loading={savingSettings}
+                      disabled={!changed}
+                      onClick={() => {
+                        showNotification({
+                          title: 'Saving Settings...',
+                          message: 'This may take a few seconds.',
+                          color: 'blue',
+                        });
+                        saveSettings(debouncedForm);
+                        props.setIsDataChanged(false);
+
+                        // close advanced settings
+                        if (opened) {
+                          toggle();
                         }
                       }}
                     >
-                      Regenerate
+                      Save Settings
                     </Button>
-                    <ProspectSelect
-                      personaId={currentProject.id}
-                      onChange={(prospect) => {
-                        if (prospect) {
-                          setProspectId(prospect.id);
-                        }
-                      }}
-                      onFinishLoading={(prospects) => {
-                        setProspectsLoading(false);
-                        if (prospects.length === 0) setNoProspectsFound(true);
-                      }}
-                      selectedProspect={prospectId}
-                      autoSelect
-                      includeDrawer
-                    />
-                  </Group>
+                  </Center>
                 </Group>
-                <Box
-                  sx={{
-                    border: '1px dashed #339af0',
-                    borderRadius: '0.5rem',
-                  }}
-                  p='sm'
-                  mih={150}
+              )}
+
+              {form.values.promptInstructions?.includes('Answer:') && (
+                <Alert
+                  icon={<IconBulb size='1rem' />}
+                  variant='outline'
+                  onClick={toggle}
+                  sx={{ cursor: 'pointer' }}
                 >
-                  {message && (
-                    <LiExampleMessage
-                      message={message}
-                      hovered={hovered || activeTab === 'personalization' ? true : undefined}
-                      onClick={openPersonalizationSettings}
-                      onAnimatonComplete={onAnimatonComplete}
-                    />
-                  )}
-                </Box>
-              </Box>
-            )}
-          </Box>
+                  <Text color='blue' fz='12px'>
+                    Note: This framework requires you fill out additional context in the prompt. Please
+                    press 'Advanced Settings'
+                  </Text>
+                </Alert>
+              )}
 
-          {changed && (
-            <Group position='right'>
-              <Center>
-                <Button
-                  variant='default'
-                  w='200px'
-                  ml='auto'
-                  loading={savingSettings}
-                  disabled={!changed}
-                  onClick={() => {
-                    form.reset();
-                    setChanged(false);
-                  }}
-                >
-                  Cancel
-                </Button>
-              </Center>
-              <Center>
-                <Button
-                  color='green'
-                  w='200px'
-                  ml='auto'
-                  loading={savingSettings}
-                  disabled={!changed}
-                  onClick={() => {
-                    showNotification({
-                      title: 'Saving Settings...',
-                      message: 'This may take a few seconds.',
-                      color: 'blue',
-                    });
-                    saveSettings(debouncedForm);
-                    props.setIsDataChanged(false);
-
-                    // close advanced settings
-                    if (opened) {
-                      toggle();
-                    }
-                  }}
-                >
-                  Save Settings
-                </Button>
-              </Center>
-            </Group>
-          )}
-
-          {form.values.promptInstructions?.includes('Answer:') && (
-            <Alert
-              icon={<IconBulb size='1rem' />}
-              variant='outline'
-              onClick={toggle}
-              sx={{ cursor: 'pointer' }}
-            >
-              <Text color='blue' fz='12px'>
-                Note: This framework requires you fill out additional context in the prompt. Please
-                press 'Advanced Settings'
-              </Text>
-            </Alert>
-          )}
-
-          <form
-            onChange={() => {
-              setChanged(true);
-            }}
-          >
-            {showUserFeedback && (
-              <>
-                <Card mb='16px'>
-                  <Card.Section
-                    sx={{
-                      backgroundColor: theme.colors.grape[6],
-                      flexDirection: 'row',
-                      display: 'flex',
-                    }}
-                    p='xs'
-                  >
-                    <Text color='white' mt='4px' size='sm'>
-                      <IconBulb size='1.2rem' color='white' />
-                      <span style={{ marginLeft: '8px' }}>
-                        FINE TUNING: Feel free to give me feedback on improving the message!
-                      </span>
-                    </Text>
-                  </Card.Section>
-                  <Card.Section
-                    sx={{
-                      border: 'solid 2px ' + theme.colors.grape[6] + ' !important',
-                    }}
-                    p='8px'
-                  >
-                    <Textarea
-                      variant='unstyled'
-                      pl={'8px'}
-                      pr={'8px'}
-                      size='xs'
-                      minRows={3}
-                      placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
-                      {...form.getInputProps('humanFeedback')}
-                    />
-                  </Card.Section>
-                </Card>
-              </>
-            )}
-
-            <Stack spacing={10}>
-              {(templateShowAll
-                ? props.frameworks.sort((a, b) => {
-                    if (a.default) return 1;
-                    if (b.default) return -1;
-                    return 0;
-                  })
-                : [
-                    props.frameworks
-                      .filter((a) => a.default)
-                      .find((v) => v?.id === props.framework?.id)!,
-                  ]
-              )
-                .filter((v) => v && v.bumped_count == props.bumpCount)
-                .filter((v) => v.overall_status === 'ACCEPTED' || v.overall_status === 'BUMPED')
-                .sort((a, b) => {
-                  if (a.default) return -1;
-                  if (b.default) return 1;
-                  return 0;
-                })
-                .map((bf, index) => (
-                  <Paper
-                    key={index}
-                    p='md'
-                    mih={80}
-                    sx={{
-                      position: 'relative',
-                      cursor: 'pointer',
-                      border:
-                        bf.id === props.framework.id ? 'solid 1px #339af0 !important' : undefined,
-                      backgroundColor:
-                        bf.id === props.framework.id ? '#339af008 !important' : undefined,
-                      flexDirection: 'row',
-                      display: 'flex',
-                    }}
-                    withBorder
-                  >
-                    <Flex mr='md' direction={'column'}>
-                      <Box
-                        miw='100px'
-                        mah={80}
-                        sx={{
-                          border: 'solid 1px #339af022',
-                          backgroundColor: '#339af022',
-                          padding: '8px',
-                          borderRadius: '4px',
-                          textAlign: 'center',
-                          cursor: 'pointer',
-                        }}
-                        mt='xl'
-                        onClick={() => {
-                          openContextModal({
-                            modal: 'frameworkReplies',
-                            title: 'Past Example Replies',
-                            innerProps: {
-                              bumpId: bf.id,
-                            },
-                          });
-                        }}
-                      >
-                        <Text fw='bold' fz='md' color='blue' mt='xs'>
-                          {bf.etl_num_times_used != null &&
-                            bf.etl_num_times_converted != null &&
-                            Math.round(
-                              (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 100
-                            )}
-                          % reply
-                        </Text>
-                        <Text size='8px' color='blue' fz={'xs'} fw='500'>
-                          ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
-                        </Text>
-                      </Box>
-                      <Button
-                        onClick={() => {
-                          openContextModal({
-                            modal: 'frameworkReplies',
-                            title: 'Past Example Usages',
-                            innerProps: {
-                              bumpId: bf.id,
-                            },
-                          });
-                        }}
-                        size='xs'
-                        mt={3}
-                      >
-                        View Replies
-                      </Button>
-                    </Flex>
-                    <Box mr={40} w='100%'>
-                      <Flex>
-                        <Text
-                          size='sm'
-                          fw='600'
-                          mb='xs'
-                          sx={{ textTransform: 'uppercase' }}
-                          color='gray'
-                          variant='outline'
-                        >
-                          {bf.title}
-                        </Text>
-                        {/* Hovercard for transformers */}
-
-                        <HoverCard width={280} shadow='md'>
-                          <HoverCard.Target>
-                            <Badge
-                              leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                              color='lime'
-                              variant={
-                                bf.active_transformers && bf.active_transformers.length > 0
-                                  ? 'filled'
-                                  : 'outline'
-                              }
-                              ml='xs'
-                              size='xs'
-                              onClick={() => {
-                                toggle();
-                              }}
-                            >
-                              {bf.active_transformers && bf.active_transformers.length > 0
-                                ? bf.active_transformers.length + ' Research Points'
-                                : '0 Research Points'}
-                            </Badge>
-                          </HoverCard.Target>
-                          <HoverCard.Dropdown
-                            style={{
-                              backgroundColor: 'rgb(34, 37, 41)',
-                              padding: 0,
-                            }}
-                          >
-                            <Paper
-                              style={{
-                                backgroundColor: 'rgb(34, 37, 41)',
-                                color: 'white',
-                                padding: 10,
-                              }}
-                            >
-                              <TextWithNewline style={{ fontSize: '12px' }}>
-                                {bf.active_transformers.length > 0
-                                  ? '<b>Active Research Points:</b>\n- ' +
-                                    bf.active_transformers
-                                      .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                      .join('\n- ')
-                                  : 'Click to activate more research points'}
-                              </TextWithNewline>
-                            </Paper>
-                          </HoverCard.Dropdown>
-                        </HoverCard>
-
-                        <AIBrainPill />
-
-                        {bf.human_feedback && (
-                          <HoverCard width={280} shadow='md'>
-                            <HoverCard.Target>
-                              <Badge
-                                leftSection={<IconBulb size='0.8rem' />}
-                                color='grape'
-                                variant='filled'
-                                ml='xs'
-                                size='xs'
-                              >
-                                Fine Tuned
-                              </Badge>
-                            </HoverCard.Target>
-                            <HoverCard.Dropdown
-                              style={{
-                                backgroundColor: 'rgb(34, 37, 41)',
-                                padding: 0,
-                              }}
-                            >
-                              <Paper
-                                style={{
-                                  backgroundColor: 'rgb(34, 37, 41)',
-                                  color: 'white',
-                                  padding: 10,
-                                }}
-                              >
-                                <TextWithNewline style={{ fontSize: '12px' }}>
-                                  {'<b>Additional Instructions:</b>\n' + bf.human_feedback}
-                                </TextWithNewline>
-                              </Paper>
-                            </HoverCard.Dropdown>
-                          </HoverCard>
-                        )}
-                      </Flex>
-                      <Card withBorder w='100%' sx={{}}>
-                        {/* {editing ? (
-                          <FocusTrap active={true}>
-                            <Textarea
-                              placeholder='Instructions'
-                              minRows={3}
-                              autosize
-                              variant='filled'
-                              defaultValue={bf.description}
-                              onChange={(e) => {
-                                form.setFieldValue('promptInstructions', e.target.value);
-                                setChanged(true);
-                              }}
-                              onBlur={() => {
-                                setEditing(false);
-                              }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
-                            />
-                          </FocusTrap>
-                        ) : ( */}
-                        <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
-                          <div
-                            // onClick={() => {
-                            //   setEditing(true);
-                            // }}
-                            dangerouslySetInnerHTML={{
-                              __html: DOMPurify.sanitize(
-                                bf.description
-                                  .replaceAll(
-                                    '[[',
-                                    "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                      theme.colors['blue'][5] +
-                                      "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
-                                  )
-                                  .replaceAll(']]', '</span>')
-                                  .replaceAll(
-                                    '\n',
-                                    `<br style="display: block; content: ' '; margin: 10px 0 "/>`
-                                  ) as string
-                              ),
-                            }}
-                          />
-                        </Text>
-                      </Card>
-                    </Box>
-                    <Box sx={{ justifyContent: 'right' }} ml='auto'>
-                      <Switch
-                        sx={{ cursor: 'pointer' }}
-                        checked={bf.default}
-                        onChange={(checked) => {
-                          setLoading(true);
-                          const result = patchBumpFramework(
-                            userToken,
-                            bf.id,
-                            bf.overall_status,
-                            bf.title,
-                            bf.description,
-                            bf.bump_length,
-                            bf.bumped_count,
-                            bf.bump_delay_days,
-                            !bf.default,
-                            bf.use_account_research,
-                            bf.transformer_blocklist
-                          )
-                            .then(() => {
-                              showNotification({
-                                title: 'Success',
-                                message: 'Bump Framework enabled',
-                                color: 'green',
-                              });
-                            })
-                            .finally(() => {
-                              (async () => {
-                                await queryClient.refetchQueries({
-                                  queryKey: [`query-get-bump-frameworks`],
-                                });
-                                setLoading(false);
-                              })();
-                              setChanged(false);
-                            });
-                        }}
-                      />
-                      <Button
-                        mt='xs'
-                        variant='subtle'
-                        radius='xl'
-                        size='sm'
-                        compact
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          // setEditing(true);
-                          openContextModal({
-                            modal: 'liBfTemplate',
-                            title: 'Edit Bf Template',
-                            innerProps: {
-                              mode: 'EDIT',
-                              editProps: {
-                                bf: bf,
-                                templateId: bf.id,
-                                title: bf.title,
-                                message: bf.description,
-                                active: bf.default,
-                                humanFeedback: bf.human_feedback,
-                                blockList: bf.transformer_blocklist,
-                              },
-                              // message: bf.description,
-                              // handleSubmit: async (message: string) => {
-                              //   form.setFieldValue('promptInstructions', message);
-                              //   // setChanged(true);
-                              //   // setEditing(false);
-                              //   const result = await patchBumpFramework(
-                              //     userToken,
-                              //     bf.id,
-                              //     bf.overall_status,
-                              //     bf.title,
-                              //     message,
-                              //     bf.bump_length,
-                              //     bf.bumped_count,
-                              //     bf.bump_delay_days,
-                              //     bf.default,
-                              //     bf.use_account_research,
-                              //     bf.transformer_blocklist
-                              //   );
-                              //   await queryClient.refetchQueries({
-                              //     queryKey: [`query-get-bump-frameworks`],
-                              //   });
-                              // },
-                            },
-                          });
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    </Box>
-                  </Paper>
-                ))}
-            </Stack>
-          </form>
-
-          <Modal opened={opened} onClose={toggle} size='lg'>
-            <Box w='100%' mb='md'>
-              <Title order={4}>"{form.values?.frameworkName}" Research Points</Title>
-              <Text color='gray'>
-                {props.framework?.active_transformers.length} research points enabled.
-              </Text>
-              <Divider />
-              <PersonalizationSection
-                blocklist={props.framework?.transformer_blocklist}
-                onItemsChange={async (items) => {
-                  setPersonalizationItemsCount(items.filter((x) => x.checked).length);
-                  setPersonalizationItemIds(items.filter((x) => !x.checked).map((x) => x.id));
-                }}
-                onChanged={() => {
+              <form
+                onChange={() => {
                   setChanged(true);
-                }}
-              />
-
-              <Button
-                w='100%'
-                mt='md'
-                onClick={() => {
-                  toggle();
-                  setChanged(true);
-                  saveSettings(debouncedForm);
-                }}
-                sx={{
-                  display: changed ? 'block' : 'none',
                 }}
               >
-                Save and Close
-              </Button>
-            </Box>
-          </Modal>
-        </Stack>
+                {showUserFeedback && (
+                  <>
+                    <Card mb='16px'>
+                      <Card.Section
+                        sx={{
+                          backgroundColor: theme.colors.grape[6],
+                          flexDirection: 'row',
+                          display: 'flex',
+                        }}
+                        p='xs'
+                      >
+                        <Text color='white' mt='4px' size='sm'>
+                          <IconBulb size='1.2rem' color='white' />
+                          <span style={{ marginLeft: '8px' }}>
+                            FINE TUNING: Feel free to give me feedback on improving the message!
+                          </span>
+                        </Text>
+                      </Card.Section>
+                      <Card.Section
+                        sx={{
+                          border: 'solid 2px ' + theme.colors.grape[6] + ' !important',
+                        }}
+                        p='8px'
+                      >
+                        <Textarea
+                          variant='unstyled'
+                          pl={'8px'}
+                          pr={'8px'}
+                          size='xs'
+                          minRows={3}
+                          placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
+                          {...form.getInputProps('humanFeedback')}
+                        />
+                      </Card.Section>
+                    </Card>
+                  </>
+                )}
 
-        {props.frameworks.length > 1 && (
-          <Button
-            onClick={() => {
-              setTemplateShowAll((p) => !p);
-            }}
-            color='gray'
-            variant='subtle'
-            leftIcon={
-              <IconChevronDown
-                size='1rem'
-                style={{
-                  transform: templateShowAll ? '' : 'rotate(180deg)',
+                <Stack spacing={10}>
+                  {(templateShowAll
+                    ? props.frameworks.sort((a, b) => {
+                        if (a.default) return 1;
+                        if (b.default) return -1;
+                        return 0;
+                      })
+                    : [
+                        props.frameworks
+                          .filter((a) => a.default)
+                          .find((v) => v?.id === props.framework?.id)!,
+                      ]
+                  )
+                    .filter((v) => v && v.bumped_count == props.bumpCount)
+                    .filter((v) => v.overall_status === 'ACCEPTED' || v.overall_status === 'BUMPED')
+                    .sort((a, b) => {
+                      if (a.default) return -1;
+                      if (b.default) return 1;
+                      return 0;
+                    })
+                    .map((bf, index) => (
+                      <Paper
+                        key={index}
+                        p='md'
+                        mih={80}
+                        sx={{
+                          position: 'relative',
+                          cursor: 'pointer',
+                          border:
+                            bf.id === props.framework.id ? 'solid 1px #339af0 !important' : undefined,
+                          backgroundColor:
+                            bf.id === props.framework.id ? '#339af008 !important' : undefined,
+                          flexDirection: 'row',
+                          display: 'flex',
+                        }}
+                        withBorder
+                      >
+                        <Flex mr='md' direction={'column'}>
+                          <Box
+                            miw='100px'
+                            mah={80}
+                            sx={{
+                              border: 'solid 1px #339af022',
+                              backgroundColor: '#339af022',
+                              padding: '8px',
+                              borderRadius: '4px',
+                              textAlign: 'center',
+                              cursor: 'pointer',
+                            }}
+                            mt='xl'
+                            onClick={() => {
+                              openContextModal({
+                                modal: 'frameworkReplies',
+                                title: 'Past Example Replies',
+                                innerProps: {
+                                  bumpId: bf.id,
+                                },
+                              });
+                            }}
+                          >
+                            <Text fw='bold' fz='md' color='blue' mt='xs'>
+                              {bf.etl_num_times_used != null &&
+                                bf.etl_num_times_converted != null &&
+                                Math.round(
+                                  (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 100
+                                )}
+                              % reply
+                            </Text>
+                            <Text size='8px' color='blue' fz={'xs'} fw='500'>
+                              ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
+                            </Text>
+                          </Box>
+                          <Button
+                            onClick={() => {
+                              openContextModal({
+                                modal: 'frameworkReplies',
+                                title: 'Past Example Usages',
+                                innerProps: {
+                                  bumpId: bf.id,
+                                },
+                              });
+                            }}
+                            size='xs'
+                            mt={3}
+                          >
+                            View Replies
+                          </Button>
+                        </Flex>
+                        <Box mr={40} w='100%'>
+                          <Flex>
+                            <Text
+                              size='sm'
+                              fw='600'
+                              mb='xs'
+                              sx={{ textTransform: 'uppercase' }}
+                              color='gray'
+                              variant='outline'
+                            >
+                              {bf.title}
+                            </Text>
+                            {/* Hovercard for transformers */}
+
+                            <HoverCard width={280} shadow='md'>
+                              <HoverCard.Target>
+                                <Badge
+                                  leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
+                                  color='lime'
+                                  variant={
+                                    bf.active_transformers && bf.active_transformers.length > 0
+                                      ? 'filled'
+                                      : 'outline'
+                                  }
+                                  ml='xs'
+                                  size='xs'
+                                  onClick={() => {
+                                    toggle();
+                                  }}
+                                >
+                                  {bf.active_transformers && bf.active_transformers.length > 0
+                                    ? bf.active_transformers.length + ' Research Points'
+                                    : '0 Research Points'}
+                                </Badge>
+                              </HoverCard.Target>
+                              <HoverCard.Dropdown
+                                style={{
+                                  backgroundColor: 'rgb(34, 37, 41)',
+                                  padding: 0,
+                                }}
+                              >
+                                <Paper
+                                  style={{
+                                    backgroundColor: 'rgb(34, 37, 41)',
+                                    color: 'white',
+                                    padding: 10,
+                                  }}
+                                >
+                                  <TextWithNewline style={{ fontSize: '12px' }}>
+                                    {bf.active_transformers.length > 0
+                                      ? '<b>Active Research Points:</b>\n- ' +
+                                        bf.active_transformers
+                                          .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
+                                          .join('\n- ')
+                                      : 'Click to activate more research points'}
+                                  </TextWithNewline>
+                                </Paper>
+                              </HoverCard.Dropdown>
+                            </HoverCard>
+
+                            <AIBrainPill />
+
+                            {bf.human_feedback && (
+                              <HoverCard width={280} shadow='md'>
+                                <HoverCard.Target>
+                                  <Badge
+                                    leftSection={<IconBulb size='0.8rem' />}
+                                    color='grape'
+                                    variant='filled'
+                                    ml='xs'
+                                    size='xs'
+                                  >
+                                    Fine Tuned
+                                  </Badge>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown
+                                  style={{
+                                    backgroundColor: 'rgb(34, 37, 41)',
+                                    padding: 0,
+                                  }}
+                                >
+                                  <Paper
+                                    style={{
+                                      backgroundColor: 'rgb(34, 37, 41)',
+                                      color: 'white',
+                                      padding: 10,
+                                    }}
+                                  >
+                                    <TextWithNewline style={{ fontSize: '12px' }}>
+                                      {'<b>Additional Instructions:</b>\n' + bf.human_feedback}
+                                    </TextWithNewline>
+                                  </Paper>
+                                </HoverCard.Dropdown>
+                              </HoverCard>
+                            )}
+                          </Flex>
+                          <Card withBorder w='100%' sx={{}}>
+                            {/* {editing ? (
+                              <FocusTrap active={true}>
+                                <Textarea
+                                  placeholder='Instructions'
+                                  minRows={3}
+                                  autosize
+                                  variant='filled'
+                                  defaultValue={bf.description}
+                                  onChange={(e) => {
+                                    form.setFieldValue('promptInstructions', e.target.value);
+                                    setChanged(true);
+                                  }}
+                                  onBlur={() => {
+                                    setEditing(false);
+                                  }}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                  }}
+                                />
+                              </FocusTrap>
+                            ) : ( */}
+                            <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                              <div
+                                // onClick={() => {
+                                //   setEditing(true);
+                                // }}
+                                dangerouslySetInnerHTML={{
+                                  __html: DOMPurify.sanitize(
+                                    bf.description
+                                      .replaceAll(
+                                        '[[',
+                                        "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
+                                          theme.colors['blue'][5] +
+                                          "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
+                                      )
+                                      .replaceAll(']]', '</span>')
+                                      .replaceAll(
+                                        '\n',
+                                        `<br style="display: block; content: ' '; margin: 10px 0 "/>`
+                                      ) as string
+                                  ),
+                                }}
+                              />
+                            </Text>
+                          </Card>
+                        </Box>
+                        <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                          <Switch
+                            sx={{ cursor: 'pointer' }}
+                            checked={bf.default}
+                            onChange={(checked) => {
+                              setLoading(true);
+                              const result = patchBumpFramework(
+                                userToken,
+                                bf.id,
+                                bf.overall_status,
+                                bf.title,
+                                bf.description,
+                                bf.bump_length,
+                                bf.bumped_count,
+                                bf.bump_delay_days,
+                                !bf.default,
+                                bf.use_account_research,
+                                bf.transformer_blocklist
+                              )
+                                .then(() => {
+                                  showNotification({
+                                    title: 'Success',
+                                    message: 'Bump Framework enabled',
+                                    color: 'green',
+                                  });
+                                })
+                                .finally(() => {
+                                  (async () => {
+                                    await queryClient.refetchQueries({
+                                      queryKey: [`query-get-bump-frameworks`],
+                                    });
+                                    setLoading(false);
+                                  })();
+                                  setChanged(false);
+                                });
+                            }}
+                          />
+                          <Button
+                            mt='xs'
+                            variant='subtle'
+                            radius='xl'
+                            size='sm'
+                            compact
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              // setEditing(true);
+                              openContextModal({
+                                modal: 'liBfTemplate',
+                                title: 'Edit Bf Template',
+                                innerProps: {
+                                  mode: 'EDIT',
+                                  editProps: {
+                                    bf: bf,
+                                    templateId: bf.id,
+                                    title: bf.title,
+                                    message: bf.description,
+                                    active: bf.default,
+                                    humanFeedback: bf.human_feedback,
+                                    blockList: bf.transformer_blocklist,
+                                  },
+                                  // message: bf.description,
+                                  // handleSubmit: async (message: string) => {
+                                  //   form.setFieldValue('promptInstructions', message);
+                                  //   // setChanged(true);
+                                  //   // setEditing(false);
+                                  //   const result = await patchBumpFramework(
+                                  //     userToken,
+                                  //     bf.id,
+                                  //     bf.overall_status,
+                                  //     bf.title,
+                                  //     message,
+                                  //     bf.bump_length,
+                                  //     bf.bumped_count,
+                                  //     bf.bump_delay_days,
+                                  //     bf.default,
+                                  //     bf.use_account_research,
+                                  //     bf.transformer_blocklist
+                                  //   );
+                                  //   await queryClient.refetchQueries({
+                                  //     queryKey: [`query-get-bump-frameworks`],
+                                  //   });
+                                  // },
+                                },
+                              });
+                            }}
+                          >
+                            Edit
+                          </Button>
+                        </Box>
+                      </Paper>
+                    ))}
+                </Stack>
+              </form>
+
+              <Modal opened={opened} onClose={toggle} size='lg'>
+                <Box w='100%' mb='md'>
+                  <Title order={4}>"{form.values?.frameworkName}" Research Points</Title>
+                  <Text color='gray'>
+                    {props.framework?.active_transformers.length} research points enabled.
+                  </Text>
+                  <Divider />
+                  <PersonalizationSection
+                    blocklist={props.framework?.transformer_blocklist}
+                    onItemsChange={async (items) => {
+                      setPersonalizationItemsCount(items.filter((x) => x.checked).length);
+                      setPersonalizationItemIds(items.filter((x) => !x.checked).map((x) => x.id));
+                    }}
+                    onChanged={() => {
+                      setChanged(true);
+                    }}
+                  />
+
+                  <Button
+                    w='100%'
+                    mt='md'
+                    onClick={() => {
+                      toggle();
+                      setChanged(true);
+                      saveSettings(debouncedForm);
+                    }}
+                    sx={{
+                      display: changed ? 'block' : 'none',
+                    }}
+                  >
+                    Save and Close
+                  </Button>
+                </Box>
+              </Modal>
+            </Stack>
+
+            {props.frameworks.length > 1 && (
+              <Button
+                onClick={() => {
+                  setTemplateShowAll((p) => !p);
                 }}
-              />
-            }
-          >
-            Show {templateShowAll ? 'All Templates' : 'Active Templates Only'}
-          </Button>
-        )}
+                color='gray'
+                variant='subtle'
+                leftIcon={
+                  <IconChevronDown
+                    size='1rem'
+                    style={{
+                      transform: templateShowAll ? '' : 'rotate(180deg)',
+                    }}
+                  />
+                }
+              >
+                Show {templateShowAll ? 'All Templates' : 'Active Templates Only'}
+              </Button>
+            )}
+          </>
+        }
 
         <Flex pt={15} sx={{ justifyContent: 'right' }}>
           {props.editProps && <BumpFrameworkSelect {...props.editProps} />}
@@ -3317,7 +3174,7 @@ function TemplateSection(props: {
                       </Text>
                       {/* Hovercard for transformers */}
 
-                      <HoverCard width={280} shadow='md'>
+                      {/* <HoverCard width={280} shadow='md'>
                         <HoverCard.Target>
                           <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
                             Personalizations:{' '}
@@ -3335,7 +3192,7 @@ function TemplateSection(props: {
                             ))}
                           </List>
                         </HoverCard.Dropdown>
-                      </HoverCard>
+                      </HoverCard> */}
 
                       <AIBrainPill />
 

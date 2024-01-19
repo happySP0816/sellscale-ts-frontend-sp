@@ -17,59 +17,54 @@ import {
   Center,
   Paper,
   Loader,
-} from "@mantine/core";
-import { useRecoilState, useRecoilValue } from "recoil";
+} from '@mantine/core';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import {
   prospectDrawerIdState,
   prospectDrawerOpenState,
   prospectDrawerNotesState,
   prospectChannelState,
   prospectDrawerStatusesState,
-} from "@atoms/prospectAtoms";
-import { useQuery } from "@tanstack/react-query";
-import ProspectDetailsSummary from "../common/prospectDetails/ProspectDetailsSummary";
+} from '@atoms/prospectAtoms';
+import { useQuery } from '@tanstack/react-query';
+import ProspectDetailsSummary from '../common/prospectDetails/ProspectDetailsSummary';
 import ProspectDetailsChangeStatus, {
   channelToIcon,
-} from "../common/prospectDetails/ProspectDetailsChangeStatus";
-import ProspectDetailsCompany from "../common/prospectDetails/ProspectDetailsCompany";
-import ProspectDetailsNotes from "../common/prospectDetails/ProspectDetailsNotes";
-import ProspectDetailsViewConversation from "../common/prospectDetails/ProspectDetailsViewConversation";
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { formatToLabel, valueToColor } from "@utils/general";
-import { logout } from "@auth/core";
-import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
-import { useEffect, useRef, useState } from "react";
-import { Channel, ProspectShallow } from "src";
-import FlexSeparate from "@common/library/FlexSeparate";
+} from '../common/prospectDetails/ProspectDetailsChangeStatus';
+import ProspectDetailsCompany from '../common/prospectDetails/ProspectDetailsCompany';
+import ProspectDetailsNotes from '../common/prospectDetails/ProspectDetailsNotes';
+import ProspectDetailsViewConversation from '../common/prospectDetails/ProspectDetailsViewConversation';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { formatToLabel, valueToColor } from '@utils/general';
+import { logout } from '@auth/core';
+import getChannels, { getChannelOptions } from '@utils/requests/getChannels';
+import { useEffect, useRef, useState } from 'react';
+import { Channel, ProspectShallow } from 'src';
+import FlexSeparate from '@common/library/FlexSeparate';
 import ProspectDetailsViewEmails, {
   openComposeEmailModal,
-} from "@common/prospectDetails/ProspectDetailsViewEmails";
-import { API_URL } from "@constants/data";
-import ProspectDetailsRemove from "@common/prospectDetails/ProspectDetailsRemove";
-import ProspectDetailsResearch from "@common/prospectDetails/ProspectDetailsResearch";
-import { IconDots, IconEdit, IconPencil } from "@tabler/icons";
-import ProspectDetailsOptionsMenu from "@common/prospectDetails/ProspectDetailsOptionsMenu";
-import ProspectDetailsCalendarLink from "@common/prospectDetails/ProspectDetailsCalendarLink";
-import ProspectDetailsHistory from "@common/prospectDetails/ProspectDetailsHistory";
-import ProspectReferralCard from "./ProspectReferralCard";
+} from '@common/prospectDetails/ProspectDetailsViewEmails';
+import { API_URL } from '@constants/data';
+import ProspectDetailsRemove from '@common/prospectDetails/ProspectDetailsRemove';
+import ProspectDetailsResearch from '@common/prospectDetails/ProspectDetailsResearch';
+import { IconDots, IconEdit, IconPencil } from '@tabler/icons';
+import ProspectDetailsOptionsMenu from '@common/prospectDetails/ProspectDetailsOptionsMenu';
+import ProspectDetailsCalendarLink from '@common/prospectDetails/ProspectDetailsCalendarLink';
+import ProspectDetailsHistory from '@common/prospectDetails/ProspectDetailsHistory';
+import ProspectReferralCard from './ProspectReferralCard';
 import { openContextModal } from '@mantine/modals';
-import InboxProspectConvo from "@common/inbox/InboxProspectConvo";
+import InboxProspectConvo from '@common/inbox/InboxProspectConvo';
 import { getProspects } from '@utils/requests/getProspects';
 import { openedProspectIdState } from '@atoms/inboxAtoms';
 import { IconChartBubble } from '@tabler/icons-react';
-
 
 export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
   const userData = useRecoilValue(userDataState);
   const theme = useMantineTheme();
   const tableFilterChannel = useRecoilValue(prospectChannelState);
-  const [channelType, setChannelType] = useState<Channel | null>(
-    'LINKEDIN'
-  );
+  const [channelType, setChannelType] = useState<Channel | null>('LINKEDIN');
 
-  const [drawerOpened, setDrawerOpened] = useRecoilState(
-    prospectDrawerOpenState
-  );
+  const [drawerOpened, setDrawerOpened] = useRecoilState(prospectDrawerOpenState);
 
   const [notes, setNotes] = useRecoilState(prospectDrawerNotesState);
   const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
@@ -95,7 +90,7 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
       }
 
       const response = await fetch(`${API_URL}/prospect/${prospectId}`, {
-        method: "GET",
+        method: 'GET',
         headers: {
           Authorization: `Bearer ${userToken}`,
         },
@@ -109,11 +104,11 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
 
       setNotes(res.prospect_info.details.notes);
 
-      persona_id.current = res.prospect_info.details.persona_id
+      persona_id.current = res.prospect_info.details.persona_id;
 
       return {
         main: res,
-        channels: res_channels.status === "success" ? res_channels.data : {},
+        channels: res_channels.status === 'success' ? res_channels.data : {},
         channelTypes: res_valid_channels,
       };
     },
@@ -124,23 +119,26 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
     const response = getProspects(
       userToken,
       undefined,
-      "SELLSCALE",
+      'SELLSCALE',
       10000, // TODO: Maybe use pagination method instead
       ['ACCEPTED', 'BUMPED', 'ACTIVE_CONVO', 'DEMO', 'REMOVED'],
       'ALL',
       undefined,
       true,
       prospectId
-    ).then((res) => {
-      const prospects = res.data as ProspectShallow[];
-      const prospectTemp: ProspectShallow | undefined = prospects?.find((prospect) => prospect.id === prospectId);
-      setProspect(prospectTemp);
-      setOpenedProspectId(prospectTemp?.id ?? -1);
-    }).catch((err) => {
-      console.log(err)
-    });
+    )
+      .then((res) => {
+        const prospects = res.data as ProspectShallow[];
+        const prospectTemp: ProspectShallow | undefined = prospects?.find(
+          (prospect) => prospect.id === prospectId
+        );
+        setProspect(prospectTemp);
+        setOpenedProspectId(prospectTemp?.id ?? -1);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, [drawerOpened]);
-
 
   useEffect(() => {
     if (!data) {
@@ -164,19 +162,14 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
       title={
         <FlexSeparate>
           <Title order={3}>
-            {data?.main.prospect_info
-              ? data.main.prospect_info.details.full_name
-              : ""}
+            {data?.main.prospect_info ? data.main.prospect_info.details.full_name : ''}
           </Title>
-          <div style={{ display: "flex" }}>
+          <div style={{ display: 'flex' }}>
             {data && (
               <>
                 <Badge
-                  color={valueToColor(
-                    theme,
-                    formatToLabel(prospectDrawerStatuses.overall)
-                  )}
-                  variant="outline"
+                  color={valueToColor(theme, formatToLabel(prospectDrawerStatuses.overall))}
+                  variant='outline'
                   mr={20}
                   mt={5}
                 >
@@ -193,19 +186,17 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
           </div>
         </FlexSeparate>
       }
-      padding="xl"
-      size="lg"
-      position="right"
+      padding='xl'
+      size='lg'
+      position='right'
       styles={(theme) => ({
         title: {
-          width: "100%",
+          width: '100%',
           marginRight: 0,
-          color:
-            theme.colorScheme === "dark" ? undefined : theme.colors.gray[2],
+          color: theme.colorScheme === 'dark' ? undefined : theme.colors.gray[2],
         },
         header: {
-          backgroundColor:
-            theme.colorScheme === "dark" ? undefined : theme.colors.dark[8],
+          backgroundColor: theme.colorScheme === 'dark' ? undefined : theme.colors.dark[8],
           paddingTop: 12,
           paddingBottom: 12,
         },
@@ -218,14 +209,12 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       {data?.main.prospect_info && !isFetching && (
         <>
-          <div style={{ position: "relative" }}>
-            <Flex w="100%" mt="md">
+          <div style={{ position: 'relative' }}>
+            <Flex w='100%' mt='md'>
               <ProspectDetailsSummary
                 fullName={data.main.prospect_info.details.full_name}
                 prospectID={data.main.prospect_info.details.id}
-                aiEnabled={
-                  !data.main.prospect_info.details.ai_responses_disabled
-                }
+                aiEnabled={!data.main.prospect_info.details.ai_responses_disabled}
                 refetch={refetch}
                 title={data.main.prospect_info.details.title}
                 email={data.main.prospect_info.email.email}
@@ -245,9 +234,9 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
             {data.main.prospect_info.email.email && (
               <Center>
                 <Button
-                  size="xs"
-                  variant="light"
-                  leftIcon={<IconEdit size="1rem" />}
+                  size='xs'
+                  variant='light'
+                  leftIcon={<IconEdit size='1rem' />}
                   disabled={!userData.nylas_connected}
                   onClick={() => {
                     openComposeEmailModal(
@@ -258,165 +247,133 @@ export default function ProspectDetailsDrawer(props: { zIndex?: number }) {
                       prospectDrawerStatuses.overall,
                       data.main.prospect_info.email.email,
                       userData.sdr_email,
-                      "",
-                      "",
-                      ""
+                      '',
+                      '',
+                      ''
                     );
                   }}
                 >
                   Compose Email
                 </Button>
-                <Text size="xs" w="40%" ml="sm" sx={{ fontSize: "70%" }}>
+                <Text size='xs' w='40%' ml='sm' sx={{ fontSize: '70%' }}>
                   {userData.nylas_connected
-                    ? ""
-                    : "Email integration not connected. Connect via Settings."}
+                    ? ''
+                    : 'Email integration not connected. Connect via Settings.'}
                 </Text>
               </Center>
             )}
             {data.main.prospect_info.referrals.length > 0 && (
-              <ProspectReferralCard
-                prospects={data.main.prospect_info.referrals}
-              />
+              <ProspectReferralCard prospects={data.main.prospect_info.referrals} />
             )}
-            <Flex direction="row">
+            <Flex direction='row'>
               {data.main.prospect_info.referred.length > 0 && (
-                <ProspectReferralCard
-                  prospects={data.main.prospect_info.referred}
-                  referredBy
-                />
+                <ProspectReferralCard prospects={data.main.prospect_info.referred} referredBy />
               )}
             </Flex>
           </div>
 
-          <ScrollArea
-            style={{ height: window.innerHeight - 200, overflowY: "hidden" }}
-            mt="sm"
-          >
-            {data?.channelTypes.length > 0 &&
-              prospectDrawerStatuses.overall !== "PROSPECTED" && (
-                <>
-                  <Tabs
-                    value={
-                      channelType === null || channelType === "SELLSCALE"
-                        ? data.channelTypes[0].value
-                        : channelType
+          <ScrollArea style={{ height: window.innerHeight - 200, overflowY: 'hidden' }} mt='sm'>
+            {data?.channelTypes.length > 0 && prospectDrawerStatuses.overall !== 'PROSPECTED' && (
+              <>
+                <Tabs
+                  value={
+                    channelType === null || channelType === 'SELLSCALE'
+                      ? data.channelTypes[0].value
+                      : channelType
+                  }
+                  onTabChange={(value) => {
+                    setChannelType(value as Channel | null);
+                  }}
+                >
+                  <Tabs.List position='center' display={'none'}>
+                    <Tabs.Tab
+                      key='conversation'
+                      value='conversation'
+                      icon={<IconChartBubble size={14} />}
+                    >
+                      Conversation
+                    </Tabs.Tab>
+                  </Tabs.List>
+
+                  {data?.channelTypes.map((channel: { label: string; value: Channel }) => {
+                    if (channel.value !== channelType) {
+                      return null;
                     }
-                    onTabChange={(value) => {
-                      setChannelType(value as Channel | null);
-                    }}
-                  >
-                    <Tabs.List position="center" display={"none"}>
-                      <Tabs.Tab
-                        key="conversation"
-                        value="conversation"
-                        icon={<IconChartBubble size={14} />}
-                      >
-                        Conversation
-                      </Tabs.Tab>
-                    </Tabs.List>
+                    return (
+                      <>
+                        <ProspectDetailsChangeStatus
+                          prospectId={data.main.prospect_info.details.id}
+                          prospectName={data.main.prospect_info.details.full_name}
+                          prospectDemoDate={data.main.prospect_info.details.demo_date}
+                          channelData={{
+                            data: data.channels[channel.value],
+                            value: channel.value,
+                            currentStatus:
+                              channel.value === 'LINKEDIN'
+                                ? prospectDrawerStatuses.linkedin
+                                : prospectDrawerStatuses.email,
+                          }}
+                        />
 
-                    {data?.channelTypes.map(
-                      (channel: { label: string; value: Channel }) => {
-                        if (channel.value !== channelType) {
-                          return null;
-                        }
-                        return (
-                          <>
-                            <ProspectDetailsChangeStatus
-                              prospectId={data.main.prospect_info.details.id}
-                              prospectName={
-                                data.main.prospect_info.details.full_name
-                              }
-                              prospectDemoDate={
-                                data.main.prospect_info.details.demo_date
-                              }
-                              channelData={{
-                                data: data.channels[channel.value],
-                                value: channel.value,
-                                currentStatus:
-                                  channel.value === "LINKEDIN"
-                                    ? prospectDrawerStatuses.linkedin
-                                    : prospectDrawerStatuses.email,
-                              }}
-                            />
+                        {userData.scheduling_link &&
+                          prospectDrawerStatuses.linkedin === 'ACTIVE_CONVO_SCHEDULING' && (
+                            <ProspectDetailsCalendarLink calendarLink={userData.scheduling_link} />
+                          )}
+                      </>
+                    );
+                  })}
 
-                            {userData.scheduling_link &&
-                              prospectDrawerStatuses.linkedin ===
-                                "ACTIVE_CONVO_SCHEDULING" && (
-                                <ProspectDetailsCalendarLink
-                                  calendarLink={userData.scheduling_link}
-                                />
-                              )}
-                          </>
-                        );
-                      }
-                    )}
-
-                    {/* {fetchingProspect ? 
+                  {/* {fetchingProspect ? 
                         <Card withBorder mt='xs'>
                           <Loader />
                         </Card>
                         : null 
                     } */}
-                    {prospect &&
-                      prospect.overall_status !== "PROSPECTED" &&
-                      prospect.overall_status !== "SENT_OUTREACH" && (
-                        <Card withBorder mt="xs">
-                          <Title order={4} mb="xs">
-                            Conversation
-                          </Title>
-                          {
-                            <InboxProspectConvo
-                              prospects={[prospect]}
-                              onTabChange={(value) => {
-                                setChannelType(value as Channel | null);
-                              }}
-                              openConvoBox
-                              hideTitle
+                  {prospect &&
+                    prospect.overall_status !== 'PROSPECTED' &&
+                    prospect.overall_status !== 'SENT_OUTREACH' && (
+                      <Card withBorder mt='xs'>
+                        <Title order={4} mb='xs'>
+                          Conversation
+                        </Title>
+                        {
+                          <InboxProspectConvo
+                            onTabChange={(value) => {
+                              setChannelType(value as Channel | null);
+                            }}
+                            openConvoBox
+                            hideTitle
+                          />
+                        }
+                      </Card>
+                    )}
+
+                  {data?.channelTypes.map((channel: { label: string; value: Channel }) => (
+                    <>
+                      {channel.value === 'LINKEDIN' && (
+                        <Card shadow='sm' p='lg' radius='md' mt='md' withBorder>
+                          <Title order={4}>Prospect History</Title>
+                          <ScrollArea h={500}>
+                            <ProspectDetailsHistory
+                              prospectId={data.main.prospect_info.details.id}
+                              forceRefresh={false}
                             />
-                          }
+                          </ScrollArea>
                         </Card>
                       )}
-
-                    {data?.channelTypes.map(
-                      (channel: { label: string; value: Channel }) => (
-                        <>
-                          {channel.value === "LINKEDIN" && (
-                            <Card
-                              shadow="sm"
-                              p="lg"
-                              radius="md"
-                              mt="md"
-                              withBorder
-                            >
-                              <Title order={4}>Prospect History</Title>
-                              <ScrollArea h={500}>
-                                <ProspectDetailsHistory
-                                  prospectId={
-                                    data.main.prospect_info.details.id
-                                  }
-                                  forceRefresh={false}
-                                />
-                              </ScrollArea>
-                            </Card>
-                          )}
-                        </>
-                      )
-                    )}
-                  </Tabs>
-                  <Divider mb="sm" size="sm" />
-                </>
-              )}
-            <ProspectDetailsResearch
-              prospectId={data.main.prospect_info.details.id}
-            />
+                    </>
+                  ))}
+                </Tabs>
+                <Divider mb='sm' size='sm' />
+              </>
+            )}
+            <ProspectDetailsResearch prospectId={data.main.prospect_info.details.id} />
 
             {/* Prospect Notes: Todo(Aakash) uncomment if needed */}
             {/* <ProspectDetailsNotes
               currentStatus={prospectDrawerStatuses.overall}
               prospectId={data.main.prospect_info.details.id}
             /> */}
-            
           </ScrollArea>
         </>
       )}

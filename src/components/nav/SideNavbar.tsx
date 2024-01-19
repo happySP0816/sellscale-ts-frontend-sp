@@ -1,6 +1,29 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { createStyles, Group, getStylesRef, rem, Button, Box, Text, Tooltip, Stack, Divider, Center, Badge } from '@mantine/core';
-import { IconUsers, IconSettings, IconInbox, IconTargetArrow, IconChartHistogram, IconBell, IconMap, IconBooks, IconSearch } from '@tabler/icons-react';
+import {
+  createStyles,
+  Group,
+  getStylesRef,
+  rem,
+  Button,
+  Box,
+  Text,
+  Tooltip,
+  Stack,
+  Divider,
+  Center,
+  Badge,
+} from '@mantine/core';
+import {
+  IconUsers,
+  IconSettings,
+  IconInbox,
+  IconTargetArrow,
+  IconChartHistogram,
+  IconBell,
+  IconMap,
+  IconBooks,
+  IconSearch,
+} from '@tabler/icons-react';
 import { useRecoilValue } from 'recoil';
 import { NAV_BAR_SIDE_WIDTH } from '@constants/data';
 import ProfileIcon from '@nav/ProfileIcon';
@@ -26,13 +49,19 @@ const useStyles = createStyles((theme) => ({
 
   header: {
     marginBottom: theme.spacing.md,
-    borderTop: `${rem(1)} solid ${theme.fn.lighten(theme.fn.variant({ variant: 'filled', color: 'dark' }).background!, 0.1)}`,
+    borderTop: `${rem(1)} solid ${theme.fn.lighten(
+      theme.fn.variant({ variant: 'filled', color: 'dark' }).background!,
+      0.1
+    )}`,
   },
 
   footer: {
     paddingTop: theme.spacing.md,
     marginTop: theme.spacing.md,
-    borderTop: `${rem(1)} solid ${theme.fn.lighten(theme.fn.variant({ variant: 'filled', color: 'dark' }).background!, 0.1)}`,
+    borderTop: `${rem(1)} solid ${theme.fn.lighten(
+      theme.fn.variant({ variant: 'filled', color: 'dark' }).background!,
+      0.1
+    )}`,
   },
 
   link: {
@@ -47,7 +76,10 @@ const useStyles = createStyles((theme) => ({
     fontWeight: 500,
 
     '&:hover': {
-      backgroundColor: theme.fn.lighten(theme.fn.variant({ variant: 'filled', color: 'dark' }).background!, 0.1),
+      backgroundColor: theme.fn.lighten(
+        theme.fn.variant({ variant: 'filled', color: 'dark' }).background!,
+        0.1
+      ),
     },
   },
 
@@ -59,7 +91,10 @@ const useStyles = createStyles((theme) => ({
   },
   linkActive: {
     '&, &:hover': {
-      backgroundColor: theme.fn.lighten(theme.fn.variant({ variant: 'filled', color: 'dark' }).background!, 0.15),
+      backgroundColor: theme.fn.lighten(
+        theme.fn.variant({ variant: 'filled', color: 'dark' }).background!,
+        0.15
+      ),
       [`& .${getStylesRef('icon')}`]: {
         opacity: 0.9,
       },
@@ -131,13 +166,17 @@ export default function SideNavbar(props: {}) {
   // const percentage = Math.round((completedStepsCount / stepsCount) * 100); // old percentage
 
   const NUM_MANDATORY_FIELDS_IN_ONBOARDING = 27;
-  const percentage = Math.min(100, Math.round((Object.keys(preOnboardingData).length / NUM_MANDATORY_FIELDS_IN_ONBOARDING) * 100));
+  const percentage = Math.min(
+    100,
+    Math.round((Object.keys(preOnboardingData).length / NUM_MANDATORY_FIELDS_IN_ONBOARDING) * 100)
+  );
 
   return (
     <Group
       position='apart'
       sx={{
         flexDirection: 'column',
+        zIndex: 5000,
       }}
       className={classes.navbar}
       w={NAV_BAR_SIDE_WIDTH}
@@ -146,7 +185,11 @@ export default function SideNavbar(props: {}) {
         <LogoFull />
         <Divider color='dark.4' />
         <Box m='md'>
-          <SideNavbarItem icon={<IconHome size='1.0rem' />} label='Overview' tabKey={['overview']} />
+          <SideNavbarItem
+            icon={<IconHome size='1.0rem' />}
+            label='Overview'
+            tabKey={['overview']}
+          />
           <SideNavbarItem
             icon={<IconInbox size='1.0rem' />}
             label={
@@ -161,8 +204,16 @@ export default function SideNavbar(props: {}) {
             }
             tabKey={['inbox']}
           />
-          <SideNavbarItem icon={<IconTargetArrow size='1.0rem' />} label='Campaigns' tabKey={['campaigns', 'all/campaigns', '']} />
-          <SideNavbarItem icon={<IconUsers size='1.0rem' />} label='Contacts' tabKey={['contacts/overview', 'contacts', 'all/contacts']} />
+          <SideNavbarItem
+            icon={<IconTargetArrow size='1.0rem' />}
+            label='Campaigns'
+            tabKey={['campaigns', 'all/campaigns', '']}
+          />
+          <SideNavbarItem
+            icon={<IconUsers size='1.0rem' />}
+            label='Contacts'
+            tabKey={['contacts/overview', 'contacts', 'all/contacts']}
+          />
           {/* <SideNavbarItem icon={<IconTarget size='1.0rem' />} label='Triggers' tabKey={['triggers', 'create-trigger']} /> */}
           <SideNavbarItem
             icon={<IconChartHistogram size='1.0rem' />}
@@ -202,14 +253,22 @@ export default function SideNavbar(props: {}) {
           )}
 
           <Divider color='dark.4' mt='lg' mb='sm' />
-          <SideNavbarItem icon={<IconSearch size='1.0rem' />} label='Search' onClick={openSpotlight} />
+          <SideNavbarItem
+            icon={<IconSearch size='1.0rem' />}
+            label='Search'
+            onClick={openSpotlight}
+          />
           {/* <SideNavbarItem
             icon={<IconBell size="1.0rem" />}
             label="Notifications"
             tabKey={["notifications", "all/recent-activity"]}
           /> */}
           <SideNavbarItem icon={<IconBooks size='1.0rem' />} label='Advanced' tabKey='advanced' />
-          <SideNavbarItem icon={<IconSettings size='1.0rem' />} label='Settings' tabKey='settings' />
+          <SideNavbarItem
+            icon={<IconSettings size='1.0rem' />}
+            label='Settings'
+            tabKey='settings'
+          />
           <SideNavbarItem icon={<IconPencil />} label='Adjust AI' tabKey='ai-request' />
         </Box>
         <Box>
@@ -221,14 +280,21 @@ export default function SideNavbar(props: {}) {
   );
 }
 
-function SideNavbarItem(props: { icon: ReactNode; label: ReactNode; tabKey?: string | string[]; onClick?: () => void }) {
+function SideNavbarItem(props: {
+  icon: ReactNode;
+  label: ReactNode;
+  tabKey?: string | string[];
+  onClick?: () => void;
+}) {
   const navigate = useNavigate();
   const { hovered, ref } = useHover();
 
   const locParts = location.pathname?.split('/');
   const activeTab = locParts.length === 2 ? locParts[1] : `${locParts[1]}/${locParts[2]}`;
 
-  const active = (Array.isArray(props.tabKey) ? props.tabKey.includes(activeTab) : activeTab === props.tabKey) || hovered;
+  const active =
+    (Array.isArray(props.tabKey) ? props.tabKey.includes(activeTab) : activeTab === props.tabKey) ||
+    hovered;
   return (
     <Box
       ref={ref}
@@ -240,7 +306,10 @@ function SideNavbarItem(props: { icon: ReactNode; label: ReactNode; tabKey?: str
       onClick={() => {
         props.onClick && props.onClick();
         if (props.tabKey) {
-          navigateToPage(navigate, '/' + (Array.isArray(props.tabKey) ? props.tabKey[0] : props.tabKey));
+          navigateToPage(
+            navigate,
+            '/' + (Array.isArray(props.tabKey) ? props.tabKey[0] : props.tabKey)
+          );
         }
       }}
     >

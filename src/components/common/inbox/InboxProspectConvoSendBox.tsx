@@ -449,12 +449,19 @@ export default forwardRef(function InboxProspectConvoSendBox(
 
   useEffect(() => {
     (async () => {
+      showNotification({
+        id: "get-bump-frameworks",
+        title: "Getting bump frameworks ...",
+        message: "",
+        color: "blue",
+        autoClose: 3000,
+      })
       const result = await getBumpFrameworks(
         userToken, 
-        // status
         ['ACTIVE_CONVO'],
         [], 
         [],
+        undefined,
         undefined,
         undefined,
         undefined,
@@ -474,7 +481,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
       setBumpFramework(bumpFrameworkArray.length > 0 ? bumpFrameworkArray[0] : undefined);
     })()
   }, [
-    props.prospectId,
+    props.prospectId, props.archetypeId, replyLabel
   ])
 
   const smartGenerate = async (additional_instructions: string) => {

@@ -1175,8 +1175,9 @@ export default function ProspectConvo(props: {
                 }
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
-                archetypeId={prospect?.archetype_id || undefined}
+                archetypeId={prospect?.archetype_id}
               />
+              
             </Box>
             <Box
               sx={{

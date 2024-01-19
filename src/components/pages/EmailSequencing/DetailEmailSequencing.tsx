@@ -27,6 +27,7 @@ import {
   useMantineTheme,
   HoverCard,
   List,
+  Modal,
 } from '@mantine/core';
 import { useDisclosure, useHover, useMediaQuery } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
@@ -41,6 +42,7 @@ import {
   IconPlus,
   IconReload,
   IconRobot,
+  IconSearch,
   IconTrash,
   IconWritingSign,
   IconX,
@@ -1186,6 +1188,8 @@ export const EmailBodyItem: React.FC<{
   const [sequence, _setSequence] = React.useState<string>(templateBody);
   const sequenceRichRaw = React.useRef<JSONContent | string>(template.template || '');
 
+  const [opened, { open, close }] = useDisclosure(false);
+
   const [title, setTitle] = React.useState<string>(template.title || '');
   const [editingTitle, setEditingTitle] = React.useState<boolean>(false);
 
@@ -1430,15 +1434,21 @@ export const EmailBodyItem: React.FC<{
                   {displayPersonalization && (
                     <HoverCard width={280} shadow='md'>
                       <HoverCard.Target>
-                        <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
-                          Personalizations:{' '}
-                          <Text fw={500} span>
+                        <Badge 
+                          color='lime' 
+                          size='xs' 
+                          styles={{ root: { textTransform: 'initial', cursor: 'pointer' } }} 
+                          variant='outline' 
+                          leftSection={<IconSearch sx={{marginTop: '2px'}} size={'0.7rem'}/>}
+                          onClick={open}
+                        >                          
+                          <Text fw={700} span>
                             {
                               RESEARCH_POINTS.filter(
                                 (p) => !template.transformer_blocklist.includes(p)
                               ).length
                             }
-                          </Text>
+                          </Text>{' '}Research Points
                         </Badge>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
@@ -1592,74 +1602,49 @@ export const EmailBodyItem: React.FC<{
             </Flex>
           </Box>
         )}
-        {/* <Tabs
-          value={editingPersonalization ? 'personalization' : ''}
-          pt='sm'
-          variant='pills'
-          keepMounted={true}
-          radius='md'
-          defaultValue='none'
-          allowTabDeactivation
-        >
-          <Tabs.Tab
-            value='personalization'
-            color='teal.5'
-            onClick={() => {
-              setEditingPersonalization(!editingPersonalization);
-            }}
-            sx={(theme) => ({
-              '&[data-active]': {
-                backgroundColor: theme.colors.teal[0] + '!important',
-                borderRadius: theme.radius.md + '!important',
-                color: theme.colors.teal[8] + '!important',
-              },
-              border: 'solid 1px ' + theme.colors.teal[5] + '!important',
-            })}
-          >
-            Edit Personalization
-          </Tabs.Tab>
-          <Tabs.Panel value='personalization'> */}
-        {/* {displayPersonalization && (
-          <PersonalizationSection
-            title='Enabled Research Points'
-            blocklist={template.transformer_blocklist ?? []}
-            onItemsChange={async (items) => {
-              // Update transformer blocklist
-
-              const result = await patchSequenceStep(
-                userToken,
-                template.id,
-                template.overall_status,
-                template.title,
-                template.template,
-                template.bumped_count,
-                template.default,
-                template.sequence_delay_days,
-                items.filter((x) => !x.checked).map((x) => x.id)
-              );
-              if (result.status != 'success') {
-                showNotification({
-                  title: 'Error',
-                  message: result.message,
-                  color: 'red',
-                });
-                return;
-              } else {
-                showNotification({
-                  title: 'Success',
-                  message: 'Successfully updated research used',
-                  color: 'green',
-                });
-                refetch();
-                refreshPersonalization();
-              }
-              // setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
-            }}
-          />
-        )} */}
-        {/* </Tabs.Panel>
-        </Tabs> */}
       </Flex>
+
+      <Modal opened={opened} onClose={() => {
+        close()
+      }} title="Authentication" size={640}>
+        <PersonalizationSection
+          title='Enabled Research Points'
+          blocklist={template.transformer_blocklist ?? []}
+          onItemsChange={async (items) => {
+            // Update transformer blocklist
+
+            const result = await patchSequenceStep(
+              userToken,
+              template.id,
+              template.overall_status,
+              template.title,
+              template.template,
+              template.bumped_count,
+              template.default,
+              template.sequence_delay_days,
+              items.filter((x) => !x.checked).map((x) => x.id)
+            );
+            if (result.status != 'success') {
+              showNotification({
+                title: 'Error',
+                message: result.message,
+                color: 'red',
+              });
+              return;
+            } else {
+              showNotification({
+                title: 'Success',
+                message: 'Successfully updated research used',
+                color: 'green',
+              });
+            }
+
+            refreshPersonalization();
+            refetch();
+            // setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
+          }}
+        />
+        </Modal>
     </Flex>
   );
 };

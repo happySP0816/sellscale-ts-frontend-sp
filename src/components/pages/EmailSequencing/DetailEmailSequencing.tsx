@@ -2,7 +2,7 @@ import { currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import DynamicRichTextArea from '@common/library/DynamicRichTextArea';
 import ProspectSelect from '@common/library/ProspectSelect';
-import { PersonalizationSection } from '@common/sequence/SequenceSection';
+import { PersonalizationSection, RESEARCH_POINTS } from '@common/sequence/SequenceSection';
 import { API_URL, SCREEN_SIZES } from '@constants/data';
 import {
   Badge,
@@ -25,6 +25,8 @@ import {
   Popover,
   Divider,
   useMantineTheme,
+  HoverCard,
+  List,
 } from '@mantine/core';
 import { useDisclosure, useHover, useMediaQuery } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
@@ -1423,6 +1425,32 @@ export const EmailBodyItem: React.FC<{
                   >
                     <IconPencil size={'0.9rem'} />
                   </ActionIcon>
+
+                  <HoverCard width={280} shadow='md'>
+                    <HoverCard.Target>
+                      <Badge color='green' styles={{ root: { textTransform: 'initial' } }}>
+                        Personalizations:{' '}
+                        <Text fw={500} span>
+                          {
+                            RESEARCH_POINTS.filter(
+                              (p) => !template.transformer_blocklist.includes(p)
+                            ).length
+                          }
+                        </Text>
+                      </Badge>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <List>
+                        {RESEARCH_POINTS.filter(
+                          (p) => !template.transformer_blocklist.includes(p)
+                        ).map((note: any, index: number) => (
+                          <List.Item key={index}>
+                            <Text fz='sm'>{note}</Text>
+                          </List.Item>
+                        ))}
+                      </List>
+                    </HoverCard.Dropdown>
+                  </HoverCard>
                 </>
               )}
             </Flex>
@@ -1586,7 +1614,6 @@ export const EmailBodyItem: React.FC<{
             Edit Personalization
           </Tabs.Tab>
           <Tabs.Panel value='personalization'> */}
-
         {displayPersonalization && (
           <PersonalizationSection
             title='Enabled Research Points'

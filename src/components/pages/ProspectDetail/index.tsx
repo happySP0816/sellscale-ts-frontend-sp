@@ -1,24 +1,20 @@
-import {
-  mainTabState,
-  nurturingModeState,
-  openedProspectIdState,
-} from "@atoms/inboxAtoms";
-import { currentProjectState } from "@atoms/personaAtoms";
-import { userTokenState } from "@atoms/userAtoms";
+import { mainTabState, nurturingModeState, openedProspectIdState } from '@atoms/inboxAtoms';
+import { currentProjectState } from '@atoms/personaAtoms';
+import { userTokenState } from '@atoms/userAtoms';
 
-import { Card, Grid, Loader } from "@mantine/core";
-import { useQuery } from "@tanstack/react-query";
-import { setPageTitle } from "@utils/documentChange";
-import { getProspects } from "@utils/requests/getProspects";
-import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { ProspectShallow } from "src";
-import { useParams } from "react-router-dom";
-import InboxProspectDetails from "@common/inbox/InboxProspectDetails";
-import InboxProspectConvo from "@common/inbox/InboxProspectConvo";
-import { API_URL } from "@constants/data";
-import getChannels, { getChannelOptions } from "@utils/requests/getChannels";
-import { logout } from "@auth/core";
+import { Card, Grid, Loader } from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
+import { setPageTitle } from '@utils/documentChange';
+import { getProspects } from '@utils/requests/getProspects';
+import { useEffect, useState } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { ProspectShallow } from 'src';
+import { useParams } from 'react-router-dom';
+import InboxProspectDetails from '@common/inbox/InboxProspectDetails';
+import InboxProspectConvo from '@common/inbox/InboxProspectConvo';
+import { API_URL } from '@constants/data';
+import getChannels, { getChannelOptions } from '@utils/requests/getChannels';
+import { logout } from '@auth/core';
 export const INBOX_PAGE_HEIGHT = `100vh`; //`calc(100vh - ${NAV_HEADER_HEIGHT}px)`;
 
 export default function ProspectDetailPage() {
@@ -37,7 +33,7 @@ export default function ProspectDetailPage() {
       }
 
       const response = await fetch(`${API_URL}/prospect/${prospectId}`, {
-        method: "GET",
+        method: 'GET',
         headers: {
           Authorization: `Bearer ${userToken}`,
         },
@@ -53,7 +49,7 @@ export default function ProspectDetailPage() {
 
       return {
         main: res,
-        channels: res_channels.status === "success" ? res_channels.data : {},
+        channels: res_channels.status === 'success' ? res_channels.data : {},
         channelTypes: res_valid_channels,
       };
     },
@@ -64,10 +60,10 @@ export default function ProspectDetailPage() {
     getProspects(
       userToken,
       undefined,
-      "SELLSCALE",
+      'SELLSCALE',
       10000, // TODO: Maybe use pagination method instead
       undefined,
-      "ALL",
+      'ALL',
       undefined,
       true,
       prospectId
@@ -96,26 +92,18 @@ export default function ProspectDetailPage() {
 
   if (!queryComplete)
     return (
-      <Card w="250px" h="250px" m="10% auto" withBorder>
-        <Loader m="88px 88px" />
+      <Card w='250px' h='250px' m='10% auto' withBorder>
+        <Loader m='88px 88px' />
       </Card>
     );
 
   return (
-    <Grid gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: "hidden" }}>
+    <Grid gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: 'hidden' }}>
       <Grid.Col span={8}>
-        <InboxProspectConvo
-          prospects={prospects}
-          showBackToInbox
-          currentEmailStatus={prospects[0].email_status}
-        />
+        <InboxProspectConvo showBackToInbox currentEmailStatus={prospects[0].email_status} />
       </Grid.Col>
       <Grid.Col span={4}>
-        <InboxProspectDetails
-          prospects={prospects}
-          noProspectResetting
-          currentEmailStatus={prospects[0].email_status}
-        />
+        <InboxProspectDetails noProspectResetting currentEmailStatus={prospects[0].email_status} />
       </Grid.Col>
     </Grid>
   );

@@ -107,10 +107,10 @@ export default function InboxPage(props: { all?: boolean }) {
               {prospects.length > 0 ? (
                 <>
                   <Grid.Col span={46}>
-                    <InboxProspectConvo prospects={prospects} />
+                    <InboxProspectConvo />
                   </Grid.Col>
                   <Grid.Col span={27}>
-                    <InboxProspectDetails prospects={prospects} />
+                    <InboxProspectDetails />
                   </Grid.Col>
                 </>
               ) : (

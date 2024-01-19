@@ -392,18 +392,6 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                   size="xl"
                   variant="filled"
                   color="blue"
-                  // pr={8}
-                  // rightSection={
-                  //   <ActionIcon
-                  //     size='xs'
-                  //     color='blue'
-                  //     radius='xl'
-                  //     variant='transparent'
-                  //     onClick={async () => openConfirmDisconnectModal()}
-                  //   >
-                  //     <IconX size={15} color='white' />
-                  //   </ActionIcon>
-                  // }
                   styles={{ root: { textTransform: "initial" } }}
                 >
                   Synced
@@ -446,20 +434,25 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
                     });
                   }}
                 >
-                  Sync
+                  Sync Campaign
                 </Button>
               )}
+              <Text>
+                After this campaign is ready to send, press `Sync` to create a
+                campaign in Smartlead with multiple mailboxes and optimal configurations.
+              </Text>
             </Group>
           </div>
           <Group noWrap>
             <TextInput
               label="Smartlead Campaign Page URL"
+              disabled
               placeholder="https://app.smartlead.ai/app/email-campaign/..."
               value={campaignUrl}
               onChange={(event) => setCampaignUrl(event.currentTarget.value)}
               miw={500}
             />
-            <Button
+            {/* <Button
               disabled={!campaignUrl.trim()}
               onClick={async () => {
                 if (!currentProject) return;
@@ -479,7 +472,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
               }}
             >
               Submit
-            </Button>
+            </Button> */}
           </Group>
         </Stack>
       </Paper>

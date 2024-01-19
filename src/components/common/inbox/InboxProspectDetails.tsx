@@ -317,7 +317,7 @@ export default function ProjectDetails(props: {
         <Flex>
           {/* make the badge a box with border radius 0px */}
           <Badge color='blue' variant='outline' sx={{borderRadius: 0}} w='100%'>
-            {data?.data.archetype_name.substring(0, 50)} {data?.data.archetype_name.length > 50 && '...'}
+            {data?.data.archetype_name.substring(0, 50)} {data?.data?.archetype_name && data?.data.archetype_name.length > 50 && '...'}
           </Badge>
 
           <Button

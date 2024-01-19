@@ -62,13 +62,21 @@ export default function ChannelSetupPage() {
       setEnabledEmail(!isEnabledEmail);
       if (!isEnabledEmail) {
         showNotification({
-          title: "Success",
+          title: "✅ Enabled",
           message:
             "Email outbound has been toggled on, new messages will be sent.",
         });
+
+        showNotification({
+          title: "📧 Fetching emails...",
+          message:
+            "We are fetching emails for your contacts. This may take a few minutes.",
+            color: "blue",
+            autoClose: 15000,
+        })
       } else {
         showNotification({
-          title: "Success",
+          title: "🔴 Disabled",
           message:
             "Email outbound has been toggled, no new messages will be sent.",
         });

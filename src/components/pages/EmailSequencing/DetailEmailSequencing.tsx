@@ -34,24 +34,9 @@ import { showNotification } from '@mantine/notifications';
 import CreateEmailSubjectLineModal from '@modals/CreateEmailSubjectLineModal';
 import EmailSequenceStepModal from '@modals/EmailSequenceStepModal';
 import ManageEmailSubjectLineTemplatesModal from '@modals/ManageEmailSubjectLineTemplatesModal';
-import {
-  IconCheck,
-  IconDatabase,
-  IconEdit,
-  IconPencil,
-  IconPlus,
-  IconReload,
-  IconRobot,
-  IconSearch,
-  IconTrash,
-  IconWritingSign,
-  IconX,
-} from '@tabler/icons';
+import { IconCheck, IconDatabase, IconEdit, IconPencil, IconPlus, IconReload, IconRobot, IconSearch, IconTrash, IconWritingSign, IconX } from '@tabler/icons';
 import { JSONContent } from '@tiptap/react';
-import {
-  postGenerateFollowupEmail,
-  postGenerateInitialEmail,
-} from '@utils/requests/emailMessageGeneration';
+import { postGenerateFollowupEmail, postGenerateInitialEmail } from '@utils/requests/emailMessageGeneration';
 import { createEmailSequenceStep, patchSequenceStep } from '@utils/requests/emailSequencing';
 import { patchEmailSubjectLineTemplate } from '@utils/requests/emailSubjectLines';
 import DOMPurify from 'dompurify';
@@ -79,8 +64,7 @@ const SpamScorePopover: FC<{
     return <></>;
   }
 
-  let totalScore =
-    ((subjectSpamScoreDetails?.total_score || 100) + (bodySpamScoreDetails?.total_score || 0)) / 2;
+  let totalScore = ((subjectSpamScoreDetails?.total_score || 100) + (bodySpamScoreDetails?.total_score || 0)) / 2;
   let color = 'red';
   if (totalScore > 75) {
     color = 'green';
@@ -134,11 +118,7 @@ const SpamScorePopover: FC<{
                 <Flex pl='md' direction='column' fz='sm' mt='2px'>
                   <Flex>
                     <Text>Spam words:</Text>
-                    <Text
-                      ml='sm'
-                      color={subjectSpamScoreDetails?.spam_words.length === 0 ? 'green' : 'red'}
-                      fw={'bold'}
-                    >
+                    <Text ml='sm' color={subjectSpamScoreDetails?.spam_words.length === 0 ? 'green' : 'red'} fw={'bold'}>
                       {subjectSpamScoreDetails?.spam_words.join(', ') || 'None'}
                     </Text>
                   </Flex>
@@ -161,13 +141,7 @@ const SpamScorePopover: FC<{
                 <Text>Read time:</Text>
                 <Text
                   ml='sm'
-                  color={
-                    bodySpamScoreDetails?.read_minutes === 1
-                      ? 'green'
-                      : bodySpamScoreDetails?.read_minutes === 2
-                      ? 'orange'
-                      : 'red'
-                  }
+                  color={bodySpamScoreDetails?.read_minutes === 1 ? 'green' : bodySpamScoreDetails?.read_minutes === 2 ? 'orange' : 'red'}
                   fw={'bold'}
                 >
                   ~ {bodySpamScoreDetails?.read_minutes} minutes
@@ -175,11 +149,7 @@ const SpamScorePopover: FC<{
               </Flex>
               <Flex>
                 <Text>Spam words:</Text>
-                <Text
-                  ml='sm'
-                  color={bodySpamScoreDetails?.spam_words.length === 0 ? 'green' : 'red'}
-                  fw={'bold'}
-                >
+                <Text ml='sm' color={bodySpamScoreDetails?.spam_words.length === 0 ? 'green' : 'red'} fw={'bold'}>
                   {bodySpamScoreDetails?.spam_words.join(', ') || 'None'}
                 </Text>
               </Flex>
@@ -209,18 +179,12 @@ const DetailEmailSequencing: FC<{
   const [pageTitle, setPageTitle] = React.useState<string>('Email Sequencing');
 
   // Create Subject Line / Email Template
-  const [createSubjectLineOpened, { open: openCreateSubject, close: closeCreateSubject }] =
-    useDisclosure();
-  const [
-    createEmailTemplateOpened,
-    { open: openCreateEmailTemplate, close: closeCreateEmailTemplate },
-  ] = useDisclosure();
+  const [createSubjectLineOpened, { open: openCreateSubject, close: closeCreateSubject }] = useDisclosure();
+  const [createEmailTemplateOpened, { open: openCreateEmailTemplate, close: closeCreateEmailTemplate }] = useDisclosure();
 
   // Template library
-  const [bodyLibraryOpened, { open: openBodyLibrary, close: closeBodyLibrary }] =
-    useDisclosure(false);
-  const [subjectLibraryOpened, { open: openSubjectLibrary, close: closeSubjectLibrary }] =
-    useDisclosure(false);
+  const [bodyLibraryOpened, { open: openBodyLibrary, close: closeBodyLibrary }] = useDisclosure(false);
+  const [subjectLibraryOpened, { open: openSubjectLibrary, close: closeSubjectLibrary }] = useDisclosure(false);
 
   // Active vs Inactive Body Templates
   const [activeTemplate, setActiveTemplate] = React.useState<EmailSequenceStep | null>(null);
@@ -228,12 +192,8 @@ const DetailEmailSequencing: FC<{
 
   // Preview Email (Generation)
   const [prospectID, setProspectID] = React.useState<number>(0);
-  const [previewEmailSubject, setPreviewEmailSubject] = React.useState<string | null>(
-    'Random Subject Line'
-  );
-  const [previewEmailBody, setPreviewEmailBody] = React.useState<string | null>(
-    'Random Email Body'
-  );
+  const [previewEmailSubject, setPreviewEmailSubject] = React.useState<string | null>('Random Subject Line');
+  const [previewEmailBody, setPreviewEmailBody] = React.useState<string | null>('Random Email Body');
   const [initialEmailLoading, setInitialEmailLoading] = React.useState<boolean>(false);
   const [followupEmailLoading, setFollowupEmailLoading] = React.useState<boolean>(false);
 
@@ -283,11 +243,8 @@ const DetailEmailSequencing: FC<{
     setInitialEmailLoading(true);
 
     try {
-      const activeSubjectLines = subjectLines.filter(
-        (subjectLine: SubjectLineTemplate) => subjectLine.active
-      );
-      const randomSubjectLineID =
-        activeSubjectLines[Math.floor(Math.random() * activeSubjectLines.length)].id;
+      const activeSubjectLines = subjectLines.filter((subjectLine: SubjectLineTemplate) => subjectLine.active);
+      const randomSubjectLineID = activeSubjectLines[Math.floor(Math.random() * activeSubjectLines.length)].id;
 
       const response = await postGenerateInitialEmail(
         userToken,
@@ -313,14 +270,8 @@ const DetailEmailSequencing: FC<{
         let subjectLineCompletion = subject_line.completion;
         if (subjectLineSpamWords && subjectLineSpamWords.length > 0) {
           subjectLineSpamWords.forEach((badWord: string) => {
-            const spannedWord =
-              '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' +
-              badWord +
-              '</span>';
-            subjectLineCompletion = subjectLineCompletion.replace(
-              new RegExp(badWord, 'g'),
-              spannedWord
-            );
+            const spannedWord = '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' + badWord + '</span>';
+            subjectLineCompletion = subjectLineCompletion.replace(new RegExp(badWord, 'g'), spannedWord);
           });
         }
 
@@ -328,14 +279,8 @@ const DetailEmailSequencing: FC<{
         let emailBodyCompletion = email_body.completion;
         if (emailBodySpamWords && emailBodySpamWords.length > 0) {
           emailBodySpamWords.forEach((badWord: string) => {
-            const spannedWord =
-              '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' +
-              badWord +
-              '</span>';
-            emailBodyCompletion = emailBodyCompletion.replace(
-              new RegExp(badWord, 'g'),
-              spannedWord
-            );
+            const spannedWord = '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' + badWord + '</span>';
+            emailBodyCompletion = emailBodyCompletion.replace(new RegExp(badWord, 'g'), spannedWord);
           });
         }
 
@@ -364,14 +309,7 @@ const DetailEmailSequencing: FC<{
     setFollowupEmailLoading(true);
 
     try {
-      const response = await postGenerateFollowupEmail(
-        userToken,
-        prospectID,
-        null,
-        activeTemplate?.id as number,
-        null,
-        followupEmailGenerationController
-      );
+      const response = await postGenerateFollowupEmail(userToken, prospectID, null, activeTemplate?.id as number, null, followupEmailGenerationController);
       if (response.status === 'success') {
         const email_body = response.data.email_body;
         if (!email_body) {
@@ -385,14 +323,8 @@ const DetailEmailSequencing: FC<{
         let emailBodyCompletion = email_body.completion;
         if (emailBodySpamWords && emailBodySpamWords.length > 0) {
           emailBodySpamWords.forEach((badWord: string) => {
-            const spannedWord =
-              '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' +
-              badWord +
-              '</span>';
-            emailBodyCompletion = emailBodyCompletion.replace(
-              new RegExp(badWord, 'g'),
-              spannedWord
-            );
+            const spannedWord = '<span style="color: red; background: rgba(250, 0, 0, 0.25); padding: 0 4px 0 4px; border-radius: 3px">' + badWord + '</span>';
+            emailBodyCompletion = emailBodyCompletion.replace(new RegExp(badWord, 'g'), spannedWord);
           });
         }
 
@@ -443,9 +375,7 @@ const DetailEmailSequencing: FC<{
     const activeTemplate = activeTemplates.length > 0 ? activeTemplates[0] : null;
     let inactiveTemplates = [];
     if (activeTemplate) {
-      inactiveTemplates = templates.filter(
-        (template: EmailSequenceStep) => template.id != activeTemplate.id
-      );
+      inactiveTemplates = templates.filter((template: EmailSequenceStep) => template.id != activeTemplate.id);
     } else {
       inactiveTemplates = templates;
     }
@@ -484,12 +414,7 @@ const DetailEmailSequencing: FC<{
           <Button onClick={openBodyLibrary} variant='outline' radius='md' color='blue' mr='xs'>
             📚 Choose from Template Library
           </Button>
-          <Button
-            variant='light'
-            leftIcon={<IconPlus size='.90rem' />}
-            radius={'sm'}
-            onClick={openCreateEmailTemplate}
-          >
+          <Button variant='light' leftIcon={<IconPlus size='.90rem' />} radius={'sm'} onClick={openCreateEmailTemplate}>
             Add Email Template
           </Button>
         </Flex>
@@ -503,8 +428,7 @@ const DetailEmailSequencing: FC<{
               children: (
                 <>
                   <Text fs='italic' fz='sm'>
-                    Review the details of the "{template.name || 'N/A'}" template below. You can
-                    always edit the template after importing.
+                    Review the details of the "{template.name || 'N/A'}" template below. You can always edit the template after importing.
                   </Text>
                   <Text mt='sm' fw='light'>
                     Name:
@@ -527,9 +451,7 @@ const DetailEmailSequencing: FC<{
                     mt='sm'
                   >
                     <Text fz='sm'>
-                      <div
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.template) }}
-                      />
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(template.template) }} />
                     </Text>
                   </Box>
                 </>
@@ -542,9 +464,7 @@ const DetailEmailSequencing: FC<{
               confirmProps: { color: 'green' },
               onCancel: () => {},
               onConfirm: async () => {
-                const bumpedCount = currentTab.includes('BUMPED-')
-                  ? parseInt(currentTab.split('-')[1])
-                  : null;
+                const bumpedCount = currentTab.includes('BUMPED-') ? parseInt(currentTab.split('-')[1]) : null;
                 const result = await postCopyEmailPoolEntry(
                   userToken,
                   template.template_type,
@@ -585,13 +505,7 @@ const DetailEmailSequencing: FC<{
           status={currentTab.includes('BUMPED-') ? 'BUMPED' : currentTab}
           archetypeID={currentProject.id}
           bumpedCount={currentTab.includes('BUMPED-') ? parseInt(currentTab.split('-')[1]) : null}
-          onFinish={async (
-            title: any,
-            sequence: any,
-            isDefault: any,
-            status: any,
-            substatus: any
-          ) => {
+          onFinish={async (title: any, sequence: any, isDefault: any, status: any, substatus: any) => {
             const result = await createEmailSequenceStep(
               userToken,
               currentProject.id,
@@ -718,10 +632,7 @@ const DetailEmailSequencing: FC<{
         </Flex>
 
         <Flex justify='flex-end' mt='sm'>
-          <SpamScorePopover
-            subjectSpamScoreDetails={subjectSpamScoreDetails}
-            bodySpamScoreDetails={bodySpamScoreDetails}
-          />
+          <SpamScorePopover subjectSpamScoreDetails={subjectSpamScoreDetails} bodySpamScoreDetails={bodySpamScoreDetails} />
         </Flex>
 
         <Box
@@ -766,8 +677,7 @@ const DetailEmailSequencing: FC<{
               </Text>
             </Flex>
             <Flex>
-              {(initialEmailLoading && !previewEmailSubject) ||
-              (followupEmailLoading && !previewEmailBody) ? (
+              {(initialEmailLoading && !previewEmailSubject) || (followupEmailLoading && !previewEmailBody) ? (
                 <Flex align='center'>
                   <Loader mr='sm' size={20} color='purple' />
                   <Text color='purple'>AI generating email body...</Text>
@@ -806,21 +716,10 @@ const DetailEmailSequencing: FC<{
             <Flex direction='column' w='100%'>
               <Flex justify='flex-end' align='center' mt='md'>
                 <Flex align='center'>
-                  <Button
-                    onClick={openSubjectLibrary}
-                    variant='outline'
-                    radius='md'
-                    color='blue'
-                    mr='xs'
-                  >
+                  <Button onClick={openSubjectLibrary} variant='outline' radius='md' color='blue' mr='xs'>
                     📚 Choose from Template Library
                   </Button>
-                  <Button
-                    variant='light'
-                    leftIcon={<IconPlus size='.90rem' />}
-                    radius={'sm'}
-                    onClick={openCreateSubject}
-                  >
+                  <Button variant='light' leftIcon={<IconPlus size='.90rem' />} radius={'sm'} onClick={openCreateSubject}>
                     Add Subject Line
                   </Button>
                 </Flex>
@@ -843,8 +742,7 @@ const DetailEmailSequencing: FC<{
                       children: (
                         <>
                           <Text fs='italic' fz='sm'>
-                            Review the details of the "{template.name || 'N/A'}" template below. You
-                            can always edit the template after importing.
+                            Review the details of the "{template.name || 'N/A'}" template below. You can always edit the template after importing.
                           </Text>
                           <Text mt='sm' fw='light'>
                             Name:
@@ -944,8 +842,7 @@ const SubjectLineItem: React.FC<{
   subjectLine: SubjectLineTemplate;
   refetch: () => Promise<void>;
 }> = ({ subjectLine, refetch }) => {
-  const [manageSubjectLineOpened, { open: openManageSubject, close: closeManageSubject }] =
-    useDisclosure();
+  const [manageSubjectLineOpened, { open: openManageSubject, close: closeManageSubject }] = useDisclosure();
   const userToken = useRecoilValue(userTokenState);
 
   const [loading, setLoading] = React.useState(false);
@@ -956,12 +853,7 @@ const SubjectLineItem: React.FC<{
   const triggerPatchEmailSubjectLineTemplate = async () => {
     setLoading(true);
 
-    const result = await patchEmailSubjectLineTemplate(
-      userToken,
-      subjectLine.id as number,
-      editedSubjectLine,
-      subjectLine.active
-    );
+    const result = await patchEmailSubjectLineTemplate(userToken, subjectLine.id as number, editedSubjectLine, subjectLine.active);
     if (result.status != 'success') {
       showNotification({
         title: 'Error',
@@ -988,12 +880,7 @@ const SubjectLineItem: React.FC<{
   const triggerPatchEmailSubjectLineTemplateActive = async () => {
     setLoading(true);
 
-    const result = await patchEmailSubjectLineTemplate(
-      userToken,
-      subjectLine.id as number,
-      subjectLine.subject_line,
-      !subjectLine.active
-    );
+    const result = await patchEmailSubjectLineTemplate(userToken, subjectLine.id as number, subjectLine.subject_line, !subjectLine.active);
     if (result.status != 'success') {
       showNotification({
         title: 'Error',
@@ -1005,9 +892,7 @@ const SubjectLineItem: React.FC<{
     } else {
       showNotification({
         title: 'Success',
-        message: `Successfully ${
-          subjectLine.active ? 'deactivated' : 'activated'
-        } email subject line`,
+        message: `Successfully ${subjectLine.active ? 'deactivated' : 'activated'} email subject line`,
         color: 'green',
       });
 
@@ -1033,37 +918,15 @@ const SubjectLineItem: React.FC<{
       <Flex direction={'column'} w={'100%'}>
         <Flex gap={'0.5rem'} mb={'0.5rem'} justify={'space-between'}>
           <Flex>
-            <Tooltip
-              label={`Prospects: ${subjectLine.times_accepted} / ${subjectLine.times_used}`}
-              withArrow
-              withinPortal
-            >
-              <Button
-                variant={'white'}
-                size='xs'
-                color={'blue'}
-                h='auto'
-                fz={'0.75rem'}
-                py={'0.125rem'}
-                px={'0.25rem'}
-                fw={'400'}
-              >
-                Acceptance:{' '}
-                {Math.max(Math.floor(subjectLine.times_accepted / subjectLine.times_used) || 0)}%
+            <Tooltip label={`Prospects: ${subjectLine.times_accepted} / ${subjectLine.times_used}`} withArrow withinPortal>
+              <Button variant={'white'} size='xs' color={'blue'} h='auto' fz={'0.75rem'} py={'0.125rem'} px={'0.25rem'} fw={'400'}>
+                Acceptance: {Math.max(Math.floor(subjectLine.times_accepted / subjectLine.times_used) || 0)}%
               </Button>
             </Tooltip>
           </Flex>
 
           <Flex wrap={'wrap'} gap={'1rem'} align={'center'}>
-            <Tooltip
-              label={
-                subjectLine.times_used > 0
-                  ? 'Cannot edit subject line after it has been used'
-                  : 'Edit subject line'
-              }
-              withinPortal
-              withArrow
-            >
+            <Tooltip label={subjectLine.times_used > 0 ? 'Cannot edit subject line after it has been used' : 'Edit subject line'} withinPortal withArrow>
               <ActionIcon
                 size='sm'
                 onClick={() => {
@@ -1079,11 +942,7 @@ const SubjectLineItem: React.FC<{
                 <IconTrash size='1.0rem' />
               </ActionIcon>
             </Tooltip>
-            <Tooltip
-              label={subjectLine.active ? 'Deactivate subject line' : 'Activate subject line'}
-              withinPortal
-              withArrow
-            >
+            <Tooltip label={subjectLine.active ? 'Deactivate subject line' : 'Activate subject line'} withinPortal withArrow>
               <div>
                 <Switch
                   disabled={editing}
@@ -1109,9 +968,7 @@ const SubjectLineItem: React.FC<{
         {editing ? (
           <TextInput
             value={editedSubjectLine}
-            error={
-              editedSubjectLine.length > 120 && 'Subject line must be less than 120 characters'
-            }
+            error={editedSubjectLine.length > 120 && 'Subject line must be less than 120 characters'}
             rightSection={
               <Flex mr='150px'>
                 <Button
@@ -1134,11 +991,7 @@ const SubjectLineItem: React.FC<{
                     triggerPatchEmailSubjectLineTemplate();
                     setEditing(false);
                   }}
-                  disabled={
-                    editedSubjectLine === subjectLine.subject_line ||
-                    editedSubjectLine.length === 0 ||
-                    editedSubjectLine.length > 120
-                  }
+                  disabled={editedSubjectLine === subjectLine.subject_line || editedSubjectLine.length === 0 || editedSubjectLine.length > 120}
                 >
                   Save
                 </Button>
@@ -1198,15 +1051,7 @@ export const EmailBodyItem: React.FC<{
   const triggerPatchEmailBodyTemplateTitle = async () => {
     setLoading(true);
 
-    const result = await patchSequenceStep(
-      userToken,
-      template.id,
-      template.overall_status,
-      title,
-      template.template,
-      template.bumped_count,
-      template.default
-    );
+    const result = await patchSequenceStep(userToken, template.id, template.overall_status, title, template.template, template.bumped_count, template.default);
     if (result.status != 'success') {
       showNotification({
         title: 'Error',
@@ -1231,15 +1076,7 @@ export const EmailBodyItem: React.FC<{
   const triggerPatchEmailBodyTemplate = async () => {
     setLoading(true);
 
-    const result = await patchSequenceStep(
-      userToken,
-      template.id,
-      template.overall_status,
-      template.title,
-      sequence,
-      template.bumped_count,
-      template.default
-    );
+    const result = await patchSequenceStep(userToken, template.id, template.overall_status, template.title, sequence, template.bumped_count, template.default);
     if (result.status != 'success') {
       showNotification({
         title: 'Error',
@@ -1434,32 +1271,25 @@ export const EmailBodyItem: React.FC<{
                   {displayPersonalization && (
                     <HoverCard width={280} shadow='md'>
                       <HoverCard.Target>
-                        <Badge 
-                          color='lime' 
-                          size='xs' 
-                          styles={{ root: { textTransform: 'initial', cursor: 'pointer' } }} 
-                          variant='outline' 
-                          leftSection={<IconSearch sx={{marginTop: '2px'}} size={'0.7rem'}/>}
+                        <Badge
+                          color='lime'
+                          size='xs'
+                          styles={{ root: { textTransform: 'initial', cursor: 'pointer' } }}
+                          variant='outline'
+                          leftSection={<IconSearch style={{ marginTop: '2px' }} size={'0.7rem'} />}
                           onClick={open}
-                        >                          
+                        >
                           <Text fw={700} span>
-                            {
-                              RESEARCH_POINTS.filter(
-                                (p) => !template.transformer_blocklist.includes(p)
-                              ).length
-                            }
-                          </Text>{' '}Research Points
+                            {RESEARCH_POINTS.filter((p) => !template.transformer_blocklist.includes(p)).length}
+                          </Text>{' '}
+                          Research Points
                         </Badge>
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
                         <List>
-                          {RESEARCH_POINTS.filter(
-                            (p) => !template.transformer_blocklist.includes(p)
-                          ).map((note, index) => (
+                          {RESEARCH_POINTS.filter((p) => !template.transformer_blocklist.includes(p)).map((note, index) => (
                             <List.Item key={index}>
-                              <Text fz='sm'>
-                                {_.capitalize(note.replace(/_/g, ' ').toLowerCase())}
-                              </Text>
+                              <Text fz='sm'>{_.capitalize(note.replace(/_/g, ' ').toLowerCase())}</Text>
                             </List.Item>
                           ))}
                         </List>
@@ -1471,11 +1301,7 @@ export const EmailBodyItem: React.FC<{
             </Flex>
             <Flex align='center'>
               <Box mr='xs'>
-                <SpamScorePopover
-                  subjectSpamScoreDetails={spamScore}
-                  bodySpamScoreDetails={spamScore}
-                  hideSubjectLineScore
-                />
+                <SpamScorePopover subjectSpamScoreDetails={spamScore} bodySpamScoreDetails={spamScore} hideSubjectLineScore />
               </Box>
               <Tooltip label='Coming Soon' withArrow withinPortal>
                 <Text fz='sm' mr='md'>
@@ -1604,9 +1430,14 @@ export const EmailBodyItem: React.FC<{
         )}
       </Flex>
 
-      <Modal opened={opened} onClose={() => {
-        close()
-      }} title="Authentication" size={640}>
+      <Modal
+        opened={opened}
+        onClose={() => {
+          close();
+        }}
+        title='Authentication'
+        size={640}
+      >
         <PersonalizationSection
           title='Enabled Research Points'
           blocklist={template.transformer_blocklist ?? []}
@@ -1644,7 +1475,7 @@ export const EmailBodyItem: React.FC<{
             // setCurrentProject(await getFreshCurrentProject(userToken, currentProject.id));
           }}
         />
-        </Modal>
+      </Modal>
     </Flex>
   );
 };

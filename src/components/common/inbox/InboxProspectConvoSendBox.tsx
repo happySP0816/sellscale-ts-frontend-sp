@@ -95,6 +95,7 @@ import { updateChannelStatus } from "@common/prospectDetails/ProspectDetailsChan
 import postSmartleadReply from "@utils/requests/postSmartleadReply";
 import { convertToTitleCase } from "@utils/stringFormatting";
 import { postGenerateEmailReplyUsingFramework } from "@utils/requests/emailReplies";
+import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 
 export default forwardRef(function InboxProspectConvoSendBox(
   props: {
@@ -107,6 +108,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
     minimizedSendBox: () => void;
     currentSubstatus?: string;
     triggerGetSmartleadProspectConvo?: () => void;
+    archetypeId?: number;
   },
   ref
 ) {
@@ -445,6 +447,36 @@ export default forwardRef(function InboxProspectConvoSendBox(
     []
   );
 
+  useEffect(() => {
+    (async () => {
+      const result = await getBumpFrameworks(
+        userToken, 
+        // status
+        ['ACTIVE_CONVO'],
+        [], 
+        [],
+        undefined,
+        undefined,
+        undefined,
+        props.archetypeId,
+      );
+
+      let bumpFrameworkArray = [] as BumpFramework[];
+      for (const bumpFramework of result.data.bump_frameworks as BumpFramework[]) {
+        if (bumpFramework.default) {
+          bumpFrameworkArray.unshift(bumpFramework);
+        } else {
+          bumpFrameworkArray.push(bumpFramework);
+        }
+      }
+
+      setBumpFrameworks(bumpFrameworkArray);
+      setBumpFramework(bumpFrameworkArray.length > 0 ? bumpFrameworkArray[0] : undefined);
+    })()
+  }, [
+    props.prospectId,
+  ])
+
   const smartGenerate = async (additional_instructions: string) => {
     setMsgLoading(true);
     if (openedOutboundChannel === "LINKEDIN") {
@@ -500,7 +532,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
     }
   }, [props.currentSubstatus]);
 
-  console.log({ bumpFrameworks });
   const replyLabels = useMemo(() => {
     const labels = [
       "ACTIVE_CONVO_QUESTION",

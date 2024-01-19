@@ -126,8 +126,8 @@ export function ProspectConvoMessage(props: {
   const triggerGetSingleBumpFramework = async (id: number) => {
     const result = await getSingleBumpFramework(userToken, id);
     if (result) {
-      setBumpNumberConverted(result.data.bump_framework.etl_num_times_converted);
-      setBumpNumberUsed(result.data.bump_framework.etl_num_times_used);
+      setBumpNumberConverted(result.data.bump_framework?.etl_num_times_converted);
+      setBumpNumberUsed(result.data.bump_framework?.etl_num_times_used);
     }
   };
 
@@ -1285,6 +1285,7 @@ export default function ProspectConvo(props: Props) {
                     minimizedSendBox={() => setOpenedConvoBox(false)}
                     currentSubstatus={statusValue}
                     triggerGetSmartleadProspectConvo={triggerGetSmartleadProspectConvo}
+                    archetypeId={prospect?.archetype_id}
                   />
                 </Box>
                 <Box
@@ -1377,6 +1378,7 @@ export default function ProspectConvo(props: Props) {
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
                 currentSubstatus={statusValue}
+                archetypeId={prospect?.archetype_id}
               />
             </Box>
             <Box

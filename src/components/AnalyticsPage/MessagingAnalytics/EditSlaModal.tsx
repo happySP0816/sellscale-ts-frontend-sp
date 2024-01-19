@@ -1,21 +1,9 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  Group,
-  Input,
-  Modal,
-  ModalProps,
-  RangeSlider,
-  Text,
-  rem,
-  useMantineTheme,
-} from '@mantine/core';
+import { Badge, Box, Button, Flex, Group, Input, Modal, ModalProps, RangeSlider, Text, TextInput, rem, useMantineTheme } from '@mantine/core';
+import { IconInfoCircle, IconNotification } from '@tabler/icons';
 import React, { FC, useState } from 'react';
 
 const marks = [
-  { value: 20, label: '20%' },
+  { value: 25, label: '25%' },
   { value: 75, label: '75%' },
 ];
 
@@ -46,12 +34,12 @@ const EditSlaModal: FC<EditSlaModalProps> = (props) => {
       }}
     >
       <Box py={'md'}>
-        <Text c={'gray.8'} fw={700}>
-          Conversions
+        <Text c={'gray.8'} size={'xl'} fw={600}>
+          Set reply reate ranges
         </Text>
 
         <Text size={'sm'} color='gray.6' fw={600}>
-          Adjust sliders to configure health range
+          Adjust sliders to define what's low, medium and high
         </Text>
 
         <Box pos={'relative'}>
@@ -116,15 +104,33 @@ const EditSlaModal: FC<EditSlaModalProps> = (props) => {
               },
             }}
           />
+          <Flex mt={-3} justify={'space-between'} px={50}>
+            <Text c={'gray.8'} tt='uppercase' size={'sm'} fw={600}>
+              low
+            </Text>
+            <Text c={'gray.8'} tt='uppercase' size={'sm'}>
+              medium
+            </Text>
+            <Text c={'gray.8'} tt='uppercase' size={'sm'}>
+              high
+            </Text>
+          </Flex>
         </Box>
       </Box>
+
+      <Flex bg={'#faf9fa'} style={{ border: '1px solid #efedf0', borderRadius: '10px' }} p={'sm'}>
+        <Text display={'flex'} style={{ alignItems: 'center', gap: '4px' }} color='gray'>
+          <IconInfoCircle size={'1.2rem'} />
+          With current thresholds, you have <span className='text-[#ff2424] font-semibold'>5 low health</span> reply rates.
+        </Text>
+      </Flex>
       <Box mt={'md'}>
-        <Text c={'gray.8'} fw={700}>
+        <Text c={'gray.8'} size={'xl'} fw={600}>
           Significance
         </Text>
 
         <Flex align={'center'} justify={'space-between'}>
-          <Text size={'sm'} color='gray.6' fw={600}>
+          <Text size={'sm'} color='gray.6' fw={600} w={'100%'}>
             Values will show up as <Badge color='gray'>N/A</Badge> if sample size is less than:
           </Text>
           <Input
@@ -132,19 +138,20 @@ const EditSlaModal: FC<EditSlaModalProps> = (props) => {
             onChange={(e) => {
               props.setSignificance(parseInt(e.currentTarget.value));
             }}
+            w={100}
             type='number'
           />
         </Flex>
       </Box>
 
-      {/* <Flex gap='md' mt='xl'>
+      <Flex gap='md' mt='xl'>
         <Button variant='outline' w={'100%'} onClick={() => props.onClose()}>
           Go Back
         </Button>
         <Button w={'100%'} onClick={() => props.onClose()}>
           Save Changes
         </Button>
-      </Flex> */}
+      </Flex>
     </Modal>
   );
 };

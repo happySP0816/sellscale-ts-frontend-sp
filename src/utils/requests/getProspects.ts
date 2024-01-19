@@ -1,9 +1,9 @@
-import { API_URL } from "@constants/data";
-import { MsgResponse, Prospect } from "src";
-import { processResponse } from "./utils";
-import _ from "lodash";
-import { isWithinLastXDays } from "@utils/general";
-import { prospectStatuses } from "@common/inbox/utils";
+import { API_URL } from '@constants/data';
+import { MsgResponse, Prospect } from 'src';
+import { processResponse } from './utils';
+import _ from 'lodash';
+import { isWithinLastXDays } from '@utils/general';
+import { prospectStatuses } from '@common/inbox/utils';
 
 export async function getProspects(
   userToken: string,
@@ -15,36 +15,30 @@ export async function getProspects(
   persona_id?: number,
   shallow_data?: boolean,
   prospect_id?: number,
-  icp_fit_score?: number,
+  icp_fit_score?: number
 ): Promise<MsgResponse> {
-
-  const response = await fetch(
-    `${API_URL}/prospect/get_prospects`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: query,
-        channel: channel,
-        limit: limit,
-        status: status,
-        show_purgatory: show_purgatory,
-        persona_id: persona_id,
-        shallow_data: shallow_data,
-        prospect_id: prospect_id,
-      }),
-    }
-  );
+  const response = await fetch(`${API_URL}/prospect/get_prospects`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: query,
+      channel: channel,
+      limit: limit,
+      status: status,
+      show_purgatory: show_purgatory,
+      persona_id: persona_id,
+      shallow_data: shallow_data,
+      prospect_id: prospect_id,
+    }),
+  });
 
   const result = await processResponse(response, 'prospects');
 
   return result;
-
 }
-
 
 export async function getProspectsForICP(
   userToken: string,
@@ -53,10 +47,10 @@ export async function getProspectsForICP(
   invited_on_linkedin: boolean
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/prospect/get_prospect_for_icp`, {
-    method: "POST",
+    method: 'POST',
     headers: {
       Authorization: `Bearer ${userToken}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       client_archetype_id: client_archetype_id,
@@ -65,7 +59,18 @@ export async function getProspectsForICP(
     }),
   });
 
-  const result = await processResponse(response, "data");
+  const result = await processResponse(response, 'data');
 
   return result;
+}
+
+export async function getProspectsForInboxRestructure(userToken: string): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/prospect/inbox_restructure_prospects`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+    },
+  });
+
+  return await processResponse(response, 'data');
 }

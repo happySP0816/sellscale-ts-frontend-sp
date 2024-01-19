@@ -47,7 +47,7 @@ import { userTokenState } from '@atoms/userAtoms';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import { ReactNode, useEffect, useRef, useState } from 'react';
-import { getProspectByID } from '@utils/requests/getProspectByID';
+import { getProspectByID, getProspectShallowByID } from '@utils/requests/getProspectByID';
 
 import { Channel, DemoFeedback, ProspectDetails, ProspectShallow } from 'src';
 import { ProspectDetailsResearchTabs } from '@common/prospectDetails/ProspectDetailsResearch';
@@ -104,7 +104,6 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function ProjectDetails(props: {
-  prospects: ProspectShallow[];
   noProspectResetting?: boolean;
   snoozeProspectEmail?: boolean;
   emailStatuses?: boolean;
@@ -147,9 +146,17 @@ export default function ProjectDetails(props: {
     enabled: openedProspectId !== -1,
   });
 
+  const { data: prospect } = useQuery({
+    queryKey: [`query-get-dashboard-prospect-shallow-${openedProspectId}`],
+    queryFn: async () => {
+      const response = await getProspectShallowByID(userToken, openedProspectId);
+      return response.status === 'success' ? (response.data as ProspectShallow) : undefined;
+    },
+    enabled: openedProspectId !== -1,
+  });
+
   let statusValue = data?.details?.linkedin_status || 'ACCEPTED';
 
-  const prospect = _.cloneDeep(props.prospects.find((p) => p.id === openedProspectId));
   const [deactivateAiEngagementStatus, setDeactivateAiEngagementStatus] = useState(
     !prospect?.deactivate_ai_engagement
   );

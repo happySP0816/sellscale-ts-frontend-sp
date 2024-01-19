@@ -53,7 +53,7 @@ import {
   valueToColor,
 } from '@utils/general';
 import { getConversation } from '@utils/requests/getConversation';
-import { getProspectByID } from '@utils/requests/getProspectByID';
+import { getProspectByID, getProspectShallowByID } from '@utils/requests/getProspectByID';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import {
@@ -230,11 +230,11 @@ export let HEADER_HEIGHT = 190;
 
 type LiStepProgress = 'COMPLETE' | 'INCOMPLETE' | 'COMING_SOON' | 'OPTIONAL';
 type Props = {
-  prospects: ProspectShallow[];
   onTabChange?: (tab: string) => void;
   openConvoBox?: boolean;
   hideTitle?: boolean;
   showBackToInbox?: boolean;
+  overrideBackToInbox?: () => void;
   currentEmailStatus?: string;
 };
 export default function ProspectConvo(props: Props) {
@@ -275,8 +275,6 @@ export default function ProspectConvo(props: Props) {
   const [emailThread, setEmailThread] = useState<EmailThread>();
   const [bumpFrameworksSequence, setBumpFrameworksSequence] = useState([]);
 
-  const prospect = _.cloneDeep(props.prospects.find((p) => p.id === openedProspectId));
-
   const isConversationOpened =
     openedOutboundChannel === 'LINKEDIN' ||
     (openedOutboundChannel === 'EMAIL' && emailThread) ||
@@ -294,6 +292,15 @@ export default function ProspectConvo(props: Props) {
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
       return response.status === 'success' ? (response.data as ProspectDetails) : undefined;
+    },
+    enabled: openedProspectId !== -1,
+  });
+
+  const { data: prospect } = useQuery({
+    queryKey: [`query-get-dashboard-prospect-shallow-${openedProspectId}`],
+    queryFn: async () => {
+      const response = await getProspectShallowByID(userToken, openedProspectId);
+      return response.status === 'success' ? (response.data as ProspectShallow) : undefined;
     },
     enabled: openedProspectId !== -1,
   });
@@ -569,10 +576,7 @@ export default function ProspectConvo(props: Props) {
       }
     } else {
       // TODO: In the future need to add substatuses for Objection Library
-      const result = await getEmailReplyFrameworks(
-        userToken,
-        []
-      );
+      const result = await getEmailReplyFrameworks(userToken, []);
 
       if (result.status === 'success') {
         sendBoxRef.current?.setEmailReplyFrameworks(result.data.data);
@@ -681,16 +685,14 @@ export default function ProspectConvo(props: Props) {
                     </Badge>
                   </>
                 )}
-                {
-                  data?.details?.disqualification_reason && (
-                    <>
-                      <br />
-                      <Badge size='xs' color='red' variant='outline'>
-                        Reason: {data?.details?.disqualification_reason}
-                      </Badge>
-                    </>
-                  )
-                }
+                {data?.details?.disqualification_reason && (
+                  <>
+                    <br />
+                    <Badge size='xs' color='red' variant='outline'>
+                      Reason: {data?.details?.disqualification_reason}
+                    </Badge>
+                  </>
+                )}
               </Box>
 
               <ProspectDetailsOptionsMenu
@@ -741,6 +743,10 @@ export default function ProspectConvo(props: Props) {
             },
           })}
           onTabChange={(value) => {
+            if (value === 'back_to') {
+              return;
+            }
+
             if (value) {
               sendBoxRef.current?.setAiGenerated(false);
               sendBoxRef.current?.setAiMessage('');
@@ -764,8 +770,14 @@ export default function ProspectConvo(props: Props) {
             {props.showBackToInbox && (
               <Tabs.Tab
                 value='back_to'
-                onClick={() => {
-                  navigate('/inbox');
+                onClick={(e) => {
+                  if (props.overrideBackToInbox) {
+                    props.overrideBackToInbox();
+                    e.preventDefault();
+                    e.stopPropagation();
+                  } else {
+                    navigate('/inbox');
+                  }
                 }}
               >
                 <Flex align={'center'}>
@@ -1081,9 +1093,7 @@ export default function ProspectConvo(props: Props) {
             )}
 
             {openedOutboundChannel === 'SMARTLEAD' && (
-              <Box pb={
-                isConversationOpened ? 200 : 0
-              }>
+              <Box pb={isConversationOpened ? 200 : 0}>
                 {smartleadEmailConversation.map((message, index) => (
                   <Box key={index} sx={{ display: 'flex', overflowX: 'hidden' }}>
                     <Flex p='sm' justify={message.type === 'SENT' ? 'end' : 'start'} w='100%'>
@@ -1331,8 +1341,7 @@ export default function ProspectConvo(props: Props) {
                         rel='noopener noreferrer'
                         href={`mailto:${prospect?.email || ''}`}
                       >
-                        {prospect?.email || ''}{' '}
-                        <IconExternalLink size='0.65rem' />
+                        {prospect?.email || ''} <IconExternalLink size='0.65rem' />
                       </Text>
                     </Flex>
                   </Button>
@@ -1368,7 +1377,6 @@ export default function ProspectConvo(props: Props) {
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
                 currentSubstatus={statusValue}
-
               />
             </Box>
             <Box

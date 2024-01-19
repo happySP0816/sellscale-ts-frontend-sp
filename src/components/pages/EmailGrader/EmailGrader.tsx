@@ -39,21 +39,22 @@ const EmailGrader = () => {
   const [opened, { open, close, toggle }] = useDisclosure(false);
   const smScreenOrLess = useMediaQuery(`(max-width: ${SCREEN_SIZES.SM})`);
   const theme = useMantineTheme();
-  const data = {
-    labels: ["Red", "Blue", "Yellow"],
-    datasets: [
-      {
-        data: [20, 20, 40, 10],
-        backgroundColor: [
-          theme.colors.red[4],
-          theme.colors.orange[4],
-          theme.colors.green[4],
-          theme.colors.gray[2],
-        ],
-        borderWidth: 5,
-      },
-    ],
-  };
+  const percentage = [
+    {
+      percentage: 80,
+      color: theme.colors.green[4],
+    },
+
+    {
+      percentage: 60,
+      color: theme.colors.red[4],
+    },
+    {
+      percentage: 30,
+      color: theme.colors.orange[4],
+    },
+  ];
+  const currentPercentage = 74;
 
   return (
     <>
@@ -69,7 +70,7 @@ const EmailGrader = () => {
       >
         <Grid>
           <Grid.Col md={6} xs={12}>
-            <Card sx={{ display: "flex", flexDirection: "column" }} h={"100%"}>
+            <Card sx={{ display: "flex", flexDirection: "column" }}>
               <Box>
                 <Text color="gray.6" fw={600} fz={"sm"}>
                   SUBJECT LINE
@@ -118,7 +119,7 @@ const EmailGrader = () => {
 
             <Card mt={"sm"}>
               <Flex align={"center"} gap={"sm"}>
-                <Box w={"50%"} pos={"relative"}>
+                {/* <Box w={"30%"} pos={"relative"}>
                   <Doughnut
                     data={data}
                     options={{
@@ -151,6 +152,102 @@ const EmailGrader = () => {
                     </Text>
                     /100
                   </Text>
+                </Box> */}
+
+                <Box
+                  sx={{
+                    width: "180px",
+                    height: "90px",
+                    position: "relative",
+
+                    display: "flex",
+                    alignItems: "flex-end",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                    boxSizing: "border-box",
+
+                    "&:before": {
+                      content: '""',
+                      width: "180px",
+                      height: "90px",
+                      border: `20px solid ${theme.colors.gray[4]}`,
+                      position: "absolute",
+                      transformOrigin: "50%  0% 0",
+                      borderRadius: "120px 120px 0 0",
+                      borderBottom: 0,
+                      left: 0,
+                      top: 0,
+                    },
+                  }}
+                >
+                  <Text fz={"sm"}>
+                    <Text component="span" fw={700} fz={"md"}>
+                      74
+                    </Text>
+                    /100
+                  </Text>
+                  {percentage.map((i, idx) => (
+                    <Box
+                      key={idx}
+                      sx={(theme) => ({
+                        width: "180px",
+                        height: "90px",
+                        border: `20px solid ${i.color}`,
+                        borderTop: "none",
+                        position: "absolute",
+                        transformOrigin: "50%  0% 0",
+                        borderRadius: "0 0 120px 120px",
+                        left: "0",
+                        top: "100%",
+                        zIndex: 5,
+                        animation: "1s fillGraphAnimation ease-in",
+                        boxSizing: "border-box",
+                        transform: `rotate(calc(1deg*${i.percentage}*1.8))`,
+
+                        "&:before": {
+                          content: '""',
+                          width: "180px",
+                          height: "90px",
+                          borderBottom: `3px solid white`,
+                          position: "absolute",
+                          transformOrigin: "left",
+                          transform: `rotate(calc(1deg*100*1.8))`,
+                          left: 0,
+                          top: 0,
+                        },
+                      })}
+                    />
+                  ))}
+
+                  <Box
+                    sx={(theme) => ({
+                      width: "180px",
+                      height: "90px",
+                      border: `20px solid transparent`,
+                      borderTop: "none",
+                      position: "absolute",
+                      transformOrigin: "50%  0% 0",
+                      borderRadius: "0 0 120px 120px",
+                      left: "0",
+                      top: "100%",
+                      zIndex: 5,
+                      animation: "1s fillGraphAnimation ease-in",
+                      boxSizing: "border-box",
+                      transform: `rotate(calc(1deg*${currentPercentage}*1.8))`,
+
+                      "&:before": {
+                        content: '""',
+                        width: "20px",
+                        height: "1px",
+                        borderBottom: `3px solid black`,
+                        position: "absolute",
+                        transformOrigin: "left",
+                        transform: `rotate(calc(1deg*100*1.8))`,
+                        left: 0,
+                        top: 0,
+                      },
+                    })}
+                  />
                 </Box>
 
                 <Card withBorder sx={{ flex: 1, height: "fit-content" }}>

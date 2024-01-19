@@ -130,6 +130,8 @@ export default function ProjectDetails(props: {
 
   const [openedNotInterestedPopover, setOpenedNotInterestedPopover] = useState(false);
   const [openedNotQualifiedPopover, setOpenedNotQualifiedPopover] = useState(false);
+  const [loadingNotInterested, setLoadingNotInterested] = useState(false);
+  const [loadingNotQualified, setLoadingNotQualified] = useState(false);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
@@ -328,8 +330,9 @@ export default function ProjectDetails(props: {
       <Stack spacing={0} mt={'md'} px={'md'}>
         <Flex>
           {/* make the badge a box with border radius 0px */}
-          <Badge color='blue' variant='outline' sx={{borderRadius: 0}} w='100%'>
-            {data?.data.archetype_name.substring(0, 50)} {data?.data?.archetype_name && data?.data.archetype_name.length > 50 && '...'}
+          <Badge color='blue' variant='outline' sx={{ borderRadius: 0 }} w='100%'>
+            {data?.data.archetype_name.substring(0, 50)}{' '}
+            {data?.data?.archetype_name && data?.data.archetype_name.length > 50 && '...'}
           </Badge>
 
           <Button
@@ -646,9 +649,13 @@ export default function ProjectDetails(props: {
                         arrowSize={12}
                         withArrow
                         shadow='md'
+                        onChange={(opened) => {
+                          setOpenedNotInterestedPopover(opened);
+                        }}
                       >
                         <Popover.Target>
                           <Button
+                            loading={loadingNotInterested}
                             variant='outlined'
                             className={classes.item}
                             leftIcon={<IconX color={theme.colors.red[6]} size={24} />}
@@ -734,12 +741,14 @@ export default function ProjectDetails(props: {
                               leftIcon={<IconTrash size={24} />}
                               radius={'md'}
                               onClick={async () => {
+                                setLoadingNotInterested(true);
                                 setOpenedNotInterestedPopover(false);
                                 await changeStatus(
                                   'NOT_INTERESTED',
                                   true,
                                   notInterestedDisqualificationReason
                                 );
+                                setLoadingNotInterested(false);
                               }}
                             >
                               Mark Not Interested
@@ -754,9 +763,13 @@ export default function ProjectDetails(props: {
                         arrowSize={12}
                         withArrow
                         shadow='md'
+                        onChange={(opened) => {
+                          setOpenedNotQualifiedPopover(opened);
+                        }}
                       >
                         <Popover.Target>
                           <Button
+                            loading={loadingNotQualified}
                             variant='outlined'
                             className={classes.item}
                             leftIcon={<IconTrash color={theme.colors.red[6]} size={24} />}
@@ -816,12 +829,14 @@ export default function ProjectDetails(props: {
                               leftIcon={<IconTrash size={24} />}
                               radius={'md'}
                               onClick={async () => {
+                                setLoadingNotQualified(true);
                                 setOpenedNotQualifiedPopover(false);
                                 await changeStatus(
                                   'NOT_QUALIFIED',
                                   true,
                                   notQualifiedDisqualificationReason
                                 );
+                                setLoadingNotQualified(false);
                               }}
                             >
                               Disqualify

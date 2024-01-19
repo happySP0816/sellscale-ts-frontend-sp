@@ -473,7 +473,9 @@ export default function ProspectConvo(props: Props) {
       return new Date(a.time).getTime() - new Date(b.time).getTime();
     });
     setSmartleadEmailConversation(conversation);
-    setOpenedOutboundChannel('SMARTLEAD');
+    if (conversation.length > 0) {
+      setOpenedOutboundChannel('SMARTLEAD');
+    }
   };
   const triggerPostSmartleadReply = async () => {
     setSendingMessage(true);
@@ -550,9 +552,14 @@ export default function ProspectConvo(props: Props) {
     triggerGetSmartleadProspectConvo();
   }, [openedProspectId]);
 
-  useEffect(() => {
-    triggerGetSmartleadProspectConvo();
-  }, []);
+  useQuery({
+    queryKey: [`query-get-smartlead-convo-prospect-${openedProspectId}`],
+    queryFn: async () => {
+      await triggerGetSmartleadProspectConvo();
+      return [];
+    },
+    enabled: !!prospect,
+  });
 
   // The prospect is no longer loading if we are not fetching any data
   useEffect(() => {

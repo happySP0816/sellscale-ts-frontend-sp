@@ -55,7 +55,7 @@ export type ProspectRestructured = {
   title: string;
   hidden_until?: string;
   icp_fit_score: number;
-  overall_status: string;
+  status: string;
   img_url?: string;
 };
 

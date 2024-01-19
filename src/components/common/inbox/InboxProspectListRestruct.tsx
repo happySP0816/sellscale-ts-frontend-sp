@@ -63,6 +63,7 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
 
   const prospects = props.prospects
+    .filter((p) => !['REMOVED', 'NULL'].includes((p.status ?? 'NULL').toUpperCase()))
     .filter((p) => p.section.toLowerCase() === mainTab)
     .filter(
       (p) =>
@@ -71,7 +72,9 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
         p.full_name.toLowerCase().includes(searchFilter.toLowerCase())
     );
 
-  const prospectGroups = _.groupBy(prospects, (p) => p.overall_status);
+  const prospectGroups = Object.entries(_.groupBy(prospects, (p) => p.status)).sort((a, b) => {
+    return a[0].localeCompare(b[0]);
+  });
 
   return (
     <>
@@ -198,12 +201,12 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
                 />
                 <Stack spacing={0}>
                   {/* Grouped prospects by overall status */}
-                  {Object.entries(prospectGroups).map((group, index) => (
+                  {prospectGroups.map((group, index) => (
                     <Box key={index}>
                       <Box bg='blue.1' py={'sm'} px={'md'} color='blue'>
                         <Flex w='100%'>
                           <Text color='blue' ta='center' fz={14} fw={700}>
-                            {labelizeStatus(group[0])}
+                            {labelizeConvoSubstatus(group[0])}
                           </Text>
                           <Badge color='blue' size='xs' ml='xs' mt='2px'>
                             {group[1].length}

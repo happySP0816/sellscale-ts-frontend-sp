@@ -224,7 +224,7 @@ export default function SlackNotifications() {
                       color='grape'
                     >
                       {
-                        notificationTestLoading ? 'Sending...' : 'Send Test Notification'
+                        notificationTestLoading ? 'Sending...' : 'Send Notification Preview'
                       }
                     </Button>
                   </Flex>

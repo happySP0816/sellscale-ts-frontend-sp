@@ -34,7 +34,6 @@ import {
   IconTrash,
   IconFilter,
   IconUserSquare,
-  IconMagnetic,
 } from "@tabler/icons-react";
 import {
   DataGrid,

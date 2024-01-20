@@ -122,7 +122,7 @@ const OperatorDashboard = (props: PropsType) => {
                 },
             });
             if (response.data.success) {
-                navigate(ctaUrl, { target: '_blank' });
+                navigate(ctaUrl);
             }
             setFetchingComplete(false);
         } catch (error) {

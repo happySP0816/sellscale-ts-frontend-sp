@@ -54,7 +54,7 @@ export default function AdvancedPage(props: {}) {
             </Tabs.Tab>
             {/* <Tabs.Tab value="demo-feedback">Demo Feedback Repo</Tabs.Tab> */}
 
-            <Tabs.Tab value="email-scraper">Email Scraper</Tabs.Tab>
+            {/* <Tabs.Tab value="email-scraper">Email Scraper</Tabs.Tab> */}
             {/* <Tabs.Tab value="domains">Domains</Tabs.Tab> */}
             {/* <Tabs.Tab value="filters">Filters</Tabs.Tab> */}
             {/* <Tabs.Tab value="clean-contacts">Clean Contacts</Tabs.Tab> */}
@@ -67,9 +67,9 @@ export default function AdvancedPage(props: {}) {
           {/* <Tabs.Panel value="demo-feedback" pl="xs">
             <DemoFeedbackChart />
           </Tabs.Panel> */}
-          <Tabs.Panel value="email-scraper" pl="xs">
+          {/* <Tabs.Panel value="email-scraper" pl="xs">
             <PullProspectEmailsCardPage />
-          </Tabs.Panel>
+          </Tabs.Panel> */}
           {/* <Tabs.Panel value="domains" pl="xs">
             <DomainSection />
           </Tabs.Panel> */}

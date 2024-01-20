@@ -263,7 +263,7 @@ export default function SideNavbar(props: {}) {
             label="Notifications"
             tabKey={["notifications", "all/recent-activity"]}
           /> */}
-          <SideNavbarItem icon={<IconBooks size='1.0rem' />} label='Advanced' tabKey='advanced' />
+          {/* <SideNavbarItem icon={<IconBooks size='1.0rem' />} label='Advanced' tabKey='advanced' /> */}
           <SideNavbarItem
             icon={<IconSettings size='1.0rem' />}
             label='Settings'

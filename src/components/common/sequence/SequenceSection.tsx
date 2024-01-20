@@ -76,6 +76,7 @@ import {
   IconPencil,
   IconPlus,
   IconReload,
+  IconSparkles,
   IconTablePlus,
   IconTools,
   IconUpload,
@@ -933,9 +934,9 @@ function BumpFrameworkSelect(props: {
       />
 
       <Button
-        variant='outline' 
-        radius='md' 
-        compact 
+        variant='outline'
+        radius='md'
+        compact
         color='orange'
         mr='xs'
         onClick={() => {
@@ -971,7 +972,7 @@ function BumpFrameworkSelect(props: {
       >
         Create New
       </Button>
-      
+
     </>
   );
 }
@@ -1102,7 +1103,15 @@ function IntroMessageSection(props: {
       return null;
     }
   };
-
+  const onRegenerate = () => {
+    if (prospectId) {
+      getIntroMessage(prospectId, true, selectedTemplateId).then((msg) => {
+        if (msg) {
+          setMessage(msg);
+        }
+      });
+    }
+  };
   // When prospect changes, get the intro message
   useEffect(() => {
     if (!prospectId) return;
@@ -1184,15 +1193,7 @@ function IntroMessageSection(props: {
                   variant='subtle'
                   compact
                   leftIcon={<IconReload size='0.75rem' />}
-                  onClick={() => {
-                    if (prospectId) {
-                      getIntroMessage(prospectId, true, selectedTemplateId).then((msg) => {
-                        if (msg) {
-                          setMessage(msg);
-                        }
-                      });
-                    }
-                  }}
+                  onClick={onRegenerate}
                 >
                   Regenerate
                 </Button>
@@ -1304,6 +1305,7 @@ function IntroMessageSection(props: {
               }}
             />
             <TemplateSection
+              onRegenerate={onRegenerate}
               showFeedback={showFeedback}
               onFoundTemplate={(id) => {
                 setSelectedTemplateId(id);
@@ -2114,7 +2116,7 @@ function FrameworkSection(props: {
   );
 
   const [opened, { toggle }] = useDisclosure(false);
-
+  const [openedCollapse, { toggle: toggleCollapse }] = useDisclosure(true);
   const [activeTab, setActiveTab] = useState<string | null>('none');
   const [descriptionEditState, setDescriptionEditState] = useState(false);
   const [personalizationItemsCount, setPersonalizationItemsCount] = useState<number>();
@@ -2274,77 +2276,88 @@ function FrameworkSection(props: {
       setShowUserFeedback(true);
     }, 500);
   };
+  const onRegenerate = () => {
+    if (prospectId) {
+      getFollowUpMessage(prospectId, false).then((msg) => {
+        if (msg) {
+          setMessage(msg);
+        }
+      });
+    }
+  };
 
   if (!currentProject) return <></>;
 
 
   return (
     <>
-      <Stack ml='xl' spacing={0}>
-        {!props.framework?.id &&
-        <>
-          <Card withBorder>
-            <Card.Section
-              sx={{
-                flexDirection: 'row',
-                display: 'flex',
-                gap: '1rem',
-                textAlign: 'center',
-                justifyContent: 'center',
-              }}
-              w='100%'
-            >
-              <Box m='md' w='100%' sx={{}}>
-                <IconCirclePlus size='1.5rem' color='gray' />
-                <Text color='gray' mr='xs' fw='400' mb='xs'>
-                  Create your first framework by clicking the buttons below.
-                </Text>
-              </Box>
-            </Card.Section>
-
-          </Card>
-        </>
-        }
-
-        {props.framework?.id &&
+      <Stack ml="xl" spacing={0}>
+        {!props.framework?.id && (
           <>
-            <Card padding='lg' radius='md'>
+            <Card withBorder>
               <Card.Section
                 sx={{
-                  flexDirection: 'row',
-                  display: 'flex',
-                  gap: '1rem',
+                  flexDirection: "row",
+                  display: "flex",
+                  gap: "1rem",
+                  textAlign: "center",
+                  justifyContent: "center",
                 }}
-                w='100%'
+                w="100%"
               >
-                <Box mt='4px' w='100%' sx={{}}>
-                  <Title order={5} color='gray' mr='xs' fw='400'>
+                <Box m="md" w="100%" sx={{}}>
+                  <IconCirclePlus size="1.5rem" color="gray" />
+                  <Text color="gray" mr="xs" fw="400" mb="xs">
+                    Create your first framework by clicking the buttons below.
+                  </Text>
+                </Box>
+              </Card.Section>
+            </Card>
+          </>
+        )}
+
+        {props.framework?.id && (
+          <>
+            <Card padding="lg" radius="md">
+              <Card.Section
+                sx={{
+                  flexDirection: "row",
+                  display: "flex",
+                  gap: "1rem",
+                }}
+                w="100%"
+              >
+                <Box mt="4px" w="100%" sx={{}}>
+                  <Title order={5} color="gray" mr="xs" fw="400">
                     Follow-Up {props.bumpCount + 1}:
                   </Title>
 
-                  <Flex direction='row'>
+                  <Flex direction="row">
                     {!titleInEditingMode ? (
-                      <Title order={3} onClick={() => setTitleInEditingMode((p) => !p)}>
-                        <span style={{ color: 'black', cursor: 'pointer' }}>
+                      <Title
+                        order={3}
+                        onClick={() => setTitleInEditingMode((p) => !p)}
+                      >
+                        <span style={{ color: "black", cursor: "pointer" }}>
                           {form.values.frameworkName}
                         </span>
                       </Title>
                     ) : (
                       <TextInput
-                        w='75%'
-                        placeholder='Name'
-                        variant='filled'
-                        {...form.getInputProps('frameworkName')}
+                        w="75%"
+                        placeholder="Name"
+                        variant="filled"
+                        {...form.getInputProps("frameworkName")}
                         onChange={(e) => {
-                          form.setFieldValue('frameworkName', e.target.value);
+                          form.setFieldValue("frameworkName", e.target.value);
                           setChanged(true);
                         }}
                       />
                     )}
                     <ActionIcon
-                      ml='8px'
-                      mt='8px'
-                      size='1rem'
+                      ml="8px"
+                      mt="8px"
+                      size="1rem"
                       sx={{ zIndex: 10, opacity: 0.7 }}
                       onClick={() => setTitleInEditingMode((p) => !p)}
                     >
@@ -2354,32 +2367,37 @@ function FrameworkSection(props: {
                 </Box>
               </Card.Section>
 
-              <Card.Section mt='xs' w='100%'>
-                <Flex direction='row'>
+              <Card.Section mt="xs" w="100%">
+                <Flex direction="row">
                   {descriptionEditState ? (
                     <Textarea
-                      w='100%'
-                      fz='xs'
-                      {...form.getInputProps('bumpFrameworkHumanReadablePrompt')}
+                      w="100%"
+                      fz="xs"
+                      {...form.getInputProps(
+                        "bumpFrameworkHumanReadablePrompt"
+                      )}
                       onChange={(e) => {
-                        form.setFieldValue('bumpFrameworkHumanReadablePrompt', e.target.value);
+                        form.setFieldValue(
+                          "bumpFrameworkHumanReadablePrompt",
+                          e.target.value
+                        );
                         setChanged(true);
                       }}
                     />
                   ) : (
                     <Text
-                      fz='xs'
-                      c='dimmed'
-                      sx={{ cursor: 'pointer' }}
+                      fz="xs"
+                      c="dimmed"
+                      sx={{ cursor: "pointer" }}
                       onClick={() => setDescriptionEditState((p) => !p)}
                     >
-                      <span style={{ fontWeight: 'bold' }}>Goal:</span>{' '}
+                      <span style={{ fontWeight: "bold" }}>Goal:</span>{" "}
                       {form.values.bumpFrameworkHumanReadablePrompt}
                     </Text>
                   )}
                   <ActionIcon
-                    size='1rem'
-                    ml='8px'
+                    size="1rem"
+                    ml="8px"
                     sx={{ zIndex: 10, opacity: 0.7 }}
                     onClick={() => setDescriptionEditState((p) => !p)}
                   >
@@ -2389,31 +2407,34 @@ function FrameworkSection(props: {
               </Card.Section>
             </Card>
             <Stack pt={20} spacing={15}>
-              <Box sx={{ position: 'relative' }}>
-                <LoadingOverlay visible={loading || prospectsLoading} zIndex={10} />
+              <Box sx={{ position: "relative" }}>
+                <LoadingOverlay
+                  visible={loading || prospectsLoading}
+                  zIndex={10}
+                />
                 {noProspectsFound ? (
                   <Box
                     sx={{
-                      border: '1px dashed #339af0',
-                      borderRadius: '0.5rem',
+                      border: "1px dashed #339af0",
+                      borderRadius: "0.5rem",
                     }}
-                    p='sm'
+                    p="sm"
                     mih={100}
                   >
                     <Center h={100}>
                       <Stack>
-                        <Text ta='center' c='dimmed' fs='italic' fz='sm'>
+                        <Text ta="center" c="dimmed" fs="italic" fz="sm">
                           No prospects found to show example message.
                         </Text>
                         <Center>
                           <Box>
                             <Button
-                              variant='filled'
-                              color='teal'
-                              radius='md'
-                              ml='auto'
-                              mr='0'
-                              size='xs'
+                              variant="filled"
+                              color="teal"
+                              radius="md"
+                              ml="auto"
+                              mr="0"
+                              size="xs"
                               rightIcon={<IconUpload size={14} />}
                               onClick={() => setUploadDrawerOpened(true)}
                             >
@@ -2426,25 +2447,17 @@ function FrameworkSection(props: {
                   </Box>
                 ) : (
                   <Box>
-                    <Group position='apart' pb='0.3125rem'>
-                      <Text fz='xs' fw={500} c='dimmed' sx={{ opacity: 0.8 }}>
+                    <Group position="apart" pb="0.3125rem">
+                      <Text fz="xs" fw={500} c="dimmed" sx={{ opacity: 0.8 }}>
                         EXAMPLE GENERATION:
                       </Text>
                       <Group>
                         <Button
-                          size='xs'
-                          variant='subtle'
+                          size="xs"
+                          variant="subtle"
                           compact
-                          leftIcon={<IconReload size='0.75rem' />}
-                          onClick={() => {
-                            if (prospectId) {
-                              getFollowUpMessage(prospectId, false).then((msg) => {
-                                if (msg) {
-                                  setMessage(msg);
-                                }
-                              });
-                            }
-                          }}
+                          leftIcon={<IconReload size="0.75rem" />}
+                          onClick={onRegenerate}
                         >
                           Regenerate
                         </Button>
@@ -2457,7 +2470,8 @@ function FrameworkSection(props: {
                           }}
                           onFinishLoading={(prospects) => {
                             setProspectsLoading(false);
-                            if (prospects.length === 0) setNoProspectsFound(true);
+                            if (prospects.length === 0)
+                              setNoProspectsFound(true);
                           }}
                           selectedProspect={prospectId}
                           autoSelect
@@ -2467,16 +2481,20 @@ function FrameworkSection(props: {
                     </Group>
                     <Box
                       sx={{
-                        border: '1px dashed #339af0',
-                        borderRadius: '0.5rem',
+                        border: "1px dashed #339af0",
+                        borderRadius: "0.5rem",
                       }}
-                      p='sm'
+                      p="sm"
                       mih={150}
                     >
                       {message && (
                         <LiExampleMessage
                           message={message}
-                          hovered={hovered || activeTab === 'personalization' ? true : undefined}
+                          hovered={
+                            hovered || activeTab === "personalization"
+                              ? true
+                              : undefined
+                          }
                           onClick={openPersonalizationSettings}
                           onAnimatonComplete={onAnimatonComplete}
                         />
@@ -2487,12 +2505,12 @@ function FrameworkSection(props: {
               </Box>
 
               {changed && (
-                <Group position='right'>
+                <Group position="right">
                   <Center>
                     <Button
-                      variant='default'
-                      w='200px'
-                      ml='auto'
+                      variant="default"
+                      w="200px"
+                      ml="auto"
                       loading={savingSettings}
                       disabled={!changed}
                       onClick={() => {
@@ -2505,16 +2523,16 @@ function FrameworkSection(props: {
                   </Center>
                   <Center>
                     <Button
-                      color='green'
-                      w='200px'
-                      ml='auto'
+                      color="green"
+                      w="200px"
+                      ml="auto"
                       loading={savingSettings}
                       disabled={!changed}
                       onClick={() => {
                         showNotification({
-                          title: 'Saving Settings...',
-                          message: 'This may take a few seconds.',
-                          color: 'blue',
+                          title: "Saving Settings...",
+                          message: "This may take a few seconds.",
+                          color: "blue",
                         });
                         saveSettings(debouncedForm);
                         props.setIsDataChanged(false);
@@ -2531,16 +2549,16 @@ function FrameworkSection(props: {
                 </Group>
               )}
 
-              {form.values.promptInstructions?.includes('Answer:') && (
+              {form.values.promptInstructions?.includes("Answer:") && (
                 <Alert
-                  icon={<IconBulb size='1rem' />}
-                  variant='outline'
+                  icon={<IconBulb size="1rem" />}
+                  variant="outline"
                   onClick={toggle}
-                  sx={{ cursor: 'pointer' }}
+                  sx={{ cursor: "pointer" }}
                 >
-                  <Text color='blue' fz='12px'>
-                    Note: This framework requires you fill out additional context in the prompt. Please
-                    press 'Advanced Settings'
+                  <Text color="blue" fz="12px">
+                    Note: This framework requires you fill out additional
+                    context in the prompt. Please press 'Advanced Settings'
                   </Text>
                 </Alert>
               )}
@@ -2552,38 +2570,84 @@ function FrameworkSection(props: {
               >
                 {showUserFeedback && (
                   <>
-                    <Card mb='16px'>
+                    <Card mb="16px">
                       <Card.Section
                         sx={{
                           backgroundColor: theme.colors.grape[6],
-                          flexDirection: 'row',
-                          display: 'flex',
+                          flexDirection: "row",
+                          display: "flex",
+                          justifyContent: "space-between",
                         }}
-                        p='xs'
+                        p="xs"
+                        onClick={toggleCollapse}
                       >
-                        <Text color='white' mt='4px' size='sm'>
-                          <IconBulb size='1.2rem' color='white' />
-                          <span style={{ marginLeft: '8px' }}>
-                            FINE TUNING: Feel free to give me feedback on improving the message!
+                        <Text
+                          color="white"
+                          mt="4px"
+                          size="sm"
+                          sx={{ display: "flex", alignItems: "center" }}
+                        >
+                          <IconSparkles
+                            size="1.2rem"
+                            color="white"
+                            strokeWidth={2}
+                          />
+                          <span style={{ marginLeft: "8px" }}>
+                            FINE TUNING: Feel free to give me feedback on
+                            improving the message!
                           </span>
                         </Text>
-                      </Card.Section>
-                      <Card.Section
-                        sx={{
-                          border: 'solid 2px ' + theme.colors.grape[6] + ' !important',
-                        }}
-                        p='8px'
-                      >
-                        <Textarea
-                          variant='unstyled'
-                          pl={'8px'}
-                          pr={'8px'}
-                          size='xs'
-                          minRows={3}
-                          placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
-                          {...form.getInputProps('humanFeedback')}
+
+                        <IconChevronDown
+                          color="white"
+                          strokeWidth={2}
+                          size={"1.2rem"}
+                          style={{
+                            transitionDuration: "150ms",
+                            transitionTimingFunction:
+                              "cubic-bezier(0.4, 0, 0.2, 1)",
+                            transform: opened
+                              ? `rotate(${opened ? 180 : 0}deg)`
+                              : "none",
+                          }}
                         />
                       </Card.Section>
+                      <Collapse in={openedCollapse}>
+                        <Card.Section
+                          sx={{
+                            border:
+                              "solid 2px " +
+                              theme.colors.gray[4] +
+                              " !important",
+                            borderTopWidth: 0,
+                            borderRadius: 12,
+                            borderTopLeftRadius: 0,
+                            borderTopRightRadius: 0,
+                          }}
+                          p="8px"
+                        >
+                          <Flex gap={"sm"}>
+                            <Box w={"100%"}>
+                              <TextInput
+                                pl={"8px"}
+                                pr={"8px"}
+                                size="xs"
+                                placeholder="- make it shorter&#10;-use this fact&#10;-mention the value prop"
+                                {...form.getInputProps("humanFeedback")}
+                              />
+                            </Box>
+                            <Button
+                              onClick={onRegenerate}
+                              variant="light"
+                              color="grape"
+                              size="xs"
+                              leftIcon={<IconReload size="0.75rem" />}
+                            >
+                              Regenerate
+                            </Button>
+                          </Flex>
+                        </Card.Section>
+                      </Collapse>
                     </Card>
                   </>
                 )}
@@ -2602,7 +2666,11 @@ function FrameworkSection(props: {
                       ]
                   )
                     .filter((v) => v && v.bumped_count == props.bumpCount)
-                    .filter((v) => v.overall_status === 'ACCEPTED' || v.overall_status === 'BUMPED')
+                    .filter(
+                      (v) =>
+                        v.overall_status === "ACCEPTED" ||
+                        v.overall_status === "BUMPED"
+                    )
                     .sort((a, b) => {
                       if (a.default) return -1;
                       if (b.default) return 1;
@@ -2611,126 +2679,145 @@ function FrameworkSection(props: {
                     .map((bf, index) => (
                       <Paper
                         key={index}
-                        p='md'
+                        p="md"
                         mih={80}
                         sx={{
-                          position: 'relative',
-                          cursor: 'pointer',
+                          position: "relative",
+                          cursor: "pointer",
                           border:
-                            bf.id === props.framework.id ? 'solid 1px #339af0 !important' : undefined,
+                            bf.id === props.framework.id
+                              ? "solid 1px #339af0 !important"
+                              : undefined,
                           backgroundColor:
-                            bf.id === props.framework.id ? '#339af008 !important' : undefined,
-                          flexDirection: 'row',
-                          display: 'flex',
+                            bf.id === props.framework.id
+                              ? "#339af008 !important"
+                              : undefined,
+                          flexDirection: "row",
+                          display: "flex",
                         }}
                         withBorder
                       >
-                        <Flex mr='md' direction={'column'}>
+                        <Flex mr="md" direction={"column"}>
                           <Box
-                            miw='100px'
+                            miw="100px"
                             mah={80}
                             sx={{
-                              border: 'solid 1px #339af022',
-                              backgroundColor: '#339af022',
-                              padding: '8px',
-                              borderRadius: '4px',
-                              textAlign: 'center',
-                              cursor: 'pointer',
+                              border: "solid 1px #339af022",
+                              backgroundColor: "#339af022",
+                              padding: "8px",
+                              borderRadius: "4px",
+                              textAlign: "center",
+                              cursor: "pointer",
                             }}
-                            mt='xl'
+                            mt="xl"
                             onClick={() => {
                               openContextModal({
-                                modal: 'frameworkReplies',
-                                title: 'Past Example Replies',
+                                modal: "frameworkReplies",
+                                title: "Past Example Replies",
                                 innerProps: {
                                   bumpId: bf.id,
                                 },
                               });
                             }}
                           >
-                            <Text fw='bold' fz='md' color='blue' mt='xs'>
+                            <Text fw="bold" fz="md" color="blue" mt="xs">
                               {bf.etl_num_times_used != null &&
                                 bf.etl_num_times_converted != null &&
                                 Math.round(
-                                  (bf.etl_num_times_converted / (bf.etl_num_times_used + 0.0001)) * 100
+                                  (bf.etl_num_times_converted /
+                                    (bf.etl_num_times_used + 0.0001)) *
+                                    100
                                 )}
                               % reply
                             </Text>
-                            <Text size='8px' color='blue' fz={'xs'} fw='500'>
-                              ({bf.etl_num_times_converted}/{bf.etl_num_times_used} times)
+                            <Text size="8px" color="blue" fz={"xs"} fw="500">
+                              ({bf.etl_num_times_converted}/
+                              {bf.etl_num_times_used} times)
                             </Text>
                           </Box>
                           <Button
                             onClick={() => {
                               openContextModal({
-                                modal: 'frameworkReplies',
-                                title: 'Past Example Usages',
+                                modal: "frameworkReplies",
+                                title: "Past Example Usages",
                                 innerProps: {
                                   bumpId: bf.id,
                                 },
                               });
                             }}
-                            size='xs'
+                            size="xs"
                             mt={3}
                           >
                             View Replies
                           </Button>
                         </Flex>
-                        <Box mr={40} w='100%'>
+                        <Box mr={40} w="100%">
                           <Flex>
                             <Text
-                              size='sm'
-                              fw='600'
-                              mb='xs'
-                              sx={{ textTransform: 'uppercase' }}
-                              color='gray'
-                              variant='outline'
+                              size="sm"
+                              fw="600"
+                              mb="xs"
+                              sx={{ textTransform: "uppercase" }}
+                              color="gray"
+                              variant="outline"
                             >
                               {bf.title}
                             </Text>
                             {/* Hovercard for transformers */}
 
-                            <HoverCard width={280} shadow='md'>
+                            <HoverCard width={280} shadow="md">
                               <HoverCard.Target>
                                 <Badge
-                                  leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                                  color='lime'
-                                  variant={
-                                    bf.active_transformers && bf.active_transformers.length > 0
-                                      ? 'filled'
-                                      : 'outline'
+                                  leftSection={
+                                    <IconSearch
+                                      size="0.8rem"
+                                      style={{ marginTop: 4 }}
+                                    />
                                   }
-                                  ml='xs'
-                                  size='xs'
+                                  color="lime"
+                                  variant={
+                                    bf.active_transformers &&
+                                    bf.active_transformers.length > 0
+                                      ? "filled"
+                                      : "outline"
+                                  }
+                                  ml="xs"
+                                  size="xs"
                                   onClick={() => {
                                     toggle();
                                   }}
                                 >
-                                  {bf.active_transformers && bf.active_transformers.length > 0
-                                    ? bf.active_transformers.length + ' Research Points'
-                                    : '0 Research Points'}
+                                  {bf.active_transformers &&
+                                  bf.active_transformers.length > 0
+                                    ? bf.active_transformers.length +
+                                      " Research Points"
+                                    : "0 Research Points"}
                                 </Badge>
                               </HoverCard.Target>
                               <HoverCard.Dropdown
                                 style={{
-                                  backgroundColor: 'rgb(34, 37, 41)',
+                                  backgroundColor: "rgb(34, 37, 41)",
                                   padding: 0,
                                 }}
                               >
                                 <Paper
                                   style={{
-                                    backgroundColor: 'rgb(34, 37, 41)',
-                                    color: 'white',
+                                    backgroundColor: "rgb(34, 37, 41)",
+                                    color: "white",
                                     padding: 10,
                                   }}
                                 >
-                                  <TextWithNewline style={{ fontSize: '12px' }}>
+                                  <TextWithNewline style={{ fontSize: "12px" }}>
                                     {bf.active_transformers.length > 0
-                                      ? '<b>Active Research Points:</b>\n- ' +
+                                      ? "<b>Active Research Points:</b>\n- " +
                                         bf.active_transformers
-                                          .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                          .join('\n- ')
-                                      : 'Click to activate more research points'}
+                                          .map((rp: any) =>
+                                            rp
+                                              .replaceAll("_", " ")
+                                              .toLowerCase()
+                                          )
+                                          .join("\n- ")
+                                      : "Click to activate more research points"}
                                   </TextWithNewline>
                                 </Paper>
                               </HoverCard.Dropdown>
@@ -2739,40 +2826,43 @@ function FrameworkSection(props: {
                             <AIBrainPill />
 
                             {bf.human_feedback && (
-                              <HoverCard width={280} shadow='md'>
+                              <HoverCard width={280} shadow="md">
                                 <HoverCard.Target>
                                   <Badge
-                                    leftSection={<IconBulb size='0.8rem' />}
-                                    color='grape'
-                                    variant='filled'
-                                    ml='xs'
-                                    size='xs'
+                                    leftSection={<IconBulb size="0.8rem" />}
+                                    color="grape"
+                                    variant="filled"
+                                    ml="xs"
+                                    size="xs"
                                   >
                                     Fine Tuned
                                   </Badge>
                                 </HoverCard.Target>
                                 <HoverCard.Dropdown
                                   style={{
-                                    backgroundColor: 'rgb(34, 37, 41)',
+                                    backgroundColor: "rgb(34, 37, 41)",
                                     padding: 0,
                                   }}
                                 >
                                   <Paper
                                     style={{
-                                      backgroundColor: 'rgb(34, 37, 41)',
-                                      color: 'white',
+                                      backgroundColor: "rgb(34, 37, 41)",
+                                      color: "white",
                                       padding: 10,
                                     }}
                                   >
-                                    <TextWithNewline style={{ fontSize: '12px' }}>
-                                      {'<b>Additional Instructions:</b>\n' + bf.human_feedback}
+                                    <TextWithNewline
+                                      style={{ fontSize: "12px" }}
+                                    >
+                                      {"<b>Additional Instructions:</b>\n" +
+                                        bf.human_feedback}
                                     </TextWithNewline>
                                   </Paper>
                                 </HoverCard.Dropdown>
                               </HoverCard>
                             )}
                           </Flex>
-                          <Card withBorder w='100%' sx={{}}>
+                          <Card withBorder w="100%" sx={{}}>
                             {/* {editing ? (
                               <FocusTrap active={true}>
                                 <Textarea
@@ -2795,7 +2885,7 @@ function FrameworkSection(props: {
                                 />
                               </FocusTrap>
                             ) : ( */}
-                            <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                            <Text style={{ fontSize: "0.9rem", lineHeight: 2 }}>
                               <div
                                 // onClick={() => {
                                 //   setEditing(true);
@@ -2804,14 +2894,14 @@ function FrameworkSection(props: {
                                   __html: DOMPurify.sanitize(
                                     bf.description
                                       .replaceAll(
-                                        '[[',
+                                        "[[",
                                         "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                          theme.colors['blue'][5] +
+                                          theme.colors["blue"][5] +
                                           "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                                       )
-                                      .replaceAll(']]', '</span>')
+                                      .replaceAll("]]", "</span>")
                                       .replaceAll(
-                                        '\n',
+                                        "\n",
                                         `<br style="display: block; content: ' '; margin: 10px 0 "/>`
                                       ) as string
                                   ),
@@ -2820,9 +2910,9 @@ function FrameworkSection(props: {
                             </Text>
                           </Card>
                         </Box>
-                        <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                        <Box sx={{ justifyContent: "right" }} ml="auto">
                           <Switch
-                            sx={{ cursor: 'pointer' }}
+                            sx={{ cursor: "pointer" }}
                             checked={bf.default}
                             onChange={(checked) => {
                               setLoading(true);
@@ -2841,9 +2931,9 @@ function FrameworkSection(props: {
                               )
                                 .then(() => {
                                   showNotification({
-                                    title: 'Success',
-                                    message: 'Bump Framework enabled',
-                                    color: 'green',
+                                    title: "Success",
+                                    message: "Bump Framework enabled",
+                                    color: "green",
                                   });
                                 })
                                 .finally(() => {
@@ -2858,20 +2948,20 @@ function FrameworkSection(props: {
                             }}
                           />
                           <Button
-                            mt='xs'
-                            variant='subtle'
-                            radius='xl'
-                            size='sm'
+                            mt="xs"
+                            variant="subtle"
+                            radius="xl"
+                            size="sm"
                             compact
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
                               // setEditing(true);
                               openContextModal({
-                                modal: 'liBfTemplate',
-                                title: 'Edit Bf Template',
+                                modal: "liBfTemplate",
+                                title: "Edit Bf Template",
                                 innerProps: {
-                                  mode: 'EDIT',
+                                  mode: "EDIT",
                                   editProps: {
                                     bf: bf,
                                     templateId: bf.id,
@@ -2915,18 +3005,25 @@ function FrameworkSection(props: {
                 </Stack>
               </form>
 
-              <Modal opened={opened} onClose={toggle} size='lg'>
-                <Box w='100%' mb='md'>
-                  <Title order={4}>"{form.values?.frameworkName}" Research Points</Title>
-                  <Text color='gray'>
-                    {props.framework?.active_transformers.length} research points enabled.
+              <Modal opened={opened} onClose={toggle} size="lg">
+                <Box w="100%" mb="md">
+                  <Title order={4}>
+                    "{form.values?.frameworkName}" Research Points
+                  </Title>
+                  <Text color="gray">
+                    {props.framework?.active_transformers.length} research
+                    points enabled.
                   </Text>
                   <Divider />
                   <PersonalizationSection
                     blocklist={props.framework?.transformer_blocklist}
                     onItemsChange={async (items) => {
-                      setPersonalizationItemsCount(items.filter((x) => x.checked).length);
-                      setPersonalizationItemIds(items.filter((x) => !x.checked).map((x) => x.id));
+                      setPersonalizationItemsCount(
+                        items.filter((x) => x.checked).length
+                      );
+                      setPersonalizationItemIds(
+                        items.filter((x) => !x.checked).map((x) => x.id)
+                      );
                     }}
                     onChanged={() => {
                       setChanged(true);
@@ -2934,15 +3031,15 @@ function FrameworkSection(props: {
                   />
 
                   <Button
-                    w='100%'
-                    mt='md'
+                    w="100%"
+                    mt="md"
                     onClick={() => {
                       toggle();
                       setChanged(true);
                       saveSettings(debouncedForm);
                     }}
                     sx={{
-                      display: changed ? 'block' : 'none',
+                      display: changed ? "block" : "none",
                     }}
                   >
                     Save and Close
@@ -2956,24 +3053,25 @@ function FrameworkSection(props: {
                 onClick={() => {
                   setTemplateShowAll((p) => !p);
                 }}
-                color='gray'
-                variant='subtle'
+                color="gray"
+                variant="subtle"
                 leftIcon={
                   <IconChevronDown
-                    size='1rem'
+                    size="1rem"
                     style={{
-                      transform: templateShowAll ? '' : 'rotate(180deg)',
+                      transform: templateShowAll ? "" : "rotate(180deg)",
                     }}
                   />
                 }
               >
-                Show {templateShowAll ? 'All Templates' : 'Active Templates Only'}
+                Show{" "}
+                {templateShowAll ? "All Templates" : "Active Templates Only"}
               </Button>
             )}
           </>
-        }
+        )}
 
-        <Flex pt={15} sx={{ justifyContent: 'right' }}>
+        <Flex pt={15} sx={{ justifyContent: "right" }}>
           {props.editProps && <BumpFrameworkSelect {...props.editProps} />}
         </Flex>
       </Stack>
@@ -2984,13 +3082,14 @@ function FrameworkSection(props: {
 function TemplateSection(props: {
   showFeedback: boolean;
   onFoundTemplate: (templateId: number) => void;
+  onRegenerate: () => void;
   messageMetaData: any; // Whoever made this for some reason made its type any
 }) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
-
+  const [opened, { toggle }] = useDisclosure(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
   const [humanFeedbackForTemplateChanged, setHumanFeedbackForTemplateChanged] =
     useState<boolean>(false);
@@ -3021,48 +3120,84 @@ function TemplateSection(props: {
     <>
       {props.showFeedback && (
         <>
-          <Card mb='16px'>
+          <Card mb="16px">
             <Card.Section
               sx={{
                 backgroundColor: theme.colors.grape[6],
-                flexDirection: 'row',
-                display: 'flex',
+                flexDirection: "row",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
-              p='xs'
+              onClick={toggle}
+              p="xs"
             >
-              <Text color='white' mt='4px' size='sm'>
-                <IconBulb size='1.2rem' color='white' />
-                <span style={{ marginLeft: '8px' }}>
-                  FINE TUNING: Feel free to give me feedback on improving the message.
+              <Text
+                color="white"
+                mt="4px"
+                size="sm"
+                sx={{ display: "flex", alignItems: "center" }}
+                fw={600}
+              >
+                <IconSparkles size="1.2rem" color="white" strokeWidth={2} />
+                <span style={{ marginLeft: "8px" }}>
+                  FINE TUNING: Feel free to give me feedback on improving the
+                  message.
                 </span>
               </Text>
-            </Card.Section>
-            <Card.Section
-              sx={{
-                border: 'solid 2px ' + theme.colors.grape[6] + ' !important',
-              }}
-              p='8px'
-            >
-              <Textarea
-                variant='unstyled'
-                pl={'8px'}
-                pr={'8px'}
-                size='xs'
-                minRows={3}
-                placeholder='- make it shorter&#10;-use this fact&#10;-mention the value prop'
-                value={humanFeedbackForTemplate}
-                onChange={(e) => {
-                  const value = e.target.value;
-
-                  setHumanFeedbackForTemplate(value);
-                  setHumanFeedbackForTemplateChanged(true);
+              <IconChevronDown
+                color="white"
+                strokeWidth={2}
+                size={"1.2rem"}
+                style={{
+                  transitionDuration: "150ms",
+                  transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
+                  transform: opened ? `rotate(${opened ? 180 : 0}deg)` : "none",
                 }}
               />
             </Card.Section>
+            <Collapse in={opened}>
+              <Card.Section
+                p="8px"
+                sx={{
+                  border: "solid 2px " + theme.colors.gray[4] + " !important",
+                  borderTopWidth: 0,
+                  borderRadius: 12,
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                }}
+              >
+                <Flex gap={"sm"}>
+                  <Box w={"100%"}>
+                    <TextInput
+                      w={"100%"}
+                      size="xs"
+                      placeholder="- make it shorter&#10;-use this fact&#10;-mention the value prop"
+                      value={humanFeedbackForTemplate}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        setHumanFeedbackForTemplate(value);
+                        setHumanFeedbackForTemplateChanged(true);
+                      }}
+                    />
+                  </Box>
+                  <Button
+                    onClick={props.onRegenerate}
+                    variant="light"
+                    color="grape"
+                    size="xs"
+                    leftIcon={<IconReload size="0.75rem" />}
+                  >
+                    Regenerate
+                  </Button>
+                </Flex>
+              </Card.Section>
+            </Collapse>
           </Card>
           {humanFeedbackForTemplateChanged && (
             <Box
-              sx={{ justifyContent: 'right', textAlign: 'right' }}
+              sx={{ justifyContent: "right", textAlign: "right" }}
               onClick={() => {
                 if (!currentProject) return;
                 updateLiTemplate(
@@ -3084,16 +3219,16 @@ function TemplateSection(props: {
                   })
                   .then((res) => {
                     setHumanFeedbackForTemplateChanged(false);
-                    setHumanFeedbackForTemplate('');
+                    setHumanFeedbackForTemplate("");
                     showNotification({
-                      title: 'Success',
-                      message: 'Feedback saved. Try regenerating.',
-                      color: 'green',
+                      title: "Success",
+                      message: "Feedback saved. Try regenerating.",
+                      color: "green",
                     });
                   });
               }}
             >
-              <Button color='green'>Save Feedback</Button>
+              <Button color="green">Save Feedback</Button>
             </Box>
           )}
         </>
@@ -3102,73 +3237,85 @@ function TemplateSection(props: {
         <Box>
           <Loader
             sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
             }}
           />
         </Box>
       ) : (
         <Stack>
-          <Stack mt='xs'>
+          <Stack mt="xs">
             {templates
               ?.filter((t: any) => templateActivesShow.includes(t.active))
               .sort((a: any, b: any) =>
-                a.active != b.active ? -(a.active - b.active) : a.title - b.title
+                a.active != b.active
+                  ? -(a.active - b.active)
+                  : a.title - b.title
               )
               .map((template, index) => (
                 <Paper
                   key={index}
-                  p='md'
+                  p="md"
                   mih={80}
                   sx={{
-                    position: 'relative',
-                    cursor: 'pointer',
+                    position: "relative",
+                    cursor: "pointer",
                     border:
-                      selectedTemplateId === template.id ? 'solid 1px #339af0 !important' : '',
+                      selectedTemplateId === template.id
+                        ? "solid 1px #339af0 !important"
+                        : "",
                     backgroundColor:
-                      selectedTemplateId === template.id ? '#339af008 !important' : '',
-                    flexDirection: 'row',
-                    display: 'flex',
+                      selectedTemplateId === template.id
+                        ? "#339af008 !important"
+                        : "",
+                    flexDirection: "row",
+                    display: "flex",
                   }}
                   withBorder
                   onClick={() => {
                     setSelectedTemplateId(template.id);
-                    setHumanFeedbackForTemplate(template.additional_instructions);
+                    setHumanFeedbackForTemplate(
+                      template.additional_instructions
+                    );
                   }}
                 >
                   <Box
-                    miw='100px'
+                    miw="100px"
                     mah={80}
                     sx={{
-                      border: 'solid 1px #339af022',
-                      backgroundColor: '#339af022',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      textAlign: 'center',
+                      border: "solid 1px #339af022",
+                      backgroundColor: "#339af022",
+                      padding: "8px",
+                      borderRadius: "4px",
+                      textAlign: "center",
                     }}
-                    mt='xl'
-                    mr='md'
+                    mt="xl"
+                    mr="md"
                   >
-                    <Text fw='bold' fz='md' color='blue' mt='xs'>
-                      {Math.round((template.times_accepted / (template.times_used + 0.0001)) * 100)}
+                    <Text fw="bold" fz="md" color="blue" mt="xs">
+                      {Math.round(
+                        (template.times_accepted /
+                          (template.times_used + 0.0001)) *
+                          100
+                      )}
                       % reply
                     </Text>
-                    <Text color='blue' size='xs'>
+                    <Text color="blue" size="xs">
                       {template.times_accepted} / {template.times_used} times
                     </Text>
                   </Box>
 
-                  <Box mr={40} w='100%'>
+                  <Box mr={40} w="100%">
                     <Flex>
                       <Text
-                        size='sm'
-                        fw='600'
-                        mb='xs'
-                        sx={{ textTransform: 'uppercase' }}
-                        color='gray'
-                        variant='outline'
+                        size="sm"
+                        fw="600"
+                        mb="xs"
+                        sx={{ textTransform: "uppercase" }}
+                        color="gray"
+                        variant="outline"
                       >
                         {template.title}
                       </Text>
@@ -3196,70 +3343,79 @@ function TemplateSection(props: {
 
                       <AIBrainPill />
 
-                      {template.research_points && template.research_points.length > 0 && (
-                        <HoverCard width={280} shadow='md'>
-                          <HoverCard.Target>
-                            <Badge
-                              leftSection={<IconSearch size='0.8rem' style={{ marginTop: 4 }} />}
-                              color='lime'
-                              variant='filled'
-                              ml='xs'
-                              size='xs'
-                            >
-                              {template.research_points.length} Research Points
-                            </Badge>
-                          </HoverCard.Target>
-                          <HoverCard.Dropdown
-                            style={{
-                              backgroundColor: 'rgb(34, 37, 41)',
-                              padding: 0,
-                            }}
-                          >
-                            <Paper
+                      {template.research_points &&
+                        template.research_points.length > 0 && (
+                          <HoverCard width={280} shadow="md">
+                            <HoverCard.Target>
+                              <Badge
+                                leftSection={
+                                  <IconSearch
+                                    size="0.8rem"
+                                    style={{ marginTop: 4 }}
+                                  />
+                                }
+                                color="lime"
+                                variant="filled"
+                                ml="xs"
+                                size="xs"
+                              >
+                                {template.research_points.length} Research
+                                Points
+                              </Badge>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown
                               style={{
-                                backgroundColor: 'rgb(34, 37, 41)',
-                                color: 'white',
-                                padding: 10,
+                                backgroundColor: "rgb(34, 37, 41)",
+                                padding: 0,
                               }}
                             >
-                              <TextWithNewline style={{ fontSize: '12px' }}>
-                                {'<b>Active Research Points:</b>\n- ' +
-                                  template.research_points
-                                    .map((rp: any) => rp.replaceAll('_', ' ').toLowerCase())
-                                    .join('\n- ')}
-                              </TextWithNewline>
-                            </Paper>
-                          </HoverCard.Dropdown>
-                        </HoverCard>
-                      )}
+                              <Paper
+                                style={{
+                                  backgroundColor: "rgb(34, 37, 41)",
+                                  color: "white",
+                                  padding: 10,
+                                }}
+                              >
+                                <TextWithNewline style={{ fontSize: "12px" }}>
+                                  {"<b>Active Research Points:</b>\n- " +
+                                    template.research_points
+                                      .map((rp: any) =>
+                                        rp.replaceAll("_", " ").toLowerCase()
+                                      )
+                                      .join("\n- ")}
+                                </TextWithNewline>
+                              </Paper>
+                            </HoverCard.Dropdown>
+                          </HoverCard>
+                        )}
                       {template.additional_instructions && (
-                        <HoverCard width={280} shadow='md'>
+                        <HoverCard width={280} shadow="md">
                           <HoverCard.Target>
                             <Badge
-                              leftSection={<IconBulb size='0.8rem' />}
-                              color='grape'
-                              variant='filled'
-                              ml='xs'
-                              size='xs'
+                              leftSection={<IconBulb size="0.8rem" />}
+                              color="grape"
+                              variant="filled"
+                              ml="xs"
+                              size="xs"
                             >
                               Fine Tuned
                             </Badge>
                           </HoverCard.Target>
                           <HoverCard.Dropdown
                             style={{
-                              backgroundColor: 'rgb(34, 37, 41)',
+                              backgroundColor: "rgb(34, 37, 41)",
                               padding: 0,
                             }}
                           >
                             <Paper
                               style={{
-                                backgroundColor: 'rgb(34, 37, 41)',
-                                color: 'white',
+                                backgroundColor: "rgb(34, 37, 41)",
+                                color: "white",
                                 padding: 10,
                               }}
                             >
-                              <TextWithNewline style={{ fontSize: '12px' }}>
-                                {'<b>Additional Instructions:</b>\n' +
+                              <TextWithNewline style={{ fontSize: "12px" }}>
+                                {"<b>Additional Instructions:</b>\n" +
                                   template.additional_instructions}
                               </TextWithNewline>
                             </Paper>
@@ -3269,23 +3425,24 @@ function TemplateSection(props: {
                     </Flex>
                     <Card
                       withBorder
-                      w='100%'
+                      w="100%"
                       sx={{
-                        backgroundColor: selectedTemplateId == template.id ? '' : '#fbfbfb',
+                        backgroundColor:
+                          selectedTemplateId == template.id ? "" : "#fbfbfb",
                       }}
                     >
-                      <Text style={{ fontSize: '0.9rem', lineHeight: 2 }}>
+                      <Text style={{ fontSize: "0.9rem", lineHeight: 2 }}>
                         <div
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(
                               template.message
                                 .replaceAll(
-                                  '[[',
+                                  "[[",
                                   "<span style='margin-left: 6px; margin-right: 6px; background-color: " +
-                                    theme.colors['blue'][5] +
+                                    theme.colors["blue"][5] +
                                     "; padding: 2px; color: white; padding-left: 8px; padding-right: 8px; border-radius: 4px;'>✨ "
                                 )
-                                .replaceAll(']]', '</span>') as string
+                                .replaceAll("]]", "</span>") as string
                             ),
                           }}
                         />
@@ -3293,9 +3450,9 @@ function TemplateSection(props: {
                     </Card>
                   </Box>
 
-                  <Box sx={{ justifyContent: 'right' }} ml='auto'>
+                  <Box sx={{ justifyContent: "right" }} ml="auto">
                     <Switch
-                      sx={{ cursor: 'pointer' }}
+                      sx={{ cursor: "pointer" }}
                       checked={template.active}
                       onChange={(e) => {
                         if (!currentProject) return;
@@ -3314,17 +3471,17 @@ function TemplateSection(props: {
                       }}
                     />
                     <Button
-                      mt='xs'
-                      variant='subtle'
-                      radius='xl'
-                      size='sm'
+                      mt="xs"
+                      variant="subtle"
+                      radius="xl"
+                      size="sm"
                       compact
                       onClick={() => {
                         openContextModal({
-                          modal: 'liTemplate',
-                          title: 'Edit Template',
+                          modal: "liTemplate",
+                          title: "Edit Template",
                           innerProps: {
-                            mode: 'EDIT',
+                            mode: "EDIT",
                             editProps: {
                               templateId: template.id,
                               title: template.title,
@@ -3352,24 +3509,28 @@ function TemplateSection(props: {
                   setTemplateActivesShow([true]);
                 }
               }}
-              color='gray'
-              variant='subtle'
+              color="gray"
+              variant="subtle"
               leftIcon={
                 <IconChevronDown
-                  size='1rem'
+                  size="1rem"
                   style={{
-                    transform: templateActivesShow.length === 1 ? '' : 'rotate(180deg)',
+                    transform:
+                      templateActivesShow.length === 1 ? "" : "rotate(180deg)",
                   }}
                 />
               }
             >
-              Show {templateActivesShow.includes(true) ? 'All Templates' : 'Active Templates Only'}
+              Show{" "}
+              {templateActivesShow.includes(true)
+                ? "All Templates"
+                : "Active Templates Only"}
             </Button>
           )}
         </Stack>
       )}
 
-      <Flex pt={15} sx={{ justifyContent: 'right' }}>
+      <Flex pt={15} sx={{ justifyContent: "right" }}>
         {/* <Button
             onClick={() => setCtaModalOpened(true)}
             size='sm'
@@ -3383,15 +3544,15 @@ function TemplateSection(props: {
         <InitialMessageTemplateSelector
           onSelect={(template: LinkedinInitialMessageTemplate) => {
             showNotification({
-              title: '🤖 Generating...',
+              title: "🤖 Generating...",
               message: 'Generating custom "' + template.name + '" template...',
-              color: 'blue',
+              color: "blue",
             });
 
             fetch(`${API_URL}/linkedin_template/adjust_template_for_client`, {
-              method: 'POST',
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${userToken}`,
               },
               body: JSON.stringify({
@@ -3402,17 +3563,17 @@ function TemplateSection(props: {
                 return res.json();
               })
               .then((res) => {
-                const adjustedTemplate = res['adjusted_template'];
+                const adjustedTemplate = res["adjusted_template"];
                 openContextModal({
-                  modal: 'liTemplate',
-                  title: 'Create Template',
+                  modal: "liTemplate",
+                  title: "Create Template",
                   innerProps: {
-                    mode: 'CREATE',
+                    mode: "CREATE",
                     editProps: {
                       title: template.name,
                       message: adjustedTemplate,
                       active: true,
-                      humanFeedback: '',
+                      humanFeedback: "",
                       researchPoints: [],
                     },
                   },
@@ -3422,16 +3583,16 @@ function TemplateSection(props: {
         />
         <Stack spacing={5}>
           <Button
-            variant='outline'
-            radius='md'
+            variant="outline"
+            radius="md"
             compact
-            color='orange'
+            color="orange"
             onClick={() => {
               openContextModal({
-                modal: 'liTemplate',
-                title: 'Create Template',
+                modal: "liTemplate",
+                title: "Create Template",
                 innerProps: {
-                  mode: 'CREATE',
+                  mode: "CREATE",
                 },
               });
             }}

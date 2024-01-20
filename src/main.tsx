@@ -63,6 +63,7 @@ import ComingSoonCard from '@common/library/ComingSoonCard';
 import AnalyticsPageNew from '@pages/AnalyticsPageNew';
 import AdjustPage from '@pages/AdjustAIPage';
 import SlackAuthPage from '@pages/SlackAuthPage';
+import EmailGrader from '@pages/EmailGrader/EmailGrader';
 import { CampaignDetail } from '@pages/CampaignDetail';
 import InboxRestructurePage from '@pages/InboxRestructurePage';
 
@@ -464,6 +465,11 @@ const router = sentryCreateBrowserRouter([
       {
         path: '/slack-auth',
         element: <SlackAuthPage />,
+      },
+
+       {
+        path: '/emailgrader',
+        element: <EmailGrader />,
       },
       {
         path: '*',

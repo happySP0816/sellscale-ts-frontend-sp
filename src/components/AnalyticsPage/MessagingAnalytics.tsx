@@ -143,6 +143,7 @@ const MessagingAnalytics = () => {
         setEndValue={(v) => {
           setRangeValue((prev) => [prev[0], v]);
         }}
+        lowHealth={(data ?? []).filter((i) => i.health === Health.LOW).length - 1}
       />
       <Box bg={'white'} p={'lg'}>
         <Flex align={'center'} justify={'space-between'}>

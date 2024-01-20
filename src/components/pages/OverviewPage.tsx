@@ -76,6 +76,8 @@ import getDomainDetails from "@utils/requests/getDomainDetails";
 import { getSDRGeneralInfo } from "@utils/requests/getClientSDR";
 import postRefreshEmailStatistics from "@utils/requests/postRefreshEmailStatistics";
 import { getLIWarmupSnapshots } from "@utils/requests/getLIWarmupSnapshots";
+import ComingSoonCard from '@common/library/ComingSoonCard';
+import OperatorDashboard, { Task } from './Overview/OperatorDash/OperatorDash';
 
 const options = {
   scales: {
@@ -1783,6 +1785,8 @@ export default function OverviewPage() {
   const userData = useRecoilValue(userDataState);
   const userToken = useRecoilValue(userTokenState);
 
+  const [numOperatorDashItems, setNumOperatorDashItems] = useState(0);
+
   const [campaignAnalyticData, setCampaignAnalyticData] =
     useState<CampaignAnalyticsData>({
       sentOutreach: 0,
@@ -1863,10 +1867,17 @@ export default function OverviewPage() {
               Stats
             </Button>
             <Button
+              color={activeTab === "operator_dash" ? "blue" : "gray"}
+              onClick={() => setActiveTab("operator_dash")}
+            >
+              Operator Dash {numOperatorDashItems > 0 && `(${numOperatorDashItems})`}
+            </Button>
+            <Button
               color={activeTab === "operation_overview" ? "blue" : "gray"}
+              variant='subtle'
               onClick={() => setActiveTab("operation_overview")}
             >
-              Operator Dash
+              ⚙️
             </Button>
           </Group>
         </Flex>
@@ -1881,6 +1892,12 @@ export default function OverviewPage() {
           <BarChart />
           <ActiveChannels />
           <ActiveCampaigns />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="operator_dash">
+          <OperatorDashboard onOperatorDashboardEntriesChange={(task: Task[]) => {
+            setNumOperatorDashItems(task.length);
+          }} />
         </Tabs.Panel>
 
         <Tabs.Panel value="operation_overview">

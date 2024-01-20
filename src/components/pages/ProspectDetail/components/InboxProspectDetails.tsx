@@ -227,12 +227,21 @@ export default function ProjectDetails(props: {
         status
       );
     }
-    queryClient.invalidateQueries({
-      queryKey: ['query-dash-get-prospects'],
+    // queryClient.invalidateQueries({
+    //   queryKey: ['query-dash-get-prospects'],
+    // });
+    // if (changeProspect || changeProspect === undefined) {
+    //   setOpenedProspectId(-1);
+    // }
+
+    // Refetch and set to the next prospect
+    queryClient.refetchQueries({
+      queryKey: ['query-prospects-list'],
     });
     if (changeProspect || changeProspect === undefined) {
-      setOpenedProspectId(-1);
+      setOpenedProspectId(-2);
     }
+
     refetch();
   };
 

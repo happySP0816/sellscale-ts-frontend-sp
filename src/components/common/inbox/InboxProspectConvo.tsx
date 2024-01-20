@@ -126,8 +126,8 @@ export function ProspectConvoMessage(props: {
   const triggerGetSingleBumpFramework = async (id: number) => {
     const result = await getSingleBumpFramework(userToken, id);
     if (result) {
-      setBumpNumberConverted(result.data.bump_framework.etl_num_times_converted);
-      setBumpNumberUsed(result.data.bump_framework.etl_num_times_used);
+      setBumpNumberConverted(result.data.bump_framework?.etl_num_times_converted);
+      setBumpNumberUsed(result.data.bump_framework?.etl_num_times_used);
     }
   };
 
@@ -300,7 +300,21 @@ export default function ProspectConvo(props: Props) {
     queryKey: [`query-get-dashboard-prospect-shallow-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectShallowByID(userToken, openedProspectId);
-      return response.status === 'success' ? (response.data as ProspectShallow) : undefined;
+      const prospect =
+        response.status === 'success' ? (response.data as ProspectShallow) : undefined;
+
+      if (
+        new Date(prospect?.li_last_message_timestamp ?? '') <
+        new Date(prospect?.email_last_message_timestamp ?? '')
+      ) {
+        if (openedOutboundChannel !== 'SMARTLEAD') {
+          setOpenedOutboundChannel('EMAIL');
+        }
+      } else {
+        setOpenedOutboundChannel('LINKEDIN');
+      }
+
+      return prospect;
     },
     enabled: openedProspectId !== -1,
   });
@@ -459,6 +473,9 @@ export default function ProspectConvo(props: Props) {
       return new Date(a.time).getTime() - new Date(b.time).getTime();
     });
     setSmartleadEmailConversation(conversation);
+    if (conversation.length > 0) {
+      setOpenedOutboundChannel('SMARTLEAD');
+    }
   };
   const triggerPostSmartleadReply = async () => {
     setSendingMessage(true);
@@ -534,6 +551,15 @@ export default function ProspectConvo(props: Props) {
     setSmartleadEmailConversation([]);
     triggerGetSmartleadProspectConvo();
   }, [openedProspectId]);
+
+  useQuery({
+    queryKey: [`query-get-smartlead-convo-prospect-${openedProspectId}`],
+    queryFn: async () => {
+      await triggerGetSmartleadProspectConvo();
+      return [];
+    },
+    enabled: !!prospect,
+  });
 
   // The prospect is no longer loading if we are not fetching any data
   useEffect(() => {
@@ -630,7 +656,7 @@ export default function ProspectConvo(props: Props) {
     }
   }
   const navigate = useNavigate();
-  if (!openedProspectId || openedProspectId === -1) {
+  if (!openedProspectId || openedProspectId < 0) {
     return (
       <Flex direction='column' align='left' p='sm' mt='lg' h={`calc(${INBOX_HEIGHT} - 100px)`}>
         <Skeleton height={50} circle mb='xl' />
@@ -945,6 +971,7 @@ export default function ProspectConvo(props: Props) {
         >
           <div style={{ marginTop: 10, marginBottom: 10 }}>
             <LoadingOverlay
+              zIndex={1}
               loader={loaderWithText('')}
               visible={isFetching || isFetchingThreads || isFetchingMessages}
             />
@@ -1285,6 +1312,7 @@ export default function ProspectConvo(props: Props) {
                     minimizedSendBox={() => setOpenedConvoBox(false)}
                     currentSubstatus={statusValue}
                     triggerGetSmartleadProspectConvo={triggerGetSmartleadProspectConvo}
+                    archetypeId={prospect?.archetype_id}
                   />
                 </Box>
                 <Box
@@ -1377,6 +1405,7 @@ export default function ProspectConvo(props: Props) {
                 scrollToBottom={scrollToBottom}
                 minimizedSendBox={() => setOpenedConvoBox(false)}
                 currentSubstatus={statusValue}
+                archetypeId={prospect?.archetype_id}
               />
             </Box>
             <Box

@@ -14,6 +14,7 @@ interface EditSlaModalProps extends ModalProps {
   setEndValue: (value: number) => void;
   significance: number;
   setSignificance: (value: number) => void;
+  lowHealth: number;
 }
 
 const EditSlaModal: FC<EditSlaModalProps> = (props) => {
@@ -121,7 +122,7 @@ const EditSlaModal: FC<EditSlaModalProps> = (props) => {
       <Flex bg={'#faf9fa'} style={{ border: '1px solid #efedf0', borderRadius: '10px' }} p={'sm'}>
         <Text display={'flex'} style={{ alignItems: 'center', gap: '4px' }} color='gray'>
           <IconInfoCircle size={'1.2rem'} />
-          With current thresholds, you have <span className='text-[#ff2424] font-semibold'>5 low health</span> reply rates.
+          With current thresholds, you have <span className='text-[#ff2424] font-semibold'>{props.lowHealth} low health</span> reply rates.
         </Text>
       </Flex>
       <Box mt={'md'}>

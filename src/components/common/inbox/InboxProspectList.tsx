@@ -68,7 +68,7 @@ import { icpFitToIcon } from '@common/pipeline/ICPFitAndReason';
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
 import { currentInboxCountState, currentProjectState } from '@atoms/personaAtoms';
 import { ProjectSelect } from '@common/library/ProjectSelect';
-import { IconChevronUp } from '@tabler/icons';
+import { IconBrandLinkedin, IconChevronUp, IconMail } from '@tabler/icons';
 import { useNavigate } from 'react-router-dom';
 
 interface StatusSelectItemProps extends React.ComponentPropsWithoutRef<'div'> {
@@ -103,6 +103,8 @@ export function ProspectConvoCard(props: {
   new_msg_count: number;
   icp_fit: number;
   opened: boolean;
+  snoozed_until?: string;
+  default_channel?: 'LINKEDIN' | 'EMAIL';
 }) {
   const fetchingProspectId = useRecoilValue(fetchingProspectIdState);
   const theme = useMantineTheme();
@@ -116,10 +118,10 @@ export function ProspectConvoCard(props: {
         sx={(theme) => ({
           overflow: 'hidden',
           cursor: 'pointer',
-          backgroundColor: 'white',
+          backgroundColor: props.opened ? '#f7f7f7' : 'white',
           borderRight: props.opened
-            ? `2px solid ${theme.colors.blue[theme.fn.primaryShade()]}`
-            : `2px solid ${theme.white}`,
+            ? `3px solid ${theme.colors.blue[theme.fn.primaryShade()]}`
+            : `3px solid ${theme.white}`,
         })}
       >
         <div style={{ flex: 0 }}>
@@ -141,14 +143,14 @@ export function ProspectConvoCard(props: {
             </Avatar>
           </Indicator>
         </div>
-        <div style={{ flexGrow: 1 }}>
+        <div style={{ flexGrow: 1, position: 'relative' }}>
           <Stack spacing={0}>
             <Group position='apart' sx={{ flexWrap: 'nowrap' }}>
               <Title size={13} fw={500}>
                 {props.name}
               </Title>
               <Text c='dimmed' size={10}>
-                {props.latest_msg_time}
+                {convertDateToCasualTime(new Date(props.latest_msg_time))}
               </Text>
             </Group>
             <Group position='apart' sx={{ flexWrap: 'nowrap' }}>
@@ -166,6 +168,54 @@ export function ProspectConvoCard(props: {
               {props.title}
             </Text>
           </Stack>
+          {props.default_channel && (
+            <Box sx={{ position: 'absolute', top: 15, right: 0 }}>
+              {props.default_channel === 'LINKEDIN' ? (
+                <ActionIcon
+                  variant='transparent'
+                  color='blue'
+                  radius='xl'
+                  size='sm'
+                  aria-label='LinkedIn'
+                >
+                  <IconBrandLinkedin size='1.0rem' />
+                </ActionIcon>
+              ) : (
+                <ActionIcon
+                  variant='transparent'
+                  color='yellow'
+                  radius='xl'
+                  size='sm'
+                  aria-label='Email'
+                >
+                  <IconMail size='1.0rem' />
+                </ActionIcon>
+              )}
+            </Box>
+          )}
+          {props.snoozed_until && new Date(props.snoozed_until) > new Date() && (
+            <Tooltip
+              label={`Snoozed until ${convertDateToLocalTime(new Date(props.snoozed_until))}`}
+              withArrow
+              withinPortal
+            >
+              <Flex
+                align={'center'}
+                gap={'0.25rem'}
+                sx={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 15,
+                }}
+              >
+                <Text fz='0.75rem' fw={500} color='gray'>
+                  {convertDateToMMMDD(new Date(props.snoozed_until))}
+                </Text>
+
+                <IconClock size='0.875rem' color='gray' />
+              </Flex>
+            </Tooltip>
+          )}
         </div>
       </Flex>
       <Divider />
@@ -339,7 +389,7 @@ export default function ProspectList(props: {
   prospects = prospects.sort((a, b) => (a.in_purgatory ? 1 : 0) - (b.in_purgatory ? 1 : 0));
 
   // useEffect(() => {
-  //   if (prospects.length > 0 && (!openedProspectId || openedProspectId === -1)) {
+  //   if (prospects.length > 0 && (!openedProspectId || openedProspectId < 0)) {
   //     setOpenedProspectId(prospects[0].id);
   //   }
   // }, [props.prospects]);
@@ -369,7 +419,7 @@ export default function ProspectList(props: {
     if (displayProspects.length > 0) {
       if (
         !openedProspectId ||
-        openedProspectId === -1 ||
+        openedProspectId < 0 ||
         !displayProspects.find((p) => p.id === openedProspectId)
       ) {
         setOpenedProspectId(displayProspects[0].id);

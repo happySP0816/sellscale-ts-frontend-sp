@@ -59,7 +59,7 @@ import { DatePicker } from '@mantine/dates';
 import ProspectDemoDateSelector from '@common/prospectDetails/ProspectDemoDateSelector';
 import DemoFeedbackDrawer from '@drawers/DemoFeedbackDrawer';
 import { demosDrawerOpenState, demosDrawerProspectIdState } from '@atoms/dashboardAtoms';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import { INBOX_PAGE_HEIGHT } from '@pages/InboxPage';
 import ProspectDetailsHistory from '@common/prospectDetails/ProspectDetailsHistory';
 import EditProspectModal from '@modals/EditProspectModal';
@@ -127,6 +127,11 @@ export default function ProjectDetails(props: {
 
   const [demosDrawerOpened, setDemosDrawerOpened] = useRecoilState(demosDrawerOpenState);
   const [drawerProspectId, setDrawerProspectId] = useRecoilState(demosDrawerProspectIdState);
+
+  const [openedNotInterestedPopover, setOpenedNotInterestedPopover] = useState(false);
+  const [openedNotQualifiedPopover, setOpenedNotQualifiedPopover] = useState(false);
+  const [loadingNotInterested, setLoadingNotInterested] = useState(false);
+  const [loadingNotQualified, setLoadingNotQualified] = useState(false);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
@@ -282,14 +287,23 @@ export default function ProjectDetails(props: {
         disqualification_reason
       );
     }
-    queryClient.invalidateQueries({
-      queryKey: ['query-dash-get-prospects'],
+    // queryClient.invalidateQueries({
+    //   queryKey: ['query-dash-get-prospects'],
+    // });
+    // if (changeProspect || changeProspect === undefined) {
+    //   if (!props.noProspectResetting) {
+    //     setOpenedProspectId(-1);
+    //   }
+    // }
+
+    // Refetch and set to the next prospect
+    queryClient.refetchQueries({
+      queryKey: ['query-prospects-list'],
     });
     if (changeProspect || changeProspect === undefined) {
-      if (!props.noProspectResetting) {
-        setOpenedProspectId(-1);
-      }
+      setOpenedProspectId(-2);
     }
+
     refetch();
   };
 
@@ -315,9 +329,11 @@ export default function ProjectDetails(props: {
     >
       <Stack spacing={0} mt={'md'} px={'md'}>
         <Flex>
-          <Box mt='4px'>
-            <Title order={4}>{data?.details.full_name}</Title>
-          </Box>
+          {/* make the badge a box with border radius 0px */}
+          <Badge color='blue' variant='outline' sx={{ borderRadius: 0 }} w='100%'>
+            {data?.data.archetype_name.substring(0, 50)}{' '}
+            {data?.data?.archetype_name && data?.data.archetype_name.length > 50 && '...'}
+          </Badge>
 
           <Button
             radius={'xs'}
@@ -626,12 +642,26 @@ export default function ProjectDetails(props: {
                           await changeStatus('DEMO_SET', false);
                         }}
                       />
-                      <Popover width={430} position='bottom' arrowSize={12} withArrow shadow='md'>
+                      <Popover
+                        opened={openedNotInterestedPopover}
+                        width={430}
+                        position='bottom'
+                        arrowSize={12}
+                        withArrow
+                        shadow='md'
+                        onChange={(opened) => {
+                          setOpenedNotInterestedPopover(opened);
+                        }}
+                      >
                         <Popover.Target>
                           <Button
+                            loading={loadingNotInterested}
                             variant='outlined'
                             className={classes.item}
                             leftIcon={<IconX color={theme.colors.red[6]} size={24} />}
+                            onClick={() => {
+                              setOpenedNotInterestedPopover(true);
+                            }}
                           >
                             Not Interested
                           </Button>
@@ -711,11 +741,14 @@ export default function ProjectDetails(props: {
                               leftIcon={<IconTrash size={24} />}
                               radius={'md'}
                               onClick={async () => {
+                                setLoadingNotInterested(true);
+                                setOpenedNotInterestedPopover(false);
                                 await changeStatus(
                                   'NOT_INTERESTED',
                                   true,
                                   notInterestedDisqualificationReason
                                 );
+                                setLoadingNotInterested(false);
                               }}
                             >
                               Mark Not Interested
@@ -723,12 +756,26 @@ export default function ProjectDetails(props: {
                           </Flex>
                         </Popover.Dropdown>
                       </Popover>
-                      <Popover width={430} position='bottom' arrowSize={12} withArrow shadow='md'>
+                      <Popover
+                        opened={openedNotQualifiedPopover}
+                        width={430}
+                        position='bottom'
+                        arrowSize={12}
+                        withArrow
+                        shadow='md'
+                        onChange={(opened) => {
+                          setOpenedNotQualifiedPopover(opened);
+                        }}
+                      >
                         <Popover.Target>
                           <Button
+                            loading={loadingNotQualified}
                             variant='outlined'
                             className={classes.item}
                             leftIcon={<IconTrash color={theme.colors.red[6]} size={24} />}
+                            onClick={() => {
+                              setOpenedNotQualifiedPopover(true);
+                            }}
                           >
                             Not Qualified
                           </Button>
@@ -782,11 +829,14 @@ export default function ProjectDetails(props: {
                               leftIcon={<IconTrash size={24} />}
                               radius={'md'}
                               onClick={async () => {
+                                setLoadingNotQualified(true);
+                                setOpenedNotQualifiedPopover(false);
                                 await changeStatus(
                                   'NOT_QUALIFIED',
                                   true,
                                   notQualifiedDisqualificationReason
                                 );
+                                setLoadingNotQualified(false);
                               }}
                             >
                               Disqualify

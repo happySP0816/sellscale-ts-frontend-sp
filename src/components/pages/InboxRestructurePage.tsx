@@ -49,9 +49,14 @@ export type ProspectRestructured = {
   full_name: string;
   id: number;
   last_message: string;
+  last_message_timestamp: string;
   primary_channel: 'LINKEDIN' | 'EMAIL';
   section: 'Inbox' | 'Snoozed' | 'Demos';
   title: string;
+  hidden_until?: string;
+  icp_fit_score: number;
+  status: string;
+  img_url?: string;
 };
 
 export default function InboxRestructurePage(props: { all?: boolean }) {
@@ -61,6 +66,10 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
 
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+
+  useEffect(() => {
+    setOpenedList(true);
+  }, []);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-prospects-list`, {}],
@@ -77,6 +86,12 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
         if (prospects.length > 0) {
           setOpenedProspectId(prospects[0].id);
         }
+      } else if (openedProspectId < 0) {
+        // Set to the next X proepct in the list where X is the negative openedProspectId
+        const nextProspect = prospects[Math.abs(openedProspectId) - 1];
+        if (nextProspect) {
+          setOpenedProspectId(nextProspect.id);
+        }
       }
 
       return prospects;
@@ -85,7 +100,7 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
   });
   const prospects = data ?? [];
 
-  console.log(openedProspectId);
+  console.log(prospects);
 
   if (isFetching)
     return (

@@ -40,6 +40,7 @@ import {
   prospectStatuses,
   nurturingProspectStatuses,
   getStatusDetails,
+  labelizeStatus,
 } from './utils';
 import InboxProspectListFilter, {
   InboxProspectListFilterState,
@@ -62,6 +63,7 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
   const [mainTab, setMainTab] = useRecoilState(mainTabState);
 
   const prospects = props.prospects
+    .filter((p) => !['REMOVED', 'NULL'].includes((p.status ?? 'NULL').toUpperCase()))
     .filter((p) => p.section.toLowerCase() === mainTab)
     .filter(
       (p) =>
@@ -69,6 +71,10 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
         p.company.toLowerCase().includes(searchFilter.toLowerCase()) ||
         p.full_name.toLowerCase().includes(searchFilter.toLowerCase())
     );
+
+  const prospectGroups = Object.entries(_.groupBy(prospects, (p) => p.status)).sort((a, b) => {
+    return b[0].localeCompare(a[0]);
+  });
 
   return (
     <>
@@ -98,6 +104,7 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
               position: 'relative',
             })}
           >
+            {/* Section tabs */}
             <Tabs
               value={mainTab}
               onTabChange={(value) => {
@@ -169,6 +176,7 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
 
             <>
               <Stack spacing={0}>
+                {/* Search bar */}
                 <Input
                   p={5}
                   sx={{ flex: 1 }}
@@ -192,25 +200,48 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
                   placeholder='Search...'
                 />
                 <Stack spacing={0}>
-                  {prospects.map((prospect) => (
-                    <Box
-                      onClick={() => {
-                        setOpenedProspectId(prospect.id);
-                        setOpenedList(false);
-                      }}
-                    >
-                      <ProspectConvoCard
-                        id={prospect.id}
-                        name={prospect.full_name}
-                        title={prospect.title}
-                        img_url={''}
-                        latest_msg={prospect.last_message}
-                        latest_msg_time={''}
-                        icp_fit={-1}
-                        new_msg_count={0}
-                        latest_msg_from_sdr={true}
-                        opened={prospect.id === openedProspectId}
-                      />
+                  {/* Grouped prospects by overall status */}
+                  {prospectGroups.map((group, index) => (
+                    <Box key={index}>
+                      <Box bg='blue.1' py={'sm'} px={'md'} color='blue'>
+                        <Flex w='100%'>
+                          <Text color='blue' ta='center' fz={14} fw={700}>
+                            {labelizeConvoSubstatus(group[0])}
+                          </Text>
+                          <Badge color='blue' size='xs' ml='xs' mt='2px'>
+                            {group[1].length}
+                          </Badge>
+                        </Flex>
+                      </Box>
+                      {/* List of prospects in that group */}
+                      <Stack spacing={0}>
+                        {group[1].map((prospect, index) => (
+                          <Box
+                            key={index}
+                            onClick={() => {
+                              setOpenedProspectId(prospect.id);
+                              setOpenedList(false);
+                            }}
+                          >
+                            <ProspectConvoCard
+                              id={prospect.id}
+                              name={prospect.full_name}
+                              title={prospect.title}
+                              img_url={prospect.img_url ?? ''}
+                              latest_msg={prospect.last_message}
+                              latest_msg_time={prospect.last_message_timestamp}
+                              icp_fit={prospect.icp_fit_score}
+                              new_msg_count={0}
+                              latest_msg_from_sdr={false}
+                              default_channel={
+                                mainTab !== 'snoozed' ? prospect.primary_channel : undefined
+                              }
+                              opened={prospect.id === openedProspectId}
+                              snoozed_until={prospect.hidden_until}
+                            />
+                          </Box>
+                        ))}
+                      </Stack>
                     </Box>
                   ))}
                 </Stack>

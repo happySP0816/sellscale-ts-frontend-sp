@@ -91,6 +91,7 @@ export default function ManageBumpFramework({
     }
 
     setBumpFrameworks(bumpFrameworkArray);
+
     setLoadingBumpFrameworks(false);
   };
 

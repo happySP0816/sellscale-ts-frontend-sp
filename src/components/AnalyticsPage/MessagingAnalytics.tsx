@@ -123,10 +123,7 @@ const MessagingAnalytics = () => {
   const newData = _.groupBy(displayData, 'campaign');
   const groupedArray = Object.entries(newData);
 
-  const groupedArrayOther = Object.entries(newData).map(([campaign, data]) => ({
-    campaign_name: campaign,
-    data,
-  }));
+  console.log('qqqqqqqqqqqq', displayData);
 
   return (
     <>
@@ -143,7 +140,7 @@ const MessagingAnalytics = () => {
         setEndValue={(v) => {
           setRangeValue((prev) => [prev[0], v]);
         }}
-        lowHealth={(data ?? []).filter((i) => i.health === Health.LOW).length - 1}
+        lowHealth={(displayData ?? []).filter((i) => i.health === Health.LOW).length}
       />
       <Box bg={'white'} p={'lg'}>
         <Flex align={'center'} justify={'space-between'}>

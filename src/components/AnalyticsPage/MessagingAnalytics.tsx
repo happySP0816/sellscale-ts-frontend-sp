@@ -21,7 +21,15 @@ import {
 } from '@mantine/core';
 import { IconExternalLink } from '@tabler/icons-react';
 import { DataGrid, stringFilterFn, DataGridFiltersState } from 'mantine-data-grid';
-import { IconAlertTriangle, IconChevronDown, IconChevronLeft, IconChevronRight, IconChevronUp, IconCircuitGroundDigital } from '@tabler/icons';
+import {
+  IconAlertTriangle,
+  IconChevronDown,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronUp,
+  IconCircuitGroundDigital,
+  IconDiscountCheck,
+} from '@tabler/icons';
 import { useState } from 'react';
 import { faker } from '@faker-js/faker';
 import { useDisclosure } from '@mantine/hooks';
@@ -68,7 +76,7 @@ const MessagingAnalytics = () => {
   const [groupby, setGroupby] = useState(true);
   const [groupid, setGroupId] = useState('');
 
-  const [rangeValue, setRangeValue] = useState<[number, number]>([20, 80]);
+  const [rangeValue, setRangeValue] = useState<[number, number]>([25, 75]);
   const [significance, setSignificance] = useState<number>(15);
 
   const {
@@ -115,6 +123,11 @@ const MessagingAnalytics = () => {
   const newData = _.groupBy(displayData, 'campaign');
   const groupedArray = Object.entries(newData);
 
+  const groupedArrayOther = Object.entries(newData).map(([campaign, data]) => ({
+    campaign_name: campaign,
+    data,
+  }));
+
   return (
     <>
       <EditSlaModal
@@ -130,6 +143,7 @@ const MessagingAnalytics = () => {
         setEndValue={(v) => {
           setRangeValue((prev) => [prev[0], v]);
         }}
+        lowHealth={(data ?? []).filter((i) => i.health === Health.LOW).length - 1}
       />
       <Box bg={'white'} p={'lg'}>
         <Flex align={'center'} justify={'space-between'}>
@@ -467,55 +481,69 @@ const MessagingAnalytics = () => {
           />
         ) : (
           <Flex direction={'column'} style={{ border: '1px solid gray', borderRadius: '6px' }} mt={'md'}>
+            <Flex p={'lg'} bg={'#f9f9fd'} style={{ borderBottom: '1px solid #e8ebed', borderTopLeftRadius: '13px', borderTopRightRadius: '13px' }}>
+              <Text w={'50%'}>Campaign Name</Text>
+              <Text w={'20%'}>Steps</Text>
+              <Text w={'17%'}>Status</Text>
+              <Text w={'10%'}></Text>
+            </Flex>
             {groupedArray.map(([campaign, data], index) => {
               return (
                 <>
-                  <Flex justify={'space-between'} align={'center'} p={'lg'} bg={groupOpened && campaign === groupid ? '#3178ea' : ''}>
-                    <Flex align={'center'} gap={'xs'}>
-                      <Avatar size={'sm'} />
+                  <Flex align={'center'} p={'lg'} bg={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? '#3178ea' : '#fa5252') : ''}>
+                    <Flex align={'center'} gap={'xs'} w={'50%'}>
+                      <Avatar size={'md'} radius={'xl'} />
                       <Box>
                         <Flex align={'center'} gap={4}>
                           <Text fw={500} size={'sm'} color={groupOpened && campaign === groupid ? 'white' : ''}>
                             {campaign}
                           </Text>
-
                           <Anchor href='/' size={'sm'} sx={{ display: 'flex', alignItems: 'center' }}>
-                            <IconExternalLink size={'0.8rem'} color={groupOpened && campaign === groupid ? 'white' : ''} />
+                            <IconExternalLink size={'0.8rem'} color={groupOpened && campaign === groupid ? 'white' : '#3178ea'} />
                           </Anchor>
                         </Flex>
                       </Box>
                     </Flex>
-                    <Flex align={'center'} gap={'sm'}>
-                      {data.find((item) => item.health.includes('LOW')) && !groupOpened && (
-                        <Text color='red' display='flex' style={{ alignItems: 'center', gap: '8px' }}>
-                          <IconAlertTriangle size='1.2rem' color='red' />
+                    <Flex w={'20%'}>
+                      {groupOpened && campaign === groupid ? (
+                        selectedHealth === 'low' && <Badge color='red'>{data.length} Frameworks</Badge>
+                      ) : (
+                        <Badge color='red'>{data.length} Frameworks</Badge>
+                      )}
+                    </Flex>
+                    <Flex w={'17%'}>
+                      {data.find((item) => item.health.includes('LOW')) ? (
+                        <Text
+                          color={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'red' : 'white') : 'red'}
+                          display={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'none' : 'flex') : 'flex'}
+                          style={{ alignItems: 'center', gap: '8px' }}
+                          fw={500}
+                        >
+                          <IconAlertTriangle size='1.2rem' color={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'red' : 'white') : 'red'} />
                           Need Attention
                         </Text>
+                      ) : (
+                        <Text
+                          color={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'green' : 'white') : 'green'}
+                          display={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'none' : 'flex') : 'flex'}
+                          style={{ alignItems: 'center', gap: '8px' }}
+                          fw={500}
+                        >
+                          <IconDiscountCheck
+                            size='1.2rem'
+                            color={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? '#08b45f' : 'white') : '#08b45f'}
+                          />
+                          No Problems
+                        </Text>
                       )}
-                      {(() => {
-                        let needAttentionCount = 0;
-                        data.forEach((item) => {
-                          if (item.health.includes('LOW')) {
-                            needAttentionCount++;
-                          }
-                        });
-                        if (needAttentionCount === 0) {
-                          return null;
-                        }
-                        return (
-                          <Badge
-                            color='red'
-                          >
-                            {needAttentionCount} frameworks
-                          </Badge>
-                        );
-                      })()}
+                    </Flex>
+                    <Flex align={'center'} gap={'sm'} w={'10%'}>
                       <Button
                         variant={groupOpened && campaign === groupid ? 'default' : 'outline'}
                         radius={'lg'}
                         style={{
                           color: groupOpened && campaign === groupid ? 'white' : '',
-                          backgroundColor: groupOpened && campaign === groupid ? '#5f96f1' : '',
+                          backgroundColor: groupOpened && campaign === groupid ? (selectedHealth === 'all' ? '#3178ea' : '#fd807f') : '',
                         }}
                         size='xs'
                         rightIcon={groupOpened && campaign === groupid ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
@@ -535,12 +563,37 @@ const MessagingAnalytics = () => {
                           highlightOnHover
                           withSorting
                           withBorder
+                          withPagination
                           sx={{ cursor: 'pointer' }}
                           columns={[
                             {
+                              accessorKey: 'step',
+                              header: 'Step',
+                              enableSorting: false,
+                              maxSize: 1000,
+                              enableResizing: true,
+                              cell: (cell) => {
+                                const { campaign, step } = cell.row.original as DateType;
+                                const { title } = cell.row.original as DateType;
+                                return (
+                                  <Flex align={'center'} gap={'xs'} w={'100%'} h={'100%'}>
+                                    <Box>
+                                      <Text display={'flex'} fw={500} c={'gray.6'}>
+                                        Step #{step.replaceAll('Follow Up #', '')}:&nbsp;
+                                        <Text fw={500} c={'black'}>
+                                          {title}
+                                        </Text>
+                                      </Text>
+                                    </Box>
+                                  </Flex>
+                                );
+                              },
+                              filterFn: stringFilterFn,
+                            },
+                            {
                               accessorKey: 'health',
                               header: 'HEALTH',
-                              maxSize: 120,
+                              maxSize: 130,
                               cell: (cell) => {
                                 const score = cell.cell.getValue<Health>();
                                 let readable_score = '';
@@ -622,35 +675,9 @@ const MessagingAnalytics = () => {
                               },
                               filterFn: stringFilterFn,
                             },
-
-                            {
-                              accessorKey: 'step',
-                              header: 'Step',
-                              enableSorting: false,
-                              maxSize: 600,
-                              enableResizing: true,
-                              cell: (cell) => {
-                                const { campaign, step } = cell.row.original as DateType;
-                                const { title } = cell.row.original as DateType;
-                                return (
-                                  <Flex align={'center'} gap={'xs'} w={'100%'} h={'100%'}>
-                                    <Box>
-                                      <Text display={'flex'} fw={500} c={'gray.6'}>
-                                        Step #{step.replaceAll("Follow Up #", "")}:&nbsp;
-                                        <Text fw={500} c={'black'}>
-                                          {title}
-                                        </Text>
-                                      </Text>
-                                    </Box>
-                                  </Flex>
-                                );
-                              },
-                              filterFn: stringFilterFn,
-                            },
-
                             {
                               accessorKey: 'action',
-                              header: 'Action',
+                              header: '',
                               enableSorting: false,
                               id: 'action',
                               cell: (cell) => {
@@ -680,6 +707,112 @@ const MessagingAnalytics = () => {
                           state={{
                             columnFilters,
                           }}
+                          components={{
+                            pagination: ({ table }) => (
+                              <Flex
+                                justify={'space-between'}
+                                align={'center'}
+                                px={'sm'}
+                                py={'1.25rem'}
+                                sx={(theme) => ({
+                                  border: `1px solid ${theme.colors.gray[4]}`,
+                                  borderTopWidth: 0,
+                                })}
+                              >
+                                <Flex align={'center'} gap={'sm'}>
+                                  <Text fw={500} color='gray.6'>
+                                    Show
+                                  </Text>
+
+                                  <Flex align={'center'}>
+                                    <NumberInput
+                                      maw={100}
+                                      value={table.getState().pagination.pageSize}
+                                      onChange={(v) => {
+                                        if (v) {
+                                          table.setPageSize(v);
+                                        }
+                                      }}
+                                    />
+                                    <Flex
+                                      sx={(theme) => ({
+                                        borderTop: `1px solid ${theme.colors.gray[4]}`,
+                                        borderRight: `1px solid ${theme.colors.gray[4]}`,
+                                        borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                                        marginLeft: '-2px',
+                                        paddingLeft: '1rem',
+                                        paddingRight: '1rem',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '0.25rem',
+                                      })}
+                                      h={36}
+                                    >
+                                      <Text color='gray.5' fw={500} fz={14}>
+                                        of {table.getPrePaginationRowModel().rows.length}
+                                      </Text>
+                                    </Flex>
+                                  </Flex>
+                                </Flex>
+
+                                <Flex align={'center'} gap={'sm'}>
+                                  <Flex align={'center'}>
+                                    <Select
+                                      maw={100}
+                                      value={`${table.getState().pagination.pageIndex + 1}`}
+                                      data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
+                                        label: String(idx + 1),
+                                        value: String(idx + 1),
+                                      }))}
+                                      onChange={(v) => {
+                                        table.setPageIndex(Number(v) - 1);
+                                      }}
+                                    />
+                                    <Flex
+                                      sx={(theme) => ({
+                                        borderTop: `1px solid ${theme.colors.gray[4]}`,
+                                        borderRight: `1px solid ${theme.colors.gray[4]}`,
+                                        borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                                        marginLeft: '-2px',
+                                        paddingLeft: '1rem',
+                                        paddingRight: '1rem',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '0.25rem',
+                                      })}
+                                      h={36}
+                                    >
+                                      <Text color='gray.5' fw={500} fz={14}>
+                                        of {table.getPageCount()} pages
+                                      </Text>
+                                    </Flex>
+                                    <ActionIcon
+                                      variant='default'
+                                      color='gray.4'
+                                      h={36}
+                                      disabled={table.getState().pagination.pageIndex === 0}
+                                      onClick={() => {
+                                        table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                                      }}
+                                    >
+                                      <IconChevronLeft stroke={theme.colors.gray[4]} />
+                                    </ActionIcon>
+                                    <ActionIcon
+                                      variant='default'
+                                      color='gray.4'
+                                      h={36}
+                                      disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                                      onClick={() => {
+                                        table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                                      }}
+                                    >
+                                      <IconChevronRight stroke={theme.colors.gray[4]} />
+                                    </ActionIcon>
+                                  </Flex>
+                                </Flex>
+                              </Flex>
+                            ),
+                          }}
                           w={'100%'}
                           styles={(theme) => ({
                             thead: {
@@ -689,7 +822,6 @@ const MessagingAnalytics = () => {
                                 backgroundColor: 'transparent',
                               },
                             },
-
                             wrapper: {
                               gap: 0,
                             },
@@ -697,7 +829,6 @@ const MessagingAnalytics = () => {
                               paddingBottom: 0,
                               gap: 0,
                             },
-
                             dataCellContent: {
                               width: '100%',
                             },

@@ -13,6 +13,7 @@ import {
   Box,
   LoadingOverlay,
   Loader,
+  Button,
 } from "@mantine/core";
 import {
   activateSubscription,
@@ -24,6 +25,7 @@ import { useRecoilValue } from "recoil";
 
 import EmailAIResponseImg from "@assets/images/notification_previews/email-ai-response.png";
 import { showNotification } from "@mantine/notifications";
+import { postTestSlackNotification } from "@utils/requests/postTestSlackNotification";
 
 const image_map = new Map<string, string>([
   ["AI_REPLY_TO_EMAIL", EmailAIResponseImg],
@@ -41,11 +43,39 @@ type SlackNotificationSubscription = {
 export default function SlackNotifications() {
   const [loading, setLoading] = useState(false);
   const [loadingSubscriptionType, setLoadingSubscriptionType] = useState("");
+  const [notificationTestLoading, setNotificationTestLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
   const [slackSubscriptions, setSlackSubscriptions] = useState<
     SlackNotificationSubscription[]
   >([]);
+
+  const triggerTestNotification = async (slackNotificationID: number) => {
+    setNotificationTestLoading(true);
+
+    const result = await postTestSlackNotification(
+      userToken,
+      slackNotificationID
+    );
+
+    if (result.status === "success") {
+      showNotification({
+        title: "Success",
+        message: "Notification sent, please check your Slack channel!",
+        color: "green",
+        autoClose: 5000,
+      });
+    } else {
+      showNotification({
+        title: "Error",
+        message: "Something went wrong, please try again. Did you hookup your Slack channel?",
+        color: "red",
+        autoClose: 5000,
+      });
+    }
+
+    setNotificationTestLoading(false);
+  };
 
   const triggerActivateSubscription = async (
     slackNotificationID: number,
@@ -121,7 +151,7 @@ export default function SlackNotifications() {
       <Title order={5}>Customize Notifications</Title>
       <Flex mt="sm">
         {slackSubscriptions &&
-          slackSubscriptions.map((subscription) => {
+          slackSubscriptions.map((slackSubscription) => {
             return (
               <HoverCard
                 withArrow
@@ -139,38 +169,40 @@ export default function SlackNotifications() {
                 <HoverCard.Target>
                   <Flex align={"center"}>
                     {loadingSubscriptionType ===
-                      subscription.notification_type && (
+                      slackSubscription.notification_type && (
                       <>
-                        <Loader color="grape" size='sm' mr='sm'/>
+                        <Loader color="grape" size="sm" mr="sm" />
                       </>
                     )}
 
                     <Checkbox
-                      key={subscription.id}
-                      label={subscription.notification_name}
-                      checked={subscription.subscribed}
+                      color={'grape'}
+                      key={slackSubscription.id}
+                      label={slackSubscription.notification_name}
+                      checked={slackSubscription.subscribed}
                       onChange={() => {
-                        if (subscription.subscribed) {
+                        if (slackSubscription.subscribed) {
                           triggerDeactivateSubscription(
-                            subscription.id,
-                            subscription.notification_type
+                            slackSubscription.id,
+                            slackSubscription.notification_type
                           );
                         } else {
                           triggerActivateSubscription(
-                            subscription.id,
-                            subscription.notification_type
+                            slackSubscription.id,
+                            slackSubscription.notification_type
                           );
                         }
                       }}
                       disabled={
-                        loadingSubscriptionType === subscription.notification_type
+                        loadingSubscriptionType ===
+                        slackSubscription.notification_type
                       }
                     />
                   </Flex>
                 </HoverCard.Target>
                 <HoverCard.Dropdown>
                   <Flex w="500px" direction="column" align={"center"}>
-                    <Text>{subscription.notification_description}</Text>
+                    <Text>{slackSubscription.notification_description}</Text>
                     <Flex
                       w={400}
                       style={{
@@ -180,10 +212,21 @@ export default function SlackNotifications() {
                     >
                       <Image
                         fit="contain"
-                        src={image_map.get(subscription.notification_type)}
+                        src={image_map.get(slackSubscription.notification_type)}
                         alt="SellScale Sight"
                       />
                     </Flex>
+                    <Button
+                      loading={notificationTestLoading}
+                      onClick={() => {
+                        triggerTestNotification(slackSubscription.id);
+                      }}
+                      color='grape'
+                    >
+                      {
+                        notificationTestLoading ? 'Sending...' : 'Send Test Notification'
+                      }
+                    </Button>
                   </Flex>
                 </HoverCard.Dropdown>
               </HoverCard>

@@ -984,9 +984,8 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                               gap: "4px",
                             }}
                           >
-                            {cell.cell?.getValue<string>()}
-
                             <CompanyTooltip prospectId={prospectId} />
+                            {cell.cell?.getValue<string>()}
                           </Text>
                         );
                       },

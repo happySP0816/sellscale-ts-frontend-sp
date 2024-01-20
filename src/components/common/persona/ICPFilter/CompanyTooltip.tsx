@@ -17,6 +17,7 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
+import { showNotification } from '@mantine/notifications';
 import {
   IconArrowRight,
   IconBrandLinkedin,
@@ -63,7 +64,7 @@ export default function CompanyTooltip(props: CompanyTooltipPropsType) {
       console.log(`Popover opened for prospect ID: ${id}`);
       fetchProspectDetails();
     }
-    setIsPopoverOpen(!isPopoverOpen);
+    setIsPopoverOpen(true);
   };
 
   const fetchProspectDetails = async () => {
@@ -110,14 +111,14 @@ export default function CompanyTooltip(props: CompanyTooltipPropsType) {
                   <Avatar
                     size={"lg"}
                     radius={"xl"}
-                    src={companyData?.data?.img_url}
+                    src={companyData?.data?.logo_url}
                   />
                   <Flex direction={"column"}>
                     <Text fw={600} size={"sm"}>
                       {companyData?.company}
                     </Text>
                     <Text color="gray" size={"sm"}>
-                      {companyData?.Tagline}
+                      {companyData?.Tagline?.slice(0, 25)} {companyData?.Tagline?.length > 25 ? '...' : ''}
                     </Text>
                   </Flex>
                 </Flex>
@@ -155,7 +156,7 @@ export default function CompanyTooltip(props: CompanyTooltipPropsType) {
                     window.open(companyData?.company_url, "_blank")
                   }
                 >
-                  {companyData?.company_url?.slice(7)}
+                  {companyData?.company_url?.slice(8)}
                 </Text>
               </Flex>
               <Flex gap={"5px"}>
@@ -217,8 +218,14 @@ export default function CompanyTooltip(props: CompanyTooltipPropsType) {
                 borderTopLeftRadius: "0px",
                 borderTopRightRadius: "0px",
               }}
+              color='gray'
               onClick={() => {
-                window.open(`/prospects/${id}`, "_blank");
+                showNotification({
+                  title: "Coming Soon!",
+                  message: "This feature is coming soon!",
+                  color: "blue",
+                  icon: <IconInfoCircle size={24} />,
+                });
               }}
             >
               View Company Page

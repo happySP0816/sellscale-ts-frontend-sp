@@ -25,7 +25,7 @@ import { useRecoilValue } from "recoil";
 
 import EmailAIResponseImg from "@assets/images/notification_previews/email-ai-response.png";
 import { showNotification } from "@mantine/notifications";
-import { postTestSlackNotification } from "@utils/requests/postTestSlackNotification";
+import { postPreviewSlackNotification } from "@utils/requests/postPreviewSlackNotification";
 
 const image_map = new Map<string, string>([
   ["AI_REPLY_TO_EMAIL", EmailAIResponseImg],
@@ -53,7 +53,7 @@ export default function SlackNotifications() {
   const triggerTestNotification = async (slackNotificationID: number) => {
     setNotificationTestLoading(true);
 
-    const result = await postTestSlackNotification(
+    const result = await postPreviewSlackNotification(
       userToken,
       slackNotificationID
     );

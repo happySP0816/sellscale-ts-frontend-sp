@@ -30,6 +30,7 @@ import {
   IconBook,
   IconCheck,
   IconEdit,
+  IconFingerprint,
   IconList,
   IconMessages,
   IconPencil,
@@ -71,6 +72,8 @@ import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
 import CreateEmailReplyFrameworkModal from "@modals/CreateEmailReplyFrameworkModal";
 
 import IconImg from "@assets/images/icon.svg";
+import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
+import PullProspectEmailsCard from '@common/credits/PullProspectEmailsCard';
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -761,8 +764,12 @@ export default function EmailSequencingPage(props: {
               Settings
             </Tabs.Tab>
 
+            <Tabs.Tab value='email-scraper' icon={<IconFingerprint size="0.8rem" />} ml='auto'>
+              Email Scraper
+            </Tabs.Tab>
+
             {currentProject.smartlead_campaign_id && (
-              <Tabs.Tab value="smartlead" icon={<IconMessages size="0.8rem" />}>
+              <Tabs.Tab value="smartlead" icon={<IconMessages size="0.8rem" />} ml='auto'>
                 Beta - Variants
               </Tabs.Tab>
             )}
@@ -795,6 +802,9 @@ export default function EmailSequencingPage(props: {
                 connected={userData ? userData.nylas_connected : false}
               />
             </Box>
+          </Tabs.Panel>
+          <Tabs.Panel value="email-scraper">
+            <PullProspectEmailsCard archetype_id={archetypeID} />
           </Tabs.Panel>
         </Tabs>
       </Card.Section>

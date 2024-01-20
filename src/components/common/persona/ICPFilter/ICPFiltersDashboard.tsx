@@ -10,7 +10,6 @@ import {
   Progress,
   Switch,
   Text,
-  Tooltip,
   Title,
   useMantineTheme,
   HoverCard,
@@ -22,10 +21,12 @@ import {
   RingProgress,
   NumberInput,
   ActionIcon,
+  Tooltip,
   Stack,
+  Modal,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { IconCheck, IconExternalLink, IconPlus, IconSearch, IconTrash, IconFilter, IconUserSquare } from '@tabler/icons-react';
+import { IconCheck, IconExternalLink, IconPlus, IconSearch, IconTrash, IconFilter, IconUserSquare, IconMagnetic } from '@tabler/icons-react';
 import { DataGrid, DataGridFiltersState, DataGridRowSelectionState, stringFilterFn } from 'mantine-data-grid';
 import { FC, useEffect, useMemo, useState } from 'react';
 import WithdrawInvitesControl from './WithdrawInvitesControl';
@@ -53,7 +54,10 @@ import {
   IconChevronRight,
   IconChevronsRight,
   IconFileDownload,
+  IconList,
+  IconMagnet,
   IconMail,
+  IconUpload,
   IconX,
 } from '@tabler/icons';
 import { navigateToPage } from '@utils/documentChange';
@@ -64,6 +68,7 @@ import { SidebarHeader } from './SidebarHeader';
 import { CSVLink } from 'react-csv';
 import { cl } from '@fullcalendar/core/internal-common';
 import ProspectDetailsTooltip from './ProspectDetailsTooltip';
+import CustomResearchPointCard from '../CustomResearchPointCard';
 
 const tabFilters = [
   {
@@ -148,6 +153,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
   const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
   const [columnFilters, setColumnFilters] = useState<DataGridFiltersState>([]);
+  const [openedCustomPoint, customPointHandlers] = useDisclosure(false);
 
   const withdrawInvites = () => {
     open();
@@ -514,6 +520,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
             )}
           </Flex>
           <Divider orientation='vertical' h={'60%'} m={'auto'} />
+          
           <Tooltip label={`${currentProject?.num_unused_li_prospects}/${currentProject?.num_prospects} remaining`} withArrow withinPortal color='blue' fw={700}>
             <Flex align={'center'} gap={4}>
               <RingProgress
@@ -537,6 +544,29 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
               </span>
             </Flex>
           </Tooltip>
+
+          <Tooltip label="Upload custom data points to your prospects.">
+            <Button 
+              size='xs' 
+              onClick={customPointHandlers.open} 
+              color='gray'
+              variant='outline'>
+              <IconMagnet size={16} />
+            </Button>
+          </Tooltip>
+
+          <Modal
+            opened={openedCustomPoint}
+            onClose={customPointHandlers.close}
+            size="xl"
+            title="Custom Data Point Importer"
+          >
+            <Text size='xs' color='gray'>
+              Upload custom data points to your prospects.
+            </Text>
+            <CustomResearchPointCard />
+          </Modal>
+
           <Button onClick={openUploadProspects} leftIcon={<IconPlus />}>
             Add Prospects
           </Button>

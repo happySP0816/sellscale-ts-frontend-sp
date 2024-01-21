@@ -167,7 +167,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
         return result;
       },
       {
-        title: `Creating Smartlead Campaign...`,
+        title: `Creating Campaign...`,
         message: `Working with servers...`,
         color: "blue",
       },
@@ -195,7 +195,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
         <Stack>
           <div>
             <Group>
-              <Title order={3}>Email and Calendar Integration</Title>
+              <Title order={3}>Multichannel Email Integration</Title>
               {props.connected ? (
                 <Badge
                   size="xl"

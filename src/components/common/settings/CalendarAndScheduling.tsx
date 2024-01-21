@@ -130,7 +130,7 @@ export default function CalendarAndScheduling() {
 
   return (
     <Paper withBorder m='xs' p='md' radius='md'>
-      <Title order={3}>Calendar and Scheduling</Title>
+      <Title order={3}>Calendar Integration</Title>
       <Card mt='md'>
         <LoadingOverlay visible={isLoading} />
         {userData.scheduling_link ? (

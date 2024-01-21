@@ -2,11 +2,13 @@ import PageFrame from "@common/PageFrame";
 import {
   Box,
   Container,
+  Divider,
   Flex,
   Group,
   LoadingOverlay,
   Tabs,
   rem,
+  Title
 } from "@mantine/core";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
@@ -127,21 +129,54 @@ export default function SettingsPage() {
         })}
       >
         <Tabs.List>
+          <Tabs.Tab value="usage" icon={<IconSausage size="0.8rem" />}>
+            Usage
+          </Tabs.Tab>
+
+          <Divider />
+          <Title color={['sellScaleBrain', 'message-automation', 'doNotContact'].includes(currentTab) ? 'blue' : 'gray'}
+            order={5} mt="lg" mb="xs">
+            SETUP
+          </Title>
           <Tabs.Tab value="sellScaleBrain" icon={<IconBrain size="0.8rem" />}>
             SellScale Brain
           </Tabs.Tab>
-          <Tabs.Tab
-            value="pipeline"
-            icon={<IconAdjustmentsFilled size="0.8rem" />}
-          >
-            Pipeline
-          </Tabs.Tab>
+          
           <Tabs.Tab
             value="message-automation"
             icon={<IconMessage2Bolt size="0.8rem" />}
           >
             Message Automation
           </Tabs.Tab>
+          <Tabs.Tab
+            value="doNotContact"
+            icon={<IconTrashFilled size="0.8rem" />}
+          >
+            Do Not Contact Filters
+          </Tabs.Tab>
+          
+
+          <Divider />
+          <Title color={['pipeline', 'conversion'].includes(currentTab) ? 'blue' : 'gray'}
+            order={5} mt="lg" mb="xs">
+            ANALYTICS
+          </Title>
+          <Tabs.Tab
+            value="pipeline"
+            icon={<IconAdjustmentsFilled size="0.8rem" />}
+          >
+            Pipeline
+          </Tabs.Tab>
+          <Tabs.Tab value="conversion" icon={<IconTrophy size="0.8rem" />}>
+            Conversion
+          </Tabs.Tab>
+          
+
+          <Divider />
+          <Title color={['linkedinConnection', 'emailConnection', 'slackbot', 'calendarAndScheduling'].includes(currentTab) ? 'blue' : 'gray'}
+            order={5} mt="lg" mb="xs">
+            INTEGRATIONS
+          </Title>
           <Tabs.Tab
             value="linkedinConnection"
             icon={<IconBrandLinkedin size="0.8rem" />}
@@ -151,26 +186,14 @@ export default function SettingsPage() {
           <Tabs.Tab value="emailConnection" icon={<IconInbox size="0.8rem" />}>
             Email Connection
           </Tabs.Tab>
-          <Tabs.Tab
-            value="calendarAndScheduling"
-            icon={<IconCalendar size="0.8rem" />}
-          >
-            Calendar and Scheduling
-          </Tabs.Tab>
-          <Tabs.Tab
-            value="doNotContact"
-            icon={<IconTrashFilled size="0.8rem" />}
-          >
-            Do Not Contact Filters
-          </Tabs.Tab>
           <Tabs.Tab value="slackbot" icon={<IconBrandSlack size="0.8rem" />}>
             Slack Connection
           </Tabs.Tab>
-          <Tabs.Tab value="conversion" icon={<IconTrophy size="0.8rem" />}>
-            Conversion
-          </Tabs.Tab>
-          <Tabs.Tab value="usage" icon={<IconSausage size="0.8rem" />}>
-            Usage
+           <Tabs.Tab
+            value="calendarAndScheduling"
+            icon={<IconCalendar size="0.8rem" />}
+          >
+            Calendar Connection
           </Tabs.Tab>
         </Tabs.List>
 

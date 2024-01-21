@@ -127,11 +127,11 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<InboxPage />} />,
       },
       {
-        path: 'inbox',
+        path: 'inbox_old',
         element: <RestrictedRoute page={<InboxPage />} />,
       },
       {
-        path: 'inbox_v2',
+        path: 'inbox',
         element: <RestrictedRoute page={<InboxRestructurePage />} />,
       },
       {

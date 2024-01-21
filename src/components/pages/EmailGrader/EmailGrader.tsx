@@ -104,16 +104,6 @@ const EmailGrader = () => {
             <Card>
               <Flex align={"center"} justify={"space-between"}>
                 <Title order={2}>AI Feedback Report</Title>
-
-                <Button
-                  leftIcon={<IconDownload size={"0.8rem"} />}
-                  compact
-                  radius={"sm"}
-                  color="gray"
-                  variant="light"
-                >
-                  Download Report
-                </Button>
               </Flex>
             </Card>
 

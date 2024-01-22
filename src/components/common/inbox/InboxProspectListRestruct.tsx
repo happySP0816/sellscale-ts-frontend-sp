@@ -53,6 +53,7 @@ import { mainTabState, openedProspectIdState, openedProspectListState } from '@a
 import { useDisclosure } from '@mantine/hooks';
 import { NAV_BAR_SIDE_WIDTH } from '@constants/data';
 import { ProspectConvoCard } from './InboxProspectList';
+import { currentInboxCountState } from '@atoms/personaAtoms';
 
 export function InboxProspectListRestruct(props: { prospects: ProspectRestructured[] }) {
   const theme = useMantineTheme();

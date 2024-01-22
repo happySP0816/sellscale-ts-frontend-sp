@@ -5,7 +5,7 @@ import {
   openedProspectIdState,
   openedProspectListState,
 } from '@atoms/inboxAtoms';
-import { currentProjectState } from '@atoms/personaAtoms';
+import { currentInboxCountState, currentProjectState } from '@atoms/personaAtoms';
 import { prospectShowPurgatoryState } from '@atoms/prospectAtoms';
 import { userTokenState, userDataState } from '@atoms/userAtoms';
 import { logout } from '@auth/core';
@@ -68,7 +68,7 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
-
+  const [currentInboxCount, setCurrentInboxCount] = useRecoilState(currentInboxCountState);
 
   useEffect(() => {
     setOpenedList(true);
@@ -102,6 +102,8 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
     refetchOnWindowFocus: false,
   });
   const prospects = data ?? [];
+
+  setCurrentInboxCount(prospects.filter((p) => p.section === 'Inbox').length);
 
   console.log(prospects);
 

@@ -24,7 +24,7 @@ import {
   IconBooks,
   IconSearch,
 } from '@tabler/icons-react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { NAV_BAR_SIDE_WIDTH } from '@constants/data';
 import ProfileIcon from '@nav/ProfileIcon';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
@@ -41,6 +41,7 @@ import { SearchBar } from '../../../legacy_code/old/SearchBar';
 import { openSpotlight } from '@mantine/spotlight';
 import { getPreOnboardingData } from '@pages/PreOnboarding';
 import { IconHome, IconPencil, IconTarget } from '@tabler/icons';
+import { currentInboxCountState } from '@atoms/personaAtoms';
 
 const useStyles = createStyles((theme) => ({
   navbar: {
@@ -134,6 +135,7 @@ export default function SideNavbar(props: {}) {
   const navigate = useNavigate();
   const [fetchedPreOnboardingData, setFetchedPreOnboardingData] = useState(false);
   const [preOnboardingData, setPreOnboardingData] = useState({});
+  const [currentInboxCount, setCurrentInboxCount] = useRecoilState(currentInboxCountState);
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-sdr-onboarding-completion-report`],
@@ -195,9 +197,9 @@ export default function SideNavbar(props: {}) {
             label={
               <Group noWrap>
                 <Text>Inbox</Text>
-                {parseInt(localStorage.getItem('inbox-count') ?? '') && (
+                {(currentInboxCount ?? '') && (
                   <Badge sx={{ pointerEvents: 'none' }} variant='filled' size='xs' color='blue'>
-                    {localStorage.getItem('inbox-count')}
+                    {currentInboxCount}
                   </Badge>
                 )}
               </Group>

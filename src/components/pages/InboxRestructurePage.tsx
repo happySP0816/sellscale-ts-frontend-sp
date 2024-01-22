@@ -14,6 +14,7 @@ import InboxProspectDetails from '@common/inbox/InboxProspectDetails';
 import InboxProspectList from '@common/inbox/InboxProspectList';
 import { populateInboxNotifs } from '@common/inbox/utils';
 import { API_URL } from '@constants/data';
+
 import {
   Box,
   Button,
@@ -66,6 +67,8 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
 
   const [openedList, setOpenedList] = useRecoilState(openedProspectListState);
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
+  const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
+
 
   useEffect(() => {
     setOpenedList(true);
@@ -113,7 +116,57 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
     <Box style={{ position: 'relative' }}>
       {prospects.length === 0 ? (
         <Center h={500}>
-          <Text>No prospects found. Please add some to view inbox.</Text>
+          <Container
+                    w='100%'
+                    mt='300px'
+                    sx={{ justifyContent: 'center', textAlign: 'center' }}
+                  >
+                    <Title
+                      fw='800'
+                      sx={{
+                        fontSize: '120px',
+                        color: '#e3e3e3',
+                        margin: '0% auto',
+                        textAlign: 'center',
+                      }}
+                    >
+                      {/* <span style={{ marginRight: '100px' }}>Inbox</span>
+                      <span style={{ marginLeft: '80px' }}>Zero</span> */}
+                    </Title>
+                    <img
+                      src={RobotEmailImage}
+                      width='300px'
+                      style={{ marginTop: '-180px', marginLeft: '50px' }}
+                    />
+                    <Text size={28} fw={600}>
+                      Automate Your Replies
+                    </Text>
+                    <Text mt='md' color='gray'>
+                      Your inbox is empty. Meanwhile, you can automate <br /> your replies using
+                      reply frameworks.
+                    </Text>
+                    <Flex justify={'center'} mt='xs'>
+                      <Button
+                        size='lg'
+                        radius={'xl'}
+                        leftIcon={<IconPencilMinus />}
+                        mt={'md'}
+                        className='glow'
+                        onClick={() => {
+                          // window.location.href = `/setup/email?${prospects[0]?.archetype_id}`;
+                          setOpenBumpFrameworks(true);
+                        }}
+                      >
+                        Edit Reply Frameworks
+                      </Button>
+                    </Flex>
+                     <InboxProspectConvoBumpFramework
+                    prospect={Object()}
+                    messages={[]}
+                    onClose={() => {}}
+                    onPopulateBumpFrameworks={() => {}}
+                  />
+                  </Container>
         </Center>
       ) : (
         <>

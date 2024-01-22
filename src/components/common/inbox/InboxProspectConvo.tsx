@@ -811,8 +811,7 @@ export default function ProspectConvo(props: Props) {
                     <IconArrowLeft size={'1rem'} />
                   </ActionIcon>
                   <Flex>
-                    <Text>Inbox/</Text>
-                    <Text fw={700}>{data?.details.full_name}</Text>
+                    <Text>Back to Inbox</Text>
                   </Flex>
                 </Flex>
               </Tabs.Tab>

@@ -3808,10 +3808,10 @@ export const PersonalizationSection = (props: {
             </Title>
           </Box>
           <Flex gap={'lg'} align={'center'} justify={'space-between'} my={'sm'}>
-            <Badge leftSection={<IconCircle size='0.7rem' />} color='grape' size='lg' w={'100%'}>
+            <Badge leftSection={<IconCircle size='0.7rem' />} color='green' size='lg' w={'100%'}>
               Profile Based Personalization:
             </Badge>
-            <Badge leftSection={<IconCircle size='0.7rem' />} color='green' size='lg' w={'100%'}>
+            <Badge leftSection={<IconCircle size='0.7rem' />} color='grape' size='lg' w={'100%'}>
               Account Based Personalization:
             </Badge>
           </Flex>

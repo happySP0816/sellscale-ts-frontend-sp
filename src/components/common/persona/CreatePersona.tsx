@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { navigateToPage } from '@utils/documentChange';
 import { createLiTemplate } from '@utils/requests/linkedinTemplates';
 import { RESEARCH_POINTS } from '@common/sequence/SequenceSection';
+import { WindowScrollController } from '@fullcalendar/core/internal';
 
 type PropsType = {
   createPersona: {
@@ -49,7 +50,7 @@ export default function CreatePersona(props: PropsType) {
     setCreatingPersona(false);
     showNotification({
       title: 'Persona created!',
-      message: 'You can now find contacts to reach out to... redirecting now...',
+      message: 'You can now create a segment to import new contacts into... redirecting now...',
       color: 'teal',
     });
 
@@ -67,7 +68,8 @@ export default function CreatePersona(props: PropsType) {
     }
 
     setTimeout(() => {
-      window.location.href = `/contacts/find?campaign_id=${result.data}`;
+      // window.location.href = `/contacts/find?campaign_id=${result.data}`;
+      window.location.href = '/contacts/overview'
     }, 3000);
 
     setCurrentProject(result.data);

@@ -8,11 +8,13 @@ import {
   Loader,
   Popover,
   Text,
+  Title,
+  useMantineTheme,
 } from "@mantine/core";
 import { API_URL } from "@constants/data";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
-import { IconBrain, IconExternalLink, IconX } from "@tabler/icons";
+import { IconArrowRight, IconBrain, IconExternalLink, IconX } from "@tabler/icons";
 
 type AIBrainPillPropsType = {};
 
@@ -21,6 +23,7 @@ export default function AIBrainPill(props: AIBrainPillPropsType) {
   const userToken = useRecoilValue(userTokenState);
   const [isLoading, setIsLoading] = useState(false);
   const [aibrainData, setAiBrainData] = useState({} as any);
+  const userData = useRecoilValue(userDataState)
 
   const togglePopover = () => {
     if (!isPopoverOpen) {
@@ -44,6 +47,9 @@ export default function AIBrainPill(props: AIBrainPillPropsType) {
     setAiBrainData(data);
     setIsLoading(false);
   };
+
+  const theme = useMantineTheme();
+
   return (
     <Popover
       width={500}
@@ -70,12 +76,12 @@ export default function AIBrainPill(props: AIBrainPillPropsType) {
       <Popover.Dropdown
         style={{
           padding: "0px",
-          border: "1px solid #be4bdb",
+          border: theme.colors.pink[6],
         }}
       >
         {!isLoading && (
           <>
-            <Flex bg={"#be4bdb"} align={"center"} pl={"xs"}>
+            <Flex bg={theme.colors.pink[6]} align={"center"} pl={"xs"}>
               <Flex gap={1} w={"100%"} align={"center"}>
                 <IconBrain size={"0.8rem"} color="white" />
                 <Text color="white">AI BRAIN</Text>
@@ -90,18 +96,9 @@ export default function AIBrainPill(props: AIBrainPillPropsType) {
               </Button>
             </Flex>
             <Flex direction={"column"} p={"xs"} gap={"sm"}>
-              <Text color="gray" size={"sm"}>
-                This is the AI's context on your business, which is used to
-                inform your AI on writing.
-              </Text>
-              <Flex gap={"xs"} align={"center"} onClick={() => {
-                setIsPopoverOpen(false)
-                window.open('/settings')
-              }}>
-                <Text color="#be4bdb">Edit in Settings</Text>
-                <IconExternalLink size={"0.8rem"} color="#be4bdb" />
-              </Flex>
-              <Divider color="#be4bdb" variant="dashed" />
+              <Title color='pink' p={0} m={0} order={4}>🧠 {userData.client.company}'s AI Brain</Title>
+              <Text color='pink' p={0} mt={-10} size='xs'>Company info fed into your AI to inform writing.</Text>
+              <Divider color={theme.colors.pink[6]} variant="dashed" />
               <Text fw={500} size={"sm"}>
                 Company Name:{" "}
                 <span className="text-[#868e96] text-[14px]">
@@ -127,6 +124,12 @@ export default function AIBrainPill(props: AIBrainPillPropsType) {
                   </span>
                 </Text>
               </Flex>
+              <Button onClick={() => {
+                setIsPopoverOpen(false)
+                window.open('/settings')
+              }} color='pink' w='60%' ml='auto' mr='auto'>
+                Edit in Settings <IconArrowRight size={"1rem"} />
+              </Button>
             </Flex>
           </>
         )}

@@ -1044,9 +1044,20 @@ export default function ProspectConvo(props: Props) {
               currentConvoLiMessages &&
               currentConvoLiMessages.length === 0 && (
                 <Center h={400}>
-                  <Text fz='sm' fs='italic' c='dimmed'>
-                    No conversation history found.
-                  </Text>
+                  <Box maw={550} sx={{textAlign: 'center'}}>
+                    <Text fz='sm' fs='italic' c='dimmed'>
+                      No conversation history found.
+                    </Text>
+                    <Card mt='xs'>
+                      <Title order={5}><IconBrandLinkedin color={theme.colors.blue[6]} size='1rem' /> Your LinkedIn May be Disconnected</Title>
+                      <Text fz='sm'>
+                        Visit the Integrations page and please connect your LinkedIn account to continue reviewing and responding to messages.
+                      </Text>
+                      <Button mt='xs' leftIcon={<IconBrandLinkedin size='0.8rem'/>} color='blue' onClick={() => navigate('/settings')}>
+                        Connect LinkedIn Account
+                      </Button>
+                    </Card>
+                  </Box>
                 </Center>
               )}
 
@@ -1095,9 +1106,20 @@ export default function ProspectConvo(props: Props) {
                   <>
                     {currentConvoEmailMessages && currentConvoEmailMessages.length === 0 && (
                       <Center h={400}>
-                        <Text fz='sm' fs='italic' c='dimmed'>
-                          No conversation history found.
-                        </Text>
+                        <Box maw={550} sx={{textAlign: 'center'}}>
+                          <Text fz='sm' fs='italic' c='dimmed'>
+                            No conversation history found.
+                          </Text>
+                          <Card mt='xs'>
+                            <Title order={5}><IconBrandLinkedin color={theme.colors.blue[6]} size='1rem' /> Your LinkedIn May be Disconnected</Title>
+                            <Text fz='sm'>
+                              Visit the Integrations page and please connect your LinkedIn account to continue reviewing and responding to messages.
+                            </Text>
+                            <Button mt='xs' leftIcon={<IconBrandLinkedin size='0.8rem'/>} color='blue' onClick={() => navigate('/settings')}>
+                              Connect LinkedIn Account
+                            </Button>
+                          </Card>
+                        </Box>
                       </Center>
                     )}
                   </>

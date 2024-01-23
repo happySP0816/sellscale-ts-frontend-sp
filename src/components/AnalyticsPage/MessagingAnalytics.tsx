@@ -506,9 +506,9 @@ const MessagingAnalytics = () => {
                     </Flex>
                     <Flex w={'20%'}>
                       {groupOpened && campaign === groupid ? (
-                        selectedHealth === 'low' && <Badge color='red'>{data.length} Frameworks</Badge>
+                        selectedHealth === 'low' && <Badge color='gray'>{data.length} Frameworks</Badge>
                       ) : (
-                        <Badge color='red'>{data.length} Frameworks</Badge>
+                        <Badge color='gray'>{data.length} Frameworks</Badge>
                       )}
                     </Flex>
                     <Flex w={'17%'}>

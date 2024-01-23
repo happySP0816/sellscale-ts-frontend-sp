@@ -230,7 +230,7 @@ export default function App() {
             }}
             modalProps={{
               closeOnClickOutside: false,
-              size: 'xl',
+              size: 'lg',
             }}
           >
             <Notifications position='top-right' />

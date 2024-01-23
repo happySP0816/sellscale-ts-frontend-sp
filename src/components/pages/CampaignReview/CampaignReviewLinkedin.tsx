@@ -147,7 +147,7 @@ export const Contact = () => {
                 {item?.jobs?.map((job: string) => {
                   return (
                     <Text
-                      bg={valueToColor(theme, item?.type)}
+                      bg={item?.type === 'job title' ? '#d4f0da' : item?.type === 'industry' ? '#ffddff' : item?.type === 'experience' ? '#fcdca1' : '#dfedff'}
                       px={8}
                       size={'xs'}
                       style={{ borderRadius: '6px', borderTopRightRadius: '16px', borderBottomRightRadius: '16px' }}

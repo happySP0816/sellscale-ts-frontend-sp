@@ -29,6 +29,8 @@ import {
   IconChevronUp,
   IconCircuitGroundDigital,
   IconDiscountCheck,
+  IconDots,
+  IconPoint,
 } from '@tabler/icons';
 import { useState } from 'react';
 import { faker } from '@faker-js/faker';
@@ -487,36 +489,37 @@ const MessagingAnalytics = () => {
             {groupedArray.map(([campaign, data], index) => {
               return (
                 <>
-                  <Flex align={'center'} p={'lg'} bg={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? '#3178ea' : '#fa5252') : ''}>
+                  {/* <Flex align={'center'} p={'lg'} bg={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? '#3178ea' : '#fa5252') : ''}> */}
+                  <Flex align={'center'} p={'lg'}>
                     <Flex align={'center'} gap={'xs'} w={'50%'}>
                       <Avatar size={'md'} radius={'xl'} />
                       <Box>
                         <Flex align={'center'} gap={4}>
-                          <Text fw={500} size={'sm'} color={groupOpened && campaign === groupid ? 'white' : ''}>
+                          <Text fw={500} size={'sm'} color={groupOpened && campaign === groupid ? '#228be6' : ''}>
                             {campaign}
                           </Text>
                           <Anchor href='/' size={'sm'} sx={{ display: 'flex', alignItems: 'center' }}>
-                            <IconExternalLink size={'0.8rem'} color={groupOpened && campaign === groupid ? 'white' : '#3178ea'} />
+                            <IconExternalLink size={'0.8rem'} color='#228be6' />
                           </Anchor>
                         </Flex>
                       </Box>
                     </Flex>
                     <Flex w={'20%'}>
                       {groupOpened && campaign === groupid ? (
-                        selectedHealth === 'low' && <Badge color='red'>{data.length} Frameworks</Badge>
+                        selectedHealth === 'low' && <Badge color='gray'>{data.length} Frameworks</Badge>
                       ) : (
-                        <Badge color='red'>{data.length} Frameworks</Badge>
+                        <Badge color='gray'>{data.length} Frameworks</Badge>
                       )}
                     </Flex>
                     <Flex w={'17%'}>
                       {data.find((item) => item.health.includes('LOW')) ? (
                         <Text
-                          color={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'red' : 'white') : 'red'}
+                          color='red'
                           display={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'none' : 'flex') : 'flex'}
                           style={{ alignItems: 'center', gap: '8px' }}
                           fw={500}
                         >
-                          <IconAlertTriangle size='1.2rem' color={groupOpened && campaign === groupid ? (selectedHealth === 'all' ? 'red' : 'white') : 'red'} />
+                          <IconAlertTriangle size='1.2rem' color='red' />
                           Need Attention
                         </Text>
                       ) : (
@@ -536,12 +539,11 @@ const MessagingAnalytics = () => {
                     </Flex>
                     <Flex align={'center'} gap={'sm'} w={'10%'}>
                       <Button
-                        variant={groupOpened && campaign === groupid ? 'default' : 'outline'}
+                        variant={'outline'}
                         radius={'lg'}
-                        style={{
-                          color: groupOpened && campaign === groupid ? 'white' : '',
-                          backgroundColor: groupOpened && campaign === groupid ? (selectedHealth === 'all' ? '#3178ea' : '#fd807f') : '',
-                        }}
+                        // style={{
+                        //   backgroundColor: groupOpened && campaign === groupid ? (selectedHealth === 'all' ? '#3178ea' : '#fd807f') : '',
+                        // }}
                         size='xs'
                         rightIcon={groupOpened && campaign === groupid ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
                         onClick={() => {
@@ -553,8 +555,8 @@ const MessagingAnalytics = () => {
                     </Flex>
                   </Flex>
                   {campaign === groupid && (
-                    <Collapse in={groupOpened} transitionTimingFunction='linear' style={{ border: '1px solid #3178ea' }}>
-                      <>
+                    <Collapse in={groupOpened} transitionTimingFunction='linear'>
+                      <Flex px={'lg'}>
                         <DataGrid
                           data={data}
                           highlightOnHover
@@ -600,7 +602,7 @@ const MessagingAnalytics = () => {
                                   case Health.LOW:
                                     readable_score = 'Low';
                                     color = 'red';
-                                    leftSection = <IconAlertTriangle size={'0.8rem'} />;
+                                    leftSection = <IconPoint fill={color} size={'1rem'} />;
                                     break;
                                   case Health.MEDIUM:
                                     readable_score = 'Medium';
@@ -831,7 +833,7 @@ const MessagingAnalytics = () => {
                             },
                           })}
                         />
-                      </>
+                      </Flex>
                     </Collapse>
                   )}
                   {index !== groupedArray.length - 1 && <Divider />}

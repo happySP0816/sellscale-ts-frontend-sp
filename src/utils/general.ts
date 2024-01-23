@@ -1,7 +1,7 @@
 import { EMAIL_REGEX, ICON_GRABBER_URL, PROXY_SERVER_URL, URL_REGEX } from '@constants/data';
 import { ex } from '@fullcalendar/core/internal-common';
 import { MantineColor, MantineTheme } from '@mantine/core';
-import _ from 'lodash';
+import _, { includes } from 'lodash';
 import { startCase } from 'lodash';
 import moment from 'moment';
 import { SetterOrUpdater } from 'recoil';
@@ -230,7 +230,12 @@ export function valueToColor(theme: MantineTheme, value: string | undefined): Ma
   let index = hashString(value, Object.keys(theme.colors).length);
   for (let color in theme.colors) {
     if (i === index) {
-      return color satisfies MantineColor;
+      const c = color satisfies MantineColor;
+      if (['dark'].includes(c)) {
+        return 'gray';
+      } else {
+        return c;
+      }
     }
     i++;
   }

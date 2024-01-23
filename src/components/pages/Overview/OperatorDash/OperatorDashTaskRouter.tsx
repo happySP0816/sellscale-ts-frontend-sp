@@ -164,7 +164,7 @@ const OperatorDashTaskRouter: React.FC = () => {
                     onClick={() => {
                         id ? markTaskComplete(id) : null
                     }}
-                    disabled={!TASK_ROUTER[task?.task_type]?.disabledCompleteButton}
+                    disabled={task?.task_type ?!TASK_ROUTER[task?.task_type]?.disabledCompleteButton : false}
                 >
                     Mark task complete
                 </Button>

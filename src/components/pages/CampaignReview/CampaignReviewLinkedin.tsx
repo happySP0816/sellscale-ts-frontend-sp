@@ -225,7 +225,7 @@ export const Messaging = (props: MessagingProps) => {
   return (
     <>
       <Flex p={'md'} direction={'column'} gap={'md'} style={{ border: '1px solid #e3f0fe', borderRadius: '6px' }}>
-        {messageData?.map((item, index) => {
+        {messageData?.map((item: any, index: number) => {
           return (
             <>
               <Flex w={'100%'} align={'center'} gap={8}>
@@ -439,7 +439,7 @@ export default function CampaignReviewLinkedin(props: CampaignReviewLinkedinProp
   if (fetchingCampaign) {
     return (
       <div style={{ display: 'flex',  paddingTop: '40px', width: '900px', marginLeft: 'auto', marginRight: 'auto' }}>
-        <Card gap={'md'} w='900px' align='center' withBorder pb='100px' pt='60px'>
+        <Card w='900px' align='center' withBorder pb='100px' pt='60px'>
           <Loader size='xl' mt='xl' />
         </Card>
       </div>

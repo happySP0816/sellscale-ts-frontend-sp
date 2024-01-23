@@ -3,7 +3,7 @@ import axios from 'axios';
 import { API_URL } from '@constants/data';
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
-import { Badge, Card, Text, Title, Button, Group, Box, Divider, Tooltip, Flex, useMantineTheme } from '@mantine/core';
+import { Badge, Card, Text, Title, Button, Group, Box, Divider, Tooltip, Flex, useMantineTheme, Loader } from '@mantine/core';
 import { IconX, IconArrowRight } from '@tabler/icons';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
@@ -31,14 +31,16 @@ const OperatorDashboard = (props: PropsType) => {
     const [oldTasks, setOldTasks] = useState<Task[]>([]);
     const navigate = useNavigate();
 
-    const [fetchingDismiss, setFetchingDismiss] = useState(false);
     const [fetchingComplete, setFetchingComplete] = useState(false);
     const [currentTaskId, setCurrentTaskId] = useState<number | null>(null); 
+
+    const [loading, setLoading] = useState(true);
 
     const userToken = useRecoilValue(userTokenState);
 
     useEffect(() => {
         const fetchTasks = async () => {
+            setLoading(true);
             try {
                 const response = await axios.get(`${API_URL}/operator_dashboard/all`, {
                     headers: {
@@ -48,6 +50,8 @@ const OperatorDashboard = (props: PropsType) => {
                     },
                 });
 
+                setLoading(false);
+
                 const tasks = response.data.entries;
                 categorizeTasks(tasks);
                 
@@ -55,6 +59,7 @@ const OperatorDashboard = (props: PropsType) => {
                 props.onOperatorDashboardEntriesChange(incompleteTasks);
             } catch (error) {
                 console.error('Error fetching tasks', error);
+                setLoading(false);
             }
         };
 
@@ -90,45 +95,10 @@ const OperatorDashboard = (props: PropsType) => {
         setOldTasks(old);
     };
 
-    const dismissTask = async (taskId: number) => {
-        setCurrentTaskId(taskId);
-        setFetchingDismiss(true);
-        try {
-            const response = await axios.post(`${API_URL}/operator_dashboard/dismiss/${taskId}`, {}, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${userToken}`
-                },
-            });
-            if (response.data.success) {
-                // Update your task list here to reflect the dismissal
-                console.log('Task dismissed successfully');
-            }
-            setFetchingDismiss(false);
-        } catch (error) {
-            setFetchingDismiss(false);
-            console.error('Error dismissing task', error);
-        }
-    };
-
-    const completeTaskAndRedirect = async (taskId: number, ctaUrl: string) => {
+    const redirectToTask = async (taskId: number) => {
         setCurrentTaskId(taskId);
         setFetchingComplete(true);
-        try {
-            const response = await axios.post(`${API_URL}/operator_dashboard/mark_complete/${taskId}`, {}, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${userToken}`
-                },
-            });
-            if (response.data.success) {
-                navigate(ctaUrl);
-            }
-            setFetchingComplete(false);
-        } catch (error) {
-            setFetchingComplete(false);
-            console.error('Error marking task as complete', error);
-        }
+        navigate(`/task/${taskId}`)
     };
     
     const theme = useMantineTheme();
@@ -149,20 +119,12 @@ const OperatorDashboard = (props: PropsType) => {
                     <Text color='gray' size='xs'>{task.subtitle} | Due on {moment(task.due_date).format('MMM Do YYYY')}</Text>
                 </Box>
                 <Group w='40%' sx={{justifyContent: 'flex-end'}}>
-                    { task.status === 'PENDING' && (
-                        <Tooltip label='Dismiss task' withinPortal>
-                            <Button onClick={() => dismissTask(task.id)} variant="subtle" color="red" loading={fetchingDismiss && currentTaskId === task.id}>
-                                <IconX size={16} />
-                            </Button>
-                        </Tooltip>
-                    )}
                     <Button 
                         component="a" 
-                        href={task.cta_url} 
                         variant="outline" 
                         disabled={ task.status !== 'PENDING'} 
                         color={ task.status !== 'PENDING' ? 'gray' : task.urgency === 'HIGH' ? 'red' : task.urgency === 'MEDIUM' ? 'yellow' : task.urgency === 'LOW' ? 'green' : ''}
-                        onClick={() => completeTaskAndRedirect(task.id, task.cta_url)}
+                        onClick={() => redirectToTask(task.id)}
                         loading={fetchingComplete && currentTaskId === task.id}
                     >
                         {task.cta}{'  '} <IconArrowRight size={16} />
@@ -185,6 +147,14 @@ const OperatorDashboard = (props: PropsType) => {
             </>
         );
     };
+
+    if (loading) {
+        return (
+            <Card shadow='sm' p='lg'>
+                <Loader ml='auto' mr='auto' />
+            </Card>
+        );
+    }
 
     return (
         <Card shadow='sm' p='lg'>

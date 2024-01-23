@@ -1840,11 +1840,11 @@ export default function OverviewPage() {
   useEffect(() => {
     fetchCampaignPersonas();
   }, []);
-  const [activeTab, setActiveTab] = useState<string | null>("overview");
+  const [activeTab, setActiveTab] = useState<string | null>("operator_dash");
   return (
     <Box p="xl" maw="1000px" ml="auto" mr="auto">
       <Tabs
-        defaultValue="overview"
+        defaultValue="operator_dash"
         value={activeTab}
         onTabChange={setActiveTab}
       >
@@ -1861,17 +1861,19 @@ export default function OverviewPage() {
 
           <Group>
             <Button
-              color={activeTab === "overview" ? "blue" : "gray"}
-              onClick={() => setActiveTab("overview")}
-            >
-              Stats
-            </Button>
-            <Button
               color={activeTab === "operator_dash" ? "blue" : "gray"}
               onClick={() => setActiveTab("operator_dash")}
             >
               Operator Dash {numOperatorDashItems > 0 && `(${numOperatorDashItems})`}
             </Button>
+
+            <Button
+              color={activeTab === "overview" ? "blue" : "gray"}
+              onClick={() => setActiveTab("overview")}
+            >
+              Stats
+            </Button>
+            
             <Button
               color={activeTab === "operation_overview" ? "blue" : "gray"}
               variant='subtle'

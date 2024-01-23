@@ -61,6 +61,7 @@ import { CampaignDetail } from '@pages/CampaignDetail';
 import InboxRestructurePage from '@pages/InboxRestructurePage';
 import CampaignReviewLinkedin from '@pages/CampaignReview/CampaignReviewLinkedin';
 import CompanyOverview from '@common/company/CompanyOverview';
+import OperatorDashTaskRouter from '@pages/Overview/OperatorDash/OperatorDashTaskRouter';
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: 'inbox',
         element: <RestrictedRoute page={<InboxRestructurePage />} />,
+      },
+      {
+        path: '/task/:id',
+        element: <RestrictedRoute page={<OperatorDashTaskRouter />} />,
       },
       {
         path: '/campaign_review',

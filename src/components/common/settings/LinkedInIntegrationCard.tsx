@@ -67,7 +67,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function LinkedInConnectedCard(props: { connected: boolean }) {
+export default function LinkedInConnectedCard(props: { connected: boolean, onConnect?: () => void }) {
   const usingFirefox = navigator.userAgent.search("Firefox") >= 0;
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
@@ -95,6 +95,12 @@ export default function LinkedInConnectedCard(props: { connected: boolean }) {
       return result.status === "success" ? result.data : null;
     },
   });
+
+  useEffect(() => {
+    if (props.connected && props.onConnect) {
+      props.onConnect();
+    }
+  }, [props.connected]);
 
   return (
     <Paper withBorder radius="md" w="100%">

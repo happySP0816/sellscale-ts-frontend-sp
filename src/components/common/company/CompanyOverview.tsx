@@ -596,15 +596,15 @@ export default function CompanyOverview() {
               <Text color='gray' fw={600} size={'xl'}>
                 Recent Activity
               </Text>
-              <Timeline bulletSize={40} lineWidth={2} ml={'lg'} mt={'lg'}>
+              <Timeline bulletSize={30} lineWidth={2} ml={'lg'} mt={'lg'}>
                 {recentActivityData?.map((item, index) => {
                   return (
                     <Timeline.Item
-                      bullet={item?.recieveMessage ? <IconMessage size={18} /> : <IconGitPullRequest size={18} />}
+                      bullet={item?.recieveMessage ? <IconMessage size={16} /> : <IconGitPullRequest size={16} />}
                       title={
-                        <Flex align={'center'} gap={'sm'} pt={'xs'}>
-                          <Text fw={600}>{item?.title}</Text>
-                          <Text color='gray' fw={400}>
+                        <Flex align={'center'} gap={'xs'}>
+                          <Text fw={500} fz='sm'>{item?.title}</Text>
+                          <Text color='gray' fw={300}>
                             {item?.date}
                           </Text>
                         </Flex>
@@ -614,7 +614,7 @@ export default function CompanyOverview() {
                       color={item?.recieveMessage ? '' : 'orange'}
                     >
                       {item?.recieveMessage && (
-                        <Text fw={500} size={'sm'}>
+                        <Text fw={400} size={'xs'}>
                           Received Message:
                           <span className=' text-gray-400 line-clamp-4'>{item?.recieveMessage}</span>
                         </Text>

@@ -6,9 +6,10 @@ import {
   Box,
   Flex,
   Transition,
+  Badge,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { FC, PropsWithChildren, useEffect } from "react";
+import { FC, PropsWithChildren, ReactNode, useEffect } from "react";
 import { IconChevronDown } from "@tabler/icons";
 
 const scaleY = {
@@ -19,13 +20,13 @@ const scaleY = {
 };
 
 const ItemCollapse: FC<
-  PropsWithChildren<{ title: string; defaultOpened?: boolean }>
-> = ({ children, title, defaultOpened = false }) => {
+  PropsWithChildren<{ title: string; numberOfItem?: number }>
+> = ({ children, title, numberOfItem = 0 }) => {
   const [opened, { toggle, open }] = useDisclosure(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (defaultOpened) {
+    if (numberOfItem > 0) {
       // timer = setTimeout(() => {
 
       // }, 200);
@@ -34,11 +35,10 @@ const ItemCollapse: FC<
     }
 
     return () => clearTimeout(timer);
-  }, [defaultOpened]);
+  }, [numberOfItem]);
 
   return (
     <Box
-      key={title}
       sx={(theme) => ({
         border: `1px solid ${theme.colors.gray[2]}`,
         borderRadius: 12,
@@ -69,24 +69,18 @@ const ItemCollapse: FC<
           }
           w={"100%"}
         >
-          <Text>{title}</Text>
+          <Flex align={"center"} gap={"xs"}>
+            <Text>{title}</Text>
+            <Badge color="gray">{numberOfItem}</Badge>
+          </Flex>
         </Button>
       </Flex>
 
-      <Transition
-        mounted={opened}
-        transition={scaleY}
-        duration={200}
-        timingFunction="ease"
-      >
-        {(styles) => (
-          <div style={styles}>
-            <Flex direction={"column"} gap={"sm"}>
-              {children}
-            </Flex>
-          </div>
-        )}
-      </Transition>
+      {opened && (
+        <Flex direction={"column"} gap={"sm"}>
+          {children}
+        </Flex>
+      )}
     </Box>
   );
 };

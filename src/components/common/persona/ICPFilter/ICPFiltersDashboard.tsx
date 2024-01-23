@@ -928,7 +928,11 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                       size: Math.min(200, window.innerWidth / 3),
                       filterFn: stringFilterFn,
                       cell: (cell) => {
-                        return <Text size='xs'>{cell.cell?.getValue<string>()}</Text>;
+                        const email = cell.cell?.getValue<string>();
+                        const valid = cell.row.original.valid_primary_email as boolean;
+                        return (
+                          <Text size='xs'>{email ? `${email} ${valid ? '✅' : ''}` : '-'}</Text>
+                        );
                       },
                     },
                     {

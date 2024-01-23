@@ -155,6 +155,7 @@ export interface ProspectICP {
   email: string;
   status: string;
   has_been_sent_outreach: boolean;
+  valid_primary_email: boolean;
 }
 
 export interface ProspectDetails {

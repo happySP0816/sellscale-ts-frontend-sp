@@ -59,6 +59,7 @@ import SlackAuthPage from '@pages/SlackAuthPage';
 import EmailGrader from '@pages/EmailGrader/EmailGrader';
 import { CampaignDetail } from '@pages/CampaignDetail';
 import InboxRestructurePage from '@pages/InboxRestructurePage';
+import CampaignReviewLinkedin from '@pages/CampaignReview/CampaignReviewLinkedin';
 import CompanyOverview from '@common/company/CompanyOverview';
 
 const queryClient = new QueryClient();
@@ -121,6 +122,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: 'inbox',
         element: <RestrictedRoute page={<InboxRestructurePage />} />,
+      },
+      {
+        path: '/campaign_review',
+        element: <RestrictedRoute page={<CampaignReviewLinkedin />} />,
       },
       {
         path: 'Overview',

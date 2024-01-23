@@ -11,7 +11,7 @@ export async function generateEmailFeedback(
   userToken: string,
   subject: string,
   body: string,
-  tracking_data: any
+  tracking_data: Record<string, any>
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/email_sequence/grade_email`, {
     method: 'POST',

@@ -477,3 +477,21 @@ export function generatePassword() {
   }
   return retVal;
 }
+
+export async function collectClientData() {
+  let ip = '';
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    ip = data.ip;
+  } catch (error) {}
+  return {
+    ip,
+    os: navigator.platform,
+    userAgent: navigator.userAgent,
+    screen: {
+      width: screen.width,
+      height: screen.height,
+    },
+  };
+}

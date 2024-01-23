@@ -43,7 +43,7 @@ import { JSONContent } from '@tiptap/react';
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import { generateEmailFeedback } from '@utils/requests/generateFeedback';
-import { formatToLabel, valueToColor } from '@utils/general';
+import { collectClientData, formatToLabel, valueToColor } from '@utils/general';
 import _ from 'lodash';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -105,7 +105,12 @@ const EmailGrader = () => {
     }
 
     setLoading(true);
-    const response = await generateEmailFeedback(userToken, subject, bodyRef.current, {});
+    const response = await generateEmailFeedback(
+      userToken,
+      subject,
+      bodyRef.current,
+      await collectClientData()
+    );
     const data = response.status === 'success' ? (response.data as EmailGrade) : null;
     setLoading(false);
     if (!data) {
@@ -457,12 +462,11 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                       )}
                     </HoverCard.Dropdown>
                   </HoverCard>
-                  <Divider mt={'xs'} />
                 </Box>
               )}
 
               <Box>
-                <Divider mt={'xs'} />
+                <Divider mb={'xs'} />
                 <HoverCard width={280} shadow='md' position='left' withinPortal>
                   <HoverCard.Target>
                     <Flex gap={'xs'} align={'center'} styles={{ cursor: 'pointer' }}>

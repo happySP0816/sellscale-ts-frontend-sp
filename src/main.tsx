@@ -129,10 +129,6 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<OperatorDashTaskRouter />} />,
       },
       {
-        path: '/campaign_review',
-        element: <RestrictedRoute page={<CampaignReviewLinkedin />} />,
-      },
-      {
         path: 'Overview',
         element: <RestrictedRoute page={<OverviewPage />} />,
       },

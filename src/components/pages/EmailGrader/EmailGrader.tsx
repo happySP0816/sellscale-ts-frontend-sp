@@ -429,7 +429,6 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                     </Text>
                   </HoverCard.Dropdown>
                 </HoverCard>
-                <Divider mt={'xs'} />
               </Box>
               {props.data.evaluated_construction_spam_words_subject_line.evaluation === 'BAD' && (
                 <Box>
@@ -463,6 +462,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
               )}
 
               <Box>
+                <Divider mt={'xs'} />
                 <HoverCard width={280} shadow='md' position='left' withinPortal>
                   <HoverCard.Target>
                     <Flex gap={'xs'} align={'center'} styles={{ cursor: 'pointer' }}>
@@ -527,7 +527,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
               PERSONALIZATIONS:
             </Text>
             <Text fw={500} color='gray.6' fz={'sm'}>
-              3 personalizations identified
+              {props.data.evaluated_personalizations.length} personalizations identified
             </Text>
             <Stack mt={'sm'}>
               {props.data.evaluated_personalizations.map((d, idx) => (

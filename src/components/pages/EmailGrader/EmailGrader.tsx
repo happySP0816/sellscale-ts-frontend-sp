@@ -20,6 +20,7 @@ import {
   HoverCard,
   Blockquote,
   Group,
+  List,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { SCREEN_SIZES } from '../../../constants/data';
@@ -32,7 +33,9 @@ import {
   IconCircleX,
   IconClock,
   IconDownload,
+  IconMinus,
   IconOctagon,
+  IconPlus,
   IconQuote,
 } from '@tabler/icons';
 import { IconSparkles } from '@tabler/icons-react';
@@ -148,7 +151,7 @@ const EmailGrader = () => {
                   BODY
                 </Text>
 
-                <Box>
+                <Box style={{ position: 'relative' }}>
                   <RichTextArea
                     onChange={(value, rawValue) => {
                       bodyRich.current = rawValue;
@@ -157,6 +160,9 @@ const EmailGrader = () => {
                     value={bodyRich.current}
                     height={500}
                   />
+                  {/* <Text style={{ position: 'absolute', left: 0, bottom: 0 }}>
+                    {body.length} characters
+                  </Text> */}
                 </Box>
               </Box>
 
@@ -176,12 +182,39 @@ const EmailGrader = () => {
           <Grid.Col md={6} xs={12}>
             {!data && (
               <Box style={{ position: 'relative' }}>
-                <LoadingOverlay visible={loading} />
-                <Text>
-                  Input your copy on the left to get it evaluated by AI. The grader will provide
-                  qualitative feedback, tones, construction, personalziations, and read time
-                  analysis.
-                </Text>
+                <Stack spacing={5}>
+                  <Title order={2}>Improve Your Email</Title>
+                  <Text fs='italic'>Get immediate, focused feedback on:</Text>
+                  <List>
+                    <List.Item>
+                      <Text fw={600} span>
+                        Tone:
+                      </Text>{' '}
+                      Understand the emotional impact of your words.
+                    </List.Item>
+                    <List.Item>
+                      <Text fw={600} span>
+                        Structure:
+                      </Text>{' '}
+                      Receive insights on the organization and clarity of your email.
+                    </List.Item>
+                    <List.Item>
+                      <Text fw={600} span>
+                        Personalization:
+                      </Text>{' '}
+                      Learn how to tailor your message for your audience.
+                    </List.Item>
+                    <List.Item>
+                      <Text fw={600} span>
+                        Read Time:
+                      </Text>{' '}
+                      Estimate how long it takes to read your email.
+                    </List.Item>
+                  </List>
+                  <Text fs='italic'>
+                    Elevate your email communication with cutting-edge AI insights.
+                  </Text>
+                </Stack>
               </Box>
             )}
             {data && <EmailFeedbackReport data={data} />}
@@ -368,6 +401,74 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
         </Flex>
       </Card>
 
+      <Grid mt={'sm'}>
+        <Grid.Col md={6} xs={12}>
+          <Card>
+            <Text fw={700} color='gray.6' fz={'sm'}>
+              PERSONALIZATIONS:
+            </Text>
+            <Text fw={500} color='gray.6' fz={'sm'}>
+              {props.data.evaluated_personalizations.length} personalizations identified
+            </Text>
+            <Stack mt={'sm'}>
+              {props.data.evaluated_personalizations.map((d, idx) => (
+                <HoverCard key={idx} width={280} shadow='md' withinPortal position='left'>
+                  <HoverCard.Target>
+                    <Badge
+                      key={idx}
+                      color='gray'
+                      maw={280}
+                      styles={{ root: { textTransform: 'initial', cursor: 'pointer' } }}
+                    >
+                      "{d.personalization}"
+                    </Badge>
+                  </HoverCard.Target>
+                  <HoverCard.Dropdown>
+                    <Group noWrap align='flex-start'>
+                      <Badge
+                        miw={60}
+                        color={d.strength === 'strong' ? 'blue' : 'yellow'}
+                        variant='light'
+                        size='xs'
+                      >
+                        {d.strength}
+                      </Badge>
+                      <Text size='xs' fs='italic' color='gray.6'>
+                        "{d.personalization}"
+                      </Text>
+                    </Group>
+                    <Text size='xs'>{d.reason}</Text>
+                  </HoverCard.Dropdown>
+                </HoverCard>
+              ))}
+            </Stack>
+          </Card>
+        </Grid.Col>
+        <Grid.Col md={6} xs={12}>
+          <Card mt={'sm'}>
+            <Text fw={700} color='gray.6' fz={'sm'}>
+              READ QUANTITY & TIME
+            </Text>
+            <Text
+              mt={'xs'}
+              fw={700}
+              fz={'lg'}
+              display={'flex'}
+              sx={{ gap: rem(4), alignItems: 'center' }}
+            >
+              <ActionIcon size={'sm'}>
+                <IconClock />
+              </ActionIcon>
+              {props.data.evaluated_read_time_seconds} seconds
+            </Text>
+
+            <Text fw={700} color='gray.6' fz={'sm'} mt={'xs'}>
+              {readTimeExplanation}
+            </Text>
+          </Card>
+        </Grid.Col>
+      </Grid>
+
       <Card mt={'sm'}>
         <Text fw={700} color='gray.6' fz={'sm'}>
           Feedback
@@ -377,7 +478,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
           {props.data.evaluated_feedback.map((d, idx) => (
             <Flex key={idx} gap={'xs'}>
               <Box>
-                <IconArrowRight />
+                {d.type === 'pro' ? <IconPlus size='0.8rem' /> : <IconMinus size='0.8rem' />}
               </Box>
               <Text fw={600} fz={'xs'}>
                 {d.feedback}
@@ -396,13 +497,19 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
 
             <Flex wrap={'wrap'} gap={'sm'} mt={'sm'}>
               {props.data.evaluated_tones.tones.map((tone, idx) => (
-                <Badge key={idx} color={valueToColor(theme, tone)} variant='light' maw={200}>
+                <Badge
+                  key={idx}
+                  color={valueToColor(theme, tone, 'green')}
+                  variant='light'
+                  maw={200}
+                >
                   #{_.capitalize(tone)}
                 </Badge>
               ))}
             </Flex>
           </Card>
-
+        </Grid.Col>
+        <Grid.Col md={6} xs={12}>
           <Card mt={'sm'}>
             <Text fw={700} color='gray.6' fz={'sm'}>
               CONSTRUCTION
@@ -423,7 +530,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                         </ActionIcon>
                       )}
                       <Text fw={600} fz={'sm'}>
-                        Subject
+                        Subject Length
                       </Text>
                     </Flex>
                   </HoverCard.Target>
@@ -435,7 +542,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   </HoverCard.Dropdown>
                 </HoverCard>
               </Box>
-              {props.data.evaluated_construction_spam_words_subject_line.evaluation === 'BAD' && (
+              {true && (
                 <Box>
                   <HoverCard shadow='md' position='left' withinPortal>
                     <HoverCard.Target>
@@ -443,7 +550,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                         <ActionIcon color='red' size={'sm'}>
                           <IconAlertOctagon />
                         </ActionIcon>
-                        <Text fw={600} fz={'sm'} color='red'>
+                        <Text fw={600} fz={'sm'}>
                           Subject - Spam Words
                         </Text>
                       </Flex>
@@ -480,7 +587,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                         </ActionIcon>
                       )}
                       <Text fw={600} fz={'sm'}>
-                        Body
+                        Body Length
                       </Text>
                     </Flex>
                   </HoverCard.Target>
@@ -494,7 +601,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                 </HoverCard>
               </Box>
 
-              {props.data.evaluated_construction_spam_words_body.evaluation === 'BAD' && (
+              {true && (
                 <Box>
                   <HoverCard shadow='md' position='left' withinPortal>
                     <HoverCard.Target>
@@ -502,7 +609,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                         <ActionIcon color='red' size={'sm'}>
                           <IconAlertOctagon />
                         </ActionIcon>
-                        <Text fw={600} fz={'sm'} color='red'>
+                        <Text fw={600} fz={'sm'}>
                           Body - Spam Words
                         </Text>
                       </Flex>
@@ -519,74 +626,9 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                       ))}
                     </HoverCard.Dropdown>
                   </HoverCard>
-                  <Divider mt={'xs'} />
                 </Box>
               )}
             </Stack>
-          </Card>
-        </Grid.Col>
-        <Grid.Col md={6} xs={12}>
-          <Card>
-            <Text fw={700} color='gray.6' fz={'sm'}>
-              PERSONALIZATIONS:
-            </Text>
-            <Text fw={500} color='gray.6' fz={'sm'}>
-              {props.data.evaluated_personalizations.length} personalizations identified
-            </Text>
-            <Stack mt={'sm'}>
-              {props.data.evaluated_personalizations.map((d, idx) => (
-                <HoverCard key={idx} width={280} shadow='md' withinPortal position='left'>
-                  <HoverCard.Target>
-                    <Badge
-                      key={idx}
-                      color='gray'
-                      maw={280}
-                      styles={{ root: { textTransform: 'initial', cursor: 'pointer' } }}
-                    >
-                      {d.personalization}
-                    </Badge>
-                  </HoverCard.Target>
-                  <HoverCard.Dropdown>
-                    <Group noWrap align='flex-start'>
-                      <Badge
-                        miw={60}
-                        color={d.strength === 'strong' ? 'blue' : 'yellow'}
-                        variant='light'
-                        size='xs'
-                      >
-                        {d.strength}
-                      </Badge>
-                      <Text size='xs' fs='italic' color='gray.6'>
-                        "{d.personalization}"
-                      </Text>
-                    </Group>
-                    <Text size='xs'>{d.reason}</Text>
-                  </HoverCard.Dropdown>
-                </HoverCard>
-              ))}
-            </Stack>
-          </Card>
-
-          <Card mt={'sm'}>
-            <Text fw={700} color='gray.6' fz={'sm'}>
-              READ QUANTITY & TIME
-            </Text>
-            <Text
-              mt={'xs'}
-              fw={700}
-              fz={'lg'}
-              display={'flex'}
-              sx={{ gap: rem(4), alignItems: 'center' }}
-            >
-              <ActionIcon size={'sm'}>
-                <IconClock />
-              </ActionIcon>
-              {props.data.evaluated_read_time_seconds} seconds
-            </Text>
-
-            <Text fw={700} color='gray.6' fz={'sm'} mt={'xs'}>
-              {readTimeExplanation}
-            </Text>
           </Card>
         </Grid.Col>
       </Grid>

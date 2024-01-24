@@ -215,9 +215,15 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   '6': 'orange',
   '7': 'red',
 };
-export function valueToColor(theme: MantineTheme, value: string | undefined): MantineColor {
+export function valueToColor(
+  theme: MantineTheme,
+  value: string | undefined,
+  defaultColor?: MantineColor
+): MantineColor {
+  const defCol = defaultColor || 'gray';
+
   if (!value) {
-    return 'gray';
+    return defCol;
   }
   value = value.toLowerCase().trim().replaceAll(' ', '_');
 
@@ -232,7 +238,7 @@ export function valueToColor(theme: MantineTheme, value: string | undefined): Ma
     if (i === index) {
       const c = color satisfies MantineColor;
       if (['dark'].includes(c)) {
-        return 'gray';
+        return defCol;
       } else {
         return c;
       }
@@ -240,7 +246,7 @@ export function valueToColor(theme: MantineTheme, value: string | undefined): Ma
     i++;
   }
 
-  return 'gray';
+  return defCol;
 }
 
 export function formatToLabel(value: string) {

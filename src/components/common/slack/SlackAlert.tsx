@@ -1,49 +1,8 @@
-import { userTokenState } from '@atoms/userAtoms';
-import {
-  Title,
-  Text,
-  Paper,
-  Container,
-  Checkbox,
-  Stack,
-  Flex,
-  Popover,
-  Image,
-  HoverCard,
-  Box,
-  LoadingOverlay,
-  Loader,
-  Button,
-  Switch,
-  Divider,
-} from '@mantine/core';
-import { activateSubscription, deactivateSubscription, getSubscriptions } from '@utils/requests/subscriptions';
-import React, { useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { Button, Divider, Flex, Switch, Text } from '@mantine/core';
+import { IconEdit } from '@tabler/icons';
+import { useState } from 'react';
 
-import EmailAIResponseImg from '@assets/images/notification_previews/email-ai-response.png';
-import { showNotification } from '@mantine/notifications';
-import { postPreviewSlackNotification } from '@utils/requests/postPreviewSlackNotification';
-
-const image_map = new Map<string, string>([['AI_REPLY_TO_EMAIL', EmailAIResponseImg]]);
-
-type SlackNotificationSubscription = {
-  id: number;
-  notification_type: string;
-  notification_name: string;
-  notification_description: string;
-  subscription_id: number;
-  subscribed: boolean;
-};
-
-export default function SlackNotifications() {
-  const [loading, setLoading] = useState(false);
-  const [loadingSubscriptionType, setLoadingSubscriptionType] = useState('');
-  const [notificationTestLoading, setNotificationTestLoading] = useState(false);
-  const userToken = useRecoilValue(userTokenState);
-
-  const [slackSubscriptions, setSlackSubscriptions] = useState<SlackNotificationSubscription[]>([]);
-
+export default function SlackAlert(props: any) {
   const [slackLinkedinNotification, setSlackLinkedinNotification] = useState([
     {
       title: 'Acceptea Notification - Coming Soon!',
@@ -79,100 +38,22 @@ export default function SlackNotifications() {
       activate: true,
     },
   ]);
-
-  // const triggerTestNotification = async (slackNotificationID: number) => {
-  //   setNotificationTestLoading(true);
-
-  //   const result = await postPreviewSlackNotification(userToken, slackNotificationID);
-
-  //   if (result.status === 'success') {
-  //     showNotification({
-  //       title: 'Success',
-  //       message: 'Notification sent, please check your Slack channel!',
-  //       color: 'green',
-  //       autoClose: 5000,
-  //     });
-  //   } else {
-  //     showNotification({
-  //       title: 'Error',
-  //       message: 'Something went wrong, please try again. Did you hookup your Slack channel?',
-  //       color: 'red',
-  //       autoClose: 5000,
-  //     });
-  //   }
-
-  //   setNotificationTestLoading(false);
-  // };
-
-  // const triggerActivateSubscription = async (slackNotificationID: number, subscriptionType: string) => {
-  //   setLoadingSubscriptionType(subscriptionType);
-
-  //   const result = await activateSubscription(userToken, slackNotificationID);
-  //   if (result.status === 'success') {
-  //     triggerGetSubscriptions();
-  //     showNotification({
-  //       title: 'Success',
-  //       message: 'Notification activated',
-  //       color: 'green',
-  //       autoClose: 5000,
-  //     });
-  //   } else {
-  //     showNotification({
-  //       title: 'Error',
-  //       message: 'Something went wrong, please try again.',
-  //       color: 'red',
-  //       autoClose: 5000,
-  //     });
-  //   }
-
-  //   setLoadingSubscriptionType('');
-  // };
-
-  // const triggerDeactivateSubscription = async (subscriptionId: number, subscriptionType: string) => {
-  //   setLoadingSubscriptionType(subscriptionType);
-
-  //   const result = await deactivateSubscription(userToken, subscriptionId);
-  //   if (result.status === 'success') {
-  //     triggerGetSubscriptions();
-  //     showNotification({
-  //       title: 'Success',
-  //       message: 'Notification deactivated',
-  //       color: 'green',
-  //       autoClose: 5000,
-  //     });
-  //   } else {
-  //     showNotification({
-  //       title: 'Error',
-  //       message: 'Something went wrong, please try again.',
-  //       color: 'red',
-  //       autoClose: 5000,
-  //     });
-  //   }
-
-  //   setLoadingSubscriptionType('');
-  // };
-
-  const triggerGetSubscriptions = async () => {
-    setLoading(true);
-
-    const result = await getSubscriptions(userToken);
-    if (result.status === 'success') {
-      setSlackSubscriptions(result.data.slack_subscriptions);
-    }
-
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    triggerGetSubscriptions();
-  }, []);
-
   return (
-    <Paper withBorder m='xs' p='lg' radius='md' bg={'#fcfcfd'}>
-      <Flex align={'center'} gap={'sm'}>
-        <Flex direction={'column'}>
-          <Text fw={600}>Customize Notifications</Text>
-          <Text size={'sm'}>Subscribed to Slack alerts for the business activities listed below.</Text>
+    <>
+      <Flex style={{ border: '1px solid gray', borderStyle: 'dashed', borderRadius: '6px' }} align={'center'} p={'sm'} justify={'space-between'} mt={'md'}>
+        <Flex align={'center'} gap={'sm'}>
+          <Text size={'sm'} fw={500}>
+            Connected to {props.selectedChannel.channelName}
+          </Text>
+          <Text size={'xs'} color='gray'>
+            - by {props.selectedChannel.invitedUser}
+          </Text>
+        </Flex>
+        <Flex gap={'sm'} align={'center'}>
+          <Button variant='outline' color='red'>
+            Unsubscribe
+          </Button>
+          <IconEdit color='gray' />
         </Flex>
       </Flex>
       <Divider my={'lg'} />
@@ -354,6 +235,6 @@ export default function SlackNotifications() {
           );
         })}
       </Flex>
-    </Paper>
+    </>
   );
 }

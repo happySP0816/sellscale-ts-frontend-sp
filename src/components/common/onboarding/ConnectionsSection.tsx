@@ -30,7 +30,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const REDIRECT_URI = `${window.location.origin}/settings`;
+const REDIRECT_URI = `${window.location.origin}/settings?tab=email`;
 
 export default function ConnectionsSection() {
   const { classes } = useStyles();

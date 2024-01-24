@@ -13,8 +13,8 @@ export async function postPreviewSlackNotification(
   slackNotificationID: number
 ): Promise<MsgResponse> {
   const response = await fetch(
-    `${API_URL}/slack_notification/preview`,
-    // `http://127.0.0.1:5000/slack_notification/preview`,
+    `${API_URL}/slack/notification/preview`,
+    // `http://127.0.0.1:5000/slack/notification/preview`,
     {
       method: "POST",
       headers: {

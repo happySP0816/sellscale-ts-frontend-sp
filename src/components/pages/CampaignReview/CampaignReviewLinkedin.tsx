@@ -439,7 +439,7 @@ export default function CampaignReviewLinkedin(props: CampaignReviewLinkedinProp
   if (fetchingCampaign) {
     return (
       <div style={{ display: 'flex',  paddingTop: '40px', width: '900px', marginLeft: 'auto', marginRight: 'auto' }}>
-        <Card w='900px' align='center' withBorder pb='100px' pt='60px'>
+        <Card w='900px' withBorder pb='100px' pt='60px'>
           <Loader size='xl' mt='xl' />
         </Card>
       </div>

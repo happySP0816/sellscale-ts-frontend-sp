@@ -31,6 +31,8 @@ import {
   IconArrowRight,
   IconCheck,
   IconCircleCheck,
+  IconCircleMinus,
+  IconCirclePlus,
   IconCircleX,
   IconClock,
   IconDownload,
@@ -96,6 +98,9 @@ const EmailGrader = () => {
   // We use this to store the raw value of the rich text editor
   const bodyRich = useRef<JSONContent | string>('');
   const bodyRef = useRef('');
+
+  const [wordCount, setWordCount] = useState(0);
+
   const setBody = (value: string) => {
     bodyRich.current = value;
     _setBody(value);
@@ -161,14 +166,16 @@ const EmailGrader = () => {
                     value={bodyRich.current}
                     height={500}
                   />
-                  {/* <Text style={{ position: 'absolute', left: 0, bottom: 0 }}>
-                    {body.length} characters
-                  </Text> */}
+                 
                 </Box>
               </Box>
 
-              <Flex mt={'sm'} justify={'end'}>
+              <Flex mt={'sm'} >
+                <Text>
+                  {bodyRef.current.split(' ').length} word{bodyRef.current.split(' ').length === 1 ? '' : 's'}
+                </Text>
                 <Button
+                  ml='auto'
                   loading={loading}
                   color='violet'
                   radius={'lg'}
@@ -234,7 +241,7 @@ const EmailGrader = () => {
                 </Stack>
               </Box>
             )}
-            {data && <EmailFeedbackReport data={data} />}
+            {data && !loading && <EmailFeedbackReport data={data} />}
           </Grid.Col>
         </Grid>
       </Container>
@@ -441,7 +448,15 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                     </Badge>
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
-                    <Group noWrap align='flex-start'>
+                    <Box>
+                      <Text fz='xs' fw='bold'>Personalization:</Text>
+                      <Text size='xs' fs='italic' color='gray.6'>
+                        "{d.personalization}"
+                      </Text>
+                    </Box>
+
+                    <Box mt='md'>
+                       <Text fz='xs' fw='bold'>Strength:</Text>
                       <Badge
                         miw={60}
                         color={d.strength === 'strong' ? 'blue' : 'yellow'}
@@ -450,11 +465,13 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                       >
                         {d.strength}
                       </Badge>
-                      <Text size='xs' fs='italic' color='gray.6'>
-                        "{d.personalization}"
-                      </Text>
-                    </Group>
-                    <Text size='xs'>{d.reason}</Text>
+                    </Box>
+                      
+                    <Box mt='md'>
+                      <Text fz='xs' fw='bold'>Reason:</Text>
+                      <Text size='xs'>{d.reason}</Text>
+                    </Box>
+                    
                   </HoverCard.Dropdown>
                 </HoverCard>
               ))}
@@ -495,9 +512,9 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
           {props.data.evaluated_feedback.map((d, idx) => (
             <Flex key={idx} gap={'xs'}>
               <Box>
-                {d.type === 'pro' ? <IconPlus size='0.8rem' /> : <IconMinus size='0.8rem' />}
+                {d.type === 'pro' ? <IconCirclePlus size='1rem' color='green' /> : <IconCircleMinus size='1rem' color='red' />}
               </Box>
-              <Text fw={600} fz={'xs'}>
+              <Text fw={400} fz={'xs'}>
                 {d.feedback}
               </Text>
             </Flex>
@@ -564,8 +581,14 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   <HoverCard shadow='md' position='left' withinPortal>
                     <HoverCard.Target>
                       <Flex gap={'xs'} align={'center'} styles={{ cursor: 'pointer' }}>
-                        <ActionIcon color='red' size={'sm'}>
-                          <IconAlertOctagon />
+                        <ActionIcon size={'sm'} color={props.data.evaluated_construction_spam_words_subject_line.evaluation === 'GOOD' ? 'green' : 'red' }>
+                          {
+                            props.data.evaluated_construction_spam_words_subject_line.words?.length === 0 ? (
+                              <IconCircleCheck />
+                            ) : (
+                              <IconAlertOctagon />
+                            )
+                          }
                         </ActionIcon>
                         <Text fw={600} fz={'sm'}>
                           Subject - Spam Words
@@ -573,6 +596,11 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                       </Flex>
                     </HoverCard.Target>
                     <HoverCard.Dropdown>
+                      {props.data.evaluated_construction_spam_words_subject_line.words.length > 0 ?
+                        <Text fz='xs' fw='bold'>Found spam words:{' '}</Text>
+                        : 
+                        <Text>No spam words found in subject line!</Text>
+                      }
                       {props.data.evaluated_construction_spam_words_subject_line.words.map(
                         (word, idx) => (
                           <Badge
@@ -610,9 +638,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
                     <Text size='sm'>
-                      An email body is considered good if it contains fewer than 120 words in total
-                      and each sentence within it is less than 15 words long; otherwise, it is
-                      considered bad.
+                      Optimal emails can be read in roughly 30 seconds since the average reader will skim through emails in their inbox. That translates to roughly 50 - 120 words.
                     </Text>
                   </HoverCard.Dropdown>
                 </HoverCard>
@@ -623,8 +649,14 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   <HoverCard shadow='md' position='left' withinPortal>
                     <HoverCard.Target>
                       <Flex gap={'xs'} align={'center'} styles={{ cursor: 'pointer' }}>
-                        <ActionIcon color='red' size={'sm'}>
-                          <IconAlertOctagon />
+                        <ActionIcon size={'sm'} color={props.data.evaluated_construction_spam_words_body.evaluation === 'GOOD' ? 'green' : 'red' }>
+                          {
+                            props.data.evaluated_construction_spam_words_body.words?.length === 0 ? (
+                              <IconCircleCheck />
+                            ) : (
+                              <IconAlertOctagon />
+                            )
+                          }
                         </ActionIcon>
                         <Text fw={600} fz={'sm'}>
                           Body - Spam Words
@@ -632,6 +664,11 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                       </Flex>
                     </HoverCard.Target>
                     <HoverCard.Dropdown>
+                      {props.data.evaluated_construction_spam_words_body.words.length > 0 ?
+                        <Text fz='xs' fw='bold'>Found spam words:{' '}</Text>
+                        : 
+                        <Text>No spam words found in subject line!</Text>
+                      }
                       {props.data.evaluated_construction_spam_words_body.words.map((word, idx) => (
                         <Badge
                           key={idx}
@@ -688,12 +725,13 @@ function EmailScore(props: { score: number }) {
   };
 
   const scoreColor = props.score >= 70 ? 'green' : props.score >= 30 ? 'orange' : 'red';
-  const scoreTitle =
-    props.score >= 70
-      ? 'You have a good score!'
-      : props.score >= 30
-      ? 'Could be better!'
-      : 'Lots to improve on!';
+  const scoreTitle = props.score >= 90 ? 'Excellent Work!' :
+    props.score >= 75 ? 'Great Job!' :
+    props.score >= 60 ? 'Good Effort!' :
+    props.score >= 45 ? 'Needs Improvement' :
+    props.score >= 30 ? 'Below Average' :
+    props.score >= 15 ? 'Far Below Average' :
+                        'Needs Major Revision';
 
   const scoreExplanation = useMemo(() => {
     let scoreExplanation = '';

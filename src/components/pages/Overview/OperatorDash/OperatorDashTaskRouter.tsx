@@ -8,6 +8,7 @@ import { Box, Button, Text } from '@mantine/core';
 import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import axios from 'axios';
 import { TaskHandlerReviewLinkedinCampaign } from './TaskHandlers/TaskHandlerReviewLinkedinCampaign';
+import { TaskHandlerSegmentCreation } from './TaskHandlers/TaskHandlerSegmentCreation';
 
 export interface OperatorDashboardEntry {
     id: number;
@@ -29,12 +30,17 @@ const TASK_ROUTER: any = {
     'LINKEDIN_DISCONNECTED': {
         component: TaskHandlerLinkedinDisconnected,
         instruction: 'Connect to LinkedIn then mark as complete',
-        disabledCompleteButton: true,
+        enabledCompleteButton: true,
     },
     'LINKEDIN_CAMPAIGN_REVIEW': {
         component: TaskHandlerReviewLinkedinCampaign,
         instruction: 'Review the campaign then mark as complete',
-        disabledCompleteButton: false
+        enabledCompleteButton: false
+    },
+    'SEGMENT_CREATION': {
+        component: TaskHandlerSegmentCreation,
+        instruction: "Filter from SellScale's 300m+ contacts to create a new segment to target",
+        enabledCompleteButton: true
     }
 }
 
@@ -164,7 +170,7 @@ const OperatorDashTaskRouter: React.FC = () => {
                     onClick={() => {
                         id ? markTaskComplete(id) : null
                     }}
-                    disabled={task?.task_type ?!TASK_ROUTER[task?.task_type]?.disabledCompleteButton : false}
+                    disabled={task?.task_type ?!TASK_ROUTER[task?.task_type]?.enabledCompleteButton : false}
                 >
                     Mark task complete
                 </Button>

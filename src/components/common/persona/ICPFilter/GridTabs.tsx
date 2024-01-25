@@ -89,7 +89,7 @@ const GridTabs = ({ selectedTab, setSelectedTab, icpDashboard, numProspects }: I
         w={'100%'}
         style={{ border: '1px solid gray', borderRadius: '5px' }}
       >
-        {tabFilters.map((tab: any) => (
+        {tabFilters.map((tab: any, idx) => (
           <>
             <Button
               key={tab.value}
@@ -140,7 +140,7 @@ const GridTabs = ({ selectedTab, setSelectedTab, icpDashboard, numProspects }: I
                 </Box>
               </Box>
             </Button>
-            <Divider orientation='vertical' color='#E0E0E0' size='sm' mt={6} style={{ height: '24px' }} />
+            {idx !== tabFilters.length - 1 && <Divider orientation='vertical' color='#E0E0E0' size='sm' mt={6} style={{ height: '24px' }} />}
           </>
         ))}
       </Flex>

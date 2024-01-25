@@ -93,7 +93,9 @@ const CustomSelect = ({
           setData((current) => [...current, query]);
           return item;
         }}
+        zIndex={9999}
         styles={{
+
           rightSection: { pointerEvents: "none" },
           label: { width: "100%" },
           value: {

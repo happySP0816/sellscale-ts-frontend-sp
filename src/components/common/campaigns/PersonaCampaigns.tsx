@@ -274,7 +274,7 @@ export default function PersonaCampaigns() {
                 navigateToPage(navigate, `/settings`);
               }}
             >
-              {`Email Send Rate (per week): ${currentEmailSla * 7}`}
+              {`Email Send Rate (per week): ${currentEmailSla * 5}`}
             </Button>
 
           {userData?.warmup_linkedin_complete ? (

@@ -50,10 +50,10 @@ export default function SlackAlert(props: any) {
           </Text>
         </Flex>
         <Flex gap={'sm'} align={'center'}>
-          <Button variant='outline' color='red'>
-            Unsubscribe
+          <Button variant='outline' color='red' disabled>
+            Disconnect
           </Button>
-          <IconEdit color='gray' />
+          {/* <IconEdit color='gray' /> */}
         </Flex>
       </Flex>
       <Divider my={'lg'} />

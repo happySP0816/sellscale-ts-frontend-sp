@@ -27,7 +27,7 @@ export default function SlackSettings() {
           </Tabs.Panel>
         </Tabs>
       </Flex>
-      <SlackNotifications />
+      {/* <SlackNotifications /> */}
     </>
   );
 }

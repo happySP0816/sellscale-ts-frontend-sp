@@ -153,6 +153,7 @@ export default function PersonaCampaigns() {
     newBumps: 0,
     newReplies: 0,
   });
+  const [currentEmailSla, setCurrentEmailSla] = useState<number>(0);
   const [currentLinkedInSLA, setCurrentLinkedInSLA] = useState<number>(0);
   const [showInactivePersonas, setShowInactivePersonas] =
     useState<boolean>(false);
@@ -194,6 +195,7 @@ export default function PersonaCampaigns() {
           moment(schedule.start_date) < moment() &&
           moment() <= moment(schedule.start_date).add(7, "days")
         ) {
+          setCurrentEmailSla(schedule.email_volume)
           setCurrentLinkedInSLA(schedule.linkedin_volume);
         }
       }
@@ -261,33 +263,49 @@ export default function PersonaCampaigns() {
           </Button>
         </Group>
 
-        {userData?.warmup_linkedin_complete ? (
+        <Group>
+        
           <Button
-            variant="filled"
-            radius="md"
-            onClick={() => {
-              navigateToPage(navigate, `/settings/linkedinConnection`);
-            }}
-          >
-            {`LinkedIn Send Rate (per week): ${currentLinkedInSLA}`}
-          </Button>
-        ) : (
-          <Tooltip
-            label="Your LinkedIn account is in a warmup phase. Explore more."
-            withArrow
-            withinPortal
-          >
+              leftIcon={<IconMail size="0.8rem" />}
+              color='orange'
+              variant="outline"
+              radius="md"
+              onClick={() => {
+                navigateToPage(navigate, `/settings`);
+              }}
+            >
+              {`Email Send Rate (per week): ${currentEmailSla * 7}`}
+            </Button>
+
+          {userData?.warmup_linkedin_complete ? (
             <Button
+              leftIcon={<IconBrandLinkedin size="0.8rem" />}
               variant="outline"
               radius="md"
               onClick={() => {
                 navigateToPage(navigate, `/settings/linkedinConnection`);
               }}
             >
-              {`LinkedIn Warming Up (per week): ${currentLinkedInSLA}`}
+              {`LinkedIn Send Rate (per week): ${currentLinkedInSLA}`}
             </Button>
-          </Tooltip>
-        )}
+          ) : (
+            <Tooltip
+              label="Your LinkedIn account is in a warmup phase. Explore more."
+              withArrow
+              withinPortal
+            >
+              <Button
+                variant="outline"
+                radius="md"
+                onClick={() => {
+                  navigateToPage(navigate, `/settings/linkedinConnection`);
+                }}
+              >
+                {`LinkedIn Warming Up (per week): ${currentLinkedInSLA}`}
+              </Button>
+            </Tooltip>
+          )}
+        </Group>
       </Group>
     </>
   );

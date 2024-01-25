@@ -22,6 +22,8 @@ import {
   Group,
   List,
   Skeleton,
+  Progress,
+  Loader,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { SCREEN_SIZES } from '../../../constants/data';
@@ -36,21 +38,24 @@ import {
   IconCircleX,
   IconClock,
   IconDownload,
+  IconEdit,
   IconMinus,
   IconOctagon,
   IconPlus,
   IconQuote,
+  IconRobot,
 } from '@tabler/icons';
-import { IconSparkles } from '@tabler/icons-react';
+import { IconRobotFace, IconSparkles } from '@tabler/icons-react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, Tooltip, ArcElement, Legend } from 'chart.js';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONContent } from '@tiptap/react';
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import { generateEmailFeedback } from '@utils/requests/generateFeedback';
 import { collectClientData, formatToLabel, valueToColor } from '@utils/general';
-import _ from 'lodash';
+import _, { set } from 'lodash';
+import { deterministicMantineColor } from '@utils/requests/utils';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -98,6 +103,27 @@ const EmailGrader = () => {
   // We use this to store the raw value of the rich text editor
   const bodyRich = useRef<JSONContent | string>('');
   const bodyRef = useRef('');
+  const [loadingMessage, setLoadingMessage] = useState('');
+
+  const [isEditMode, setIsEditMode] = useState(true);
+  const toggleEditMode = () => {
+    setIsEditMode((prevMode) => !prevMode);
+  };
+  const highlightPersonalizations = (text) => {
+    if (!data || !data.evaluated_personalizations) {
+      return text;
+    }
+
+    let highlightedText = text;
+    data.evaluated_personalizations.forEach((personalization) => {
+      highlightedText = highlightedText.replace(
+        personalization.personalization,
+        `<span style="background-color: ` + (personalization.strength === 'strong' ? '#E7F5FF' : '#FFF9DB') + `; border: solid 1px ` + (personalization.strength === 'strong' ? '#B3D8FF' : '#FFEAA7') + `; border-radius: 4px; padding: 0px 4px;">` + personalization.personalization + `</span>`
+      );
+    });
+
+    return highlightedText;
+  };
 
   const [wordCount, setWordCount] = useState(0);
 
@@ -126,7 +152,26 @@ const EmailGrader = () => {
       return;
     }
     setData(data);
+    setIsEditMode(false);
   };
+
+  useEffect(() => {
+    let timeoutId: any;
+
+    if (loading) {
+      setLoadingMessage('Checking for spam words');
+      timeoutId = setTimeout(() => setLoadingMessage('Measuring read time'), 2000);
+      setTimeout(() => setLoadingMessage('Checking personalizations'), 4000);
+      setTimeout(() => setLoadingMessage('Writing feedback'), 6000);
+      setTimeout(() => setLoadingMessage('Checking construction'), 8000);
+      setTimeout(() => setLoadingMessage('Checking tones'), 10000);
+      setTimeout(() => setLoadingMessage('Generating score'), 12000);
+      setTimeout(() => setLoadingMessage('Almost there...'), 14000);
+      setTimeout(() => setLoadingMessage('Making final adjustments'), 16000);
+    }
+
+    return () => clearTimeout(timeoutId); // Clear timeout on component unmount
+  }, [loading]);
 
   return (
     <>
@@ -140,8 +185,9 @@ const EmailGrader = () => {
       >
         <Grid>
           <Grid.Col md={6} xs={12}>
-            <Card sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Box>
+          <Card sx={{ display: 'flex', flexDirection: 'column' }}>
+            {isEditMode ? (
+              <>
                 <Text color='gray.6' fw={600} fz={'sm'}>
                   SUBJECT LINE
                 </Text>
@@ -150,14 +196,11 @@ const EmailGrader = () => {
                   value={subject}
                   onChange={(e) => setSubject(e.currentTarget.value)}
                 />
-              </Box>
 
-              <Box mt={'sm'}>
-                <Text color='gray.6' fw={600} fz={'sm'}>
-                  BODY
-                </Text>
-
-                <Box style={{ position: 'relative' }}>
+                <Box mt={'sm'}>
+                  <Text color='gray.6' fw={600} fz={'sm'}>
+                    BODY
+                  </Text>
                   <RichTextArea
                     onChange={(value, rawValue) => {
                       bodyRich.current = rawValue;
@@ -166,11 +209,39 @@ const EmailGrader = () => {
                     value={bodyRich.current}
                     height={500}
                   />
-                 
                 </Box>
-              </Box>
+              </>
+            ) : (
+              <>
+                {/* Uneditable text blocks for subject and body */}
+                <Text color='gray.6' fw={600} fz={'sm'}>
+                  SUBJECT LINE
+                </Text>
+                <div style={{border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(subject) }}></div>
 
-              <Flex mt={'sm'} >
+                <Box mt={'sm'}>
+                  <Text color='gray.6' fw={600} fz={'sm'}>
+                    BODY
+                  </Text>
+                  <div style={{height: 500, border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll', paddingBottom: '40px'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(bodyRef.current) }}></div>
+                </Box>
+              </>
+            )}
+            <Button
+              ml='auto'
+              onClick={toggleEditMode}
+              pos={'absolute'}
+              size='xs'
+              variant='outline'
+              right={30}
+              bottom={loading ? 110 : 80}
+              display={!loading && !isEditMode ? 'block' : 'none'}
+              leftIcon={<IconEdit size={'0.8rem'} />}
+            >
+              {isEditMode ? '' : 'Edit'}
+            </Button>
+
+            <Flex mt={'sm'} >
                 <Text>
                   {bodyRef.current.split(' ').length} word{bodyRef.current.split(' ').length === 1 ? '' : 's'}
                 </Text>
@@ -185,8 +256,19 @@ const EmailGrader = () => {
                   Generate Feedback
                 </Button>
               </Flex>
-            </Card>
-          </Grid.Col>
+
+              {/* Loading Progress Bar and Message */}
+                {loading && (
+                  <Flex style={{textAlign: 'right', justifyContent: 'right'}}>
+                    <Text fw='400' mr='md' mt="xs" color='grape'>{loadingMessage}...</Text>
+                    <Loader mr='xs' mt='8px' variant='dots' color='grape'/>
+                  </Flex>
+                )}
+          </Card>
+          
+        </Grid.Col>
+
+          
           <Grid.Col md={6} xs={12}>
             {
               loading && (
@@ -440,11 +522,12 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   <HoverCard.Target>
                     <Badge
                       key={idx}
-                      color='gray'
+                      color={d.strength === 'strong' ? 'blue' : 'yellow'}
+                      variant='light'
                       maw={280}
                       styles={{ root: { textTransform: 'initial', cursor: 'pointer' } }}
                     >
-                      "{d.personalization}"
+                      <i>"{d.personalization}"</i>
                     </Badge>
                   </HoverCard.Target>
                   <HoverCard.Dropdown>

@@ -21,6 +21,7 @@ import {
   Blockquote,
   Group,
   List,
+  Skeleton,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { SCREEN_SIZES } from '../../../constants/data';
@@ -180,7 +181,23 @@ const EmailGrader = () => {
             </Card>
           </Grid.Col>
           <Grid.Col md={6} xs={12}>
-            {!data && (
+            {
+              loading && (
+                <>
+                  <Skeleton height={120} mb="8" />
+                  <Flex>
+                    <Skeleton height={100} mt={8} />
+                    <Skeleton height={100} mt={8} ml='xs' />
+                  </Flex>
+                  <Skeleton height={300} mt={8} width='100%'/>
+                  <Flex>
+                    <Skeleton height={100} mt={8} />
+                    <Skeleton height={140} mt={8} ml='xs' />
+                  </Flex>
+                </>
+              )
+            }
+            {!data && !loading && (
               <Box style={{ position: 'relative' }}>
                 <Stack spacing={5}>
                   <Title order={2}>Improve Your Email</Title>

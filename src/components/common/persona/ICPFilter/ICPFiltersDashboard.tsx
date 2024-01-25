@@ -808,7 +808,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
             </Flex>
           )}
           <Paper radius={'8px'}>
-            <Flex>
+            <Flex gap={'sm'}>
               {sideBarVisible && (
                 <Flex gap={'sm'}>
                   <Box
@@ -816,7 +816,6 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                       borderRight: `1px solid ${theme.colors.gray[0]}`,
                       overflowX: 'hidden',
                     })}
-                    mr={30}
                   >
                     <SidebarHeader
                       sideBarVisible={sideBarVisible}
@@ -830,7 +829,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                   </Box>
                 </Flex>
               )}
-              <Box w={'100%'}>
+              <Box w={'100%'} maw={sideBarVisible ?  'calc(100vw - 13vw - 360px)' : 'calc(100vw - 12vw)'}>
                 <GridTabs
                   selectedTab={selectedTab}
                   setSelectedTab={setSelectedTab}

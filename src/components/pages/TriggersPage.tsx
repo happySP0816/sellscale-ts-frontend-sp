@@ -337,9 +337,9 @@ export default function TriggersPage() {
     // Join the room in which the messages will be sent
     if (socket) {
       const triggerId = new URLSearchParams(location.search).get('trigger_id');
-      socket.emit('join-trigger-room', {
+      socket.emit('join-room', {
         sdr_id: userData.id,
-        payload: { trigger_id: `trigger-$${triggerId}` },
+        payload: { room_id: `trigger-$${triggerId}` },
       });
     }
 

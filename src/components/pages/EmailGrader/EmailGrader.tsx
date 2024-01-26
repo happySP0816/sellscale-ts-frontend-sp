@@ -51,11 +51,14 @@ import { Chart as ChartJS, Tooltip, ArcElement, Legend } from 'chart.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { JSONContent } from '@tiptap/react';
 import { useRecoilValue } from 'recoil';
-import { userTokenState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { generateEmailFeedback } from '@utils/requests/generateFeedback';
-import { collectClientData, formatToLabel, valueToColor } from '@utils/general';
+import { cleanJsonString, collectClientData, formatToLabel, valueToColor } from '@utils/general';
 import _, { set } from 'lodash';
 import { deterministicMantineColor } from '@utils/requests/utils';
+import { socket } from '../../App';
+import { completionStream } from '@utils/sockets/completionStream';
+import LoadingStream from '@common/library/LoadingStream';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -118,7 +121,13 @@ const EmailGrader = () => {
     data.evaluated_personalizations.forEach((personalization) => {
       highlightedText = highlightedText.replace(
         personalization.personalization,
-        `<span style="background-color: ` + (personalization.strength === 'strong' ? '#E7F5FF' : '#FFF9DB') + `; border: solid 1px ` + (personalization.strength === 'strong' ? '#B3D8FF' : '#FFEAA7') + `; border-radius: 4px; padding: 0px 4px;">` + personalization.personalization + `</span>`
+        `<span style="background-color: ` +
+          (personalization.strength === 'strong' ? '#E7F5FF' : '#FFF9DB') +
+          `; border: solid 1px ` +
+          (personalization.strength === 'strong' ? '#B3D8FF' : '#FFEAA7') +
+          `; border-radius: 4px; padding: 0px 4px;">` +
+          personalization.personalization +
+          `</span>`
       );
     });
 
@@ -133,6 +142,7 @@ const EmailGrader = () => {
   };
 
   const [data, setData] = useState<EmailGrade | undefined>();
+  const [eventRoomId, setEventRoomId] = useState<string>();
 
   const generateFeedback = async () => {
     if (subject.trim() === '' || bodyRef.current.trim() === '') {
@@ -140,23 +150,20 @@ const EmailGrader = () => {
     }
 
     setLoading(true);
-    try {
-      const response = await generateEmailFeedback(
-        userToken,
-        subject,
-        bodyRef.current,
-        await collectClientData()
-      );
-      const data = response.status === 'success' ? (response.data as EmailGrade) : null;
-      setLoading(false);
-      if (!data) {
-        return;
-      }
-      setData(data);
-      setIsEditMode(false);
-    } catch (error) {
-      console.error('Error generating feedback', error);
-      setLoading(false);
+
+    // Set the room id to the subject (hacky fs, should prob be ip address + subject)
+    setEventRoomId(subject);
+
+    const response = await generateEmailFeedback(
+      userToken,
+      subject,
+      bodyRef.current,
+      await collectClientData()
+    );
+    const data = response.status === 'success' ? (response.data as EmailGrade) : null;
+    setLoading(false);
+    if (!data) {
+      return;
     }
     
   };
@@ -191,29 +198,16 @@ const EmailGrader = () => {
       >
         <Grid>
           <Grid.Col md={6} xs={12}>
-          <Card sx={{ display: 'flex', flexDirection: 'column' }}>
-            {isEditMode ? (
-              <>
-                <Text color='gray.6' fw={600} fz={'sm'}>
-                  SUBJECT LINE
-                </Text>
-                <TextInput
-                  placeholder='Subject'
-                  value={subject}
-                  onChange={(e) => setSubject(e.currentTarget.value)}
-                />
-
-                <Box mt={'sm'}>
+            <Card sx={{ display: 'flex', flexDirection: 'column' }}>
+              {isEditMode ? (
+                <>
                   <Text color='gray.6' fw={600} fz={'sm'}>
-                    BODY
+                    SUBJECT LINE
                   </Text>
-                  <RichTextArea
-                    onChange={(value, rawValue) => {
-                      bodyRich.current = rawValue;
-                      bodyRef.current = value;
-                    }}
-                    value={bodyRich.current}
-                    height={500}
+                  <TextInput
+                    placeholder='Subject'
+                    value={subject}
+                    onChange={(e) => setSubject(e.currentTarget.value)}
                   />
                 </Box>
               </>
@@ -227,9 +221,25 @@ const EmailGrader = () => {
                   onClick={toggleEditMode}
                   style={{border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(subject) }}></div>
 
-                <Box mt={'sm'}>
+                  <Box mt={'sm'}>
+                    <Text color='gray.6' fw={600} fz={'sm'}>
+                      BODY
+                    </Text>
+                    <RichTextArea
+                      onChange={(value, rawValue) => {
+                        bodyRich.current = rawValue;
+                        bodyRef.current = value;
+                      }}
+                      value={bodyRich.current}
+                      height={500}
+                    />
+                  </Box>
+                </>
+              ) : (
+                <>
+                  {/* Uneditable text blocks for subject and body */}
                   <Text color='gray.6' fw={600} fz={'sm'}>
-                    BODY
+                    SUBJECT LINE
                   </Text>
                   <div 
                     onClick={toggleEditMode}
@@ -251,9 +261,46 @@ const EmailGrader = () => {
               {isEditMode ? '' : 'Edit'}
             </Button>
 
-            <Flex mt={'sm'} >
+                  <Box mt={'sm'}>
+                    <Text color='gray.6' fw={600} fz={'sm'}>
+                      BODY
+                    </Text>
+                    <div
+                      style={{
+                        height: 500,
+                        border: 'solid 1px #ddd',
+                        padding: 4,
+                        paddingLeft: 12,
+                        paddingRight: 12,
+                        borderRadius: 8,
+                        overflowY: 'scroll',
+                        paddingBottom: '40px',
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: highlightPersonalizations(bodyRef.current),
+                      }}
+                    ></div>
+                  </Box>
+                </>
+              )}
+              <Button
+                ml='auto'
+                onClick={toggleEditMode}
+                pos={'absolute'}
+                size='xs'
+                variant='outline'
+                right={30}
+                bottom={loading ? 110 : 80}
+                display={!loading && !isEditMode ? 'block' : 'none'}
+                leftIcon={<IconEdit size={'0.8rem'} />}
+              >
+                {isEditMode ? '' : 'Edit'}
+              </Button>
+
+              <Flex mt={'sm'}>
                 <Text>
-                  {bodyRef.current.split(' ').length} word{bodyRef.current.split(' ').length === 1 ? '' : 's'}
+                  {bodyRef.current.split(' ').length} word
+                  {bodyRef.current.split(' ').length === 1 ? '' : 's'}
                 </Text>
                 <Button
                   ml='auto'
@@ -268,34 +315,37 @@ const EmailGrader = () => {
               </Flex>
 
               {/* Loading Progress Bar and Message */}
-                {loading && (
-                  <Flex style={{textAlign: 'right', justifyContent: 'right'}}>
-                    <Text fw='400' mr='md' mt="xs" color='grape'>{loadingMessage}...</Text>
-                    <Loader mr='xs' mt='8px' variant='dots' color='grape'/>
-                  </Flex>
-                )}
-          </Card>
-          
-        </Grid.Col>
+              {loading && (
+                <Flex style={{ textAlign: 'right', justifyContent: 'right' }}>
+                  <Text fw='400' mr='md' mt='xs' color='grape'>
+                    {loadingMessage}...
+                  </Text>
+                  <Loader mr='xs' mt='8px' variant='dots' color='grape' />
+                </Flex>
+              )}
+            </Card>
+          </Grid.Col>
 
-          
           <Grid.Col md={6} xs={12}>
-            {
-              loading && (
-                <>
-                  <Skeleton height={120} mb="8" />
-                  <Flex>
-                    <Skeleton height={100} mt={8} />
-                    <Skeleton height={100} mt={8} ml='xs' />
-                  </Flex>
-                  <Skeleton height={300} mt={8} width='100%'/>
-                  <Flex>
-                    <Skeleton height={100} mt={8} />
-                    <Skeleton height={140} mt={8} ml='xs' />
-                  </Flex>
-                </>
-              )
-            }
+            {loading && (
+              <>
+                <LoadingStream
+                  event='generate_email_feedback'
+                  roomId={eventRoomId}
+                  // label='Loading Feedback'
+                />
+                {/* <Skeleton height={120} mb='8' />
+                <Flex>
+                  <Skeleton height={100} mt={8} />
+                  <Skeleton height={100} mt={8} ml='xs' />
+                </Flex>
+                <Skeleton height={300} mt={8} width='100%' />
+                <Flex>
+                  <Skeleton height={100} mt={8} />
+                  <Skeleton height={140} mt={8} ml='xs' />
+                </Flex> */}
+              </>
+            )}
             {!data && !loading && (
               <Box style={{ position: 'relative' }}>
                 <Stack spacing={5}>
@@ -542,14 +592,18 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
                     <Box>
-                      <Text fz='xs' fw='bold'>Personalization:</Text>
+                      <Text fz='xs' fw='bold'>
+                        Personalization:
+                      </Text>
                       <Text size='xs' fs='italic' color='gray.6'>
                         "{d.personalization}"
                       </Text>
                     </Box>
 
                     <Box mt='md'>
-                       <Text fz='xs' fw='bold'>Strength:</Text>
+                      <Text fz='xs' fw='bold'>
+                        Strength:
+                      </Text>
                       <Badge
                         miw={60}
                         color={d.strength === 'strong' ? 'blue' : 'yellow'}
@@ -559,12 +613,13 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                         {d.strength}
                       </Badge>
                     </Box>
-                      
+
                     <Box mt='md'>
-                      <Text fz='xs' fw='bold'>Reason:</Text>
+                      <Text fz='xs' fw='bold'>
+                        Reason:
+                      </Text>
                       <Text size='xs'>{d.reason}</Text>
                     </Box>
-                    
                   </HoverCard.Dropdown>
                 </HoverCard>
               ))}
@@ -605,7 +660,11 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
           {props.data.evaluated_feedback.map((d, idx) => (
             <Flex key={idx} gap={'xs'}>
               <Box>
-                {d.type === 'pro' ? <IconCirclePlus size='1rem' color='green' /> : <IconCircleMinus size='1rem' color='red' />}
+                {d.type === 'pro' ? (
+                  <IconCirclePlus size='1rem' color='green' />
+                ) : (
+                  <IconCircleMinus size='1rem' color='red' />
+                )}
               </Box>
               <Text fw={400} fz={'xs'}>
                 {d.feedback}
@@ -674,14 +733,21 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   <HoverCard shadow='md' position='left' withinPortal>
                     <HoverCard.Target>
                       <Flex gap={'xs'} align={'center'} styles={{ cursor: 'pointer' }}>
-                        <ActionIcon size={'sm'} color={props.data.evaluated_construction_spam_words_subject_line.evaluation === 'GOOD' ? 'green' : 'red' }>
-                          {
-                            props.data.evaluated_construction_spam_words_subject_line.words?.length === 0 ? (
-                              <IconCircleCheck />
-                            ) : (
-                              <IconAlertOctagon />
-                            )
+                        <ActionIcon
+                          size={'sm'}
+                          color={
+                            props.data.evaluated_construction_spam_words_subject_line.evaluation ===
+                            'GOOD'
+                              ? 'green'
+                              : 'red'
                           }
+                        >
+                          {props.data.evaluated_construction_spam_words_subject_line.words
+                            ?.length === 0 ? (
+                            <IconCircleCheck />
+                          ) : (
+                            <IconAlertOctagon />
+                          )}
                         </ActionIcon>
                         <Text fw={600} fz={'sm'}>
                           Subject - Spam Words
@@ -689,11 +755,14 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                       </Flex>
                     </HoverCard.Target>
                     <HoverCard.Dropdown>
-                      {props.data.evaluated_construction_spam_words_subject_line.words.length > 0 ?
-                        <Text fz='xs' fw='bold'>Found spam words:{' '}</Text>
-                        : 
+                      {props.data.evaluated_construction_spam_words_subject_line.words.length >
+                      0 ? (
+                        <Text fz='xs' fw='bold'>
+                          Found spam words:{' '}
+                        </Text>
+                      ) : (
                         <Text>No spam words found in subject line!</Text>
-                      }
+                      )}
                       {props.data.evaluated_construction_spam_words_subject_line.words.map(
                         (word, idx) => (
                           <Badge
@@ -731,7 +800,8 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
                     <Text size='sm'>
-                      Optimal emails can be read in roughly 30 seconds since the average reader will skim through emails in their inbox. That translates to roughly 50 - 120 words.
+                      Optimal emails can be read in roughly 30 seconds since the average reader will
+                      skim through emails in their inbox. That translates to roughly 50 - 120 words.
                     </Text>
                   </HoverCard.Dropdown>
                 </HoverCard>
@@ -742,14 +812,19 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   <HoverCard shadow='md' position='left' withinPortal>
                     <HoverCard.Target>
                       <Flex gap={'xs'} align={'center'} styles={{ cursor: 'pointer' }}>
-                        <ActionIcon size={'sm'} color={props.data.evaluated_construction_spam_words_body.evaluation === 'GOOD' ? 'green' : 'red' }>
-                          {
-                            props.data.evaluated_construction_spam_words_body.words?.length === 0 ? (
-                              <IconCircleCheck />
-                            ) : (
-                              <IconAlertOctagon />
-                            )
+                        <ActionIcon
+                          size={'sm'}
+                          color={
+                            props.data.evaluated_construction_spam_words_body.evaluation === 'GOOD'
+                              ? 'green'
+                              : 'red'
                           }
+                        >
+                          {props.data.evaluated_construction_spam_words_body.words?.length === 0 ? (
+                            <IconCircleCheck />
+                          ) : (
+                            <IconAlertOctagon />
+                          )}
                         </ActionIcon>
                         <Text fw={600} fz={'sm'}>
                           Body - Spam Words
@@ -818,13 +893,20 @@ function EmailScore(props: { score: number }) {
   };
 
   const scoreColor = props.score >= 70 ? 'green' : props.score >= 30 ? 'orange' : 'red';
-  const scoreTitle = props.score >= 90 ? 'Excellent Work!' :
-    props.score >= 75 ? 'Great Job!' :
-    props.score >= 60 ? 'Good Effort!' :
-    props.score >= 45 ? 'Needs Improvement' :
-    props.score >= 30 ? 'Below Average' :
-    props.score >= 15 ? 'Far Below Average' :
-                        'Needs Major Revision';
+  const scoreTitle =
+    props.score >= 90
+      ? 'Excellent Work!'
+      : props.score >= 75
+      ? 'Great Job!'
+      : props.score >= 60
+      ? 'Good Effort!'
+      : props.score >= 45
+      ? 'Needs Improvement'
+      : props.score >= 30
+      ? 'Below Average'
+      : props.score >= 15
+      ? 'Far Below Average'
+      : 'Needs Major Revision';
 
   const scoreExplanation = useMemo(() => {
     let scoreExplanation = '';

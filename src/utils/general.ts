@@ -360,6 +360,19 @@ export function removeExtraCharacters(str: string) {
 }
 
 /**
+ * Returns a string with many of the common special characters removed
+ * @param jsonString
+ * @returns -
+ */
+export function cleanJsonString(jsonString: string): string {
+  // Remove square brackets, curly braces, double quotes
+  return jsonString
+    .replace(/",/g, '\n')
+    .replace(/[\[\]{}"']+/g, '')
+    .replace(/,/g, '');
+}
+
+/**
  * Checks if a date is within the last X days
  * @param date
  * @param days

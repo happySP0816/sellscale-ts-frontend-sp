@@ -12,7 +12,7 @@ export default function TextWithNewline(props: {
       style={props.style}
       dangerouslySetInnerHTML={{
         __html: DOMPurify.sanitize(
-          ((props.children as string) || '').replaceAll(
+          (`${props.children}` || '').replaceAll(
             '\n',
             `<br style="display: block; content: ' '; margin: ${props.breakheight || 0} 0 "/>`
           )

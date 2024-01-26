@@ -109,7 +109,7 @@ const EmailGrader = () => {
   const toggleEditMode = () => {
     setIsEditMode((prevMode) => !prevMode);
   };
-  const highlightPersonalizations = (text) => {
+  const highlightPersonalizations = (text: any) => {
     if (!data || !data.evaluated_personalizations) {
       return text;
     }

@@ -17,7 +17,6 @@ export const TaskHandlerSegmentCreation = (props: TaskHandlerSegmentCreationData
             width={'100%'}
             height={window.innerHeight - 30}
             frameBorder={0}
-            outline="0"
             allowFullScreen
         />
 

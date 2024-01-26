@@ -40,6 +40,7 @@
     "@mantine/notifications": "^6.0.10",
     "@mantine/spotlight": "^6.0.10",
     "@mantine/tiptap": "^6.0.10",
+    "@mergeapi/react-merge-link": "^2.1.2",
     "@nivo/bar": "^0.83.0",
     "@nivo/line": "^0.83.0",
     "@react-email/components": "0.0.11",

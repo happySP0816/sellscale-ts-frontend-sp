@@ -3,7 +3,7 @@ import { Box, Container, Divider, Flex, Group, LoadingOverlay, Tabs, rem, Title 
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { useEffect, useState } from 'react';
-import { IconBrandLinkedin, IconBrandSlack, IconCalendar, IconInbox, IconSausage, IconTrophy } from '@tabler/icons';
+import { IconBrandLinkedin, IconBrandSlack, IconCalendar, IconCloud, IconInbox, IconSausage, IconTrophy } from '@tabler/icons';
 import PageTitle from '@nav/PageTitle';
 import { useQuery } from '@tanstack/react-query';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
@@ -23,6 +23,8 @@ import SettingsConversion from '@common/settings/SettingsConversion';
 import SlackSettings from '@common/slack/SlackSettings';
 import SettingUsage from '@common/settings/SettingUsage';
 import exchangeSlackAuthCode from '@utils/requests/exchangeSlackAuthCode';
+import ComingSoonCard from '@common/library/ComingSoonCard';
+import CRMConnectionPage from './CRMConnectionPage';
 
 export default function SettingsPage() {
   setPageTitle('Settings');
@@ -171,6 +173,9 @@ export default function SettingsPage() {
           <Tabs.Tab value='calendarAndScheduling' icon={<IconCalendar size='0.8rem' />}>
             Calendar Connection
           </Tabs.Tab>
+          <Tabs.Tab value='crmConnection' icon={<IconCloud size='0.8rem' />}>
+            CRM Connection
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value='linkedinConnection' pl='xs' w='60%'>
@@ -187,6 +192,10 @@ export default function SettingsPage() {
 
         <Tabs.Panel value='doNotContact' pl='xs'>
           <Group noWrap>{currentTab === 'doNotContact' && <DoNotContactFiltersPage />}</Group>
+        </Tabs.Panel>
+
+        <Tabs.Panel value='crmConnection' pl='x'>
+          <CRMConnectionPage />
         </Tabs.Panel>
 
         <Tabs.Panel value='sellScaleBrain' pl='xs'>

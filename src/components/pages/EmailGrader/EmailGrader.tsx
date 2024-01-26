@@ -140,19 +140,25 @@ const EmailGrader = () => {
     }
 
     setLoading(true);
-    const response = await generateEmailFeedback(
-      userToken,
-      subject,
-      bodyRef.current,
-      await collectClientData()
-    );
-    const data = response.status === 'success' ? (response.data as EmailGrade) : null;
-    setLoading(false);
-    if (!data) {
-      return;
+    try {
+      const response = await generateEmailFeedback(
+        userToken,
+        subject,
+        bodyRef.current,
+        await collectClientData()
+      );
+      const data = response.status === 'success' ? (response.data as EmailGrade) : null;
+      setLoading(false);
+      if (!data) {
+        return;
+      }
+      setData(data);
+      setIsEditMode(false);
+    } catch (error) {
+      console.error('Error generating feedback', error);
+      setLoading(false);
     }
-    setData(data);
-    setIsEditMode(false);
+    
   };
 
   useEffect(() => {
@@ -217,13 +223,17 @@ const EmailGrader = () => {
                 <Text color='gray.6' fw={600} fz={'sm'}>
                   SUBJECT LINE
                 </Text>
-                <div style={{border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(subject) }}></div>
+                <div 
+                  onClick={toggleEditMode}
+                  style={{border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(subject) }}></div>
 
                 <Box mt={'sm'}>
                   <Text color='gray.6' fw={600} fz={'sm'}>
                     BODY
                   </Text>
-                  <div style={{height: 500, border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll', paddingBottom: '40px'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(bodyRef.current) }}></div>
+                  <div 
+                    onClick={toggleEditMode}
+                    style={{height: 500, border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll', paddingBottom: '40px'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(bodyRef.current) }}></div>
                 </Box>
               </>
             )}
@@ -750,7 +760,7 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                       {props.data.evaluated_construction_spam_words_body.words.length > 0 ?
                         <Text fz='xs' fw='bold'>Found spam words:{' '}</Text>
                         : 
-                        <Text>No spam words found in subject line!</Text>
+                        <Text>No spam words found in the body!</Text>
                       }
                       {props.data.evaluated_construction_spam_words_body.words.map((word, idx) => (
                         <Badge

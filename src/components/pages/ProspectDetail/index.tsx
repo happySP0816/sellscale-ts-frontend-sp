@@ -100,10 +100,10 @@ export default function ProspectDetailPage() {
   return (
     <Grid gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: 'hidden' }}>
       <Grid.Col span={8}>
-        <InboxProspectConvo showBackToInbox currentEmailStatus={prospects[0].email_status} />
+        <InboxProspectConvo showBackToInbox currentEmailStatus={prospects[0]?.email_status} />
       </Grid.Col>
       <Grid.Col span={4}>
-        <InboxProspectDetails noProspectResetting currentEmailStatus={prospects[0].email_status} />
+        <InboxProspectDetails noProspectResetting currentEmailStatus={prospects[0]?.email_status} />
       </Grid.Col>
     </Grid>
   );

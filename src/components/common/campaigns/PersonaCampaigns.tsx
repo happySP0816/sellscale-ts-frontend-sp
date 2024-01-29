@@ -908,10 +908,10 @@ export function PersonCampaignCard(props: {
   const filteredCampaignList = useMemo(() => {
     if (value === "sent") {
       return campaignList?.filter(
-        (item: any) => item.to_status === "SENT_OUTREACH"
+        (item: any) => item.to_status === "SENT_OUTREACH" 
       );
     } else if (value === "open") {
-      return campaignList?.filter((item: any) => item.to_status === "ACCEPTED");
+      return campaignList?.filter((item: any) => item.to_status === "ACCEPTED" || item.to_status === 'EMAIL_OPENED');
     } else if (value === "reply") {
       return campaignList?.filter(
         (item: any) => item.to_status === "ACTIVE_CONVO"

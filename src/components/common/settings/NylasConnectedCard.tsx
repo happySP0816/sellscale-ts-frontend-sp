@@ -75,7 +75,7 @@ const useStyles = createStyles((theme) => ({
 
 const REDIRECT_URI = `${window.location.origin}/settings`;
 
-export default function NylasConnectedCard(props: { connected: boolean }) {
+export default function NylasConnectedCard(props: { connected: boolean, showSmartlead: boolean }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
@@ -382,7 +382,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
         </Stack>
       </Paper> */}
 
-      <Paper withBorder m="xs" p="md" radius="md">
+      {props.showSmartlead && <Paper withBorder m="xs" p="md" radius="md">
         <Stack>
           <div>
             <Group>
@@ -475,7 +475,7 @@ export default function NylasConnectedCard(props: { connected: boolean }) {
             </Button> */}
           </Group>
         </Stack>
-      </Paper>
+      </Paper>}
 
       <MultiEmails />
       <ScheduleSetting />

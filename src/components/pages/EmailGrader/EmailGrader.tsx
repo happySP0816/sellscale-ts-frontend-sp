@@ -166,6 +166,7 @@ const EmailGrader = () => {
       return;
     }
     
+    setData(data)
   };
 
   useEffect(() => {
@@ -209,18 +210,6 @@ const EmailGrader = () => {
                     value={subject}
                     onChange={(e) => setSubject(e.currentTarget.value)}
                   />
-                </Box>
-              </>
-            ) : (
-              <>
-                {/* Uneditable text blocks for subject and body */}
-                <Text color='gray.6' fw={600} fz={'sm'}>
-                  SUBJECT LINE
-                </Text>
-                <div 
-                  onClick={toggleEditMode}
-                  style={{border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(subject) }}></div>
-
                   <Box mt={'sm'}>
                     <Text color='gray.6' fw={600} fz={'sm'}>
                       BODY
@@ -234,19 +223,24 @@ const EmailGrader = () => {
                       height={500}
                     />
                   </Box>
-                </>
-              ) : (
-                <>
-                  {/* Uneditable text blocks for subject and body */}
-                  <Text color='gray.6' fw={600} fz={'sm'}>
-                    SUBJECT LINE
-                  </Text>
-                  <div 
-                    onClick={toggleEditMode}
-                    style={{height: 500, border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll', paddingBottom: '40px'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(bodyRef.current) }}></div>
-                </Box>
               </>
-            )}
+            ) : (
+              <>
+                {/* Uneditable text blocks for subject and body */}
+                <Text color='gray.6' fw={600} fz={'sm'}>
+                  SUBJECT LINE
+                </Text>
+                <div 
+                  onClick={toggleEditMode}
+                  style={{border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(subject) }}></div>
+                <Text color='gray.6' fw={600} fz={'sm'}>
+                  BODY
+                </Text>
+                <div 
+                  onClick={toggleEditMode}
+                  style={{height: 500, border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll', paddingBottom: '40px'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(bodyRef.current) }}></div>
+                </>
+              )}
             <Button
               ml='auto'
               onClick={toggleEditMode}
@@ -260,29 +254,7 @@ const EmailGrader = () => {
             >
               {isEditMode ? '' : 'Edit'}
             </Button>
-
-                  <Box mt={'sm'}>
-                    <Text color='gray.6' fw={600} fz={'sm'}>
-                      BODY
-                    </Text>
-                    <div
-                      style={{
-                        height: 500,
-                        border: 'solid 1px #ddd',
-                        padding: 4,
-                        paddingLeft: 12,
-                        paddingRight: 12,
-                        borderRadius: 8,
-                        overflowY: 'scroll',
-                        paddingBottom: '40px',
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: highlightPersonalizations(bodyRef.current),
-                      }}
-                    ></div>
-                  </Box>
-                </>
-              )}
+              
               <Button
                 ml='auto'
                 onClick={toggleEditMode}
@@ -329,21 +301,21 @@ const EmailGrader = () => {
           <Grid.Col md={6} xs={12}>
             {loading && (
               <>
-                <LoadingStream
+                {/* <LoadingStream
                   event='generate_email_feedback'
                   roomId={eventRoomId}
                   // label='Loading Feedback'
-                />
-                {/* <Skeleton height={120} mb='8' />
-                <Flex>
-                  <Skeleton height={100} mt={8} />
-                  <Skeleton height={100} mt={8} ml='xs' />
-                </Flex>
-                <Skeleton height={300} mt={8} width='100%' />
-                <Flex>
-                  <Skeleton height={100} mt={8} />
-                  <Skeleton height={140} mt={8} ml='xs' />
-                </Flex> */}
+                /> */}
+                  <Skeleton height={120} mb='8' />
+                  <Flex>
+                    <Skeleton height={100} mt={8} />
+                    <Skeleton height={100} mt={8} ml='xs' />
+                  </Flex>
+                  <Skeleton height={300} mt={8} width='100%' />
+                  <Flex>
+                    <Skeleton height={100} mt={8} />
+                    <Skeleton height={140} mt={8} ml='xs' />
+                  </Flex>
               </>
             )}
             {!data && !loading && (

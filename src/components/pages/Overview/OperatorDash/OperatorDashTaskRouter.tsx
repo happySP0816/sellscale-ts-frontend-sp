@@ -32,6 +32,11 @@ const TASK_ROUTER: any = {
         instruction: 'Connect to LinkedIn then mark as complete',
         enabledCompleteButton: true,
     },
+    'CONNECT_LINKEDIN': {
+        component: TaskHandlerLinkedinDisconnected,
+        instruction: 'Connect to LinkedIn then mark as complete',
+        enabledCompleteButton: true,
+    },
     'LINKEDIN_CAMPAIGN_REVIEW': {
         component: TaskHandlerReviewLinkedinCampaign,
         instruction: 'Review the campaign then mark as complete',

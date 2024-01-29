@@ -3,6 +3,8 @@ import { OperatorDashboardEntry } from '../OperatorDashTaskRouter';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
 import { useRecoilValue } from 'recoil';
 import { userDataState } from '@atoms/userAtoms';
+import { IconLink } from '@tabler/icons';
+import { showNotification } from '@mantine/notifications';
 
 interface TaskHandlerLinkedinDisconnectedData {
     data: {
@@ -18,7 +20,13 @@ export const TaskHandlerLinkedinDisconnected = (props: TaskHandlerLinkedinDiscon
             <LinkedInConnectedCard 
                 connected={userData ? userData.li_voyager_connected : false} 
                 onConnect={() => {
-                    alert('Connect to LinkedIn')
+                    showNotification({
+                        title: 'LinkedIn connected!',
+                        message: 'Feel free to mark this task as complete.',
+                        color: 'blue',
+                        icon: <IconLink size="sm" />,
+                        autoClose: true
+                    })
                 }}
             />
         </div>

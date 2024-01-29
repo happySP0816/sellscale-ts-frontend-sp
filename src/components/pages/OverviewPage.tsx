@@ -625,8 +625,7 @@ export function ActiveChannels() {
                         }
                       }
 
-                      let inboxes = sdr.emails
-                        .filter(
+                      let inboxes = sdr.emails?.filter(
                           (inbox: any) => inbox.smartlead_account_id != null
                         )
                         .sort(
@@ -691,8 +690,7 @@ export function ActiveChannels() {
                                       inbox.client_sdr_id == sdr.id
                                   );
                                 } else {
-                                  inboxes = sdr.emails
-                                    .filter(
+                                  inboxes = sdr.emails?.filter(
                                       (inbox: any) =>
                                         inbox.smartlead_account_id != null
                                     )
@@ -709,7 +707,7 @@ export function ActiveChannels() {
 
                                 let numUnits = 1;
                                 if (channel == "EMAIL") {
-                                  numUnits = inboxes.length;
+                                  numUnits = inboxes?.length;
                                 }
 
                                 return (
@@ -764,7 +762,7 @@ export function ActiveChannels() {
                                               </tr>
                                             </thead>
                                             <tbody>
-                                              {inboxes.map((inbox: any) => {
+                                              {inboxes?.map((inbox: any) => {
                                                 let warmed =
                                                   inbox.total_sent_count > 100;
                                                 let days_left =
@@ -845,9 +843,9 @@ export function ActiveChannels() {
                               })}
                             </Box>
 
-                            {inboxes.length > 0 && <Divider mt="md" />}
+                            {inboxes?.length > 0 && <Divider mt="md" />}
 
-                            {inboxes.map((inbox: any) => {
+                            {inboxes?.map((inbox: any) => {
                               const warmed = inbox.total_sent_count > 100;
                               const days_left =
                                 (180 - inbox.total_sent_count) /
@@ -952,11 +950,11 @@ export function ActiveChannels() {
                         // Calculate average reputation
                         inboxes = inboxes || [];
                         const avg =
-                          inboxes.reduce(
+                          inboxes?.reduce(
                             (sum, inbox) =>
                               sum + (inbox?.smartlead_reputation || 0),
                             0
-                          ) / inboxes.length;
+                          ) / inboxes?.length;
                         return (
                           <Text>
                             {avg.toFixed(0)}% {avg === 100 ? "🟩" : "🟥"}

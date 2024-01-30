@@ -1,9 +1,9 @@
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
-import SchedulingFeedbackReview from '@pages/DemoFeedbackReview';
+import DemoFeedbackReview from '@pages/DemoFeedbackReview';
 
-interface TaskHandlerSchedulingFeedbackData {
+interface TaskHandlerDemoFeedbackData {
   data: {
     prospect_id: number;
     prospect_full_name: string;
@@ -12,11 +12,11 @@ interface TaskHandlerSchedulingFeedbackData {
   onTaskComplete?: () => void;
 }
 
-export const TaskHandlerSchedulingFeedback = (props: TaskHandlerSchedulingFeedbackData) => {
+export const TaskHandlerDemoFeedback = (props: TaskHandlerDemoFeedbackData) => {
   const userToken = useRecoilValue(userTokenState);
 
   return (
-    <SchedulingFeedbackReview
+    <DemoFeedbackReview
       prospect_id={props.data.prospect_id}
       prospect_full_name={props.data.prospect_full_name}
       prospect_demo_date_formatted={props.data.prospect_demo_date_formatted}

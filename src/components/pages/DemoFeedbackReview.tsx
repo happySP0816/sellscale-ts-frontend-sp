@@ -39,6 +39,9 @@ import { useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { ProspectShallow } from 'src';
 import { ICPFitPillOnly } from '@common/pipeline/ICPFitAndReason';
+import { navigateToPage } from '@utils/documentChange';
+import { useNavigate } from 'react-router-dom';
+import postSubmitDemoFeedback from '@utils/requests/postSubmitDemoFeedback';
 
 const ProvideFeedback = forwardRef((props: { prospect: ProspectShallow }, ref) => {
   useImperativeHandle(
@@ -319,7 +322,7 @@ export const ProspectOverview = (props: { prospect: ProspectShallow; demoDate: s
   );
 };
 
-export default function SchedulingFeedbackReview(props: {
+export default function DemoFeedbackReview(props: {
   prospect_id: number;
   prospect_full_name: string;
   prospect_demo_date_formatted: string;
@@ -327,11 +330,11 @@ export default function SchedulingFeedbackReview(props: {
   const userToken = useRecoilValue(userTokenState);
   const [opened, { open, close }] = useDisclosure(false);
   const [step, setStep] = useState('prospect_overview');
+  const navigate = useNavigate();
 
   const feedbackRef = useRef<any>();
 
-  const handleNext = () => {
-    // TODO: Add record to the database
+  const handleNext = async () => {
     const feedback = feedbackRef.current?.getState() as {
       status: string;
       rating: number;
@@ -340,11 +343,24 @@ export default function SchedulingFeedbackReview(props: {
       rescheduleDate: Date | null;
     };
 
-    console.log(feedback);
+    await postSubmitDemoFeedback(
+      userToken,
+      props.prospect_id,
+      feedback.status === 'yes'
+        ? 'OCCURRED'
+        : feedback.status === 'no-show'
+        ? 'NO-SHOW'
+        : 'RESCHEDULED',
+      `${feedback.rating}/5`,
+      feedback.feedback,
+      feedback.rescheduleDate ?? undefined,
+      undefined
+    );
+    navigateToPage(navigate, '/overview');
   };
 
   const { data: prospect } = useQuery({
-    queryKey: [`query-get-schedule-feedback-prospect-shallow-${props.prospect_id}`],
+    queryKey: [`query-get-demo-feedback-prospect-shallow-${props.prospect_id}`],
     queryFn: async () => {
       const response = await getProspectShallowByID(userToken, props.prospect_id);
       return response.status === 'success' ? (response.data as ProspectShallow) : undefined;
@@ -361,12 +377,12 @@ export default function SchedulingFeedbackReview(props: {
         <Flex align={'center'} gap={'sm'}>
           <IconMessage />
           <Text size={24} fw={700}>
-            Schedule Meeting
+            Demo Feedback
           </Text>
         </Flex>
         <Flex direction={'column'} gap={'xl'}>
           <Text color='gray' size={'sm'}>
-            {'Scheduling feedback is needed for the prospect'}
+            {'Demo feedback is needed for the prospect'}
           </Text>
           <Flex gap={'sm'} align={'center'} px={'sm'}>
             <Divider w={'100%'} />

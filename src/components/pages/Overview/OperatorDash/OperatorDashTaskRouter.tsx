@@ -9,6 +9,7 @@ import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import axios from 'axios';
 import { TaskHandlerReviewLinkedinCampaign } from './TaskHandlers/TaskHandlerReviewLinkedinCampaign';
 import { TaskHandlerSegmentCreation } from './TaskHandlers/TaskHandlerSegmentCreation';
+import { TaskHandlerDemoFeedback } from './TaskHandlers/TaskHandlerDemoFeedback';
 import { TaskHandlerSchedulingFeedback } from './TaskHandlers/TaskHandlerSchedulingFeedback';
 
 export interface OperatorDashboardEntry {
@@ -46,6 +47,11 @@ const TASK_ROUTER: any = {
   SCHEDULING_FEEDBACK_NEEDED: {
     component: TaskHandlerSchedulingFeedback,
     instruction: 'Give feedback on how the scheduling process is going',
+    enabledCompleteButton: true,
+  },
+  DEMO_FEEDBACK_NEEDED: {
+    component: TaskHandlerDemoFeedback,
+    instruction: 'Give feedback on how the demo went',
     enabledCompleteButton: true,
   },
 };

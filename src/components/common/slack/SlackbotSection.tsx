@@ -35,35 +35,6 @@ export default function SlackbotSection() {
   const [slackConnectState, setSlackConnectState] = useState(false);
   const [channelConnected, setChannelConnected] = useState(false);
   const [connectedChannel, setConnectedChannel] = useState("");
-  const [channelList, setChannelList] = useState<ChannelListType[] | undefined>(
-    [
-      {
-        channelName: "#finance-ramp1",
-        link: "https://#finance-ramp1",
-        invitedUser: "Ishan Sharma",
-      },
-      {
-        channelName: "#finance-ramp2",
-        link: "https://#finance-ramp2",
-        invitedUser: "David Wei",
-      },
-      {
-        channelName: "#finance-ramp3",
-        link: "https://#finance-ramp3",
-        invitedUser: "Aakash Adesara",
-      },
-      {
-        channelName: "#finance-ramp4",
-        link: "https://#finance-ramp4",
-        invitedUser: "Anton Sokolov",
-      },
-      {
-        channelName: "#finance-ramp5",
-        link: "https://#finance-ramp5",
-        invitedUser: "Aaron Cessar",
-      },
-    ]
-  );
 
   const triggerGetConnectedSlackChannels = async () => {
     const result = await getConnectedSlackChannels(userToken);
@@ -91,39 +62,29 @@ export default function SlackbotSection() {
 
   return (
     <>
-      <Paper withBorder m="xs" p="lg" radius="md" bg={"#fcfcfd"}>
-        <Flex align={"center"} justify={"space-between"}>
-          <Flex align={"center"} gap={"sm"}>
-            <Image src={SlackLogo} alt="slack" width={25} height={25} />
-            {slackConnectState ? (
-              <Flex direction={"column"}>
-                <Text fw={600}>✅ Slack Connected</Text>
-                <Text color="gray" size={"xs"}>
-                  Connected by {userData.client.slack_bot_connecting_user_name}
-                </Text>
-              </Flex>
-            ) : (
+      {!slackConnectState && (
+        <Paper withBorder m="xs" p="lg" radius="md" bg={"#fcfcfd"}>
+          <Flex align={"center"} justify={"space-between"}>
+            <Flex align={"center"} gap={"sm"}>
+              <Image src={SlackLogo} alt="slack" width={25} height={25} />
               <Text fw={600}>Connect to your Slack workspace</Text>
-            )}
+            </Flex>
+            <Button
+              className={"bg-black"}
+              variant={"filled"}
+              color={""}
+              component="a"
+              target="_blank"
+              rel="noopener noreferrer"
+              href={`https://slack.com/oauth/v2/authorize?client_id=3939139709313.4226296432962&scope=app_mentions:read,incoming-webhook,channels:join,chat:write,commands,files:read,files:write,im:write,im:history,im:read,channels:history,links:write,links:read,mpim:history,mpim:read,mpim:write,mpim:write.invites,mpim:write.topic&redirect_uri=${SLACK_REDIRECT_URI}`}
+              loading={connecting}
+              onClick={() => {
+                setConnecting(true);
+              }}
+            >
+              Connect
+            </Button>
           </Flex>
-          <Button
-            className={`${slackConnectState ? "" : "bg-black"}`}
-            variant={slackConnectState ? "outline" : "filled"}
-            color={slackConnectState ? "red" : ""}
-            disabled={slackConnectState}
-            component="a"
-            target="_blank"
-            rel="noopener noreferrer"
-            href={`https://slack.com/oauth/v2/authorize?client_id=3939139709313.4226296432962&scope=app_mentions:read,incoming-webhook,channels:join,chat:write,commands,files:read,files:write,im:write,im:history,im:read,channels:history,links:write,links:read,mpim:history,mpim:read,mpim:write,mpim:write.invites,mpim:write.topic&redirect_uri=${SLACK_REDIRECT_URI}`}
-            loading={connecting}
-            onClick={() => {
-              setConnecting(true);
-            }}
-          >
-            {slackConnectState ? "Connected" : "Connect"}
-          </Button>
-        </Flex>
-        {!slackConnectState && (
           <>
             <Divider my="md" />
             <Text color="gray" size={"xs"} mt={"md"}>
@@ -132,49 +93,66 @@ export default function SlackbotSection() {
               section or contact SellScale if installation is not possible.
             </Text>
           </>
-        )}
-      </Paper>
-      {slackConnectState && (
-        <Paper withBorder m="xs" p="lg" radius="md" bg={"#fcfcfd"}>
-          <Flex align={"center"} gap={"sm"}>
-            <Image src={SlackLogo} alt="slack" width={25} height={25} />
-            <Flex direction={"column"}>
-              <Text fw={600}>
-                {channelConnected
-                  ? "✅ Slack Channel Connected"
-                  : "Connect a Channel"}
-              </Text>
-              <Text size={"xs"} color="gray">
-                Slack notifications will be sent to this channel
-              </Text>
-            </Flex>
-          </Flex>
-          <Divider mt="md" />
-          {connectedChannel !== undefined ? (
-            <SlackAlert selectedChannel={connectedChannel} />
-          ) : (
-            <Select
-              // data={channelList!.map((channel) => ({
-              //   value: channel.channelName,
-              //   label: channel.channelName,
-              // }))}
-              data={[]}
-              value={connectedChannel}
-              // onChange={(value) => {
-              //   if (value) {
-              //     const selected = channelList!.find((channel) => channel.channelName === value);
-              //     setSelectedChannel(selected);
-              //   }
-              // }}
-              // mt={'md'}
-              // placeholder='Select a channel to get notified!'
-            />
-          )}
         </Paper>
       )}
-      {/* {channelConnected && (
-        <SlackNotifications/>
-      )} */}
+
+      {slackConnectState && (
+        <>
+          <Paper withBorder m="xs" p="lg" radius="md" bg={"#fcfcfd"}>
+            <Flex align={"center"} gap={"sm"}>
+              <Image src={SlackLogo} alt="slack" width={25} height={25} />
+              <Flex direction={"column"}>
+                <Text fw={600}>
+                  {channelConnected
+                    ? "✅ Slack Channel Connected"
+                    : "Connect a Channel"}
+                </Text>
+                <Text size={"xs"} color="gray">
+                  Slack notifications will be sent to this channel
+                </Text>
+              </Flex>
+            </Flex>
+            <Divider mt="md" />
+            {connectedChannel !== undefined ? (
+              <SlackAlert selectedChannel={connectedChannel} />
+            ) : (
+              <Select
+                // data={channelList!.map((channel) => ({
+                //   value: channel.channelName,
+                //   label: channel.channelName,
+                // }))}
+                data={[]}
+                value={connectedChannel}
+                // onChange={(value) => {
+                //   if (value) {
+                //     const selected = channelList!.find((channel) => channel.channelName === value);
+                //     setSelectedChannel(selected);
+                //   }
+                // }}
+                // mt={'md'}
+                // placeholder='Select a channel to get notified!'
+              />
+            )}
+          </Paper>
+          <Paper withBorder m="xs" p="lg" radius="md" bg={"#fcfcfd"}>
+            <Flex align={"center"} justify={"space-between"}>
+              <Flex align={"center"} gap={"sm"}>
+                <Image src={SlackLogo} alt="slack" width={25} height={25} />
+                <Flex direction={"column"}>
+                  <Text fw={600}>✅ Slack Connected</Text>
+                  <Text color="gray" size={"xs"}>
+                    Connected by{" "}
+                    {userData.client.slack_bot_connecting_user_name}
+                  </Text>
+                </Flex>
+              </Flex>
+              <Button disabled className={""} variant={"outline"} color={"red"}>
+                Connected
+              </Button>
+            </Flex>
+          </Paper>
+        </>
+      )}
     </>
   );
 }

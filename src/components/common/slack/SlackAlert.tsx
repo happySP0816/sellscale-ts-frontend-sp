@@ -64,7 +64,7 @@ export default function SlackAlert(props: any) {
                 color: 'red'
               }}
             >
-              {props.selectedChannel}
+              #{props.selectedChannel}
             </span>
           </Text>
           {/* <Text size={'xs'} color='gray'>

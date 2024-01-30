@@ -11,6 +11,7 @@ import { TaskHandlerReviewLinkedinCampaign } from './TaskHandlers/TaskHandlerRev
 import { TaskHandlerSegmentCreation } from './TaskHandlers/TaskHandlerSegmentCreation';
 import { TaskHandlerDemoFeedback } from './TaskHandlers/TaskHandlerDemoFeedback';
 import { TaskHandlerSchedulingFeedback } from './TaskHandlers/TaskHandlerSchedulingFeedback';
+import { TaskHandlerCreatePrefilters } from './TaskHandlers/TaskHandlerCreatePrefilters';
 
 export interface OperatorDashboardEntry {
   id: number;
@@ -54,6 +55,11 @@ const TASK_ROUTER: any = {
     instruction: 'Give feedback on how the demo went',
     enabledCompleteButton: true,
   },
+  CREATE_PREFILTERS: {
+    component: TaskHandlerCreatePrefilters,
+    instruction: 'Create pre-filters to guide AI prospecting',
+    enabledCompleteButton: true
+  }
 };
 
 const OperatorDashTaskRouter: React.FC = () => {

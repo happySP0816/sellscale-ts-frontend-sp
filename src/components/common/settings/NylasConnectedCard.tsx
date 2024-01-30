@@ -75,7 +75,7 @@ const useStyles = createStyles((theme) => ({
 
 const REDIRECT_URI = `${window.location.origin}/settings`;
 
-export default function NylasConnectedCard(props: { connected: boolean, showSmartlead: boolean }) {
+export default function NylasConnectedCard(props: { connected: boolean, showSmartlead?: boolean }) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();

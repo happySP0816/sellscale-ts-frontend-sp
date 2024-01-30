@@ -821,14 +821,14 @@ export default function ProspectConvo(props: Props) {
                 LinkedIn <Badge>{currentConvoLiMessages?.length}</Badge>
               </Tabs.Tab>
             )}
-            {prospect?.email && (
+            {prospect?.email && !smartleadEmailConversation.length && (
               <Tabs.Tab value='EMAIL' icon={<IconMail size='0.8rem' />}>
-                Email
+                Email (Primary Inbox)
               </Tabs.Tab>
             )}
             {smartleadEmailConversation.length > 0 && (
               <Tabs.Tab value='SMARTLEAD' icon={<IconMail size='0.8rem' />}>
-                Email - Beta
+                Email
               </Tabs.Tab>
             )}
 

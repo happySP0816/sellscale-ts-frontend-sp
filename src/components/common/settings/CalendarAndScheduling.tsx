@@ -198,7 +198,7 @@ export default function CalendarAndScheduling() {
           </Flex>
         )}
       </Card>
-      <Card>
+      {/* <Card>
         <Text fz='lg' fw='bold'>
           Calendly Integration
         </Text>
@@ -226,7 +226,7 @@ export default function CalendarAndScheduling() {
             Connect to Calendly
           </Button>
         )}
-      </Card>
+      </Card> */}
 
       <Card>
         <Text fz='lg' fw='bold'>

@@ -18,6 +18,10 @@ import {
   Loader,
   useMantineTheme,
   TextInput,
+  Box,
+  Flex,
+  Divider,
+  Anchor,
 } from "@mantine/core";
 import { openConfirmModal, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
@@ -75,11 +79,15 @@ const useStyles = createStyles((theme) => ({
 
 const REDIRECT_URI = `${window.location.origin}/settings`;
 
-export default function NylasConnectedCard(props: { connected: boolean, showSmartlead?: boolean }) {
+export default function NylasConnectedCard(props: {
+  connected: boolean;
+  showSmartlead?: boolean;
+}) {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const queryClient = useQueryClient();
-  const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
+  const [currentProject, setCurrentProject] =
+    useRecoilState(currentProjectState);
 
   const [campaignUrl, setCampaignUrl] = useState<string>(
     currentProject?.smartlead_campaign_id
@@ -152,7 +160,7 @@ export default function NylasConnectedCard(props: { connected: boolean, showSmar
         let result = await postCreateSmartleadCampaign(
           userToken,
           currentProject?.id,
-          true,
+          true
         );
         if (result.status === "success") {
           // Refresh the smartlead data
@@ -162,7 +170,7 @@ export default function NylasConnectedCard(props: { connected: boolean, showSmar
           });
           setCampaignUrl(
             `https://app.smartlead.ai/app/email-campaign/${result.data.campaign_id}/analytics`
-          )
+          );
         }
         return result;
       },
@@ -190,107 +198,107 @@ export default function NylasConnectedCard(props: { connected: boolean, showSmar
       ?.total;
 
   return (
-    <>
-      <Paper withBorder m="xs" p="md" radius="md">
+    <Box bg={"white"} py={"md"}>
+      <Box px={"md"}>
+        <Group>
+          <Text fw={600} size={28}>Email integration</Text>
+          {props.connected ? (
+            <Badge
+              size="xl"
+              variant="filled"
+              color="blue"
+              pr={8}
+              rightSection={
+                <ActionIcon
+                  size="xs"
+                  color="blue"
+                  radius="xl"
+                  variant="transparent"
+                  onClick={async () => openConfirmDisconnectModal()}
+                >
+                  <IconX size={15} color="white" />
+                </ActionIcon>
+              }
+              styles={{ root: { textTransform: "initial" } }}
+            >
+              Connected
+            </Badge>
+          ) : (
+            <Badge
+              size="xl"
+              variant="filled"
+              color="red"
+              styles={{ root: { textTransform: "initial" } }}
+            >
+              Not Connected
+            </Badge>
+          )}
+        </Group>
+
+        <Text fz="sm" pt="xs" fw={600} color="gray.6">
+          By connecting your email, SellScale is able to manage, read, and
+          respond to your contact's conversations.
+        </Text>
+      </Box>
+      <Paper withBorder m="xs" p="md" radius="md" bg={"gray.0"}>
         <Stack>
           <div>
-            <Group>
-              <Title order={3}>Multichannel Email Integration</Title>
-              {props.connected ? (
-                <Badge
-                  size="xl"
-                  variant="filled"
-                  color="blue"
-                  pr={8}
-                  rightSection={
-                    <ActionIcon
-                      size="xs"
-                      color="blue"
-                      radius="xl"
-                      variant="transparent"
-                      onClick={async () => openConfirmDisconnectModal()}
-                    >
-                      <IconX size={15} color="white" />
-                    </ActionIcon>
-                  }
-                  styles={{ root: { textTransform: "initial" } }}
-                >
-                  Connected
-                </Badge>
-              ) : (
-                <Badge
-                  size="xl"
-                  variant="filled"
-                  color="red"
-                  styles={{ root: { textTransform: "initial" } }}
-                >
-                  Not Connected
-                </Badge>
-              )}
-            </Group>
             {props.connected ? (
-              <Text fz="sm" pt="xs">
-                By connecting your email, SellScale is able to manage, read, and
-                respond to your contact's conversations.
-              </Text>
+              <></>
             ) : (
               <>
-                <Text fz="sm" pt="xs">
-                  By connecting your email, SellScale is able to manage, read,
-                  and respond to your contact's conversations.
-                </Text>
-                <Center>
-                  <Button
-                    component="a"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={
-                      nylasClientId
-                        ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scopes=email.read_only,email.send`
-                        : ""
-                    }
-                    my={20}
-                    variant="outline"
-                    size="md"
-                    color="gray"
-                    sx={{
-                      height: "40px",
-                      fontFamily: "Roboto, sans-serif;",
-                      fontSize: "14px",
-                      color: "#00000088",
-                      textTransform: "uppercase",
-                    }}
-                    pl="8px"
-                    pr="30px"
-                    leftIcon={
-                      <img
-                        src={GoogleLogo}
-                        width="18px"
-                        height="18px"
-                        style={{
-                          marginRight: "24px",
-                          marginLeft: "8px",
-                          marginTop: "11px",
-                          marginBottom: "11px",
-                        }}
-                      />
-                    }
-                    loading={isFetching}
-                  >
-                    SIGN IN WITH GOOGLE
-                  </Button>
-                </Center>
-                <Text color="gray" size="xs">
-                  (App’s) use and transfer to any other app of information
-                  received from Google APIs will adhere to{" "}
-                  <a
-                    target="_blank"
-                    href="https://developers.google.com/terms/api-services-user-data-policy"
-                  >
-                    Google API Services User Data Policy
-                  </a>
-                  , including the Limited Use requirements
-                </Text>
+                <Box
+                  sx={(theme) => ({
+                    border: `1px solid ${theme.colors.gray[4]}`,
+                    backgroundColor: theme.colors.gray[0],
+                    borderRadius: 12,
+                  })}
+                  p={"md"}
+                >
+                  <Flex justify={"space-between"} align={"center"} wrap={'wrap'} gap={4}>
+                    <Flex align={"center"}  wrap={'wrap'} gap={4}>
+                      <img src={GoogleLogo} width="24px" height="24px" />
+
+                      <Text fw={600} >
+                        Connect to your Gmail Account
+                      </Text>
+                    </Flex>
+
+                    <Button
+                      className={"bg-black"}
+                      variant={"filled"}
+                      color={""}
+                      component="a"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={
+                        nylasClientId
+                          ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scopes=email.read_only,email.send`
+                          : ""
+                      }
+                      leftIcon={
+                        <img src={GoogleLogo} width="18px" height="18px" />
+                      }
+                      loading={isFetching}
+                    >
+                      Sign in with Google
+                    </Button>
+                  </Flex>
+
+                  <Divider my={"sm"} />
+
+                  <Text color="gray.6" size="sm" fw={600}>
+                    SellScale's use and transfer to any other app of information
+                    received from Google APIs will adhere to{" "}
+                    <Anchor
+                      target="_blank"
+                      href="https://developers.google.com/terms/api-services-user-data-policy"
+                    >
+                      Google API Services User Data Policy
+                    </Anchor>
+                    , including the Limited Use requirements
+                  </Text>
+                </Box>
               </>
             )}
           </div>
@@ -382,77 +390,79 @@ export default function NylasConnectedCard(props: { connected: boolean, showSmar
         </Stack>
       </Paper> */}
 
-      {props.showSmartlead && <Paper withBorder m="xs" p="md" radius="md">
-        <Stack>
-          <div>
-            <Group>
-              <Title order={3}>Smartlead Campaign Sync</Title>
-              {currentProject?.smartlead_campaign_id ? (
-                <Badge
-                  size="xl"
-                  variant="filled"
-                  color="blue"
-                  styles={{ root: { textTransform: "initial" } }}
-                >
-                  Synced
-                </Badge>
-              ) : (
-                <Button
-                  variant="outline"
-                  color="green"
-                  radius="lg"
-                  leftIcon={<IconPlugConnected size={18} />}
-                  onClick={() => {
-                    openConfirmModal({
-                      title: <Title order={3}>Sync into Smartlead</Title>,
-                      children: (
-                        <>
-                          <Text>
-                            After syncing, verify the campaign is created in{" "}
-                            <a
-                              href="https://app.smartlead.ai/app/email-campaign/all"
-                              target="_blank"
-                            >
-                              Smartlead
-                            </a>
-                            .
-                          </Text>
-                          <Text fw="bold" mt="xl">
-                            Only sync once the sequence is fully ready.
-                          </Text>
-                        </>
-                      ),
-                      labels: {
-                        confirm: "Sync",
-                        cancel: "Go Back",
-                      },
-                      cancelProps: { color: "red", variant: "outline" },
-                      confirmProps: { color: "green" },
-                      onConfirm: () => {
-                        triggerPostCreateSmartleadCampaign()
-                      },
-                    });
-                  }}
-                >
-                  Sync Campaign
-                </Button>
-              )}
-              <Text>
-                After this campaign is ready to send, press `Sync` to create a
-                campaign in Smartlead with multiple mailboxes and optimal configurations.
-              </Text>
-            </Group>
-          </div>
-          <Group noWrap>
-            <TextInput
-              label="Smartlead Campaign Page URL"
-              disabled
-              placeholder="https://app.smartlead.ai/app/email-campaign/..."
-              value={campaignUrl}
-              onChange={(event) => setCampaignUrl(event.currentTarget.value)}
-              miw={500}
-            />
-            {/* <Button
+      {props.showSmartlead && (
+        <Paper withBorder m="xs" p="md" radius="md">
+          <Stack>
+            <div>
+              <Group>
+                <Title order={3}>Smartlead Campaign Sync</Title>
+                {currentProject?.smartlead_campaign_id ? (
+                  <Badge
+                    size="xl"
+                    variant="filled"
+                    color="blue"
+                    styles={{ root: { textTransform: "initial" } }}
+                  >
+                    Synced
+                  </Badge>
+                ) : (
+                  <Button
+                    variant="outline"
+                    color="green"
+                    radius="lg"
+                    leftIcon={<IconPlugConnected size={18} />}
+                    onClick={() => {
+                      openConfirmModal({
+                        title: <Title order={3}>Sync into Smartlead</Title>,
+                        children: (
+                          <>
+                            <Text>
+                              After syncing, verify the campaign is created in{" "}
+                              <a
+                                href="https://app.smartlead.ai/app/email-campaign/all"
+                                target="_blank"
+                              >
+                                Smartlead
+                              </a>
+                              .
+                            </Text>
+                            <Text fw="bold" mt="xl">
+                              Only sync once the sequence is fully ready.
+                            </Text>
+                          </>
+                        ),
+                        labels: {
+                          confirm: "Sync",
+                          cancel: "Go Back",
+                        },
+                        cancelProps: { color: "red", variant: "outline" },
+                        confirmProps: { color: "green" },
+                        onConfirm: () => {
+                          triggerPostCreateSmartleadCampaign();
+                        },
+                      });
+                    }}
+                  >
+                    Sync Campaign
+                  </Button>
+                )}
+                <Text>
+                  After this campaign is ready to send, press `Sync` to create a
+                  campaign in Smartlead with multiple mailboxes and optimal
+                  configurations.
+                </Text>
+              </Group>
+            </div>
+            <Group noWrap>
+              <TextInput
+                label="Smartlead Campaign Page URL"
+                disabled
+                placeholder="https://app.smartlead.ai/app/email-campaign/..."
+                value={campaignUrl}
+                onChange={(event) => setCampaignUrl(event.currentTarget.value)}
+                miw={500}
+              />
+              {/* <Button
               disabled={!campaignUrl.trim()}
               onClick={async () => {
                 if (!currentProject) return;
@@ -473,12 +483,13 @@ export default function NylasConnectedCard(props: { connected: boolean, showSmar
             >
               Submit
             </Button> */}
-          </Group>
-        </Stack>
-      </Paper>}
+            </Group>
+          </Stack>
+        </Paper>
+      )}
 
       <MultiEmails />
       <ScheduleSetting />
-    </>
+    </Box>
   );
 }

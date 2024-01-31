@@ -21,11 +21,12 @@ import {
   Box,
   Flex,
   Divider,
+  Image,
   Anchor,
 } from "@mantine/core";
 import { openConfirmModal, openContextModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import GoogleLogo from "./g-logo.png";
+import GoogleLogo from "@assets/images/google-g.svg";
 import {
   IconBrandGoogle,
   IconBrandLinkedin,
@@ -201,7 +202,7 @@ export default function NylasConnectedCard(props: {
     <Box bg={"white"} py={"md"}>
       <Box px={"md"}>
         <Group>
-          <Text fw={600} size={28}>Email integration</Text>
+          <Text fw={600} size={28}>Email Integration</Text>
           {props.connected ? (
             <Badge
               size="xl"
@@ -257,7 +258,7 @@ export default function NylasConnectedCard(props: {
                 >
                   <Flex justify={"space-between"} align={"center"} wrap={'wrap'} gap={4}>
                     <Flex align={"center"}  wrap={'wrap'} gap={4}>
-                      <img src={GoogleLogo} width="24px" height="24px" />
+                      <Image src={GoogleLogo} maw="24px" mah="24px" mr='4px'/>
 
                       <Text fw={600} >
                         Connect to your Gmail Account

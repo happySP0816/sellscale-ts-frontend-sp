@@ -2920,6 +2920,7 @@ function FrameworkSection(props: {
                                     active: bf.default,
                                     humanFeedback: bf.human_feedback,
                                     blockList: bf.transformer_blocklist,
+                                    onChange: props.onFrameworkChange
                                   },
                                   // message: bf.description,
                                   // handleSubmit: async (message: string) => {

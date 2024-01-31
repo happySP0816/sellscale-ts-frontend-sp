@@ -66,6 +66,7 @@ export default function LiBfTemplateModal({
     active: boolean;
     humanFeedback: string;
     blockList: string[];
+    onChange: (framework: BumpFramework) => void;
   };
 }>) {
   const theme = useMantineTheme();
@@ -114,6 +115,12 @@ export default function LiBfTemplateModal({
       await createTemplate(values);
     } else {
       await updateTemplate(values);
+    }
+
+    if (innerProps?.editProps?.onChange) {
+      innerProps?.editProps?.onChange(
+        innerProps?.editProps?.bf
+      )
     }
   };
 

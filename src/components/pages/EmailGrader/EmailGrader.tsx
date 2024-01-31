@@ -198,8 +198,15 @@ const EmailGrader = () => {
                   <Text color='gray.6' fw={600} fz={'sm'}>
                     SUBJECT LINE
                   </Text>
+<<<<<<< HEAD
+                  <TextInput
+                    placeholder='Subject'
+                    value={subject}
+                    onChange={(e) => setSubject(e.currentTarget.value)}
+                  />
+=======
                   <TextInput placeholder='Subject' value={subject} onChange={(e) => setSubject(e.currentTarget.value)} />
-                  {/* </Box> */}
+>>>>>>> 28077d2b76ed14d05f50153cfc8f9c8ecdf8ba06
                 </>
               ) : (
                 <>
@@ -209,7 +216,18 @@ const EmailGrader = () => {
                   </Text>
                   <div
                     onClick={toggleEditMode}
+<<<<<<< HEAD
+                    style={{
+                      border: 'solid 1px #ddd',
+                      padding: 4,
+                      paddingLeft: 12,
+                      paddingRight: 12,
+                      borderRadius: 8,
+                      overflowY: 'scroll',
+                    }}
+=======
                     style={{ border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll' }}
+>>>>>>> 28077d2b76ed14d05f50153cfc8f9c8ecdf8ba06
                     dangerouslySetInnerHTML={{ __html: highlightPersonalizations(subject) }}
                   ></div>
 
@@ -236,7 +254,6 @@ const EmailGrader = () => {
                 //     <div
                 //       onClick={toggleEditMode}
                 //       style={{height: 500, border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll', paddingBottom: '40px'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(bodyRef.current) }}></div>
-                //   {/* </Box> */}
                 // </>
               )}
               <Button
@@ -273,8 +290,6 @@ const EmailGrader = () => {
                   }}
                 ></div>
               </Box>
-              {/* </>
-              )} */}
               <Button
                 ml='auto'
                 onClick={toggleEditMode}

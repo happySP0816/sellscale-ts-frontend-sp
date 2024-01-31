@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
-import DemoFeedbackReview from '@pages/DemoFeedbackReview';
+import SchedulingReview from '@pages/SchedulingReview';
 
 interface TaskHandlerSchedulingFeedbackData {
   data: {
@@ -16,10 +16,11 @@ export const TaskHandlerSchedulingFeedback = (props: TaskHandlerSchedulingFeedba
   const userToken = useRecoilValue(userTokenState);
 
   return (
-    <DemoFeedbackReview
+    <SchedulingReview
       prospect_id={props.data.prospect_id}
       prospect_full_name={props.data.prospect_full_name}
       prospect_demo_date_formatted={props.data.prospect_demo_date_formatted}
+      onTaskComplete={props.onTaskComplete}
     />
   );
 };

@@ -1,5 +1,5 @@
 import React, { FC, forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { useDisclosure } from '@mantine/hooks';
+import { useDidUpdate, useDisclosure } from '@mantine/hooks';
 import {
   Text,
   Flex,
@@ -43,175 +43,202 @@ import { navigateToPage } from '@utils/documentChange';
 import { useNavigate } from 'react-router-dom';
 import postSubmitDemoFeedback from '@utils/requests/postSubmitDemoFeedback';
 
-const ProvideFeedback = forwardRef((props: { prospect: ProspectShallow }, ref) => {
-  useImperativeHandle(
-    ref,
-    () => {
-      return {
-        getState: () => {
-          return {
-            status,
-            rating,
-            feedback,
-            reschedule,
-            rescheduleDate,
-          };
-        },
+const ProvideFeedback = forwardRef(
+  (
+    props: { prospect: ProspectShallow; sendFeedback: boolean; onTaskComplete?: () => void },
+    ref
+  ) => {
+    useImperativeHandle(
+      ref,
+      () => {
+        return {
+          getState: () => {
+            return {
+              status,
+              rating,
+              feedback,
+              reschedule,
+              rescheduleDate,
+            };
+          },
+        };
+      },
+      []
+    );
+
+    const userToken = useRecoilValue(userTokenState);
+    const navigate = useNavigate();
+
+    const [status, setStatus] = useState<string | null>('yes');
+    const [rating, setRating] = useState(0);
+    const [feedback, setFeedback] = useState('');
+    const [reschedule, setReschedule] = useState('yes');
+    const [rescheduleDate, setRescheduleDate] = useState<Date | null>(null);
+
+    useDidUpdate(() => {
+      const handleNext = async () => {
+        await postSubmitDemoFeedback(
+          userToken,
+          props.prospect.id,
+          status === 'yes' ? 'OCCURRED' : status === 'no-show' ? 'NO-SHOW' : 'RESCHEDULED',
+          `${rating}/5`,
+          feedback,
+          rescheduleDate ?? undefined,
+          undefined
+        );
+        props.onTaskComplete?.();
+        navigateToPage(navigate, '/overview');
       };
-    },
-    []
-  );
+      if (props.sendFeedback) {
+        handleNext();
+      }
+    }, [props.sendFeedback]);
 
-  const [status, setStatus] = useState<string | null>('yes');
-  const [rating, setRating] = useState(0);
-  const [feedback, setFeedback] = useState('');
-  const [reschedule, setReschedule] = useState('yes');
-  const [rescheduleDate, setRescheduleDate] = useState<Date | null>(null);
-
-  return (
-    <Flex w={'100%'} p={'xl'}>
-      <Tabs
-        value={status}
-        onTabChange={setStatus}
-        mt='md'
-        keepMounted={false}
-        h='100%'
-        w={'100%'}
-        variant='unstyled'
-        styles={(theme) => ({
-          tabsList: {
-            height: '44px',
-          },
-          panel: {
-            backgroundColor: theme.white,
-            marginInline: 7,
-            marginBlock: 20,
-          },
-          tab: {
-            ...theme.fn.focusStyles(),
-            backgroundColor: theme.white,
-            marginBottom: 0,
-            height: '35px',
-            marginInline: 5,
-            border: '2px solid',
-            borderRadius: 8,
-            color: theme.colors.blue[theme.fn.primaryShade()],
-
-            '&[data-active]': {},
-            '&:disabled': {
-              backgroundColor: theme.colors.gray[theme.fn.primaryShade()],
-              color: theme.colors.gray[4],
+    return (
+      <Flex w={'100%'} p={'xl'}>
+        <Tabs
+          value={status}
+          onTabChange={setStatus}
+          mt='md'
+          keepMounted={false}
+          h='100%'
+          w={'100%'}
+          variant='unstyled'
+          styles={(theme) => ({
+            tabsList: {
+              height: '44px',
             },
-            '&:not([data-active])': {
-              borderColor: '#f3f2f4',
+            panel: {
+              backgroundColor: theme.white,
+              marginInline: 7,
+              marginBlock: 20,
             },
-          },
-          tabLabel: {
-            fontWeight: 700,
-            fontSize: rem(14),
-          },
-        })}
-      >
-        <Tabs.List grow>
-          <Tabs.Tab value='yes' icon={<IconCircleCheck size='0.9rem' />}>
-            <Text color='black'>Yes</Text>
-          </Tabs.Tab>
-          <Tabs.Tab value='no-show' icon={<IconXboxX size='0.9rem' color='red' />}>
-            <Text color='black'>No-Show</Text>
-          </Tabs.Tab>
-          <Tabs.Tab value='reschedule' icon={<IconClock size='0.9rem' color='orange' />}>
-            <Text color='black'>Rescheduled</Text>
-          </Tabs.Tab>
-        </Tabs.List>
-        <Tabs.Panel value='yes'>
-          <Text tt={'uppercase'} color='gray' fw={500}>
-            rate demo:
-          </Text>
-          <Rating value={rating} onChange={setRating} />
-          <Text tt={'uppercase'} color='gray' fw={500} mt={'md'}>
-            provide feedback:
-          </Text>
-          <Textarea
-            placeholder='Write feedback here...'
-            minRows={5}
-            value={feedback}
-            onChange={(event) => setFeedback(event.currentTarget.value)}
-          />
-        </Tabs.Panel>
-        <Tabs.Panel value='no-show'>
-          <Flex align={'center'} justify={'space-between'}>
-            <Flex direction={'column'} gap={5} w={'100%'}>
-              <Text tt={'uppercase'} color='gray' fw={500} size={'sm'}>
-                do you want sellscale to reschedule:
-              </Text>
-              <Flex>
-                <Radio.Group>
-                  <Group>
-                    <Radio
-                      label='Yes'
-                      name='Yes'
-                      value='Yes'
-                      px={'xl'}
-                      py={7}
-                      size='xs'
-                      style={{
-                        outline: `${
-                          reschedule === 'yes' ? ' 1px solid #228be6' : ' 1px solid #ced4da'
-                        }`,
-                        borderRadius: '6px',
-                      }}
-                      onClick={() => setReschedule('yes')}
-                    />
-                    <Radio
-                      label='No'
-                      name='No'
-                      value='No'
-                      px={'xl'}
-                      py={7}
-                      size='xs'
-                      style={{
-                        outline: `${
-                          reschedule === 'no' ? ' 1px solid #228be6' : '1px solid #ced4da'
-                        }`,
-                        borderRadius: '6px',
-                      }}
-                      onClick={() => setReschedule('no')}
-                    />
-                  </Group>
-                </Radio.Group>
+            tab: {
+              ...theme.fn.focusStyles(),
+              backgroundColor: theme.white,
+              marginBottom: 0,
+              height: '35px',
+              marginInline: 5,
+              border: '2px solid',
+              borderRadius: 8,
+              color: theme.colors.blue[theme.fn.primaryShade()],
+
+              '&[data-active]': {},
+              '&:disabled': {
+                backgroundColor: theme.colors.gray[theme.fn.primaryShade()],
+                color: theme.colors.gray[4],
+              },
+              '&:not([data-active])': {
+                borderColor: '#f3f2f4',
+              },
+            },
+            tabLabel: {
+              fontWeight: 700,
+              fontSize: rem(14),
+            },
+          })}
+        >
+          <Tabs.List grow>
+            <Tabs.Tab value='yes' icon={<IconCircleCheck size='0.9rem' />}>
+              <Text color='black'>Yes</Text>
+            </Tabs.Tab>
+            <Tabs.Tab value='no-show' icon={<IconXboxX size='0.9rem' color='red' />}>
+              <Text color='black'>No-Show</Text>
+            </Tabs.Tab>
+            <Tabs.Tab value='reschedule' icon={<IconClock size='0.9rem' color='orange' />}>
+              <Text color='black'>Rescheduled</Text>
+            </Tabs.Tab>
+          </Tabs.List>
+          <Tabs.Panel value='yes'>
+            <Text tt={'uppercase'} color='gray' fw={500}>
+              rate demo:
+            </Text>
+            <Rating value={rating} onChange={setRating} />
+            <Text tt={'uppercase'} color='gray' fw={500} mt={'md'}>
+              provide feedback:
+            </Text>
+            <Textarea
+              placeholder='Write feedback here...'
+              minRows={5}
+              value={feedback}
+              onChange={(event) => setFeedback(event.currentTarget.value)}
+            />
+          </Tabs.Panel>
+          <Tabs.Panel value='no-show'>
+            <Flex align={'center'} justify={'space-between'}>
+              <Flex direction={'column'} gap={5} w={'100%'}>
+                <Text tt={'uppercase'} color='gray' fw={500} size={'sm'}>
+                  do you want sellscale to reschedule:
+                </Text>
+                <Flex>
+                  <Radio.Group>
+                    <Group>
+                      <Radio
+                        label='Yes'
+                        name='Yes'
+                        value='Yes'
+                        px={'xl'}
+                        py={7}
+                        size='xs'
+                        style={{
+                          outline: `${
+                            reschedule === 'yes' ? ' 1px solid #228be6' : ' 1px solid #ced4da'
+                          }`,
+                          borderRadius: '6px',
+                        }}
+                        onClick={() => setReschedule('yes')}
+                      />
+                      <Radio
+                        label='No'
+                        name='No'
+                        value='No'
+                        px={'xl'}
+                        py={7}
+                        size='xs'
+                        style={{
+                          outline: `${
+                            reschedule === 'no' ? ' 1px solid #228be6' : '1px solid #ced4da'
+                          }`,
+                          borderRadius: '6px',
+                        }}
+                        onClick={() => setReschedule('no')}
+                      />
+                    </Group>
+                  </Radio.Group>
+                </Flex>
+              </Flex>
+              <Flex direction={'column'} gap={5} w={'100%'}>
+                <Text tt={'uppercase'} color='gray' fw={500} size={'sm'}>
+                  reschedule to:
+                </Text>
+                <DateInput
+                  value={rescheduleDate}
+                  onChange={setRescheduleDate}
+                  placeholder='Set Date'
+                  size='xs'
+                  disabled={reschedule === 'no'}
+                  rightSection={<IconCalendar size={'0.8rem'} />}
+                />
               </Flex>
             </Flex>
+          </Tabs.Panel>
+          <Tabs.Panel value='reschedule'>
             <Flex direction={'column'} gap={5} w={'100%'}>
               <Text tt={'uppercase'} color='gray' fw={500} size={'sm'}>
-                reschedule to:
+                what date was it rescheduled to:
               </Text>
               <DateInput
-                value={rescheduleDate}
-                onChange={setRescheduleDate}
                 placeholder='Set Date'
-                size='xs'
-                disabled={reschedule === 'no'}
-                rightSection={<IconCalendar size={'0.8rem'} />}
+                size='sm'
+                rightSection={<IconCalendar size={'1rem'} />}
               />
             </Flex>
-          </Flex>
-        </Tabs.Panel>
-        <Tabs.Panel value='reschedule'>
-          <Flex direction={'column'} gap={5} w={'100%'}>
-            <Text tt={'uppercase'} color='gray' fw={500} size={'sm'}>
-              what date was it rescheduled to:
-            </Text>
-            <DateInput
-              placeholder='Set Date'
-              size='sm'
-              rightSection={<IconCalendar size={'1rem'} />}
-            />
-          </Flex>
-        </Tabs.Panel>
-      </Tabs>
-    </Flex>
-  );
-});
+          </Tabs.Panel>
+        </Tabs>
+      </Flex>
+    );
+  }
+);
 
 export const ProspectOverview = (props: { prospect: ProspectShallow; demoDate: string }) => {
   const userData = useRecoilValue(userDataState);
@@ -326,38 +353,14 @@ export default function DemoFeedbackReview(props: {
   prospect_id: number;
   prospect_full_name: string;
   prospect_demo_date_formatted: string;
+  onTaskComplete?: () => void;
 }) {
   const userToken = useRecoilValue(userTokenState);
   const [opened, { open, close }] = useDisclosure(false);
   const [step, setStep] = useState('prospect_overview');
-  const navigate = useNavigate();
 
   const feedbackRef = useRef<any>();
-
-  const handleNext = async () => {
-    const feedback = feedbackRef.current?.getState() as {
-      status: string;
-      rating: number;
-      feedback: string;
-      reschedule: string;
-      rescheduleDate: Date | null;
-    };
-
-    await postSubmitDemoFeedback(
-      userToken,
-      props.prospect_id,
-      feedback.status === 'yes'
-        ? 'OCCURRED'
-        : feedback.status === 'no-show'
-        ? 'NO-SHOW'
-        : 'RESCHEDULED',
-      `${feedback.rating}/5`,
-      feedback.feedback,
-      feedback.rescheduleDate ?? undefined,
-      undefined
-    );
-    navigateToPage(navigate, '/overview');
-  };
+  const [sendFeedback, setSendFeedback] = useState(false);
 
   const { data: prospect } = useQuery({
     queryKey: [`query-get-demo-feedback-prospect-shallow-${props.prospect_id}`],
@@ -365,7 +368,7 @@ export default function DemoFeedbackReview(props: {
       const response = await getProspectShallowByID(userToken, props.prospect_id);
       return response.status === 'success' ? (response.data as ProspectShallow) : undefined;
     },
-    enabled: props.prospect_id !== -1,
+    enabled: !!props.prospect_id,
   });
 
   if (!prospect) return null;
@@ -427,7 +430,12 @@ export default function DemoFeedbackReview(props: {
             {step === 'prospect_overview' ? (
               <ProspectOverview prospect={prospect} demoDate={props.prospect_demo_date_formatted} />
             ) : (
-              <ProvideFeedback ref={feedbackRef} prospect={prospect} />
+              <ProvideFeedback
+                ref={feedbackRef}
+                prospect={prospect}
+                sendFeedback={sendFeedback}
+                onTaskComplete={props.onTaskComplete}
+              />
             )}
           </Flex>
           <Flex gap={60} p={'xl'} justify={'space-between'}>
@@ -452,7 +460,9 @@ export default function DemoFeedbackReview(props: {
               color={step === 'provide_feedback' ? 'green' : ''}
               onClick={() => {
                 if (step === 'prospect_overview') setStep('provide_feedback');
-                else handleNext();
+                else {
+                  setSendFeedback(true);
+                }
               }}
               radius={'md'}
             >

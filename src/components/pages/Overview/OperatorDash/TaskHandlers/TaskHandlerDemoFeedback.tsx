@@ -20,6 +20,7 @@ export const TaskHandlerDemoFeedback = (props: TaskHandlerDemoFeedbackData) => {
       prospect_id={props.data.prospect_id}
       prospect_full_name={props.data.prospect_full_name}
       prospect_demo_date_formatted={props.data.prospect_demo_date_formatted}
+      onTaskComplete={props.onTaskComplete}
     />
   );
 };

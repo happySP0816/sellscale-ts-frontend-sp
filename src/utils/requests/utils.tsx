@@ -81,25 +81,25 @@ async function getResponseJSON(
     res &&
     res.message.toLowerCase() === "invalid linkedin cookies"
   ) {
-    if (showNotif) {
-      hideNotification("inactive-linkedin");
-      showNotification({
-        id: "inactive-linkedin",
-        title: (
-          <Group>
-            <Text fz='md'>LinkedIn Disconnected</Text>
-            <Button leftIcon={<IconPlugConnected size='0.9rem' />} variant="light" color="red" size="xs" radius="xl" compact
-              onClick={() => {
-                window.location.href = "/settings/linkedinConnection";
-              }}
-            >Go to Reconnect</Button>
-          </Group>
-        ),
-        message: `Looks like your LinkedIn account has been disconnected. Please reconnect.`,
-        color: "red",
-        autoClose: false,
-      });
-    }
+    // if (showNotif) {
+    //   hideNotification("inactive-linkedin");
+    //   showNotification({
+    //     id: "inactive-linkedin",
+    //     title: (
+    //       <Group>
+    //         <Text fz='md'>LinkedIn Disconnected</Text>
+    //         <Button leftIcon={<IconPlugConnected size='0.9rem' />} variant="light" color="red" size="xs" radius="xl" compact
+    //           onClick={() => {
+    //             window.location.href = "/settings/linkedinConnection";
+    //           }}
+    //         >Go to Reconnect</Button>
+    //       </Group>
+    //     ),
+    //     message: `Looks like your LinkedIn account has been disconnected. Please reconnect.`,
+    //     color: "red",
+    //     autoClose: false,
+    //   });
+    // }
     return {
       status: "error",
       title: `LinkedIn Disconnected`,

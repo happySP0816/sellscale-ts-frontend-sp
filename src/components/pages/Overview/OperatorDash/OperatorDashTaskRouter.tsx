@@ -15,6 +15,7 @@ import { TaskHandlerCreatePrefilters } from './TaskHandlers/TaskHandlerCreatePre
 import { TaskHandlerConnectSlack } from './TaskHandlers/TaskHandlerConnectSlack';
 import { TaskHandlerConnectCalendar } from './TaskHandlers/TaskHandlerConnectCalendar';
 import { TaskHandlerAddDNCFilters } from './TaskHandlers/TaskHandlerAddDNCFilters';
+import { TaskHandlerEnrichSegment } from './TaskHandlers/TaskHandlerEnrichSegment';
 
 export interface OperatorDashboardEntry {
   id: number;
@@ -81,6 +82,11 @@ const TASK_ROUTER: any = {
   CONNECT_LINKEDIN: {
     component: TaskHandlerLinkedinDisconnected,
     instruction: 'Connect to LinkedIn then mark as complete',
+    enabledCompleteButton: true,
+  },
+  ENRICH_SEGMENT: {
+    component: TaskHandlerEnrichSegment,
+    instruction: 'Enrich the segment with more data',
     enabledCompleteButton: true,
   }
 };

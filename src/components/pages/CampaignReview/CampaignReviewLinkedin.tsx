@@ -211,7 +211,7 @@ export const Messaging = (props: MessagingProps) => {
       step: x?.title,
       avatar: '',
       username: userData?.sdr_name,
-      message: "Instruction: \"" + x?.description + "\"",
+      message: x?.description
     }
   })
   console.log(props.campaignOverview?.linkedin?.sequence)

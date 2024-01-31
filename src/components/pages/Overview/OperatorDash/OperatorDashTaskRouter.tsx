@@ -12,6 +12,9 @@ import { TaskHandlerSegmentCreation } from './TaskHandlers/TaskHandlerSegmentCre
 import { TaskHandlerDemoFeedback } from './TaskHandlers/TaskHandlerDemoFeedback';
 import { TaskHandlerSchedulingFeedback } from './TaskHandlers/TaskHandlerSchedulingFeedback';
 import { TaskHandlerCreatePrefilters } from './TaskHandlers/TaskHandlerCreatePrefilters';
+import { TaskHandlerConnectSlack } from './TaskHandlers/TaskHandlerConnectSlack';
+import { TaskHandlerConnectCalendar } from './TaskHandlers/TaskHandlerConnectCalendar';
+import { TaskHandlerAddDNCFilters } from './TaskHandlers/TaskHandlerAddDNCFilters';
 
 export interface OperatorDashboardEntry {
   id: number;
@@ -59,6 +62,26 @@ const TASK_ROUTER: any = {
     component: TaskHandlerCreatePrefilters,
     instruction: 'Create pre-filters to guide AI prospecting',
     enabledCompleteButton: true
+  },
+  CONNECT_SLACK: {
+    component: TaskHandlerConnectSlack,
+    instruction: 'Connect to Slack then mark as complete',
+    enabledCompleteButton: true,
+  },
+  ADD_DNC_FILTERS: {
+    component: TaskHandlerAddDNCFilters,
+    instruction: 'Add DNC filters to the system then mark as complete',
+    enabledCompleteButton: true,
+  },
+  ADD_CALENDAR_LINK: {
+    component: TaskHandlerConnectCalendar,
+    instruction: 'Add calendar link to the system then mark as complete',
+    enabledCompleteButton: true,
+  },
+  CONNECT_LINKEDIN: {
+    component: TaskHandlerLinkedinDisconnected,
+    instruction: 'Connect to LinkedIn then mark as complete',
+    enabledCompleteButton: true,
   }
 };
 

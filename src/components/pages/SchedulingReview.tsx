@@ -239,11 +239,15 @@ export const MarkAs = (props: {
               onChange={setNotQualified}
             >
               <Group>
-                <Radio size='xs' value='not_decision' label='Not a decision maker' />
-                <Radio size='xs' value='account_fit' label='Poor account fit' />
-                <Radio size='xs' value='contact' label="Contact is 'open to work'" />
-                <Radio size='xs' value='competitor' label='Competitor' />
-                <Radio size='xs' value='other' label='Other' />
+                <Radio size='xs' value='Not a decision maker.' label='Not a decision maker' />
+                <Radio size='xs' value='Poor account fit' label='Poor account fit' />
+                <Radio
+                  size='xs'
+                  value="Contact is 'Open to work'"
+                  label="Contact is 'open to work'"
+                />
+                <Radio size='xs' value='Competitor' label='Competitor' />
+                <Radio size='xs' value='Other' label='Other' />
               </Group>
             </Radio.Group>
             {notQualified === 'other' && (
@@ -267,11 +271,11 @@ export const MarkAs = (props: {
               onChange={setNotInterested}
             >
               <Group>
-                <Radio size='xs' value='uniconvinced' label='Uniconvinced' />
-                <Radio size='xs' value='timing_not_right' label='Timing not right' />
-                <Radio size='xs' value='unrespoonsive' label='Unresponsive' />
-                <Radio size='xs' value='using_a_competitor' label='Using a competitor' />
-                <Radio size='xs' value='other' label='Other' />
+                <Radio size='xs' value='Unconvinced' label='Unconvinced' />
+                <Radio size='xs' value='Timing not right' label='Timing not right' />
+                <Radio size='xs' value='Unresponsive' label='Unresponsive' />
+                <Radio size='xs' value='Using a competitor' label='Using a competitor' />
+                <Radio size='xs' value='Other' label='Other' />
               </Group>
             </Radio.Group>
             {notInterested === 'other' && (
@@ -532,6 +536,7 @@ export default function SchedulingReview(props: {
             </Flex>
             <Divider w={'100%'} />
           </Flex>
+          <Text>This is an overview of the prospect to jog your memory.</Text>
           <Flex style={{ border: '1px solid #9ac0f7', borderRadius: '6px' }}>
             {step === 'prospect_overview' ? (
               <ProspectOverview prospect={prospect} />

@@ -138,6 +138,9 @@ const ProvideFeedback = forwardRef(
             },
           })}
         >
+          <Text tt={'uppercase'} color='gray' fw={500} size={'sm'} pl={5}>
+            did the demo happen:
+          </Text>
           <Tabs.List grow>
             <Tabs.Tab value='yes' icon={<IconCircleCheck size='0.9rem' />}>
               <Text color='black'>Yes</Text>
@@ -150,11 +153,11 @@ const ProvideFeedback = forwardRef(
             </Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value='yes'>
-            <Text tt={'uppercase'} color='gray' fw={500}>
+            <Text tt={'uppercase'} color='gray' fw={500} size={'sm'}>
               rate demo:
             </Text>
             <Rating value={rating} onChange={setRating} />
-            <Text tt={'uppercase'} color='gray' fw={500} mt={'md'}>
+            <Text tt={'uppercase'} color='gray' fw={500} mt={'md'} size={'sm'}>
               provide feedback:
             </Text>
             <Textarea
@@ -426,6 +429,11 @@ export default function DemoFeedbackReview(props: {
             </Flex>
             <Divider w={'100%'} />
           </Flex>
+          <Text>
+            {step === 'prospect_overview'
+              ? 'This is an overview of the prospect to jog your memory.'
+              : 'Provide feedback on the prospect.'}
+          </Text>
           <Flex style={{ border: '1px solid #9ac0f7', borderRadius: '6px' }}>
             {step === 'prospect_overview' ? (
               <ProspectOverview prospect={prospect} demoDate={props.prospect_demo_date_formatted} />

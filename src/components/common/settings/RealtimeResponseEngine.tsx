@@ -27,13 +27,10 @@ export default function RealtimeResponseEngine() {
   ];
   return (
     <Card withBorder shadow='md'>
-      <Title order={4}>Realtime Response Engine</Title>
+      <Title order={4}>Realtime Response Engine (Coming soon ⚠️)</Title>
       <Flex align={'center'} gap={'xs'}>
-        <Text color='gray'>Configure how you want SellScale AI to manage replies. Alternately, edit</Text>
-        <UnstyledButton component='a' href='#Sellscales' style={{ color: '#228be6', display: 'flex', alignItems: 'center', gap: 3 }}>
-          SellScale AI's response
-          <IconExternalLink color='#228be6' size={'1rem'} />
-        </UnstyledButton>
+        <Text color='gray'>Configure how you want SellScale AI to manage replies. Alternately, edit <a href='/campaigns' color='blue'>SellScale AI's responses <IconExternalLink color='#228be6' size={'1rem'} /></a></Text>
+          
       </Flex>
       <DataGrid
         data={data}
@@ -95,7 +92,7 @@ export default function RealtimeResponseEngine() {
                   <Text fw={500} color='gray' lineClamp={3}>
                     SellScale AI:
                   </Text>
-                  <Switch defaultChecked={responsdAI} />
+                  <Switch defaultChecked={responsdAI} disabled />
                 </Flex>
               );
             },

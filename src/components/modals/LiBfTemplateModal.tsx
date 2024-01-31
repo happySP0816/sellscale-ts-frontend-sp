@@ -261,7 +261,7 @@ export default function LiBfTemplateModal({
             </Button>
 
             <Box>
-              <Button disabled={loading || form.values['message'].length > 300} type='submit'>
+              <Button disabled={loading} type='submit'>
                 {innerProps.mode === 'CREATE' ? 'Create' : 'Update'}
               </Button>
             </Box>

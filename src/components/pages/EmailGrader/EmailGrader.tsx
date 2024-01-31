@@ -154,7 +154,12 @@ const EmailGrader = () => {
     // Set the room id to the subject (hacky fs, should prob be ip address + subject)
     setEventRoomId(subject);
 
-    const response = await generateEmailFeedback(userToken, subject, bodyRef.current, await collectClientData());
+    const response = await generateEmailFeedback(
+      userToken,
+      subject,
+      bodyRef.current,
+      await collectClientData()
+    );
     const data = response.status === 'success' ? (response.data as EmailGrade) : null;
     setLoading(false);
     if (!data) {
@@ -198,15 +203,11 @@ const EmailGrader = () => {
                   <Text color='gray.6' fw={600} fz={'sm'}>
                     SUBJECT LINE
                   </Text>
-<<<<<<< HEAD
                   <TextInput
                     placeholder='Subject'
                     value={subject}
                     onChange={(e) => setSubject(e.currentTarget.value)}
                   />
-=======
-                  <TextInput placeholder='Subject' value={subject} onChange={(e) => setSubject(e.currentTarget.value)} />
->>>>>>> 28077d2b76ed14d05f50153cfc8f9c8ecdf8ba06
                 </>
               ) : (
                 <>
@@ -216,7 +217,6 @@ const EmailGrader = () => {
                   </Text>
                   <div
                     onClick={toggleEditMode}
-<<<<<<< HEAD
                     style={{
                       border: 'solid 1px #ddd',
                       padding: 4,
@@ -225,9 +225,6 @@ const EmailGrader = () => {
                       borderRadius: 8,
                       overflowY: 'scroll',
                     }}
-=======
-                    style={{ border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll' }}
->>>>>>> 28077d2b76ed14d05f50153cfc8f9c8ecdf8ba06
                     dangerouslySetInnerHTML={{ __html: highlightPersonalizations(subject) }}
                   ></div>
 
@@ -309,7 +306,14 @@ const EmailGrader = () => {
                   {bodyRef.current.split(' ').length} word
                   {bodyRef.current.split(' ').length === 1 ? '' : 's'}
                 </Text>
-                <Button ml='auto' loading={loading} color='violet' radius={'lg'} onClick={generateFeedback} leftIcon={<IconSparkles size={'0.8rem'} />}>
+                <Button
+                  ml='auto'
+                  loading={loading}
+                  color='violet'
+                  radius={'lg'}
+                  onClick={generateFeedback}
+                  leftIcon={<IconSparkles size={'0.8rem'} />}
+                >
                   Generate Feedback
                 </Button>
               </Flex>
@@ -377,7 +381,9 @@ const EmailGrader = () => {
                       Estimate how long it takes to read your email.
                     </List.Item>
                   </List>
-                  <Text fs='italic'>Elevate your email communication with cutting-edge AI insights.</Text>
+                  <Text fs='italic'>
+                    Elevate your email communication with cutting-edge AI insights.
+                  </Text>
                 </Stack>
               </Box>
             )}
@@ -602,7 +608,12 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                       <Text fz='xs' fw='bold'>
                         Strength:
                       </Text>
-                      <Badge miw={60} color={d.strength === 'strong' ? 'blue' : 'yellow'} variant='light' size='xs'>
+                      <Badge
+                        miw={60}
+                        color={d.strength === 'strong' ? 'blue' : 'yellow'}
+                        variant='light'
+                        size='xs'
+                      >
                         {d.strength}
                       </Badge>
                     </Box>
@@ -624,7 +635,13 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
             <Text fw={700} color='gray.6' fz={'sm'}>
               READ QUANTITY & TIME
             </Text>
-            <Text mt={'xs'} fw={700} fz={'lg'} display={'flex'} sx={{ gap: rem(4), alignItems: 'center' }}>
+            <Text
+              mt={'xs'}
+              fw={700}
+              fz={'lg'}
+              display={'flex'}
+              sx={{ gap: rem(4), alignItems: 'center' }}
+            >
               <ActionIcon size={'sm'}>
                 <IconClock />
               </ActionIcon>
@@ -646,7 +663,13 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
         <Stack mt={'md'}>
           {props.data.evaluated_feedback.map((d, idx) => (
             <Flex key={idx} gap={'xs'}>
-              <Box>{d.type === 'pro' ? <IconCirclePlus size='1rem' color='green' /> : <IconCircleMinus size='1rem' color='red' />}</Box>
+              <Box>
+                {d.type === 'pro' ? (
+                  <IconCirclePlus size='1rem' color='green' />
+                ) : (
+                  <IconCircleMinus size='1rem' color='red' />
+                )}
+              </Box>
               <Text fw={400} fz={'xs'}>
                 {d.feedback}
               </Text>
@@ -664,7 +687,12 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
 
             <Flex wrap={'wrap'} gap={'sm'} mt={'sm'}>
               {props.data.evaluated_tones.tones.map((tone, idx) => (
-                <Badge key={idx} color={valueToColor(theme, tone, 'green')} variant='light' maw={200}>
+                <Badge
+                  key={idx}
+                  color={valueToColor(theme, tone, 'green')}
+                  variant='light'
+                  maw={200}
+                >
                   #{_.capitalize(tone)}
                 </Badge>
               ))}
@@ -697,7 +725,10 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                     </Flex>
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
-                    <Text size='sm'>A subject line is deemed good if it is less than 100 characters in length; otherwise, it is considered bad.</Text>
+                    <Text size='sm'>
+                      A subject line is deemed good if it is less than 100 characters in length;
+                      otherwise, it is considered bad.
+                    </Text>
                   </HoverCard.Dropdown>
                 </HoverCard>
               </Box>
@@ -706,8 +737,21 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   <HoverCard shadow='md' position='left' withinPortal>
                     <HoverCard.Target>
                       <Flex gap={'xs'} align={'center'} styles={{ cursor: 'pointer' }}>
-                        <ActionIcon size={'sm'} color={props.data.evaluated_construction_spam_words_subject_line.evaluation === 'GOOD' ? 'green' : 'red'}>
-                          {props.data.evaluated_construction_spam_words_subject_line.words?.length === 0 ? <IconCircleCheck /> : <IconAlertOctagon />}
+                        <ActionIcon
+                          size={'sm'}
+                          color={
+                            props.data.evaluated_construction_spam_words_subject_line.evaluation ===
+                            'GOOD'
+                              ? 'green'
+                              : 'red'
+                          }
+                        >
+                          {props.data.evaluated_construction_spam_words_subject_line.words
+                            ?.length === 0 ? (
+                            <IconCircleCheck />
+                          ) : (
+                            <IconAlertOctagon />
+                          )}
                         </ActionIcon>
                         <Text fw={600} fz={'sm'}>
                           Subject - Spam Words
@@ -715,18 +759,25 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                       </Flex>
                     </HoverCard.Target>
                     <HoverCard.Dropdown>
-                      {props.data.evaluated_construction_spam_words_subject_line.words.length > 0 ? (
+                      {props.data.evaluated_construction_spam_words_subject_line.words.length >
+                      0 ? (
                         <Text fz='xs' fw='bold'>
                           Found spam words:{' '}
                         </Text>
                       ) : (
                         <Text>No spam words found in subject line!</Text>
                       )}
-                      {props.data.evaluated_construction_spam_words_subject_line.words.map((word, idx) => (
-                        <Badge key={idx} color='red' styles={{ root: { textTransform: 'initial' } }}>
-                          {word}
-                        </Badge>
-                      ))}
+                      {props.data.evaluated_construction_spam_words_subject_line.words.map(
+                        (word, idx) => (
+                          <Badge
+                            key={idx}
+                            color='red'
+                            styles={{ root: { textTransform: 'initial' } }}
+                          >
+                            {word}
+                          </Badge>
+                        )
+                      )}
                     </HoverCard.Dropdown>
                   </HoverCard>
                 </Box>
@@ -753,8 +804,8 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   </HoverCard.Target>
                   <HoverCard.Dropdown>
                     <Text size='sm'>
-                      Optimal emails can be read in roughly 30 seconds since the average reader will skim through emails in their inbox. That translates to
-                      roughly 50 - 120 words.
+                      Optimal emails can be read in roughly 30 seconds since the average reader will
+                      skim through emails in their inbox. That translates to roughly 50 - 120 words.
                     </Text>
                   </HoverCard.Dropdown>
                 </HoverCard>
@@ -765,8 +816,19 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                   <HoverCard shadow='md' position='left' withinPortal>
                     <HoverCard.Target>
                       <Flex gap={'xs'} align={'center'} styles={{ cursor: 'pointer' }}>
-                        <ActionIcon size={'sm'} color={props.data.evaluated_construction_spam_words_body.evaluation === 'GOOD' ? 'green' : 'red'}>
-                          {props.data.evaluated_construction_spam_words_body.words?.length === 0 ? <IconCircleCheck /> : <IconAlertOctagon />}
+                        <ActionIcon
+                          size={'sm'}
+                          color={
+                            props.data.evaluated_construction_spam_words_body.evaluation === 'GOOD'
+                              ? 'green'
+                              : 'red'
+                          }
+                        >
+                          {props.data.evaluated_construction_spam_words_body.words?.length === 0 ? (
+                            <IconCircleCheck />
+                          ) : (
+                            <IconAlertOctagon />
+                          )}
                         </ActionIcon>
                         <Text fw={600} fz={'sm'}>
                           Body - Spam Words
@@ -782,7 +844,11 @@ function EmailFeedbackReport(props: { data: EmailGrade }) {
                         <Text>No spam words found in the body!</Text>
                       )}
                       {props.data.evaluated_construction_spam_words_body.words.map((word, idx) => (
-                        <Badge key={idx} color='red' styles={{ root: { textTransform: 'initial' } }}>
+                        <Badge
+                          key={idx}
+                          color='red'
+                          styles={{ root: { textTransform: 'initial' } }}
+                        >
                           {word}
                         </Badge>
                       ))}

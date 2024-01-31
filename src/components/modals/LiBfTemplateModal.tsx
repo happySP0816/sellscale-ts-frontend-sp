@@ -261,10 +261,13 @@ export default function LiBfTemplateModal({
             </Button>
 
             <Box>
-              <Button disabled={loading} type='submit'>
+              <Button disabled={loading || form.values['message'].length > 4000} type='submit'>
                 {innerProps.mode === 'CREATE' ? 'Create' : 'Update'}
               </Button>
             </Box>
+            <Text color={form.values['message'].length > 4000 ? 'red' : 'black'} fz='xs'>
+              {form.values['message'].length} / 4000 chars
+            </Text>
           </Stack>
         </Card>
       </form>

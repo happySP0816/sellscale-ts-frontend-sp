@@ -2,9 +2,11 @@ import React from 'react';
 import { OperatorDashboardEntry } from '../OperatorDashTaskRouter';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
 import { useRecoilValue } from 'recoil';
-import { userDataState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { IconLink } from '@tabler/icons';
 import { showNotification } from '@mantine/notifications';
+import { useQuery } from '@tanstack/react-query';
+import { syncLocalStorage } from '@auth/core';
 
 interface TaskHandlerLinkedinDisconnectedData {
     data: {
@@ -13,7 +15,16 @@ interface TaskHandlerLinkedinDisconnectedData {
 }
 
 export const TaskHandlerLinkedinDisconnected = (props: TaskHandlerLinkedinDisconnectedData) => {
-    const userData = useRecoilValue(userDataState)
+    const [userData, setUserData] = useRecoilValue(userDataState);
+    const userToken = useRecoilValue(userTokenState)
+
+    useQuery({
+        queryKey: [`query-get-accounts-connected`],
+        queryFn: async () => {
+        await syncLocalStorage(userToken, setUserData);
+        return true;
+        },
+    });
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', paddingTop: '100px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>

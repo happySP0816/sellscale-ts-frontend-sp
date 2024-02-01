@@ -1,7 +1,7 @@
 import React from 'react';
 import { OperatorDashboardEntry } from '../OperatorDashTaskRouter';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { IconLink } from '@tabler/icons';
 import { showNotification } from '@mantine/notifications';
@@ -15,7 +15,7 @@ interface TaskHandlerLinkedinDisconnectedData {
 }
 
 export const TaskHandlerLinkedinDisconnected = (props: TaskHandlerLinkedinDisconnectedData) => {
-    const [userData, setUserData] = useRecoilValue(userDataState);
+    const [userData, setUserData] = useRecoilState(userDataState);
     const userToken = useRecoilValue(userTokenState)
 
     useQuery({

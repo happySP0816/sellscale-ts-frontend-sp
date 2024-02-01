@@ -589,7 +589,6 @@ const WeeklyReportTemplate = () => {
                       Sent Outreach
                     </p>
                   </Row>
-                  <Row></Row>
                 </Column>
                 <Column style={{ width: '140px' }}>
                   <Row

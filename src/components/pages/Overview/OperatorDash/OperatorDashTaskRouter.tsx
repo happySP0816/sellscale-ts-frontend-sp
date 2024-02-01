@@ -16,6 +16,7 @@ import { TaskHandlerConnectSlack } from './TaskHandlers/TaskHandlerConnectSlack'
 import { TaskHandlerConnectCalendar } from './TaskHandlers/TaskHandlerConnectCalendar';
 import { TaskHandlerAddDNCFilters } from './TaskHandlers/TaskHandlerAddDNCFilters';
 import { TaskHandlerEnrichSegment } from './TaskHandlers/TaskHandlerEnrichSegment';
+import { TaskHandlerReviewSegment } from './TaskHandlers/TaskHandlerReviewSegment';
 
 export interface OperatorDashboardEntry {
   id: number;
@@ -87,6 +88,11 @@ const TASK_ROUTER: any = {
   ENRICH_SEGMENT: {
     component: TaskHandlerEnrichSegment,
     instruction: 'Enrich the segment with more data',
+    enabledCompleteButton: true,
+  },
+  REVIEW_SEGMENT: {
+    component: TaskHandlerReviewSegment,
+    instruction: 'Review the segment then mark as complete',
     enabledCompleteButton: true,
   }
 };

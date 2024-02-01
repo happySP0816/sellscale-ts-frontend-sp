@@ -59,7 +59,7 @@ import SlackAuthPage from '@pages/SlackAuthPage';
 import EmailGrader from '@pages/EmailGrader/EmailGrader';
 import { CampaignDetail } from '@pages/CampaignDetail';
 import InboxRestructurePage from '@pages/InboxRestructurePage';
-import CampaignReviewLinkedin from '@pages/CampaignReview/CampaignReviewLinkedin';
+import CampaignReview from '@pages/CampaignReview/CampaignReviewLinkedin';
 import CompanyOverview from '@common/company/CompanyOverview';
 import OperatorDashTaskRouter from '@pages/Overview/OperatorDash/OperatorDashTaskRouter';
 import TaskEmailTemplate from '@common/resend_email/task_resend_email';

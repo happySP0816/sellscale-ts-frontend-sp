@@ -1,19 +1,26 @@
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { userDataState } from '@atoms/userAtoms';
-import CampaignReviewLinkedin from '@pages/CampaignReview/CampaignReviewLinkedin';
+import CampaignReview from '@pages/CampaignReview/CampaignReviewLinkedin';
 
-interface TaskHandlerReviewLinkedinCampaignData {
+interface TaskHandlerReviewCampaignData {
     data: {
         campaign_id: number;
     },
     onTaskComplete?: () => void;
+    taskType?: string;
 }
 
-export const TaskHandlerReviewLinkedinCampaign = (props: TaskHandlerReviewLinkedinCampaignData) => {
+export const TaskHandlerReviewCampaign = (props: TaskHandlerReviewCampaignData) => {
     const userData = useRecoilValue(userDataState)
 
+    if (props.taskType == 'EMAIL_CAMPAIGN_REVIEW') {
+        return (
+            <CampaignReview onTaskComplete={props.onTaskComplete} campaignId={props.data.campaign_id} campaignType='EMAIL'/>
+        );
+    }
+
     return (
-        <CampaignReviewLinkedin onTaskComplete={props.onTaskComplete} campaignId={props.data.campaign_id} />
+        <CampaignReview onTaskComplete={props.onTaskComplete} campaignId={props.data.campaign_id} campaignType='LINKEDIN'/>
     );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
-import CampaignReviewLinkedin from '@pages/CampaignReview/CampaignReviewLinkedin';
+import CampaignReview from '@pages/CampaignReview/CampaignReviewLinkedin';
 
 interface TaskHandlerReviewSegment {
     data: {

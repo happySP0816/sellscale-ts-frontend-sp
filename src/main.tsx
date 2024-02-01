@@ -62,6 +62,7 @@ import InboxRestructurePage from '@pages/InboxRestructurePage';
 import CampaignReviewLinkedin from '@pages/CampaignReview/CampaignReviewLinkedin';
 import CompanyOverview from '@common/company/CompanyOverview';
 import OperatorDashTaskRouter from '@pages/Overview/OperatorDash/OperatorDashTaskRouter';
+import TaskEmailTemplate from '@common/resend_email/task_resend_email';
 
 const queryClient = new QueryClient();
 
@@ -455,6 +456,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: '/weekly-update',
         element: <RestrictedRoute page={<EmailHome />} />,
+      },
+      {
+        path: '/task-update',
+        element: <RestrictedRoute page={<TaskEmailTemplate />} />,
       },
       {
         path: '/slack-auth',

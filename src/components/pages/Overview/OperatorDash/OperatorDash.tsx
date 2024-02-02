@@ -170,7 +170,8 @@ const OperatorDashboard = (props: PropsType) => {
             onClick={() => redirectToTask(task.id)}
             loading={fetchingComplete && currentTaskId === task.id}
           >
-            {task.cta}
+            {/* {task.cta} */}
+            Let's do it
             {'  '} <IconArrowRight size={16} />
           </Button>
         </Group>

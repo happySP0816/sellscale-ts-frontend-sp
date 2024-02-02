@@ -1,4 +1,20 @@
-import { ActionIcon, Badge, Button, useMantineTheme, Card, Collapse, Flex, NumberInput, Select, Text, Title, Divider } from '@mantine/core';
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  useMantineTheme,
+  Card,
+  Collapse,
+  Flex,
+  NumberInput,
+  Select,
+  Text,
+  Title,
+  Divider,
+  Table,
+  TableProps,
+  TextInput,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
   IconChevronDown,
@@ -14,9 +30,126 @@ import {
 import { DataGrid, stringFilterFn } from 'mantine-data-grid';
 import { useState } from 'react';
 
+type EngagementType = {
+  disinterest_reason: string;
+  timeline: number;
+};
+
+const ReEngagement = (data: any) => {
+  return (
+    <Flex gap={'md'} justify={'space-between'}>
+      <Flex direction={'column'} justify={'space-between'} w={'100%'}>
+        <Flex align={'center'}>
+          <Text tt={'uppercase'} color='gray' size={'xs'} w={'100%'}>
+            Disinterest reason
+          </Text>
+          <Text tt={'uppercase'} color='gray' size={'xs'} w={'100%'}>
+            re-engagement timeline
+          </Text>
+        </Flex>
+        <Flex align={'center'}>
+          <Text w={'100%'}>No Need</Text>
+          <div className='w-full flex items-center gap-3'>
+            <NumberInput
+              defaultValue={
+                data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need').length
+                  ? data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need')[0].timeline
+                  : 0
+              }
+              style={{ width: '80px' }}
+            />
+            Days
+          </div>
+        </Flex>
+        <Flex align={'center'}>
+          <Text w={'100%'}>Timing Not Right</Text>
+          <div className='w-full flex items-center gap-3'>
+            <NumberInput
+              defaultValue={
+                data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need').length
+                  ? data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need')[0].timeline
+                  : 0
+              }
+              style={{ width: '80px' }}
+            />
+            Days
+          </div>
+        </Flex>
+        <Flex align={'center'}>
+          <Text w={'100%'}>Unconvinced</Text>
+          <div className='w-full flex items-center gap-3'>
+            <NumberInput
+              defaultValue={
+                data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need').length
+                  ? data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need')[0].timeline
+                  : 0
+              }
+              style={{ width: '80px' }}
+            />
+            Days
+          </div>
+        </Flex>
+      </Flex>
+      <Flex direction={'column'} gap={6} w={'100%'}>
+        <Flex align={'center'}>
+          <Text tt={'uppercase'} color='gray' size={'xs'} w={'100%'}>
+            Disinterest reason
+          </Text>
+          <Text tt={'uppercase'} color='gray' size={'xs'} w={'100%'}>
+            re-engagement timeline
+          </Text>
+        </Flex>
+        <Flex align={'center'}>
+          <Text w={'100%'}>No Need</Text>
+          <div className='w-full flex items-center gap-3'>
+            <NumberInput
+              defaultValue={
+                data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need').length
+                  ? data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need')[0].timeline
+                  : 0
+              }
+              style={{ width: '80px' }}
+            />
+            Days
+          </div>
+        </Flex>
+        <Flex align={'center'}>
+          <Text w={'100%'}>Timing Not Right</Text>
+          <div className='w-full flex items-center gap-3'>
+            <NumberInput
+              defaultValue={
+                data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need').length
+                  ? data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need')[0].timeline
+                  : 0
+              }
+              style={{ width: '80px' }}
+            />
+            Days
+          </div>
+        </Flex>
+        <Flex align={'center'}>
+          <Text w={'100%'}>Unconvinced</Text>
+          <div className='w-full flex items-center gap-3'>
+            <NumberInput
+              defaultValue={
+                data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need').length
+                  ? data?.data.filter((value: any) => value.disinterest_reason === '❓ No Need')[0].timeline
+                  : 0
+              }
+              style={{ width: '80px' }}
+            />
+            Days
+          </div>
+        </Flex>
+      </Flex>
+    </Flex>
+  );
+};
+
 export default function ContactRecycling() {
   const [opened, { toggle }] = useDisclosure(false);
-  const data = [
+  const [engagementState, setEngagementState] = useState(true);
+  const data: EngagementType[] = [
     {
       disinterest_reason: '❓ No Need',
       timeline: 180,
@@ -57,63 +190,74 @@ export default function ContactRecycling() {
     { name: 'John Doe', campaign: '⚽ CFO Reachouts', status: 'timing not right', day: 179 },
   ];
   const theme = useMantineTheme();
+  const handleEngagementChange = () => {
+    setEngagementState(false);
+  };
+
   return (
     <Card>
       <Flex direction={'column'} gap={'sm'}>
-        <Title color='gray'>Contact Recycling</Title>
+        <Text color='gray' fw={600} size={30}>
+          Contact Recycling
+        </Text>
         <Text>
           Adjust the re-engagement metric to configure when prospects will return back from 'Nurture' to your unassigned contacts for Sellscale to reach out to
           again.
         </Text>
-        <DataGrid
-          data={data}
-          highlightOnHover
-          withSorting
-          withBorder
-          withColumnBorders
-          verticalSpacing={'md'}
-          columns={[
-            {
-              accessorKey: 'disinterest_reason',
-              header: 'Disinterest Reason',
-              maxSize: 320,
-              cell: (cell) => {
-                const { disinterest_reason } = cell.row.original;
+        {engagementState ? (
+          <DataGrid
+            data={data}
+            highlightOnHover
+            withSorting
+            withBorder
+            withColumnBorders
+            verticalSpacing={'md'}
+            columns={[
+              {
+                accessorKey: 'disinterest_reason',
+                header: 'Disinterest Reason',
+                maxSize: 320,
+                cell: (cell) => {
+                  const { disinterest_reason } = cell.row.original;
 
-                return (
-                  <Text fw={700} size={'md'} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    {disinterest_reason} <IconInfoCircle size={'1rem'} />
-                  </Text>
-                );
+                  return (
+                    <Text fw={700} size={'md'} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {disinterest_reason} <IconInfoCircle size={'1rem'} color='gray' />
+                    </Text>
+                  );
+                },
+                filterFn: stringFilterFn,
               },
-              filterFn: stringFilterFn,
-            },
-            {
-              accessorKey: 'timeline',
-              header: 'Re-engagement Timeline',
-              cell: (cell) => {
-                const { timeline } = cell.row.original;
+              {
+                accessorKey: 'timeline',
+                header: 'Re-engagement Timeline',
+                cell: (cell) => {
+                  const { timeline } = cell.row.original;
 
-                return (
-                  <Flex gap={4} align={'center'}>
-                    <Text fw={700} size={'md'}>
-                      {timeline}
-                    </Text>
-                    <Text color='gray' fw={700} size={'md'} mr={5}>
-                      Days
-                    </Text>
-                    <IconEdit color='gray' size={'1rem'} />
-                  </Flex>
-                );
+                  return (
+                    <Flex gap={4} align={'center'}>
+                      <Text fw={700} size={'md'}>
+                        {timeline}
+                      </Text>
+                      <Text color='gray' fw={700} size={'md'} mr={5}>
+                        Days
+                      </Text>
+                      <IconEdit color='gray' size={'1rem'} onClick={handleEngagementChange} style={{ cursor: 'pointer' }} />
+                    </Flex>
+                  );
+                },
+                filterFn: stringFilterFn,
               },
-              filterFn: stringFilterFn,
-            },
-          ]}
-          options={{
-            enableFilters: true,
-          }}
-        />
-        <Flex py={'lg'} align={'center'} justify={'space-between'} px={'xl'} style={{ border: '1px solid gray', borderRadius: '10px' }}>
+            ]}
+            options={{
+              enableFilters: true,
+            }}
+          />
+        ) : (
+          <ReEngagement data={data} />
+        )}
+
+        <Flex py={'lg'} align={'center'} justify={'space-between'} px={'xl'} style={{ border: '1px solid #ced4da', borderRadius: '10px' }}>
           <Text fw={600} size={'lg'}>
             Nurture
           </Text>
@@ -212,7 +356,7 @@ export default function ContactRecycling() {
                   })}
                   mt={-36}
                 >
-                  <Select
+                  {/* <Select
                     data={[
                       { value: '5', label: 'Select 5 rows' },
                       { value: '10', label: 'Select 10 rows' },
@@ -225,7 +369,42 @@ export default function ContactRecycling() {
                     }}
                     //   value={'10'}
                     style={{ width: '160px' }}
-                  />
+                  /> */}
+                  <Flex align={'center'} gap={'sm'}>
+                    <Text fw={500} color='gray.6'>
+                      Show
+                    </Text>
+
+                    <Flex align={'center'}>
+                      <NumberInput
+                        maw={100}
+                        value={table.getState().pagination.pageSize}
+                        onChange={(v) => {
+                          if (v) {
+                            table.setPageSize(v);
+                          }
+                        }}
+                      />
+                      <Flex
+                        sx={(theme) => ({
+                          borderTop: `1px solid ${theme.colors.gray[4]}`,
+                          borderRight: `1px solid ${theme.colors.gray[4]}`,
+                          borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                          marginLeft: '-2px',
+                          paddingLeft: '1rem',
+                          paddingRight: '1rem',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '0.25rem',
+                        })}
+                        h={36}
+                      >
+                        <Text color='gray.5' fw={500} fz={14}>
+                          of {table.getPrePaginationRowModel().rows.length}
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </Flex>
 
                   <Flex align={'center'} gap={'sm'}>
                     <Flex align={'center'}>

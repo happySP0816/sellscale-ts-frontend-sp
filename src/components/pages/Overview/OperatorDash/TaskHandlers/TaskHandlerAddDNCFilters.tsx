@@ -10,7 +10,7 @@ interface TaskHandlerAddDNCFiltersProps {
 export const TaskHandlerAddDNCFilters = (props: TaskHandlerAddDNCFiltersProps) => {
     return (
         <Card maw={1200} sx={{ margin: 'auto' }} mt='36px'>
-            <DoNotContactListV2 forSDR={true} />
+            <DoNotContactListV2 />
         </Card>
     );
 }

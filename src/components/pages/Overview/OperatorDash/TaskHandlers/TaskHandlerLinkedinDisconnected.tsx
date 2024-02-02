@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { OperatorDashboardEntry } from '../OperatorDashTaskRouter';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -11,7 +11,8 @@ import { syncLocalStorage } from '@auth/core';
 interface TaskHandlerLinkedinDisconnectedData {
     data: {
         client_sdr_id: number;
-    }
+    },
+    onTaskComplete?: () => void;
 }
 
 export const TaskHandlerLinkedinDisconnected = (props: TaskHandlerLinkedinDisconnectedData) => {
@@ -25,6 +26,12 @@ export const TaskHandlerLinkedinDisconnected = (props: TaskHandlerLinkedinDiscon
         return true;
         },
     });
+
+    useEffect(() => {
+        if (userData?.li_voyager_connected) {
+            props.onTaskComplete && props.onTaskComplete();
+        }
+    }, [userData.li_voyager_connected]);
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', paddingTop: '100px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>

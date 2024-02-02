@@ -253,7 +253,7 @@ const OperatorDashTaskRouter: React.FC = () => {
         </Button>
       </Box>
       {TaskComponent && (
-        <TaskComponent data={task?.task_data} onTaskComplete={() => id && markTaskComplete(id)} taskType={task?.task_type} />
+        <TaskComponent data={task?.task_data} onTaskComplete={() => id && markTaskComplete(id)} taskType={task?.task_type} taskId={task?.id} />
       )}
     </Box>
   );

@@ -190,7 +190,7 @@ export default function SideNavbar(props: {}) {
           <SideNavbarItem
             icon={<IconHome size='1.0rem' />}
             label='Overview'
-            tabKey={['overview']}
+            tabKey={['overview', '']}
           />
           <SideNavbarItem
             icon={<IconInbox size='1.0rem' />}
@@ -209,7 +209,7 @@ export default function SideNavbar(props: {}) {
           <SideNavbarItem
             icon={<IconTargetArrow size='1.0rem' />}
             label='Campaigns'
-            tabKey={['campaigns', 'all/campaigns', '']}
+            tabKey={['campaigns', 'all/campaigns']}
           />
           <SideNavbarItem
             icon={<IconUsers size='1.0rem' />}

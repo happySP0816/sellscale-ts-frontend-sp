@@ -1846,15 +1846,11 @@ export default function OverviewPage() {
         value={activeTab}
         onTabChange={setActiveTab}
       >
-        <Flex justify={"space-between"}>
-          <Box>
+        <Flex justify={"space-between"} mb='xs'>
+          <Box mb='xs'>
             <Title order={2} mb="0px">
-              Overview
+              Operator Dashboard
             </Title>
-            <Text mb="md" color="gray">
-              View analytics from across all of {userData.client?.company}'s
-              users
-            </Text>
           </Box>
 
           <Group>

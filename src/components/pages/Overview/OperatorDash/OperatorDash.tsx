@@ -142,10 +142,13 @@ const OperatorDashboard = (props: PropsType) => {
             {task.emoji}
           </Text>
         </Box>
-        <Box w='55%'>
+        <Box w='80%'>
           <Title order={5}>{task.title}</Title>
-          <Text color='gray' size='xs'>
-            {task.subtitle} | Due on {moment(task.due_date).format('MMM Do YYYY')}
+          <Text color='#666' size='sm'>
+            {task.subtitle}
+          </Text>
+          <Text color='gray' fw='600' fz='xs' mt='xs'>
+            Due on {moment(task.due_date).format('MMM Do YYYY')}
           </Text>
         </Box>
         <Group w='40%' sx={{ justifyContent: 'flex-end' }}>

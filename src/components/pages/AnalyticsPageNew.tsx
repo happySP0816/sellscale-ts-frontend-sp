@@ -9,12 +9,15 @@ import SettingUsage from '@common/settings/SettingUsage';
 import { Tabs, rem } from '@mantine/core';
 import MessagingAnalytics from '../AnalyticsPage/MessagingAnalytics';
 import AiActivityLogs from '../AnalyticsPage/AiActivityLogs';
+import { useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
 
 const AnalyticsPageNew = () => {
+  const userToken = useRecoilValue(userTokenState)
   return (
     <PageFrame>
       <Tabs
-        defaultValue='usage'
+        defaultValue='chatbot'
         px='xs'
         styles={(theme) => ({
           tab: {
@@ -38,6 +41,7 @@ const AnalyticsPageNew = () => {
         })}
       >
         <Tabs.List>
+          <Tabs.Tab value='chatbot'>Chatbot</Tabs.Tab>
           <Tabs.Tab value='usage'>Usage</Tabs.Tab>
           <Tabs.Tab value='tam'>TAM</Tabs.Tab>
           <Tabs.Tab value='scraping'>Scraping</Tabs.Tab>
@@ -46,6 +50,15 @@ const AnalyticsPageNew = () => {
           <Tabs.Tab value='message-analytics'>Messaging Analytics </Tabs.Tab>
           <Tabs.Tab value='ai-activity-logs'>AI Activity Logs </Tabs.Tab>
         </Tabs.List>
+        <Tabs.Panel value='chatbot' pt='xs'>
+          <iframe 
+              src={'https://sellscale.retool.com/embedded/public/2fe5bcbd-17cd-4432-9a3e-6d8908703034#authToken=' + userToken}
+              width={'100%'}
+              height={window.innerHeight - 30}
+              frameBorder={0}
+              allowFullScreen
+          />
+        </Tabs.Panel>
         <Tabs.Panel value='tam' pt='xs'>
           <TAMGraphV2 />
         </Tabs.Panel>

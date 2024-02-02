@@ -1,7 +1,6 @@
 import { Flex, Tabs, Text } from '@mantine/core';
 import SlackbotSection from './SlackbotSection';
 import SlackWebhookSection from './SlackWebhookSection';
-import SlackNotifications from './SlackNotifications';
 
 export default function SlackSettings() {
   return (
@@ -27,7 +26,6 @@ export default function SlackSettings() {
           </Tabs.Panel>
         </Tabs>
       </Flex>
-      {/* <SlackNotifications /> */}
     </>
   );
 }

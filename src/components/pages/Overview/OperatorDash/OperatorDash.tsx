@@ -154,18 +154,10 @@ const OperatorDashboard = (props: PropsType) => {
         <Group w='40%' sx={{ justifyContent: 'flex-end' }}>
           <Button
             component='a'
-            variant='outline'
+            variant='filled'
             disabled={task.status !== 'PENDING'}
             color={
-              task.status !== 'PENDING'
-                ? 'gray'
-                : task.urgency === 'HIGH'
-                ? 'red'
-                : task.urgency === 'MEDIUM'
-                ? 'yellow'
-                : task.urgency === 'LOW'
-                ? 'green'
-                : ''
+              'teal'
             }
             onClick={() => redirectToTask(task.id)}
             loading={fetchingComplete && currentTaskId === task.id}

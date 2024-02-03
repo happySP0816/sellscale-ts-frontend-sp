@@ -190,7 +190,7 @@ export default function SideNavbar(props: {}) {
           <SideNavbarItem
             icon={<IconHome size='1.0rem' />}
             label='Overview'
-            tabKey={['overview']}
+            tabKey={['overview', '']}
           />
           <SideNavbarItem
             icon={<IconInbox size='1.0rem' />}
@@ -209,7 +209,7 @@ export default function SideNavbar(props: {}) {
           <SideNavbarItem
             icon={<IconTargetArrow size='1.0rem' />}
             label='Campaigns'
-            tabKey={['campaigns', 'all/campaigns', '']}
+            tabKey={['campaigns', 'all/campaigns']}
           />
           <SideNavbarItem
             icon={<IconUsers size='1.0rem' />}
@@ -231,7 +231,7 @@ export default function SideNavbar(props: {}) {
       </Stack>
       <Stack w={'100%'} spacing={0}>
         <Box m='md'>
-          {percentage !== 100 && (
+          {/* {percentage !== 100 && (
             <Button
               variant='gradient'
               gradient={{ from: 'green.6', to: 'green.9', deg: 90 }}
@@ -252,7 +252,7 @@ export default function SideNavbar(props: {}) {
             >
               Onboarding {percentage}%
             </Button>
-          )}
+          )} */}
 
           <Divider color='dark.4' mt='lg' mb='sm' />
           <SideNavbarItem

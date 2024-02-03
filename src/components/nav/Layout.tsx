@@ -38,26 +38,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const [navOpened, setNavOpened] = useState(false);
 
-  useEffect(() => {
-    if(userData && userData.li_voyager_connected === false) {
-      showNotification({
-        id: "inactive-linkedin",
-        title: (
-          <Group>
-            <Text fz='md'>LinkedIn Not Connected</Text>
-            <Button leftIcon={<IconPlugConnected size='0.9rem' />} variant="light" color="red" size="xs" radius="xl" compact
-              onClick={() => {
-                window.location.href = "/settings/linkedinConnection";
-              }}
-            >Go to Connect</Button>
-          </Group>
-        ),
-        message: `Looks like your LinkedIn account isn't connect. Please connect.`,
-        color: "red",
-        autoClose: false,
-      });
-    }
-  }, [userData]);
+  // useEffect(() => {
+  //   if(userData && userData.li_voyager_connected === false) {
+  //     showNotification({
+  //       id: "inactive-linkedin",
+  //       title: (
+  //         <Group>
+  //           <Text fz='md'>LinkedIn Not Connected</Text>
+  //           <Button leftIcon={<IconPlugConnected size='0.9rem' />} variant="light" color="red" size="xs" radius="xl" compact
+  //             onClick={() => {
+  //               window.location.href = "/settings/linkedinConnection";
+  //             }}
+  //           >Go to Connect</Button>
+  //         </Group>
+  //       ),
+  //       message: `Looks like your LinkedIn account isn't connect. Please connect.`,
+  //       color: "red",
+  //       autoClose: false,
+  //     });
+  //   }
+  // }, [userData]);
 
 
   return (

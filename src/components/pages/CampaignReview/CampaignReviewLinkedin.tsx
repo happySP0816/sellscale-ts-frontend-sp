@@ -1,4 +1,4 @@
-import { Avatar, Badge, Button, Card, Collapse, Divider, Flex, Group, Loader, Modal, Text, Textarea, Title, useMantineTheme } from '@mantine/core';
+import { ActionIcon, Avatar, Badge, Box, Button, Card, Collapse, Divider, Flex, Group, Loader, Modal, Text, Textarea, Title, useMantineTheme } from '@mantine/core';
 import { IconBrandLinkedin, IconChecks, IconChevronDown, IconChevronUp, IconEdit, IconMessages, IconPencil, IconRocket, IconTargetArrow, IconUsers, IconXboxX } from '@tabler/icons';
 import { useEffect, useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
@@ -14,9 +14,15 @@ import { useNavigate } from 'react-router-dom';
 
 type SequenceProps = {
   campaignOverview: any;
+  campaignType: string;
 }
 
 export const Sequence = (props: SequenceProps) => {
+  let SEQUENCE = props.campaignOverview?.linkedin?.sequence;
+  if (props.campaignType === 'EMAIL') {
+    SEQUENCE = props.campaignOverview?.email?.sequence;
+  }
+
   return (
     <Flex direction={'column'} p={'lg'} style={{ border: '3px solid #0f6cbf' }} h={280}>
       <Card withBorder>
@@ -34,7 +40,7 @@ export const Sequence = (props: SequenceProps) => {
         </Card>
         <Card>
           <Text color='#0f6cbf' size={'lg'} fw={500}>
-            # of steps in sequence: {props.campaignOverview?.linkedin?.sequence.length} step{props.campaignOverview?.linkedin?.sequence.length > 1 ? 's' : ''}
+            # of steps in sequence: {SEQUENCE?.length} step{SEQUENCE?.length > 1 ? 's' : ''}
           </Text>
         </Card>
       </Flex>
@@ -63,6 +69,8 @@ export const Contact = (props: ContactProps) => {
         username: x?.full_name,
         score: x?.icp_fit_score,
         content: x?.title,
+        linkedin_url: x?.linkedin_url,
+        icp_fit_reason: x?.icp_fit_reason
       }
     })
     const res_filter = props.campaignOverview?.contacts && Object.keys(props.campaignOverview?.contacts).filter((key: string) => key !== 'sample_contacts').map((key: string) => {
@@ -126,14 +134,18 @@ export const Contact = (props: ContactProps) => {
           <Flex direction={'column'} gap={3}>
             {contactData?.map((item: any, index: number) => {
               return !showAll || index < 5 ? (
-                <Flex key={index} align={'center'} gap={'xs'}>
+                <Flex key={index} align={'center'} gap={'xs'} mb='md'>
                   <Avatar src={"https://ui-avatars.com/api/?background=random&name=" + item?.username.replaceAll(" ", "+")} size={30} radius={'xl'} />
                   <Flex direction={'column'} w={'100%'}>
-                    <Flex align={'center'} justify={'space-between'} w={'100%'}>
+                    <Flex align={'center'} w={'100%'}>
+                      <ActionIcon color='blue' onClick={() => window.open('https://' + item?.linkedin_url, '_blank')}>
+                        <IconBrandLinkedin size={'0.8rem'} />
+                      </ActionIcon>
                       <Text fw={500} size={'sm'}>
                         {item?.username}
                       </Text>
                       <Badge
+                        ml='auto'
                         size='md'
                         color={
                           item?.score == 0
@@ -165,6 +177,9 @@ export const Contact = (props: ContactProps) => {
                     </Flex>
                     <Text color='gray' size={'xs'} mt={3}>
                       {item?.content}
+                    </Text>
+                    <Text size='xs' color='gray'>
+                      {item?.icp_fit_reason?.split("), (").map((x: string) => x.replaceAll("(", "").replaceAll(")", "")).join(", ")}
                     </Text>
                   </Flex>
                 </Flex>
@@ -199,6 +214,7 @@ type MessagingProps = {
   feedback: string;
   onFeedbackChange: (feedback: string) => void;
   campaignOverview?: any;
+  campaignType: string;
 }
 
 export const Messaging = (props: MessagingProps) => {
@@ -206,15 +222,20 @@ export const Messaging = (props: MessagingProps) => {
   const [openid, setOpenId] = useState<number>(0);
   const userData = useRecoilValue(userDataState)
 
-  const messageData = props.campaignOverview?.linkedin?.sequence?.map((x: any) => {
+  let SEQUENCE = props.campaignOverview?.linkedin?.sequence;
+  if (props.campaignType === 'EMAIL') {
+    SEQUENCE = props.campaignOverview?.email?.sequence;
+  }
+
+  const messageData = SEQUENCE?.map((x: any) => {
     return {
       step: x?.title,
       avatar: '',
       username: userData?.sdr_name,
-      message: "Instruction: \"" + x?.description + "\"",
+      message: x?.description,
+      delay: x?.bump_framework_delay
     }
   })
-  console.log(props.campaignOverview?.linkedin?.sequence)
   const handleToggle = (id: number) => {
     toggle();
     setOpenId(id);
@@ -228,6 +249,11 @@ export const Messaging = (props: MessagingProps) => {
         {messageData?.map((item: any, index: number) => {
           return (
             <>
+              <Box>
+                {item?.delay ? <Badge color='blue' variant='outline'>
+                  Wait {item?.delay} days
+                </Badge> : null}
+              </Box>
               <Flex w={'100%'} align={'center'} gap={8}>
                 <IconTargetArrow color='gray' />
                 <Flex>
@@ -276,7 +302,8 @@ export const Messaging = (props: MessagingProps) => {
                       </Text>
                     </Flex>
                     <Text lineClamp={4} size={'xs'} fs='italic' fw={500}>
-                      {item?.message}
+                      {/* if campaign type is LINKEDIN, show message as is. if email, show html in dangerously set */}
+                      {props.campaignType === 'LINKEDIN' ? item?.message : <div dangerouslySetInnerHTML={{ __html: item?.message }} />}
                     </Text>
                   </Flex>
                 </Collapse>
@@ -360,10 +387,11 @@ function Finalize(props: CampaignFeedback) {
 type CampaignReviewLinkedinProps = {
   onTaskComplete?: () => void;
   campaignId: number;
+  campaignType: string;
 };
 
 
-export default function CampaignReviewLinkedin(props: CampaignReviewLinkedinProps) {
+export default function CampaignReview(props: CampaignReviewLinkedinProps) {
   const [opened, { open, close }] = useDisclosure(true);
   const [steps, setSteps] = useState('sequence');
 
@@ -473,9 +501,9 @@ export default function CampaignReviewLinkedin(props: CampaignReviewLinkedinProp
           </Badge>
         </Flex>
         {steps === 'sequence' ? 
-          <Sequence campaignOverview={campaignOverview} /> : 
+          <Sequence campaignOverview={campaignOverview} campaignType={props.campaignType} /> : 
           steps === 'contact' ? <Contact feedback={contactFeedback} onFeedbackChange={setContactFeedback} campaignOverview={campaignOverview} /> :
-          steps === 'messaging' ? <Messaging feedback={messagingFeedback} onFeedbackChange={setMessagingFeedback} campaignOverview={campaignOverview} /> :
+          steps === 'messaging' ? <Messaging feedback={messagingFeedback} onFeedbackChange={setMessagingFeedback} campaignOverview={campaignOverview} campaignType={props.campaignType} />:
           <Finalize campaign_id={1} prospect_feedback={contactFeedback} messaging_feedback={messagingFeedback} />
         }
         <Flex align={'center'} justify={'space-between'} w='900px'>

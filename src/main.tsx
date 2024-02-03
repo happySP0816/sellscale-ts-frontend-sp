@@ -59,9 +59,10 @@ import SlackAuthPage from '@pages/SlackAuthPage';
 import EmailGrader from '@pages/EmailGrader/EmailGrader';
 import { CampaignDetail } from '@pages/CampaignDetail';
 import InboxRestructurePage from '@pages/InboxRestructurePage';
-import CampaignReviewLinkedin from '@pages/CampaignReview/CampaignReviewLinkedin';
+import CampaignReview from '@pages/CampaignReview/CampaignReviewLinkedin';
 import CompanyOverview from '@common/company/CompanyOverview';
 import OperatorDashTaskRouter from '@pages/Overview/OperatorDash/OperatorDashTaskRouter';
+import TaskEmailTemplate from '@common/resend_email/task_resend_email';
 
 const queryClient = new QueryClient();
 
@@ -107,7 +108,7 @@ const router = sentryCreateBrowserRouter([
     children: [
       {
         path: '',
-        element: <RestrictedRoute page={<PersonaCampaigns />} />,
+        element: <RestrictedRoute page={<OverviewPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { prospectId: '' };
         },
@@ -455,6 +456,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: '/weekly-update',
         element: <RestrictedRoute page={<EmailHome />} />,
+      },
+      {
+        path: '/task-update',
+        element: <RestrictedRoute page={<TaskEmailTemplate />} />,
       },
       {
         path: '/slack-auth',

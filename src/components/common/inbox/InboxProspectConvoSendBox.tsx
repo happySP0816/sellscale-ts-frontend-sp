@@ -845,7 +845,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   setMessageDraft(result.msg);
                   setAiMessage(result.msg);
                   setAiGenerated(result.aiGenerated);
-                } else if (openedOutboundChannel === 'EMAIL') {
+                } else if (openedOutboundChannel === 'EMAIL' || openedOutboundChannel === 'SMARTLEAD') {
                   if (!currentConvoEmailThread) {
                     showNotification({
                       id: 'send-email-message-error',

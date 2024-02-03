@@ -7,9 +7,7 @@ import {
   Divider,
   Select,
 } from "@mantine/core";
-import { IconX } from "@tabler/icons";
 import { useEffect, useState } from "react";
-import SlackAlert from "./SlackAlert";
 import SlackNotifications from "./SlackNotifications";
 
 import SlackLogo from "@assets/images/slack-logo.png";
@@ -33,7 +31,6 @@ export default function SlackbotSection() {
 
   const [connecting, setConnecting] = useState(false);
   const [slackConnectState, setSlackConnectState] = useState(false);
-  const [channelConnected, setChannelConnected] = useState(false);
   const [connectedChannel, setConnectedChannel] = useState("");
 
   const triggerGetConnectedSlackChannels = async () => {
@@ -103,7 +100,7 @@ export default function SlackbotSection() {
               <Image src={SlackLogo} alt="slack" width={25} height={25} />
               <Flex direction={"column"}>
                 <Text fw={600}>
-                  {channelConnected
+                  {connectedChannel
                     ? "✅ Slack Channel Connected"
                     : "Connect a Channel"}
                 </Text>
@@ -113,8 +110,8 @@ export default function SlackbotSection() {
               </Flex>
             </Flex>
             <Divider mt="md" />
-            {connectedChannel !== undefined ? (
-              <SlackAlert selectedChannel={connectedChannel} />
+            {connectedChannel ? (
+              <SlackNotifications selectedChannel={connectedChannel} />
             ) : (
               <Select
                 // data={channelList!.map((channel) => ({

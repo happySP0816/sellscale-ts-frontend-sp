@@ -142,32 +142,28 @@ const OperatorDashboard = (props: PropsType) => {
             {task.emoji}
           </Text>
         </Box>
-        <Box w='55%'>
+        <Box w='80%'>
           <Title order={5}>{task.title}</Title>
-          <Text color='gray' size='xs'>
-            {task.subtitle} | Due on {moment(task.due_date).format('MMM Do YYYY')}
+          <Text color='#666' size='sm'>
+            {task.subtitle}
+          </Text>
+          <Text color='gray' fw='600' fz='xs' mt='xs'>
+            Due on {moment(task.due_date).format('MMM Do YYYY')}
           </Text>
         </Box>
         <Group w='40%' sx={{ justifyContent: 'flex-end' }}>
           <Button
             component='a'
-            variant='outline'
+            variant='filled'
             disabled={task.status !== 'PENDING'}
             color={
-              task.status !== 'PENDING'
-                ? 'gray'
-                : task.urgency === 'HIGH'
-                ? 'red'
-                : task.urgency === 'MEDIUM'
-                ? 'yellow'
-                : task.urgency === 'LOW'
-                ? 'green'
-                : ''
+              'teal'
             }
             onClick={() => redirectToTask(task.id)}
             loading={fetchingComplete && currentTaskId === task.id}
           >
-            {task.cta}
+            {/* {task.cta} */}
+            Let's do it
             {'  '} <IconArrowRight size={16} />
           </Button>
         </Group>

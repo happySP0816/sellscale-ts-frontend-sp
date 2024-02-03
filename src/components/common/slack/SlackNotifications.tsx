@@ -1,4 +1,4 @@
-import { userTokenState } from '@atoms/userAtoms';
+import { userTokenState } from "@atoms/userAtoms";
 import {
   Title,
   Text,
@@ -16,148 +16,61 @@ import {
   Button,
   Switch,
   Divider,
-} from '@mantine/core';
-import { activateSubscription, deactivateSubscription, getSubscriptions } from '@utils/requests/subscriptions';
-import React, { useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+} from "@mantine/core";
+import {
+  activateSubscription,
+  deactivateSubscription,
+  getSubscriptions,
+} from "@utils/requests/subscriptions";
+import React, { useEffect, useState } from "react";
+import { useRecoilValue } from "recoil";
 
-import EmailAIResponseImg from '@assets/images/notification_previews/email-ai-response.png';
-import { showNotification } from '@mantine/notifications';
-import { postPreviewSlackNotification } from '@utils/requests/postPreviewSlackNotification';
+import EmailAIResponseImg from "@assets/images/notification_previews/email-ai-response.png";
+import { showNotification } from "@mantine/notifications";
+import { postPreviewSlackNotification } from "@utils/requests/postPreviewSlackNotification";
 
-const image_map = new Map<string, string>([['AI_REPLY_TO_EMAIL', EmailAIResponseImg]]);
+const image_map = new Map<string, string>([
+  ["AI_REPLY_TO_EMAIL", EmailAIResponseImg],
+]);
 
 type SlackNotificationSubscription = {
   id: number;
   notification_type: string;
   notification_name: string;
   notification_description: string;
+  notification_outbound_channel: "email" | "linkedin";
   subscription_id: number;
   subscribed: boolean;
 };
 
-export default function SlackNotifications() {
+export default function SlackNotifications(props: { selectedChannel: string }) {
   const [loading, setLoading] = useState(false);
-  const [loadingSubscriptionType, setLoadingSubscriptionType] = useState('');
-  const [notificationTestLoading, setNotificationTestLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
-  const [slackSubscriptions, setSlackSubscriptions] = useState<SlackNotificationSubscription[]>([]);
-
-  const [slackLinkedinNotification, setSlackLinkedinNotification] = useState([
-    {
-      title: 'Acceptea Notification - Coming Soon!',
-      content: `"Ariel is requesting a new card."`,
-      activate: true,
-    },
-    {
-      title: 'Replied Notification - Coming Soon!',
-      content: `"Ariel is requesting a new card."`,
-      activate: true,
-    },
-    {
-      title: 'Demo Set Notification - Coming Soon!',
-      content: `"Ariel is requesting a new card."`,
-      activate: false,
-    },
-  ]);
-
-  const [slackEmailNotification, setSlackEmailNotification] = useState([
-    {
-      title: 'Opened Notifications - Coming Soon!',
-      content: `"Ariel is requesting a new card."`,
-      activate: true,
-    },
-    {
-      title: 'Replied Notifications - Coming Soon!',
-      content: `"Ariel is requesting a new card."`,
-      activate: false,
-    },
-    {
-      title: 'Demo Set Notifications - Coming Soon!',
-      content: `"Ariel is requesting a new card."`,
-      activate: true,
-    },
-  ]);
-
-  // const triggerTestNotification = async (slackNotificationID: number) => {
-  //   setNotificationTestLoading(true);
-
-  //   const result = await postPreviewSlackNotification(userToken, slackNotificationID);
-
-  //   if (result.status === 'success') {
-  //     showNotification({
-  //       title: 'Success',
-  //       message: 'Notification sent, please check your Slack channel!',
-  //       color: 'green',
-  //       autoClose: 5000,
-  //     });
-  //   } else {
-  //     showNotification({
-  //       title: 'Error',
-  //       message: 'Something went wrong, please try again. Did you hookup your Slack channel?',
-  //       color: 'red',
-  //       autoClose: 5000,
-  //     });
-  //   }
-
-  //   setNotificationTestLoading(false);
-  // };
-
-  // const triggerActivateSubscription = async (slackNotificationID: number, subscriptionType: string) => {
-  //   setLoadingSubscriptionType(subscriptionType);
-
-  //   const result = await activateSubscription(userToken, slackNotificationID);
-  //   if (result.status === 'success') {
-  //     triggerGetSubscriptions();
-  //     showNotification({
-  //       title: 'Success',
-  //       message: 'Notification activated',
-  //       color: 'green',
-  //       autoClose: 5000,
-  //     });
-  //   } else {
-  //     showNotification({
-  //       title: 'Error',
-  //       message: 'Something went wrong, please try again.',
-  //       color: 'red',
-  //       autoClose: 5000,
-  //     });
-  //   }
-
-  //   setLoadingSubscriptionType('');
-  // };
-
-  // const triggerDeactivateSubscription = async (subscriptionId: number, subscriptionType: string) => {
-  //   setLoadingSubscriptionType(subscriptionType);
-
-  //   const result = await deactivateSubscription(userToken, subscriptionId);
-  //   if (result.status === 'success') {
-  //     triggerGetSubscriptions();
-  //     showNotification({
-  //       title: 'Success',
-  //       message: 'Notification deactivated',
-  //       color: 'green',
-  //       autoClose: 5000,
-  //     });
-  //   } else {
-  //     showNotification({
-  //       title: 'Error',
-  //       message: 'Something went wrong, please try again.',
-  //       color: 'red',
-  //       autoClose: 5000,
-  //     });
-  //   }
-
-  //   setLoadingSubscriptionType('');
-  // };
+  const [linkedinSubscriptions, setLinkedinSubscriptions] = useState<
+    SlackNotificationSubscription[]
+  >([]);
+  const [emailSubscriptions, setEmailSubscriptions] = useState<
+    SlackNotificationSubscription[]
+  >([]);
 
   const triggerGetSubscriptions = async () => {
     setLoading(true);
 
     const result = await getSubscriptions(userToken);
-    if (result.status === 'success') {
-      setSlackSubscriptions(result.data.slack_subscriptions);
+    if (result.status === "success") {
+      // Filter out the subscriptions for the two channels
+      const linkedinSubscriptions = result.data.slack_subscriptions.filter(
+        (subscription: SlackNotificationSubscription) =>
+          subscription.notification_outbound_channel === "linkedin"
+      );
+      const emailSubscriptions = result.data.slack_subscriptions.filter(
+        (subscription: SlackNotificationSubscription) =>
+          subscription.notification_outbound_channel === "email"
+      );
+
+      setLinkedinSubscriptions(linkedinSubscriptions);
+      setEmailSubscriptions(emailSubscriptions);
     }
 
     setLoading(false);
@@ -168,192 +81,245 @@ export default function SlackNotifications() {
   }, []);
 
   return (
-    <Paper withBorder m='xs' p='lg' radius='md' bg={'#fcfcfd'}>
-      <Flex align={'center'} gap={'sm'}>
-        <Flex direction={'column'}>
-          <Text fw={600}>Customize Notifications</Text>
-          <Text size={'sm'}>Subscribed to Slack alerts for the business activities listed below.</Text>
+    <>
+      <Flex
+        style={{
+          border: "1px solid gray",
+          borderStyle: "dashed",
+          borderRadius: "6px",
+        }}
+        align={"center"}
+        p={"sm"}
+        justify={"space-between"}
+        mt={"md"}
+      >
+        <Flex align={"center"} gap={"sm"}>
+          <Text size={"sm"} fw={500}>
+            Connected to{" "}
+            <span
+              style={{
+                fontFamily: "monospace", // Use a monospaced font for code-like appearance
+                backgroundColor: "#f0f0f0", // Set background color for code block
+                padding: "0.5em", // Add padding for better readability
+                borderRadius: "4px", // Optional: Add rounded corners for a softer look
+                display: "inline",
+                color: "red",
+              }}
+            >
+              #{props.selectedChannel}
+            </span>
+          </Text>
+          {/* <Text size={'xs'} color='gray'>
+            - by {props.selectedChannel}
+          </Text> */}
+        </Flex>
+        <Flex gap={"sm"} align={"center"}>
+          <Button variant="outline" color="red" disabled>
+            Disconnect
+          </Button>
+          {/* <IconEdit color='gray' /> */}
         </Flex>
       </Flex>
-      <Divider my={'lg'} />
-      <Flex direction={'column'} gap={'sm'}>
-        <Flex direction={'column'}>
-          <label
-            htmlFor={'qq'}
-            style={{
-              borderRadius: '8px',
-              width: '100%',
-            }}
-          >
-            <Flex align={'center'} justify={'space-between'} style={{ borderRadius: '6px', border: '1px solid #dee2e6' }} p={'xs'}>
-              <Flex direction={'column'}>
-                <Text fw={600} mt={2} size={'sm'}>
-                  AI Reply to Email
-                </Text>
-                <Text color='gray' size={'xs'}>
-                  {`"Ariel is requesting a new card."`}
-                </Text>
-              </Flex>
-              <Switch
-                // value={item?.id}
-                id={'qq'}
-                size='xs'
-                // onClick={() => {
-                //   setData(item);
-                //   setBlockList(item?.transformer_blocklist);
-                // }}
-                color='green'
-              />
-            </Flex>
-          </label>
-        </Flex>
-        <Flex direction={'column'}>
-          <label
-            htmlFor={'ss'}
-            style={{
-              borderRadius: '8px',
-              width: '100%',
-            }}
-          >
-            <Flex align={'center'} justify={'space-between'} style={{ borderRadius: '6px', border: '1px solid #dee2e6' }} p={'xs'}>
-              <Flex direction={'column'}>
-                <Text fw={600} mt={2} size={'sm'}>
-                  AI Reply to Email
-                </Text>
-                <Text color='gray' size={'xs'}>
-                  {`"Ariel is requesting a new card."`}
-                </Text>
-              </Flex>
-              <Switch
-                // value={item?.id}
-                id={'ss'}
-                size='xs'
-                // onClick={() => {
-                //   setData(item);
-                //   setBlockList(item?.transformer_blocklist);
-                // }}
-                color='green'
-              />
-            </Flex>
-          </label>
+      <Divider my={"lg"} />
+
+      <Flex align={"center"} gap={"sm"}>
+        <Flex direction={"column"}>
+          <Text fw={600}>Customize Notifications</Text>
+          <Text size={"sm"}>
+            Subscribed to Slack alerts for the business activities listed below.
+          </Text>
         </Flex>
       </Flex>
       <Divider
-        labelPosition='left'
+        labelPosition="left"
         label={
-          <Text fw={500} size={'lg'}>
-            {' '}
+          <Text fw={500} size={"lg"}>
+            {" "}
             Linkedin
           </Text>
         }
-        mb={'sm'}
-        mt={'lg'}
+        mb={"sm"}
+        mt={"lg"}
       />
-      <Flex direction={'column'} gap={'sm'}>
-        {slackLinkedinNotification.map((item, index) => {
+      <Flex direction={"column"} gap={"sm"}>
+        {linkedinSubscriptions.map((item, index) => {
           return (
-            <Flex direction={'column'}>
-              <label
-                htmlFor={item?.title}
-                style={{
-                  borderRadius: '8px',
-                  width: '100%',
-                }}
-              >
-                <Flex
-                  align={'center'}
-                  justify={'space-between'}
-                  style={{ borderRadius: '6px', background: item?.activate ? '' : '#f6f6f7', border: item?.activate ? '1px solid #dee2e6' : '' }}
-                  p={'xs'}
-                >
-                  <Flex direction={'column'}>
-                    <Text fw={600} mt={2} size={'sm'} color='gray'>
-                      {item?.title}
-                    </Text>
-                    <Text color='gray' size={'xs'}>
-                      {item?.content}
-                    </Text>
-                  </Flex>
-                  <Switch
-                    checked={item.activate}
-                    id={item.title}
-                    size='xs'
-                    onChange={() => {
-                      setSlackLinkedinNotification(
-                        slackLinkedinNotification.map((prev) => ({
-                          ...prev,
-                          activate: prev.title === item.title ? !prev.activate : prev.activate,
-                        }))
-                      );
-                    }}
-                    color='green'
-                  />
-                </Flex>
-              </label>
-            </Flex>
+            <SlackNotificationCard
+              key={index}
+              userToken={userToken}
+              notification={item}
+              backFunction={triggerGetSubscriptions}
+            />
           );
         })}
       </Flex>
       <Divider
-        labelPosition='left'
+        labelPosition="left"
         label={
-          <Text fw={500} size={'lg'}>
-            {' '}
+          <Text fw={500} size={"lg"}>
+            {" "}
             Email
           </Text>
         }
-        mb={'sm'}
-        mt={'lg'}
+        mb={"sm"}
+        mt={"lg"}
       />
-      <Flex direction={'column'} gap={'sm'}>
-        {slackEmailNotification.map((item, index) => {
+      <Flex direction={"column"} gap={"sm"}>
+        {emailSubscriptions.map((item, index) => {
           return (
-            <Flex direction={'column'} key={index}>
-              <label
-                htmlFor={item?.title}
-                style={{
-                  borderRadius: '8px',
-                  width: '100%',
-                }}
-              >
-                <Flex
-                  align={'center'}
-                  justify={'space-between'}
-                  style={{
-                    borderRadius: '6px',
-                    background: item?.activate ? '' : '#f6f6f7',
-                    border: item?.activate ? '1px solid #dee2e6' : '',
-                  }}
-                  p={'xs'}
-                >
-                  <Flex direction={'column'}>
-                    <Text fw={600} mt={2} size={'sm'} color='gray'>
-                      {item?.title}
-                    </Text>
-                    <Text color='gray' size={'xs'}>
-                      {item?.content}
-                    </Text>
-                  </Flex>
-                  <Switch
-                    checked={item.activate}
-                    id={item.title}
-                    size='xs'
-                    onChange={() => {
-                      setSlackEmailNotification(
-                        slackEmailNotification.map((prev) => ({
-                          ...prev,
-                          activate: prev.title === item.title ? !prev.activate : prev.activate,
-                        }))
-                      );
-                    }}
-                    color='green'
-                  />
-                </Flex>
-              </label>
-            </Flex>
+            <SlackNotificationCard
+              key={index}
+              userToken={userToken}
+              notification={item}
+              backFunction={triggerGetSubscriptions}
+            />
           );
         })}
       </Flex>
-    </Paper>
+    </>
   );
 }
+
+const SlackNotificationCard = (props: {
+  userToken: string;
+  notification: SlackNotificationSubscription;
+  backFunction: () => void;
+}) => {
+  const notification = props.notification;
+
+  const [notificationTestLoading, setNotificationTestLoading] = useState(false);
+  const [loadingSubscriptionType, setLoadingSubscriptionType] = useState("");
+
+  const triggerTestNotification = async (slackNotificationID: number) => {
+    setNotificationTestLoading(true);
+
+    const result = await postPreviewSlackNotification(
+      props.userToken,
+      slackNotificationID
+    );
+
+    if (result.status === "success") {
+      showNotification({
+        title: "Success",
+        message: "Notification sent, please check your Slack channel!",
+        color: "green",
+        autoClose: 5000,
+      });
+    } else {
+      showNotification({
+        title: "Error",
+        message:
+          "Something went wrong, please try again. Did you hookup your Slack channel?",
+        color: "red",
+        autoClose: 5000,
+      });
+    }
+
+    setNotificationTestLoading(false);
+  };
+
+  const triggerActivateSubscription = async (slackNotificationID: number, subscriptionType: string) => {
+    setLoadingSubscriptionType(subscriptionType);
+
+    const result = await activateSubscription(props.userToken, slackNotificationID);
+    if (result.status === 'success') {
+      props.backFunction();
+      showNotification({
+        title: 'Success',
+        message: 'Notification activated',
+        color: 'green',
+        autoClose: 5000,
+      });
+    } else {
+      showNotification({
+        title: 'Error',
+        message: 'Something went wrong, please try again.',
+        color: 'red',
+        autoClose: 5000,
+      });
+    }
+
+    setLoadingSubscriptionType('');
+  };
+
+  const triggerDeactivateSubscription = async (subscriptionId: number, subscriptionType: string) => {
+    setLoadingSubscriptionType(subscriptionType);
+
+    const result = await deactivateSubscription(props.userToken, subscriptionId);
+    if (result.status === 'success') {
+      props.backFunction();
+      showNotification({
+        title: 'Success',
+        message: 'Notification deactivated',
+        color: 'green',
+        autoClose: 5000,
+      });
+    } else {
+      showNotification({
+        title: 'Error',
+        message: 'Something went wrong, please try again.',
+        color: 'red',
+        autoClose: 5000,
+      });
+    }
+
+    setLoadingSubscriptionType('');
+  };
+
+  return (
+    <Flex direction={"column"}>
+      <label
+        htmlFor={notification.notification_type}
+        style={{
+          borderRadius: "8px",
+          width: "100%",
+        }}
+      >
+        <Flex
+          align={"center"}
+          justify={"space-between"}
+          style={{
+            borderRadius: "6px",
+            background: notification.subscribed ? "#fff" : "#f6f6f7",
+            border: notification.subscribed ? "1px solid #dee2e6" : "",
+          }}
+          p={"xs"}
+        >
+          <Flex direction={"column"}>
+            <Text fw={600} mt={2} size={"sm"}>
+              {notification.notification_name}
+            </Text>
+            <Text size={"xs"}>{notification.notification_description}</Text>
+          </Flex>
+          <Flex direction={"column"} justify="center" align="center">
+            <Switch
+              checked={notification.subscribed}
+              id={notification.subscription_id.toString()}
+              size="xs"
+              onChange={() => {
+                if (notification.subscribed) {
+                  triggerDeactivateSubscription(notification.subscription_id, notification.notification_type);
+                } else {
+                  triggerActivateSubscription(notification.id, notification.notification_type);
+                }
+              }}
+              color="green"
+            />
+            <Button
+              variant="transparent"
+              color="grape"
+              mt="4px"
+              size="xs"
+              loading={notificationTestLoading}
+              onClick={() => {
+                triggerTestNotification(notification.id);
+              }}
+            >
+              {notificationTestLoading ? "" : "Preview"}
+            </Button>
+          </Flex>
+        </Flex>
+      </label>
+    </Flex>
+  );
+};

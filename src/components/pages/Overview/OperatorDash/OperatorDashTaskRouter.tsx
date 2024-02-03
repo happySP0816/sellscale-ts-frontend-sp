@@ -7,11 +7,16 @@ import { TaskHandlerLinkedinDisconnected } from './TaskHandlers/TaskHandlerLinke
 import { Box, Button, Text } from '@mantine/core';
 import { IconArrowBack, IconCheck, IconX } from '@tabler/icons';
 import axios from 'axios';
-import { TaskHandlerReviewLinkedinCampaign } from './TaskHandlers/TaskHandlerReviewLinkedinCampaign';
+import { TaskHandlerReviewCampaign } from './TaskHandlers/TaskHandlerReviewLinkedinCampaign';
 import { TaskHandlerSegmentCreation } from './TaskHandlers/TaskHandlerSegmentCreation';
 import { TaskHandlerDemoFeedback } from './TaskHandlers/TaskHandlerDemoFeedback';
 import { TaskHandlerSchedulingFeedback } from './TaskHandlers/TaskHandlerSchedulingFeedback';
 import { TaskHandlerCreatePrefilters } from './TaskHandlers/TaskHandlerCreatePrefilters';
+import { TaskHandlerConnectSlack } from './TaskHandlers/TaskHandlerConnectSlack';
+import { TaskHandlerConnectCalendar } from './TaskHandlers/TaskHandlerConnectCalendar';
+import { TaskHandlerAddDNCFilters } from './TaskHandlers/TaskHandlerAddDNCFilters';
+import { TaskHandlerEnrichSegment } from './TaskHandlers/TaskHandlerEnrichSegment';
+import { TaskHandlerReviewSegment } from './TaskHandlers/TaskHandlerReviewSegment';
 
 export interface OperatorDashboardEntry {
   id: number;
@@ -35,8 +40,13 @@ const TASK_ROUTER: any = {
     instruction: 'Connect to LinkedIn then mark as complete',
     enabledCompleteButton: true,
   },
+  EMAIL_CAMPAIGN_REVIEW: {
+    component: TaskHandlerReviewCampaign,
+    instruction: 'Review the campaign then mark as complete',
+    enabledCompleteButton: false,
+  },
   LINKEDIN_CAMPAIGN_REVIEW: {
-    component: TaskHandlerReviewLinkedinCampaign,
+    component: TaskHandlerReviewCampaign,
     instruction: 'Review the campaign then mark as complete',
     enabledCompleteButton: false,
   },
@@ -59,6 +69,36 @@ const TASK_ROUTER: any = {
     component: TaskHandlerCreatePrefilters,
     instruction: 'Create pre-filters to guide AI prospecting',
     enabledCompleteButton: true
+  },
+  CONNECT_SLACK: {
+    component: TaskHandlerConnectSlack,
+    instruction: 'Connect to Slack then mark as complete',
+    enabledCompleteButton: true,
+  },
+  ADD_DNC_FILTERS: {
+    component: TaskHandlerAddDNCFilters,
+    instruction: 'Add DNC filters to the system then mark as complete',
+    enabledCompleteButton: true,
+  },
+  ADD_CALENDAR_LINK: {
+    component: TaskHandlerConnectCalendar,
+    instruction: 'Add calendar link to the system then mark as complete',
+    enabledCompleteButton: true,
+  },
+  CONNECT_LINKEDIN: {
+    component: TaskHandlerLinkedinDisconnected,
+    instruction: 'Connect to LinkedIn then mark as complete',
+    enabledCompleteButton: true,
+  },
+  ENRICH_SEGMENT: {
+    component: TaskHandlerEnrichSegment,
+    instruction: 'Enrich the segment with more data',
+    enabledCompleteButton: true,
+  },
+  REVIEW_SEGMENT: {
+    component: TaskHandlerReviewSegment,
+    instruction: 'Review the segment then mark as complete',
+    enabledCompleteButton: true,
   }
 };
 
@@ -213,7 +253,7 @@ const OperatorDashTaskRouter: React.FC = () => {
         </Button>
       </Box>
       {TaskComponent && (
-        <TaskComponent data={task?.task_data} onTaskComplete={() => id && markTaskComplete(id)} />
+        <TaskComponent data={task?.task_data} onTaskComplete={() => id && markTaskComplete(id)} taskType={task?.task_type} taskId={task?.id} />
       )}
     </Box>
   );

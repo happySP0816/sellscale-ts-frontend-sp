@@ -23,12 +23,16 @@ import {
 import { FC, useEffect, useMemo, useState } from "react";
 import { NylasData } from "./MutlEmails.types";
 import {
+  Icon123,
   IconCircleCheck,
+  IconCircleX,
   IconLetterT,
   IconLink,
+  IconPercentage,
   IconPlus,
   IconSearch,
   IconSend,
+  IconWorld,
 } from "@tabler/icons";
 import { useDisclosure } from "@mantine/hooks";
 import { useRecoilState, useRecoilValue } from "recoil";
@@ -38,53 +42,40 @@ import { DataTable, DataTableSortStatus } from "mantine-datatable";
 import ICPFitPill from "@common/pipeline/ICPFitAndReason";
 import { nameToInitials, proxyURL, valueToColor } from "@utils/general";
 import { sortBy } from "lodash";
+import getEmailBanks from "@utils/requests/getEmailBanks";
+import { IconGrid4x4 } from "@tabler/icons-react";
+import moment from "moment";
 
 interface EmailBankItem {
   active: boolean;
+  daily_limit: number;
+  daily_sent_count: number;
+  domain_details: {
+    dkim_record_valid: boolean;
+    dmarc_record_valid: boolean;
+    forwarding_enabled: boolean;
+    id: number;
+    spf_record_valid: boolean;
+  };
   email_address: string;
   email_type: "ANCHOR" | "SELLSCALE" | "ALIAS";
   id: number;
   nylas_account_id: string;
   nylas_active: boolean;
   nylas_auth_code: string;
+  smartlead_reputation: number;
+  smartlead_warmup_enabled: boolean;
+  total_sent_count: number;
 }
 
 const MultiEmails = () => {
+  const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
-  const [opened, { open, toggle, close }] = useDisclosure(false);
-  const [emailInput, setEmailInput] = useState("");
   const [emails, setEmails] = useState<EmailBankItem[]>([]);
+  const [currentEmailSla, setCurrentEmailSla] = useState<number>(0);
 
   const [userData, setUserData] = useRecoilState(userDataState);
-  const [smartleadWarmup, setSmarleadWarmup] = useState<any>(null);
 
-  const [selectItem, setSelectItem] = useState<null | string>(null);
-  // const onOpenModal = () => {
-  //   setEmailInput("");
-  //   open();
-  // };
-  // const onAddEmail = () => {
-  //   setEmailInput("");
-  //   setSelectItem(null);
-  //   setEmails((oldEmails) => [
-  //     ...oldEmails,
-  //     {
-  //       email: emailInput,
-  //       type: selectItem || "Anchor Email",
-  //     },
-  //   ]);
-
-  //   close();
-  // };
-
-  const triggerGetSmartleadWarmup = async () => {
-    const result = await getSmartleadWarmup(userToken);
-    if (result.status == "success") {
-      const data = result.data;
-      const inboxes = data.inboxes;
-      setSmarleadWarmup(inboxes);
-    }
-  };
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({
     columnAccessor: "email_address",
     direction: "asc",
@@ -94,48 +85,71 @@ const MultiEmails = () => {
     setEmails(sortStatus.direction === "desc" ? data.reverse() : data);
   }, [sortStatus]);
 
-  useEffect(() => {
-    if (userData.emails) {
-      setEmails(userData.emails);
+  const triggerGetEmailBanks = async () => {
+    const result = await getEmailBanks(userToken);
+    if (result.status == "success") {
+      const data = result.data.emails;
+      setEmails(data);
     }
-    triggerGetSmartleadWarmup();
+  };
+  useEffect(() => {
+    triggerGetEmailBanks();
+
+    // Get SLA
+    if (userData.sla_schedules) {
+      for (const schedule of userData.sla_schedules) {
+        if (
+          moment(schedule.start_date) < moment() &&
+          moment() <= moment(schedule.start_date).add(7, "days")
+        ) {
+          setCurrentEmailSla(schedule.email_volume);
+        }
+      }
+    }
   }, []);
-  const theme = useMantineTheme();
 
   const [searchInput, setSearchInput] = useState("");
-
-  const filteredEmails = useMemo(
-    () =>
-      emails.filter((e) => {
-        if (!searchInput) {
-          return true;
-        }
-
-        return e.email_address.toLowerCase().includes(searchInput);
-      }),
-    [emails, searchInput]
-  );
 
   return (
     <>
       <Paper withBorder m="xs" p="md" radius="md" bg={"gray.0"}>
         <Title order={3}>{userData?.sdr_name}'s Email</Title>
 
-        <Input
-          mt={"xs"}
-          icon={<IconSearch />}
-          w={200}
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-        />
+        <Flex direction="row" mt={"xs"} w="100%">
+          <Input
+            icon={<IconSearch size={"0.9rem"} />}
+            w={"80%"}
+            maw={400}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+          <Box
+            ml='md'
+            style={{
+              border: "1px solid",
+              borderColor: theme.colors.gray[5],
+              borderRadius: "5px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+            px={'sm'}
+          >
+            <Flex w="100%" justify={"center"} align={"center"}>
+              <Text size="12px">
+                Weekly Send Limit: <b>{currentEmailSla}</b>
+              </Text>
+            </Flex>
+          </Box>
+        </Flex>
 
         <Stack mt={"xs"}>
-          <Box maw={'calc(100vw - 42rem)'} w={'100%'}>
+          <Box maw={"calc(100vw - 32rem)"} w={"100%"}>
             <DataTable
+              withColumnBorders
               sortStatus={sortStatus}
               onSortStatusChange={setSortStatus}
               mt={"md"}
-              records={filteredEmails || []}
+              records={emails || []}
               columns={[
                 {
                   accessor: "email_address",
@@ -146,8 +160,8 @@ const MultiEmails = () => {
                       align={"center"}
                       gap={"xs"}
                     >
-                      <IconLink color={theme.colors.gray[6]} size={"0.8rem"} />
-                      <Text color={theme.colors.gray[6]}>Domain</Text>
+                      <IconWorld color={theme.colors.gray[6]} size={"0.8rem"} />
+                      <Text color={theme.colors.gray[6]}>Email</Text>
                     </Flex>
                   ),
                   render: ({ email_address }) => {
@@ -202,7 +216,7 @@ const MultiEmails = () => {
                 },
 
                 {
-                  accessor: "reputation",
+                  accessor: "smartlead_reputation",
                   sortable: true,
                   title: (
                     <Flex
@@ -210,20 +224,30 @@ const MultiEmails = () => {
                       align={"center"}
                       gap={"xs"}
                     >
-                      <IconLetterT
+                      <IconPercentage
                         color={theme.colors.gray[6]}
                         size={"0.8rem"}
                       />
                       <Text color={theme.colors.gray[6]}>Reputation</Text>
                     </Flex>
                   ),
-                  render: () => {
-                    return <Badge color="green">86%</Badge>;
+                  render: ({ email_type, smartlead_reputation }) => {
+                    if (email_type === "ANCHOR") {
+                      return <></>;
+                    }
+                    return (
+                      <Flex w="100%" justify="center">
+                        <Badge
+                          color={smartlead_reputation == 100 ? "green" : "red"}
+                        >
+                          {smartlead_reputation}%
+                        </Badge>
+                      </Flex>
+                    );
                   },
                 },
-
                 {
-                  accessor: "infrastructure",
+                  accessor: "daily_limit",
                   sortable: true,
                   title: (
                     <Flex
@@ -231,26 +255,62 @@ const MultiEmails = () => {
                       align={"center"}
                       gap={"xs"}
                     >
-                      <IconLetterT
+                      <Icon123 color={theme.colors.gray[6]} size={"0.8rem"} />
+                      <Text color={theme.colors.gray[6]}>Daily Limit</Text>
+                    </Flex>
+                  ),
+                  render: ({ daily_limit }) => {
+                    return (
+                      <Flex w="100%" justify="center">
+                        <Text fz={"sm"} fw={600}>
+                          {daily_limit}
+                        </Text>
+                      </Flex>
+                    );
+                  },
+                },
+                {
+                  accessor: "domain_details",
+                  sortable: true,
+                  title: (
+                    <Flex
+                      color={theme.colors.gray[6]}
+                      align={"center"}
+                      gap={"xs"}
+                    >
+                      <IconGrid4x4
                         color={theme.colors.gray[6]}
                         size={"0.8rem"}
                       />
                       <Text color={theme.colors.gray[6]}>Infrastructure</Text>
                     </Flex>
                   ),
-                  width: 500,
-                  render: () => {
+                  width: 620,
+                  render: ({ domain_details, smartlead_warmup_enabled }) => {
+                    if (!domain_details || !domain_details.id) {
+                      return <></>;
+                    }
+
                     return (
                       <Flex gap={"xs"}>
                         <Group>
                           <Text fz={"sm"} fw={700}>
                             DKIM:{" "}
                           </Text>
-                          <IconCircleCheck
-                            fill={theme.colors.green[4]}
-                            stroke={theme.white}
-                            color={theme.white}
-                          />
+                          {domain_details &&
+                          domain_details.dkim_record_valid ? (
+                            <IconCircleCheck
+                              fill={theme.colors.green[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          ) : (
+                            <IconCircleX
+                              fill={theme.colors.red[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          )}
                           <Divider orientation="vertical" />
                         </Group>
 
@@ -258,33 +318,78 @@ const MultiEmails = () => {
                           <Text fz={"sm"} fw={700}>
                             SPF:{" "}
                           </Text>
-                          <IconCircleCheck
-                            fill={theme.colors.green[4]}
-                            stroke={theme.white}
-                            color={theme.white}
-                          />
+                          {domain_details && domain_details.spf_record_valid ? (
+                            <IconCircleCheck
+                              fill={theme.colors.green[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          ) : (
+                            <IconCircleX
+                              fill={theme.colors.red[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          )}
                           <Divider orientation="vertical" />
                         </Group>
                         <Group>
                           <Text fz={"sm"} fw={700}>
                             DMARC:{" "}
                           </Text>
-                          <IconCircleCheck
-                            fill={theme.colors.green[4]}
-                            stroke={theme.white}
-                            color={theme.white}
-                          />
+                          {domain_details &&
+                          domain_details.dmarc_record_valid ? (
+                            <IconCircleCheck
+                              fill={theme.colors.green[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          ) : (
+                            <IconCircleX
+                              fill={theme.colors.red[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          )}
                           <Divider orientation="vertical" />
                         </Group>
                         <Group>
                           <Text fz={"sm"} fw={700}>
                             Forwarding:{" "}
                           </Text>
-                          <IconCircleCheck
-                            fill={theme.colors.green[4]}
-                            stroke={theme.white}
-                            color={theme.white}
-                          />
+                          {domain_details &&
+                          domain_details.forwarding_enabled ? (
+                            <IconCircleCheck
+                              fill={theme.colors.green[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          ) : (
+                            <IconCircleX
+                              fill={theme.colors.red[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          )}
+                          <Divider orientation="vertical" />
+                        </Group>
+                        <Group>
+                          <Text fz={"sm"} fw={700}>
+                            Warmup:{" "}
+                          </Text>
+                          {smartlead_warmup_enabled ? (
+                            <IconCircleCheck
+                              fill={theme.colors.green[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          ) : (
+                            <IconCircleX
+                              fill={theme.colors.red[4]}
+                              stroke={theme.white}
+                              color={theme.white}
+                            />
+                          )}
                         </Group>
                       </Flex>
                     );
@@ -293,98 +398,8 @@ const MultiEmails = () => {
               ]}
             />
           </Box>
-
-          {smartleadWarmup && smartleadWarmup.length > 0 && (
-            <DataTable
-              records={smartleadWarmup}
-              columns={[
-                {
-                  accessor: "from_email",
-                  title: "Inbox",
-                  // @ts-ignore
-                  render: ({ from_email }) => {
-                    return (
-                      <Flex direction="row" align="center">
-                        <IconSend size={14} />
-                        <Text ml={4}>{from_email}</Text>
-                      </Flex>
-                    );
-                  },
-                },
-                {
-                  accessor: "limit",
-                  title: "Daily Limit",
-                  // @ts-ignore
-                  render: ({ daily_sent_count, message_per_day }) => {
-                    return (
-                      <Text>
-                        {daily_sent_count} / {message_per_day}
-                      </Text>
-                    );
-                  },
-                },
-                {
-                  accessor: "email_warmup_details",
-                  title: "Warmup Enabled",
-                  // @ts-ignore
-                  render: ({ email_warmup_details }) => {
-                    const status = email_warmup_details.status;
-                    return (
-                      <Badge color={status === "ACTIVE" ? "green" : "red"}>
-                        {status}
-                      </Badge>
-                    );
-                  },
-                },
-                {
-                  accessor: "email_warmup_details",
-                  title: "Reputation",
-                  // @ts-ignore
-                  render: ({ email_warmup_details }) => {
-                    const reputation = email_warmup_details.warmup_reputation;
-
-                    return (
-                      <Badge
-                        color={
-                          reputation > 80
-                            ? "green"
-                            : reputation > 60
-                            ? "yellow"
-                            : "red"
-                        }
-                      >
-                        {reputation || "N/A"}%
-                      </Badge>
-                    );
-                  },
-                },
-              ]}
-            />
-          )}
         </Stack>
       </Paper>
-
-      {/* <Modal opened={opened} onClose={close} title="Add Email">
-        <Stack>
-          <TextInput
-            type="email"
-            label="Email"
-            value={emailInput}
-            onChange={(e) => setEmailInput(e.target.value)}
-          />
-
-          <Select
-            label="Type"
-            value={selectItem}
-            onChange={(value) => setSelectItem(value)}
-            data={[
-              { value: "Anchor Email", label: "Anchor Email" },
-              { value: "SellScale Email", label: "SellScale Email" },
-            ]}
-          />
-          <Button onClick={() => onAddEmail()}>Save</Button>
-        </Stack>
-      </Modal> */}
     </>
   );
 };

@@ -69,7 +69,7 @@ export default function SettingsPage() {
   });
 
   return (
-    <Box p={20} mx={150}>
+    <Box p={20}>
       <PageTitle title='Settings' />
       <Tabs
         value={currentTab}

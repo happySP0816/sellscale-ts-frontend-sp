@@ -271,10 +271,10 @@ export default function PersonaCampaigns() {
               variant="outline"
               radius="md"
               onClick={() => {
-                navigateToPage(navigate, `/settings`);
+                navigateToPage(navigate, `/settings/email`);
               }}
             >
-              {`Email Send Rate (per week): ${currentEmailSla * 5}`}
+              {`Email Send Rate (per week): ${currentEmailSla}`}
             </Button>
 
           {userData?.warmup_linkedin_complete ? (

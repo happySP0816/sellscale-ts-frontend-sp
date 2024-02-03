@@ -1048,6 +1048,7 @@ function IntroMessageSection(props: {
     selectedTemplateId?: number
   ) => {
     if (!currentProject) return null;
+    if (prospectId === -1) return null;
     setLoading(true);
     setMessage('');
 
@@ -2920,7 +2921,7 @@ function FrameworkSection(props: {
                                     active: bf.default,
                                     humanFeedback: bf.human_feedback,
                                     blockList: bf.transformer_blocklist,
-                                    onChange: props.onFrameworkChange
+                                    onChange: props.onFrameworkChange,
                                   },
                                   // message: bf.description,
                                   // handleSubmit: async (message: string) => {

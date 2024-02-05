@@ -165,6 +165,8 @@ const EmailGrader = () => {
     if (!data) {
       return;
     }
+
+    setData(data);
   };
 
   useEffect(() => {
@@ -208,6 +210,18 @@ const EmailGrader = () => {
                     value={subject}
                     onChange={(e) => setSubject(e.currentTarget.value)}
                   />
+
+                  <Text color='gray.6' fw={600} fz={'sm'} mt='xs'>
+                      BODY
+                    </Text>
+                  <RichTextArea
+                      onChange={(value, rawValue) => {
+                        bodyRich.current = rawValue;
+                        bodyRef.current = value;
+                      }}
+                      value={bodyRich.current}
+                      height={500}
+                    />
                 </>
               ) : (
                 <>
@@ -232,25 +246,20 @@ const EmailGrader = () => {
                     <Text color='gray.6' fw={600} fz={'sm'}>
                       BODY
                     </Text>
-                    <RichTextArea
-                      onChange={(value, rawValue) => {
-                        bodyRich.current = rawValue;
-                        bodyRef.current = value;
-                      }}
-                      value={bodyRich.current}
-                      height={500}
-                    />
+                    
+                    <div
+                      onClick={toggleEditMode}
+                      style={{height: 500, border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll', paddingBottom: '40px'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(bodyRef.current) }}></div>
                   </Box>
                 </>
-                // ) : (
+                // ) 
+                // : (
                 //   <>
                 //     {/* Uneditable text blocks for subject and body */}
                 //     <Text color='gray.6' fw={600} fz={'sm'}>
-                //       SUBJECT LINE
+                //       BODY
                 //     </Text>
-                //     <div
-                //       onClick={toggleEditMode}
-                //       style={{height: 500, border: 'solid 1px #ddd', padding: 4, paddingLeft: 12, paddingRight: 12, borderRadius: 8, overflowY: 'scroll', paddingBottom: '40px'}} dangerouslySetInnerHTML={{ __html: highlightPersonalizations(bodyRef.current) }}></div>
+                    
                 // </>
               )}
               <Button
@@ -267,7 +276,7 @@ const EmailGrader = () => {
                 {isEditMode ? '' : 'Edit'}
               </Button>
 
-              <Box mt={'sm'}>
+              {/* <Box mt={'sm'}>
                 <Text color='gray.6' fw={600} fz={'sm'}>
                   BODY
                 </Text>
@@ -286,7 +295,7 @@ const EmailGrader = () => {
                     __html: highlightPersonalizations(bodyRef.current),
                   }}
                 ></div>
-              </Box>
+              </Box> */}
               <Button
                 ml='auto'
                 onClick={toggleEditMode}

@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from "react";
 import BumpFrameworksPage from "./BumpFrameworksPage";
-import { Box, Flex, Tabs, rem, Text, Switch, Divider, LoadingOverlay, Tooltip } from "@mantine/core";
+import {
+  Box,
+  Flex,
+  Tabs,
+  rem,
+  Text,
+  Switch,
+  Divider,
+  LoadingOverlay,
+  Tooltip,
+  Title,
+} from "@mantine/core";
 import ChannelsSetupSelector from "./channels";
 import EmailSequencingPage from "./EmailSequencingPage";
 import { currentProjectState } from "@atoms/personaAtoms";
@@ -11,7 +22,7 @@ import ICPFilters from "@common/persona/ICPFilter/ICPFilters";
 import { IconBrandLinkedin, IconMailOpened, IconUser } from "@tabler/icons";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { showNotification } from "@mantine/notifications";
-import { openConfirmModal } from '@mantine/modals';
+import { openConfirmModal } from "@mantine/modals";
 
 export default function ChannelSetupPage() {
   const { channelType, tabId } = useLoaderData() as {
@@ -35,17 +46,55 @@ export default function ChannelSetupPage() {
   useEffect(() => {
     setEnabledEmail(currentProject?.email_active);
     setEnabledLinkedin(currentProject?.linkedin_active);
-  }, [currentProject?.linkedin_active, currentProject?.email_active])
+  }, [currentProject?.linkedin_active, currentProject?.email_active]);
 
   const onToggleEmail = async () => {
     openConfirmModal({
-      title: "Are you sure?",
-      children: "Are you sure you want to " + (isEnabledEmail ? "🔴 disable" : "✅ enable") + " email outbound for this campaign?",
-      labels: { confirm: 'Confirm', cancel: 'Cancel' },
-      onCancel: () => { },
-      onConfirm: () => { toggleEmail() }
+      title: (
+        <Title order={3}>
+          {isEnabledEmail ? "Disable Email Outbound" : "Enable Email Outbound"}
+        </Title>
+      ),
+      children: (
+        <>
+          {isEnabledEmail ? (
+            <>
+              <Text fw="bold" fz="lg">
+                Once deactivated:
+              </Text>
+              <Text mt="xs" fz="md">
+                🔴 No new emails will be fetched for your contacts.
+              </Text>
+              <Text mt="2px" fz="md">
+                🔴 No new messages will be sent.
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text fw="bold" fz="lg">
+                Once activated:
+              </Text>
+              <Text mt="xs" fz="md">
+                ✅ SellScale finds and verifies emails for your contacts.
+              </Text>
+              <Text mt="2px" fz="md">
+                ✅ Emails will generate and send daily.
+              </Text>
+              <Text mt="2px" fz="md">
+                🔴 You be unable to add or remove steps to the sequencing for this campaign.
+              </Text>
+            </>
+          )}
+        </>
+      ),
+      labels: { confirm: "Confirm", cancel: "Cancel" },
+      confirmProps: {color: isEnabledEmail ? "red" : "green"},
+      onCancel: () => {},
+      onConfirm: () => {
+        toggleEmail();
+      },
     });
-  }
+  };
 
   const toggleEmail = async () => {
     setTogglingEmail(true);
@@ -71,9 +120,9 @@ export default function ChannelSetupPage() {
           title: "📧 Fetching emails...",
           message:
             "We are fetching emails for your contacts. This may take a few minutes.",
-            color: "blue",
-            autoClose: 15000,
-        })
+          color: "blue",
+          autoClose: 15000,
+        });
       } else {
         showNotification({
           title: "🔴 Disabled",
@@ -87,12 +136,17 @@ export default function ChannelSetupPage() {
   const onToggleLinkedin = async () => {
     openConfirmModal({
       title: "Are you sure?",
-      children: "Are you sure you want to " + (isEnabledLinkedin ? "🔴 disable" : "✅ enable") + " LinkedIn outbound for this campaign?",
-      labels: { confirm: 'Confirm', cancel: 'Cancel' },
-      onCancel: () => { },
-      onConfirm: () => { toggleLinkedin() }
+      children:
+        "Are you sure you want to " +
+        (isEnabledLinkedin ? "🔴 disable" : "✅ enable") +
+        " LinkedIn outbound for this campaign?",
+      labels: { confirm: "Confirm", cancel: "Cancel" },
+      onCancel: () => {},
+      onConfirm: () => {
+        toggleLinkedin();
+      },
     });
-  }
+  };
 
   const toggleLinkedin = async () => {
     setTogglingLinkedin(true);
@@ -183,23 +237,25 @@ export default function ChannelSetupPage() {
                 value="linkedin"
                 icon={<IconBrandLinkedin size={"0.8rem"} />}
                 // disabled={!isEnabledLinkedin}
-                ml='xs'
+                ml="xs"
               >
                 <Flex align={"center"} gap={"md"}>
                   <Text>Linkedin</Text>
 
                   <LoadingOverlay visible={togglingLinkedin} />
 
-                  <Tooltip 
-                    label={isEnabledLinkedin ? "Disable Linkedin" : "Enable Linkedin"}
+                  <Tooltip
+                    label={
+                      isEnabledLinkedin ? "Disable Linkedin" : "Enable Linkedin"
+                    }
                     position="bottom"
                     withArrow
                     withinPortal
-                    >
+                  >
                     <Box>
                       <Switch
                         size="xs"
-                        sx={{ zIndex: 200, cursor: 'pointer'}}
+                        sx={{ zIndex: 200, cursor: "pointer" }}
                         color={activeTab === "linkedin" ? "green" : "blue"}
                         checked={isEnabledLinkedin}
                         onChange={onToggleLinkedin}
@@ -212,19 +268,19 @@ export default function ChannelSetupPage() {
                 value="email"
                 icon={<IconMailOpened size={"0.8rem"} />}
                 // disabled={!isEnabledEmail}
-                ml='xs'
+                ml="xs"
               >
                 <Flex align={"center"} gap={"md"}>
                   <Text>Email</Text>
 
                   <LoadingOverlay visible={togglingEmail} />
 
-                  <Tooltip 
-                    label={isEnabledLinkedin ? "Disable Email" : "Enable Email"}
+                  <Tooltip
+                    label={isEnabledEmail ? "Disable Email" : "Enable Email"}
                     position="bottom"
                     withArrow
                     withinPortal
-                    >
+                  >
                     <Box>
                       <Switch
                         size="xs"

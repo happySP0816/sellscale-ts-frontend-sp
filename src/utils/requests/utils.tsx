@@ -90,7 +90,7 @@ async function getResponseJSON(
     //         <Text fz='md'>LinkedIn Disconnected</Text>
     //         <Button leftIcon={<IconPlugConnected size='0.9rem' />} variant="light" color="red" size="xs" radius="xl" compact
     //           onClick={() => {
-    //             window.location.href = "/settings/linkedinConnection";
+    //             window.location.href = "/settings/linkedin";
     //           }}
     //         >Go to Reconnect</Button>
     //       </Group>

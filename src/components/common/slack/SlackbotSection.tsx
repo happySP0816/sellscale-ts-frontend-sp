@@ -16,7 +16,7 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { getConnectedSlackChannels } from "@utils/requests/slack";
 
-const SLACK_REDIRECT_URI = `${window.location.origin}/settings?tab=slack`;
+const SLACK_REDIRECT_URI = `${window.location.origin}/settings/slack`;
 
 type ChannelListType = {
   channelName: string;

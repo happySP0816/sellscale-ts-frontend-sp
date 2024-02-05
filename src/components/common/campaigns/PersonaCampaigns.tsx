@@ -283,7 +283,7 @@ export default function PersonaCampaigns() {
               variant="outline"
               radius="md"
               onClick={() => {
-                navigateToPage(navigate, `/settings/linkedinConnection`);
+                navigateToPage(navigate, `/settings/linkedin`);
               }}
             >
               {`LinkedIn Send Rate (per week): ${currentLinkedInSLA}`}
@@ -298,7 +298,7 @@ export default function PersonaCampaigns() {
                 variant="outline"
                 radius="md"
                 onClick={() => {
-                  navigateToPage(navigate, `/settings/linkedinConnection`);
+                  navigateToPage(navigate, `/settings/linkedin`);
                 }}
               >
                 {`LinkedIn Warming Up (per week): ${currentLinkedInSLA}`}

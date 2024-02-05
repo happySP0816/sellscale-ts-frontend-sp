@@ -115,21 +115,21 @@ function GeneralOnboarding(props: { data: any }) {
         {
           title: 'Company Information',
           description: 'Collect general company information',
-          link: '/settings/sellScaleBrain',
+          link: '/settings/brain',
           searchParams: new URLSearchParams({ tab: 'company_info' }),
           complete: props.data.general.company_info,
         },
         {
           title: 'SDR Information',
           description: 'Collect general SDR information',
-          link: '/settings/sellScaleBrain',
+          link: '/settings/brain',
           searchParams: new URLSearchParams({ tab: 'user_info' }),
           complete: props.data.general.sdr_info,
         },
         {
           title: 'Scheduling Information',
           description: 'Connect to Calendly OR scheduling link',
-          link: '/settings/calendarAndScheduling',
+          link: '/settings/scheduling',
           complete: props.data.general.scheduling_info,
         },
         {
@@ -141,7 +141,7 @@ function GeneralOnboarding(props: { data: any }) {
         {
           title: 'LinkedIn Integration',
           description: 'Connect to LinkedIn',
-          link: '/settings/linkedinConnection',
+          link: '/settings/linkedin',
           complete: props.data.general.linkedin_integration,
         },
       ]}
@@ -169,7 +169,7 @@ function PersonaOnboarding(props: { data: any }) {
         {
           title: 'Add Do Not Contact List Filters',
           description: 'Customize who they do not want to target',
-          link: '/settings/doNotContact',
+          link: '/settings/filters',
           complete: props.data.persona.do_not_contact_filters,
         },
       ]}

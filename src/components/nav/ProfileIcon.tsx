@@ -102,7 +102,7 @@ export default function ProfileIcon() {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      navigateToPage(navigate, '/settings/linkedinConnection');
+                      navigateToPage(navigate, '/settings/linkedin');
                     }}
                   >
                     LinkedIn is {userData?.li_voyager_connected ? 'Connected' : 'Disconnected'}
@@ -116,7 +116,7 @@ export default function ProfileIcon() {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      navigateToPage(navigate, '/settings/linkedinConnection');
+                      navigateToPage(navigate, '/settings/linkedin');
                     }}
                   >
                     LinkedIn Not Setup

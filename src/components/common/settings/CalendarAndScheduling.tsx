@@ -2,6 +2,7 @@ import {
   Card,
   Paper,
   TextInput,
+  Input,
   Text,
   Title,
   ActionIcon,
@@ -11,8 +12,14 @@ import {
   Notification,
   Select,
   Badge,
+  Divider,
+  Avatar,
+  Anchor,
+  Overlay,
+  AspectRatio,
+  Box,
 } from '@mantine/core';
-import { IconCheck, IconEdit, IconX } from '@tabler/icons';
+import { IconCheck, IconCircleCheck, IconCopy, IconEdit, IconInfoCircle, IconLink, IconPencil, IconX } from '@tabler/icons';
 import { useEffect, useState } from 'react';
 
 import { patchSchedulingLink } from '@utils/requests/patchSchedulingLink';
@@ -20,7 +27,7 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { showNotification } from '@mantine/notifications';
 import { API_URL } from '@constants/data';
-import { IconCalendarShare } from '@tabler/icons-react';
+import { IconCalendarShare, IconCircleCheckFilled, IconInfoHexagon, IconInfoTriangle, IconPointFilled } from '@tabler/icons-react';
 
 const urlRegex: RegExp = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[a-z0-9\-]+(?:\.[a-z]{2,})+(?:\/[\w\-\.\?\=\&]*)*$/i;
 
@@ -33,6 +40,8 @@ export default function CalendarAndScheduling() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+
+  const [updated, setUpdated] = useState<boolean>(false);
 
   const [timeZone, setTimeZone] = useState<string>(userData.timezone);
 
@@ -117,6 +126,7 @@ export default function CalendarAndScheduling() {
         autoClose: 3000,
       });
       setUserData({ ...userData, scheduling_link: schedulingLink });
+      setUpdated(true);
       setIsEditing(false);
     } else {
       showNotification({
@@ -131,54 +141,51 @@ export default function CalendarAndScheduling() {
   return (
     <Paper withBorder m='xs' p='md' radius='md'>
       <Title order={3}>Calendar Integration</Title>
-      <Card mt='md'>
+      <Card mt='md' padding='lg' radius='md' withBorder>
         <LoadingOverlay visible={isLoading} />
-        {userData.scheduling_link ? (
-          <Notification
-            closeButtonProps={{ opacity: 0 }}
-            icon={<IconCheck size='1.1rem' />}
-            title='Scheduling link is set'
-            color='green'
-            mb='sm'
-            withBorder
-          />
-        ) : (
-          <Notification
-            closeButtonProps={{ opacity: 0 }}
-            icon={<IconX size='1.1rem' />}
-            title='Scheduling link is not set'
-            color='red'
-            mb='sm'
-            withBorder
-          />
-        )}
-        <Text fz='lg' fw='bold'>
-          Scheduling Link
-        </Text>
+        <Flex gap={4} align={'center'}>
+          <Text fz='lg' fw='bold'>
+            Scheduling Link
+          </Text>
+          {updated && <IconCircleCheck color='green' size={'1.2rem'} />}
+        </Flex>
         <Text mt='sm' fz='sm'>
-          Whenever SellScale AI detects a high propensity prospect who is interested in scheduling a time with you, the
-          AI will use this link to book on your calendar.
+          Whenever SellScale AI detects a high propensity prospect who is interested in scheduling a time with you, the AI will use this link to book on your
+          calendar. Needs to be a valid URL (Calendly, Chron, Hubspot, etc).
         </Text>
-        <Text mt='xs' fz='xs'>
-          Needs to be a valid URL (Calendly, Chron, Hubspot, etc).
-        </Text>
-        <TextInput
-          mt='sm'
-          label='Scheduling Link'
-          placeholder='https://calendly.com/yourname'
-          value={schedulingLink}
-          error={error}
-          disabled={!isEditing}
-          onChange={handleUrlChange}
-          withAsterisk
-        />
-        {!isEditing && (
+        <Divider mt={'sm'} />
+        <Flex align={'end'} gap={'sm'} justify={'space-between'} w={'100%'}>
+          <Input.Wrapper
+            label={
+              <Text color='gray' tt={'uppercase'}>
+                calendar link
+              </Text>
+            }
+            error={error}
+            mt='sm'
+            w={'100%'}
+          >
+            <Input
+              placeholder='https://calendly.com/yourname'
+              value={schedulingLink}
+              disabled={!isEditing}
+              onChange={handleUrlChange}
+              rightSection={<IconCopy size={'1rem'} />}
+              // withAsterisk
+            />
+          </Input.Wrapper>
+          <Button leftIcon={<IconPencil size={'0.9rem'} />} onClick={() => setIsEditing(true)}>
+            Edit
+          </Button>
+        </Flex>
+        {/* {!isEditing && (
           <Flex justify='flex-end' mt='xs'>
             <ActionIcon color='dark' variant='transparent' onClick={() => setIsEditing(true)}>
               <IconEdit size='1.125rem' />
             </ActionIcon>
           </Flex>
-        )}
+          )} */}
+
         {isEditing && (
           <Flex justify='space-between' mt='sm'>
             <Button
@@ -197,6 +204,64 @@ export default function CalendarAndScheduling() {
             </Button>
           </Flex>
         )}
+        <Flex direction={'column'} gap={2} mt={'sm'}>
+          <Text color='gray' tt={'uppercase'}>
+            example message
+          </Text>
+          <Flex style={{ border: '1px solid #dee2e6', borderRadius: '8px' }} align={'center'} justify={'center'}>
+            <Box pos='relative'>
+              <LoadingOverlay
+                visible={updated && userData.scheduling_link}
+                zIndex={1000}
+                overlayBlur={2}
+                loader={
+                  <Notification
+                    withCloseButton={false}
+                    icon={<IconInfoTriangle size='0.8rem' />}
+                    title='Scheduling link is not set'
+                    color='red'
+                    withBorder
+                    bg={'#fff6f5'}
+                    style={{ border: '1px solid #f9c5c4' }}
+                    w={'fit-content'}
+                    fw={500}
+                  >
+                    <Text size={'xs'}>Integrate Calendar to schedule meetings using SellScale AI.</Text>
+                  </Notification>
+                }
+              />
+              <Flex p={'sm'} gap={'sm'}>
+                <Avatar src={userData.img_url} radius={'xl'} size={'lg'} />
+                <Flex direction={'column'} gap={'sm'}>
+                  <Text fw={'700'} size={'sm'} style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                    {userData.sdr_name}
+                    <Text color='gray' fw={500}>
+                      <IconPointFilled size={'0.5rem'} style={{ marginRight: '5' }} />
+                      {'5:04 PM'}
+                    </Text>
+                  </Text>
+                  <Text size={'sm'} color='gray' fw={500}>
+                    {'Hi Brandon'}
+                  </Text>
+                  <Text size={'sm'} color='gray' fw={500}>
+                    {
+                      "Hope you're doing great! Just wanted to quickly check in and see if you might have a few minutes to chat about some cool stuff we're working on."
+                    }
+                  </Text>
+                  <Text size={'sm'} style={{ display: 'flex', gap: 5 }} color='gray' fw={500}>
+                    You can pick a time that works for your here:{' '}
+                    <Anchor href={userData.scheduling_link} target='_blank' fw={500}>
+                      {userData.scheduling_link}
+                    </Anchor>
+                  </Text>
+                  <Text size={'sm'} color='gray' fw={500}>
+                    Looking forward to it!
+                  </Text>
+                </Flex>
+              </Flex>
+            </Box>
+          </Flex>
+        </Flex>
       </Card>
       {/* <Card>
         <Text fz='lg' fw='bold'>
@@ -238,7 +303,6 @@ export default function CalendarAndScheduling() {
         <Select
           mt='md'
           withinPortal
-          /* @ts-ignore */
           data={Intl.supportedValuesOf('timeZone')}
           placeholder={Intl.DateTimeFormat().resolvedOptions().timeZone}
           searchable

@@ -202,7 +202,9 @@ export default function NylasConnectedCard(props: {
     <Box bg={"white"} py={"md"}>
       <Box px={"md"}>
         <Group>
-          <Text fw={600} size={28}>Email Integration</Text>
+          <Text fw={600} size={28}>
+            Email Integration
+          </Text>
           {props.connected ? (
             <Badge
               size="xl"
@@ -241,155 +243,6 @@ export default function NylasConnectedCard(props: {
           respond to your contact's conversations.
         </Text>
       </Box>
-      <Paper withBorder m="xs" p="md" radius="md" bg={"gray.0"}>
-        <Stack>
-          <div>
-            {props.connected ? (
-              <></>
-            ) : (
-              <>
-                <Box
-                  sx={(theme) => ({
-                    border: `1px solid ${theme.colors.gray[4]}`,
-                    backgroundColor: theme.colors.gray[0],
-                    borderRadius: 12,
-                  })}
-                  p={"md"}
-                >
-                  <Flex justify={"space-between"} align={"center"} wrap={'wrap'} gap={4}>
-                    <Flex align={"center"}  wrap={'wrap'} gap={4}>
-                      <Image src={GoogleLogo} maw="24px" mah="24px" mr='4px'/>
-
-                      <Text fw={600} >
-                        Connect to your Gmail Account
-                      </Text>
-                    </Flex>
-
-                    <Button
-                      className={"bg-black"}
-                      variant={"filled"}
-                      color={""}
-                      component="a"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={
-                        nylasClientId
-                          ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scopes=email.read_only,email.send`
-                          : ""
-                      }
-                      leftIcon={
-                        <img src={GoogleLogo} width="18px" height="18px" />
-                      }
-                      loading={isFetching}
-                    >
-                      Sign in with Google
-                    </Button>
-                  </Flex>
-
-                  <Divider my={"sm"} />
-
-                  <Text color="gray.6" size="sm" fw={600}>
-                    SellScale's use and transfer to any other app of information
-                    received from Google APIs will adhere to{" "}
-                    <Anchor
-                      target="_blank"
-                      href="https://developers.google.com/terms/api-services-user-data-policy"
-                    >
-                      Google API Services User Data Policy
-                    </Anchor>
-                    , including the Limited Use requirements
-                  </Text>
-                </Box>
-              </>
-            )}
-          </div>
-
-          {props.connected && (
-            <div>
-              {!data && (
-                <Center w="100%" h={100}>
-                  <Stack align="center">
-                    <Loader variant="dots" size="xl" />
-                    <Text c="dimmed" fz="sm" fs="italic">
-                      Fetching Email details...
-                    </Text>
-                  </Stack>
-                </Center>
-              )}
-              {data && (
-                <Group noWrap spacing={10} align="flex-start" pt="xs">
-                  <Avatar
-                    src=""
-                    color={valueToColor(
-                      theme,
-                      `${data.name}, ${data.email_address}`
-                    )}
-                    size={94}
-                    radius="md"
-                  >
-                    {nameToInitials(data.name)}
-                  </Avatar>
-                  <div>
-                    <Title order={3}>{data.name}</Title>
-
-                    <Group noWrap spacing={10} mt={3}>
-                      <IconSocial
-                        stroke={1.5}
-                        size={16}
-                        className={classes.icon}
-                      />
-                      <Text size="xs" color="dimmed">
-                        {formatToLabel(data.provider)}
-                      </Text>
-                    </Group>
-
-                    <Group noWrap spacing={10} mt={5}>
-                      <IconMail
-                        stroke={1.5}
-                        size={16}
-                        className={classes.icon}
-                      />
-                      <Text
-                        size="xs"
-                        color="dimmed"
-                        component="a"
-                        href={`mailto:${data.email_address}`}
-                      >
-                        {data.email_address}
-                      </Text>
-                    </Group>
-                  </div>
-                </Group>
-              )}
-            </div>
-          )}
-        </Stack>
-      </Paper>
-
-      {/* DEPRECATED */}
-      {/* <Paper withBorder m='xs' p='md' radius='md'>
-        <Stack>
-          <div>
-            <Group>
-              <Title order={3}>Sync Contacts into Smartlead</Title>
-              <Text>
-                Only {smartlead_lead_count} out of {persona_prospect_count} contacts have been
-                synced into Smartlead. Press button below to complete syncing.
-              </Text>
-              <Button
-                onClick={async () => {
-                  if (!currentProject) return;
-
-                  await syncSmartleadContacts(userToken, currentProject?.id);
-                  window.location.reload();
-                }}
-              >
-                Sync Contacts Now
-              </Button>
-            </Group>
-          </div>
-        </Stack>
-      </Paper> */}
 
       {props.showSmartlead && (
         <Paper withBorder m="xs" p="md" radius="md">
@@ -489,8 +342,127 @@ export default function NylasConnectedCard(props: {
         </Paper>
       )}
 
-      <MultiEmails />
       <ScheduleSetting />
+      <MultiEmails />
+
+      <Paper withBorder m="xs" p="md" radius="md" bg={"gray.0"}>
+        <Stack>
+          <div>
+            {props.connected ? (
+              <></>
+            ) : (
+              <>
+                <Flex
+                  justify={"space-between"}
+                  align={"center"}
+                  wrap={"wrap"}
+                  gap={4}
+                >
+                  <Flex align={"center"} wrap={"wrap"} gap={4}>
+                    <Image src={GoogleLogo} maw="24px" mah="24px" mr="4px" />
+
+                    <Text fw={600}>Connect to your Gmail Account</Text>
+                  </Flex>
+
+                  <Button
+                    className={"bg-black"}
+                    variant={"filled"}
+                    color={""}
+                    component="a"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={
+                      nylasClientId
+                        ? `https://api.nylas.com/oauth/authorize?client_id=${nylasClientId}&redirect_uri=${REDIRECT_URI}&response_type=code&scopes=email.read_only,email.send`
+                        : ""
+                    }
+                    leftIcon={
+                      <img src={GoogleLogo} width="18px" height="18px" />
+                    }
+                    loading={isFetching}
+                  >
+                    Sign in with Google
+                  </Button>
+                </Flex>
+
+                <Divider my={"sm"} />
+
+                <Text color="gray.6" size="sm" fw={600}>
+                  SellScale's use and transfer to any other app of information
+                  received from Google APIs will adhere to{" "}
+                  <Anchor
+                    target="_blank"
+                    href="https://developers.google.com/terms/api-services-user-data-policy"
+                  >
+                    Google API Services User Data Policy
+                  </Anchor>
+                  , including the Limited Use requirements
+                </Text>
+              </>
+            )}
+          </div>
+
+          {props.connected && (
+            <div>
+              {!data && (
+                <Center w="100%" h={100}>
+                  <Stack align="center">
+                    <Loader variant="dots" size="xl" />
+                    <Text c="dimmed" fz="sm" fs="italic">
+                      Fetching Email details...
+                    </Text>
+                  </Stack>
+                </Center>
+              )}
+              {data && (
+                <Group noWrap spacing={10} align="flex-start" pt="xs">
+                  <Avatar
+                    src=""
+                    color={valueToColor(
+                      theme,
+                      `${data.name}, ${data.email_address}`
+                    )}
+                    size={94}
+                    radius="md"
+                  >
+                    {nameToInitials(data.name)}
+                  </Avatar>
+                  <div>
+                    <Title order={3}>{data.name}</Title>
+
+                    <Group noWrap spacing={10} mt={3}>
+                      <IconSocial
+                        stroke={1.5}
+                        size={16}
+                        className={classes.icon}
+                      />
+                      <Text size="xs" color="dimmed">
+                        {formatToLabel(data.provider)}
+                      </Text>
+                    </Group>
+
+                    <Group noWrap spacing={10} mt={5}>
+                      <IconMail
+                        stroke={1.5}
+                        size={16}
+                        className={classes.icon}
+                      />
+                      <Text
+                        size="xs"
+                        color="dimmed"
+                        component="a"
+                        href={`mailto:${data.email_address}`}
+                      >
+                        {data.email_address}
+                      </Text>
+                    </Group>
+                  </div>
+                </Group>
+              )}
+            </div>
+          )}
+        </Stack>
+      </Paper>
     </Box>
   );
 }

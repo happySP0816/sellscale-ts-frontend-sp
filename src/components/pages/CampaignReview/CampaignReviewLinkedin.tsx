@@ -255,7 +255,7 @@ export const Messaging = (props: MessagingProps) => {
                 </Badge> : null}
               </Box>
               <Flex w={'100%'} align={'center'} gap={8}>
-                <IconTargetArrow color='gray' />
+                <IconTargetArrow color='gray' size={'1.5rem'} />
                 <Flex>
                   <Text tt={'uppercase'} color='gray' className='w-max' fw={500}>
                     step {index + 1}:
@@ -301,9 +301,9 @@ export const Messaging = (props: MessagingProps) => {
                         {item?.username}
                       </Text>
                     </Flex>
-                    <Text lineClamp={4} size={'xs'} fs='italic' fw={500}>
+                    <Text size={'xs'} fs='italic' fw={500}>
                       {/* if campaign type is LINKEDIN, show message as is. if email, show html in dangerously set */}
-                      {props.campaignType === 'LINKEDIN' ? item?.message : <div dangerouslySetInnerHTML={{ __html: item?.message }} />}
+                      {<div dangerouslySetInnerHTML={{ __html: item?.message.replaceAll("\n", "<br/>") }} />}
                     </Text>
                   </Flex>
                 </Collapse>
@@ -430,7 +430,13 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
 
   const getCampaignOverview = async () => {
     setFetchingCampaign(true);
-    const response = await fetch(`${API_URL}/client/campaign_overview?client_archetype_id=${props.campaignId}`, {
+
+    let return_raw_prompts = false;
+    if (props.campaignType === 'EMAIL') {
+      return_raw_prompts = true;
+    }
+
+    const response = await fetch(`${API_URL}/client/campaign_overview?client_archetype_id=${props.campaignId}&return_raw_prompts=${return_raw_prompts}`, {
       'method': 'GET',
       headers: {
         'Authorization': `Bearer ${userToken}`,
@@ -467,8 +473,16 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
   if (fetchingCampaign) {
     return (
       <div style={{ display: 'flex',  paddingTop: '40px', width: '900px', marginLeft: 'auto', marginRight: 'auto' }}>
-        <Card w='900px' withBorder pb='100px' pt='60px'>
-          <Loader size='xl' mt='xl' />
+        <Card w='900px' withBorder pb='100px' pt='60px' sx={{justifyContent: 'center', alignItems: 'center'}}>
+          <Box ml='auto' mr='auto'>
+            <Text size='xl' align='center' fw='bold' mb='4px'>
+              Fetching campaign data...
+            </Text>
+            <Text mt='xs'>
+              Please wait while we fetch the campaign data. This can take anywhere from 20-60 seconds.
+            </Text>
+            <Loader size='xl' mt='xl' />
+          </Box>
         </Card>
       </div>
     )

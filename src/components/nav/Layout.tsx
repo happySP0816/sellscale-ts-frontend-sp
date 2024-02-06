@@ -47,7 +47,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   //           <Text fz='md'>LinkedIn Not Connected</Text>
   //           <Button leftIcon={<IconPlugConnected size='0.9rem' />} variant="light" color="red" size="xs" radius="xl" compact
   //             onClick={() => {
-  //               window.location.href = "/settings/linkedinConnection";
+  //               window.location.href = "/settings/linkedin";
   //             }}
   //           >Go to Connect</Button>
   //         </Group>

@@ -430,7 +430,13 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
 
   const getCampaignOverview = async () => {
     setFetchingCampaign(true);
-    const response = await fetch(`${API_URL}/client/campaign_overview?client_archetype_id=${props.campaignId}`, {
+
+    let return_raw_prompts = false;
+    if (props.campaignType === 'EMAIL') {
+      return_raw_prompts = true;
+    }
+
+    const response = await fetch(`${API_URL}/client/campaign_overview?client_archetype_id=${props.campaignId}&return_raw_prompts=${return_raw_prompts}`, {
       'method': 'GET',
       headers: {
         'Authorization': `Bearer ${userToken}`,

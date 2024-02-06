@@ -29,8 +29,8 @@ const ScheduleSetting = () => {
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
 
-  const [timeZone, setTimeZone] = useState<null | string>(null);
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [timeZone, setTimeZone] = useState<null | string>("Pacific Standard Time");
+  const [selectedDays, setSelectedDays] = useState<string[]>(["5"]);
   const fromTime = useRef<HTMLInputElement>(null);
   const toTime = useRef<HTMLInputElement>(null);
 
@@ -51,7 +51,7 @@ const ScheduleSetting = () => {
 
     // Calculate selected days
     setSelectedDays(
-      userData?.emails && userData?.emails[0]?.send_schedule?.days.map(String)
+      (userData?.emails && userData?.emails[0]?.send_schedule?.days.map(String)) || ["0", "1", "2", "3", "4"]
     );
   }, [userData]);
 
@@ -141,8 +141,8 @@ const ScheduleSetting = () => {
                 })}
                 ref={fromTime}
                 defaultValue={
-                  userData?.emails &&
-                  userData?.emails[0]?.send_schedule?.start_time
+                  (userData?.emails &&
+                  userData?.emails[0]?.send_schedule?.start_time) || "09:00"
                 }
               />
               <Divider w={10} size={"lg"} mb={15} />
@@ -158,8 +158,8 @@ const ScheduleSetting = () => {
                 })}
                 ref={toTime}
                 defaultValue={
-                  userData?.emails &&
-                  userData?.emails[0]?.send_schedule?.end_time
+                  (userData?.emails &&
+                  userData?.emails[0]?.send_schedule?.end_time) || "17:00"
                 }
               />
             </Flex>
@@ -200,6 +200,7 @@ const ScheduleSetting = () => {
           }}
           value={selectedDays || []}
           onChange={(value) => {
+            console.log('value', value)
             setSelectedDays(value);
           }}
         >

@@ -24,7 +24,7 @@ export const TaskHandlerSegmentCreation = (props: TaskHandlerSegmentCreationData
     return (
         <>
             <iframe 
-                src={'https://sellscale.retool.com/embedded/public/3bcba3d6-fedb-4f07-a9fe-0506594f79f1#authToken=' + userToken + '&segmentName=' + segmentName + '&enrichment_label=' + enrichment_label + '&enrichment_value=' + enrichment_value + '&saved_search_id=' + props.data['saved_search_id'] + '&task_id=' + props.taskId}
+                src={'https://sellscale.retool.com/embedded/public/3bcba3d6-fedb-4f07-a9fe-0506594f79f1#authToken=' + userToken + '&segmentName=' + segmentName + '&task_id=' + props.taskId}
                 width={'100%'}
                 height={window.innerHeight - 30}
                 frameBorder={0}

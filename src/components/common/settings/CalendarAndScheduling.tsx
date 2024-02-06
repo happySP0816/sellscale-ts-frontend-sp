@@ -303,6 +303,7 @@ export default function CalendarAndScheduling() {
         <Select
           mt='md'
           withinPortal
+          /* @ts-ignore */
           data={Intl.supportedValuesOf('timeZone')}
           placeholder={Intl.DateTimeFormat().resolvedOptions().timeZone}
           searchable

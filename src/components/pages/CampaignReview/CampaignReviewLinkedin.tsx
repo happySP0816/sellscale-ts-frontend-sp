@@ -467,7 +467,7 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
   if (fetchingCampaign) {
     return (
       <div style={{ display: 'flex',  paddingTop: '40px', width: '900px', marginLeft: 'auto', marginRight: 'auto' }}>
-        <Card w='900px' withBorder pb='100px' pt='60px' justify='center' align='center'>
+        <Card w='900px' withBorder pb='100px' pt='60px' sx={{justifyContent: 'center', alignItems: 'center'}}>
           <Box ml='auto' mr='auto'>
             <Text size='xl' align='center' fw='bold' mb='4px'>
               Fetching campaign data...

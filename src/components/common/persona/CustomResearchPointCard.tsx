@@ -1,5 +1,15 @@
 import { userTokenState } from '@atoms/userAtoms';
-import { Card, Container, Code, Button, Title, Text, Textarea, FileInput, rem } from '@mantine/core';
+import {
+  Card,
+  Container,
+  Code,
+  Button,
+  Title,
+  Text,
+  Textarea,
+  FileInput,
+  rem,
+} from '@mantine/core';
 import { MIME_TYPES } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { IconUpload } from '@tabler/icons';
@@ -10,7 +20,6 @@ import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 export default function CustomResearchPointCard(props: {}) {
-
   const userToken = useRecoilValue(userTokenState);
   const [description, setDescription] = useState('');
   const [value, setValue] = useState<File | null>();
@@ -42,15 +51,16 @@ export default function CustomResearchPointCard(props: {}) {
     });
 
     const entries = [];
-    for(const row of result) {
-
+    for (const row of result) {
       const email = Object.values(row).find((value) => isEmail(value as string));
       const li_url = Object.values(row).find((value) => isLinkedInURL(value as string));
       if (!email && !li_url) {
         continue;
       }
 
-      const custom_data_key = Object.keys(row).find((key) => (key.toLowerCase().trim() === 'custom_data'));
+      const custom_data_key = Object.keys(row).find(
+        (key) => key.toLowerCase().trim() === 'custom_data'
+      );
       let custom_data_value = null;
       if (custom_data_key) {
         custom_data_value = row[custom_data_key];
@@ -102,7 +112,6 @@ export default function CustomResearchPointCard(props: {}) {
         autoClose: 5000,
       });
     }
-
   };
 
   return (
@@ -110,14 +119,14 @@ export default function CustomResearchPointCard(props: {}) {
       <Container>
         <Title order={3}>Import Custom Data Point</Title>
         <Text size='sm'>
-          Create a CSV with a LinkedIn URL or email and a <Code>custom_data</Code> field. This is used to add an
-          additional data point to your prospects.
+          Create a CSV with a LinkedIn URL or email and a <Code>custom_data</Code> field. This is
+          used to add an additional data point to your prospects.
         </Text>
       </Container>
       <Container>
         <Textarea
-          placeholder='What does your custom data represent or describe?'
-          label='Description'
+          placeholder='What does your custom data represent?'
+          label='Name'
           withAsterisk
           value={description}
           onChange={(event) => {
@@ -128,7 +137,13 @@ export default function CustomResearchPointCard(props: {}) {
         <FileInput
           label='Upload File'
           icon={<IconUpload size={rem(14)} />}
-          accept={[MIME_TYPES.csv, MIME_TYPES.xls, MIME_TYPES.xlsx, 'text/tsv', 'text/tab-separated-values'].join()}
+          accept={[
+            MIME_TYPES.csv,
+            MIME_TYPES.xls,
+            MIME_TYPES.xlsx,
+            'text/tsv',
+            'text/tab-separated-values',
+          ].join()}
           withAsterisk
           value={value}
           onChange={setValue}

@@ -18,28 +18,39 @@ import {
   Stack,
   Collapse,
   TextInput,
-} from "@mantine/core";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
-import { Archetype, PersonaOverview } from "src";
-import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
-import createCTA from "@utils/requests/createCTA";
-import CTAGeneratorExample from "@common/cta_generator/CTAGeneratorExample";
-import { DateInput } from "@mantine/dates";
-import { API_URL } from "@constants/data";
-import { createLiTemplate, detectLiTemplateResearch, updateLiTemplate } from "@utils/requests/linkedinTemplates";
-import { currentProjectState } from "@atoms/personaAtoms";
-import { PersonalizationSection, RESEARCH_POINTS } from "@common/sequence/SequenceSection";
-import { TypeAnimation } from "react-type-animation";
+} from '@mantine/core';
+import { ContextModalProps, openContextModal } from '@mantine/modals';
+import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
+import { Archetype, PersonaOverview, ResearchPointType } from 'src';
+import { useForm } from '@mantine/form';
+import { showNotification } from '@mantine/notifications';
+import createCTA from '@utils/requests/createCTA';
+import CTAGeneratorExample from '@common/cta_generator/CTAGeneratorExample';
+import { DateInput } from '@mantine/dates';
+import { API_URL } from '@constants/data';
+import {
+  createLiTemplate,
+  detectLiTemplateResearch,
+  updateLiTemplate,
+} from '@utils/requests/linkedinTemplates';
+import { currentProjectState } from '@atoms/personaAtoms';
+import { PersonalizationSection } from '@common/sequence/SequenceSection';
+import { TypeAnimation } from 'react-type-animation';
 import sellScaleLogo from '../common/sequence/assets/logo.jpg';
-import _ from "lodash";
-import { useDebouncedValue, useDidUpdate, useDisclosure, useTimeout } from "@mantine/hooks";
-import { IconChevronDown, IconChevronUp, IconRotateRectangle, IconSettings, IconWashMachine } from '@tabler/icons';
-import { IconRobot } from "@tabler/icons";
+import _ from 'lodash';
+import { useDebouncedValue, useDidUpdate, useDisclosure, useTimeout } from '@mantine/hooks';
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconRotateRectangle,
+  IconSettings,
+  IconWashMachine,
+} from '@tabler/icons';
+import { IconRobot } from '@tabler/icons';
+import getResearchPointTypes from '@utils/requests/getResearchPointTypes';
 
 export default function LiTemplateModal({
   context,
@@ -64,9 +75,10 @@ export default function LiTemplateModal({
   const currentProject = useRecoilValue(currentProjectState);
   const [opened, { toggle, open }] = useDisclosure(false);
 
-
   const [loadingResearch, setLoadingResearch] = useState(false);
-  const [researchPoints, setResearchPoints] = useState<string[]>(innerProps.editProps?.researchPoints ?? []);
+  const [researchPoints, setResearchPoints] = useState<string[]>(
+    innerProps.editProps?.researchPoints ?? []
+  );
 
   const showUserFeedback = true;
 
@@ -83,7 +95,7 @@ export default function LiTemplateModal({
 
   // useDidUpdate(() => {
   //   (async () => {
-      
+
   //   })();
   // }, [debouncedMessage]);
 
@@ -104,6 +116,15 @@ export default function LiTemplateModal({
     setLoadingResearch(false);
   };
 
+  const { data: researchPointTypes } = useQuery({
+    queryKey: [`query-get-research-point-types`],
+    queryFn: async () => {
+      const response = await getResearchPointTypes(userToken);
+      return response.status === 'success' ? (response.data as ResearchPointType[]) : [];
+    },
+    refetchOnWindowFocus: false,
+  });
+
   const handleSubmit = async (values: typeof form.values) => {
     if (innerProps.mode === 'CREATE') {
       await createTemplate(values);
@@ -115,7 +136,15 @@ export default function LiTemplateModal({
   const createTemplate = async (values: typeof form.values) => {
     if (!currentProject) return;
 
-    await createLiTemplate(userToken, currentProject.id, values.title, values.message, false, researchPoints, values.humanFeedback);
+    await createLiTemplate(
+      userToken,
+      currentProject.id,
+      values.title,
+      values.message,
+      false,
+      researchPoints,
+      values.humanFeedback
+    );
 
     queryClient.refetchQueries({
       queryKey: [`query-get-li-templates`],
@@ -199,7 +228,10 @@ export default function LiTemplateModal({
                 ) : (
                   <PersonalizationSection
                     title='Enabled Research Points'
-                    blocklist={_.difference(RESEARCH_POINTS, researchPoints)}
+                    blocklist={_.difference(
+                      researchPointTypes?.map((p) => p.name),
+                      researchPoints
+                    )}
                     onItemsChange={async (items) => {
                       setResearchPoints(items.filter((x) => x.checked).map((x) => x.id));
                     }}

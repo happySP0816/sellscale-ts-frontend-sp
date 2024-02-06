@@ -37,7 +37,7 @@ import {
   updateLiTemplate,
 } from '@utils/requests/linkedinTemplates';
 import { currentProjectState } from '@atoms/personaAtoms';
-import { PersonalizationSection, RESEARCH_POINTS } from '@common/sequence/SequenceSection';
+import { PersonalizationSection } from '@common/sequence/SequenceSection';
 import { TypeAnimation } from 'react-type-animation';
 import sellScaleLogo from '../common/sequence/assets/logo.jpg';
 import _, { set } from 'lodash';

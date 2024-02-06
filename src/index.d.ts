@@ -447,6 +447,16 @@ export type EmailSequenceStep = {
   // TODO: MISSING A LOT OF FIELDS
 };
 
+export type ResearchPointType = {
+  active: booelan;
+  client_id?: number;
+  client_sdr_id?: number;
+  description: string;
+  function_name: string;
+  id: number;
+  name: string;
+};
+
 export type EmailReplyFramework = {
   id: number;
   title: string;

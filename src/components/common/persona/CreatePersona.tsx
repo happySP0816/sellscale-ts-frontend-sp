@@ -8,8 +8,10 @@ import { showNotification } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
 import { navigateToPage } from '@utils/documentChange';
 import { createLiTemplate } from '@utils/requests/linkedinTemplates';
-import { RESEARCH_POINTS } from '@common/sequence/SequenceSection';
 import { WindowScrollController } from '@fullcalendar/core/internal';
+import { useQuery } from '@tanstack/react-query';
+import getResearchPointTypes from '@utils/requests/getResearchPointTypes';
+import { ResearchPointType } from 'src';
 
 type PropsType = {
   createPersona: {
@@ -28,6 +30,15 @@ export default function CreatePersona(props: PropsType) {
   const [userToken] = useRecoilState(userTokenState);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const navigate = useNavigate();
+
+  const { data: researchPointTypes } = useQuery({
+    queryKey: [`query-get-research-point-types`],
+    queryFn: async () => {
+      const response = await getResearchPointTypes(userToken);
+      return response.status === 'success' ? (response.data as ResearchPointType[]) : [];
+    },
+    refetchOnWindowFocus: false,
+  });
 
   const createPersonaHandler = async () => {
     setCreatingPersona(true);
@@ -62,14 +73,14 @@ export default function CreatePersona(props: PropsType) {
         'Great to connect!',
         `Hi [first name]! [personalization related to them]. It’s great to connect.`,
         true,
-        RESEARCH_POINTS,
-        '',
+        researchPointTypes?.map((rpt) => rpt.name) || [],
+        ''
       );
     }
 
     setTimeout(() => {
       // window.location.href = `/contacts/find?campaign_id=${result.data}`;
-      window.location.href = '/contacts/overview'
+      window.location.href = '/contacts/overview';
     }, 3000);
 
     setCurrentProject(result.data);

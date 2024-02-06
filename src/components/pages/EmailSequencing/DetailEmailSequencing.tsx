@@ -2,7 +2,7 @@ import { currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import DynamicRichTextArea from '@common/library/DynamicRichTextArea';
 import ProspectSelect from '@common/library/ProspectSelect';
-import { PersonalizationSection, RESEARCH_POINTS } from '@common/sequence/SequenceSection';
+import { PersonalizationSection } from '@common/sequence/SequenceSection';
 import { API_URL, SCREEN_SIZES } from '@constants/data';
 import {
   Badge,
@@ -57,7 +57,13 @@ import { patchEmailSubjectLineTemplate } from '@utils/requests/emailSubjectLines
 import DOMPurify from 'dompurify';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { EmailSequenceStep, EmailTemplate, SpamScoreResults, SubjectLineTemplate } from 'src';
+import {
+  EmailSequenceStep,
+  EmailTemplate,
+  ResearchPointType,
+  SpamScoreResults,
+  SubjectLineTemplate,
+} from 'src';
 import ReactDOMServer from 'react-dom/server';
 import { deterministicMantineColor } from '@utils/requests/utils';
 import EmailTemplateLibraryModal from '@modals/EmailTemplateLibraryModal';
@@ -66,6 +72,8 @@ import postCopyEmailPoolEntry from '@utils/requests/postCopyEmailLibraryItem';
 import { isValidUrl } from '@utils/general';
 import useRefresh from '@common/library/use-refresh';
 import _ from 'lodash';
+import getResearchPointTypes from '@utils/requests/getResearchPointTypes';
+import { useQuery } from '@tanstack/react-query';
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
@@ -1196,6 +1204,15 @@ export const EmailBodyItem: React.FC<{
 
   const [displayPersonalization, refreshPersonalization] = useRefresh();
 
+  const { data: researchPointTypes } = useQuery({
+    queryKey: [`query-get-research-point-types`],
+    queryFn: async () => {
+      const response = await getResearchPointTypes(userToken);
+      return response.status === 'success' ? (response.data as ResearchPointType[]) : [];
+    },
+    refetchOnWindowFocus: false,
+  });
+
   const triggerPatchEmailBodyTemplateTitle = async () => {
     setLoading(true);
 
@@ -1445,8 +1462,8 @@ export const EmailBodyItem: React.FC<{
                         >
                           <Text fw={700} span>
                             {
-                              RESEARCH_POINTS.filter(
-                                (p) => !template.transformer_blocklist.includes(p)
+                              researchPointTypes?.filter(
+                                (p) => !template.transformer_blocklist.includes(p.name)
                               ).length
                             }
                           </Text>{' '}
@@ -1455,15 +1472,15 @@ export const EmailBodyItem: React.FC<{
                       </HoverCard.Target>
                       <HoverCard.Dropdown>
                         <List>
-                          {RESEARCH_POINTS.filter(
-                            (p) => !template.transformer_blocklist.includes(p)
-                          ).map((note, index) => (
-                            <List.Item key={index}>
-                              <Text fz='sm'>
-                                {_.capitalize(note.replace(/_/g, ' ').toLowerCase())}
-                              </Text>
-                            </List.Item>
-                          ))}
+                          {researchPointTypes
+                            ?.filter((p) => !template.transformer_blocklist.includes(p.name))
+                            .map((note, index) => (
+                              <List.Item key={index}>
+                                <Text fz='sm'>
+                                  {_.capitalize(note.name.replace(/_/g, ' ').toLowerCase())}
+                                </Text>
+                              </List.Item>
+                            ))}
                         </List>
                       </HoverCard.Dropdown>
                     </HoverCard>

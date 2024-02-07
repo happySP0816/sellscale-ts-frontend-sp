@@ -143,6 +143,8 @@ export default function SlackNotifications(props: { selectedChannel: string }) {
       />
       <Flex direction={"column"} gap={"sm"}>
         {linkedinSubscriptions.map((item, index) => {
+                    console.log('item', item)
+
           return (
             <SlackNotificationCard
               key={index}
@@ -166,6 +168,7 @@ export default function SlackNotifications(props: { selectedChannel: string }) {
       />
       <Flex direction={"column"} gap={"sm"}>
         {emailSubscriptions.map((item, index) => {
+          console.log('item', item)
           return (
             <SlackNotificationCard
               key={index}
@@ -280,8 +283,8 @@ const SlackNotificationCard = (props: {
           justify={"space-between"}
           style={{
             borderRadius: "6px",
-            background: notification.subscribed ? "#fff" : "#f6f6f7",
-            border: notification.subscribed ? "1px solid #dee2e6" : "",
+            background: "#fff",
+            border: "1px solid #dee2e6",
           }}
           p={"xs"}
         >
@@ -294,7 +297,7 @@ const SlackNotificationCard = (props: {
           <Flex direction={"column"} justify="center" align="center">
             <Switch
               checked={notification.subscribed}
-              id={notification.subscription_id.toString()}
+              id={notification.subscription_id?.toString()}
               size="xs"
               onChange={() => {
                 if (notification.subscribed) {

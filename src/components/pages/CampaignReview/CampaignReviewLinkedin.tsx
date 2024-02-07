@@ -1,5 +1,5 @@
 import { ActionIcon, Avatar, Badge, Box, Button, Card, Collapse, Divider, Flex, Group, Loader, Modal, Text, Textarea, Title, useMantineTheme } from '@mantine/core';
-import { IconBrandLinkedin, IconChecks, IconChevronDown, IconChevronUp, IconEdit, IconMessages, IconPencil, IconRocket, IconTargetArrow, IconUsers, IconXboxX } from '@tabler/icons';
+import { IconBrandLinkedin, IconChecks, IconChevronDown, IconChevronUp, IconEdit, IconMessages, IconPencil, IconRecordMail, IconRocket, IconTargetArrow, IconUsers, IconXboxX } from '@tabler/icons';
 import { useEffect, useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { TextInput } from '@mantine/core';
@@ -493,9 +493,16 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
       <Flex direction={'column'} gap={'md'} w='900px'>
         <Flex align={'center'} gap={'sm'}>
           <Text fw={600}>{campaignOverview?.overview?.emoji} {campaignOverview?.overview?.archetype_name}</Text>
-          <Badge color='blue' variant='filled' size='md' leftSection={<IconBrandLinkedin size='0.8rem' style={{marginTop: '4px'}} />}>
-            LinkedIn
-          </Badge>
+          {
+          props.campaignType === 'LINKEDIN' ?
+            <Badge color='blue' variant='filled' size='md' leftSection={<IconBrandLinkedin size='0.8rem' style={{marginTop: '4px'}} />}>
+              LinkedIn
+            </Badge>
+            :
+            <Badge color='blue' variant='filled' size='md' leftSection={<IconRecordMail size='0.8rem' style={{marginTop: '4px'}} />}>
+              Email
+            </Badge>
+          }
         </Flex>
         <Flex align={'center'} gap={'md'}>
           <Badge color='blue' w={'100%'} variant='filled' size='lg'>

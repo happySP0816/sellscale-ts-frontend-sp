@@ -54,6 +54,8 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
   const [prospectTitle, setProspectTitleValue] = useState<any>("prospectTitle");
   const [prospectLocation, setProspectLocationValue] =
     useState<any>("prospectLocation");
+  const [prospectName, setProspectNameValue] = useState<any>("prospectName");
+  const [prospectEmail, setProspectEmailValue] = useState<any>("prospectEmail");
   const [keywords, setKeywords] = useState<{ value: string; label: string }[]>([
     // { value: "staffing", label: "staffing" },
   ]);
@@ -80,6 +82,16 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
   >([
     // { value: "America", label: "america" },
   ]);
+  const [prospectNames, setProspectNames] = useState<
+    { value: string; label: string }[]
+  >([
+    // { value: "America", label: "america" },
+  ]);
+  const [prospectEmails, setProspectEmails] = useState<
+    { value: string; label: string }[]
+  >([
+    // { value: "America", label: "america" },
+  ]);
 
   const [isViewRemovedProspects, setIsViewRemovedProspects] =
     useState<boolean>(false);
@@ -98,6 +110,12 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
   const [selectedProspectLocations, setSelectedProspectLocations] = useState<
     string[]
   >([]);
+  const [selectedProspectNames, setSelectedProspectNames] = useState<string[]>(
+    []
+  );
+  const [selectedProspectEmails, setSelectedProspectEmails] = useState<string[]>(
+    []
+  );
   const [needsSave, setNeedsSave] = useState(false);
 
   const [keywordSearchValue, setKeywordSearchValue] = useState("");
@@ -109,6 +127,8 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
   const [prospectTitleSearchValue, setProspectTitleSearchValue] = useState("");
   const [prospectLocationSearchValue, setProspectLocationSearchValue] =
     useState("");
+  const [prospectNameSearchValue, setProspectNameSearchValue] = useState("");
+  const [prospectEmailSearchValue, setProspectEmailSearchValue] = useState("");
   const [caughtProspects, setCaughtProspects] = useState([]);
   const userData = useRecoilValue(userDataState);
 
@@ -120,7 +140,7 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
   );
 
   const [ProspectData_Count, setProspectData_Count] = useState(
-    selectedProspectTitles.length + selectedProspectLocations.length
+    selectedProspectTitles.length + selectedProspectLocations.length + selectedProspectNames.length + selectedProspectEmails.length
   );
 
   // Save as nothing tracking state
@@ -244,6 +264,34 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
 
     if (resp.data.do_not_contact_prospect_location_keywords?.length === 0)
       setProspectLocationValue("");
+
+    setProspectNames(
+      resp.data.do_not_contact_people_names.map((x: any) => ({
+        value: x,
+        label: x,
+      }))
+    );
+    setSelectedProspectNames(
+      resp.data.do_not_contact_people_names.map((x: any) => x)
+    );
+
+    if (resp.data.do_not_contact_people_names?.length === 0)
+      setProspectNameValue("");
+
+    setProspectEmails(
+      resp.data.do_not_contact_emails.map((x: any) => ({
+        value: x,
+        label: x,
+      }))
+    );
+    setSelectedProspectEmails(
+      resp.data.do_not_contact_emails.map((x: any) => x)
+    );
+
+    if (resp.data.do_not_contact_emails?.length === 0)
+      setProspectEmailValue("");
+
+      
   };
   useEffect(() => {
     if (!fetchedData) {
@@ -268,6 +316,8 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
           do_not_contact_location_keywords: selectedCompanyLocations,
           do_not_contact_titles: selectedProspectTitles,
           do_not_contact_prospect_location_keywords: selectedProspectLocations,
+          do_not_contact_people_names: selectedProspectNames,
+          do_not_contact_emails: selectedProspectEmails,
         }),
       }
     );
@@ -357,6 +407,8 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
     setSelectedCompanyIndustries([]);
     setSelectedProspectTitles([]);
     setSelectedProspectLocations([]);
+    setSelectedProspectNames([]);
+    setSelectedProspectEmails([]);
   };
 
   useEffect(() => {
@@ -375,9 +427,9 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
 
   useEffect(() => {
     setProspectData_Count(
-      selectedProspectTitles.length + selectedProspectLocations.length
+      selectedProspectTitles.length + selectedProspectLocations.length + selectedProspectNames.length + selectedProspectEmails.length
     );
-  }, [selectedProspectTitles, selectedProspectLocations]);
+  }, [selectedProspectTitles, selectedProspectLocations, selectedProspectNames, selectedProspectEmails]);
 
   // File Import / Export
   const handleFileImport = async (payload: File | null) => {
@@ -1219,6 +1271,182 @@ export default function DoNotContactListV2(props: { forSDR?: boolean }) {
                               }
 
                               setProspectLocationSearchValue(newValue);
+                            }}
+                          />
+                        </Accordion.Panel>
+                      </Accordion.Item>
+                    </Accordion>
+
+                    <Accordion
+                      value={prospectName}
+                      mt={"md"}
+                      style={{
+                        border: "1px solid #eceaee",
+                        borderBottom: "0px",
+                        borderRadius: "6px",
+                      }}
+                      onChange={(e) => {
+                        setProspectNameValue(e);
+                      }}
+                    >
+                      <Accordion.Item value="prospectName">
+                        <Accordion.Control style={{ color: "#5b5b5b" }}>
+                          Name
+                        </Accordion.Control>
+                        <Accordion.Panel>
+                          <MultiSelect
+                            withinPortal
+                            variant={
+                              selectedProspectNames.length ? "unstyled" : "default"
+                            }
+                            rightSection={<></>}
+                            data={prospectNames}
+                            placeholder="Name"
+                            searchable
+                            creatable
+                            value={selectedProspectNames}
+                            onChange={(value: any) => {
+                              setSelectedProspectNames(value);
+                              setNeedsSave(true);
+                              setSaveAsNothing(false);
+                            }}
+                            getCreateLabel={(query) =>
+                              `+ Add a filter for ${query}`
+                            }
+                            onCreate={(query: any) => {
+                              const item: any = { value: query, label: query };
+                              setProspectNames((current: any) => [...current, item]);
+                              return item;
+                            }}
+                            searchValue={prospectNameSearchValue}
+                            onSearchChange={(query) => {
+                              // If search value includes any newlines, add those items
+                              let newValue = query;
+                              let newKeywords: {
+                                value: string;
+                                label: string;
+                              }[] = [];
+
+                              const matches = [...query.matchAll(/(.*?)\\n/gm)];
+                              for (const match of matches) {
+                                newKeywords.push({
+                                  value: match[1],
+                                  label: match[1],
+                                });
+                                newValue = newValue.replace(match[0], "");
+                              }
+
+                              // If there are more than 4 being added, add the last input to the list as well
+                              if (matches.length > 4) {
+                                newKeywords.push({
+                                  value: newValue,
+                                  label: newValue,
+                                });
+                                newValue = "";
+                              }
+
+                              if (matches.length > 0) {
+                                setProspectNames((current) => [
+                                  ...current,
+                                  ...newKeywords,
+                                ]);
+                                setSelectedProspectNames((current) => [
+                                  ...current,
+                                  ...newKeywords.map((x) => x.value),
+                                ]);
+                                setNeedsSave(true);
+                                setSaveAsNothing(false);
+                              }
+
+                              setProspectNameSearchValue(newValue);
+                            }}
+                          />
+                        </Accordion.Panel>
+                      </Accordion.Item>
+                    </Accordion>
+
+                    <Accordion
+                      value={prospectEmail}
+                      mt={"md"}
+                      style={{
+                        border: "1px solid #eceaee",
+                        borderBottom: "0px",
+                        borderRadius: "6px",
+                      }}
+                      onChange={(e) => {
+                        setProspectEmailValue(e);
+                      }}
+                    >
+                      <Accordion.Item value="prospectEmail">
+                        <Accordion.Control style={{ color: "#5b5b5b" }}>
+                          Email
+                        </Accordion.Control>
+                        <Accordion.Panel>
+                          <MultiSelect
+                            withinPortal
+                            variant={
+                              selectedProspectEmails.length ? "unstyled" : "default"
+                            }
+                            rightSection={<></>}
+                            data={prospectEmails}
+                            placeholder="Email"
+                            searchable
+                            creatable
+                            value={selectedProspectEmails}
+                            onChange={(value: any) => {
+                              setSelectedProspectEmails(value);
+                              setNeedsSave(true);
+                              setSaveAsNothing(false);
+                            }}
+                            getCreateLabel={(query) =>
+                              `+ Add a filter for ${query}`
+                            }
+                            onCreate={(query: any) => {
+                              const item: any = { value: query, label: query };
+                              setProspectEmails((current: any) => [...current, item]);
+                              return item;
+                            }}
+                            searchValue={prospectEmailSearchValue}
+                            onSearchChange={(query) => {
+                              // If search value includes any newlines, add those items
+                              let newValue = query;
+                              let newKeywords: {
+                                value: string;
+                                label: string;
+                              }[] = [];
+
+                              const matches = [...query.matchAll(/(.*?)\\n/gm)];
+                              for (const match of matches) {
+                                newKeywords.push({
+                                  value: match[1],
+                                  label: match[1],
+                                });
+                                newValue = newValue.replace(match[0], "");
+                              }
+
+                              // If there are more than 4 being added, add the last input to the list as well
+                              if (matches.length > 4) {
+                                newKeywords.push({
+                                  value: newValue,
+                                  label: newValue,
+                                });
+                                newValue = "";
+                              }
+
+                              if (matches.length > 0) {
+                                setProspectEmails((current) => [
+                                  ...current,
+                                  ...newKeywords,
+                                ]);
+                                setSelectedProspectEmails((current) => [
+                                  ...current,
+                                  ...newKeywords.map((x) => x.value),
+                                ]);
+                                setNeedsSave(true);
+                                setSaveAsNothing(false);
+                              }
+
+                              setProspectEmailSearchValue(newValue);
                             }}
                           />
                         </Accordion.Panel>

@@ -211,7 +211,7 @@ export default function CalendarAndScheduling() {
           <Flex style={{ border: '1px solid #dee2e6', borderRadius: '8px' }} align={'center'} justify={'center'}>
             <Box pos='relative'>
               <LoadingOverlay
-                visible={updated && userData.scheduling_link}
+                visible={!userData.scheduling_link}
                 zIndex={1000}
                 overlayBlur={2}
                 loader={

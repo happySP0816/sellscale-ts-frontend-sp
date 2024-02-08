@@ -53,6 +53,7 @@ type ContactProps = {
   feedback: string;
   onFeedbackChange: (feedback: string) => void;
   campaignOverview?: any;
+  campaignId: number;
 }
 
 export const Contact = (props: ContactProps) => {
@@ -60,6 +61,9 @@ export const Contact = (props: ContactProps) => {
   const [showAll, setShowAll] = useState(true);
   const [filterData, setFilterData] = useState<any>();
   const theme = useMantineTheme();
+  const [modalOpened, modalHandlers] = useDisclosure(false); // For the edit messaging modal
+  const userToken = useRecoilValue(userTokenState)
+
   const handleShowAll = () => {
     setShowAll(!showAll);
   };
@@ -128,10 +132,31 @@ export const Contact = (props: ContactProps) => {
         >
           <Flex align={'center'} gap={'sm'} ml={'sm'}>
             <IconUsers size={'1rem'} color='#228be6' />
-            <Text tt={'uppercase'} color='blue'>
+            <Text tt={'uppercase'} color='blue' w='60%'>
               example contacts
             </Text>
+            <Button size='xs' w='30%' onClick={
+              () => modalHandlers.open()
+            }>
+              View All
+            </Button>
           </Flex>
+
+          <Modal
+            opened={modalOpened}
+            onClose={() => modalHandlers.close()}
+            title="View All Contacts"
+            size="1000px"
+          >
+            <iframe
+              src={"https://sellscale.retool.com/embedded/public/20d97ed1-4602-4513-aa77-97f15a210a9d#authToken=" + userToken + "&campaignId=" + props.campaignId}
+              frameBorder="0"
+              width="100%"
+              height="400px" // Adjust the height as needed
+              allowFullScreen
+            ></iframe>
+          </Modal>
+          
           <Flex direction={'column'} gap={3}>
             {contactData?.map((item: any, index: number) => {
               return !showAll || index < 5 ? (
@@ -221,7 +246,6 @@ type MessagingProps = {
 
 export const Messaging = (props: MessagingProps) => {
   const [opened, { toggle }] = useDisclosure(false);
-  const [modalOpened, modalHandlers] = useDisclosure(false); // For the edit messaging modal
   const [editMessage, setEditMessage] = useState(''); // State to hold the edited message
 
   const [openid, setOpenId] = useState<number>(0);
@@ -535,7 +559,7 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
         </Flex>
         {steps === 'sequence' ? 
           <Sequence campaignOverview={campaignOverview} campaignType={props.campaignType} /> : 
-          steps === 'contact' ? <Contact feedback={contactFeedback} onFeedbackChange={setContactFeedback} campaignOverview={campaignOverview} /> :
+          steps === 'contact' ? <Contact feedback={contactFeedback} onFeedbackChange={setContactFeedback} campaignOverview={campaignOverview} campaignId={props.campaignId} /> :
           steps === 'messaging' ? <Messaging feedback={messagingFeedback} onFeedbackChange={setMessagingFeedback} campaignOverview={campaignOverview} campaignType={props.campaignType} campaignId={props.campaignId} />:
           <Finalize campaign_id={1} prospect_feedback={contactFeedback} messaging_feedback={messagingFeedback} />
         }

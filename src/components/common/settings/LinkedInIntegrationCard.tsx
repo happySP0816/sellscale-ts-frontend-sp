@@ -246,17 +246,17 @@ export default function LinkedInConnectedCard(props: {
 
           <Collapse in={opened} mt={"md"}>
             <Grid>
-              <Grid.Col span={5} sx={{backgroundColor: '#eee'}} mr='xs'>
-                {/* <iframe
+              <Grid.Col span={6} sx={{backgroundColor: '#eee'}} mr='xs'>
+                <iframe
                   width="100%"
-                  height="300"
-                  src="https://www.youtube.com/embed/m95s5HlfvWg?si=JCStgJrTyO7q3dpw"
-                  title="YouTube video player"
+                  height="340"
+                  src="https://www.youtube.com/embed/EHC0-4G_UDQ?si=f5L0owhpJymoPFAT"
+                  title="Connect SellScale to LinkedIn"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
-                /> */}
+                />
               </Grid.Col>
-              <Grid.Col span={6}>
+              <Grid.Col span={4}>
                 <Timeline active={3} bulletSize={24} lineWidth={2}>
                   <Timeline.Item
                     bullet={<Text>1</Text>}

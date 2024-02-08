@@ -11,6 +11,7 @@ import { deterministicMantineColor } from '@utils/requests/utils';
 import { postAIRequest } from '@utils/requests/postAIRequest';
 import { showNotification } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
+import NewUIEmailSequencing from '@pages/EmailSequencing/NewUIEmailSequencing';
 
 type SequenceProps = {
   campaignOverview: any;
@@ -215,10 +216,14 @@ type MessagingProps = {
   onFeedbackChange: (feedback: string) => void;
   campaignOverview?: any;
   campaignType: string;
+  campaignId: number;
 }
 
 export const Messaging = (props: MessagingProps) => {
   const [opened, { toggle }] = useDisclosure(false);
+  const [modalOpened, modalHandlers] = useDisclosure(false); // For the edit messaging modal
+  const [editMessage, setEditMessage] = useState(''); // State to hold the edited message
+
   const [openid, setOpenId] = useState<number>(0);
   const userData = useRecoilValue(userDataState)
 
@@ -243,6 +248,7 @@ export const Messaging = (props: MessagingProps) => {
   useEffect(() => {
     toggle();
   }, []);
+  
   return (
     <>
       <Flex p={'md'} direction={'column'} gap={'md'} style={{ border: '1px solid #e3f0fe', borderRadius: '6px' }}>
@@ -312,6 +318,12 @@ export const Messaging = (props: MessagingProps) => {
           );
         })}
       </Flex>
+      <Button onClick={() => {
+        const campaignType = props.campaignType === 'LINKEDIN' ? 'linkedin' : 'email';
+        window.open('/setup/' + campaignType + '?campaign_id=' + props.campaignId, '_blank')
+      }} mt="md" ml='auto' mr='auto' leftIcon={<IconPencil size={'1rem'} />} variant="outline" color='grape'>
+        Edit Messaging in Campaign Editor
+      </Button>
       <Textarea
         label="Feedback for AI"
         description="Provide feedback to the AI to adjust your messaging prior to launch."
@@ -524,7 +536,7 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
         {steps === 'sequence' ? 
           <Sequence campaignOverview={campaignOverview} campaignType={props.campaignType} /> : 
           steps === 'contact' ? <Contact feedback={contactFeedback} onFeedbackChange={setContactFeedback} campaignOverview={campaignOverview} /> :
-          steps === 'messaging' ? <Messaging feedback={messagingFeedback} onFeedbackChange={setMessagingFeedback} campaignOverview={campaignOverview} campaignType={props.campaignType} />:
+          steps === 'messaging' ? <Messaging feedback={messagingFeedback} onFeedbackChange={setMessagingFeedback} campaignOverview={campaignOverview} campaignType={props.campaignType} campaignId={props.campaignId} />:
           <Finalize campaign_id={1} prospect_feedback={contactFeedback} messaging_feedback={messagingFeedback} />
         }
         <Flex align={'center'} justify={'space-between'} w='900px'>

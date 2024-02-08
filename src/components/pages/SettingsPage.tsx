@@ -19,6 +19,7 @@ import {
   IconCalendar,
   IconCloud,
   IconInbox,
+  IconRefresh,
   IconSausage,
   IconTrophy,
 } from "@tabler/icons";
@@ -48,6 +49,7 @@ import SettingUsage from "@common/settings/SettingUsage";
 import exchangeSlackAuthCode from "@utils/requests/exchangeSlackAuthCode";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import CRMConnectionPage from "./CRMConnectionPage";
+import ContactRecycling from '@common/settings/ContactRecycling';
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -179,6 +181,9 @@ export default function SettingsPage() {
           >
             Do Not Contact Filters
           </Tabs.Tab>
+          <Tabs.Tab value='contactRecycling' icon={<IconRefresh size='0.8rem' />}>
+            Contact Recycling
+          </Tabs.Tab>
 
           <Divider />
           <Title
@@ -264,6 +269,13 @@ export default function SettingsPage() {
           </Group>
         </Tabs.Panel>
 
+        <Tabs.Panel value='doNotContact' pl='xs'>
+          <Group noWrap>{currentTab === 'doNotContact' && <DoNotContactFiltersPage />}</Group>
+        </Tabs.Panel>
+        <Tabs.Panel value='contactRecycling' pl='xs'>
+          <Group noWrap>{currentTab === 'contactRecycling' && <ContactRecycling />}</Group>
+        </Tabs.Panel>
+
         <Tabs.Panel value="crm" pl="x">
           <CRMConnectionPage />
         </Tabs.Panel>
@@ -294,6 +306,16 @@ export default function SettingsPage() {
 
         <Tabs.Panel value="usage" pl="xs">
           <SettingUsage />
+        </Tabs.Panel>
+
+        <Tabs.Panel value='sellScaleBrain' pl='xs'>
+          <SellScaleBrain />
+        </Tabs.Panel>
+        <Tabs.Panel value='message-automation' pl='xs'>
+          <MessageAutomation />
+        </Tabs.Panel>
+        <Tabs.Panel value='logout' pl='xs'>
+          <LoadingOverlay visible />
         </Tabs.Panel>
       </Tabs>
     </Box>

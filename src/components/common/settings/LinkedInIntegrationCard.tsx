@@ -274,7 +274,14 @@ export default function LinkedInConnectedCard(props: {
                         <Text fz="sm">
                           Open the extension popup by either using the Chrome
                           extensions dropdown (via the puzzle piece icon 🧩 in the
-                          top right):
+                          top right).
+                        </Text>
+                        <Text fz='sm' mt='sm'>
+                          Or alternatievly, on Chrome, use the keyboard shortcut{" "}
+                        </Text>
+                        {/* cmd + shift + S */}
+                        <Text>
+                          <Kbd>⌘</Kbd> + <Kbd>shift</Kbd> + <Kbd>S</Kbd>
                         </Text>
                       </Box>
                     }

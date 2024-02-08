@@ -179,14 +179,14 @@ export default function ContactRecycling() {
     { name: 'Ishan Sharma', campaign: '🍞 CEO Reachouts', status: 'unresponsive', day: 180 },
     { name: 'Aakash Adesara', campaign: '🐥 Engineer Hiring', status: 'unresponsive', day: 179 },
     { name: 'David Wei', campaign: '🥐 GTM Hiring', status: 'no need', day: 180 },
-    { name: 'Hristina Bell', campaign: '🚗 Outreach', status: 'unresponsive', day: 180 },
+    { name: 'George Bell', campaign: '🚗 Outreach', status: 'unresponsive', day: 180 },
     { name: 'John Doe', campaign: '⚽ CFO Reachouts', status: 'timing not right', day: 179 },
     { name: 'David Wei', campaign: '🥐 GTM Hiring', status: 'no need', day: 180 },
-    { name: 'Hristina Bell', campaign: '🚗 Outreach', status: 'unresponsive', day: 180 },
+    { name: 'George Bell', campaign: '🚗 Outreach', status: 'unresponsive', day: 180 },
     { name: 'John Doe', campaign: '⚽ CFO Reachouts', status: 'timing not right', day: 179 },
     { name: 'John Doe', campaign: '⚽ CFO Reachouts', status: 'timing not right', day: 179 },
     { name: 'David Wei', campaign: '🥐 GTM Hiring', status: 'no need', day: 180 },
-    { name: 'Hristina Bell', campaign: '🚗 Outreach', status: 'unresponsive', day: 180 },
+    { name: 'George Bell', campaign: '🚗 Outreach', status: 'unresponsive', day: 180 },
     { name: 'John Doe', campaign: '⚽ CFO Reachouts', status: 'timing not right', day: 179 },
   ];
   const theme = useMantineTheme();
@@ -198,7 +198,7 @@ export default function ContactRecycling() {
     <Card>
       <Flex direction={'column'} gap={'sm'}>
         <Text color='gray' fw={600} size={30}>
-          Contact Recycling
+          Contact Recycling (⚠️ Beta - Coming soon)
         </Text>
         <Text>
           Adjust the re-engagement metric to configure when prospects will return back from 'Nurture' to your unassigned contacts for Sellscale to reach out to

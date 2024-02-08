@@ -77,6 +77,8 @@ import {
   prospectStatuses,
 } from '@common/inbox/utils';
 import { patchProspectAIEnabled } from '@utils/requests/patchProspectAIEnabled';
+import { patchProspect } from '@utils/requests/patchProspect';
+import { setDemoSetProspect } from '@utils/requests/setDemoSetProspect';
 
 const useStyles = createStyles((theme) => ({
   icon: {
@@ -132,6 +134,10 @@ export default function ProjectDetails(props: {
   const [openedNotQualifiedPopover, setOpenedNotQualifiedPopover] = useState(false);
   const [loadingNotInterested, setLoadingNotInterested] = useState(false);
   const [loadingNotQualified, setLoadingNotQualified] = useState(false);
+
+  const [openedDemoSetPopover, setOpenedDemoSetPopover] = useState(false);
+  const [demoSetType, setDemoSetType] = useState('DIRECT');
+  const [handoffText, setHandoffText] = useState('');
 
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
@@ -318,6 +324,9 @@ export default function ProjectDetails(props: {
       </Flex>
     );
   }
+
+  console.log(prospect);
+
   return (
     <Flex
       gap={0}
@@ -635,13 +644,79 @@ export default function ProjectDetails(props: {
                           setOpenedSnoozeModal(true);
                         }}
                       />
-                      <StatusBlockButton
-                        title='Demo Set'
-                        icon={<IconCalendarEvent color={theme.colors.green[6]} size={24} />}
-                        onClick={async () => {
-                          await changeStatus('DEMO_SET', false);
+                      <Popover
+                        width={250}
+                        position='bottom'
+                        withArrow
+                        shadow='md'
+                        opened={openedDemoSetPopover}
+                        onChange={(opened) => {
+                          setOpenedDemoSetPopover(opened);
                         }}
-                      />
+                      >
+                        <Popover.Target>
+                          <Box>
+                            <StatusBlockButton
+                              title='Demo Set'
+                              icon={<IconCalendarEvent color={theme.colors.green[6]} size={24} />}
+                              onClick={() => {
+                                setOpenedDemoSetPopover(true);
+                              }}
+                            />
+                          </Box>
+                        </Popover.Target>
+                        <Popover.Dropdown>
+                          <Stack spacing={10}>
+                            <Title order={5}>Select Demo Set Type</Title>
+                            <Divider />
+                            <Radio
+                              checked={demoSetType === 'DIRECT'}
+                              onChange={() => {
+                                setDemoSetType('DIRECT');
+                              }}
+                              label='Set Directly'
+                            />
+                            <Divider />
+                            <Radio
+                              checked={demoSetType === 'HANDOFF'}
+                              onChange={() => {
+                                setDemoSetType('HANDOFF');
+                              }}
+                              label='Lead Handoff'
+                            />
+                            {demoSetType === 'HANDOFF' && (
+                              <Textarea
+                                placeholder='Describe what happened...'
+                                value={handoffText}
+                                onChange={(event) => {
+                                  setHandoffText(event.currentTarget.value);
+                                }}
+                              />
+                            )}
+                            <Button
+                              variant='filled'
+                              onClick={async () => {
+                                if (!prospect) return;
+                                await setDemoSetProspect(
+                                  userToken,
+                                  prospect.id,
+                                  demoSetType,
+                                  handoffText
+                                );
+                                if (demoSetType === 'HANDOFF') {
+                                  await changeStatus('DEMO_WON', false);
+                                } else {
+                                  await changeStatus('DEMO_SET', false);
+                                }
+
+                                setOpenedDemoSetPopover(false);
+                              }}
+                            >
+                              Set Status
+                            </Button>
+                          </Stack>
+                        </Popover.Dropdown>
+                      </Popover>
                       <Popover
                         opened={openedNotInterestedPopover}
                         width={430}
@@ -848,6 +923,8 @@ export default function ProjectDetails(props: {
                   ) : (
                     <Stack spacing={10}>
                       <Box>
+                        <Text>{prospect?.meta_data?.demo_set?.description}</Text>
+
                         {(!demoFeedbacks || demoFeedbacks.length === 0) && (
                           <Box mb={10} mt={10}>
                             <ProspectDemoDateSelector prospectId={openedProspectId} />

@@ -103,6 +103,7 @@ export interface Prospect {
   contract_size: number;
   matched_filter_words?: string[];
   matched_filters?: string[];
+  meta_data?: Record<string, any>;
 }
 
 export interface ProspectShallow {
@@ -141,6 +142,7 @@ export interface ProspectShallow {
   in_icp_sample: boolean | null;
   icp_fit_score_override: number | null;
   contract_size: number;
+  meta_data?: Record<string, any>;
 }
 
 export interface ProspectICP {

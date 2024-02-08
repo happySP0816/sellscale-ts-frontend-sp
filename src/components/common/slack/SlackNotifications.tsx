@@ -38,7 +38,7 @@ type SlackNotificationSubscription = {
   notification_type: string;
   notification_name: string;
   notification_description: string;
-  notification_outbound_channel: "email" | "linkedin";
+  notification_outbound_channel: "email" | "linkedin" | "all";
   subscription_id: number;
   subscribed: boolean;
 };
@@ -51,6 +51,9 @@ export default function SlackNotifications(props: { selectedChannel: string }) {
     SlackNotificationSubscription[]
   >([]);
   const [emailSubscriptions, setEmailSubscriptions] = useState<
+    SlackNotificationSubscription[]
+  >([]);
+  const [generalSubscriptions, setGeneralSubscriptions] = useState<
     SlackNotificationSubscription[]
   >([]);
 
@@ -68,9 +71,14 @@ export default function SlackNotifications(props: { selectedChannel: string }) {
         (subscription: SlackNotificationSubscription) =>
           subscription.notification_outbound_channel === "email"
       );
+      const generalSubscriptions = result.data.slack_subscriptions.filter(
+        (subscription: SlackNotificationSubscription) =>
+          subscription.notification_outbound_channel === "all"
+      );
 
       setLinkedinSubscriptions(linkedinSubscriptions);
       setEmailSubscriptions(emailSubscriptions);
+      setGeneralSubscriptions(generalSubscriptions);
     }
 
     setLoading(false);
@@ -143,8 +151,6 @@ export default function SlackNotifications(props: { selectedChannel: string }) {
       />
       <Flex direction={"column"} gap={"sm"}>
         {linkedinSubscriptions.map((item, index) => {
-                    console.log('item', item)
-
           return (
             <SlackNotificationCard
               key={index}
@@ -168,7 +174,29 @@ export default function SlackNotifications(props: { selectedChannel: string }) {
       />
       <Flex direction={"column"} gap={"sm"}>
         {emailSubscriptions.map((item, index) => {
-          console.log('item', item)
+          return (
+            <SlackNotificationCard
+              key={index}
+              userToken={userToken}
+              notification={item}
+              backFunction={triggerGetSubscriptions}
+            />
+          );
+        })}
+      </Flex>
+      <Divider
+        labelPosition="left"
+        label={
+          <Text fw={500} size={"lg"}>
+            {" "}
+            General
+          </Text>
+        }
+        mb={"sm"}
+        mt={"lg"}
+      />
+      <Flex direction={"column"} gap={"sm"}>
+        {generalSubscriptions.map((item, index) => {
           return (
             <SlackNotificationCard
               key={index}
@@ -221,52 +249,64 @@ const SlackNotificationCard = (props: {
     setNotificationTestLoading(false);
   };
 
-  const triggerActivateSubscription = async (slackNotificationID: number, subscriptionType: string) => {
+  const triggerActivateSubscription = async (
+    slackNotificationID: number,
+    subscriptionType: string
+  ) => {
     setLoadingSubscriptionType(subscriptionType);
 
-    const result = await activateSubscription(props.userToken, slackNotificationID);
-    if (result.status === 'success') {
+    const result = await activateSubscription(
+      props.userToken,
+      slackNotificationID
+    );
+    if (result.status === "success") {
       props.backFunction();
       showNotification({
-        title: 'Success',
-        message: 'Notification activated',
-        color: 'green',
+        title: "Success",
+        message: "Notification activated",
+        color: "green",
         autoClose: 5000,
       });
     } else {
       showNotification({
-        title: 'Error',
-        message: 'Something went wrong, please try again.',
-        color: 'red',
+        title: "Error",
+        message: "Something went wrong, please try again.",
+        color: "red",
         autoClose: 5000,
       });
     }
 
-    setLoadingSubscriptionType('');
+    setLoadingSubscriptionType("");
   };
 
-  const triggerDeactivateSubscription = async (subscriptionId: number, subscriptionType: string) => {
+  const triggerDeactivateSubscription = async (
+    subscriptionId: number,
+    subscriptionType: string
+  ) => {
     setLoadingSubscriptionType(subscriptionType);
 
-    const result = await deactivateSubscription(props.userToken, subscriptionId);
-    if (result.status === 'success') {
+    const result = await deactivateSubscription(
+      props.userToken,
+      subscriptionId
+    );
+    if (result.status === "success") {
       props.backFunction();
       showNotification({
-        title: 'Success',
-        message: 'Notification deactivated',
-        color: 'green',
+        title: "Success",
+        message: "Notification deactivated",
+        color: "green",
         autoClose: 5000,
       });
     } else {
       showNotification({
-        title: 'Error',
-        message: 'Something went wrong, please try again.',
-        color: 'red',
+        title: "Error",
+        message: "Something went wrong, please try again.",
+        color: "red",
         autoClose: 5000,
       });
     }
 
-    setLoadingSubscriptionType('');
+    setLoadingSubscriptionType("");
   };
 
   return (
@@ -301,9 +341,15 @@ const SlackNotificationCard = (props: {
               size="xs"
               onChange={() => {
                 if (notification.subscribed) {
-                  triggerDeactivateSubscription(notification.subscription_id, notification.notification_type);
+                  triggerDeactivateSubscription(
+                    notification.subscription_id,
+                    notification.notification_type
+                  );
                 } else {
-                  triggerActivateSubscription(notification.id, notification.notification_type);
+                  triggerActivateSubscription(
+                    notification.id,
+                    notification.notification_type
+                  );
                 }
               }}
               color="green"

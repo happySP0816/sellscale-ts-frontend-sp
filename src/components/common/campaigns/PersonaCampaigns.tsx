@@ -1223,7 +1223,7 @@ export function PersonCampaignCard(props: {
                   onChangeUserStatusSuccess={(status: boolean) => {
                     const result = postTogglePersonaActive(
                       userToken,
-                      props.project.id,
+                      props.persona.id,
                       "email",
                       !props.persona.email_active
                     ).then((res) => {

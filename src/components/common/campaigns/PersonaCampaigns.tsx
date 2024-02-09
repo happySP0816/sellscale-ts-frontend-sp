@@ -58,16 +58,13 @@ import {
   IconSeeding,
   IconSend,
   IconTarget,
+  IconToggleRight,
   IconX,
 } from '@tabler/icons';
 import { IconArrowDown, IconArrowUp, IconClipboard, IconMessageCheck } from '@tabler/icons-react';
 import { navigateToPage } from '@utils/documentChange';
 import { convertDateToShortFormatWithoutTime, formatToLabel } from '@utils/general';
-import {
-  getPersonasActivity,
-  getPersonasCampaignView,
-  getPersonasOverview,
-} from '@utils/requests/getPersonas';
+import { getPersonasActivity, getPersonasCampaignView, getPersonasOverview } from '@utils/requests/getPersonas';
 import _, { orderBy, sortBy } from 'lodash';
 import moment from 'moment';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
@@ -84,6 +81,8 @@ import UserStatusToggle from './UserStatusToggle';
 import AllCampaign from '../../PersonaCampaigns/AllCampaign';
 import postSyncSmartleadCampaigns from '@utils/requests/postSyncSmartleadCampaigns';
 import TriggersList from '@pages/TriggersList';
+import { DataTable } from 'mantine-datatable';
+import postTogglePersonaActive from '@utils/requests/postTogglePersonaActive';
 
 export type CampaignPersona = {
   id: number;
@@ -124,9 +123,7 @@ export default function PersonaCampaigns() {
 
   const [search, setSearch] = useState<string>('');
 
-  let filteredProjects = personas.filter((personas) =>
-    personas.name.toLowerCase().includes(search.toLowerCase())
-  );
+  let filteredProjects = personas.filter((personas) => personas.name.toLowerCase().includes(search.toLowerCase()));
   let allProjects = personas;
 
   const [campaignAnalyticData, setCampaignAnalyticData] = useState<CampaignAnalyticsData>({
@@ -175,10 +172,7 @@ export default function PersonaCampaigns() {
     // Get LinkedIn SLA
     if (userData.sla_schedules) {
       for (const schedule of userData.sla_schedules) {
-        if (
-          moment(schedule.start_date) < moment() &&
-          moment() <= moment(schedule.start_date).add(7, 'days')
-        ) {
+        if (moment(schedule.start_date) < moment() && moment() <= moment(schedule.start_date).add(7, 'days')) {
           setCurrentEmailSla(schedule.email_volume);
           setCurrentLinkedInSLA(schedule.linkedin_volume);
         }
@@ -229,6 +223,60 @@ export default function PersonaCampaigns() {
     <>
       <Group position='apart' mb='xs'>
         <Group>
+          <Title color='gray.6' order={3}>
+            {userData?.sdr_name.split(' ')[0]}'s Campaigns
+          </Title>
+        </Group>
+
+        <Group>
+          {userData?.warmup_linkedin_complete ? (
+            <Button
+              leftIcon={<IconBrandLinkedin size='1.4rem' color='white' fill='#228be6' />}
+              variant='default'
+              radius='md'
+              onClick={() => {
+                navigateToPage(navigate, `/settings/linkedin`);
+              }}
+            >
+              LINKEDIN SEND RATE:
+              <Text color='blue' mt={2} mx={4} size={'md'} fw={700}>
+                {currentLinkedInSLA}
+              </Text>{' '}
+              / Week
+            </Button>
+          ) : (
+            <Tooltip label='Your LinkedIn account is in a warmup phase. Explore more.' withArrow withinPortal>
+              <Button
+                leftIcon={<IconBrandLinkedin size='1.4rem' color='white' fill='#228be6' />}
+                variant='default'
+                radius='md'
+                onClick={() => {
+                  navigateToPage(navigate, `/settings/linkedin`);
+                }}
+              >
+                LINKEDIN WARMING UP:
+                <Text color='blue' mt={2} mx={4} size={'md'} fw={700}>
+                  {currentLinkedInSLA}
+                </Text>{' '}
+                / Week
+              </Button>
+            </Tooltip>
+          )}
+
+          <Button
+            leftIcon={<IconMail size='1.4rem' color='white' fill='#fd7e14' />}
+            variant='default'
+            radius='md'
+            onClick={() => {
+              navigateToPage(navigate, `/settings/email`);
+            }}
+          >
+            EMAIL SEND RATE:
+            <Text color='orange' mt={2} mx={4} size={'md'} fw={700}>
+              {currentEmailSla}
+            </Text>{' '}
+            / Week
+          </Button>
           <Button
             radius='md'
             leftIcon={<IconPlus size='1rem' />}
@@ -242,49 +290,6 @@ export default function PersonaCampaigns() {
           >
             Create New Campaign
           </Button>
-        </Group>
-
-        <Group>
-          <Button
-            leftIcon={<IconMail size='0.8rem' />}
-            color='orange'
-            variant='outline'
-            radius='md'
-            onClick={() => {
-              navigateToPage(navigate, `/settings/email`);
-            }}
-          >
-            {`Email Send Rate (per week): ${currentEmailSla}`}
-          </Button>
-
-          {userData?.warmup_linkedin_complete ? (
-            <Button
-              leftIcon={<IconBrandLinkedin size='0.8rem' />}
-              variant='outline'
-              radius='md'
-              onClick={() => {
-                navigateToPage(navigate, `/settings/linkedin`);
-              }}
-            >
-              {`LinkedIn Send Rate (per week): ${currentLinkedInSLA}`}
-            </Button>
-          ) : (
-            <Tooltip
-              label='Your LinkedIn account is in a warmup phase. Explore more.'
-              withArrow
-              withinPortal
-            >
-              <Button
-                variant='outline'
-                radius='md'
-                onClick={() => {
-                  navigateToPage(navigate, `/settings/linkedin`);
-                }}
-              >
-                {`LinkedIn Warming Up (per week): ${currentLinkedInSLA}`}
-              </Button>
-            </Tooltip>
-          )}
         </Group>
       </Group>
     </>
@@ -324,10 +329,6 @@ export default function PersonaCampaigns() {
           <Tabs.Panel value='overview' pt='xs'>
             <Stack>
               {campaignsSectionHeader}
-
-              <Title color='gray.6' order={3}>
-                {userData?.sdr_name.split(' ')[0]}'s Campaigns
-              </Title>
 
               <ScrollArea h={'78vh'}>
                 <Stack spacing={0}>
@@ -384,10 +385,7 @@ export default function PersonaCampaigns() {
                     </>
                   )}
 
-                  {filteredProjects
-                    .filter((persona) => !persona.active)
-                    .filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length >
-                    0 && (
+                  {filteredProjects.filter((persona) => !persona.active).filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length > 0 && (
                     <Button
                       color='gray'
                       leftIcon={<IconCalendar color='gray' size='0.8rem'></IconCalendar>}
@@ -402,17 +400,9 @@ export default function PersonaCampaigns() {
                       mb='md'
                     >
                       {showInactivePersonas ? 'Hide' : 'Show'}{' '}
-                      {
-                        filteredProjects
-                          .filter((persona) => !persona.active)
-                          .filter((persona: CampaignPersona) => persona.sdr_id === userData?.id)
-                          .length
-                      }{' '}
+                      {filteredProjects.filter((persona) => !persona.active).filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length}{' '}
                       Inactive Campaign
-                      {filteredProjects
-                        .filter((persona) => !persona.active)
-                        .filter((persona: CampaignPersona) => persona.sdr_id === userData?.id)
-                        .length > 1
+                      {filteredProjects.filter((persona) => !persona.active).filter((persona: CampaignPersona) => persona.sdr_id === userData?.id).length > 1
                         ? 's'
                         : ''}
                     </Button>
@@ -571,11 +561,7 @@ export function PersonCampaignCard(props: {
         >
           <Flex justify={'space-between'} w={'100%'} align={'center'} px={43} py={25}>
             <Text size={'lg'} color='white'>
-              Outreach for:{' '}
-              <span className=' font-semibold text-[20px]'>
-                {' '}
-                {campaignName ? campaignName : 'Coming soon! ⚠️ - This is all mock data...'}
-              </span>
+              Outreach for: <span className=' font-semibold text-[20px]'> {campaignName ? campaignName : 'Coming soon! ⚠️ - This is all mock data...'}</span>
             </Text>
             <CloseButton
               aria-label='Close modal'
@@ -674,9 +660,7 @@ export function PersonCampaignCard(props: {
                 percentcolor='#e2f6e7'
                 border={value === 'demo' ? '#40c057' : ''}
                 total={props.persona.total_demo ?? 0}
-                percentage={Math.floor(
-                  ((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100
-                )}
+                percentage={Math.floor(((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100)}
               />
             </Box>
           </Group>
@@ -826,24 +810,18 @@ export function PersonCampaignCard(props: {
     if (value === 'sent') {
       return campaignList?.filter((item: any) => item.to_status === 'SENT_OUTREACH');
     } else if (value === 'open') {
-      return campaignList?.filter(
-        (item: any) => item.to_status === 'ACCEPTED' || item.to_status === 'EMAIL_OPENED'
-      );
+      return campaignList?.filter((item: any) => item.to_status === 'ACCEPTED' || item.to_status === 'EMAIL_OPENED');
     } else if (value === 'reply') {
       return campaignList?.filter((item: any) => item.to_status === 'ACTIVE_CONVO');
     } else if (value === 'demo') {
       return campaignList?.filter((item: any) => item.to_status === 'DEMO_SET');
     } else if (value === 'pos_reply') {
-      return campaignList?.filter((item: any) =>
-        ['ACTIVE_CONVO_SCHEDULING', 'ACTIVE_CONVO_NEXT_STEPS', 'ACTIVE_CONVO_QUESTION'].includes(
-          item.to_status
-        )
-      );
+      return campaignList?.filter((item: any) => ['ACTIVE_CONVO_SCHEDULING', 'ACTIVE_CONVO_NEXT_STEPS', 'ACTIVE_CONVO_QUESTION'].includes(item.to_status));
     }
   }, [value, campaignList]);
 
   return (
-    <Paper radius='md' ref={ref}>
+    <Paper ref={ref}>
       <ChannelModal />
       <Stack
         spacing={0}
@@ -859,31 +837,21 @@ export function PersonCampaignCard(props: {
             border: 'solid 1px ' + theme.colors.gray[2],
             position: 'relative',
           })}
-          p={'4px'}
+          // p={'4px'}
           pl='xs'
           pr='xs'
           spacing={0}
         >
-          <Group sx={{ flex: '8%' }}>
+          <Group sx={{ flex: '8%', padding: '0 4px' }} maw={'fit-content'}>
             <Box
               onClick={() => {
-                navigateToPage(
-                  navigate,
-                  `/contacts`,
-                  new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                );
+                navigateToPage(navigate, `/contacts`, new URLSearchParams(`?campaign_id=${props.persona.id}`));
               }}
+              mt={5}
             >
               <Popover width={200} position='bottom' withArrow shadow='md' opened={popoverOpened}>
                 <Popover.Target>
-                  <Button
-                    variant='outline'
-                    radius='xl'
-                    size='sm'
-                    h={55}
-                    color='gray'
-                    sx={{ border: 'solid 1px #f1f1f1' }}
-                  >
+                  <Button variant='outline' radius='xl' size='sm' h={55} color='gray' sx={{ border: 'solid 1px #f1f1f1' }} maw={'fit-content'}>
                     <RingProgress
                       onMouseEnter={openPopover}
                       onMouseLeave={closePopover}
@@ -891,27 +859,14 @@ export function PersonCampaignCard(props: {
                       thickness={5}
                       label={
                         <Text size='xs' align='center'>
-                          {Math.min(
-                            100,
-                            Math.floor(
-                              ((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
-                            )
-                          )}
-                          %
+                          {Math.min(100, Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100))}%
                         </Text>
                       }
                       variant='animated'
                       sections={[
                         {
-                          value: Math.floor(
-                            ((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
-                          ),
-                          color:
-                            Math.round(
-                              ((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
-                            ) >= 100
-                              ? 'green'
-                              : 'blue',
+                          value: Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100),
+                          color: Math.round(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100) >= 100 ? 'green' : 'blue',
                         },
                       ]}
                     />
@@ -921,10 +876,7 @@ export function PersonCampaignCard(props: {
                   <Flex direction='column'>
                     <Box>
                       <Text size={'sm'} color='white'>
-                        {Math.floor(
-                          ((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100
-                        )}{' '}
-                        % of campaign is pending
+                        {Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100)} % of campaign is pending
                       </Text>
                     </Box>
 
@@ -937,15 +889,13 @@ export function PersonCampaignCard(props: {
 
                       <Text color='white' size={'sm'} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Total # Sourced: </Text>{' '}
-                          <Text ml='auto'>{props.persona.total_prospects || 0}</Text>
+                          <Text fw='bold'>Total # Sourced: </Text> <Text ml='auto'>{props.persona.total_prospects || 0}</Text>
                         </Flex>
                       </Text>
 
                       <Text color='white' size={'sm'} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Total # Contacted: </Text>{' '}
-                          <Text ml='auto'>{total_sent ?? 0}</Text>
+                          <Text fw='bold'>Total # Contacted: </Text> <Text ml='auto'>{total_sent ?? 0}</Text>
                         </Flex>
                       </Text>
                     </Box>
@@ -959,8 +909,7 @@ export function PersonCampaignCard(props: {
 
                       <Text color='white' size={'sm'} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Prospected: </Text>{' '}
-                          <Text ml='auto'>{props.persona.total_prospects}</Text>
+                          <Text fw='bold'>Prospected: </Text> <Text ml='auto'>{props.persona.total_prospects}</Text>
                         </Flex>
                       </Text>
 
@@ -984,8 +933,7 @@ export function PersonCampaignCard(props: {
 
                       <Text color='white' size={'sm'} fw={600}>
                         <Flex>
-                          <Text fw='bold'>Demo Set: </Text>{' '}
-                          <Text ml='auto'>{props.persona.total_demo}</Text>
+                          <Text fw='bold'>Demo Set: </Text> <Text ml='auto'>{props.persona.total_demo}</Text>
                         </Flex>
                       </Text>
 
@@ -1000,8 +948,8 @@ export function PersonCampaignCard(props: {
               </Popover>
             </Box>
           </Group>
-          <Divider orientation='vertical' ml='xs' mr='xs' color='white' />
-          <Group sx={{ flex: '27%' }}>
+          <Divider orientation='vertical' ml='xs' mr='xs' />
+          <Group w={'31.2%'}>
             <Flex direction={'column'}>
               <Flex gap={'xs'}>
                 <Popover position='bottom' withArrow shadow='md'>
@@ -1040,17 +988,10 @@ export function PersonCampaignCard(props: {
                           if (props.project == undefined) return;
                           setOpenedProspectId(-1);
                           setCurrentProject(props.project);
-                          navigateToPage(
-                            navigate,
-                            `/setup/linkedin`,
-                            new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                          );
+                          navigateToPage(navigate, `/setup/linkedin`, new URLSearchParams(`?campaign_id=${props.persona.id}`));
                         }}
                       >
-                        <IconBrandLinkedin
-                          size='1rem'
-                          color={props.persona.active ? theme.colors.blue[6] : 'gray'}
-                        />
+                        <IconBrandLinkedin size='1rem' color={props.persona.active ? theme.colors.blue[6] : 'gray'} />
                       </ActionIcon>
                     )} */}
                     {/* {props.persona.email_sent > 0 && (
@@ -1062,33 +1003,16 @@ export function PersonCampaignCard(props: {
                           if (props.project == undefined) return;
                           setOpenedProspectId(-1);
                           setCurrentProject(props.project);
-                          navigateToPage(
-                            navigate,
-                            `/setup/email`,
-                            new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                          );
+                          navigateToPage(navigate, `/setup/email`, new URLSearchParams(`?campaign_id=${props.persona.id}`));
                         }}
                       >
-                        <IconMail
-                          size='1rem'
-                          color={props.persona.active ? theme.colors.yellow[6] : 'gray'}
-                        />
+                        <IconMail size='1rem' color={props.persona.active ? theme.colors.yellow[6] : 'gray'} />
                       </ActionIcon>
                     )} */}
                   </Flex>
 
                   <Flex>
-                    <Tooltip
-                      label={
-                        props.persona.name +
-                        ' - ' +
-                        +total_sent +
-                        ' / ' +
-                        props.persona.total_prospects +
-                        ' prospects sent'
-                      }
-                      withArrow
-                    >
+                    <Tooltip label={props.persona.name + ' - ' + +total_sent + ' / ' + props.persona.total_prospects + ' prospects sent'} withArrow>
                       <Text
                         fz={'sm'}
                         c={'gray.7'}
@@ -1135,22 +1059,24 @@ export function PersonCampaignCard(props: {
               </Flex>
             </Flex>
           </Group>
-          <Divider orientation='vertical' ml='xs' mr='xs' color='white' />
-          <Group sx={{ flex: '6%' }}>
+          <Divider orientation='vertical' ml='xs' />
+          {/* <Group sx={{ flex: '6%' }}>
             <Flex>
               <Avatar src={props.persona.sdr_img_url} radius='xl' size='sm' />
               <Text size='xs' fw='450' mt='2px' ml='xs'>
                 {props.persona.sdr_name.split(' ')[0]}
               </Text>
             </Flex>
-          </Group>
-          <Divider orientation='vertical' ml='xs' mr='xs' color='white' />
-          <Group sx={{ flex: '37%' }}>
+          </Group> */}
+          {/* <Divider orientation='vertical' ml='xs' mr='xs' /> */}
+          <Flex w={'38%'} h={'67px'}>
             <Box
-              w={'15%'}
+              // w={'15%'}
+              w={'100%'}
               onClick={() => {
                 handleChannelOpen('sent', props.persona.id, props.persona.name);
               }}
+              bg={'#f9fbfe'}
             >
               <StatDisplay
                 color='blue'
@@ -1162,12 +1088,14 @@ export function PersonCampaignCard(props: {
                 hoverColor='hover:bg-[#cadef9]'
               />
             </Box>
-
+            <Divider orientation='vertical' />
             <Box
-              w={'15%'}
+              // w={'12%'}
+              w={'100%'}
               onClick={() => {
                 handleChannelOpen('open', props.persona.id, props.persona.name);
               }}
+              bg={'#fdf9fe	'}
             >
               <StatDisplay
                 color='pink'
@@ -1179,12 +1107,15 @@ export function PersonCampaignCard(props: {
                 hoverColor='hover:bg-[#fbdefb]'
               />
             </Box>
-
+            <Divider orientation='vertical' />
             <Box
-              w={'15%'}
+              // w={'12%'}
+              w={'100%'}
               onClick={() => {
                 handleChannelOpen('reply', props.persona.id, props.persona.name);
               }}
+              bg={'#fffbf8'}
+              p={0}
             >
               <StatDisplay
                 color='orange'
@@ -1196,12 +1127,14 @@ export function PersonCampaignCard(props: {
                 hoverColor='hover:bg-[#f8f3f0]'
               />
             </Box>
-
+            <Divider orientation='vertical' />
             <Box
-              w={'15%'}
+              // w={'12%'}
+              w={'100%'}
               onClick={() => {
                 handleChannelOpen('pos_reply', props.persona.id, props.persona.name);
               }}
+              bg={'#f8fbf9'}
             >
               <StatDisplay
                 color='#14B887'
@@ -1213,34 +1146,29 @@ export function PersonCampaignCard(props: {
                 hoverColor='hover:bg-[#E8F6F2]'
               />
             </Box>
-
+            <Divider orientation='vertical' />
             <Box
-              w={'15%'}
+              w={'100%'}
+              // w={'12%'}
               onClick={() => {
                 handleChannelOpen('demo', props.persona.id, props.persona.name);
               }}
+              bg={'#f8fbf9'}
             >
               <StatDisplay
                 color='green'
                 icon={<IconCalendar color={theme.colors.green[6]} size='0.9rem' />}
                 label='Demo'
                 total={props.persona.total_demo ?? 0}
-                percentage={Math.floor(
-                  ((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100
-                )}
+                percentage={Math.floor(((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100)}
                 percentColor='#e2f6e7'
                 hoverColor='hover:bg-[#d9f5e0]'
               />
             </Box>
-          </Group>
-          <Divider orientation='vertical' ml='xs' mr='xs' color='white' />
-          <Group
-            sx={{
-              flex: '11%',
-            }}
-          >
-            <Flex gap={'sm'}>
-              {/* <Button
+          </Flex>
+          <Divider orientation='vertical' mr='xs' />
+          <Flex w={'8.3%'} gap={'sm'} justify={'center'}>
+            {/* <Button
                 w={60}
                 radius="xl"
                 size="xs"
@@ -1260,67 +1188,68 @@ export function PersonCampaignCard(props: {
                 Edit
               </Button> */}
 
-              <Box>
-                <Group noWrap>
-                  <Stack spacing={5}>
-                    <Center>
-                      <ThemeIcon
-                        size='xs'
-                        color={props.persona.linkedin_active ? undefined : 'gray.4'}
-                      >
-                        <IconBrandLinkedin style={{ width: '90%', height: '90%' }} />
-                      </ThemeIcon>
-                    </Center>
-                    <UserStatusToggle
-                      projectId={props.persona.id}
-                      isActive={props.persona.linkedin_active}
-                      onChangeUserStatusSuccess={(status: boolean) => {
-                        setPersonaActive(status);
-                        props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
-                      }}
-                    />
-                  </Stack>
-                  <Stack spacing={5}>
-                    <Center>
-                      <ThemeIcon
-                        size='xs'
-                        color={props.persona.email_active ? undefined : 'gray.4'}
-                      >
-                        <IconMail style={{ width: '90%', height: '90%' }} />
-                      </ThemeIcon>
-                    </Center>
-                    <UserStatusToggle
-                      projectId={props.persona.id}
-                      isActive={props.persona.email_active}
-                      onChangeUserStatusSuccess={(status: boolean) => {
-                        setPersonaActive(status);
-                        props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
-                      }}
-                    />
-                  </Stack>
-                </Group>
-              </Box>
-            </Flex>
-          </Group>
-          <Box
+            <Group noWrap>
+              <Stack spacing={5}>
+                <Center>
+                  <ThemeIcon size='xs' color={props.persona.linkedin_active ? undefined : 'gray.4'}>
+                    <IconBrandLinkedin style={{ width: '90%', height: '90%' }} />
+                  </ThemeIcon>
+                </Center>
+                <UserStatusToggle
+                  projectId={props.persona.id}
+                  isActive={props.persona.linkedin_active}
+                  onChangeUserStatusSuccess={(status: boolean) => {
+                    const result = postTogglePersonaActive(
+                      userToken,
+                      props.persona.id,
+                      "linkedin",
+                      !props.persona.linkedin_active
+                    ).then((res) => {
+                      // setPersonaActive(status);
+                      props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
+                    });
+                  }}
+                />
+              </Stack>
+              <Stack spacing={5}>
+                <Center>
+                  <ThemeIcon size='xs' color={props.persona.email_active ? undefined : 'gray.4'}>
+                    <IconMail style={{ width: '90%', height: '90%' }} />
+                  </ThemeIcon>
+                </Center>
+                <UserStatusToggle
+                  projectId={props.persona.id}
+                  isActive={props.persona.email_active}
+                  onChangeUserStatusSuccess={(status: boolean) => {
+                    const result = postTogglePersonaActive(
+                      userToken,
+                      props.project.id,
+                      "email",
+                      !props.persona.email_active
+                    ).then((res) => {
+                      // setPersonaActive(status);
+                      props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
+                    });
+                  }}
+                />
+              </Stack>
+            </Group>
+          </Flex>
+          <Divider orientation='vertical' ml='xs' mr='xs' />
+          <Flex w={'9%'} align={'center'} direction={'column'} justify={'center'}>
+            {/* <Box
             sx={{
               position: 'absolute',
               right: 0,
               top: '50%',
               transform: 'translateY(-50%)',
             }}
-          >
+            >
+            </Box> */}
             <Stack pb={5}>
               <Center>
-                <Badge
-                  size='xs'
-                  color={
-                    props.persona.linkedin_active || props.persona.email_active ? 'blue' : 'gray'
-                  }
-                >
-                  {props.persona.linkedin_active || props.persona.email_active
-                    ? 'Active'
-                    : 'Inactive'}
+                <Badge size='xs' color={props.persona.active ? 'blue' : 'gray'}>
+                  {props.persona.active ? 'Active' : 'Inactive'}
                 </Badge>
                 {!!props.persona.smartlead_campaign_id && (
                   <Tooltip label='Synced with SmartLead' withArrow>
@@ -1356,7 +1285,7 @@ export function PersonCampaignCard(props: {
                 </ActionIcon>
               </Center>
             </Stack>
-          </Box>
+          </Flex>
         </Group>
         <Collapse in={opened}>
           {props.viewMode === 'node-view' && (
@@ -1369,11 +1298,7 @@ export function PersonCampaignCard(props: {
                   if (props.project == undefined) return;
                   setOpenedProspectId(-1);
                   setCurrentProject(props.project);
-                  navigateToPage(
-                    navigate,
-                    `/setup/${sectionType.toLowerCase()}`,
-                    new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                  );
+                  navigateToPage(navigate, `/setup/${sectionType.toLowerCase()}`, new URLSearchParams(`?campaign_id=${props.persona.id}`));
                 }}
               />
             </Box>
@@ -1392,11 +1317,7 @@ export function PersonCampaignCard(props: {
                         if (props.project == undefined) return;
                         setOpenedProspectId(-1);
                         setCurrentProject(props.project);
-                        navigateToPage(
-                          navigate,
-                          `/setup/${section.type.toLowerCase()}`,
-                          new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                        );
+                        navigateToPage(navigate, `/setup/${section.type.toLowerCase()}`, new URLSearchParams(`?campaign_id=${props.persona.id}`));
                       }}
                     />
                   </Box>
@@ -1417,11 +1338,7 @@ export function PersonCampaignCard(props: {
                               if (props.project == undefined) return;
                               setOpenedProspectId(-1);
                               setCurrentProject(props.project);
-                              navigateToPage(
-                                navigate,
-                                `/setup/${section.type.toLowerCase()}`,
-                                new URLSearchParams(`?campaign_id=${props.persona.id}`)
-                              );
+                              navigateToPage(navigate, `/setup/${section.type.toLowerCase()}`, new URLSearchParams(`?campaign_id=${props.persona.id}`));
                             }}
                           />
                         </Box>
@@ -1435,16 +1352,9 @@ export function PersonCampaignCard(props: {
                     size='xs'
                     color='gray'
                     onClick={() => setInactiveChannelsOpened(!inactiveChannelsOpened)}
-                    leftIcon={
-                      inactiveChannelsOpened ? (
-                        <IconArrowUp size='0.7rem' />
-                      ) : (
-                        <IconArrowDown size='0.7rem' />
-                      )
-                    }
+                    leftIcon={inactiveChannelsOpened ? <IconArrowUp size='0.7rem' /> : <IconArrowDown size='0.7rem' />}
                   >
-                    {inactiveChannelsOpened ? 'Hide' : 'Show'}{' '}
-                    {types.filter((x) => !x.active).length} Inactive Channel
+                    {inactiveChannelsOpened ? 'Hide' : 'Show'} {types.filter((x) => !x.active).length} Inactive Channel
                     {types.filter((x) => !x.active).length > 1 ? 's' : ''}
                   </Button>
                 </>
@@ -1484,23 +1394,19 @@ function PersonCampaignCardSection(props: { section: ChannelSection; onClick?: (
         <Box sx={{ flexBasis: '30%' }}>
           <Group>
             <Text fz='xs' color='gray' w='90px'>
-              <IconSend size='0.8rem' /> Sent:{' '}
-              <span style={{ color: 'black' }}>{props.section.sends}</span>
+              <IconSend size='0.8rem' /> Sent: <span style={{ color: 'black' }}>{props.section.sends}</span>
             </Text>
             <Text fz='xs' color='gray' w='90px'>
-              <IconChecks size='0.8rem' /> Opens:{' '}
-              <span style={{ color: 'black' }}>{props.section.opens}</span>
+              <IconChecks size='0.8rem' /> Opens: <span style={{ color: 'black' }}>{props.section.opens}</span>
             </Text>
             <Text fz='xs' color='gray' w='90px'>
-              <IconMessageCheck size='0.8rem' /> Replies:{' '}
-              <span style={{ color: 'black' }}>{props.section.replies}</span>
+              <IconMessageCheck size='0.8rem' /> Replies: <span style={{ color: 'black' }}>{props.section.replies}</span>
             </Text>
           </Group>
         </Box>
         <Box sx={{ flexBasis: '20%', color: 'gray' }}>
           <Text fz='xs' span>
-            <IconCalendar size='0.8rem' />{' '}
-            {convertDateToShortFormatWithoutTime(new Date(props.section.date))}
+            <IconCalendar size='0.8rem' /> {convertDateToShortFormatWithoutTime(new Date(props.section.date))}
           </Text>
         </Box>
         <Box sx={{ flexBasis: '10%' }}>
@@ -1514,17 +1420,9 @@ function PersonCampaignCardSection(props: { section: ChannelSection; onClick?: (
               size='xs'
               thumbIcon={
                 checked ? (
-                  <IconCheck
-                    size='0.6rem'
-                    color={theme.colors.teal[theme.fn.primaryShade()]}
-                    stroke={3}
-                  />
+                  <IconCheck size='0.6rem' color={theme.colors.teal[theme.fn.primaryShade()]} stroke={3} />
                 ) : (
-                  <IconX
-                    size='0.6rem'
-                    color={theme.colors.red[theme.fn.primaryShade()]}
-                    stroke={3}
-                  />
+                  <IconX size='0.6rem' color={theme.colors.red[theme.fn.primaryShade()]} stroke={3} />
                 )
               }
             />
@@ -1566,13 +1464,7 @@ function StatModalDisplay(props: {
             <Text color={props.color} fz={'16px'} fw={500}>
               {props.total.toLocaleString()}
             </Text>
-            <Text
-              fz={'12px'}
-              color={props.color}
-              bg={props.percentcolor}
-              style={{ borderRadius: '20px' }}
-              px={'10px'}
-            >
+            <Text fz={'12px'} color={props.color} bg={props.percentcolor} style={{ borderRadius: '20px' }} px={'10px'}>
               {/* percentage */}
               {props.percentage}%
             </Text>
@@ -1593,34 +1485,27 @@ function StatDisplay(props: {
   hoverColor: string;
 }) {
   return (
-    <div className={`${props.hoverColor} rounded-md px-2 py-1`}>
-      <Stack spacing={0}>
-        <Flex justify='left' gap='xl'>
+    <div className={`${props.hoverColor} rounded-md px-2 py-1 h-full`}>
+      <Stack spacing={0} h={'100%'}>
+        <Flex justify='center' gap='xl' align={'center'} h={'100%'}>
           <Tooltip label={props.percentage + '% conversion'} withArrow withinPortal>
             <Flex align={'center'} gap={4}>
               <Text color={props.color} fz='md' fw={500}>
                 {props.total.toLocaleString()}
               </Text>
-              <Text
-                size='8px'
-                color={props.color}
-                bg={props.percentColor}
-                py={2}
-                px={4}
-                style={{ borderRadius: '8px' }}
-              >
+              <Text size='8px' color={props.color} bg={props.percentColor} py={2} px={4} style={{ borderRadius: '8px' }}>
                 {/* percentage */}
                 {props.percentage}%
               </Text>
             </Flex>
           </Tooltip>
         </Flex>
-        <Flex>
+        {/* <Flex>
           <Box mt='1px'>{props.icon}</Box>
           <Text c='gray.7' fz='xs' ml='4px'>
             {props.label}
           </Text>
-        </Flex>
+        </Flex> */}
       </Stack>
     </div>
   );
@@ -1634,17 +1519,14 @@ export const PersonCampaignTable = (props: {
   hideHeader?: boolean;
 }) => {
   const userToken = useRecoilValue(userTokenState);
+  const theme = useMantineTheme();
 
   const [sort, setSort] = useState<'asc' | 'desc'>('desc');
   let tempData = useMemo(() => {
     if (sort === 'asc') {
-      return props.filteredProjects.sort((a, b) =>
-        moment(a.created_at).isAfter(moment(b.created_at)) ? 1 : -1
-      );
+      return props.filteredProjects.sort((a, b) => (moment(a.created_at).isAfter(moment(b.created_at)) ? 1 : -1));
     } else {
-      return props.filteredProjects.sort((a, b) =>
-        moment(a.created_at).isAfter(moment(b.created_at)) ? -1 : 1
-      );
+      return props.filteredProjects.sort((a, b) => (moment(a.created_at).isAfter(moment(b.created_at)) ? -1 : 1));
     }
   }, [sort]);
 
@@ -1669,24 +1551,19 @@ export const PersonCampaignTable = (props: {
             position: 'relative',
           })}
           display={props.hideHeader ? 'none' : 'flex'}
-          py={'md'}
+          // py={'md'}
           pl='xs'
           pr='xs'
           spacing={0}
         >
-          <Group sx={{ flex: '8%' }}>
+          <Group w={'8%'}>
             <Text fw={600} color='gray.8' fz='sm'>
               Contacts
             </Text>
           </Group>
           <Divider orientation='vertical' ml='xs' mr='xs' />
-          <Group sx={{ flex: '27%' }} spacing={5} noWrap>
-            <Flex
-              style={{ cursor: 'pointer' }}
-              align={'center'}
-              gap={'xs'}
-              onClick={() => setSort((s) => (s === 'asc' ? 'desc' : 'asc'))}
-            >
+          <Group w={'32%'} spacing={5} noWrap>
+            <Flex style={{ cursor: 'pointer' }} align={'center'} gap={'xs'} onClick={() => setSort((s) => (s === 'asc' ? 'desc' : 'asc'))}>
               <Text fw={600} color='gray.8' fz='sm'>
                 Campaigns
               </Text>
@@ -1700,18 +1577,18 @@ export const PersonCampaignTable = (props: {
             </Flex>
           </Group>
 
-          <Divider orientation='vertical' ml='xs' mr='xs' />
+          {/* <Divider orientation='vertical' ml='xs' mr='xs' /> */}
 
-          <Group sx={{ flex: '7%' }} grow>
+          {/* <Group sx={{ flex: '7%' }} grow>
             <Text fw={600} color='gray.8' fz='sm'>
               SDR
             </Text>
-          </Group>
+          </Group> */}
 
-          <Divider orientation='vertical' ml='xs' mr='xs' />
+          <Divider orientation='vertical' />
 
-          <Group sx={{ flex: '37%' }}>
-            <Text fw={600} color='gray.8' fz='sm'>
+          <Flex w={'38%'}>
+            {/* <Text fw={600} color='gray.8' fz='sm'>
               Overall Report
             </Text>
             <Tooltip label='Refresh overall report.' withArrow withinPortal>
@@ -1723,8 +1600,7 @@ export const PersonCampaignTable = (props: {
                   if (result.status === 'success') {
                     showNotification({
                       title: 'Refreshing overall report.',
-                      message:
-                        'Please wait for a few minutes for changes to take effect. You can refresh this page to see the changes.',
+                      message: 'Please wait for a few minutes for changes to take effect. You can refresh this page to see the changes.',
                       color: 'blue',
                       autoClose: 5000,
                     });
@@ -1740,16 +1616,75 @@ export const PersonCampaignTable = (props: {
               >
                 <IconRefresh size='0.8rem' />
               </ActionIcon>
-            </Tooltip>
-          </Group>
+            </Tooltip> */}
+            <Box
+              // w={'15%'}
+              w={'100%'}
+              bg={'#f9fbfe'}
+            >
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+                <IconSend color={theme.colors.blue[6]} size='0.9rem' />
+                <Text size={'sm'}>Sent</Text>
+              </Flex>
+            </Box>
+            <Divider orientation='vertical' />
+            <Box
+              // w={'15%'}
+              w={'100%'}
+              bg={'#fdf9fe'}
+            >
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+                <IconChecks color={theme.colors.pink[6]} size='0.9rem' />
+                <Text size={'sm'}>Open</Text>
+              </Flex>
+            </Box>
+            <Divider orientation='vertical' />
+            <Box
+              // w={'15%'}
+              w={'100%'}
+              bg={'#fffbf8'}
+            >
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+                <IconMessage color={theme.colors.orange[6]} size='0.9rem' />
+                <Text size={'sm'}>Reply</Text>
+              </Flex>
+            </Box>
+            <Divider orientation='vertical' />
+            <Box
+              // w={'15%'}
+              w={'100%'}
+              bg={'#f8fbf9'}
+            >
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+                <IconMessage color={theme.colors.teal[6]} size='0.9rem' />
+                <Text size={'sm'}>(+)Reply</Text>
+              </Flex>
+            </Box>
+            <Divider orientation='vertical' />
+            <Box
+              // w={'15%'}
+              w={'100%'}
+              bg={'#f8fbf9'}
+            >
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+                <IconCalendar color={theme.colors.green[6]} size='0.9rem' />
+                <Text size={'sm'}>Demo</Text>
+              </Flex>
+            </Box>
+            <Divider orientation='vertical' />
+          </Flex>
 
-          <Divider orientation='vertical' ml='xs' mr='xs' />
-
-          <Group sx={{ flex: '11%' }} grow>
-            <Text fw={600} color='gray.8' fz='sm'>
+          <Flex w={'10%'} align={'center'} justify={'center'} gap={'sm'}>
+            {/* <Text fw={600} color='gray.8' fz='sm'>
               Details
-            </Text>
-          </Group>
+            </Text> */}
+            <Group noWrap>
+              <IconToggleRight size={'0.8rem'} />
+              <Text size={'sm'}>Channels</Text>
+            </Group>
+          </Flex>
+          <Divider orientation='vertical' mr='xs' />
+          <Flex w={'10%'} align={'center'} justify={'center'}></Flex>
         </Group>
       </Paper>
       {data

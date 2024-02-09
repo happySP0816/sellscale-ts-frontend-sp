@@ -17,6 +17,7 @@ import { TaskHandlerConnectCalendar } from './TaskHandlers/TaskHandlerConnectCal
 import { TaskHandlerAddDNCFilters } from './TaskHandlers/TaskHandlerAddDNCFilters';
 import { TaskHandlerEnrichSegment } from './TaskHandlers/TaskHandlerEnrichSegment';
 import { TaskHandlerReviewSegment } from './TaskHandlers/TaskHandlerReviewSegment';
+import { TaskHandlerRequestCampaign } from './TaskHandlers/TaskHandlerRequestCampaign';
 
 export interface OperatorDashboardEntry {
   id: number;
@@ -98,6 +99,11 @@ const TASK_ROUTER: any = {
   REVIEW_SEGMENT: {
     component: TaskHandlerReviewSegment,
     instruction: 'Review the segment then mark as complete',
+    enabledCompleteButton: true,
+  },
+  CAMPAIGN_REQUEST: {
+    component: TaskHandlerRequestCampaign,
+    instruction: 'Request a new campaign then mark as complete',
     enabledCompleteButton: true,
   }
 };

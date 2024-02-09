@@ -82,6 +82,7 @@ import AllCampaign from '../../PersonaCampaigns/AllCampaign';
 import postSyncSmartleadCampaigns from '@utils/requests/postSyncSmartleadCampaigns';
 import TriggersList from '@pages/TriggersList';
 import { DataTable } from 'mantine-datatable';
+import postTogglePersonaActive from '@utils/requests/postTogglePersonaActive';
 
 export type CampaignPersona = {
   id: number;
@@ -1198,8 +1199,15 @@ export function PersonCampaignCard(props: {
                   projectId={props.persona.id}
                   isActive={props.persona.linkedin_active}
                   onChangeUserStatusSuccess={(status: boolean) => {
-                    setPersonaActive(status);
-                    props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
+                    const result = postTogglePersonaActive(
+                      userToken,
+                      props.persona.id,
+                      "linkedin",
+                      !props.persona.linkedin_active
+                    ).then((res) => {
+                      // setPersonaActive(status);
+                      props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
+                    });
                   }}
                 />
               </Stack>
@@ -1213,8 +1221,15 @@ export function PersonCampaignCard(props: {
                   projectId={props.persona.id}
                   isActive={props.persona.email_active}
                   onChangeUserStatusSuccess={(status: boolean) => {
-                    setPersonaActive(status);
-                    props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
+                    const result = postTogglePersonaActive(
+                      userToken,
+                      props.project.id,
+                      "email",
+                      !props.persona.email_active
+                    ).then((res) => {
+                      // setPersonaActive(status);
+                      props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
+                    });
                   }}
                 />
               </Stack>
@@ -1233,8 +1248,8 @@ export function PersonCampaignCard(props: {
             </Box> */}
             <Stack pb={5}>
               <Center>
-                <Badge size='xs' color={props.persona.linkedin_active || props.persona.email_active ? 'blue' : 'gray'}>
-                  {props.persona.linkedin_active || props.persona.email_active ? 'Active' : 'Inactive'}
+                <Badge size='xs' color={props.persona.active ? 'blue' : 'gray'}>
+                  {props.persona.active ? 'Active' : 'Inactive'}
                 </Badge>
                 {!!props.persona.smartlead_campaign_id && (
                   <Tooltip label='Synced with SmartLead' withArrow>

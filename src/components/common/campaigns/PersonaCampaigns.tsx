@@ -1031,7 +1031,7 @@ export function PersonCampaignCard(props: {
                 </Popover>
                 <Box>
                   <Flex>
-                    {props.persona.li_sent > 0 && (
+                    {/* {props.persona.li_sent > 0 && (
                       <ActionIcon
                         variant='subtle'
                         radius='md'
@@ -1052,8 +1052,8 @@ export function PersonCampaignCard(props: {
                           color={props.persona.active ? theme.colors.blue[6] : 'gray'}
                         />
                       </ActionIcon>
-                    )}
-                    {props.persona.email_sent > 0 && (
+                    )} */}
+                    {/* {props.persona.email_sent > 0 && (
                       <ActionIcon
                         variant='subtle'
                         radius='md'
@@ -1074,7 +1074,7 @@ export function PersonCampaignCard(props: {
                           color={props.persona.active ? theme.colors.yellow[6] : 'gray'}
                         />
                       </ActionIcon>
-                    )}
+                    )} */}
                   </Flex>
 
                   <Flex>

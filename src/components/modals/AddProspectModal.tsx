@@ -12,30 +12,30 @@ import {
   Card,
   Box,
   TextInput,
-} from "@mantine/core";
-import { ContextModalProps, openContextModal } from "@mantine/modals";
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
-import { Archetype, CTA } from "src";
-import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
-import { createProspectFromLinkedinLink } from "@utils/requests/createProspectFromLinkedinLink";
-import { getProspectByID } from "@utils/requests/getProspectByID";
-import { generateInitialLiMessage } from "@utils/requests/generateInitialLiMessage";
-import { updateProspect } from "@utils/requests/updateProspect";
-import { addProspectReferral } from "@utils/requests/addProspectReferral";
+} from '@mantine/core';
+import { ContextModalProps, openContextModal } from '@mantine/modals';
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
+import { Archetype, CTA } from 'src';
+import { useForm } from '@mantine/form';
+import { showNotification } from '@mantine/notifications';
+import { createProspectFromLinkedinLink } from '@utils/requests/createProspectFromLinkedinLink';
+import { getProspectByID } from '@utils/requests/getProspectByID';
+import { generateInitialLiMessage } from '@utils/requests/generateInitialLiMessage';
+import { updateProspect } from '@utils/requests/updateProspect';
+import { addProspectReferral } from '@utils/requests/addProspectReferral';
 
 export default function AddProspectModal({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ archetypeId: number, sourceProspectId?: number }>) {
+}: ContextModalProps<{ archetypeId: number; sourceProspectId?: number }>) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
-  
+
   const userToken = useRecoilValue(userTokenState);
 
   const form = useForm({
@@ -49,18 +49,44 @@ export default function AddProspectModal({
     setLoading(true);
 
     const prospectId = await (async () => {
-      const createResponse = await createProspectFromLinkedinLink(userToken, innerProps.archetypeId, values.li_url);
-      if (createResponse.status !== 'success') return -1;
+      const createResponse = await createProspectFromLinkedinLink(
+        userToken,
+        innerProps.archetypeId,
+        values.li_url
+      );
+      if (createResponse.status !== 'success') {
+        setLoading(false);
+        console.error('Error while creating prospect', createResponse);
+
+        showNotification({
+          id: 'prospect-added-error',
+          title: 'Error while adding prospect',
+          message:
+            'Prospect may have already been added by you or someone else in your organization.',
+          color: 'red',
+          autoClose: false,
+        });
+
+        return -1;
+      }
 
       // Create referral
-      if (innerProps.sourceProspectId){
-        const referralResponse = await addProspectReferral(userToken, innerProps.sourceProspectId, createResponse.data.prospect_id);
+      if (innerProps.sourceProspectId) {
+        const referralResponse = await addProspectReferral(
+          userToken,
+          innerProps.sourceProspectId,
+          createResponse.data.prospect_id
+        );
       }
 
       //const prospectResponse = await getProspectByID(userToken, createResponse.data.prospect_id);
 
       // Add email to prospect
-      const updateResponse = await updateProspect(userToken, createResponse.data.prospect_id, values.email);
+      const updateResponse = await updateProspect(
+        userToken,
+        createResponse.data.prospect_id,
+        values.email
+      );
       if (updateResponse.status !== 'success') return -1;
 
       return createResponse.data.prospect_id as number;
@@ -70,11 +96,10 @@ export default function AddProspectModal({
 
     if (prospectId !== -1) {
       showNotification({
-        id: "prospect-added",
-        title: "Prospect successfully added",
-        message:
-          "Please allow some time for it to propagate through our systems.",
-        color: "blue",
+        id: 'prospect-added',
+        title: 'Prospect successfully added',
+        message: 'Please allow some time for it to propagate through our systems.',
+        color: 'blue',
         autoClose: 3000,
       });
       context.closeModal(id);
@@ -89,18 +114,18 @@ export default function AddProspectModal({
         },
       });
 
-      if (innerProps.sourceProspectId){
+      if (innerProps.sourceProspectId) {
         queryClient.invalidateQueries({
           queryKey: [`query-prospect-details-${innerProps.sourceProspectId}`],
         });
       }
-
     } else {
       showNotification({
-        id: "prospect-added-error",
-        title: "Error while adding prospect",
-        message: "Please contact an administrator. This prospect may have already been added by you or someone else in your organization.",
-        color: "red",
+        id: 'prospect-added-error',
+        title: 'Error while adding prospect',
+        message:
+          'Please contact an administrator. This prospect may have already been added by you or someone else in your organization.',
+        color: 'red',
         autoClose: false,
       });
       context.closeModal(id);
@@ -111,42 +136,31 @@ export default function AddProspectModal({
     <Paper
       p={0}
       style={{
-        position: "relative",
+        position: 'relative',
       }}
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <LoadingOverlay visible={loading} />
 
-        <Flex direction="column">
+        <Flex direction='column'>
           <TextInput
-            placeholder="https://www.linkedin.com/in/..."
-            label="LinkedIn URL"
+            placeholder='https://www.linkedin.com/in/...'
+            label='LinkedIn URL'
             required
-            {...form.getInputProps("li_url")}
+            {...form.getInputProps('li_url')}
           />
         </Flex>
 
-        <Flex direction="column">
-          <TextInput
-            placeholder="Optional"
-            label="Email"
-            {...form.getInputProps("email")}
-          />
+        <Flex direction='column'>
+          <TextInput placeholder='Optional' label='Email' {...form.getInputProps('email')} />
         </Flex>
 
         {
           <Group pt='md'>
-            <Anchor component="button" type="button" color="dimmed" size="sm">
+            <Anchor component='button' type='button' color='dimmed' size='sm'>
               {/* Need help? */}
             </Anchor>
-            <Button
-              variant="light"
-              radius="md"
-              type="submit"
-              ml="auto"
-              mr="auto"
-              size="md"
-            >
+            <Button variant='light' radius='md' type='submit' ml='auto' mr='auto' size='md'>
               Add Prospect
             </Button>
           </Group>

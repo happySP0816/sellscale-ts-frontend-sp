@@ -704,6 +704,7 @@ export default function ProjectDetails(props: {
                                   handoffText
                                 );
                                 if (demoSetType === 'HANDOFF') {
+                                  await changeStatus('DEMO_SET', false);
                                   await changeStatus('DEMO_WON', false);
                                 } else {
                                   await changeStatus('DEMO_SET', false);

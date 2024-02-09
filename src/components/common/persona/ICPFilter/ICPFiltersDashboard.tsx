@@ -406,34 +406,36 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
       );
     });
 
-    filteredProspects = filteredProspects.filter((prospect) => {
-      switch (selectedProspectStatusFilter) {
-        case 'Prospected':
-          return prospect.status === 'PROSPECTED';
+    filteredProspects = filteredProspects
+      .filter((p) => p.status !== 'REMOVED')
+      .filter((prospect) => {
+        switch (selectedProspectStatusFilter) {
+          case 'Prospected':
+            return prospect.status === 'PROSPECTED';
 
-        case 'Sent Outreach':
-          return prospect.status === 'SENT_OUTREACH';
+          case 'Sent Outreach':
+            return prospect.status === 'SENT_OUTREACH';
 
-        case 'Accepted':
-          return prospect.status === 'ACCEPTED';
+          case 'Accepted':
+            return prospect.status === 'ACCEPTED';
 
-        case 'Bumped':
-          return prospect.status === 'BUMPED';
+          case 'Bumped':
+            return prospect.status === 'BUMPED';
 
-        case 'Active Convo':
-          return prospect.status === 'ACTIVE_CONVO';
+          case 'Active Convo':
+            return prospect.status === 'ACTIVE_CONVO';
 
-        case 'Demo':
-          return prospect.status === 'DEMO';
-        case 'Removed':
-          return prospect.status === 'REMOVED';
-        case 'All Contacts':
-          return true;
+          case 'Demo':
+            return prospect.status === 'DEMO';
+          case 'Removed':
+            return prospect.status === 'REMOVED';
+          case 'All Contacts':
+            return true;
 
-        default:
-          return false;
-      }
-    });
+          default:
+            return false;
+        }
+      });
 
     return filteredProspects;
   }, [globalSearch, icpProspects, selectedProspectStatusFilter]);
@@ -829,7 +831,10 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                   </Box>
                 </Flex>
               )}
-              <Box w={'100%'} maw={sideBarVisible ?  'calc(100vw - 13vw - 360px)' : 'calc(100vw - 12vw)'}>
+              <Box
+                w={'100%'}
+                maw={sideBarVisible ? 'calc(100vw - 13vw - 360px)' : 'calc(100vw - 12vw)'}
+              >
                 <GridTabs
                   selectedTab={selectedTab}
                   setSelectedTab={setSelectedTab}

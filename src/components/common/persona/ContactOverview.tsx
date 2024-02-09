@@ -16,7 +16,9 @@ import {
   IconChartArcs,
   IconChartAreaLine,
   IconFilter,
+  IconGlobe,
   IconList,
+  IconMap,
   IconTable,
   IconTarget,
   IconWashMachine,
@@ -31,6 +33,7 @@ import TAMGraph from './TAMGraph';
 import ScrapingReport from './ScrapingReport';
 import TAMGraphV2 from './TAMGraphV2';
 import PulseTabSelector from './PulseTabSelector';
+import Territories from './Territories';
 
 const ContactOverview = () => {
   const userToken = useRecoilValue(userTokenState)
@@ -68,9 +71,9 @@ const ContactOverview = () => {
           <IconTarget size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Do Not Contact
         </Tabs.Tab>
-        <Tabs.Tab value='pre-filters'>
-          <IconFilter size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
-          Pre-Filters
+        <Tabs.Tab value='territories'>
+          <IconMap size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
+          Territories
         </Tabs.Tab>
         
         
@@ -94,15 +97,9 @@ const ContactOverview = () => {
         <GlobalContacts />
       </Tabs.Panel>
 
-      <Tabs.Panel value='pre-filters' pt='xs' style={{ position: 'relative' }}>
-          {userToken && 
-            <iframe
-              src={'https://sellscale.retool.com/embedded/public/80a08f60-8b0d-4ff8-a90a-c22cdcd3a4be#authToken=' + userToken}
-              style={{ width: '100%', height: window.innerHeight + 120 }}
-              frameBorder={0}
-            />
-          }
-        </Tabs.Panel>
+      <Tabs.Panel value='territories' pt='xs' style={{ position: 'relative' }}>
+        <Territories />
+      </Tabs.Panel>
       {/* <Tabs.Panel value='prospect_scoring'>
           <ICPFilters />
       </Tabs.Panel> */}

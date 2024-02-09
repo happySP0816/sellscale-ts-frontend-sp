@@ -246,13 +246,18 @@ export default function PersonaCampaigns() {
           ) : (
             <Tooltip label='Your LinkedIn account is in a warmup phase. Explore more.' withArrow withinPortal>
               <Button
-                variant='outline'
+                leftIcon={<IconBrandLinkedin size='1.4rem' color='white' fill='#228be6' />}
+                variant='default'
                 radius='md'
                 onClick={() => {
                   navigateToPage(navigate, `/settings/linkedin`);
                 }}
               >
-                {`LINKEDIN WARMING UP: ${currentLinkedInSLA}`}
+                LINKEDIN WARMING UP:
+                <Text color='blue' mt={2} mx={4} size={'md'} fw={700}>
+                  {currentLinkedInSLA}
+                </Text>{' '}
+                / Week
               </Button>
             </Tooltip>
           )}
@@ -836,7 +841,7 @@ export function PersonCampaignCard(props: {
           pr='xs'
           spacing={0}
         >
-          <Group sx={{ flex: '8%' }}>
+          <Group sx={{ flex: '8%', padding: '0 4px' }} maw={'fit-content'}>
             <Box
               onClick={() => {
                 navigateToPage(navigate, `/contacts`, new URLSearchParams(`?campaign_id=${props.persona.id}`));
@@ -845,7 +850,7 @@ export function PersonCampaignCard(props: {
             >
               <Popover width={200} position='bottom' withArrow shadow='md' opened={popoverOpened}>
                 <Popover.Target>
-                  <Button variant='outline' radius='xl' size='sm' h={55} color='gray' sx={{ border: 'solid 1px #f1f1f1' }}>
+                  <Button variant='outline' radius='xl' size='sm' h={55} color='gray' sx={{ border: 'solid 1px #f1f1f1' }} maw={'fit-content'}>
                     <RingProgress
                       onMouseEnter={openPopover}
                       onMouseLeave={closePopover}
@@ -943,7 +948,7 @@ export function PersonCampaignCard(props: {
             </Box>
           </Group>
           <Divider orientation='vertical' ml='xs' mr='xs' />
-          <Group w={'380px'}>
+          <Group w={'31.2%'}>
             <Flex direction={'column'}>
               <Flex gap={'xs'}>
                 <Popover position='bottom' withArrow shadow='md'>
@@ -1063,7 +1068,7 @@ export function PersonCampaignCard(props: {
             </Flex>
           </Group> */}
           {/* <Divider orientation='vertical' ml='xs' mr='xs' /> */}
-          <Flex w={'520px'} h={'67px'}>
+          <Flex w={'38%'} h={'67px'}>
             <Box
               // w={'15%'}
               w={'100%'}
@@ -1161,7 +1166,7 @@ export function PersonCampaignCard(props: {
             </Box>
           </Flex>
           <Divider orientation='vertical' mr='xs' />
-          <Flex w={'120px'} gap={'sm'} justify={'center'}>
+          <Flex w={'8.3%'} gap={'sm'} justify={'center'}>
             {/* <Button
                 w={60}
                 radius="xl"
@@ -1216,55 +1221,55 @@ export function PersonCampaignCard(props: {
             </Group>
           </Flex>
           <Divider orientation='vertical' ml='xs' mr='xs' />
-          <Flex w={'60px'} justify={'center'}>
-            <Box
-            // sx={{
-            //   position: 'absolute',
-            //   right: 0,
-            //   top: '50%',
-            //   transform: 'translateY(-50%)',
-            // }}
+          <Flex w={'9%'} align={'center'} direction={'column'} justify={'center'}>
+            {/* <Box
+            sx={{
+              position: 'absolute',
+              right: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+            }}
             >
-              <Stack pb={5}>
-                <Center>
-                  <Badge size='xs' color={props.persona.linkedin_active || props.persona.email_active ? 'blue' : 'gray'}>
-                    {props.persona.linkedin_active || props.persona.email_active ? 'Active' : 'Inactive'}
-                  </Badge>
-                  {!!props.persona.smartlead_campaign_id && (
-                    <Tooltip label='Synced with SmartLead' withArrow>
-                      <Badge size='xs' color={'violet'}>
-                        {'Synced'}
-                      </Badge>
-                    </Tooltip>
-                  )}
-                </Center>
-              </Stack>
+            </Box> */}
+            <Stack pb={5}>
+              <Center>
+                <Badge size='xs' color={props.persona.linkedin_active || props.persona.email_active ? 'blue' : 'gray'}>
+                  {props.persona.linkedin_active || props.persona.email_active ? 'Active' : 'Inactive'}
+                </Badge>
+                {!!props.persona.smartlead_campaign_id && (
+                  <Tooltip label='Synced with SmartLead' withArrow>
+                    <Badge size='xs' color={'violet'}>
+                      {'Synced'}
+                    </Badge>
+                  </Tooltip>
+                )}
+              </Center>
+            </Stack>
 
-              <Stack>
-                <Center>
-                  <ActionIcon
-                    color={props.persona?.sdr_id === userData?.id ? 'blue' : 'gray'}
-                    sx={{ opacity: props.persona?.sdr_id === userData?.id ? 1 : 0.5 }}
-                    variant='filled'
-                    radius='lg'
-                    onClick={() => {
-                      if (props.persona?.sdr_id === userData?.id) {
-                        toggle();
-                      } else {
-                        showNotification({
-                          title: 'You cannot edit this campaign',
-                          message: 'You are not the owner of this campaign',
-                          color: 'gray',
-                          autoClose: 5000,
-                        });
-                      }
-                    }}
-                  >
-                    {opened ? <IconChevronUp size='1.1rem' /> : <IconChevronDown size='1.1rem' />}
-                  </ActionIcon>
-                </Center>
-              </Stack>
-            </Box>
+            <Stack>
+              <Center>
+                <ActionIcon
+                  color={props.persona?.sdr_id === userData?.id ? 'blue' : 'gray'}
+                  sx={{ opacity: props.persona?.sdr_id === userData?.id ? 1 : 0.5 }}
+                  variant='filled'
+                  radius='lg'
+                  onClick={() => {
+                    if (props.persona?.sdr_id === userData?.id) {
+                      toggle();
+                    } else {
+                      showNotification({
+                        title: 'You cannot edit this campaign',
+                        message: 'You are not the owner of this campaign',
+                        color: 'gray',
+                        autoClose: 5000,
+                      });
+                    }
+                  }}
+                >
+                  {opened ? <IconChevronUp size='1.1rem' /> : <IconChevronDown size='1.1rem' />}
+                </ActionIcon>
+              </Center>
+            </Stack>
           </Flex>
         </Group>
         <Collapse in={opened}>
@@ -1536,13 +1541,13 @@ export const PersonCampaignTable = (props: {
           pr='xs'
           spacing={0}
         >
-          <Group sx={{ flex: '8%' }}>
+          <Group w={'8%'}>
             <Text fw={600} color='gray.8' fz='sm'>
               Contacts
             </Text>
           </Group>
           <Divider orientation='vertical' ml='xs' mr='xs' />
-          <Group w={'390px'} spacing={5} noWrap>
+          <Group w={'32%'} spacing={5} noWrap>
             <Flex style={{ cursor: 'pointer' }} align={'center'} gap={'xs'} onClick={() => setSort((s) => (s === 'asc' ? 'desc' : 'asc'))}>
               <Text fw={600} color='gray.8' fz='sm'>
                 Campaigns
@@ -1567,7 +1572,7 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation='vertical' />
 
-          <Flex w={'520px'}>
+          <Flex w={'38%'}>
             {/* <Text fw={600} color='gray.8' fz='sm'>
               Overall Report
             </Text>
@@ -1654,7 +1659,7 @@ export const PersonCampaignTable = (props: {
             <Divider orientation='vertical' />
           </Flex>
 
-          <Flex w={'140px'} align={'center'} justify={'center'} gap={'sm'}>
+          <Flex w={'10%'} align={'center'} justify={'center'} gap={'sm'}>
             {/* <Text fw={600} color='gray.8' fz='sm'>
               Details
             </Text> */}
@@ -1664,7 +1669,7 @@ export const PersonCampaignTable = (props: {
             </Group>
           </Flex>
           <Divider orientation='vertical' mr='xs' />
-          <Flex w={'60px'} align={'center'} justify={'center'}></Flex>
+          <Flex w={'10%'} align={'center'} justify={'center'}></Flex>
         </Group>
       </Paper>
       {data

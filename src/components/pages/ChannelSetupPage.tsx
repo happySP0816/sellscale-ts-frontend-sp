@@ -19,10 +19,12 @@ import { useRecoilValue } from "recoil";
 import { useLoaderData } from "react-router-dom";
 import { userTokenState } from "@atoms/userAtoms";
 import ICPFilters from "@common/persona/ICPFilter/ICPFilters";
-import { IconBrandLinkedin, IconMailOpened, IconUser } from "@tabler/icons";
+import { IconBooks, IconBrandLinkedin, IconMailOpened, IconUser } from "@tabler/icons";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { showNotification } from "@mantine/notifications";
 import { openConfirmModal } from "@mantine/modals";
+import ComingSoonCard from '@common/library/ComingSoonCard';
+import AssetLibrary from './AssetLibrary';
 
 export default function ChannelSetupPage() {
   const { channelType, tabId } = useLoaderData() as {
@@ -293,10 +295,24 @@ export default function ChannelSetupPage() {
                   </Tooltip>
                 </Flex>
               </Tabs.Tab>
+
+              <Tabs.Tab
+                value="assets"
+                icon={<IconBooks size={"0.8rem"} />}
+                // disabled={!isEnabledEmail}
+                ml="auto"
+              >
+                <Flex align={"center"} gap={"md"}>
+                  <Text>Assets</Text>
+                </Flex>
+              </Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="filter_contact">
               <ICPFilters hideTitleBar />
+            </Tabs.Panel>
+            <Tabs.Panel value="assets">
+              <AssetLibrary />
             </Tabs.Panel>
             <Tabs.Panel value="linkedin">
               <Box

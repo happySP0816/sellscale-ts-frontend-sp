@@ -429,7 +429,14 @@ export default function SequenceSection() {
                   // bodyText={bf0?.description ?? ""}
                   footer={
                     <Center>
-                      <Group spacing={2}>
+                      {
+                        !bf0?.id && (
+                            <Text color='gray' size='md' align='center'>
+                              No framework selected
+                            </Text>
+                        )
+                      }
+                      <Group spacing={2} sx={{visibility: bf0?.id ? 'visible' : 'hidden'}}>
                         <Text fz={14}>wait for</Text>
                         <NumberInput
                           defaultValue={bf0Delay.current}
@@ -501,7 +508,14 @@ export default function SequenceSection() {
                   // bodyText={bf1?.description ?? ""}
                   footer={
                     <Center>
-                      <Group spacing={2}>
+                      {
+                        !bf1?.id && (
+                            <Text color='gray' size='md' align='center'>
+                              No framework selected
+                            </Text>
+                        )
+                      }
+                      <Group spacing={2} sx={{visibility: bf1?.id ? 'visible' : 'hidden'}}>
                         <Text fz={14}>wait for</Text>
                         <NumberInput
                           defaultValue={bf1Delay.current}
@@ -575,7 +589,14 @@ export default function SequenceSection() {
                   // bodyText={bf2?.description ?? ""}
                   footer={
                     <Center>
-                      <Group spacing={2}>
+                      {
+                        !bf2?.id && (
+                            <Text color='gray' size='md' align='center'>
+                              No framework selected
+                            </Text>
+                        )
+                      }
+                      <Group spacing={2} sx={{visibility: bf2?.id ? 'visible' : 'hidden'}}>
                         <Text fz={14}>wait for</Text>
                         <NumberInput
                           defaultValue={bf2Delay.current}

@@ -51,7 +51,12 @@ type UpcomingGeneration = {
   daily_sla_count: number;
 };
 
-const UpcomingGenerationsView = () => {
+type UpcomingGenerationsViewProps = {
+  showLinkedinActive?: boolean;
+  showEmailActive?: boolean;
+};
+
+export const UpcomingGenerationsView = (props: UpcomingGenerationsViewProps) => {
   const userToken = useRecoilValue(userTokenState);
   const [isFetching, setIsFetching] = useState(false);
   const [upcomingGenerations, setUpcomingGenerations] = useState<UpcomingGeneration[]>([]);
@@ -66,13 +71,16 @@ const UpcomingGenerationsView = () => {
 
     const response = await getUpcomingGenerations(userToken, true, true);
     const archetypes = response.status === 'success' ? response.data : [];
-    let linkedinActiveArchetypes = [];
+    let activeArchetypes = [];
     for (const archetype of archetypes) {
-      if (archetype.linkedin_active) {
-        linkedinActiveArchetypes.push(archetype);
+      if (archetype.linkedin_active && props.showLinkedinActive) {
+        activeArchetypes.push(archetype);
+      }
+      if (archetype.email_active && props.showEmailActive) {
+        activeArchetypes.push(archetype);
       }
     }
-    setUpcomingGenerations(linkedinActiveArchetypes);
+    setUpcomingGenerations(activeArchetypes);
 
     setIsFetching(false);
   };
@@ -88,7 +96,7 @@ const UpcomingGenerationsView = () => {
 
   return (
     <>
-      <Title order={4}>Upcoming Generations</Title>
+      <Title order={4} mb='xs'>Upcoming {props.showLinkedinActive && props.showEmailActive ? 'Generations' : props.showLinkedinActive ? 'Linkedin Generations' : props.showEmailActive ? 'Email Generations' : 'Generations'}</Title>
       <DataTable
         withBorder
         borderRadius={4}
@@ -197,7 +205,7 @@ export default function LinkedinQueuedMessages(props: { all?: boolean }) {
       w='100%'
     >
       <Stack p='md'>
-        <UpcomingGenerationsView />
+        <UpcomingGenerationsView showLinkedinActive />
         <Title order={4}>{userData.sdr_name}'s Queued Messages</Title>
         {allMessages && allMessages.length > 0 ? (
           allMessages.map((messageItem, i) => {

@@ -1,5 +1,5 @@
-import { userTokenState } from "@atoms/userAtoms";
-import { ActionIcon, Badge, Box, Button, Flex, HoverCard, Text, TextInput } from "@mantine/core";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { ActionIcon, Badge, Box, Button, Flex, HoverCard, Text, TextInput, Title } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import { useRecoilValue } from "recoil";
 import EmailQueuedMessageItem from "./EmailQueuedMessageItem";
@@ -14,9 +14,11 @@ import { DateTimePicker } from "@mantine/dates";
 import { patchScheduledEmails } from "@utils/requests/patchScheduledEmail";
 import { showNotification } from "@mantine/notifications";
 import { useForceUpdate } from "@mantine/hooks";
+import { UpcomingGenerationsView } from '@common/messages/LinkedinQueuedMessages';
 
 export default function EmailQueuedMessages(props: { all?: boolean }) {
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState)
   const currentProject = useRecoilValue(currentProjectState);
   const [messages, setMessages] = useState<any[]>([]);
   const [search, setSearch] = useState<string>('');
@@ -90,6 +92,8 @@ export default function EmailQueuedMessages(props: { all?: boolean }) {
 
   return (
     <Flex w='100%' align='left' justify={'center'} direction='column'>
+      <UpcomingGenerationsView showEmailActive />
+      <Title order={4} mt='lg' mb='xs'>{userData.sdr_name}'s Queued Emails</Title>
       <TextInput
         rightSection={<IconSearch size={14} />}
         placeholder="Search by prospect name"

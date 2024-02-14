@@ -6,6 +6,16 @@ export interface MsgResponse {
   data?: any;
 }
 
+export interface ActivityLog {
+  client_sdr_id: number;
+  created_at: string;
+  description: string;
+  id: number;
+  name: string;
+  sdr_name: string;
+  type: string;
+}
+
 export interface Campaign {
   uuid: string;
   id: number;

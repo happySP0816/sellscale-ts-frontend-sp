@@ -5,7 +5,7 @@ import { useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { API_URL } from '@constants/data';
 import { showNotification } from '@mantine/notifications';
-import { IconCirclePlus, IconMinus, IconTrash } from '@tabler/icons';
+import { IconCheck, IconCirclePlus, IconMinus, IconTrash } from '@tabler/icons';
 import { currentProjectState } from '@atoms/personaAtoms';
 
 type Asset = {
@@ -215,16 +215,18 @@ export default function AssetLibrary() {
                 const assetUsed = asset.client_archetype_ids && asset.client_archetype_ids.includes(currentProjectId);
 
                 return (
-                    <Card key={index} withBorder padding="lg" h='210px'>
-                        <Badge color={assetUsed ? 'green' : 'gray'} size='sm' variant='filled' mb='xs'>
+                    <Card key={index} padding="lg" h='230px' sx={{border: assetUsed ? '2px solid #2F98C1' : '2px solid #E0E0E0', position: 'relative'}}>
+                        <Badge color={assetUsed ? 'blue' : 'gray'
+                        } size='sm' mb='xs' variant={assetUsed ? 'filled' : 'outline'}>
+                            {assetUsed && <IconCheck size={12} style={{marginRight: 8}} />}
                             {assetUsed ? 'Used in Campaign' : 'Not Used'}
                         </Badge>
-                        <Text weight={600} fz='lg'>{asset.asset_key}</Text>
+                        <Text weight={600} fz='md'>{asset.asset_key.length > 15 ? asset.asset_key.slice(0, 15) + '...' : asset.asset_key}</Text>
                         <Text size="sm" style={{ marginBottom: 10 }}>{asset.asset_value.length > 105 ? asset.asset_value.slice(0, 105) + '...' : asset.asset_value}</Text>
                         <Text size="xs" color='gray'>{asset.asset_reason}</Text>
 
                         <Flex mt='md' justify='flex-end' sx={{position: 'absolute', bottom: 10, right: 0, padding: '0 16px'}}>
-                            <Button color={assetUsed ? 'red' : 'green'} size="xs" variant="outline" onClick={() => {
+                            <Button color={assetUsed ? 'gray' : 'blue'} size="xs" variant="outline" onClick={() => {
                                 toggleCampaignIdInAsset(asset.id);
                             }} mr='xs'>
                                 {
@@ -233,7 +235,7 @@ export default function AssetLibrary() {
                                     :
                                     <IconCirclePlus size={12} style={{marginRight: 8}} />
                                 }
-                                {assetUsed ? 'Remove from Campaign' : 'Click to Use'}
+                                {assetUsed ? 'Stop using' : 'Click to Use'}
                             </Button>
                         <Button size="xs" color="red" onClick={() => deleteAsset(asset.id)} variant="outline">
                             <IconTrash size={12} style={{marginRight: 8}} />

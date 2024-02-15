@@ -1,27 +1,27 @@
-import { Box, Button, Divider, Flex, Text, useMantineTheme } from '@mantine/core'
-import { getICPScoreColor, getStatusMessageBadgeColor } from '../../../../utils/icp'
-import { useEffect, useMemo, useState } from 'react'
+import { Box, Button, Divider, Flex, Text, useMantineTheme } from '@mantine/core';
+import { getICPScoreColor, getStatusMessageBadgeColor } from '../../../../utils/icp';
+import { useEffect, useMemo, useState } from 'react';
 
 interface IGridTabsProps {
   selectedTab: {
-    label: string
-    value: string
-    count: number
-  }
-  setSelectedTab: (value: { label: string; value: string; count: number }) => void
+    label: string;
+    value: string;
+    count: number;
+  };
+  setSelectedTab: (value: { label: string; value: string; count: number }) => void;
   icpDashboard: {
-    label: string
-    color: string
-    bgColor: string
-    percent: number
-    value: string
-    widthModifier: number
-  }[]
-  numProspects: number
+    label: string;
+    color: string;
+    bgColor: string;
+    percent: number;
+    value: string;
+    widthModifier: number;
+  }[];
+  numProspects: number;
 }
 
 const GridTabs = ({ selectedTab, setSelectedTab, icpDashboard, numProspects }: IGridTabsProps) => {
-  const theme = useMantineTheme()
+  const theme = useMantineTheme();
   const computeTabFilters = () => {
     return [
       {
@@ -55,17 +55,17 @@ const GridTabs = ({ selectedTab, setSelectedTab, icpDashboard, numProspects }: I
         count: icpDashboard.find((c) => c.label === 'Very Low')?.value || '0',
       },
       {
-        label: 'Unscored',
+        label: 'Do Not Contact',
         value: '-1',
-        count: icpDashboard.find((c) => c.label === 'Unscored')?.value || '0',
+        count: icpDashboard.find((c) => c.label === 'Do Not Contact')?.value || '0',
       },
-    ]
-  }
-  const [tabFilters, setTabFilters] = useState(computeTabFilters())
+    ];
+  };
+  const [tabFilters, setTabFilters] = useState(computeTabFilters());
 
   useEffect(() => {
-    setTabFilters(computeTabFilters())
-  }, [icpDashboard])
+    setTabFilters(computeTabFilters());
+  }, [icpDashboard]);
 
   const generateBackgroundBudge = (value: string) => {
     const COLORS: { [key: string]: string } = {
@@ -75,11 +75,11 @@ const GridTabs = ({ selectedTab, setSelectedTab, icpDashboard, numProspects }: I
       medium: theme.colors.yellow[1],
       low: theme.colors.red[1],
       'very low': theme.colors.red[1],
-      unscored: theme.colors.gray[1],
-    }
+      'do not contact': theme.colors.gray[1],
+    };
 
-    return COLORS[value?.toLowerCase()]
-  }
+    return COLORS[value?.toLowerCase()];
+  };
   return (
     <Flex justify={'space-between'} align={'center'}>
       <Flex
@@ -100,7 +100,9 @@ const GridTabs = ({ selectedTab, setSelectedTab, icpDashboard, numProspects }: I
               style={{
                 // padding: '0.5rem 1rem',
                 backgroundColor:
-                  selectedTab.value === tab.value ? getStatusMessageBadgeColor(tab.label).filled : 'white',
+                  selectedTab.value === tab.value
+                    ? getStatusMessageBadgeColor(tab.label).filled
+                    : 'white',
                 // borderRight: '1px solid #E0E0E0',
                 color: selectedTab.value === tab.value ? '#fff' : getICPScoreColor(tab.label),
                 fontWeight: 600,
@@ -140,12 +142,20 @@ const GridTabs = ({ selectedTab, setSelectedTab, icpDashboard, numProspects }: I
                 </Box>
               </Box>
             </Button>
-            {idx !== tabFilters.length - 1 && <Divider orientation='vertical' color='#E0E0E0' size='sm' mt={6} style={{ height: '24px' }} />}
+            {idx !== tabFilters.length - 1 && (
+              <Divider
+                orientation='vertical'
+                color='#E0E0E0'
+                size='sm'
+                mt={6}
+                style={{ height: '24px' }}
+              />
+            )}
           </>
         ))}
       </Flex>
     </Flex>
-  )
-}
+  );
+};
 
-export default GridTabs
+export default GridTabs;

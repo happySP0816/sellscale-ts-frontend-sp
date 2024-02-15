@@ -1,16 +1,9 @@
-import { currentProjectState } from "@atoms/personaAtoms";
-import {
-  prospectDrawerIdState,
-  prospectDrawerOpenState,
-} from "@atoms/prospectAtoms";
-import { userTokenState } from "@atoms/userAtoms";
-import { ProspectICP } from "@common/persona/Pulse";
-import {
-  getIcpFitScoreMap,
-  icpFitToColor,
-  icpFitToLabel,
-} from "@common/pipeline/ICPFitAndReason";
-import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
+import { currentProjectState } from '@atoms/personaAtoms';
+import { prospectDrawerIdState, prospectDrawerOpenState } from '@atoms/prospectAtoms';
+import { userTokenState } from '@atoms/userAtoms';
+import { ProspectICP } from '@common/persona/Pulse';
+import { getIcpFitScoreMap, icpFitToColor, icpFitToLabel } from '@common/pipeline/ICPFitAndReason';
+import ProspectDetailsDrawer from '@drawers/ProspectDetailsDrawer';
 import {
   Box,
   Group,
@@ -22,25 +15,23 @@ import {
   LoadingOverlay,
   Stack,
   Center,
-} from "@mantine/core";
-import { useElementSize } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
-import { formatToLabel, valueToColor } from "@utils/general";
-import { getProspects } from "@utils/requests/getProspects";
-import { getProspectsForICP } from "@utils/requests/getProspectsForICP";
-import _ from "lodash";
-import { DataTable } from "mantine-datatable";
-import { useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { ProspectShallow } from "src";
+} from '@mantine/core';
+import { useElementSize } from '@mantine/hooks';
+import { useQuery } from '@tanstack/react-query';
+import { formatToLabel, valueToColor } from '@utils/general';
+import { getProspects } from '@utils/requests/getProspects';
+import { getProspectsForICP } from '@utils/requests/getProspectsForICP';
+import _ from 'lodash';
+import { DataTable } from 'mantine-datatable';
+import { useEffect, useState } from 'react';
+import { Bar } from 'react-chartjs-2';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { ProspectShallow } from 'src';
 
 export default function PulseBarChart(props: {}) {
   const theme = useMantineTheme();
 
-  const [prospectDrawerOpened, setProspectDrawerOpened] = useRecoilState(
-    prospectDrawerOpenState
-  );
+  const [prospectDrawerOpened, setProspectDrawerOpened] = useRecoilState(prospectDrawerOpenState);
   const [prospectId, setProspectId] = useRecoilState(prospectDrawerIdState);
 
   const userToken = useRecoilValue(userTokenState);
@@ -56,7 +47,7 @@ export default function PulseBarChart(props: {}) {
     queryKey: [`query-isp-fit-chart-prospects`],
     queryFn: async () => {
       const response = await getProspectsForICP(userToken, currentProject?.id || -1);
-      if (response.status === "error") {
+      if (response.status === 'error') {
         return null;
       }
       return response.data;
@@ -65,63 +56,69 @@ export default function PulseBarChart(props: {}) {
     enabled: !!currentProject,
   });
 
-  const data = raw_data ? [
-    {
-      icp_score: '4',
-      icp_label: icpFitToLabel(parseInt('4')),
-      icp_color: icpFitToColor(parseInt('4')),
-      count: raw_data.very_high_count,
-      data: raw_data.very_high_data as ProspectICP[],
-    },
-    {
-      icp_score: '3',
-      icp_label: icpFitToLabel(parseInt('3')),
-      icp_color: icpFitToColor(parseInt('3')),
-      count: raw_data.high_count,
-      data: raw_data.high_data as ProspectICP[],
-    },
-    {
-      icp_score: '2',
-      icp_label: icpFitToLabel(parseInt('2')),
-      icp_color: icpFitToColor(parseInt('2')),
-      count: raw_data.medium_count,
-      data: raw_data.medium_data as ProspectICP[],
-    },
-    {
-      icp_score: '1',
-      icp_label: icpFitToLabel(parseInt('1')),
-      icp_color: icpFitToColor(parseInt('1')),
-      count: raw_data.low_count,
-      data: raw_data.low_data as ProspectICP[],
-    },
-    {
-      icp_score: '0',
-      icp_label: icpFitToLabel(parseInt('0')),
-      icp_color: icpFitToColor(parseInt('0')),
-      count: raw_data.very_low_count,
-      data: raw_data.very_low_data as ProspectICP[],
-    },
+  const data = raw_data
+    ? [
+        {
+          icp_score: '4',
+          icp_label: icpFitToLabel(parseInt('4')),
+          icp_color: icpFitToColor(parseInt('4')),
+          count: raw_data.very_high_count,
+          data: raw_data.very_high_data as ProspectICP[],
+        },
+        {
+          icp_score: '3',
+          icp_label: icpFitToLabel(parseInt('3')),
+          icp_color: icpFitToColor(parseInt('3')),
+          count: raw_data.high_count,
+          data: raw_data.high_data as ProspectICP[],
+        },
+        {
+          icp_score: '2',
+          icp_label: icpFitToLabel(parseInt('2')),
+          icp_color: icpFitToColor(parseInt('2')),
+          count: raw_data.medium_count,
+          data: raw_data.medium_data as ProspectICP[],
+        },
+        {
+          icp_score: '1',
+          icp_label: icpFitToLabel(parseInt('1')),
+          icp_color: icpFitToColor(parseInt('1')),
+          count: raw_data.low_count,
+          data: raw_data.low_data as ProspectICP[],
+        },
+        {
+          icp_score: '0',
+          icp_label: icpFitToLabel(parseInt('0')),
+          icp_color: icpFitToColor(parseInt('0')),
+          count: raw_data.very_low_count,
+          data: raw_data.very_low_data as ProspectICP[],
+        },
 
-    {
-      icp_score: '-1',
-      icp_label: 'Unscored',
-      icp_color: icpFitToColor(parseInt('-1')),
-      count: raw_data.error_count + raw_data.queued_count + raw_data.calculating_count,
-      data: [...raw_data.error_data, ...raw_data.queued_data, ...raw_data.calculating_data] as ProspectICP[],
-    },
-  ] : [];
+        {
+          icp_score: '-1',
+          icp_label: 'Do Not Contact',
+          icp_color: icpFitToColor(parseInt('-1')),
+          count: raw_data.error_count + raw_data.queued_count + raw_data.calculating_count,
+          data: [
+            ...raw_data.error_data,
+            ...raw_data.queued_data,
+            ...raw_data.calculating_data,
+          ] as ProspectICP[],
+        },
+      ]
+    : [];
 
   return (
-    <Box sx={{ position: "relative" }}>
+    <Box sx={{ position: 'relative' }}>
       <LoadingOverlay visible={isFetching} />
-      <Center sx={{ height: tablesWidth/2 }}>
+      <Center sx={{ height: tablesWidth / 2 }}>
         <Bar
           options={{
             responsive: true,
             plugins: {
               title: {
                 display: true,
-                text: "ICP Fit Score Distribution",
+                text: 'ICP Fit Score Distribution',
               },
               legend: {
                 display: false,
@@ -158,12 +155,10 @@ export default function PulseBarChart(props: {}) {
             labels: data.map((d) => d.icp_label),
             datasets: [
               {
-                label: "ICP Fit Score Distribution",
+                label: 'ICP Fit Score Distribution',
                 data: data.map((d) => d.count),
                 // Add alpha channel to hex color (browser support: https://caniuse.com/css-rrggbbaa)
-                backgroundColor: data.map(
-                  (d) => theme.colors[d.icp_color][5] + "70"
-                ),
+                backgroundColor: data.map((d) => theme.colors[d.icp_color][5] + '70'),
               },
             ],
           }}
@@ -221,18 +216,18 @@ export default function PulseBarChart(props: {}) {
         ariaLabel="ICP Fit Score Distribution"
     /> */}
       </Center>
-      <Group ref={tablesRef} align="flex-start" grow>
+      <Group ref={tablesRef} align='flex-start' grow>
         {data.map((d, index) => (
           <Paper key={index} p={5}>
             <Title order={4}>
               <Badge
                 color={d.icp_color}
-                variant="light"
+                variant='light'
                 size='xl'
-                styles={{ root: { textTransform: "initial" } }}
+                styles={{ root: { textTransform: 'initial' } }}
               >
                 {formatToLabel(d.icp_label)}
-              </Badge>{" "}
+              </Badge>{' '}
               Prospects
             </Title>
 
@@ -241,8 +236,8 @@ export default function PulseBarChart(props: {}) {
               highlightOnHover
               columns={[
                 {
-                  accessor: "full_name",
-                  title: "Name",
+                  accessor: 'full_name',
+                  title: 'Name',
                   width: 150,
                   render: ({ full_name, title, company }) => (
                     <Stack spacing={2}>
@@ -253,7 +248,9 @@ export default function PulseBarChart(props: {}) {
                         {_.truncate(title, {
                           length: 45,
                           separator: ' ',
-                        })} @ {_.truncate(company, {
+                        })}{' '}
+                        @{' '}
+                        {_.truncate(company, {
                           length: 45,
                           separator: ' ',
                         })}

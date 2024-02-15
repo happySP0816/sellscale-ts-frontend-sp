@@ -116,8 +116,8 @@ const tabFilters = [
     count: 0,
   },
   {
-    label: 'Unscored',
-    value: 'unscored',
+    label: 'Do Not Contact',
+    value: 'do_not_contact',
     count: 0,
   },
 ];
@@ -128,7 +128,7 @@ type ProspectFilterState =
   | 'Bumped'
   | 'Active Convo'
   | 'Demo'
-  | 'Removed'
+  | 'Do Not Contact'
   | 'All Contacts';
 
 const csvHeaders = [
@@ -204,7 +204,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
     //   ];
     // }
 
-    if (selectedTab && selectedTab.value !== 'all') {
+    if (selectedTab && selectedTab.value !== 'all' && selectedTab.label !== 'Do Not Contact') {
       newFilters = [
         ...newFilters,
         {
@@ -212,6 +212,19 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
           value: {
             op: 'eq',
             value: selectedTab.value,
+          },
+        },
+      ];
+    }
+
+    if (selectedTab.label === 'Do Not Contact') {
+      newFilters = [
+        ...newFilters,
+        {
+          id: 'status',
+          value: {
+            op: 'eq',
+            value: 'REMOVED',
           },
         },
       ];
@@ -375,7 +388,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
               : (icp_analytics['0'] / icp_analytics['Total']) * 20,
         },
         {
-          label: 'Unscored',
+          label: 'Do Not Contact',
           color: '#84818A',
           badgeColor: 'gray',
           bgColor: 'rgba(132, 129, 138, 0.05)',
@@ -407,7 +420,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
     });
 
     filteredProspects = filteredProspects
-      .filter((p) => p.status !== 'REMOVED')
+      // .filter((p) => p.status !== 'REMOVED')
       .filter((prospect) => {
         switch (selectedProspectStatusFilter) {
           case 'Prospected':
@@ -427,13 +440,13 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
 
           case 'Demo':
             return prospect.status === 'DEMO';
-          case 'Removed':
+          case 'Do Not Contact':
             return prospect.status === 'REMOVED';
           case 'All Contacts':
             return true;
 
           default:
-            return false;
+            return true;
         }
       });
 
@@ -716,7 +729,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
                       'Bumped',
                       'Active Convo',
                       'Demo',
-                      'Removed',
+                      'Do Not Contact',
                       'All Contacts',
                     ]}
                     defaultValue={selectedProspectStatusFilter}
@@ -861,7 +874,7 @@ const ICPFiltersDashboard = (props: ICPFiltersDashboardPropsType) => {
 
                         switch (score) {
                           case -1:
-                            readable_score = 'Unscored';
+                            readable_score = 'Do Not Contact';
                             color = 'gray';
                             break;
                           case 0:

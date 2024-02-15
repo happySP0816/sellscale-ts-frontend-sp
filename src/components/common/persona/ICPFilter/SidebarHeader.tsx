@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react'
+import { forwardRef, useEffect, useState } from 'react';
 import {
   Group,
   Box,
@@ -13,105 +13,108 @@ import {
   Switch,
   Text,
   Progress,
-} from '@mantine/core'
+} from '@mantine/core';
 import {
   IconArrowNarrowLeft,
   IconArrowNarrowRight,
   IconChevronLeft,
   IconInfoCircle,
   IconQuestionCircle,
-} from '@tabler/icons'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRecoilState, useRecoilValue } from 'recoil'
-import { currentProjectState } from '@atoms/personaAtoms'
-import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms'
-import { runScoringICP, updateICPRuleSet } from '@utils/requests/icpScoring'
-import { userTokenState } from '@atoms/userAtoms'
-import { showNotification } from '@mantine/notifications'
-import { getICPScoringJobs } from '@utils/requests/getICPScoringJobs'
-import { navConfettiState } from '@atoms/navAtoms'
+} from '@tabler/icons';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { currentProjectState } from '@atoms/personaAtoms';
+import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms';
+import { runScoringICP, updateICPRuleSet } from '@utils/requests/icpScoring';
+import { userTokenState } from '@atoms/userAtoms';
+import { showNotification } from '@mantine/notifications';
+import { getICPScoringJobs } from '@utils/requests/getICPScoringJobs';
+import { navConfettiState } from '@atoms/navAtoms';
 
 type Props = {
-  sideBarVisible: boolean
-  toggleSideBar: () => void
-  isTesting: boolean
-  setIsTesting: (val: boolean) => void
-}
+  sideBarVisible: boolean;
+  toggleSideBar: () => void;
+  isTesting: boolean;
+  setIsTesting: (val: boolean) => void;
+};
 
 const SwitchWrapper = forwardRef<HTMLDivElement, { children: React.ReactNode }>((props, ref) => (
   <div ref={ref} {...props}>
     {props.children}
   </div>
-))
+));
 export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsTesting }: Props) {
-  const [value, setValue] = useState('')
-  const queryClient = useQueryClient()
-  const userToken = useRecoilValue(userTokenState)
-  const [_confetti, dropConfetti] = useRecoilState(navConfettiState)
+  const [value, setValue] = useState('');
+  const queryClient = useQueryClient();
+  const userToken = useRecoilValue(userTokenState);
+  const [_confetti, dropConfetti] = useRecoilState(navConfettiState);
 
-  const [loading, setLoading] = useState(false)
-  const currentProject = useRecoilValue(currentProjectState)
-  const globalRuleSetData = useRecoilValue(filterRuleSetState)
-  const icpProspects = useRecoilValue(filterProspectsState)
+  const [loading, setLoading] = useState(false);
+  const currentProject = useRecoilValue(currentProjectState);
+  const globalRuleSetData = useRecoilValue(filterRuleSetState);
+  const icpProspects = useRecoilValue(filterProspectsState);
 
-  const TRIGGER_REFRESH_INTERVAL = 10000 // 10000 ms = 10 seconds
-  const TIME_PER_PROSPECT = 0.1 // 0.1 seconds
-  const [icpScoringJobs, setIcpScoringJobs] = useState<any[]>([])
-  const [currentScoringJob, setCurrentScoringJob] = useState<any>(null)
-  const [scoringTimeRemaining, setScoringTimeRemaining] = useState<number>(0)
-  const [scoringProgress, setScoringProgress] = useState<number>(0)
+  const TRIGGER_REFRESH_INTERVAL = 10000; // 10000 ms = 10 seconds
+  const TIME_PER_PROSPECT = 0.1; // 0.1 seconds
+  const [icpScoringJobs, setIcpScoringJobs] = useState<any[]>([]);
+  const [currentScoringJob, setCurrentScoringJob] = useState<any>(null);
+  const [scoringTimeRemaining, setScoringTimeRemaining] = useState<number>(0);
+  const [scoringProgress, setScoringProgress] = useState<number>(0);
 
   const triggerGetScoringJobs = async () => {
-    if (!userToken || !currentProject?.id) return
+    if (!userToken || !currentProject?.id) return;
 
-    const result = await getICPScoringJobs(userToken, currentProject?.id)
-    console.log('result', result)
+    const result = await getICPScoringJobs(userToken, currentProject?.id);
+    console.log('result', result);
 
-    const jobs = result?.data?.icp_runs
-    setIcpScoringJobs(jobs)
+    const jobs = result?.data?.icp_runs;
+    setIcpScoringJobs(jobs);
 
-    if (jobs.length > 0 && (jobs[0].run_status === 'IN_PROGRESS' || jobs[0].run_status === 'PENDING')) {
-      setCurrentScoringJob(jobs[0])
-      return jobs[0]
+    if (
+      jobs.length > 0 &&
+      (jobs[0].run_status === 'IN_PROGRESS' || jobs[0].run_status === 'PENDING')
+    ) {
+      setCurrentScoringJob(jobs[0]);
+      return jobs[0];
     }
 
-    setCurrentScoringJob(null)
+    setCurrentScoringJob(null);
     queryClient.refetchQueries({
       queryKey: [`query-get-icp-prospects`],
-    })
+    });
 
     setTimeout(() => {
-      dropConfetti(300)
-    }, 1000)
-  }
+      dropConfetti(300);
+    }, 1000);
+  };
 
   useEffect(() => {
-    triggerGetScoringJobs()
-  }, [])
+    triggerGetScoringJobs();
+  }, []);
 
   useQuery({
     queryKey: [`query-check-scoring-job-status`],
     queryFn: async () => {
-      const job = await triggerGetScoringJobs()
+      const job = await triggerGetScoringJobs();
       if (job) {
-        const numProspects = job.prospect_ids?.length
-        const estimatedSeconds = TIME_PER_PROSPECT * numProspects
+        const numProspects = job.prospect_ids?.length;
+        const estimatedSeconds = TIME_PER_PROSPECT * numProspects;
 
-        const now = new Date().getTime()
-        const startedAt = new Date(job.created_at).getTime()
-        let timeElapsedSeconds = (now - startedAt) / 1000
+        const now = new Date().getTime();
+        const startedAt = new Date(job.created_at).getTime();
+        let timeElapsedSeconds = (now - startedAt) / 1000;
 
-        const timeRemaining = Math.ceil((estimatedSeconds - timeElapsedSeconds) / 60)
-        setScoringTimeRemaining(timeRemaining)
+        const timeRemaining = Math.ceil((estimatedSeconds - timeElapsedSeconds) / 60);
+        setScoringTimeRemaining(timeRemaining);
 
-        let progress = 100 - ((estimatedSeconds - timeElapsedSeconds) / estimatedSeconds) * 100
-        setScoringProgress(Math.floor(Math.min(progress, 99)))
+        let progress = 100 - ((estimatedSeconds - timeElapsedSeconds) / estimatedSeconds) * 100;
+        setScoringProgress(Math.floor(Math.min(progress, 99)));
       }
-      return job ?? null
+      return job ?? null;
     },
     enabled: currentScoringJob !== null,
     refetchInterval: TRIGGER_REFRESH_INTERVAL,
-  })
+  });
 
   return (
     <>
@@ -147,15 +150,15 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
             loading={loading}
             color={isTesting ? 'blue' : 'red'}
             onClick={async () => {
-              if (!currentProject) return
-              setLoading(true)
-              console.log('updating rule set')
+              if (!currentProject) return;
+              setLoading(true);
+              console.log('updating rule set');
 
               showNotification({
                 title: 'Filtering prospects...',
                 message: 'Applying filters to prospects',
                 color: 'blue',
-              })
+              });
 
               const response = await updateICPRuleSet(
                 userToken,
@@ -185,41 +188,41 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
                 globalRuleSetData.excluded_individual_education_keywords,
                 globalRuleSetData.included_individual_seniority_keywords,
                 globalRuleSetData.excluded_individual_seniority_keywords
-              )
-              console.log('response', response)
-              console.log('running scoring')
+              );
+              console.log('response', response);
+              console.log('running scoring');
 
               await runScoringICP(
                 userToken,
                 currentProject.id,
                 isTesting ? icpProspects.map((prospect) => prospect.id) : undefined
-              )
-              console.log('refetching queries')
+              );
+              console.log('refetching queries');
 
-              setLoading(false)
+              setLoading(false);
 
               if (isTesting) {
                 showNotification({
                   title: 'Test sample has been scored!',
                   message: 'The test sample has been filtered',
                   color: 'green',
-                })
+                });
               } else {
                 showNotification({
                   title: 'Prospects are being scored...',
                   message: 'This may take a few minutes. Please check back and refresh page..',
                   color: 'blue',
-                })
+                });
               }
 
               triggerGetScoringJobs().then(() => {
                 if (isTesting) {
                   queryClient.refetchQueries({
                     queryKey: [`query-get-icp-prospects`],
-                  })
-                  dropConfetti(300)
+                  });
+                  dropConfetti(300);
                 }
-              })
+              });
             }}
           >
             {isTesting ? 'Filter test sample' : 'Start Filtering'}
@@ -243,7 +246,7 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
                   <Switch
                     size='xs'
                     onChange={(event) => {
-                      setIsTesting(event.currentTarget.checked)
+                      setIsTesting(event.currentTarget.checked);
                     }}
                   />
                   <IconQuestionCircle color='orange' size={20} />
@@ -258,12 +261,12 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
 
         <Flex align={'center'} gap={14} mt={'sm'} px={10}>
           <Text w={'fit-content'} style={{ display: 'flex', gap: '6px' }} color='gray'>
-            {currentScoringJob ? 'Complete:' : 'Scoring:'}{' '}
+            {currentScoringJob ? 'Complete:' : 'Prospects Scored:'}{' '}
             <span style={{ fontWeight: '600', color: 'black' }}>{scoringProgress}%</span>
           </Text>
           <Progress w={'100%'} value={scoringProgress} />
         </Flex>
       </Flex>
     </>
-  )
+  );
 }

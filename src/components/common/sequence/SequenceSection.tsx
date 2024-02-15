@@ -429,14 +429,12 @@ export default function SequenceSection() {
                   // bodyText={bf0?.description ?? ""}
                   footer={
                     <Center>
-                      {
-                        !bf0?.id && (
-                            <Text color='gray' size='md' align='center'>
-                              No framework selected
-                            </Text>
-                        )
-                      }
-                      <Group spacing={2} sx={{visibility: bf0?.id ? 'visible' : 'hidden'}}>
+                      {!bf0?.id && (
+                        <Text color='gray' size='md' align='center'>
+                          No framework selected
+                        </Text>
+                      )}
+                      <Group spacing={2} sx={{ visibility: bf0?.id ? 'visible' : 'hidden' }}>
                         <Text fz={14}>wait for</Text>
                         <NumberInput
                           defaultValue={bf0Delay.current}
@@ -508,14 +506,12 @@ export default function SequenceSection() {
                   // bodyText={bf1?.description ?? ""}
                   footer={
                     <Center>
-                      {
-                        !bf1?.id && (
-                            <Text color='gray' size='md' align='center'>
-                              No framework selected
-                            </Text>
-                        )
-                      }
-                      <Group spacing={2} sx={{visibility: bf1?.id ? 'visible' : 'hidden'}}>
+                      {!bf1?.id && (
+                        <Text color='gray' size='md' align='center'>
+                          No framework selected
+                        </Text>
+                      )}
+                      <Group spacing={2} sx={{ visibility: bf1?.id ? 'visible' : 'hidden' }}>
                         <Text fz={14}>wait for</Text>
                         <NumberInput
                           defaultValue={bf1Delay.current}
@@ -589,14 +585,12 @@ export default function SequenceSection() {
                   // bodyText={bf2?.description ?? ""}
                   footer={
                     <Center>
-                      {
-                        !bf2?.id && (
-                            <Text color='gray' size='md' align='center'>
-                              No framework selected
-                            </Text>
-                        )
-                      }
-                      <Group spacing={2} sx={{visibility: bf2?.id ? 'visible' : 'hidden'}}>
+                      {!bf2?.id && (
+                        <Text color='gray' size='md' align='center'>
+                          No framework selected
+                        </Text>
+                      )}
+                      <Group spacing={2} sx={{ visibility: bf2?.id ? 'visible' : 'hidden' }}>
                         <Text fz={14}>wait for</Text>
                         <NumberInput
                           defaultValue={bf2Delay.current}
@@ -1660,7 +1654,7 @@ function LiExampleInvitation(props: {
                   {endMessage}
                 </Text> */}
                 <TextWithNewline style={{ fontSize: '12px' }}>
-                  {`${startMessage}${endMessage}`}
+                  {`${startMessage} ${endMessage}`}
                 </TextWithNewline>
                 <Text
                   ml={5}
@@ -1707,7 +1701,7 @@ function LiExampleInvitation(props: {
                   {cutEndMessage}
                 </Text> */}
                 <TextWithNewline style={{ fontSize: '12px' }}>
-                  {`${cutStartMessage}${cutEndMessage}`}
+                  {`${cutStartMessage} ${cutEndMessage}`}
                 </TextWithNewline>
                 <Text
                   ml={5}

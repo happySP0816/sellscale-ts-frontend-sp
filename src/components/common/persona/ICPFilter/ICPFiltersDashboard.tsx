@@ -83,6 +83,7 @@ import { cl } from '@fullcalendar/core/internal-common';
 import ProspectDetailsTooltip from './ProspectDetailsTooltip';
 import CompanyTooltip from './CompanyTooltip';
 import CustomResearchPointCard from '../CustomResearchPointCard';
+import { getICPRuleSet } from '@utils/requests/icpScoring';
 
 const tabFilters = [
   {

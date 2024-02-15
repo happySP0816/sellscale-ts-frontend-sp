@@ -25,8 +25,8 @@ import {
   Loader,
   ThemeIcon,
   rem,
-} from "@mantine/core";
-import { openConfirmModal, openContextModal } from "@mantine/modals";
+} from '@mantine/core';
+import { openConfirmModal, openContextModal } from '@mantine/modals';
 import {
   IconBrain,
   IconBrandLinkedin,
@@ -35,41 +35,35 @@ import {
   IconPhoto,
   IconTestPipe,
   IconTrash,
-} from "@tabler/icons";
-import {
-  ComponentPropsWithoutRef,
-  forwardRef,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+} from '@tabler/icons';
+import { ComponentPropsWithoutRef, forwardRef, useEffect, useRef, useState } from 'react';
 
-import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
-import { Archetype, PersonaOverview, ProspectShallow } from "src";
+import { useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
+import { Archetype, PersonaOverview, ProspectShallow } from 'src';
 
-import getICPClassificationPrompt from "@utils/requests/getICPClassificationPrompt";
-import { getArchetypeProspects } from "@utils/requests/getArchetypeProspects";
-import postRunICPClassification from "@utils/requests/postRunICPClassification";
-import { getRandomItems, valueToColor } from "@utils/general";
-import { getICPOneProspect } from "@utils/requests/getICPOneProspect";
-import { showNotification } from "@mantine/notifications";
-import { useDebouncedState } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
-import { getProspects } from "@utils/requests/getProspects";
-import _, { set } from "lodash";
+import getICPClassificationPrompt from '@utils/requests/getICPClassificationPrompt';
+import { getArchetypeProspects } from '@utils/requests/getArchetypeProspects';
+import postRunICPClassification from '@utils/requests/postRunICPClassification';
+import { getRandomItems, valueToColor } from '@utils/general';
+import { getICPOneProspect } from '@utils/requests/getICPOneProspect';
+import { showNotification } from '@mantine/notifications';
+import { useDebouncedState } from '@mantine/hooks';
+import { useQuery } from '@tanstack/react-query';
+import { getProspects } from '@utils/requests/getProspects';
+import _, { set } from 'lodash';
 import ICPFitPill, {
   ICPFitPillOnly,
   getIcpFitScoreMap,
   getScoreFromLabel,
   icpFitToLabel,
-} from "@common/pipeline/ICPFitAndReason";
-import { updateProspect } from "@utils/requests/updateProspect";
-import { getProspectsForICP } from "@utils/requests/getProspectsForICP";
-import postICPClassificationPromptChange from "@utils/requests/postICPClassificationPromptChange";
-import { IconPointFilled } from "@tabler/icons-react";
+} from '@common/pipeline/ICPFitAndReason';
+import { updateProspect } from '@utils/requests/updateProspect';
+import { getProspectsForICP } from '@utils/requests/getProspectsForICP';
+import postICPClassificationPromptChange from '@utils/requests/postICPClassificationPromptChange';
+import { IconPointFilled } from '@tabler/icons-react';
 
-interface LabelItemProps extends React.ComponentPropsWithoutRef<"div"> {
+interface LabelItemProps extends React.ComponentPropsWithoutRef<'div'> {
   icp_fit: number;
 }
 
@@ -81,7 +75,7 @@ const LabelSelectItem = forwardRef<HTMLDivElement, LabelItemProps>(
   )
 );
 
-interface ProspectItemProps extends ComponentPropsWithoutRef<"div"> {
+interface ProspectItemProps extends ComponentPropsWithoutRef<'div'> {
   label: string;
   icpFit: number;
   title: string;
@@ -104,6 +98,7 @@ export type ProspectICP = {
   icp_fit_score_override: string;
   in_icp_sample: string | false;
   icp_fit_reason: string;
+  icp_fit_last_hash: string;
 };
 
 export default function Pulse(props: { personaOverview: PersonaOverview }) {
@@ -112,14 +107,12 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
 
   const firstLoad = useRef(true);
   const [loading, setLoading] = useState(false);
-  const [currentICPPrompt, setCurrentICPPrompt] = useState("");
+  const [currentICPPrompt, setCurrentICPPrompt] = useState('');
   const [currentICPFilters, setCurrentICPFilters] = useState<any>();
-  const [testSearchValue, setTestSearchValue] = useDebouncedState("", 300);
+  const [testSearchValue, setTestSearchValue] = useDebouncedState('', 300);
 
   const [sampleProspects, setSampleProspects] = useState<ProspectICP[]>([]);
-  const [overrideMap, setOverrideMap] = useState<Map<number, string>>(
-    new Map()
-  );
+  const [overrideMap, setOverrideMap] = useState<Map<number, string>>(new Map());
 
   const [testingPrompt, setTestingPrompt] = useState(false);
 
@@ -130,11 +123,8 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   } = useQuery({
     queryKey: [`query-isp-fit-prospects`],
     queryFn: async () => {
-      const response = await getProspectsForICP(
-        userToken,
-        props.personaOverview.id
-      );
-      if (response.status === "error") {
+      const response = await getProspectsForICP(userToken, props.personaOverview.id);
+      if (response.status === 'error') {
         return [];
       }
 
@@ -150,11 +140,10 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
           [
             ...prev,
             ...all_prospects.filter(
-              (prospect) =>
-                prospect.in_icp_sample && prospect.in_icp_sample.startsWith("t")
+              (prospect) => prospect.in_icp_sample && prospect.in_icp_sample.startsWith('t')
             ),
           ],
-          "id"
+          'id'
         );
       });
 
@@ -169,15 +158,15 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   const ProspectSelectItem = forwardRef<HTMLDivElement, ProspectItemProps>(
     ({ label, icpFit, reason, title, company, ...others }: ProspectItemProps, ref) => (
       <div ref={ref} {...others}>
-        <Flex justify={"space-between"}>
+        <Flex justify={'space-between'}>
           <Text>{label}</Text>
           {icpFit ? (
             <ICPFitPill icp_fit_score={icpFit} icp_fit_reason={reason} />
           ) : (
-            <Badge color={valueToColor(theme, "NONE")}>NONE</Badge>
+            <Badge color={valueToColor(theme, 'NONE')}>NONE</Badge>
           )}
         </Flex>
-        <Text fz="xs">
+        <Text fz='xs'>
           {title} @ {company}
         </Text>
       </div>
@@ -185,18 +174,15 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
   );
 
   const triggerGetICPClassificationPrompt = async () => {
-    const result = await getICPClassificationPrompt(
-      userToken,
-      props.personaOverview.id
-    );
+    const result = await getICPClassificationPrompt(userToken, props.personaOverview.id);
 
     console.log(result);
 
-    if (result.status === "success") {
+    if (result.status === 'success') {
       setCurrentICPPrompt(result.data.prompt);
       setCurrentICPFilters(result.data.filters);
     } else {
-      setCurrentICPPrompt("");
+      setCurrentICPPrompt('');
     }
   };
 
@@ -238,39 +224,35 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
 
   const openRunAllModal = () =>
     openConfirmModal({
-      title: "Run AI Filter on All Prospects",
+      title: 'Run AI Filter on All Prospects',
       children: (
-        <Text size="sm">
-          Are you sure you want to run the pulse prompt on all prospects? This
-          may take a while and will cost you credits.
+        <Text size='sm'>
+          Are you sure you want to run the pulse prompt on all prospects? This may take a while and
+          will cost you credits.
         </Text>
       ),
-      labels: { confirm: "Confirm", cancel: "Cancel" },
+      labels: { confirm: 'Confirm', cancel: 'Cancel' },
       onCancel: () => {},
       onConfirm: () => triggerPostRunICPClassification(),
     });
 
   const triggerPostRunICPClassification = async () => {
-    const result = await postRunICPClassification(
-      userToken,
-      props.personaOverview.id
-    );
+    const result = await postRunICPClassification(userToken, props.personaOverview.id);
 
-    if (result.status === "success") {
+    if (result.status === 'success') {
       showNotification({
-        title: "Success",
+        title: 'Success',
         message:
-          "Successfully ran pulse prompt on all prospects. Check the updated fit and reason in a few minutes.",
-        color: "teal",
+          'Successfully ran pulse prompt on all prospects. Check the updated fit and reason in a few minutes.',
+        color: 'teal',
         autoClose: 3000,
       });
       refetch();
     } else {
       showNotification({
-        title: "Error",
-        message:
-          "Failed to run pulse prompt on prospects. Please try again or contact support.",
-        color: "red",
+        title: 'Error',
+        message: 'Failed to run pulse prompt on prospects. Please try again or contact support.',
+        color: 'red',
         autoClose: 3000,
       });
     }
@@ -296,14 +278,12 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
         checked++;
       }
     }
-    return checked === 0
-      ? "Unknown"
-      : Math.round((correct / checked) * 100) + "%";
+    return checked === 0 ? 'Unknown' : Math.round((correct / checked) * 100) + '%';
   };
 
   const getFitLabel = (prospect: ProspectICP) => {
     if (overrideMap.has(+prospect.id)) {
-      return overrideMap.get(+prospect.id) + "";
+      return overrideMap.get(+prospect.id) + '';
     }
     if (prospect.icp_fit_score_override) {
       return icpFitToLabel(+prospect.icp_fit_score_override);
@@ -315,44 +295,38 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
     const randomProspects = getRandomItems(prospects || [], amount);
     for (const prospect of randomProspects) {
       setSampleProspects((prev) => {
-        return _.uniqBy([...prev, prospect], "id");
+        return _.uniqBy([...prev, prospect], 'id');
       });
-      const response = await updateProspect(
-        userToken,
-        +prospect.id,
-        undefined,
-        true,
-        undefined
-      );
+      const response = await updateProspect(userToken, +prospect.id, undefined, true, undefined);
     }
   };
 
   return (
-    <Paper withBorder p="xs" my={20} radius="md">
+    <Paper withBorder p='xs' my={20} radius='md'>
       <Flex>
-        <Flex w="50%" direction="column" mr="xs">
+        <Flex w='50%' direction='column' mr='xs'>
           <Textarea
             defaultValue={currentICPPrompt}
-            placeholder="No prompt? Send SellScale a prompt request through here."
-            label="Describe your ideal customer profile (ICP)"
-            description={""}
+            placeholder='No prompt? Send SellScale a prompt request through here.'
+            label='Describe your ideal customer profile (ICP)'
+            description={''}
             minRows={4}
             autosize
             disabled
           />
           <Button
-            mt="xs"
-            rightIcon={<IconEdit size="1rem" />}
-            variant="outline"
-            radius="lg"
-            color="teal"
+            mt='xs'
+            rightIcon={<IconEdit size='1rem' />}
+            variant='outline'
+            radius='lg'
+            color='teal'
             onClick={() => {
               currentICPPrompt
                 ? openContextModal({
-                    modal: "managePulsePrompt",
+                    modal: 'managePulsePrompt',
                     title: <Title order={3}>Edit AI Filter</Title>,
                     innerProps: {
-                      mode: "EDIT",
+                      mode: 'EDIT',
                       personaOverview: props.personaOverview,
                       backfillICPPrompt: triggerGetICPClassificationPrompt,
                       icpPrompt: currentICPPrompt,
@@ -360,10 +334,10 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                     },
                   })
                 : openContextModal({
-                    modal: "managePulsePrompt",
+                    modal: 'managePulsePrompt',
                     title: <Title order={3}>Create AI Filter</Title>,
                     innerProps: {
-                      mode: "CREATE",
+                      mode: 'CREATE',
                       personaOverview: props.personaOverview,
                       backfillICPPrompt: triggerGetICPClassificationPrompt,
                       icpPrompt: currentICPPrompt,
@@ -371,60 +345,48 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                   });
             }}
           >
-            {currentICPPrompt ? "Edit AI Filter" : "Create New AI Filter"}
+            {currentICPPrompt ? 'Edit AI Filter' : 'Create New AI Filter'}
           </Button>
         </Flex>
-        <Flex w="50%">
-          <Paper withBorder p="xs" w="100%" sx={{ position: "relative" }}>
+        <Flex w='50%'>
+          <Paper withBorder p='xs' w='100%' sx={{ position: 'relative' }}>
             <LoadingOverlay visible={isFetching && firstLoad.current} />
-            <Tabs defaultValue="test" color="teal" h={"100%"}>
+            <Tabs defaultValue='test' color='teal' h={'100%'}>
               <Tabs.List>
-                <Tabs.Tab value="test" icon={<IconTestPipe size="0.8rem" />}>
+                <Tabs.Tab value='test' icon={<IconTestPipe size='0.8rem' />}>
                   Test & Polish
                 </Tabs.Tab>
-                <Tabs.Tab value="run" icon={<IconBrain size="0.8rem" />}>
+                <Tabs.Tab value='run' icon={<IconBrain size='0.8rem' />}>
                   Run for All
                 </Tabs.Tab>
               </Tabs.List>
 
-              <Tabs.Panel value="test" pt="xs" h={"100%"}>
-                <Group
-                  noWrap
-                  position="apart"
-                  sx={{ flexDirection: "column" }}
-                  h={"90%"}
-                >
+              <Tabs.Panel value='test' pt='xs' h={'100%'}>
+                <Group noWrap position='apart' sx={{ flexDirection: 'column' }} h={'90%'}>
                   <Box>
-                    <Text fz="sm">
-                      Test your pulse prompt on a few prospects to see how well
-                      it does.
+                    <Text fz='sm'>
+                      Test your pulse prompt on a few prospects to see how well it does.
                     </Text>
 
                     <Group grow>
                       <Select
-                        mt="md"
-                        label="Select a prospect"
-                        placeholder="Add to sample set"
+                        mt='md'
+                        label='Select a prospect'
+                        placeholder='Add to sample set'
                         itemComponent={ProspectSelectItem}
                         searchable
                         onSearchChange={(value) => {
                           setTestSearchValue(value);
                         }}
                         clearable
-                        nothingFound={
-                          loading
-                            ? "Grabbing prospects..."
-                            : "No prospects found"
-                        }
-                        value={"-1"}
+                        nothingFound={loading ? 'Grabbing prospects...' : 'No prospects found'}
+                        value={'-1'}
                         data={
                           prospects
-                            ?.filter(
-                              (prospect) => !sampleProspects.includes(prospect)
-                            )
+                            ?.filter((prospect) => !sampleProspects.includes(prospect))
                             .map((prospect) => {
                               return {
-                                value: prospect.id + "",
+                                value: prospect.id + '',
                                 label: prospect.full_name,
                                 icpFit: prospect.icp_fit_score,
                                 reason: prospect.icp_fit_reason,
@@ -439,7 +401,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                           );
                           if (foundProspect) {
                             setSampleProspects((prev) => {
-                              return _.uniqBy([...prev, foundProspect], "id");
+                              return _.uniqBy([...prev, foundProspect], 'id');
                             });
                             const response = await updateProspect(
                               userToken,
@@ -453,7 +415,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                       />
                       <Button
                         mt={40}
-                        size="xs"
+                        size='xs'
                         onClick={async () => {
                           await selectRandomProspects(10);
                         }}
@@ -465,20 +427,20 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                     <Box>
                       <Grid>
                         <Grid.Col span={1}>
-                          <Text fz="xs" c="dimmed"></Text>
+                          <Text fz='xs' c='dimmed'></Text>
                         </Grid.Col>
                         <Grid.Col span={6}>
-                          <Text fz="xs" c="dimmed">
+                          <Text fz='xs' c='dimmed'>
                             Prospect
                           </Text>
                         </Grid.Col>
                         <Grid.Col span={2}>
-                          <Text fz="xs" c="dimmed">
+                          <Text fz='xs' c='dimmed'>
                             AI Label
                           </Text>
                         </Grid.Col>
                         <Grid.Col span={3}>
-                          <Text fz="xs" c="dimmed">
+                          <Text fz='xs' c='dimmed'>
                             Manual Label
                           </Text>
                         </Grid.Col>
@@ -487,12 +449,10 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
 
                     {sampleProspects
                       .sort((a, b) =>
-                        parseInt(a.icp_fit_score) > parseInt(b.icp_fit_score)
-                          ? -1
-                          : 1
+                        parseInt(a.icp_fit_score) > parseInt(b.icp_fit_score) ? -1 : 1
                       )
                       .map((prospect, index) => (
-                        <Box key={index} m={5} sx={{ position: "relative" }}>
+                        <Box key={index} m={5} sx={{ position: 'relative' }}>
                           <Divider m={5} />
 
                           <Grid>
@@ -501,9 +461,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                                 <ActionIcon
                                   onClick={async () => {
                                     setSampleProspects((prev) => {
-                                      return prev.filter(
-                                        (p) => p.id !== prospect.id
-                                      );
+                                      return prev.filter((p) => p.id !== prospect.id);
                                     });
                                     const response = await updateProspect(
                                       userToken,
@@ -514,14 +472,9 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                                     );
                                   }}
                                 >
-                                  <IconTrash size="0.9rem" />
+                                  <IconTrash size='0.9rem' />
                                 </ActionIcon>
-                                <ThemeIcon
-                                  variant="outline"
-                                  color="red"
-                                  size={5}
-                                  radius={10}
-                                >
+                                <ThemeIcon variant='outline' color='red' size={5} radius={10}>
                                   <IconPointFilled size={rem(14)} />
                                 </ThemeIcon>
                               </Group>
@@ -539,22 +492,17 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
                               <Select
                                 itemComponent={LabelSelectItem}
                                 value={getFitLabel(prospect)}
-                                data={[...getIcpFitScoreMap(true).values()].map(
-                                  (icp) => {
-                                    return {
-                                      value: icp,
-                                      label: icp,
-                                      icp_fit: getScoreFromLabel(icp),
-                                    };
-                                  }
-                                )}
+                                data={[...getIcpFitScoreMap(true).values()].map((icp) => {
+                                  return {
+                                    value: icp,
+                                    label: icp,
+                                    icp_fit: getScoreFromLabel(icp),
+                                  };
+                                })}
                                 onChange={async (value) => {
                                   if (!value) return;
                                   setOverrideMap((prev) => {
-                                    return new Map(prev).set(
-                                      +prospect.id,
-                                      value
-                                    );
+                                    return new Map(prev).set(+prospect.id, value);
                                   });
                                   const response = await updateProspect(
                                     userToken,
@@ -594,72 +542,66 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
 
                   <Group>
                     <Button
-                      variant="light"
-                      color="teal"
-                      radius="md"
+                      variant='light'
+                      color='teal'
+                      radius='md'
                       onClick={async () => {
                         // Reclassify all sample prospects
                         for (const prospect of sampleProspects) {
-                          getICPOneProspect(
-                            userToken,
-                            props.personaOverview.id,
-                            +prospect.id
-                          );
+                          getICPOneProspect(userToken, props.personaOverview.id, +prospect.id);
                         }
 
                         // Show notification
                         showNotification({
-                          title: "Classifying Sample Prospects...",
-                          message: "Please coming back in a few minutes.",
-                          color: "green",
+                          title: 'Classifying Sample Prospects...',
+                          message: 'Please coming back in a few minutes.',
+                          color: 'green',
                         });
                       }}
                     >
                       Reclassify Sample Prospects
                     </Button>
-                    <Text fz="sm" c="dimmed">
+                    <Text fz='sm' c='dimmed'>
                       {getScorePercentage()} Score
                     </Text>
                   </Group>
                 </Group>
               </Tabs.Panel>
 
-              <Tabs.Panel value="run" pt="xs">
-                <Text fz="lg" fw="bold" mt="xs">
+              <Tabs.Panel value='run' pt='xs'>
+                <Text fz='lg' fw='bold' mt='xs'>
                   Run Pulse
                 </Text>
-                <Text fz="sm">Run your pulse prompt on all prospects.</Text>
+                <Text fz='sm'>Run your pulse prompt on all prospects.</Text>
                 {prospects && (
                   <>
-                    <Card mt="md">
-                      <Text fz="md">
-                        This is a costly operation and will take a while to
-                        complete!
+                    <Card mt='md'>
+                      <Text fz='md'>
+                        This is a costly operation and will take a while to complete!
                       </Text>
-                      <Flex mt="md">
-                        <Text fw="bold">Number of Prospects:</Text>
-                        <Text ml="xs">{prospects.length}</Text>
+                      <Flex mt='md'>
+                        <Text fw='bold'>Number of Prospects:</Text>
+                        <Text ml='xs'>{prospects.length}</Text>
                       </Flex>
                       <Flex>
-                        <Text fw="bold">Estimated Time:</Text>
-                        <Text ml="xs">
-                          {((prospects.length * 0.3) / 60).toPrecision(1)}{" "}
-                          minutes
+                        <Text fw='bold'>Estimated Time:</Text>
+                        <Text ml='xs'>
+                          {((prospects.length * 0.3) / 60).toPrecision(1)} minutes
                         </Text>
                       </Flex>
                       <Flex>
-                        <Text fw="bold">Estimated Cost:</Text>
-                        <Text ml="xs">{prospects.length} credits</Text>
+                        <Text fw='bold'>Estimated Cost:</Text>
+                        <Text ml='xs'>{prospects.length} credits</Text>
                       </Flex>
                     </Card>
-                    <Flex justify={"flex-end"}>
+                    <Flex justify={'flex-end'}>
                       <Button
-                        variant="light"
-                        color="teal"
-                        radius="md"
-                        mt="md"
+                        variant='light'
+                        color='teal'
+                        radius='md'
+                        mt='md'
                         loading={testingPrompt}
-                        disabled={currentICPPrompt === ""}
+                        disabled={currentICPPrompt === ''}
                         onClick={openRunAllModal}
                       >
                         Run Pulse
@@ -671,10 +613,7 @@ export default function Pulse(props: { personaOverview: PersonaOverview }) {
             </Tabs>
 
             {isFetching && !firstLoad.current && (
-              <Loader
-                variant="dots"
-                sx={{ position: "absolute", right: 15, bottom: 20 }}
-              />
+              <Loader variant='dots' sx={{ position: 'absolute', right: 15, bottom: 20 }} />
             )}
           </Paper>
         </Flex>
@@ -690,27 +629,23 @@ export function ProspectOverview(props: { prospect: ProspectShallow }) {
 
   return (
     <>
-      <Card mt="md">
-        <Text fz="lg" fw="bold">
+      <Card mt='md'>
+        <Text fz='lg' fw='bold'>
           {selectedProspect.full_name}
         </Text>
-        <Text fz="sm">
+        <Text fz='sm'>
           {selectedProspect.title} @ {selectedProspect.company}
         </Text>
 
         {selectedProspect.li_public_id && (
           <Group noWrap spacing={10} mt={5}>
-            <IconBrandLinkedin
-              stroke={1.5}
-              size={16}
-              className={classes.icon}
-            />
+            <IconBrandLinkedin stroke={1.5} size={16} className={classes.icon} />
             <Text
-              size="xs"
-              color="dimmed"
-              component="a"
-              target="_blank"
-              rel="noopener noreferrer"
+              size='xs'
+              color='dimmed'
+              component='a'
+              target='_blank'
+              rel='noopener noreferrer'
               href={`https://www.linkedin.com/in/${selectedProspect.li_public_id}`}
             >
               linkedin.com/in/{selectedProspect.li_public_id}
@@ -718,14 +653,14 @@ export function ProspectOverview(props: { prospect: ProspectShallow }) {
           </Group>
         )}
 
-        <Flex mt="md">
-          <Text fz="sm" fw="bold" mr="xs">
+        <Flex mt='md'>
+          <Text fz='sm' fw='bold' mr='xs'>
             Fit:
           </Text>
           {selectedProspect.icp_fit_score ? (
             <ICPFitPillOnly icp_fit_score={selectedProspect.icp_fit_score} />
           ) : (
-            <Badge color={valueToColor(theme, "NONE")}>None</Badge>
+            <Badge color={valueToColor(theme, 'NONE')}>None</Badge>
           )}
           {/* <Badge
                           color={valueToColor(theme, icpFitScoreMap.get(selectedProspect.icp_fit_score.toString()) || 'NONE')}
@@ -734,11 +669,11 @@ export function ProspectOverview(props: { prospect: ProspectShallow }) {
                         </Badge> */}
         </Flex>
 
-        <Flex mt="md">
-          <Text fz="sm" fw="bold" mr="xs">
+        <Flex mt='md'>
+          <Text fz='sm' fw='bold' mr='xs'>
             Reason:
           </Text>
-          <Text fz="sm">{selectedProspect.icp_fit_reason || "None"}</Text>
+          <Text fz='sm'>{selectedProspect.icp_fit_reason || 'None'}</Text>
         </Flex>
       </Card>
     </>

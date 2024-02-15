@@ -25,11 +25,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { filterProspectsState, filterRuleSetState } from '@atoms/icpFilterAtoms';
-import { runScoringICP, updateICPRuleSet } from '@utils/requests/icpScoring';
+import { getICPRuleSet, runScoringICP, updateICPRuleSet } from '@utils/requests/icpScoring';
 import { userTokenState } from '@atoms/userAtoms';
 import { showNotification } from '@mantine/notifications';
 import { getICPScoringJobs } from '@utils/requests/getICPScoringJobs';
 import { navConfettiState } from '@atoms/navAtoms';
+import { getProspectsForICP } from '@utils/requests/getProspects';
+import { ProspectICP } from '../Pulse';
+import { set } from 'lodash';
 
 type Props = {
   sideBarVisible: boolean;
@@ -49,70 +52,89 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
   const userToken = useRecoilValue(userTokenState);
   const [_confetti, dropConfetti] = useRecoilState(navConfettiState);
 
-  const [loading, setLoading] = useState(false);
   const currentProject = useRecoilValue(currentProjectState);
   const globalRuleSetData = useRecoilValue(filterRuleSetState);
   const icpProspects = useRecoilValue(filterProspectsState);
 
-  const TRIGGER_REFRESH_INTERVAL = 10000; // 10000 ms = 10 seconds
+  const TRIGGER_REFRESH_INTERVAL = 1000; // = 1 seconds
   const TIME_PER_PROSPECT = 0.1; // 0.1 seconds
   const [icpScoringJobs, setIcpScoringJobs] = useState<any[]>([]);
   const [currentScoringJob, setCurrentScoringJob] = useState<any>(null);
   const [scoringTimeRemaining, setScoringTimeRemaining] = useState<number>(0);
   const [scoringProgress, setScoringProgress] = useState<number>(0);
 
-  const triggerGetScoringJobs = async () => {
-    if (!userToken || !currentProject?.id) return;
+  const [scoring, setScoring] = useState(false);
 
-    const result = await getICPScoringJobs(userToken, currentProject?.id);
-    console.log('result', result);
+  // const triggerGetScoringJobs = async () => {
+  //   if (!userToken || !currentProject?.id) return;
 
-    const jobs = result?.data?.icp_runs;
-    setIcpScoringJobs(jobs);
+  //   const result = await getICPScoringJobs(userToken, currentProject?.id);
+  //   console.log('result', result);
 
-    if (
-      jobs.length > 0 &&
-      (jobs[0].run_status === 'IN_PROGRESS' || jobs[0].run_status === 'PENDING')
-    ) {
-      setCurrentScoringJob(jobs[0]);
-      return jobs[0];
-    }
+  //   const jobs = result?.data?.icp_runs;
+  //   setIcpScoringJobs(jobs);
 
-    setCurrentScoringJob(null);
-    queryClient.refetchQueries({
-      queryKey: [`query-get-icp-prospects`],
-    });
+  //   if (
+  //     jobs.length > 0 &&
+  //     (jobs[0].run_status === 'IN_PROGRESS' || jobs[0].run_status === 'PENDING')
+  //   ) {
+  //     setCurrentScoringJob(jobs[0]);
+  //     return jobs[0];
+  //   }
 
-    setTimeout(() => {
-      dropConfetti(300);
-    }, 1000);
-  };
+  //   setCurrentScoringJob(null);
+  //   queryClient.refetchQueries({
+  //     queryKey: [`query-get-icp-prospects`],
+  //   });
 
-  useEffect(() => {
-    triggerGetScoringJobs();
-  }, []);
+  //   setTimeout(() => {
+  //     dropConfetti(300);
+  //   }, 1000);
+  // };
 
-  useQuery({
+  // useEffect(() => {
+  //   triggerGetScoringJobs();
+  // }, []);
+
+  const { data } = useQuery({
     queryKey: [`query-check-scoring-job-status`],
     queryFn: async () => {
-      const job = await triggerGetScoringJobs();
-      if (job) {
-        const numProspects = job.prospect_ids?.length;
-        const estimatedSeconds = TIME_PER_PROSPECT * numProspects;
+      // const job = await triggerGetScoringJobs();
+      // if (job) {
+      //   const numProspects = job.prospect_ids?.length;
+      //   const estimatedSeconds = TIME_PER_PROSPECT * numProspects;
 
-        const now = new Date().getTime();
-        const startedAt = new Date(job.created_at).getTime();
-        let timeElapsedSeconds = (now - startedAt) / 1000;
+      //   const now = new Date().getTime();
+      //   const startedAt = new Date(job.created_at).getTime();
+      //   let timeElapsedSeconds = (now - startedAt) / 1000;
 
-        const timeRemaining = Math.ceil((estimatedSeconds - timeElapsedSeconds) / 60);
-        setScoringTimeRemaining(timeRemaining);
+      //   const timeRemaining = Math.ceil((estimatedSeconds - timeElapsedSeconds) / 60);
+      //   setScoringTimeRemaining(timeRemaining);
 
-        let progress = 100 - ((estimatedSeconds - timeElapsedSeconds) / estimatedSeconds) * 100;
-        setScoringProgress(Math.floor(Math.min(progress, 99)));
+      //   let progress = 100 - ((estimatedSeconds - timeElapsedSeconds) / estimatedSeconds) * 100;
+      //   setScoringProgress(Math.floor(Math.min(progress, 99)));
+      // }
+      // return job ?? null;
+
+      const result = await getProspectsForICP(userToken, currentProject!.id, isTesting, false);
+      const prospects =
+        result.status === 'success' ? (result.data.prospects as ProspectICP[]) : null;
+      if (!prospects) return null;
+
+      const resRules = await getICPRuleSet(userToken, currentProject!.id);
+      const rules = resRules.status === 'success' ? resRules.data : null;
+
+      const scoredProspects = prospects.filter((prospect) => {
+        return rules.hash === prospect.icp_fit_last_hash;
+      });
+
+      setScoringProgress((scoredProspects.length / prospects.length) * 100);
+
+      if (scoredProspects.length / prospects.length === 1) {
+        setScoring(false);
       }
-      return job ?? null;
     },
-    enabled: currentScoringJob !== null,
+    enabled: scoring,
     refetchInterval: TRIGGER_REFRESH_INTERVAL,
   });
 
@@ -147,11 +169,10 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
             radius={'md'}
             mt={'-0.4rem'}
             fullWidth
-            loading={loading}
+            loading={scoring}
             color={isTesting ? 'blue' : 'red'}
             onClick={async () => {
               if (!currentProject) return;
-              setLoading(true);
               console.log('updating rule set');
 
               showNotification({
@@ -192,37 +213,38 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
               console.log('response', response);
               console.log('running scoring');
 
-              await runScoringICP(
+              runScoringICP(
                 userToken,
                 currentProject.id,
                 isTesting ? icpProspects.map((prospect) => prospect.id) : undefined
               );
-              console.log('refetching queries');
 
-              setLoading(false);
+              setScoring(true);
 
-              if (isTesting) {
-                showNotification({
-                  title: 'Test sample has been scored!',
-                  message: 'The test sample has been filtered',
-                  color: 'green',
-                });
-              } else {
-                showNotification({
-                  title: 'Prospects are being scored...',
-                  message: 'This may take a few minutes. Please check back and refresh page..',
-                  color: 'blue',
-                });
-              }
+              // console.log('refetching queries');
 
-              triggerGetScoringJobs().then(() => {
-                if (isTesting) {
-                  queryClient.refetchQueries({
-                    queryKey: [`query-get-icp-prospects`],
-                  });
-                  dropConfetti(300);
-                }
-              });
+              // if (isTesting) {
+              //   showNotification({
+              //     title: 'Test sample has been scored!',
+              //     message: 'The test sample has been filtered',
+              //     color: 'green',
+              //   });
+              // } else {
+              //   showNotification({
+              //     title: 'Prospects are being scored...',
+              //     message: 'This may take a few minutes. Please check back and refresh page..',
+              //     color: 'blue',
+              //   });
+              // }
+
+              // triggerGetScoringJobs().then(() => {
+              //   if (isTesting) {
+              //     queryClient.refetchQueries({
+              //       queryKey: [`query-get-icp-prospects`],
+              //     });
+              //     dropConfetti(300);
+              //   }
+              // });
             }}
           >
             {isTesting ? 'Filter test sample' : 'Start Filtering'}
@@ -261,7 +283,7 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
 
         <Flex align={'center'} gap={14} mt={'sm'} px={10}>
           <Text w={'fit-content'} style={{ display: 'flex', gap: '6px' }} color='gray'>
-            {currentScoringJob ? 'Complete:' : 'Prospects Scored:'}{' '}
+            {currentScoringJob ? 'Complete:' : 'Scored:'}{' '}
             <span style={{ fontWeight: '600', color: 'black' }}>{scoringProgress}%</span>
           </Text>
           <Progress w={'100%'} value={scoringProgress} />

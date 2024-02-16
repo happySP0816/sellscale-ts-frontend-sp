@@ -25,6 +25,7 @@ import { showNotification } from "@mantine/notifications";
 import { openConfirmModal } from "@mantine/modals";
 import ComingSoonCard from '@common/library/ComingSoonCard';
 import AssetLibrary from './AssetLibrary';
+import AssetLibraryRetool from './AssetLibraryRetool';
 
 export default function ChannelSetupPage() {
   const { channelType, tabId } = useLoaderData() as {
@@ -312,7 +313,7 @@ export default function ChannelSetupPage() {
               <ICPFilters hideTitleBar />
             </Tabs.Panel>
             <Tabs.Panel value="assets">
-              <AssetLibrary />
+              <AssetLibraryRetool />
             </Tabs.Panel>
             <Tabs.Panel value="linkedin">
               <Box

@@ -131,6 +131,10 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
       setScoringProgress((scoredProspects.length / prospects.length) * 100);
 
       if (scoredProspects.length / prospects.length === 1) {
+        queryClient.refetchQueries({
+          queryKey: [`query-get-icp-prospects`],
+        });
+        dropConfetti(300);
         setScoring(false);
       }
     },
@@ -284,7 +288,9 @@ export function SidebarHeader({ toggleSideBar, sideBarVisible, isTesting, setIsT
         <Flex align={'center'} gap={14} mt={'sm'} px={10}>
           <Text w={'fit-content'} style={{ display: 'flex', gap: '6px' }} color='gray'>
             {currentScoringJob ? 'Complete:' : 'Scored:'}{' '}
-            <span style={{ fontWeight: '600', color: 'black' }}>{scoringProgress}%</span>
+            <span style={{ fontWeight: '600', color: 'black' }}>
+              {Math.round(scoringProgress)}%
+            </span>
           </Text>
           <Progress w={'100%'} value={scoringProgress} />
         </Flex>

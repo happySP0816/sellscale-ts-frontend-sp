@@ -38,6 +38,7 @@
     "@mantine/hooks": "^6.0.10",
     "@mantine/modals": "^6.0.10",
     "@mantine/notifications": "^6.0.10",
+    "@mantine/prism": "^6.0.21",
     "@mantine/spotlight": "^6.0.10",
     "@mantine/tiptap": "^6.0.10",
     "@mergeapi/react-merge-link": "^2.1.2",

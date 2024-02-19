@@ -149,11 +149,6 @@ export default function SettingsPage() {
         })}
       >
         <Tabs.List h={"fit-content"}>
-          <Tabs.Tab value="usage" icon={<IconSausage size="0.8rem" />}>
-            Usage
-          </Tabs.Tab>
-
-          <Divider />
           <Title
             color={
               ["brain", "automation", "filters"].includes(
@@ -199,15 +194,18 @@ export default function SettingsPage() {
           >
             ANALYTICS
           </Title>
-          <Tabs.Tab
-            value="pipeline"
-            icon={<IconAdjustmentsFilled size="0.8rem" />}
-          >
-            Pipeline
-          </Tabs.Tab>
-          <Tabs.Tab value="conversion" icon={<IconTrophy size="0.8rem" />}>
-            Conversion
-          </Tabs.Tab>
+            <Tabs.Tab value="usage" icon={<IconSausage size="0.8rem" />}>
+              Usage
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="pipeline"
+              icon={<IconAdjustmentsFilled size="0.8rem" />}
+            >
+              Pipeline
+            </Tabs.Tab>
+            <Tabs.Tab value="conversion" icon={<IconTrophy size="0.8rem" />}>
+              Conversion
+            </Tabs.Tab>
 
           <Divider />
           <Title

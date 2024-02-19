@@ -18,10 +18,12 @@ import {
   IconBrandSlack,
   IconCalendar,
   IconCloud,
+  IconFishHook,
   IconInbox,
   IconRefresh,
   IconSausage,
   IconTrophy,
+  IconWebhook,
 } from "@tabler/icons";
 import PageTitle from "@nav/PageTitle";
 import { useQuery } from "@tanstack/react-query";
@@ -50,6 +52,7 @@ import exchangeSlackAuthCode from "@utils/requests/exchangeSlackAuthCode";
 import ComingSoonCard from "@common/library/ComingSoonCard";
 import CRMConnectionPage from "./CRMConnectionPage";
 import ContactRecycling from '@common/settings/ContactRecycling';
+import WebhookConnectionPage from './WebhookConnectionPage';
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -245,6 +248,9 @@ export default function SettingsPage() {
           <Tabs.Tab value="crm" icon={<IconCloud size="0.8rem" />}>
             CRM Connection
           </Tabs.Tab>
+          <Tabs.Tab value="webhooks" icon={<IconWebhook size="0.8rem" />}>
+            Webhook Connection
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="linkedin" pl="xs" w="60%">
@@ -274,6 +280,10 @@ export default function SettingsPage() {
         </Tabs.Panel>
         <Tabs.Panel value='contactRecycling' pl='xs'>
           <Group noWrap>{currentTab === 'contactRecycling' && <ContactRecycling />}</Group>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="webhooks" pl="xs">
+          <WebhookConnectionPage />
         </Tabs.Panel>
 
         <Tabs.Panel value="crm" pl="x">

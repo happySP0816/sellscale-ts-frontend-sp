@@ -2486,6 +2486,7 @@ function FrameworkSection(props: {
                       sx={{
                         border: '1px dashed #339af0',
                         borderRadius: '0.5rem',
+                        maxWidth: '100%',
                       }}
                       p='sm'
                       mih={150}

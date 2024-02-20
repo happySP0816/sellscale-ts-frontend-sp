@@ -49,6 +49,7 @@ const AnalyticsPageNew = () => {
           <Tabs.Tab value='demo-feedback'>Demo Feedback</Tabs.Tab>
           <Tabs.Tab value='message-analytics'>Messaging Analytics </Tabs.Tab>
           <Tabs.Tab value='ai-activity-logs'>AI Activity Logs </Tabs.Tab>
+          <Tabs.Tab value='assets'>Assets </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value='chatbot' pt='xs'>
           <iframe 
@@ -79,6 +80,15 @@ const AnalyticsPageNew = () => {
         </Tabs.Panel>
         <Tabs.Panel value='ai-activity-logs' pt='xs'>
           <AiActivityLogs />
+        </Tabs.Panel>
+        <Tabs.Panel value='assets' pt='xs'>
+          <iframe 
+            src={'https://sellscale.retool.com/embedded/public/83130c61-1271-4cbc-9c41-530d8b3fbdf8#authToken=' + userToken}
+              width={'100%'}
+              height={window.innerHeight - 30}
+              frameBorder={0}
+              allowFullScreen
+          />
         </Tabs.Panel>
       </Tabs>
     </PageFrame>

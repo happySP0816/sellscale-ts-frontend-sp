@@ -29,7 +29,9 @@ const ScheduleSetting = () => {
   const userToken = useRecoilValue(userTokenState);
   const [loading, setLoading] = useState(false);
 
-  const [timeZone, setTimeZone] = useState<null | string>("Pacific Standard Time");
+  const [timeZone, setTimeZone] = useState<null | string>(
+    userData.timezone || "America/Los_Angeles"
+  );
   const [selectedDays, setSelectedDays] = useState<string[]>(["5"]);
   const fromTime = useRef<HTMLInputElement>(null);
   const toTime = useRef<HTMLInputElement>(null);
@@ -37,13 +39,10 @@ const ScheduleSetting = () => {
   useEffect(() => {
     if (!userData) return;
 
-    // Calculate timezone
-    const time_zone =
-      userData?.emails && userData?.emails[0]?.send_schedule?.time_zone;
-    if (time_zone) {
+    if (userData.timezone) {
       for (let i = 0; i < timezones.length; i++) {
-        if (timezones[i].utc.includes(time_zone)) {
-          setTimeZone(timezones[i].value);
+        if (timezones[i].utc.includes(userData.timezone)) {
+          setTimeZone(timezones[i].utc[0]);
           break;
         }
       }
@@ -51,9 +50,16 @@ const ScheduleSetting = () => {
 
     // Calculate selected days
     setSelectedDays(
-      (userData?.emails && userData?.emails[0]?.send_schedule?.days.map(String)) || ["0", "1", "2", "3", "4"]
+      (userData?.emails &&
+        userData?.emails[0]?.send_schedule?.days.map(String)) || [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+      ]
     );
-  }, [userData]);
+  }, []);
 
   const triggerPatchSendSchedule = async () => {
     if (!userToken) return;
@@ -114,21 +120,40 @@ const ScheduleSetting = () => {
     setLoading(false);
   };
   const theme = useMantineTheme();
+
   return (
-    <Paper withBorder m="xs" p="md" radius="md" bg={'gray.0'}>
+    <Paper withBorder m="xs" p="md" radius="md" bg={"gray.0"}>
       <Title order={4}>Email Sending Settings</Title>
 
       <Text color="gray.6" mt={"xs"}>
-        If a thread receives a reply from an email that is not listed below,
-        that prospect will be marked as 'replied'
+        Emails will be sent out on the following days and times.
       </Text>
+      {userData?.timezone && (
+        <Text color="gray.9" mt={"xs"}>
+          Email send times will match your LinkedIn send times at: {" "}
+          <span
+            style={{
+              whiteSpace: "nowrap",
+              fontFamily: "monospace",
+              backgroundColor: "#f4f4f4",
+              padding: "0.2em 0.4em",
+              borderRadius: "4px",
+              fontSize: "0.9em",
+              color: "red",
+            }}
+          >
+            <IconClock size="0.8rem" /> {userData.timezone}
+          </span>
+          .
+        </Text>
+      )}
 
       <Divider my={"sm"} />
 
       <Stack mt={"xs"}>
         <Grid gutter={"xl"}>
           <Grid.Col lg={6}>
-            <Flex gap={"xs"} align={"end"} wrap={'wrap'}>
+            <Flex gap={"xs"} align={"end"} wrap={"wrap"}>
               <TimeInput
                 rightSection={<IconClock />}
                 label="From"
@@ -142,8 +167,10 @@ const ScheduleSetting = () => {
                 ref={fromTime}
                 defaultValue={
                   (userData?.emails &&
-                  userData?.emails[0]?.send_schedule?.start_time) || "09:00"
+                    userData?.emails[0]?.send_schedule?.start_time) ||
+                  "09:00"
                 }
+                disabled
               />
               <Divider w={10} size={"lg"} mb={15} />
               <TimeInput
@@ -159,8 +186,10 @@ const ScheduleSetting = () => {
                 ref={toTime}
                 defaultValue={
                   (userData?.emails &&
-                  userData?.emails[0]?.send_schedule?.end_time) || "17:00"
+                    userData?.emails[0]?.send_schedule?.end_time) ||
+                  "17:00"
                 }
+                disabled
               />
             </Flex>
           </Grid.Col>
@@ -182,8 +211,9 @@ const ScheduleSetting = () => {
               }}
               data={timezones.map((timezone) => ({
                 label: timezone.text,
-                value: timezone.value,
+                value: timezone.utc[0],
               }))}
+              disabled
             />
           </Grid.Col>
         </Grid>
@@ -200,7 +230,6 @@ const ScheduleSetting = () => {
           }}
           value={selectedDays || []}
           onChange={(value) => {
-            console.log('value', value)
             setSelectedDays(value);
           }}
         >
@@ -209,36 +238,43 @@ const ScheduleSetting = () => {
               styles={{ label: { fontWeight: 500, fontSize: rem(14) } }}
               value="6"
               label="Sunday"
+              disabled
             />
             <Checkbox
               styles={{ label: { fontWeight: 500, fontSize: rem(14) } }}
               value="0"
               label="Monday"
+              disabled
             />
             <Checkbox
               styles={{ label: { fontWeight: 500, fontSize: rem(14) } }}
               value="1"
               label="Tuesday"
+              disabled
             />
             <Checkbox
               styles={{ label: { fontWeight: 500, fontSize: rem(14) } }}
               value="2"
               label="Wednesday"
+              disabled
             />
             <Checkbox
               styles={{ label: { fontWeight: 500, fontSize: rem(14) } }}
               value="3"
               label="Thursday"
+              disabled
             />
             <Checkbox
               styles={{ label: { fontWeight: 500, fontSize: rem(14) } }}
               value="4"
               label="Friday"
+              disabled
             />
             <Checkbox
               styles={{ label: { fontWeight: 500, fontSize: rem(14) } }}
               value="5"
               label="Saturday"
+              disabled
             />
           </Group>
         </Checkbox.Group>
@@ -249,6 +285,7 @@ const ScheduleSetting = () => {
           radius="md"
           loading={loading}
           onClick={triggerPatchSendSchedule}
+          disabled
         >
           Save
         </Button>

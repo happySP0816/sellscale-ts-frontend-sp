@@ -1,5 +1,35 @@
-import { ActionIcon, Avatar, Badge, Box, Button, Card, Collapse, Divider, Flex, Group, Loader, Modal, Text, Textarea, Title, useMantineTheme } from '@mantine/core';
-import { IconBrandLinkedin, IconChecks, IconChevronDown, IconChevronUp, IconEdit, IconMessages, IconPencil, IconRecordMail, IconRocket, IconTargetArrow, IconUsers, IconXboxX } from '@tabler/icons';
+import {
+  ActionIcon,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  Collapse,
+  Divider,
+  Flex,
+  Group,
+  Loader,
+  Modal,
+  Text,
+  Textarea,
+  Title,
+  useMantineTheme,
+} from '@mantine/core';
+import {
+  IconBrandLinkedin,
+  IconChecks,
+  IconChevronDown,
+  IconChevronUp,
+  IconEdit,
+  IconMessages,
+  IconPencil,
+  IconRecordMail,
+  IconRocket,
+  IconTargetArrow,
+  IconUsers,
+  IconXboxX,
+} from '@tabler/icons';
 import { useEffect, useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { TextInput } from '@mantine/core';
@@ -12,11 +42,13 @@ import { postAIRequest } from '@utils/requests/postAIRequest';
 import { showNotification } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
 import NewUIEmailSequencing from '@pages/EmailSequencing/NewUIEmailSequencing';
+import { CampaignEntityData } from '@pages/CampaignDetail';
+import { Carousel } from '@mantine/carousel';
 
 type SequenceProps = {
   campaignOverview: any;
   campaignType: string;
-}
+};
 
 export const Sequence = (props: SequenceProps) => {
   let SEQUENCE = props.campaignOverview?.linkedin?.sequence;
@@ -29,7 +61,8 @@ export const Sequence = (props: SequenceProps) => {
       <Card withBorder>
         <Title order={5}>💡 Review Campaign</Title>
         <Text color='gray' size='sm'>
-          Review the campaign and provide feedback when necessary for both the Contacts and Messaging. The AI will adjust the campaign based on your feedback and then launch.
+          Review the campaign and provide feedback when necessary for both the Contacts and
+          Messaging. The AI will adjust the campaign based on your feedback and then launch.
         </Text>
       </Card>
 
@@ -54,7 +87,7 @@ type ContactProps = {
   onFeedbackChange: (feedback: string) => void;
   campaignOverview?: any;
   campaignId: number;
-}
+};
 
 export const Contact = (props: ContactProps) => {
   const [contactData, setContactData] = useState<any>();
@@ -62,7 +95,7 @@ export const Contact = (props: ContactProps) => {
   const [filterData, setFilterData] = useState<any>();
   const theme = useMantineTheme();
   const [modalOpened, modalHandlers] = useDisclosure(false); // For the edit messaging modal
-  const userToken = useRecoilValue(userTokenState)
+  const userToken = useRecoilValue(userTokenState);
 
   const handleShowAll = () => {
     setShowAll(!showAll);
@@ -75,16 +108,25 @@ export const Contact = (props: ContactProps) => {
         score: x?.icp_fit_score,
         content: x?.title,
         linkedin_url: x?.linkedin_url,
-        icp_fit_reason: x?.icp_fit_reason
-      }
-    })
-    const res_filter = props.campaignOverview?.contacts && Object.keys(props.campaignOverview?.contacts).filter((key: string) => key !== 'sample_contacts').map((key: string) => {
-      if (props.campaignOverview?.contacts[key] && props.campaignOverview?.contacts[key].length === 0) return null;
-      return {
-        type: key.replaceAll("_", " "),
-        jobs: props.campaignOverview?.contacts[key]
-      }
-    }).filter((x: any) => x !== null)
+        icp_fit_reason: x?.icp_fit_reason,
+      };
+    });
+    const res_filter =
+      props.campaignOverview?.contacts &&
+      Object.keys(props.campaignOverview?.contacts)
+        .filter((key: string) => key !== 'sample_contacts')
+        .map((key: string) => {
+          if (
+            props.campaignOverview?.contacts[key] &&
+            props.campaignOverview?.contacts[key].length === 0
+          )
+            return null;
+          return {
+            type: key.replaceAll('_', ' '),
+            jobs: props.campaignOverview?.contacts[key],
+          };
+        })
+        .filter((x: any) => x !== null);
     setFilterData(res_filter);
     setContactData(res);
   }, []);
@@ -101,26 +143,40 @@ export const Contact = (props: ContactProps) => {
               </Text>
             </Flex>
           )}
-          {filterData?.filter((item: any, index: number) => item?.jobs?.length > 0).map((item: any, index: number) => {
-            return (
-              <Flex direction={'column'}>
-                <Text color='gray' tt={'uppercase'} fw={600} size={'sm'}>
-                  {item?.type.replaceAll("included ", "").replaceAll("excluded ", "").replaceAll("individual ", "contact ").replaceAll("keywords ", "")}
-                </Text>
-                <Group mb='md' mt='xs'>
-                  {item?.jobs?.map((job: string) => {
-                    return (
-                      <p
-                        style={{fontSize: '10px', padding: '2px', paddingLeft: '8px', paddingRight: '8px', margin: 2, borderRadius: '8px', backgroundColor: theme.colors[deterministicMantineColor(item?.type)][2] }}
-                      >
-                        {job}
-                      </p>
-                    );
-                  })}
-                </Group>
-              </Flex>
-            );
-          })}
+          {filterData
+            ?.filter((item: any, index: number) => item?.jobs?.length > 0)
+            .map((item: any, index: number) => {
+              return (
+                <Flex direction={'column'}>
+                  <Text color='gray' tt={'uppercase'} fw={600} size={'sm'}>
+                    {item?.type
+                      .replaceAll('included ', '')
+                      .replaceAll('excluded ', '')
+                      .replaceAll('individual ', 'contact ')
+                      .replaceAll('keywords ', '')}
+                  </Text>
+                  <Group mb='md' mt='xs'>
+                    {item?.jobs?.map((job: string) => {
+                      return (
+                        <p
+                          style={{
+                            fontSize: '10px',
+                            padding: '2px',
+                            paddingLeft: '8px',
+                            paddingRight: '8px',
+                            margin: 2,
+                            borderRadius: '8px',
+                            backgroundColor: theme.colors[deterministicMantineColor(item?.type)][2],
+                          }}
+                        >
+                          {job}
+                        </p>
+                      );
+                    })}
+                  </Group>
+                </Flex>
+              );
+            })}
         </Flex>
         <Flex
           direction={'column'}
@@ -135,9 +191,7 @@ export const Contact = (props: ContactProps) => {
             <Text tt={'uppercase'} color='blue' w='60%'>
               example contacts
             </Text>
-            <Button size='xs' w='30%' onClick={
-              () => modalHandlers.open()
-            }>
+            <Button size='xs' w='30%' onClick={() => modalHandlers.open()}>
               View All
             </Button>
           </Flex>
@@ -145,26 +199,41 @@ export const Contact = (props: ContactProps) => {
           <Modal
             opened={modalOpened}
             onClose={() => modalHandlers.close()}
-            title="View All Contacts"
-            size="1000px"
+            title='View All Contacts'
+            size='1000px'
           >
             <iframe
-              src={"https://sellscale.retool.com/embedded/public/20d97ed1-4602-4513-aa77-97f15a210a9d#authToken=" + userToken + "&campaignId=" + props.campaignId}
-              frameBorder="0"
-              width="100%"
-              height="400px" // Adjust the height as needed
+              src={
+                'https://sellscale.retool.com/embedded/public/20d97ed1-4602-4513-aa77-97f15a210a9d#authToken=' +
+                userToken +
+                '&campaignId=' +
+                props.campaignId
+              }
+              frameBorder='0'
+              width='100%'
+              height='400px' // Adjust the height as needed
               allowFullScreen
             ></iframe>
           </Modal>
-          
+
           <Flex direction={'column'} gap={3}>
             {contactData?.map((item: any, index: number) => {
               return !showAll || index < 5 ? (
                 <Flex key={index} align={'center'} gap={'xs'} mb='md'>
-                  <Avatar src={"https://ui-avatars.com/api/?background=random&name=" + item?.username.replaceAll(" ", "+")} size={30} radius={'xl'} />
+                  <Avatar
+                    src={
+                      'https://ui-avatars.com/api/?background=random&name=' +
+                      item?.username.replaceAll(' ', '+')
+                    }
+                    size={30}
+                    radius={'xl'}
+                  />
                   <Flex direction={'column'} w={'100%'}>
                     <Flex align={'center'} w={'100%'}>
-                      <ActionIcon color='blue' onClick={() => window.open('https://' + item?.linkedin_url, '_blank')}>
+                      <ActionIcon
+                        color='blue'
+                        onClick={() => window.open('https://' + item?.linkedin_url, '_blank')}
+                      >
                         <IconBrandLinkedin size={'0.8rem'} />
                       </ActionIcon>
                       <Text fw={500} size={'sm'}>
@@ -205,7 +274,10 @@ export const Contact = (props: ContactProps) => {
                       {item?.content}
                     </Text>
                     <Text size='xs' color='gray'>
-                      {item?.icp_fit_reason?.split("), (").map((x: string) => x.replaceAll("(", "").replaceAll(")", "")).join(", ")}
+                      {item?.icp_fit_reason
+                        ?.split('), (')
+                        .map((x: string) => x.replaceAll('(', '').replaceAll(')', ''))
+                        .join(', ')}
                     </Text>
                   </Flex>
                 </Flex>
@@ -223,12 +295,12 @@ export const Contact = (props: ContactProps) => {
           </Flex>
         </Flex>
       </Flex>
-    
+
       <Textarea
-        label="Feedback for AI"
-        description="Provide feedback to the AI to adjust your contacts prior to launch."
+        label='Feedback for AI'
+        description='Provide feedback to the AI to adjust your contacts prior to launch.'
         defaultValue={props.feedback}
-        placeholder="ex. I primarily only want to target New Jersey and Canada. Can we focus on those territories? Additionally, VP of Marketing may not be the exact right target for this campaign."
+        placeholder='ex. I primarily only want to target New Jersey and Canada. Can we focus on those territories? Additionally, VP of Marketing may not be the exact right target for this campaign.'
         minRows={4}
         onChange={(event) => props.onFeedbackChange(event.currentTarget.value)}
       />
@@ -239,17 +311,17 @@ export const Contact = (props: ContactProps) => {
 type MessagingProps = {
   feedback: string;
   onFeedbackChange: (feedback: string) => void;
-  campaignOverview?: any;
+  campaignOverview?: CampaignEntityData;
   campaignType: string;
   campaignId: number;
-}
+};
 
 export const Messaging = (props: MessagingProps) => {
   const [opened, { toggle }] = useDisclosure(false);
   const [editMessage, setEditMessage] = useState(''); // State to hold the edited message
 
   const [openid, setOpenId] = useState<number>(0);
-  const userData = useRecoilValue(userDataState)
+  const userData = useRecoilValue(userDataState);
 
   let SEQUENCE = props.campaignOverview?.linkedin?.sequence;
   if (props.campaignType === 'EMAIL') {
@@ -262,9 +334,9 @@ export const Messaging = (props: MessagingProps) => {
       avatar: '',
       username: userData?.sdr_name,
       message: x?.description,
-      delay: x?.bump_framework_delay
-    }
-  })
+      delay: x?.bump_framework_delay,
+    };
+  });
   const handleToggle = (id: number) => {
     toggle();
     setOpenId(id);
@@ -272,17 +344,31 @@ export const Messaging = (props: MessagingProps) => {
   useEffect(() => {
     toggle();
   }, []);
-  
+
   return (
     <>
-      <Flex p={'md'} direction={'column'} gap={'md'} style={{ border: '1px solid #e3f0fe', borderRadius: '6px' }}>
+      <Box>
+        <Title order={3}>Assets Used</Title>
+        <Text>Here are the assets used in this campaign</Text>
+        <Carousel slideSize='70%' height={200} slideGap='md' loop>
+          {/* ...slides */}
+        </Carousel>
+      </Box>
+      <Flex
+        p={'md'}
+        direction={'column'}
+        gap={'md'}
+        style={{ border: '1px solid #e3f0fe', borderRadius: '6px' }}
+      >
         {messageData?.map((item: any, index: number) => {
           return (
             <>
               <Box>
-                {item?.delay ? <Badge color='blue' variant='outline'>
-                  Wait {item?.delay} days
-                </Badge> : null}
+                {item?.delay ? (
+                  <Badge color='blue' variant='outline'>
+                    Wait {item?.delay} days
+                  </Badge>
+                ) : null}
               </Box>
               <Flex w={'100%'} align={'center'} gap={8}>
                 <IconTargetArrow color='gray' size={'1.5rem'} />
@@ -299,7 +385,13 @@ export const Messaging = (props: MessagingProps) => {
                 <Divider w={'100%'} />
                 <Button
                   tt={'uppercase'}
-                  rightIcon={openid === index && opened ? <IconChevronUp size={'0.9rem'} /> : <IconChevronDown size={'0.9rem'} />}
+                  rightIcon={
+                    openid === index && opened ? (
+                      <IconChevronUp size={'0.9rem'} />
+                    ) : (
+                      <IconChevronDown size={'0.9rem'} />
+                    )
+                  }
                   onClick={() => handleToggle(index)}
                   variant='light'
                   size='xs'
@@ -315,7 +407,11 @@ export const Messaging = (props: MessagingProps) => {
                     p={'md'}
                     gap={'xs'}
                     bg={'#f4f9ff'}
-                    style={{ border: '1px solid #89c3fc', borderRadius: '6px', borderStyle: 'dashed' }}
+                    style={{
+                      border: '1px solid #89c3fc',
+                      borderRadius: '6px',
+                      borderStyle: 'dashed',
+                    }}
                   >
                     <Flex align={'center'} justify={'space-between'}>
                       <Flex align={'center'} gap={'sm'}>
@@ -333,7 +429,13 @@ export const Messaging = (props: MessagingProps) => {
                     </Flex>
                     <Text size={'xs'} fs='italic' fw={500}>
                       {/* if campaign type is LINKEDIN, show message as is. if email, show html in dangerously set */}
-                      {<div dangerouslySetInnerHTML={{ __html: item?.message.replaceAll("\n", "<br/>") }} />}
+                      {
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: item?.message.replaceAll('\n', '<br/>'),
+                          }}
+                        />
+                      }
                     </Text>
                   </Flex>
                 </Collapse>
@@ -342,15 +444,23 @@ export const Messaging = (props: MessagingProps) => {
           );
         })}
       </Flex>
-      <Button onClick={() => {
-        const campaignType = props.campaignType === 'LINKEDIN' ? 'linkedin' : 'email';
-        window.open('/setup/' + campaignType + '?campaign_id=' + props.campaignId, '_blank')
-      }} mt="md" ml='auto' mr='auto' leftIcon={<IconPencil size={'1rem'} />} variant="outline" color='grape'>
+      <Button
+        onClick={() => {
+          const campaignType = props.campaignType === 'LINKEDIN' ? 'linkedin' : 'email';
+          window.open('/setup/' + campaignType + '?campaign_id=' + props.campaignId, '_blank');
+        }}
+        mt='md'
+        ml='auto'
+        mr='auto'
+        leftIcon={<IconPencil size={'1rem'} />}
+        variant='outline'
+        color='grape'
+      >
         Edit Messaging in Campaign Editor
       </Button>
       <Textarea
-        label="Feedback for AI"
-        description="Provide feedback to the AI to adjust your messaging prior to launch."
+        label='Feedback for AI'
+        description='Provide feedback to the AI to adjust your messaging prior to launch.'
         defaultValue={props.feedback}
         placeholder="ex. For bump #1, instead of saying 'I saw you were the VP of Marketing at Acme Corp', can we say 'I saw you were the VP of Marketing at Acme Corp, and I noticed you're hiring for a new marketing manager. I'd love to learn more about the role and see if I can help.' Also, in general, let's add a 👋 emoji to the first message!"
         minRows={4}
@@ -413,7 +523,8 @@ function Finalize(props: CampaignFeedback) {
         <Divider />
 
         <Text italic mt='lg' fz='sm'>
-          💡 If feedback was provided, SellScale AI will adjust the messaging and campaign prior to launch.
+          💡 If feedback was provided, SellScale AI will adjust the messaging and campaign prior to
+          launch.
         </Text>
       </Card>
     </div>
@@ -426,7 +537,6 @@ type CampaignReviewLinkedinProps = {
   campaignType: string;
 };
 
-
 export default function CampaignReview(props: CampaignReviewLinkedinProps) {
   const [opened, { open, close }] = useDisclosure(true);
   const [steps, setSteps] = useState('sequence');
@@ -435,9 +545,9 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
   const [messagingFeedback, setMessagingFeedback] = useState('');
 
   const [finalizingFeedback, setFinalizingFeedback] = useState(false);
-  const userToken = useRecoilValue(userTokenState)
+  const userToken = useRecoilValue(userTokenState);
 
-  const [campaignOverview, setCampaignOverview] = useState<any>();
+  const [campaignOverview, setCampaignOverview] = useState<CampaignEntityData>();
   const [fetchingCampaign, setFetchingCampaign] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -451,18 +561,22 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
 
     // Submit AI Request
     const campaign_name = campaignOverview?.overview?.archetype_name;
-    postAIRequest(userToken, `Please address the feedback for the campaign titled ${campaign_name} then launch it.\n\nContact Feedback: ${contactFeedback}\nMessaging Feedback: ${messagingFeedback}`).then(res => {
-      props.onTaskComplete && props.onTaskComplete()
+    postAIRequest(
+      userToken,
+      `Please address the feedback for the campaign titled ${campaign_name} then launch it.\n\nContact Feedback: ${contactFeedback}\nMessaging Feedback: ${messagingFeedback}`
+    ).then((res) => {
+      props.onTaskComplete && props.onTaskComplete();
       setFinalizingFeedback(false);
 
       showNotification({
         title: 'Campaign Queued for Launch',
-        message: 'SellScale AI will launch this campaign shortly after addressing any feedback provided.',
+        message:
+          'SellScale AI will launch this campaign shortly after addressing any feedback provided.',
         color: 'blue',
         icon: <IconRocket size='1.5rem' />,
       });
-    })
-  }
+    });
+  };
 
   const getCampaignOverview = async () => {
     setFetchingCampaign(true);
@@ -472,13 +586,16 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
       return_raw_prompts = true;
     }
 
-    const response = await fetch(`${API_URL}/client/campaign_overview?client_archetype_id=${props.campaignId}&return_raw_prompts=${return_raw_prompts}`, {
-      'method': 'GET',
-      headers: {
-        'Authorization': `Bearer ${userToken}`,
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${API_URL}/client/campaign_overview?client_archetype_id=${props.campaignId}&return_raw_prompts=${return_raw_prompts}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          'Content-Type': 'application/json',
+        },
       }
-    })
+    );
 
     setFetchingCampaign(false);
 
@@ -486,11 +603,11 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
     setCampaignOverview(data);
 
     console.log(data);
-  }
+  };
 
   useEffect(() => {
     getCampaignOverview();
-  }, [props.campaignId])
+  }, [props.campaignId]);
 
   const handleGoBack = () => {
     if (steps === 'sequence') return;
@@ -508,77 +625,165 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
 
   if (fetchingCampaign) {
     return (
-      <div style={{ display: 'flex',  paddingTop: '40px', width: '900px', marginLeft: 'auto', marginRight: 'auto' }}>
-        <Card w='900px' withBorder pb='100px' pt='60px' sx={{justifyContent: 'center', alignItems: 'center'}}>
+      <div
+        style={{
+          display: 'flex',
+          paddingTop: '40px',
+          width: '900px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        <Card
+          w='900px'
+          withBorder
+          pb='100px'
+          pt='60px'
+          sx={{ justifyContent: 'center', alignItems: 'center' }}
+        >
           <Box ml='auto' mr='auto'>
             <Text size='xl' align='center' fw='bold' mb='4px'>
               Fetching campaign data...
             </Text>
             <Text mt='xs'>
-              Please wait while we fetch the campaign data. This can take anywhere from 20-60 seconds.
+              Please wait while we fetch the campaign data. This can take anywhere from 20-60
+              seconds.
             </Text>
             <Loader size='xl' mt='xl' />
           </Box>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
-    <div style={{ display: 'flex',  paddingTop: '40px', width: '900px', marginLeft: 'auto', marginRight: 'auto' }}>
+    <div
+      style={{
+        display: 'flex',
+        paddingTop: '40px',
+        width: '900px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+      }}
+    >
       <Flex direction={'column'} gap={'md'} w='900px'>
         <Flex align={'center'} gap={'sm'}>
-          <Text fw={600}>{campaignOverview?.overview?.emoji} {campaignOverview?.overview?.archetype_name}</Text>
-          {
-          props.campaignType === 'LINKEDIN' ?
-            <Badge color='blue' variant='filled' size='md' leftSection={<IconBrandLinkedin size='0.8rem' style={{marginTop: '4px'}} />}>
+          <Text fw={600}>
+            {campaignOverview?.overview?.emoji} {campaignOverview?.overview?.archetype_name}
+          </Text>
+          {props.campaignType === 'LINKEDIN' ? (
+            <Badge
+              color='blue'
+              variant='filled'
+              size='md'
+              leftSection={<IconBrandLinkedin size='0.8rem' style={{ marginTop: '4px' }} />}
+            >
               LinkedIn
             </Badge>
-            :
-            <Badge color='blue' variant='filled' size='md' leftSection={<IconRecordMail size='0.8rem' style={{marginTop: '4px'}} />}>
+          ) : (
+            <Badge
+              color='blue'
+              variant='filled'
+              size='md'
+              leftSection={<IconRecordMail size='0.8rem' style={{ marginTop: '4px' }} />}
+            >
               Email
             </Badge>
-          }
+          )}
         </Flex>
         <Flex align={'center'} gap={'md'}>
           <Badge color='blue' w={'100%'} variant='filled' size='lg'>
             1. Sequence
           </Badge>
-          <Divider w={'100%'} size={2} color={steps === 'contact' || steps === 'messaging' || steps === 'finalize' ? '#89c3fc' : '#ced4da'} />
-          <Badge color='blue' w={'100%'} variant={steps === 'contact' || steps === 'messaging' || steps === 'finalize' ? 'filled' : 'outline'} size='lg'>
+          <Divider
+            w={'100%'}
+            size={2}
+            color={
+              steps === 'contact' || steps === 'messaging' || steps === 'finalize'
+                ? '#89c3fc'
+                : '#ced4da'
+            }
+          />
+          <Badge
+            color='blue'
+            w={'100%'}
+            variant={
+              steps === 'contact' || steps === 'messaging' || steps === 'finalize'
+                ? 'filled'
+                : 'outline'
+            }
+            size='lg'
+          >
             2. Contacts
           </Badge>
-          <Divider w={'100%'} size={2} color={steps === 'messaging' || steps === 'finalize' ? '#89c3fc' : '#ced4da'} />
-          <Badge color='blue' w={'100%'} variant={steps === 'messaging' || steps === 'finalize' ? 'filled' : 'outline'} size='lg'>
+          <Divider
+            w={'100%'}
+            size={2}
+            color={steps === 'messaging' || steps === 'finalize' ? '#89c3fc' : '#ced4da'}
+          />
+          <Badge
+            color='blue'
+            w={'100%'}
+            variant={steps === 'messaging' || steps === 'finalize' ? 'filled' : 'outline'}
+            size='lg'
+          >
             3. Messaging
           </Badge>
           <Divider w={'100%'} size={2} color={steps === 'finalize' ? '#89c3fc' : '#ced4da'} />
-          <Badge color='blue' w={'100%'} variant={steps === 'finalize' ? 'filled' : 'outline'} size='lg'>
+          <Badge
+            color='blue'
+            w={'100%'}
+            variant={steps === 'finalize' ? 'filled' : 'outline'}
+            size='lg'
+          >
             4. Complete
           </Badge>
         </Flex>
-        {steps === 'sequence' ? 
-          <Sequence campaignOverview={campaignOverview} campaignType={props.campaignType} /> : 
-          steps === 'contact' ? <Contact feedback={contactFeedback} onFeedbackChange={setContactFeedback} campaignOverview={campaignOverview} campaignId={props.campaignId} /> :
-          steps === 'messaging' ? <Messaging feedback={messagingFeedback} onFeedbackChange={setMessagingFeedback} campaignOverview={campaignOverview} campaignType={props.campaignType} campaignId={props.campaignId} />:
-          <Finalize campaign_id={1} prospect_feedback={contactFeedback} messaging_feedback={messagingFeedback} />
-        }
+        {steps === 'sequence' ? (
+          <Sequence campaignOverview={campaignOverview} campaignType={props.campaignType} />
+        ) : steps === 'contact' ? (
+          <Contact
+            feedback={contactFeedback}
+            onFeedbackChange={setContactFeedback}
+            campaignOverview={campaignOverview}
+            campaignId={props.campaignId}
+          />
+        ) : steps === 'messaging' ? (
+          <Messaging
+            feedback={messagingFeedback}
+            onFeedbackChange={setMessagingFeedback}
+            campaignOverview={campaignOverview}
+            campaignType={props.campaignType}
+            campaignId={props.campaignId}
+          />
+        ) : (
+          <Finalize
+            campaign_id={1}
+            prospect_feedback={contactFeedback}
+            messaging_feedback={messagingFeedback}
+          />
+        )}
         <Flex align={'center'} justify={'space-between'} w='900px'>
-          
           <Flex align={'center'} gap={'sm'} ml='auto'>
             <Button onClick={handleGoBack} disabled={steps === 'sequence'} w={180} ml='xs' mr='xs'>
               Go back
             </Button>
-            {
-              steps === 'finalize' ?
-              (<Button variant='filled' color='green' leftIcon={<IconRocket size={'0.9rem'} />} px={40} onClick={submitFeedbackAndCompleteHandler} loading={finalizingFeedback}>
+            {steps === 'finalize' ? (
+              <Button
+                variant='filled'
+                color='green'
+                leftIcon={<IconRocket size={'0.9rem'} />}
+                px={40}
+                onClick={submitFeedbackAndCompleteHandler}
+                loading={finalizingFeedback}
+              >
                 Submit Feedback & Launch
-              </Button>) 
-              :
-              (<Button onClick={handleGoNext} w={180}>
+              </Button>
+            ) : (
+              <Button onClick={handleGoNext} w={180}>
                 Next
-              </Button>)
-            }
+              </Button>
+            )}
           </Flex>
         </Flex>
       </Flex>

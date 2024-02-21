@@ -514,3 +514,8 @@ export async function collectClientData() {
     },
   };
 }
+
+export async function getRingsIcon(content: string) {
+  const res = await fetch(`https://api.dicebear.com/7.x/rings/svg?seed=${content}`);
+  return res.ok ? await res.text() : '';
+}

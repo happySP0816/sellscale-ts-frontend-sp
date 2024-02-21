@@ -6,11 +6,14 @@ import {
   Button,
   Card,
   Collapse,
+  Container,
   Divider,
   Flex,
   Group,
   Loader,
   Modal,
+  Paper,
+  Stack,
   Text,
   Textarea,
   Title,
@@ -30,10 +33,10 @@ import {
   IconUsers,
   IconXboxX,
 } from '@tabler/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { TextInput } from '@mantine/core';
-import { valueToColor } from '@utils/general';
+import { getRingsIcon, hashString, valueToColor } from '@utils/general';
 import { API_URL } from '@constants/data';
 import { useRecoilValue } from 'recoil';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
@@ -44,6 +47,8 @@ import { useNavigate } from 'react-router-dom';
 import NewUIEmailSequencing from '@pages/EmailSequencing/NewUIEmailSequencing';
 import { CampaignEntityData } from '@pages/CampaignDetail';
 import { Carousel } from '@mantine/carousel';
+import { useQuery } from '@tanstack/react-query';
+import DOMPurify from 'dompurify';
 
 type SequenceProps = {
   campaignOverview: any;
@@ -345,21 +350,88 @@ export const Messaging = (props: MessagingProps) => {
     toggle();
   }, []);
 
+  const { data: assetIcons } = useQuery({
+    queryKey: [`query-asset-icons`],
+    queryFn: async () => {
+      const assetMap = new Map<string, string>();
+      for (const asset of props.campaignOverview?.assets_used ?? []) {
+        assetMap.set(
+          asset.title,
+          await getRingsIcon(`${hashString(JSON.stringify(asset), Number.MAX_VALUE)}`)
+        );
+      }
+      return assetMap;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const CAROUSEL_HEIGHT = 200;
+
   return (
     <>
-      <Box>
-        <Title order={3}>Assets Used</Title>
-        <Text>Here are the assets used in this campaign</Text>
-        <Carousel slideSize='70%' height={200} slideGap='md' loop>
-          {/* ...slides */}
-        </Carousel>
-      </Box>
       <Flex
         p={'md'}
         direction={'column'}
         gap={'md'}
         style={{ border: '1px solid #e3f0fe', borderRadius: '6px' }}
       >
+        <Box>
+          <Title order={4}>Assets Used</Title>
+          <Text>Here are the assets used in this campaign</Text>
+        </Box>
+        <Carousel slideSize='70%' height={CAROUSEL_HEIGHT} slideGap='md' loop>
+          {props.campaignOverview?.assets_used?.map((asset, index) => (
+            <Carousel.Slide key={index}>
+              <Paper h={CAROUSEL_HEIGHT}>
+                <Stack spacing={5} h={CAROUSEL_HEIGHT} justify='space-between'>
+                  <Stack spacing={5}>
+                    <Group spacing={5} noWrap>
+                      <Avatar
+                        m='sm'
+                        radius={30}
+                        size={30}
+                        src={`data:image/svg+xml;utf8,${encodeURIComponent(
+                          assetIcons?.get(asset.title) ?? ''
+                        )}`}
+                        alt={asset.title}
+                      />
+                      <Title order={5}>{asset.title}</Title>
+                    </Group>
+                    <Container>
+                      <Text color='gray.8' fz='xs' fw={150}>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(asset.value),
+                          }}
+                        />
+                      </Text>
+                    </Container>
+                  </Stack>
+                  <Stack spacing={5} mih={50}>
+                    <Divider />
+                    <Container>
+                      <Text fz='xs' c='dimmed'>
+                        {asset.reason}
+                      </Text>
+                    </Container>
+                  </Stack>
+                </Stack>
+              </Paper>
+            </Carousel.Slide>
+          ))}
+        </Carousel>
+      </Flex>
+      <Flex
+        p={'md'}
+        direction={'column'}
+        gap={'md'}
+        style={{ border: '1px solid #e3f0fe', borderRadius: '6px' }}
+      >
+        <Box>
+          <Title order={4}>Sequences Generated</Title>
+          <Text>The generated sequences from the assets.</Text>
+        </Box>
+
         {messageData?.map((item: any, index: number) => {
           return (
             <>

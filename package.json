@@ -31,6 +31,7 @@
     "@fullcalendar/react": "^6.1.8",
     "@headlessui/react": "^1.7.10",
     "@heroicons/react": "^2.0.15",
+    "@mantine/carousel": "^6.0.10",
     "@mantine/core": "^6.0.10",
     "@mantine/dates": "^6.0.10",
     "@mantine/dropzone": "^6.0.10",

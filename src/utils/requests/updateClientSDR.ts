@@ -7,7 +7,8 @@ export async function updateClientSDR(
   name?: string,
   title?: string,
   disable_ai_on_prospect_respond?: boolean,
-  disable_ai_on_message_send?: boolean
+  disable_ai_on_message_send?: boolean,
+  meta_data?: Record<string, any>
 ): Promise<MsgResponse> {
   const response = await fetch(`${API_URL}/client/sdr`, {
     method: 'PATCH',
@@ -20,6 +21,7 @@ export async function updateClientSDR(
       title: title,
       disable_ai_on_prospect_respond: disable_ai_on_prospect_respond,
       disable_ai_on_message_send: disable_ai_on_message_send,
+      meta_data: meta_data,
     }),
   });
   return await processResponse(response);

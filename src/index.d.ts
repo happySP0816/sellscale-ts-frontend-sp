@@ -16,6 +16,16 @@ export interface ActivityLog {
   type: string;
 }
 
+export interface SyncData {
+  id: number;
+  client_id: number;
+  sync_type?: 'leads_only' | 'account_and_leads';
+  status_mapping?: Record<string, any>; // TODO
+  event_handlers?: {
+    on_demo_set?: 'create_lead' | 'do_nothing';
+  };
+}
+
 export interface Campaign {
   uuid: string;
   id: number;

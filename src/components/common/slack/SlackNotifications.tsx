@@ -28,6 +28,7 @@ import { useRecoilValue } from "recoil";
 import EmailAIResponseImg from "@assets/images/notification_previews/email-ai-response.png";
 import { showNotification } from "@mantine/notifications";
 import { postPreviewSlackNotification } from "@utils/requests/postPreviewSlackNotification";
+import { IconSend } from "@tabler/icons";
 
 const image_map = new Map<string, string>([
   ["AI_REPLY_TO_EMAIL", EmailAIResponseImg],
@@ -328,7 +329,7 @@ const SlackNotificationCard = (props: {
           }}
           p={"xs"}
         >
-          <Flex direction={"column"}>
+          <Flex direction={"column"} align={"flex-start"}>
             <Text fw={600} mt={2} size={"sm"}>
               {notification.notification_name}
             </Text>
@@ -356,15 +357,30 @@ const SlackNotificationCard = (props: {
             />
             <Button
               variant="transparent"
-              color="grape"
-              mt="4px"
+              mt="8px"
               size="xs"
               loading={notificationTestLoading}
               onClick={() => {
                 triggerTestNotification(notification.id);
               }}
+              styles={{
+                root: {
+                  padding: 0,
+                  height: "10px",
+                },
+                label: {
+                  fontSize: "0.7rem",
+                  color: "purple",
+                },
+                rightIcon: {
+                  marginLeft: "4px",
+                },
+              }}
+              rightIcon={
+                <IconSend size={".70rem"} stroke={2} color={"purple"} />
+              }
             >
-              {notificationTestLoading ? "" : "Preview"}
+              {notificationTestLoading ? "" : "Test"}
             </Button>
           </Flex>
         </Flex>

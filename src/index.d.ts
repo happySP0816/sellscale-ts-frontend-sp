@@ -326,6 +326,8 @@ export interface PersonaOverview {
   first_message_delay_days?: number;
   linkedin_active?: boolean;
   email_active?: boolean;
+  email_open_tracking_enabled: boolean;
+  email_link_tracking_enabled: boolean;
 }
 
 export interface LinkedInMessage {

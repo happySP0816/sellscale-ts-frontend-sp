@@ -23,6 +23,7 @@ import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { patchSendSchedule } from "@utils/requests/patchSendSchedule";
 import { showNotification } from "@mantine/notifications";
+import { postSDREmailTrackingSettings } from "@utils/requests/emailTrackingSettings";
 
 const ScheduleSetting = () => {
   const [userData, setUserData] = useRecoilState(userDataState);
@@ -35,6 +36,52 @@ const ScheduleSetting = () => {
   const [selectedDays, setSelectedDays] = useState<string[]>(["5"]);
   const fromTime = useRef<HTMLInputElement>(null);
   const toTime = useRef<HTMLInputElement>(null);
+
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [openTracking, setOpenTracking] = useState(
+    (userData.email_open_tracking_enabled == null || userData.email_open_tracking_enabled == undefined)
+      ? true
+      : (userData.email_open_tracking_enabled as boolean)
+  );
+  const [linkTracking, setLinkTracking] = useState(
+    (userData.email_link_tracking_enabled == null || userData.email_link_tracking_enabled == undefined)
+      ? true
+      : (userData.email_link_tracking_enabled as boolean)
+  );
+
+  const triggerPostEmailTrackingSettings = async (
+    openTracking: boolean,
+    linkTracking: boolean
+  ) => {
+    setTrackingLoading(true);
+    const result = await postSDREmailTrackingSettings(
+      userToken,
+      openTracking,
+      linkTracking
+    );
+    if (result.status !== "success") {
+      showNotification({
+        title: "Error",
+        message: "Could not post tracking settings.",
+        color: "red",
+        autoClose: false,
+      });
+    } else {
+      showNotification({
+        title: "Success",
+        message: "Tracking settings updated.",
+        color: "green",
+        autoClose: true,
+      });
+    }
+
+    if (result.status === "success") {
+      setOpenTracking(openTracking);
+      setLinkTracking(linkTracking);
+    }
+
+    setTrackingLoading(false);
+  };
 
   useEffect(() => {
     if (!userData) return;
@@ -125,32 +172,28 @@ const ScheduleSetting = () => {
     <Paper withBorder m="xs" p="md" radius="md" bg={"gray.0"}>
       <Title order={4}>Email Sending Settings</Title>
 
-      <Text color="gray.6" mt={"xs"}>
-        Emails will be sent out on the following days and times.
-      </Text>
-      {userData?.timezone && (
-        <Text color="gray.9" mt={"xs"}>
-          Email send times will match your LinkedIn send times at: {" "}
-          <span
-            style={{
-              whiteSpace: "nowrap",
-              fontFamily: "monospace",
-              backgroundColor: "#f4f4f4",
-              padding: "0.2em 0.4em",
-              borderRadius: "4px",
-              fontSize: "0.9em",
-              color: "red",
-            }}
-          >
-            <IconClock size="0.8rem" /> {userData.timezone}
-          </span>
-          .
-        </Text>
-      )}
-
       <Divider my={"sm"} />
 
       <Stack mt={"xs"}>
+        {userData?.timezone && (
+          <Text color="gray.9">
+            Email send times will match your LinkedIn send times at:{" "}
+            <span
+              style={{
+                whiteSpace: "nowrap",
+                fontFamily: "monospace",
+                backgroundColor: "#f4f4f4",
+                padding: "0.2em 0.4em",
+                borderRadius: "4px",
+                fontSize: "0.9em",
+                color: "red",
+              }}
+            >
+              <IconClock size="0.8rem" /> {userData.timezone}
+            </span>
+            .
+          </Text>
+        )}
         <Grid gutter={"xl"}>
           <Grid.Col lg={6}>
             <Flex gap={"xs"} align={"end"} wrap={"wrap"}>
@@ -289,6 +332,37 @@ const ScheduleSetting = () => {
         >
           Save
         </Button>
+      </Stack>
+
+      <Divider my={"sm"} />
+
+      <Stack mt={"xs"}>
+        <Text fz="lg" fw={600}>
+          Tracking
+        </Text>
+        <Text fz="sm" mt={-12}>
+          These settings will be applied on all future email campaigns. You may
+          need to adjust past campaigns manually.
+        </Text>
+        <Checkbox
+          label="Track Email Opens"
+          description="Enable to track when an email is opened by the recipient. May affect deliverability."
+          checked={openTracking}
+          onChange={() => {
+            triggerPostEmailTrackingSettings(!openTracking, linkTracking);
+          }}
+          disabled={trackingLoading}
+        />
+        <Checkbox
+          label="Track Link Clicks"
+          description="Enable to track when a link in an email is clicked by the recipient. May affect deliverability."
+          defaultChecked
+          checked={linkTracking}
+          onChange={() => {
+            triggerPostEmailTrackingSettings(openTracking, !linkTracking);
+          }}
+          disabled={trackingLoading}
+        />
       </Stack>
     </Paper>
   );

@@ -20,8 +20,9 @@ import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import { showNotification } from '@mantine/notifications';
 import { useQuery } from '@tanstack/react-query';
-import { getSyncCRM, updateSyncCRM } from '@utils/requests/mergeCRM';
+import { getOperationAvailableCRM, getSyncCRM, updateSyncCRM } from '@utils/requests/mergeCRM';
 import { SyncData } from 'src';
+import _ from 'lodash';
 
 type MergeIntegrationType = {
   id: string;
@@ -141,7 +142,23 @@ const CRMConnectionPage: React.FC = () => {
     },
   });
 
-  console.log(syncData);
+  const { data: availableOperations } = useQuery({
+    queryKey: [`query-get-csm-operation-available`],
+    queryFn: async () => {
+      const operations = ['CRMContact_CREATE', 'CRMContact_FETCH'];
+      const results: Record<string, boolean> = {};
+
+      for (const op of operations) {
+        const contactRes = await getOperationAvailableCRM(userToken, op);
+        results[op] =
+          contactRes.status === 'success' ? (contactRes.data.available as boolean) : false;
+      }
+
+      return results;
+    },
+  });
+
+  console.log(syncData, availableOperations);
 
   const [crmSetup, setCRMSetup] = useState([
     {
@@ -208,6 +225,7 @@ const CRMConnectionPage: React.FC = () => {
       title: 'On Demo Set',
       content:
         'Whenever a prospect moves to "Demo Set" status, choose an automated action to take place in your CRM.',
+      required_operations: ['CRMContact_CREATE', 'CRMContact_FETCH'],
       key: 'on_demo_set',
       options: [
         {
@@ -221,6 +239,14 @@ const CRMConnectionPage: React.FC = () => {
       ],
     },
   ]);
+
+  const hasAvailability = (required_operations: string[]) => {
+    if (!availableOperations) return false;
+    const enabledOperations = Object.keys(availableOperations).filter(
+      (op) => availableOperations[op]
+    );
+    return required_operations.every((op) => enabledOperations.includes(op));
+  };
 
   return (
     <Card ml='md'>
@@ -415,55 +441,63 @@ const CRMConnectionPage: React.FC = () => {
               mt={'lg'}
             />
             <Flex direction={'column'} gap={'sm'}>
-              {eventHandlers.map((item, index) => {
-                return (
-                  <Flex direction={'column'} key={index}>
-                    <label
-                      htmlFor={item?.title}
-                      style={{
-                        borderRadius: '8px',
-                        width: '100%',
-                      }}
-                    >
-                      <Flex
-                        align={'center'}
-                        justify={'space-between'}
+              {eventHandlers
+                .filter((item) => hasAvailability(item.required_operations))
+                .map((item, index) => {
+                  return (
+                    <Flex direction={'column'} key={index}>
+                      <label
+                        htmlFor={item?.title}
                         style={{
-                          borderRadius: '6px',
-                          background: '',
-                          border: '1px solid #dee2e6',
+                          borderRadius: '8px',
+                          width: '100%',
                         }}
-                        p={'xs'}
                       >
-                        <Flex direction={'column'}>
-                          <Text fw={600} mt={2} size={'sm'} color='gray'>
-                            {item?.title}
-                          </Text>
-                          <Text color='gray' size={'xs'}>
-                            {item?.content}
-                          </Text>
+                        <Flex
+                          align={'center'}
+                          justify={'space-between'}
+                          style={{
+                            borderRadius: '6px',
+                            background: '',
+                            border: '1px solid #dee2e6',
+                          }}
+                          p={'xs'}
+                        >
+                          <Flex direction={'column'}>
+                            <Text fw={600} mt={2} size={'sm'} color='gray'>
+                              {item?.title}
+                            </Text>
+                            <Text color='gray' size={'xs'}>
+                              {item?.content}
+                            </Text>
+                          </Flex>
+                          <Flex>
+                            <Text mt='6px' mr='sm' fz='sm' color='gray'>
+                              Action:
+                            </Text>
+                            <Select
+                              data={item.options}
+                              value={syncData?.event_handlers?.on_demo_set ?? 'do_nothing'}
+                              onChange={async (val) => {
+                                await updateSyncCRM(userToken, undefined, undefined, {
+                                  ...(syncData?.event_handlers ?? {}),
+                                  [item.key]: val,
+                                });
+                                refetch();
+                              }}
+                            />
+                          </Flex>
                         </Flex>
-                        <Flex>
-                          <Text mt='6px' mr='sm' fz='sm' color='gray'>
-                            Action:
-                          </Text>
-                          <Select
-                            data={item.options}
-                            value={syncData?.event_handlers?.on_demo_set ?? 'do_nothing'}
-                            onChange={async (val) => {
-                              await updateSyncCRM(userToken, undefined, undefined, {
-                                ...(syncData?.event_handlers ?? {}),
-                                [item.key]: val,
-                              });
-                              refetch();
-                            }}
-                          />
-                        </Flex>
-                      </Flex>
-                    </label>
-                  </Flex>
-                );
-              })}
+                      </label>
+                    </Flex>
+                  );
+                })}
+              {eventHandlers.filter((item) => hasAvailability(item.required_operations)).length ===
+                0 && (
+                <Text color='gray' fs='italic' size='sm'>
+                  No available event handlers
+                </Text>
+              )}
             </Flex>
           </>
 

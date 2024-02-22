@@ -32,3 +32,19 @@ export async function updateSyncCRM(
   });
   return await processResponse(response, 'data');
 }
+
+export async function getOperationAvailableCRM(
+  userToken: string,
+  operation: string
+): Promise<MsgResponse> {
+  const response = await fetch(
+    `${API_URL}/merge_crm/crm_operation_available?operation=${operation}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+      },
+    }
+  );
+  return await processResponse(response, 'data');
+}

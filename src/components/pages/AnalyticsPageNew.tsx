@@ -11,9 +11,12 @@ import MessagingAnalytics from '../AnalyticsPage/MessagingAnalytics';
 import AiActivityLogs from '../AnalyticsPage/AiActivityLogs';
 import { useRecoilValue } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
+import { currentProjectState } from '@atoms/personaAtoms';
 
 const AnalyticsPageNew = () => {
   const userToken = useRecoilValue(userTokenState)
+  const currentProject = useRecoilValue(currentProjectState)
+  const campaignId = currentProject?.id
   return (
     <PageFrame>
       <Tabs
@@ -83,7 +86,7 @@ const AnalyticsPageNew = () => {
         </Tabs.Panel>
         <Tabs.Panel value='assets' pt='xs'>
           <iframe 
-            src={'https://sellscale.retool.com/embedded/public/83130c61-1271-4cbc-9c41-530d8b3fbdf8#authToken=' + userToken}
+            src={'https://sellscale.retool.com/embedded/public/035e7bc0-da4c-4913-a028-5c49e0d457fc#auth_token=' + userToken}
               width={'100%'}
               height={window.innerHeight - 30}
               frameBorder={0}

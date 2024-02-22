@@ -72,8 +72,9 @@ import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
 import CreateEmailReplyFrameworkModal from "@modals/CreateEmailReplyFrameworkModal";
 
 import IconImg from "@assets/images/icon.svg";
-import { PullProspectEmailsCardPage } from '@common/credits/PullProspectEmailsCardPage';
-import PullProspectEmailsCard from '@common/credits/PullProspectEmailsCard';
+import { PullProspectEmailsCardPage } from "@common/credits/PullProspectEmailsCardPage";
+import PullProspectEmailsCard from "@common/credits/PullProspectEmailsCard";
+import { postEmailTrackingSettings } from "@utils/requests/emailTrackingSettings";
 
 type EmailSequenceStepBuckets = {
   PROSPECTED: {
@@ -764,12 +765,20 @@ export default function EmailSequencingPage(props: {
               Settings
             </Tabs.Tab>
 
-            <Tabs.Tab value='email-scraper' icon={<IconFingerprint size="0.8rem" />} ml='auto'>
+            <Tabs.Tab
+              value="email-scraper"
+              icon={<IconFingerprint size="0.8rem" />}
+              ml="auto"
+            >
               Email Scraper
             </Tabs.Tab>
 
             {currentProject.smartlead_campaign_id && (
-              <Tabs.Tab value="smartlead" icon={<IconMessages size="0.8rem" />} ml='auto'>
+              <Tabs.Tab
+                value="smartlead"
+                icon={<IconMessages size="0.8rem" />}
+                ml="auto"
+              >
                 Beta - Variants
               </Tabs.Tab>
             )}
@@ -797,10 +806,11 @@ export default function EmailSequencingPage(props: {
             />
           </Tabs.Panel>{" "}
           <Tabs.Panel value="settings">
-            <Box maw="800px" ml="auto" mr="auto">
-              <NylasConnectedCard
+            <Box maw="800px" mt="md" ml="auto" mr="auto">
+              <EmailSettingsView userToken={userToken} />
+              {/* <NylasConnectedCard
                 connected={userData ? userData.nylas_connected : false} showSmartlead={true}
-              />
+              /> */}
             </Box>
           </Tabs.Panel>
           <Tabs.Panel value="email-scraper">
@@ -811,6 +821,90 @@ export default function EmailSequencingPage(props: {
     </Flex>
   );
 }
+
+const EmailSettingsView = (props: { userToken: string }) => {
+  const currentProject = useRecoilValue(currentProjectState);
+
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [openTracking, setOpenTracking] = useState(
+    (currentProject?.email_open_tracking_enabled == null || currentProject?.email_open_tracking_enabled == undefined)
+    ? true
+    : (currentProject?.email_open_tracking_enabled as boolean)
+  );
+  const [linkTracking, setLinkTracking] = useState(
+    (currentProject?.email_link_tracking_enabled == null || currentProject?.email_link_tracking_enabled == undefined)
+    ? true
+    : (currentProject?.email_link_tracking_enabled as boolean)
+  );
+
+  const triggerPostEmailTrackingSettings = async (
+    openTracking: boolean,
+    linkTracking: boolean
+  ) => {
+    setTrackingLoading(true);
+    const result = await postEmailTrackingSettings(
+      props.userToken,
+      currentProject?.smartlead_campaign_id as number,
+      openTracking,
+      linkTracking
+    );
+    if (result.status !== "success") {
+      showNotification({
+        title: "Error",
+        message: "Could not post tracking settings.",
+        color: "red",
+        autoClose: false,
+      });
+    } else {
+      showNotification({
+        title: "Success",
+        message: "Tracking settings updated.",
+        color: "green",
+        autoClose: true,
+      });
+    }
+
+    if (result.status === "success") {
+      setOpenTracking(openTracking);
+      setLinkTracking(linkTracking);
+    }
+
+    setTrackingLoading(false);
+  };
+
+  return (
+    <>
+      <Text fw={600} size={20}>
+        Email Settings
+      </Text>
+      <Divider my="md" />
+      <Text size="lg" fw={500}>
+        Tracking - Campaign
+      </Text>
+      <Checkbox
+        label="Track Email Opens"
+        description="Enable to track when an email is opened by the recipient. May affect deliverability."
+        mt="sm"
+        checked={openTracking}
+        onChange={() => {
+          triggerPostEmailTrackingSettings(!openTracking, linkTracking);
+        }}
+        disabled={trackingLoading}
+      />
+      <Checkbox
+        label="Track Link Clicks"
+        description="Enable to track when a link in an email is clicked by the recipient. May affect deliverability."
+        defaultChecked
+        mt="sm"
+        checked={linkTracking}
+        onChange={() => {
+          triggerPostEmailTrackingSettings(openTracking, !linkTracking);
+        }}
+        disabled={trackingLoading}
+      />
+    </>
+  );
+};
 
 const EmailReplyFrameworkView = (props: {
   userToken: string;
@@ -1001,7 +1095,7 @@ const EmailReplyFrameworkView = (props: {
                             setSelectedFramework(item);
                             // setBlockList(item?.transformer_blocklist);
                           }}
-                          mr='sm'
+                          mr="sm"
                         />
                         <Text fw={600} mt={2}>
                           {item?.title}

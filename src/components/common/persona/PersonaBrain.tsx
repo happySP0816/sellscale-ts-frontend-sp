@@ -1,25 +1,13 @@
-import {
-  Box,
-  Button,
-  Card,
-  Container,
-  Flex,
-  LoadingOverlay,
-  NumberInput,
-  Progress,
-  Text,
-  TextInput,
-  Title,
-} from "@mantine/core";
-import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
-import { API_URL } from "@constants/data";
-import TextAreaWithAI from "@common/library/TextAreaWithAI";
-import displayNotification from "@utils/notificationFlow";
-import { MsgResponse } from "src";
-import { showNotification } from "@mantine/notifications";
-import { currentProjectState } from "@atoms/personaAtoms";
+import { Box, Button, Card, Container, Flex, LoadingOverlay, NumberInput, Progress, Text, TextInput, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
+import { API_URL } from '@constants/data';
+import TextAreaWithAI from '@common/library/TextAreaWithAI';
+import displayNotification from '@utils/notificationFlow';
+import { MsgResponse } from 'src';
+import { showNotification } from '@mantine/notifications';
+import { currentProjectState } from '@atoms/personaAtoms';
 type PropsType = {
   archetype_id?: number;
 };
@@ -29,29 +17,22 @@ export default function PersonaBrain(props: PropsType) {
   const [fetchedPersona, setFetchedPersona] = useState(false);
   const [loadingPersona, setLoadingPersona] = useState(false);
 
-  const [personaName, setPersonaName] = useState("");
+  const [personaName, setPersonaName] = useState('');
   const [loadingPersonaFitReason, setLoadingPersonaFitReason] = useState(false);
-  const [personaFitReason, setPersonaFitReason] = useState("");
-  const [personaICPMatchingInstructions, setPersonaICPMatchingInstructions] =
-    useState("");
-  const [personaContactObjective, setPersonaContactObjective] = useState("");
+  const [personaFitReason, setPersonaFitReason] = useState('');
+  const [personaICPMatchingInstructions, setPersonaICPMatchingInstructions] = useState('');
+  const [personaContactObjective, setPersonaContactObjective] = useState('');
   const [personaContractSize, setPersonaContractSize] = useState(0);
-  const [personaCTAFrameworkCompany, setPersonaCTAFrameworkCompany] = useState(
-    ""
-  );
-  const [personaCTAFrameworkPersona, setPersonaCTAFrameworkPersona] = useState(
-    ""
-  );
-  const [personaCTAFrameworkAction, setPersonaCTAFrameworkAction] = useState(
-    ""
-  );
-  const [personaUseCases, setPersonaUseCases] = useState("");
-  const [personaFilters, setPersonaFilters] = useState("");
-  const [personaLookalikeProfile1, setPersonaLookalikeProfile1] = useState("");
-  const [personaLookalikeProfile2, setPersonaLookalikeProfile2] = useState("");
-  const [personaLookalikeProfile3, setPersonaLookalikeProfile3] = useState("");
-  const [personaLookalikeProfile4, setPersonaLookalikeProfile4] = useState("");
-  const [personaLookalikeProfile5, setPersonaLookalikeProfile5] = useState("");
+  const [personaCTAFrameworkCompany, setPersonaCTAFrameworkCompany] = useState('');
+  const [personaCTAFrameworkPersona, setPersonaCTAFrameworkPersona] = useState('');
+  const [personaCTAFrameworkAction, setPersonaCTAFrameworkAction] = useState('');
+  const [personaUseCases, setPersonaUseCases] = useState('');
+  const [personaFilters, setPersonaFilters] = useState('');
+  const [personaLookalikeProfile1, setPersonaLookalikeProfile1] = useState('');
+  const [personaLookalikeProfile2, setPersonaLookalikeProfile2] = useState('');
+  const [personaLookalikeProfile3, setPersonaLookalikeProfile3] = useState('');
+  const [personaLookalikeProfile4, setPersonaLookalikeProfile4] = useState('');
+  const [personaLookalikeProfile5, setPersonaLookalikeProfile5] = useState('');
 
   const [needsSave, setNeedsSave] = useState(false);
 
@@ -62,10 +43,10 @@ export default function PersonaBrain(props: PropsType) {
   const fetchPersonaDetails = async () => {
     setLoadingPersona(true);
     await fetch(`${API_URL}/client/archetype/${archetype_id}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${userToken}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     })
       .then((res) => res.json())
@@ -97,42 +78,39 @@ export default function PersonaBrain(props: PropsType) {
 
   const savePersonaDetails = async () => {
     setLoadingPersona(true);
-    await fetch(
-      `${API_URL}/client/archetype/${archetype_id}/update_description_and_fit`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          updated_persona_name: personaName,
-          updated_persona_fit_reason: personaFitReason,
-          updated_persona_icp_matching_prompt: personaICPMatchingInstructions,
-          updated_persona_contact_objective: personaContactObjective,
-          updated_persona_contract_size: personaContractSize,
-          updated_cta_framework_company: personaCTAFrameworkCompany,
-          updated_cta_framework_persona: personaCTAFrameworkPersona,
-          updated_cta_framework_action: personaCTAFrameworkAction,
-          updated_use_cases: personaUseCases,
-          updated_filters: personaFilters,
-          updated_lookalike_profile_1: personaLookalikeProfile1,
-          updated_lookalike_profile_2: personaLookalikeProfile2,
-          updated_lookalike_profile_3: personaLookalikeProfile3,
-          updated_lookalike_profile_4: personaLookalikeProfile4,
-          updated_lookalike_profile_5: personaLookalikeProfile5,
-        }),
-      }
-    )
+    await fetch(`${API_URL}/client/archetype/${archetype_id}/update_description_and_fit`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        updated_persona_name: personaName,
+        updated_persona_fit_reason: personaFitReason,
+        updated_persona_icp_matching_prompt: personaICPMatchingInstructions,
+        updated_persona_contact_objective: personaContactObjective,
+        updated_persona_contract_size: personaContractSize,
+        updated_cta_framework_company: personaCTAFrameworkCompany,
+        updated_cta_framework_persona: personaCTAFrameworkPersona,
+        updated_cta_framework_action: personaCTAFrameworkAction,
+        updated_use_cases: personaUseCases,
+        updated_filters: personaFilters,
+        updated_lookalike_profile_1: personaLookalikeProfile1,
+        updated_lookalike_profile_2: personaLookalikeProfile2,
+        updated_lookalike_profile_3: personaLookalikeProfile3,
+        updated_lookalike_profile_4: personaLookalikeProfile4,
+        updated_lookalike_profile_5: personaLookalikeProfile5,
+      }),
+    })
       .then((res) => res.json())
       .then((persona) => {
         setPersonaName(persona.archetype);
         setPersonaFitReason(persona.persona_fit_reason);
         setPersonaICPMatchingInstructions(persona.icp_matching_prompt);
         showNotification({
-          title: "Success",
-          message: "Persona details saved",
-          color: "blue",
+          title: 'Success',
+          message: 'Persona details saved',
+          color: 'blue',
         });
       })
       .catch((err) => {
@@ -152,14 +130,13 @@ export default function PersonaBrain(props: PropsType) {
 
   return (
     <Flex>
-      <Container mt="md">
+      <Container mt='md'>
         <Card>
           <LoadingOverlay visible={loadingPersona} overlayBlur={2} />
           <Title order={4}>Persona Brain</Title>
-          <Text size="sm" mb="lg">
-            This is what SellScale knows about this persona. Adjust the
-            information below to improve the accuracy of SellScale's
-            recommendations, message generations, email generations, and more.
+          <Text size='sm' mb='lg'>
+            This is what SellScale knows about this persona. Adjust the information below to improve the accuracy of SellScale's recommendations, message
+            generations, email generations, and more.
           </Text>
 
           {fetchedPersona && (
@@ -182,9 +159,7 @@ export default function PersonaBrain(props: PropsType) {
               onUpdate={(data) => {
                 setPersonaName(data.personaName);
                 setPersonaFitReason(data.personaFitReason);
-                setPersonaICPMatchingInstructions(
-                  data.personaICPMatchingInstructions
-                );
+                setPersonaICPMatchingInstructions(data.personaICPMatchingInstructions);
                 setPersonaContactObjective(data.personaContactObjective);
                 setPersonaContractSize(data.personaContractSize);
                 setNeedsSave(true);
@@ -192,23 +167,10 @@ export default function PersonaBrain(props: PropsType) {
             />
           )}
 
-          <Button
-            color="blue"
-            variant="light"
-            mt="md"
-            disabled={!needsSave}
-            onClick={savePersonaDetails}
-          >
+          <Button color='blue' variant='light' mt='md' disabled={!needsSave} onClick={savePersonaDetails}>
             Save Persona Information
           </Button>
-          <Button
-            color="red"
-            variant="outline"
-            mt="md"
-            ml="lg"
-            onClick={fetchPersonaDetails}
-            hidden={!needsSave}
-          >
+          <Button color='red' variant='outline' mt='md' ml='lg' onClick={fetchPersonaDetails} hidden={!needsSave}>
             Cancel Edits
           </Button>
         </Card>
@@ -255,78 +217,56 @@ export function PersonaBasicForm(props: {
 
   const [personaName, setPersonaName] = useState(props.personaName);
   const [loadingPersonaFitReason, setLoadingPersonaFitReason] = useState(false);
-  const [personaFitReason, setPersonaFitReason] = useState(
-    props.personaFitReason
-  );
-  const [personaICPMatchingInstructions, setPersonaICPMatchingInstructions] =
-    useState(props.personaICPMatchingInstructions);
-  const [personaContactObjective, setPersonaContactObjective] = useState(
-    props.personaContactObjective
-  );
-  const [personaContractSize, setPersonaContractSize] = useState(
-    props.personaContractSize
-  );
-  const [personaCTAFrameworkCompany, setPersonaCTAFrameworkCompany] = useState(
-    props.personaCTAFrameworkCompany
-  );
-  const [personaCTAFrameworkPersona, setPersonaCTAFrameworkPersona] = useState(
-    props.personaCTAFrameworkPersona
-  );
-  const [personaCTAFrameworkAction, setPersonaCTAFrameworkAction] = useState( 
-    props.personaCTAFrameworkAction
-  );
+  const [personaFitReason, setPersonaFitReason] = useState(props.personaFitReason);
+  const [personaICPMatchingInstructions, setPersonaICPMatchingInstructions] = useState(props.personaICPMatchingInstructions);
+  const [personaContactObjective, setPersonaContactObjective] = useState(props.personaContactObjective);
+  const [personaContractSize, setPersonaContractSize] = useState(props.personaContractSize);
+  const [personaCTAFrameworkCompany, setPersonaCTAFrameworkCompany] = useState(props.personaCTAFrameworkCompany);
+  const [personaCTAFrameworkPersona, setPersonaCTAFrameworkPersona] = useState(props.personaCTAFrameworkPersona);
+  const [personaCTAFrameworkAction, setPersonaCTAFrameworkAction] = useState(props.personaCTAFrameworkAction);
   const [personaUseCases, setPersonaUseCases] = useState(props.personaUseCases);
-  const [personaFilters, setPersonaFilters] = useState(props.personaFilters || "Seniority: ex. Executive, Directors, VPs \nTitles/profile keywords: ex. Chief Revenue, Account Executive, Business Development \nCompany Type: ex. Technology \nCompany Size: ex. 200 - 1000 employees \nIndustries: ex. Internet, IT");
-  const [personaLookalikeProfile1, setPersonaLookalikeProfile1] = useState(
-    props.personaLookalikeProfile1
+  const [personaFilters, setPersonaFilters] = useState(
+    props.personaFilters ||
+      'Seniority: ex. Executive, Directors, VPs \nTitles/profile keywords: ex. Chief Revenue, Account Executive, Business Development \nCompany Type: ex. Technology \nCompany Size: ex. 200 - 1000 employees \nIndustries: ex. Internet, IT'
   );
-  const [personaLookalikeProfile2, setPersonaLookalikeProfile2] = useState(
-    props.personaLookalikeProfile2
-  );
-  const [personaLookalikeProfile3, setPersonaLookalikeProfile3] = useState(
-    props.personaLookalikeProfile3
-  );
-  const [personaLookalikeProfile4, setPersonaLookalikeProfile4] = useState(
-    props.personaLookalikeProfile4
-  );
-
+  const [personaLookalikeProfile1, setPersonaLookalikeProfile1] = useState(props.personaLookalikeProfile1);
+  const [personaLookalikeProfile2, setPersonaLookalikeProfile2] = useState(props.personaLookalikeProfile2);
+  const [personaLookalikeProfile3, setPersonaLookalikeProfile3] = useState(props.personaLookalikeProfile3);
+  const [personaLookalikeProfile4, setPersonaLookalikeProfile4] = useState(props.personaLookalikeProfile4);
 
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaFitReason(true);
-    const res = await fetch(
-      `${API_URL}/client/archetype/generate_persona_buy_reason`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          persona_name: personaName,
-        }),
-      }
-    )
+    const res = await fetch(`${API_URL}/client/archetype/generate_persona_buy_reason`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${userToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        persona_name: personaName,
+      }),
+    })
       .then(async (r) => {
         if (r.status === 200) {
           return {
-            status: "success",
-            title: "Success",
-            message: "Persona buying reason generated successfully",
+            status: 'success',
+            title: 'Success',
+            message: 'Persona buying reason generated successfully',
             data: await r.json(),
           };
         } else {
           return {
-            status: "error",
+            status: 'error',
             title: `Error (${r.status})`,
-            message: "Failed to generate persona buying reason",
+            message: 'Failed to generate persona buying reason',
             data: {},
           };
         }
       })
       .catch((e) => {
         return {
-          status: "error",
-          title: "Error",
+          status: 'error',
+          title: 'Error',
           message: e.message,
           data: {},
         };
@@ -353,19 +293,31 @@ export function PersonaBasicForm(props: {
       personaLookalikeProfile2: personaLookalikeProfile2,
       personaLookalikeProfile3: personaLookalikeProfile3,
       personaLookalikeProfile4: personaLookalikeProfile4,
-    }
+    };
     if (hardcodeKey && hardcodeValue) {
-      update[hardcodeKey] = hardcodeValue
+      update[hardcodeKey] = hardcodeValue;
     }
-    props.onUpdate(update)
+    props.onUpdate(update);
   };
 
   const fields = [
-    personaName, personaFitReason, personaContactObjective, personaContractSize, personaCTAFrameworkCompany, personaCTAFrameworkPersona, personaCTAFrameworkAction, personaUseCases, personaFilters, personaLookalikeProfile1, personaLookalikeProfile2, personaLookalikeProfile3, personaLookalikeProfile4
-  ]
-  const numFields = fields.length
-  const numFilled = fields.filter(f => f).length
-  const percentFilled = Math.round(numFilled / numFields * 100)
+    personaName,
+    personaFitReason,
+    personaContactObjective,
+    personaContractSize,
+    personaCTAFrameworkCompany,
+    personaCTAFrameworkPersona,
+    personaCTAFrameworkAction,
+    personaUseCases,
+    personaFilters,
+    personaLookalikeProfile1,
+    personaLookalikeProfile2,
+    personaLookalikeProfile3,
+    personaLookalikeProfile4,
+  ];
+  const numFields = fields.length;
+  const numFilled = fields.filter((f) => f).length;
+  const percentFilled = Math.round((numFilled / numFields) * 100);
 
   return (
     <Box>
@@ -379,25 +331,22 @@ export function PersonaBasicForm(props: {
             {percentFilled}% ({numFilled}/{numFields})
           </Text>
         </Flex>
-        <Progress color={percentFilled > 100 ? 'green' : 'blue'} size="xl" value={percentFilled} striped />
+        <Progress color={percentFilled > 100 ? 'green' : 'blue'} size='xl' value={percentFilled} striped />
       </Box>
-      <Box sx={{maxHeight: '650px', overflowY: 'scroll', border: 'solid 1px #eee', padding: '16px'}}>
+      <Box sx={{ maxHeight: '650px', overflowY: 'scroll', border: 'solid 1px #eee', padding: '16px' }}>
         <Flex w='100%' mb='sm'>
           <TextAreaWithAI
-            label="Descriptive Persona Name"
+            label='Descriptive Persona Name'
             description='Give a short name to this persona. For example, "Sales Manager" or "Marketing Director". The AI will use this name when generating messages and splitting prospects.'
             minRows={1}
             value={personaName}
             onChange={(e) => {
-              setPersonaName(e.currentTarget.value)
-              sendUpdate(
-                "personaName",
-                e.currentTarget.value
-              );
+              setPersonaName(e.currentTarget.value);
+              sendUpdate('personaName', e.currentTarget.value);
             }}
           />
         </Flex>
-        <Flex w='100%' mb='sm'>
+        {/* <Flex w='100%' mb='sm'>
           <TextAreaWithAI
             label="Why do they buy your product?"
             description="Explain why this persona is a good fit for your product or service. This will be used by the AI to generate emails and messages."
@@ -433,9 +382,9 @@ export function PersonaBasicForm(props: {
               );
             }}
           />
-        </Flex>
+        </Flex> */}
         {/* TODO(AAKASH) delete component below if no use by July 20, 2023 */}
-        {false && (
+        {/* {false && (
           <TextAreaWithAI
             label="Rich Persona Description"
             description="Explain how to match a prospect to this persona's ICP. Include details like seniority, tiers, company size, other notes, etc. Note that the AI will use this information to rank your prospects."
@@ -464,8 +413,8 @@ export function PersonaBasicForm(props: {
               );
             }}
           />
-        </Flex>
-        <Text fw='500' size='sm' mb='xs'>Fill in this one sentence framework exactly</Text>
+        </Flex> */}
+        {/* <Text fw='500' size='sm' mb='xs'>Fill in this one sentence framework exactly</Text>
         <Flex w='100%' mb='md'>
           <TextInput
             placeholder="Company"
@@ -503,52 +452,47 @@ export function PersonaBasicForm(props: {
             }}
             />
           
-        </Flex>
+        </Flex> */}
         <Flex w='100%' mb='md'>
           <TextAreaWithAI
-            label="Use Cases"
-            description="List use cases this persona cares about."
+            label='Use Cases'
+            description='List use cases this persona cares about.'
             placeholder='- Use Case 1: Connect to your HRIS software ...'
             minRows={3}
             value={personaUseCases}
             onChange={(e) => {
               setPersonaUseCases(e.currentTarget.value);
-              sendUpdate(
-                "personaUseCases",
-                e.currentTarget.value
-              );
+              sendUpdate('personaUseCases', e.currentTarget.value);
             }}
           />
         </Flex>
         <Flex w='100%' mb='md'>
           <TextAreaWithAI
-            label="Persona Filters"
-            description="(e.g., seniority, titles, company type, company size, industries)"
+            label='Persona Filters'
+            description='(e.g., seniority, titles, company type, company size, industries)'
             placeholder='Seniority: ex. Executive, Directors, VPs \ Titles/profile keywords: ex. Chief Revenue, Account Executive, Business Development \ Company Type: ex. Technology \ Company Size: ex. 200 - 1000 employees \ Industries: ex. Internet, IT'
             minRows={5}
             value={personaFilters}
             onChange={(e) => {
               setPersonaFilters(e.currentTarget.value);
-              sendUpdate(
-                "personaFilters",
-                e.currentTarget.value
-              );
+              sendUpdate('personaFilters', e.currentTarget.value);
             }}
           />
         </Flex>
 
-        <Text fw='500' size='sm' >Lookalike LinkedIn Profiles</Text>
-        <Text size='sm' mb='xs' fz='sm'>Paste in at least 3 who you haven't contacted.</Text>
+        <Text fw='500' size='sm'>
+          Lookalike LinkedIn Profiles
+        </Text>
+        <Text size='sm' mb='xs' fz='sm'>
+          Paste in at least 3 who you haven't contacted.
+        </Text>
         <TextInput
           placeholder='Lookalike Profile #1'
           value={personaLookalikeProfile1}
           mt='xs'
           onChange={(e) => {
             setPersonaLookalikeProfile1(e.currentTarget.value);
-            sendUpdate(
-              "personaLookalikeProfile1",
-              e.currentTarget.value
-            );
+            sendUpdate('personaLookalikeProfile1', e.currentTarget.value);
           }}
         />
         <TextInput
@@ -557,10 +501,7 @@ export function PersonaBasicForm(props: {
           mt='xs'
           onChange={(e) => {
             setPersonaLookalikeProfile2(e.currentTarget.value);
-            sendUpdate(
-              "personaLookalikeProfile2",
-              e.currentTarget.value
-            );
+            sendUpdate('personaLookalikeProfile2', e.currentTarget.value);
           }}
         />
         <TextInput
@@ -569,10 +510,7 @@ export function PersonaBasicForm(props: {
           mt='xs'
           onChange={(e) => {
             setPersonaLookalikeProfile3(e.currentTarget.value);
-            sendUpdate(
-              "personaLookalikeProfile3",
-              e.currentTarget.value
-            );
+            sendUpdate('personaLookalikeProfile3', e.currentTarget.value);
           }}
         />
         <TextInput
@@ -581,15 +519,12 @@ export function PersonaBasicForm(props: {
           mt='xs'
           onChange={(e) => {
             setPersonaLookalikeProfile4(e.currentTarget.value);
-            sendUpdate(
-              "personaLookalikeProfile4",
-              e.currentTarget.value
-            );
+            sendUpdate('personaLookalikeProfile4', e.currentTarget.value);
           }}
         />
 
         <Flex mb='md' mt='sm'>
-        {/* <NumberInput
+          {/* <NumberInput
           label="Annual Contract Value (ACV)"
           value={personaContractSize}
           parser={(value) => value.replace(/\$\s?|(,*)/g, "")}

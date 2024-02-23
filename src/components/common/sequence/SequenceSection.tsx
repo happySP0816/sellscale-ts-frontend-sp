@@ -1409,6 +1409,9 @@ function IntroMessageSection(props: {
               >
                 Edit CTAs
               </Tabs.Tab>
+              <Tabs.Tab ml='auto' value='cta-analytics'>
+                📊 CTA Analytics
+              </Tabs.Tab>
               {/* <Tabs.Tab value="voice" ml="auto">
               Train Your AI
             </Tabs.Tab> */}
@@ -1437,6 +1440,18 @@ function IntroMessageSection(props: {
                   setCtasItemsCount(data.filter((x: any) => x.active).length);
                 }}
                 outlineCTA={hoveredCTA ? messageMetaData.cta : undefined}
+              />
+            </Tabs.Panel>
+            <Tabs.Panel value='cta-analytics'>
+              <iframe 
+                src={'https://sellscale.retool.com/embedded/public/7d0f9279-762b-46c5-ac75-cd90dd4bec05#auth_token=' + userToken}
+                style={{
+                  width: '100%',
+                  height: '500px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  marginTop: '8px',
+                }}
               />
             </Tabs.Panel>
           </Tabs>

@@ -189,7 +189,8 @@ function BumpBucketView(props: {
 
                 let bumpConversionRate;
                 if (framework.etl_num_times_converted && framework.etl_num_times_used) {
-                  bumpConversionRate = (framework.etl_num_times_converted / framework.etl_num_times_used) * 100;
+                  bumpConversionRate =
+                    (framework.etl_num_times_converted / framework.etl_num_times_used) * 100;
                 }
 
                 return (
@@ -203,22 +204,34 @@ function BumpBucketView(props: {
                             checked={framework.default === true}
                             thumbIcon={
                               framework.default === true ? (
-                                <IconCheck size='0.8rem' color={theme.colors.teal[theme.fn.primaryShade()]} stroke={3} />
+                                <IconCheck
+                                  size='0.8rem'
+                                  color={theme.colors.teal[theme.fn.primaryShade()]}
+                                  stroke={3}
+                                />
                               ) : (
-                                <IconX size='0.8rem' color={theme.colors.red[theme.fn.primaryShade()]} stroke={3} />
+                                <IconX
+                                  size='0.8rem'
+                                  color={theme.colors.red[theme.fn.primaryShade()]}
+                                  stroke={3}
+                                />
                               )
                             }
                             disabled={true}
                             styles={{
                               label: {
                                 backgroundColor:
-                                  framework.default === true ? theme.colors.teal[theme.fn.primaryShade()] : theme.colors.red[theme.fn.primaryShade()],
+                                  framework.default === true
+                                    ? theme.colors.teal[theme.fn.primaryShade()]
+                                    : theme.colors.red[theme.fn.primaryShade()],
                               },
                             }}
                           />
 
                           <Tooltip
-                            label={`Prospects reply to this bump directly, ${bumpConversionRate?.toFixed(2) || 'an unknown '}% of the time`}
+                            label={`Prospects reply to this bump directly, ${
+                              bumpConversionRate?.toFixed(2) || 'an unknown '
+                            }% of the time`}
                             withinPortal
                             withArrow
                           >
@@ -233,7 +246,11 @@ function BumpBucketView(props: {
                               {framework.title}
                             </Text>
                             {framework.use_account_research && (
-                              <Tooltip withArrow withinPortal label='This BumpFramework will use Account Research'>
+                              <Tooltip
+                                withArrow
+                                withinPortal
+                                label='This BumpFramework will use Account Research'
+                              >
                                 <div>
                                   <IconSearch size='.75rem' stroke='2px' />
                                 </div>
@@ -309,8 +326,16 @@ function BumpBucketView(props: {
           <Card padding='sm' w='100%' mb='12px' mt='12px'>
             <Card.Section px='xs'>
               <Flex align={'center'} justify={'center'} w='100%'>
-                <Tooltip label={`Prospect will be snoozed for ${framework.bump_delay_days} days after bump is sent`} withinPortal>
-                  <Badge mt='12px' size='md' color={valueToColor(theme, formatToLabel(framework.bump_delay_days + ''))} variant='filled'>
+                <Tooltip
+                  label={`Prospect will be snoozed for ${framework.bump_delay_days} days after bump is sent`}
+                  withinPortal
+                >
+                  <Badge
+                    mt='12px'
+                    size='md'
+                    color={valueToColor(theme, formatToLabel(framework.bump_delay_days + ''))}
+                    variant='filled'
+                  >
                     Snooze for {framework.bump_delay_days} day
                     {framework.bump_delay_days > 1 ? 's' : ''}
                   </Badge>
@@ -324,7 +349,11 @@ function BumpBucketView(props: {
   );
 }
 
-function QuestionObjectionLibraryCard(props: { archetypeID: number | null; bumpFramework: BumpFramework; afterEdit: () => void }) {
+function QuestionObjectionLibraryCard(props: {
+  archetypeID: number | null;
+  bumpFramework: BumpFramework;
+  afterEdit: () => void;
+}) {
   const theme = useMantineTheme();
 
   const splitted_substatus = props.bumpFramework?.substatus?.replace('ACTIVE_CONVO_', '');
@@ -373,7 +402,9 @@ function QuestionObjectionLibraryCard(props: { archetypeID: number | null; bumpF
         </Card.Section>
 
         <Text fz='xs'>For convos with status labeled:</Text>
-        <Badge color={valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO')}>{splitted_substatus || 'ACTIVE_CONVO'}</Badge>
+        <Badge color={valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO')}>
+          {splitted_substatus || 'ACTIVE_CONVO'}
+        </Badge>
       </Card>
     </>
   );
@@ -451,7 +482,8 @@ function BumpFrameworkAnalysisTable(props: {
               accessor: 'etl_num_times_converted',
               title: 'Times Converted',
               sortable: true,
-              render: ({ etl_num_times_converted }) => (etl_num_times_converted ? etl_num_times_converted : 0),
+              render: ({ etl_num_times_converted }) =>
+                etl_num_times_converted ? etl_num_times_converted : 0,
             },
             {
               accessor: 'etl_conversion_rate',
@@ -487,8 +519,12 @@ export default function BumpFrameworksPage(props: {
   const [loading, setLoading] = useState(false);
   const theme = useMantineTheme();
 
-  const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] = useDisclosure();
-  const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] = useDisclosure();
+  const [addNewSequenceStepOpened, { open: openSequenceStep, close: closeSequenceStep }] =
+    useDisclosure();
+  const [
+    addNewQuestionObjectionOpened,
+    { open: openQuestionObjection, close: closeQuestionObjection },
+  ] = useDisclosure();
   const [maximumBumpSoftLock, setMaximumBumpSoftLock] = useState(false);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
   const archetypeID = currentProject?.id || -1;
@@ -564,9 +600,9 @@ export default function BumpFrameworksPage(props: {
     setLoading(true);
 
     const result = await getBumpFrameworks(
-      userToken, 
-      [], 
-      [], 
+      userToken,
+      [],
+      [],
       [],
       undefined,
       undefined,
@@ -643,7 +679,10 @@ export default function BumpFrameworksPage(props: {
         }
       }
     }
-    const sortedActiveConvo = _.sortBy(newBumpBuckets.ACTIVE_CONVO.frameworks, (obj) => obj.substatus);
+    const sortedActiveConvo = _.sortBy(
+      newBumpBuckets.ACTIVE_CONVO.frameworks,
+      (obj) => obj.substatus
+    );
     newBumpBuckets.ACTIVE_CONVO.frameworks = sortedActiveConvo;
 
     bumpBuckets.current = newBumpBuckets;
@@ -656,8 +695,6 @@ export default function BumpFrameworksPage(props: {
     if (props.onPopulateBumpFrameworks) {
       props.onPopulateBumpFrameworks(newBumpBuckets);
     }
-
-
   };
 
   const triggerPostBumpDeactivate = async () => {
@@ -722,7 +759,9 @@ export default function BumpFrameworksPage(props: {
   }, [archetypeID, deactivateState]);
 
   useEffect(() => {
-    let length = bumpFrameworkLengthMarks.find((marks) => marks.api_label === data.bumpLength)?.value;
+    let length = bumpFrameworkLengthMarks.find(
+      (marks) => marks.api_label === data.bumpLength
+    )?.value;
     if (length == null) {
       length = 50;
     }
@@ -742,7 +781,13 @@ export default function BumpFrameworksPage(props: {
 
         <Flex direction={'row'}>
           <Box w={'100%'}>
-            <Tabs keepMounted={false} color='blue' variant='outline' defaultValue={props.defaultTab || 'sequence'} orientation='horizontal'>
+            <Tabs
+              keepMounted={false}
+              color='blue'
+              variant='outline'
+              defaultValue={props.defaultTab || 'sequence'}
+              orientation='horizontal'
+            >
               <Tabs.List>
                 {/* <Tabs.Tab value='ctas' icon={<IconList size='0.8rem' />}>
                   CTAs
@@ -776,12 +821,15 @@ export default function BumpFrameworksPage(props: {
 
               <Tabs.Panel value='settings' pt='xs'>
                 <Container maw='800px' ml='auto' mr='auto'>
-                  <LinkedInConnectedCard connected={userData ? userData.li_voyager_connected : false} />
+                  <LinkedInConnectedCard
+                    connected={userData ? userData.li_voyager_connected : false}
+                  />
                   {/* Auto bump component */}
                   <Card withBorder mt='xs' radius={'md'}>
                     <Title order={4}>Autobump</Title>
                     <Text size='xs' color='gray'>
-                      By enabling AutoBump, SellScale will automatically send follow-up messages to prospects who do not respond to your initial message.
+                      By enabling AutoBump, SellScale will automatically send follow-up messages to
+                      prospects who do not respond to your initial message.
                     </Text>
                     <Switch
                       label='AutoBump'
@@ -815,7 +863,11 @@ export default function BumpFrameworksPage(props: {
                           title: (
                             <Flex direction='row' align='center' justify='space-between'>
                               <Title order={3}>AutoBump</Title>
-                              <Badge color={userData.auto_bump ? 'green' : 'red'} variant='filled' ml='sm'>
+                              <Badge
+                                color={userData.auto_bump ? 'green' : 'red'}
+                                variant='filled'
+                                ml='sm'
+                              >
                                 {userData.auto_bump ? 'Enabled' : 'Disabled'}
                               </Badge>
                             </Flex>
@@ -823,18 +875,22 @@ export default function BumpFrameworksPage(props: {
                           children: (
                             <>
                               <Text fz='sm'>
-                                AutoBump is SellScale AI's system for automatically sending follow-up messages to prospects. AutoBumps are sent when a prospect
-                                does not respond to a message, and are sent at random times between 9am and 5pm in your timezone on workdays.
+                                AutoBump is SellScale AI's system for automatically sending
+                                follow-up messages to prospects. AutoBumps are sent when a prospect
+                                does not respond to a message, and are sent at random times between
+                                9am and 5pm in your timezone on workdays.
                               </Text>
                               <Card mt='sm' mb='md' withBorder shadow='sm'>
                                 <Text fw='bold'>
-                                  Please test your bump frameworks before enabling AutoBump. AutoBump will always use your default bump framework, so make sure
+                                  Please test your bump frameworks before enabling AutoBump.
+                                  AutoBump will always use your default bump framework, so make sure
                                   it is working as expected.
                                 </Text>
                               </Card>
 
                               <Text mt='md' fz='sm'>
-                                AutoBumps using personalized bump frameworks see a significant increase in response rates.
+                                AutoBumps using personalized bump frameworks see a significant
+                                increase in response rates.
                               </Text>
                             </>
                           ),
@@ -854,8 +910,9 @@ export default function BumpFrameworksPage(props: {
                   <Card withBorder mt='xs' radius={'md'}>
                     <Title order={4}>Template Mode vs CTA Mode</Title>
                     <Text size='xs' color='gray'>
-                      CTA Mode is a more generative mode where you use a combination of CTAs and Voice to control your messaging. Template mode is more
-                      controlled. Feel free to toggle this persona to your preference.{' '}
+                      CTA Mode is a more generative mode where you use a combination of CTAs and
+                      Voice to control your messaging. Template mode is more controlled. Feel free
+                      to toggle this persona to your preference.{' '}
                     </Text>
                     <Switch
                       label='Template Mode Enabled'
@@ -864,25 +921,32 @@ export default function BumpFrameworksPage(props: {
                       mt='xs'
                       checked={currentProject?.template_mode}
                       onClick={() => {
-                        fetch(`${API_URL}/client/archetype/${currentProject?.id}/toggle_template_mode`, {
-                          method: 'PATCH',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            Authorization: `Bearer ${userToken}`,
-                          },
-                          body: JSON.stringify({
-                            template_mode: !currentProject?.template_mode,
-                          }),
-                        }).then((res) => {
-                          getFreshCurrentProject(userToken, currentProject?.id as number).then((project: any) => {
-                            showNotification({
-                              title: 'Success',
-                              message: `Template mode ${project?.template_mode ? 'enabled' : 'disabled'}`,
-                              color: 'green',
-                              icon: <IconCheck size='1rem' />,
-                            });
-                            setCurrentProject(project);
-                          });
+                        fetch(
+                          `${API_URL}/client/archetype/${currentProject?.id}/toggle_template_mode`,
+                          {
+                            method: 'PATCH',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              Authorization: `Bearer ${userToken}`,
+                            },
+                            body: JSON.stringify({
+                              template_mode: !currentProject?.template_mode,
+                            }),
+                          }
+                        ).then((res) => {
+                          getFreshCurrentProject(userToken, currentProject?.id as number).then(
+                            (project: any) => {
+                              showNotification({
+                                title: 'Success',
+                                message: `Template mode ${
+                                  project?.template_mode ? 'enabled' : 'disabled'
+                                }`,
+                                color: 'green',
+                                icon: <IconCheck size='1rem' />,
+                              });
+                              setCurrentProject(project);
+                            }
+                          );
                         });
                       }}
                     />
@@ -891,7 +955,10 @@ export default function BumpFrameworksPage(props: {
               </Tabs.Panel>
 
               <Tabs.Panel value='simulate' pt='xs'>
-                <LinkedInConvoSimulator personaId={archetypeID as number} sequenceSetUpMode={true} />
+                <LinkedInConvoSimulator
+                  personaId={archetypeID as number}
+                  sequenceSetUpMode={true}
+                />
               </Tabs.Panel>
 
               <Tabs.Panel value='replies' pt='xs'>
@@ -914,61 +981,72 @@ export default function BumpFrameworksPage(props: {
                     </Button>
                     <Radio.Group value={data?.id}>
                       <Group mt='xs'>
-                        {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map((item: any, i: number) => {
-                          const splitted_substatus = item.substatus?.replace('ACTIVE_CONVO_', '');
+                        {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map(
+                          (item: any, i: number) => {
+                            const splitted_substatus = item.substatus?.replace('ACTIVE_CONVO_', '');
 
-                          return (
-                            <>
-                              {(!bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1] ||
-                                item.substatus !== bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1].substatus) && (
-                                <Divider
-                                  label={
-                                    <Flex align={'center'} gap={4}>
-                                      <div
-                                        style={{
-                                          width: '10px',
-                                          height: '10px',
-                                          background: valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO'),
-                                          borderRadius: '100%',
-                                        }}
-                                      ></div>
-                                      <Text color='gray' fw={600}>
-                                        {splitted_substatus || 'ACTIVE_CONVERSATION'}
-                                      </Text>
-                                    </Flex>
-                                  }
-                                  labelPosition='left'
-                                  w={'100%'}
-                                />
-                              )}
-
-                              <label
-                                htmlFor={item?.title}
-                                style={{
-                                  outline: `${data?.id === item?.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
-                                  borderRadius: '8px',
-                                  padding: '10px 14px',
-                                  width: '100%',
-                                }}
-                              >
-                                <Flex align={'center'} gap={10}>
-                                  <Radio
-                                    value={item?.id}
-                                    id={item?.title}
-                                    size='xs'
-                                    onClick={() => {
-                                      setData(item);
-                                      setBlockList(item?.transformer_blocklist);
-                                    }}
+                            return (
+                              <>
+                                {(!bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1] ||
+                                  item.substatus !==
+                                    bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1]
+                                      .substatus) && (
+                                  <Divider
+                                    label={
+                                      <Flex align={'center'} gap={4}>
+                                        <div
+                                          style={{
+                                            width: '10px',
+                                            height: '10px',
+                                            background: valueToColor(
+                                              theme,
+                                              splitted_substatus || 'ACTIVE_CONVO'
+                                            ),
+                                            borderRadius: '100%',
+                                          }}
+                                        ></div>
+                                        <Text color='gray' fw={600}>
+                                          {splitted_substatus || 'ACTIVE_CONVERSATION'}
+                                        </Text>
+                                      </Flex>
+                                    }
+                                    labelPosition='left'
+                                    w={'100%'}
                                   />
-                                  <Text fw={600} mt={2}>
-                                    {item?.title}
-                                  </Text>
-                                </Flex>
-                              </label>
-                            </>
-                          );
-                        })}
+                                )}
+
+                                <label
+                                  htmlFor={item?.title}
+                                  style={{
+                                    outline: `${
+                                      data?.id === item?.id
+                                        ? ' 0.125rem solid #228be6'
+                                        : ' 0.0625rem solid #ced4da'
+                                    }`,
+                                    borderRadius: '8px',
+                                    padding: '10px 14px',
+                                    width: '100%',
+                                  }}
+                                >
+                                  <Flex align={'center'} gap={10}>
+                                    <Radio
+                                      value={item?.id}
+                                      id={item?.title}
+                                      size='xs'
+                                      onClick={() => {
+                                        setData(item);
+                                        setBlockList(item?.transformer_blocklist);
+                                      }}
+                                    />
+                                    <Text fw={600} mt={2}>
+                                      {item?.title}
+                                    </Text>
+                                  </Flex>
+                                </label>
+                              </>
+                            );
+                          }
+                        )}
                       </Group>
                     </Radio.Group>
                   </Flex>
@@ -1061,10 +1139,21 @@ export default function BumpFrameworksPage(props: {
                       />
                     </Flex>
                     <Flex gap={'xl'}>
-                      <Button variant='filled' color='red' w={'100%'} size='lg' onClick={() => triggerPostBumpDeactivate()}>
+                      <Button
+                        variant='filled'
+                        color='red'
+                        w={'100%'}
+                        size='lg'
+                        onClick={() => triggerPostBumpDeactivate()}
+                      >
                         Deactivate
                       </Button>
-                      <Button variant='filled' w={'100%'} size='lg' onClick={() => triggerEditBumpFramework()}>
+                      <Button
+                        variant='filled'
+                        w={'100%'}
+                        size='lg'
+                        onClick={() => triggerEditBumpFramework()}
+                      >
                         Save Framework
                       </Button>
                     </Flex>
@@ -1105,7 +1194,8 @@ export default function BumpFrameworksPage(props: {
                             data.overall_status,
                             data.title,
                             data.description,
-                            bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)?.api_label as string,
+                            bumpFrameworkLengthMarks.find((mark) => mark.value === bumpLengthValue)
+                              ?.api_label as string,
                             data.bumped_count,
                             data.bump_delay_days,
                             data.default,

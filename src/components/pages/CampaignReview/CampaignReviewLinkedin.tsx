@@ -49,6 +49,10 @@ import { CampaignEntityData } from '@pages/CampaignDetail';
 import { Carousel } from '@mantine/carousel';
 import { useQuery } from '@tanstack/react-query';
 import DOMPurify from 'dompurify';
+import { CtaList, CtaSection } from '@common/sequence/CtaSection';
+import PersonaDetailsCTAs from '@common/persona/details/PersonaDetailsCTAs';
+import { getPersonasOverview } from '@utils/requests/getPersonas';
+import { PersonaOverview } from 'src';
 
 type SequenceProps = {
   campaignOverview: any;
@@ -327,6 +331,7 @@ export const Messaging = (props: MessagingProps) => {
 
   const [openid, setOpenId] = useState<number>(0);
   const userData = useRecoilValue(userDataState);
+  const userToken = useRecoilValue(userTokenState);
 
   let SEQUENCE = props.campaignOverview?.linkedin?.sequence;
   if (props.campaignType === 'EMAIL') {
@@ -364,6 +369,18 @@ export const Messaging = (props: MessagingProps) => {
     },
     refetchOnWindowFocus: false,
   });
+
+  const { data: persona } = useQuery({
+    queryKey: [`query-personas-data`],
+    queryFn: async () => {
+      const response = await getPersonasOverview(userToken);
+      const personas = response.status === 'success' ? (response.data as PersonaOverview[]) : [];
+      return personas.find((persona) => persona.id === props.campaignId);
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  console.log(persona);
 
   const CAROUSEL_HEIGHT = 200;
 
@@ -432,7 +449,7 @@ export const Messaging = (props: MessagingProps) => {
           <Text>The generated sequences from the assets.</Text>
         </Box>
 
-        {messageData?.map((item: any, index: number) => {
+        {messageData?.map((item, index) => {
           return (
             <>
               <Box>
@@ -509,6 +526,9 @@ export const Messaging = (props: MessagingProps) => {
                         />
                       }
                     </Text>
+                    {!persona?.template_mode && persona?.linkedin_active && (
+                      <CtaList personaId={props.campaignId} />
+                    )}
                   </Flex>
                 </Collapse>
               )}

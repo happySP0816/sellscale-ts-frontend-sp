@@ -705,6 +705,8 @@ const DetailEmailSequencing: FC<{
             onChange={setOpenedTemplate}
           >
             {inactiveTemplates.map((template: EmailSequenceStep, index) => {
+              const open_conversion = template.times_used ? Math.floor(100 * (template.times_accepted / template.times_used)) : "-"
+              const reply_conversion = template.times_replied ? Math.floor(100 * (template.times_replied / template.times_used)) : "-"
               return (
                 <Accordion.Item value={`${index}`}>
                   <Accordion.Control>
@@ -713,14 +715,14 @@ const DetailEmailSequencing: FC<{
                         <Text fw={500}>{template.title}</Text>
                       </Flex>
                       <Flex>
-                        <Tooltip label="Coming Soon" withArrow withinPortal>
-                          <Text fz="sm" mr="md">
-                            Open %: <b>TBD</b>
+                        <Tooltip label={`Prospects: ${template.times_accepted} / ${template.times_used}`} withArrow withinPortal>
+                          <Text fz='sm' mr='md'>
+                            Open %: <b>{open_conversion}</b>
                           </Text>
                         </Tooltip>
-                        <Tooltip label="Coming Soon" withArrow withinPortal>
-                          <Text fz="sm">
-                            Reply %: <b>TBD</b>
+                        <Tooltip label={`Prospects: ${template.times_replied} / ${template.times_used}`} withArrow withinPortal>
+                          <Text fz='sm'>
+                            Reply %: <b>{reply_conversion}</b>
                           </Text>
                         </Tooltip>
                       </Flex>
@@ -1146,13 +1148,8 @@ const SubjectLineItem: React.FC<{
                 px={"0.25rem"}
                 fw={"400"}
               >
-                Acceptance:{" "}
-                {Math.max(
-                  Math.floor(
-                    subjectLine.times_accepted / subjectLine.times_used
-                  ) || 0
-                )}
-                %
+                Acceptance:{' '}
+                {subjectLine.times_used ? Math.floor(100 * (subjectLine.times_accepted / subjectLine.times_used)) : "-"}%
               </Button>
             </Tooltip>
           </Flex>
@@ -1637,14 +1634,14 @@ export const EmailBodyItem: React.FC<{
                   hideSubjectLineScore
                 />
               </Box>
-              <Tooltip label="Coming Soon" withArrow withinPortal>
-                <Text fz="sm" mr="md">
-                  Open %: <b>TBD</b>
+              <Tooltip label={`Prospects: ${template.times_accepted || 0} / ${template.times_used || 0} `} withArrow withinPortal>
+                <Text fz='sm' mr='md'>
+                  Open %: <b>{template.times_used ? Math.floor(100 * (template.times_accepted / template.times_used)) : "-"}</b>
                 </Text>
               </Tooltip>
-              <Tooltip label="Coming Soon" withArrow withinPortal>
-                <Text fz="sm" mr="md">
-                  Reply %: <b>TBD</b>
+              <Tooltip label={`Prospects: ${template.times_replied || 0} / ${template.times_used || 0}`} withArrow withinPortal>
+                <Text fz='sm' mr='md'>
+                  Reply %: <b>{template.times_used ? Math.floor(100 * (template.times_replied / template.times_used)) : "-"}</b>
                 </Text>
               </Tooltip>
               {/*

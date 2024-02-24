@@ -1199,12 +1199,7 @@ export function PersonCampaignCard(props: {
                   projectId={props.persona.id}
                   isActive={props.persona.linkedin_active}
                   onChangeUserStatusSuccess={(status: boolean) => {
-                    const result = postTogglePersonaActive(
-                      userToken,
-                      props.persona.id,
-                      "linkedin",
-                      !props.persona.linkedin_active
-                    ).then((res) => {
+                    const result = postTogglePersonaActive(userToken, props.persona.id, 'linkedin', !props.persona.linkedin_active).then((res) => {
                       // setPersonaActive(status);
                       props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
                     });
@@ -1221,12 +1216,7 @@ export function PersonCampaignCard(props: {
                   projectId={props.persona.id}
                   isActive={props.persona.email_active}
                   onChangeUserStatusSuccess={(status: boolean) => {
-                    const result = postTogglePersonaActive(
-                      userToken,
-                      props.persona.id,
-                      "email",
-                      !props.persona.email_active
-                    ).then((res) => {
+                    const result = postTogglePersonaActive(userToken, props.persona.id, 'email', !props.persona.email_active).then((res) => {
                       // setPersonaActive(status);
                       props.onPersonaActiveStatusUpdate?.(props.persona?.id ?? 0, status);
                     });
@@ -1556,26 +1546,31 @@ export const PersonCampaignTable = (props: {
           pr='xs'
           spacing={0}
         >
-          <Group w={'8%'}>
-            <Text fw={600} color='gray.8' fz='sm'>
+          <Flex w={'8%'} justify={'center'}>
+            <Text fw={600} color='gray.8' fz='sm' style={{ display: 'flex', justifyContent: 'center' }}>
               Contacts
             </Text>
-          </Group>
+          </Flex>
           <Divider orientation='vertical' ml='xs' mr='xs' />
-          <Group w={'32%'} spacing={5} noWrap>
-            <Flex style={{ cursor: 'pointer' }} align={'center'} gap={'xs'} onClick={() => setSort((s) => (s === 'asc' ? 'desc' : 'asc'))}>
-              <Text fw={600} color='gray.8' fz='sm'>
-                Campaigns
-              </Text>
+          <Flex
+            style={{ cursor: 'pointer' }}
+            w={'32%'}
+            align={'center'}
+            justify={'center'}
+            gap={'xs'}
+            onClick={() => setSort((s) => (s === 'asc' ? 'desc' : 'asc'))}
+          >
+            <Text fw={600} color='gray.8' fz='sm'>
+              Campaigns
+            </Text>
 
-              {/* <IconArrowDown
+            {/* <IconArrowDown
                 size='0.85rem'
                 style={{
                   transform: sort === 'desc' ? 'rotate(0deg)' : 'rotate(180deg)',
                 }}
               /> */}
-            </Flex>
-          </Group>
+          </Flex>
 
           {/* <Divider orientation='vertical' ml='xs' mr='xs' /> */}
 

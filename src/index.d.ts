@@ -468,6 +468,9 @@ export type EmailSequenceStep = {
   bumped_count: number | null;
   sequence_delay_days: number | null;
   transformer_blocklist: string[];
+  times_used: number;
+  times_accepted: number;
+  times_replied: number
   // TODO: MISSING A LOT OF FIELDS
 };
 

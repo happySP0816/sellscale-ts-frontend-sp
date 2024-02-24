@@ -4,7 +4,14 @@ import './index.css';
 import App from './components/App';
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createBrowserRouter, createRoutesFromChildren, matchRoutes, RouterProvider, useLocation, useNavigationType } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  createRoutesFromChildren,
+  matchRoutes,
+  RouterProvider,
+  useLocation,
+  useNavigationType,
+} from 'react-router-dom';
 import ErrorPage from './components/pages/ErrorPage';
 import PersonaPage from './components/pages/PersonaPage';
 import MissingPage from './components/pages/MissingPage';
@@ -63,6 +70,7 @@ import CampaignReview from '@pages/CampaignReview/CampaignReviewLinkedin';
 import CompanyOverview from '@common/company/CompanyOverview';
 import OperatorDashTaskRouter from '@pages/Overview/OperatorDash/OperatorDashTaskRouter';
 import TaskEmailTemplate from '@common/resend_email/task_resend_email';
+import ExtractPdfPage from '@pages/ExtractPdfPage';
 
 const queryClient = new QueryClient();
 
@@ -72,7 +80,13 @@ if (import.meta.env.PROD) {
     dsn: 'https://562db49ea9174f5c9f9c75921f664755@o4504749544767488.ingest.sentry.io/4504776732901376',
     integrations: [
       new BrowserTracing({
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(React.useEffect, useLocation, useNavigationType, createRoutesFromChildren, matchRoutes),
+        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+          React.useEffect,
+          useLocation,
+          useNavigationType,
+          createRoutesFromChildren,
+          matchRoutes
+        ),
       }),
     ],
 
@@ -230,6 +244,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: 'personas',
         element: <RestrictedRoute page={<PersonaPage />} />,
+      },
+      {
+        path: 'extract-pdf',
+        element: <RestrictedRoute page={<ExtractPdfPage />} />,
       },
       {
         path: 'personas/:personaId?',

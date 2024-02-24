@@ -1,10 +1,11 @@
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { syncLocalStorage } from '@auth/core';
-import { Box, Card, Flex, Select, Switch, Text, Title, UnstyledButton } from '@mantine/core';
+import { Box, Button, Card, Flex, Popover, Select, Switch, Text, Title, Tooltip, UnstyledButton } from '@mantine/core';
 import { IconExternalLink, IconInfoCircle } from '@tabler/icons';
 import { updateClientSDR } from '@utils/requests/updateClientSDR';
 import { booleanFilterFn, DataGrid, stringFilterFn } from 'mantine-data-grid';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import { useDisclosure } from '@mantine/hooks';
 
 export default function RealtimeResponseEngine() {
   const [userData, setUserData] = useRecoilState(userDataState);
@@ -127,6 +128,7 @@ export default function RealtimeResponseEngine() {
             filterFn: stringFilterFn,
             cell: (cell) => {
               const { emoji, label, content } = cell.row.original;
+              const [opened, { close, open }] = useDisclosure(false);
               return (
                 <Flex justify={'center'} align={'center'} direction={'row'} gap={4} w={'100%'} h={'100%'}>
                   <div
@@ -147,9 +149,16 @@ export default function RealtimeResponseEngine() {
                       <Text fw={700} size={'sm'} ml='4px'>
                         {label}
                       </Text>
-                      <IconInfoCircle color='gray' size={'0.8rem'} style={{ marginTop: '-3px' }} />
+                      {/* <Tooltip.Floating label={content} refProp='innerRef'>
+                        <IconInfoCircle color='gray' size={'0.8rem'} />
+                      </Tooltip.Floating> */}
+                      <Tooltip label={content}>
+                        <Box>
+                          <IconInfoCircle color='gray' size={'0.8rem'} />
+                        </Box>
+                      </Tooltip>
                     </Flex>
-                    <Text ml='4px'>{content}</Text>
+                    {/*  */}
                   </Flex>
                 </Flex>
               );

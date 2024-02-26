@@ -453,7 +453,7 @@ export function PersonaBasicForm(props: {
             />
           
         </Flex> */}
-        <Flex w='100%' mb='md'>
+        {/* <Flex w='100%' mb='md'>
           <TextAreaWithAI
             label='Use Cases'
             description='List use cases this persona cares about.'
@@ -465,8 +465,8 @@ export function PersonaBasicForm(props: {
               sendUpdate('personaUseCases', e.currentTarget.value);
             }}
           />
-        </Flex>
-        <Flex w='100%' mb='md'>
+        </Flex> */}
+        {/* <Flex w='100%' mb='md'>
           <TextAreaWithAI
             label='Persona Filters'
             description='(e.g., seniority, titles, company type, company size, industries)'
@@ -478,9 +478,9 @@ export function PersonaBasicForm(props: {
               sendUpdate('personaFilters', e.currentTarget.value);
             }}
           />
-        </Flex>
+        </Flex> */}
 
-        <Text fw='500' size='sm'>
+        {/* <Text fw='500' size='sm'>
           Lookalike LinkedIn Profiles
         </Text>
         <Text size='sm' mb='xs' fz='sm'>
@@ -521,7 +521,7 @@ export function PersonaBasicForm(props: {
             setPersonaLookalikeProfile4(e.currentTarget.value);
             sendUpdate('personaLookalikeProfile4', e.currentTarget.value);
           }}
-        />
+        /> */}
 
         <Flex mb='md' mt='sm'>
           {/* <NumberInput

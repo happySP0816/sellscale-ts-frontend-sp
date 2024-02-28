@@ -100,6 +100,7 @@ export function ProspectConvoMessage(props: {
   name: string;
   message: string;
   timestamp: string;
+  casualTimestamp: string;
   is_me: boolean;
   aiGenerated: boolean;
   bumpFrameworkId?: number;
@@ -211,9 +212,11 @@ export function ProspectConvoMessage(props: {
                     />
                   )}
                 </Group>
-                <Text weight={400} size={11} c='dimmed' pr={10}>
-                  {props.timestamp}
-                </Text>
+                <Tooltip label={props.timestamp} openDelay={500}>
+                  <Text weight={400} size={11} c='dimmed' pr={10}>
+                    {props.casualTimestamp}
+                  </Text>
+                </Tooltip>
               </Group>
               <TextWithNewlines style={{ fontSize: '0.875rem' }} breakheight='12px'>
                 {finalMessage}
@@ -1018,7 +1021,8 @@ export default function ProspectConvo(props: Props) {
                   img_url={msg.img_url}
                   name={`${msg.first_name} ${msg.last_name}`}
                   message={msg.message}
-                  timestamp={convertDateToCasualTime(new Date(msg.date))}
+                  casualTimestamp={convertDateToCasualTime(new Date(msg.date))}
+                  timestamp={convertDateToLocalTime(new Date(msg.date))}
                   is_me={msg.connection_degree === 'You'}
                   aiGenerated={msg.ai_generated}
                   bumpFrameworkId={msg.bump_framework_id}
@@ -1044,16 +1048,25 @@ export default function ProspectConvo(props: Props) {
               currentConvoLiMessages &&
               currentConvoLiMessages.length === 0 && (
                 <Center h={400}>
-                  <Box maw={550} sx={{textAlign: 'center'}}>
+                  <Box maw={550} sx={{ textAlign: 'center' }}>
                     <Text fz='sm' fs='italic' c='dimmed'>
                       No conversation history found.
                     </Text>
                     <Card mt='xs'>
-                      <Title order={5}><IconBrandLinkedin color={theme.colors.blue[6]} size='1rem' /> Your LinkedIn May be Disconnected</Title>
+                      <Title order={5}>
+                        <IconBrandLinkedin color={theme.colors.blue[6]} size='1rem' /> Your LinkedIn
+                        May be Disconnected
+                      </Title>
                       <Text fz='sm'>
-                        Visit the Integrations page and please connect your LinkedIn account to continue reviewing and responding to messages.
+                        Visit the Integrations page and please connect your LinkedIn account to
+                        continue reviewing and responding to messages.
                       </Text>
-                      <Button mt='xs' leftIcon={<IconBrandLinkedin size='0.8rem'/>} color='blue' onClick={() => navigate('/settings')}>
+                      <Button
+                        mt='xs'
+                        leftIcon={<IconBrandLinkedin size='0.8rem' />}
+                        color='blue'
+                        onClick={() => navigate('/settings')}
+                      >
                         Connect LinkedIn Account
                       </Button>
                     </Card>
@@ -1074,7 +1087,8 @@ export default function ProspectConvo(props: Props) {
                           : 'Unknown'
                       }
                       message={msg.body}
-                      timestamp={convertDateToCasualTime(new Date(msg.date_received))}
+                      casualTimestamp={convertDateToCasualTime(new Date(msg.date_received))}
+                      timestamp={convertDateToLocalTime(new Date(msg.date_received))}
                       is_me={msg.from_sdr}
                       aiGenerated={msg.ai_generated || false}
                       bumpFrameworkId={undefined}
@@ -1106,16 +1120,25 @@ export default function ProspectConvo(props: Props) {
                   <>
                     {currentConvoEmailMessages && currentConvoEmailMessages.length === 0 && (
                       <Center h={400}>
-                        <Box maw={550} sx={{textAlign: 'center'}}>
+                        <Box maw={550} sx={{ textAlign: 'center' }}>
                           <Text fz='sm' fs='italic' c='dimmed'>
                             No conversation history found.
                           </Text>
                           <Card mt='xs'>
-                            <Title order={5}><IconBrandLinkedin color={theme.colors.blue[6]} size='1rem' /> Your LinkedIn May be Disconnected</Title>
+                            <Title order={5}>
+                              <IconBrandLinkedin color={theme.colors.blue[6]} size='1rem' /> Your
+                              LinkedIn May be Disconnected
+                            </Title>
                             <Text fz='sm'>
-                              Visit the Integrations page and please connect your LinkedIn account to continue reviewing and responding to messages.
+                              Visit the Integrations page and please connect your LinkedIn account
+                              to continue reviewing and responding to messages.
                             </Text>
-                            <Button mt='xs' leftIcon={<IconBrandLinkedin size='0.8rem'/>} color='blue' onClick={() => navigate('/settings')}>
+                            <Button
+                              mt='xs'
+                              leftIcon={<IconBrandLinkedin size='0.8rem' />}
+                              color='blue'
+                              onClick={() => navigate('/settings')}
+                            >
                               Connect LinkedIn Account
                             </Button>
                           </Card>
@@ -1615,18 +1638,23 @@ function EmailThreadsOption(props: { thread: EmailThread; onClick?: () => void }
             </Stack>
           </Box>
         </Flex>
-        <Text
-          sx={{
-            position: 'absolute',
-            top: 5,
-            right: 5,
-          }}
-          weight={400}
-          size={8}
-          c='dimmed'
+        <Tooltip
+          label={convertDateToLocalTime(new Date(props.thread.last_message_timestamp))}
+          openDelay={500}
         >
-          {convertDateToCasualTime(new Date(props.thread.last_message_timestamp))}
-        </Text>
+          <Text
+            sx={{
+              position: 'absolute',
+              top: 5,
+              right: 5,
+            }}
+            weight={400}
+            size={8}
+            c='dimmed'
+          >
+            {convertDateToCasualTime(new Date(props.thread.last_message_timestamp))}
+          </Text>
+        </Tooltip>
       </Box>
       <Divider m={0} />
     </Box>

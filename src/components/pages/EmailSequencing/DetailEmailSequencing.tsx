@@ -77,6 +77,7 @@ import useRefresh from "@common/library/use-refresh";
 import _ from "lodash";
 import getResearchPointTypes from "@utils/requests/getResearchPointTypes";
 import { useQuery } from "@tanstack/react-query";
+import EmailSequenceStepAssets from './EmailSequenceStepAssets';
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
@@ -1625,6 +1626,7 @@ export const EmailBodyItem: React.FC<{
                   )}
                 </>
               )}
+              <EmailSequenceStepAssets sequence_step_id={template.id} />
             </Flex>
             <Flex align="center">
               <Box mr="xs">

@@ -415,7 +415,7 @@ export const Messaging = (props: MessagingProps) => {
                       <Title order={5}>{asset.title}</Title>
                     </Group>
                     <Container>
-                      <Text color='gray.8' fz='xs' fw={150}>
+                      <Text color='gray.8' fz='xs' fw={400}>
                         <div
                           dangerouslySetInnerHTML={{
                             __html: DOMPurify.sanitize(asset.value),

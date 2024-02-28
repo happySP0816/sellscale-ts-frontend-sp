@@ -149,9 +149,14 @@ export function ProspectConvoCard(props: {
               <Title size={13} fw={500}>
                 {props.name}
               </Title>
-              <Text c='dimmed' size={10}>
-                {convertDateToCasualTime(new Date(props.latest_msg_time))}
-              </Text>
+              <Tooltip
+                label={convertDateToLocalTime(new Date(props.latest_msg_time))}
+                openDelay={500}
+              >
+                <Text c='dimmed' size={10}>
+                  {convertDateToCasualTime(new Date(props.latest_msg_time))}
+                </Text>
+              </Tooltip>
             </Group>
             <Group position='apart' sx={{ flexWrap: 'nowrap' }}>
               <Text size={12} truncate fw={!props.opened && !props.latest_msg_from_sdr ? 600 : 300}>

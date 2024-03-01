@@ -726,8 +726,8 @@ const DetailEmailSequencing: FC<{
 
       {/* INACTIVE TEMPLATES */}
       {inactiveTemplates && inactiveTemplates.length > 0 && (
-        <Flex w="100%">
-          <Divider mt="md" label={"Variants not in use"} />
+        <Flex w="100%" direction={"column"}>
+          <Divider my="md" variant='dashed' labelPosition="center" label={"Variants not in use"} />
           <Accordion
             w="100%"
             value={openedTemplate}

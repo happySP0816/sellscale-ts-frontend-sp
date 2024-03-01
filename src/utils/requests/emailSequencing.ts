@@ -166,3 +166,27 @@ export async function postSequenceStepDeactivate(
   });
   return await processResponse(response);
 }
+
+
+/**
+ * Activates an Email Sequence Step
+ * @param userToken
+ * @param sequenceStepID
+ * @returns - MsgResponse
+ */
+export async function postSequenceStepActivate(
+  userToken: string,
+  sequenceStepID: number
+): Promise<MsgResponse> {
+  const response = await fetch(`${API_URL}/email_sequence/step/activate`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      sequence_step_id: sequenceStepID,
+    }),
+  });
+  return await processResponse(response);
+}

@@ -182,13 +182,13 @@ const Sidebar: React.FC<{
             if (!sequenceBucket?.templates) {
               return;
             }
-            let hasDefault = false;
+            let hasActive = false;
             for (const template of sequenceBucket.templates) {
-              if (template.default) {
-                hasDefault = true;
+              if (template.active) {
+                hasActive = true;
               }
             }
-            if (!hasDefault) {
+            if (!hasActive) {
               return;
             }
 

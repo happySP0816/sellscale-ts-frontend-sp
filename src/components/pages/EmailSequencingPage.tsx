@@ -22,7 +22,7 @@ import {
   Select,
   Accordion,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDebouncedValue, useDisclosure } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import EmailSequenceStepModal from '@modals/EmailSequenceStepModal';
 import ManageEmailSubjectLineTemplatesModal from '@modals/ManageEmailSubjectLineTemplatesModal';
@@ -738,13 +738,11 @@ export default function EmailSequencingPage(props: {
 interface SmartLeadEmailAccount {
   id: number;
   active: boolean;
-  from_email: string;
-  from_name: string;
-  username: string;
-  warmup_details: {
-    warmup_reputation: string;
-    status: string;
-  };
+  smartlead_account_id: string;
+  email_address: string;
+  aws_username: string;
+  smartlead_reputation: number;
+  warming?: Record<string, any>;
 }
 
 const EmailSettingsView = (props: { userToken: string }) => {
@@ -752,6 +750,7 @@ const EmailSettingsView = (props: { userToken: string }) => {
   const userToken = useRecoilValue(userTokenState);
 
   const [selectedRecords, setSelectedRecords] = useState<SmartLeadEmailAccount[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [openTracking, setOpenTracking] = useState(
@@ -767,7 +766,7 @@ const EmailSettingsView = (props: { userToken: string }) => {
       : (currentProject?.email_link_tracking_enabled as boolean)
   );
 
-  const { data: smartlead_inboxes } = useQuery({
+  const { data: smartlead_inboxes, refetch } = useQuery({
     queryKey: [`query-get-all-smartlead-inboxes`],
     queryFn: async () => {
       if (!currentProject) {
@@ -778,39 +777,51 @@ const EmailSettingsView = (props: { userToken: string }) => {
       const results =
         response.status === 'success' ? (response.data as SmartLeadEmailAccount[]) : [];
 
-      setSelectedRecords(results.filter((record) => record.active));
+      setSelectedRecords(results.filter((record) => record.warming));
+
+      setLoading(false);
       return results;
     },
   });
 
-  useEffect(() => {
-    (async () => {
-      if (!currentProject) {
-        return;
-      }
+  const saveInboxChanges = async () => {
+    if (!currentProject) {
+      return;
+    }
 
-      const activeAccounts = selectedRecords;
-      // Any smartlead_inboxes that aren't in activeAccounts are inactive
-      const inactiveAccounts =
-        smartlead_inboxes?.filter(
-          (record) => !activeAccounts.map((record) => record.id).includes(record.id)
-        ) ?? [];
+    setLoading(true);
 
-      toggleEmailAccounts(
-        userToken,
-        currentProject.id,
-        inactiveAccounts.map((r) => `${r.id}`),
-        false
-      );
+    const activeAccounts = selectedRecords;
+    // Any smartlead_inboxes that aren't in activeAccounts are inactive
+    const inactiveAccounts =
+      smartlead_inboxes?.filter(
+        (record) => !activeAccounts.map((record) => record.id).includes(record.id)
+      ) ?? [];
 
-      toggleEmailAccounts(
-        userToken,
-        currentProject.id,
-        activeAccounts.map((r) => `${r.id}`),
-        true
-      );
-    })();
-  }, [selectedRecords]);
+    await toggleEmailAccounts(
+      userToken,
+      currentProject.id,
+      inactiveAccounts.map((r) => r.smartlead_account_id),
+      false
+    );
+
+    await toggleEmailAccounts(
+      userToken,
+      currentProject.id,
+      activeAccounts.map((r) => r.smartlead_account_id),
+      true
+    );
+
+    showNotification({
+      id: 'save-inbox-changes',
+      title: `Updated`,
+      message: `Saved Active Inboxes`,
+      color: 'blue',
+      autoClose: 1000,
+    });
+
+    refetch();
+  };
 
   console.log(smartlead_inboxes);
 
@@ -878,9 +889,14 @@ const EmailSettingsView = (props: { userToken: string }) => {
       />
 
       <Box pt={10}>
-        <Text size='lg' fw={500}>
-          Smartlead Inboxes
-        </Text>
+        <Group>
+          <Text size='lg' fw={500}>
+            Smartlead Inboxes
+          </Text>
+          <Button size='xs' compact loading={loading} onClick={saveInboxChanges}>
+            Save
+          </Button>
+        </Group>
         <Box>
           <DataTable
             withBorder
@@ -893,25 +909,24 @@ const EmailSettingsView = (props: { userToken: string }) => {
             records={smartlead_inboxes || []}
             columns={[
               {
-                accessor: 'from_name',
+                accessor: 'aws_username',
                 title: 'Name',
-                render: ({ from_name }) => <Text weight={700}>{from_name}</Text>,
+                render: ({ aws_username }) => <Text weight={700}>{aws_username}</Text>,
               },
               {
-                accessor: 'from_email',
+                accessor: 'email_address',
                 title: 'Email',
-                render: ({ from_email }) => <Text weight={700}>{from_email}</Text>,
+                render: ({ email_address }) => <Text weight={700}>{email_address}</Text>,
               },
               {
-                accessor: 'warmup_details',
+                accessor: 'smartlead_reputation',
                 title: 'Reputation',
-                render: ({ warmup_details }) => (
-                  <Text weight={700}>{warmup_details.warmup_reputation}</Text>
+                render: ({ smartlead_reputation }) => (
+                  <Text weight={700}>{smartlead_reputation}</Text>
                 ),
               },
             ]}
-            // execute this callback when a row is clicked
-            onRowClick={({ from_name }) => alert(`You clicked on ${from_name}`)}
+            onRowClick={({ email_address }) => alert(`You clicked on ${email_address}`)}
           />
         </Box>
       </Box>

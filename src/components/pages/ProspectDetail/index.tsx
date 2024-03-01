@@ -20,19 +20,24 @@ export const INBOX_PAGE_HEIGHT = `100vh`; //`calc(100vh - ${NAV_HEADER_HEIGHT}px
 export default function ProspectDetailPage() {
   const prams = useParams() as { prospectId: string };
   const prospectId = Number(prams.prospectId);
+
+  return <ProspectDetails prospectId={prospectId} />;
+}
+
+export function ProspectDetails(props: { prospectId: number }) {
   const [queryComplete, setQueryComplete] = useState(false);
   const [, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const userToken = useRecoilValue(userTokenState);
   const [prospects, setProspects] = useState<ProspectShallow[]>([]);
 
   const { data } = useQuery({
-    queryKey: [`query-prospect-details-${prospectId}`],
+    queryKey: [`query-prospect-details-${props.prospectId}`],
     queryFn: async () => {
-      if (prospectId === -1) {
+      if (props.prospectId === -1) {
         return null;
       }
 
-      const response = await fetch(`${API_URL}/prospect/${prospectId}`, {
+      const response = await fetch(`${API_URL}/prospect/${props.prospectId}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${userToken}`,
@@ -45,7 +50,7 @@ export default function ProspectDetailPage() {
 
       console.log;
       const res_channels = await getChannels(userToken);
-      const res_valid_channels = await getChannelOptions(prospectId, userToken);
+      const res_valid_channels = await getChannelOptions(props.prospectId, userToken);
 
       return {
         main: res,
@@ -66,12 +71,12 @@ export default function ProspectDetailPage() {
       'ALL',
       undefined,
       true,
-      prospectId
+      props.prospectId
     )
       .then((res) => {
         const prospects = res.data as ProspectShallow[];
         const prospectTemp: ProspectShallow | undefined = prospects?.find(
-          (prospect) => prospect.id === prospectId
+          (prospect) => prospect.id === props.prospectId
         );
         setProspects(prospects);
         setOpenedProspectId(prospectTemp?.id ?? -1);

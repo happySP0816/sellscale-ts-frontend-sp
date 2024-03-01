@@ -18,6 +18,7 @@ import { TaskHandlerAddDNCFilters } from './TaskHandlers/TaskHandlerAddDNCFilter
 import { TaskHandlerEnrichSegment } from './TaskHandlers/TaskHandlerEnrichSegment';
 import { TaskHandlerReviewSegment } from './TaskHandlers/TaskHandlerReviewSegment';
 import { TaskHandlerRequestCampaign } from './TaskHandlers/TaskHandlerRequestCampaign';
+import { TaskHandlerViewProspect } from './TaskHandlers/TaskHandlerViewProspect';
 
 export interface OperatorDashboardEntry {
   id: number;
@@ -69,7 +70,7 @@ const TASK_ROUTER: any = {
   CREATE_PREFILTERS: {
     component: TaskHandlerCreatePrefilters,
     instruction: 'Create pre-filters to guide AI prospecting',
-    enabledCompleteButton: true
+    enabledCompleteButton: true,
   },
   CONNECT_SLACK: {
     component: TaskHandlerConnectSlack,
@@ -105,7 +106,12 @@ const TASK_ROUTER: any = {
     component: TaskHandlerRequestCampaign,
     instruction: 'Request a new campaign then mark as complete',
     enabledCompleteButton: true,
-  }
+  },
+  REP_INTERVENTION_NEEDED: {
+    component: TaskHandlerViewProspect,
+    instruction: 'View the prospect and take necessary action. Mark ticket as complete when done',
+    enabledCompleteButton: true,
+  },
 };
 
 const OperatorDashTaskRouter: React.FC = () => {
@@ -259,7 +265,12 @@ const OperatorDashTaskRouter: React.FC = () => {
         </Button>
       </Box>
       {TaskComponent && (
-        <TaskComponent data={task?.task_data} onTaskComplete={() => id && markTaskComplete(id)} taskType={task?.task_type} taskId={task?.id} />
+        <TaskComponent
+          data={task?.task_data}
+          onTaskComplete={() => id && markTaskComplete(id)}
+          taskType={task?.task_type}
+          taskId={task?.id}
+        />
       )}
     </Box>
   );

@@ -59,6 +59,7 @@ import LiBfTemplateModal from '@modals/LiBfTemplateModal';
 import EditTriggerModal from '@modals/EditTriggerModal';
 import ComposeGenericEmailModal from '@modals/ComposeGenericEmailModal';
 import { CreateEmailReplyFrameworkContextModal } from '@modals/CreateEmailReplyFrameworkModal';
+import MakeReminderCardModal from '@modals/MakeReminderCardModal';
 
 export const socket = io(SOCKET_SERVICE_URL); //'http://localhost:3000');
 
@@ -201,6 +202,7 @@ export default function App() {
               viewEmail: ViewEmailModal,
               composeEmail: ComposeEmailModal,
               composeGenericEmail: ComposeGenericEmailModal,
+              makeReminderCard: MakeReminderCardModal,
               sequenceWriter: SequenceWriterModal,
               ctaGenerator: CTAGeneratorModal,
               managePulsePrompt: ManagePulsePrompt,

@@ -950,6 +950,45 @@ export default function ProspectConvo(props: Props) {
                 >
                   Ask AE
                 </Button>
+                <Divider />
+                <Button
+                  w={'100%'}
+                  color='gray.8'
+                  variant='subtle'
+                  styles={{
+                    inner: {
+                      justifyContent: 'flex-start',
+                    },
+                  }}
+                  onClick={() => {
+                    setAdvancedAIActionsOpened(false);
+                    openContextModal({
+                      modal: 'makeReminderCard',
+                      title: (
+                        <Group position='apart'>
+                          <div>
+                            <Title order={4}>Make Reminder Card</Title>
+                          </div>
+                        </Group>
+                      ),
+                      styles: (theme) => ({
+                        title: {
+                          width: '100%',
+                        },
+                        header: {
+                          margin: 0,
+                        },
+                      }),
+                      innerProps: {
+                        prospect: prospect,
+                        onCreate: (prospect: ProspectShallow, reason: string) => {},
+                        onCancel: () => {},
+                      },
+                    });
+                  }}
+                >
+                  Make Reminder Card
+                </Button>
               </Popover.Dropdown>
             </Popover>
           </Tabs.List>

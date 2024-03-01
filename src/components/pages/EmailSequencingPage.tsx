@@ -922,11 +922,11 @@ const EmailSettingsView = (props: { userToken: string }) => {
                 accessor: 'smartlead_reputation',
                 title: 'Reputation',
                 render: ({ smartlead_reputation }) => (
-                  <Text weight={700}>{smartlead_reputation}</Text>
+                  <Text weight={700}>{smartlead_reputation}%</Text>
                 ),
               },
             ]}
-            onRowClick={({ email_address }) => alert(`You clicked on ${email_address}`)}
+            onRowClick={({ email_address }) => console.log(`You clicked on ${email_address}`)}
           />
         </Box>
       </Box>

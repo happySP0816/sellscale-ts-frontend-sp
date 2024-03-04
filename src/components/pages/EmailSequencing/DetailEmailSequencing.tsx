@@ -28,6 +28,7 @@ import {
   HoverCard,
   List,
   Modal,
+  Collapse,
 } from "@mantine/core";
 import { useDisclosure, useHover, useMediaQuery } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
@@ -55,6 +56,8 @@ import {
 import {
   createEmailSequenceStep,
   patchSequenceStep,
+  postSequenceStepActivate,
+  postSequenceStepDeactivate,
 } from "@utils/requests/emailSequencing";
 import { patchEmailSubjectLineTemplate } from "@utils/requests/emailSubjectLines";
 import DOMPurify from "dompurify";
@@ -74,10 +77,10 @@ import { openConfirmModal } from "@mantine/modals";
 import postCopyEmailPoolEntry from "@utils/requests/postCopyEmailLibraryItem";
 import { isValidUrl } from "@utils/general";
 import useRefresh from "@common/library/use-refresh";
-import _ from "lodash";
+import _, { random } from "lodash";
 import getResearchPointTypes from "@utils/requests/getResearchPointTypes";
 import { useQuery } from "@tanstack/react-query";
-import EmailSequenceStepAssets from './EmailSequenceStepAssets';
+import EmailSequenceStepAssets from "./EmailSequenceStepAssets";
 
 let initialEmailGenerationController = new AbortController();
 let followupEmailGenerationController = new AbortController();
@@ -122,9 +125,18 @@ const SpamScorePopover: FC<{
 
   return (
     <>
-      <Popover width={360} position="bottom" withArrow shadow="md">
+      <Popover width={360} position="bottom" withArrow shadow="md" withinPortal>
         <Popover.Target>
-          <Button size="compact-sm" variant="outline" color={color}>
+          <Button
+            size="compact-xs"
+            variant="outline"
+            color={color}
+            sx={{
+              fontSize: "10px",
+              borderRadius: "22px",
+              height: "20px",
+            }}
+          >
             Spam Score: {totalScore}%
           </Button>
         </Popover.Target>
@@ -259,7 +271,10 @@ const DetailEmailSequencing: FC<{
   ] = useDisclosure(false);
 
   // Active vs Inactive Body Templates
-  const [activeTemplate, setActiveTemplate] =
+  const [activeTemplates, setActiveTemplates] = React.useState<
+    EmailSequenceStep[]
+  >([]);
+  const [randomActiveTemplate, setRandomActiveTemplate] =
     React.useState<EmailSequenceStep | null>(null);
   const [inactiveTemplates, setInactiveTemplates] = React.useState<
     EmailSequenceStep[]
@@ -291,7 +306,7 @@ const DetailEmailSequencing: FC<{
   const [openedTemplate, setOpenedTemplate] = useState<string | null>(null);
 
   useEffect(() => {
-    if (fetchedTemplateSpamScore && !activeTemplate?.template) {
+    if (fetchedTemplateSpamScore && !randomActiveTemplate?.template) {
       return;
     }
 
@@ -302,7 +317,7 @@ const DetailEmailSequencing: FC<{
         Authorization: `Bearer ${userToken}`,
       },
       body: JSON.stringify({
-        email_body: activeTemplate?.template,
+        email_body: randomActiveTemplate?.template,
       }),
     })
       .then((res) => res.json())
@@ -343,7 +358,7 @@ const DetailEmailSequencing: FC<{
       const response = await postGenerateInitialEmail(
         userToken,
         prospectID,
-        activeTemplate?.id as number,
+        randomActiveTemplate?.id as number,
         null,
         randomSubjectLineID as number,
         null,
@@ -421,7 +436,7 @@ const DetailEmailSequencing: FC<{
         userToken,
         prospectID,
         null,
-        activeTemplate?.id as number,
+        randomActiveTemplate?.id as number,
         null,
         followupEmailGenerationController
       );
@@ -490,26 +505,32 @@ const DetailEmailSequencing: FC<{
   // Trigger Generation
   useEffect(() => {
     triggerGenerateEmail();
-  }, [prospectID, activeTemplate, subjectLines]);
+  }, [prospectID, activeTemplates, subjectLines]);
 
   // Set Active / Inactive Templates
   useEffect(() => {
+
+    console.log('templates', templates)
     // Get active template, everything else goes into inactive
     const activeTemplates = templates.filter(
-      (template: EmailSequenceStep) => template.default
+      (template: EmailSequenceStep) => template.active
     );
-    const activeTemplate =
-      activeTemplates.length > 0 ? activeTemplates[0] : null;
+    const randomActiveTemplate =
+      activeTemplates[Math.floor(Math.random() * activeTemplates.length)];
     let inactiveTemplates = [];
-    if (activeTemplate) {
-      inactiveTemplates = templates.filter(
-        (template: EmailSequenceStep) => template.id != activeTemplate.id
-      );
+    if (activeTemplates) {
+      inactiveTemplates = templates.filter((template: EmailSequenceStep) => {
+        if (template.active) {
+          return;
+        }
+        return template.id;
+      });
     } else {
       inactiveTemplates = templates;
     }
 
-    setActiveTemplate(activeTemplate);
+    setActiveTemplates(activeTemplates);
+    setRandomActiveTemplate(randomActiveTemplate);
     setInactiveTemplates(inactiveTemplates);
   }, [templates]);
 
@@ -555,7 +576,7 @@ const DetailEmailSequencing: FC<{
             radius={"sm"}
             onClick={openCreateEmailTemplate}
           >
-            Add Email Template
+            Add Email Variant
           </Button>
         </Flex>
         <EmailTemplateLibraryModal
@@ -686,28 +707,43 @@ const DetailEmailSequencing: FC<{
       </Flex>
 
       {/* ACTIVE TEMPLATE */}
-      {activeTemplate && (
-        <EmailBodyItem
-          key={activeTemplate.id}
-          template={activeTemplate}
-          refetch={async () => {
-            await refetch();
-          }}
-          spamScore={spamScore}
-        />
+      {activeTemplates && activeTemplates.length > 0 && (
+        <>
+          {activeTemplates.map((template: EmailSequenceStep) => {
+            return (
+              <EmailBodyItem
+                key={template.id}
+                template={template}
+                refetch={async () => {
+                  await refetch();
+                }}
+                spamScore={spamScore}
+              />
+            );
+          })}
+        </>
       )}
 
       {/* INACTIVE TEMPLATES */}
       {inactiveTemplates && inactiveTemplates.length > 0 && (
-        <Flex mt="md" w="100%">
+        <Flex w="100%" direction={"column"}>
+          <Divider my="md" variant='dashed' labelPosition="center" label={"Variants not in use"} />
           <Accordion
             w="100%"
             value={openedTemplate}
             onChange={setOpenedTemplate}
           >
             {inactiveTemplates.map((template: EmailSequenceStep, index) => {
-              const open_conversion = template.times_used ? Math.floor(100 * (template.times_accepted / template.times_used)) : "-"
-              const reply_conversion = template.times_replied ? Math.floor(100 * (template.times_replied / template.times_used)) : "-"
+              const open_conversion = template.times_used
+                ? Math.floor(
+                    100 * (template.times_accepted / template.times_used)
+                  )
+                : "-";
+              const reply_conversion = template.times_replied
+                ? Math.floor(
+                    100 * (template.times_replied / template.times_used)
+                  )
+                : "-";
               return (
                 <Accordion.Item value={`${index}`}>
                   <Accordion.Control>
@@ -716,13 +752,21 @@ const DetailEmailSequencing: FC<{
                         <Text fw={500}>{template.title}</Text>
                       </Flex>
                       <Flex>
-                        <Tooltip label={`Prospects: ${template.times_accepted} / ${template.times_used}`} withArrow withinPortal>
-                          <Text fz='sm' mr='md'>
+                        <Tooltip
+                          label={`Prospects: ${template.times_accepted} / ${template.times_used}`}
+                          withArrow
+                          withinPortal
+                        >
+                          <Text fz="sm" mr="md">
                             Open %: <b>{open_conversion}</b>
                           </Text>
                         </Tooltip>
-                        <Tooltip label={`Prospects: ${template.times_replied} / ${template.times_used}`} withArrow withinPortal>
-                          <Text fz='sm'>
+                        <Tooltip
+                          label={`Prospects: ${template.times_replied} / ${template.times_used}`}
+                          withArrow
+                          withinPortal
+                        >
+                          <Text fz="sm">
                             Reply %: <b>{reply_conversion}</b>
                           </Text>
                         </Tooltip>
@@ -1149,8 +1193,14 @@ const SubjectLineItem: React.FC<{
                 px={"0.25rem"}
                 fw={"400"}
               >
-                Acceptance:{' '}
-                {subjectLine.times_used ? Math.floor(100 * (subjectLine.times_accepted / subjectLine.times_used)) : "-"}%
+                Acceptance:{" "}
+                {subjectLine.times_used
+                  ? Math.floor(
+                      100 *
+                        (subjectLine.times_accepted / subjectLine.times_used)
+                    )
+                  : "-"}
+                %
               </Button>
             </Tooltip>
           </Flex>
@@ -1257,7 +1307,7 @@ const SubjectLineItem: React.FC<{
             />
             {(editedSubjectLine.includes("[[") ||
               editedSubjectLine.includes("{{")) && (
-              <Text color="yellow.7" size='xs' fw='bold' mt='xs'>
+              <Text color="yellow.7" size="xs" fw="bold" mt="xs">
                 Warning: AI generations may cause the subject line length to
                 exceed 100 characters.
               </Text>
@@ -1282,11 +1332,12 @@ type SpamScore = {
 };
 
 export const EmailBodyItem: React.FC<{
+  key: number;
   template: EmailSequenceStep;
   refetch: () => Promise<void>;
   hideHeader?: boolean;
   spamScore?: SpamScore | null;
-}> = ({ template, refetch, hideHeader, spamScore }) => {
+}> = ({ key, template, refetch, hideHeader, spamScore }) => {
   const userToken = useRecoilValue(userTokenState);
   const currentProject = useRecoilValue(currentProjectState);
 
@@ -1393,18 +1444,37 @@ export const EmailBodyItem: React.FC<{
     setLoading(false);
   };
 
+  const triggerToggleEmailBodyTemplateInactive = async () => {
+    setLoading(true);
+
+    const result = await postSequenceStepDeactivate(userToken, template.id);
+    if (result.status != "success") {
+      showNotification({
+        title: "Error",
+        message: result.message,
+        color: "red",
+      });
+      setLoading(false);
+      return;
+    } else {
+      showNotification({
+        title: "Success",
+        message: `Successfully ${
+          template.default ? "deactivated" : "activated"
+        } email body`,
+        color: "green",
+      });
+
+      await refetch();
+    }
+
+    setLoading(false);
+  };
+
   const triggerToggleEmailBodyTemplateActive = async () => {
     setLoading(true);
 
-    const result = await patchSequenceStep(
-      userToken,
-      template.id,
-      template.overall_status,
-      template.title,
-      template.template,
-      template.bumped_count,
-      !template.default
-    );
+    const result = await postSequenceStepActivate(userToken, template.id);
     if (result.status != "success") {
       showNotification({
         title: "Error",
@@ -1484,7 +1554,15 @@ export const EmailBodyItem: React.FC<{
   }, []);
 
   return (
-    <Flex w="100%">
+    <Flex
+      w="100%"
+      sx={{
+        border: "1px solid #dee2e6",
+        borderRadius: "0.5rem",
+      }}
+      p="sm"
+      mb="sm"
+    >
       <LoadingOverlay visible={loading} />
       <Flex direction="column" w="100%">
         {hideHeader ? (
@@ -1499,7 +1577,7 @@ export const EmailBodyItem: React.FC<{
                   triggerToggleEmailBodyTemplateActive();
                 }}
               >
-                {template.default ? "Deactivate" : "Activate"}
+                {template.active ? "Deactivate" : "Activate"}
               </Button>
             </div>
           </Flex>
@@ -1569,7 +1647,172 @@ export const EmailBodyItem: React.FC<{
                   >
                     <IconPencil size={"0.9rem"} />
                   </ActionIcon>
+                </>
+              )}
+            </Flex>
+            <Flex align="center">
+              <Tooltip
+                label={`Prospects: ${template.times_accepted || 0} / ${
+                  template.times_used || 0
+                } `}
+                withArrow
+                withinPortal
+              >
+                <Text fz="sm" mr="md">
+                  Open %:{" "}
+                  <b>
+                    {template.times_used
+                      ? Math.floor(
+                          100 * (template.times_accepted / template.times_used)
+                        )
+                      : "-"}
+                  </b>
+                </Text>
+              </Tooltip>
+              <Tooltip
+                label={`Prospects: ${template.times_replied || 0} / ${
+                  template.times_used || 0
+                }`}
+                withArrow
+                withinPortal
+              >
+                <Text fz="sm" mr="md">
+                  Reply %:{" "}
+                  <b>
+                    {template.times_used
+                      ? Math.floor(
+                          100 * (template.times_replied / template.times_used)
+                        )
+                      : "-"}
+                  </b>
+                </Text>
+              </Tooltip>
+              <Tooltip label={"Deactivate Variant"} withinPortal withArrow>
+                <div>
+                  <Switch
+                    disabled={editing}
+                    checked={template.active}
+                    color={"blue"}
+                    size="xs"
+                    onChange={({ currentTarget: { checked } }) => {
+                      triggerToggleEmailBodyTemplateInactive();
+                    }}
+                  />
+                </div>
+              </Tooltip>
+            </Flex>
+          </Flex>
+        )}
 
+        <Accordion
+          style={{
+            border: "1px solid #eceaee",
+            borderBottom: "0px",
+            borderRadius: "6px",
+            fontSize: "12px",
+          }}
+        >
+          <Accordion.Item value="variant-details">
+            <Accordion.Control>
+              <Flex w="100%" justify={"center"} align={"center"}>
+                <Text>View Variant Details</Text>
+              </Flex>
+            </Accordion.Control>
+            <Accordion.Panel mt='md'>
+              {editing ? (
+                <>
+                  <Box>
+                    <DynamicRichTextArea
+                      height={400}
+                      onChange={(value, rawValue) => {
+                        sequenceRichRaw.current = rawValue;
+                        _setSequence(value);
+                      }}
+                      value={sequenceRichRaw.current}
+                      signifyCustomInsert={false}
+                      inserts={[
+                        {
+                          key: "first_name",
+                          label: "First Name",
+                          icon: <IconWritingSign stroke={1.5} size="0.9rem" />,
+                          color: "blue",
+                        },
+                        {
+                          key: "last_name",
+                          label: "Last Name",
+                          icon: <IconRobot stroke={2} size="0.9rem" />,
+                          color: "red",
+                        },
+                        {
+                          key: "company_name",
+                          label: "Company Name",
+                          icon: <IconDatabase stroke={2} size="0.9rem" />,
+                          color: "teal",
+                        },
+                      ]}
+                    />
+                  </Box>
+                  <Flex mt="sm" justify={"flex-end"}>
+                    <Button
+                      mr="sm"
+                      color="red"
+                      onClick={() => {
+                        _setSequence(templateBody || "");
+                        sequenceRichRaw.current = template.template || "";
+                        setEditing(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      color="green"
+                      onClick={() => {
+                        triggerPatchEmailBodyTemplate();
+                        setEditing(false);
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </Flex>
+                </>
+              ) : (
+                <Box
+                  sx={() => ({
+                    border: "1px solid #E0E0E0",
+                    borderRadius: "8px",
+                    backgroundColor: "#F5F5F5",
+                  })}
+                  px="md"
+                  onClick={() => {
+                    setEditing(true);
+                  }}
+                >
+                  <Text fz="sm">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(formatedSequence as string),
+                      }}
+                    />
+                  </Text>
+                  <Flex h="0px" w="100%">
+                    <Button
+                      leftIcon={<IconEdit size="1.0rem" />}
+                      variant="outline"
+                      pos="relative"
+                      bottom="50px"
+                      left="88%"
+                      h="32px"
+                      onClick={() => {
+                        setEditing(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Flex>
+                </Box>
+              )}
+              <Flex mt="md" align="center" justify={"space-between"}>
+                <Flex>
                   {displayPersonalization && (
                     <HoverCard width={280} shadow="md">
                       <HoverCard.Target>
@@ -1624,145 +1867,22 @@ export const EmailBodyItem: React.FC<{
                       </HoverCard.Dropdown>
                     </HoverCard>
                   )}
-                </>
-              )}
-              <EmailSequenceStepAssets sequence_step_id={template.id} />
-            </Flex>
-            <Flex align="center">
-              <Box mr="xs">
-                <SpamScorePopover
-                  subjectSpamScoreDetails={spamScore}
-                  bodySpamScoreDetails={spamScore}
-                  hideSubjectLineScore
-                />
-              </Box>
-              <Tooltip label={`Prospects: ${template.times_accepted || 0} / ${template.times_used || 0} `} withArrow withinPortal>
-                <Text fz='sm' mr='md'>
-                  Open %: <b>{template.times_used ? Math.floor(100 * (template.times_accepted / template.times_used)) : "-"}</b>
-                </Text>
-              </Tooltip>
-              <Tooltip label={`Prospects: ${template.times_replied || 0} / ${template.times_used || 0}`} withArrow withinPortal>
-                <Text fz='sm' mr='md'>
-                  Reply %: <b>{template.times_used ? Math.floor(100 * (template.times_replied / template.times_used)) : "-"}</b>
-                </Text>
-              </Tooltip>
-              {/*
-                    <Tooltip
-                      label={'Activate template'}
-                      withinPortal
-                      withArrow
-                    >
-                      <div>
-                        <Switch
-                          disabled={editing}
-                          checked={template.default}
-                          color={"blue"}
-                          size="xs"
-                          onChange={({ currentTarget: { checked } }) => {
-                            triggerToggleEmailBodyTemplateActive();
-                          }}
-                        />
-                      </div>
-                    </Tooltip>
-                */}
-            </Flex>
-          </Flex>
-        )}
 
-        {editing ? (
-          <>
-            <Box>
-              <DynamicRichTextArea
-                height={400}
-                onChange={(value, rawValue) => {
-                  sequenceRichRaw.current = rawValue;
-                  _setSequence(value);
-                }}
-                value={sequenceRichRaw.current}
-                signifyCustomInsert={false}
-                inserts={[
-                  {
-                    key: "first_name",
-                    label: "First Name",
-                    icon: <IconWritingSign stroke={1.5} size="0.9rem" />,
-                    color: "blue",
-                  },
-                  {
-                    key: "last_name",
-                    label: "Last Name",
-                    icon: <IconRobot stroke={2} size="0.9rem" />,
-                    color: "red",
-                  },
-                  {
-                    key: "company_name",
-                    label: "Company Name",
-                    icon: <IconDatabase stroke={2} size="0.9rem" />,
-                    color: "teal",
-                  },
-                ]}
-              />
-            </Box>
-            <Flex mt="sm" justify={"flex-end"}>
-              <Button
-                mr="sm"
-                color="red"
-                onClick={() => {
-                  _setSequence(templateBody || "");
-                  sequenceRichRaw.current = template.template || "";
-                  setEditing(false);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                color="green"
-                onClick={() => {
-                  triggerPatchEmailBodyTemplate();
-                  setEditing(false);
-                }}
-              >
-                Save
-              </Button>
-            </Flex>
-          </>
-        ) : (
-          <Box
-            sx={() => ({
-              border: "1px solid #E0E0E0",
-              borderRadius: "8px",
-              backgroundColor: "#F5F5F5",
-            })}
-            px="md"
-            onClick={() => {
-              setEditing(true);
-            }}
-          >
-            <Text fz="sm">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(formatedSequence as string),
-                }}
-              />
-            </Text>
-            <Flex h="0px" w="100%">
-              <Button
-                leftIcon={<IconEdit size="1.0rem" />}
-                variant="outline"
-                pos="relative"
-                bottom="50px"
-                left="88%"
-                h="32px"
-                onClick={() => {
-                  setEditing(true);
-                }}
-              >
-                Edit
-              </Button>
-            </Flex>
-          </Box>
-        )}
+                  <EmailSequenceStepAssets sequence_step_id={template.id} />
+                </Flex>
+
+                <Flex>
+                  <SpamScorePopover
+                    subjectSpamScoreDetails={spamScore}
+                    bodySpamScoreDetails={spamScore}
+                    hideSubjectLineScore
+                  />
+                </Flex>
+              </Flex>
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
       </Flex>
-
       <Modal
         opened={opened}
         onClose={() => {

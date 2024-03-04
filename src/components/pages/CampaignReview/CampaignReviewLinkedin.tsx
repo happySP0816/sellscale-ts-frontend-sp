@@ -526,7 +526,7 @@ export const Messaging = (props: MessagingProps) => {
                         />
                       }
                     </Text>
-                    {!persona?.template_mode && persona?.linkedin_active && (
+                    {!persona?.template_mode && persona?.linkedin_active && props.campaignType === 'LINKEDIN' && (
                       <CtaList personaId={props.campaignId} />
                     )}
                   </Flex>

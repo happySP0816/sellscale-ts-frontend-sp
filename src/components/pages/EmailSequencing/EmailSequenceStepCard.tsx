@@ -127,7 +127,7 @@ export default function EmailSequenceStepCard(props: {
     // Get the default sequence step
     if (props.sequenceBucket?.templates) {
       const defaultSequenceStep = _.find(props.sequenceBucket?.templates, {
-        default: true,
+        active: true,
       });
       setDefaultSequenceStep(defaultSequenceStep);
       delayDaysRef.current = defaultSequenceStep?.sequence_delay_days || 3;

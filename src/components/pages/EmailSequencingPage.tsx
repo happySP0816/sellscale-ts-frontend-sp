@@ -891,7 +891,7 @@ const EmailSettingsView = (props: { userToken: string }) => {
       <Box pt={10}>
         <Group>
           <Text size='lg' fw={500}>
-            Smartlead Inboxes
+            Inboxes
           </Text>
           <Button size='xs' compact loading={loading} onClick={saveInboxChanges}>
             Save

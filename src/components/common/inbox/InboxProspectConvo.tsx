@@ -493,12 +493,20 @@ export default function ProspectConvo(props: Props) {
   const triggerPostSmartleadReply = async () => {
     setSendingMessage(true);
 
+    const ccEmails: string[] = []; // userData?.meta_data?.handoff_emails
+
     if (!prospect) {
       return;
     }
 
     const prospectid = prospect.id;
-    const response = await postSmartleadReply(userToken, prospectid, messageDraftEmail.current);
+    const response = await postSmartleadReply(
+      userToken,
+      prospectid,
+      messageDraftEmail.current,
+      undefined,
+      ccEmails
+    );
     if (response.status !== 'success') {
       showNotification({
         title: 'Error',

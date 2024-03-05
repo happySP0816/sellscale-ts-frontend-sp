@@ -130,7 +130,7 @@ export default function ProjectDetails(props: {
     queryKey: [`query-get-prospect-demo-feedback-${openedProspectId}`],
     queryFn: async () => {
       const response = await getDemoFeedback(userToken, openedProspectId);
-      return response.status === 'success' ? (response.data as DemoFeedback[]) : undefined;
+      return response.status === 'success' ? (response.data as DemoFeedback[]) : null;
     },
     enabled: openedProspectId !== -1,
   });

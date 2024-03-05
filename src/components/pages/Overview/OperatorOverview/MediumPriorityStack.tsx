@@ -65,7 +65,7 @@ function DemoFeedbackWrapper(props: { prospect: Prospect }) {
     queryKey: [`query-get-prospect-demo-feedback-${props.prospect.id}`],
     queryFn: async () => {
       const response = await getDemoFeedback(userToken, props.prospect.id);
-      return response.status === 'success' ? (response.data as DemoFeedback[]) : undefined;
+      return response.status === 'success' ? (response.data as DemoFeedback[]) : null;
     },
   });
 

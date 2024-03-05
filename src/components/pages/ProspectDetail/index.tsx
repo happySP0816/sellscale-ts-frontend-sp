@@ -48,9 +48,9 @@ export function ProspectDetails(props: { prospectId: number }) {
       }
       const res = await response.json();
 
-      console.log;
       const res_channels = await getChannels(userToken);
       const res_valid_channels = await getChannelOptions(props.prospectId, userToken);
+      setOpenedProspectId(props.prospectId);
 
       return {
         main: res,

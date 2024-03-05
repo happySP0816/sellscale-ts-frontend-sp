@@ -38,7 +38,7 @@ import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import getPersonas, { getPersonasOverview } from '@utils/requests/getPersonas';
 import { Archetype, BumpFramework, EmailSequenceStep, PersonaOverview } from 'src';
 import { API_URL } from '@constants/data';
-import DOMPurify from "dompurify";
+import DOMPurify from 'dompurify';
 import { showNotification } from '@mantine/notifications';
 import { getEmailSequenceSteps } from '@utils/requests/emailSequencing';
 import { valueToColor } from '@utils/general';
@@ -69,7 +69,9 @@ const CampaignReviewModal: FC<Props> = (props) => {
           stepsRes.status === 'success'
             ? (stepsRes.data.sequence_steps as EmailSequenceStep[])
             : [];
-        email_templates = allFrameworks.filter((f) => f.default);
+        email_templates = allFrameworks
+          .filter((f) => f.default)
+          .sort((a, b) => (a.bumped_count ?? 0) - (b.bumped_count ?? 0));
       } else {
         const frameworksRes = await getBumpFrameworks(userToken, [], [], [archetypeId]);
         const allFrameworks =

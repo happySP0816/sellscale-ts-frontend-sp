@@ -143,7 +143,7 @@ export default function ProjectDetails(props: {
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
-      return response.status === 'success' ? (response.data as ProspectDetails) : undefined;
+      return response.status === 'success' ? (response.data as ProspectDetails) : null;
     },
     enabled: openedProspectId !== -1,
   });
@@ -152,7 +152,7 @@ export default function ProjectDetails(props: {
     queryKey: [`query-get-prospect-demo-feedback-${openedProspectId}`],
     queryFn: async () => {
       const response = await getDemoFeedback(userToken, openedProspectId);
-      return response.status === 'success' ? (response.data as DemoFeedback[]) : undefined;
+      return response.status === 'success' ? (response.data as DemoFeedback[]) : null;
     },
     enabled: openedProspectId !== -1,
   });
@@ -161,7 +161,7 @@ export default function ProjectDetails(props: {
     queryKey: [`query-get-dashboard-prospect-shallow-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectShallowByID(userToken, openedProspectId);
-      return response.status === 'success' ? (response.data as ProspectShallow) : undefined;
+      return response.status === 'success' ? (response.data as ProspectShallow) : null;
     },
     enabled: openedProspectId !== -1,
   });

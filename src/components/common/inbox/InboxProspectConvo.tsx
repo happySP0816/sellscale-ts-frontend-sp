@@ -283,43 +283,53 @@ export default function ProspectConvo(props: Props) {
     (openedOutboundChannel === 'EMAIL' && emailThread) ||
     openedOutboundChannel !== 'SMARTLEAD';
 
+  useEffect(() => {
+    setOpenedOutboundChannel('SELLSCALE');
+  }, []);
+
   const viewport = useRef<HTMLDivElement>(null);
   const scrollToBottom = () =>
     viewport.current?.scrollTo({
       top: viewport.current.scrollHeight,
-      behavior: 'smooth',
+      behavior: 'instant',
     });
 
-  const { data, isFetching } = useQuery({
+  const { data: prospectDetails } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
       return response.status === 'success' ? (response.data as ProspectDetails) : undefined;
     },
     enabled: openedProspectId !== -1,
+    refetchOnWindowFocus: false,
   });
 
-  const { data: prospect } = useQuery({
+  const { data: prospect, isFetching } = useQuery({
     queryKey: [`query-get-dashboard-prospect-shallow-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectShallowByID(userToken, openedProspectId);
       const prospect =
         response.status === 'success' ? (response.data as ProspectShallow) : undefined;
 
+      const smartleadConvo = await triggerGetSmartleadProspectConvo(prospect);
+
       if (
         new Date(prospect?.li_last_message_timestamp ?? '') <
         new Date(prospect?.email_last_message_timestamp ?? '')
       ) {
-        if (openedOutboundChannel !== 'SMARTLEAD') {
+        if (smartleadConvo.length > 0) {
+          setOpenedOutboundChannel('SMARTLEAD');
+        } else {
           setOpenedOutboundChannel('EMAIL');
         }
       } else {
-        setOpenedOutboundChannel('LINKEDIN');
+        setOpenedOutboundChannel(getDefaultChannel(prospect, smartleadConvo));
       }
 
       return prospect;
     },
     enabled: openedProspectId !== -1,
+    refetchOnWindowFocus: false,
   });
 
   const { data: threads, isFetching: isFetchingThreads } = useQuery({
@@ -360,8 +370,8 @@ export default function ProspectConvo(props: Props) {
       // eslint-disable-next-line
       const [_key, { emailThread }] = queryKey;
 
-      setCurrentConvoEmailMessages(undefined);
-      setCurrentConvoLiMessages(undefined);
+      // setCurrentConvoEmailMessages(undefined);
+      // setCurrentConvoLiMessages(undefined);
       setHasGeneratedMessage(false);
 
       // For Email //
@@ -375,20 +385,25 @@ export default function ProspectConvo(props: Props) {
           response.status === 'success' ? (response.data.reverse() as EmailMessage[]) : [];
         setCurrentConvoEmailMessages(finalMessages);
         return finalMessages;
+      } else {
+        setCurrentConvoEmailMessages(undefined);
       }
 
       // For LinkedIn //
       const result = await getConversation(userToken, openedProspectId, false);
-      getConversation(userToken, openedProspectId, true).then((updatedResult) => {
-        const finalMessages =
-          updatedResult.status === 'success'
-            ? (updatedResult.data.data.reverse() as LinkedInMessage[])
-            : [];
-        if (openedProspectId === currentMessagesProspectId.current) {
-          setCurrentConvoLiMessages(finalMessages);
-        }
-        setFetchingProspectId(-1);
-      });
+      const finalMessages =
+        result.status === 'success' ? (result.data.data.reverse() as LinkedInMessage[]) : undefined;
+      setCurrentConvoLiMessages(finalMessages);
+      // getConversation(userToken, openedProspectId, true).then((updatedResult) => {
+      //   const finalMessages =
+      //     updatedResult.status === 'success'
+      //       ? (updatedResult.data.data.reverse() as LinkedInMessage[])
+      //       : [];
+      //   if (openedProspectId === currentMessagesProspectId.current) {
+      //     setCurrentConvoLiMessages(finalMessages);
+      //   }
+      //   setFetchingProspectId(-1);
+      // });
 
       // Indicate messages as read
       readLiMessages(userToken, openedProspectId).then((readLiResult) => {
@@ -423,10 +438,7 @@ export default function ProspectConvo(props: Props) {
       // Update the bump frameworks
       triggerGetBumpFrameworks();
 
-      const finalMessages =
-        result.status === 'success' ? (result.data.data.reverse() as LinkedInMessage[]) : [];
-      setCurrentConvoLiMessages(finalMessages);
-      return finalMessages;
+      return true;
     },
     enabled: openedProspectId !== -1 && (openedOutboundChannel !== 'EMAIL' || !!threads),
     refetchOnWindowFocus: false,
@@ -458,10 +470,10 @@ export default function ProspectConvo(props: Props) {
   };
   // For email we have to use this ref instead, otherwise the textbox does a weird refocusing.
   const messageDraftEmail = useRef('');
-  const triggerGetSmartleadProspectConvo = async () => {
-    if (!prospect) return;
+  const triggerGetSmartleadProspectConvo = async (p: ProspectShallow | undefined) => {
+    if (!p) return;
 
-    const response = await getSmartleadProspectConvo(userToken, prospect.id, null);
+    const response = await getSmartleadProspectConvo(userToken, p.id, null);
     let conversation = response?.data?.conversation;
 
     // Sort results by time ascending
@@ -476,9 +488,7 @@ export default function ProspectConvo(props: Props) {
       return new Date(a.time).getTime() - new Date(b.time).getTime();
     });
     setSmartleadEmailConversation(conversation);
-    if (conversation.length > 0) {
-      setOpenedOutboundChannel('SMARTLEAD');
-    }
+    return conversation;
   };
   const triggerPostSmartleadReply = async () => {
     setSendingMessage(true);
@@ -508,7 +518,7 @@ export default function ProspectConvo(props: Props) {
 
     setSendingMessage(false);
 
-    triggerGetSmartleadProspectConvo();
+    await triggerGetSmartleadProspectConvo(prospect);
   };
 
   const handleConvertDate = (date: string) => {
@@ -538,6 +548,30 @@ export default function ProspectConvo(props: Props) {
     return formattedDateTime;
   };
 
+  const hasLinkedIn = (p: ProspectShallow | undefined) => {
+    return !!p?.li_conversation_urn_id;
+  };
+
+  const hasEmail = (p: ProspectShallow | undefined) => {
+    return !!p?.email;
+  };
+
+  const hasSmartleadEmail = (p: ProspectShallow | undefined, smartleadConvo?: any[]) => {
+    const convo = smartleadConvo || smartleadEmailConversation;
+    return hasEmail(p) && convo.length > 0;
+  };
+
+  const getDefaultChannel = (p: ProspectShallow | undefined, smartleadConvo?: any[]) => {
+    if (hasSmartleadEmail(p, smartleadConvo)) {
+      return 'SMARTLEAD';
+    } else if (hasLinkedIn(p)) {
+      return 'LINKEDIN';
+    } else if (hasEmail(p)) {
+      return 'EMAIL';
+    }
+    return 'LINKEDIN';
+  };
+
   useEffect(() => {
     scrollToBottom();
     if (isFetchingMessages) {
@@ -552,16 +586,17 @@ export default function ProspectConvo(props: Props) {
     sendBoxRef.current?.setAiMessage('');
     currentMessagesProspectId.current = openedProspectId;
     setSmartleadEmailConversation([]);
-    triggerGetSmartleadProspectConvo();
+    triggerGetSmartleadProspectConvo(prospect);
   }, [openedProspectId]);
 
   useQuery({
     queryKey: [`query-get-smartlead-convo-prospect-${openedProspectId}`],
     queryFn: async () => {
-      await triggerGetSmartleadProspectConvo();
+      await triggerGetSmartleadProspectConvo(prospect);
       return [];
     },
     enabled: !!prospect,
+    refetchOnWindowFocus: false,
   });
 
   // The prospect is no longer loading if we are not fetching any data
@@ -630,12 +665,11 @@ export default function ProspectConvo(props: Props) {
   //   triggerGetBumpFrameworks();
   // }, [])
 
-  let statusValue = data?.details?.linkedin_status || 'ACTIVE_CONVO';
-  if (openedOutboundChannel === 'EMAIL' || openedOutboundChannel === 'SMARTLEAD') {
-    statusValue = props.currentEmailStatus || 'ACTIVE_CONVO';
-  }
+  const statusValue =
+    (openedOutboundChannel === 'LINKEDIN' ? prospect?.linkedin_status : prospect?.email_status) ??
+    '';
 
-  const linkedin_public_id = data?.li.li_profile?.split('/in/')[1]?.split('/')[0] ?? '';
+  const linkedin_public_id = prospect?.li_public_id?.split('/in/')[1]?.split('/')[0] ?? '';
 
   // Disable AI based on SDR settings
   let ai_disabled =
@@ -681,7 +715,7 @@ export default function ProspectConvo(props: Props) {
           <Group position='apart' p={15} h={66} sx={{ flexWrap: 'nowrap' }} bg={'white'}>
             <div style={{ overflow: 'hidden' }}>
               <Title order={3} truncate>
-                {data?.details.full_name}
+                {prospect?.full_name}
               </Title>
               <Text weight={300} fs='italic' size={10} c='dimmed' truncate>
                 {prospect && new Date(prospect.hidden_until).getTime() > new Date().getTime() ? (
@@ -700,7 +734,7 @@ export default function ProspectConvo(props: Props) {
               )}
               <Box sx={{ textAlign: 'right' }}>
                 <Badge size='lg' color={'blue'}>
-                  {labelizeConvoSubstatus(statusValue, data?.details?.bump_count)}
+                  {labelizeConvoSubstatus(statusValue, prospectDetails?.details.bump_count)}
                 </Badge>
                 {(statusValue === 'ACTIVE_CONVO_REVIVAL' ||
                   statusValue === 'ACTIVE_CONVO_QUEUED_FOR_SNOOZE') && (
@@ -708,17 +742,17 @@ export default function ProspectConvo(props: Props) {
                     <br />
                     <Badge size='xs' color='gray' variant='outline'>
                       Previously:{' '}
-                      {data?.details?.previous_status
+                      {prospectDetails?.details?.previous_status
                         ?.replaceAll('ACTIVE_CONVO_', '')
                         .replaceAll('_', ' ')}
                     </Badge>
                   </>
                 )}
-                {data?.details?.disqualification_reason && (
+                {prospectDetails?.details?.disqualification_reason && (
                   <>
                     <br />
                     <Badge size='xs' color='red' variant='outline'>
-                      Reason: {data?.details?.disqualification_reason}
+                      Reason: {prospectDetails?.details?.disqualification_reason}
                     </Badge>
                   </>
                 )}
@@ -736,7 +770,7 @@ export default function ProspectConvo(props: Props) {
 
         <Tabs
           variant='outline'
-          defaultValue='LINKEDIN'
+          defaultValue={getDefaultChannel(prospect)}
           radius={theme.radius.md}
           value={openedOutboundChannel}
           styles={(theme) => ({
@@ -780,6 +814,7 @@ export default function ProspectConvo(props: Props) {
               sendBoxRef.current?.setAiGenerated(false);
               sendBoxRef.current?.setAiMessage('');
               sendBoxRef.current?.setMessageDraft('');
+
               setOpenedOutboundChannel(value as Channel);
               setOpenedConvoBox(value === 'LINKEDIN' || value === 'SMARTLEAD');
 
@@ -819,17 +854,17 @@ export default function ProspectConvo(props: Props) {
                 </Flex>
               </Tabs.Tab>
             )}
-            {prospect?.li_public_id && (
+            {hasLinkedIn(prospect) && (
               <Tabs.Tab value='LINKEDIN' icon={<IconBrandLinkedin size='0.8rem' />}>
                 LinkedIn <Badge>{currentConvoLiMessages?.length}</Badge>
               </Tabs.Tab>
             )}
-            {prospect?.email && !smartleadEmailConversation.length && (
+            {hasEmail(prospect) && !hasSmartleadEmail(prospect) && (
               <Tabs.Tab value='EMAIL' icon={<IconMail size='0.8rem' />}>
                 Email (Primary Inbox)
               </Tabs.Tab>
             )}
-            {smartleadEmailConversation.length > 0 && (
+            {hasSmartleadEmail(prospect) && (
               <Tabs.Tab value='SMARTLEAD' icon={<IconMail size='0.8rem' />}>
                 Email
               </Tabs.Tab>
@@ -949,6 +984,45 @@ export default function ProspectConvo(props: Props) {
                   }}
                 >
                   Ask AE
+                </Button>
+                <Divider />
+                <Button
+                  w={'100%'}
+                  color='gray.8'
+                  variant='subtle'
+                  styles={{
+                    inner: {
+                      justifyContent: 'flex-start',
+                    },
+                  }}
+                  onClick={() => {
+                    setAdvancedAIActionsOpened(false);
+                    openContextModal({
+                      modal: 'makeReminderCard',
+                      title: (
+                        <Group position='apart'>
+                          <div>
+                            <Title order={4}>Make Reminder Card</Title>
+                          </div>
+                        </Group>
+                      ),
+                      styles: (theme) => ({
+                        title: {
+                          width: '100%',
+                        },
+                        header: {
+                          margin: 0,
+                        },
+                      }),
+                      innerProps: {
+                        prospect: prospect,
+                        onCreate: (prospect: ProspectShallow, reason: string) => {},
+                        onCancel: () => {},
+                      },
+                    });
+                  }}
+                >
+                  Make Reminder Card
                 </Button>
               </Popover.Dropdown>
             </Popover>
@@ -1355,7 +1429,9 @@ export default function ProspectConvo(props: Props) {
                     scrollToBottom={scrollToBottom}
                     minimizedSendBox={() => setOpenedConvoBox(false)}
                     currentSubstatus={statusValue}
-                    triggerGetSmartleadProspectConvo={triggerGetSmartleadProspectConvo}
+                    triggerGetSmartleadProspectConvo={() => {
+                      triggerGetSmartleadProspectConvo(prospect);
+                    }}
                     archetypeId={prospect?.archetype_id}
                   />
                 </Box>

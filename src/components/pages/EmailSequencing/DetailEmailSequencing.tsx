@@ -1505,7 +1505,7 @@ export const EmailBodyItem: React.FC<{
   }, [template]);
 
   const theme = useMantineTheme();
-  const formatedSequence = useMemo(() => {
+  const formattedSequence = useMemo(() => {
     let newText = sequence;
 
     if (newText) {
@@ -1552,6 +1552,16 @@ export const EmailBodyItem: React.FC<{
 
     return newText;
   }, []);
+  console.log('formattedSequence', formattedSequence)
+
+  const [previewSequence, setPreviewSequence] = useState(formattedSequence)
+  useEffect(() => {
+    // Clean the formatted sequence to remove any HTML elements
+    const nonHTMLFormattedSequence = sequence.replace(/<[^>]*>/g, ' ')
+
+    setPreviewSequence(nonHTMLFormattedSequence)
+  }, [formattedSequence])
+
 
   return (
     <Flex
@@ -1715,7 +1725,7 @@ export const EmailBodyItem: React.FC<{
           <Accordion.Item value="variant-details">
             <Accordion.Control>
               <Flex w="100%" justify={"center"} align={"center"}>
-                <Text>View Variant Details</Text>
+                <Text>{previewSequence.substring(0, 125) + "..."}</Text>
               </Flex>
             </Accordion.Control>
             <Accordion.Panel mt='md'>
@@ -1790,7 +1800,7 @@ export const EmailBodyItem: React.FC<{
                   <Text fz="sm">
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(formatedSequence as string),
+                        __html: DOMPurify.sanitize(formattedSequence as string),
                       }}
                     />
                   </Text>

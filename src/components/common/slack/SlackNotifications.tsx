@@ -30,10 +30,6 @@ import { showNotification } from "@mantine/notifications";
 import { postPreviewSlackNotification } from "@utils/requests/postPreviewSlackNotification";
 import { IconSend } from "@tabler/icons";
 
-const image_map = new Map<string, string>([
-  ["AI_REPLY_TO_EMAIL", EmailAIResponseImg],
-]);
-
 type SlackNotificationSubscription = {
   id: number;
   notification_type: string;
@@ -44,7 +40,7 @@ type SlackNotificationSubscription = {
   subscribed: boolean;
 };
 
-export default function SlackNotifications(props: { selectedChannel: string }) {
+export const CustomizeSlackNotifications = () => {
   const [loading, setLoading] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
@@ -88,49 +84,8 @@ export default function SlackNotifications(props: { selectedChannel: string }) {
   useEffect(() => {
     triggerGetSubscriptions();
   }, []);
-
   return (
     <>
-      <Flex
-        style={{
-          border: "1px solid gray",
-          borderStyle: "dashed",
-          borderRadius: "6px",
-        }}
-        align={"center"}
-        p={"sm"}
-        justify={"space-between"}
-        mt={"md"}
-      >
-        <Flex align={"center"} gap={"sm"}>
-          <Text size={"sm"} fw={500}>
-            Connected to{" "}
-            <span
-              style={{
-                fontFamily: "monospace", // Use a monospaced font for code-like appearance
-                backgroundColor: "#f0f0f0", // Set background color for code block
-                padding: "0.5em", // Add padding for better readability
-                borderRadius: "4px", // Optional: Add rounded corners for a softer look
-                display: "inline",
-                color: "red",
-              }}
-            >
-              #{props.selectedChannel}
-            </span>
-          </Text>
-          {/* <Text size={'xs'} color='gray'>
-            - by {props.selectedChannel}
-          </Text> */}
-        </Flex>
-        <Flex gap={"sm"} align={"center"}>
-          <Button variant="outline" color="red" disabled>
-            Disconnect
-          </Button>
-          {/* <IconEdit color='gray' /> */}
-        </Flex>
-      </Flex>
-      <Divider my={"lg"} />
-
       <Flex align={"center"} gap={"sm"}>
         <Flex direction={"column"}>
           <Text fw={600}>Customize Notifications</Text>
@@ -210,7 +165,7 @@ export default function SlackNotifications(props: { selectedChannel: string }) {
       </Flex>
     </>
   );
-}
+};
 
 const SlackNotificationCard = (props: {
   userToken: string;

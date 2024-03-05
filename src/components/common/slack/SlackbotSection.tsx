@@ -8,13 +8,13 @@ import {
   Select,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
-import SlackNotifications from "./SlackNotifications";
 
 import SlackLogo from "@assets/images/slack-logo.png";
 import { useSearchParams } from "react-router-dom";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { getConnectedSlackChannels } from "@utils/requests/slack";
+import { CustomizeSlackNotifications } from "./SlackNotifications";
 
 const SLACK_REDIRECT_URI = `${window.location.origin}/settings/slack`;
 
@@ -111,7 +111,48 @@ export default function SlackbotSection() {
             </Flex>
             <Divider mt="md" />
             {connectedChannel ? (
-              <SlackNotifications selectedChannel={connectedChannel} />
+              <>
+                <Flex
+                  style={{
+                    border: "1px solid gray",
+                    borderStyle: "dashed",
+                    borderRadius: "6px",
+                  }}
+                  align={"center"}
+                  p={"sm"}
+                  justify={"space-between"}
+                  mt={"md"}
+                >
+                  <Flex align={"center"} gap={"sm"}>
+                    <Text size={"sm"} fw={500}>
+                      Connected to{" "}
+                      <span
+                        style={{
+                          fontFamily: "monospace", // Use a monospaced font for code-like appearance
+                          backgroundColor: "#f0f0f0", // Set background color for code block
+                          padding: "0.5em", // Add padding for better readability
+                          borderRadius: "4px", // Optional: Add rounded corners for a softer look
+                          display: "inline",
+                          color: "red",
+                        }}
+                      >
+                        #{connectedChannel}
+                      </span>
+                    </Text>
+                    {/* <Text size={'xs'} color='gray'>
+                  - by {props.selectedChannel}
+                </Text> */}
+                  </Flex>
+                  <Flex gap={"sm"} align={"center"}>
+                    <Button variant="outline" color="red" disabled>
+                      Disconnect
+                    </Button>
+                    {/* <IconEdit color='gray' /> */}
+                  </Flex>
+                </Flex>
+                <Divider my={"lg"} />
+                <CustomizeSlackNotifications />
+              </>
             ) : (
               <Select
                 // data={channelList!.map((channel) => ({

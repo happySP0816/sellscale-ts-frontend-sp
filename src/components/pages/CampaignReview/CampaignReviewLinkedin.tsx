@@ -10,9 +10,11 @@ import {
   Divider,
   Flex,
   Group,
+  HoverCard,
   Loader,
   Modal,
   Paper,
+  Popover,
   Stack,
   Text,
   Textarea,
@@ -336,7 +338,6 @@ export const Messaging = (props: MessagingProps) => {
   let SEQUENCE = props.campaignOverview?.linkedin?.sequence;
   if (props.campaignType === 'EMAIL') {
     SEQUENCE = props.campaignOverview?.email?.sequence;
-    console.log(props.campaignOverview?.email.sequence);
   }
 
   // const fetchAttachedAssets = () => {
@@ -354,13 +355,16 @@ export const Messaging = (props: MessagingProps) => {
   //     .catch((error) => console.error('Failed to fetch attached assets', error));
   // };
 
-  const messageData = SEQUENCE?.map((x: any) => {
+  const messageData = SEQUENCE?.map((x) => {
     return {
       step: x?.title,
       avatar: '',
       username: userData?.sdr_name,
       message: x?.description,
+      // @ts-ignore
       delay: x?.bump_framework_delay,
+      // @ts-ignore
+      assets: x?.assets,
     };
   });
   const handleToggle = (id: number) => {
@@ -526,6 +530,23 @@ export const Messaging = (props: MessagingProps) => {
                         <Text tt={'uppercase'} color='blue' fw={600}>
                           example message
                         </Text>
+                        {item.assets && (
+                          <HoverCard width={280} shadow='md' disabled={item.assets.length == 0}>
+                            <HoverCard.Target>
+                              <Badge color='green'>{item.assets.length} used assets</Badge>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown>
+                              <Text fz='sm' fw='bold'>
+                                Assets Used:
+                              </Text>
+                              {item.assets.map((asset: any, index: number) => (
+                                <Text key={index} fz='sm'>
+                                  - {asset.asset_key}
+                                </Text>
+                              ))}
+                            </HoverCard.Dropdown>
+                          </HoverCard>
+                        )}
                       </Flex>
                     </Flex>
                     <Flex align={'center'} gap={'sm'}>

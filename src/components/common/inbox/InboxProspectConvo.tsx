@@ -291,7 +291,7 @@ export default function ProspectConvo(props: Props) {
   const scrollToBottom = () =>
     viewport.current?.scrollTo({
       top: viewport.current.scrollHeight,
-      behavior: 'instant',
+      // behavior: 'auto',
     });
 
   const { data: prospectDetails } = useQuery({

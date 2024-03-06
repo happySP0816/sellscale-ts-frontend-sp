@@ -80,7 +80,7 @@ export const Sequence = (props: SequenceProps) => {
       <Flex mt='md'>
         <Card mr='md'>
           <Text color='#0f6cbf' size={'lg'} fw={500}>
-            # of Contacts: {props.campaignOverview?.overview?.num_prospects}
+            # of Contacts: {props.campaignType === 'EMAIL' ? props.campaignOverview?.overview?.num_prospects_with_emails : props.campaignOverview?.overview?.num_prospects}
           </Text>
         </Card>
         <Card>
@@ -215,6 +215,7 @@ export const Contact = (props: ContactProps) => {
           >
             <iframe
               src={
+                // Editable Retool URL: https://sellscale.retool.com/apps/d472bc28-c6d6-11ee-8cc1-4fd0d3627823/Delete%20Prospects%20from%20Campaign
                 'https://sellscale.retool.com/embedded/public/20d97ed1-4602-4513-aa77-97f15a210a9d#authToken=' +
                 userToken +
                 '&campaignId=' +

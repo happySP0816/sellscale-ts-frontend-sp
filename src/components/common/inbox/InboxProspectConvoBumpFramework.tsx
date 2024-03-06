@@ -1,4 +1,8 @@
-import { bumpFrameworkSelectedSubstatusState, openedBumpFameworksState, selectedBumpFrameworkState } from '@atoms/inboxAtoms';
+import {
+  bumpFrameworkSelectedSubstatusState,
+  openedBumpFameworksState,
+  selectedBumpFrameworkState,
+} from '@atoms/inboxAtoms';
 import { userDataState, userTokenState } from '@atoms/userAtoms';
 import {
   Button,
@@ -19,17 +23,23 @@ import {
   Box,
   Container,
 } from '@mantine/core';
-import {
-  IconLock,
-  IconExternalLink
-} from "@tabler/icons";
+import { IconLock, IconExternalLink } from '@tabler/icons';
 import { getBumpFrameworks } from '@utils/requests/getBumpFrameworks';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { BumpFramework, EmailSequenceStep, LinkedInMessage, PersonaOverview, ProspectShallow } from 'src';
+import {
+  BumpFramework,
+  EmailSequenceStep,
+  LinkedInMessage,
+  PersonaOverview,
+  ProspectShallow,
+} from 'src';
 import { showNotification } from '@mantine/notifications';
-import { postBumpGenerateEmailResponse, postBumpGenerateResponse } from '@utils/requests/postBumpGenerateResponse';
+import {
+  postBumpGenerateEmailResponse,
+  postBumpGenerateResponse,
+} from '@utils/requests/postBumpGenerateResponse';
 import _ from 'lodash';
 import { API_URL } from '@constants/data';
 import { prospectDrawerStatusesState } from '@atoms/prospectAtoms';
@@ -63,7 +73,11 @@ type BumpFrameworkBuckets = {
   };
 };
 
-export const generateAIFollowup = async (userToken: string, prospectId: number, bumpFramework: BumpFramework | undefined) => {
+export const generateAIFollowup = async (
+  userToken: string,
+  prospectId: number,
+  bumpFramework: BumpFramework | undefined
+) => {
   const result = await postBumpGenerateResponse(
     userToken,
     prospectId,
@@ -93,12 +107,17 @@ export const generateAIFollowup = async (userToken: string, prospectId: number, 
   }
 };
 
-export const generateAIEmailReply = async (userToken: string, prospectId: number, emailThreadID: string, emailSequenceStep: EmailSequenceStep | undefined) => {
+export const generateAIEmailReply = async (
+  userToken: string,
+  prospectId: number,
+  emailThreadID: string,
+  emailSequenceStep: EmailSequenceStep | undefined
+) => {
   const result = await postBumpGenerateEmailResponse(
     userToken,
     prospectId,
     emailThreadID,
-    emailSequenceStep?.id,
+    emailSequenceStep?.step.id,
     [] // EmailSequenceStep?.account_research?
   );
 
@@ -149,7 +168,7 @@ export const autoFillBumpFrameworkAccountResearch = (userToken: string, prospect
 export default function InboxProspectConvoBumpFramework(props: {
   prospect: ProspectShallow;
   messages: LinkedInMessage[];
-  bumpFrameworksSequence?: BumpFramework[]
+  bumpFrameworksSequence?: BumpFramework[];
   onClose?: () => void;
   onPopulateBumpFrameworks?: (buckets: BumpFrameworkBuckets) => void;
 }) {
@@ -160,7 +179,9 @@ export default function InboxProspectConvoBumpFramework(props: {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
 
-  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(prospectDrawerStatusesState);
+  const [prospectDrawerStatuses, setProspectDrawerStatuses] = useRecoilState(
+    prospectDrawerStatusesState
+  );
 
   const [loading, setLoading] = useState(false);
   const [currentProject, setCurrentProject] = useRecoilState(currentProjectState);
@@ -176,27 +197,23 @@ export default function InboxProspectConvoBumpFramework(props: {
 
   const navigate = useNavigate();
 
-  const [addNewQuestionObjectionOpened, { open: openQuestionObjection, close: closeQuestionObjection }] = useDisclosure();
+  const [
+    addNewQuestionObjectionOpened,
+    { open: openQuestionObjection, close: closeQuestionObjection },
+  ] = useDisclosure();
 
   useEffect(() => {
     (async () => {
       if (!isLoggedIn()) return;
       const response = await getPersonasOverview(userToken);
-      const result =
-        response.status === "success"
-          ? (response.data as PersonaOverview[])
-          : [];
+      const result = response.status === 'success' ? (response.data as PersonaOverview[]) : [];
       setProjects(result);
     })();
   }, []);
 
+  const unassignedPersona = projects.find((project) => project.is_unassigned_contact_archetype);
 
-  const unassignedPersona = projects.find(
-    (project) => project.is_unassigned_contact_archetype
-  );
-
-  const archetypeID = unassignedPersona?.id || -1
-
+  const archetypeID = unassignedPersona?.id || -1;
 
   const { data: dataChannels } = useQuery({
     queryKey: [`query-get-channels-campaign-prospects`],
@@ -221,15 +238,15 @@ export default function InboxProspectConvoBumpFramework(props: {
   const triggerGetBumpFrameworks = async () => {
     setLoading(true);
 
-    let substatuses = []
+    let substatuses = [];
     if (substatus) {
-      substatuses.push(substatus)
+      substatuses.push(substatus);
     }
 
     const result = await getBumpFrameworks(
-      userToken, 
-      [], 
-      substatuses, 
+      userToken,
+      [],
+      substatuses,
       [],
       undefined,
       undefined,
@@ -302,7 +319,10 @@ export default function InboxProspectConvoBumpFramework(props: {
         }
       }
     }
-    const sortedActiveConvo = _.sortBy(newBumpBuckets.ACTIVE_CONVO.frameworks, (obj) => obj.substatus);
+    const sortedActiveConvo = _.sortBy(
+      newBumpBuckets.ACTIVE_CONVO.frameworks,
+      (obj) => obj.substatus
+    );
     newBumpBuckets.ACTIVE_CONVO.frameworks = sortedActiveConvo;
 
     bumpBuckets.current = newBumpBuckets;
@@ -333,7 +353,12 @@ export default function InboxProspectConvoBumpFramework(props: {
     element?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  function QuestionObjectionLibraryCard(props: { archetypeID: number | null; bumpFramework: BumpFramework; afterEdit: () => void; id: string }) {
+  function QuestionObjectionLibraryCard(props: {
+    archetypeID: number | null;
+    bumpFramework: BumpFramework;
+    afterEdit: () => void;
+    id: string;
+  }) {
     const theme = useMantineTheme();
 
     const splitted_substatus = props.bumpFramework?.substatus?.replace('ACTIVE_CONVO_', '');
@@ -347,7 +372,11 @@ export default function InboxProspectConvoBumpFramework(props: {
             radius='md'
             id={props.id}
             style={{
-              outline: `${props.bumpFramework?.id === data.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
+              outline: `${
+                props.bumpFramework?.id === data.id
+                  ? ' 0.125rem solid #228be6'
+                  : ' 0.0625rem solid #ced4da'
+              }`,
               borderRadius: '8px',
               padding: '10px 14px',
               width: '100%',
@@ -358,18 +387,14 @@ export default function InboxProspectConvoBumpFramework(props: {
               <Flex justify='space-between' align='center'>
                 <Box>
                   <Title order={5}>{props.bumpFramework.title}</Title>
-                  {
-                    !props.bumpFramework.client_archetype_id && props.bumpFramework.default && (
-                      <Badge size='xs' color='gray'>
-                        SellScale Default Framework
-                      </Badge>
-                    )
-                  }
+                  {!props.bumpFramework.client_archetype_id && props.bumpFramework.default && (
+                    <Badge size='xs' color='gray'>
+                      SellScale Default Framework
+                    </Badge>
+                  )}
                 </Box>
                 <ActionIcon
-                  disabled={
-                    !props.bumpFramework.client_archetype_id && props.bumpFramework.default
-                  }
+                  disabled={!props.bumpFramework.client_archetype_id && props.bumpFramework.default}
                   onClick={() => {
                     openContextModal({
                       modal: 'editBumpFramework',
@@ -423,7 +448,9 @@ export default function InboxProspectConvoBumpFramework(props: {
             </Card.Section>
 
             {/* <Text fz='xs'>For convos with status labeled:</Text> */}
-            <Badge color={valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO')}>{splitted_substatus || 'ACTIVE_CONVO'}</Badge>
+            <Badge color={valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO')}>
+              {splitted_substatus || 'ACTIVE_CONVO'}
+            </Badge>
           </Card>
         </div>
       </>
@@ -433,9 +460,7 @@ export default function InboxProspectConvoBumpFramework(props: {
     triggerGetBumpFrameworks();
   }, [archetypeID, substatus]);
 
-  const [selectedBumpFramework, setBumpFramework] = useRecoilState(
-    selectedBumpFrameworkState
-  );
+  const [selectedBumpFramework, setBumpFramework] = useRecoilState(selectedBumpFrameworkState);
 
   return (
     <Modal
@@ -481,33 +506,41 @@ export default function InboxProspectConvoBumpFramework(props: {
                       return (
                         <>
                           {(!bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1] ||
-                            item.substatus !== bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1].substatus) && (
-                              <Divider
-                                label={
-                                  <Flex align={'center'} gap={4}>
-                                    <div
-                                      style={{
-                                        width: '10px',
-                                        height: '10px',
-                                        background: valueToColor(theme, splitted_substatus || 'ACTIVE_CONVO'),
-                                        borderRadius: '100%',
-                                      }}
-                                    ></div>
-                                    <Text color='gray' fw={600}>
-                                      {splitted_substatus || 'ACTIVE_CONVERSATION'}
-                                    </Text>
-                                  </Flex>
-                                }
-                                labelPosition='left'
-                                w={'100%'}
-                              />
-                            )}
+                            item.substatus !==
+                              bumpBuckets.current?.ACTIVE_CONVO.frameworks[i - 1].substatus) && (
+                            <Divider
+                              label={
+                                <Flex align={'center'} gap={4}>
+                                  <div
+                                    style={{
+                                      width: '10px',
+                                      height: '10px',
+                                      background: valueToColor(
+                                        theme,
+                                        splitted_substatus || 'ACTIVE_CONVO'
+                                      ),
+                                      borderRadius: '100%',
+                                    }}
+                                  ></div>
+                                  <Text color='gray' fw={600}>
+                                    {splitted_substatus || 'ACTIVE_CONVERSATION'}
+                                  </Text>
+                                </Flex>
+                              }
+                              labelPosition='left'
+                              w={'100%'}
+                            />
+                          )}
 
                           <label
                             htmlFor={item?.id ? String(item?.id) : undefined}
                             key={i}
                             style={{
-                              outline: `${data?.id === item?.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
+                              outline: `${
+                                data?.id === item?.id
+                                  ? ' 0.125rem solid #228be6'
+                                  : ' 0.0625rem solid #ced4da'
+                              }`,
                               borderRadius: '8px',
                               padding: '10px 14px',
                               width: '100%',
@@ -535,57 +568,68 @@ export default function InboxProspectConvoBumpFramework(props: {
                     })}
                   </Group>
                   {!!props.bumpFrameworksSequence?.length && (
-                  <Box sx={{
-                    marginTop: '16px',
-                    marginBottom: '16px'}}
-                  >
-                    <Flex
-                      justify={'space-between'}
-                      align={'center'}
-                      gap={4}
+                    <Box
                       sx={{
-                        marginBottom: '8px'
+                        marginTop: '16px',
+                        marginBottom: '16px',
                       }}
                     >
-                      <Divider
-                        label={
-                          <Flex align={'center'} gap={4}>
-                            <div
-                              style={{
-                                width: '10px',
-                                height: '10px',
-                                background: 'yellow',
-                                borderRadius: '100%',
-                              }}
-                            ></div>
-                            <Text color='gray' fw={600}>
-                              CONTINUE THE SEQUENCE
-                            </Text>
-                          </Flex>
-                        }
-                        labelPosition='left'
-                        w={'100%'}
-                      />
-                      <Flex className='cursor-pointer' gap={4} align={'center'} onClick={() => navigate('/setup/linkedin')}>
-                        <Text size={13} color='blue'>
-                          Edit
-                        </Text>
-                        <IconExternalLink width={15} style={{ color: 'blue' }} />
+                      <Flex
+                        justify={'space-between'}
+                        align={'center'}
+                        gap={4}
+                        sx={{
+                          marginBottom: '8px',
+                        }}
+                      >
+                        <Divider
+                          label={
+                            <Flex align={'center'} gap={4}>
+                              <div
+                                style={{
+                                  width: '10px',
+                                  height: '10px',
+                                  background: 'yellow',
+                                  borderRadius: '100%',
+                                }}
+                              ></div>
+                              <Text color='gray' fw={600}>
+                                CONTINUE THE SEQUENCE
+                              </Text>
+                            </Flex>
+                          }
+                          labelPosition='left'
+                          w={'100%'}
+                        />
+                        <Flex
+                          className='cursor-pointer'
+                          gap={4}
+                          align={'center'}
+                          onClick={() => navigate('/setup/linkedin')}
+                        >
+                          <Text size={13} color='blue'>
+                            Edit
+                          </Text>
+                          <IconExternalLink width={15} style={{ color: 'blue' }} />
+                        </Flex>
                       </Flex>
-                    </Flex>
-                    <Box>
-                      {props.bumpFrameworksSequence?.map((sequence) => (
+                      <Box>
+                        {props.bumpFrameworksSequence?.map((sequence) => (
                           <Box
                             key={sequence.id}
                             style={{
-                              outline: `${data?.id === sequence.id ? ' 0.125rem solid #228be6' : ' 0.0625rem solid #ced4da'}`,
+                              outline: `${
+                                data?.id === sequence.id
+                                  ? ' 0.125rem solid #228be6'
+                                  : ' 0.0625rem solid #ced4da'
+                              }`,
                               borderRadius: '8px',
                               padding: '10px 14px',
                               width: '100%',
-                              marginBottom: '16px'
+                              marginBottom: '16px',
                             }}
                           >
-                            <Flex align={'center'} gap={10} sx={{width: '100%'}}>
+                            <Flex align={'center'} gap={10} sx={{ width: '100%' }}>
                               <Radio
                                 value={sequence.id}
                                 id={sequence.id ? String(sequence.id) : undefined}
@@ -594,7 +638,7 @@ export default function InboxProspectConvoBumpFramework(props: {
                                   setData(sequence);
                                   setBlockList(sequence.transformer_blocklist);
                                   handleScroll(e, sequence.id);
-                                  setBumpFramework(sequence); 
+                                  setBumpFramework(sequence);
                                 }}
                               />
                               <Text fw={600} mt={2}>
@@ -602,10 +646,10 @@ export default function InboxProspectConvoBumpFramework(props: {
                               </Text>
                             </Flex>
                           </Box>
-                      ))}
+                        ))}
+                      </Box>
                     </Box>
-                  </Box>
-                )}
+                  )}
                 </Radio.Group>
               </Box>
             </ScrollArea>
@@ -614,9 +658,9 @@ export default function InboxProspectConvoBumpFramework(props: {
           <ScrollArea scrollbarSize={6} mt={'sm'} w={'60%'}>
             <Flex w={'100%'} direction='column' gap={'xl'} px={10} mt={'sm'}>
               {bumpBuckets.current?.ACTIVE_CONVO.frameworks.map((qno: any, index) => {
-
                 // only show qnos with same stats
-                if (qno.substatus !== data?.substatus && qno?.overall_status === 'ACTIVE_CONVO') return null;
+                if (qno.substatus !== data?.substatus && qno?.overall_status === 'ACTIVE_CONVO')
+                  return null;
 
                 return (
                   <>
@@ -629,43 +673,44 @@ export default function InboxProspectConvoBumpFramework(props: {
                   </>
                 );
               })}
-              {
-                (data?.overall_status === 'ACCEPTED' || data?.overall_status === 'BUMPED') && 
+              {(data?.overall_status === 'ACCEPTED' || data?.overall_status === 'BUMPED') &&
                 props.bumpFrameworksSequence?.map((sequence) => (
-                <div>
-                  <Card
-                    withBorder
-                    p='sm'
-                    radius='md'
-                    style={{
-                      outline: '0.0625rem solid #ced4da',
-                      borderRadius: '8px',
-                      padding: '10px 14px',
-                      width: '100%',
-                      marginBottom: '20px',
-                    }}
-                  >
-                    <Card.Section px='md' pt='md'>
-                      <Flex justify='space-between' align='center'>
-                        <Title order={5}>{sequence.Title}</Title>
+                  <div>
+                    <Card
+                      withBorder
+                      p='sm'
+                      radius='md'
+                      style={{
+                        outline: '0.0625rem solid #ced4da',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        width: '100%',
+                        marginBottom: '20px',
+                      }}
+                    >
+                      <Card.Section px='md' pt='md'>
+                        <Flex justify='space-between' align='center'>
+                          <Title order={5}>{sequence.Title}</Title>
+                        </Flex>
+                      </Card.Section>
+
+                      <Card.Section style={{ display: 'flex', justifyContent: 'center' }}>
+                        <Divider my='xs' w={'90%'} />
+                      </Card.Section>
+                      <Flex align='center'>
+                        <TextWithNewline>{sequence.Description}</TextWithNewline>
                       </Flex>
-                    </Card.Section>
 
-                    <Card.Section style={{ display: 'flex', justifyContent: 'center' }}>
-                      <Divider my='xs' w={'90%'} />
-                    </Card.Section>
-                    <Flex align='center'>
-                      <TextWithNewline>{sequence.Description}</TextWithNewline>
-                    </Flex>
+                      <Card.Section style={{ display: 'flex', justifyContent: 'center' }}>
+                        <Divider my='xs' w={'90%'} />
+                      </Card.Section>
 
-                    <Card.Section style={{ display: 'flex', justifyContent: 'center' }}>
-                      <Divider my='xs' w={'90%'} />
-                    </Card.Section>
-
-                    <Badge color={valueToColor(theme, 'ACTIVE_CONVO')}>CONTINUE THE SEQUENCE</Badge>
-                  </Card>
-                </div>
-              ))}
+                      <Badge color={valueToColor(theme, 'ACTIVE_CONVO')}>
+                        CONTINUE THE SEQUENCE
+                      </Badge>
+                    </Card>
+                  </div>
+                ))}
             </Flex>
           </ScrollArea>
 

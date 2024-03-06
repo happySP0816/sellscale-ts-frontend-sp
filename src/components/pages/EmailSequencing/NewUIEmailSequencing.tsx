@@ -86,7 +86,7 @@ const Sidebar: React.FC<{
     // ACCEPTED
     let sawDefault = false;
     for (const template of templateBuckets?.ACCEPTED.templates) {
-      if (template.default) {
+      if (template.step.default) {
         sawDefault = true;
         break;
       }
@@ -107,7 +107,7 @@ const Sidebar: React.FC<{
       }
       let sawDefault = false;
       for (const template of sequenceBucket.templates) {
-        if (template.default) {
+        if (template.step.default) {
           sawDefault = true;
         }
       }
@@ -184,7 +184,7 @@ const Sidebar: React.FC<{
             }
             let hasActive = false;
             for (const template of sequenceBucket.templates) {
-              if (template.active) {
+              if (template.step.active) {
                 hasActive = true;
               }
             }
@@ -219,7 +219,7 @@ const Sidebar: React.FC<{
                 continue;
               }
               for (const template of futureSequenceBucket.templates) {
-                if (template.default) {
+                if (template.step.default) {
                   hasDefaultInFuture = true;
                   break;
                 }

@@ -1,5 +1,5 @@
-import { currentProjectState } from "@atoms/personaAtoms";
-import { userTokenState } from "@atoms/userAtoms";
+import { currentProjectState } from '@atoms/personaAtoms';
+import { userTokenState } from '@atoms/userAtoms';
 import {
   Card,
   Stack,
@@ -13,18 +13,15 @@ import {
   NumberInput,
   Flex,
   LoadingOverlay,
-} from "@mantine/core";
-import { useHover, useTimeout } from "@mantine/hooks";
-import { showNotification } from "@mantine/notifications";
-import { IconMessages, IconTrash } from "@tabler/icons";
-import {
-  patchSequenceStep,
-  postDeactivateAllSequenceSteps,
-} from "@utils/requests/emailSequencing";
-import _ from "lodash";
-import { useEffect, useRef, useState } from "react";
-import { useRecoilValue } from "recoil";
-import { EmailSequenceStep, MsgResponse } from "src";
+} from '@mantine/core';
+import { useHover, useTimeout } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
+import { IconMessages, IconTrash } from '@tabler/icons';
+import { patchSequenceStep, postDeactivateAllSequenceSteps } from '@utils/requests/emailSequencing';
+import _ from 'lodash';
+import { useEffect, useRef, useState } from 'react';
+import { useRecoilValue } from 'recoil';
+import { EmailSequenceStep, MsgResponse } from 'src';
 
 export default function EmailSequenceStepCard(props: {
   active: boolean;
@@ -46,8 +43,7 @@ export default function EmailSequenceStepCard(props: {
   const userToken = useRecoilValue(userTokenState);
   const { hovered, ref } = useHover();
 
-  const [defaultSequenceStep, setDefaultSequenceStep] =
-    useState<EmailSequenceStep>();
+  const [defaultSequenceStep, setDefaultSequenceStep] = useState<EmailSequenceStep>();
   const [loading, setLoading] = useState<boolean>(false);
   const delayDaysRef = useRef(3);
 
@@ -60,25 +56,25 @@ export default function EmailSequenceStepCard(props: {
 
     const result = await patchSequenceStep(
       userToken,
-      defaultSequenceStep.id,
-      defaultSequenceStep.overall_status,
-      defaultSequenceStep.title,
-      defaultSequenceStep.template,
-      defaultSequenceStep.bumped_count,
+      defaultSequenceStep.step.id,
+      defaultSequenceStep.step.overall_status,
+      defaultSequenceStep.step.title,
+      defaultSequenceStep.step.template,
+      defaultSequenceStep.step.bumped_count,
       true,
       delayDays
     );
-    if (result.status != "success") {
+    if (result.status != 'success') {
       showNotification({
-        title: "Error",
+        title: 'Error',
         message: result.message,
-        color: "red",
+        color: 'red',
       });
     } else {
       showNotification({
-        title: "Success",
-        message: "Email delay days updated",
-        color: "green",
+        title: 'Success',
+        message: 'Email delay days updated',
+        color: 'green',
       });
       if (props.afterDelete) {
         props.afterDelete();
@@ -97,23 +93,20 @@ export default function EmailSequenceStepCard(props: {
     if (!props.sequenceBucket?.templates) return;
 
     // Get a random sequence step id to pass to the request
-    const randomSequenceStepId = props.sequenceBucket?.templates[0].id;
+    const randomSequenceStepId = props.sequenceBucket?.templates[0].step.id;
 
-    const result = await postDeactivateAllSequenceSteps(
-      userToken,
-      randomSequenceStepId
-    );
-    if (result.status != "success") {
+    const result = await postDeactivateAllSequenceSteps(userToken, randomSequenceStepId);
+    if (result.status != 'success') {
       showNotification({
-        title: "Error",
+        title: 'Error',
         message: result.message,
-        color: "red",
+        color: 'red',
       });
     } else {
       showNotification({
-        title: "Success",
-        message: "All email steps deactivated",
-        color: "green",
+        title: 'Success',
+        message: 'All email steps deactivated',
+        color: 'green',
       });
       if (props.refetch) {
         props.refetch();
@@ -126,11 +119,9 @@ export default function EmailSequenceStepCard(props: {
   useEffect(() => {
     // Get the default sequence step
     if (props.sequenceBucket?.templates) {
-      const defaultSequenceStep = _.find(props.sequenceBucket?.templates, {
-        active: true,
-      });
+      const defaultSequenceStep = props.sequenceBucket?.templates.find((s) => s.step.active);
       setDefaultSequenceStep(defaultSequenceStep);
-      delayDaysRef.current = defaultSequenceStep?.sequence_delay_days || 3;
+      delayDaysRef.current = defaultSequenceStep?.step.sequence_delay_days || 3;
     }
   }, [props.sequenceBucket, props.active]);
 
@@ -138,8 +129,8 @@ export default function EmailSequenceStepCard(props: {
     <Card
       ref={ref}
       p={0}
-      radius="md"
-      w={"100%"}
+      radius='md'
+      w={'100%'}
       withBorder
       onClick={() => {
         if (props.onClick) {
@@ -147,45 +138,40 @@ export default function EmailSequenceStepCard(props: {
         }
       }}
       sx={(theme) => ({
-        cursor: "pointer",
+        cursor: 'pointer',
         backgroundColor: props.active
           ? theme.fn.lighten(
-              theme.fn.variant({ variant: "filled", color: "blue" })
-                .background!,
+              theme.fn.variant({ variant: 'filled', color: 'blue' }).background!,
               0.95
             )
           : hovered
           ? theme.fn.lighten(
-              theme.fn.variant({ variant: "filled", color: "blue" })
-                .background!,
+              theme.fn.variant({ variant: 'filled', color: 'blue' }).background!,
               0.99
             )
           : undefined,
-        borderColor:
-          props.active || hovered
-            ? theme.colors.blue[5] + "!important"
-            : undefined,
-        borderWidth: "4px",
+        borderColor: props.active || hovered ? theme.colors.blue[5] + '!important' : undefined,
+        borderWidth: '4px',
       })}
     >
       <LoadingOverlay visible={loading} />
       <Stack spacing={0}>
-        <Group position="apart" px={15} py={10} noWrap>
-          <Group spacing={0} noWrap w={"100%"} display="flex">
+        <Group position='apart' px={15} py={10} noWrap>
+          <Group spacing={0} noWrap w={'100%'} display='flex'>
             <ActionIcon
-              variant="transparent"
-              color="blue"
+              variant='transparent'
+              color='blue'
               sx={{
-                cursor: "default",
+                cursor: 'default',
               }}
             >
-              <IconMessages size="1.1rem" />
+              <IconMessages size='1.1rem' />
             </ActionIcon>
-            <Text ml="xs" fw={800} sx={{ whiteSpace: "nowrap" }} color="gray.6">
+            <Text ml='xs' fw={800} sx={{ whiteSpace: 'nowrap' }} color='gray.6'>
               {props.title}
             </Text>
             {props.bumpedCount && (
-              <Badge color="gray" size="sm" ml={"0.5rem"}>
+              <Badge color='gray' size='sm' ml={'0.5rem'}>
                 If no reply from prospect
               </Badge>
             )}
@@ -194,24 +180,22 @@ export default function EmailSequenceStepCard(props: {
               <Tooltip
                 label={
                   currentProject?.smartlead_campaign_id
-                    ? "Synced campaigns cannot remove steps"
-                    : "Remove this step"
+                    ? 'Synced campaigns cannot remove steps'
+                    : 'Remove this step'
                 }
                 withinPortal
                 withArrow
               >
                 <div>
-                <ActionIcon
-                  disabled={
-                    currentProject?.smartlead_campaign_id ? true : false
-                  }
-                  ml="auto"
-                  color="gray.9"
-                  size="sm"
-                  onClick={triggerPostDeactivateAllSequenceSteps}
-                >
-                  <IconTrash />
-                </ActionIcon>
+                  <ActionIcon
+                    disabled={currentProject?.smartlead_campaign_id ? true : false}
+                    ml='auto'
+                    color='gray.9'
+                    size='sm'
+                    onClick={triggerPostDeactivateAllSequenceSteps}
+                  >
+                    <IconTrash />
+                  </ActionIcon>
                 </div>
               </Tooltip>
             )}
@@ -219,18 +203,18 @@ export default function EmailSequenceStepCard(props: {
         </Group>
         <Divider />
         <Box px={20} py={10}>
-          {defaultSequenceStep && defaultSequenceStep.title ? (
-            <Text fw={700} size="xl">
-              {defaultSequenceStep.title}
+          {defaultSequenceStep && defaultSequenceStep.step.title ? (
+            <Text fw={700} size='xl'>
+              {defaultSequenceStep.step.title}
             </Text>
           ) : (
-            <Flex w="100%" justify="center">
-              <Text size="lg" color="gray.7">
+            <Flex w='100%' justify='center'>
+              <Text size='lg' color='gray.7'>
                 No active template set
               </Text>
             </Flex>
           )}
-          <Text size={"sm"} fw={500} color="gray.5">
+          <Text size={'sm'} fw={500} color='gray.5'>
             {props.content}
           </Text>
         </Box>
@@ -238,18 +222,18 @@ export default function EmailSequenceStepCard(props: {
           <>
             <Divider />
             <Box px={20} py={10}>
-              <Flex align="center" justify={"center"}>
+              <Flex align='center' justify={'center'}>
                 <Text fz={14} fw={500}>
                   Wait for
                 </Text>
                 {defaultSequenceStep ? (
                   <NumberInput
-                    mx="xs"
-                    w="32px"
-                    variant="filled"
+                    mx='xs'
+                    w='32px'
+                    variant='filled'
                     hideControls
-                    sx={{ border: "solid 1px #777; border-radius: 4px;" }}
-                    size="xs"
+                    sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                    size='xs'
                     min={1}
                     defaultValue={delayDaysRef.current}
                     onChange={(e) => {
@@ -259,18 +243,18 @@ export default function EmailSequenceStepCard(props: {
                   />
                 ) : (
                   <Tooltip
-                    label={"Please activate a template to set a wait time"}
+                    label={'Please activate a template to set a wait time'}
                     withinPortal
                     withArrow
                   >
                     <div>
                       <NumberInput
-                        mx="xs"
-                        w="32px"
-                        variant="filled"
+                        mx='xs'
+                        w='32px'
+                        variant='filled'
                         hideControls
-                        sx={{ border: "solid 1px #777; border-radius: 4px;" }}
-                        size="xs"
+                        sx={{ border: 'solid 1px #777; border-radius: 4px;' }}
+                        size='xs'
                         min={2}
                         max={99}
                         value={3}

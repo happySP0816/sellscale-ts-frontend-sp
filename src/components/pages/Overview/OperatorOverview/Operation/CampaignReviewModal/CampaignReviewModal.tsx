@@ -70,8 +70,8 @@ const CampaignReviewModal: FC<Props> = (props) => {
             ? (stepsRes.data.sequence_steps as EmailSequenceStep[])
             : [];
         email_templates = allFrameworks
-          .filter((f) => f.default)
-          .sort((a, b) => (a.bumped_count ?? 0) - (b.bumped_count ?? 0));
+          .filter((f) => f.step.default)
+          .sort((a, b) => (a.step.bumped_count ?? 0) - (b.step.bumped_count ?? 0));
       } else {
         const frameworksRes = await getBumpFrameworks(userToken, [], [], [archetypeId]);
         const allFrameworks =
@@ -104,8 +104,8 @@ const CampaignReviewModal: FC<Props> = (props) => {
     description: string;
   }[] = isEmail
     ? (data?.email_templates ?? []).map((t) => ({
-        title: t.title,
-        description: t.template,
+        title: t.step.title,
+        description: t.step.template,
       }))
     : (data?.li_templates ?? []).map((t) => ({
         title: t.title,

@@ -458,20 +458,22 @@ export type BumpFramework = {
 };
 
 export type EmailSequenceStep = {
-  id: number;
-  title: string;
-  template: string;
-  overall_status: string;
-  substatus: string;
-  active: boolean;
-  default: boolean;
-  bumped_count: number | null;
-  sequence_delay_days: number | null;
-  transformer_blocklist: string[];
-  times_used: number;
-  times_accepted: number;
-  times_replied: number
-  // TODO: MISSING A LOT OF FIELDS
+  step: {
+    id: number;
+    title: string;
+    template: string;
+    overall_status: string;
+    substatus: string;
+    active: boolean;
+    default: boolean;
+    bumped_count: number | null;
+    sequence_delay_days: number | null;
+    transformer_blocklist: string[];
+    times_used: number;
+    times_accepted: number;
+    times_replied: number;
+  };
+  assets: Record<string, any>[];
 };
 
 export type ResearchPointType = {

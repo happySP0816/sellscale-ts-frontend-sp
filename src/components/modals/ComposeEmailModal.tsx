@@ -49,7 +49,11 @@ interface ComposeEmail extends Record<string, unknown> {
   };
 }
 
-export default function ComposeEmailModal({ context, id, innerProps }: ContextModalProps<ComposeEmail>) {
+export default function ComposeEmailModal({
+  context,
+  id,
+  innerProps,
+}: ContextModalProps<ComposeEmail>) {
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
 
@@ -61,12 +65,12 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
   const [body, _setBody] = useState(innerProps.body);
   // We use this to store the raw value of the rich text editor
   const bodyRich = useRef<JSONContent | string>();
-  const bodyRef = useRef('')
+  const bodyRef = useRef('');
   const [bodyPrompt, setBodyPrompt] = useState('');
   const setBody = (value: string) => {
     bodyRich.current = value;
     _setBody(value);
-  }
+  };
 
   const [sending, setSending] = useState(false);
   const [generatingEmail, setGeneratingEmail] = useState(false);
@@ -76,7 +80,6 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
   const [isFirstEmail, setIsFirstEmail] = useState(false);
   const [sequenceSteps, setSequenceSteps] = useState<EmailSequenceStep[]>([]);
   const [selectedSequenceStep, setSelectedSequenceStep] = useState<EmailSequenceStep | null>(null);
-
 
   const triggerPostGenerateInitialEmail = async () => {
     setGeneratingEmail(true);
@@ -95,24 +98,24 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
     const result = await postGenerateInitialEmail(
       userToken,
       innerProps.prospectId,
-      selectedSequenceStep?.id,
+      selectedSequenceStep?.step.id,
       null,
       null,
       null
-    )
+    );
     if (result.status != 'success') {
       showNotification({
         title: 'Error',
         message: 'Could not generate email.',
         color: 'red',
-      })
+      });
       setGeneratingEmail(false);
       return;
     }
     const data = result.data;
 
     const email_body = data.email_body;
-    const processed_email_body = email_body.completion.replaceAll('\n', '<br/>')
+    const processed_email_body = email_body.completion.replaceAll('\n', '<br/>');
     bodyRef.current = processed_email_body;
     setBody(processed_email_body);
     setBodyPrompt(email_body.prompt);
@@ -127,7 +130,6 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
     return;
   };
 
-
   const triggerGetEmailSequenceSteps = async () => {
     var sequenceStatus = innerProps.emailStatus;
     if (innerProps.overallStatus === 'PROSPECTED' || innerProps.emailStatus === null) {
@@ -135,7 +137,12 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
       sequenceStatus = 'PROSPECTED';
     }
 
-    const result = await getEmailSequenceSteps(userToken, [sequenceStatus], [], [innerProps.archetypeID as number]);
+    const result = await getEmailSequenceSteps(
+      userToken,
+      [sequenceStatus],
+      [],
+      [innerProps.archetypeID as number]
+    );
 
     if (result.status !== 'success') {
       showNotification({
@@ -148,12 +155,11 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
     }
 
     setSequenceSteps(result.data.sequence_steps);
-
   };
 
   const triggerSendEmail = async () => {
     setSending(true);
-  
+
     let body = bodyRich.current as string;
     if (typeof bodyRich.current !== 'string') {
       body = bodyRef.current;
@@ -186,7 +192,7 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
 
     closeAllModals();
     context.closeModal(id);
-  }
+  };
 
   // If body was cleared, it's no longer ai generated
   useEffect(() => {
@@ -197,7 +203,7 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
 
   useEffect(() => {
     triggerGetEmailSequenceSteps();
-  }, [])
+  }, []);
 
   return (
     <Paper
@@ -239,7 +245,7 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
             <Button
               leftIcon={<IconWriting size='1rem' />}
               variant='outline'
-              color="gray.8"
+              color='gray.8'
               radius={theme.radius.lg}
               size='xs'
               onClick={triggerPostGenerateInitialEmail}
@@ -248,37 +254,40 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
             </Button>
             <Select
               withinPortal
-              placeholder={sequenceSteps.length > 0 ? "Select Template" : "No Templates"}
+              placeholder={sequenceSteps.length > 0 ? 'Select Template' : 'No Templates'}
               radius={0}
               size='xs'
               data={
-                sequenceSteps.length > 0 ? sequenceSteps.map((step: EmailSequenceStep) => {
-                  return {
-                    value: step.id + "",
-                    label: (step.default ? "🟢 " : "⚪️ ") + step.title,
-                  };
-                }) : []
+                sequenceSteps.length > 0
+                  ? sequenceSteps.map((step: EmailSequenceStep) => {
+                      return {
+                        value: step.step.id + '',
+                        label: (step.step.default ? '🟢 ' : '⚪️ ') + step.step.title,
+                      };
+                    })
+                  : []
               }
               styles={{
                 input: { borderColor: 'black', borderRight: '0', borderLeft: '0' },
-                dropdown: { minWidth: 150 }
+                dropdown: { minWidth: 150 },
               }}
               onChange={(value) => {
-                const selected = sequenceSteps.find((step) => step.id === parseInt(value as string));
+                const selected = sequenceSteps.find(
+                  (step) => step.step.id === parseInt(value as string)
+                );
                 if (selected) {
                   setSelectedSequenceStep(selected);
                 }
               }}
-              value={selectedSequenceStep ? selectedSequenceStep.id + "" : undefined}
+              value={selectedSequenceStep ? selectedSequenceStep.step.id + '' : undefined}
             />
             <Tooltip label={'Preview coming soon'} withArrow>
-              <Button
-                variant="outline"
-                color="gray.8"
-                radius={theme.radius.lg}
-                size='xs'
-              >
-                {selectedSequenceStep ? (<IconSettingsFilled size="1.225rem" />) : (<IconSettings size="1.225rem" />)}
+              <Button variant='outline' color='gray.8' radius={theme.radius.lg} size='xs'>
+                {selectedSequenceStep ? (
+                  <IconSettingsFilled size='1.225rem' />
+                ) : (
+                  <IconSettings size='1.225rem' />
+                )}
               </Button>
             </Tooltip>
           </Button.Group>
@@ -301,59 +310,71 @@ export default function ComposeEmailModal({ context, id, innerProps }: ContextMo
               title: 'Send Email?',
               children: (
                 <>
-                  {
-                    isFirstEmail ? (
-                      <>
-                        <Text>
-                          Please review your email carefully. After you send this, this Prospect will not appear in any email campaigns! We will still manage the relationship for you.
+                  {isFirstEmail ? (
+                    <>
+                      <Text>
+                        Please review your email carefully. After you send this, this Prospect will
+                        not appear in any email campaigns! We will still manage the relationship for
+                        you.
+                      </Text>
+                      <Box
+                        sx={() => ({
+                          border: '1px solid #E0E0E0',
+                          borderRadius: '8px',
+                          backgroundColor: '#F5F5F5',
+                        })}
+                        px='md'
+                        mt='sm'
+                      >
+                        <Text fz='sm'>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: DOMPurify.sanitize(bodyRef.current),
+                            }}
+                          />
                         </Text>
-                        <Box
-                          sx={() => ({
-                            border: '1px solid #E0E0E0',
-                            borderRadius: '8px',
-                            backgroundColor: '#F5F5F5',
-                          })}
-                          px='md'
-                          mt='sm'
-                        >
-                          <Text fz="sm">
-                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(bodyRef.current) }} />
-                          </Text>
-                        </Box>
-
-                      </>
-
-                    ) : (
-                      <>
-                        <Text>
-                          Please review your email message. We manage relationships automatically for you, but you can still send emails, such as this one, manually.
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      <Text>
+                        Please review your email message. We manage relationships automatically for
+                        you, but you can still send emails, such as this one, manually.
+                      </Text>
+                      <Box
+                        sx={() => ({
+                          border: '1px solid #E0E0E0',
+                          borderRadius: '8px',
+                          backgroundColor: '#F5F5F5',
+                        })}
+                        px='md'
+                        mt='sm'
+                      >
+                        <Text fz='sm'>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: DOMPurify.sanitize(bodyRef.current),
+                            }}
+                          />
                         </Text>
-                        <Box
-                          sx={() => ({
-                            border: '1px solid #E0E0E0',
-                            borderRadius: '8px',
-                            backgroundColor: '#F5F5F5',
-                          })}
-                          px='md'
-                          mt='sm'
-                        >
-                          <Text fz="sm">
-                            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(bodyRef.current) }} />
-                          </Text>
-                        </Box>
-                      </>
-                    )
-                  }
-                </>),
+                      </Box>
+                    </>
+                  )}
+                </>
+              ),
               labels: { confirm: 'Confirm', cancel: 'Cancel' },
-              onCancel: () => { bodyRich.current = bodyRich.current },
-              onConfirm: () => { triggerSendEmail() },
-            })
+              onCancel: () => {
+                bodyRich.current = bodyRich.current;
+              },
+              onConfirm: () => {
+                triggerSendEmail();
+              },
+            });
           }}
         >
           Send {innerProps.reply ? 'Reply' : 'Email'}
         </Button>
-      </Flex >
-    </Paper >
+      </Flex>
+    </Paper>
   );
 }

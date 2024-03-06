@@ -1,6 +1,19 @@
 // EmailSequenceStepAssets.tsx
 import React, { useState, useEffect } from 'react';
-import { Badge, Modal, Select, Button, Group, Text, CloseButton, Flex, Box, Card, Divider, Title } from '@mantine/core';
+import {
+  Badge,
+  Modal,
+  Select,
+  Button,
+  Group,
+  Text,
+  CloseButton,
+  Flex,
+  Box,
+  Card,
+  Divider,
+  Title,
+} from '@mantine/core';
 import { useRecoilValue } from 'recoil';
 import { currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from '@atoms/userAtoms';
@@ -25,7 +38,7 @@ const EmailSequenceStepAssets: React.FC<{ sequence_step_id: number }> = ({ seque
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + userToken,
+        Authorization: 'Bearer ' + userToken,
       },
     })
       .then((response) => response.json())
@@ -45,7 +58,7 @@ const EmailSequenceStepAssets: React.FC<{ sequence_step_id: number }> = ({ seque
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + userToken,
+        Authorization: 'Bearer ' + userToken,
       },
     })
       .then((response) => response.json())
@@ -60,7 +73,7 @@ const EmailSequenceStepAssets: React.FC<{ sequence_step_id: number }> = ({ seque
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + userToken,
+        Authorization: 'Bearer ' + userToken,
       },
       body: JSON.stringify({
         sequence_step_id: sequence_step_id,
@@ -82,7 +95,7 @@ const EmailSequenceStepAssets: React.FC<{ sequence_step_id: number }> = ({ seque
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + userToken,
+        Authorization: 'Bearer ' + userToken,
       },
       body: JSON.stringify({
         email_sequence_step_to_asset_mapping_id: assetMappingId,
@@ -98,50 +111,50 @@ const EmailSequenceStepAssets: React.FC<{ sequence_step_id: number }> = ({ seque
       .catch((error) => console.error('Failed to remove asset', error));
   };
 
+  console.log(attachedAssets);
+
   return (
     <>
-      <Badge color="blue" ml='xs' variant='outline' size='xs' onClick={() => setOpened(true)}>
+      <Badge color='blue' ml='xs' variant='outline' size='xs' onClick={() => setOpened(true)}>
         {attachedAssets.length} used assets
       </Badge>
-      <Modal
-        opened={opened}
-        onClose={() => setOpened(false)}
-        title="Select an asset"
-      >
+      <Modal opened={opened} onClose={() => setOpened(false)} title='Select an asset'>
         <Select
-            withinPortal
-            data={assets}
-            placeholder="Select an asset"
-            onChange={(value: string | null) => setSelectedAsset(value || '')}
-            nothingFound="No options"
+          withinPortal
+          data={assets}
+          placeholder='Select an asset'
+          onChange={(value: string | null) => setSelectedAsset(value || '')}
+          nothingFound='No options'
         />
-        <Button onClick={addAsset} mt='xs'>Add Asset to Step</Button>
+        <Button onClick={addAsset} mt='xs'>
+          Add Asset to Step
+        </Button>
 
         <Divider mt='md' mb='xs' />
 
         <Title order={4} mb='xs'>
-            Attached Assets
+          Attached Assets
         </Title>
 
-        {
-            attachedAssets.length === 0 && (
-                <Text color='gray' mt='xs'>
-                    No assets attached to this step.
-                </Text>
-            )
-        }
+        {attachedAssets.length === 0 && (
+          <Text color='gray' mt='xs'>
+            No assets attached to this step.
+          </Text>
+        )}
 
-        <Group spacing="xs" mt="xs">
+        <Group spacing='xs' mt='xs'>
           {attachedAssets.map((asset: any) => (
             <Card key={asset.mapping_id} withBorder w='100%'>
-                <Flex>
-                    <CloseButton mr='xs' mt='xs' onClick={() => removeAsset(asset.mapping_id)} />
-                    <Box>
-                        <Text>{asset.asset_key}</Text>
-                        <Text fz='xs' color='gray'>{asset.asset_value.substring(0, 50)}{asset.asset_value.length > 50 ? '...' : ''}</Text>
-                    </Box>
-                </Flex>
-              
+              <Flex>
+                <CloseButton mr='xs' mt='xs' onClick={() => removeAsset(asset.mapping_id)} />
+                <Box>
+                  <Text>{asset.asset_key}</Text>
+                  <Text fz='xs' color='gray'>
+                    {asset.asset_value.substring(0, 50)}
+                    {asset.asset_value.length > 50 ? '...' : ''}
+                  </Text>
+                </Box>
+              </Flex>
             </Card>
           ))}
         </Group>

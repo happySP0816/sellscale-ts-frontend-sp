@@ -26,9 +26,11 @@ import { useRecoilValue } from 'recoil';
 import { EmailSequenceStep, ProspectShallow } from 'src';
 import { Markdown } from 'tiptap-markdown';
 import { getEmailSequenceSteps } from '@utils/requests/emailSequencing';
-import { postGenerateFollowupEmail, postGenerateInitialEmail } from '@utils/requests/emailMessageGeneration';
+import {
+  postGenerateFollowupEmail,
+  postGenerateInitialEmail,
+} from '@utils/requests/emailMessageGeneration';
 import { showNotification } from '@mantine/notifications';
-
 
 interface ProspectItemProps extends React.ComponentPropsWithoutRef<'div'> {
   label: string;
@@ -54,7 +56,12 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function EmailTemplate(props: { archetypeId: number, template?: string, selectTemplate?: boolean, emailStatus: string }) {
+export default function EmailTemplate(props: {
+  archetypeId: number;
+  template?: string;
+  selectTemplate?: boolean;
+  emailStatus: string;
+}) {
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const userToken = useRecoilValue(userTokenState);
@@ -62,31 +69,39 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
   const [selectedProspect, setSelectedProspect] = useState<ProspectShallow>();
 
   const [loading, setLoading] = useState(false);
-  const [previewEmail, setPreviewEmail] = useState<{ subject: string | null; body: string } | null>(null);
+  const [previewEmail, setPreviewEmail] = useState<{ subject: string | null; body: string } | null>(
+    null
+  );
 
   const [emailSequenceSteps, setemailSequenceSteps] = useState<EmailSequenceStep[]>([]);
-  const [selectedSequenceStep, setSelectedSequenceStep] = useState<EmailSequenceStep | undefined>(undefined);
+  const [selectedSequenceStep, setSelectedSequenceStep] = useState<EmailSequenceStep | undefined>(
+    undefined
+  );
   const triggerGetEmailSequenceSteps = async () => {
     setLoading(true);
-    const result = await getEmailSequenceSteps(userToken, ['ACCEPTED', 'BUMPED'], [], [props.archetypeId]);
+    const result = await getEmailSequenceSteps(
+      userToken,
+      ['ACCEPTED', 'BUMPED'],
+      [],
+      [props.archetypeId]
+    );
 
     if (result.status === 'success') {
       setemailSequenceSteps(result.data.sequence_steps);
     }
     setLoading(false);
-  }
+  };
 
   const previewBodyEditor = useEditor({
-    extensions: [
-      StarterKit,
-      Markdown,
-    ],
+    extensions: [StarterKit, Markdown],
     content: '',
     editable: false,
   });
 
   useEffect(() => {
-    previewBodyEditor && previewEmail?.body && previewBodyEditor.commands.setContent(previewEmail.body);
+    previewBodyEditor &&
+      previewEmail?.body &&
+      previewBodyEditor.commands.setContent(previewEmail.body);
   }, [previewEmail]);
 
   useEffect(() => {
@@ -148,11 +163,11 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
               searchable
               clearable
               nothingFound='No bump frameworks found'
-              value={selectedSequenceStep ? selectedSequenceStep.id + '' : '-1'}
+              value={selectedSequenceStep ? selectedSequenceStep.step.id + '' : '-1'}
               data={emailSequenceSteps.map((sequenceStep: EmailSequenceStep) => {
                 return {
-                  value: sequenceStep.id + '',
-                  label: sequenceStep.title,
+                  value: sequenceStep.step.id + '',
+                  label: sequenceStep.step.title,
                 };
               })}
               onChange={(value) => {
@@ -160,7 +175,9 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
                   setSelectedSequenceStep(undefined);
                   return;
                 }
-                const foundSequenceStep = emailSequenceSteps.find((sequenceStep) => sequenceStep.id === (parseInt(value) || -1));
+                const foundSequenceStep = emailSequenceSteps.find(
+                  (sequenceStep) => sequenceStep.step.id === (parseInt(value) || -1)
+                );
                 setSelectedSequenceStep(foundSequenceStep);
               }}
               withinPortal
@@ -192,7 +209,9 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
                 setSelectedProspect(undefined);
                 return;
               }
-              const foundProspect = prospects.find((prospect) => prospect.id === (parseInt(value) || -1));
+              const foundProspect = prospects.find(
+                (prospect) => prospect.id === (parseInt(value) || -1)
+              );
               setSelectedProspect(foundProspect);
             }}
             withinPortal
@@ -236,20 +255,20 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
                     setLoading(true);
 
                     let response = null;
-                    console.log('template', props.template)
+                    console.log('template', props.template);
                     // Route depending on the status. Either initial (cold) message or a followup
                     if (props.emailStatus === 'PROSPECTED') {
                       response = await postGenerateInitialEmail(
                         userToken,
                         selectedProspect.id,
-                        selectedSequenceStep?.id as number,
-                        props.template || selectedSequenceStep?.template || null,
+                        selectedSequenceStep?.step.id as number,
+                        props.template || selectedSequenceStep?.step.template || null,
                         null,
                         null
                       );
                       if (response.status === 'success') {
-                        const email_body = response.data.email_body
-                        const subject_line = response.data.subject_line
+                        const email_body = response.data.email_body;
+                        const subject_line = response.data.subject_line;
                         if (!email_body || !subject_line) {
                           showNotification({
                             title: 'Error',
@@ -260,20 +279,23 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
 
                         setPreviewEmail({
                           subject: subject_line.completion,
-                          body: email_body.completion
-                        })
+                          body: email_body.completion,
+                        });
                       }
                     } else {
-                      console.log('selectedSequenceStep?.template', selectedSequenceStep?.template)
+                      console.log(
+                        'selectedSequenceStep?.template',
+                        selectedSequenceStep?.step.template
+                      );
                       response = await postGenerateFollowupEmail(
                         userToken,
                         selectedProspect.id,
                         null,
-                        selectedSequenceStep?.id || null,
-                        props.template || selectedSequenceStep?.template || null
+                        selectedSequenceStep?.step.id || null,
+                        props.template || selectedSequenceStep?.step.template || null
                       );
                       if (response.status === 'success') {
-                        const email_body = response.data.email_body
+                        const email_body = response.data.email_body;
                         if (!email_body) {
                           showNotification({
                             title: 'Error',
@@ -284,8 +306,8 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
 
                         setPreviewEmail({
                           subject: null,
-                          body: email_body.completion
-                        })
+                          body: email_body.completion,
+                        });
                       }
                     }
 
@@ -294,13 +316,17 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
                 >
                   Generate Preview
                 </Button>
-                {
-                  previewEmail && (
-                    <ActionIcon ml='xs' size='sm' onClick={() => { setPreviewEmail(null) }}>
-                      <IconX />
-                    </ActionIcon>
-                  )
-                }
+                {previewEmail && (
+                  <ActionIcon
+                    ml='xs'
+                    size='sm'
+                    onClick={() => {
+                      setPreviewEmail(null);
+                    }}
+                  >
+                    <IconX />
+                  </ActionIcon>
+                )}
               </Flex>
             </Center>
           </>
@@ -312,18 +338,21 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
           </Flex>
         )}
 
-        {(!loading && previewEmail) && (
+        {!loading && previewEmail && (
           <Card>
-            <Text fz='sm' fw={500}>Subject</Text>
+            <Text fz='sm' fw={500}>
+              Subject
+            </Text>
             <Text
               variant={previewEmail.subject ? 'gradient' : 'text'}
               gradient={{ from: 'pink', to: 'purple', deg: 45 }}
             >
-              {previewEmail.subject || "Not available on followup emails"}
+              {previewEmail.subject || 'Not available on followup emails'}
             </Text>
 
-
-            <Text mt='md' fz='sm' fw={500}>Body</Text>
+            <Text mt='md' fz='sm' fw={500}>
+              Body
+            </Text>
             <RichTextEditor
               editor={previewBodyEditor}
               styles={{
@@ -340,7 +369,6 @@ export default function EmailTemplate(props: { archetypeId: number, template?: s
           </Card>
         )}
       </Card>
-
     </>
   );
 }

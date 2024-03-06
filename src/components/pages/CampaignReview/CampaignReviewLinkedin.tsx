@@ -336,7 +336,23 @@ export const Messaging = (props: MessagingProps) => {
   let SEQUENCE = props.campaignOverview?.linkedin?.sequence;
   if (props.campaignType === 'EMAIL') {
     SEQUENCE = props.campaignOverview?.email?.sequence;
+    console.log(props.campaignOverview);
   }
+
+  // const fetchAttachedAssets = () => {
+  //   fetch(`${API_URL}/email_sequence/get_all_asset_mapping?sequence_step_id=${sequence_step_id}`, {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       Authorization: 'Bearer ' + userToken,
+  //     },
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setAttachedAssets(data.mappings);
+  //     })
+  //     .catch((error) => console.error('Failed to fetch attached assets', error));
+  // };
 
   const messageData = SEQUENCE?.map((x: any) => {
     return {
@@ -386,58 +402,60 @@ export const Messaging = (props: MessagingProps) => {
 
   return (
     <>
-      <Flex
-        p={'md'}
-        direction={'column'}
-        gap={'md'}
-        style={{ border: '1px solid #e3f0fe', borderRadius: '6px' }}
-      >
-        <Box>
-          <Title order={4}>Assets Used</Title>
-          <Text>Here are the assets used in this campaign</Text>
-        </Box>
-        <Carousel slideSize='70%' height={CAROUSEL_HEIGHT} slideGap='md' loop>
-          {props.campaignOverview?.assets_used?.map((asset, index) => (
-            <Carousel.Slide key={index}>
-              <Paper h={CAROUSEL_HEIGHT}>
-                <Stack spacing={5} h={CAROUSEL_HEIGHT} justify='space-between'>
-                  <Stack spacing={5}>
-                    <Group spacing={5} noWrap>
-                      <Avatar
-                        m='sm'
-                        radius={30}
-                        size={30}
-                        src={`data:image/svg+xml;utf8,${encodeURIComponent(
-                          assetIcons?.get(asset.title) ?? ''
-                        )}`}
-                        alt={asset.title}
-                      />
-                      <Title order={5}>{asset.title}</Title>
-                    </Group>
-                    <Container>
-                      <Text color='gray.8' fz='xs' fw={400}>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(asset.value),
-                          }}
+      {props.campaignType !== 'EMAIL' && (
+        <Flex
+          p={'md'}
+          direction={'column'}
+          gap={'md'}
+          style={{ border: '1px solid #e3f0fe', borderRadius: '6px' }}
+        >
+          <Box>
+            <Title order={4}>Assets Used</Title>
+            <Text>Here are the assets used in this campaign</Text>
+          </Box>
+          <Carousel slideSize='70%' height={CAROUSEL_HEIGHT} slideGap='md' loop>
+            {props.campaignOverview?.assets_used?.map((asset, index) => (
+              <Carousel.Slide key={index}>
+                <Paper h={CAROUSEL_HEIGHT}>
+                  <Stack spacing={5} h={CAROUSEL_HEIGHT} justify='space-between'>
+                    <Stack spacing={5}>
+                      <Group spacing={5} noWrap>
+                        <Avatar
+                          m='sm'
+                          radius={30}
+                          size={30}
+                          src={`data:image/svg+xml;utf8,${encodeURIComponent(
+                            assetIcons?.get(asset.title) ?? ''
+                          )}`}
+                          alt={asset.title}
                         />
-                      </Text>
-                    </Container>
+                        <Title order={5}>{asset.title}</Title>
+                      </Group>
+                      <Container>
+                        <Text color='gray.8' fz='xs' fw={400}>
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: DOMPurify.sanitize(asset.value),
+                            }}
+                          />
+                        </Text>
+                      </Container>
+                    </Stack>
+                    <Stack spacing={5} mih={50}>
+                      <Divider />
+                      <Container>
+                        <Text fz='xs' c='dimmed'>
+                          {asset.reason}
+                        </Text>
+                      </Container>
+                    </Stack>
                   </Stack>
-                  <Stack spacing={5} mih={50}>
-                    <Divider />
-                    <Container>
-                      <Text fz='xs' c='dimmed'>
-                        {asset.reason}
-                      </Text>
-                    </Container>
-                  </Stack>
-                </Stack>
-              </Paper>
-            </Carousel.Slide>
-          ))}
-        </Carousel>
-      </Flex>
+                </Paper>
+              </Carousel.Slide>
+            ))}
+          </Carousel>
+        </Flex>
+      )}
       <Flex
         p={'md'}
         direction={'column'}
@@ -526,9 +544,9 @@ export const Messaging = (props: MessagingProps) => {
                         />
                       }
                     </Text>
-                    {!persona?.template_mode && persona?.linkedin_active && props.campaignType === 'LINKEDIN' && (
-                      <CtaList personaId={props.campaignId} />
-                    )}
+                    {!persona?.template_mode &&
+                      persona?.linkedin_active &&
+                      props.campaignType === 'LINKEDIN' && <CtaList personaId={props.campaignId} />}
                   </Flex>
                 </Collapse>
               )}

@@ -222,7 +222,7 @@ function EmailInitialOutboundView(props: {
                       variant='gradient'
                       gradient={{ from: 'purple', to: 'pink', deg: 45 }}
                     >
-                      {template.title}
+                      {template.step.title}
                     </Text>
                   </Flex>
                   <Flex direction='row' mb='md' align='center' justify='space-between'>
@@ -238,7 +238,7 @@ function EmailInitialOutboundView(props: {
                       <Text fz='sm'>
                         <div
                           dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(template.template),
+                            __html: DOMPurify.sanitize(template.step.template),
                           }}
                         />
                       </Text>
@@ -261,17 +261,17 @@ function EmailInitialOutboundView(props: {
                       status='PROSPECTED'
                       archetypeID={props.archetypeID || -1}
                       bumpedCount={0}
-                      title={template.title}
-                      isDefault={template.default}
-                      sequence={template.template}
+                      title={template.step.title}
+                      isDefault={template.step.default}
+                      sequence={template.step.template}
                       onFinish={async (title, sequence, isDefault, status, substatus) => {
                         const result = await patchSequenceStep(
                           userToken,
-                          template.id,
+                          template.step.id,
                           status ?? '',
                           title,
                           sequence,
-                          template.bumped_count,
+                          template.step.bumped_count,
                           isDefault
                         );
                         return result.status === 'success';
@@ -397,9 +397,9 @@ function EmailSequenceStepView(props: {
                           ml='md'
                           onLabel='Default'
                           offLabel='Default'
-                          checked={template.default}
+                          checked={template.step.default}
                           thumbIcon={
-                            template.default ? (
+                            template.step.default ? (
                               <IconCheck
                                 size='0.8rem'
                                 color={theme.colors.teal[theme.fn.primaryShade()]}
@@ -416,7 +416,7 @@ function EmailSequenceStepView(props: {
                           disabled={true}
                           styles={{
                             label: {
-                              backgroundColor: template.default
+                              backgroundColor: template.step.default
                                 ? theme.colors.teal[theme.fn.primaryShade()]
                                 : theme.colors.red[theme.fn.primaryShade()],
                             },
@@ -424,7 +424,7 @@ function EmailSequenceStepView(props: {
                         />
                         <Flex direction='column' ml='xl'>
                           <Text fw='bold' fz='lg'>
-                            {template.title}
+                            {template.step.title}
                           </Text>
 
                           <Box
@@ -439,7 +439,7 @@ function EmailSequenceStepView(props: {
                             <Text fz='sm'>
                               <div
                                 dangerouslySetInnerHTML={{
-                                  __html: DOMPurify.sanitize(template.template),
+                                  __html: DOMPurify.sanitize(template.step.template),
                                 }}
                               />
                             </Text>
@@ -458,20 +458,20 @@ function EmailSequenceStepView(props: {
                       closeModal={closeEdit}
                       type={'EDIT'}
                       backFunction={props.afterEdit}
-                      status={template.overall_status}
+                      status={template.step.overall_status}
                       archetypeID={props.archetypeID || -1}
-                      bumpedCount={template.bumped_count}
-                      title={template.title}
-                      isDefault={template.default}
-                      sequence={template.template}
+                      bumpedCount={template.step.bumped_count}
+                      title={template.step.title}
+                      isDefault={template.step.default}
+                      sequence={template.step.template}
                       onFinish={async (title, sequence, isDefault, status, substatus) => {
                         const result = await patchSequenceStep(
                           userToken,
-                          template.id,
+                          template.step.id,
                           status ?? '',
                           title,
                           sequence,
-                          template.bumped_count || 0,
+                          template.step.bumped_count || 0,
                           isDefault
                         );
                         return result.status === 'success';
@@ -611,23 +611,23 @@ export default function EmailSequencingPage(props: {
       },
     } as EmailSequenceStepBuckets;
     for (const bumpFramework of result.data.sequence_steps as EmailSequenceStep[]) {
-      const status = bumpFramework.overall_status;
+      const status = bumpFramework.step.overall_status;
       if (status === 'PROSPECTED') {
         newsequenceBuckets.PROSPECTED.total += 1;
-        if (bumpFramework.default) {
+        if (bumpFramework.step.default) {
           newsequenceBuckets.PROSPECTED.templates.unshift(bumpFramework);
         } else {
           newsequenceBuckets.PROSPECTED.templates.push(bumpFramework);
         }
       } else if (status === 'ACCEPTED') {
         newsequenceBuckets.ACCEPTED.total += 1;
-        if (bumpFramework.default) {
+        if (bumpFramework.step.default) {
           newsequenceBuckets.ACCEPTED.templates.unshift(bumpFramework);
         } else {
           newsequenceBuckets.ACCEPTED.templates.push(bumpFramework);
         }
       } else if (status === 'BUMPED') {
-        const bumpCount = bumpFramework.bumped_count as number;
+        const bumpCount = bumpFramework.step.bumped_count as number;
         if (!(bumpCount in newsequenceBuckets.BUMPED)) {
           newsequenceBuckets.BUMPED[bumpCount] = {
             total: 0,
@@ -635,14 +635,14 @@ export default function EmailSequencingPage(props: {
           };
         }
         newsequenceBuckets.BUMPED[bumpCount].total += 1;
-        if (bumpFramework.default) {
+        if (bumpFramework.step.default) {
           newsequenceBuckets.BUMPED[bumpCount].templates.unshift(bumpFramework);
         } else {
           newsequenceBuckets.BUMPED[bumpCount].templates.push(bumpFramework);
         }
       } else if (status === 'ACTIVE_CONVO') {
         newsequenceBuckets.ACTIVE_CONVO.total += 1;
-        if (bumpFramework.default) {
+        if (bumpFramework.step.default) {
           newsequenceBuckets.ACTIVE_CONVO.templates.unshift(bumpFramework);
         } else {
           newsequenceBuckets.ACTIVE_CONVO.templates.push(bumpFramework);

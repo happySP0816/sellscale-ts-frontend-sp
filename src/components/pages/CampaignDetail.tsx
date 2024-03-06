@@ -44,6 +44,7 @@ interface EmailSequence {
   description: string;
   overall_status: string;
   title: string;
+  assets: Record<string, any>[];
 }
 
 interface LinkedInSequence {

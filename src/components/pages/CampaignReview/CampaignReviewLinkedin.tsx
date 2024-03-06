@@ -336,7 +336,7 @@ export const Messaging = (props: MessagingProps) => {
   let SEQUENCE = props.campaignOverview?.linkedin?.sequence;
   if (props.campaignType === 'EMAIL') {
     SEQUENCE = props.campaignOverview?.email?.sequence;
-    console.log(props.campaignOverview);
+    console.log(props.campaignOverview?.email.sequence);
   }
 
   // const fetchAttachedAssets = () => {

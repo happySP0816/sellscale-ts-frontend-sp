@@ -42,6 +42,7 @@ import LinkedinQueuedMessages from '@common/messages/LinkedinQueuedMessages';
 import InboxSmartleadPage from './InboxPageSmartleadPage';
 import InboxProspectConvoBumpFramework from '@common/inbox/InboxProspectConvoBumpFramework';
 import { InboxProspectListRestruct } from '@common/inbox/InboxProspectListRestruct';
+import useRefresh from '@common/library/use-refresh';
 
 export const INBOX_PAGE_HEIGHT = `calc(100vh)`;
 
@@ -69,6 +70,7 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
   const [openedProspectId, setOpenedProspectId] = useRecoilState(openedProspectIdState);
   const [openBumpFrameworks, setOpenBumpFrameworks] = useRecoilState(openedBumpFameworksState);
   const [currentInboxCount, setCurrentInboxCount] = useRecoilState(currentInboxCountState);
+  const [displayConvo, refreshConvo] = useRefresh();
 
   useEffect(() => {
     setOpenedList(true);
@@ -103,9 +105,11 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
   });
   const prospects = data ?? [];
 
-  setCurrentInboxCount(prospects.filter((p) => p.section === 'Inbox').length);
+  useEffect(() => {
+    refreshConvo();
+  }, [openedProspectId]);
 
-  console.log(prospects);
+  setCurrentInboxCount(prospects.filter((p) => p.section === 'Inbox').length);
 
   if (isFetching)
     return (
@@ -118,57 +122,53 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
     <Box style={{ position: 'relative' }}>
       {prospects.length === 0 ? (
         <Center h={500}>
-          <Container
-                    w='100%'
-                    mt='300px'
-                    sx={{ justifyContent: 'center', textAlign: 'center' }}
-                  >
-                    <Title
-                      fw='800'
-                      sx={{
-                        fontSize: '120px',
-                        color: '#e3e3e3',
-                        margin: '0% auto',
-                        textAlign: 'center',
-                      }}
-                    >
-                      {/* <span style={{ marginRight: '100px' }}>Inbox</span>
+          <Container w='100%' mt='300px' sx={{ justifyContent: 'center', textAlign: 'center' }}>
+            <Title
+              fw='800'
+              sx={{
+                fontSize: '120px',
+                color: '#e3e3e3',
+                margin: '0% auto',
+                textAlign: 'center',
+              }}
+            >
+              {/* <span style={{ marginRight: '100px' }}>Inbox</span>
                       <span style={{ marginLeft: '80px' }}>Zero</span> */}
-                    </Title>
-                    <img
-                      src={RobotEmailImage}
-                      width='300px'
-                      style={{ marginTop: '-180px', marginLeft: '50px' }}
-                    />
-                    <Text size={28} fw={600}>
-                      Automate Your Replies
-                    </Text>
-                    <Text mt='md' color='gray'>
-                      Your inbox is empty. Meanwhile, you can automate <br /> your replies using
-                      reply frameworks.
-                    </Text>
-                    <Flex justify={'center'} mt='xs'>
-                      <Button
-                        size='lg'
-                        radius={'xl'}
-                        leftIcon={<IconPencilMinus />}
-                        mt={'md'}
-                        className='glow'
-                        onClick={() => {
-                          // window.location.href = `/setup/email?${prospects[0]?.archetype_id}`;
-                          setOpenBumpFrameworks(true);
-                        }}
-                      >
-                        Edit Reply Frameworks
-                      </Button>
-                    </Flex>
-                     <InboxProspectConvoBumpFramework
-                    prospect={Object()}
-                    messages={[]}
-                    onClose={() => {}}
-                    onPopulateBumpFrameworks={() => {}}
-                  />
-                  </Container>
+            </Title>
+            <img
+              src={RobotEmailImage}
+              width='300px'
+              style={{ marginTop: '-180px', marginLeft: '50px' }}
+            />
+            <Text size={28} fw={600}>
+              Automate Your Replies
+            </Text>
+            <Text mt='md' color='gray'>
+              Your inbox is empty. Meanwhile, you can automate <br /> your replies using reply
+              frameworks.
+            </Text>
+            <Flex justify={'center'} mt='xs'>
+              <Button
+                size='lg'
+                radius={'xl'}
+                leftIcon={<IconPencilMinus />}
+                mt={'md'}
+                className='glow'
+                onClick={() => {
+                  // window.location.href = `/setup/email?${prospects[0]?.archetype_id}`;
+                  setOpenBumpFrameworks(true);
+                }}
+              >
+                Edit Reply Frameworks
+              </Button>
+            </Flex>
+            <InboxProspectConvoBumpFramework
+              prospect={Object()}
+              messages={[]}
+              onClose={() => {}}
+              onPopulateBumpFrameworks={() => {}}
+            />
+          </Container>
         </Center>
       ) : (
         <>
@@ -183,12 +183,14 @@ export default function InboxRestructurePage(props: { all?: boolean }) {
           </Box>
           <Grid gutter={0} h={INBOX_PAGE_HEIGHT} sx={{ overflow: 'hidden' }}>
             <Grid.Col span={8}>
-              <InboxProspectConvo
-                showBackToInbox
-                overrideBackToInbox={() => {
-                  setOpenedList(!openedList);
-                }}
-              />
+              {displayConvo && (
+                <InboxProspectConvo
+                  showBackToInbox
+                  overrideBackToInbox={() => {
+                    setOpenedList(!openedList);
+                  }}
+                />
+              )}
             </Grid.Col>
             <Grid.Col span={4}>
               <InboxProspectDetails noProspectResetting />

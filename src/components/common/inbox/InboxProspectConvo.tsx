@@ -240,7 +240,7 @@ type Props = {
   overrideBackToInbox?: () => void;
   currentEmailStatus?: string;
 };
-export default function ProspectConvo(props: Props) {
+export default function InboxProspectConvo(props: Props) {
   const [stepThreeComplete, setStepThreeComplete] = useState<LiStepProgress>('INCOMPLETE');
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
@@ -253,7 +253,7 @@ export default function ProspectConvo(props: Props) {
   const openedProspectId = useRecoilValue(openedProspectIdState);
 
   const [hasGeneratedMessage, setHasGeneratedMessage] = useState(false);
-  const [openedConvoBox, setOpenedConvoBox]: any = useState(props.openConvoBox || true);
+  const [openedConvoBox, setOpenedConvoBox] = useState<any>(props.openConvoBox || true);
 
   // This is used to fix a bug with the hacky way we're doing message loading now
   const currentMessagesProspectId = useRef(-1);
@@ -295,8 +295,12 @@ export default function ProspectConvo(props: Props) {
     });
 
   const { data: prospectDetails } = useQuery({
-    queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
-    queryFn: async () => {
+    queryKey: [`query-get-dashboard-prospect-${openedProspectId}`, { openedProspectId }],
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { openedProspectId }] = queryKey;
+
       const response = await getProspectByID(userToken, openedProspectId);
       return response.status === 'success' ? (response.data as ProspectDetails) : undefined;
     },
@@ -305,8 +309,12 @@ export default function ProspectConvo(props: Props) {
   });
 
   const { data: prospect, isFetching } = useQuery({
-    queryKey: [`query-get-dashboard-prospect-shallow-${openedProspectId}`],
-    queryFn: async () => {
+    queryKey: [`query-get-dashboard-prospect-shallow-${openedProspectId}`, { openedProspectId }],
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { openedProspectId }] = queryKey;
+
       const response = await getProspectShallowByID(userToken, openedProspectId);
       const prospect =
         response.status === 'success' ? (response.data as ProspectShallow) : undefined;
@@ -333,8 +341,12 @@ export default function ProspectConvo(props: Props) {
   });
 
   const { data: threads, isFetching: isFetchingThreads } = useQuery({
-    queryKey: [`query-prospect-email-threads-${openedProspectId}`],
-    queryFn: async () => {
+    queryKey: [`query-prospect-email-threads-${openedProspectId}`, { openedProspectId }],
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { openedProspectId }] = queryKey;
+
       const response = await getEmailThreads(userToken, openedProspectId, 10, 0);
       const threads = response.status === 'success' ? (response.data as EmailThread[]) : [];
 
@@ -363,12 +375,12 @@ export default function ProspectConvo(props: Props) {
   const { isFetching: isFetchingMessages, refetch } = useQuery({
     queryKey: [
       `query-get-dashboard-prospect-${openedProspectId}-convo-${openedOutboundChannel}`,
-      { emailThread },
+      { emailThread, openedProspectId },
     ],
     queryFn: async ({ queryKey }) => {
       // @ts-ignore
       // eslint-disable-next-line
-      const [_key, { emailThread }] = queryKey;
+      const [_key, { emailThread, openedProspectId }] = queryKey;
 
       // setCurrentConvoEmailMessages(undefined);
       // setCurrentConvoLiMessages(undefined);
@@ -598,8 +610,14 @@ export default function ProspectConvo(props: Props) {
   }, [openedProspectId]);
 
   useQuery({
-    queryKey: [`query-get-smartlead-convo-prospect-${openedProspectId}`],
-    queryFn: async () => {
+    queryKey: [
+      `query-get-smartlead-convo-prospect-${openedProspectId}`,
+      { openedProspectId, prospect },
+    ],
+    queryFn: async ({ queryKey }) => {
+      // @ts-ignore
+      // eslint-disable-next-line
+      const [_key, { openedProspectId, prospect }] = queryKey;
       await triggerGetSmartleadProspectConvo(prospect);
       return [];
     },

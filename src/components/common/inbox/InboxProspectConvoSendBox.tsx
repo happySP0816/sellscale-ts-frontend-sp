@@ -13,7 +13,7 @@ import {
   bumpFrameworkSelectedSubstatusState,
   selectedEmailReplyFrameworkState,
 } from '@atoms/inboxAtoms';
-import { userTokenState } from '@atoms/userAtoms';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
 import { openConfirmModal } from '@mantine/modals';
 import {
   Paper,
@@ -29,6 +29,8 @@ import {
   Select,
   Box,
   Popover,
+  Indicator,
+  MultiSelect,
 } from '@mantine/core';
 import { getHotkeyHandler } from '@mantine/hooks';
 import { hideNotification, showNotification } from '@mantine/notifications';
@@ -47,6 +49,7 @@ import {
   IconHourglass,
   IconX,
   IconPencil,
+  IconTags,
 } from '@tabler/icons';
 import {
   IconClock24,
@@ -181,6 +184,7 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
   const [scheduleDay, setScheduleDay] = useState<Date | undefined>(undefined);
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [snoozeDay, setSnoozeDay] = useState(moment(new Date()).add(4, 'days').toDate());
@@ -225,6 +229,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
   const [aiMessage, setAiMessage] = useState('');
   const [aiGenerated, setAiGenerated] = useState(false);
   const [msgLoading, setMsgLoading] = useState(props.msgLoading || false);
+
+  const [ccEmails, setCcEmails] = useState<string[]>([]);
 
   const sendMessage = async () => {
     setMsgLoading(true);
@@ -308,7 +314,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
         userToken,
         prospectid,
         messageDraftEmail.current,
-        scheduleDay
+        scheduleDay,
+        ccEmails
       );
       if (response.status !== 'success') {
         showNotification({
@@ -1021,6 +1028,37 @@ export default forwardRef(function InboxProspectConvoSendBox(
           </Flex>
 
           <Flex mt='xs' align='center' direction='row' justify={'end'}>
+            {openedOutboundChannel !== 'LINKEDIN' && (
+              <Box px={15}>
+                <Popover width={250} position='bottom' withArrow shadow='md'>
+                  <Popover.Target>
+                    <Indicator
+                      inline
+                      label={ccEmails.length}
+                      size={16}
+                      disabled={ccEmails.length == 0}
+                    >
+                      <ActionIcon variant='filled' color='blue' radius='xl' aria-label='CC Emails'>
+                        <IconTags size='1.2rem' stroke={1.5} />
+                      </ActionIcon>
+                    </Indicator>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <MultiSelect
+                      withinPortal
+                      data={userData?.meta_data?.handoff_emails ?? []}
+                      searchable
+                      value={ccEmails}
+                      onChange={(value) => {
+                        setCcEmails(value);
+                      }}
+                      placeholder='Add Email to CC'
+                    />
+                  </Popover.Dropdown>
+                </Popover>
+              </Box>
+            )}
+
             <Popover position='bottom' withArrow shadow='md' trapFocus opened={showCalendarPopup}>
               <Popover.Target>
                 <Tooltip label='Set a custom snooze day' withArrow withinPortal>

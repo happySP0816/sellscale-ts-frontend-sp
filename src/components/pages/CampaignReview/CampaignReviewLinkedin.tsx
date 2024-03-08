@@ -80,7 +80,10 @@ export const Sequence = (props: SequenceProps) => {
       <Flex mt='md'>
         <Card mr='md'>
           <Text color='#0f6cbf' size={'lg'} fw={500}>
-            # of Contacts: {props.campaignType === 'EMAIL' ? props.campaignOverview?.overview?.num_prospects_with_emails : props.campaignOverview?.overview?.num_prospects}
+            # of Contacts:{' '}
+            {props.campaignType === 'EMAIL'
+              ? props.campaignOverview?.overview?.num_prospects_with_emails
+              : props.campaignOverview?.overview?.num_prospects}
           </Text>
         </Card>
         <Card>
@@ -364,7 +367,6 @@ export const Messaging = (props: MessagingProps) => {
       message: x?.description,
       // @ts-ignore
       delay: x?.bump_framework_delay,
-      // @ts-ignore
       assets: x?.assets,
     };
   });
@@ -407,7 +409,7 @@ export const Messaging = (props: MessagingProps) => {
 
   return (
     <>
-      {props.campaignType !== 'EMAIL' && (
+      {false && (
         <Flex
           p={'md'}
           direction={'column'}
@@ -540,7 +542,7 @@ export const Messaging = (props: MessagingProps) => {
                               <Text fz='sm' fw='bold'>
                                 Assets Used:
                               </Text>
-                              {item.assets.map((asset: any, index: number) => (
+                              {item.assets.map((asset, index) => (
                                 <Text key={index} fz='sm'>
                                   - {asset.asset_key}
                                 </Text>

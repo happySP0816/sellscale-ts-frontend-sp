@@ -60,9 +60,23 @@ interface EmailSequence {
 }
 
 interface LinkedInSequence {
+  // bump_framework_id?: number;
   bumped_count: number;
   description: string;
   title: string;
+  assets: {
+    asset_key: string;
+    asset_raw_value: null;
+    asset_tags: string[];
+    asset_type: string;
+    asset_value: string;
+    client_archetype_ids: number[];
+    client_id: number;
+    id: number;
+    num_opens: number;
+    num_replies: number;
+    num_sends: number;
+  }[];
 }
 
 interface TopCompanies {

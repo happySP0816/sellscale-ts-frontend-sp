@@ -143,6 +143,7 @@ import { createBumpFramework } from '@utils/requests/createBumpFramework';
 import useRefresh from '@common/library/use-refresh';
 import AIBrainPill from '@common/persona/ICPFilter/AiBrainPill';
 import getResearchPointTypes from '@utils/requests/getResearchPointTypes';
+import BumpFrameworkAssets from '@modals/BumpFrameworkAssets';
 
 export default function SequenceSection() {
   const [activeCard, setActiveCard] = useState(0);
@@ -177,13 +178,22 @@ export default function SequenceSection() {
         userToken,
         ['ACCEPTED', 'BUMPED'],
         [],
-        [currentProject?.id]
+        [currentProject?.id],
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        true
       );
       if (result.status !== 'success') return [];
       return result.data.bump_frameworks as BumpFramework[];
     },
   });
   const bumpFrameworks = data ?? [];
+
+  console.log(bumpFrameworks);
+
   const [isDataChanged, setIsDataChanged] = useState(false);
   const [isModalBlockerVisible, setIsModalBlockerVisible] = useState(false);
   const [nextActiveCardIndex, setNextActiveCardIndex] = useState(0);
@@ -1443,8 +1453,11 @@ function IntroMessageSection(props: {
               />
             </Tabs.Panel>
             <Tabs.Panel value='cta-analytics'>
-              <iframe 
-                src={'https://sellscale.retool.com/embedded/public/7d0f9279-762b-46c5-ac75-cd90dd4bec05#auth_token=' + userToken}
+              <iframe
+                src={
+                  'https://sellscale.retool.com/embedded/public/7d0f9279-762b-46c5-ac75-cd90dd4bec05#auth_token=' +
+                  userToken
+                }
                 style={{
                   width: '100%',
                   height: '500px',
@@ -2810,6 +2823,8 @@ function FrameworkSection(props: {
                             </HoverCard>
 
                             <AIBrainPill />
+
+                            <BumpFrameworkAssets bump_framework_id={bf.id} />
 
                             {bf.human_feedback && (
                               <HoverCard width={280} shadow='md'>

@@ -455,6 +455,7 @@ export type BumpFramework = {
   Title?: string;
   Description?: string;
   bump_id?: number;
+  assets?: Record<string, any>[];
 };
 
 export type EmailSequenceStep = {

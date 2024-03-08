@@ -1,10 +1,10 @@
 import { currentProjectState } from '@atoms/personaAtoms';
-import { prospectDrawerOpenState } from "@atoms/prospectAtoms";
-import { userTokenState } from "@atoms/userAtoms";
-import { logout } from "@auth/core";
-import PersonaDetailsPatterns from "@common/persona/details/PersonaDetailsPatterns";
-import { API_URL } from "@constants/data";
-import ProspectDetailsDrawer from "@drawers/ProspectDetailsDrawer";
+import { prospectDrawerOpenState } from '@atoms/prospectAtoms';
+import { userTokenState } from '@atoms/userAtoms';
+import { logout } from '@auth/core';
+import PersonaDetailsPatterns from '@common/persona/details/PersonaDetailsPatterns';
+import { API_URL } from '@constants/data';
+import ProspectDetailsDrawer from '@drawers/ProspectDetailsDrawer';
 import {
   Avatar,
   Badge,
@@ -16,16 +16,16 @@ import {
   Table,
   Title,
   useMantineTheme,
-} from "@mantine/core";
-import { openContextModal } from "@mantine/modals";
+} from '@mantine/core';
+import { openContextModal } from '@mantine/modals';
 import VoiceBuilderModal from '@modals/VoiceBuilderModal';
-import { IconPencil } from "@tabler/icons";
-import { useQuery } from "@tanstack/react-query";
-import { valueToColor } from "@utils/general";
+import { IconPencil } from '@tabler/icons';
+import { useQuery } from '@tanstack/react-query';
+import { valueToColor } from '@utils/general';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from "recoil";
-import { Archetype } from "src";
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { Archetype } from 'src';
 
 export default function VoicesSection(props: { personas?: Archetype[] }) {
   const theme = useMantineTheme();
@@ -41,9 +41,10 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
     queryKey: [`query-voices`],
     queryFn: async () => {
       const response = await fetch(
-        `${API_URL}/message_generation/stack_ranked_configurations` + (currentProject?.id ? `?archetype_id=${currentProject?.id}` : ``) ,
+        `${API_URL}/message_generation/stack_ranked_configurations` +
+          (currentProject?.id ? `?archetype_id=${currentProject?.id}` : ``),
         {
-          method: "GET",
+          method: 'GET',
           headers: {
             Authorization: `Bearer ${userToken}`,
           },
@@ -60,16 +61,16 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
 
   useEffect(() => {
     const create = searchParams.get('create');
-    if(create){
+    if (create) {
       setVoiceBuilderOpen(true);
     }
   }, []);
 
   return (
     <>
-      <Group position="right">
+      <Group position='right'>
         <Button
-          size="md"
+          size='md'
           onClick={() => {
             setVoiceBuilderOpen(true);
           }}
@@ -79,7 +80,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
       </Group>
 
       <ScrollArea>
-        <Table verticalSpacing="sm" horizontalSpacing="md">
+        <Table verticalSpacing='sm' horizontalSpacing='md'>
           <thead>
             <tr>
               <th style={{ minWidth: '90px' }}>Priority</th>
@@ -96,50 +97,44 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
                   <td>
                     <Avatar
                       size={40}
-                      color={valueToColor(theme, (data.indexOf(item)+1)+'')}
+                      color={valueToColor(theme, data.indexOf(item) + 1 + '')}
                       radius={40}
                     >
-                      #{data.indexOf(item)+1}
+                      #{data.indexOf(item) + 1}
                     </Avatar>
                   </td>
                   <td>
-                    <Group spacing="sm">
+                    <Group spacing='sm'>
                       <div>
-                        <Text fz="sm" fw={500}>
+                        <Text fz='sm' fw={500}>
                           {item.name}
                         </Text>
-                        <Text fz="xs" c="dimmed"></Text>
+                        <Text fz='xs' c='dimmed'></Text>
                       </div>
                     </Group>
                   </td>
 
                   <td>
-                    <Badge
-                      color={
-                        item.generated_message_type == "LINKEDIN"
-                          ? "blue"
-                          : "orange"
-                      }
-                    >
+                    <Badge color={item.generated_message_type == 'LINKEDIN' ? 'blue' : 'orange'}>
                       {item.generated_message_type}
                     </Badge>
                   </td>
                   <td>
                     {item.active ? (
-                      <Badge fullWidth color="green">
+                      <Badge fullWidth color='green'>
                         Active
                       </Badge>
                     ) : (
-                      <Badge color="gray">Disabled</Badge>
+                      <Badge color='gray'>Disabled</Badge>
                     )}
                   </td>
                   <td>
                     <Button
-                      color="grape"
-                      rightIcon={<IconPencil size="0.9rem" />}
+                      color='grape'
+                      rightIcon={<IconPencil size='0.9rem' />}
                       onClick={() => {
                         openContextModal({
-                          modal: "voiceEditor",
+                          modal: 'voiceEditor',
                           title: <Title order={3}>Voice Editor: {item.name}</Title>,
                           innerProps: {
                             persona_id: item.archetype_id,
@@ -158,7 +153,7 @@ export default function VoicesSection(props: { personas?: Archetype[] }) {
       </ScrollArea>
       <VoiceBuilderModal
         opened={voiceBuilderOpen}
-        close={() => {
+        onClose={() => {
           setVoiceBuilderOpen(false);
         }}
       />

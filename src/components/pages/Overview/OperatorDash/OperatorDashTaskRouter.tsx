@@ -19,6 +19,7 @@ import { TaskHandlerEnrichSegment } from './TaskHandlers/TaskHandlerEnrichSegmen
 import { TaskHandlerReviewSegment } from './TaskHandlers/TaskHandlerReviewSegment';
 import { TaskHandlerRequestCampaign } from './TaskHandlers/TaskHandlerRequestCampaign';
 import { TaskHandlerViewProspect } from './TaskHandlers/TaskHandlerViewProspect';
+import { TaskHandlerVoiceBuilder } from './TaskHandlers/TaskHandlerVoiceBuilder';
 
 export interface OperatorDashboardEntry {
   id: number;
@@ -110,6 +111,11 @@ const TASK_ROUTER: any = {
   REP_INTERVENTION_NEEDED: {
     component: TaskHandlerViewProspect,
     instruction: 'View the prospect and take necessary action. Mark ticket as complete when done',
+    enabledCompleteButton: true,
+  },
+  VOICE_BUILDER: {
+    component: TaskHandlerVoiceBuilder,
+    instruction: 'Create your AI voice then mark as complete',
     enabledCompleteButton: true,
   },
 };

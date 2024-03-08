@@ -18,21 +18,17 @@ import {
   Loader,
   ScrollArea,
   Stack,
-} from "@mantine/core";
-import {
-  ContextModalProps,
-  openConfirmModal,
-  openContextModal,
-} from "@mantine/modals";
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { userDataState, userTokenState } from "@atoms/userAtoms";
-import { Archetype } from "src";
-import { useForm } from "@mantine/form";
-import { showNotification } from "@mantine/notifications";
-import createCTA from "@utils/requests/createCTA";
-import { IconRefresh, IconUser } from "@tabler/icons";
+} from '@mantine/core';
+import { ContextModalProps, openConfirmModal, openContextModal } from '@mantine/modals';
+import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { Archetype } from 'src';
+import { useForm } from '@mantine/form';
+import { showNotification } from '@mantine/notifications';
+import createCTA from '@utils/requests/createCTA';
+import { IconRefresh, IconUser } from '@tabler/icons';
 import {
   createVoice,
   createVoiceBuilderOnboarding,
@@ -41,8 +37,8 @@ import {
   getVoiceBuilderDetails,
   getVoiceOnboardings,
   updateSample,
-} from "@utils/requests/voiceBuilder";
-import { currentProjectState } from "@atoms/personaAtoms";
+} from '@utils/requests/voiceBuilder';
+import { currentProjectState } from '@atoms/personaAtoms';
 
 export const STARTING_INSTRUCTIONS = `Follow instructions to generate a short intro message:
 - If mentioning title, colloquialize it (i.e. make Vice President -> VP)
@@ -54,20 +50,64 @@ export const STARTING_INSTRUCTIONS = `Follow instructions to generate a short in
 export const MSG_GEN_AMOUNT = 6;
 // export const MAX_EDITING_PHASES = 3;
 
-import { Modal, ActionIcon } from "@mantine/core";
-import { IconX } from "@tabler/icons-react";
-import { voiceBuilderMessagesState } from "@atoms/voiceAtoms";
-import { logout } from "@auth/core";
-import TrainYourAi from "@common/voice_builder/TrainYourAi";
-import { API_URL } from "@constants/data";
-import { count } from "console";
-import _ from "lodash";
-import { useInterval } from "@mantine/hooks";
+import { Modal, ActionIcon } from '@mantine/core';
+import { IconX } from '@tabler/icons-react';
+import { voiceBuilderMessagesState } from '@atoms/voiceAtoms';
+import { logout } from '@auth/core';
+import TrainYourAi from '@common/voice_builder/TrainYourAi';
+import { API_URL } from '@constants/data';
+import { count } from 'console';
+import _ from 'lodash';
+import { useInterval } from '@mantine/hooks';
 
 const VoiceBuilderModal: React.FC<{
   opened: boolean;
-  close: () => void;
-}> = ({ opened, close }) => {
+  onClose: () => void;
+}> = ({ opened, onClose }) => {
+  const blue = '#228be6';
+
+  return (
+    <Modal.Root opened={opened} onClose={onClose} fullScreen closeOnClickOutside>
+      <Modal.Overlay blur={3} color='gray.2' opacity={0.5} />
+      <Modal.Content sx={{ borderRadius: '8px', overflow: 'hidden' }}>
+        <Modal.Header
+          md-px={'1.5rem'}
+          px={'1rem'}
+          sx={{
+            background: blue,
+            display: 'flex',
+          }}
+          h={'3.5rem'}
+        >
+          <Modal.Title
+            fz={'1.2rem'}
+            fw={600}
+            sx={{
+              color: '#FFFFFF',
+            }}
+            w='50vw'
+            ta='center'
+          >
+            Train your voice module
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body p={0}>
+          <VoiceBuilderSection opened={opened} onClose={onClose} />
+        </Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
+  );
+};
+
+export default VoiceBuilderModal;
+
+export function VoiceBuilderSection(props: {
+  opened?: boolean;
+  onClose?: () => void;
+  archetypeId?: number;
+  regenOffset?: number;
+}) {
   const theme = useMantineTheme();
   const queryClient = useQueryClient();
   const userToken = useRecoilValue(userTokenState);
@@ -76,34 +116,28 @@ const VoiceBuilderModal: React.FC<{
   const [loading, setLoading] = useState(false);
   const [loadingOverlay, setLoadingOverlay] = useState(false);
 
-  const [voiceBuilderMessages, setVoiceBuilderMessages] = useRecoilState(
-    voiceBuilderMessagesState
-  );
+  const [voiceBuilderMessages, setVoiceBuilderMessages] = useRecoilState(voiceBuilderMessagesState);
 
-  const [voiceBuilderOnboardingId, setVoiceBuilderOnboardingId] =
-    useState<number>(-1);
+  const [voiceBuilderOnboardingId, setVoiceBuilderOnboardingId] = useState<number>(-1);
 
   const [count, setCount] = useState(0);
   const interval = useInterval(() => setCount((s) => s + 1), 1000);
 
-  const currentProject = useRecoilValue(currentProjectState);
+  const archetypeId = props.archetypeId ?? useRecoilValue(currentProjectState)?.id;
 
   const setLatestVoiceOnboarding = async () => {
-    if (!currentProject) return;
+    if (!archetypeId) return;
 
-    const response = await getVoiceOnboardings(userToken, currentProject.id);
-    if (response.status === "success") {
+    const response = await getVoiceOnboardings(userToken, archetypeId);
+    if (response.status === 'success') {
       const onboardings = response.data.sort((a: any, b: any) => {
         return b.id - a.id;
       });
       if (onboardings.length > 0) {
         setVoiceBuilderOnboardingId(onboardings[0].id);
 
-        const detailsResponse = await getVoiceBuilderDetails(
-          userToken,
-          onboardings[0].id
-        );
-        if (detailsResponse.status === "success") {
+        const detailsResponse = await getVoiceBuilderDetails(userToken, onboardings[0].id);
+        if (detailsResponse.status === 'success') {
           if (detailsResponse.data.sample_info.length > 0) {
             // Sort the samples by id
             let details = detailsResponse.data.sample_info.sort((a: any, b: any) => {
@@ -117,7 +151,7 @@ const VoiceBuilderModal: React.FC<{
                   prospect: item.prospect,
                   meta_data: item.meta_data,
                   problems: item.sample_problems,
-                  highlighted_words: item.highlighted_words
+                  highlighted_words: item.highlighted_words,
                 };
               })
             );
@@ -130,15 +164,15 @@ const VoiceBuilderModal: React.FC<{
   };
 
   const setNewVoiceOnboarding = async () => {
-    if (!currentProject) return;
+    if (!archetypeId) return;
 
     const response = await createVoiceBuilderOnboarding(
       userToken,
-      "LINKEDIN",
+      'LINKEDIN',
       `${STARTING_INSTRUCTIONS}`,
-      currentProject.id
+      archetypeId
     );
-    if (response.status === "success") {
+    if (response.status === 'success') {
       setVoiceBuilderOnboardingId(response.data.id);
       await generateMessages(response.data.id);
       return true;
@@ -156,16 +190,16 @@ const VoiceBuilderModal: React.FC<{
         return true;
       }
     },
-    enabled: opened && !!currentProject,
+    enabled: props.opened && !!archetypeId,
     refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
-    if(!opened) {
+    if (!props.opened) {
       setCount(0);
       setVoiceBuilderMessages([]);
     }
-  }, [opened]);
+  }, [props.opened]);
 
   useEffect(() => {
     if (loading) {
@@ -197,13 +231,9 @@ const VoiceBuilderModal: React.FC<{
     }
 
     // Generate new samples
-    const response = await generateSamples(
-      userToken,
-      voiceBuilderOnboardingId,
-      MSG_GEN_AMOUNT
-    );
+    const response = await generateSamples(userToken, voiceBuilderOnboardingId, MSG_GEN_AMOUNT);
 
-    if (response.status === "success") {
+    if (response.status === 'success') {
       // Sort the samples by id
       let details = response.data.sort((a: any, b: any) => {
         return a.id - b.id;
@@ -217,7 +247,7 @@ const VoiceBuilderModal: React.FC<{
             prospect: item.prospect,
             meta_data: item.meta_data,
             problems: item.sample_problems,
-            highlighted_words: item.highlighted_words
+            highlighted_words: item.highlighted_words,
           };
         })
       );
@@ -241,7 +271,7 @@ const VoiceBuilderModal: React.FC<{
 
     // Delete all samples that are empty
     for (const message of currentMessages) {
-      if (message.value === "") {
+      if (message.value === '') {
         await deleteSample(userToken, message.id);
       } else {
         await updateSample(userToken, message.id, message.value);
@@ -259,14 +289,14 @@ const VoiceBuilderModal: React.FC<{
       nextWeek.setDate(nextWeek.getDate() + 7);
 
       const response = await fetch(`${API_URL}/campaigns/instant`, {
-        method: "POST",
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          campaign_type: "LINKEDIN",
-          client_archetype_id: currentProject?.id,
+          campaign_type: 'LINKEDIN',
+          client_archetype_id: archetypeId,
           campaign_start_date: new Date().toISOString(),
           campaign_end_date: nextWeek.toISOString(),
           priority_rating: 10,
@@ -289,127 +319,97 @@ const VoiceBuilderModal: React.FC<{
     }
 
     setLoadingOverlay(false);
-    if (response.status === "success") {
-      queryClient.refetchQueries(["query-voices"]);
-      close();
+    if (response.status === 'success') {
+      queryClient.refetchQueries(['query-voices']);
+      props.onClose?.();
     }
   };
 
   const openCompleteModal = () =>
     openConfirmModal({
       title: (
-        <Title order={2} ta="center">
+        <Title order={2} ta='center'>
           Congrats!
         </Title>
       ),
       children: (
         <Stack>
           <Box>
-            <Text size="lg" ta="center">
+            <Text size='lg' ta='center'>
               You've edited your voice:
             </Text>
-            <Text size="lg" fw={700} ta="center">
-              "{userData.sdr_name.trim().split(" ")[0]}'s Voice"
+            <Text size='lg' fw={700} ta='center'>
+              "{userData.sdr_name.trim().split(' ')[0]}'s Voice"
             </Text>
           </Box>
           <Box>
-            <Text size="lg" ta="center">
+            <Text size='lg' ta='center'>
               The AI will study your samples to mimick your voice.
             </Text>
           </Box>
           <Box>
-            <Text size="lg" ta="center">
+            <Text size='lg' ta='center'>
               Come back to this module any time to edit.
             </Text>
           </Box>
         </Stack>
       ),
-      labels: { confirm: "Create", cancel: "Cancel" },
+      labels: { confirm: 'Create', cancel: 'Cancel' },
       onConfirm: async () => {
         await completeVoice();
       },
       onCancel: () => {},
     });
 
-  const borderGray = "#E9ECEF";
-  const blue = "#228be6";
+  const borderGray = '#E9ECEF';
 
   return (
-    <Modal.Root opened={opened} onClose={close} fullScreen closeOnClickOutside>
-      <Modal.Overlay blur={3} color="gray.2" opacity={0.5} />
-      <Modal.Content sx={{ borderRadius: "8px", overflow: "hidden" }}>
-        <Modal.Header
-          md-px={"1.5rem"}
-          px={"1rem"}
-          sx={{
-            background: blue,
-            display: "flex",
+    <Box>
+      <Group style={{ position: 'absolute', top: props.regenOffset ?? 10, right: 5 }}>
+        <Button
+          variant='light'
+          color='white'
+          radius='xl'
+          compact
+          leftIcon={<IconRefresh size='1rem' />}
+          loading={(isFetching || loading) && voiceBuilderMessages.length > 0}
+          onClick={() => {
+            generateMessages(voiceBuilderOnboardingId);
           }}
-          h={"3.5rem"}
         >
-          <Modal.Title
-            fz={"1.2rem"}
-            fw={600}
-            sx={{
-              color: "#FFFFFF",
-            }}
-            w="50vw"
-            ta="center"
-          >
-            Train your voice module
-          </Modal.Title>
-          <Group>
-            <Button variant="light" color="white" radius="xl" compact leftIcon={<IconRefresh size='1rem' />}
-              loading={(isFetching || loading) && voiceBuilderMessages.length > 0}
-              onClick={() => {
-                generateMessages(voiceBuilderOnboardingId);
-              }}
-            >
-              Regenerate
-            </Button>
-            <ActionIcon
-              variant="outline"
-              size={"sm"}
-              onClick={close}
-              sx={{ borderColor: borderGray, borderRadius: 999 }}
-            >
-              <IconX color="#FFFFFF" />
-            </ActionIcon>
-          </Group>
-        </Modal.Header>
+          Regenerate
+        </Button>
+        <ActionIcon
+          variant='outline'
+          size={'sm'}
+          onClick={props.onClose}
+          sx={{ borderColor: borderGray, borderRadius: 999 }}
+        >
+          <IconX color='#FFFFFF' />
+        </ActionIcon>
+      </Group>
 
-        <Modal.Body p={0}>
-          {isFetching || loading ? (
-            <div style={{ position: "relative" }}>
-              <ScrollArea style={{ position: "relative", height: 410 }}>
-                <Container>
-                  <Text pt={15} px={2} fz="sm" fw={400}>
-                    We'll have you edit {MSG_GEN_AMOUNT} sample messages to your style.
-                  </Text>
-                  <Divider my="sm" />
-                </Container>
+      {isFetching || loading ? (
+        <div style={{ position: 'relative' }}>
+          <ScrollArea style={{ position: 'relative', height: 410 }}>
+            <Container>
+              <Text pt={15} px={2} fz='sm' fw={400}>
+                We'll have you edit {MSG_GEN_AMOUNT} sample messages to your style.
+              </Text>
+              <Divider my='sm' />
+            </Container>
 
-                <Container w="100%">
-                  {<Loader mx="auto" variant="dots" />}
-                  <Text color="blue">Generating messages ...</Text>
-                  {count > 2 && (
-                    <Text color="blue">Researching prospects ...</Text>
-                  )}
-                  {count > 3 && (
-                    <Text color="blue">Writing sample copy ...</Text>
-                  )}
-                  {count > 5 && (
-                    <Text color="blue">Applying previous edits ...</Text>
-                  )}
-                  {count > 7 && (
-                    <Text color="blue">Finalizing messages ...</Text>
-                  )}
-                  {count > 9 && <Text color="blue">Almost there ...</Text>}
-                  {count > 15 && (
-                    <Text color="blue">Making final touches ...</Text>
-                  )}
-                </Container>
-                {/* {!loadingMsgGen &&
+            <Container w='100%'>
+              {<Loader mx='auto' variant='dots' />}
+              <Text color='blue'>Generating messages ...</Text>
+              {count > 2 && <Text color='blue'>Researching prospects ...</Text>}
+              {count > 3 && <Text color='blue'>Writing sample copy ...</Text>}
+              {count > 5 && <Text color='blue'>Applying previous edits ...</Text>}
+              {count > 7 && <Text color='blue'>Finalizing messages ...</Text>}
+              {count > 9 && <Text color='blue'>Almost there ...</Text>}
+              {count > 15 && <Text color='blue'>Making final touches ...</Text>}
+            </Container>
+            {/* {!loadingMsgGen &&
             voiceBuilderMessages.map((item) => (
               <ItemComponent
                 key={item.id}
@@ -417,25 +417,21 @@ const VoiceBuilderModal: React.FC<{
                 defaultValue={item.value}
               />
             ))} */}
-              </ScrollArea>
-            </div>
-          ) : (
-            <>
-              {voiceBuilderMessages.length > 0 && (
-                <TrainYourAi
-                  messages={voiceBuilderMessages.filter((msg) => msg.value)}
-                  onComplete={async () => {
-                    openCompleteModal();
-                  }}
-                  refreshMessages={setLatestVoiceOnboarding}
-                />
-              )}
-            </>
+          </ScrollArea>
+        </div>
+      ) : (
+        <>
+          {voiceBuilderMessages.length > 0 && (
+            <TrainYourAi
+              messages={voiceBuilderMessages.filter((msg) => msg.value)}
+              onComplete={async () => {
+                openCompleteModal();
+              }}
+              refreshMessages={setLatestVoiceOnboarding}
+            />
           )}
-        </Modal.Body>
-      </Modal.Content>
-    </Modal.Root>
+        </>
+      )}
+    </Box>
   );
-};
-
-export default VoiceBuilderModal;
+}

@@ -251,7 +251,7 @@ export default function VoiceSelect(props: {
       />
       <VoiceBuilderModal
         opened={voiceBuilderOpen}
-        close={() => {
+        onClose={() => {
           setVoiceBuilderOpen(false);
         }}
       />

@@ -234,9 +234,6 @@ export default function CompanyOverview() {
                       <IconExternalLink size={"0.8rem"} color="#439bf8" />
                     </Stack>
                   </Flex>
-                  <Text fw={500}>
-                    {"To accelerate the advent of sustainable transport."}
-                  </Text>
                   <Text color="gray" className=" whitespace-normal" size={"xs"}>
                     {companyDetails?.description}
                   </Text>
@@ -529,7 +526,7 @@ export default function CompanyOverview() {
                   ),
                 }}
                 w={"100%"}
-                pageSizes={["20"]}
+                pageSizes={["5"]}
                 styles={(theme) => ({
                   thead: {
                     height: "44px",
@@ -689,30 +686,8 @@ export default function CompanyOverview() {
                       fw={600}
                       size={34}
                     >
-                      {currentPercentage >= 80
-                        ? "Very High"
-                        : currentPercentage >= 60
-                        ? "High"
-                        : currentPercentage >= 40
-                        ? "Medium"
-                        : currentPercentage >= 20
-                        ? "Low"
-                        : "Very Low"}
+                      {Math.ceil(currentPercentage)} % Engaged
                     </Text>
-                    <IconDiscountCheck
-                      color={
-                        currentPercentage >= 80
-                          ? theme.colors.green[4]
-                          : currentPercentage >= 60
-                          ? theme.colors.blue[4]
-                          : currentPercentage >= 40
-                          ? theme.colors.yellow[4]
-                          : currentPercentage >= 20
-                          ? theme.colors.orange[4]
-                          : theme.colors.red[4]
-                      }
-                      size={30}
-                    />
                   </Flex>
                   <Text
                     color="gray"
@@ -723,7 +698,7 @@ export default function CompanyOverview() {
                       gap: "5px",
                     }}
                   >
-                    Overall intent score:{" "}
+                    {" "}
                     <Text
                       color={
                         currentPercentage >= 80
@@ -738,7 +713,19 @@ export default function CompanyOverview() {
                       }
                       fw={600}
                     >
-                      {currentPercentage}
+                      {
+                        currentPercentage >= 95 
+                          ? "Engagement Maxed"
+                          : currentPercentage >= 80
+                          ? "Highly Engaged"
+                          : currentPercentage >= 60
+                          ? "Moderately Engaged"
+                          : currentPercentage >= 40
+                          ? "Somewhat Engaged"
+                          : currentPercentage >= 20
+                          ? "Low Engagement"
+                          : "No Engagement"
+                      }
                     </Text>
                   </Text>
                 </Flex>
@@ -752,7 +739,7 @@ export default function CompanyOverview() {
               <Text color="gray" fw={600} size={"xl"}>
                 Recent Activity
               </Text>
-              <Timeline bulletSize={30} lineWidth={2} ml={"lg"} mt={"lg"}>
+              <Timeline bulletSize={30} lineWidth={2} ml={"lg"} mt={"lg"} mah={450} sx={{ overflow: "auto" }}>
                 {recentActivityData?.map((item, index) => {
                   return (
                     <Timeline.Item

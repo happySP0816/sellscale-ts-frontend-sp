@@ -64,24 +64,31 @@ type CompanyDetailsType = {
 
 type timeDataType = {
   title: string;
-  concat: string;
+  subtitle: string;
 }[];
 
 export default function CompanyOverview() {
   const theme = useMantineTheme();
   const percentage = [
     {
-      percentage: 80,
+      percentage: 100,
       color: theme.colors.green[4],
     },
-
     {
-      percentage: 60,
-      color: theme.colors.red[4],
+      percentage: 80,
+      color: theme.colors.blue[4],
     },
     {
-      percentage: 30,
+      percentage: 60,
+      color: theme.colors.yellow[4],
+    },
+    {
+      percentage: 40,
       color: theme.colors.orange[4],
+    },
+    {
+      percentage: 20,
+      color: theme.colors.red[4],
     },
   ];
   const [companyContactData, setCompanyContactData] =
@@ -108,6 +115,8 @@ export default function CompanyOverview() {
   };
 
   const url = useParams();
+  let filterData = [];
+  const [filteredData, setFilteredData] = useState([]);
 
   useEffect(() => {
     const fetchCompanyDetails = async () => {
@@ -138,8 +147,8 @@ export default function CompanyOverview() {
         }
       );
       const data = await response.json();
-
       setCompanyContactData(data?.prospect_engagement);
+      setFilteredData(data?.prospect_engagement);
     };
     const fetchTimelineData = async () => {
       const response = await fetch(
@@ -162,6 +171,16 @@ export default function CompanyOverview() {
     fetchProspectEngagementData();
     fetchTimelineData();
   }, []);
+  const [filterOption, setFilterOption] = useState("");
+
+  const handleFilter = (filterOption: string) => {
+    setFilterOption(filterOption);
+    let data: any = [];
+    data =
+      companyContactData?.filter((item: any) => item.status === filterOption) ||
+      [];
+    setFilteredData(data);
+  };
 
   return (
     <Paper>
@@ -188,7 +207,7 @@ export default function CompanyOverview() {
                   <Card shadow="lg" radius="md" h={"fit-content"} p={0}>
                     <Image
                       radius={"md"}
-                      src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png"
+                      src={`https://logo.clearbit.com/${companyDetails?.websites[0]}`}
                       height={120}
                       width={120}
                       alt="Norway"
@@ -224,7 +243,7 @@ export default function CompanyOverview() {
                   <Flex align={"center"} gap={4}>
                     <IconExternalLink size={"0.8rem"} color="gray" />
                     <Text color="gray" fw={400} size={"sm"}>
-                      Indusctry:{" "}
+                      Industry:{" "}
                     </Text>
                     <Text fw={500} size={"sm"}>
                       {companyDetails?.industries.map((item) => {
@@ -243,15 +262,6 @@ export default function CompanyOverview() {
                     </Text>
                   </Flex>
                   <Flex align={"center"} gap={4}>
-                    <IconSparkles size={"0.8rem"} color="gray" />
-                    <Text color="gray" fw={400} size={"sm"}>
-                      Specialties:{" "}
-                    </Text>
-                    <Text fw={500} size={"sm"}>
-                      {"Austin, Texas, USA"}
-                    </Text>
-                  </Flex>
-                  <Flex align={"center"} gap={4}>
                     <IconUser size={"0.8rem"} color="gray" />
                     <Text color="gray" fw={400} size={"sm"}>
                       No. of employees:{" "}
@@ -260,32 +270,9 @@ export default function CompanyOverview() {
                       {companyDetails?.num_employees}
                     </Text>
                   </Flex>
-                  <Flex align={"center"} gap={4}>
-                    <IconTags size={"0.8rem"} color="gray" />
-                    <Text color="gray" size={"sm"}>
-                      Tags:{" "}
-                    </Text>
-                    <Flex gap={4} align={"center"}>
-                      {companyDetails?.specialities?.map((item) => {
-                        return (
-                          <Badge color="gray" size="sm">
-                            {item}
-                          </Badge>
-                        );
-                      })}
-                    </Flex>
-                  </Flex>
                 </Flex>
               </Flex>
               <Divider variant="dashed" />
-              <Button
-                variant="light"
-                fullWidth
-                leftIcon={<IconUserEdit />}
-                radius={"xl"}
-              >
-                Edit Company Details
-              </Button>
             </Flex>
             <Flex direction={"column"} mt={"md"}>
               <Flex w={"100%"} justify={"space-between"} align={"center"}>
@@ -301,7 +288,14 @@ export default function CompanyOverview() {
                   }}
                   gap={"sm"}
                 >
-                  <Text color="green" p={3} fw={600}>
+                  <Text
+                    color="green"
+                    p={3}
+                    fw={filterOption === "engaged" ? 800 : 600}
+                    onClick={() => {
+                      handleFilter("engaged");
+                    }}
+                  >
                     Engaged{" "}
                     <Badge color="green">
                       {
@@ -312,7 +306,14 @@ export default function CompanyOverview() {
                     </Badge>
                   </Text>
                   <Divider orientation="vertical" />
-                  <Text color="yellow" p={3} fw={600}>
+                  <Text
+                    color="yellow"
+                    p={3}
+                    fw={filterOption === "sourced" ? 800 : 600}
+                    onClick={() => {
+                      handleFilter("sourced");
+                    }}
+                  >
                     Sourced{" "}
                     <Badge color="yellow">
                       {
@@ -325,7 +326,7 @@ export default function CompanyOverview() {
                 </Flex>
               </Flex>
               <DataGrid
-                data={companyContactData}
+                data={filteredData}
                 highlightOnHover
                 withPagination
                 withSorting
@@ -676,32 +677,69 @@ export default function CompanyOverview() {
                     <Text
                       color={
                         currentPercentage >= 80
-                          ? "green"
-                          : currentPercentage >= 65
-                          ? "Blue"
-                          : currentPercentage >= 50
-                          ? "Yellow"
-                          : currentPercentage >= 30
-                          ? "Orange"
-                          : "Red"
+                          ? theme.colors.green[4]
+                          : currentPercentage >= 60
+                          ? theme.colors.blue[4]
+                          : currentPercentage >= 40
+                          ? theme.colors.yellow[4]
+                          : currentPercentage >= 20
+                          ? theme.colors.orange[4]
+                          : theme.colors.red[4]
                       }
                       fw={600}
                       size={34}
                     >
                       {currentPercentage >= 80
                         ? "Very High"
-                        : currentPercentage >= 65
+                        : currentPercentage >= 60
                         ? "High"
-                        : currentPercentage >= 50
+                        : currentPercentage >= 40
                         ? "Medium"
-                        : currentPercentage >= 30
+                        : currentPercentage >= 20
                         ? "Low"
                         : "Very Low"}
                     </Text>
-                    <IconDiscountCheck color="#40c057" size={30} />
+                    <IconDiscountCheck
+                      color={
+                        currentPercentage >= 80
+                          ? theme.colors.green[4]
+                          : currentPercentage >= 60
+                          ? theme.colors.blue[4]
+                          : currentPercentage >= 40
+                          ? theme.colors.yellow[4]
+                          : currentPercentage >= 20
+                          ? theme.colors.orange[4]
+                          : theme.colors.red[4]
+                      }
+                      size={30}
+                    />
                   </Flex>
-                  <Text color="gray" fw={400}>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  <Text
+                    color="gray"
+                    fw={400}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    Overall intent score:{" "}
+                    <Text
+                      color={
+                        currentPercentage >= 80
+                          ? theme.colors.green[4]
+                          : currentPercentage >= 60
+                          ? theme.colors.blue[4]
+                          : currentPercentage >= 40
+                          ? theme.colors.yellow[4]
+                          : currentPercentage >= 20
+                          ? theme.colors.orange[4]
+                          : theme.colors.red[4]
+                      }
+                      fw={600}
+                    >
+                      {currentPercentage}
+                    </Text>
                   </Text>
                 </Flex>
               </Flex>
@@ -719,7 +757,7 @@ export default function CompanyOverview() {
                   return (
                     <Timeline.Item
                       bullet={
-                        item?.concat ? (
+                        item?.subtitle ? (
                           <IconMessage size={16} />
                         ) : (
                           <IconGitPullRequest size={16} />
@@ -737,13 +775,13 @@ export default function CompanyOverview() {
                       }
                       active
                       lineVariant="dashed"
-                      color={item?.concat ? "" : "orange"}
+                      color={item?.subtitle ? "" : "orange"}
                     >
-                      {item?.concat && (
+                      {item?.subtitle && (
                         <Text fw={400} size={"xs"}>
                           Received Message:
                           <span className=" text-gray-400 line-clamp-4">
-                            {item?.concat}
+                            {item?.subtitle}
                           </span>
                         </Text>
                       )}

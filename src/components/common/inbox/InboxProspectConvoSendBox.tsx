@@ -908,20 +908,11 @@ export default forwardRef(function InboxProspectConvoSendBox(
                 setMsgLoading(true);
                 if (openedOutboundChannel === "LINKEDIN") {
                   // If the substatus is breakup, then we want to generate slightly different message:
-                  if (replyLabel === "ACTIVE_CONVO_BREAKUP") {
-                    const result = await generateAIFollowup(
-                      userToken,
-                      props.prospectId,
-                      selectedBumpFramework,
-                      true
-                    );
-                  } else {
-                    const result = await generateAIFollowup(
-                      userToken,
-                      props.prospectId,
-                      selectedBumpFramework
-                    );
-                  }
+                  const result = await generateAIFollowup(
+                    userToken,
+                    props.prospectId,
+                    selectedBumpFramework
+                  );
                   setMessageDraft(result.msg);
                   setAiMessage(result.msg);
                   setAiGenerated(result.aiGenerated);

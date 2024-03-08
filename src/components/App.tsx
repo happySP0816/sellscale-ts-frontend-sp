@@ -241,14 +241,14 @@ export default function App() {
               {/* Outlet is where react-router will render child routes */}
               <Outlet />
             </Layout>
-            {/* <Confetti
+            <Confetti
               width={width}
               height={height}
               run={!!confetti}
               recycle={false}
               numberOfPieces={confetti ?? 0}
               onConfettiComplete={() => setConfetti(null)}
-            /> */}
+            />
             {isLoggedIn() && <ProspectDetailsDrawer />}
           </ModalsProvider>
         </SpotlightWrapper>

@@ -20,6 +20,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { openConfirmModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
+import displayNotification from "@utils/notificationFlow";
 import {
   IconAlertTriangle,
   IconCheck,
@@ -331,11 +332,34 @@ export default function MessageAutomation() {
             <PersonalizationSection
               blocklist={userData.default_transformer_blocklist}
               onItemsChange={async (items) => {
-                const result = await updateSDRDefaultBlocklist(
-                  userToken,
-                  items.filter((x) => !x.checked).map((x) => x.id)
+                await displayNotification(
+                  "update-sdr-transformer-blocklist",
+                  async () => {
+                    const result = await updateSDRDefaultBlocklist(
+                      userToken,
+                      items.filter((x) => !x.checked).map((x) => x.id)
+                    );
+                    return result;
+                  },
+                  {
+                    title: "Updating Research Point Preferences:",
+                    message: "Working with servers...",
+                    color: "grape",
+                  },
+                  {
+                    title: "Updated!",
+                    message:
+                      "Your research point preferences have been updated.",
+                    color: "teal",
+                  },
+                  {
+                    title: "Error",
+                    message: "Something went wrong. Please try again later.",
+                    color: "red",
+                  }
                 );
               }}
+              title='Available Research Points'
             />
           </Card>
         </Stack>

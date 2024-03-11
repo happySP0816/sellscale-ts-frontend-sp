@@ -180,6 +180,7 @@ const PRESET_COLOR_MAPS: Record<string, MantineColor> = {
   active_convo_scheduling: 'yellow',
   active_convo_next_steps: 'yellow',
   active_convo_revival: 'yellow',
+  active_convo_breakup: 'yellow',
   bumped: 'orange',
   demo: 'blue',
   demo_complete: 'green',

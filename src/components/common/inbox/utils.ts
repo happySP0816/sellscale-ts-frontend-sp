@@ -38,6 +38,10 @@ export const prospectStatuses = [
     value: 'ACTIVE_CONVO_CONTINUE_SEQUENCE',
   },
   {
+    label: 'Breakup',
+    value: 'ACTIVE_CONVO_BREAKUP',
+  },
+  {
     label: 'Demoing',
     value: 'DEMO_SET',
   },

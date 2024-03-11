@@ -151,7 +151,7 @@ export default function SettingsPage() {
         <Tabs.List h={"fit-content"}>
           <Title
             color={
-              ["brain", "automation", "filters"].includes(
+              ["brain", "messages", "filters"].includes(
                 currentTab
               )
                 ? "blue"
@@ -168,7 +168,7 @@ export default function SettingsPage() {
           </Tabs.Tab>
 
           <Tabs.Tab
-            value="automation"
+            value="messages"
             icon={<IconMessage2Bolt size="0.8rem" />}
           >
             Message Automation
@@ -304,7 +304,7 @@ export default function SettingsPage() {
           <SlackSettings />
         </Tabs.Panel>
 
-        <Tabs.Panel value="automation" pl="xs">
+        <Tabs.Panel value="messages" pl="xs">
           <MessageAutomation />
         </Tabs.Panel>
 
@@ -315,16 +315,7 @@ export default function SettingsPage() {
         <Tabs.Panel value="usage" pl="xs">
           <SettingUsage />
         </Tabs.Panel>
-
-        <Tabs.Panel value='sellScaleBrain' pl='xs'>
-          <SellScaleBrain />
-        </Tabs.Panel>
-        <Tabs.Panel value='message-automation' pl='xs'>
-          <MessageAutomation />
-        </Tabs.Panel>
-        <Tabs.Panel value='logout' pl='xs'>
-          <LoadingOverlay visible />
-        </Tabs.Panel>
+        
       </Tabs>
     </Box>
   );

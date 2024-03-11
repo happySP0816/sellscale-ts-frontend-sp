@@ -354,7 +354,7 @@ export function VoiceBuilderSection(props: {
           </Box>
         </Stack>
       ),
-      labels: { confirm: 'Create', cancel: 'Cancel' },
+      labels: { confirm: 'Okay', cancel: 'Cancel' },
       onConfirm: async () => {
         await completeVoice();
       },

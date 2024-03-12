@@ -195,7 +195,7 @@ export default function ChannelSetupPage() {
 
   useEffect(() => {
     triggerGetAssets();
-  }, [])
+  }, [currentProject?.id])
 
   return (
     <Box>

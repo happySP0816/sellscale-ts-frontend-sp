@@ -588,6 +588,8 @@ export default forwardRef(function InboxProspectConvoSendBox(
     }
   };
 
+
+
   const filteredFrameworkData =
     openedOutboundChannel === "LINKEDIN"
       ? bumpFrameworks.length > 0
@@ -870,7 +872,6 @@ export default forwardRef(function InboxProspectConvoSendBox(
                     const selected = emailReplyFrameworks.find(
                       (step) => step.id === parseInt(value as string)
                     );
-                    console.log("email selected", selected);
                     if (selected) {
                       setEmailReplyFramework(selected);
                     }
@@ -920,17 +921,17 @@ export default forwardRef(function InboxProspectConvoSendBox(
                   openedOutboundChannel === "EMAIL" ||
                   openedOutboundChannel === "SMARTLEAD"
                 ) {
-                  if (!currentConvoEmailThread) {
-                    showNotification({
-                      id: "send-email-message-error",
-                      title: "Error",
-                      message: "Please select an email thread",
-                      color: "red",
-                      autoClose: false,
-                    });
-                    setMsgLoading(false);
-                    return;
-                  }
+                  // if (!currentConvoEmailThread) {
+                  //   showNotification({
+                  //     id: "send-email-message-error",
+                  //     title: "Error",
+                  //     message: "Please select an email thread",
+                  //     color: "red",
+                  //     autoClose: false,
+                  //   });
+                  //   setMsgLoading(false);
+                  //   return;
+                  // }
                   if (!selectedEmailReplyFramework) {
                     showNotification({
                       id: "send-email-message-error",

@@ -111,14 +111,14 @@ export default function CompanyTooltip(props: CompanyTooltipPropsType) {
                   <Avatar
                     size={"lg"}
                     radius={"xl"}
-                    src={companyData?.data?.logo_url}
+                    src={"https://logo.clearbit.com/" + companyData?.company_url}
                   />
                   <Flex direction={"column"}>
                     <Text fw={600} size={"sm"}>
                       {companyData?.company}
                     </Text>
                     <Text color="gray" size={"sm"}>
-                      {companyData?.Tagline?.slice(0, 25)} {companyData?.Tagline?.length > 25 ? '...' : ''}
+                      {companyData?.company_url?.slice(0, 25)} {companyData?.Tagline?.length > 25 ? '...' : ''}
                     </Text>
                   </Flex>
                 </Flex>
@@ -218,14 +218,8 @@ export default function CompanyTooltip(props: CompanyTooltipPropsType) {
                 borderTopLeftRadius: "0px",
                 borderTopRightRadius: "0px",
               }}
-              color='gray'
               onClick={() => {
-                showNotification({
-                  title: "Coming Soon!",
-                  message: "This feature is coming soon!",
-                  color: "blue",
-                  icon: <IconInfoCircle size={24} />,
-                });
+                window.location.href = `/company/${companyData?.company_id}`;
               }}
             >
               View Company Page

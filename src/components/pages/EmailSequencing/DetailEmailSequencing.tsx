@@ -2,7 +2,7 @@ import { currentProjectState } from "@atoms/personaAtoms";
 import { userTokenState } from "@atoms/userAtoms";
 import DynamicRichTextArea from "@common/library/DynamicRichTextArea";
 import ProspectSelect from "@common/library/ProspectSelect";
-import { PersonalizationSection } from "@common/sequence/SequenceSection";
+import { PersonalizationSection } from "@common/sequence/LinkedInSequenceSection";
 import { API_URL, SCREEN_SIZES } from "@constants/data";
 import {
   Badge,

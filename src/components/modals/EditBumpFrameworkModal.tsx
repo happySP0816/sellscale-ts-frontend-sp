@@ -1,7 +1,7 @@
 import { userTokenState } from '@atoms/userAtoms';
 import { prospectStatuses } from '@common/inbox/utils';
 import TextWithNewline from '@common/library/TextWithNewlines';
-import { PersonalizationSection } from '@common/sequence/SequenceSection';
+import { PersonalizationSection } from '@common/sequence/LinkedInSequenceSection';
 import {
   Button,
   Card,

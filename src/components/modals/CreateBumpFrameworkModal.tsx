@@ -1,7 +1,7 @@
 import { userTokenState } from '@atoms/userAtoms';
 import TextWithNewline from '@common/library/TextWithNewlines';
 import PersonaSelect from '@common/persona/PersonaSplitSelect';
-import { PersonalizationSection } from '@common/sequence/SequenceSection';
+import { PersonalizationSection } from '@common/sequence/LinkedInSequenceSection';
 import {
   Modal,
   TextInput,

@@ -145,7 +145,11 @@ import AIBrainPill from '@common/persona/ICPFilter/AiBrainPill';
 import getResearchPointTypes from '@utils/requests/getResearchPointTypes';
 import BumpFrameworkAssets from '@modals/BumpFrameworkAssets';
 
-export default function SequenceSection() {
+export default function LinkedInSequenceSection(
+  props: {
+    backFunction?: () => void;
+  }
+) {
   const [activeCard, setActiveCard] = useState(0);
 
   const userToken = useRecoilValue(userTokenState);
@@ -191,8 +195,6 @@ export default function SequenceSection() {
     },
   });
   const bumpFrameworks = data ?? [];
-
-  console.log(bumpFrameworks);
 
   const [isDataChanged, setIsDataChanged] = useState(false);
   const [isModalBlockerVisible, setIsModalBlockerVisible] = useState(false);
@@ -727,6 +729,7 @@ export default function SequenceSection() {
                   activeBumpFrameworkId: bf0?.id ?? -1,
                   overallStatus: 'ACCEPTED',
                 }}
+                backFunction={props.backFunction}
               />
             )}
             {activeCard === 2 && (
@@ -746,6 +749,7 @@ export default function SequenceSection() {
                   activeBumpFrameworkId: bf1?.id ?? -1,
                   overallStatus: 'BUMPED',
                 }}
+                backFunction={props.backFunction}
               />
             )}
             {activeCard === 3 && (
@@ -765,6 +769,7 @@ export default function SequenceSection() {
                   activeBumpFrameworkId: bf2?.id ?? -1,
                   overallStatus: 'BUMPED',
                 }}
+                backFunction={props.backFunction}
               />
             )}
             {activeCard === 4 && (
@@ -784,6 +789,7 @@ export default function SequenceSection() {
                   activeBumpFrameworkId: bf3?.id ?? -1,
                   overallStatus: 'BUMPED',
                 }}
+                backFunction={props.backFunction}
               />
             )}
           </Box>
@@ -2080,6 +2086,7 @@ function FrameworkSectionShell(props: {
     activeBumpFrameworkId: number;
     overallStatus: string;
   };
+  backFunction?: () => void;
 }) {
   const frameworks = props.frameworks.sort((a, b) => {
     // Sort by default then by id
@@ -2113,6 +2120,7 @@ function FrameworkSectionShell(props: {
           onFrameworkChange={(framework) => {
             setActiveFramework(framework);
             refreshFrameworkSection();
+            props.backFunction && props.backFunction();
           }}
         />
       )}
@@ -2957,7 +2965,7 @@ function FrameworkSection(props: {
                               // setEditing(true);
                               openContextModal({
                                 modal: 'liBfTemplate',
-                                title: 'Edit Bf Template',
+                                title: 'Edit Template',
                                 innerProps: {
                                   mode: 'EDIT',
                                   editProps: {

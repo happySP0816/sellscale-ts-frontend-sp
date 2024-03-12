@@ -77,7 +77,7 @@ import TextWithNewline from '@common/library/TextWithNewlines';
 import postToggleAutoBump from '@utils/requests/postToggleAutoBump';
 import PersonaDetailsCTAs from '@common/persona/details/PersonaDetailsCTAs';
 import VoicesSection from '@common/voice_builder/VoicesSection';
-import SequenceSection, { PersonalizationSection } from '@common/sequence/SequenceSection';
+import LinkedInSequenceSection, { PersonalizationSection } from '@common/sequence/LinkedInSequenceSection';
 import LinkedInConnectedCard from '@common/settings/LinkedInIntegrationCard';
 import { getFreshCurrentProject } from '@auth/core';
 import { API_URL } from '@constants/data';
@@ -811,7 +811,7 @@ export default function BumpFrameworksPage(props: {
 
               <Tabs.Panel value='sequence' pt='xs'>
                 {!loading ? (
-                  <SequenceSection />
+                  <LinkedInSequenceSection />
                 ) : (
                   <Flex justify='center' mt='xl'>
                     <Loader />

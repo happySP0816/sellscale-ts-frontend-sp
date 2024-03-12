@@ -15,7 +15,7 @@ import {
 import ChannelsSetupSelector from "./channels";
 import EmailSequencingPage from "./EmailSequencingPage";
 import { currentProjectState } from "@atoms/personaAtoms";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { useLoaderData } from "react-router-dom";
 import { userTokenState } from "@atoms/userAtoms";
 import ICPFilters from "@common/persona/ICPFilter/ICPFilters";
@@ -26,6 +26,8 @@ import { openConfirmModal } from "@mantine/modals";
 import ComingSoonCard from '@common/library/ComingSoonCard';
 import AssetLibrary from './AssetLibrary';
 import AssetLibraryRetool from './AssetLibraryRetool';
+import { filterProspectsState } from "@atoms/icpFilterAtoms";
+import { getSDRAssets } from "@utils/requests/getAssets";
 
 export default function ChannelSetupPage() {
   const { channelType, tabId } = useLoaderData() as {
@@ -34,6 +36,10 @@ export default function ChannelSetupPage() {
   };
   const [activeTab, setActiveTab] = useState<string | null>(channelType);
   const userToken = useRecoilValue(userTokenState);
+
+  const [icpProspects] = useRecoilState(filterProspectsState);
+  const [assets, setAssets] = useState([] as any[]);
+
   const [selectedChannel, setSelectedChannel] = React.useState(channelType);
   const currentProject = useRecoilValue(currentProjectState);
   const [isEnabledEmail, setEnabledEmail] = useState(
@@ -179,6 +185,18 @@ export default function ChannelSetupPage() {
       }
     }
   };
+
+  const triggerGetAssets = async () => {
+    const result = await getSDRAssets(userToken, currentProject!.id);
+    if (result.status === "success") {
+      setAssets(result.data);
+    }
+  }
+
+  useEffect(() => {
+    triggerGetAssets();
+  }, [])
+
   return (
     <Box>
       <ChannelsSetupSelector
@@ -234,7 +252,7 @@ export default function ChannelSetupPage() {
                 value="filter_contact"
                 icon={<IconUser size={"0.8rem"} />}
               >
-                Filter Contacts
+                {`Filter ${icpProspects.length} Contacts`}
               </Tabs.Tab>
               <Tabs.Tab
                 value="linkedin"
@@ -304,7 +322,7 @@ export default function ChannelSetupPage() {
                 ml="auto"
               >
                 <Flex align={"center"} gap={"md"}>
-                  <Text>Assets</Text>
+                  <Text>{`${assets.length} Used Assets`}</Text>
                 </Flex>
               </Tabs.Tab>
             </Tabs.List>

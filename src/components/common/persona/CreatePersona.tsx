@@ -73,7 +73,8 @@ export default function CreatePersona(props: PropsType) {
         'Great to connect!',
         `Hi [first name]! [personalization related to them]. It’s great to connect.`,
         true,
-        researchPointTypes?.map((rpt) => rpt.name) || [],
+        // researchPointTypes?.map((rpt) => rpt.name) || [], WE SHOULD LET THE BACKEND USE THE DEFAULT RESEARCH POINTS
+        [],
         ''
       );
     }

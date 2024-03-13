@@ -37,7 +37,7 @@ const Territories: React.FC = () => {
   const [editMode, setEditMode] = useState(false);
   const [fetchTerritories, setFetchTerritories] = useState(false);
   const modals = useModals();
-  const [autoScrape, setAutoScrape] = useState(userData?.meta_data?.apollo_auto_scrape ?? []);
+  const [autoScrape, setAutoScrape] = useState(userData?.meta_data?.apollo_auto_scrape ?? false);
 
   const updateAutoScrape = async (value: boolean) => {
     showNotification({

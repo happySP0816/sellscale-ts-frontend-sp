@@ -58,6 +58,8 @@ import { getPersonasOverview } from "@utils/requests/getPersonas";
 import { PersonaOverview } from "src";
 import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
 import { navConfettiState } from "@atoms/navAtoms";
+import NewUIEmailSequencingModal from "@modals/NewUIEmailSequencingModal";
+import LinkedInSequenceSectionModal from "@modals/LinkedInSequenceSectionModal";
 
 type SequenceProps = {
   campaignOverview: any;
@@ -358,6 +360,7 @@ type MessagingProps = {
   feedback: string;
   onFeedbackChange: (feedback: string) => void;
   campaignOverview?: CampaignEntityData;
+  refetchCampaignOverview?: () => void;
   campaignType: string;
   campaignId: number;
 };
@@ -374,6 +377,15 @@ export const Messaging = (props: MessagingProps) => {
   if (props.campaignType === "EMAIL") {
     SEQUENCE = props.campaignOverview?.email?.sequence;
   }
+
+  const [
+    emailSequencingOpened,
+    { open: openEmailSequencing, close: closeEmailSequencing },
+  ] = useDisclosure();
+  const [
+    linkedinSequenceSectionOpened,
+    { open: openLinkedinSequenceSection, close: closeLinkedinSequenceSection },
+  ] = useDisclosure();
 
   // const fetchAttachedAssets = () => {
   //   fetch(`${API_URL}/email_sequence/get_all_asset_mapping?sequence_step_id=${sequence_step_id}`, {
@@ -438,8 +450,6 @@ export const Messaging = (props: MessagingProps) => {
     },
     refetchOnWindowFocus: false,
   });
-
-  console.log(persona);
 
   const CAROUSEL_HEIGHT = 200;
 
@@ -633,12 +643,17 @@ export const Messaging = (props: MessagingProps) => {
       </Flex>
       <Button
         onClick={() => {
-          const campaignType =
-            props.campaignType === "LINKEDIN" ? "linkedin" : "email";
-          window.open(
-            "/setup/" + campaignType + "?campaign_id=" + props.campaignId,
-            "_blank"
-          );
+          if (props.campaignType === "LINKEDIN") {
+            openLinkedinSequenceSection();
+          } else {
+            openEmailSequencing();
+          }
+          // const campaignType =
+          //   props.campaignType === "LINKEDIN" ? "linkedin" : "email";
+          // window.open(
+          //   "/setup/" + campaignType + "?campaign_id=" + props.campaignId,
+          //   "_blank"
+          // );
         }}
         mt="md"
         ml="auto"
@@ -649,6 +664,24 @@ export const Messaging = (props: MessagingProps) => {
       >
         Edit Messaging in Campaign Editor
       </Button>
+
+      {/* Modals to review the sequencing */}
+      {props.campaignType === "LINKEDIN" ? (
+        <LinkedInSequenceSectionModal
+          opened={linkedinSequenceSectionOpened}
+          onClose={closeLinkedinSequenceSection}
+          archetypeID={props.campaignId}
+          backFunction={props.refetchCampaignOverview}
+        />
+      ) : (
+        <NewUIEmailSequencingModal
+          opened={emailSequencingOpened}
+          onClose={closeEmailSequencing}
+          archetypeID={props.campaignId}
+          backFunction={props.refetchCampaignOverview}
+        />
+      )}
+
       <Textarea
         label="Feedback for AI"
         description="Provide feedback to the AI to adjust your messaging prior to launch."
@@ -796,8 +829,8 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
         color: "green",
         icon: <IconRocket size="1.5rem" />,
       });
-    })
-  }
+    });
+  };
 
   const getCampaignOverview = async () => {
     setFetchingCampaign(true);
@@ -998,6 +1031,7 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
             feedback={messagingFeedback}
             onFeedbackChange={setMessagingFeedback}
             campaignOverview={campaignOverview}
+            refetchCampaignOverview={getCampaignOverview}
             campaignType={props.campaignType}
             campaignId={props.campaignId}
           />

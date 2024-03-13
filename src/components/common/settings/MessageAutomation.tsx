@@ -34,7 +34,7 @@ import { updateClientSDR } from "@utils/requests/updateClientSDR";
 import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import RealtimeResponseEngine from "./RealtimeResponseEngine";
-import { PersonalizationSection } from "@common/sequence/SequenceSection";
+import { PersonalizationSection } from "@common/sequence/LinkedInSequenceSection";
 import { updateSDRDefaultBlocklist } from "@utils/requests/postSDRTransformerBlocklist";
 
 export default function MessageAutomation() {

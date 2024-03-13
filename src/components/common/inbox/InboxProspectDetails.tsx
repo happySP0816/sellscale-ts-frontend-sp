@@ -139,7 +139,7 @@ export default function ProjectDetails(props: {
   const [demoSetType, setDemoSetType] = useState('DIRECT');
   const [handoffText, setHandoffText] = useState('');
 
-  const { data, isFetching, refetch } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
     queryFn: async () => {
       const response = await getProspectByID(userToken, openedProspectId);
@@ -236,6 +236,15 @@ export default function ProjectDetails(props: {
     setNoteLoading(false);
   };
 
+  const refetchState = () => {
+    queryClient.refetchQueries({
+      queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
+    });
+    queryClient.refetchQueries({
+      queryKey: [`query-get-dashboard-prospect-shallow-${openedProspectId}`],
+    });
+  };
+
   // For changing the status of the prospect
   const changeStatus = async (
     status: string,
@@ -279,9 +288,9 @@ export default function ProjectDetails(props: {
           autoClose: 5000,
         });
       }
-      if (props.refetchSmartleadProspects) {
-        props.refetchSmartleadProspects();
-      }
+      // if (props.refetchSmartleadProspects) {
+      //   props.refetchSmartleadProspects();
+      // }
     } else {
       await updateChannelStatus(
         openedProspectId,
@@ -303,14 +312,15 @@ export default function ProjectDetails(props: {
     // }
 
     // Refetch and set to the next prospect
-    queryClient.refetchQueries({
-      queryKey: ['query-prospects-list'],
-    });
-    if (changeProspect || changeProspect === undefined) {
-      setOpenedProspectId(-2);
-    }
+    // queryClient.refetchQueries({
+    //   queryKey: ['query-prospects-list'],
+    // });
+    // if (changeProspect || changeProspect === undefined) {
+    //   setOpenedProspectId(-2);
+    // }
+    // refetch();
 
-    refetch();
+    refetchState();
   };
 
   if (!openedProspectId || openedProspectId == -1) {
@@ -324,8 +334,6 @@ export default function ProjectDetails(props: {
       </Flex>
     );
   }
-
-  console.log(prospect);
 
   return (
     <Flex
@@ -405,7 +413,7 @@ export default function ProjectDetails(props: {
                     }
                   });
 
-                  refetch();
+                  refetchState();
                 }}
               />
             </Card>
@@ -517,7 +525,9 @@ export default function ProjectDetails(props: {
           modalOpened={editProspectModalOpened}
           openModal={openProspectModal}
           closeModal={closeProspectModal}
-          backFunction={refetch}
+          backFunction={() => {
+            refetchState();
+          }}
           prospectID={openedProspectId}
         />
       </Stack>
@@ -958,7 +968,11 @@ export default function ProjectDetails(props: {
                           {demoFeedbacks && demoFeedbacks.length > 0 ? 'Add' : 'Give'} Demo Feedback
                         </Button>
 
-                        <DemoFeedbackDrawer refetch={refetch} />
+                        <DemoFeedbackDrawer
+                          refetch={() => {
+                            refetchState();
+                          }}
+                        />
                       </Box>
                     </Stack>
                   )}
@@ -1062,12 +1076,14 @@ export default function ProjectDetails(props: {
                   }
                 );
                 setOpenedSnoozeModal(false);
-                if (!props.noProspectResetting) {
-                  setOpenedProspectId(-1);
-                }
-                if (props.refetchSmartleadProspects) {
-                  props.refetchSmartleadProspects();
-                }
+                // if (!props.noProspectResetting) {
+                //   setOpenedProspectId(-1);
+                // }
+                // if (props.refetchSmartleadProspects) {
+                //   props.refetchSmartleadProspects();
+                // }
+
+                refetchState();
                 return;
               }
 
@@ -1094,16 +1110,17 @@ export default function ProjectDetails(props: {
                 }
               );
               setOpenedSnoozeModal(false);
-              if (!props.noProspectResetting) {
-                setOpenedProspectId(-1);
-              }
-              queryClient.refetchQueries({
-                queryKey: [`query-dash-get-prospects`],
-              });
-              queryClient.refetchQueries({
-                queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
-              });
+              // if (!props.noProspectResetting) {
+              //   setOpenedProspectId(-1);
+              // }
+              // queryClient.refetchQueries({
+              //   queryKey: [`query-dash-get-prospects`],
+              // });
+              // queryClient.refetchQueries({
+              //   queryKey: [`query-get-dashboard-prospect-${openedProspectId}`],
+              // });
               // location.reload();
+              refetchState();
             }}
           />
         </Center>

@@ -117,7 +117,7 @@ export default function ClientCampaignView() {
       <Flex direction={'column'} mx={'5%'} py={'lg'} gap={'lg'}>
         <Flex direction={'column'} gap={'sm'}>
           <Text style={{ display: 'flex', alignItems: 'center', gap: '5px' }} color='gray' fw={700} size={'lg'}>
-            <IconExternalLink />
+            <IconTargetArrow />
             Active Campaigns
           </Text>
           <DataGrid

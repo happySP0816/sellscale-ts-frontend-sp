@@ -82,7 +82,7 @@ export default function AssetLibraryV2() {
   ];
 
   return (
-    <Flex direction={'column'} px={'150px'} gap={'sm'} bg={'white'}>
+    <Flex direction={'column'} px={'5%'} gap={'sm'} bg={'white'}>
       <Flex align={'center'} justify={'space-between'}>
         <Text size={'25px'} fw={700}>
           SellScale's Asset Library

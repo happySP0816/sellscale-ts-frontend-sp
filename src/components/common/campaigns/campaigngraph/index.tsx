@@ -1,46 +1,52 @@
-import { Box, Button, Container, Flex, Grid, Group, Paper, Stack, Text, Title } from "@mantine/core";
-import CampaignSequenceDAG from "./components/CampaignSequenceDAG";
-import React, { useEffect, useState } from "react";
-import { IconChevronsRight } from "@tabler/icons-react";
-import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
-import { showNotification } from "@mantine/notifications";
-import { useRecoilValue } from "recoil";
-import { userTokenState } from "@atoms/userAtoms";
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  Grid,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
+import CampaignSequenceDAG from './components/CampaignSequenceDAG';
+import React, { useEffect, useState } from 'react';
+import { IconChevronsRight } from '@tabler/icons-react';
+import postTogglePersonaActive from '@utils/requests/postTogglePersonaActive';
+import { showNotification } from '@mantine/notifications';
+import { useRecoilValue } from 'recoil';
+import { userTokenState } from '@atoms/userAtoms';
 
 const Hook: React.FC<{ linkedLeft: boolean; linkedRight: boolean }> = ({
   linkedLeft,
   linkedRight,
 }) => {
   return (
-    <Flex
-      align={"center"}
-      justify={"center"}
-      h={"100%"}
-      sx={{ position: "relative" }}
-    >
+    <Flex align={'center'} justify={'center'} h={'100%'} sx={{ position: 'relative' }}>
       <Flex
-        align={"center"}
-        justify={"center"}
-        bg={linkedLeft || linkedRight ? "#228BE6" : "#E9ECEF"}
+        align={'center'}
+        justify={'center'}
+        bg={linkedLeft || linkedRight ? '#228BE6' : '#E9ECEF'}
         w={32}
         h={32}
         sx={{ borderRadius: 999, zIndex: 10 }}
       >
-        <IconChevronsRight size={"1.25rem"} color="#FFFFFF" />
+        <IconChevronsRight size={'1.25rem'} color='#FFFFFF' />
       </Flex>
       <Box
-        h={"0.125rem"}
-        w={"50%"}
-        sx={{ position: "absolute", zIndex: 1 }}
-        bg={linkedLeft ? "#228BE6" : "#E9ECEF"}
+        h={'0.125rem'}
+        w={'50%'}
+        sx={{ position: 'absolute', zIndex: 1 }}
+        bg={linkedLeft ? '#228BE6' : '#E9ECEF'}
         left={0}
       />
 
       <Box
-        h={"0.125rem"}
-        w={"50%"}
-        sx={{ position: "absolute" }}
-        bg={linkedRight ? "#228BE6" : "#E9ECEF"}
+        h={'0.125rem'}
+        w={'50%'}
+        sx={{ position: 'absolute' }}
+        bg={linkedRight ? '#228BE6' : '#E9ECEF'}
         right={0}
       />
     </Flex>
@@ -49,8 +55,8 @@ const Hook: React.FC<{ linkedLeft: boolean; linkedRight: boolean }> = ({
 
 const CampaignGraph = (props: {
   sections: any;
-  personaId: number,
-  unusedProspects: number;
+  personaId: number;
+  unusedProspects: string;
   onChannelClick: (sectionType: string) => void;
 }) => {
   const userToken = useRecoilValue(userTokenState);
@@ -134,7 +140,7 @@ const CampaignGraph = (props: {
                   props.personaId,
                   'linkedin',
                   !isEnabledLinkedin
-                )
+                );
 
                 if (result.status == 'success') {
                   setEnabledLinkedin(!isEnabledLinkedin);
@@ -142,55 +148,55 @@ const CampaignGraph = (props: {
                     showNotification({
                       title: 'Success',
                       message: 'LinkedIn outbound has been toggled on, new messages will be sent.',
-                    })
+                    });
                   } else {
                     showNotification({
                       title: 'Success',
                       message: 'LinkedIn outbound has been toggled, no new messages will be sent.',
-                    })
+                    });
                   }
                 }
               }}
               onChannelClick={() => props.onChannelClick('linkedin')}
-              numbers={[linkedinSection[0]?.sends, linkedinSection[0]?.opens, linkedinSection[0]?.replies]}
+              numbers={[
+                linkedinSection[0]?.sends,
+                linkedinSection[0]?.opens,
+                linkedinSection[0]?.replies,
+              ]}
             />
             <CampaignSequenceDAG
               type='email'
               active={isEnabledEmail}
               enabled={isEnabledEmail}
               onToggle={async () => {
-
                 const result = await postTogglePersonaActive(
                   userToken,
                   props.personaId,
                   'email',
                   !isEnabledEmail
-                )
+                );
 
-                if (result.status == "success") {
+                if (result.status == 'success') {
                   setEnabledEmail(!isEnabledEmail);
                   if (!isEnabledEmail) {
                     showNotification({
-                      title: "✅ Enabled",
-                      message:
-                        "Email outbound has been toggled on, new messages will be sent.",
+                      title: '✅ Enabled',
+                      message: 'Email outbound has been toggled on, new messages will be sent.',
                     });
                     showNotification({
-                      title: "📧 Fetching emails...",
+                      title: '📧 Fetching emails...',
                       message:
-                        "We are fetching emails for your contacts. This may take a few minutes.",
-                        color: "blue",
-                        autoClose: 15000,
-                    })
+                        'We are fetching emails for your contacts. This may take a few minutes.',
+                      color: 'blue',
+                      autoClose: 15000,
+                    });
                   } else {
                     showNotification({
-                      title: "🔴 Disabled",
-                      message:
-                        "Email outbound has been toggled, no new messages will be sent.",
+                      title: '🔴 Disabled',
+                      message: 'Email outbound has been toggled, no new messages will be sent.',
                     });
                   }
                 }
-
               }}
               onChannelClick={() => props.onChannelClick('email')}
               numbers={[emailSection[0]?.sends, emailSection[0]?.opens, emailSection[0]?.replies]}

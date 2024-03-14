@@ -871,6 +871,10 @@ export function PersonCampaignCard(props: {
     }
   }, [value, campaignList]);
 
+  const unusedProspects =
+    (props.project?.num_unused_email_prospects ?? 0) +
+    (props.project?.num_unused_li_prospects ?? 0);
+
   return (
     <Paper ref={ref}>
       <ChannelModal />
@@ -1387,7 +1391,7 @@ export function PersonCampaignCard(props: {
             <Box>
               <CampaignGraph
                 personaId={props.persona.id}
-                unusedProspects={Math.min(props.project?.num_unused_li_prospects ?? 0)}
+                unusedProspects={`${unusedProspects}/${props.project?.num_prospects ?? 0}`}
                 sections={types}
                 onChannelClick={(sectionType: string) => {
                   if (props.project == undefined) return;

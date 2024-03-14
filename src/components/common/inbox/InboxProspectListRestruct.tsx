@@ -73,9 +73,18 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
         p.full_name.toLowerCase().includes(searchFilter.toLowerCase())
     );
 
-  const prospectGroups = Object.entries(_.groupBy(prospects, (p) => p.status)).sort((a, b) => {
-    return b[0].localeCompare(a[0]);
-  });
+  const prospectGroups = Object.entries(_.groupBy(prospects, (p) => p.status))
+    .sort((a, b) => {
+      console.log(a[0].toLowerCase());
+      if (a[0].toLowerCase().includes('scheduling')) return -1;
+      if (b[0].toLowerCase().includes('scheduling')) return 1;
+      return b[0].localeCompare(a[0]);
+    })
+    .filter((group) => {
+      if (group[0].toLowerCase().includes('sent_outreach')) return false;
+      if (group[0].toLowerCase().includes('email_opened')) return false;
+      return true;
+    });
 
   return (
     <>
@@ -200,6 +209,7 @@ export function InboxProspectListRestruct(props: { prospects: ProspectRestructur
                   radius={theme.radius.md}
                   placeholder='Search...'
                 />
+
                 <Stack spacing={0}>
                   {/* Grouped prospects by overall status */}
                   {prospectGroups.map((group, index) => (

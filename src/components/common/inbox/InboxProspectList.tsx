@@ -691,7 +691,6 @@ export default function ProspectList(props: {
                   No conversations found.
                 </Text>
               )}
-
               <Box h='50px'></Box>
             </ScrollArea>
             {/* <Text

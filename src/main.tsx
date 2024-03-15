@@ -65,6 +65,7 @@ import OperatorDashTaskRouter from '@pages/Overview/OperatorDash/OperatorDashTas
 import TaskEmailTemplate from '@common/resend_email/task_resend_email';
 import ExtractPdfPage from '@pages/ExtractPdfPage';
 import AssetLibraryV2 from '@pages/AssetLibraryV2';
+import ClientCampaignView from '@pages/ClientCampaignView/ClientCampaignView';
 
 const queryClient = new QueryClient();
 
@@ -491,6 +492,10 @@ const router = sentryCreateBrowserRouter([
       {
         path: '/assetLibrary',
         element: <AssetLibraryV2 />,
+      },
+      {
+        path: '/clientCampaignView',
+        element: <ClientCampaignView />,
       },
     ],
   },

@@ -1,4 +1,15 @@
-import { ActionIcon, Badge, Button, Collapse, Flex, RingProgress, Select, Switch, Text, useMantineTheme } from '@mantine/core';
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Collapse,
+  Flex,
+  RingProgress,
+  Select,
+  Switch,
+  Text,
+  useMantineTheme,
+} from '@mantine/core';
 import {
   IconBrandLinkedin,
   IconCalendar,
@@ -7,6 +18,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconCircleCheck,
+  IconCircleX,
   IconCloudUpload,
   IconExternalLink,
   IconLetterT,
@@ -20,103 +32,123 @@ import { IconInfoTriangle, IconMessageCheck, IconNumber12Small } from '@tabler/i
 import { DataGrid } from 'mantine-data-grid';
 import { useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
+import { useQuery } from '@tanstack/react-query';
+import { CampaignPersona } from '@common/campaigns/PersonaCampaigns';
+import { getPersonasCampaignView } from '@utils/requests/getPersonas';
+import { useRecoilValue } from 'recoil';
+import { userDataState, userTokenState } from '@atoms/userAtoms';
+import { API_URL } from '@constants/data';
+import { Task } from '@pages/Overview/OperatorDash/OperatorDash';
 
 export default function ClientCampaignView() {
   const theme = useMantineTheme();
+  const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
   const [activeCampaignOpen, { toggle: activeCampaignToggle }] = useDisclosure(false);
-  const [activeCampaigns, setActiveCampaigns] = useState([
-    {
-      status: true,
-      percentage: 63,
-      campaign: 'Casual sequence: MM devops, security, and platforms architects',
-      sent: 521,
-      open: 303,
-      reply: 15,
-      demo: 3,
-      linkedin: true,
-      email: true,
+
+  const [acPageSize, setAcPageSize] = useState('25');
+  const [raPageSize, setRaPageSize] = useState('25');
+  const [udPageSize, setUdPageSize] = useState('25');
+  const [cdPageSize, setCdPageSize] = useState('25');
+
+  const { data: campaigns } = useQuery({
+    queryKey: [`query-get-campaigns`],
+    queryFn: async () => {
+      const response = await getPersonasCampaignView(userToken);
+      const result = response.status === 'success' ? (response.data as CampaignPersona[]) : [];
+
+      return result;
     },
-    {
-      status: true,
-      percentage: 87,
-      campaign: 'Senior Engineering Hiring',
-      sent: 1056,
-      open: 844,
-      reply: 85,
-      demo: 15,
-      linkedin: true,
-      email: false,
+  });
+
+  const { data: opTasks } = useQuery({
+    queryKey: [`query-get-op-task`],
+    queryFn: async () => {
+      const response = await fetch(`${API_URL}/operator_dashboard/all`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      return (await response.json()).entries as Task[];
     },
-  ]);
-  const [repNeedData, setRepNeedData] = useState([
-    {
-      status: 'rep action needed',
-      campaign: 'Enterprise Security/DevOps managers',
-      sdr: 'Tim Bruno',
-      task: 'Campaign Request',
-    },
-    {
-      status: 'rep action needed',
-      campaign: 'Enterprise Security/DevOps managers',
-      sdr: 'Tim Bruno',
-      task: 'Final Review of Samsung Research America (SRA) for Email',
-    },
-    {
-      status: 'rep action needed',
-      campaign: 'casual sequence: MM devops, security. SR XXXXXXX',
-      sdr: 'Tim Bruno',
-      task: 'Intervention Needed: Nisha Kohil',
-    },
-    {
-      status: 'rep action needed',
-      campaign: 'Enterprise Security/ DevOps managers',
-      sdr: 'Sascha Edier',
-      task: 'Final Review of Snap Inc - Product Marketing for Email',
-    },
-    {
-      status: 'rep action needed',
-      campaign: 'Priority 1 DevWeek: Best in Class conference xXXXXX',
-      sdr: 'Sascha Edier',
-      task: 'Campaign Request',
-    },
-  ]);
-  const [upladingData, setUploadingData] = useState([
-    {
-      status: 'uploading by sellscale',
-      campaign: 'Enterprise Security/ DevOps managers',
-      sdr: 'Tim Bruno',
-    },
-    {
-      status: 'uploading by sellscale',
-      campaign: 'Enterprise Security/ DevOps managers',
-      sdr: 'Shivang Patel',
-    },
-  ]);
-  const [completedData, setCompletedData] = useState([
-    {
-      status: true,
-      campaign: 'Enterprise Security/ DevOps managers',
-      sdr: 'Tim Bruno',
-      last_send_date: 'Mar 7, 2024 8:43 PM',
-      num_sent: 51,
-      linkedin: true,
-      email: false,
-    },
-    {
-      status: true,
-      campaign: 'Enterprise Security/ DevOps managers',
-      sdr: 'Shivang Patel',
-      last_send_date: 'Mar 5, 2024 6:43 PM',
-      num_sent: 26,
-      linkedin: true,
-      email: true,
-    },
-  ]);
+  });
+
+  const activeCampaigns =
+    campaigns
+      ?.map((c) => {
+        return {
+          status: c.active,
+          percentage: Math.ceil((c.total_sent / c.total_prospects) * 100 || 0),
+          campaign: c.name,
+          sent: c.total_sent,
+          open: c.total_opened,
+          reply: c.total_replied,
+          demo: c.total_demo,
+          linkedin: c.linkedin_active,
+          email: c.email_active,
+        };
+      })
+      .sort((a, b) => (a.linkedin || a.email ? -1 : 1))
+      .filter((c) => c.status) ?? [];
+
+  const completedData =
+    campaigns
+      ?.map((c) => {
+        return {
+          status: c.active,
+          percentage: Math.ceil((c.total_sent / c.total_prospects) * 100 || 0),
+          campaign: c.name,
+          sdr: c.sdr_name,
+          last_send_date: c.created_at, // TODO
+          num_sent: c.total_sent,
+          linkedin: c.linkedin_active,
+          email: c.email_active,
+        };
+      })
+      .filter((c) => c.percentage === 100) ?? [];
+
+  console.log(campaigns, opTasks, completedData);
+
+  const repNeedData =
+    opTasks
+      ?.filter((t) => t.status === 'PENDING')
+      .map((t) => {
+        return {
+          status: t.status === 'PENDING' ? 'rep action needed' : false,
+          campaign: (t.task_data?.campaign_name as string) || false,
+          campaign_id: t.task_data?.campaign_id ?? false,
+          sdr: userData?.full_name,
+          task: t.title,
+          task_type: t.task_type,
+          task_data: t.task_data,
+        };
+      })
+      .filter((t) => t.status && t.campaign) ?? [];
+
+  const upladingData =
+    campaigns
+      ?.map((c) => {
+        return {
+          status: 'uploading by sellscale',
+          campaign: c.name,
+          sdr: userData?.full_name,
+          campaign_id: c.id,
+        };
+      })
+      .filter((c) => repNeedData.find((r) => r.campaign_id === c.campaign_id)) ?? [];
+
   return (
     <div className='bg-white'>
       <Flex direction={'column'} mx={'5%'} py={'lg'} gap={'lg'}>
         <Flex direction={'column'} gap={'sm'}>
-          <Text style={{ display: 'flex', alignItems: 'center', gap: '5px' }} color='gray' fw={700} size={'lg'}>
+          <Text
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+            color='gray'
+            fw={700}
+            size={'lg'}
+          >
             <IconTargetArrow />
             Active Campaigns
           </Text>
@@ -202,7 +234,15 @@ export default function ClientCampaignView() {
                   const { sent } = cell.row.original;
 
                   return (
-                    <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'} bg={'#f9fbfe'}>
+                    <Flex
+                      align={'center'}
+                      justify={'center'}
+                      gap={'xs'}
+                      py={'lg'}
+                      w={'100%'}
+                      h={'100%'}
+                      bg={'#f9fbfe'}
+                    >
                       <Text color='#228be6' fw={700}>
                         {sent}
                       </Text>
@@ -227,11 +267,23 @@ export default function ClientCampaignView() {
                   const { open } = cell.row.original;
 
                   return (
-                    <Flex align={'center'} justify={'center'} gap={'xs'} w={'100%'} py={'lg'} h={'100%'} bg={'#fdf9fe'}>
+                    <Flex
+                      align={'center'}
+                      justify={'center'}
+                      gap={'xs'}
+                      w={'100%'}
+                      py={'lg'}
+                      h={'100%'}
+                      bg={'#fdf9fe'}
+                    >
                       <Text color={'#db66f3'} fw={700}>
                         {open}
                       </Text>
-                      <Badge variant='light' bg='rgba(219,102,243, 0.1)' style={{ color: '#db66f3' }}>
+                      <Badge
+                        variant='light'
+                        bg='rgba(219,102,243, 0.1)'
+                        style={{ color: '#db66f3' }}
+                      >
                         {open}%
                       </Badge>
                     </Flex>
@@ -252,11 +304,23 @@ export default function ClientCampaignView() {
                   const { reply } = cell.row.original;
 
                   return (
-                    <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'} bg={'#fffbf8'}>
+                    <Flex
+                      align={'center'}
+                      justify={'center'}
+                      gap={'xs'}
+                      py={'lg'}
+                      w={'100%'}
+                      h={'100%'}
+                      bg={'#fffbf8'}
+                    >
                       <Text color={'#f0ab78'} fw={700}>
                         {reply}
                       </Text>
-                      <Badge variant='light' bg='rgba(240, 171, 120, 0.1)' style={{ color: '#f0ab78' }}>
+                      <Badge
+                        variant='light'
+                        bg='rgba(240, 171, 120, 0.1)'
+                        style={{ color: '#f0ab78' }}
+                      >
                         {reply}%
                       </Badge>
                     </Flex>
@@ -277,11 +341,23 @@ export default function ClientCampaignView() {
                   const { demo } = cell.row.original;
 
                   return (
-                    <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'} bg={'#f8fbf9'}>
+                    <Flex
+                      align={'center'}
+                      justify={'center'}
+                      gap={'xs'}
+                      py={'lg'}
+                      w={'100%'}
+                      h={'100%'}
+                      bg={'#f8fbf9'}
+                    >
                       <Text color={'#73d0a5'} fw={700}>
                         {demo}
                       </Text>
-                      <Badge variant='light' bg='rbga(115, 208, 165, 0.1)' style={{ color: '#73d0a5' }}>
+                      <Badge
+                        variant='light'
+                        bg='rbga(115, 208, 165, 0.1)'
+                        style={{ color: '#73d0a5' }}
+                      >
                         {demo}%
                       </Badge>
                     </Flex>
@@ -302,7 +378,14 @@ export default function ClientCampaignView() {
                   const { linkedin, email } = cell.row.original;
 
                   return (
-                    <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
+                    <Flex
+                      align={'center'}
+                      justify={'center'}
+                      gap={'xs'}
+                      py={'lg'}
+                      w={'100%'}
+                      h={'100%'}
+                    >
                       <Flex direction={'column'} gap={'3px'} align={'center'}>
                         <IconBrandLinkedin size={'1.3rem'} fill='#228be6' color='white' />
                         <Switch defaultChecked={linkedin} />
@@ -326,7 +409,11 @@ export default function ClientCampaignView() {
 
                   return (
                     <Flex align={'center'} gap={'xs'} h={'100%'} w={'100%'} justify={'center'}>
-                      <Button style={{ borderRadius: '100%', padding: '0px' }} w={'fit-content'} h={'fit-content'}>
+                      <Button
+                        style={{ borderRadius: '100%', padding: '0px' }}
+                        w={'fit-content'}
+                        h={'fit-content'}
+                      >
                         <IconChevronDown />
                       </Button>
                     </Flex>
@@ -349,7 +436,18 @@ export default function ClientCampaignView() {
                     borderTopWidth: 0,
                   })}
                 >
-                  <Select style={{ width: '150px' }} data={['Show 25 rows', 'Show 5 rows', 'Show 10 rows']} defaultValue='Show 25 rows' />
+                  <Select
+                    style={{ width: '150px' }}
+                    data={[
+                      { label: 'Show 25 rows', value: '25' },
+                      { label: 'Show 10 rows', value: '10' },
+                      { label: 'Show 5 rows', value: '5' },
+                    ]}
+                    value={acPageSize}
+                    onChange={(v) => {
+                      setAcPageSize(v ?? '25');
+                    }}
+                  />
                   <Flex align={'center'} gap={'sm'}>
                     <Flex align={'center'}>
                       <Select
@@ -396,7 +494,9 @@ export default function ClientCampaignView() {
                         variant='default'
                         color='gray.4'
                         h={36}
-                        disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                        disabled={
+                          table.getState().pagination.pageIndex === table.getPageCount() - 1
+                        }
                         onClick={() => {
                           table.setPageIndex(table.getState().pagination.pageIndex + 1);
                         }}
@@ -409,7 +509,7 @@ export default function ClientCampaignView() {
               ),
             }}
             w={'100%'}
-            pageSizes={['20']}
+            pageSizes={[acPageSize]}
             styles={(theme) => ({
               thead: {
                 height: '44px',
@@ -515,7 +615,15 @@ export default function ClientCampaignView() {
                     const { sent } = cell.row.original;
 
                     return (
-                      <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'} bg={'#f9fbfe'}>
+                      <Flex
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                        bg={'#f9fbfe'}
+                      >
                         <Text color='#228be6' fw={700}>
                           {sent}
                         </Text>
@@ -540,11 +648,23 @@ export default function ClientCampaignView() {
                     const { open } = cell.row.original;
 
                     return (
-                      <Flex align={'center'} justify={'center'} gap={'xs'} w={'100%'} py={'lg'} h={'100%'} bg={'#fdf9fe'}>
+                      <Flex
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        w={'100%'}
+                        py={'lg'}
+                        h={'100%'}
+                        bg={'#fdf9fe'}
+                      >
                         <Text color={'#db66f3'} fw={700}>
                           {open}
                         </Text>
-                        <Badge variant='light' bg='rgba(219,102,243, 0.1)' style={{ color: '#db66f3' }}>
+                        <Badge
+                          variant='light'
+                          bg='rgba(219,102,243, 0.1)'
+                          style={{ color: '#db66f3' }}
+                        >
                           {open}%
                         </Badge>
                       </Flex>
@@ -565,11 +685,23 @@ export default function ClientCampaignView() {
                     const { reply } = cell.row.original;
 
                     return (
-                      <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'} bg={'#fffbf8'}>
+                      <Flex
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                        bg={'#fffbf8'}
+                      >
                         <Text color={'#f0ab78'} fw={700}>
                           {reply}
                         </Text>
-                        <Badge variant='light' bg='rgba(240, 171, 120, 0.1)' style={{ color: '#f0ab78' }}>
+                        <Badge
+                          variant='light'
+                          bg='rgba(240, 171, 120, 0.1)'
+                          style={{ color: '#f0ab78' }}
+                        >
                           {reply}%
                         </Badge>
                       </Flex>
@@ -590,11 +722,23 @@ export default function ClientCampaignView() {
                     const { demo } = cell.row.original;
 
                     return (
-                      <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'} bg={'#f8fbf9'}>
+                      <Flex
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                        bg={'#f8fbf9'}
+                      >
                         <Text color={'#73d0a5'} fw={700}>
                           {demo}
                         </Text>
-                        <Badge variant='light' bg='rbga(115, 208, 165, 0.1)' style={{ color: '#73d0a5' }}>
+                        <Badge
+                          variant='light'
+                          bg='rbga(115, 208, 165, 0.1)'
+                          style={{ color: '#73d0a5' }}
+                        >
                           {demo}%
                         </Badge>
                       </Flex>
@@ -615,7 +759,14 @@ export default function ClientCampaignView() {
                     const { linkedin, email } = cell.row.original;
 
                     return (
-                      <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
+                      <Flex
+                        align={'center'}
+                        justify={'center'}
+                        gap={'xs'}
+                        py={'lg'}
+                        w={'100%'}
+                        h={'100%'}
+                      >
                         <Flex direction={'column'} gap={'3px'} align={'center'}>
                           <IconBrandLinkedin size={'1.3rem'} fill='#228be6' color='white' />
                           <Switch defaultChecked={linkedin} />
@@ -639,7 +790,11 @@ export default function ClientCampaignView() {
 
                     return (
                       <Flex align={'center'} gap={'xs'} h={'100%'} w={'100%'} justify={'center'}>
-                        <Button style={{ borderRadius: '100%', padding: '0px' }} w={'fit-content'} h={'fit-content'}>
+                        <Button
+                          style={{ borderRadius: '100%', padding: '0px' }}
+                          w={'fit-content'}
+                          h={'fit-content'}
+                        >
                           <IconChevronDown />
                         </Button>
                       </Flex>
@@ -665,7 +820,18 @@ export default function ClientCampaignView() {
                       borderTopWidth: 0,
                     })}
                   >
-                    <Select style={{ width: '150px' }} data={['Show 25 rows', 'Show 5 rows', 'Show 10 rows']} defaultValue='Show 25 rows' />
+                    <Select
+                      style={{ width: '150px' }}
+                      data={[
+                        { label: 'Show 25 rows', value: '25' },
+                        { label: 'Show 10 rows', value: '10' },
+                        { label: 'Show 5 rows', value: '5' },
+                      ]}
+                      value={acPageSize}
+                      onChange={(v) => {
+                        setAcPageSize(v ?? '25');
+                      }}
+                    />
                     <Flex align={'center'} gap={'sm'}>
                       <Flex align={'center'}>
                         <Select
@@ -712,7 +878,9 @@ export default function ClientCampaignView() {
                           variant='default'
                           color='gray.4'
                           h={36}
-                          disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                          disabled={
+                            table.getState().pagination.pageIndex === table.getPageCount() - 1
+                          }
                           onClick={() => {
                             table.setPageIndex(table.getState().pagination.pageIndex + 1);
                           }}
@@ -725,7 +893,7 @@ export default function ClientCampaignView() {
                 ),
               }}
               w={'100%'}
-              pageSizes={['20']}
+              pageSizes={[acPageSize]}
               styles={(theme) => ({
                 thead: {
                   height: '44px',
@@ -761,7 +929,9 @@ export default function ClientCampaignView() {
                 style={{
                   transitionDuration: '400ms',
                   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: activeCampaignOpen ? `rotate(${activeCampaignOpen ? 180 : 0}deg)` : 'none',
+                  transform: activeCampaignOpen
+                    ? `rotate(${activeCampaignOpen ? 180 : 0}deg)`
+                    : 'none',
                 }}
               />
             }
@@ -773,7 +943,12 @@ export default function ClientCampaignView() {
           </Button>
         </Flex>
         <Flex direction={'column'} gap={'sm'}>
-          <Text style={{ display: 'flex', alignItems: 'center', gap: '5px' }} color='gray' fw={700} size={'lg'}>
+          <Text
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+            color='gray'
+            fw={700}
+            size={'lg'}
+          >
             <IconInfoTriangle color='orange' />
             Rep Action Needed
           </Text>
@@ -880,7 +1055,11 @@ export default function ClientCampaignView() {
                 cell: () => {
                   return (
                     <Flex align={'center'} h={'100%'}>
-                      <Button rightIcon={<IconExternalLink size={'0.9rem'} />} style={{ borderRadius: '16px', height: '1.3rem' }} size='xs'>
+                      <Button
+                        rightIcon={<IconExternalLink size={'0.9rem'} />}
+                        style={{ borderRadius: '16px', height: '1.3rem' }}
+                        size='xs'
+                      >
                         View Task
                       </Button>
                     </Flex>
@@ -903,7 +1082,18 @@ export default function ClientCampaignView() {
                     borderTopWidth: 0,
                   })}
                 >
-                  <Select style={{ width: '150px' }} data={['Show 25 rows', 'Show 5 rows', 'Show 10 rows']} defaultValue='Show 25 rows' />
+                  <Select
+                    style={{ width: '150px' }}
+                    data={[
+                      { label: 'Show 25 rows', value: '25' },
+                      { label: 'Show 10 rows', value: '10' },
+                      { label: 'Show 5 rows', value: '5' },
+                    ]}
+                    value={raPageSize}
+                    onChange={(v) => {
+                      setRaPageSize(v ?? '25');
+                    }}
+                  />
 
                   <Flex align={'center'} gap={'sm'}>
                     <Flex align={'center'}>
@@ -951,7 +1141,9 @@ export default function ClientCampaignView() {
                         variant='default'
                         color='gray.4'
                         h={36}
-                        disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                        disabled={
+                          table.getState().pagination.pageIndex === table.getPageCount() - 1
+                        }
                         onClick={() => {
                           table.setPageIndex(table.getState().pagination.pageIndex + 1);
                         }}
@@ -964,7 +1156,7 @@ export default function ClientCampaignView() {
               ),
             }}
             w={'100%'}
-            pageSizes={['20']}
+            pageSizes={[raPageSize]}
             styles={(theme) => ({
               thead: {
                 height: '44px',
@@ -989,7 +1181,12 @@ export default function ClientCampaignView() {
           />
         </Flex>
         <Flex direction={'column'} gap={'sm'}>
-          <Text style={{ display: 'flex', alignItems: 'center', gap: '5px' }} color='gray' fw={700} size={'lg'}>
+          <Text
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+            color='gray'
+            fw={700}
+            size={'lg'}
+          >
             <IconCloudUpload color='#228be6' />
             Uploading by SellScale
           </Text>
@@ -1080,7 +1277,18 @@ export default function ClientCampaignView() {
                     borderTopWidth: 0,
                   })}
                 >
-                  <Select style={{ width: '150px' }} data={['Show 25 rows', 'Show 5 rows', 'Show 10 rows']} defaultValue='Show 25 rows' />
+                  <Select
+                    style={{ width: '150px' }}
+                    data={[
+                      { label: 'Show 25 rows', value: '25' },
+                      { label: 'Show 10 rows', value: '10' },
+                      { label: 'Show 5 rows', value: '5' },
+                    ]}
+                    value={udPageSize}
+                    onChange={(v) => {
+                      setUdPageSize(v ?? '25');
+                    }}
+                  />
 
                   <Flex align={'center'} gap={'sm'}>
                     <Flex align={'center'}>
@@ -1128,7 +1336,9 @@ export default function ClientCampaignView() {
                         variant='default'
                         color='gray.4'
                         h={36}
-                        disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                        disabled={
+                          table.getState().pagination.pageIndex === table.getPageCount() - 1
+                        }
                         onClick={() => {
                           table.setPageIndex(table.getState().pagination.pageIndex + 1);
                         }}
@@ -1141,7 +1351,7 @@ export default function ClientCampaignView() {
               ),
             }}
             w={'100%'}
-            pageSizes={['20']}
+            pageSizes={[udPageSize]}
             styles={(theme) => ({
               thead: {
                 height: '44px',
@@ -1166,7 +1376,12 @@ export default function ClientCampaignView() {
           />
         </Flex>
         <Flex direction={'column'} gap={'sm'}>
-          <Text style={{ display: 'flex', alignItems: 'center', gap: '5px' }} color='gray' fw={700} size={'lg'}>
+          <Text
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+            color='gray'
+            fw={700}
+            size={'lg'}
+          >
             <IconCircleCheck color='green' />
             Completed
           </Text>
@@ -1292,8 +1507,15 @@ export default function ClientCampaignView() {
                   const { linkedin } = cell.row.original;
 
                   return (
-                    <Flex align={'center'} justify={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                      {linkedin && <IconCircleCheck color='green' />}
+                    <Flex
+                      align={'center'}
+                      justify={'center'}
+                      gap={'xs'}
+                      py={'sm'}
+                      w={'100%'}
+                      h={'100%'}
+                    >
+                      {linkedin ? <IconCircleCheck color='green' /> : <IconCircleX color='red' />}
                     </Flex>
                   );
                 },
@@ -1312,8 +1534,15 @@ export default function ClientCampaignView() {
                   const { email } = cell.row.original;
 
                   return (
-                    <Flex align={'center'} justify={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                      {email && <IconCircleCheck color='green' />}
+                    <Flex
+                      align={'center'}
+                      justify={'center'}
+                      gap={'xs'}
+                      py={'sm'}
+                      w={'100%'}
+                      h={'100%'}
+                    >
+                      {email ? <IconCircleCheck color='green' /> : <IconCircleX color='red' />}
                     </Flex>
                   );
                 },
@@ -1334,7 +1563,18 @@ export default function ClientCampaignView() {
                     borderTopWidth: 0,
                   })}
                 >
-                  <Select style={{ width: '150px' }} data={['Show 25 rows', 'Show 5 rows', 'Show 10 rows']} defaultValue='Show 25 rows' />
+                  <Select
+                    style={{ width: '150px' }}
+                    data={[
+                      { label: 'Show 25 rows', value: '25' },
+                      { label: 'Show 10 rows', value: '10' },
+                      { label: 'Show 5 rows', value: '5' },
+                    ]}
+                    value={cdPageSize}
+                    onChange={(v) => {
+                      setCdPageSize(v ?? '25');
+                    }}
+                  />
 
                   <Flex align={'center'} gap={'sm'}>
                     <Flex align={'center'}>
@@ -1382,7 +1622,9 @@ export default function ClientCampaignView() {
                         variant='default'
                         color='gray.4'
                         h={36}
-                        disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                        disabled={
+                          table.getState().pagination.pageIndex === table.getPageCount() - 1
+                        }
                         onClick={() => {
                           table.setPageIndex(table.getState().pagination.pageIndex + 1);
                         }}
@@ -1395,7 +1637,7 @@ export default function ClientCampaignView() {
               ),
             }}
             w={'100%'}
-            pageSizes={['20']}
+            pageSizes={[cdPageSize]}
             styles={(theme) => ({
               thead: {
                 height: '44px',

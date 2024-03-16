@@ -30,6 +30,9 @@ export interface Task {
   cta: string;
   cta_url: string;
   due_date: string; // or Date if you convert the date string to a Date object
+  tag: string;
+  task_type: string;
+  task_data: Record<string, any>;
 }
 
 type PropsType = {

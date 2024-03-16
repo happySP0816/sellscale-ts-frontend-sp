@@ -75,7 +75,7 @@ export default function ClientCampaignView() {
     },
   });
 
-  const activeCampaigns =
+  const processedCampaigns =
     campaigns
       ?.map((c) => {
         return {
@@ -90,8 +90,7 @@ export default function ClientCampaignView() {
           email: c.email_active,
         };
       })
-      .sort((a, b) => (a.linkedin || a.email ? -1 : 1))
-      .filter((c) => c.status) ?? [];
+      .sort((a, b) => (a.linkedin || a.email ? -1 : 1)) ?? [];
 
   const completedData =
     campaigns
@@ -153,7 +152,7 @@ export default function ClientCampaignView() {
             Active Campaigns
           </Text>
           <DataGrid
-            data={activeCampaigns}
+            data={processedCampaigns.filter((c) => c.status)}
             highlightOnHover
             withPagination
             withSorting
@@ -177,7 +176,7 @@ export default function ClientCampaignView() {
                     <Text color='gray'>Status</Text>
                   </Flex>
                 ),
-                maxSize: 170,
+                maxSize: 180,
                 cell: (cell) => {
                   const { status, percentage } = cell.row.original;
 
@@ -534,7 +533,7 @@ export default function ClientCampaignView() {
           />
           <Collapse in={activeCampaignOpen}>
             <DataGrid
-              data={activeCampaigns}
+              data={processedCampaigns.filter((c) => !c.status)}
               highlightOnHover
               withPagination
               withSorting
@@ -558,7 +557,7 @@ export default function ClientCampaignView() {
                       <Text color='gray'>Status</Text>
                     </Flex>
                   ),
-                  maxSize: 170,
+                  maxSize: 180,
                   cell: (cell) => {
                     const { status, percentage } = cell.row.original;
 
@@ -578,7 +577,9 @@ export default function ClientCampaignView() {
                         <Text size='sm' align='center'>
                           {percentage}%
                         </Text>
-                        <Badge color={status ? 'green' : 'red'}>active</Badge>
+                        <Badge color={status ? 'green' : 'red'}>
+                          {status ? 'Active' : 'Inactive'}
+                        </Badge>
                       </Flex>
                     );
                   },

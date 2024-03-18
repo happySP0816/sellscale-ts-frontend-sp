@@ -68,7 +68,7 @@ const AccountSettings: React.FC = () => {
 
   return (
     <Card shadow="sm" p="lg" radius="md" withBorder>
-      <Box position="relative">
+      <Box>
         <LoadingOverlay visible={loading} />
         <Title order={4}>Danger Zone: Toggle Seat</Title>
         <Text color="dimmed" size="sm" mt="sm">

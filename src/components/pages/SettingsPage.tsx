@@ -36,6 +36,7 @@ import CalendarAndScheduling from "@common/settings/CalendarAndScheduling";
 import {
   IconAdjustmentsFilled,
   IconBrain,
+  IconHexagonalPrism,
   IconMessage2Bolt,
   IconTrashFilled,
 } from "@tabler/icons-react";
@@ -53,6 +54,7 @@ import ComingSoonCard from "@common/library/ComingSoonCard";
 import CRMConnectionPage from "./CRMConnectionPage";
 import ContactRecycling from '@common/settings/ContactRecycling';
 import WebhookConnectionPage from './WebhookConnectionPage';
+import AccountSettings from './AccountSettings';
 
 export default function SettingsPage() {
   setPageTitle("Settings");
@@ -249,7 +251,34 @@ export default function SettingsPage() {
           <Tabs.Tab value="webhooks" icon={<IconWebhook size="0.8rem" />}>
             Webhook Connection
           </Tabs.Tab>
+
+          <Divider />
+
+          <Title
+            color={
+              [
+                "account",
+              ].includes(currentTab)
+                ? "blue"
+                : "gray"
+            }
+            order={5}
+            mt="lg"
+            mb="xs"
+          >
+            ACCOUNT
+          </Title>
+          <Tabs.Tab
+            value="account"
+            icon={<IconHexagonalPrism size="0.8rem" />}
+          >
+            Account Settings
+          </Tabs.Tab>
         </Tabs.List>
+
+        <Tabs.Panel value='account' pl='xs'>
+          <AccountSettings />
+        </Tabs.Panel>
 
         <Tabs.Panel value="linkedin" pl="xs" w="60%">
           <LinkedInConnectedCard

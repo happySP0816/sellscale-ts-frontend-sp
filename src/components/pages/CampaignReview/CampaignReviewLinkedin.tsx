@@ -64,6 +64,7 @@ import LinkedInSequenceSectionModal from "@modals/LinkedInSequenceSectionModal";
 type SequenceProps = {
   campaignOverview: any;
   campaignType: string;
+  campaignNotes?: string;
 };
 
 export const Sequence = (props: SequenceProps) => {
@@ -79,9 +80,17 @@ export const Sequence = (props: SequenceProps) => {
       style={{ border: "3px solid #0f6cbf" }}
       h={280}
     >
+      {props.campaignNotes && (
+        <Card withBorder mb='xs' pb='xs'>
+          <Title order={5}>📝 AI Notes</Title>
+          <Text color="gray" size="sm" mb='xs'>
+            {props.campaignNotes}
+          </Text>
+        </Card>
+      )}
       <Card withBorder>
         <Title order={5}>💡 Review Campaign</Title>
-        <Text color="gray" size="sm">
+        <Text color="gray" size="sm" mb='xs'>
           Review the campaign and provide feedback when necessary for both the
           Contacts and Messaging. The AI will adjust the campaign based on your
           feedback and then launch.
@@ -764,6 +773,7 @@ type CampaignReviewLinkedinProps = {
   onTaskComplete?: () => void;
   campaignId: number;
   campaignType: string;
+  campaignNotes?: string;
 };
 
 export default function CampaignReview(props: CampaignReviewLinkedinProps) {
@@ -1018,6 +1028,7 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
           <Sequence
             campaignOverview={campaignOverview}
             campaignType={props.campaignType}
+            campaignNotes={props.campaignNotes}
           />
         ) : steps === "contact" ? (
           <Contact

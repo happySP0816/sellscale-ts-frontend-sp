@@ -78,7 +78,6 @@ export const Sequence = (props: SequenceProps) => {
       direction={"column"}
       p={"lg"}
       style={{ border: "3px solid #0f6cbf" }}
-      h={280}
     >
       {props.campaignNotes && (
         <Card withBorder mb='xs' pb='xs'>

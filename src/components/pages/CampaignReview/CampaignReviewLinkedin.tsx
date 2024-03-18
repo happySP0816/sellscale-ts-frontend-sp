@@ -81,20 +81,20 @@ export const Sequence = (props: SequenceProps) => {
     >
       {props.campaignNotes && (
         <Card withBorder mb='xs' pb='xs'>
-          <Title order={5}>📝 AI Notes</Title>
+          <Title order={5}>💡 Review Campaign - Notes from SellScale</Title>
           <Text color="gray" size="sm" mb='xs'>
             {props.campaignNotes}
           </Text>
         </Card>
       )}
-      <Card withBorder>
+      {!props.campaignNotes && (<Card withBorder>
         <Title order={5}>💡 Review Campaign</Title>
         <Text color="gray" size="sm" mb='xs'>
           Review the campaign and provide feedback when necessary for both the
           Contacts and Messaging. The AI will adjust the campaign based on your
           feedback and then launch.
         </Text>
-      </Card>
+      </Card>}
 
       <Flex mt="md">
         <Card mr="md">

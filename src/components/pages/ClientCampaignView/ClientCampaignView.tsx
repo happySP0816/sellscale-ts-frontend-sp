@@ -75,6 +75,23 @@ export default function ClientCampaignView() {
     },
   });
 
+  const { data: ccData } = useQuery({
+    queryKey: [`query-get-client-campaign-data`],
+    queryFn: async () => {
+      const response = await fetch(`${API_URL}/campaigns/client_campaign_view_data`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+        method: 'POST',
+      });
+      return (await response.json()).data.records as Record<string, any>[];
+    },
+  });
+
+  console.log(ccData);
+
   const processedCampaigns =
     campaigns
       ?.map((c) => {
@@ -110,31 +127,47 @@ export default function ClientCampaignView() {
 
   console.log(campaigns, opTasks, completedData);
 
+  const ccRepActions = ccData?.filter((c) => c.status.endsWith('Rep Action Needed')) ?? [];
   const repNeedData =
-    opTasks
-      ?.filter((t) => t.status === 'PENDING')
-      .map((t) => {
+    ccRepActions.map((a) => {
+      const campaign = campaigns?.find((c) => a.campaign.endsWith(c.name));
+      if (!campaign)
         return {
-          status: t.status === 'PENDING' ? 'rep action needed' : false,
-          campaign: (t.task_data?.campaign_name as string) || false,
-          campaign_id: t.task_data?.campaign_id ?? false,
-          sdr: userData?.full_name,
-          task: t.title,
-          task_type: t.task_type,
-          task_data: t.task_data,
+          campaign: '',
+          campaign_id: -1,
+          sdr: '',
+          company: '',
         };
-      })
-      .filter((t) => t.status) ?? [];
+
+      return {
+        campaign: campaign.name,
+        campaign_id: campaign.id,
+        sdr: a.rep as string,
+        company: a.company as string,
+      };
+    }) ?? [];
 
   const upladingData =
-    campaigns?.map((c) => {
-      return {
-        status: 'uploading by sellscale',
-        campaign: c.name,
-        sdr: userData?.full_name,
-        campaign_id: c.id,
-      };
-    }) ?? []; // .filter((c) => repNeedData.find((r) => r.campaign_id === c.campaign_id))
+    ccData
+      ?.filter((c) => c.status.endsWith('Uploading to SellScale'))
+      .map((c) => {
+        return {
+          status: 'uploading by sellscale',
+          campaign: c.campaign,
+          sdr: c.rep,
+          campaign_id: -1,
+        };
+      }) ?? [];
+
+  // const upladingData =
+  //   campaigns?.map((c) => {
+  //     return {
+  //       status: 'uploading by sellscale',
+  //       campaign: c.name,
+  //       sdr: userData?.full_name,
+  //       campaign_id: c.id,
+  //     };
+  //   }) ?? []; // .filter((c) => repNeedData.find((r) => r.campaign_id === c.campaign_id))
 
   return (
     <div className='bg-white'>
@@ -965,25 +998,25 @@ export default function ClientCampaignView() {
               },
             }}
             columns={[
-              {
-                accessorKey: 'Status',
-                header: () => (
-                  <Flex align={'center'} gap={'3px'}>
-                    <IconLetterT color='gray' size={'0.9rem'} />
-                    <Text color='gray'>Status</Text>
-                  </Flex>
-                ),
-                maxSize: 170,
-                cell: (cell) => {
-                  const { status } = cell.row.original;
+              // {
+              //   accessorKey: 'Status',
+              //   header: () => (
+              //     <Flex align={'center'} gap={'3px'}>
+              //       <IconLetterT color='gray' size={'0.9rem'} />
+              //       <Text color='gray'>Status</Text>
+              //     </Flex>
+              //   ),
+              //   maxSize: 170,
+              //   cell: (cell) => {
+              //     const { status } = cell.row.original;
 
-                  return (
-                    <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'}>
-                      <Badge color={status ? 'orange' : 'red'}>{status}</Badge>
-                    </Flex>
-                  );
-                },
-              },
+              //     return (
+              //       <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'}>
+              //         <Badge color={status ? 'orange' : 'red'}>{status}</Badge>
+              //       </Flex>
+              //     );
+              //   },
+              // },
               {
                 accessorKey: 'campaign',
                 header: () => (
@@ -1022,25 +1055,25 @@ export default function ClientCampaignView() {
                   );
                 },
               },
-              {
-                accessorKey: 'task',
-                header: () => (
-                  <Flex align={'center'} gap={'3px'}>
-                    <IconLetterT color='gray' size={'0.9rem'} />
-                    <Text color='gray'>Task</Text>
-                  </Flex>
-                ),
-                enableResizing: true,
-                cell: (cell) => {
-                  const { task } = cell.row.original;
+              // {
+              //   accessorKey: 'task',
+              //   header: () => (
+              //     <Flex align={'center'} gap={'3px'}>
+              //       <IconLetterT color='gray' size={'0.9rem'} />
+              //       <Text color='gray'>Task</Text>
+              //     </Flex>
+              //   ),
+              //   enableResizing: true,
+              //   cell: (cell) => {
+              //     const { task } = cell.row.original;
 
-                  return (
-                    <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                      <Text>{task}</Text>
-                    </Flex>
-                  );
-                },
-              },
+              //     return (
+              //       <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
+              //         <Text>{task}</Text>
+              //       </Flex>
+              //     );
+              //   },
+              // },
               {
                 accessorKey: 'action',
                 header: () => (

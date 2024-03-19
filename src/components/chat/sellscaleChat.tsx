@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useScrollIntoView } from "@mantine/hooks";
+import WhiteLogo from './logo.png'
 import {
   ActionIcon,
   Avatar,
@@ -23,8 +24,11 @@ import {
 } from "@tabler/icons";
 import moment from "moment";
 import { IconSparkles } from "@tabler/icons-react";
+import { useRecoilValue } from 'recoil';
+import { userDataState } from '@atoms/userAtoms';
 
 export default function SellscaleChat() {
+  const userData = useRecoilValue(userDataState)
   const [chatbot, setChatbot] = useState(false);
   const [mineChat, setMineChat] = useState("");
   const [loading, setLoading] = useState(false);
@@ -80,6 +84,10 @@ export default function SellscaleChat() {
     setMineChat("");
   };
 
+  if (userData.id !== 34) {
+    return null;
+  }
+
   return (
     <>
       <Popover offset={{ mainAxis: 10, crossAxis: -85 }}>
@@ -99,7 +107,7 @@ export default function SellscaleChat() {
             h={"fit-content"}
             p={"sm"}
           >
-            <img src={"White-LogoMark.png"} className="w-[26px] h-[26px]" />
+            <img src={WhiteLogo} className="w-[26px] h-[26px]" />
           </Button>
         </Popover.Target>
         <Popover.Dropdown
@@ -149,7 +157,7 @@ export default function SellscaleChat() {
                     fw={600}
                   >
                     <img
-                      src={"White-LogoMark.png"}
+                      src={WhiteLogo}
                       className="w-[20px] h-[20px]"
                     />
                     Sage
@@ -221,7 +229,7 @@ export default function SellscaleChat() {
                                       <Avatar
                                         size={"xs"}
                                         radius={"100%"}
-                                        src={"favicon.svg"}
+                                        src={WhiteLogo}
                                       />
                                     </Box>
                                     <Flex direction={"column"}>

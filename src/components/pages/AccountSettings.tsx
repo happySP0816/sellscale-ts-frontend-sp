@@ -148,8 +148,8 @@ const AccountSettings: React.FC = () => {
                 onClick={() => {
                   setEdit(true);
                   setEditAccount({
-                    full_name: userData.sdr_name,
-                    public_title: userData.sdr_title,
+                    name: userData.sdr_name,
+                    title: userData.sdr_title,
                     email: userData.sdr_email,
                   });
                 }}

@@ -124,19 +124,17 @@ export default function ClientCampaignView() {
           task_data: t.task_data,
         };
       })
-      .filter((t) => t.status && t.campaign) ?? [];
+      .filter((t) => t.status) ?? [];
 
   const upladingData =
-    campaigns
-      ?.map((c) => {
-        return {
-          status: 'uploading by sellscale',
-          campaign: c.name,
-          sdr: userData?.full_name,
-          campaign_id: c.id,
-        };
-      })
-      .filter((c) => repNeedData.find((r) => r.campaign_id === c.campaign_id)) ?? [];
+    campaigns?.map((c) => {
+      return {
+        status: 'uploading by sellscale',
+        campaign: c.name,
+        sdr: userData?.full_name,
+        campaign_id: c.id,
+      };
+    }) ?? []; // .filter((c) => repNeedData.find((r) => r.campaign_id === c.campaign_id))
 
   return (
     <div className='bg-white'>

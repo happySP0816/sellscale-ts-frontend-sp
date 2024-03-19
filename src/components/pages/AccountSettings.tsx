@@ -10,7 +10,13 @@ import {
   TextInput,
   Flex,
 } from "@mantine/core";
-import { IconPlayerPause, IconPlayerPlay } from "@tabler/icons";
+import {
+  IconFile,
+  IconPencil,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconX,
+} from "@tabler/icons";
 import { useRecoilState, useRecoilValue } from "recoil";
 import { userDataState, userTokenState } from "@atoms/userAtoms";
 import { API_URL } from "@constants/data";
@@ -21,6 +27,12 @@ const AccountSettings: React.FC = () => {
   const [userData, setUserData] = useRecoilState(userDataState);
   const [sdrActive, setSdrActive] = useState<boolean>(userData?.active);
   const [loading, setLoading] = useState<boolean>(false);
+  const [edit, setEdit] = useState<boolean>(true);
+  const [editAccount, setEditAccount] = useState({
+    full_name: userData.sdr_name,
+    public_title: userData.sdr_title,
+    email: userData.sdr_email,
+  });
 
   const userToken = useRecoilValue(userTokenState);
 
@@ -70,6 +82,11 @@ const AccountSettings: React.FC = () => {
 
     setLoading(false);
   };
+  const handleSave = () => {
+    setEdit(true);
+    console.log("editAccount================", editAccount);
+  };
+  console.log("qweqweqweqwe", edit);
   return (
     <>
       <Card shadow="sm" p="lg" radius="md" withBorder>
@@ -77,19 +94,52 @@ const AccountSettings: React.FC = () => {
         <Flex direction="column" gap={"sm"} mt={"md"}>
           <TextInput
             label="Your Full Name"
-            value={userData.sdr_name}
+            value={editAccount.full_name}
             placeholder="your full name"
+            onChange={(e) => {
+              setEditAccount({ ...editAccount, full_name: e.target.value });
+              setEdit(false);
+            }}
           />
           <TextInput
             label="Your Public Title"
-            value={userData.sdr_title}
+            value={editAccount.public_title}
             placeholder="your public title"
+            onChange={(e) => {
+              setEditAccount({ ...editAccount, public_title: e.target.value });
+              setEdit(false);
+            }}
           />
           <TextInput
             label="Email"
-            value={userData.sdr_email}
+            value={editAccount.email}
             placeholder="Your email"
+            onChange={(e) => {
+              setEditAccount({ ...editAccount, email: e.target.value });
+              setEdit(false);
+            }}
           />
+          <Flex gap={"md"} align={"center"} mt={"md"}>
+            <Button w={"fit-content"} onClick={handleSave} disabled={edit}>
+              Save Account Info
+            </Button>
+            {!edit && (
+              <Button
+                onClick={() => {
+                  setEdit(true);
+                  setEditAccount({
+                    full_name: userData.sdr_name,
+                    public_title: userData.sdr_title,
+                    email: userData.sdr_email,
+                  });
+                }}
+                color="red"
+                variant="outline"
+              >
+                Cancel Edit
+              </Button>
+            )}
+          </Flex>
         </Flex>
       </Card>
       <Card shadow="sm" p="lg" radius="md" withBorder mt={"md"}>

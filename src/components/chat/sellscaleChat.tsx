@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   Flex,
+  Image,
   Input,
   Popover,
   ScrollArea,
@@ -21,6 +22,7 @@ import {
   IconX,
 } from "@tabler/icons";
 import moment from "moment";
+import { IconSparkles } from "@tabler/icons-react";
 
 export default function SellscaleChat() {
   const [chatbot, setChatbot] = useState(false);
@@ -83,14 +85,21 @@ export default function SellscaleChat() {
       <Popover offset={{ mainAxis: 10, crossAxis: -85 }}>
         <Popover.Target>
           <Button
-            color="pink"
-            style={{ position: "absolute", bottom: "50px", right: "50px" }}
+            sx={{
+              position: "absolute",
+              bottom: "50px",
+              right: "50px",
+              backgroundColor: "#d444f1",
+              "&:hover": {
+                backgroundColor: "#d444f1",
+              },
+            }}
             radius={"100%"}
             w={"fit-content"}
             h={"fit-content"}
             p={"sm"}
           >
-            <IconEdit />
+            <img src={"White-LogoMark.png"} className="w-[26px] h-[26px]" />
           </Button>
         </Popover.Target>
         <Popover.Dropdown
@@ -104,9 +113,9 @@ export default function SellscaleChat() {
               <Card
                 shadow="sm"
                 padding="lg"
-                radius="md"
+                radius="lg"
                 withBorder
-                w={380}
+                w={350}
                 h={580}
                 py={"lg"}
                 mr={"35px"}
@@ -127,7 +136,22 @@ export default function SellscaleChat() {
                     margin: "0px !important",
                   }}
                 >
-                  <Text w={"100%"} align="center">
+                  <Text
+                    w={"100%"}
+                    align="center"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "12px",
+                    }}
+                    size={"lg"}
+                    fw={600}
+                  >
+                    <img
+                      src={"White-LogoMark.png"}
+                      className="w-[20px] h-[20px]"
+                    />
                     Sage
                   </Text>
                   <IconX
@@ -146,7 +170,7 @@ export default function SellscaleChat() {
                 </Card.Section>
                 <Flex direction={"column"} p={"sm"} h={"100%"} gap={"lg"}>
                   <ScrollArea
-                    h={"445px"}
+                    h={"430px"}
                     offsetScrollbars
                     scrollbarSize={8}
                     scrollHideDelay={4000}
@@ -163,7 +187,7 @@ export default function SellscaleChat() {
                               <Flex align={"end"} direction={"column"}>
                                 <Box
                                   p={"xs"}
-                                  bg={"#22b624"}
+                                  bg={"#228be6"}
                                   sx={{
                                     borderRadius: "8px",
                                     borderBottomRightRadius: "0px",
@@ -186,13 +210,28 @@ export default function SellscaleChat() {
                             ) : (
                               <>
                                 {item?.chatbot && (
-                                  <Flex mt={"sm"}>
-                                    <Avatar size={"md"} radius={"100%"} />
+                                  <Flex mt={"sm"} gap={"xs"}>
+                                    <Box
+                                      bg={"black"}
+                                      w={"fit-content"}
+                                      h={"fit-content"}
+                                      p={"8px"}
+                                      sx={{ borderRadius: "100%" }}
+                                    >
+                                      <Avatar
+                                        size={"xs"}
+                                        radius={"100%"}
+                                        src={"favicon.svg"}
+                                      />
+                                    </Box>
                                     <Flex direction={"column"}>
                                       <Box
                                         p={"xs"}
-                                        bg={"gray"}
-                                        sx={{ borderRadius: "8px" }}
+                                        bg={"#f8f9fa"}
+                                        sx={{
+                                          borderRadius: "8px",
+                                          borderBottomLeftRadius: "0px",
+                                        }}
                                       >
                                         <Text size={"xs"}>{item?.chatbot}</Text>
                                       </Box>
@@ -208,11 +247,53 @@ export default function SellscaleChat() {
                         );
                       })}
                     </Flex>
+                    <Box
+                      sx={{
+                        border: "2px #f6d5fb solid",
+                        borderRadius: "8px",
+                        backgroundColor: "#fdf5fe",
+                        wordBreak: "break-all",
+                      }}
+                      p={"sm"}
+                      mt={"md"}
+                    >
+                      <span
+                        style={{
+                          color: "#d444f1",
+                          fontWeight: 600,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "3px",
+                          width: "fit-content",
+                          fontSize: "13px",
+                          lineHeight: "1.4",
+                        }}
+                      >
+                        <IconSparkles size={"0.9rem"} />
+                        Finding Prospects:{" "}
+                      </span>
+                      <span
+                        style={{
+                          color: "#d444f1",
+                          fontSize: "12px",
+                          lineHeight: "1.4",
+                        }}
+                      >
+                        Finding contacts who are Product Managers at companies
+                        that are mid sized (100 - 1000 employees). Specifically
+                        target companies working in the Augmented Reality space.
+                        No large companies. Target Bay Area cities like San
+                        Francisco, San Jose, San Mateo, and more.
+                      </span>
+                      <Text color="#d444f1" size={"xs"}></Text>
+                    </Box>
                   </ScrollArea>
                   <Flex w={"100%"}>
                     <Input
                       placeholder="Type here..."
                       w={"100%"}
+                      size="md"
+                      radius={"md"}
                       disabled={loading}
                       value={mineChat}
                       rightSection={
@@ -220,6 +301,7 @@ export default function SellscaleChat() {
                           variant="filled"
                           aria-label="Settings"
                           color="blue"
+                          radius={"md"}
                           onClick={handleChat}
                         >
                           <IconSend

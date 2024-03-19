@@ -29,12 +29,36 @@ const AccountSettings: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [edit, setEdit] = useState<boolean>(true);
   const [editAccount, setEditAccount] = useState({
-    full_name: userData.sdr_name,
-    public_title: userData.sdr_title,
+    name: userData.sdr_name,
+    title: userData.sdr_title,
     email: userData.sdr_email,
   });
 
   const userToken = useRecoilValue(userTokenState);
+
+  // PATCH /client/sdr - update sdr info
+  const handleSave = async () => {
+      setEdit(true);
+
+      setLoading(true);
+      const response = await fetch(`${API_URL}/client/sdr`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editAccount),
+      });
+
+      const json = await response.json();
+
+      setLoading(false);
+
+      showNotification({
+        title: "Account Info Updated",
+        message: "Your account info has been updated successfully",
+      });
+  }
 
   const fetchUserInfo = async () => {
     const info = await getUserInfo(userToken);
@@ -82,11 +106,7 @@ const AccountSettings: React.FC = () => {
 
     setLoading(false);
   };
-  const handleSave = () => {
-    setEdit(true);
-    console.log("editAccount================", editAccount);
-  };
-  console.log("qweqweqweqwe", edit);
+
   return (
     <>
       <Card shadow="sm" p="lg" radius="md" withBorder>
@@ -94,19 +114,19 @@ const AccountSettings: React.FC = () => {
         <Flex direction="column" gap={"sm"} mt={"md"}>
           <TextInput
             label="Your Full Name"
-            value={editAccount.full_name}
+            value={editAccount.name}
             placeholder="your full name"
             onChange={(e) => {
-              setEditAccount({ ...editAccount, full_name: e.target.value });
+              setEditAccount({ ...editAccount, name: e.target.value });
               setEdit(false);
             }}
           />
           <TextInput
             label="Your Public Title"
-            value={editAccount.public_title}
+            value={editAccount.title}
             placeholder="your public title"
             onChange={(e) => {
-              setEditAccount({ ...editAccount, public_title: e.target.value });
+              setEditAccount({ ...editAccount, title: e.target.value });
               setEdit(false);
             }}
           />

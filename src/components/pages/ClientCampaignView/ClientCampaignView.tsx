@@ -21,6 +21,7 @@ import {
   IconCircleX,
   IconCloudUpload,
   IconExternalLink,
+  IconFileUnknown,
   IconLetterT,
   IconLoader,
   IconMail,
@@ -50,6 +51,7 @@ export default function ClientCampaignView() {
   const [raPageSize, setRaPageSize] = useState('25');
   const [udPageSize, setUdPageSize] = useState('25');
   const [cdPageSize, setCdPageSize] = useState('25');
+  const [ncPageSize, setNcPageSize] = useState('25');
 
   const { data: campaigns } = useQuery({
     queryKey: [`query-get-campaigns`],
@@ -107,6 +109,7 @@ export default function ClientCampaignView() {
           email: c.email_active,
         };
       })
+      .filter((c) => c.linkedin || c.email)
       .sort((a, b) => (a.linkedin || a.email ? -1 : 1)) ?? [];
 
   const completedData =
@@ -156,6 +159,16 @@ export default function ClientCampaignView() {
           campaign: c.campaign,
           sdr: c.rep,
           campaign_id: -1,
+        };
+      }) ?? [];
+
+  const noCampaignData =
+    ccData
+      ?.filter((c) => c.status.endsWith('No Campaign Found'))
+      .map((c) => {
+        return {
+          status: 'No Campaign Found',
+          sdr: c.rep,
         };
       }) ?? [];
 
@@ -418,38 +431,38 @@ export default function ClientCampaignView() {
                     >
                       <Flex direction={'column'} gap={'3px'} align={'center'}>
                         <IconBrandLinkedin size={'1.3rem'} fill='#228be6' color='white' />
-                        <Switch defaultChecked={linkedin} />
+                        <Switch defaultChecked={linkedin} readOnly />
                       </Flex>
                       <Flex direction={'column'} gap={'3px'} align={'center'}>
                         <IconMail size={'1.3rem'} fill='#228be6' color='white' />
-                        <Switch defaultChecked={email} />
+                        <Switch defaultChecked={email} readOnly />
                       </Flex>
                     </Flex>
                   );
                 },
               },
-              {
-                accessorKey: 'action',
-                header: '',
-                maxSize: 50,
-                enableSorting: false,
-                enableResizing: true,
-                cell: (cell) => {
-                  const { sent } = cell.row.original;
+              // {
+              //   accessorKey: 'action',
+              //   header: '',
+              //   maxSize: 50,
+              //   enableSorting: false,
+              //   enableResizing: true,
+              //   cell: (cell) => {
+              //     const { sent } = cell.row.original;
 
-                  return (
-                    <Flex align={'center'} gap={'xs'} h={'100%'} w={'100%'} justify={'center'}>
-                      <Button
-                        style={{ borderRadius: '100%', padding: '0px' }}
-                        w={'fit-content'}
-                        h={'fit-content'}
-                      >
-                        <IconChevronDown />
-                      </Button>
-                    </Flex>
-                  );
-                },
-              },
+              //     return (
+              //       <Flex align={'center'} gap={'xs'} h={'100%'} w={'100%'} justify={'center'}>
+              //         <Button
+              //           style={{ borderRadius: '100%', padding: '0px' }}
+              //           w={'fit-content'}
+              //           h={'fit-content'}
+              //         >
+              //           <IconChevronDown />
+              //         </Button>
+              //       </Flex>
+              //     );
+              //   },
+              // },
             ]}
             options={{
               enableFilters: true,
@@ -801,11 +814,11 @@ export default function ClientCampaignView() {
                       >
                         <Flex direction={'column'} gap={'3px'} align={'center'}>
                           <IconBrandLinkedin size={'1.3rem'} fill='#228be6' color='white' />
-                          <Switch defaultChecked={linkedin} />
+                          <Switch defaultChecked={linkedin} readOnly />
                         </Flex>
                         <Flex direction={'column'} gap={'3px'} align={'center'}>
                           <IconMail size={'1.3rem'} fill='#228be6' color='white' />
-                          <Switch defaultChecked={email} />
+                          <Switch defaultChecked={email} readOnly />
                         </Flex>
                       </Flex>
                     );
@@ -949,7 +962,7 @@ export default function ClientCampaignView() {
               })}
             />
           </Collapse>
-          <Button
+          {/* <Button
             mx={'auto'}
             w={'fit-content'}
             color='gray'
@@ -967,12 +980,10 @@ export default function ClientCampaignView() {
                 }}
               />
             }
-            // onClick={() => setShouldShowInactiveCampaign((s) => !s)}
             onClick={activeCampaignToggle}
           >
-            {/* {shouldShowInactiveCampaign ? 'Hide' : 'Show'} {triggers?.filter((t: any) => !t.active).length} Inactive Campaigns */}
             {activeCampaignOpen ? 'Hide' : 'Show'} {12} Inactive Campaigns
-          </Button>
+          </Button> */}
         </Flex>
         <Flex direction={'column'} gap={'sm'}>
           <Text
@@ -1384,6 +1395,183 @@ export default function ClientCampaignView() {
             }}
             w={'100%'}
             pageSizes={[udPageSize]}
+            styles={(theme) => ({
+              thead: {
+                height: '44px',
+                backgroundColor: theme.colors.gray[0],
+                '::after': {
+                  backgroundColor: 'transparent',
+                },
+              },
+
+              wrapper: {
+                gap: 0,
+              },
+              scrollArea: {
+                paddingBottom: 0,
+                gap: 0,
+              },
+
+              dataCellContent: {
+                width: '100%',
+              },
+            })}
+          />
+        </Flex>
+        <Flex direction={'column'} gap={'sm'}>
+          <Text
+            style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
+            color='gray'
+            fw={700}
+            size={'lg'}
+          >
+            <IconFileUnknown color='#ff0000' />
+            Campaign Not Found
+          </Text>
+          <DataGrid
+            data={noCampaignData}
+            highlightOnHover
+            withPagination
+            withSorting
+            withColumnBorders
+            withBorder
+            sx={{
+              cursor: 'pointer',
+              '& tr': {
+                background: 'white',
+              },
+            }}
+            columns={[
+              {
+                accessorKey: 'Status',
+                header: () => (
+                  <Flex align={'center'} gap={'3px'}>
+                    <IconLetterT color='gray' size={'0.9rem'} />
+                    <Text color='gray'>Status</Text>
+                  </Flex>
+                ),
+                maxSize: 210,
+                cell: (cell) => {
+                  const { status } = cell.row.original;
+
+                  return (
+                    <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'}>
+                      <Badge color='red'>{status}</Badge>
+                    </Flex>
+                  );
+                },
+              },
+              {
+                accessorKey: 'sdr',
+                header: () => (
+                  <Flex align={'center'} gap={'3px'}>
+                    <IconLetterT color='gray' size={'0.9rem'} />
+                    <Text color='gray'>SDR</Text>
+                  </Flex>
+                ),
+
+                enableResizing: true,
+                cell: (cell) => {
+                  const { sdr } = cell.row.original;
+
+                  return (
+                    <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
+                      <Text>{sdr}</Text>
+                    </Flex>
+                  );
+                },
+              },
+            ]}
+            options={{
+              enableFilters: true,
+            }}
+            components={{
+              pagination: ({ table }) => (
+                <Flex
+                  justify={'space-between'}
+                  align={'center'}
+                  px={'sm'}
+                  py={'1.25rem'}
+                  sx={(theme) => ({
+                    border: `1px solid ${theme.colors.gray[4]}`,
+                    borderTopWidth: 0,
+                  })}
+                >
+                  <Select
+                    style={{ width: '150px' }}
+                    data={[
+                      { label: 'Show 25 rows', value: '25' },
+                      { label: 'Show 10 rows', value: '10' },
+                      { label: 'Show 5 rows', value: '5' },
+                    ]}
+                    value={ncPageSize}
+                    onChange={(v) => {
+                      setNcPageSize(v ?? '25');
+                    }}
+                  />
+
+                  <Flex align={'center'} gap={'sm'}>
+                    <Flex align={'center'}>
+                      <Select
+                        maw={100}
+                        value={`${table.getState().pagination.pageIndex + 1}`}
+                        data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
+                          label: String(idx + 1),
+                          value: String(idx + 1),
+                        }))}
+                        onChange={(v) => {
+                          table.setPageIndex(Number(v) - 1);
+                        }}
+                      />
+                      <Flex
+                        sx={(theme) => ({
+                          borderTop: `1px solid ${theme.colors.gray[4]}`,
+                          borderRight: `1px solid ${theme.colors.gray[4]}`,
+                          borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                          marginLeft: '-2px',
+                          paddingLeft: '1rem',
+                          paddingRight: '1rem',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '0.25rem',
+                        })}
+                        h={36}
+                      >
+                        <Text color='gray.5' fw={500} fz={14}>
+                          of {table.getPageCount()} pages
+                        </Text>
+                      </Flex>
+                      <ActionIcon
+                        variant='default'
+                        color='gray.4'
+                        h={36}
+                        disabled={table.getState().pagination.pageIndex === 0}
+                        onClick={() => {
+                          table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                        }}
+                      >
+                        <IconChevronLeft stroke={theme.colors.gray[4]} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant='default'
+                        color='gray.4'
+                        h={36}
+                        disabled={
+                          table.getState().pagination.pageIndex === table.getPageCount() - 1
+                        }
+                        onClick={() => {
+                          table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                        }}
+                      >
+                        <IconChevronRight stroke={theme.colors.gray[4]} />
+                      </ActionIcon>
+                    </Flex>
+                  </Flex>
+                </Flex>
+              ),
+            }}
+            w={'100%'}
+            pageSizes={[ncPageSize]}
             styles={(theme) => ({
               thead: {
                 height: '44px',

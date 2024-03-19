@@ -19,6 +19,7 @@ import { IconArrowRight } from '@tabler/icons';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import DashboardSection from './DashboardSection';
+import RecommendedSegments from './RecommendedSegments';
 
 export interface Task {
   id: number;
@@ -206,6 +207,7 @@ const OperatorDashboard = (props: PropsType) => {
         {renderSection('Medium Priority', mediumPriorityTasks)}
         {renderSection('Low Priority', lowPriorityTasks)}
         {renderSection('Completed tasks', oldTasks)}
+        <RecommendedSegments/>
       </Stack>
     </Box>
   );

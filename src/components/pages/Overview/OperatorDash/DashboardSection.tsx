@@ -15,6 +15,9 @@ const DashboardSection: FC<{
     if (title === "Completed tasks") {
       return "🟢";
     }
+    if (title == 'Suggested segments') {
+      return "✨";
+    }
     return tasks[0].status !== "PENDING"
       ? "☑️"
       : tasks[0].urgency === "HIGH"

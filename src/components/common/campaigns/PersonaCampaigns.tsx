@@ -44,6 +44,7 @@ import {
   IconBriefcase,
   IconBuilding,
   IconCalendar,
+  IconChargingPile,
   IconCheck,
   IconChecks,
   IconChevronDown,
@@ -87,6 +88,7 @@ import postSyncSmartleadCampaigns from '@utils/requests/postSyncSmartleadCampaig
 import TriggersList from '@pages/TriggersList';
 import { DataTable } from 'mantine-datatable';
 import postTogglePersonaActive from '@utils/requests/postTogglePersonaActive';
+import ClientCampaignView from '@pages/ClientCampaignView/ClientCampaignView';
 
 export type CampaignPersona = {
   id: number;
@@ -322,6 +324,9 @@ export default function PersonaCampaigns() {
             <Tabs.Tab value='triggers' icon={<IconTarget size='0.8rem' />}>
               Triggers
             </Tabs.Tab>
+            <Tabs.Tab value='utilization' icon={<IconChargingPile size='0.8rem' />}>
+              Utilization
+            </Tabs.Tab>
             <Tabs.Tab value='linkedin' icon={<IconBrandLinkedin size='0.8rem' />} ml='auto'>
               Queued LinkedIns
             </Tabs.Tab>
@@ -329,6 +334,10 @@ export default function PersonaCampaigns() {
               Queued Emails
             </Tabs.Tab>
           </Tabs.List>
+
+          <Tabs.Panel value='utilization' pt='xs'>
+            <ClientCampaignView />
+          </Tabs.Panel>
 
           <Tabs.Panel value='triggers' pt='xs'>
             <TriggersList />

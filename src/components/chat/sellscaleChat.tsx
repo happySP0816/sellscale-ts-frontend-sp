@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WhiteLogo from './logo.png';
 import { ActionIcon, Avatar, Box, Button, Card, Flex, Image, Input, Popover, ScrollArea, Text } from '@mantine/core';
 import { IconChartBar, IconEdit, IconMessage, IconSend, IconTargetArrow, IconX } from '@tabler/icons';
@@ -16,7 +16,13 @@ export function AnimationText(props: any) {
   const [displayedText, setDisplayedText] = useState('');
   const [index, setIndex] = useState(0);
 
+  props.setIsAnimation(true);
+
   useEffect(() => {
+    if (displayedText.length == props.text.length) {
+      props.setIsAnimation(false);
+    }
+
     if (index < props.text.length) {
       const timeoutId = setTimeout(() => {
         setDisplayedText((prev) => prev + props.text[index]);
@@ -27,7 +33,11 @@ export function AnimationText(props: any) {
     }
   }, [index, props.text]);
 
-  return <Text size={'xs'}>{displayedText}</Text>;
+  return (
+    <Text size={'xs'} sx={{ whiteSpace: 'pre-line' }}>
+      {displayedText}
+    </Text>
+  );
 }
 
 export default function SellscaleChat() {
@@ -38,7 +48,7 @@ export default function SellscaleChat() {
 
   const handleEnterKeyPress = (event: any) => {
     if (event.key === 'Enter') {
-      handleChat(index);
+      handleChat(index, false);
     }
   };
   const handleClick = () => {
@@ -60,12 +70,12 @@ export default function SellscaleChat() {
           a. 'New York Hedge Fund Managers'
           b. 'Directors + VPs at NYC Hedge Funds'
           c. 'Hedge Fund Decision Makers'`,
-      response_status: true,
+      response_status: false,
     },
     {
       type: 'action',
       message: 'Directors + VPs at NYC Hedge Funds',
-      response_status: true,
+      response_status: false,
     },
     {
       type: 'ai',
@@ -204,46 +214,55 @@ export default function SellscaleChat() {
     },
   ];
   const [index, setIndex] = useState(0);
+  const [isAnimation, setIsAnimation] = useState(true);
   const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
-
-  const handleChat = (currentIndex: number) => {
-    setLoading(true);
-    if (currentIndex >= 0 && currentIndex < response.length) {
+  const hasCalledHandleChat = useRef(false);
+  const viewport = useRef<HTMLDivElement>(null);
+  const handleChat = async (currentIndex: number, flag: boolean) => {
+    if (flag) {
       const currentResponse = response[currentIndex];
-      if (!response[currentIndex].response_status) {
-        const newEntry = {
-          type: currentResponse.type,
-          message: currentResponse.message,
-        };
-        const timeoutId = setTimeout(() => {
-          setChatHistory((chatHistory) => [...chatHistory, newEntry]);
-        }, 3000);
-        setIndex(currentIndex + 1);
-        handleChat(currentIndex + 1);
-        return () => clearTimeout(timeoutId);
-      }
-
-      if (response[currentIndex].response_status) {
-        setLoading(false);
-        if (mineChat !== '') {
-          const newEntry = {
-            type: 'user',
-            message: mineChat,
-          };
-          setChatHistory((chatHistory) => [...chatHistory, newEntry]);
-          setIndex(currentIndex + 1);
-          setMineChat('');
-        } else {
-          return;
-        }
-        const newEntry = {
-          type: currentResponse.type,
-          message: currentResponse.message,
-        };
-        setChatHistory((chatHistory) => [...chatHistory, newEntry]);
-      }
+      setChatHistory((chatHistory) => [...chatHistory, { type: currentResponse.type, message: currentResponse.message }]);
+    } else {
+      setChatHistory((chatHistory) => [...chatHistory, { type: 'user', message: mineChat }]);
     }
+
+    if (response[currentIndex].response_status === true) {
+      if (!flag) {
+        setIndex(currentIndex + 1);
+        await handleChat(currentIndex + 1, true);
+      }
+    } else {
+      setIndex(currentIndex + 1);
+
+      const waitForPreviousChat = async (checkVariable: any, interval = 100) => {
+        return new Promise<void>((resolve) => {
+          const intervalId = setInterval(() => {
+            if (checkVariable()) {
+              clearInterval(intervalId);
+              resolve();
+            }
+          }, interval);
+        });
+      };
+
+      await waitForPreviousChat(() => isAnimation == true);
+
+      await new Promise((resolve) => setTimeout(resolve, 4000));
+      await handleChat(currentIndex + 1, true);
+    }
+    setMineChat('');
   };
+
+  useEffect(() => {
+    if (!hasCalledHandleChat.current) {
+      handleChat(index, true);
+      hasCalledHandleChat.current = true;
+    }
+  }, [chatbot]);
+
+  useEffect(() => {
+    viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
+  }, []);
 
   return (
     <>
@@ -332,7 +351,7 @@ export default function SellscaleChat() {
                   />
                 </Card.Section>
                 <Flex direction={'column'} p={'sm'} h={'100%'} gap={'lg'}>
-                  <ScrollArea h={'430px'} offsetScrollbars scrollbarSize={8} scrollHideDelay={4000}>
+                  <ScrollArea h={'430px'} offsetScrollbars scrollbarSize={8} scrollHideDelay={4000} viewportRef={viewport}>
                     <Flex direction={'column'} justify={'flex-start'} w={'100%'} gap={'sm'}>
                       {chatHistory?.map((chat, idx) => (
                         <div key={idx}>
@@ -350,7 +369,7 @@ export default function SellscaleChat() {
                                     borderBottomLeftRadius: '0px',
                                   }}
                                 >
-                                  <AnimationText text={chat?.message} />
+                                  <AnimationText text={chat?.message} setIsAnimation={setIsAnimation} />
                                 </Box>
                                 {/* <Text color='gray' size={'xs'}>
                                   {item?.response_date}
@@ -431,7 +450,7 @@ export default function SellscaleChat() {
                       disabled={loading}
                       value={mineChat}
                       rightSection={
-                        <ActionIcon variant='filled' aria-label='Settings' color='blue' radius={'md'} onClick={() => handleChat(index)}>
+                        <ActionIcon variant='filled' aria-label='Settings' color='blue' radius={'md'} onClick={() => handleChat(index, false)}>
                           <IconSend style={{ width: '70%', height: '70%' }} stroke={1.5} />
                         </ActionIcon>
                       }

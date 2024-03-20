@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import WhiteLogo from './logo.png';
 import { ActionIcon, Avatar, Box, Button, Card, Flex, Image, Input, Popover, ScrollArea, Text } from '@mantine/core';
-import { IconChartBar, IconEdit, IconMessage, IconSend, IconTargetArrow, IconX } from '@tabler/icons';
-import moment from 'moment';
-import { IconSparkles } from '@tabler/icons-react';
+import { IconChartBar, IconMessage, IconSend, IconTargetArrow, IconX } from '@tabler/icons';
 import { useRecoilValue } from 'recoil';
 import { userDataState } from '@atoms/userAtoms';
 
@@ -70,11 +68,11 @@ export default function SellscaleChat() {
           a. 'New York Hedge Fund Managers'
           b. 'Directors + VPs at NYC Hedge Funds'
           c. 'Hedge Fund Decision Makers'`,
-      response_status: false,
+      response_status: true,
     },
     {
       type: 'action',
-      message: 'Directors + VPs at NYC Hedge Funds',
+      message: "create_campaign('Directors + VPs at NYC Hedge Funds')",
       response_status: false,
     },
     {
@@ -84,12 +82,12 @@ export default function SellscaleChat() {
           2. I will then look for decision makers like directors and managers.
           3. I will then proceed to process the list and verify it's accurate.
                 Give me a moment`,
-      response_status: true,
+      response_status: false,
     },
     {
       type: 'action',
-      message: 'top 30 hedge funds in New York',
-      response_status: true,
+      message: "search('top 30 hedge funds in New York')",
+      response_status: false,
     },
     {
       type: 'ai',
@@ -212,6 +210,53 @@ export default function SellscaleChat() {
       message: 'create_asset("Lunch @ NewtonX Office", "Invite your prospect to get lunch at the NewtonX office")',
       response_status: false,
     },
+    {
+      type: 'ai',
+      message: `I've created the asset and connected it to your campaign. Let's move on to the next step which is writing the copy.
+
+          I will proceed to create a 3 step LinkedIn sequence for this campaign.`,
+      response_status: false,
+    },
+    {
+      type: 'action',
+      message:
+        'create_sequence("LinkedIn", "3-step", "hedge funds", "vice presidents", assets=["Coffee chat", "Lunch @ NewtonX Office", "NYC NewtonX Conference"])',
+      response_status: false,
+    },
+    {
+      type: 'ai',
+      message: `I've created the sequence and connected it to your campaign. Here's a preview of three steps:
+
+          Step 1: Coffee chat
+          "Hi [First Name], fellow Stanford-alum reaching out - would love to connect over a coffee chat and learn more about your work at [Hedge Fund Name]. I've been meaning to connect with more finance leaders in the area"
+
+          Step 2: Lunch @ NewtonX Office
+          "Hi [First Name], I'm hosting a lunch at the NewtonX office next week and would love to invite you. I think you'd find the conversation with our team and other finance leaders valuable"
+
+          Step 3: NYC NewtonX Conference
+          "Hi [First Name], I'm inviting you to the NYC NewtonX conference next month. I think you'd find the conversations with other finance leaders valuable"
+
+          How does that look, Ishan?`,
+      response_status: true,
+    },
+    {
+      type: 'ai',
+      message: 'Great! I will now proceed to create a review card for this campaign',
+      response_status: false,
+    },
+    {
+      type: 'action',
+      message: 'create_review_card(campaign_id)',
+      response_status: false,
+    },
+    {
+      type: 'ai',
+      message: `The review card has been successfully created. You can verify and make any final adjustments at this link:
+          https://app.sellscale.com/campaigns/8391/review
+
+          Best of luck with your campaign, Ishan! Let me know if you need anything else.`,
+      response_status: false,
+    },
   ];
   const [index, setIndex] = useState(0);
   const [isAnimation, setIsAnimation] = useState(true);
@@ -224,6 +269,7 @@ export default function SellscaleChat() {
       setChatHistory((chatHistory) => [...chatHistory, { type: currentResponse.type, message: currentResponse.message }]);
     } else {
       setChatHistory((chatHistory) => [...chatHistory, { type: 'user', message: mineChat }]);
+      setMineChat('');
     }
 
     if (response[currentIndex].response_status === true) {
@@ -250,7 +296,6 @@ export default function SellscaleChat() {
       await new Promise((resolve) => setTimeout(resolve, 4000));
       await handleChat(currentIndex + 1, true);
     }
-    setMineChat('');
   };
 
   useEffect(() => {
@@ -405,7 +450,6 @@ export default function SellscaleChat() {
                                 wordBreak: 'break-all',
                               }}
                               p={'sm'}
-                              mt={'md'}
                             >
                               {/* <span
                                 style={{

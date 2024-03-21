@@ -21,6 +21,7 @@ import {
   IconMap,
   IconTable,
   IconTarget,
+  IconWallpaper,
   IconWashMachine,
   IconWorld,
 } from '@tabler/icons';
@@ -34,10 +35,11 @@ import ScrapingReport from './ScrapingReport';
 import TAMGraphV2 from './TAMGraphV2';
 import PulseTabSelector from './PulseTabSelector';
 import Territories from './Territories';
+import OngoingScrapes from './OngoingScrapes';
 
 const ContactOverview = () => {
-  const userToken = useRecoilValue(userTokenState)
-  const userData = useRecoilValue(userDataState)
+  const userToken = useRecoilValue(userTokenState);
+  const userData = useRecoilValue(userDataState);
 
   return (
     <Tabs defaultValue='segments' className='min-h-full flex flex-col'>
@@ -75,8 +77,11 @@ const ContactOverview = () => {
           <IconMap size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
           Territories
         </Tabs.Tab>
-        
-        
+        <Tabs.Tab value='ongoing_scrapes'>
+          <IconWallpaper size='0.8rem' style={{ marginRight: '8px', marginTop: '4px' }} />
+          Ongoing Scrapes
+        </Tabs.Tab>
+
         {/* <Tabs.Tab value='TAM_graph' style={{ marginRight: '8px' }}>
           TAM Graph
         </Tabs.Tab> */}
@@ -100,6 +105,11 @@ const ContactOverview = () => {
       <Tabs.Panel value='territories' pt='xs' style={{ position: 'relative' }}>
         <Territories />
       </Tabs.Panel>
+
+      <Tabs.Panel value='ongoing_scrapes' pt='xs' style={{ position: 'relative' }}>
+        <OngoingScrapes />
+      </Tabs.Panel>
+
       {/* <Tabs.Panel value='prospect_scoring'>
           <ICPFilters />
       </Tabs.Panel> */}
@@ -120,13 +130,19 @@ const ContactOverview = () => {
         <Box pl='md' pr='md' mt='xs' pb='4px' w='100%' display='flex'>
           <Button
             ml='auto'
-            onClick={() => window.location.href = '/contacts/find?campaign_id=' + userData?.unassigned_persona_id}  
+            onClick={() =>
+              (window.location.href =
+                '/contacts/find?campaign_id=' + userData?.unassigned_persona_id)
+            }
           >
             Add Contacts
           </Button>
         </Box>
-        <iframe 
-          src={'https://sellscale.retool.com/embedded/public/93860ed4-1e1f-442a-a00e-c4ea46a2865b#authToken=' + userToken}
+        <iframe
+          src={
+            'https://sellscale.retool.com/embedded/public/93860ed4-1e1f-442a-a00e-c4ea46a2865b#authToken=' +
+            userToken
+          }
           style={{
             width: '100%',
             height: '100%',

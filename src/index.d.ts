@@ -6,6 +6,20 @@ export interface MsgResponse {
   data?: any;
 }
 
+export interface ApolloScrape {
+  id: number;
+  archetype_id?: number;
+  archetype_name?: string;
+  segment_id?: number;
+  segment_name?: string;
+  name: string;
+  page_num: number;
+  page_size: number;
+  max_pages?: number;
+  filters: Record<string, any>;
+  active: boolean;
+}
+
 export interface ActivityLog {
   client_sdr_id: number;
   created_at: string;

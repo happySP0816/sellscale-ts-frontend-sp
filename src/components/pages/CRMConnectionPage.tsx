@@ -158,8 +158,6 @@ const CRMConnectionPage: React.FC = () => {
     },
   });
 
-  console.log(syncData, availableOperations);
-
   const [crmSetup, setCRMSetup] = useState([
     {
       title: 'Leads vs Account + Contacts',

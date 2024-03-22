@@ -4,6 +4,8 @@ import { ActionIcon, Avatar, Box, Button, Card, Flex, Image, Input, Popover, Scr
 import { IconChartBar, IconMessage, IconSend, IconTargetArrow, IconX } from '@tabler/icons';
 import { useRecoilValue } from 'recoil';
 import { userDataState } from '@atoms/userAtoms';
+import { useNavigate } from 'react-router-dom';
+import { navigateToPage } from '@utils/documentChange';
 
 interface ChatEntry {
   type: string;
@@ -43,6 +45,7 @@ export default function SellscaleChat() {
   const [chatbot, setChatbot] = useState(false);
   const [mineChat, setMineChat] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleEnterKeyPress = (event: any) => {
     if (event.key === 'Enter') {
@@ -61,6 +64,7 @@ export default function SellscaleChat() {
       type: 'ai',
       message: "Hello Ishan! I'm SellScale AI. To kick things off, what kind of campaign did you want to run today?",
       response_status: true,
+      go_to_url: '/campaigns',
     },
     {
       type: 'ai',
@@ -69,11 +73,13 @@ export default function SellscaleChat() {
           b. 'Directors + VPs at NYC Hedge Funds'
           c. 'Hedge Fund Decision Makers'`,
       response_status: true,
+      go_to_url: '/null',
     },
     {
       type: 'action',
       message: "create_campaign('Directors + VPs at NYC Hedge Funds')",
       response_status: false,
+      go_to_url: '/test1',
     },
     {
       type: 'ai',
@@ -83,11 +89,13 @@ export default function SellscaleChat() {
           3. I will then proceed to process the list and verify it's accurate.
                 Give me a moment`,
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'action',
       message: "search('top 30 hedge funds in New York')",
       response_status: false,
+      go_to_url: '/test2',
     },
     {
       type: 'ai',
@@ -99,11 +107,13 @@ export default function SellscaleChat() {
 
         I'm going to look for decision makers (directors and managers) at these hedge funds now.`,
       response_status: false,
+      go_to_url: '/test3',
     },
     {
       type: 'action',
       message: 'find_contacts("managing partners, directors", list_30_hedge_funds)',
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'ai',
@@ -114,16 +124,19 @@ export default function SellscaleChat() {
 
           How do these contacts look? Anything you'd like to adjust?`,
       response_status: true,
+      go_to_url: null,
     },
     {
       type: 'ai',
       message: `On it! Sounds like you want to target vice presidents only. Let me adjust your filtering now`,
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'action',
       message: 'find_contacts("vice presidents", list_30_hedge_funds)',
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'ai',
@@ -134,17 +147,20 @@ export default function SellscaleChat() {
 
           By the way Ishan, I noticed that you went to Stanford in 2015. Would you like me to filter this list to only include contacts that went to Stanford University?`,
       response_status: true,
+      go_to_url: '/test4',
     },
     {
       type: 'ai',
       message: `Go trees! Targetting contacts that went to your university is a great strategy. 
           I will adjust the filtering to only include contacts that went to Stanford University while looking for vice presidents at hedge funds in New York.`,
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'action',
       message: 'find_contacts("vice presidents", list_30_hedge_funds, "Stanford University")',
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'ai',
@@ -155,16 +171,19 @@ export default function SellscaleChat() {
 
           How do these contacts look? Anything you'd like to adjust?`,
       response_status: true,
+      go_to_url: '/test5',
     },
     {
       type: 'ai',
       message: `Great! I will now proceed to process the list and verify it's accurate`,
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'action',
       message: 'score_contacts(list_27_vp_hedge_funds)',
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'ai',
@@ -177,11 +196,13 @@ export default function SellscaleChat() {
 
           Let's get started with writing the campaign sequence. To kick things off, let me check your asset library for any interesting assets.`,
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'action',
       message: 'find_relevant_assets("hedge funds", "vice presidents")',
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'ai',
@@ -194,21 +215,25 @@ export default function SellscaleChat() {
 
           Would you like to use any of these assets in your campaign?`,
       response_status: true,
+      go_to_url: null,
     },
     {
       type: 'ai',
       message: `Are there any other assets you'd like for us to use?`,
       response_status: true,
+      go_to_url: null,
     },
     {
       type: 'ai',
       message: `Inviting them to get lunch at the office is a great idea! I will create that asset and connect it to your campaign.`,
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'action',
       message: 'create_asset("Lunch @ NewtonX Office", "Invite your prospect to get lunch at the NewtonX office")',
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'ai',
@@ -216,12 +241,14 @@ export default function SellscaleChat() {
 
           I will proceed to create a 3 step LinkedIn sequence for this campaign.`,
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'action',
       message:
         'create_sequence("LinkedIn", "3-step", "hedge funds", "vice presidents", assets=["Coffee chat", "Lunch @ NewtonX Office", "NYC NewtonX Conference"])',
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'ai',
@@ -238,16 +265,19 @@ export default function SellscaleChat() {
 
           How does that look, Ishan?`,
       response_status: true,
+      go_to_url: null,
     },
     {
       type: 'ai',
       message: 'Great! I will now proceed to create a review card for this campaign',
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'action',
       message: 'create_review_card(campaign_id)',
       response_status: false,
+      go_to_url: null,
     },
     {
       type: 'ai',
@@ -256,6 +286,7 @@ export default function SellscaleChat() {
 
           Best of luck with your campaign, Ishan! Let me know if you need anything else.`,
       response_status: false,
+      go_to_url: null,
     },
   ];
   const [index, setIndex] = useState(0);
@@ -296,10 +327,14 @@ export default function SellscaleChat() {
       await new Promise((resolve) => setTimeout(resolve, 4000));
       await handleChat(currentIndex + 1, true);
     }
+    // if (response[currentIndex].go_to_url !== null) {
+    //   console.log('qqqqqqqqqqqqqqqqqqqqqqqq');
+    //   navigateToPage(navigate, response[currentIndex].go_to_url);
+    // }
   };
 
   useEffect(() => {
-    if (!hasCalledHandleChat.current) {
+    if (!hasCalledHandleChat.current && chatbot) {
       handleChat(index, true);
       hasCalledHandleChat.current = true;
     }

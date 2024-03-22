@@ -73,13 +73,13 @@ export default function SellscaleChat() {
           b. 'Directors + VPs at NYC Hedge Funds'
           c. 'Hedge Fund Decision Makers'`,
       response_status: true,
-      go_to_url: '/null',
+      go_to_url: '/overview',
     },
     {
       type: 'action',
       message: "create_campaign('Directors + VPs at NYC Hedge Funds')",
       response_status: false,
-      go_to_url: '/test1',
+      go_to_url: '/analytics',
     },
     {
       type: 'ai',
@@ -95,7 +95,7 @@ export default function SellscaleChat() {
       type: 'action',
       message: "search('top 30 hedge funds in New York')",
       response_status: false,
-      go_to_url: '/test2',
+      go_to_url: '/overview',
     },
     {
       type: 'ai',
@@ -124,7 +124,7 @@ export default function SellscaleChat() {
 
           How do these contacts look? Anything you'd like to adjust?`,
       response_status: true,
-      go_to_url: null,
+      go_to_url: '/contacts/overview',
     },
     {
       type: 'ai',
@@ -303,6 +303,10 @@ export default function SellscaleChat() {
       setMineChat('');
     }
 
+    if (response[currentIndex].go_to_url !== null) {
+      navigateToPage(navigate, response[currentIndex].go_to_url as string);
+    }
+
     if (response[currentIndex].response_status === true) {
       if (!flag) {
         setIndex(currentIndex + 1);
@@ -327,10 +331,6 @@ export default function SellscaleChat() {
       await new Promise((resolve) => setTimeout(resolve, 4000));
       await handleChat(currentIndex + 1, true);
     }
-    // if (response[currentIndex].go_to_url !== null) {
-    //   console.log('qqqqqqqqqqqqqqqqqqqqqqqq');
-    //   navigateToPage(navigate, response[currentIndex].go_to_url);
-    // }
   };
 
   useEffect(() => {

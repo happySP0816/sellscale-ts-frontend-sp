@@ -18,7 +18,7 @@ import { currentProjectState } from '@atoms/personaAtoms';
 import { userTokenState } from '@atoms/userAtoms';
 import { API_URL } from '@constants/data';
 
-const BumpFrameworkAssets: React.FC<{ bump_framework_id: number }> = ({ bump_framework_id }) => {
+const CtaAssets: React.FC<{ cta_id: number }> = ({ cta_id }) => {
   const [opened, setOpened] = useState(false);
   const [assets, setAssets] = useState([]);
   const [selectedAsset, setSelectedAsset] = useState('');
@@ -27,9 +27,10 @@ const BumpFrameworkAssets: React.FC<{ bump_framework_id: number }> = ({ bump_fra
   const userToken = useRecoilValue(userTokenState);
 
   useEffect(() => {
+    console.log('cta_id', cta_id);
     fetchAssets();
     fetchAttachedAssets();
-  }, [bump_framework_id]); // Re-run these functions if bump_framework_id changes
+  }, [cta_id]); // Re-run these functions if cta_id changes
 
   const fetchAssets = () => {
     const archetype_id = currentProject?.id;
@@ -54,7 +55,7 @@ const BumpFrameworkAssets: React.FC<{ bump_framework_id: number }> = ({ bump_fra
 
   const fetchAttachedAssets = () => {
     fetch(
-      `${API_URL}/bump_framework/get_all_asset_mapping?bump_framework_id=${bump_framework_id}`,
+      `${API_URL}/message_generation/cta/get_all_asset_mapping?generated_message_cta_id=${cta_id}`,
       {
         method: 'GET',
         headers: {
@@ -71,14 +72,14 @@ const BumpFrameworkAssets: React.FC<{ bump_framework_id: number }> = ({ bump_fra
   };
 
   const addAsset = () => {
-    fetch(`${API_URL}/bump_framework/create_asset_mapping`, {
+    fetch(`${API_URL}/message_generation/cta/create_asset_mapping`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + userToken,
       },
       body: JSON.stringify({
-        bump_framework_id: bump_framework_id,
+        generated_message_cta_id: cta_id,
         asset_id: selectedAsset,
       }),
     })
@@ -93,14 +94,14 @@ const BumpFrameworkAssets: React.FC<{ bump_framework_id: number }> = ({ bump_fra
   };
 
   const removeAsset = (assetMappingId: number) => {
-    fetch(`${API_URL}/bump_framework/delete_asset_mapping`, {
+    fetch(`${API_URL}/message_generation/cta/delete_asset_mapping`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + userToken,
       },
       body: JSON.stringify({
-        bump_framework_step_to_asset_mapping_id: assetMappingId,
+        cta_to_asset_mapping_id: assetMappingId,
       }),
     })
       .then((response) => {
@@ -117,14 +118,7 @@ const BumpFrameworkAssets: React.FC<{ bump_framework_id: number }> = ({ bump_fra
 
   return (
     <>
-      <Badge
-        color='blue'
-        ml='xs'
-        variant='outline'
-        size='xs'
-        style={{ cursor: 'pointer' }}
-        onClick={() => setOpened(true)}
-      >
+      <Badge color='blue' ml='xs' variant='outline' size='xs' onClick={() => setOpened(true)}>
         {attachedAssets.length} used assets
       </Badge>
       <Modal opened={opened} onClose={() => setOpened(false)} title='Select an asset'>
@@ -172,4 +166,4 @@ const BumpFrameworkAssets: React.FC<{ bump_framework_id: number }> = ({ bump_fra
   );
 };
 
-export default BumpFrameworkAssets;
+export default CtaAssets;

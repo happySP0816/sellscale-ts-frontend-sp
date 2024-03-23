@@ -8,8 +8,10 @@ import {
   Flex,
   MantineColor,
   Badge,
-} from "@mantine/core";
-import { IconEdit, IconTrash } from "@tabler/icons";
+  Group,
+} from '@mantine/core';
+import CtaAssets from '@modals/CtaAssets';
+import { IconEdit, IconTrash } from '@tabler/icons';
 import { deterministicMantineColor } from '@utils/requests/utils';
 
 interface Tag {
@@ -17,7 +19,7 @@ interface Tag {
   highlight?: string;
   color: MantineColor;
   hovered?: string;
-  variant: "subtle" | "filled" | "light";
+  variant: 'subtle' | 'filled' | 'light';
 }
 
 export interface TabOption {
@@ -42,58 +44,47 @@ export const CTAOption: React.FC<{
     total_responded?: number;
     total_count?: number;
   };
-}> = ({
-  data,
-  onToggle,
-  onClickEdit,
-  onClickDelete,
-  autoMarkScheduling,
-  acceptance,
-}) => {
+}> = ({ data, onToggle, onClickEdit, onClickDelete, autoMarkScheduling, acceptance }) => {
   return (
     <Card
-      radius={"md"}
-      py={"1rem"}
-      pos={"relative"}
+      radius={'md'}
+      py={'1rem'}
+      pos={'relative'}
       sx={(theme) => ({
-        border: "1px dashed " + theme.colors.gray[2],
-        overflow: "unset",
+        border: '1px dashed ' + theme.colors.gray[2],
+        overflow: 'unset',
       })}
     >
-      <Badge
-        fw={700}
-        variant="light"
-        pos={"absolute"}
-        top={-10}
-        left={104}
-        size='sm'
-        style={{ zIndex: 10 }}
-        color={deterministicMantineColor(data.type || "manually-added")}
-      >
-        {data.type ? data.type.replace("-", " ") : "CTA Type"}
-      </Badge>
-      <Flex direction={"row"} w={"100%"} gap={"0.75rem"}>
-        <Flex wrap={"wrap"} gap={"0.5rem"} align={"center"}>
+      <Group spacing={5} pos={'absolute'} top={-10} left={104} style={{ zIndex: 10 }} noWrap>
+        <Badge
+          fw={700}
+          variant='light'
+          size='sm'
+          color={deterministicMantineColor(data.type || 'manually-added')}
+        >
+          {data.type ? data.type.replace('-', ' ') : 'CTA Type'}
+        </Badge>
+
+        <CtaAssets cta_id={data.id} />
+      </Group>
+
+      <Flex direction={'row'} w={'100%'} gap={'0.75rem'}>
+        <Flex wrap={'wrap'} gap={'0.5rem'} align={'center'}>
           <Tooltip
-            label={
-              "Prospects: " +
-              acceptance.total_responded +
-              "/" +
-              acceptance.total_count
-            }
+            label={'Prospects: ' + acceptance.total_responded + '/' + acceptance.total_count}
             withArrow
             withinPortal
           >
             <Flex
-              direction="column"
-              align="center"
+              direction='column'
+              align='center'
               style={{ borderRadius: 12, cursor: 'pointer' }}
               mr='md'
             >
-              <Text color={"blue.6"} fw={700} fz={18}>
+              <Text color={'blue.6'} fw={700} fz={18}>
                 {acceptance.percentage}%
               </Text>
-              <Text color="blue.4" size='10px'>
+              <Text color='blue.4' size='10px'>
                 ACCEPTANCE
               </Text>
             </Flex>
@@ -135,45 +126,45 @@ export const CTAOption: React.FC<{
               </Tooltip>
             )} */}
         </Flex>
-        <Flex align={"center"} mr='md'>
-          <Text color={"gray.8"} fw={500} fz='14px'>
+        <Flex align={'center'} mr='md'>
+          <Text color={'gray.8'} fw={500} fz='14px'>
             {data.label}
-            <Tooltip label="Edit CTA">
-              <Button
-                size="compact-xs"
-                variant="subtle"
-                ml='8px'
-                fz="xs"
-                onClick={onClickEdit}
-              >
-                  <IconEdit size={14} />
+            <Tooltip label='Edit CTA'>
+              <Button size='compact-xs' variant='subtle' ml='8px' fz='xs' onClick={onClickEdit}>
+                <IconEdit size={14} />
               </Button>
             </Tooltip>
           </Text>
         </Flex>
-        <Flex gap={"0.5rem"} align={"center"} ml={"auto"}>
+        <Flex gap={'0.5rem'} align={'center'} ml={'auto'}>
           {autoMarkScheduling && (
-              <Tooltip
-                label="Accepted invite will automatically classify prospect as 'scheduling'"
-                withArrow
-              >
-                <Text sx={{ cursor: "pointer" }} size="sm">
-                  🛎
-                </Text>
-              </Tooltip>
-            )}
-          <ActionIcon radius="xl" onClick={onClickDelete} sx={{
-            visibility: acceptance?.total_count && acceptance?.total_count > 0 ? 'hidden' : 'visible',
-            display: acceptance?.total_count && acceptance?.total_count > 0 ? 'none' : 'block',
-            opacity: acceptance?.total_count && acceptance?.total_count > 0 ? 0.5 : 1,
-            cursor: acceptance?.total_count && acceptance?.total_count > 0 ? 'not-allowed' : 'pointer'
-          }}>
-            <IconTrash size='1rem'/>
+            <Tooltip
+              label="Accepted invite will automatically classify prospect as 'scheduling'"
+              withArrow
+            >
+              <Text sx={{ cursor: 'pointer' }} size='sm'>
+                🛎
+              </Text>
+            </Tooltip>
+          )}
+          <ActionIcon
+            radius='xl'
+            onClick={onClickDelete}
+            sx={{
+              visibility:
+                acceptance?.total_count && acceptance?.total_count > 0 ? 'hidden' : 'visible',
+              display: acceptance?.total_count && acceptance?.total_count > 0 ? 'none' : 'block',
+              opacity: acceptance?.total_count && acceptance?.total_count > 0 ? 0.5 : 1,
+              cursor:
+                acceptance?.total_count && acceptance?.total_count > 0 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            <IconTrash size='1rem' />
           </ActionIcon>
           <Switch
             checked={data.checked}
-            color={"green"}
-            size="sm"
+            color={'green'}
+            size='sm'
             onChange={({ currentTarget: { checked } }) => onToggle(checked)}
           />
         </Flex>

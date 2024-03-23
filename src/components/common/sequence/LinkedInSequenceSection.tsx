@@ -145,11 +145,7 @@ import AIBrainPill from '@common/persona/ICPFilter/AiBrainPill';
 import getResearchPointTypes from '@utils/requests/getResearchPointTypes';
 import BumpFrameworkAssets from '@modals/BumpFrameworkAssets';
 
-export default function LinkedInSequenceSection(
-  props: {
-    backFunction?: () => void;
-  }
-) {
+export default function LinkedInSequenceSection(props: { backFunction?: () => void }) {
   const [activeCard, setActiveCard] = useState(0);
 
   const userToken = useRecoilValue(userTokenState);

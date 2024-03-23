@@ -118,7 +118,14 @@ const CtaAssets: React.FC<{ cta_id: number }> = ({ cta_id }) => {
 
   return (
     <>
-      <Badge color='blue' ml='xs' variant='outline' size='xs' onClick={() => setOpened(true)}>
+      <Badge
+        color='blue'
+        ml='xs'
+        variant='outline'
+        size='xs'
+        style={{ cursor: 'pointer' }}
+        onClick={() => setOpened(true)}
+      >
         {attachedAssets.length} used assets
       </Badge>
       <Modal opened={opened} onClose={() => setOpened(false)} title='Select an asset'>

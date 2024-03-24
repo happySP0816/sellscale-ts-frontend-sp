@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { API_URL } from '@constants/data';
-import { useRecoilValue } from 'recoil';
-import { userTokenState } from '@atoms/userAtoms';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { API_URL } from "@constants/data";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
 import {
   Card,
   Text,
@@ -14,17 +14,25 @@ import {
   useMantineTheme,
   Loader,
   Stack,
-} from '@mantine/core';
-import { IconArrowRight } from '@tabler/icons';
-import moment from 'moment';
-import { useNavigate } from 'react-router-dom';
-import DashboardSection from './DashboardSection';
-import RecommendedSegments from './RecommendedSegments';
+  Grid,
+  Badge,
+} from "@mantine/core";
+import {
+  IconArrowRight,
+  IconCircle,
+  IconCircleCheck,
+  IconTargetArrow,
+} from "@tabler/icons";
+import moment from "moment";
+import { useNavigate } from "react-router-dom";
+import DashboardSection from "./DashboardSection";
+import RecommendedSegments from "./RecommendedSegments";
+import WhiteLogo from "../../../../../public/favicon.svg";
 
 export interface Task {
   id: number;
-  urgency: 'HIGH' | 'MEDIUM' | 'LOW';
-  status: 'PENDING' | 'COMPLETED' | 'DISMISSED';
+  urgency: "HIGH" | "MEDIUM" | "LOW";
+  status: "PENDING" | "COMPLETED" | "DISMISSED";
   emoji: string;
   title: string;
   subtitle: string;
@@ -44,6 +52,7 @@ const OperatorDashboard = (props: PropsType) => {
   const [highPriorityTasks, setHighPriorityTasks] = useState<Task[]>([]);
   const [mediumPriorityTasks, setMediumPriorityTasks] = useState<Task[]>([]);
   const [lowPriorityTasks, setLowPriorityTasks] = useState<Task[]>([]);
+  const [priorityTasks, setPriorityTasks] = useState<Task[]>([]);
   const [oldTasks, setOldTasks] = useState<Task[]>([]);
   const navigate = useNavigate();
 
@@ -60,8 +69,8 @@ const OperatorDashboard = (props: PropsType) => {
       try {
         const response = await axios.get(`${API_URL}/operator_dashboard/all`, {
           headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
+            "Content-Type": "application/json",
+            Accept: "application/json",
             Authorization: `Bearer ${userToken}`,
           },
         });
@@ -71,11 +80,16 @@ const OperatorDashboard = (props: PropsType) => {
         const tasks = response.data.entries;
         console.log(tasks);
         categorizeTasks(tasks);
+        setPriorityTasks(
+          tasks.filter((data: any) => data.status === "PENDING")
+        );
 
-        const incompleteTasks = tasks.filter((task: Task) => task.status === 'PENDING');
+        const incompleteTasks = tasks.filter(
+          (task: Task) => task.status === "PENDING"
+        );
         props.onOperatorDashboardEntriesChange(incompleteTasks);
       } catch (error) {
-        console.error('Error fetching tasks', error);
+        console.error("Error fetching tasks", error);
         setLoading(false);
       }
     };
@@ -90,17 +104,17 @@ const OperatorDashboard = (props: PropsType) => {
       old: Task[] = [];
 
     tasks.forEach((task: Task) => {
-      if (task.status !== 'PENDING') {
+      if (task.status !== "PENDING") {
         old.push(task);
       } else {
         switch (task.urgency) {
-          case 'HIGH':
+          case "HIGH":
             high.push(task);
             break;
-          case 'MEDIUM':
+          case "MEDIUM":
             medium.push(task);
             break;
-          case 'LOW':
+          case "LOW":
             low.push(task);
             break;
           default:
@@ -109,9 +123,9 @@ const OperatorDashboard = (props: PropsType) => {
       }
     });
 
-    setHighPriorityTasks(high);
-    setMediumPriorityTasks(medium);
-    setLowPriorityTasks(low);
+    // setHighPriorityTasks(high);
+    // setMediumPriorityTasks(medium);
+    // setLowPriorityTasks(low);
     setOldTasks(old);
   };
 
@@ -123,61 +137,114 @@ const OperatorDashboard = (props: PropsType) => {
 
   const theme = useMantineTheme();
 
-  const renderTaskCard = (task: Task) => (
-    <Card withBorder mb='xs' p='md' key={task.id}>
-      <Flex>
-        <Box
-          sx={{
-            borderRadius: '100px',
-            textAlign: 'center',
-            width: 36,
-            height: 36,
-            flexShrink: 0,
-          }}
-          bg={
-            task.status !== 'PENDING'
-              ? theme.colors.gray[3]
-              : task.urgency === 'HIGH'
-              ? theme.colors.red[3]
-              : task.urgency === 'MEDIUM'
-              ? theme.colors.yellow[3]
-              : task.urgency === 'LOW'
-              ? theme.colors.green[3]
-              : ''
-          }
-          mr='16px'
-          mt='4px'
-        >
-          <Text fz={'18px'} size='xl' mt='5px'>
-            {task.emoji}
-          </Text>
-        </Box>
-        <Box w='80%'>
-          <Title order={5}>{task.title}</Title>
-          <Text color='#666' size='sm'>
-            {task.subtitle}
-          </Text>
-          <Text color='gray' fw='600' fz='xs' mt='xs'>
-            Due on {moment(task.due_date).format('MMM Do YYYY')}
-          </Text>
-        </Box>
-        <Group w='40%' sx={{ justifyContent: 'flex-end' }}>
-          <Button
-            component='a'
-            variant='filled'
-            disabled={task.status !== 'PENDING'}
-            color={'teal'}
-            onClick={() => redirectToTask(task.id)}
-            loading={fetchingComplete && currentTaskId === task.id}
+  const renderTaskCard = (task: Task) => {
+    return (
+      <Grid.Col span={4} mt={"sm"}>
+        <Card withBorder mb="xs" p="md" key={task.id} h={"100%"}>
+          <Flex
+            direction={"column"}
+            gap={"sm"}
+            justify={"space-between"}
+            h={"100%"}
           >
-            {/* {task.cta} */}
-            Let's do it
-            {'  '} <IconArrowRight size={16} />
-          </Button>
-        </Group>
-      </Flex>
-    </Card>
-  );
+            <Flex align={"center"} justify={"space-between"}>
+              <Flex
+                sx={{
+                  borderRadius: "100px",
+                  textAlign: "center",
+                  width: 36,
+                  height: 36,
+                  flexShrink: 0,
+                  border:
+                    task.status === "COMPLETED" ||
+                    (task.status === "PENDING" && task.urgency === "HIGH")
+                      ? ""
+                      : "1px dashed",
+                }}
+                justify={"center"}
+                align={"center"}
+                bg={
+                  task.status === "COMPLETED"
+                    ? theme.colors.green[0]
+                    : task.status === "PENDING" && task.urgency === "HIGH"
+                    ? theme.colors.red[0]
+                    : task.status === "PENDING" && task.urgency === "MEDIUM"
+                    ? theme.colors.orange[0]
+                    : task.status === "PENDING" && task.urgency === "LOW"
+                    ? theme.colors.gray[0]
+                    : ""
+                }
+              >
+                {task.status === "COMPLETED" ? (
+                  <IconTargetArrow
+                    color={theme.colors.green[4]}
+                    size={"1.2rem"}
+                  />
+                ) : task.status === "PENDING" && task.urgency === "MEDIUM" ? (
+                  <img src={WhiteLogo} className="w-[20px] h-[20px]" />
+                ) : task.status === "PENDING" && task.urgency === "HIGH" ? (
+                  <IconTargetArrow
+                    color={theme.colors.red[4]}
+                    size={"1.2rem"}
+                  />
+                ) : task.status === "PENDING" && task.urgency === "MEDIUM" ? (
+                  <IconTargetArrow
+                    color={theme.colors.orange[4]}
+                    size={"1.2rem"}
+                  />
+                ) : (
+                  <></>
+                )}
+              </Flex>
+              {task.status === "PENDING" && task.urgency === "HIGH" && (
+                <Badge size="lg" color={"red"}>
+                  High Priority
+                </Badge>
+              )}
+            </Flex>
+            <Box>
+              <Title order={5} lineClamp={2}>
+                {task.title}
+              </Title>
+              <Text color="#666" size="sm" lineClamp={4}>
+                {task.subtitle}
+              </Text>
+              {/* <Text color='gray' fw='600' fz='xs' mt='xs'>
+                Due on {moment(task.due_date).format('MMM Do YYYY')}
+              </Text> */}
+            </Box>
+            {task.status === "COMPLETED" ? (
+              <Button
+                component="a"
+                w={"fit-content"}
+                variant="outline"
+                color={"green"}
+                // onClick={() => redirectToTask(task.id)}
+                disabled={true}
+                loading={fetchingComplete && currentTaskId === task.id}
+              >
+                {"  "}{" "}
+                <IconCircleCheck size={16} color={theme.colors.gray[5]} />
+                Reviewed
+              </Button>
+            ) : (
+              <Button
+                component="a"
+                w={"fit-content"}
+                variant="outline"
+                color={"red"}
+                onClick={() => redirectToTask(task.id)}
+                loading={fetchingComplete && currentTaskId === task.id}
+              >
+                Review
+                {"  "} <IconArrowRight size={16} color="red" />
+              </Button>
+            )}
+          </Flex>
+        </Card>
+      </Grid.Col>
+    );
+  };
 
   const renderSection = (title: string, tasks: Task[]) => {
     if (tasks.length === 0) return null;
@@ -186,28 +253,29 @@ const OperatorDashboard = (props: PropsType) => {
       <DashboardSection
         tasks={tasks}
         title={title}
-        content={<>{tasks.map(renderTaskCard)}</>}
-        defaultOpen={title !== 'Completed tasks'}
+        content={<Grid>{tasks.map(renderTaskCard)}</Grid>}
+        defaultOpen={title !== "Completed tasks"}
       />
     );
   };
 
   if (loading) {
     return (
-      <Card shadow='sm' p='lg'>
-        <Loader ml='auto' mr='auto' />
+      <Card shadow="sm" p="lg">
+        <Loader ml="auto" mr="auto" />
       </Card>
     );
   }
 
   return (
-    <Box p='lg'>
+    <Box py="lg">
       <Stack>
-        {renderSection('High Priority', highPriorityTasks)}
+        {/* {renderSection('High Priority', highPriorityTasks)}
         {renderSection('Medium Priority', mediumPriorityTasks)}
-        {renderSection('Low Priority', lowPriorityTasks)}
-        {renderSection('Completed tasks', oldTasks)}
-        <RecommendedSegments/>
+        {renderSection('Low Priority', lowPriorityTasks)} */}
+        {renderSection("Recent Updates", priorityTasks)}
+        <RecommendedSegments />
+        {renderSection("Completed", oldTasks)}
       </Stack>
     </Box>
   );

@@ -155,11 +155,6 @@ const OperatorDashboard = (props: PropsType) => {
                   width: 36,
                   height: 36,
                   flexShrink: 0,
-                  border:
-                    task.status === "COMPLETED" ||
-                    (task.status === "PENDING" && task.urgency === "HIGH")
-                      ? ""
-                      : "1px dashed",
                 }}
                 justify={"center"}
                 align={"center"}
@@ -172,7 +167,7 @@ const OperatorDashboard = (props: PropsType) => {
                     ? theme.colors.orange[0]
                     : task.status === "PENDING" && task.urgency === "LOW"
                     ? theme.colors.gray[0]
-                    : ""
+                    : theme.colors.green[0]
                 }
               >
                 {task.status === "COMPLETED" ? (
@@ -193,7 +188,10 @@ const OperatorDashboard = (props: PropsType) => {
                     size={"1.2rem"}
                   />
                 ) : (
-                  <></>
+                  <IconTargetArrow
+                    color={theme.colors.green[4]}
+                    size={"1.2rem"}
+                  />
                 )}
               </Flex>
               {task.status === "PENDING" && task.urgency === "HIGH" && (
@@ -213,7 +211,7 @@ const OperatorDashboard = (props: PropsType) => {
                 Due on {moment(task.due_date).format('MMM Do YYYY')}
               </Text> */}
             </Box>
-            {task.status === "COMPLETED" ? (
+            {task.status !== "PENDING" ? (
               <Button
                 component="a"
                 w={"fit-content"}
@@ -254,7 +252,7 @@ const OperatorDashboard = (props: PropsType) => {
         tasks={tasks}
         title={title}
         content={<Grid>{tasks.map(renderTaskCard)}</Grid>}
-        defaultOpen={title !== "Completed tasks"}
+        defaultOpen={title !== "Completed"}
       />
     );
   };

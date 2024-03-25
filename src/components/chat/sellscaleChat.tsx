@@ -167,7 +167,7 @@ export default function SellscaleChat() {
 
           By the way Ishan, I noticed that you went to Stanford in 2015. Would you like me to filter this list to only include contacts that went to Stanford University?`,
       response_status: true,
-      go_to_url: "/test4",
+      go_to_url: null,
     },
     {
       type: "ai",
@@ -192,7 +192,7 @@ export default function SellscaleChat() {
 
           How do these contacts look? Anything you'd like to adjust?`,
       response_status: true,
-      go_to_url: "/test5",
+      go_to_url: null,
     },
     {
       type: "ai",
@@ -217,7 +217,7 @@ export default function SellscaleChat() {
 
           Let's get started with writing the campaign sequence. To kick things off, let me check your asset library for any interesting assets.`,
       response_status: false,
-      go_to_url: null,
+      go_to_url: "/contacts",
     },
     {
       type: "action",
@@ -236,7 +236,7 @@ export default function SellscaleChat() {
 
           Would you like to use any of these assets in your campaign?`,
       response_status: true,
-      go_to_url: null,
+      go_to_url: "/setup/linkedin",
     },
     {
       type: "ai",

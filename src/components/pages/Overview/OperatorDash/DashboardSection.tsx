@@ -1,8 +1,21 @@
-import React, { FC, useMemo } from 'react';
-import { Task } from './OperatorDash';
-import { Title, Divider, Box, Flex, Button, Collapse, ActionIcon } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons';
+import React, { FC, useMemo } from "react";
+import { Task } from "./OperatorDash";
+import {
+  Title,
+  Divider,
+  Box,
+  Flex,
+  Button,
+  Collapse,
+  ActionIcon,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import {
+  IconChevronDown,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronUp,
+} from "@tabler/icons";
 
 const DashboardSection: FC<{
   title: string;
@@ -12,39 +25,48 @@ const DashboardSection: FC<{
 }> = ({ title, tasks, content, defaultOpen = true }) => {
   const [opened, { toggle }] = useDisclosure(defaultOpen);
   const color = useMemo(() => {
-    if (title === 'Completed tasks') {
-      return '🟢';
+    if (title === "Completed tasks") {
+      return "🟢";
     }
-    if (title == 'Suggested segments') {
-      return '✨';
+    if (title == "Suggested segments") {
+      return "✨";
     }
-    return tasks[0].status !== 'PENDING'
-      ? '☑️'
-      : tasks[0].urgency === 'HIGH'
-      ? '🔴'
-      : tasks[0].urgency === 'MEDIUM'
-      ? '🟡'
-      : tasks[0].urgency === 'LOW'
-      ? '🟢'
-      : '';
+    return tasks[0].status !== "PENDING"
+      ? "☑️"
+      : tasks[0].urgency === "HIGH"
+      ? "🔴"
+      : tasks[0].urgency === "MEDIUM"
+      ? "🟡"
+      : tasks[0].urgency === "LOW"
+      ? "🟢"
+      : "";
   }, []);
 
   return (
     <Box>
-      <Flex align={'center'} gap={'sm'}>
-        <Title order={4} sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          {title} <span style={{ fontWeight: '400', color: 'gray', fontSize: '14px' }}>{tasks.length} tasks</span>
+      <Flex align={"center"} gap={"sm"}>
+        <Title
+          order={4}
+          sx={{ display: "flex", alignItems: "center", gap: "4px" }}
+        >
+          {title}{" "}
+          <span style={{ fontWeight: "400", color: "gray", fontSize: "14px" }}>
+            {tasks.length} tasks
+          </span>
         </Title>
 
         <Divider style={{ flex: 1 }} />
 
         <Flex>
-          <ActionIcon>
-            <IconChevronLeft size={'0.8rem'} />
-          </ActionIcon>
-          <ActionIcon>
-            <IconChevronRight size={'0.8rem'} />
-          </ActionIcon>
+          {opened ? (
+            <ActionIcon onClick={toggle} aria-label="Close section">
+              <IconChevronUp />
+            </ActionIcon>
+          ) : (
+            <ActionIcon onClick={toggle} aria-label="Open section">
+              <IconChevronDown />
+            </ActionIcon>
+          )}
         </Flex>
 
         {/* <Button
@@ -69,9 +91,9 @@ const DashboardSection: FC<{
         </Button> */}
       </Flex>
 
-      {/* <Collapse in={opened} mt={'md'}> */}
-      {content}
-      {/* </Collapse> */}
+      <Collapse in={opened} mt={"md"}>
+        {content}
+      </Collapse>
     </Box>
   );
 };

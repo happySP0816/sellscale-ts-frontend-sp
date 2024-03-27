@@ -74,7 +74,7 @@ export default function SellscaleChat() {
     setChatbot(!chatbot);
   };
 
-  if (userData.id !== 34) {
+  if (userData.id !== 34 && userData.id !== 203) {
     return null;
   }
   const response = [
@@ -106,8 +106,8 @@ export default function SellscaleChat() {
           1. I am going to look for the top 30 hedge funds in New York
           2. I will then look for decision makers like directors and managers.
           3. I will then proceed to process the list and verify it's accurate.
-                Give me a moment`,
-      response_status: false,
+                Sound like a plan?`,
+      response_status: true,
       go_to_url: "/campaigns",
     },
     {
@@ -131,72 +131,46 @@ export default function SellscaleChat() {
     {
       type: "action",
       message:
-        'find_contacts("managing partners, directors", list_30_hedge_funds)',
+        'find_contacts("managing partners, directors", "vp" list_30_hedge_funds)',
       response_status: false,
-      go_to_url: "/contacts",
+      go_to_url: "/contacts/find",
     },
     {
       type: "ai",
-      message: `I found 1,391 directors and VPs at hedge funds in New York. Here's a sample:
-          - 👥 Rebecca Jordan, Director [linkedin.com/rebeccajordan]
-          - 👥 Fernance Morin, Managing Partner [linkedin.com/fernancemorin]
-          - 👥 Monica Patel, Vice President [linkedin.com/monicapatel]
+      message: `I found 4,100+ directors and VPs at hedge funds in New York. Here's a sample:
+          - 👥 Bob Sincerbeaux, Vice President @ Evercore
+          - 👥 Joseph Raia, Vice President @ Neuberger Berman 
+          - 👥 Nitin Sharma, Director @ The D. E. Shaw Group
 
-          How do these contacts look? Anything you'd like to adjust?`,
-      response_status: true,
-      go_to_url: "/contacts/overview",
-    },
-    {
-      type: "ai",
-      message: `On it! Sounds like you want to target vice presidents only. Let me adjust your filtering now`,
-      response_status: false,
-      go_to_url: null,
-    },
-    {
-      type: "action",
-      message: 'find_contacts("vice presidents", list_30_hedge_funds)',
-      response_status: false,
-      go_to_url: null,
-    },
-    {
-      type: "ai",
-      message: `I found 731 vice presidents at hedge funds in New York. I've listed a couple examples list below:
-          - 👥 Monica Patel, Vice President [linkedin.com/monicapatel]
-          - 👥 Stewart M. Johnson, Vice President [linkedin.com/stewartmjohnson]
-          - 👥 Johnathan Smith, Vice President [linkedin.com/johnathansmith]
-
-          By the way Ishan, I noticed that you went to Stanford in 2015. Would you like me to filter this list to only include contacts that went to Stanford University?`,
+          This is quite a broad list. Here's a recommended way to narrow down your list:
+          1. Focus on 'Vice President' titles only.
+          2. I noticed that you went to UC Berkeley in 2016. I can also filter for alums from your university.
+          
+          Should I apply these filters?`,
       response_status: true,
       go_to_url: null,
     },
     {
       type: "ai",
-      message: `Go trees! Targetting contacts that went to your university is a great strategy. 
-          I will adjust the filtering to only include contacts that went to Stanford University while looking for vice presidents at hedge funds in New York.`,
+      message: `Go Bears! Targetting contacts that went to your university is a great strategy.\n\nI will adjust the filtering to only include contacts that went to UC Berkeley and are currently VPs at the top 30 hedge funds in New York City.\n\nLet me adjust your filtering now`,
       response_status: false,
       go_to_url: null,
     },
     {
       type: "action",
       message:
-        'find_contacts("vice presidents", list_30_hedge_funds, "Stanford University")',
+        'find_contacts("vice presidents", list_30_hedge_funds, "UC Berkeley", "New York")',
       response_status: false,
-      go_to_url: null,
+      go_to_url: "/contacts",
     },
     {
       type: "ai",
-      message: `I found the following 27 vice presidents at hedge funds in New York who went to Stanford University. Review three below:
-          - 👥 Monica Patel, Vice President [linkedin.com/monicapatel] (Stanford University)
-          - 👥 Joshua P. Quin, Vice President [linkedin.com/joshuapquin] (Stanford University)
-          - 👥 Colin Z. Plath, Vice President [linkedin.com/colinzplath] (Stanford University)
-
-          How do these contacts look? Anything you'd like to adjust?`,
-      response_status: true,
-      go_to_url: null,
-    },
-    {
-      type: "ai",
-      message: `Great! I will now proceed to process the list and verify it's accurate`,
+      message: `I found the following 72 vice presidents at hedge funds in New York who went to UC Berkeley. Review three below:
+          - 👥 Monica Patel, Vice President [linkedin.com/monicapatel] (UC Berkeley)
+          - 👥 Joshua P. Quin, Vice President [linkedin.com/joshuapquin] (UC Berkeley)
+          - 👥 Colin Z. Plath, Vice President [linkedin.com/colinzplath] (UC Berkeley)
+          
+          I am going to proceed to score these contacts.`,
       response_status: false,
       go_to_url: null,
     },
@@ -208,16 +182,16 @@ export default function SellscaleChat() {
     },
     {
       type: "ai",
-      message: `I've gone ahead and imported, reviewed, and scored the profiles of all 27 contacts in this campaign.
-          🟩 23 Very High Fits
-          🟦 4 High Fits
+      message: `I've gone ahead and imported, reviewed, and scored the profiles of all 72 contacts in this campaign.
+          🟩 70 Very High Fits
+          🟦 2 High Fits
           🟨 0 Medium Fits
           🟧 0 Low Fits
           🟥 0 Very Low Fits
 
           Let's get started with writing the campaign sequence. To kick things off, let me check your asset library for any interesting assets.`,
       response_status: false,
-      go_to_url: "/contacts",
+      go_to_url: null,
     },
     {
       type: "action",
@@ -236,7 +210,7 @@ export default function SellscaleChat() {
 
           Would you like to use any of these assets in your campaign?`,
       response_status: true,
-      go_to_url: "/setup/linkedin",
+      go_to_url: null,
     },
     {
       type: "ai",
@@ -270,7 +244,7 @@ export default function SellscaleChat() {
       message:
         'create_sequence("LinkedIn", "3-step", "hedge funds", "vice presidents", assets=["Coffee chat", "Lunch @ NewtonX Office", "NYC NewtonX Conference"])',
       response_status: false,
-      go_to_url: null,
+      go_to_url: "/setup/linkedin",
     },
     {
       type: "ai",

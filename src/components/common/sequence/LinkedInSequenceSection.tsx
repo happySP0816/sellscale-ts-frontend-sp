@@ -144,6 +144,7 @@ import useRefresh from '@common/library/use-refresh';
 import AIBrainPill from '@common/persona/ICPFilter/AiBrainPill';
 import getResearchPointTypes from '@utils/requests/getResearchPointTypes';
 import BumpFrameworkAssets from '@modals/BumpFrameworkAssets';
+import LiInitialMessageAssets from '@modals/LiInitialMessageAssets';
 
 export default function LinkedInSequenceSection(props: { backFunction?: () => void }) {
   const [activeCard, setActiveCard] = useState(0);
@@ -3324,6 +3325,8 @@ function TemplateSection(props: {
                       </HoverCard> */}
 
                       <AIBrainPill />
+
+                      <LiInitialMessageAssets linkedin_initial_message_id={template.id} />
 
                       {template.research_points && template.research_points.length > 0 && (
                         <HoverCard width={280} shadow='md'>

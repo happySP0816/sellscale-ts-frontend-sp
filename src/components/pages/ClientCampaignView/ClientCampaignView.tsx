@@ -60,8 +60,9 @@ export default function ClientCampaignView() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
   const userData = useRecoilValue(userDataState);
-  const [activeCampaignOpen, { toggle: activeCampaignToggle }] =
-    useDisclosure(false);
+  const [activeCampaignOpen, { toggle: activeCampaignToggle }] = useDisclosure(
+    false
+  );
 
   const [acPageSize, setAcPageSize] = useState("25");
   const [raPageSize, setRaPageSize] = useState("25");
@@ -117,16 +118,13 @@ export default function ClientCampaignView() {
 
   useEffect(() => {
     const handleGetOutboundData = async () => {
-      const response = await fetch(`${API_URL}/campaigns`, {
+      const response = await fetch(`${API_URL}/campaigns/utilization`, {
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
           Authorization: `Bearer ${userToken}`,
         },
-        method: "POST",
-        body: JSON.stringify({
-          client_id: userData.id,
-        }),
+        method: "GET",
       });
       if (response.status === 200) {
         const data = await response.json();

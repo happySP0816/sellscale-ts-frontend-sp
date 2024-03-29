@@ -121,6 +121,7 @@ export interface CampaignEntityData {
     num_replies: number;
     num_sent: number;
     sdr_name: string;
+    num_prospects: number;
   };
   assets_used: {
     title: string;

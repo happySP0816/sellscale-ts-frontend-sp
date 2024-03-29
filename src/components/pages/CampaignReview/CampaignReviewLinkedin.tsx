@@ -845,8 +845,10 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
   const [finalizingFeedback, setFinalizingFeedback] = useState(false);
   const userToken = useRecoilValue(userTokenState);
 
-  const [campaignOverview, setCampaignOverview] =
-    useState<CampaignEntityData>();
+  const [
+    campaignOverview,
+    setCampaignOverview,
+  ] = useState<CampaignEntityData>();
   const [fetchingCampaign, setFetchingCampaign] = useState<boolean>(false);
 
   const navigate = useNavigate();
@@ -1029,7 +1031,7 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
               <IconUsers size={"1rem"} />
               Contacts:{" "}
               <span className="text-[#228be6]">
-                {campaignOverview?.contacts?.sample_contacts?.length}
+                {campaignOverview?.overview?.num_prospects}
               </span>
             </Text>
             <Divider orientation="vertical" />
@@ -1041,11 +1043,18 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
               <IconClock size={"1rem"} /> Time to complete:{" "}
               <span className="text-[#228be6]">
                 {(
+                  1 +
                   Math.ceil(
                     campaignOverview?.contacts?.sample_contacts?.length || 0
-                  ) / 75
+                  ) /
+                    75
                 ).toFixed(0)}{" "}
-                weeks
+                week
+                {Math.ceil(
+                  campaignOverview?.contacts?.sample_contacts?.length || 0
+                ) > 75
+                  ? "s"
+                  : ""}
               </span>
             </Text>
           </Flex>

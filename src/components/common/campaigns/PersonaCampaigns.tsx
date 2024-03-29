@@ -978,7 +978,7 @@ export function PersonCampaignCard(props: {
                   </Flex>
                 </Popover.Dropdown>
               </Popover>
-              <Popover width={350} position='bottom' withArrow shadow='md' opened={statuspopoverOpened}>
+              <Popover width={350} position='bottom' shadow='lg' opened={statuspopoverOpened}>
                 <Popover.Target>
                   <Stack pb={5}>
                     <Center>
@@ -995,7 +995,7 @@ export function PersonCampaignCard(props: {
                     </Center>
                   </Stack>
                 </Popover.Target>
-                <Popover.Dropdown>
+                <Popover.Dropdown sx={{ borderRadius: '8px' }} p={'xl'}>
                   <Flex gap={'sm'} align={'center'}>
                     <IconLoader color='#228be6' />{' '}
                     <Text fw={700} size={'lg'}>

@@ -22,6 +22,7 @@ import {
   NumberInput,
   SegmentedControl,
   Box,
+  Switch,
 } from '@mantine/core';
 import { ContextModalProps } from '@mantine/modals';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -38,6 +39,9 @@ import {
   IconPlus,
   IconUsers,
   IconSettings,
+  IconBrandLinkedin,
+  IconRecordMail,
+  IconMail,
 } from '@tabler/icons';
 import { DataTable } from 'mantine-datatable';
 import FileDropAndPreview from './upload-prospects/FileDropAndPreview';
@@ -54,11 +58,7 @@ import CreatePersona from '@common/persona/CreatePersona';
 import { getSinglePersona } from '@utils/requests/getPersonas';
 import { set } from 'lodash';
 
-export default function UploadProspectsModal({
-  context,
-  id,
-  innerProps,
-}: ContextModalProps<{ mode: 'ADD-ONLY' | 'ADD-CREATE' | 'CREATE-ONLY' }>) {
+export default function UploadProspectsModal({ context, id, innerProps }: ContextModalProps<{ mode: 'ADD-ONLY' | 'ADD-CREATE' | 'CREATE-ONLY' }>) {
   const theme = useMantineTheme();
   const userData = useRecoilValue(userDataState);
   const [personas, setPersonas] = useState<{ value: string; label: string; group: string | undefined }[]>([]);
@@ -247,33 +247,68 @@ export default function UploadProspectsModal({
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
       <Stack spacing='xl'>
+        <Text color='gray' size={'sm'}>
+          Enter the information below to describe and fine-tune your campaign
+        </Text>
         {!isFetching && (
           <>
             {innerProps.mode === 'CREATE-ONLY' ? (
-              <TextInput
-                placeholder='eg. C-Suite Sales Leaders in tech companies'
-                label='Descriptive Name'
-                value={createdPersona}
-                required
-                onChange={(e) => setCreatedPersona(e.currentTarget.value)}
-              />
+              <>
+                <TextInput
+                  placeholder='eg. C-Suite Sales Leaders in tech companies'
+                  label='Campaign Name'
+                  value={createdPersona}
+                  // required
+                  onChange={(e) => setCreatedPersona(e.currentTarget.value)}
+                />
+                <Textarea
+                  label='Describe the prospect'
+                  placeholder='Eg. I want to see product mangers in chicago who went to BYU and are currently in a hedge fund role at a large financial institution'
+                  minRows={3}
+                />
+                <TextInput
+                  placeholder='Eg. I want to grab a coffee with them!'
+                  label='Objective'
+                  // value={createdPersona}
+                  // required
+                  // onChange={(e) => setCreatedPersona(e.currentTarget.value)}
+                />
+                <Flex w={'100%'}>
+                  <Flex align={'center'} gap={'lg'} w={'100%'}>
+                    <Flex px={'lg'} py={'sm'} sx={{ border: '1px solid #ced4da', borderRadius: '8px' }} justify={'space-between'} align={'center'} w={'100%'}>
+                      <Text sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <IconBrandLinkedin color='white' fill='#228be6' />
+                        Linkedin
+                      </Text>
+                      <Switch />
+                    </Flex>
+                    <NumberInput placeholder='Steps' w={'200px'} size='lg' />
+                  </Flex>
+                </Flex>
+                <Flex w={'100%'}>
+                  <Flex align={'center'} gap={'lg'} w={'100%'}>
+                    <Flex px={'lg'} py={'sm'} sx={{ border: '1px solid #ced4da', borderRadius: '8px' }} justify={'space-between'} align={'center'} w={'100%'}>
+                      <Text sx={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <IconMail color='white' fill='#228be6' />
+                        Email
+                      </Text>
+                      <Switch />
+                    </Flex>
+                    <NumberInput placeholder='Steps' w={'200px'} size='lg' />
+                  </Flex>
+                </Flex>
+              </>
             ) : (
               <Select
                 label={'Set Persona'}
                 defaultValue={
                   defaultPersonas.current.length === 1 ||
-                  (defaultPersonas.current.length > 1 &&
-                    defaultPersonas.current[0].group === 'Active' &&
-                    defaultPersonas.current[1].group === 'Inactive')
+                  (defaultPersonas.current.length > 1 && defaultPersonas.current[0].group === 'Active' && defaultPersonas.current[1].group === 'Inactive')
                     ? defaultPersonas.current[0].value
                     : undefined
                 }
                 data={personas}
-                placeholder={
-                  innerProps.mode === 'ADD-ONLY'
-                    ? 'Select a persona for the prospects'
-                    : 'Select or create a persona for the prospects'
-                }
+                placeholder={innerProps.mode === 'ADD-ONLY' ? 'Select a persona for the prospects' : 'Select or create a persona for the prospects'}
                 nothingFound={'Nothing found'}
                 icon={<IconUsers size={14} />}
                 searchable
@@ -294,10 +329,7 @@ export default function UploadProspectsModal({
                 }}
                 onChange={(value) => {
                   // If created persona exists and is one of the existing personas, clear it
-                  if (
-                    createdPersona.length > 0 &&
-                    personas.filter((personas) => personas.value === value).length > 0
-                  ) {
+                  if (createdPersona.length > 0 && personas.filter((personas) => personas.value === value).length > 0) {
                     setPersonas(defaultPersonas.current);
                     setCreatedPersona('');
                   }
@@ -405,7 +437,9 @@ export default function UploadProspectsModal({
                 />
 
                 <Box>
-                  <Text fz='sm' fw={500}>Gen Mode</Text>
+                  <Text fz='sm' fw={500}>
+                    Gen Mode
+                  </Text>
                   <SegmentedControl
                     value={templateMode}
                     onChange={setTemplateMode}
@@ -420,11 +454,7 @@ export default function UploadProspectsModal({
                   label='Annual Contract Value (ACV)'
                   value={personaContractSize}
                   parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
-                  formatter={(value) =>
-                    !Number.isNaN(parseFloat(value))
-                      ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
-                      : '$ '
-                  }
+                  formatter={(value) => (!Number.isNaN(parseFloat(value)) ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',') : '$ ')}
                   onChange={(value) => {
                     setPersonaContractSize(value || 0);
                   }}

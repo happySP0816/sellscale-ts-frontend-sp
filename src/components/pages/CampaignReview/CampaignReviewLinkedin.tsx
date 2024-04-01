@@ -186,8 +186,8 @@ export const Contact = (props: ContactProps) => {
               Applied Filters
             </Text>
             <Text color="gray" fw={400} size={"sm"}>
-              Lorem ipsum dolor sit armet, consectetur adipiscing edit.
-              Curabitur gravida eget.
+              Change this subtitle to say "These are the filters applied to find
+              these contacts"
             </Text>
           </Box>
           {filterData?.length == 0 && (
@@ -777,7 +777,7 @@ function Finalize(props: CampaignFeedback) {
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
       <Card>
-        <Card withBorder>
+        {/* <Card withBorder>
           <Title order={4} mb="xs">
             Contacts Feedback
           </Title>
@@ -790,7 +790,7 @@ function Finalize(props: CampaignFeedback) {
               </Text>
             )}
           </Text>
-        </Card>
+        </Card> */}
 
         <Card withBorder mt="md">
           <Title order={4} mb="xs">
@@ -801,6 +801,8 @@ function Finalize(props: CampaignFeedback) {
               <i>{'"' + messagingFeedback + '"'}</i>
             ) : (
               <Text color="gray" size="sm">
+                Input any custom messaging you'd like the AI to use if needed.
+                If not, just launch the campaign. <br />
                 No feedback provided
               </Text>
             )}
@@ -979,7 +981,6 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
     );
   }
 
-  console.log("qqqqqqqqqqqqqqqqqqqq", steps);
   return (
     <div
       style={{
@@ -1013,7 +1014,7 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
             w={"fit-content"}
             gap={"sm"}
           >
-            <Text
+            {/* <Text
               sx={{ display: "flex", gap: "3px", alignItems: "center" }}
               size={"sm"}
               fw={500}
@@ -1021,14 +1022,17 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
               <IconTarget size={"1rem"} />
               Territory: <span className="text-[#228be6]">-</span>
             </Text>
-            <Divider orientation="vertical" />
+            <Divider orientation="vertical" /> */}
             <Text
               sx={{ display: "flex", gap: "3px", alignItems: "center" }}
               size={"sm"}
               fw={500}
             >
               <IconUsers size={"1rem"} />
-              Contacts: <span className="text-[#228be6]">-</span>
+              Contacts:{" "}
+              <span className="text-[#228be6]">
+                {campaignOverview?.overview?.num_prospects}
+              </span>
             </Text>
             <Divider orientation="vertical" />
             <Text
@@ -1037,7 +1041,21 @@ export default function CampaignReview(props: CampaignReviewLinkedinProps) {
               fw={500}
             >
               <IconClock size={"1rem"} /> Time to complete:{" "}
-              <span className="text-[#228be6]">-</span>
+              <span className="text-[#228be6]">
+                {(
+                  1 +
+                  Math.ceil(
+                    campaignOverview?.contacts?.sample_contacts?.length || 0
+                  ) /
+                    75
+                ).toFixed(0)}{" "}
+                week
+                {Math.ceil(
+                  campaignOverview?.contacts?.sample_contacts?.length || 0
+                ) > 75
+                  ? "s"
+                  : ""}
+              </span>
             </Text>
           </Flex>
         </Card>

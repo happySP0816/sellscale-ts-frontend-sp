@@ -78,7 +78,7 @@ export default function RealtimeResponseEngine() {
   ];
   return (
     <Card withBorder shadow='md'>
-      <Title order={4}>Realtime Response Engine (Coming soon ⚠️)</Title>
+      <Title order={4}>Realtime Response Engine</Title>
       <Flex align={'center'} gap={'xs'}>
         <Text color='gray' fz='sm'>
           Configure how you want SellScale AI to manage replies. Alternately, edit{' '}

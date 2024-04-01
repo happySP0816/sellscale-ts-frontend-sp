@@ -56,6 +56,7 @@ import {
   IconMail,
   IconMan,
   IconPhoto,
+  IconPlaystationCircle,
   IconPlus,
   IconRefresh,
   IconSeeding,

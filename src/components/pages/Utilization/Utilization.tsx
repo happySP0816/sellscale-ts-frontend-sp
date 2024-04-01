@@ -56,6 +56,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getPersonasCampaignView } from '@utils/requests/getPersonas';
 import { CampaignPersona } from '@common/campaigns/PersonaCampaigns';
 import { API_URL } from '@constants/data';
+import { openContextModal } from '@mantine/modals';
 
 interface outboundType {
   message_active: number;
@@ -261,17 +262,23 @@ export default function Utilization() {
 
   return (
     <Card withBorder>
-      <Flex w={'100%'}>
-        <Text>Outbound Utilization</Text>
-        <Popover width={200} position='bottom' withArrow shadow='md'>
-          <Popover.Target>
-            <Badge color='blue' variant='filled' sx={{ textTransform: 'none' }} leftSection={<IconInfoCircle size={'0.9rem'} style={{ marginTop: '4px' }} />}>
-              View Details
-            </Badge>
-          </Popover.Target>
-
-          <Popover.Dropdown>Dropdown</Popover.Dropdown>
-        </Popover>
+      <Flex w={'100%'} justify={'space-between'}>
+        <Text size={'xl'} fw={600}>
+          Outbound Utilization
+        </Text>
+        <Button
+          radius='md'
+          leftIcon={<IconPlus size='1rem' />}
+          onClick={() => {
+            openContextModal({
+              modal: 'uploadProspects',
+              title: <Title order={3}>Create Campaign</Title>,
+              innerProps: { mode: 'CREATE-ONLY' },
+            });
+          }}
+        >
+          Create New Campaign
+        </Button>
       </Flex>
       <Text>View which reps have campaigns that are active, completed, or need action.</Text>
 
@@ -284,7 +291,7 @@ export default function Utilization() {
                 <Flex
                   style={{
                     position: 'absolute',
-                    top: '75px',
+                    top: '60px',
                     width: '100%',
                     alignItems: 'center',
                   }}
@@ -373,7 +380,7 @@ export default function Utilization() {
                 <Flex
                   style={{
                     position: 'absolute',
-                    top: '75px',
+                    top: '60px',
                     width: '100%',
                     alignItems: 'center',
                   }}
@@ -1329,7 +1336,7 @@ export default function Utilization() {
                     const { status } = cell.row.original;
 
                     return (
-                      <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'}>
+                      <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'} justify={'center'}>
                         <Badge sx={{ color: '#d549f2', background: '#fbebfe' }}>ai is setting up</Badge>
                       </Flex>
                     );
@@ -1611,6 +1618,17 @@ export default function Utilization() {
                                 w={'100%'}
                                 sx={{ textTransform: 'none', cursor: 'pointer' }}
                                 leftSection={<IconPlus size={'0.9rem'} style={{ marginTop: '4px' }} />}
+                                onClick={() => {
+                                  openContextModal({
+                                    modal: 'uploadProspects',
+                                    title: (
+                                      <Title order={3} sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                        <IconTargetArrow color='#228be6' /> Request Campaign
+                                      </Title>
+                                    ),
+                                    innerProps: { mode: 'CREATE-ONLY' },
+                                  });
+                                }}
                               >
                                 Add Campaign for Adam
                               </Badge>

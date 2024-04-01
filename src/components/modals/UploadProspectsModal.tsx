@@ -22,11 +22,12 @@ import {
   NumberInput,
   SegmentedControl,
   Box,
-} from '@mantine/core';
-import { ContextModalProps } from '@mantine/modals';
-import { useContext, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Dropzone, DropzoneProps, MIME_TYPES } from '@mantine/dropzone';
+  Switch,
+} from "@mantine/core";
+import { ContextModalProps } from "@mantine/modals";
+import { useContext, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Dropzone, DropzoneProps, MIME_TYPES } from "@mantine/dropzone";
 import {
   IconUpload,
   IconX,
@@ -38,49 +39,62 @@ import {
   IconPlus,
   IconUsers,
   IconSettings,
-} from '@tabler/icons';
-import { DataTable } from 'mantine-datatable';
-import FileDropAndPreview from './upload-prospects/FileDropAndPreview';
-import { useQuery } from '@tanstack/react-query';
-import { useRecoilValue } from 'recoil';
-import { userDataState, userTokenState } from '@atoms/userAtoms';
-import { logout } from '@auth/core';
-import { Archetype, MsgResponse } from 'src';
-import ComingSoonCard from '@common/library/ComingSoonCard';
-import { API_URL } from '@constants/data';
-import TextAreaWithAI from '@common/library/TextAreaWithAI';
-import displayNotification from '@utils/notificationFlow';
-import CreatePersona from '@common/persona/CreatePersona';
-import { getSinglePersona } from '@utils/requests/getPersonas';
-import { set } from 'lodash';
+  IconBrandLinkedin,
+  IconRecordMail,
+  IconMail,
+} from "@tabler/icons";
+import { DataTable } from "mantine-datatable";
+import FileDropAndPreview from "./upload-prospects/FileDropAndPreview";
+import { useQuery } from "@tanstack/react-query";
+import { useRecoilValue } from "recoil";
+import { userDataState, userTokenState } from "@atoms/userAtoms";
+import { logout } from "@auth/core";
+import { Archetype, MsgResponse } from "src";
+import ComingSoonCard from "@common/library/ComingSoonCard";
+import { API_URL } from "@constants/data";
+import TextAreaWithAI from "@common/library/TextAreaWithAI";
+import displayNotification from "@utils/notificationFlow";
+import CreatePersona from "@common/persona/CreatePersona";
+import { getSinglePersona } from "@utils/requests/getPersonas";
+import { set } from "lodash";
 
 export default function UploadProspectsModal({
   context,
   id,
   innerProps,
-}: ContextModalProps<{ mode: 'ADD-ONLY' | 'ADD-CREATE' | 'CREATE-ONLY' }>) {
+}: ContextModalProps<{ mode: "ADD-ONLY" | "ADD-CREATE" | "CREATE-ONLY" }>) {
   const theme = useMantineTheme();
   const userData = useRecoilValue(userDataState);
-  const [personas, setPersonas] = useState<{ value: string; label: string; group: string | undefined }[]>([]);
-  const defaultPersonas = useRef<{ value: string; label: string; group: string | undefined }[]>([]);
-  const [createdPersona, setCreatedPersona] = useState('');
+  const [personas, setPersonas] = useState<
+    { value: string; label: string; group: string | undefined }[]
+  >([]);
+  const defaultPersonas = useRef<
+    { value: string; label: string; group: string | undefined }[]
+  >([]);
+  const [createdPersona, setCreatedPersona] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
 
   const [openedCTAs, setOpenedCTAs] = useState(false);
-  const [newCTAText, setNewCTAText] = useState('');
+  const [newCTAText, setNewCTAText] = useState("");
   const addCTAInputRef = useRef<HTMLTextAreaElement | null>(null);
   const [ctas, setCTAs] = useState<{ id: number; cta: string }[]>([]);
 
   const [advancedOpened, setAdvancedOpened] = useState(false);
 
-  const [description, setDescription] = useState('');
-  const [fitReason, setFitReason] = useState('');
-  const [icpMatchingPrompt, setICPMatchingPrompt] = useState('Describe your persona here ...');
+  const [description, setDescription] = useState("");
+  const [fitReason, setFitReason] = useState("");
+  const [icpMatchingPrompt, setICPMatchingPrompt] = useState(
+    "Describe your persona here ..."
+  );
 
-  const [contactObjective, setContactObjective] = useState('Set up a discovery call in order to identify a pain point');
+  const [contactObjective, setContactObjective] = useState(
+    "Set up a discovery call in order to identify a pain point"
+  );
 
-  const [personaContractSize, setPersonaContractSize] = useState(userData.client.contract_size);
-  const [templateMode, setTemplateMode] = useState<string>('cta');
+  const [personaContractSize, setPersonaContractSize] = useState(
+    userData.client.contract_size
+  );
+  const [templateMode, setTemplateMode] = useState<string>("cta");
 
   const addNewCTA = () => {
     if (newCTAText.length > 0) {
@@ -89,7 +103,7 @@ export default function UploadProspectsModal({
         cta: newCTAText,
       };
       setCTAs((current) => [...current, cta]);
-      setNewCTAText('');
+      setNewCTAText("");
     }
   };
   const deleteCTA = (id: number) => {
@@ -101,40 +115,46 @@ export default function UploadProspectsModal({
     addCTAInputRef.current?.focus();
   };
 
-  const [loadingPersonaBuyReasonGeneration, setLoadingPersonaBuyReasonGeneration] = useState(false);
+  const [
+    loadingPersonaBuyReasonGeneration,
+    setLoadingPersonaBuyReasonGeneration,
+  ] = useState(false);
   const generatePersonaBuyReason = async (): Promise<MsgResponse> => {
     setLoadingPersonaBuyReasonGeneration(true);
-    const res = await fetch(`${API_URL}/client/archetype/generate_persona_buy_reason`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        persona_name: createdPersona,
-      }),
-    })
+    const res = await fetch(
+      `${API_URL}/client/archetype/generate_persona_buy_reason`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          persona_name: createdPersona,
+        }),
+      }
+    )
       .then(async (r) => {
         if (r.status === 200) {
           return {
-            status: 'success',
-            title: 'Success',
-            message: 'Persona buying reason generated successfully',
+            status: "success",
+            title: "Success",
+            message: "Persona buying reason generated successfully",
             data: await r.json(),
           };
         } else {
           return {
-            status: 'error',
+            status: "error",
             title: `Error (${r.status})`,
-            message: 'Failed to generate persona buying reason',
+            message: "Failed to generate persona buying reason",
             data: {},
           };
         }
       })
       .catch((e) => {
         return {
-          status: 'error',
-          title: 'Error',
+          status: "error",
+          title: "Error",
           message: e.message,
           data: {},
         };
@@ -144,41 +164,47 @@ export default function UploadProspectsModal({
     return res as MsgResponse;
   };
 
-  const [loadingICPMatchingPromptGeneration, setLoadingICPMatchingPromptGeneration] = useState(false);
+  const [
+    loadingICPMatchingPromptGeneration,
+    setLoadingICPMatchingPromptGeneration,
+  ] = useState(false);
   const generateICPMatchingPrompt = async (): Promise<MsgResponse> => {
     setLoadingICPMatchingPromptGeneration(true);
-    const res = await fetch(`${API_URL}/client/archetype/generate_persona_icp_matching_prompt`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${userToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        persona_name: selectedPersona,
-        persona_buy_reason: fitReason,
-      }),
-    })
+    const res = await fetch(
+      `${API_URL}/client/archetype/generate_persona_icp_matching_prompt`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          persona_name: selectedPersona,
+          persona_buy_reason: fitReason,
+        }),
+      }
+    )
       .then(async (r) => {
         if (r.status === 200) {
           return {
-            status: 'success',
-            title: 'Success',
-            message: 'ICP matching prompt generated successfully',
+            status: "success",
+            title: "Success",
+            message: "ICP matching prompt generated successfully",
             data: await r.json(),
           };
         } else {
           return {
-            status: 'error',
+            status: "error",
             title: `Error (${r.status})`,
-            message: 'Failed to generate ICP matching prompt',
+            message: "Failed to generate ICP matching prompt",
             data: {},
           };
         }
       })
       .catch((e) => {
         return {
-          status: 'error',
-          title: 'Error',
+          status: "error",
+          title: "Error",
           message: e.message,
           data: {},
         };
@@ -193,12 +219,15 @@ export default function UploadProspectsModal({
   const { data, isFetching, refetch } = useQuery({
     queryKey: [`query-personas-active-data`],
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/client/archetype/get_archetypes`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/client/archetype/get_archetypes`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
       if (response.status === 401) {
         logout();
       }
@@ -223,9 +252,12 @@ export default function UploadProspectsModal({
     refetchOnWindowFocus: false,
   });
   // After fetch, set default personas and set personas if they haven't been set yet
-  if (data && (innerProps.mode === 'ADD-ONLY' || innerProps.mode === 'ADD-CREATE')) {
+  if (
+    data &&
+    (innerProps.mode === "ADD-ONLY" || innerProps.mode === "ADD-CREATE")
+  ) {
     defaultPersonas.current = data.map((persona) => ({
-      value: persona.id + '',
+      value: persona.id + "",
       label: persona.archetype,
       group: undefined, //persona.active ? "Active" : "Inactive",
     }));
@@ -241,43 +273,63 @@ export default function UploadProspectsModal({
     <Paper
       p={0}
       style={{
-        position: 'relative',
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+        position: "relative",
+        backgroundColor:
+          theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
       }}
     >
       <LoadingOverlay visible={isFetching} overlayBlur={2} />
-      <Stack spacing='xl'>
+      <Stack spacing="xl">
+        <Text color="gray" size={"sm"}>
+          Enter the information below to describe and fine-tune your campaign
+        </Text>
         {!isFetching && (
           <>
-            {innerProps.mode === 'CREATE-ONLY' ? (
-              <TextInput
-                placeholder='eg. C-Suite Sales Leaders in tech companies'
-                label='Descriptive Name'
-                value={createdPersona}
-                required
-                onChange={(e) => setCreatedPersona(e.currentTarget.value)}
-              />
+            {innerProps.mode === "CREATE-ONLY" ? (
+              <>
+                <TextInput
+                  placeholder="eg. C-Suite Sales Leaders in tech companies"
+                  label="Campaign Name"
+                  value={createdPersona}
+                  // required
+                  onChange={(e) => setCreatedPersona(e.currentTarget.value)}
+                />
+                <Textarea
+                  label="Who do you want to target"
+                  placeholder="Eg. I want to see product mangers in chicago who went to BYU and are currently in a hedge fund role at a large financial institution"
+                  minRows={3}
+                  disabled
+                />
+                <Textarea
+                  placeholder="Eg. I want to grab a coffee with them!"
+                  label="What do you want to say"
+                  disabled
+                  // value={createdPersona}
+                  // required
+                  // onChange={(e) => setCreatedPersona(e.currentTarget.value)}
+                />
+              </>
             ) : (
               <Select
-                label={'Set Persona'}
+                label={"Set Persona"}
                 defaultValue={
                   defaultPersonas.current.length === 1 ||
                   (defaultPersonas.current.length > 1 &&
-                    defaultPersonas.current[0].group === 'Active' &&
-                    defaultPersonas.current[1].group === 'Inactive')
+                    defaultPersonas.current[0].group === "Active" &&
+                    defaultPersonas.current[1].group === "Inactive")
                     ? defaultPersonas.current[0].value
                     : undefined
                 }
                 data={personas}
                 placeholder={
-                  innerProps.mode === 'ADD-ONLY'
-                    ? 'Select a persona for the prospects'
-                    : 'Select or create a persona for the prospects'
+                  innerProps.mode === "ADD-ONLY"
+                    ? "Select a persona for the prospects"
+                    : "Select or create a persona for the prospects"
                 }
-                nothingFound={'Nothing found'}
+                nothingFound={"Nothing found"}
                 icon={<IconUsers size={14} />}
                 searchable
-                creatable={innerProps.mode === 'ADD-CREATE'}
+                creatable={innerProps.mode === "ADD-CREATE"}
                 clearable
                 getCreateLabel={(query) => (
                   <>
@@ -296,10 +348,11 @@ export default function UploadProspectsModal({
                   // If created persona exists and is one of the existing personas, clear it
                   if (
                     createdPersona.length > 0 &&
-                    personas.filter((personas) => personas.value === value).length > 0
+                    personas.filter((personas) => personas.value === value)
+                      .length > 0
                   ) {
                     setPersonas(defaultPersonas.current);
-                    setCreatedPersona('');
+                    setCreatedPersona("");
                   }
                   setSelectedPersona(value);
                 }}
@@ -308,21 +361,21 @@ export default function UploadProspectsModal({
           </>
         )}
 
-        {innerProps.mode === 'CREATE-ONLY' && (
+        {innerProps.mode === "CREATE-ONLY" && (
           <Stack spacing={10}>
             <Divider
               my={0}
-              labelPosition='center'
-              color='gray'
+              labelPosition="center"
+              color="gray"
               label={
                 <Button
-                  variant={advancedOpened ? 'light' : 'subtle'}
-                  rightIcon={<IconSettings size='1rem' />}
+                  variant={advancedOpened ? "light" : "subtle"}
+                  rightIcon={<IconSettings size="1rem" />}
                   onClick={() => {
                     setAdvancedOpened((prev) => !prev);
                   }}
                   compact
-                  color='gray'
+                  color="gray"
                 >
                   Advanced
                 </Button>
@@ -330,32 +383,82 @@ export default function UploadProspectsModal({
             />
             <Collapse in={advancedOpened}>
               <Stack spacing={10}>
+                <Flex w={"100%"}>
+                  <Flex align={"center"} gap={"lg"} w={"100%"}>
+                    <Flex
+                      px={"lg"}
+                      py={"sm"}
+                      sx={{ border: "1px solid #ced4da", borderRadius: "8px" }}
+                      justify={"space-between"}
+                      align={"center"}
+                      w={"100%"}
+                    >
+                      <Text
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <IconBrandLinkedin color="white" fill="#228be6" />
+                        Linkedin
+                      </Text>
+                      <Switch />
+                    </Flex>
+                    <NumberInput placeholder="Steps" w={"200px"} size="lg" />
+                  </Flex>
+                </Flex>
+                <Flex w={"100%"}>
+                  <Flex align={"center"} gap={"lg"} w={"100%"}>
+                    <Flex
+                      px={"lg"}
+                      py={"sm"}
+                      sx={{ border: "1px solid #ced4da", borderRadius: "8px" }}
+                      justify={"space-between"}
+                      align={"center"}
+                      w={"100%"}
+                    >
+                      <Text
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <IconMail color="white" fill="#228be6" />
+                        Email
+                      </Text>
+                      <Switch />
+                    </Flex>
+                    <NumberInput placeholder="Steps" w={"200px"} size="lg" />
+                  </Flex>
+                </Flex>
                 <TextAreaWithAI
                   withAsterisk
                   value={fitReason}
                   onChange={(e) => setFitReason(e.target.value)}
-                  placeholder='The AI will use this reasoning to reach out to prospects and explain why they are a good fit for your product.'
-                  label='Why would this persona buy your product?'
-                  description='This information is used by the AI to construct value prop messages'
+                  placeholder="The AI will use this reasoning to reach out to prospects and explain why they are a good fit for your product."
+                  label="Why would this persona buy your product?"
+                  description="This information is used by the AI to construct value prop messages"
                   loadingAIGenerate={loadingPersonaBuyReasonGeneration}
                   onAIGenerateClicked={async () => {
                     await displayNotification(
-                      'generate-persona-buy-reason',
+                      "generate-persona-buy-reason",
                       generatePersonaBuyReason,
                       {
-                        title: 'Generating persona fit reason...',
-                        message: 'This may take a few seconds.',
-                        color: 'teal',
+                        title: "Generating persona fit reason...",
+                        message: "This may take a few seconds.",
+                        color: "teal",
                       },
                       {
-                        title: 'Persona fit reason generated!',
-                        message: 'Your persona fit reason has been generated.',
-                        color: 'teal',
+                        title: "Persona fit reason generated!",
+                        message: "Your persona fit reason has been generated.",
+                        color: "teal",
                       },
                       {
-                        title: 'Failed to generate persona fit reason',
-                        message: 'Please try again or contact SellScale team.',
-                        color: 'red',
+                        title: "Failed to generate persona fit reason",
+                        message: "Please try again or contact SellScale team.",
+                        color: "red",
                       }
                     );
                   }}
@@ -398,32 +501,37 @@ export default function UploadProspectsModal({
                 <Textarea
                   withAsterisk
                   value={contactObjective}
-                  label='Contact Objective'
-                  description='Describe the objective of the outreach.'
-                  placeholder='To get a demo scheduled with the goal of potentially integrating our product into their workflow.'
+                  label="Contact Objective"
+                  description="Describe the objective of the outreach."
+                  placeholder="To get a demo scheduled with the goal of potentially integrating our product into their workflow."
                   onChange={(e) => setContactObjective(e.target.value)}
                 />
 
                 <Box>
-                  <Text fz='sm' fw={500}>Gen Mode</Text>
+                  <Text fz="sm" fw={500}>
+                    Gen Mode
+                  </Text>
                   <SegmentedControl
                     value={templateMode}
                     onChange={setTemplateMode}
                     data={[
-                      { label: 'CTA-based', value: 'cta' },
-                      { label: 'Template-based', value: 'template' },
+                      { label: "CTA-based", value: "cta" },
+                      { label: "Template-based", value: "template" },
                     ]}
                   />
                 </Box>
 
                 <NumberInput
-                  label='Annual Contract Value (ACV)'
+                  label="Annual Contract Value (ACV)"
                   value={personaContractSize}
-                  parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
                   formatter={(value) =>
                     !Number.isNaN(parseFloat(value))
-                      ? `$ ${value}`.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
-                      : '$ '
+                      ? `$ ${value}`.replace(
+                          /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g,
+                          ","
+                        )
+                      : "$ "
                   }
                   onChange={(value) => {
                     setPersonaContractSize(value || 0);
@@ -463,7 +571,7 @@ export default function UploadProspectsModal({
             icpMatchingPrompt: icpMatchingPrompt,
             contactObjective: contactObjective,
             contractSize: personaContractSize,
-            templateMode: templateMode === 'template',
+            templateMode: templateMode === "template",
           }}
         />
 

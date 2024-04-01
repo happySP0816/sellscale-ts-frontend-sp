@@ -62,6 +62,7 @@ import {
   IconSeeding,
   IconSend,
   IconTarget,
+  IconTargetArrow,
   IconToggleRight,
   IconX,
 } from '@tabler/icons';
@@ -288,7 +289,11 @@ export default function PersonaCampaigns() {
             onClick={() => {
               openContextModal({
                 modal: 'uploadProspects',
-                title: <Title order={3}>Create Campaign</Title>,
+                title: (
+                  <Title order={3} sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <IconTargetArrow color='#228be6' /> Request Campaign
+                  </Title>
+                ),
                 innerProps: { mode: 'CREATE-ONLY' },
               });
             }}
@@ -1060,7 +1065,7 @@ export function PersonCampaignCard(props: {
                       </Flex>
                       <Divider w={'100%'} />
                       <Flex w={'fit-content'}>
-                        <IconPlaystationCircle color='white' size={'1.2rem'} fill='orange' />
+                        <IconCircleCheck color='white' size={'1.2rem'} fill='green' />
                       </Flex>
                     </Flex>
                     <Text color='gray' size={'xs'}>

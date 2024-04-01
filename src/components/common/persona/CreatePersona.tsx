@@ -1,6 +1,6 @@
 import React from 'react';
 import createPersona from '@utils/requests/createPersona';
-import { Button, Card, Text, Title } from '@mantine/core';
+import { Button, Card, Flex, Text, Title } from '@mantine/core';
 import { useRecoilState } from 'recoil';
 import { userTokenState } from '@atoms/userAtoms';
 import { currentProjectState } from '@atoms/personaAtoms';
@@ -42,18 +42,13 @@ export default function CreatePersona(props: PropsType) {
 
   const createPersonaHandler = async () => {
     setCreatingPersona(true);
-    const result = await createPersona(
-      userToken,
-      props.createPersona.name,
-      props.createPersona.ctas,
-      {
-        fitReason: props.createPersona.fitReason,
-        icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
-        contactObjective: props.createPersona.contactObjective,
-        contractSize: props.createPersona.contractSize,
-        template_mode: props.createPersona.templateMode,
-      }
-    );
+    const result = await createPersona(userToken, props.createPersona.name, props.createPersona.ctas, {
+      fitReason: props.createPersona.fitReason,
+      icpMatchingPrompt: props.createPersona.icpMatchingPrompt,
+      contactObjective: props.createPersona.contactObjective,
+      contractSize: props.createPersona.contractSize,
+      template_mode: props.createPersona.templateMode,
+    });
     if (result.status === 'error') {
       console.error('Failed to create persona & CTAs');
       return;
@@ -90,13 +85,26 @@ export default function CreatePersona(props: PropsType) {
 
   return (
     <Card>
-      <Button
-        disabled={!props.createPersona?.name || !props.createPersona.contactObjective}
-        onClick={() => createPersonaHandler()}
-        loading={creatingPersona}
-      >
-        Create Campaign
-      </Button>
+      <Flex align={'center'} justify={'space-between'} gap={'lg'}>
+        <Button
+          // disabled={!props.createPersona?.name || !props.createPersona.contactObjective}
+          // onClick={() => createPersonaHandler()}
+          // loading={creatingPersona}
+          fullWidth
+          variant='outline'
+          color='gray'
+        >
+          Cancel
+        </Button>
+        <Button
+          // disabled={!props.createPersona?.name || !props.createPersona.contactObjective}
+          onClick={() => createPersonaHandler()}
+          loading={creatingPersona}
+          fullWidth
+        >
+          Request Campaign
+        </Button>
+      </Flex>
     </Card>
   );
 }

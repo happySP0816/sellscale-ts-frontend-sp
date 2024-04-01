@@ -36,6 +36,7 @@ import {
   CloseButton,
   Anchor,
   ThemeIcon,
+  Grid,
 } from '@mantine/core';
 import { useDisclosure, useHover } from '@mantine/hooks';
 import { openContextModal } from '@mantine/modals';
@@ -65,40 +66,61 @@ import {
   IconTargetArrow,
   IconToggleRight,
   IconX,
-} from '@tabler/icons';
-import { IconArrowDown, IconArrowUp, IconClipboard, IconMessageCheck } from '@tabler/icons-react';
-import { navigateToPage } from '@utils/documentChange';
-import { convertDateToShortFormatWithoutTime, formatToLabel } from '@utils/general';
-import { getPersonasActivity, getPersonasCampaignView, getPersonasOverview } from '@utils/requests/getPersonas';
-import _, { orderBy, sortBy } from 'lodash';
-import moment from 'moment';
-import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { PersonaOverview } from 'src';
-import { API_URL } from '@constants/data';
-import CampaignGraph from './campaigngraph';
-import { showNotification } from '@mantine/notifications';
-import { CampaignAnalyticsData } from './CampaignAnalytics';
-// import { CampaignAnalyticChart } from "./CampaignAnalyticsV2";
-import { TodayActivityData } from './OverallPipeline/TodayActivity';
-import UserStatusToggle from './UserStatusToggle';
-import AllCampaign from '../../PersonaCampaigns/AllCampaign';
-import postSyncSmartleadCampaigns from '@utils/requests/postSyncSmartleadCampaigns';
-import TriggersList from '@pages/TriggersList';
-import { DataTable } from 'mantine-datatable';
-import postTogglePersonaActive from '@utils/requests/postTogglePersonaActive';
-import ClientCampaignView from '@pages/ClientCampaignView/ClientCampaignView';
+} from "@tabler/icons";
+import {
+  IconArrowDown,
+  IconArrowUp,
+  IconClipboard,
+  IconMessageCheck,
+} from "@tabler/icons-react";
+import { navigateToPage } from "@utils/documentChange";
+import {
+  convertDateToShortFormatWithoutTime,
+  formatToLabel,
+} from "@utils/general";
+import {
+  getPersonasActivity,
+  getPersonasCampaignView,
+  getPersonasOverview,
+} from "@utils/requests/getPersonas";
+import _ from "lodash";
+import moment from "moment";
+import { ReactNode, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { PersonaOverview } from "src";
+import { API_URL } from "@constants/data";
+import CampaignGraph from "./campaigngraph";
+import { showNotification } from "@mantine/notifications";
+import { CampaignAnalyticsData } from "./CampaignAnalytics";
+import { TodayActivityData } from "./OverallPipeline/TodayActivity";
+import UserStatusToggle from "./UserStatusToggle";
+import AllCampaign from "../../PersonaCampaigns/AllCampaign";
+import TriggersList from "@pages/TriggersList";
+import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
+import ClientCampaignView from "@pages/ClientCampaignView/ClientCampaignView";
 
 export type CampaignPersona = {
   id: number;
   name: string;
+  email_eligible: number;
+  email_used: number;
+  email_queued: number;
   email_sent: number;
   email_opened: number;
   email_replied: number;
+  email_demo: number;
+  email_bounced: number;
+  email_removed: number;
+  li_eligible: number;
+  li_used: number;
+  li_queued: number;
   li_sent: number;
   li_opened: number;
   li_replied: number;
+  li_demo: number;
+  li_failed: number;
+  li_removed: number;
   active: boolean;
   linkedin_active: boolean;
   email_active: boolean;
@@ -110,6 +132,9 @@ export type CampaignPersona = {
   total_pos_replied: number;
   total_demo: number;
   total_prospects: number;
+  total_prospects_left_linkedin: number;
+  total_prospects_left_email: number;
+  total_used: number;
   sdr_name: string;
   sdr_img_url: string;
   sdr_id: number;
@@ -482,8 +507,6 @@ export function PersonCampaignCard(props: {
 
   const userToken = useRecoilValue(userTokenState);
 
-  const [personaActive, setPersonaActive] = useState<boolean>(props.persona.active);
-
   let total_replied = props.persona.total_replied;
   let total_pos_replied = props.persona.total_pos_replied;
   let total_opened = props.persona.total_opened;
@@ -854,7 +877,90 @@ export function PersonCampaignCard(props: {
     }
   }, [value, campaignList]);
 
-  const unusedProspects = (props.project?.num_unused_email_prospects ?? 0) + (props.project?.num_unused_li_prospects ?? 0);
+  const unusedProspects =
+    (props.project?.num_unused_email_prospects ?? 0) +
+    (props.project?.num_unused_li_prospects ?? 0);
+
+  // Calculate the completion percentage as following:
+  // Numerator: Number of successful sends to prospects on active channels
+  // Denominator: Total number of eligible prospects on active channels
+  let liNumerator = 0;
+  let liDenominator = 0;
+  let linkedinCompletionPercentage;
+  if (
+    props.persona.total_prospects_left_linkedin == 0 &&
+    props.persona.li_sent > 0
+  ) {
+    // LI: If we have no more eligible prospects and we've sent some messages, then we can assume LI is complete
+    liNumerator += props.persona.li_used;
+    liDenominator += props.persona.li_used;
+  } else if (props.persona.li_sent) {
+    // LI: Otherwise if we have prospects left and have sent messages, then we calculate the completion percentage
+    liNumerator += props.persona.li_used;
+    liDenominator +=
+      props.persona.li_used + props.persona.total_prospects_left_linkedin;
+  }
+  linkedinCompletionPercentage =
+    Math.min(100, Math.floor((liNumerator / liDenominator) * 100)) || 0;
+
+  let emailNumerator = 0;
+  let emailDenominator = 0;
+  let emailCompletionPercentage;
+  if (
+    props.persona.total_prospects_left_email == 0 &&
+    props.persona.email_sent > 0
+  ) {
+    // Email: If we have no more eligible prospects and we've sent some messages, then we can assume Email is complete
+    emailNumerator += props.persona.email_used;
+    emailDenominator += props.persona.email_used;
+  } else if (props.persona.email_sent) {
+    // Email: Otherwise if we have prospects left and have sent messages, then we calculate the completion percentage
+    emailNumerator += props.persona.email_used;
+    emailDenominator +=
+      props.persona.email_used + props.persona.total_prospects_left_email;
+  }
+  emailCompletionPercentage =
+    Math.min(100, Math.floor((emailNumerator / emailDenominator) * 100)) || 0;
+
+  let completionNumerator = 0;
+  let completionDenominator = 0;
+  if (
+    props.persona.linkedin_active ||
+    props.persona.total_prospects_left_linkedin == 0
+  ) {
+    // LI: If this channel is active or we have no more prospects left, then we include it in the completion percentage
+    completionNumerator += liNumerator;
+    completionDenominator += liDenominator;
+  }
+  if (
+    // Email: If this channel is active or we have no more prospects left, then we include it in the completion percentage
+    props.persona.email_active ||
+    props.persona.total_prospects_left_email == 0
+  ) {
+    completionNumerator += emailNumerator;
+    completionDenominator += emailDenominator;
+  }
+  const completionPercentage =
+    Math.min(
+      100,
+      Math.floor((completionNumerator / completionDenominator) * 100)
+    ) || 0;
+  let numberOfRings = 0;
+  if (linkedinCompletionPercentage > 0 || props.persona.linkedin_active)
+    numberOfRings++;
+  if (emailCompletionPercentage > 0 || props.persona.email_active)
+    numberOfRings++;
+  if (numberOfRings === 0) numberOfRings = 1;
+  let completionsActiveSpan = 12;
+  if (linkedinCompletionPercentage > 0 && emailCompletionPercentage > 0) {
+    completionsActiveSpan = 6;
+  }
+
+  console.log(
+    emailCompletionPercentage,
+    linkedinCompletionPercentage,
+    completionPercentage
+  );
 
   return (
     <Paper ref={ref}>
@@ -887,7 +993,13 @@ export function PersonCampaignCard(props: {
               gap={'5px'}
               align={'center'}
             >
-              <Popover width={200} position='bottom' withArrow shadow='md' opened={popoverOpened}>
+              <Popover
+                width={200 * numberOfRings}
+                position="bottom"
+                withArrow
+                shadow="md"
+                opened={popoverOpened}
+              >
                 <Popover.Target>
                   <Button variant='outline' radius='xl' size='sm' h={55} color='gray' sx={{ border: 'solid 1px #f1f1f1' }} maw={'fit-content'}>
                     <RingProgress
@@ -896,92 +1008,47 @@ export function PersonCampaignCard(props: {
                       size={55}
                       thickness={5}
                       label={
-                        <Text size='xs' align='center'>
-                          {Math.min(100, Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100))}%
+                        <Text size="xs" align="center">
+                          {completionPercentage}%
                         </Text>
                       }
                       variant='animated'
                       sections={[
                         {
-                          value: Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100),
-                          color: Math.round(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100) >= 100 ? 'green' : 'blue',
+                          value: completionPercentage,
+                          color: completionPercentage >= 100 ? "green" : "blue",
                         },
                       ]}
                     />
                   </Button>
                 </Popover.Target>
-                <Popover.Dropdown sx={{ pointerEvents: 'none' }} bg={'blue'}>
-                  <Flex direction='column'>
-                    <Box>
-                      <Text size={'sm'} color='white'>
-                        {Math.floor(((total_sent ?? 0) / (props.persona.total_prospects || 1)) * 100)} % of campaign is pending
-                      </Text>
-                    </Box>
-
-                    <Divider my={'sm'} />
-
-                    <Box>
-                      <Text color='white' size={'sm'} fw={600}>
-                        SUMMARY
-                      </Text>
-
-                      <Text color='white' size={'sm'} fw={600}>
-                        <Flex>
-                          <Text fw='bold'>Total # Sourced: </Text> <Text ml='auto'>{props.persona.total_prospects || 0}</Text>
-                        </Flex>
-                      </Text>
-
-                      <Text color='white' size={'sm'} fw={600}>
-                        <Flex>
-                          <Text fw='bold'>Total # Contacted: </Text> <Text ml='auto'>{total_sent ?? 0}</Text>
-                        </Flex>
-                      </Text>
-                    </Box>
-
-                    <Divider my={'sm'} />
-
-                    <Box>
-                      <Text color='white' size={'sm'}>
-                        BY STATUS
-                      </Text>
-
-                      <Text color='white' size={'sm'} fw={600}>
-                        <Flex>
-                          <Text fw='bold'>Prospected: </Text> <Text ml='auto'>{props.persona.total_prospects}</Text>
-                        </Flex>
-                      </Text>
-
-                      <Text color='white' size={'sm'} fw={600}>
-                        <Flex>
-                          <Text fw='bold'>Sending: </Text> <Text ml='auto'>{total_sent}</Text>
-                        </Flex>
-                      </Text>
-
-                      <Text color='white' size={'sm'} fw={600}>
-                        <Flex>
-                          <Text fw='bold'>Opened: </Text> <Text ml='auto'>{total_opened}</Text>
-                        </Flex>
-                      </Text>
-
-                      <Text color='white' size={'sm'} fw={600}>
-                        <Flex>
-                          <Text fw='bold'>Replies: </Text> <Text ml='auto'>{total_replied}</Text>
-                        </Flex>
-                      </Text>
-
-                      <Text color='white' size={'sm'} fw={600}>
-                        <Flex>
-                          <Text fw='bold'>Demo Set: </Text> <Text ml='auto'>{props.persona.total_demo}</Text>
-                        </Flex>
-                      </Text>
-
-                      <Text color='white' size={'sm'} fw={600}>
-                        <Flex>
-                          <Text fw='bold'>Removed: </Text> <Text ml='auto'>-</Text>
-                        </Flex>
-                      </Text>
-                    </Box>
-                  </Flex>
+                <Popover.Dropdown sx={{ pointerEvents: "none" }} bg={"blue"}>
+                  <Grid>
+                    {(linkedinCompletionPercentage > 0 ||
+                      props.persona.linkedin_active) && (
+                      <Grid.Col span={completionsActiveSpan}>
+                        <CampaignProgressDropdown
+                          persona={props.persona}
+                          numerator={liNumerator}
+                          denominator={liDenominator}
+                          completionPercentage={linkedinCompletionPercentage}
+                          channel="LINKEDIN"
+                        />
+                      </Grid.Col>
+                    )}
+                    {(emailCompletionPercentage > 0 ||
+                      props.persona.email_active) && (
+                      <Grid.Col span={completionsActiveSpan}>
+                        <CampaignProgressDropdown
+                          persona={props.persona}
+                          numerator={emailNumerator}
+                          denominator={emailDenominator}
+                          completionPercentage={emailCompletionPercentage}
+                          channel="EMAIL"
+                        />
+                      </Grid.Col>
+                    )}
+                  </Grid>
                 </Popover.Dropdown>
               </Popover>
               <Popover width={350} position='bottom' shadow='lg' opened={statuspopoverOpened}>
@@ -1484,6 +1551,172 @@ export function PersonCampaignCard(props: {
         </Collapse>
       </Stack>
     </Paper>
+  );
+}
+
+function CampaignProgressDropdown(props: {
+  persona: CampaignPersona;
+  numerator: number;
+  denominator: number;
+  completionPercentage: number;
+  channel: "LINKEDIN" | "EMAIL";
+}) {
+  let channel;
+  let channel_total_prospect;
+  let total_usabled;
+  let total_used;
+  let total_queued;
+  let total_sent;
+  let total_prospected;
+  let total_opened;
+  let total_replied;
+  let total_demo;
+  let total_other;
+  if (props.channel === "LINKEDIN") {
+    channel = "LinkedIn";
+    channel_total_prospect = props.persona.li_eligible;
+    total_usabled = props.persona.total_prospects_left_linkedin;
+    total_used = props.persona.li_used;
+    total_queued = props.persona.li_queued;
+    total_sent = props.persona.li_sent;
+    total_prospected = props.persona.li_eligible;
+    total_opened = props.persona.li_opened;
+    total_replied = props.persona.li_replied;
+    total_demo = props.persona.li_demo;
+    total_other = props.persona.li_failed + props.persona.li_removed;
+  } else if (props.channel === "EMAIL") {
+    channel = "Email";
+    channel_total_prospect = props.persona.email_eligible;
+    total_usabled = props.persona.total_prospects_left_email;
+    total_used = props.persona.email_used;
+    total_queued = props.persona.email_queued;
+    total_sent = props.persona.email_sent;
+    total_prospected = props.persona.email_eligible;
+    total_opened = props.persona.email_opened;
+    total_replied = props.persona.email_replied;
+    total_demo = props.persona.email_demo;
+    total_other = props.persona.email_bounced + props.persona.email_removed;
+  } else {
+    return <></>;
+  }
+
+  return (
+    <Flex direction="column" w="100%">
+      <Box mt={"2px"}>
+        <Flex justify={"center"} align={"center"} direction="column">
+          <RingProgress
+            size={55}
+            thickness={5}
+            label={
+              <Text size="xs" align="center" color="white">
+                {props.completionPercentage}%
+              </Text>
+            }
+            variant="animated"
+            sections={[
+              {
+                value: props.completionPercentage,
+                color: props.completionPercentage >= 100 ? "green" : "green",
+              },
+            ]}
+          />
+          <Text color="white" size="xs">
+            {channel}
+          </Text>
+          <Text color="white" size="8px">
+            {props.numerator} / {props.denominator}
+          </Text>
+        </Flex>
+      </Box>
+
+      <Divider my={"sm"} />
+
+      <Box>
+        <Text color="white" size={"sm"} fw={600}>
+          SUMMARY
+        </Text>
+
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold"># {channel} Sourced: </Text>{" "}
+            <Text ml="auto">{channel_total_prospect}</Text>
+          </Flex>
+        </Text>
+
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold"># {channel} Usable: </Text>{" "}
+            <Text ml="auto">{total_usabled}</Text>
+          </Flex>
+        </Text>
+
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold">Total # Used: </Text>{" "}
+            <Text ml="auto">{total_used}</Text>
+          </Flex>
+        </Text>
+      </Box>
+
+      <Divider my={"sm"} />
+
+      <Box>
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold">QUEUED: </Text>{" "}
+            <Text ml="auto">{total_queued}</Text>
+          </Flex>
+        </Text>
+      </Box>
+
+      <Divider my={"sm"} />
+
+      <Box>
+        <Text color="white" size={"sm"}>
+          BY STATUS
+        </Text>
+
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold">Prospected: </Text>{" "}
+            <Text ml="auto">{total_prospected}</Text>
+          </Flex>
+        </Text>
+
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold">Sent: </Text> <Text ml="auto">{total_sent}</Text>
+          </Flex>
+        </Text>
+
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold">Opened: </Text>{" "}
+            <Text ml="auto">{total_opened}</Text>
+          </Flex>
+        </Text>
+
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold">Replies: </Text>{" "}
+            <Text ml="auto">{total_replied}</Text>
+          </Flex>
+        </Text>
+
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold">Demo Set: </Text>{" "}
+            <Text ml="auto">{total_demo}</Text>
+          </Flex>
+        </Text>
+
+        <Text color="white" size={"sm"} fw={600}>
+          <Flex>
+            <Text fw="bold">Others: </Text> <Text ml="auto">{total_other}</Text>
+          </Flex>
+        </Text>
+      </Box>
+    </Flex>
   );
 }
 

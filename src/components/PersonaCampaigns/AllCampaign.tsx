@@ -8,7 +8,6 @@ import { useEffect, useMemo, useState } from "react";
 import { IconBrandLinkedin, IconMail, IconSearch } from "@tabler/icons";
 import {
   CampaignPersona,
-  PersonCampaignCard,
   PersonCampaignTable,
 } from "@common/campaigns/PersonaCampaigns";
 

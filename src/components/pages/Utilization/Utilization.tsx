@@ -492,13 +492,14 @@ export default function Utilization() {
                 columns={[
                   {
                     accessorKey: 'Status',
+                    minSize: 210,
+                    maxSize: 210,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLoader color='gray' size={'0.9rem'} />
                         <Text color='gray'>Status</Text>
                       </Flex>
                     ),
-                    maxSize: 180,
                     cell: (cell) => {
                       const { status, percentage } = cell.row.original;
 
@@ -511,12 +512,15 @@ export default function Utilization() {
                   },
                   {
                     accessorKey: 'campaigns',
+                    minSize: 500,
+                    maxSize: 500,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconTargetArrow color='gray' size={'0.9rem'} />
                         <Text color='gray'>Campaigns</Text>
                       </Flex>
                     ),
+
                     cell: (cell) => {
                       const { campaign } = cell.row.original;
 
@@ -529,6 +533,7 @@ export default function Utilization() {
                   },
                   {
                     accessorKey: 'sdr',
+                    minSize: 200,
                     maxSize: 200,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
@@ -553,7 +558,7 @@ export default function Utilization() {
                         <Text color='gray'>Channels</Text>
                       </Flex>
                     ),
-                    maxSize: 130,
+                    maxSize: 180,
                     enableResizing: true,
                     cell: (cell) => {
                       const { linkedin, email } = cell.row.original;
@@ -576,7 +581,7 @@ export default function Utilization() {
                         <Text color='gray'>Progress</Text>
                       </Flex>
                     ),
-                    maxSize: 200,
+                    maxSize: 280,
                     enableResizing: true,
                     cell: (cell) => {
                       return (
@@ -606,7 +611,6 @@ export default function Utilization() {
                         <Text color='gray'>Last Send Date</Text>
                       </Flex>
                     ),
-                    maxSize: 200,
                     enableResizing: true,
                     cell: (cell) => {
                       return (
@@ -622,334 +626,6 @@ export default function Utilization() {
                 options={{
                   enableFilters: true,
                 }}
-                components={{
-                  pagination: ({ table }) => (
-                    <Flex
-                      justify={'space-between'}
-                      align={'center'}
-                      px={'sm'}
-                      py={'1.25rem'}
-                      sx={(theme) => ({
-                        border: `1px solid ${theme.colors.gray[4]}`,
-                        borderTopWidth: 0,
-                      })}
-                    >
-                      <Select
-                        style={{ width: '150px' }}
-                        data={[
-                          { label: 'Show 25 rows', value: '25' },
-                          { label: 'Show 10 rows', value: '10' },
-                          { label: 'Show 5 rows', value: '5' },
-                        ]}
-                        value={acPageSize}
-                        onChange={(v) => {
-                          setAcPageSize(v ?? '25');
-                        }}
-                      />
-                      <Flex align={'center'} gap={'sm'}>
-                        <Flex align={'center'}>
-                          <Select
-                            maw={100}
-                            value={`${table.getState().pagination.pageIndex + 1}`}
-                            data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                              label: String(idx + 1),
-                              value: String(idx + 1),
-                            }))}
-                            onChange={(v) => {
-                              table.setPageIndex(Number(v) - 1);
-                            }}
-                          />
-                          <Flex
-                            sx={(theme) => ({
-                              borderTop: `1px solid ${theme.colors.gray[4]}`,
-                              borderRight: `1px solid ${theme.colors.gray[4]}`,
-                              borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                              marginLeft: '-2px',
-                              paddingLeft: '1rem',
-                              paddingRight: '1rem',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              borderRadius: '0.25rem',
-                            })}
-                            h={36}
-                          >
-                            <Text color='gray.5' fw={500} fz={14}>
-                              of {table.getPageCount()} pages
-                            </Text>
-                          </Flex>
-                          <ActionIcon
-                            variant='default'
-                            color='gray.4'
-                            h={36}
-                            disabled={table.getState().pagination.pageIndex === 0}
-                            onClick={() => {
-                              table.setPageIndex(table.getState().pagination.pageIndex - 1);
-                            }}
-                          >
-                            <IconChevronLeft stroke={theme.colors.gray[4]} />
-                          </ActionIcon>
-                          <ActionIcon
-                            variant='default'
-                            color='gray.4'
-                            h={36}
-                            disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
-                            onClick={() => {
-                              table.setPageIndex(table.getState().pagination.pageIndex + 1);
-                            }}
-                          >
-                            <IconChevronRight stroke={theme.colors.gray[4]} />
-                          </ActionIcon>
-                        </Flex>
-                      </Flex>
-                    </Flex>
-                  ),
-                }}
-                w={'100%'}
-                pageSizes={[acPageSize]}
-                styles={(theme) => ({
-                  thead: {
-                    height: '44px',
-                    backgroundColor: theme.colors.gray[0],
-                    '::after': {
-                      backgroundColor: 'transparent',
-                    },
-                  },
-
-                  wrapper: {
-                    gap: 0,
-                  },
-                  scrollArea: {
-                    paddingBottom: 0,
-                    gap: 0,
-                  },
-
-                  dataCellContent: {
-                    width: '100%',
-                  },
-                })}
-              />
-            </Collapse>
-            <Collapse in={activeCampaignOpen}>
-              <DataGrid
-                data={processedCampaigns.filter((c) => !c.status)}
-                highlightOnHover
-                withPagination
-                withSorting
-                withColumnBorders
-                withBorder
-                sx={{
-                  cursor: 'pointer',
-                  '& .mantine-10xyzsm>tbody>tr>td': {
-                    padding: '0px',
-                  },
-                  '& tr': {
-                    background: 'white',
-                  },
-                }}
-                columns={[
-                  {
-                    accessorKey: 'Status',
-                    header: () => (
-                      <Flex align={'center'} gap={'3px'}>
-                        <IconLoader color='gray' size={'0.9rem'} />
-                        <Text color='gray'>Status</Text>
-                      </Flex>
-                    ),
-                    maxSize: 180,
-                    cell: (cell) => {
-                      const { status, percentage } = cell.row.original;
-
-                      return (
-                        <Flex gap={'xs'} w={'100%'} h={'100%'} px={'sm'} align={'center'}>
-                          <RingProgress
-                            size={30}
-                            thickness={4}
-                            variant='animated'
-                            sections={[
-                              {
-                                value: Math.floor(percentage),
-                                color: Math.round(percentage) ? 'green' : 'blue',
-                              },
-                            ]}
-                          />
-                          <Text size='sm' align='center'>
-                            {percentage}%
-                          </Text>
-                          <Badge color={status ? 'green' : 'red'}>{status ? 'Active' : 'Inactive'}</Badge>
-                        </Flex>
-                      );
-                    },
-                  },
-                  {
-                    accessorKey: 'campaigns',
-                    header: () => (
-                      <Flex align={'center'} gap={'3px'}>
-                        <IconTargetArrow color='gray' size={'0.9rem'} />
-                        <Text color='gray'>Campaigns</Text>
-                      </Flex>
-                    ),
-                    cell: (cell) => {
-                      const { campaign } = cell.row.original;
-
-                      return (
-                        <Flex w={'100%'} px={'sm'} h={'100%'} align={'center'}>
-                          <Text lineClamp={1}>{campaign}</Text>
-                        </Flex>
-                      );
-                    },
-                  },
-                  {
-                    accessorKey: 'sent',
-                    header: () => (
-                      <Flex align={'center'} gap={'3px'}>
-                        <IconSend color='#228be6' size={'0.9rem'} />
-                        <Text color='gray'>Sent</Text>
-                      </Flex>
-                    ),
-                    maxSize: 120,
-                    enableResizing: true,
-                    cell: (cell) => {
-                      const { sent } = cell.row.original;
-
-                      return (
-                        <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'} bg={'#f9fbfe'}>
-                          <Text color='#228be6' fw={700}>
-                            {sent}
-                          </Text>
-                          <Badge variant='light' color={theme.colors.blue[1]}>
-                            {sent}%
-                          </Badge>
-                        </Flex>
-                      );
-                    },
-                  },
-                  {
-                    accessorKey: 'open',
-                    header: () => (
-                      <Flex align={'center'} gap={'3px'}>
-                        <IconChecks color='#db66f3' size={'0.9rem'} />
-                        <Text color='gray'>Sent</Text>
-                      </Flex>
-                    ),
-                    maxSize: 120,
-                    enableResizing: true,
-                    cell: (cell) => {
-                      const { open } = cell.row.original;
-
-                      return (
-                        <Flex align={'center'} justify={'center'} gap={'xs'} w={'100%'} py={'lg'} h={'100%'} bg={'#fdf9fe'}>
-                          <Text color={'#db66f3'} fw={700}>
-                            {open}
-                          </Text>
-                          <Badge variant='light' bg='rgba(219,102,243, 0.1)' style={{ color: '#db66f3' }}>
-                            {open}%
-                          </Badge>
-                        </Flex>
-                      );
-                    },
-                  },
-                  {
-                    accessorKey: 'reply',
-                    header: () => (
-                      <Flex align={'center'} gap={'3px'}>
-                        <IconMessageCheck color='#f0ab78' size={'0.9rem'} />
-                        <Text color='gray'>Reply</Text>
-                      </Flex>
-                    ),
-                    maxSize: 120,
-                    enableResizing: true,
-                    cell: (cell) => {
-                      const { reply } = cell.row.original;
-
-                      return (
-                        <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'} bg={'#fffbf8'}>
-                          <Text color={'#f0ab78'} fw={700}>
-                            {reply}
-                          </Text>
-                          <Badge variant='light' bg='rgba(240, 171, 120, 0.1)' style={{ color: '#f0ab78' }}>
-                            {reply}%
-                          </Badge>
-                        </Flex>
-                      );
-                    },
-                  },
-                  {
-                    accessorKey: 'demo',
-                    header: () => (
-                      <Flex align={'center'} gap={'3px'}>
-                        <IconCalendar color='#73d0a5' size={'0.9rem'} />
-                        <Text color='gray'>Demo</Text>
-                      </Flex>
-                    ),
-                    maxSize: 120,
-                    enableResizing: true,
-                    cell: (cell) => {
-                      const { demo } = cell.row.original;
-
-                      return (
-                        <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'} bg={'#f8fbf9'}>
-                          <Text color={'#73d0a5'} fw={700}>
-                            {demo}
-                          </Text>
-                          <Badge variant='light' bg='rbga(115, 208, 165, 0.1)' style={{ color: '#73d0a5' }}>
-                            {demo}%
-                          </Badge>
-                        </Flex>
-                      );
-                    },
-                  },
-                  {
-                    accessorKey: 'channel',
-                    header: () => (
-                      <Flex align={'center'} gap={'3px'}>
-                        <IconToggleRight color='gray' size={'0.9rem'} />
-                        <Text color='gray'>Channels</Text>
-                      </Flex>
-                    ),
-                    maxSize: 130,
-                    enableResizing: true,
-                    cell: (cell) => {
-                      const { linkedin, email } = cell.row.original;
-
-                      return (
-                        <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
-                          <Flex direction={'column'} gap={'3px'} align={'center'}>
-                            <IconBrandLinkedin size={'1.3rem'} fill='#228be6' color='white' />
-                            <Switch defaultChecked={linkedin} readOnly />
-                          </Flex>
-                          <Flex direction={'column'} gap={'3px'} align={'center'}>
-                            <IconMail size={'1.3rem'} fill='#228be6' color='white' />
-                            <Switch defaultChecked={email} readOnly />
-                          </Flex>
-                        </Flex>
-                      );
-                    },
-                  },
-                  {
-                    accessorKey: 'action',
-                    header: '',
-                    maxSize: 50,
-                    enableSorting: false,
-                    enableResizing: true,
-                    cell: (cell) => {
-                      const { sent } = cell.row.original;
-
-                      return (
-                        <Flex align={'center'} gap={'xs'} h={'100%'} w={'100%'} justify={'center'}>
-                          <Button style={{ borderRadius: '100%', padding: '0px' }} w={'fit-content'} h={'fit-content'}>
-                            <IconChevronDown />
-                          </Button>
-                        </Flex>
-                      );
-                    },
-                  },
-                ]}
-                options={{
-                  enableFilters: true,
-                }}
-                //   state={{
-                //     columnFilters,
-                //   }}
                 components={{
                   pagination: ({ table }) => (
                     <Flex
@@ -1087,16 +763,17 @@ export default function Utilization() {
                 columns={[
                   {
                     accessorKey: 'Status',
+                    minSize: 210,
+                    maxSize: 210,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLetterT color='gray' size={'0.9rem'} />
                         <Text color='gray'>Status</Text>
                       </Flex>
                     ),
-                    maxSize: 170,
                     cell: (cell) => {
                       return (
-                        <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'}>
+                        <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'} justify={'center'}>
                           <Badge color={'orange'}>rep action needed</Badge>
                         </Flex>
                       );
@@ -1104,6 +781,8 @@ export default function Utilization() {
                   },
                   {
                     accessorKey: 'campaign',
+                    minSize: 500,
+                    maxSize: 500,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLetterT color='gray' size={'0.9rem'} />
@@ -1122,13 +801,14 @@ export default function Utilization() {
                   },
                   {
                     accessorKey: 'sdr',
+                    minSize: 200,
+                    maxSize: 200,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLetterT color='gray' size={'0.9rem'} />
                         <Text color='gray'>SDR</Text>
                       </Flex>
                     ),
-                    maxSize: 200,
                     enableResizing: true,
                     cell: (cell) => {
                       const { sdr } = cell.row.original;
@@ -1149,7 +829,6 @@ export default function Utilization() {
                         <Text color='gray'>Details</Text>
                       </Flex>
                     ),
-                    maxSize: 300,
                     enableResizing: true,
                     cell: (cell) => {
                       const { sdr } = cell.row.original;
@@ -1309,212 +988,217 @@ export default function Utilization() {
               <Divider w={'100%'} />
               <ActionIcon onClick={aiToggle}>{aiOpened ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon>
             </Flex>
-            <DataGrid
-              data={upladingData}
-              highlightOnHover
-              withPagination
-              withSorting
-              withColumnBorders
-              withBorder
-              sx={{
-                cursor: 'pointer',
-                '& tr': {
-                  background: 'white',
-                },
-              }}
-              columns={[
-                {
-                  accessorKey: 'Status',
-                  header: () => (
-                    <Flex align={'center'} gap={'3px'}>
-                      <IconLetterT color='gray' size={'0.9rem'} />
-                      <Text color='gray'>Status</Text>
-                    </Flex>
-                  ),
-                  maxSize: 210,
-                  cell: (cell) => {
-                    const { status } = cell.row.original;
-
-                    return (
-                      <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'} justify={'center'}>
-                        <Badge sx={{ color: '#d549f2', background: '#fbebfe' }}>ai is setting up</Badge>
-                      </Flex>
-                    );
+            <Collapse in={aiOpened}>
+              <DataGrid
+                data={upladingData}
+                highlightOnHover
+                withPagination
+                withSorting
+                withColumnBorders
+                withBorder
+                sx={{
+                  cursor: 'pointer',
+                  '& tr': {
+                    background: 'white',
                   },
-                },
-                {
-                  accessorKey: 'campaign',
-                  header: () => (
-                    <Flex align={'center'} gap={'3px'}>
-                      <IconLetterT color='gray' size={'0.9rem'} />
-                      <Text color='gray'>Campaign</Text>
-                    </Flex>
-                  ),
-                  cell: (cell) => {
-                    const { campaign } = cell.row.original;
-
-                    return (
-                      <Flex w={'100%'} h={'100%'} align={'center'}>
-                        <Text lineClamp={1}>{campaign}</Text>
+                }}
+                columns={[
+                  {
+                    accessorKey: 'Status',
+                    minSize: 210,
+                    maxSize: 210,
+                    header: () => (
+                      <Flex align={'center'} gap={'3px'}>
+                        <IconLetterT color='gray' size={'0.9rem'} />
+                        <Text color='gray'>Status</Text>
                       </Flex>
-                    );
-                  },
-                },
-                {
-                  accessorKey: 'sdr',
-                  header: () => (
-                    <Flex align={'center'} gap={'3px'}>
-                      <IconLetterT color='gray' size={'0.9rem'} />
-                      <Text color='gray'>SDR</Text>
-                    </Flex>
-                  ),
-                  maxSize: 250,
-                  enableResizing: true,
-                  cell: (cell) => {
-                    const { sdr } = cell.row.original;
+                    ),
+                    cell: (cell) => {
+                      const { status } = cell.row.original;
 
-                    return (
-                      <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                        <Avatar src={''} radius={'xl'} />
-                        <Text>{sdr}</Text>
-                      </Flex>
-                    );
-                  },
-                },
-                {
-                  accessorKey: 'detail',
-                  header: () => (
-                    <Flex align={'center'} gap={'3px'}>
-                      <IconLetterT color='gray' size={'0.9rem'} />
-                      <Text color='gray'>Details</Text>
-                    </Flex>
-                  ),
-                  maxSize: 500,
-                  enableResizing: true,
-                  cell: (cell) => {
-                    const { sdr } = cell.row.original;
-
-                    return (
-                      <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                        <Text fw={500} color='gray'>
-                          Step {2} / {3}:
-                        </Text>
-                        <Text fw={500}>Writing Sequence</Text>
-                      </Flex>
-                    );
-                  },
-                },
-              ]}
-              options={{
-                enableFilters: true,
-              }}
-              components={{
-                pagination: ({ table }) => (
-                  <Flex
-                    justify={'space-between'}
-                    align={'center'}
-                    px={'sm'}
-                    py={'1.25rem'}
-                    sx={(theme) => ({
-                      border: `1px solid ${theme.colors.gray[4]}`,
-                      borderTopWidth: 0,
-                    })}
-                  >
-                    <Select
-                      style={{ width: '150px' }}
-                      data={[
-                        { label: 'Show 25 rows', value: '25' },
-                        { label: 'Show 10 rows', value: '10' },
-                        { label: 'Show 5 rows', value: '5' },
-                      ]}
-                      value={udPageSize}
-                      onChange={(v) => {
-                        setUdPageSize(v ?? '25');
-                      }}
-                    />
-
-                    <Flex align={'center'} gap={'sm'}>
-                      <Flex align={'center'}>
-                        <Select
-                          maw={100}
-                          value={`${table.getState().pagination.pageIndex + 1}`}
-                          data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                            label: String(idx + 1),
-                            value: String(idx + 1),
-                          }))}
-                          onChange={(v) => {
-                            table.setPageIndex(Number(v) - 1);
-                          }}
-                        />
-                        <Flex
-                          sx={(theme) => ({
-                            borderTop: `1px solid ${theme.colors.gray[4]}`,
-                            borderRight: `1px solid ${theme.colors.gray[4]}`,
-                            borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                            marginLeft: '-2px',
-                            paddingLeft: '1rem',
-                            paddingRight: '1rem',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: '0.25rem',
-                          })}
-                          h={36}
-                        >
-                          <Text color='gray.5' fw={500} fz={14}>
-                            of {table.getPageCount()} pages
-                          </Text>
+                      return (
+                        <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'} justify={'center'}>
+                          <Badge sx={{ color: '#d549f2', background: '#fbebfe' }}>ai is setting up</Badge>
                         </Flex>
-                        <ActionIcon
-                          variant='default'
-                          color='gray.4'
-                          h={36}
-                          disabled={table.getState().pagination.pageIndex === 0}
-                          onClick={() => {
-                            table.setPageIndex(table.getState().pagination.pageIndex - 1);
-                          }}
-                        >
-                          <IconChevronLeft stroke={theme.colors.gray[4]} />
-                        </ActionIcon>
-                        <ActionIcon
-                          variant='default'
-                          color='gray.4'
-                          h={36}
-                          disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
-                          onClick={() => {
-                            table.setPageIndex(table.getState().pagination.pageIndex + 1);
-                          }}
-                        >
-                          <IconChevronRight stroke={theme.colors.gray[4]} />
-                        </ActionIcon>
+                      );
+                    },
+                  },
+                  {
+                    accessorKey: 'campaign',
+                    minSize: 500,
+                    maxSize: 500,
+                    header: () => (
+                      <Flex align={'center'} gap={'3px'}>
+                        <IconLetterT color='gray' size={'0.9rem'} />
+                        <Text color='gray'>Campaign</Text>
+                      </Flex>
+                    ),
+                    cell: (cell) => {
+                      const { campaign } = cell.row.original;
+
+                      return (
+                        <Flex w={'100%'} h={'100%'} align={'center'}>
+                          <Text lineClamp={1}>{campaign}</Text>
+                        </Flex>
+                      );
+                    },
+                  },
+                  {
+                    accessorKey: 'sdr',
+                    minSize: 200,
+                    maxSize: 200,
+                    header: () => (
+                      <Flex align={'center'} gap={'3px'}>
+                        <IconLetterT color='gray' size={'0.9rem'} />
+                        <Text color='gray'>SDR</Text>
+                      </Flex>
+                    ),
+                    enableResizing: true,
+                    cell: (cell) => {
+                      const { sdr } = cell.row.original;
+
+                      return (
+                        <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
+                          <Avatar src={''} radius={'xl'} />
+                          <Text>{sdr}</Text>
+                        </Flex>
+                      );
+                    },
+                  },
+                  {
+                    accessorKey: 'detail',
+                    header: () => (
+                      <Flex align={'center'} gap={'3px'}>
+                        <IconLetterT color='gray' size={'0.9rem'} />
+                        <Text color='gray'>Details</Text>
+                      </Flex>
+                    ),
+                    enableResizing: true,
+                    cell: (cell) => {
+                      const { sdr } = cell.row.original;
+
+                      return (
+                        <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
+                          <Text fw={500} color='gray'>
+                            Step {2} / {3}:
+                          </Text>
+                          <Text fw={500}>Writing Sequence</Text>
+                        </Flex>
+                      );
+                    },
+                  },
+                ]}
+                options={{
+                  enableFilters: true,
+                }}
+                components={{
+                  pagination: ({ table }) => (
+                    <Flex
+                      justify={'space-between'}
+                      align={'center'}
+                      px={'sm'}
+                      py={'1.25rem'}
+                      sx={(theme) => ({
+                        border: `1px solid ${theme.colors.gray[4]}`,
+                        borderTopWidth: 0,
+                      })}
+                    >
+                      <Select
+                        style={{ width: '150px' }}
+                        data={[
+                          { label: 'Show 25 rows', value: '25' },
+                          { label: 'Show 10 rows', value: '10' },
+                          { label: 'Show 5 rows', value: '5' },
+                        ]}
+                        value={udPageSize}
+                        onChange={(v) => {
+                          setUdPageSize(v ?? '25');
+                        }}
+                      />
+
+                      <Flex align={'center'} gap={'sm'}>
+                        <Flex align={'center'}>
+                          <Select
+                            maw={100}
+                            value={`${table.getState().pagination.pageIndex + 1}`}
+                            data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
+                              label: String(idx + 1),
+                              value: String(idx + 1),
+                            }))}
+                            onChange={(v) => {
+                              table.setPageIndex(Number(v) - 1);
+                            }}
+                          />
+                          <Flex
+                            sx={(theme) => ({
+                              borderTop: `1px solid ${theme.colors.gray[4]}`,
+                              borderRight: `1px solid ${theme.colors.gray[4]}`,
+                              borderBottom: `1px solid ${theme.colors.gray[4]}`,
+                              marginLeft: '-2px',
+                              paddingLeft: '1rem',
+                              paddingRight: '1rem',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: '0.25rem',
+                            })}
+                            h={36}
+                          >
+                            <Text color='gray.5' fw={500} fz={14}>
+                              of {table.getPageCount()} pages
+                            </Text>
+                          </Flex>
+                          <ActionIcon
+                            variant='default'
+                            color='gray.4'
+                            h={36}
+                            disabled={table.getState().pagination.pageIndex === 0}
+                            onClick={() => {
+                              table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                            }}
+                          >
+                            <IconChevronLeft stroke={theme.colors.gray[4]} />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant='default'
+                            color='gray.4'
+                            h={36}
+                            disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                            onClick={() => {
+                              table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                            }}
+                          >
+                            <IconChevronRight stroke={theme.colors.gray[4]} />
+                          </ActionIcon>
+                        </Flex>
                       </Flex>
                     </Flex>
-                  </Flex>
-                ),
-              }}
-              w={'100%'}
-              pageSizes={[udPageSize]}
-              styles={(theme) => ({
-                thead: {
-                  height: '44px',
-                  backgroundColor: theme.colors.gray[0],
-                  '::after': {
-                    backgroundColor: 'transparent',
+                  ),
+                }}
+                w={'100%'}
+                pageSizes={[udPageSize]}
+                styles={(theme) => ({
+                  thead: {
+                    height: '44px',
+                    backgroundColor: theme.colors.gray[0],
+                    '::after': {
+                      backgroundColor: 'transparent',
+                    },
                   },
-                },
 
-                wrapper: {
-                  gap: 0,
-                },
-                scrollArea: {
-                  paddingBottom: 0,
-                  gap: 0,
-                },
+                  wrapper: {
+                    gap: 0,
+                  },
+                  scrollArea: {
+                    paddingBottom: 0,
+                    gap: 0,
+                  },
 
-                dataCellContent: {
-                  width: '100%',
-                },
-              })}
-            />
+                  dataCellContent: {
+                    width: '100%',
+                  },
+                })}
+              />
+            </Collapse>
           </Flex>
           <Flex direction={'column'} gap={'sm'}>
             <Flex align={'center'} gap={'5px'}>
@@ -1545,18 +1229,19 @@ export default function Utilization() {
                 columns={[
                   {
                     accessorKey: 'Status',
+                    minSize: 210,
+                    maxSize: 210,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLetterT color='gray' size={'0.9rem'} />
                         <Text color='gray'>Status</Text>
                       </Flex>
                     ),
-                    maxSize: 210,
                     cell: (cell) => {
                       const { status } = cell.row.original;
 
                       return (
-                        <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'}>
+                        <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'} justify={'center'}>
                           <Badge color='red'>{status}</Badge>
                         </Flex>
                       );
@@ -1564,6 +1249,8 @@ export default function Utilization() {
                   },
                   {
                     accessorKey: 'campaign',
+                    minSize: 500,
+                    maxSize: 500,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLetterT color='gray' size={'0.9rem'} />
@@ -1580,13 +1267,14 @@ export default function Utilization() {
                   },
                   {
                     accessorKey: 'sdr',
+                    minSize: 200,
+                    maxSize: 200,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLetterT color='gray' size={'0.9rem'} />
                         <Text color='gray'>SDR</Text>
                       </Flex>
                     ),
-                    maxSize: 200,
                     enableResizing: true,
                     cell: (cell) => {
                       return (
@@ -1605,7 +1293,6 @@ export default function Utilization() {
                         <Text color='gray'>Action</Text>
                       </Flex>
                     ),
-                    maxSize: 500,
                     enableResizing: true,
                     cell: (cell) => {
                       return (
@@ -1780,13 +1467,14 @@ export default function Utilization() {
                 columns={[
                   {
                     accessorKey: 'Status',
+                    minSize: 210,
+                    maxSize: 210,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLetterT color='gray' size={'0.9rem'} />
                         <Text color='gray'>Status</Text>
                       </Flex>
                     ),
-                    maxSize: 170,
                     cell: (cell) => {
                       const { status } = cell.row.original;
 
@@ -1799,6 +1487,8 @@ export default function Utilization() {
                   },
                   {
                     accessorKey: 'campaign',
+                    minSize: 500,
+                    maxSize: 500,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLetterT color='gray' size={'0.9rem'} />
@@ -1817,6 +1507,8 @@ export default function Utilization() {
                   },
                   {
                     accessorKey: 'sdr',
+                    minSize: 200,
+                    maxSize: 200,
                     header: () => (
                       <Flex align={'center'} gap={'3px'}>
                         <IconLetterT color='gray' size={'0.9rem'} />
@@ -1824,7 +1516,6 @@ export default function Utilization() {
                       </Flex>
                     ),
                     enableResizing: true,
-                    maxSize: 200,
                     cell: (cell) => {
                       return (
                         <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
@@ -1842,7 +1533,7 @@ export default function Utilization() {
                         <Text color='gray'>Channels</Text>
                       </Flex>
                     ),
-                    maxSize: 130,
+                    maxSize: 180,
                     enableResizing: true,
                     cell: (cell) => {
                       const { linkedin, email } = cell.row.original;
@@ -1865,7 +1556,7 @@ export default function Utilization() {
                         <Text color='gray'>Progress</Text>
                       </Flex>
                     ),
-                    maxSize: 200,
+                    maxSize: 280,
                     enableResizing: true,
                     cell: (cell) => {
                       return (
@@ -1894,7 +1585,6 @@ export default function Utilization() {
                       </Flex>
                     ),
                     enableResizing: true,
-                    maxSize: 250,
                     cell: (cell) => {
                       const { last_send_date } = cell.row.original;
 

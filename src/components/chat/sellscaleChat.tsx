@@ -17,10 +17,14 @@ export function AnimationText(props: any) {
   const [index, setIndex] = useState(0);
 
   props.setIsAnimation(true);
+  console.log('typeeeeeeeeeeeeeee', props.type);
 
   useEffect(() => {
     if (displayedText.length == props.text.length) {
       props.setIsAnimation(false);
+      if (props.type === 'action') {
+        props.setPulseAnimation(false);
+      }
     }
 
     if (index < props.text.length) {
@@ -54,7 +58,10 @@ export default function SellscaleChat() {
     }
   };
   const handleClick = () => {
-    setChatbot(!chatbot);
+    if (chatbot === false) {
+      setChatbot(true);
+    }
+    // setChatbot(!chatbot);
   };
 
   if (userData.id !== 34 && userData.id !== 203) {
@@ -266,6 +273,7 @@ export default function SellscaleChat() {
   ];
   const [index, setIndex] = useState(0);
   const [isAnimation, setIsAnimation] = useState(true);
+  const [pulseAnimation, setPulseAnimation] = useState(true);
   const [chatHistory, setChatHistory] = useState<ChatEntry[]>([]);
   const hasCalledHandleChat = useRef(false);
   const viewport = useRef<HTMLDivElement>(null);
@@ -311,16 +319,25 @@ export default function SellscaleChat() {
     }
   };
 
-  useEffect(() => {
+  if (chatbot) {
     if (!hasCalledHandleChat.current && chatbot) {
       handleChat(index, true);
       hasCalledHandleChat.current = true;
     }
-  }, [chatbot]);
+  }
+
+  // useEffect(() => {
+  //   if (!hasCalledHandleChat.current && chatbot) {
+  //     handleChat(index, true);
+  //     hasCalledHandleChat.current = true;
+  //   }
+  // }, [chatbot]);
 
   useEffect(() => {
     viewport.current?.scrollTo({ top: viewport.current.scrollHeight });
   }, []);
+
+  console.log('qqqqqqqqqqqqqqqqqqqqq', pulseAnimation);
 
   return (
     <>
@@ -340,6 +357,7 @@ export default function SellscaleChat() {
             w={'fit-content'}
             h={'fit-content'}
             p={'sm'}
+            className={`${pulseAnimation ? '' : 'pulse'}`}
           >
             <img src={WhiteLogo} className='w-[26px] h-[26px]' />
           </Button>
@@ -403,7 +421,7 @@ export default function SellscaleChat() {
                     size={'1.2rem'}
                     onClick={() => {
                       setChatbot(false);
-                      setChatHistory([]);
+                      // setChatHistory([]);
                       setIndex(0);
                     }}
                   />
@@ -427,7 +445,7 @@ export default function SellscaleChat() {
                                     borderBottomLeftRadius: '0px',
                                   }}
                                 >
-                                  <AnimationText text={chat?.message} setIsAnimation={setIsAnimation} setChatLoading={setChatLoading} />
+                                  <AnimationText text={chat?.message} type={chat.type} setIsAnimation={setIsAnimation} setChatLoading={setChatLoading} />
                                 </Box>
                                 {/* <Text color='gray' size={'xs'}>
                                   {item?.response_date}
@@ -489,7 +507,13 @@ export default function SellscaleChat() {
                                 {/* Finding contacts who are Product Managers at companies that are mid sized (100 - 1000 employees). Specifically target companies
                                 working in the Augmented Reality space. No large companies. Target Bay Area cities like San Francisco, San Jose, San Mateo, and
                                 more. */}
-                                <AnimationText text={chat?.message} setIsAnimation={setIsAnimation} setChatLoading={setChatLoading} />
+                                <AnimationText
+                                  text={chat?.message}
+                                  type={chat.type}
+                                  setIsAnimation={setIsAnimation}
+                                  setChatLoading={setChatLoading}
+                                  setPulseAnimation={setPulseAnimation}
+                                />
                               </span>
                               <Text color='#d444f1' size={'xs'}></Text>
                             </Box>

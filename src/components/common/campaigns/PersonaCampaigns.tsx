@@ -235,7 +235,7 @@ export default function PersonaCampaigns() {
       <Group position='apart' mb='xs'>
         <Group>
           <Title color='gray.6' order={3}>
-            {userData?.sdr_name.split(' ')[0]}'s Campaigns
+            {userData?.sdr_name && userData?.sdr_name.split(' ')[0]}'s Campaigns
           </Title>
         </Group>
 
@@ -316,7 +316,7 @@ export default function PersonaCampaigns() {
         <Tabs defaultValue='overview'>
           <Tabs.List mb='md'>
             <Tabs.Tab value='overview' icon={<IconClipboard size='0.8rem' />}>
-              {userData?.sdr_name.split(' ')[0]}'s Campaigns
+              {userData?.sdr_name && userData?.sdr_name.split(' ')[0]}'s Campaigns
             </Tabs.Tab>
             <Tabs.Tab value='all-campaigns' icon={<IconClipboard size='0.8rem' />}>
               {userData?.client?.company}'s Campaigns

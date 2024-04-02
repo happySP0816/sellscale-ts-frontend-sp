@@ -66,39 +66,27 @@ import {
   IconTargetArrow,
   IconToggleRight,
   IconX,
-} from "@tabler/icons";
-import {
-  IconArrowDown,
-  IconArrowUp,
-  IconClipboard,
-  IconMessageCheck,
-} from "@tabler/icons-react";
-import { navigateToPage } from "@utils/documentChange";
-import {
-  convertDateToShortFormatWithoutTime,
-  formatToLabel,
-} from "@utils/general";
-import {
-  getPersonasActivity,
-  getPersonasCampaignView,
-  getPersonasOverview,
-} from "@utils/requests/getPersonas";
-import _ from "lodash";
-import moment from "moment";
-import { ReactNode, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { PersonaOverview } from "src";
-import { API_URL } from "@constants/data";
-import CampaignGraph from "./campaigngraph";
-import { showNotification } from "@mantine/notifications";
-import { CampaignAnalyticsData } from "./CampaignAnalytics";
-import { TodayActivityData } from "./OverallPipeline/TodayActivity";
-import UserStatusToggle from "./UserStatusToggle";
-import AllCampaign from "../../PersonaCampaigns/AllCampaign";
-import TriggersList from "@pages/TriggersList";
-import postTogglePersonaActive from "@utils/requests/postTogglePersonaActive";
-import ClientCampaignView from "@pages/ClientCampaignView/ClientCampaignView";
+} from '@tabler/icons';
+import { IconArrowDown, IconArrowUp, IconClipboard, IconMessageCheck } from '@tabler/icons-react';
+import { navigateToPage } from '@utils/documentChange';
+import { convertDateToShortFormatWithoutTime, formatToLabel } from '@utils/general';
+import { getPersonasActivity, getPersonasCampaignView, getPersonasOverview } from '@utils/requests/getPersonas';
+import _ from 'lodash';
+import moment from 'moment';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { PersonaOverview } from 'src';
+import { API_URL } from '@constants/data';
+import CampaignGraph from './campaigngraph';
+import { showNotification } from '@mantine/notifications';
+import { CampaignAnalyticsData } from './CampaignAnalytics';
+import { TodayActivityData } from './OverallPipeline/TodayActivity';
+import UserStatusToggle from './UserStatusToggle';
+import AllCampaign from '../../PersonaCampaigns/AllCampaign';
+import TriggersList from '@pages/TriggersList';
+import postTogglePersonaActive from '@utils/requests/postTogglePersonaActive';
+import ClientCampaignView from '@pages/ClientCampaignView/ClientCampaignView';
 
 export type CampaignPersona = {
   id: number;
@@ -877,9 +865,7 @@ export function PersonCampaignCard(props: {
     }
   }, [value, campaignList]);
 
-  const unusedProspects =
-    (props.project?.num_unused_email_prospects ?? 0) +
-    (props.project?.num_unused_li_prospects ?? 0);
+  const unusedProspects = (props.project?.num_unused_email_prospects ?? 0) + (props.project?.num_unused_li_prospects ?? 0);
 
   // Calculate the completion percentage as following:
   // Numerator: Number of successful sends to prospects on active channels
@@ -887,47 +873,34 @@ export function PersonCampaignCard(props: {
   let liNumerator = 0;
   let liDenominator = 0;
   let linkedinCompletionPercentage;
-  if (
-    props.persona.total_prospects_left_linkedin == 0 &&
-    props.persona.li_sent > 0
-  ) {
+  if (props.persona.total_prospects_left_linkedin == 0 && props.persona.li_sent > 0) {
     // LI: If we have no more eligible prospects and we've sent some messages, then we can assume LI is complete
     liNumerator += props.persona.li_used;
     liDenominator += props.persona.li_used;
   } else if (props.persona.li_sent) {
     // LI: Otherwise if we have prospects left and have sent messages, then we calculate the completion percentage
     liNumerator += props.persona.li_used;
-    liDenominator +=
-      props.persona.li_used + props.persona.total_prospects_left_linkedin;
+    liDenominator += props.persona.li_used + props.persona.total_prospects_left_linkedin;
   }
-  linkedinCompletionPercentage =
-    Math.min(100, Math.floor((liNumerator / liDenominator) * 100)) || 0;
+  linkedinCompletionPercentage = Math.min(100, Math.floor((liNumerator / liDenominator) * 100)) || 0;
 
   let emailNumerator = 0;
   let emailDenominator = 0;
   let emailCompletionPercentage;
-  if (
-    props.persona.total_prospects_left_email == 0 &&
-    props.persona.email_sent > 0
-  ) {
+  if (props.persona.total_prospects_left_email == 0 && props.persona.email_sent > 0) {
     // Email: If we have no more eligible prospects and we've sent some messages, then we can assume Email is complete
     emailNumerator += props.persona.email_used;
     emailDenominator += props.persona.email_used;
   } else if (props.persona.email_sent) {
     // Email: Otherwise if we have prospects left and have sent messages, then we calculate the completion percentage
     emailNumerator += props.persona.email_used;
-    emailDenominator +=
-      props.persona.email_used + props.persona.total_prospects_left_email;
+    emailDenominator += props.persona.email_used + props.persona.total_prospects_left_email;
   }
-  emailCompletionPercentage =
-    Math.min(100, Math.floor((emailNumerator / emailDenominator) * 100)) || 0;
+  emailCompletionPercentage = Math.min(100, Math.floor((emailNumerator / emailDenominator) * 100)) || 0;
 
   let completionNumerator = 0;
   let completionDenominator = 0;
-  if (
-    props.persona.linkedin_active ||
-    props.persona.total_prospects_left_linkedin == 0
-  ) {
+  if (props.persona.linkedin_active || props.persona.total_prospects_left_linkedin == 0) {
     // LI: If this channel is active or we have no more prospects left, then we include it in the completion percentage
     completionNumerator += liNumerator;
     completionDenominator += liDenominator;
@@ -940,30 +913,20 @@ export function PersonCampaignCard(props: {
     completionNumerator += emailNumerator;
     completionDenominator += emailDenominator;
   }
-  const completionPercentage =
-    Math.min(
-      100,
-      Math.floor((completionNumerator / completionDenominator) * 100)
-    ) || 0;
+  const completionPercentage = Math.min(100, Math.floor((completionNumerator / completionDenominator) * 100)) || 0;
   let numberOfRings = 0;
-  if (linkedinCompletionPercentage > 0 || props.persona.linkedin_active)
-    numberOfRings++;
-  if (emailCompletionPercentage > 0 || props.persona.email_active)
-    numberOfRings++;
+  if (linkedinCompletionPercentage > 0 || props.persona.linkedin_active) numberOfRings++;
+  if (emailCompletionPercentage > 0 || props.persona.email_active) numberOfRings++;
   if (numberOfRings === 0) numberOfRings = 1;
   let completionsActiveSpan = 12;
   if (linkedinCompletionPercentage > 0 && emailCompletionPercentage > 0) {
     completionsActiveSpan = 6;
   }
 
-  console.log(
-    emailCompletionPercentage,
-    linkedinCompletionPercentage,
-    completionPercentage
-  );
+  console.log(emailCompletionPercentage, linkedinCompletionPercentage, completionPercentage);
 
   return (
-    <Paper ref={ref}>
+    <Paper ref={ref} id='child'>
       <ChannelModal />
       <Stack
         spacing={0}
@@ -978,28 +941,25 @@ export function PersonCampaignCard(props: {
             borderRadius: '0.5rem 0.5rem 0 0',
             border: 'solid 1px ' + theme.colors.gray[2],
             position: 'relative',
+            flexWrap: 'nowrap',
           })}
           // p={'4px'}
           pl='xs'
           pr='xs'
           spacing={0}
         >
-          <Group sx={{ flex: '12%', padding: '0 4px' }} maw={'fit-content'}>
+          <Group sx={{ width: '200px', padding: '0 4px' }}>
             <Flex
               onClick={() => {
                 navigateToPage(navigate, `/contacts`, new URLSearchParams(`?campaign_id=${props.persona.id}`));
               }}
               mt={5}
+              w={'100%'}
               gap={'5px'}
               align={'center'}
+              justify={'center'}
             >
-              <Popover
-                width={200 * numberOfRings}
-                position="bottom"
-                withArrow
-                shadow="md"
-                opened={popoverOpened}
-              >
+              <Popover width={200 * numberOfRings} position='bottom' withArrow shadow='md' opened={popoverOpened}>
                 <Popover.Target>
                   <Button variant='outline' radius='xl' size='sm' h={55} color='gray' sx={{ border: 'solid 1px #f1f1f1' }} maw={'fit-content'}>
                     <RingProgress
@@ -1008,7 +968,7 @@ export function PersonCampaignCard(props: {
                       size={55}
                       thickness={5}
                       label={
-                        <Text size="xs" align="center">
+                        <Text size='xs' align='center'>
                           {completionPercentage}%
                         </Text>
                       }
@@ -1016,35 +976,33 @@ export function PersonCampaignCard(props: {
                       sections={[
                         {
                           value: completionPercentage,
-                          color: completionPercentage >= 100 ? "green" : "blue",
+                          color: completionPercentage >= 100 ? 'green' : 'blue',
                         },
                       ]}
                     />
                   </Button>
                 </Popover.Target>
-                <Popover.Dropdown sx={{ pointerEvents: "none" }} bg={"blue"}>
+                <Popover.Dropdown sx={{ pointerEvents: 'none' }} bg={'blue'}>
                   <Grid>
-                    {(linkedinCompletionPercentage > 0 ||
-                      props.persona.linkedin_active) && (
+                    {(linkedinCompletionPercentage > 0 || props.persona.linkedin_active) && (
                       <Grid.Col span={completionsActiveSpan}>
                         <CampaignProgressDropdown
                           persona={props.persona}
                           numerator={liNumerator}
                           denominator={liDenominator}
                           completionPercentage={linkedinCompletionPercentage}
-                          channel="LINKEDIN"
+                          channel='LINKEDIN'
                         />
                       </Grid.Col>
                     )}
-                    {(emailCompletionPercentage > 0 ||
-                      props.persona.email_active) && (
+                    {(emailCompletionPercentage > 0 || props.persona.email_active) && (
                       <Grid.Col span={completionsActiveSpan}>
                         <CampaignProgressDropdown
                           persona={props.persona}
                           numerator={emailNumerator}
                           denominator={emailDenominator}
                           completionPercentage={emailCompletionPercentage}
-                          channel="EMAIL"
+                          channel='EMAIL'
                         />
                       </Grid.Col>
                     )}
@@ -1144,7 +1102,7 @@ export function PersonCampaignCard(props: {
             </Flex>
           </Group>
           <Divider orientation='vertical' ml='xs' mr='xs' />
-          <Group w={'30.2%'}>
+          <Group w={'380px'}>
             <Flex direction={'column'}>
               <Flex gap={'xs'}>
                 <Popover position='bottom' withArrow shadow='md'>
@@ -1254,7 +1212,7 @@ export function PersonCampaignCard(props: {
               </Flex>
             </Flex>
           </Group>
-          <Divider orientation='vertical' ml='xs' />
+          <Divider orientation='vertical' />
           {/* <Group sx={{ flex: '6%' }}>
             <Flex>
               <Avatar src={props.persona.sdr_img_url} radius='xl' size='sm' />
@@ -1264,27 +1222,29 @@ export function PersonCampaignCard(props: {
             </Flex>
           </Group> */}
           {/* <Divider orientation='vertical' ml='xs' mr='xs' /> */}
-          <Flex w={'37%'} h={'67px'}>
-            <Box
-              // w={'15%'}
+          <Flex h={'67px'}>
+            <Flex
               w={'100%'}
               onClick={() => {
                 handleChannelOpen('sent', props.persona.id, props.persona.name);
               }}
               bg={'#f9fbfe'}
             >
-              <StatDisplay
-                color='blue'
-                icon={<IconSend color={theme.colors.blue[6]} size='0.9rem' />}
-                label='Sent'
-                total={total_sent ?? 0}
-                percentage={Math.floor(((total_sent ?? 0) / (total_sent || 1)) * 100)}
-                percentColor='#eaf3ff'
-                hoverColor='hover:bg-[#cadef9]'
-              />
-            </Box>
+              <Flex w={'100%'} justify={'center'} h={'100%'} align={'center'}>
+                <StatDisplay
+                  color='blue'
+                  width='w-[92px]'
+                  icon={<IconSend color={theme.colors.blue[6]} size='0.9rem' />}
+                  label='Sent'
+                  total={total_sent ?? 0}
+                  percentage={Math.floor(((total_sent ?? 0) / (total_sent || 1)) * 100)}
+                  percentColor='#eaf3ff'
+                  hoverColor='hover:bg-[#cadef9]'
+                />
+              </Flex>
+            </Flex>
             <Divider orientation='vertical' />
-            <Box
+            <Flex
               // w={'12%'}
               w={'100%'}
               onClick={() => {
@@ -1292,18 +1252,21 @@ export function PersonCampaignCard(props: {
               }}
               bg={'#fdf9fe	'}
             >
-              <StatDisplay
-                color='pink'
-                icon={<IconChecks color={theme.colors.pink[6]} size='0.9rem' />}
-                label='Open'
-                total={total_opened ?? 0}
-                percentage={Math.floor(((total_opened ?? 0) / (total_sent || 1)) * 100)}
-                percentColor='#ffeeff'
-                hoverColor='hover:bg-[#fbdefb]'
-              />
-            </Box>
+              <Flex w={'100%'} justify={'center'} h={'100%'} align={'center'}>
+                <StatDisplay
+                  color='pink'
+                  width='w-[93px]'
+                  icon={<IconChecks color={theme.colors.pink[6]} size='0.9rem' />}
+                  label='Open'
+                  total={total_opened ?? 0}
+                  percentage={Math.floor(((total_opened ?? 0) / (total_sent || 1)) * 100)}
+                  percentColor='#ffeeff'
+                  hoverColor='hover:bg-[#fbdefb]'
+                />
+              </Flex>
+            </Flex>
             <Divider orientation='vertical' />
-            <Box
+            <Flex
               // w={'12%'}
               w={'100%'}
               onClick={() => {
@@ -1312,18 +1275,21 @@ export function PersonCampaignCard(props: {
               bg={'#fffbf8'}
               p={0}
             >
-              <StatDisplay
-                color='orange'
-                icon={<IconMessage color={theme.colors.orange[6]} size='0.9rem' />}
-                label='Reply'
-                total={total_replied ?? 0}
-                percentage={Math.floor(((total_replied ?? 0) / (total_opened || 1)) * 100)}
-                percentColor='#f9e7dc'
-                hoverColor='hover:bg-[#f8f3f0]'
-              />
-            </Box>
+              <Flex w={'100%'} justify={'center'} h={'100%'} align={'center'}>
+                <StatDisplay
+                  color='orange'
+                  width='w-[93px]'
+                  icon={<IconMessage color={theme.colors.orange[6]} size='0.9rem' />}
+                  label='Reply'
+                  total={total_replied ?? 0}
+                  percentage={Math.floor(((total_replied ?? 0) / (total_opened || 1)) * 100)}
+                  percentColor='#f9e7dc'
+                  hoverColor='hover:bg-[#f8f3f0]'
+                />
+              </Flex>
+            </Flex>
             <Divider orientation='vertical' />
-            <Box
+            <Flex
               // w={'12%'}
               w={'100%'}
               onClick={() => {
@@ -1331,18 +1297,21 @@ export function PersonCampaignCard(props: {
               }}
               bg={'#f8fbf9'}
             >
-              <StatDisplay
-                color='#14B887'
-                icon={<IconMessage color={theme.colors.teal[6]} size='0.9rem' />}
-                label='(+)Reply'
-                total={total_pos_replied ?? 0}
-                percentage={Math.floor(((total_pos_replied ?? 0) / (total_replied || 1)) * 100)}
-                percentColor='#CFF1E7'
-                hoverColor='hover:bg-[#E8F6F2]'
-              />
-            </Box>
+              <Flex w={'100%'} justify={'center'} h={'100%'} align={'center'}>
+                <StatDisplay
+                  color='#14B887'
+                  width='w-[93px]'
+                  icon={<IconMessage color={theme.colors.teal[6]} size='0.9rem' />}
+                  label='(+)Reply'
+                  total={total_pos_replied ?? 0}
+                  percentage={Math.floor(((total_pos_replied ?? 0) / (total_replied || 1)) * 100)}
+                  percentColor='#CFF1E7'
+                  hoverColor='hover:bg-[#E8F6F2]'
+                />
+              </Flex>
+            </Flex>
             <Divider orientation='vertical' />
-            <Box
+            <Flex
               w={'100%'}
               // w={'12%'}
               onClick={() => {
@@ -1350,19 +1319,22 @@ export function PersonCampaignCard(props: {
               }}
               bg={'#f8fbf9'}
             >
-              <StatDisplay
-                color='green'
-                icon={<IconCalendar color={theme.colors.green[6]} size='0.9rem' />}
-                label='Demo'
-                total={props.persona.total_demo ?? 0}
-                percentage={Math.floor(((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100)}
-                percentColor='#e2f6e7'
-                hoverColor='hover:bg-[#d9f5e0]'
-              />
-            </Box>
+              <Flex w={'100%'} justify={'center'} h={'100%'} align={'center'}>
+                <StatDisplay
+                  color='green'
+                  width='w-[93px]'
+                  icon={<IconCalendar color={theme.colors.green[6]} size='0.9rem' />}
+                  label='Demo'
+                  total={props.persona.total_demo ?? 0}
+                  percentage={Math.floor(((props.persona.total_demo ?? 0) / (total_pos_replied || 1)) * 100)}
+                  percentColor='#e2f6e7'
+                  hoverColor='hover:bg-[#d9f5e0]'
+                />
+              </Flex>
+            </Flex>
           </Flex>
           <Divider orientation='vertical' mr='xs' />
-          <Flex w={'7.3%'} gap={'sm'} justify={'center'}>
+          <Flex w={'93px'} gap={'sm'} justify={'center'}>
             {/* <Button
                 w={60}
                 radius="xl"
@@ -1421,7 +1393,7 @@ export function PersonCampaignCard(props: {
             </Group>
           </Flex>
           <Divider orientation='vertical' ml='xs' mr='xs' />
-          <Flex w={'8%'} align={'center'} direction={'column'} justify={'center'}>
+          <Flex w={'5%'} align={'center'} direction={'column'} justify={'center'}>
             {/* <Box
             sx={{
               position: 'absolute',
@@ -1559,7 +1531,7 @@ function CampaignProgressDropdown(props: {
   numerator: number;
   denominator: number;
   completionPercentage: number;
-  channel: "LINKEDIN" | "EMAIL";
+  channel: 'LINKEDIN' | 'EMAIL';
 }) {
   let channel;
   let channel_total_prospect;
@@ -1572,8 +1544,8 @@ function CampaignProgressDropdown(props: {
   let total_replied;
   let total_demo;
   let total_other;
-  if (props.channel === "LINKEDIN") {
-    channel = "LinkedIn";
+  if (props.channel === 'LINKEDIN') {
+    channel = 'LinkedIn';
     channel_total_prospect = props.persona.li_eligible;
     total_usabled = props.persona.total_prospects_left_linkedin;
     total_used = props.persona.li_used;
@@ -1584,8 +1556,8 @@ function CampaignProgressDropdown(props: {
     total_replied = props.persona.li_replied;
     total_demo = props.persona.li_demo;
     total_other = props.persona.li_failed + props.persona.li_removed;
-  } else if (props.channel === "EMAIL") {
-    channel = "Email";
+  } else if (props.channel === 'EMAIL') {
+    channel = 'Email';
     channel_total_prospect = props.persona.email_eligible;
     total_usabled = props.persona.total_prospects_left_email;
     total_used = props.persona.email_used;
@@ -1601,118 +1573,110 @@ function CampaignProgressDropdown(props: {
   }
 
   return (
-    <Flex direction="column" w="100%">
-      <Box mt={"2px"}>
-        <Flex justify={"center"} align={"center"} direction="column">
+    <Flex direction='column' w='100%'>
+      <Box mt={'2px'}>
+        <Flex justify={'center'} align={'center'} direction='column'>
           <RingProgress
             size={55}
             thickness={5}
             label={
-              <Text size="xs" align="center" color="white">
+              <Text size='xs' align='center' color='white'>
                 {props.completionPercentage}%
               </Text>
             }
-            variant="animated"
+            variant='animated'
             sections={[
               {
                 value: props.completionPercentage,
-                color: props.completionPercentage >= 100 ? "green" : "green",
+                color: props.completionPercentage >= 100 ? 'green' : 'green',
               },
             ]}
           />
-          <Text color="white" size="xs">
+          <Text color='white' size='xs'>
             {channel}
           </Text>
-          <Text color="white" size="8px">
+          <Text color='white' size='8px'>
             {props.numerator} / {props.denominator}
           </Text>
         </Flex>
       </Box>
 
-      <Divider my={"sm"} />
+      <Divider my={'sm'} />
 
       <Box>
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           SUMMARY
         </Text>
 
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold"># {channel} Sourced: </Text>{" "}
-            <Text ml="auto">{channel_total_prospect}</Text>
+            <Text fw='bold'># {channel} Sourced: </Text> <Text ml='auto'>{channel_total_prospect}</Text>
           </Flex>
         </Text>
 
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold"># {channel} Usable: </Text>{" "}
-            <Text ml="auto">{total_usabled}</Text>
+            <Text fw='bold'># {channel} Usable: </Text> <Text ml='auto'>{total_usabled}</Text>
           </Flex>
         </Text>
 
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold">Total # Used: </Text>{" "}
-            <Text ml="auto">{total_used}</Text>
+            <Text fw='bold'>Total # Used: </Text> <Text ml='auto'>{total_used}</Text>
           </Flex>
         </Text>
       </Box>
 
-      <Divider my={"sm"} />
+      <Divider my={'sm'} />
 
       <Box>
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold">QUEUED: </Text>{" "}
-            <Text ml="auto">{total_queued}</Text>
+            <Text fw='bold'>QUEUED: </Text> <Text ml='auto'>{total_queued}</Text>
           </Flex>
         </Text>
       </Box>
 
-      <Divider my={"sm"} />
+      <Divider my={'sm'} />
 
       <Box>
-        <Text color="white" size={"sm"}>
+        <Text color='white' size={'sm'}>
           BY STATUS
         </Text>
 
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold">Prospected: </Text>{" "}
-            <Text ml="auto">{total_prospected}</Text>
+            <Text fw='bold'>Prospected: </Text> <Text ml='auto'>{total_prospected}</Text>
           </Flex>
         </Text>
 
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold">Sent: </Text> <Text ml="auto">{total_sent}</Text>
+            <Text fw='bold'>Sent: </Text> <Text ml='auto'>{total_sent}</Text>
           </Flex>
         </Text>
 
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold">Opened: </Text>{" "}
-            <Text ml="auto">{total_opened}</Text>
+            <Text fw='bold'>Opened: </Text> <Text ml='auto'>{total_opened}</Text>
           </Flex>
         </Text>
 
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold">Replies: </Text>{" "}
-            <Text ml="auto">{total_replied}</Text>
+            <Text fw='bold'>Replies: </Text> <Text ml='auto'>{total_replied}</Text>
           </Flex>
         </Text>
 
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold">Demo Set: </Text>{" "}
-            <Text ml="auto">{total_demo}</Text>
+            <Text fw='bold'>Demo Set: </Text> <Text ml='auto'>{total_demo}</Text>
           </Flex>
         </Text>
 
-        <Text color="white" size={"sm"} fw={600}>
+        <Text color='white' size={'sm'} fw={600}>
           <Flex>
-            <Text fw="bold">Others: </Text> <Text ml="auto">{total_other}</Text>
+            <Text fw='bold'>Others: </Text> <Text ml='auto'>{total_other}</Text>
           </Flex>
         </Text>
       </Box>
@@ -1830,6 +1794,7 @@ function StatModalDisplay(props: {
 
 function StatDisplay(props: {
   color: MantineColor;
+  width: string;
   icon: ReactNode;
   label: string;
   total: number;
@@ -1838,7 +1803,7 @@ function StatDisplay(props: {
   hoverColor: string;
 }) {
   return (
-    <div className={`${props.hoverColor} rounded-md px-2 py-1 h-full`}>
+    <div className={`${props.hoverColor} ${props.width} rounded-md px-2 py-1 h-full`}>
       <Stack spacing={0} h={'100%'}>
         <Flex justify='center' gap='xl' align={'center'} h={'100%'}>
           <Tooltip label={props.percentage + '% conversion'} withArrow withinPortal>
@@ -1896,7 +1861,7 @@ export const PersonCampaignTable = (props: {
     <>
       <Paper radius='md'>
         <Group
-          // position="apart"
+          id='dssss'
           sx={(theme) => ({
             backgroundColor: 'white', //props.persona.active ? theme.colors.blue[6] : 'white',
             borderRadius: '0.5rem 0.5rem 0 0',
@@ -1909,7 +1874,7 @@ export const PersonCampaignTable = (props: {
           pr='xs'
           spacing={0}
         >
-          <Flex w={'12.3%'} justify={'center'}>
+          <Flex w={'200px'} justify={'center'}>
             <Text fw={600} color='gray.8' fz='sm' style={{ display: 'flex', justifyContent: 'center' }}>
               Contacts
             </Text>
@@ -1917,7 +1882,7 @@ export const PersonCampaignTable = (props: {
           <Divider orientation='vertical' ml='xs' mr='xs' />
           <Flex
             style={{ cursor: 'pointer' }}
-            w={'31%'}
+            w={'380px'}
             align={'center'}
             justify={'center'}
             gap={'xs'}
@@ -1945,7 +1910,7 @@ export const PersonCampaignTable = (props: {
 
           <Divider orientation='vertical' />
 
-          <Flex w={'37%'}>
+          <Flex>
             {/* <Text fw={600} color='gray.8' fz='sm'>
               Overall Report
             </Text>
@@ -1975,12 +1940,8 @@ export const PersonCampaignTable = (props: {
                 <IconRefresh size='0.8rem' />
               </ActionIcon>
             </Tooltip> */}
-            <Box
-              // w={'15%'}
-              w={'100%'}
-              bg={'#f9fbfe'}
-            >
-              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+            <Box w={'100%'} bg={'#f9fbfe'}>
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'} w={'92px'}>
                 <IconSend color={theme.colors.blue[6]} size='0.9rem' />
                 <Text size={'sm'}>Sent</Text>
               </Flex>
@@ -1991,7 +1952,7 @@ export const PersonCampaignTable = (props: {
               w={'100%'}
               bg={'#fdf9fe'}
             >
-              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'} w={'93px'}>
                 <IconChecks color={theme.colors.pink[6]} size='0.9rem' />
                 <Text size={'sm'}>Open</Text>
               </Flex>
@@ -2002,7 +1963,7 @@ export const PersonCampaignTable = (props: {
               w={'100%'}
               bg={'#fffbf8'}
             >
-              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'} w={'93px'}>
                 <IconMessage color={theme.colors.orange[6]} size='0.9rem' />
                 <Text size={'sm'}>Reply</Text>
               </Flex>
@@ -2013,7 +1974,7 @@ export const PersonCampaignTable = (props: {
               w={'100%'}
               bg={'#f8fbf9'}
             >
-              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'} w={'93px'}>
                 <IconMessage color={theme.colors.teal[6]} size='0.9rem' />
                 <Text size={'sm'}>(+)Reply</Text>
               </Flex>
@@ -2024,7 +1985,7 @@ export const PersonCampaignTable = (props: {
               w={'100%'}
               bg={'#f8fbf9'}
             >
-              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'}>
+              <Flex align={'center'} h={'100%'} justify={'center'} gap={4} mb={'xl'} w={'93px'}>
                 <IconCalendar color={theme.colors.green[6]} size='0.9rem' />
                 <Text size={'sm'}>Demo</Text>
               </Flex>
@@ -2032,7 +1993,7 @@ export const PersonCampaignTable = (props: {
             <Divider orientation='vertical' />
           </Flex>
 
-          <Flex w={'8.7%'} align={'center'} justify={'center'} gap={'sm'}>
+          <Flex w={'113px'} align={'center'} justify={'center'} gap={'sm'}>
             {/* <Text fw={600} color='gray.8' fz='sm'>
               Details
             </Text> */}
@@ -2041,8 +2002,10 @@ export const PersonCampaignTable = (props: {
               <Text size={'sm'}>Channels</Text>
             </Group>
           </Flex>
-          <Divider orientation='vertical' mr='xs' />
-          <Flex w={'10%'} align={'center'} justify={'center'}></Flex>
+          <Divider orientation='vertical' />
+          <Flex w={'100px'} align={'center'} justify={'center'}>
+            <div className='w-full'></div>
+          </Flex>
         </Group>
       </Paper>
       {data

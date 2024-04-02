@@ -17,7 +17,7 @@ import {
   useMantineTheme,
   Container,
   Switch,
-} from '@mantine/core';
+} from "@mantine/core";
 import {
   IconBolt,
   IconBrandLinkedin,
@@ -37,20 +37,24 @@ import {
   IconTargetArrow,
   IconToggleRight,
   IconUserCircle,
-} from '@tabler/icons';
-import { IconInfoHexagon, IconInfoTriangle, IconSparkles } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
-import { useDisclosure } from '@mantine/hooks';
-import { DataGrid } from 'mantine-data-grid';
-import { Doughnut } from 'react-chartjs-2';
-import { useRecoilValue } from 'recoil';
-import { userTokenState } from '@atoms/userAtoms';
-import { API_URL } from '@constants/data';
-import { openContextModal } from '@mantine/modals';
-import moment from 'moment';
-import { valueToColor, nameToInitials } from '@utils/general';
-import { deactivatePersona } from '@utils/requests/postPersonaDeactivation';
-import { showNotification } from '@mantine/notifications';
+} from "@tabler/icons";
+import {
+  IconInfoHexagon,
+  IconInfoTriangle,
+  IconSparkles,
+} from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { useDisclosure } from "@mantine/hooks";
+import { DataGrid } from "mantine-data-grid";
+import { Doughnut } from "react-chartjs-2";
+import { useRecoilValue } from "recoil";
+import { userTokenState } from "@atoms/userAtoms";
+import { API_URL } from "@constants/data";
+import { openContextModal } from "@mantine/modals";
+import moment from "moment";
+import { valueToColor, nameToInitials } from "@utils/general";
+import { deactivatePersona } from "@utils/requests/postPersonaDeactivation";
+import { showNotification } from "@mantine/notifications";
 
 interface outboundType {
   message_active: number;
@@ -72,7 +76,7 @@ interface activeCampaignType {
   rep: string;
   rep_profile_picture: string;
   status: string;
-  id: number;
+  persona_id: number;
 }
 
 interface repCampaignType {
@@ -128,7 +132,7 @@ export default function Utilization() {
   const theme = useMantineTheme();
   const userToken = useRecoilValue(userTokenState);
 
-  const currentTime = moment().format('ddd, DD MMM YYYY HH:mm:ss');
+  const currentTime = moment().format("ddd, DD MMM YYYY HH:mm:ss");
 
   const [activeOpened, { toggle: activeToggle }] = useDisclosure(true);
   const [repOpened, { toggle: repToggle }] = useDisclosure(true);
@@ -136,45 +140,79 @@ export default function Utilization() {
   const [noOpened, { toggle: noToggle }] = useDisclosure(true);
   const [completeOpened, { toggle: completeToggle }] = useDisclosure(true);
 
-  const [acPageSize, setAcPageSize] = useState('25');
-  const [raPageSize, setRaPageSize] = useState('25');
-  const [udPageSize, setUdPageSize] = useState('25');
-  const [cdPageSize, setCdPageSize] = useState('25');
-  const [ncPageSize, setNcPageSize] = useState('25');
+  const [acPageSize, setAcPageSize] = useState("25");
+  const [raPageSize, setRaPageSize] = useState("25");
+  const [udPageSize, setUdPageSize] = useState("25");
+  const [cdPageSize, setCdPageSize] = useState("25");
+  const [ncPageSize, setNcPageSize] = useState("25");
 
-  const [activeCampaign, setActiveCampaign] = useState<activeCampaignType[]>([]);
+  const [activeCampaign, setActiveCampaign] = useState<activeCampaignType[]>(
+    []
+  );
   const [repCampaign, setRepCampaign] = useState<repCampaignType[]>([]);
   const [aiCampaign, setAICampaign] = useState<aiCampaignType[]>([]);
   const [noCampaign, setNoCampaign] = useState<noCampaignType[]>([]);
-  const [completedCampaign, setCompletedCampaign] = useState<completedCampaignType[]>([]);
+  const [completedCampaign, setCompletedCampaign] = useState<
+    completedCampaignType[]
+  >([]);
   const [seatData, setSeatData] = useState<seatDataType[]>([]);
   const [outboundData, setOutboundData] = useState<outboundType>();
 
   const [loading, setLoading] = useState(false);
 
   const seat_data = {
-    labels: ['Label 1', 'Label 2'],
+    labels: ["Label 1", "Label 2"],
     datasets: [
       {
         data: [
-          Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100)),
-          100 - Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100)),
+          Math.min(
+            100,
+            Math.floor(
+              ((outboundData?.seat_active || 0) /
+                (outboundData?.seat_total || 1)) *
+                100
+            )
+          ),
+          100 -
+            Math.min(
+              100,
+              Math.floor(
+                ((outboundData?.seat_active || 0) /
+                  (outboundData?.seat_total || 1)) *
+                  100
+              )
+            ),
         ],
-        backgroundColor: ['#3b84ef', '#eaecf0'],
+        backgroundColor: ["#3b84ef", "#eaecf0"],
         borderWidth: 0,
         borderRadius: 1,
       },
     ],
   };
   const message_data = {
-    labels: ['Label 1', 'Label 2'],
+    labels: ["Label 1", "Label 2"],
     datasets: [
       {
         data: [
-          Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100)),
-          100 - Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100)),
+          Math.min(
+            100,
+            Math.floor(
+              ((outboundData?.message_active || 0) /
+                (outboundData?.message_total || 1)) *
+                100
+            )
+          ),
+          100 -
+            Math.min(
+              100,
+              Math.floor(
+                ((outboundData?.message_active || 0) /
+                  (outboundData?.message_total || 1)) *
+                  100
+              )
+            ),
         ],
-        backgroundColor: ['#d444f1', '#eaecf0'],
+        backgroundColor: ["#d444f1", "#eaecf0"],
         borderWidth: 0,
         borderRadius: 1,
       },
@@ -185,7 +223,7 @@ export default function Utilization() {
     rotation: 270,
     circumference: 180,
     cutout: `80%`,
-    rounded: '10px',
+    rounded: "10px",
     plugins: {
       legend: {
         display: false,
@@ -197,25 +235,25 @@ export default function Utilization() {
   const handleDeactive = async (projectId: number) => {
     if (!projectId) {
       showNotification({
-        title: 'Error',
-        message: 'No current project',
-        color: 'red',
+        title: "Error",
+        message: "No current project",
+        color: "red",
       });
       return;
     }
     setLoading(true);
     const result = await deactivatePersona(userToken, projectId, false);
-    if (result.status === 'success') {
+    if (result.status === "success") {
       showNotification({
-        title: 'Persona Deactivated',
-        message: 'Your persona has been deactivated.',
-        color: 'blue',
+        title: "Persona Deactivated",
+        message: "Your persona has been deactivated.",
+        color: "blue",
       });
     } else {
       showNotification({
-        title: 'Error',
-        message: 'There was an error deactivating your persona.',
-        color: 'red',
+        title: "Error",
+        message: "There was an error deactivating your persona.",
+        color: "red",
       });
     }
     setLoading(false);
@@ -225,11 +263,11 @@ export default function Utilization() {
     const fetchUtilizationData = async () => {
       const response = await fetch(`${API_URL}/utilizationv2/`, {
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
           Authorization: `Bearer ${userToken}`,
         },
-        method: 'GET',
+        method: "GET",
       });
       const data = await response.json();
 
@@ -243,11 +281,11 @@ export default function Utilization() {
     const handleGetOutboundData = async () => {
       const response = await fetch(`${API_URL}/campaigns/utilization`, {
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
           Authorization: `Bearer ${userToken}`,
         },
-        method: 'GET',
+        method: "GET",
       });
       if (response.status === 200) {
         const data = await response.json();
@@ -260,107 +298,164 @@ export default function Utilization() {
   }, [loading]);
 
   return (
-    <Container maw={1500} mt={'xl'}>
+    <Container maw={1500} mt={"xl"}>
       <Card withBorder>
-        <Flex w={'100%'} justify={'space-between'}>
-          <Text size={'xl'} fw={600}>
+        <Flex w={"100%"} justify={"space-between"}>
+          <Text size={"xl"} fw={600}>
             Outbound Utilization
           </Text>
           <Button
-            radius='md'
-            leftIcon={<IconPlus size='1rem' />}
+            radius="md"
+            leftIcon={<IconPlus size="1rem" />}
             onClick={() => {
               openContextModal({
-                modal: 'uploadProspects',
+                modal: "uploadProspects",
                 title: <Title order={3}>Create Campaign</Title>,
-                innerProps: { mode: 'CREATE-ONLY' },
+                innerProps: { mode: "CREATE-ONLY" },
               });
             }}
           >
             Create New Campaign
           </Button>
         </Flex>
-        <Text>View which reps have campaigns that are active, completed, or need action.</Text>
+        <Text>
+          View which reps have campaigns that are active, completed, or need
+          action.
+        </Text>
 
-        <div className='bg-white'>
-          <Flex direction={'column'} py={'lg'} gap={'lg'}>
-            <Flex gap={'md'}>
-              <Flex px={'md'} sx={{ border: '1px solid #dee2e6', borderRadius: '8px' }} w={'100%'} h={'fit-content'} align={'center'} gap={'xl'}>
-                <div className='w-[140px] relative'>
+        <div className="bg-white">
+          <Flex direction={"column"} py={"lg"} gap={"lg"}>
+            <Flex gap={"md"}>
+              <Flex
+                px={"md"}
+                sx={{ border: "1px solid #dee2e6", borderRadius: "8px" }}
+                w={"100%"}
+                h={"fit-content"}
+                align={"center"}
+                gap={"xl"}
+              >
+                <div className="w-[140px] relative">
                   <Doughnut data={seat_data} options={piechartOptions} />
                   <Flex
                     style={{
-                      position: 'absolute',
-                      top: '60px',
-                      width: '100%',
-                      alignItems: 'center',
+                      position: "absolute",
+                      top: "60px",
+                      width: "100%",
+                      alignItems: "center",
                     }}
-                    direction={'column'}
+                    direction={"column"}
                   >
-                    <Text fw={600} size={'xl'}>
-                      {Math.min(100, Math.floor(((outboundData?.seat_active || 0) / (outboundData?.seat_total || 1)) * 100))}%
-                    </Text>{' '}
+                    <Text fw={600} size={"xl"}>
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          ((outboundData?.seat_active || 0) /
+                            (outboundData?.seat_total || 1)) *
+                            100
+                        )
+                      )}
+                      %
+                    </Text>{" "}
                   </Flex>
                 </div>
-                <Box w={'100%'}>
-                  <Flex align={'center'} justify={'space-between'} w={'100%'}>
-                    <Text size={'sm'} color='gray' sx={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      <div className=' rounded-full bg-[#3b84ef] w-[8px] h-[8px]'></div>
+                <Box w={"100%"}>
+                  <Flex align={"center"} justify={"space-between"} w={"100%"}>
+                    <Text
+                      size={"sm"}
+                      color="gray"
+                      sx={{ display: "flex", gap: "6px", alignItems: "center" }}
+                    >
+                      <div className=" rounded-full bg-[#3b84ef] w-[8px] h-[8px]"></div>
                       Seat Utilization
                     </Text>
-                    <Popover width={390} position='bottom' withArrow shadow='lg'>
+                    <Popover
+                      width={390}
+                      position="bottom"
+                      withArrow
+                      shadow="lg"
+                    >
                       <Popover.Target>
                         <Badge
-                          color='blue'
-                          variant='filled'
-                          sx={{ textTransform: 'none', cursor: 'pointer' }}
-                          leftSection={<IconInfoCircle size={'0.9rem'} style={{ marginTop: '4px' }} />}
+                          color="blue"
+                          variant="filled"
+                          sx={{ textTransform: "none", cursor: "pointer" }}
+                          leftSection={
+                            <IconInfoCircle
+                              size={"0.9rem"}
+                              style={{ marginTop: "4px" }}
+                            />
+                          }
                         >
                           View Details
                         </Badge>
                       </Popover.Target>
 
-                      <Popover.Dropdown sx={{ borderRadius: '8px' }} p={'xl'}>
-                        <Flex gap={'sm'} align={'center'}>
-                          <IconUserCircle color='#228be6' />{' '}
-                          <Text fw={700} size={'lg'}>
+                      <Popover.Dropdown sx={{ borderRadius: "8px" }} p={"xl"}>
+                        <Flex gap={"sm"} align={"center"}>
+                          <IconUserCircle color="#228be6" />{" "}
+                          <Text fw={700} size={"lg"}>
                             Seat Utilization by Rep
                           </Text>
                         </Flex>
-                        <ScrollArea h={350} mr={'-15px'} scrollbarSize={10}>
+                        <ScrollArea h={350} mr={"-15px"} scrollbarSize={10}>
                           {seatData?.map((item, index) => {
                             return (
                               <Box
                                 key={index}
-                                mt={'md'}
+                                mt={"md"}
                                 sx={{
-                                  border: '1px solid #dee2e6',
-                                  borderRadius: '4px',
+                                  border: "1px solid #dee2e6",
+                                  borderRadius: "4px",
                                 }}
-                                p={'sm'}
-                                mr={'15px'}
+                                p={"sm"}
+                                mr={"15px"}
                               >
-                                <Flex align={'center'} gap={'5px'}>
-                                  <Flex w={'100%'} gap={'5px'}>
-                                    <Avatar size={'sm'} src={item?.rep_image ? item?.rep_image : item.rep} color={valueToColor(theme, item?.rep)} radius={'xl'}>
+                                <Flex align={"center"} gap={"5px"}>
+                                  <Flex w={"100%"} gap={"5px"}>
+                                    <Avatar
+                                      size={"sm"}
+                                      src={
+                                        item?.rep_image
+                                          ? item?.rep_image
+                                          : item.rep
+                                      }
+                                      color={valueToColor(theme, item?.rep)}
+                                      radius={"xl"}
+                                    >
                                       {nameToInitials(item?.rep)}
                                     </Avatar>
-                                    <Text tt={'uppercase'} w={'100%'} fw={600} sx={{ whiteSpace: 'nowrap' }}>
+                                    <Text
+                                      tt={"uppercase"}
+                                      w={"100%"}
+                                      fw={600}
+                                      sx={{ whiteSpace: "nowrap" }}
+                                    >
                                       {item?.rep}
                                     </Text>
                                   </Flex>
-                                  <Divider w={'100%'} />
-                                  <Flex w={'fit-content'}>
+                                  <Divider w={"100%"} />
+                                  <Flex w={"fit-content"}>
                                     {item?.num_campaigns > 0 ? (
-                                      <IconCircleCheck color='white' size={'1.2rem'} fill='green' />
+                                      <IconCircleCheck
+                                        color="white"
+                                        size={"1.2rem"}
+                                        fill="green"
+                                      />
                                     ) : (
-                                      <IconInfoCircle color='white' fill='red' size={'1.2rem'} />
+                                      <IconInfoCircle
+                                        color="white"
+                                        fill="red"
+                                        size={"1.2rem"}
+                                      />
                                     )}
                                   </Flex>
                                 </Flex>
                                 <Flex>
-                                  <Text color='gray' size={'xs'}>
-                                    {item?.num_campaigns > 0 ? item.num_campaigns : 'No'} active campaigns
+                                  <Text color="gray" size={"xs"}>
+                                    {item?.num_campaigns > 0
+                                      ? item.num_campaigns
+                                      : "No"}{" "}
+                                    active campaigns
                                   </Text>
                                 </Flex>
                               </Box>
@@ -371,78 +466,103 @@ export default function Utilization() {
                     </Popover>
                   </Flex>
 
-                  <Text color='gray'>
+                  <Text color="gray">
                     <span
                       style={{
-                        fontSize: '24px',
-                        fontWeight: '700',
-                        color: 'black',
+                        fontSize: "24px",
+                        fontWeight: "700",
+                        color: "black",
                       }}
                     >
-                      {outboundData?.seat_active || 0} / {outboundData?.seat_total || 0}
-                    </span>{' '}
+                      {outboundData?.seat_active || 0} /{" "}
+                      {outboundData?.seat_total || 0}
+                    </span>{" "}
                     Seats with Active Campaings
                   </Text>
                 </Box>
               </Flex>
-              <Flex px={'md'} sx={{ border: '1px solid #dee2e6', borderRadius: '8px' }} w={'100%'} align={'center'} gap={'xl'} h={'fit-content'}>
-                <div className='w-[140px] relative'>
+              <Flex
+                px={"md"}
+                sx={{ border: "1px solid #dee2e6", borderRadius: "8px" }}
+                w={"100%"}
+                align={"center"}
+                gap={"xl"}
+                h={"fit-content"}
+              >
+                <div className="w-[140px] relative">
                   <Doughnut data={message_data} options={piechartOptions} />
                   <Flex
                     style={{
-                      position: 'absolute',
-                      top: '60px',
-                      width: '100%',
-                      alignItems: 'center',
+                      position: "absolute",
+                      top: "60px",
+                      width: "100%",
+                      alignItems: "center",
                     }}
-                    direction={'column'}
+                    direction={"column"}
                   >
-                    <Text fw={600} size={'xl'}>
-                      {Math.min(100, Math.floor(((outboundData?.message_active || 0) / (outboundData?.message_total || 1)) * 100))}%
-                    </Text>{' '}
+                    <Text fw={600} size={"xl"}>
+                      {Math.min(
+                        100,
+                        Math.floor(
+                          ((outboundData?.message_active || 0) /
+                            (outboundData?.message_total || 1)) *
+                            100
+                        )
+                      )}
+                      %
+                    </Text>{" "}
                   </Flex>
                 </div>
-                <Box w={'100%'}>
-                  <Flex align={'center'} justify={'space-between'} w={'100%'}>
-                    <Text size={'sm'} color='gray' sx={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      <div className=' rounded-full bg-[#d444f1] w-[8px] h-[8px]'></div>
+                <Box w={"100%"}>
+                  <Flex align={"center"} justify={"space-between"} w={"100%"}>
+                    <Text
+                      size={"sm"}
+                      color="gray"
+                      sx={{ display: "flex", gap: "6px", alignItems: "center" }}
+                    >
+                      <div className=" rounded-full bg-[#d444f1] w-[8px] h-[8px]"></div>
                       Message Utilization
                     </Text>
                   </Flex>
-                  <Text color='gray'>
+                  <Text color="gray">
                     <span
                       style={{
-                        fontSize: '24px',
-                        fontWeight: '700',
-                        color: 'black',
+                        fontSize: "24px",
+                        fontWeight: "700",
+                        color: "black",
                       }}
                     >
-                      {outboundData?.message_active || 0} / {outboundData?.message_total || 0}
-                    </span>{' '}
+                      {outboundData?.message_active || 0} /{" "}
+                      {outboundData?.message_total || 0}
+                    </span>{" "}
                     Available Sending Out
                   </Text>
                 </Box>
               </Flex>
             </Flex>
-            <Flex direction={'column'} gap={'sm'}>
-              <Flex align={'center'} gap={'5px'}>
+            <Flex direction={"column"} gap={"sm"}>
+              <Flex align={"center"} gap={"5px"}>
                 <Text
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    whiteSpace: 'nowrap',
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
                   }}
-                  color='gray'
+                  color="gray"
                   fw={700}
-                  size={'lg'}
+                  size={"lg"}
                 >
-                  <IconTargetArrow color='#228be6' />
+                  <IconTargetArrow color="#228be6" />
                   <span>Active Campaigns</span>
-                  <Badge sx={{ background: '#228be6', color: 'white' }}>{activeCampaign?.length}</Badge>
+                  <Badge sx={{ background: "#228be6", color: "white" }}>
+                    {activeCampaign?.length}
+                  </Badge>
                 </Text>
-                <Divider w={'100%'} />
-                <ActionIcon onClick={activeToggle}>{activeOpened ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon>
+                <Divider w={"100%"} />
+                <ActionIcon onClick={activeToggle}>
+                  {activeOpened ? <IconChevronUp /> : <IconChevronDown />}
+                </ActionIcon>
               </Flex>
               <Collapse in={activeOpened}>
                 <DataGrid
@@ -453,43 +573,49 @@ export default function Utilization() {
                   withColumnBorders
                   withBorder
                   sx={{
-                    cursor: 'pointer',
-                    '& .mantine-10xyzsm>tbody>tr>td': {
-                      padding: '0px',
+                    cursor: "pointer",
+                    "& .mantine-10xyzsm>tbody>tr>td": {
+                      padding: "0px",
                     },
-                    '& tr': {
-                      background: 'white',
+                    "& tr": {
+                      background: "white",
                     },
                   }}
                   columns={[
                     {
-                      accessorKey: 'Status',
+                      accessorKey: "Status",
                       minSize: 180,
                       maxSize: 180,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLoader color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Status</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLoader color="gray" size={"0.9rem"} />
+                          <Text color="gray">Status</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { status } = cell.row.original;
 
                         return (
-                          <Flex w={'100%'} h={'100%'} px={'sm'} align={'center'} justify={'center'}>
+                          <Flex
+                            w={"100%"}
+                            h={"100%"}
+                            px={"sm"}
+                            align={"center"}
+                            justify={"center"}
+                          >
                             <Badge>{status}</Badge>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'campaigns',
+                      accessorKey: "campaigns",
                       minSize: 400,
                       maxSize: 400,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconTargetArrow color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Campaigns</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconTargetArrow color="gray" size={"0.9rem"} />
+                          <Text color="gray">Campaigns</Text>
                         </Flex>
                       ),
 
@@ -497,28 +623,43 @@ export default function Utilization() {
                         const { campaign } = cell.row.original;
 
                         return (
-                          <Flex w={'100%'} px={'sm'} h={'100%'} align={'center'}>
+                          <Flex
+                            w={"100%"}
+                            px={"sm"}
+                            h={"100%"}
+                            align={"center"}
+                          >
                             <Text lineClamp={1}>{campaign}</Text>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'sdr',
+                      accessorKey: "sdr",
                       minSize: 200,
                       maxSize: 200,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconTargetArrow color='gray' size={'0.9rem'} />
-                          <Text color='gray'>SDR</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconTargetArrow color="gray" size={"0.9rem"} />
+                          <Text color="gray">SDR</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { rep, rep_profile_picture } = cell.row.original;
 
                         return (
-                          <Flex gap={'sm'} w={'100%'} px={'sm'} h={'100%'} align={'center'}>
-                            <Avatar src={rep_profile_picture} color={valueToColor(theme, rep)} radius={'xl'}>
+                          <Flex
+                            gap={"sm"}
+                            w={"100%"}
+                            px={"sm"}
+                            h={"100%"}
+                            align={"center"}
+                          >
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
                               {nameToInitials(rep)}
                             </Avatar>
                             <Text fw={500}>{rep}</Text>
@@ -527,35 +668,60 @@ export default function Utilization() {
                       },
                     },
                     {
-                      accessorKey: 'channel',
+                      accessorKey: "channel",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconToggleRight color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Channels</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconToggleRight color="gray" size={"0.9rem"} />
+                          <Text color="gray">Channels</Text>
                         </Flex>
                       ),
                       maxSize: 120,
                       minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const { num_total_linkedin, num_total_email } = cell.row.original;
+                        const { num_total_linkedin, num_total_email } =
+                          cell.row.original;
 
                         return (
-                          <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
-                            <Flex justify={'center'} w={'100%'} align={'center'} gap={'md'}>
-                              {num_total_linkedin > 0 && <IconBrandLinkedin size={'1.3rem'} fill='#228be6' color='white' />}
-                              {num_total_email > 0 && <IconMail size={'1.3rem'} fill='#228be6' color='white' />}
+                          <Flex
+                            align={"center"}
+                            justify={"center"}
+                            gap={"xs"}
+                            py={"lg"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
+                            <Flex
+                              justify={"center"}
+                              w={"100%"}
+                              align={"center"}
+                              gap={"md"}
+                            >
+                              {num_total_linkedin > 0 && (
+                                <IconBrandLinkedin
+                                  size={"1.3rem"}
+                                  fill="#228be6"
+                                  color="white"
+                                />
+                              )}
+                              {num_total_email > 0 && (
+                                <IconMail
+                                  size={"1.3rem"}
+                                  fill="#228be6"
+                                  color="white"
+                                />
+                              )}
                             </Flex>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'Progress',
+                      accessorKey: "Progress",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconBolt color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Progress</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconBolt color="gray" size={"0.9rem"} />
+                          <Text color="gray">Progress</Text>
                         </Flex>
                       ),
                       maxSize: 220,
@@ -565,26 +731,58 @@ export default function Utilization() {
                         const { num_used_total, num_total } = cell.row.original;
 
                         return (
-                          <Flex direction={'column'} align={'center'} justify={'center'} w={'100%'} h={'100%'} py={'sm'}>
-                            <Flex w={'100%'} align={'center'} gap={'8px'} px={'xs'}>
-                              <Progress value={(num_used_total / num_total) * 100} w={'100%'} />
-                              <Text color='#228be6' fw={500}>
-                                {Math.round((num_used_total / num_total) * 100)}%
+                          <Flex
+                            direction={"column"}
+                            align={"center"}
+                            justify={"center"}
+                            w={"100%"}
+                            h={"100%"}
+                            py={"sm"}
+                          >
+                            <Flex
+                              w={"100%"}
+                              align={"center"}
+                              gap={"8px"}
+                              px={"xs"}
+                            >
+                              <Progress
+                                value={(num_used_total / num_total) * 100}
+                                w={"100%"}
+                              />
+                              <Text color="#228be6" fw={500}>
+                                {Math.round((num_used_total / num_total) * 100)}
+                                %
                               </Text>
                             </Flex>
-                            <Flex align={'center'}>
+                            <Flex align={"center"}>
                               <Text fw={500}>
-                                {num_used_total} / {num_total} <span style={{ color: 'gray !important' }}>Sent</span>
+                                {num_used_total} / {num_total}{" "}
+                                <span style={{ color: "gray !important" }}>
+                                  Sent
+                                </span>
                               </Text>
-                              {Math.round((num_total - num_used_total) / 20) < 3 ? <IconPoint fill='gray' color='white' /> : null}
+                              {Math.round((num_total - num_used_total) / 20) <
+                              3 ? (
+                                <IconPoint fill="gray" color="white" />
+                              ) : null}
                               <Text
-                                color={'red'}
+                                color={"red"}
                                 sx={{
-                                  display: Math.round((num_total - num_used_total) / 20) < 3 ? 'block' : 'none',
+                                  display:
+                                    Math.round(
+                                      (num_total - num_used_total) / 20
+                                    ) < 3
+                                      ? "block"
+                                      : "none",
                                 }}
                               >
-                                {Math.round((num_total - num_used_total) / 20)} day
-                                {Math.round((num_total - num_used_total) / 20) < 3 ? 's' : ''} left
+                                {Math.round((num_total - num_used_total) / 20)}{" "}
+                                day
+                                {Math.round((num_total - num_used_total) / 20) <
+                                3
+                                  ? "s"
+                                  : ""}{" "}
+                                left
                               </Text>
                             </Flex>
                           </Flex>
@@ -592,21 +790,32 @@ export default function Utilization() {
                       },
                     },
                     {
-                      accessorKey: 'active',
+                      accessorKey: "active",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconCalendar color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Active</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconCalendar color="gray" size={"0.9rem"} />
+                          <Text color="gray">Active</Text>
                         </Flex>
                       ),
                       enableResizing: true,
                       minSize: 230,
                       cell: (cell) => {
-                        const { id } = cell.row.original;
+                        const { persona_id } = cell.row.original;
 
                         return (
-                          <Flex direction={'column'} align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
-                            <Switch checked onClick={() => handleDeactive(id)} />
+                          <Flex
+                            direction={"column"}
+                            align={"center"}
+                            justify={"center"}
+                            gap={"xs"}
+                            py={"lg"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
+                            <Switch
+                              checked
+                              onClick={() => handleDeactive(persona_id)}
+                            />
                           </Flex>
                         );
                       },
@@ -619,36 +828,40 @@ export default function Utilization() {
                   components={{
                     pagination: ({ table }) => (
                       <Flex
-                        justify={'space-between'}
-                        align={'center'}
-                        px={'sm'}
-                        py={'1.25rem'}
+                        justify={"space-between"}
+                        align={"center"}
+                        px={"sm"}
+                        py={"1.25rem"}
                         sx={(theme) => ({
                           border: `1px solid ${theme.colors.gray[4]}`,
                           borderTopWidth: 0,
                         })}
                       >
                         <Select
-                          style={{ width: '150px' }}
+                          style={{ width: "150px" }}
                           data={[
-                            { label: 'Show 25 rows', value: '25' },
-                            { label: 'Show 10 rows', value: '10' },
-                            { label: 'Show 5 rows', value: '5' },
+                            { label: "Show 25 rows", value: "25" },
+                            { label: "Show 10 rows", value: "10" },
+                            { label: "Show 5 rows", value: "5" },
                           ]}
                           value={acPageSize}
                           onChange={(v) => {
-                            setAcPageSize(v ?? '25');
+                            setAcPageSize(v ?? "25");
                           }}
                         />
-                        <Flex align={'center'} gap={'sm'}>
-                          <Flex align={'center'}>
+                        <Flex align={"center"} gap={"sm"}>
+                          <Flex align={"center"}>
                             <Select
                               maw={100}
-                              value={`${table.getState().pagination.pageIndex + 1}`}
-                              data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                                label: String(idx + 1),
-                                value: String(idx + 1),
-                              }))}
+                              value={`${
+                                table.getState().pagination.pageIndex + 1
+                              }`}
+                              data={new Array(table.getPageCount())
+                                .fill(0)
+                                .map((i, idx) => ({
+                                  label: String(idx + 1),
+                                  value: String(idx + 1),
+                                }))}
                               onChange={(v) => {
                                 table.setPageIndex(Number(v) - 1);
                               }}
@@ -658,37 +871,46 @@ export default function Utilization() {
                                 borderTop: `1px solid ${theme.colors.gray[4]}`,
                                 borderRight: `1px solid ${theme.colors.gray[4]}`,
                                 borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                                marginLeft: '-2px',
-                                paddingLeft: '1rem',
-                                paddingRight: '1rem',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '0.25rem',
+                                marginLeft: "-2px",
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderRadius: "0.25rem",
                               })}
                               h={36}
                             >
-                              <Text color='gray.5' fw={500} fz={14}>
+                              <Text color="gray.5" fw={500} fz={14}>
                                 of {table.getPageCount()} pages
                               </Text>
                             </Flex>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === 0}
+                              disabled={
+                                table.getState().pagination.pageIndex === 0
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex - 1
+                                );
                               }}
                             >
                               <IconChevronLeft stroke={theme.colors.gray[4]} />
                             </ActionIcon>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                              disabled={
+                                table.getState().pagination.pageIndex ===
+                                table.getPageCount() - 1
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex + 1
+                                );
                               }}
                             >
                               <IconChevronRight stroke={theme.colors.gray[4]} />
@@ -698,14 +920,14 @@ export default function Utilization() {
                       </Flex>
                     ),
                   }}
-                  w={'100%'}
+                  w={"100%"}
                   pageSizes={[acPageSize]}
                   styles={(theme) => ({
                     thead: {
-                      height: '44px',
+                      height: "44px",
                       backgroundColor: theme.colors.gray[0],
-                      '::after': {
-                        backgroundColor: 'transparent',
+                      "::after": {
+                        backgroundColor: "transparent",
                       },
                     },
 
@@ -718,33 +940,35 @@ export default function Utilization() {
                     },
 
                     dataCellContent: {
-                      width: '100%',
+                      width: "100%",
                     },
                   })}
                 />
               </Collapse>
             </Flex>
-            <Flex direction={'column'} gap={'sm'}>
-              <Flex align={'center'} gap={'5px'}>
+            <Flex direction={"column"} gap={"sm"}>
+              <Flex align={"center"} gap={"5px"}>
                 <Text
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    whiteSpace: 'nowrap',
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
                   }}
-                  color='gray'
+                  color="gray"
                   fw={700}
-                  size={'lg'}
+                  size={"lg"}
                 >
-                  <IconInfoTriangle color='orange' />
+                  <IconInfoTriangle color="orange" />
                   <span>Rep Action Needed</span>
-                  <Badge color='orange' variant='filled'>
+                  <Badge color="orange" variant="filled">
                     {repCampaign?.length}
                   </Badge>
                 </Text>
-                <Divider w={'100%'} />
-                <ActionIcon onClick={repToggle}>{repOpened ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon>
+                <Divider w={"100%"} />
+                <ActionIcon onClick={repToggle}>
+                  {repOpened ? <IconChevronUp /> : <IconChevronDown />}
+                </ActionIcon>
               </Flex>
               <Collapse in={repOpened}>
                 <DataGrid
@@ -755,62 +979,68 @@ export default function Utilization() {
                   withSorting
                   withBorder
                   sx={{
-                    cursor: 'pointer',
-                    '& tr': {
-                      background: 'white',
+                    cursor: "pointer",
+                    "& tr": {
+                      background: "white",
                     },
                   }}
                   columns={[
                     {
-                      accessorKey: 'Status',
+                      accessorKey: "Status",
                       minSize: 180,
                       maxSize: 180,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Status</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Status</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { status } = cell.row.original;
 
                         return (
-                          <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'} justify={'center'}>
-                            <Badge color={'orange'}>{status}</Badge>
+                          <Flex
+                            gap={"xs"}
+                            w={"100%"}
+                            h={"100%"}
+                            align={"center"}
+                            justify={"center"}
+                          >
+                            <Badge color={"orange"}>{status}</Badge>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'campaign',
+                      accessorKey: "campaign",
                       minSize: 400,
                       maxSize: 400,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Campaign</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Campaign</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { campaign } = cell.row.original;
 
                         return (
-                          <Flex w={'100%'} h={'100%'} align={'center'}>
-                            <Text lineClamp={1} color={campaign ? '' : 'gray'}>
-                              {campaign ? campaign : 'No Campaign'}
+                          <Flex w={"100%"} h={"100%"} align={"center"}>
+                            <Text lineClamp={1} color={campaign ? "" : "gray"}>
+                              {campaign ? campaign : "No Campaign"}
                             </Text>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'sdr',
+                      accessorKey: "sdr",
                       minSize: 200,
                       maxSize: 200,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>SDR</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">SDR</Text>
                         </Flex>
                       ),
                       enableResizing: true,
@@ -818,8 +1048,18 @@ export default function Utilization() {
                         const { rep, rep_profile_picture } = cell.row.original;
 
                         return (
-                          <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                            <Avatar src={rep_profile_picture} color={valueToColor(theme, rep)} radius={'xl'}>
+                          <Flex
+                            align={"center"}
+                            gap={"xs"}
+                            py={"sm"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
                               {nameToInitials(rep)}
                             </Avatar>
                             <Text>{rep}</Text>
@@ -828,11 +1068,11 @@ export default function Utilization() {
                       },
                     },
                     {
-                      accessorKey: 'details',
+                      accessorKey: "details",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Details</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Details</Text>
                         </Flex>
                       ),
                       enableResizing: true,
@@ -840,9 +1080,15 @@ export default function Utilization() {
                         const { num_open_tasks } = cell.row.original;
 
                         return (
-                          <Flex align={'center'} gap={'4px'} py={'sm'} w={'100%'} h={'100%'}>
+                          <Flex
+                            align={"center"}
+                            gap={"4px"}
+                            py={"sm"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
                             <Text fw={500}>{num_open_tasks}</Text>
-                            <Text fw={500} color='gray'>
+                            <Text fw={500} color="gray">
                               Open Tasks
                             </Text>
                           </Flex>
@@ -850,19 +1096,23 @@ export default function Utilization() {
                       },
                     },
                     {
-                      accessorKey: 'action',
+                      accessorKey: "action",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconToggleRight color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Action</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconToggleRight color="gray" size={"0.9rem"} />
+                          <Text color="gray">Action</Text>
                         </Flex>
                       ),
                       maxSize: 200,
                       enableResizing: true,
                       cell: () => {
                         return (
-                          <Flex align={'center'} h={'100%'} justify={'center'}>
-                            <Button rightIcon={<IconExternalLink size={'0.9rem'} />} style={{ borderRadius: '16px', height: '1.3rem' }} size='xs'>
+                          <Flex align={"center"} h={"100%"} justify={"center"}>
+                            <Button
+                              rightIcon={<IconExternalLink size={"0.9rem"} />}
+                              style={{ borderRadius: "16px", height: "1.3rem" }}
+                              size="xs"
+                            >
                               View Task
                             </Button>
                           </Flex>
@@ -877,37 +1127,41 @@ export default function Utilization() {
                   components={{
                     pagination: ({ table }) => (
                       <Flex
-                        justify={'space-between'}
-                        align={'center'}
-                        px={'sm'}
-                        py={'1.25rem'}
+                        justify={"space-between"}
+                        align={"center"}
+                        px={"sm"}
+                        py={"1.25rem"}
                         sx={(theme) => ({
                           border: `1px solid ${theme.colors.gray[4]}`,
                           borderTopWidth: 0,
                         })}
                       >
                         <Select
-                          style={{ width: '150px' }}
+                          style={{ width: "150px" }}
                           data={[
-                            { label: 'Show 25 rows', value: '25' },
-                            { label: 'Show 10 rows', value: '10' },
-                            { label: 'Show 5 rows', value: '5' },
+                            { label: "Show 25 rows", value: "25" },
+                            { label: "Show 10 rows", value: "10" },
+                            { label: "Show 5 rows", value: "5" },
                           ]}
                           value={raPageSize}
                           onChange={(v) => {
-                            setRaPageSize(v ?? '25');
+                            setRaPageSize(v ?? "25");
                           }}
                         />
 
-                        <Flex align={'center'} gap={'sm'}>
-                          <Flex align={'center'}>
+                        <Flex align={"center"} gap={"sm"}>
+                          <Flex align={"center"}>
                             <Select
                               maw={100}
-                              value={`${table.getState().pagination.pageIndex + 1}`}
-                              data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                                label: String(idx + 1),
-                                value: String(idx + 1),
-                              }))}
+                              value={`${
+                                table.getState().pagination.pageIndex + 1
+                              }`}
+                              data={new Array(table.getPageCount())
+                                .fill(0)
+                                .map((i, idx) => ({
+                                  label: String(idx + 1),
+                                  value: String(idx + 1),
+                                }))}
                               onChange={(v) => {
                                 table.setPageIndex(Number(v) - 1);
                               }}
@@ -917,37 +1171,46 @@ export default function Utilization() {
                                 borderTop: `1px solid ${theme.colors.gray[4]}`,
                                 borderRight: `1px solid ${theme.colors.gray[4]}`,
                                 borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                                marginLeft: '-2px',
-                                paddingLeft: '1rem',
-                                paddingRight: '1rem',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '0.25rem',
+                                marginLeft: "-2px",
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderRadius: "0.25rem",
                               })}
                               h={36}
                             >
-                              <Text color='gray.5' fw={500} fz={14}>
+                              <Text color="gray.5" fw={500} fz={14}>
                                 of {table.getPageCount()} pages
                               </Text>
                             </Flex>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === 0}
+                              disabled={
+                                table.getState().pagination.pageIndex === 0
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex - 1
+                                );
                               }}
                             >
                               <IconChevronLeft stroke={theme.colors.gray[4]} />
                             </ActionIcon>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                              disabled={
+                                table.getState().pagination.pageIndex ===
+                                table.getPageCount() - 1
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex + 1
+                                );
                               }}
                             >
                               <IconChevronRight stroke={theme.colors.gray[4]} />
@@ -957,14 +1220,14 @@ export default function Utilization() {
                       </Flex>
                     ),
                   }}
-                  w={'100%'}
+                  w={"100%"}
                   pageSizes={[raPageSize]}
                   styles={(theme) => ({
                     thead: {
-                      height: '44px',
+                      height: "44px",
                       backgroundColor: theme.colors.gray[0],
-                      '::after': {
-                        backgroundColor: 'transparent',
+                      "::after": {
+                        backgroundColor: "transparent",
                       },
                     },
 
@@ -977,33 +1240,35 @@ export default function Utilization() {
                     },
 
                     dataCellContent: {
-                      width: '100%',
+                      width: "100%",
                     },
                   })}
                 />
               </Collapse>
             </Flex>
-            <Flex direction={'column'} gap={'sm'}>
-              <Flex align={'center'} gap={'5px'}>
+            <Flex direction={"column"} gap={"sm"}>
+              <Flex align={"center"} gap={"5px"}>
                 <Text
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    whiteSpace: 'nowrap',
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
                   }}
-                  color='gray'
+                  color="gray"
                   fw={700}
-                  size={'lg'}
+                  size={"lg"}
                 >
-                  <IconSparkles color='#d549f2' />
+                  <IconSparkles color="#d549f2" />
                   <span>AI is Setting Up</span>
-                  <Badge sx={{ background: '#d549f2' }} variant='filled'>
+                  <Badge sx={{ background: "#d549f2" }} variant="filled">
                     {aiCampaign.length}
                   </Badge>
                 </Text>
-                <Divider w={'100%'} />
-                <ActionIcon onClick={aiToggle}>{aiOpened ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon>
+                <Divider w={"100%"} />
+                <ActionIcon onClick={aiToggle}>
+                  {aiOpened ? <IconChevronUp /> : <IconChevronDown />}
+                </ActionIcon>
               </Flex>
               <Collapse in={aiOpened}>
                 <DataGrid
@@ -1014,60 +1279,70 @@ export default function Utilization() {
                   withColumnBorders
                   withBorder
                   sx={{
-                    cursor: 'pointer',
-                    '& tr': {
-                      background: 'white',
+                    cursor: "pointer",
+                    "& tr": {
+                      background: "white",
                     },
                   }}
                   columns={[
                     {
-                      accessorKey: 'Status',
+                      accessorKey: "Status",
                       minSize: 180,
                       maxSize: 180,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Status</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Status</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { status } = cell.row.original;
 
                         return (
-                          <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'} justify={'center'}>
-                            <Badge sx={{ color: '#d549f2', background: '#fbebfe' }}>{status}</Badge>
+                          <Flex
+                            gap={"xs"}
+                            w={"100%"}
+                            h={"100%"}
+                            align={"center"}
+                            justify={"center"}
+                          >
+                            <Badge
+                              sx={{ color: "#d549f2", background: "#fbebfe" }}
+                            >
+                              {status}
+                            </Badge>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'campaign',
+                      accessorKey: "campaign",
                       minSize: 400,
                       maxSize: 400,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Campaign</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Campaign</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { campaign } = cell.row.original;
 
                         return (
-                          <Flex w={'100%'} h={'100%'} align={'center'}>
+                          <Flex w={"100%"} h={"100%"} align={"center"}>
                             <Text lineClamp={1}>{campaign}</Text>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'sdr',
+                      accessorKey: "sdr",
                       minSize: 200,
                       maxSize: 200,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>SDR</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">SDR</Text>
                         </Flex>
                       ),
                       enableResizing: true,
@@ -1075,8 +1350,18 @@ export default function Utilization() {
                         const { rep, rep_profile_picture } = cell.row.original;
 
                         return (
-                          <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                            <Avatar src={rep_profile_picture} color={valueToColor(theme, rep)} radius={'xl'}>
+                          <Flex
+                            align={"center"}
+                            gap={"xs"}
+                            py={"sm"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
                               {nameToInitials(rep)}
                             </Avatar>
                             <Text>{rep}</Text>
@@ -1085,19 +1370,26 @@ export default function Utilization() {
                       },
                     },
                     {
-                      accessorKey: 'detail',
+                      accessorKey: "detail",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Details</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Details</Text>
                         </Flex>
                       ),
                       enableResizing: true,
                       cell: (cell) => {
-                        const { linkedin_setup, email_setup, prospects } = cell.row.original;
+                        const { linkedin_setup, email_setup, prospects } =
+                          cell.row.original;
 
                         return (
-                          <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
+                          <Flex
+                            align={"center"}
+                            gap={"xs"}
+                            py={"sm"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
                             {prospects} - {email_setup} - {linkedin_setup}
                           </Flex>
                         );
@@ -1111,37 +1403,41 @@ export default function Utilization() {
                   components={{
                     pagination: ({ table }) => (
                       <Flex
-                        justify={'space-between'}
-                        align={'center'}
-                        px={'sm'}
-                        py={'1.25rem'}
+                        justify={"space-between"}
+                        align={"center"}
+                        px={"sm"}
+                        py={"1.25rem"}
                         sx={(theme) => ({
                           border: `1px solid ${theme.colors.gray[4]}`,
                           borderTopWidth: 0,
                         })}
                       >
                         <Select
-                          style={{ width: '150px' }}
+                          style={{ width: "150px" }}
                           data={[
-                            { label: 'Show 25 rows', value: '25' },
-                            { label: 'Show 10 rows', value: '10' },
-                            { label: 'Show 5 rows', value: '5' },
+                            { label: "Show 25 rows", value: "25" },
+                            { label: "Show 10 rows", value: "10" },
+                            { label: "Show 5 rows", value: "5" },
                           ]}
                           value={udPageSize}
                           onChange={(v) => {
-                            setUdPageSize(v ?? '25');
+                            setUdPageSize(v ?? "25");
                           }}
                         />
 
-                        <Flex align={'center'} gap={'sm'}>
-                          <Flex align={'center'}>
+                        <Flex align={"center"} gap={"sm"}>
+                          <Flex align={"center"}>
                             <Select
                               maw={100}
-                              value={`${table.getState().pagination.pageIndex + 1}`}
-                              data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                                label: String(idx + 1),
-                                value: String(idx + 1),
-                              }))}
+                              value={`${
+                                table.getState().pagination.pageIndex + 1
+                              }`}
+                              data={new Array(table.getPageCount())
+                                .fill(0)
+                                .map((i, idx) => ({
+                                  label: String(idx + 1),
+                                  value: String(idx + 1),
+                                }))}
                               onChange={(v) => {
                                 table.setPageIndex(Number(v) - 1);
                               }}
@@ -1151,37 +1447,46 @@ export default function Utilization() {
                                 borderTop: `1px solid ${theme.colors.gray[4]}`,
                                 borderRight: `1px solid ${theme.colors.gray[4]}`,
                                 borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                                marginLeft: '-2px',
-                                paddingLeft: '1rem',
-                                paddingRight: '1rem',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '0.25rem',
+                                marginLeft: "-2px",
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderRadius: "0.25rem",
                               })}
                               h={36}
                             >
-                              <Text color='gray.5' fw={500} fz={14}>
+                              <Text color="gray.5" fw={500} fz={14}>
                                 of {table.getPageCount()} pages
                               </Text>
                             </Flex>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === 0}
+                              disabled={
+                                table.getState().pagination.pageIndex === 0
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex - 1
+                                );
                               }}
                             >
                               <IconChevronLeft stroke={theme.colors.gray[4]} />
                             </ActionIcon>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                              disabled={
+                                table.getState().pagination.pageIndex ===
+                                table.getPageCount() - 1
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex + 1
+                                );
                               }}
                             >
                               <IconChevronRight stroke={theme.colors.gray[4]} />
@@ -1191,14 +1496,14 @@ export default function Utilization() {
                       </Flex>
                     ),
                   }}
-                  w={'100%'}
+                  w={"100%"}
                   pageSizes={[udPageSize]}
                   styles={(theme) => ({
                     thead: {
-                      height: '44px',
+                      height: "44px",
                       backgroundColor: theme.colors.gray[0],
-                      '::after': {
-                        backgroundColor: 'transparent',
+                      "::after": {
+                        backgroundColor: "transparent",
                       },
                     },
 
@@ -1211,33 +1516,35 @@ export default function Utilization() {
                     },
 
                     dataCellContent: {
-                      width: '100%',
+                      width: "100%",
                     },
                   })}
                 />
               </Collapse>
             </Flex>
-            <Flex direction={'column'} gap={'sm'}>
-              <Flex align={'center'} gap={'5px'}>
+            <Flex direction={"column"} gap={"sm"}>
+              <Flex align={"center"} gap={"5px"}>
                 <Text
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    whiteSpace: 'nowrap',
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
                   }}
-                  color='gray'
+                  color="gray"
                   fw={700}
-                  size={'lg'}
+                  size={"lg"}
                 >
-                  <IconInfoHexagon color='red' />
+                  <IconInfoHexagon color="red" />
                   <span>No Campaign Found</span>
-                  <Badge color='red' variant='filled'>
+                  <Badge color="red" variant="filled">
                     {noCampaign.length}
                   </Badge>
                 </Text>
-                <Divider w={'100%'} />
-                <ActionIcon onClick={noToggle}>{noOpened ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon>
+                <Divider w={"100%"} />
+                <ActionIcon onClick={noToggle}>
+                  {noOpened ? <IconChevronUp /> : <IconChevronDown />}
+                </ActionIcon>
               </Flex>
               <Collapse in={noOpened}>
                 <DataGrid
@@ -1248,62 +1555,68 @@ export default function Utilization() {
                   withColumnBorders
                   withBorder
                   sx={{
-                    cursor: 'pointer',
-                    '& tr': {
-                      background: 'white',
+                    cursor: "pointer",
+                    "& tr": {
+                      background: "white",
                     },
                   }}
                   columns={[
                     {
-                      accessorKey: 'Status',
+                      accessorKey: "Status",
                       minSize: 180,
                       maxSize: 180,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Status</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Status</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { status } = cell.row.original;
 
                         return (
-                          <Flex gap={'xs'} w={'100%'} h={'100%'} align={'center'} justify={'center'}>
-                            <Badge color='red'>{status}</Badge>
+                          <Flex
+                            gap={"xs"}
+                            w={"100%"}
+                            h={"100%"}
+                            align={"center"}
+                            justify={"center"}
+                          >
+                            <Badge color="red">{status}</Badge>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'campaign',
+                      accessorKey: "campaign",
                       minSize: 400,
                       maxSize: 400,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Campaign</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Campaign</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { campaign } = cell.row.original;
 
                         return (
-                          <Flex w={'100%'} h={'100%'} align={'center'}>
-                            <Text lineClamp={1} color={campaign ? '' : 'gray'}>
-                              {campaign ? campaign : 'No Campaign'}
+                          <Flex w={"100%"} h={"100%"} align={"center"}>
+                            <Text lineClamp={1} color={campaign ? "" : "gray"}>
+                              {campaign ? campaign : "No Campaign"}
                             </Text>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'sdr',
+                      accessorKey: "sdr",
                       minSize: 200,
                       maxSize: 200,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>SDR</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">SDR</Text>
                         </Flex>
                       ),
                       enableResizing: true,
@@ -1311,8 +1624,18 @@ export default function Utilization() {
                         const { rep, rep_profile_picture } = cell.row.original;
 
                         return (
-                          <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                            <Avatar src={rep_profile_picture} color={valueToColor(theme, rep)} radius={'xl'}>
+                          <Flex
+                            align={"center"}
+                            gap={"xs"}
+                            py={"sm"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
                               {nameToInitials(rep)}
                             </Avatar>
                             <Text>{rep}</Text>
@@ -1321,44 +1644,56 @@ export default function Utilization() {
                       },
                     },
                     {
-                      accessorKey: 'action',
+                      accessorKey: "action",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconToggleRight color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Action</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconToggleRight color="gray" size={"0.9rem"} />
+                          <Text color="gray">Action</Text>
                         </Flex>
                       ),
                       enableResizing: true,
                       cell: (cell) => {
                         return (
-                          <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                            <Flex w={'100%'} justify={'center'}>
-                              <ActionIcon w={'fit-content'}>
+                          <Flex
+                            align={"center"}
+                            gap={"xs"}
+                            py={"sm"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
+                            <Flex w={"100%"} justify={"center"}>
+                              <ActionIcon w={"fit-content"}>
                                 <Badge
-                                  color='blue'
-                                  variant='filled'
-                                  w={'100%'}
+                                  color="blue"
+                                  variant="filled"
+                                  w={"100%"}
                                   sx={{
-                                    textTransform: 'none',
-                                    cursor: 'pointer',
+                                    textTransform: "none",
+                                    cursor: "pointer",
                                   }}
-                                  leftSection={<IconPlus size={'0.9rem'} style={{ marginTop: '4px' }} />}
+                                  leftSection={
+                                    <IconPlus
+                                      size={"0.9rem"}
+                                      style={{ marginTop: "4px" }}
+                                    />
+                                  }
                                   onClick={() => {
                                     openContextModal({
-                                      modal: 'uploadProspects',
+                                      modal: "uploadProspects",
                                       title: (
                                         <Title
                                           order={3}
                                           sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '5px',
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "5px",
                                           }}
                                         >
-                                          <IconTargetArrow color='#228be6' /> Request Campaign
+                                          <IconTargetArrow color="#228be6" />{" "}
+                                          Request Campaign
                                         </Title>
                                       ),
-                                      innerProps: { mode: 'CREATE-ONLY' },
+                                      innerProps: { mode: "CREATE-ONLY" },
                                     });
                                   }}
                                 >
@@ -1378,37 +1713,41 @@ export default function Utilization() {
                   components={{
                     pagination: ({ table }) => (
                       <Flex
-                        justify={'space-between'}
-                        align={'center'}
-                        px={'sm'}
-                        py={'1.25rem'}
+                        justify={"space-between"}
+                        align={"center"}
+                        px={"sm"}
+                        py={"1.25rem"}
                         sx={(theme) => ({
                           border: `1px solid ${theme.colors.gray[4]}`,
                           borderTopWidth: 0,
                         })}
                       >
                         <Select
-                          style={{ width: '150px' }}
+                          style={{ width: "150px" }}
                           data={[
-                            { label: 'Show 25 rows', value: '25' },
-                            { label: 'Show 10 rows', value: '10' },
-                            { label: 'Show 5 rows', value: '5' },
+                            { label: "Show 25 rows", value: "25" },
+                            { label: "Show 10 rows", value: "10" },
+                            { label: "Show 5 rows", value: "5" },
                           ]}
                           value={ncPageSize}
                           onChange={(v) => {
-                            setNcPageSize(v ?? '25');
+                            setNcPageSize(v ?? "25");
                           }}
                         />
 
-                        <Flex align={'center'} gap={'sm'}>
-                          <Flex align={'center'}>
+                        <Flex align={"center"} gap={"sm"}>
+                          <Flex align={"center"}>
                             <Select
                               maw={100}
-                              value={`${table.getState().pagination.pageIndex + 1}`}
-                              data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                                label: String(idx + 1),
-                                value: String(idx + 1),
-                              }))}
+                              value={`${
+                                table.getState().pagination.pageIndex + 1
+                              }`}
+                              data={new Array(table.getPageCount())
+                                .fill(0)
+                                .map((i, idx) => ({
+                                  label: String(idx + 1),
+                                  value: String(idx + 1),
+                                }))}
                               onChange={(v) => {
                                 table.setPageIndex(Number(v) - 1);
                               }}
@@ -1418,37 +1757,46 @@ export default function Utilization() {
                                 borderTop: `1px solid ${theme.colors.gray[4]}`,
                                 borderRight: `1px solid ${theme.colors.gray[4]}`,
                                 borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                                marginLeft: '-2px',
-                                paddingLeft: '1rem',
-                                paddingRight: '1rem',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '0.25rem',
+                                marginLeft: "-2px",
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderRadius: "0.25rem",
                               })}
                               h={36}
                             >
-                              <Text color='gray.5' fw={500} fz={14}>
+                              <Text color="gray.5" fw={500} fz={14}>
                                 of {table.getPageCount()} pages
                               </Text>
                             </Flex>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === 0}
+                              disabled={
+                                table.getState().pagination.pageIndex === 0
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex - 1
+                                );
                               }}
                             >
                               <IconChevronLeft stroke={theme.colors.gray[4]} />
                             </ActionIcon>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                              disabled={
+                                table.getState().pagination.pageIndex ===
+                                table.getPageCount() - 1
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex + 1
+                                );
                               }}
                             >
                               <IconChevronRight stroke={theme.colors.gray[4]} />
@@ -1458,14 +1806,14 @@ export default function Utilization() {
                       </Flex>
                     ),
                   }}
-                  w={'100%'}
+                  w={"100%"}
                   pageSizes={[ncPageSize]}
                   styles={(theme) => ({
                     thead: {
-                      height: '44px',
+                      height: "44px",
                       backgroundColor: theme.colors.gray[0],
-                      '::after': {
-                        backgroundColor: 'transparent',
+                      "::after": {
+                        backgroundColor: "transparent",
                       },
                     },
 
@@ -1478,33 +1826,35 @@ export default function Utilization() {
                     },
 
                     dataCellContent: {
-                      width: '100%',
+                      width: "100%",
                     },
                   })}
                 />
               </Collapse>
             </Flex>
-            <Flex direction={'column'} gap={'sm'}>
-              <Flex align={'center'} gap={'5px'}>
+            <Flex direction={"column"} gap={"sm"}>
+              <Flex align={"center"} gap={"5px"}>
                 <Text
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    whiteSpace: 'nowrap',
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    whiteSpace: "nowrap",
                   }}
-                  color='gray'
+                  color="gray"
                   fw={700}
-                  size={'lg'}
+                  size={"lg"}
                 >
-                  <IconCircleCheck color='green' />
+                  <IconCircleCheck color="green" />
                   <span>Completed Campaigns</span>
-                  <Badge color='green' variant='filled'>
+                  <Badge color="green" variant="filled">
                     {completedCampaign.length}
                   </Badge>
                 </Text>
-                <Divider w={'100%'} />
-                <ActionIcon onClick={completeToggle}>{completeOpened ? <IconChevronUp /> : <IconChevronDown />}</ActionIcon>
+                <Divider w={"100%"} />
+                <ActionIcon onClick={completeToggle}>
+                  {completeOpened ? <IconChevronUp /> : <IconChevronDown />}
+                </ActionIcon>
               </Flex>
               <Collapse in={completeOpened}>
                 <DataGrid
@@ -1515,60 +1865,66 @@ export default function Utilization() {
                   withColumnBorders
                   withBorder
                   sx={{
-                    cursor: 'pointer',
-                    '& tr': {
-                      background: 'white',
+                    cursor: "pointer",
+                    "& tr": {
+                      background: "white",
                     },
                   }}
                   columns={[
                     {
-                      accessorKey: 'Status',
+                      accessorKey: "Status",
                       minSize: 180,
                       maxSize: 180,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Status</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Status</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { status } = cell.row.original;
 
                         return (
-                          <Flex gap={'xs'} w={'100%'} h={'100%'} justify={'center'} align={'center'}>
-                            <Badge color='green'>{status}</Badge>
+                          <Flex
+                            gap={"xs"}
+                            w={"100%"}
+                            h={"100%"}
+                            justify={"center"}
+                            align={"center"}
+                          >
+                            <Badge color="green">{status}</Badge>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'campaign',
+                      accessorKey: "campaign",
                       minSize: 400,
                       maxSize: 400,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Campaign</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">Campaign</Text>
                         </Flex>
                       ),
                       cell: (cell) => {
                         const { campaign } = cell.row.original;
 
                         return (
-                          <Flex w={'100%'} h={'100%'} align={'center'}>
+                          <Flex w={"100%"} h={"100%"} align={"center"}>
                             <Text lineClamp={1}>{campaign}</Text>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'sdr',
+                      accessorKey: "sdr",
                       minSize: 200,
                       maxSize: 200,
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconLetterT color='gray' size={'0.9rem'} />
-                          <Text color='gray'>SDR</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconLetterT color="gray" size={"0.9rem"} />
+                          <Text color="gray">SDR</Text>
                         </Flex>
                       ),
                       enableResizing: true,
@@ -1576,8 +1932,18 @@ export default function Utilization() {
                         const { rep, rep_profile_picture } = cell.row.original;
 
                         return (
-                          <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'}>
-                            <Avatar src={rep_profile_picture} color={valueToColor(theme, rep)} radius={'xl'}>
+                          <Flex
+                            align={"center"}
+                            gap={"xs"}
+                            py={"sm"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
+                            <Avatar
+                              src={rep_profile_picture}
+                              color={valueToColor(theme, rep)}
+                              radius={"xl"}
+                            >
                               {nameToInitials(rep)}
                             </Avatar>
                             <Text fw={500}>{rep}</Text>
@@ -1586,35 +1952,60 @@ export default function Utilization() {
                       },
                     },
                     {
-                      accessorKey: 'channel',
+                      accessorKey: "channel",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconToggleRight color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Channels</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconToggleRight color="gray" size={"0.9rem"} />
+                          <Text color="gray">Channels</Text>
                         </Flex>
                       ),
                       maxSize: 120,
                       minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const { num_used_linkedin, num_used_email } = cell.row.original;
+                        const { num_used_linkedin, num_used_email } =
+                          cell.row.original;
 
                         return (
-                          <Flex align={'center'} justify={'center'} gap={'xs'} py={'lg'} w={'100%'} h={'100%'}>
-                            <Flex justify={'center'} w={'100%'} align={'center'} gap={'md'}>
-                              {num_used_linkedin > 0 && <IconBrandLinkedin size={'1.3rem'} fill='#228be6' color='white' />}
-                              {num_used_email > 0 && <IconMail size={'1.3rem'} fill='#228be6' color='white' />}
+                          <Flex
+                            align={"center"}
+                            justify={"center"}
+                            gap={"xs"}
+                            py={"lg"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
+                            <Flex
+                              justify={"center"}
+                              w={"100%"}
+                              align={"center"}
+                              gap={"md"}
+                            >
+                              {num_used_linkedin > 0 && (
+                                <IconBrandLinkedin
+                                  size={"1.3rem"}
+                                  fill="#228be6"
+                                  color="white"
+                                />
+                              )}
+                              {num_used_email > 0 && (
+                                <IconMail
+                                  size={"1.3rem"}
+                                  fill="#228be6"
+                                  color="white"
+                                />
+                              )}
                             </Flex>
                           </Flex>
                         );
                       },
                     },
                     {
-                      accessorKey: 'Progress',
+                      accessorKey: "Progress",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconBolt color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Progress</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconBolt color="gray" size={"0.9rem"} />
+                          <Text color="gray">Progress</Text>
                         </Flex>
                       ),
                       maxSize: 220,
@@ -1624,16 +2015,30 @@ export default function Utilization() {
                         const { num_total } = cell.row.original;
 
                         return (
-                          <Flex direction={'column'} align={'start'} justify={'center'} w={'100%'} h={'100%'}>
-                            <Flex w={'100%'} align={'center'} gap={'8px'} px={'xs'}>
-                              <Progress value={100} w={'100%'} color='green' />
-                              <Text color='green' fw={500}>
+                          <Flex
+                            direction={"column"}
+                            align={"start"}
+                            justify={"center"}
+                            w={"100%"}
+                            h={"100%"}
+                          >
+                            <Flex
+                              w={"100%"}
+                              align={"center"}
+                              gap={"8px"}
+                              px={"xs"}
+                            >
+                              <Progress value={100} w={"100%"} color="green" />
+                              <Text color="green" fw={500}>
                                 100%
                               </Text>
                             </Flex>
-                            <Flex align={'start'} px={'xs'}>
+                            <Flex align={"start"} px={"xs"}>
                               <Text fw={500}>
-                                {num_total} / {num_total} <span style={{ color: 'gray !important' }}>Sent</span>
+                                {num_total} / {num_total}{" "}
+                                <span style={{ color: "gray !important" }}>
+                                  Sent
+                                </span>
                               </Text>
                             </Flex>
                           </Flex>
@@ -1641,19 +2046,26 @@ export default function Utilization() {
                       },
                     },
                     {
-                      accessorKey: 'last_send_date',
+                      accessorKey: "last_send_date",
                       header: () => (
-                        <Flex align={'center'} gap={'3px'}>
-                          <IconCalendar color='gray' size={'0.9rem'} />
-                          <Text color='gray'>Last Send Date</Text>
+                        <Flex align={"center"} gap={"3px"}>
+                          <IconCalendar color="gray" size={"0.9rem"} />
+                          <Text color="gray">Last Send Date</Text>
                         </Flex>
                       ),
                       enableResizing: true,
                       minSize: 230,
                       cell: (cell) => {
                         return (
-                          <Flex align={'center'} gap={'xs'} py={'sm'} w={'100%'} h={'100%'} justify={'center'}>
-                            <Text color='gray' fw={500}>
+                          <Flex
+                            align={"center"}
+                            gap={"xs"}
+                            py={"sm"}
+                            w={"100%"}
+                            h={"100%"}
+                            justify={"center"}
+                          >
+                            <Text color="gray" fw={500}>
                               {currentTime}
                             </Text>
                           </Flex>
@@ -1668,37 +2080,41 @@ export default function Utilization() {
                   components={{
                     pagination: ({ table }) => (
                       <Flex
-                        justify={'space-between'}
-                        align={'center'}
-                        px={'sm'}
-                        py={'1.25rem'}
+                        justify={"space-between"}
+                        align={"center"}
+                        px={"sm"}
+                        py={"1.25rem"}
                         sx={(theme) => ({
                           border: `1px solid ${theme.colors.gray[4]}`,
                           borderTopWidth: 0,
                         })}
                       >
                         <Select
-                          style={{ width: '150px' }}
+                          style={{ width: "150px" }}
                           data={[
-                            { label: 'Show 25 rows', value: '25' },
-                            { label: 'Show 10 rows', value: '10' },
-                            { label: 'Show 5 rows', value: '5' },
+                            { label: "Show 25 rows", value: "25" },
+                            { label: "Show 10 rows", value: "10" },
+                            { label: "Show 5 rows", value: "5" },
                           ]}
                           value={cdPageSize}
                           onChange={(v) => {
-                            setCdPageSize(v ?? '25');
+                            setCdPageSize(v ?? "25");
                           }}
                         />
 
-                        <Flex align={'center'} gap={'sm'}>
-                          <Flex align={'center'}>
+                        <Flex align={"center"} gap={"sm"}>
+                          <Flex align={"center"}>
                             <Select
                               maw={100}
-                              value={`${table.getState().pagination.pageIndex + 1}`}
-                              data={new Array(table.getPageCount()).fill(0).map((i, idx) => ({
-                                label: String(idx + 1),
-                                value: String(idx + 1),
-                              }))}
+                              value={`${
+                                table.getState().pagination.pageIndex + 1
+                              }`}
+                              data={new Array(table.getPageCount())
+                                .fill(0)
+                                .map((i, idx) => ({
+                                  label: String(idx + 1),
+                                  value: String(idx + 1),
+                                }))}
                               onChange={(v) => {
                                 table.setPageIndex(Number(v) - 1);
                               }}
@@ -1708,37 +2124,46 @@ export default function Utilization() {
                                 borderTop: `1px solid ${theme.colors.gray[4]}`,
                                 borderRight: `1px solid ${theme.colors.gray[4]}`,
                                 borderBottom: `1px solid ${theme.colors.gray[4]}`,
-                                marginLeft: '-2px',
-                                paddingLeft: '1rem',
-                                paddingRight: '1rem',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '0.25rem',
+                                marginLeft: "-2px",
+                                paddingLeft: "1rem",
+                                paddingRight: "1rem",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderRadius: "0.25rem",
                               })}
                               h={36}
                             >
-                              <Text color='gray.5' fw={500} fz={14}>
+                              <Text color="gray.5" fw={500} fz={14}>
                                 of {table.getPageCount()} pages
                               </Text>
                             </Flex>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === 0}
+                              disabled={
+                                table.getState().pagination.pageIndex === 0
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex - 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex - 1
+                                );
                               }}
                             >
                               <IconChevronLeft stroke={theme.colors.gray[4]} />
                             </ActionIcon>
                             <ActionIcon
-                              variant='default'
-                              color='gray.4'
+                              variant="default"
+                              color="gray.4"
                               h={36}
-                              disabled={table.getState().pagination.pageIndex === table.getPageCount() - 1}
+                              disabled={
+                                table.getState().pagination.pageIndex ===
+                                table.getPageCount() - 1
+                              }
                               onClick={() => {
-                                table.setPageIndex(table.getState().pagination.pageIndex + 1);
+                                table.setPageIndex(
+                                  table.getState().pagination.pageIndex + 1
+                                );
                               }}
                             >
                               <IconChevronRight stroke={theme.colors.gray[4]} />
@@ -1748,14 +2173,14 @@ export default function Utilization() {
                       </Flex>
                     ),
                   }}
-                  w={'100%'}
+                  w={"100%"}
                   pageSizes={[cdPageSize]}
                   styles={(theme) => ({
                     thead: {
-                      height: '44px',
+                      height: "44px",
                       backgroundColor: theme.colors.gray[0],
-                      '::after': {
-                        backgroundColor: 'transparent',
+                      "::after": {
+                        backgroundColor: "transparent",
                       },
                     },
 
@@ -1768,7 +2193,7 @@ export default function Utilization() {
                     },
 
                     dataCellContent: {
-                      width: '100%',
+                      width: "100%",
                     },
                   })}
                 />

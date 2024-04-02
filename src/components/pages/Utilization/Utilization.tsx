@@ -16,6 +16,7 @@ import {
   Title,
   useMantineTheme,
   Container,
+  Switch,
 } from "@mantine/core";
 import {
   IconBolt,
@@ -52,6 +53,8 @@ import { API_URL } from "@constants/data";
 import { openContextModal } from "@mantine/modals";
 import moment from "moment";
 import { valueToColor, nameToInitials } from "@utils/general";
+import { deactivatePersona } from "@utils/requests/postPersonaDeactivation";
+import { showNotification } from "@mantine/notifications";
 
 interface outboundType {
   message_active: number;
@@ -73,6 +76,7 @@ interface activeCampaignType {
   rep: string;
   rep_profile_picture: string;
   status: string;
+  persona_id: number;
 }
 
 interface repCampaignType {
@@ -154,6 +158,8 @@ export default function Utilization() {
   const [seatData, setSeatData] = useState<seatDataType[]>([]);
   const [outboundData, setOutboundData] = useState<outboundType>();
 
+  const [loading, setLoading] = useState(false);
+
   const seat_data = {
     labels: ["Label 1", "Label 2"],
     datasets: [
@@ -226,6 +232,33 @@ export default function Utilization() {
     },
   };
 
+  const handleDeactive = async (projectId: number) => {
+    if (!projectId) {
+      showNotification({
+        title: "Error",
+        message: "No current project",
+        color: "red",
+      });
+      return;
+    }
+    setLoading(true);
+    const result = await deactivatePersona(userToken, projectId, false);
+    if (result.status === "success") {
+      showNotification({
+        title: "Persona Deactivated",
+        message: "Your persona has been deactivated.",
+        color: "blue",
+      });
+    } else {
+      showNotification({
+        title: "Error",
+        message: "There was an error deactivating your persona.",
+        color: "red",
+      });
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     const fetchUtilizationData = async () => {
       const response = await fetch(`${API_URL}/utilizationv2/`, {
@@ -262,7 +295,7 @@ export default function Utilization() {
 
     handleGetOutboundData();
     fetchUtilizationData();
-  }, []);
+  }, [loading]);
 
   return (
     <Container maw={1500} mt={"xl"}>
@@ -519,7 +552,6 @@ export default function Utilization() {
                   color="gray"
                   fw={700}
                   size={"lg"}
-                  // w={"320px"}
                 >
                   <IconTargetArrow color="#228be6" />
                   <span>Active Campaigns</span>
@@ -647,10 +679,8 @@ export default function Utilization() {
                       minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const {
-                          num_total_linkedin,
-                          num_total_email,
-                        } = cell.row.original;
+                        const { num_total_linkedin, num_total_email } =
+                          cell.row.original;
 
                         return (
                           <Flex
@@ -760,16 +790,18 @@ export default function Utilization() {
                       },
                     },
                     {
-                      accessorKey: "date",
+                      accessorKey: "active",
                       header: () => (
                         <Flex align={"center"} gap={"3px"}>
                           <IconCalendar color="gray" size={"0.9rem"} />
-                          <Text color="gray">Last Send Date</Text>
+                          <Text color="gray">Active</Text>
                         </Flex>
                       ),
                       enableResizing: true,
                       minSize: 230,
                       cell: (cell) => {
+                        const { persona_id } = cell.row.original;
+
                         return (
                           <Flex
                             direction={"column"}
@@ -780,9 +812,10 @@ export default function Utilization() {
                             w={"100%"}
                             h={"100%"}
                           >
-                            <Text color="gray" fw={500}>
-                              {currentTime}
-                            </Text>
+                            <Switch
+                              checked
+                              onClick={() => handleDeactive(persona_id)}
+                            />
                           </Flex>
                         );
                       },
@@ -791,6 +824,7 @@ export default function Utilization() {
                   options={{
                     enableFilters: true,
                   }}
+                  loading={loading}
                   components={{
                     pagination: ({ table }) => (
                       <Flex
@@ -1089,6 +1123,7 @@ export default function Utilization() {
                   options={{
                     enableFilters: true,
                   }}
+                  loading={loading}
                   components={{
                     pagination: ({ table }) => (
                       <Flex
@@ -1344,11 +1379,8 @@ export default function Utilization() {
                       ),
                       enableResizing: true,
                       cell: (cell) => {
-                        const {
-                          linkedin_setup,
-                          email_setup,
-                          prospects,
-                        } = cell.row.original;
+                        const { linkedin_setup, email_setup, prospects } =
+                          cell.row.original;
 
                         return (
                           <Flex
@@ -1367,6 +1399,7 @@ export default function Utilization() {
                   options={{
                     enableFilters: true,
                   }}
+                  loading={loading}
                   components={{
                     pagination: ({ table }) => (
                       <Flex
@@ -1676,6 +1709,7 @@ export default function Utilization() {
                   options={{
                     enableFilters: true,
                   }}
+                  loading={loading}
                   components={{
                     pagination: ({ table }) => (
                       <Flex
@@ -1929,10 +1963,8 @@ export default function Utilization() {
                       minSize: 120,
                       enableResizing: true,
                       cell: (cell) => {
-                        const {
-                          num_used_linkedin,
-                          num_used_email,
-                        } = cell.row.original;
+                        const { num_used_linkedin, num_used_email } =
+                          cell.row.original;
 
                         return (
                           <Flex
@@ -2044,6 +2076,7 @@ export default function Utilization() {
                   options={{
                     enableFilters: true,
                   }}
+                  loading={loading}
                   components={{
                     pagination: ({ table }) => (
                       <Flex

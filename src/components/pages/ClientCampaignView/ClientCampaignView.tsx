@@ -410,8 +410,8 @@ export default function ClientCampaignView() {
                       color: "black",
                     }}
                   >
-                    {outboundData?.message_active} /{" "}
-                    {outboundData?.message_total}
+                    {outboundData?.message_active?.toLocaleString()} /{" "}
+                    {outboundData?.message_total?.toLocaleString()}
                   </span>{" "}
                   Available Sending Out
                 </Text>

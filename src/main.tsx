@@ -67,6 +67,7 @@ import ExtractPdfPage from '@pages/ExtractPdfPage';
 import AssetLibraryV2 from '@pages/AssetLibraryV2';
 import ClientCampaignView from '@pages/ClientCampaignView/ClientCampaignView';
 import { CampaignAGI } from '@pages/CampaignAGI/CampaignAGI';
+import InternalToolsPage from '@pages/InternalToolsPage';
 import Utilization from '@pages/Utilization/Utilization';
 
 const queryClient = new QueryClient();
@@ -230,6 +231,13 @@ const router = sentryCreateBrowserRouter([
         element: <RestrictedRoute page={<ToolsPage />} />,
         loader: async ({ params }: { params: any }) => {
           return { tabId: params.tabId };
+        },
+      },
+      {
+        path: 'internal-tools/:routedToolId?',
+        element: <RestrictedRoute page={<InternalToolsPage />} />,
+        loader: async ({ params }: { params: any }) => {
+          return { routedToolId: params.routedToolId };
         },
       },
       {

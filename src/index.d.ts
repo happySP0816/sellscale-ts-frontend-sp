@@ -78,6 +78,32 @@ export interface Sequence {
   status: string;
 }
 
+export interface Client {
+  id: number;
+  active: boolean;
+  auto_generate_email_messages: boolean;
+  auto_generate_li_messages: boolean;
+  case_study: string;
+  company: string;
+  contact_email: string;
+  contact_name: string;
+  contract_size: number;
+  description: string;
+  domain: string;
+  email_outbound_enabled: boolean;
+  example_outbound_copy: string;
+  existing_clients: string;
+  impressive_facts: string;
+  linkedin_outbound_enabled: boolean;
+  mission: string;
+  pipeline_notifications_webhook_url: string;
+  slack_bot_connected: boolean;
+  slack_bot_connecting_user_name: string;
+  tagline: string;
+  tone_attributes: string;
+  value_prop_key_points: string;
+}
+
 export interface Prospect {
   approved_outreach_message_id: number | null;
   approved_prospect_email_id: number | null;
